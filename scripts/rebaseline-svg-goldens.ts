@@ -10,7 +10,9 @@
  *
  * Walks every `in.puml` under `oracle/goldens/svg-<type>/`, captures each with the
  * pinned jar (the exact deterministic-text invocation `oracle/capture.sh`
- * uses) into a scratch directory, and byte-compares the capture against
+ * uses) -- ONE JVM PER FIXTURE, via scripts/lib/recapture-render.ts, the same
+ * renderer as scripts/recapture-oracles.ts (which supersedes this script for
+ * a full-oracle re-capture) -- and byte-compares the capture against
  * the sibling `golden.svg`. Report-only by default; `--write` copies each
  * CHANGED capture over its golden -- but only after the oracle drift guard
  * (oracle/build-oracle.sh's pin.json check) passes, replicated here without
@@ -19,18 +21,29 @@
  * behind (see oracle/pin.json:previousPin.svgSuitesNotRebaselined) -- so
  * --write refuses outright rather than writing from an unverified jar.
  *
+ * Batching several fixtures into one JVM is NOT byte-identical to solo
+ * renders (an earlier version of this script claimed it was, "verified over
+ * 20 real fixtures"; that claim was false). Measured counter-examples
+ * (`.agent-notes/oracle-svg-seam.md`, `.agent-notes/isw-T0b.md`): the `{{ }}`
+ * diagram usecase/zidebi-71-nocu387 renders 875 px wide batched vs 895 px
+ * solo, because JVM static state leaks between diagrams; and 5
+ * `oracle/goldens/svg-dot/*` goldens report CHANGED batched yet equal a solo
+ * render (`@startdot` output differs under batching).
+ *
  * Usage: `npx tsx scripts/rebaseline-svg-goldens.ts [--write]`
  * Output: one line per CHANGED/FAILED fixture, then a summary line
  * `SAME=<n> CHANGED=<n> FAILED=<n>`. Exit 0 iff zero fixtures FAILED (and,
  * under --write, the drift guard passed); non-zero otherwise.
  */
-import { existsSync, readdirSync, readFileSync, copyFileSync, mkdtempSync, mkdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync, mkdtempSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { tmpdir, homedir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { spawnSync, execFileSync } from 'node:child_process';
-import { oracleJarBatchTimeoutMs } from './lib/oracle-jar-timeout.js';
-import { runInPlainMinute, type GuardClock, type GuardSleep } from './lib/oracle-minute-guard.js';
+import { execFileSync } from 'node:child_process';
+import type { GuardClock, GuardSleep } from './lib/oracle-minute-guard.js';
+import { selectOutputs } from './lib/recapture-classify.js';
+import { TARGET_KIND } from './lib/recapture-manifest.js';
+import { renderPuml, type Renderer } from './lib/recapture-render.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const GOLDENS_ROOT = join(REPO, 'oracle', 'goldens');
@@ -154,7 +167,7 @@ function gitTree(fork: string, rev: string): string | undefined {
 /** I/O wrapper around `evaluateDrift`: locates the fork checkout, resolves
  *  both tree hashes via read-only `git rev-parse`, and defers the actual
  *  judgment to the pure function above. */
-function checkDriftGuard(): DriftResult {
+export function checkDriftGuard(): DriftResult {
   const fork = process.env.PLANTUML_FORK ?? join(homedir(), 'git', 'plantuml');
   if (!existsSync(join(fork, '.git'))) {
     return { ok: false, reason: `fork not found at ${fork} (set PLANTUML_FORK)` };
@@ -223,88 +236,44 @@ export interface Capture {
   exitCode: number;
 }
 
-/** Every fixture the jar reported a diagram error for, keyed by the input
- *  path it printed. A BATCHED run returns a single process exit code, so
- *  this is how per-fixture error status survives batching -- without it the
- *  ERROR-DIAGRAM signal would be lost the moment more than one file shares
- *  a JVM.
- *
- *  Format, verified against the pinned jar:
- *  `Error line 13 in file: <path>` on stderr, one line per errored input. */
-export function parseErroredFiles(stderr: string): ReadonlySet<string> {
-  const out = new Set<string>();
-  for (const m of stderr.matchAll(/^Error line \d+ in file: (.+)$/gm)) {
-    out.add(m[1]!.trim());
-  }
-  return out;
-}
+/** Fixtures rendered concurrently, each in its OWN JVM. Concurrency across
+ *  JVMs shares no state; only batching inside one JVM does. */
+const RENDER_WORKERS = 4;
 
-/** How many `in.puml` paths to hand a single JVM. The win here is entirely
- *  JVM STARTUP amortisation -- measured on this corpus, 60 fixtures take
- *  ~2.3s in one JVM against ~120s one-JVM-per-file, a ~50x difference --
- *  so the chunk exists only to keep the argv comfortably under ARG_MAX,
- *  not to tune throughput. Output is byte-identical either way (verified
- *  over 20 real fixtures).
- *
- *  `-nbthread` is deliberately NOT used: it buys about 10% on top of
- *  batching and shares mutable id state across threads, which is not a
- *  trade worth making for an oracle. */
-const BATCH_SIZE = 120;
-
-/** Captures a batch of fixtures in ONE jar invocation, guarded against
- *  PSystemError.java's time-based error-page decorations (D9) -- see
- *  scripts/lib/oracle-minute-guard.ts.
- *
- *  Each fixture's `in.puml` is mirrored into the scratch tree first, and
- *  `-o` is passed RELATIVE (`cap`) so the jar writes beside each input
- *  rather than into one shared directory -- with a shared `-o`, 446 files
- *  all named `in.svg` would overwrite each other. */
-export function captureBatch(
+/** Captures each fixture in its own JVM, guarded against PSystemError.java's
+ *  time-based error-page decorations (D9) inside `renderPuml` -- see
+ *  scripts/lib/oracle-minute-guard.ts. The renderer is injectable. */
+export async function captureEach(
   fixtures: readonly { relPath: string; fixtureDir: string }[],
   scratchRoot: string,
   guard: GuardDeps = {},
+  render: Renderer = renderPuml,
 ): Promise<Map<string, Capture>> {
-  for (const f of fixtures) {
-    mkdirSync(join(scratchRoot, f.relPath), { recursive: true });
-    copyFileSync(join(f.fixtureDir, 'in.puml'), join(scratchRoot, f.relPath, 'in.puml'));
-  }
-  const inputs = fixtures.map((f) => join(scratchRoot, f.relPath, 'in.puml'));
-  return runInPlainMinute(
-    () => {
-      const proc = spawnSync(
-        'java',
-        ['-DPLANTUML_DETERMINISTIC_TEXT=true', '-jar', JAR_PATH, '-tsvg', '-o', 'cap', ...inputs],
-        { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: oracleJarBatchTimeoutMs(fixtures.length) },
-      );
-      const errored = parseErroredFiles(proc.stderr ?? '');
-      const out = new Map<string, Capture>();
-      for (const f of fixtures) {
-        const outDir = join(scratchRoot, f.relPath, 'cap');
-        const svgs = existsSync(outDir) ? readdirSync(outDir).filter((n) => n.endsWith('.svg')) : [];
-        const bytes = svgs.length === 0 ? undefined : readFileSync(join(outDir, svgs[0]!));
-        const inPuml = join(scratchRoot, f.relPath, 'in.puml');
-        out.set(f.relPath, { bytes, exitCode: errored.has(inPuml) ? 200 : 0 });
-      }
-      return out;
-    },
-    guard.now,
-    guard.sleep,
-  );
+  const out = new Map<string, Capture>();
+  const pending = [...fixtures];
+  const lane = async (): Promise<void> => {
+    for (let f = pending.shift(); f; f = pending.shift()) {
+      const puml = join(f.fixtureDir, 'in.puml');
+      const rendered = await render(puml, { jar: JAR_PATH, repo: REPO, scratchRoot, ...guard });
+      const target = { kind: TARGET_KIND.svgGolden, dir: f.relPath, puml, outputs: ['golden.svg'] } as const;
+      const selected = rendered.timedOut ? 'timed out' : selectOutputs(target, rendered.files);
+      const bytes = typeof selected === 'string' ? undefined : selected.get('golden.svg');
+      out.set(f.relPath, { bytes, exitCode: rendered.exitCode ?? -1 });
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(RENDER_WORKERS, fixtures.length) }, lane));
+  return out;
 }
 
-function evaluateFixture(fixtureDir: string, scratchRoot: string, write: boolean, captured: Capture): FixtureOutcome {
+function evaluateFixture(fixtureDir: string, write: boolean, captured: Capture): FixtureOutcome {
   const relPath = relative(GOLDENS_ROOT, fixtureDir);
   const goldenPath = join(fixtureDir, 'golden.svg');
   if (!existsSync(goldenPath)) {
     return { relPath, status: 'FAILED', detail: 'missing golden.svg' };
   }
-  const capturedPath = join(scratchRoot, relPath, 'cap');
   const golden = readFileSync(goldenPath);
   const status = compareCapture(captured.bytes, golden);
-  if (status === 'CHANGED' && write) {
-    const svgs = readdirSync(capturedPath).filter((f) => f.endsWith('.svg'));
-    copyFileSync(join(capturedPath, svgs[0]!), goldenPath);
-  }
+  if (status === 'CHANGED' && write) writeFileSync(goldenPath, captured.bytes!);
   const outcome: FixtureOutcome = { relPath, status };
   const detail = describeOutcome(status, captured.exitCode);
   if (detail) outcome.detail = detail;
@@ -335,17 +304,14 @@ function checkPreconditions(write: boolean): string | undefined {
 async function runFixtures(scratchRoot: string, write: boolean, guard: GuardDeps = {}): Promise<FixtureOutcome[]> {
   const fixtureDirs = findSvgGoldenTypeDirs().flatMap((typeDir) => findFixtureDirs(typeDir));
   const all = fixtureDirs.map((d) => ({ fixtureDir: d, relPath: relative(GOLDENS_ROOT, d) }));
+  const captures = await captureEach(all, scratchRoot, guard);
   const outcomes: FixtureOutcome[] = [];
-  for (let i = 0; i < all.length; i += BATCH_SIZE) {
-    const batch = all.slice(i, i + BATCH_SIZE);
-    const captures = await captureBatch(batch, scratchRoot, guard);
-    for (const f of batch) {
-      const captured = captures.get(f.relPath) ?? { bytes: undefined, exitCode: -1 };
-      const outcome = evaluateFixture(f.fixtureDir, scratchRoot, write, captured);
-      outcomes.push(outcome);
-      const line = formatOutcomeLine(outcome);
-      if (line) process.stdout.write(`${line}\n`);
-    }
+  for (const f of all) {
+    const captured = captures.get(f.relPath) ?? { bytes: undefined, exitCode: -1 };
+    const outcome = evaluateFixture(f.fixtureDir, write, captured);
+    outcomes.push(outcome);
+    const line = formatOutcomeLine(outcome);
+    if (line) process.stdout.write(`${line}\n`);
   }
   return outcomes;
 }
