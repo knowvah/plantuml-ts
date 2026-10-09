@@ -8,7 +8,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { usesClassUSymbolEntity } from '../../../src/diagrams/class/renderer-usymbol-entity.js';
 import type { ClassifierGeo } from '../../../src/diagrams/class/class-geo-types.js';
 
@@ -34,7 +34,7 @@ describe('descriptive package leaf in a class diagram (cdd3-T28, E3-14)', () => 
   });
 
   it('draws the USymbolFolder tab path and bold title the jar draws (gujigi-63-roki030)', () => {
-    const group = entityGroup(renderSync(PUML, { measurer: new WidthTableMeasurer() }), 'Elektronisk dokument');
+    const group = entityGroup(renderSync(PUML, { measurer: new DeterministicMeasurer() }), 'Elektronisk dokument');
     // jar: `<path d="M376.32,584.5 ... L373.82,587 ..." fill="#F1F1F1"/>`,
     // a divider `<line>` and `<text ... textLength="129.938"
     // font-weight="700">` 10px right of the path's left edge.

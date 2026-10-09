@@ -11,7 +11,7 @@ import { parseDescription } from '../../../src/diagrams/description/parser.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { DescriptionDiagramAST } from '../../../src/diagrams/description/ast.js';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { descriptionAst } from './parse-description-ast.js';
@@ -53,7 +53,7 @@ describe('description together membership (CucaDiagram.java:188-194,232,339-353)
     setLayoutInputObserver(({ graph: input }) => inputs.push(input));
     try {
       renderSync('@startuml\ncomponent A\ntogether {\ncomponent B\n}\nA --> B\n@enduml\n', {
-        measurer: new WidthTableMeasurer(),
+        measurer: new DeterministicMeasurer(),
       });
     } finally {
       setLayoutInputObserver(undefined);

@@ -43,7 +43,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { renderSync } from '../src/index.js';
 import { setLayoutInputObserver, type LayoutInputEvent } from '../src/core/graph-layout.js';
-import { WidthTableMeasurer } from '../src/core/measurer.js';
+import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { computeDotEqual, hasActiveSmetanaPragma } from './lib/survey-dot-equal.js';
 import { buildSpriteAssetsStore } from './sprite-assets-store.js';
 // cdd4-T9 (journal row 11): the jar always has its Twemoji artwork too --
@@ -258,7 +258,7 @@ function renderOneMode(dir: string): void {
     // eager walk per subprocess, measured at 5.5 ms -- ~7 s across the whole
     // corpus, against a survey that runs for tens of minutes.
     svg = renderSync(markup, {
-      measurer: new WidthTableMeasurer(),
+      measurer: new DeterministicMeasurer(),
       assetStore: SURVEY_ASSET_STORE,
       includeStore: fixtureIncludeStore(),
     });
@@ -282,7 +282,7 @@ function renderFrame(dir: string): string {
   setLayoutInputObserver((e) => events.push(e));
   try {
     const svg = renderSync(markup, {
-      measurer: new WidthTableMeasurer(),
+      measurer: new DeterministicMeasurer(),
       assetStore: SURVEY_ASSET_STORE,
       includeStore: fixtureIncludeStore(),
     });

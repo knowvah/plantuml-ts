@@ -21,11 +21,11 @@ import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layou
 import type { ClassDiagramAST, Classifier } from '../../../src/diagrams/class/ast.js';
 import { MAP_POINT_SENTINEL } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const theme = defaultTheme; // fontFamily 'sans-serif', fontSize 14 — matches the oracle capture
 
 function makeAST(classifiers: Classifier[], relationships: ClassDiagramAST['relationships'] = []): ClassDiagramAST {

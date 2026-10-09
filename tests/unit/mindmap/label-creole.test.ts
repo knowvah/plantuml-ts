@@ -14,7 +14,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { MeasurerStringBounder } from '../../../src/core/measurer-bounder.js';
 import { renderSync } from '../../../src/index.js';
 import type { CreoleAtom } from '../../../src/core/klimt/creole/atom/Atom.js';
@@ -23,7 +23,7 @@ import { getSplitted } from '../../../src/core/klimt/creole/Fission.js';
 import { asAtomOpenIconic } from '../../../src/core/klimt/creole/atom/AtomOpenIconic.js';
 import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const FIXTURES = 'tests/unit/mindmap/fixtures';
 
 function render(body: string): string {

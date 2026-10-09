@@ -11,7 +11,7 @@
  */
 import { describe, expect, test } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { buildHeaderRows } from '../../../src/diagrams/class/class-stereotype-layout.js';
 import type { MemberRenderAtom } from '../../../src/diagrams/class/class-member-creole.js';
 
@@ -83,7 +83,7 @@ describe('lecelo-92-loma110 emoji name lines (jar golden)', () => {
         'class "<:label:> label\\n<:wrench:> wrench\\n<:hammer_and_wrench:> hammer_and_wrench"',
         '@enduml',
       ].join('\n'),
-      { measurer: new WidthTableMeasurer() },
+      { measurer: new DeterministicMeasurer() },
     );
     const yOf = (word: string): number => {
       const m = new RegExp(`<text[^>]*y="([0-9.]+)"[^>]*>${word}</text>`).exec(svg);

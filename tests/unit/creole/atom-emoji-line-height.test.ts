@@ -14,7 +14,7 @@
  * the observed output.
  */
 import { describe, expect, test } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { MeasurerStringBounder } from '../../../src/core/measurer-bounder.js';
 import { HorizontalAlignment } from '../../../src/core/klimt/geom/HorizontalAlignment.js';
 import { buildTextBlock } from '../../../src/core/svek/image/EntityImageDescriptionSupport.js';
@@ -158,7 +158,7 @@ describe('buildTextBlock (naive substitute) matches the Sea heights', () => {
     color: null,
     styles: new Set(),
   };
-  const bounder = new MeasurerStringBounder(new WidthTableMeasurer());
+  const bounder = new MeasurerStringBounder(new DeterministicMeasurer());
 
   function blockHeight(text: string): number {
     return buildTextBlock(text, BLOCK_FONT, HorizontalAlignment.CENTER).calculateDimension(bounder).getHeight();

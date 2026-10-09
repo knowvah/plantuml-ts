@@ -19,7 +19,7 @@ import { describe, it, expect } from 'vitest';
 import { measureUsecaseOrActor } from '../../../src/diagrams/class/class-layout-leaf-shapes.js';
 import { measureClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
 import { measureUsecaseOrActorLeaf, measureLeafNode } from '../../../src/core/svek/image/leaf-sizing.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { createSpriteRegistry, addSprite, spriteDimsLookupFor } from '../../../src/core/sprite-commands.js';
 import { SpriteSvg } from '../../../src/core/klimt/sprite/SpriteSvg.js';
 import { defaultTheme } from '../../../src/core/theme.js';
@@ -27,7 +27,7 @@ import type { Classifier } from '../../../src/diagrams/class/ast.js';
 import type { DescriptiveNode } from '../../../src/diagrams/description/ast.js';
 
 const fontSpec = { family: 'Helvetica', size: 14 };
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 /** Declared 16x16, ink rectangle [1,11]x[1,9] (10x8 at offset 1,1) -- the
  *  same fixture `leaf-sizing-widen-routing.test.ts` (T1) uses for its own

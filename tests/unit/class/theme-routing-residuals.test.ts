@@ -10,10 +10,10 @@
  */
 import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 const render = (body: string): string =>
-  renderSync(`@startuml\n${body}\n@enduml`, { measurer: new WidthTableMeasurer() });
+  renderSync(`@startuml\n${body}\n@enduml`, { measurer: new DeterministicMeasurer() });
 
 function entity(svg: string, name: string): string {
   const start = svg.indexOf(`data-qualified-name="${name}"`);

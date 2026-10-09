@@ -19,11 +19,11 @@ import type { DotLayoutResult } from '../../../src/core/graph-layout.js';
 import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { resolveArrowLabelFont } from '../../../src/core/arrow-label-font.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { createSpriteRegistry, addSprite } from '../../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../../src/core/klimt/sprite/SpriteMonochrome.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const labelFont = resolveArrowLabelFont(defaultTheme);
 
 /** A 17x12 monochrome sprite -- the same declared dims as kexaba's own

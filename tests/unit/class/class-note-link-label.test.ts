@@ -23,11 +23,11 @@ import { edgeLabelAttrs } from '../../../src/diagrams/class/class-layout-helpers
 import { measureLinkNoteDim } from '../../../src/diagrams/class/class-note-link-box.js';
 import { measureNote } from '../../../src/diagrams/class/note-layout-measure.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { ARROW_LABEL_FONT_SIZE } from '../../../src/core/klimt/font/FontParam.js';
 import type { Relationship } from '../../../src/diagrams/class/ast.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const font = { family: defaultTheme.fontFamily, size: ARROW_LABEL_FONT_SIZE };
 const noteCtx = { theme: defaultTheme };
 /** `class-layout-edge-labels.ts#LINK_LABEL_MARGIN` -- 1 for a non-self link. */

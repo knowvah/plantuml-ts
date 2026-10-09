@@ -8,7 +8,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { parseClass } from './parse-helper.js';
 
 function parse(...lines: string[]): ReturnType<typeof parseClass> {
@@ -49,7 +49,7 @@ describe('package header: rendered labels (mupavi-50-fijo192 golden)', () => {
         '}',
         '@enduml',
       ].join('\n'),
-      { measurer: new WidthTableMeasurer() },
+      { measurer: new DeterministicMeasurer() },
     );
     const labels = [...svg.matchAll(/font-style="italic"[^>]*>([^<]*)<\/text>/g)].map((m) => m[1]);
     expect(labels).toEqual(['«A»', '«B»', '«Foo»', '«Node»', '«Bar»']);

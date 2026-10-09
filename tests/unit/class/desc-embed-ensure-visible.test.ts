@@ -14,9 +14,9 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function canvas(svg: string): string {
   return /width="(\d+)px" height="(\d+)px"/.exec(svg)!.slice(1, 3).join('x');

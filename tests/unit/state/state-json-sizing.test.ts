@@ -7,12 +7,12 @@
  */
 import { describe, it, expect } from 'vitest';
 import { measureJsonState } from '../../../src/diagrams/state/state-json-sizing.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { State } from '../../../src/diagrams/state/ast.js';
 import type { JsonNode } from '../../../src/core/command/JsonNode.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function jsonState(id: string, jsonValue?: JsonNode, extra: Partial<State> = {}): State {
   return {

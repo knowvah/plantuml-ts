@@ -13,7 +13,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseClass } from './parse-helper.js';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
 function parse(source: string): ReturnType<typeof parseClass> {
@@ -114,7 +114,7 @@ describe('note creation-index / phantom-slot threading (G2 N15)', () => {
 // ---------------------------------------------------------------------------
 
 describe('removed entities still consume uid ranks (cdd-T3 SB5)', () => {
-  const render = (markup: string): string => renderSync(markup, { measurer: new WidthTableMeasurer() });
+  const render = (markup: string): string => renderSync(markup, { measurer: new DeterministicMeasurer() });
   const ids = (svg: string): string[] => [...svg.matchAll(/ id="([^"]+)"/g)].map((m) => m[1]!);
 
   it('cejili-77-gepe377: a purged member-tip note + an `@unlinked` class keep their three ranks', () => {

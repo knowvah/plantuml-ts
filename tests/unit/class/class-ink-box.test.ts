@@ -8,14 +8,14 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { computeClassRawInkDims } from '../../../src/diagrams/class/layout-ink-extent.js';
 import { buildInkBox } from '../../../src/diagrams/class/class-ink-box.js';
 import { HACK_X_FOR_POLYGON } from '../../../src/diagrams/class/class-ink-shapes.js';
 import type { ClassifierGeo, EdgeGeo } from '../../../src/diagrams/class/layout.js';
 
 function svgDims(markup: string): { width: string | undefined; height: string | undefined } {
-  const svg = renderSync(markup, { measurer: new WidthTableMeasurer() });
+  const svg = renderSync(markup, { measurer: new DeterministicMeasurer() });
   const root = /<svg[^>]*>/.exec(svg)?.[0] ?? '';
   return {
     width: /\bwidth="([^"]+)"/.exec(root)?.[1],

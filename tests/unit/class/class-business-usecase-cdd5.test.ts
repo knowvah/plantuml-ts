@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { parseClassifierDecl } from '../../../src/diagrams/class/class-declaration-parser.js';
 
 describe('business usecase', () => {
@@ -18,7 +18,7 @@ describe('business usecase', () => {
 
   it('sizes and draws the business ellipse with its slash (xisora-84-faca166)', () => {
     const svg = renderSync(['@startuml', 'allowmixing', 'usecase/ "usecase/"', '@enduml'].join('\n'), {
-      measurer: new WidthTableMeasurer(),
+      measurer: new DeterministicMeasurer(),
     });
     expect(svg).toContain('<ellipse cx="60.154" cy="20.031" rx="53.154" ry="13.031" fill="#F1F1F1"');
     expect(svg).toMatch(/<text x="28.654" y="22.725"[^>]*>usecase\/<\/text>/);
@@ -37,7 +37,7 @@ describe('business usecase', () => {
       ['@startuml', 'usecase/ test15 #cccccc as "', '    test 15', '    multiline with alias', '"', '@enduml'].join(
         '\n',
       ),
-      { measurer: new WidthTableMeasurer() },
+      { measurer: new DeterministicMeasurer() },
     );
     const texts = [...svg.matchAll(/<text x="([\d.]+)"[^>]*textLength="([\d.]+)"[^>]*>([^<]*)<\/text>/g)].map((m) => ({
       mid: Number(m[1]) + Number(m[2]) / 2,

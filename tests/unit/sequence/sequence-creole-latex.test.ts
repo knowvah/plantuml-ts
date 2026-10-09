@@ -24,7 +24,6 @@ import { sequenceText } from '../../../src/diagrams/sequence/sequence-text.js';
 import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.js';
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import type { SequenceGeometry, TextRun } from '../../../src/diagrams/sequence/ast.js';
 
 const measurer = new DeterministicMeasurer();
@@ -162,7 +161,7 @@ describe('scaleRun — the image is a length and scales with the diagram', () =>
 
 describe('the two <math> sequence fixtures', () => {
   const svgOf = (src: string): string => {
-    const out = renderSync(src, { measurer: new WidthTableMeasurer() });
+    const out = renderSync(src, { measurer: new DeterministicMeasurer() });
     return typeof out === 'string' ? out : (out as { svg: string }).svg;
   };
 

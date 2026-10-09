@@ -16,12 +16,12 @@ import { PSystemWelcome } from '../../../../src/core/error/PSystemWelcome.js';
 import { buildV2, merge } from '../../../../src/core/error/PSystemErrorUtils.js';
 import { umlSourceOf } from '../../../../src/core/error/UmlSource.js';
 import { renderPSystemError, renderPSystemUnsupported } from '../../../../src/core/error/error-renderer.js';
-import { WidthTableMeasurer } from '../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
 import { readLines } from '../../../../src/core/tim/ReadLineReader.js';
 import { LineLocationImpl } from '../../../../src/core/tim/LineLocationImpl.js';
 import { StringLocated } from '../../../../src/core/tim/StringLocated.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 /** A source and a trace that fails on its last line, as `TimLoader#load` leaves them. */
 function failing(source: string, message: string): PSystemErrorPreprocessor {

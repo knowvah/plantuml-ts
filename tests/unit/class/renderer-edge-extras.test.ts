@@ -15,7 +15,7 @@ import {
 import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 const theme = scaleClassTheme(defaultTheme, 1);
 
@@ -166,7 +166,7 @@ describe('renderEdgeNoteBox', () => {
 
 // A2a/M9 -- gujigi-63-roki030's four constrained links.
 describe('renderEdgeConstraint', () => {
-  const measurer = new WidthTableMeasurer();
+  const measurer = new DeterministicMeasurer();
 
   it('returns empty string when the edge carries no constraint', () => {
     expect(renderEdgeConstraint(makeEdgeGeo(), theme, measurer)).toBe('');

@@ -18,7 +18,7 @@
  *   zuduxu-90-kosi876. Theme field is the same pending-plumbing seam.
  */
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
 import type { Classifier, ClassifierKind, ClassDiagramAST, Relationship } from '../../../src/diagrams/class/ast.js';
@@ -31,7 +31,7 @@ import {
   type ThemeSameClassWidth,
 } from '../../../src/diagrams/class/class-dot-graph.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const SUPPRESS = { fields: false, methods: false };
 
 function classifier(id: string, kind: ClassifierKind, usymbol?: string): Classifier {

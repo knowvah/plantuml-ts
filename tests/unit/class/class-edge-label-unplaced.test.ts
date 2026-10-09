@@ -39,9 +39,9 @@ import type { DotLayoutResult } from '../../../src/core/graph-layout.js';
 import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { resolveArrowLabelFont } from '../../../src/core/arrow-label-font.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const labelFont = resolveArrowLabelFont(defaultTheme);
 const text: EdgeGeoTextContext = { measurer, labelFont, fontFamily: defaultTheme.fontFamily };
 

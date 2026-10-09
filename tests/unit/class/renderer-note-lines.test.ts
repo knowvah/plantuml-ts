@@ -16,9 +16,9 @@ import { renderNoteRowExtra } from '../../../src/diagrams/class/renderer-note-li
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout-types.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const theme = scaleClassTheme(defaultTheme, 1);
 const NOTE_BASELINE_OFFSET = 13 - 13 / 4.5; // theme default note font size 13
 

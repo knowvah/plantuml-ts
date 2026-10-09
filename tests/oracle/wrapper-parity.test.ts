@@ -34,7 +34,7 @@ import { createGraph } from '@knowvah/dot-engine';
 import type { Graph } from '@knowvah/dot-engine';
 
 import { renderSync } from '../../src/index.js';
-import { WidthTableMeasurer } from '../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../src/core/graph-layout.js';
 import { addClusters } from '../../src/core/graph-layout-build.js';
@@ -120,7 +120,7 @@ for (const { label, dir, fixtures } of CORPORA) {
       it(`${name}: every cluster wraps identically on both paths`, () => {
         captured = [];
         renderSync(readFileSync(join(dir, name, 'input.puml'), 'utf8'), {
-          measurer: new WidthTableMeasurer(),
+          measurer: new DeterministicMeasurer(),
         });
         for (const [n, input] of captured.entries()) {
           const built = builderLevels(input);

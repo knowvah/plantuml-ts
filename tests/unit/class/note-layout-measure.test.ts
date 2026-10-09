@@ -10,9 +10,9 @@
 import { describe, it, expect } from 'vitest';
 import { measureNote } from '../../../src/diagrams/class/note-layout-measure.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const F13 = { family: defaultTheme.fontFamily, size: 13 };
 const w = (s: string): number => measurer.measure(s, F13).width;
 const wBold = (s: string): number => measurer.measure(s, { ...F13, weight: 'bold' }).width;

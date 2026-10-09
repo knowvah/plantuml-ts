@@ -14,7 +14,7 @@ import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { StateDiagramAST, State } from '../../../src/diagrams/state/ast.js';
 import { renderSync } from '../../../src/index.js';
 import { setLayoutInputObserver, type DotInputGraph } from '../../../src/core/graph-layout.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { dotInputToStructural, parseSvekDot, type StructuralGraph } from '../../oracle/svek-dot.js';
 import { buildTopLevelPass } from '../../../src/diagrams/state/state-composite-pass.js';
 import { defaultTheme } from '../../../src/core/theme.js';
@@ -312,7 +312,7 @@ state D {
     const inputs: DotInputGraph[] = [];
     setLayoutInputObserver(({ graph: g }) => inputs.push(g));
     try {
-      renderSync(markup, { measurer: new WidthTableMeasurer() });
+      renderSync(markup, { measurer: new DeterministicMeasurer() });
     } finally {
       setLayoutInputObserver(undefined);
     }
@@ -363,7 +363,7 @@ describe('note-only concurrent region sizes from SvekResult margin, not raw canv
     const captured: DotInputGraph[] = [];
     setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
-      renderSync(readFileSync(join(CACHE, 'in.puml'), 'utf8'), { measurer: new WidthTableMeasurer() });
+      renderSync(readFileSync(join(CACHE, 'in.puml'), 'utf8'), { measurer: new DeterministicMeasurer() });
     } finally {
       setLayoutInputObserver(undefined);
     }
@@ -446,7 +446,7 @@ describe('concurrent-region PassAccumulator carries labelFont/measurer (G21, zac
 
   it("every resolved region pass's accumulator carries both labelFont and measurer", () => {
     const ast = parse(MARKUP);
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const { ctx } = buildTopLevelPass(ast, defaultTheme, measurer);
     expect(ctx.resolvedRegions.size).toBeGreaterThan(0);
     for (const [key, region] of ctx.resolvedRegions) {
@@ -457,7 +457,7 @@ describe('concurrent-region PassAccumulator carries labelFont/measurer (G21, zac
 
   it("the region accumulator's labelFont matches resolveArrowLabelFont(theme), like both sibling call sites", () => {
     const ast = parse(MARKUP);
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const { ctx } = buildTopLevelPass(ast, defaultTheme, measurer);
     const expectedFont = resolveArrowLabelFont(defaultTheme);
     for (const region of ctx.resolvedRegions.values()) {

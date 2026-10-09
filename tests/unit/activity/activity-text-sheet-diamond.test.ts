@@ -10,12 +10,12 @@ import {
   renderDiamondTestLabel,
 } from '../../../src/diagrams/activity/activity-text-sheet-diamond.js';
 import { klimtStringBounder } from '../../../src/diagrams/activity/activity-creole-sheet.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { XDimension2D } from '../../../src/core/klimt/geom/XDimension2D.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { TextBlock } from '../../../src/core/klimt/shape/TextBlock.js';
 
-const BOUNDER = klimtStringBounder(new WidthTableMeasurer(), { family: 'sans-serif', size: 11 });
+const BOUNDER = klimtStringBounder(new DeterministicMeasurer(), { family: 'sans-serif', size: 11 });
 
 function fixedBlock(width: number, height: number): TextBlock {
   return { calculateDimension: () => new XDimension2D(width, height), drawU: () => undefined };

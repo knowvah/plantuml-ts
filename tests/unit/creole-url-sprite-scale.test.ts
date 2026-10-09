@@ -35,7 +35,7 @@ import { fileURLToPath } from 'node:url';
 import { renderSync } from '../../src/index.js';
 import { setLayoutInputObserver } from '../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../src/core/graph-layout.js';
-import { WidthTableMeasurer } from '../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
 import { dotInputToStructural } from '../oracle/svek-dot.js';
 import { spriteAtomScale, spriteScale, measureInlineAtom } from '../../src/core/creole-atoms-measure.js';
 import type { SpriteAtomToken, SpriteDimsLookup } from '../../src/core/creole-atoms.js';
@@ -73,7 +73,7 @@ function dotNodeDims(markup: string): { width: number; height: number }[] {
   const captured: DotInputGraph[] = [];
   setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
-    renderSync(markup, { measurer: new WidthTableMeasurer() });
+    renderSync(markup, { measurer: new DeterministicMeasurer() });
   } finally {
     setLayoutInputObserver(undefined);
   }
@@ -85,7 +85,7 @@ function dotNodeDims(markup: string): { width: number; height: number }[] {
 
 /** Every `<image>` element's declared box in the rendered SVG. */
 function svgImageBoxes(markup: string): { width: number; height: number }[] {
-  const svg = renderSync(markup, { measurer: new WidthTableMeasurer() });
+  const svg = renderSync(markup, { measurer: new DeterministicMeasurer() });
   return [...svg.matchAll(/<image\s[^>]*?width="([0-9.]+)"[^>]*?height="([0-9.]+)"/g)].map((m) => ({
     width: Number(m[1]),
     height: Number(m[2]),

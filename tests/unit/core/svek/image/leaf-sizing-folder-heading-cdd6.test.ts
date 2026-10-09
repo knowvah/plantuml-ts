@@ -7,9 +7,9 @@
  */
 import { describe, it, expect } from 'vitest';
 import { measureFolderLeaf } from '../../../../../src/core/svek/image/leaf-sizing-folder.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const FONT = { family: 'sans-serif', size: 14 };
 
 describe('measureFolderLeaf label heading font (cepedu-19-namu934)', () => {

@@ -8,7 +8,8 @@
  */
 import { describe, it, expect } from 'vitest';
 import { creoleTextLines } from '../../../../../src/core/svek/image/creole-text-lines.js';
-import { WidthTableMeasurer, FixedMeasurer } from '../../../../../src/core/measurer.js';
+import { FixedMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 import type { FontSpec, StringMeasurer } from '../../../../../src/core/measurer.js';
 import { parseSimpleColor, toSvgHex } from '../../../../../src/core/klimt/color/HColorSet.js';
 import { renderLatexAsImage } from '../../../../../src/core/latex.js';
@@ -19,14 +20,14 @@ const font: FontSpec = { family: 'Helvetica', size: 14 };
 
 describe('creoleTextLines', () => {
   it('empty display -> no lines (leaf-sizing-text.ts#lineCount S1L-e precedent)', () => {
-    const lines = creoleTextLines('', font, new WidthTableMeasurer());
+    const lines = creoleTextLines('', font, new DeterministicMeasurer());
     expect(lines).toEqual([]);
   });
 
   it('<color:red>bleh</color> -> one line, one run, visible text "bleh", resolved color, width matches a plain measure of "bleh"', () => {
     // CommandCreoleColorChange.ts: color resolves via parseSimpleColor/toSvgHex
     // (HColorSet.ts), not the literal token — CommandCreoleColorChange.java.
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const lines = creoleTextLines('<color:red>bleh</color>', font, measurer);
     const expectedColor = toSvgHex(parseSimpleColor('red')!);
     const expectedWidth = measurer.measure('bleh', font).width;
@@ -40,7 +41,7 @@ describe('creoleTextLines', () => {
   });
 
   it('**entry** -> one run, visible text "entry" (markup stripped), bold flag set (FontStyle.java getUbrexCreoleSyntax BOLD="**", CommandCreoleStyle.ts)', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const lines = creoleTextLines('**entry**', font, measurer);
 
     expect(lines).toHaveLength(1);
@@ -52,7 +53,7 @@ describe('creoleTextLines', () => {
   });
 
   it("<math>x</math> IS ported now -- it becomes a latex atom, carried as an IMAGE run whose width/height are core/latex.ts#renderLatexAsImage's, not the tag-inclusive literal's", () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
 
     // This assertion used to pin the OPPOSITE, citing
     // `CommandCreoleBuilder.java:111` as a registration this port had not
@@ -89,7 +90,7 @@ describe('creoleTextLines', () => {
   });
 
   it('a <math> atom sharing a line with text: the image box is BOTTOM-aligned against the text box, so its own top is the line height minus its height (Sea.java:72-80, AtomMath.java:73-75 altitude 0)', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const lines = creoleTextLines('ab<math>x</math>', font, measurer);
     const drawn = renderLatexAsImage('{x}', JAR_DEFAULT_TEXT_COLOR);
 
@@ -106,7 +107,7 @@ describe('creoleTextLines', () => {
   });
 
   it('[[http://x]] -> one run, visible text defaults to the url itself, hyperlink color+underline, url set (CommandCreoleUrl.java / Url label-defaulting ctor)', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const lines = creoleTextLines('[[http://x]]', font, measurer);
 
     expect(lines).toHaveLength(1);
@@ -118,7 +119,7 @@ describe('creoleTextLines', () => {
   });
 
   it('[[S1]] -> one run, visible text "S1" (no space in the bracket -> label defaults to the url itself)', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const lines = creoleTextLines('[[S1]]', font, measurer);
 
     expect(lines).toHaveLength(1);
@@ -167,7 +168,7 @@ describe('creoleTextLines', () => {
   });
 
   it('---- -> kind "hr", no runs, fixed 8px height (CREOLE_HR_HEIGHT, leaf-sizing-text.ts, jar-verified oracle)', () => {
-    const lines = creoleTextLines('----', font, new WidthTableMeasurer());
+    const lines = creoleTextLines('----', font, new DeterministicMeasurer());
 
     expect(lines).toHaveLength(1);
     expect(lines[0]!.kind).toBe('hr');
@@ -177,7 +178,7 @@ describe('creoleTextLines', () => {
   });
 
   it('|= h |= h2 | -> kind "table-row" (CreoleParser.java:117,121-122 isTableLine, checked before HR/heading classification, CreoleParser.java:91-100)', () => {
-    const lines = creoleTextLines('|= h |= h2 |', font, new WidthTableMeasurer());
+    const lines = creoleTextLines('|= h |= h2 |', font, new DeterministicMeasurer());
 
     expect(lines).toHaveLength(1);
     expect(lines[0]!.kind).toBe('table-row');
@@ -186,7 +187,7 @@ describe('creoleTextLines', () => {
   });
 
   it('two physical lines ("a\\nb") -> two CreoleTextLine entries (Display#getWithNewlines splits on real newlines, Display.java:262-346)', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const lines = creoleTextLines('a\nb', font, measurer);
 
     expect(lines).toHaveLength(2);
@@ -195,7 +196,7 @@ describe('creoleTextLines', () => {
   });
 
   it('<$unknownSprite> -> no run (CreoleTextRun has no image/sprite variant), zero width/height (StripeSimple.addSprite: an unresolved name contributes nothing, java:228-236)', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const lines = creoleTextLines('<$unknownSprite>', font, measurer);
 
     expect(lines).toHaveLength(1);
@@ -205,7 +206,7 @@ describe('creoleTextLines', () => {
   });
 
   it('<:rocket:> alone on its line -> no run, the 36*factor SQUARE both ways (AtomEmoji.java:57-59); Sea supplies both bounds, so the -3*factor hang does NOT grow it (SI30 T3)', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const lines = creoleTextLines('<:rocket:>', font, measurer);
     const factor = font.size / 24; // AtomEmoji.MAGIC, AtomEmoji.java:46
 
@@ -222,7 +223,7 @@ describe('creoleTextLines', () => {
   });
 
   it('<:rocket:> WITH a text atom on the line -> 39*factor (Sea: emoji minY -39f vs text maxY 0, AtomEmoji.java:57-64)', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const lines = creoleTextLines('<:rocket:>x', font, measurer);
     const factor = font.size / 24;
 
@@ -230,7 +231,7 @@ describe('creoleTextLines', () => {
   });
 
   it('<latex>x</latex> -> one image run sized by renderLatexAsImage, the SAME contract <math> gets (both build a latex atom; AtomMath.java:64-97)', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const lines = creoleTextLines('<latex>x</latex>', font, measurer);
     // `<latex>` is passed through verbatim -- only `<math>` goes through the
     // ASCIIMath -> LaTeX conversion (`CommandCreoleLatex` uses
@@ -258,7 +259,7 @@ describe('creoleTextLines', () => {
 // ---------------------------------------------------------------------------
 
 describe('creoleTextLines — FontPosition runs through Sea (SI30 D1/D2)', () => {
-  const measurer = new WidthTableMeasurer();
+  const measurer = new DeterministicMeasurer();
   /** `StringBounder#getDescent`, this port's `size/4.5` (`measurer.ts:195-197`,
    *  D3 — no new constant). `AtomText#drawU` reads it at java:214. */
   const descent = (size: number): number => measurer.getDescent({ ...font, size }, 'x');
@@ -409,7 +410,7 @@ describe('creoleTextLines — FontPosition runs through Sea (SI30 D1/D2)', () =>
 // the creole `__underline__` command ONLY under `CreoleMode.FULL`, while
 // `**bold**` (`:76`) is registered for every mode.
 describe('creoleTextLines mode option (CommandCreoleBuilder.java:85-86)', () => {
-  const measurer = new WidthTableMeasurer();
+  const measurer = new DeterministicMeasurer();
 
   it('SIMPLE_LINE keeps `__under__` literal: one unstyled run whose width is the raw text', () => {
     const line = creoleTextLines('a __u__ b', font, measurer, { mode: CreoleMode.SIMPLE_LINE })[0]!;
@@ -436,7 +437,7 @@ describe('creoleTextLines mode option (CommandCreoleBuilder.java:85-86)', () => 
 // `SkinParam.java:1068-1070`); `SvgGraphics.java:720-722` maps it to
 // `monospace` at draw time. The run must report it, not the caller's.
 describe('creoleTextLines run family', () => {
-  const measurer = new WidthTableMeasurer();
+  const measurer = new DeterministicMeasurer();
 
   it('a ""mono"" run reports family "monospaced"; plain runs report the caller family', () => {
     const line = creoleTextLines('a ""Gw"" b', font, measurer)[0]!;

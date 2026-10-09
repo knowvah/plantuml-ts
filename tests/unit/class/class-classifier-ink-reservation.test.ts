@@ -7,19 +7,19 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import {
   headerInkReservation,
   compartmentReservationWidth,
 } from '../../../src/diagrams/class/class-classifier-ink-reservation.js';
 
 function svgWidth(body: string[]): string | undefined {
-  const svg = renderSync(['@startuml', ...body, '@enduml'].join('\n'), { measurer: new WidthTableMeasurer() });
+  const svg = renderSync(['@startuml', ...body, '@enduml'].join('\n'), { measurer: new DeterministicMeasurer() });
   return /<svg[^>]*\bwidth="([^"]+)"/.exec(svg)?.[1];
 }
 
 function svgHeight(body: string[]): string | undefined {
-  const svg = renderSync(['@startuml', ...body, '@enduml'].join('\n'), { measurer: new WidthTableMeasurer() });
+  const svg = renderSync(['@startuml', ...body, '@enduml'].join('\n'), { measurer: new DeterministicMeasurer() });
   return /<svg[^>]*\bheight="([^"]+)"/.exec(svg)?.[1];
 }
 

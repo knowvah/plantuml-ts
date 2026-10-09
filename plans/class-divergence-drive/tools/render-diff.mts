@@ -5,7 +5,7 @@
  * `class/<slug>` (T4). For each: reads `test-results/dot-cache/<tree>/<slug>/
  * in.puml`, renders it through the exact production call
  * `scripts/svg-parity-survey.ts:268-271` uses (`renderSync(markup, {
- * measurer: new WidthTableMeasurer(), assetStore: buildSpriteAssetsStore()
+ * measurer: new DeterministicMeasurer(), assetStore: buildSpriteAssetsStore()
  * })`, with the asset store built ONCE per process), writes the result to
  * `measurements/out/<tree>__<slug>.ours.svg`, copies the cached `in.svg` to
  * `measurements/out/<tree>__<slug>.jar.svg`, then prints the structural and
@@ -24,7 +24,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { AssetStore } from '../../../src/core/asset-store.js';
 import { combineAssetStores } from '../../../src/core/asset-store.js';
 import { buildSpriteAssetsStore } from '../../../scripts/sprite-assets-store.js';
@@ -85,7 +85,7 @@ export function formatDiffLine(d: Diff): string {
 /** The exact upstream render call (`scripts/svg-parity-survey.ts:268-271`):
  *  `WidthTableMeasurer` + a shared, process-wide sprite asset store. */
 export function renderFixture(markup: string, store: AssetStore): string {
-  return renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore: store, includeStore: fixtureIncludeStore() });
+  return renderSync(markup, { measurer: new DeterministicMeasurer(), assetStore: store, includeStore: fixtureIncludeStore() });
 }
 
 interface FixtureFiles {

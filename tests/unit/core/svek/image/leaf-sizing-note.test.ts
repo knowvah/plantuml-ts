@@ -51,7 +51,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../../../src/index.js';
 import { measureLeafNode } from '../../../../../src/core/svek/image/leaf-sizing.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 import type { FontSpec } from '../../../../../src/core/measurer.js';
 import type { DescriptiveNode } from '../../../../../src/diagrams/description/ast.js';
 
@@ -60,7 +60,7 @@ import type { DescriptiveNode } from '../../../../../src/diagrams/description/as
  *  override" into this value, which is exactly why `measureNote` may not
  *  derive the note font from it (ADR-4). */
 const fontSpec: FontSpec = { family: 'SansSerif', size: 14 };
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function note(display: string): DescriptiveNode {
   return { id: 'n', display, symbol: 'note', children: [] };
@@ -202,7 +202,7 @@ function render(style: string): string {
   // DOT at all (`isDegeneratedWithFewEntities`). `UC` shares no substring with
   // any note line, so the assertions below cannot match it by accident.
   return renderSync(`@startuml\n${style}usecase UC\n${NOTE_SOURCE}\nN .. UC\n@enduml`, {
-    measurer: new WidthTableMeasurer(),
+    measurer: new DeterministicMeasurer(),
   });
 }
 

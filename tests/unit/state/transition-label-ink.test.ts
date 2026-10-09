@@ -29,7 +29,7 @@ import { computeSvekResultGeometry, computeStateDocumentDims } from '../../../sr
 import { layoutState } from '../../../src/diagrams/state/layout.js';
 import { renderState } from '../../../src/diagrams/state/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { FontSpec } from '../../../src/core/measurer.js';
 import { computeReservedLabelBox } from '../../../src/core/edge-label-box.js';
 import { resolveArrowLabelFont } from '../../../src/core/arrow-label-font.js';
@@ -39,7 +39,7 @@ import { defaultTheme } from '../../../src/core/theme.js';
 import type { TransitionGeo } from '../../../src/diagrams/state/state-geo-types.js';
 import type { Transition, StateDiagramAST, State } from '../../../src/diagrams/state/ast.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 /** The transition-label font every state fixture uses (13pt sans). */
 const FONT: FontSpec = { family: 'sans-serif', size: 13 };
 
@@ -167,7 +167,7 @@ describe('state engine — <style> arrow { FontSize 20 } reaches both the DOT bo
   });
 
   it('the DOT box (layoutState -> layout.ts:buildFlatTransitionGeos) reserves the SAME box computeReservedLabelBox gives the resolved font', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const geo = layoutState(ast(), theme, measurer);
     const label = geo.transitions.find((t) => t.label !== undefined)!.label!;
     const expectedBox = computeReservedLabelBox('trigger', resolveArrowLabelFont(theme), measurer, false);
@@ -180,7 +180,7 @@ describe('state engine — <style> arrow { FontSize 20 } reaches both the DOT bo
   });
 
   it('the SVG <text> (renderState -> state-renderer-transitions.ts) draws the label at the SAME resolved size, from the SAME geometry the DOT box test used', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const geo = layoutState(ast(), theme, measurer);
     const svg = assembleSvg(renderState(geo, theme));
     expect(svg).toContain('trigger');

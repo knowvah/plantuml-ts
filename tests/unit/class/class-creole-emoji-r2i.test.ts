@@ -9,7 +9,7 @@
  * jar golden — see each test's own comment.
  */
 import { describe, expect, test } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { FontConfiguration } from '../../../src/core/klimt/shape/UText.js';
 import { buildLineAtoms, buildStripeAtoms } from '../../../src/core/klimt/creole/legacy/StripeSimple.js';
 import { CreoleMode } from '../../../src/core/klimt/creole/CreoleMode.js';
@@ -27,7 +27,7 @@ import { parseIdDisplay } from '../../../src/diagrams/class/class-declaration-ex
 import { createSpriteRegistry, addSprite } from '../../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../../src/core/klimt/sprite/SpriteMonochrome.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const FONT: FontConfiguration = { family: 'sans-serif', size: 14, color: null, styles: new Set() };
 const FONT_SPEC = { family: 'sans-serif', size: 14 };
 

@@ -20,14 +20,14 @@ import {
   renderClassUSymbolEntity,
 } from '../../../src/diagrams/class/renderer-usymbol-entity.js';
 import type { ClassifierGeo } from '../../../src/diagrams/class/class-geo-types.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 
 const theme = scaleClassTheme(defaultTheme, 1);
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 describe('measureCircleInterface (cdd-T22, E8)', () => {
   it('sizes a circle leaf as the fixed 18x18 interface-eye box, independent of label length', () => {

@@ -16,12 +16,12 @@
 import { describe, it, expect } from 'vitest';
 import { measureLeafNode } from '../../../../../src/core/svek/image/leaf-sizing.js';
 import { measureShownFolderTitle } from '../../../../../src/core/svek/image/leaf-sizing-folder-title.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 import type { FontSpec } from '../../../../../src/core/measurer.js';
 import type { DescriptiveNode } from '../../../../../src/diagrams/description/ast.js';
 
 const fontSpec: FontSpec = { family: 'Helvetica', size: 14 };
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function node(id: string, display: string, symbol: DescriptiveNode['symbol']): DescriptiveNode {
   return { id, display, symbol, children: [] };

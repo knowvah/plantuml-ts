@@ -21,7 +21,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { ClassDiagramAST, Namespace } from '../../../src/diagrams/class/ast.js';
 import {
@@ -82,7 +82,7 @@ function ns(ast: ClassDiagramAST, id: string): Namespace {
   return found;
 }
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 describe('per-group legend routing (AbstractClassOrObjectDiagram.java:353-363)', () => {
   it('stores a legend written inside a group on that group, not the diagram', () => {

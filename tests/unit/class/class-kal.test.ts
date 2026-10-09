@@ -20,7 +20,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { layoutFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 import type { ClassGeometry } from '../../../src/diagrams/class/layout.js';
 import {
@@ -36,7 +36,7 @@ import {
 import { parseRelationshipLine } from '../../../src/diagrams/class/class-relationship-parser.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function markupOf(slug: string): string {
   return readFileSync(`test-results/dot-cache/class/${slug}/in.puml`, 'utf8');

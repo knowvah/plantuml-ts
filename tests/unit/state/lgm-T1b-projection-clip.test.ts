@@ -20,7 +20,6 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../src/index.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { linkEndsById, mismatchedLinks } from '../../helpers/link-endpoints.js';
 import { clipLinesInSolveOrder, type SolveLine } from '../../../src/diagrams/state/state-transition-clip.js';
 import { clipSplineStart } from '../../../src/core/spline-clip.js';
@@ -58,7 +57,7 @@ describe('lgm-T1b — state composite-anchored clip against the jar', () => {
 
   it('pesita-10-dene726 (AA, three lines through an exit-point composite): every link end equals the jar’s', () => {
     const dir = join(ROOT, 'test-results/dot-cache/state/pesita-10-dene726');
-    const ours = renderSync(readFileSync(join(dir, 'in.puml'), 'utf8'), { measurer: new WidthTableMeasurer() });
+    const ours = renderSync(readFileSync(join(dir, 'in.puml'), 'utf8'), { measurer: new DeterministicMeasurer() });
     const jar = readFileSync(join(dir, 'in.svg'), 'utf8');
     expect(linkEndsById(jar).size).toBe(16);
     expect(mismatchedLinks(ours, jar)).toEqual([]);

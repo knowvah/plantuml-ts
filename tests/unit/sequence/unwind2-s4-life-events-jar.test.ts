@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/unwind2-S4');
@@ -52,7 +52,7 @@ function jar(name: string): string {
 }
 
 function ours(name: string): string {
-  return renderSync(source(name), { measurer: new WidthTableMeasurer() });
+  return renderSync(source(name), { measurer: new DeterministicMeasurer() });
 }
 
 function shapesOf(svg: string, attrs: Record<string, readonly string[]>): string[] {

@@ -23,10 +23,10 @@ import { parseClass } from './parse-helper.js';
 import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { EnhancedBodyPart } from '../../../src/diagrams/class/class-body-enhanced-layout.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const theme = defaultTheme;
 
 /** Preserves blank lines — the subject under test. */

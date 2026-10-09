@@ -11,13 +11,13 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { preprocess } from '../../../src/core/preprocessor.js';
 import { resolveSkinparam } from '../../../src/core/skinparam.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 
 function render(src: string): string {
-  return renderSync(src, { measurer: new WidthTableMeasurer() });
+  return renderSync(src, { measurer: new DeterministicMeasurer() });
 }
 
 function unknownKeys(src: string): string[] {

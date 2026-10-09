@@ -31,7 +31,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { renderSync } from '../../../../../src/index.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 import { compareSvg } from '../../../../oracle/svg-conformance/compare.js';
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), '../../../../fixtures/unwind2-S3');
@@ -41,7 +41,7 @@ const TEXT_ATTRS = ['x', 'y', 'textLength'] as const;
 
 function load(name: string): { ours: string; jar: string } {
   const source = readFileSync(join(FIXTURES, `${name}.puml`), 'utf-8');
-  const ours = renderSync(source, { measurer: new WidthTableMeasurer() });
+  const ours = renderSync(source, { measurer: new DeterministicMeasurer() });
   return { ours, jar: readFileSync(join(FIXTURES, `${name}.svg`), 'utf-8') };
 }
 

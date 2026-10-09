@@ -13,12 +13,12 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { layoutFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 import { constraintSquare, sampleEdgePath } from '../../../src/diagrams/class/class-edge-constraint.js';
 import type { ClassGeometry } from '../../../src/diagrams/class/layout.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function fixture(slug: string): ClassGeometry {
   const markup = readFileSync(`test-results/dot-cache/class/${slug}/in.puml`, 'utf8');

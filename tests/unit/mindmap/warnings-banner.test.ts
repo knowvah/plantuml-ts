@@ -17,12 +17,12 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { preprocess } from '../../../src/core/preprocessor.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderSync } from '../../../src/index.js';
 import { createMindMapDiagram } from '../../../src/diagrams/mindmap/MindMapDiagramFactory.js';
 import type { MindMapDiagram } from '../../../src/diagrams/mindmap/MindMapDiagram.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function fixture(slug: string): { markup: string; golden: string } {
   const dir = `test-results/dot-cache/mindmap/${slug}`;

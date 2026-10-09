@@ -23,7 +23,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
 import { setLayoutInputObserver, type DotInputGraph } from '../../../src/core/graph-layout.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { dotInputToStructural } from '../../oracle/svek-dot.js';
 
 /** `test-results/dot-cache/state/pacami-67-dafe414/in.puml`, verbatim. */
@@ -79,7 +79,7 @@ function declaredScopes(markup: string): DotInputGraph[] {
   const inputs: DotInputGraph[] = [];
   setLayoutInputObserver(({ graph: g }) => inputs.push(g));
   try {
-    renderSync(markup, { measurer: new WidthTableMeasurer() });
+    renderSync(markup, { measurer: new DeterministicMeasurer() });
   } finally {
     setLayoutInputObserver(undefined);
   }

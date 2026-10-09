@@ -47,13 +47,13 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph, DotInputEdge } from '../../../src/core/graph-layout.js';
 
 const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/state');
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const size13 = (text: string): number => measurer.measure(text, { family: 'sans-serif', size: 13 }).width;
 const size14 = (text: string): number => measurer.measure(text, { family: 'sans-serif', size: 14 }).width;
 

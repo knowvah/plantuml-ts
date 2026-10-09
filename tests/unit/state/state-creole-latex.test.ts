@@ -18,7 +18,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderStateRuns } from '../../../src/diagrams/state/renderer-box.js';
 import { renderLatexAsImage } from '../../../src/core/latex.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../../src/core/decoration/symbol/usymbol-resolve.js';
@@ -27,7 +27,7 @@ import type { StateTextRun } from '../../../src/diagrams/state/state-sizing-creo
 const MATH_STATE = '@startuml\nstate State\nState : <math>S<=1/(F+(1-F)/N)</math>\n@enduml';
 
 function svgOf(source: string): string {
-  const out = renderSync(source, { measurer: new WidthTableMeasurer() });
+  const out = renderSync(source, { measurer: new DeterministicMeasurer() });
   return typeof out === 'string' ? out : (out as { svg: string }).svg;
 }
 

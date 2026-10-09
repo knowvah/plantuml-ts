@@ -31,7 +31,7 @@ import { RAW_GLYPHS } from '../../src/core/openiconic-glyphs-data.js';
 import { scanLineForAtoms, matchAtomAt } from '../../src/core/creole-atoms.js';
 import { measureInlineAtom } from '../../src/core/creole-atoms-measure.js';
 import { measureLeafNode } from '../../src/core/svek/image/leaf-sizing.js';
-import { WidthTableMeasurer } from '../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
 import type { DescriptiveNode } from '../../src/diagrams/description/ast.js';
 
 describe('isKnownOpenIconicGlyph', () => {
@@ -338,7 +338,7 @@ describe('<&cloud> -- F1-c AC1/AC2, the vivido-49-nisu863 node-2 isolation (G11)
     // `rectangle "aa<&cloud>"` minimal repro (not the link-wrapped fixture
     // node, which also carries M3).
     const node: DescriptiveNode = { id: 'x', display: 'aa<&cloud>', symbol: 'rectangle', children: [] };
-    const dim = measureLeafNode(node, { family: 'sans-serif', size: 14 }, new WidthTableMeasurer());
+    const dim = measureLeafNode(node, { family: 'sans-serif', size: 14 }, new DeterministicMeasurer());
     expect(dim.width).toBeCloseTo(46.9083, 3);
     expect(dim.height).toBe(34);
   });

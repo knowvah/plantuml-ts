@@ -23,7 +23,7 @@ import { describe, expect, it } from 'vitest';
 import { isMethodMember } from '../../../src/diagrams/class/class-member-rows.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 
@@ -56,7 +56,7 @@ describe('isMethodMember — url-bracket-aware paren scan (T24 row 83)', () => {
 describe('sejuzo-42-fini523 — end-to-end divider position (jar: y=43, y=65)', () => {
   it('the field lands in the FIELDS compartment, not methods — no spurious empty-methods divider at y=51', () => {
     const markup = readFileSync(join(REPO_ROOT, 'test-results/dot-cache/class/sejuzo-42-fini523/in.puml'), 'utf-8');
-    const svg = renderSync(markup, { measurer: new WidthTableMeasurer() });
+    const svg = renderSync(markup, { measurer: new DeterministicMeasurer() });
     const lineYs = [...svg.matchAll(/<line x1="8" y1="(\d+)"/g)].map((m) => Number(m[1]));
     expect(lineYs).toEqual([43, 65]);
   });

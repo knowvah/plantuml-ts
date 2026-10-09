@@ -13,12 +13,12 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
 import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const SPRITE = 'archimate/business-actor';
 /** The shared `extractNodeStereotype` ref -- `Stereotype#getHtmlColor` as
  *  the description engine's own producer returns it for a bare `<<$name>>`. */

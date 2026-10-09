@@ -33,7 +33,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { renderSync } from '../../src/index.js';
-import { WidthTableMeasurer } from '../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../src/core/graph-layout.js';
 import { parseSvekDot, dotInputToStructural, compareStructural, SIZE_CONFORMANCE_TOLERANCE_IN } from './svek-dot.js';
@@ -103,7 +103,7 @@ describe('oracle DOT parity harness — class diagrams', () => {
     it(`${name}: renders, captures, and produces a structural diff`, () => {
       captured = [];
       const svg = renderSync(readFileSync(join(GOLDENS, name, 'input.puml'), 'utf8'), {
-        measurer: new WidthTableMeasurer(),
+        measurer: new DeterministicMeasurer(),
       });
       expectNoErrorDiagram(svg);
       // A single-scope class diagram drives the layout seam exactly once.
@@ -134,7 +134,7 @@ describe.skipIf(ratchetFixtures.length === 0)('oracle DOT-parity ratchet — cla
       // real structural check, independent of *why* zero graphs were
       // produced.
       renderSync(readFileSync(join(GOLDENS, name, 'input.puml'), 'utf8'), {
-        measurer: new WidthTableMeasurer(),
+        measurer: new DeterministicMeasurer(),
       });
       expect(
         captured.length,
