@@ -121,7 +121,7 @@ export function extendForEdgeLabelText(acc: MutableInkBounds, edge: ActivityEdge
   // (`SheetBlock1.java:209-210`), so the LEFT block's ink spans
   // `[x + p, x + width - p]`.
   const pad = theme.padding ?? 0;
-  const dim = edgeLabelBlockSize(edge.label, theme);
+  const dim = edgeLabelBlockSize(edge.label, theme, undefined, edge.labelWrapped === true);
   const position = getTextBlockPosition(edge.points, dim, edge.labelAlign ?? DEFAULT_LABEL_ALIGN);
   const baselineY = position.y + pad + fontSize * TITLE_ASCENT_FRACTION;
   acc.minX = Math.min(acc.minX, position.x + pad);

@@ -25,6 +25,7 @@ import { ifElseHexagonReservation } from './hexagon-reservations.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { diamondBackOf } from './diamond-labels.js';
+import { wrappedSpread } from './diamond-wrap.js';
 
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
@@ -101,6 +102,7 @@ function pushDiamondLabel(ctx: IfDownCtx, side: 'north' | 'south' | 'west' | 'ea
       height: l.height,
       label: l.label,
       ...testLabelRole(t.diamond1, side),
+      ...wrappedSpread(t.diamond1),
       ...diamondBackOf(t.diamond1),
     },
     myLane,
@@ -128,6 +130,7 @@ function pushDiamondOwnLabel(ctx: IfDownCtx, dX: number, dY: number): void {
       width: t.diamond1.width,
       height: t.diamond1.height,
       label: t.diamond1.label,
+      ...wrappedSpread(t.diamond1),
     },
     myLane,
   );

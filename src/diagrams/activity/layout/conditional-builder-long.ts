@@ -75,7 +75,7 @@ function buildLongHorizontalDiamonds(
     if (b.label !== undefined) labels.north = b.label;
     if (i === branches.length - 1 && elseLabel !== undefined) labels.east = elseLabel;
     if (b.incomingLabel !== undefined) labels.west = b.incomingLabel;
-    return new GtileDiamondInside2(b.condition, labels, bounder, theme);
+    return new GtileDiamondInside2(b.condition, labels, bounder, theme, true);
   });
 }
 
@@ -148,7 +148,7 @@ function buildLongVerticalDiamonds(
   return branches.map((b) => {
     const labels: { east?: string } = {};
     if (b.label !== undefined) labels.east = b.label;
-    return new GtileDiamondInside2(b.condition, labels, bounder, theme);
+    return new GtileDiamondInside2(b.condition, labels, bounder, theme, false);
   });
 }
 

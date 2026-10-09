@@ -52,6 +52,12 @@ export interface ActivityNodeGeo {
    * elseif hexagon's slots (`FtileIfLongHorizontal.java:172-173,186`).
    */
   ifLabelRole?: 'test' | 'full';
+  /** isw-T2-act F5: an `'if-label'`/`'if-own-label'` whose block carries the
+   *  style `wrapWidth()` -- `ConditionalBuilder`'s test and SIMPLE_LINE
+   *  branch labels, the switch's and horizontal elseif's tests
+   *  (`ConditionalBuilder.java:120-121`, `FtileFactoryDelegatorSwitch.java:134`,
+   *  `FtileIfLongHorizontal.java:174`). Absent: `LineBreakStrategy.NONE`. */
+  wrapped?: true;
   /**
    * unwind2-S11: an `'if-label'` in a north/south/west/east slot of a
    * `FtileDiamondInside`/`FtileDiamondInside2`/`FtileDiamondSquare`, whose
@@ -89,6 +95,10 @@ export type CompositeUSymbol = 'package' | 'card' | 'rectangle';
 export interface ActivityEdgeGeo {
   points: Array<{ x: number; y: number }>;
   label?: string;
+  /** isw-T2-act F5: {@link label} is a `Branch#getTextBlock` block, wrapped
+   *  at the arrow style's `wrapWidth()` (`Branch.java:248-258`) -- a switch
+   *  case's in/out label. Absent: `create7`'s `LineBreakStrategy.NONE`. */
+  labelWrapped?: true;
   /**
    * How {@link label} is positioned, mirroring `Snake#withLabel`'s two
    * overloads (`ftile/Snake.java:124-136`) -- a pushed label carries

@@ -27,7 +27,12 @@
  */
 import type { Theme } from '../../core/theme.js';
 import type { ActivitySName } from './activity-style-defaults.js';
-import { activityFontColor, activityFontFamily, activityHyperlinkColor } from './activity-text-style.js';
+import {
+  activityFontColor,
+  activityFontFamily,
+  activityHyperlinkColor,
+  activityWrapWidth,
+} from './activity-text-style.js';
 import {
   activityHorizontalAlignment,
   activityMinimumWidth,
@@ -39,7 +44,6 @@ import { NOTE_MARGIN_X1, NOTE_MARGIN_X2, NOTE_MARGIN_Y } from './activity-layout
 import { Display } from '../../core/klimt/creole/Display.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
-import { LineBreakStrategy } from '../../core/klimt/LineBreakStrategy.js';
 import { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 import { CreoleParser } from '../../core/klimt/creole/legacy/CreoleParser.js';
 import { SheetBlock1 } from '../../core/klimt/creole/SheetBlock1.js';
@@ -196,7 +200,14 @@ export function buildActionTextBlock(
 ): SheetBlock2 {
   const fc = activityFontConfiguration(theme, fontSize, sname);
   const sheet = createSheet(label, fc, ALIGNMENT_MAP[activityHorizontalAlignment(theme)], theme.sprites);
-  const sheet1 = new SheetBlock1(sheet, LineBreakStrategy.NONE, chromeAtomOps(theme.sprites, fc), theme.padding ?? 0);
+  // isw-T2-act F5: `new SheetBlock1(sheet, wrapWidth, ...)`, `wrapWidth =
+  // style.wrapWidth()` (`FtileBox.java:175,180`).
+  const sheet1 = new SheetBlock1(
+    sheet,
+    activityWrapWidth(theme, sname),
+    chromeAtomOps(theme.sprites, fc),
+    theme.padding ?? 0,
+  );
   const padding = activityPadding(sname);
   return new SheetBlock2(
     sheet1,
@@ -342,7 +353,9 @@ export function renderActionLabel(
 export function buildNoteTextBlock(text: string, theme: Theme): SheetBlock1 {
   const fc = activityFontConfiguration(theme, activityFontSize(theme, 'note'), 'note');
   const sheet = createSheet(text, fc, ALIGNMENT_MAP[activityNoteHorizontalAlignment(theme)], theme.sprites);
-  return new SheetBlock1(sheet, LineBreakStrategy.NONE, chromeAtomOps(theme.sprites, fc));
+  // isw-T2-act F5: the note style's `wrapWidth()` (`FtileWithNoteOpale.java:143,149`,
+  // `FtileNoteAlone.java:109,117`, `FtileWithNotes.java:115,121`).
+  return new SheetBlock1(sheet, activityWrapWidth(theme, 'note'), chromeAtomOps(theme.sprites, fc));
 }
 
 /**

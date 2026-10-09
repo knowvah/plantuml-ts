@@ -7,13 +7,12 @@ import type {
   ActivityWhile,
   ActivityRepeat,
 } from '../ast.js';
-import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
 import type { StringMeasurer } from '../../../core/measurer.js';
 import { withActivityMeasurer } from '../activity-string-bounder.js';
 import type { Theme } from '../../../core/theme.js';
 import { Pragma } from '../../../core/skin/Pragma.js';
 import type { StringBounder, Tile } from '../tiles/tile.js';
-import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
+import { CREATE_TEXT, GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import type { DiamondConditionTile } from '../tiles/gtile-diamond-inside.js';
 import { GtileDiamondSquare } from '../tiles/gtile-diamond-square.js';
 import { GtileDiamondEmpty } from '../tiles/gtile-diamond-empty.js';
@@ -242,11 +241,11 @@ function buildWhileHeader(
     const emptyLabels: { south?: string; west?: string } = {};
     if (node.yesLabel !== undefined) emptyLabels.south = node.yesLabel;
     if (node.exitLabel !== undefined) emptyLabels.west = node.exitLabel;
-    return new GtileDiamondEmpty(nonWhiteTest(node.condition), emptyLabels, bounder, theme, CreoleMode.FULL);
+    return new GtileDiamondEmpty(nonWhiteTest(node.condition), emptyLabels, bounder, theme, CREATE_TEXT);
   }
   if (theme.conditionStyle === 'insideDiamond')
-    return new GtileDiamondSquare(nonWhiteTest(node.condition), labels, bounder, theme, CreoleMode.FULL);
-  return new GtileDiamondInside(nonWhiteTest(node.condition), labels, bounder, theme, CreoleMode.FULL);
+    return new GtileDiamondSquare(nonWhiteTest(node.condition), labels, bounder, theme, CREATE_TEXT);
+  return new GtileDiamondInside(nonWhiteTest(node.condition), labels, bounder, theme, CREATE_TEXT);
 }
 
 function tileWhile(
@@ -349,11 +348,11 @@ function tileRepeatCondition(
   // own EMPTY_DIAMOND call never leaving `testLabel` unset the way this
   // one always does).
   if (theme.conditionStyle === 'emptyDiamond')
-    return new GtileDiamondEmpty('', { east: nonWhiteTest(node.condition) }, bounder, theme, CreoleMode.FULL);
+    return new GtileDiamondEmpty('', { east: nonWhiteTest(node.condition) }, bounder, theme, CREATE_TEXT);
   // CSTYLE (add2 T3i): FtileRepeat.java:159-161.
   if (theme.conditionStyle === 'insideDiamond')
-    return new GtileDiamondSquare(nonWhiteTest(node.condition), labels, bounder, theme, CreoleMode.FULL);
-  return new GtileDiamondInside(nonWhiteTest(node.condition), labels, bounder, theme, CreoleMode.FULL);
+    return new GtileDiamondSquare(nonWhiteTest(node.condition), labels, bounder, theme, CREATE_TEXT);
+  return new GtileDiamondInside(nonWhiteTest(node.condition), labels, bounder, theme, CREATE_TEXT);
 }
 
 /**

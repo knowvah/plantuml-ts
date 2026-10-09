@@ -371,7 +371,8 @@ function edgeLabelShape(edge: ActivityEdgeGeo, bounder: StringBounder, theme: Th
   // each `UText` of the drawn SIMPLE_LINE block, inside `SheetBlock1`'s
   // padding (`SheetBlock1.java:209-210`): `[x + p, x + width - p]`.
   const pad = theme.padding ?? 0;
-  const width = edgeLabelBlockSize(lines.join('\n'), theme, measurerAdapterOf(bounder)).width - 2 * pad;
+  const wrapped = edge.labelWrapped === true;
+  const width = edgeLabelBlockSize(lines.join('\n'), theme, measurerAdapterOf(bounder), wrapped).width - 2 * pad;
   const first = layout.baselineY + pad;
   const last = first + size * (lines.length - 1);
   const height = last - first + bounder.getDimension(lines[0]!, size).height;

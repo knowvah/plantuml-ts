@@ -11,13 +11,11 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 import { polygon } from '../../core/svg.js';
 import {} from '../../core/latex.js';
 import { orderedLine, renderNodesDispatchingGotos } from './activity-renderer-terminals.js';
-import { activityDisplayBlock, activityTextFontConfiguration, drawActivityTextBlock } from './activity-text-sheet.js';
+import { activityTextFontConfiguration, drawActivityTextBlock } from './activity-text-sheet.js';
 import { ASCENT_FRACTION } from './activity-renderer-shapes.js';
-import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
-import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityArrowHeadColor, activityLineThickness } from './activity-style-defaults.js';
-import { edgeLabelLayout } from './layout/compress/edge-label-anchor.js';
+import { edgeLabelBlock, edgeLabelLayout } from './layout/compress/edge-label-anchor.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
 import { LinkStyle } from '../../core/decoration/LinkStyle.js';
@@ -113,11 +111,7 @@ function renderEdgeLabel(edge: ActivityEdgeGeo, theme: Theme): string {
   const { lines, size, x, baselineY } = layout;
   const label = lines.join('\n');
   const fc = activityTextFontConfiguration(theme, size, 'arrow');
-  const tb = activityDisplayBlock(label, theme, {
-    fontConfiguration: fc,
-    horizontalAlignment: HorizontalAlignment.LEFT,
-    creoleMode: CreoleMode.SIMPLE_LINE,
-  });
+  const tb = edgeLabelBlock(label, theme, edge.labelWrapped === true);
   return drawActivityTextBlock(tb, { x, y: baselineY - size * ASCENT_FRACTION }, theme, fc);
 }
 

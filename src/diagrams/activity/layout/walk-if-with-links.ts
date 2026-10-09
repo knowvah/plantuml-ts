@@ -26,6 +26,7 @@ import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { diamondBackOf } from './diamond-labels.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
+import { wrappedSpread } from './diamond-wrap.js';
 
 /** `ActivityNodeGeo.diamondShape`'s own producer (add3-T3c) -- see
  *  `walk-if-down.ts#diamondShapeOf`'s own doc for why this is duplicated,
@@ -109,6 +110,7 @@ function pushDiamondLabel(
       height: l.height,
       label: l.label,
       ...testLabelRole(diamond, side),
+      ...wrappedSpread(diamond),
       ...diamondBackOf(diamond),
     },
     lane,
@@ -127,6 +129,7 @@ function pushDiamondOwnLabel(diamond: DiamondConditionTile, origin: GPoint, lane
     width: diamond.width,
     height: diamond.height,
     label: diamond.label,
+    ...wrappedSpread(diamond),
   };
   pushNode(out, node, lane);
 }

@@ -13,6 +13,14 @@
  * single `" "` atom (`StripeSimple.java:124-127`) -- so its title measures
  * one space at the title font, not zero.
  *
+ * No `wrap` is passed: `getWrap` (`Swimlanes.java:296-301`) falls back to
+ * `style.wrapWidth()` only when `swimlaneWrapTitleWidth()` `==
+ * LineBreakStrategy.NONE`, a reference test that a fresh `new
+ * LineBreakStrategy(null)` (`SkinParam.java:981-984`) never passes -- so
+ * only `skinparam swimlaneWrapTitleWidth` wraps a title, and `Theme` does
+ * not carry it yet (isw-T2-act F5, reported; jar fixture
+ * `tests/fixtures/isw-T2-act/wrap-swimlane`).
+ *
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:285-293
  */
 import type { Theme } from '../../../core/theme.js';

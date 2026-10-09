@@ -1,0 +1,11 @@
+@startuml
+skinparam wrapWidth 60
+start
+if (first long condition test?) then (long yes one)
+  :one;
+elseif (second long condition test?) then (long yes two)
+  :two;
+else (long else label)
+  :three;
+endif
+@enduml

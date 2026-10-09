@@ -4,6 +4,7 @@ import type { StringBounder } from './tile.js';
 import { TileLeaf } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
+import { activityWrapWidth } from '../activity-text-style.js';
 import { measurerAdapterOf } from './gtile-action.js';
 import { klimtStringBounder } from '../activity-creole-sheet.js';
 import { activityDisplayBlock, activityTextFontConfiguration } from '../activity-text-sheet.js';
@@ -52,6 +53,9 @@ export interface DiamondConditionTile {
   readonly swimlane?: string;
   readonly swimlaneOut?: string;
   readonly label: string;
+  /** isw-T2-act F5: the test and SIMPLE_LINE side blocks carry the style
+   *  `wrapWidth()` ({@link DiamondText}). */
+  readonly wrapped: boolean;
   readonly width: number;
   readonly height: number;
   getCoord(hook: HookName): GPoint;
@@ -59,6 +63,22 @@ export interface DiamondConditionTile {
   swapEastWest(): void;
   hasPointOut(): boolean;
 }
+
+/**
+ * isw-T2-act F5: how upstream built a diamond's texts. `CONDITIONAL_TEXT`:
+ * `ConditionalBuilder` (and the switch's `getDiamond1`) -- SIMPLE_LINE
+ * branch labels at `styleArrow.wrapWidth()`, the test at
+ * `styleDiamond.wrapWidth()` (`ConditionalBuilder.java:120-121,244,280-283`,
+ * `FtileFactoryDelegatorSwitch.java:131-134`). `CREATE_TEXT`: a while's or
+ * repeat's `Display#create` blocks -- FULL, `LineBreakStrategy.NONE`
+ * (`FtileWhile.java:123-128`, `FtileRepeat.java:127-131`, `Display.java:614-623`).
+ */
+export interface DiamondText {
+  readonly sideMode: CreoleMode;
+  readonly wrapped: boolean;
+}
+export const CONDITIONAL_TEXT: DiamondText = { sideMode: CreoleMode.SIMPLE_LINE, wrapped: true };
+export const CREATE_TEXT: DiamondText = { sideMode: CreoleMode.FULL, wrapped: false };
 
 export interface LabelDim {
   readonly text: string;
@@ -97,6 +117,7 @@ export function measureSide(
   bounder: StringBounder,
   theme: Theme,
   creoleMode: CreoleMode = CreoleMode.SIMPLE_LINE,
+  wrapped = false,
 ): LabelDim {
   const t = text ?? '';
   if (t === '') return { text: t, width: 0, height: 0 };
@@ -105,6 +126,7 @@ export function measureSide(
     fontConfiguration: fc,
     horizontalAlignment: HorizontalAlignment.LEFT,
     creoleMode,
+    ...(wrapped ? { maxMessageSize: activityWrapWidth(theme, 'arrow') } : {}),
   });
   return { text: t, ...blockDimension(tb, bounder, fc) };
 }
@@ -119,10 +141,10 @@ export function measureSide(
  * hexagon carries (`FtileIfLongHorizontal.java:175-177`): a stencil never
  * changes a `SheetBlock2` dimension.
  */
-export function measureCondition(text: string, bounder: StringBounder, theme: Theme): LabelDim {
+export function measureCondition(text: string, bounder: StringBounder, theme: Theme, wrapped = false): LabelDim {
   if (text === '') return { text, width: 0, height: 0 };
   const fc = activityTextFontConfiguration(theme, activityFontSize(theme, 'diamond'), 'diamond');
-  return { text, ...blockDimension(diamondTestBlock(text, theme), bounder, fc) };
+  return { text, ...blockDimension(diamondTestBlock(text, theme, wrapped), bounder, fc) };
 }
 
 /**
@@ -154,6 +176,7 @@ function hexagonAlone(dimLabel: { width: number; height: number }): { width: num
 export class GtileDiamondInside extends TileLeaf implements DiamondConditionTile {
   readonly kind = 'gtile-diamond-inside' as const;
   readonly label: string;
+  readonly wrapped: boolean;
   readonly width: number;
   readonly height: number;
   private readonly hexHeight: number;
@@ -162,26 +185,28 @@ export class GtileDiamondInside extends TileLeaf implements DiamondConditionTile
   private west: LabelDim;
   private east: LabelDim;
 
-  /** @param sideMode `SIMPLE_LINE` for an `if` (`ConditionalBuilder.java:280-283`),
-   *  `FULL` for a while / repeat (`FtileWhile.java:123,127-128`, `FtileRepeat.java:130-131`). */
+  /** @param text {@link CONDITIONAL_TEXT} for an `if` / switch
+   *  (`ConditionalBuilder.java:280-283`), {@link CREATE_TEXT} for a while /
+   *  repeat (`FtileWhile.java:123,127-128`, `FtileRepeat.java:130-131`). */
   constructor(
     label: string,
     labels: DiamondInsideLabels,
     bounder: StringBounder,
     theme: Theme,
-    sideMode: CreoleMode = CreoleMode.SIMPLE_LINE,
+    text: DiamondText = CONDITIONAL_TEXT,
   ) {
     super();
     this.label = label;
-    this.north = measureSide(labels.north, bounder, theme, sideMode);
-    this.south = measureSide(labels.south, bounder, theme, sideMode);
-    this.west = measureSide(labels.west, bounder, theme, sideMode);
-    this.east = measureSide(labels.east, bounder, theme, sideMode);
+    this.wrapped = text.wrapped;
+    this.north = measureSide(labels.north, bounder, theme, text.sideMode, text.wrapped);
+    this.south = measureSide(labels.south, bounder, theme, text.sideMode, text.wrapped);
+    this.west = measureSide(labels.west, bounder, theme, text.sideMode, text.wrapped);
+    this.east = measureSide(labels.east, bounder, theme, text.sideMode, text.wrapped);
 
     // `FtileDiamondInside#calculateDimensionAlone` reads `label
     // .calculateDimension` (`FtileDiamondInside.java:106-116`) -- the Sheet,
     // one stripe per real `\n` (IFNL, T3d, `vaxiki-78-nice114`).
-    const dimLabel = measureCondition(label, bounder, theme);
+    const dimLabel = measureCondition(label, bounder, theme, text.wrapped);
     const hex = hexagonAlone(dimLabel);
     this.width = hex.width;
     this.hexHeight = hex.height;

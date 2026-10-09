@@ -1,0 +1,9 @@
+@startuml
+skinparam wrapWidth 60
+start
+if (is this a rather long condition test?) then (a long yes branch label)
+  :one;
+else (a long no branch label)
+  :two;
+endif
+@enduml
