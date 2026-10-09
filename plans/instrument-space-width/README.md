@@ -98,7 +98,7 @@ every all-engine survey run with NO agents active (load).
 
 | Batch | Scope | Tasks | Parallel | Done |
 |---|---|---|---|---|
-| [0](batch-0/overview.md) | baseline, re-capture tool, harness rename | T0a, T0b, T0c | T0b ∥ T0a; T0c after T0b | [ ] |
+| [0](batch-0/overview.md) | baseline, re-capture tool, harness rename | T0a, T0b, T0c | T0b ∥ T0a; T0c after T0b | [x] |
 | [1](batch-1/overview.md) | atomic instrument change + re-capture + classify | T1a, T1b | sequential | [ ] |
 | [2](batch-2/overview.md) | fix every reveal family (template; repeats) | from census | per batch | [ ] |
 | [final](batch-final/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
