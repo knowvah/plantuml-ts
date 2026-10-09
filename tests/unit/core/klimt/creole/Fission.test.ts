@@ -80,7 +80,7 @@ describe('getSplitted — word-boundary greedy packing (1-unit-per-char measurer
 });
 
 describe('getSplitted — jar-verified against a real DeterministicMeasurer probe', () => {
-  test('wrapWidth 100, font-size 14: splits into 10 lines matching the jar exactly', () => {
+  test('wrapWidth 100, font-size 14: splits into 11 lines matching the jar exactly', () => {
     const measurer = new DeterministicMeasurer();
     const stringBounder = {
       calculateDimension(font: { family: string; size: number }, text: string): XDimension2D {
@@ -98,11 +98,15 @@ describe('getSplitted — jar-verified against a real DeterministicMeasurer prob
     const atoms = buildStripeAtoms(text, PLAIN);
     const lines = texts(getSplitted(atoms, 100, measureAtomWidth));
 
+    // Source of the lines: a one-JVM jar render under seam #4 v2 (a space is
+    // 44 tenths) of `skinparam wrapWidth 100` + `rectangle "<text>"`; the
+    // <text> y values group into exactly these 11 lines.
     expect(lines).toEqual([
       ['This', ' ', 'is', ' ', 'a'],
       ['genuinely', ' ', 'long'],
-      ['single', ' ', 'line', ' ', 'of', ' ', 'text'],
-      ['with', ' ', 'no', ' ', 'explicit'],
+      ['single', ' ', 'line', ' ', 'of'],
+      ['text', ' ', 'with', ' ', 'no'],
+      ['explicit'],
       ['newlines', ' ', 'that'],
       ['should', ' ', 'trigger'],
       ['wrapping', ' ', 'if', ' ', 'a'],
