@@ -38,17 +38,16 @@ import { getNestedDiagramRenderer } from '../../nested-diagram-registry.js';
 import { MeasurerStringBounder } from '../../measurer-bounder.js';
 
 /**
- * `EmbeddedDiagram`'s two arms for a description label, split the way the
- * oracle jar splits them. SIZE: `calculateDimensionSlow` takes the SVG arm
- * only when `stringBounder.matchesProperty("SVG")` (java:129); the oracle's
- * `StringBounderFromWidthTable` (`FileFormat.java:185-187`) keeps
- * `StringBounder.java:43-45`'s `false`, so the raster `getImage` arm runs
- * (java:138-139) -- no raster here -- and the catch returns `(42, 42)`
- * (java:148-152): the dimension below throws into that same catch. DRAW:
- * `UGraphicSvg#matchesProperty("SVG")` is true (`UGraphicSvg.java:175-179`),
- * so `drawU` draws the real nested SVG (java:169-174) -- the registered
- * renderer's own `drawU`. Nothing registered (a unit test bypassing
- * `src/index.ts`): both arms fall to their catch.
+ * `EmbeddedDiagram`'s two passes for a description label. SIZE:
+ * `calculateDimensionSlow` takes the SVG arm (java:129-133) because the
+ * oracle's `StringBounderFromWidthTable` reports `matchesProperty("SVG")`
+ * (oracle seam #3): the slot is the exported nested document's
+ * `UImageSvg` width/height, which is what the registered renderer's
+ * `TextBlock` reports. DRAW: `UGraphicSvg#matchesProperty("SVG")` is true
+ * (`UGraphicSvg.java:175-179`), so `drawU` draws the real nested SVG
+ * (java:169-174) -- the registered renderer's own `drawU`. Nothing
+ * registered (a unit test bypassing `src/index.ts`): both fall to their
+ * catch (java:148-152, 191-193).
  *
  * See this module's own doc comment for the ink-pass gating in `drawU`.
  */
@@ -61,9 +60,7 @@ export function descEmbeddedRenderer(): NestedDiagramRenderer {
       }
       const drawn = registered.render(source, skinParam);
       return {
-        calculateDimension(): XDimension2D {
-          throw new Error('EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported');
-        },
+        calculateDimension: (stringBounder): XDimension2D => drawn.calculateDimension(stringBounder),
         // `LimitFinder.java:99-100`: the ink pass's `matchesProperty("SVG")`
         // is false, so `EmbeddedDiagram#drawU`'s raster arm throws and its
         // catch draws nothing (java:169-193). This port has no

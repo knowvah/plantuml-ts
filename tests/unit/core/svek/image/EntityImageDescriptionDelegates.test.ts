@@ -150,13 +150,13 @@ function fakeNestedRenderer(sources: string[][]): NestedDiagramRenderer {
 }
 
 describe('buildDesc — {{ }} embed in a description label (cdd5-T4d)', () => {
-  test('sizes at the 42x42 catch fallback but draws the nested image at its own size', () => {
+  test('sizes at the nested image own size (SVG arm, EmbeddedDiagram.java:129-133) and draws it there', () => {
     const sources: string[][] = [];
     registerNestedDiagramRenderer(fakeNestedRenderer(sources));
     const block = buildDesc(noteSymbol, labels('{{\nfile f1\n}}'), paint());
     const dim = block.calculateDimension(new MeasurerStringBounder(measurer));
-    expect(dim.getWidth()).toBe(42);
-    expect(dim.getHeight()).toBe(42);
+    expect(dim.getWidth()).toBe(51);
+    expect(dim.getHeight()).toBe(54);
 
     const ug = newGraphic();
     block.drawU(ug);
