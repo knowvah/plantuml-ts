@@ -25,6 +25,7 @@ import {
   ARROW_LABEL_PADDING_X1,
   messageLabelBlock,
   messageLabelRows,
+  numberTextOf,
 } from './text-block-geo.js';
 
 export function handleMessageEvent(
@@ -113,15 +114,6 @@ const ARROW_DELTA_Y = 4;
  *  the extra a self tile reserves over a flat one. `renderer-message.ts`'s
  *  `SELF_LOOP_HEIGHT` is the same number on the drawing side. */
 const SELF_ARROW_ONLY_HEIGHT = 13;
-
-/** The autonumber run's text, when the message carries one.
- *  `getLabelNumbered` prepends it as a `MessageNumber`
- *  (`AbstractMessage.java:200-206`); the formatted `sequenceLabel` wins over
- *  the bare `sequenceNumber` when both are present. */
-function numberTextOf(event: MessageEvent): string | undefined {
-  if (event.sequenceLabel !== undefined) return event.sequenceLabel;
-  return event.sequenceNumber === undefined ? undefined : String(event.sequenceNumber);
-}
 
 /**
  * Optional scalar fields carried from `event` onto its `MessageGeo`

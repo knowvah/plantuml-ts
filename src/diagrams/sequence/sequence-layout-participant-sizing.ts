@@ -19,6 +19,7 @@
 
 import type { ParticipantBadge, ParticipantType } from './ast.js';
 import type { Theme } from '../../core/theme.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import { measureParticipantSymbol } from './renderer-participant-symbol.js';
 
 /**
@@ -67,7 +68,8 @@ export function symbolPreferredWidth(
   type: ParticipantType,
   blockWidth: number,
   theme: Theme,
-  shadow = 0,
+  shadow: number,
+  measurer: StringMeasurer,
 ): number | undefined {
   switch (type) {
     case 'actor':
@@ -75,9 +77,12 @@ export function symbolPreferredWidth(
     case 'boundary':
     case 'control':
     case 'entity':
-      return Math.max(measureParticipantSymbol(type, theme, shadow).width, blockWidth + DB_TEXT_PADDING_X * 2);
+      return Math.max(
+        measureParticipantSymbol(type, theme, measurer, shadow).width,
+        blockWidth + DB_TEXT_PADDING_X * 2,
+      );
     case 'queue':
-      return measureParticipantSymbol('queue', theme).width + blockWidth;
+      return measureParticipantSymbol('queue', theme, measurer).width + blockWidth;
     default:
       return undefined;
   }
@@ -93,7 +98,8 @@ export function symbolPreferredHeight(
   type: ParticipantType,
   blockHeight: number,
   theme: Theme,
-  shadow = 0,
+  shadow: number,
+  measurer: StringMeasurer,
 ): number | undefined {
   switch (type) {
     case 'actor':
@@ -102,7 +108,7 @@ export function symbolPreferredHeight(
     case 'control':
     case 'entity':
     case 'queue':
-      return measureParticipantSymbol(type, theme, shadow).height + blockHeight;
+      return measureParticipantSymbol(type, theme, measurer, shadow).height + blockHeight;
     default:
       return undefined;
   }

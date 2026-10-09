@@ -21,7 +21,7 @@ import { ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf, LIVE_DELTA_SIZE, TOP_MARG
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
 import { symbolPreferredHeight, symbolPreferredWidth } from './sequence-layout-participant-sizing.js';
 import { ARROW_DELTA_X } from './sequence-arrowhead.js';
-import { displayLines, refBodyLines, refBodyWidth } from './text-block-geo.js';
+import { displayLines, MESSAGE_NUMBER_MARGIN, numberTextOf, refBodyLines, refBodyWidth } from './text-block-geo.js';
 import {
   anyBadgeFor,
   BADGE_GAP,
@@ -32,7 +32,7 @@ import {
   visibleStereotypeLines,
   type ParticipantLayoutCtx,
 } from './sequence-layout-participant-label.js';
-import { sequenceAtomContext, sequenceLabelBlockWidth } from './sequence-creole.js';
+import { sequenceAtomContext, sequenceLabelBlockWidth, sequenceLabelLineWidth } from './sequence-creole.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 
 /**
@@ -175,7 +175,15 @@ function scanMessageLabels(
       const ti = sortedParticipants.findIndex((p) => p.id === ev.to);
       if (fi >= 0 && ti >= 0 && fi !== ti) {
         const lines = ev.label === '' ? [] : displayLines(ev.label);
-        const labelWidth = sequenceLabelBlockWidth(lines, arrowSpec, measurer, atoms);
+        // `Display#createMessageNumber` (`Display.java:703-712`) merges the
+        // number, a 4px right margin and the label, so the component's text
+        // block -- hence `getPreferredWidth` -- is that sum.
+        const numberText = numberTextOf(ev);
+        const numberWidth =
+          numberText === undefined
+            ? 0
+            : sequenceLabelLineWidth(numberText, arrowSpec, measurer, atoms) + MESSAGE_NUMBER_MARGIN;
+        const labelWidth = numberWidth + sequenceLabelBlockWidth(lines, arrowSpec, measurer, atoms);
         out.push({
           from: Math.min(fi, ti),
           to: Math.max(fi, ti),
@@ -253,7 +261,7 @@ function computeParticipantWidths(sortedParticipants: Participant[], ctx: Partic
     // `TextBlockSprited#calculateDimension`: the badge widens the block by its
     // own width plus the 6px gap (`:57-67`).
     const lw = badge === undefined ? textW : textW + badge.width + BADGE_GAP;
-    const symbolW = symbolPreferredWidth(p.type, lw, theme, participantShadowOf(p, theme));
+    const symbolW = symbolPreferredWidth(p.type, lw, theme, participantShadowOf(p, theme), ctx.measurer);
     if (symbolW !== undefined) return symbolW;
     // `PARTICIPANT_HEAD` / `COLLECTIONS_HEAD` both reach
     // `ComponentRoseParticipant`, differing only by `getDeltaCollection()`
@@ -384,11 +392,11 @@ function preferredHeightOf(
   type: ParticipantType,
   blockHeight: number,
   boxHeight: number,
-  style: { readonly theme: Theme; readonly shadow: number },
+  style: { readonly theme: Theme; readonly shadow: number; readonly measurer: StringMeasurer },
 ): number {
   const box =
     (type === 'collections' ? boxHeight + COLLECTIONS_DELTA : boxHeight) + reservedShadowOf(type, style.shadow);
-  return symbolPreferredHeight(type, blockHeight, style.theme, style.shadow) ?? box;
+  return symbolPreferredHeight(type, blockHeight, style.theme, style.shadow, style.measurer) ?? box;
 }
 
 /** Build the geometry for a single participant column at a given x offset. */
@@ -427,7 +435,7 @@ function buildParticipantGeo(
   const blockHeight = Math.max(textHeight, badge?.height ?? 0);
   const boxHeight = blockHeight + 2 * theme.sequence.participantPadding;
   const shadow = participantShadowOf(p, theme);
-  const pHeight = preferredHeightOf(p.type, blockHeight, boxHeight, { theme, shadow });
+  const pHeight = preferredHeightOf(p.type, blockHeight, boxHeight, { theme, shadow, measurer: ctx.measurer });
   const centerX = currentX + width / 2;
 
   return {

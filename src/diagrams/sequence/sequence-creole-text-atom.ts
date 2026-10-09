@@ -11,6 +11,7 @@ import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { FontStyle, getFont } from '../../core/klimt/shape/UText.js';
 import { atomTextWidth, hasTabulation, layoutTabbedText } from '../../core/klimt/creole/legacy/AtomText.js';
 import { CharHidder } from '../../core/utils/CharHidder.js';
+import { runDrawMetrics } from './run-draw-metrics.js';
 import type { TextRun } from './text-block-geo.js';
 
 /**
@@ -101,7 +102,14 @@ export function textAtomRuns(
   // A tab-free run keeps its ONE run even when empty: callers read line
   // metrics off it, and that is the shape this producer always had.
   const tokens = hasTabulation(shown) ? layout.tokens : [{ text: shown, x: 0, width: layout.width }];
-  const runs = tokens.map((t) => ({ text: t.text, x: x + t.x, y: baselineY, textWidth: t.width, ...style }));
+  const runs = tokens.map((t) => ({
+    text: t.text,
+    x: x + t.x,
+    y: baselineY,
+    textWidth: t.width,
+    ...runDrawMetrics(t.text, spec, measurer),
+    ...style,
+  }));
   return { runs, width: layout.width };
 }
 

@@ -13,6 +13,7 @@ import type { ScaledTheme } from './scale-geo.js';
 import { scaledDashPattern } from './scale-geo.js';
 import { line } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
+import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import { ARROW_FONT_SIZE } from './sequence-layout-shared.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import { renderFlatMessageArrow, renderSelfMessageHead } from './renderer-arrowhead.js';
@@ -121,10 +122,10 @@ function renderSelfMessage(msg: MessageGeo, configuration: ArrowConfiguration, t
  */
 function messageLabelRun(run: TextRun, theme: ScaledTheme): string {
   return sequenceText({
-    leftX: run.x,
+    leftX: drawnLeftX(run),
     baselineY: run.y,
     text: run.text,
-    width: run.textWidth,
+    width: drawnWidth(run),
     // `""mono""` sets its own family; `<size:N>`/`<sup>` its own size. The
     // ambient fallbacks are the pair layout measured the block at --
     // `theme.fontFamily` and `arrow { FontSize 13 }` (`plantuml.skin:306-308`),

@@ -589,13 +589,14 @@ describe('divider events', () => {
     const ast = parse(['participant Alice', '== Section ==']);
     const ev = ast.events[0] as DividerEvent | undefined;
     expect(ev?.kind).toBe('divider');
-    expect(ev?.text).toBe('Section');
+    // CommandDivider.java:57-62: greedy `(.*)` keeps the trailing space.
+    expect(ev?.text).toBe('Section ');
   });
 
-  it('divider text is trimmed', () => {
+  it('divider text is trimmed at the front only (leading spaceZeroOrMore; LABEL is greedy)', () => {
     const ast = parse(['participant Alice', '==  My Section  ==']);
     const ev = ast.events[0] as DividerEvent | undefined;
-    expect(ev?.text).toBe('My Section');
+    expect(ev?.text).toBe('My Section  ');
   });
 });
 

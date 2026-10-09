@@ -214,8 +214,14 @@ describe('messageLabelBlock creole (C3)', () => {
     });
     expect(block.lines.map((r) => r.text)).toEqual(['a ', 'bold', ' label']);
     expect(block.lines.map((r) => r.bold)).toEqual([undefined, true, undefined]);
-    // The jar's own three advances: 7.231, 24.619, 27.544.
-    expect(block.lines.map((r) => Number(r.textWidth.toFixed(3)))).toEqual([7.231, 24.619, 27.544]);
+    // The jar's own three advances: 72.069 -> 82.875 -> 107.494 + 3.575 (the
+    // leading space of ` label` is moved into x, not textLength).
+    expect(block.lines.map((r) => Number(r.textWidth.toFixed(3)))).toEqual([10.806, 24.619, 31.119]);
+    // Drawn widths = the jar's textLength; `a` has none (one character) but
+    // measures 7.231, ` label` draws 27.544 shifted right by one space.
+    const to3 = (n: number | undefined): number | undefined => (n === undefined ? undefined : Number(n.toFixed(3)));
+    expect(block.lines.map((r) => to3(r.drawWidth))).toEqual([7.231, undefined, 27.544]);
+    expect(block.lines.map((r) => to3(r.drawDx))).toEqual([0, undefined, 3.575]);
   });
 
   it('advances each run by the previous run’s own measured width', () => {
@@ -240,7 +246,10 @@ describe('messageLabelBlock creole (C3)', () => {
     // logical one.
     expect(block.lines[0]!.fontFamily).toBe('monospaced');
     expect(block.lines[0]!.text).toBe('x->  ');
-    expect(block.lines[0]!.textWidth).toBeCloseTo(18.444, 3);
+    // Advance = the label block width 25.594 (jar: 72.069 + 25.594 + padding);
+    // the jar's textLength is the trimmed 18.444 (message-label-creole.svg).
+    expect(block.lines[0]!.textWidth).toBeCloseTo(25.594, 3);
+    expect(block.lines[0]!.drawWidth).toBeCloseTo(18.444, 3);
   });
 
   it('interprets creole in the AUTONUMBER rather than emitting it literally', () => {

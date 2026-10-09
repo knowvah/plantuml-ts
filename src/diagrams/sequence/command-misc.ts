@@ -67,11 +67,13 @@ export const hideEmptyDescriptionCommand: Command = {
  * `== text ==` — `CommandDivider`. The LABEL group is `(.*)` upstream, i.e.
  * it accepts an EMPTY label (`====` with nothing between the two `==` runs);
  * this port previously required at least one character (`(.+?)`), which
- * refused `valiva-41-fabo221`'s line 4 `====`. Widened to `(.*?)` to match.
+ * refused `valiva-41-fabo221`'s line 4 `====`. It is also GREEDY, so the spaces
+ * before the closing `==` stay in the label (`== diver 1 ==` -> `diver 1 `),
+ * and the box is one space wider (`DriverTextSvg` then trims the drawn text).
  * @see sequencediagram/command/CommandDivider.java:57-62
  */
 export const dividerCommand: Command = {
-  pattern: /^==\s*(.*?)\s*==\s*$/,
+  pattern: /^==\s*(.*)\s*==\s*$/,
   execute(state, match) {
     const ev: DividerEvent = {
       kind: 'divider',

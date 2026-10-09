@@ -122,6 +122,8 @@ const scaleRun = (r: TextRun, k: number): TextRun => ({
   x: r.x * k,
   y: r.y * k,
   textWidth: r.textWidth * k,
+  ...(r.drawWidth !== undefined ? { drawWidth: r.drawWidth * k } : {}),
+  ...(r.drawDx !== undefined ? { drawDx: r.drawDx * k } : {}),
   textAscent: r.textAscent * k,
   textLineHeight: r.textLineHeight * k,
   ...(r.fontSize !== undefined ? { fontSize: r.fontSize * k } : {}),
