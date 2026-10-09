@@ -289,7 +289,7 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
   walkTile(root, baseX, contentY, { kindHint: null, lane: undefined }, out);
 
   const lanes = { laneNames: ast.swimlanes, laneDisplays: ast.swimlaneDisplays, walkReservations: reservations };
-  const placedRaw = placeSwimlanes({ nodes, edges, edgeMeta, ...lanes, baseX, baseY, bounder, theme });
+  const placedRaw = placeSwimlanes({ nodes, edges, edgeMeta, ...lanes, baseX, baseY, theme });
   const placed = mergeBeforeCompress(withLaneBackgrounds(placedRaw, ast.swimlaneColors), ast.swimlanes);
   const bounds = computeBounds(root, baseX, contentY, placed);
   // `drawTitlesBackground`'s `UTranslate.dx(5)` from the block origin, which

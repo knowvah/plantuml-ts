@@ -25,6 +25,7 @@ import type { GPoint, HookName } from '../../../../src/diagrams/activity/tiles/p
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
+import { withActivityMeasurer } from '../../../../src/diagrams/activity/activity-string-bounder.js';
 import type { LoopTranslate } from '../../../../src/diagrams/activity/layout/swimlane-loop-translate.js';
 
 /** A minimal leaf tile with a caller-controlled width/height, used to feed
@@ -56,6 +57,15 @@ class FixedTile extends TileLeaf {
 }
 
 const theme: Theme = resolveTheme('default');
+
+/** isw-T2-act F3: lane titles are measured through the theme's string
+ *  bounder (`swimlane-title.ts`); this adapts a fake `StringBounder`. */
+function themeWith(bounder: StringBounder): Theme {
+  return withActivityMeasurer(theme, {
+    measure: (text: string, font: { size: number }) => bounder.getDimension(text, font.size),
+    getDescent: () => 0,
+  });
+}
 
 function node(id: string, x: number, width: number, swimlane: string): ActivityNodeGeo {
   return { id, kind: 'action', x, y: 0, width, height: 32, swimlane };
@@ -149,8 +159,7 @@ describe('placeSwimlanes — no lanes is a byte-identical passthrough', () => {
       laneNames: [],
       baseX: 12,
       baseY: 12,
-      bounder: { getDimension: () => ({ width: 0, height: 0 }) },
-      theme,
+      theme: themeWith({ getDimension: () => ({ width: 0, height: 0 }) }),
     });
     expect(result.swimlanes).toEqual([]);
     expect(result.nodes).toEqual(nodes);
@@ -180,8 +189,7 @@ describe('placeSwimlanes — a single named lane is also a byte-identical passth
       laneNames: ['Swimlane 1'],
       baseX: 12,
       baseY: 12,
-      bounder: { getDimension: () => ({ width: 0, height: 0 }) },
-      theme,
+      theme: themeWith({ getDimension: () => ({ width: 0, height: 0 }) }),
     });
     expect(result.swimlanes).toEqual([]);
     expect(result.nodes).toEqual(nodes);
@@ -218,6 +226,9 @@ describe('placeSwimlanes — worked-example arithmetic (pakema-21-xema183)', () 
     getDimension: (text: string) => {
       if (text === 'A') return { width: TITLE_A, height: 18 };
       if (text === 'BBBBBBBBBBBBBBBBBBBBBBBBB') return { width: TITLE_B, height: 18 };
+      // isw-T2-act F3: the special lane's `""` title is one `" "` atom
+      // (`StripeSimple.java:124-127`), 4.95 at 18pt under seam #4.
+      if (text === ' ') return { width: 4.95, height: 18 };
       throw new Error(`unexpected title text: ${text}`);
     },
   };
@@ -231,8 +242,7 @@ describe('placeSwimlanes — worked-example arithmetic (pakema-21-xema183)', () 
       laneNames: ['A', 'BBBBBBBBBBBBBBBBBBBBBBBBB'],
       baseX: 0,
       baseY: 0,
-      bounder,
-      theme,
+      theme: themeWith(bounder),
     });
   }
 
@@ -269,7 +279,15 @@ describe('placeSwimlanes — divider reservations (no title overflow)', () => {
   const nodes = [node('a', 0, 20, 'A'), node('b', 0, 30, 'B')];
 
   function place(baseX: number, baseY: number) {
-    return placeSwimlanes({ nodes, edges: [], edgeMeta: [], laneNames: ['A', 'B'], baseX, baseY, bounder, theme });
+    return placeSwimlanes({
+      nodes,
+      edges: [],
+      edgeMeta: [],
+      laneNames: ['A', 'B'],
+      baseX,
+      baseY,
+      theme: themeWith(bounder),
+    });
   }
 
   it('emits laneNames.length + 1 reservations', () => {
@@ -318,7 +336,15 @@ describe('placeSwimlanes — edge routing', () => {
         ],
       },
     ];
-    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    const result = placeSwimlanes({
+      nodes,
+      edges,
+      edgeMeta,
+      laneNames,
+      baseX: 12,
+      baseY: 12,
+      theme: themeWith(bounder),
+    });
     const pts = result.edges[0]!.points;
     expect(pts).toHaveLength(4);
     expect(pts[1]!.y).toBe(pts[2]!.y);
@@ -343,15 +369,22 @@ describe('placeSwimlanes — edge routing', () => {
       laneNames,
       baseX: 12,
       baseY: 12,
-      bounder,
-      theme,
+      theme: themeWith(bounder),
     });
     expect(result.edges[0]!.points).toHaveLength(2);
   });
 
   it('a node whose lane is not among laneNames is left unshifted', () => {
     const nodes = [node('a', 12, 40, 'A'), node('stray', 12, 40, 'unknown-lane')];
-    const result = placeSwimlanes({ nodes, edges: [], edgeMeta: [], laneNames, baseX: 12, baseY: 12, bounder, theme });
+    const result = placeSwimlanes({
+      nodes,
+      edges: [],
+      edgeMeta: [],
+      laneNames,
+      baseX: 12,
+      baseY: 12,
+      theme: themeWith(bounder),
+    });
     const stray = result.nodes.find((n) => n.id === 'stray')!;
     expect(stray.x).toBe(12);
   });
@@ -372,7 +405,15 @@ describe('placeSwimlanes — edge routing', () => {
         ],
       },
     ];
-    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    const result = placeSwimlanes({
+      nodes,
+      edges,
+      edgeMeta,
+      laneNames,
+      baseX: 12,
+      baseY: 12,
+      theme: themeWith(bounder),
+    });
     const pts = result.edges[0]!.points;
     expect(pts).toHaveLength(4);
     expect(pts[0]).toEqual({ x: pts[0]!.x, y: 32 });
@@ -397,7 +438,15 @@ describe('placeSwimlanes — edge routing', () => {
         ],
       },
     ];
-    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    const result = placeSwimlanes({
+      nodes,
+      edges,
+      edgeMeta,
+      laneNames,
+      baseX: 12,
+      baseY: 12,
+      theme: themeWith(bounder),
+    });
     const pts = result.edges[0]!.points;
     expect(pts).toHaveLength(4);
     expect(pts[0]).toEqual({ x: pts[0]!.x, y: 32 });
@@ -437,7 +486,15 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
     const nodes = [node('a', 12, 40, 'A'), node('b', 12, 40, 'B')];
     const edgeMeta: EdgeMeta[] = [{ lane1: 'A', lane2: 'B', shape: 'while-back', loop: whileBack }];
     const edges = [{ points: [{ x: 999, y: 999 }] }]; // deliberately NOT loop.p1/p2 -- proves the source is the loop record, not `edge.points`
-    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    const result = placeSwimlanes({
+      nodes,
+      edges,
+      edgeMeta,
+      laneNames,
+      baseX: 12,
+      baseY: 12,
+      theme: themeWith(bounder),
+    });
     const pts = result.edges[0]!.points;
     expect(pts).toHaveLength(5);
     // y1 = whileBack.p1.y (32, NOT edge.points[0].y 999); y1bis = y1 + 12
@@ -502,7 +559,15 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
         ],
       },
     ];
-    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    const result = placeSwimlanes({
+      nodes,
+      edges,
+      edgeMeta,
+      laneNames,
+      baseX: 12,
+      baseY: 12,
+      theme: themeWith(bounder),
+    });
     expect(result.edges).toHaveLength(1);
     expect(result.edges[0]!.points).toHaveLength(4);
   });
@@ -524,7 +589,15 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
         ],
       },
     ];
-    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    const result = placeSwimlanes({
+      nodes,
+      edges,
+      edgeMeta,
+      laneNames,
+      baseX: 12,
+      baseY: 12,
+      theme: themeWith(bounder),
+    });
     expect(result.edges).toHaveLength(2);
     expect(result.edges[0]!.arrowhead).toBe(false);
     expect(result.edges[1]!.arrowhead).toBeUndefined();
@@ -544,7 +617,15 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
         ],
       },
     ];
-    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    const result = placeSwimlanes({
+      nodes,
+      edges,
+      edgeMeta,
+      laneNames,
+      baseX: 12,
+      baseY: 12,
+      theme: themeWith(bounder),
+    });
     // Same-lane shift keeps the pass-1 point count (2) -- the loop record's
     // own 4-point elbow (proven in the test above) never fires here.
     expect(result.edges[0]!.points).toHaveLength(2);
@@ -568,7 +649,15 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
       { lane1: 'A', lane2: 'B', shape: 'repeat-simple2', loop: repeatSimple2 },
     ];
     const edges = [{ points: [{ x: 1, y: 1 }] }, { points: [{ x: 2, y: 2 }] }];
-    const result = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    const result = placeSwimlanes({
+      nodes,
+      edges,
+      edgeMeta,
+      laneNames,
+      baseX: 12,
+      baseY: 12,
+      theme: themeWith(bounder),
+    });
     expect(result.edges).toHaveLength(2);
     // First routed edge sources from `whileBack.p1` (y=32); second from
     // `repeatSimple2.p1` (y=10) -- order matches the input `edgeMeta`
@@ -595,7 +684,15 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
         ],
       },
     ];
-    const withLoop = placeSwimlanes({ nodes, edges, edgeMeta, laneNames, baseX: 12, baseY: 12, bounder, theme });
+    const withLoop = placeSwimlanes({
+      nodes,
+      edges,
+      edgeMeta,
+      laneNames,
+      baseX: 12,
+      baseY: 12,
+      theme: themeWith(bounder),
+    });
     const withoutLoop = placeSwimlanes({
       nodes,
       edges,
@@ -603,8 +700,7 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
       laneNames,
       baseX: 12,
       baseY: 12,
-      bounder,
-      theme,
+      theme: themeWith(bounder),
     });
     // `ConnectionBackSimple#drawTranslate`'s own `UEmpty(5, hexagonHalfSize)`
     // at `(x1, y1 + hexagonHalfSize)` (:304-305) is ONE extra reservation
@@ -657,8 +753,7 @@ describe('placeSwimlanes — edgeMeta parallel to edges, one-edge cases end to e
       laneNames: [],
       baseX: 12,
       baseY: 12,
-      bounder,
-      theme,
+      theme: themeWith(bounder),
     });
     expect(result.edgeMeta).toEqual(inputMeta);
     expect(result.edgeMeta).not.toBe(inputMeta);
@@ -682,8 +777,7 @@ describe('placeSwimlanes — edgeMeta parallel to edges, one-edge cases end to e
       laneNames,
       baseX: 12,
       baseY: 12,
-      bounder,
-      theme,
+      theme: themeWith(bounder),
     });
     expect(result.edgeMeta).toHaveLength(result.edges.length);
     expect(result.edgeMeta).toEqual(inputMeta);
@@ -708,8 +802,7 @@ describe('placeSwimlanes — edgeMeta parallel to edges, one-edge cases end to e
       laneNames,
       baseX: 12,
       baseY: 12,
-      bounder,
-      theme,
+      theme: themeWith(bounder),
     });
     expect(result.edgeMeta).toHaveLength(result.edges.length);
     expect(result.edgeMeta).toEqual(inputMeta);
@@ -810,8 +903,7 @@ describe('placeSwimlanes — a note spikeTip shifts with its lane', () => {
       laneNames: ['A', 'B'],
       baseX: 12,
       baseY: 12,
-      bounder: { getDimension: () => ({ width: 0, height: 0 }) },
-      theme,
+      theme: themeWith({ getDimension: () => ({ width: 0, height: 0 }) }),
     });
     const placed = result.nodes.find((n) => n.id === 'n')!;
     expect(placed.spikeTip).toEqual({ x: 5 + (placed.x - note.x), y: 9 });

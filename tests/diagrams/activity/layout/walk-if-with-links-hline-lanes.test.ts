@@ -7,7 +7,9 @@
  *
  * Expected divider x values were read from `scripts/oracle-render.sh` renders
  * of `tests/fixtures/activity/add4-T1g/hline-links-*.puml` (deterministic
- * text). `else-xlane` is the pezubu-98-niba240 markup.
+ * text). `else-xlane` is the pezubu-98-niba240 markup. isw-T2-act: both
+ * re-read from one-JVM seam-#4 renders (2026-10-09; 59.012 is the float-
+ * rounded width the jar now prints).
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -24,7 +26,7 @@ function dividerXs(name: string): readonly number[] {
 
 describe('FtileIfWithLinks ConnectionHline lane ink — divider x vs the jar', () => {
   it('then branch in another lane widens that lane to the bar', () => {
-    expect(dividerXs('hline-links-then-xlane.puml')).toEqual([20, 262.194, 348.569]);
+    expect(dividerXs('hline-links-then-xlane.puml')).toEqual([20, 282.544, 372.219]);
   });
 });
 
@@ -36,7 +38,7 @@ describe('FtileIfWithLinks ConnectionHline lane ink — divider x vs the jar', (
  */
 describe('FtileIfWithLinks ConnectionVerticalOut stays in its tile lane', () => {
   it('else branch in another lane: dividers equal the jar (pezubu shape)', () => {
-    expect(dividerXs('hline-links-else-xlane.puml')).toEqual([20, 59.013, 152.025, 200.375]);
+    expect(dividerXs('hline-links-else-xlane.puml')).toEqual([20, 59.012, 152.025, 200.375]);
   });
 
   it('else branch exit drops straight to the bar, no cross-lane elbow', () => {

@@ -225,6 +225,13 @@ export interface SwimlaneGeo {
    */
   display?: string;
   /**
+   * The LAST lane only: `getHalfMissingSpace(n + 1)` (`Swimlanes.java:
+   * 436-449`), the appended special lane's half-space -- `5`, or more when
+   * its `""` title (one space at the title font) overflows `min`. The
+   * title band's right edge is that lane's translate (`:363`).
+   */
+  trailingHalfMissingSpace?: number;
+  /**
    * O (add2 T3i): `|#color|name|`'s own background -- `x`/`width` above
    * already span exactly the jar's background-rect bounds (verified
    * against `cejupe-34-muti621`'s oracle SVG: both divider lines land

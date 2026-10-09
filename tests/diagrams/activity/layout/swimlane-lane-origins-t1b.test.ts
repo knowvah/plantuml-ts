@@ -21,12 +21,27 @@ describe('computeLaneOrigins — divider UEmpty anchoring', () => {
       ['A', lane(30, 30)],
       ['B', lane(50, 50)],
     ]);
-    const { dividerReservations } = computeLaneOrigins(LANES, widths, 0, 0);
+    const { dividerReservations } = computeLaneOrigins(LANES, widths, { min: 0, specialTitleWidth: 0 }, 0);
     expect(dividerReservations).toEqual([
       { x: 0, width: 10 },
       { x: 40, width: 10 },
       { x: 100, width: 10 },
     ]);
+  });
+
+  it('the special lane\'s "" title widens the trailing UEmpty when it overflows min', () => {
+    // isw-T2-act F3: `getHalfMissingSpace(n + 1)` (`Swimlanes.java:436-449`)
+    // reads `swimlanesSpecial()`'s appended `""` lane, whose title is one
+    // `" "` atom (`StripeSimple.java:124-127`): 4.95 at the 18pt title font
+    // under seam #4. min 0 < 4.95 -> x2 = 5 + 4.95 / 2 = 7.475.
+    const widths = new Map([
+      ['A', lane(30, 30)],
+      ['B', lane(50, 50)],
+    ]);
+    const { dividerReservations, origins } = computeLaneOrigins(LANES, widths, { min: 0, specialTitleWidth: 4.95 }, 0);
+    expect(dividerReservations[2]).toEqual({ x: 100, width: 12.475 });
+    expect(origins.get('B')!.geo.trailingHalfMissingSpace).toBe(7.475);
+    expect(origins.get('A')!.geo.trailingHalfMissingSpace).toBeUndefined();
   });
 
   it('a swimlaneWidth floor leaves the padding to the RIGHT of each UEmpty', () => {
@@ -36,7 +51,7 @@ describe('computeLaneOrigins — divider UEmpty anchoring', () => {
       ['A', lane(30, 100)],
       ['B', lane(50, 100)],
     ]);
-    const { dividerReservations, origins } = computeLaneOrigins(LANES, widths, 100, 0);
+    const { dividerReservations, origins } = computeLaneOrigins(LANES, widths, { min: 100, specialTitleWidth: 0 }, 0);
     expect(dividerReservations).toEqual([
       { x: 35, width: 10 },
       { x: 135, width: 10 },
