@@ -164,7 +164,7 @@ function renderTableCellAtom(
   atom: Extract<MemberRenderAtom, { kind: 'text' }>,
   theme: ScaledTheme,
 ): string {
-  const rendered = text(x, y, atom.renderText ?? atom.text, {
+  const rendered = text(x + (atom.renderDx ?? 0), y, atom.renderText ?? atom.text, {
     fontFamily: atom.font.family,
     fontSize: getFont(atom.font).size,
     fill: atom.font.color ?? theme.colors.graph.noteCascadeFontColor ?? '#000000',

@@ -330,7 +330,7 @@ function renderTextRowAtom(
   // row's own baseline `y` PLUS the atom's own Sea correction
   // ({@link textAtomRowY} -- 0 for every atom of an all-NORMAL row, the
   // identity property `creole-sea-line.ts`'s doc comment names).
-  const rendered = text(x, textAtomRowY(y, atom), atom.renderText ?? atom.text, {
+  const rendered = text(x + (atom.renderDx ?? 0), textAtomRowY(y, atom), atom.renderText ?? atom.text, {
     fontFamily: resolveAtomFontFamily(atom.font.family, theme),
     fontSize: getFont(atom.font).size,
     fill: atom.font.color ?? fallbackFontColor,
@@ -348,7 +348,7 @@ function renderTextRowAtom(
   // Upstream java:180: the extra lines are drawn AFTER the `<text>`.
   const extra = decorationLines(
     deco.extraLines,
-    x,
+    x + (atom.renderDx ?? 0),
     textAtomRowY(y, atom),
     atom.renderWidth ?? atom.width,
     getFont(atom.font).size,

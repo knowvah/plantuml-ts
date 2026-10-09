@@ -143,6 +143,7 @@ export function scaleAtom(atom: MemberRenderAtom, k: number): MemberRenderAtom {
         font: scaleFontConfig(atom.font, k),
         width: atom.width * k,
         ...(atom.renderWidth !== undefined ? { renderWidth: atom.renderWidth * k } : {}),
+        ...(atom.renderDx !== undefined ? { renderDx: atom.renderDx * k } : {}),
         ...(atom.dy !== undefined ? { dy: atom.dy * k } : {}),
       };
     case 'image':
