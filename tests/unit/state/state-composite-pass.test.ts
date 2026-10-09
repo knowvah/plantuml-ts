@@ -88,12 +88,15 @@ function findEdgeByLabel(graphs: readonly DotInputGraph[], label: string): DotIn
  *  for is unaffected -- size 13 reserves 21 where size 14 reserves 23. */
 const reserved = (measuredWidth: number): number => Math.floor(measuredWidth + 2);
 
+// New-jar widths (seam #4 v2, spaces 3.575 @13): nimana-36-veco708 in.svg
+// textLength 52.65 / 77.188 / 71.419 (3-decimal rounding of 52.65 / 77.1875 /
+// 71.4187).
 describe('state-composite-pass.ts addLevelEdges — site 2, top-level scope call', () => {
   const graphs = captureAll(readPuml('nimana-36-veco708'));
 
-  it('measures "go to yes" at font-size 13 (jar-exact 45.5px), not 14', () => {
+  it('measures "go to yes" at font-size 13 (jar-exact 52.65px), not 14', () => {
     const edge = findEdgeByLabel(graphs, 'go to yes');
-    expect(size13('go to yes')).toBeCloseTo(45.5, 3);
+    expect(size13('go to yes')).toBeCloseTo(52.65, 3);
     expect(size14('go to yes')).not.toBeCloseTo(size13('go to yes'), 3);
     expect(edge.attributes!.labelWidth).toBe(reserved(size13('go to yes')));
   });
@@ -120,16 +123,16 @@ describe('state-composite-pass.ts addLevelEdges — non-top-level scope call (be
 describe('state-composite-pass.ts sweepOrphanEdges — site 3', () => {
   const graphs = captureAll(readPuml('nimana-36-veco708'));
 
-  it('measures "go to yes-yes" at font-size 13 (jar-exact 70.0375px), not 14', () => {
+  it('measures "go to yes-yes" at font-size 13 (jar-exact 77.1875px), not 14', () => {
     const edge = findEdgeByLabel(graphs, 'go to yes-yes');
-    expect(size13('go to yes-yes')).toBeCloseTo(70.0375, 3);
+    expect(size13('go to yes-yes')).toBeCloseTo(77.1875, 3);
     expect(size14('go to yes-yes')).not.toBeCloseTo(size13('go to yes-yes'), 3);
     expect(edge.attributes!.labelWidth).toBe(reserved(size13('go to yes-yes')));
   });
 
-  it('measures "go to yes-no" at font-size 13 (jar-exact 64.2688px), not 14', () => {
+  it('measures "go to yes-no" at font-size 13 (jar-exact 71.4187px), not 14', () => {
     const edge = findEdgeByLabel(graphs, 'go to yes-no');
-    expect(size13('go to yes-no')).toBeCloseTo(64.2688, 3);
+    expect(size13('go to yes-no')).toBeCloseTo(71.4187, 3);
     expect(edge.attributes!.labelWidth).toBe(reserved(size13('go to yes-no')));
     expect(edge.attributes!.labelWidth).not.toBe(reserved(size14('go to yes-no')));
   });

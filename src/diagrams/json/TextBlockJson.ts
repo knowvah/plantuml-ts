@@ -290,12 +290,13 @@ function cellLines(
   // `JsonDiagram.java:78-88` rewrites to an array holding one empty string)
   // emits exactly that one text inside a 10x18 box.
   //
-  // The space measures 0 wide under deterministic text metrics, so this adds
-  // an element without moving any geometry -- which is why the jar's box for
-  // `{}` is 10 wide (0 + 2x the 5pt cell margin), a number no JSON_CELL_MIN_WIDTH
-  // produces. CLAUDE.md cites that box as a case where hours went into fitting
-  // a constant instead of reading this branch.
-  const blanked = atomLines.map((a) => (a.length === 0 ? [' '] : a));
+  // That space has a real width (seam #4: U+0020 is measured as U+0021), so
+  // the jar's box for `{}` is 13.85 wide (3.85 + 2x the 5pt cell margin), a
+  // number no JSON_CELL_MIN_WIDTH produces. CLAUDE.md cites that box as a case
+  // where hours went into fitting a constant instead of reading this branch.
+  // `splitStripe('')` yields ONE empty atom, not none: an empty text builds no
+  // atom upstream, so an all-empty list is the "no atoms" case.
+  const blanked = atomLines.map((a) => (a.every((t) => t === '') ? [' '] : a));
   return { processed, valueLines: blanked.map((a) => a.join('')), atomLines: blanked, valueType };
 }
 

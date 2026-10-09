@@ -78,19 +78,22 @@ describe('G1/1a — inline creole markup in a state DISPLAY name', () => {
     const state = makeState({ display: '<color:red>this should be red</color>' });
     const dim = measureState(state, false, theme, measurer, 'TB');
     // `EntityImageStateCommon.java:80-81` name block + MARGIN*2+2*MARGIN_LINE.
-    expect(dim.width).toBeCloseTo(98.875 + 20, 6);
+    // New jar (seam #4 v2): svek-1.dot sh0006 width=1.811458in = 130.425px;
+    // 110.425 = the visible text, the 3 spaces now 3.85 each.
+    expect(dim.width).toBeCloseTo(110.425 + 20, 4); // float32 sum
 
     const svg = renderNormal(leafGeo(state), theme);
     expect(svg).toContain('>this should be red<');
     expect(svg).not.toContain('&lt;color');
-    expect(svg).toContain('textLength="98.875"');
+    expect(svg).toContain('textLength="110.425"');
     expect(svg).toContain('fill="#F00"');
   });
 
   it('strips `**bold**` markers and draws a bold run (mefici-97-tudu030)', () => {
     const state = makeState({ description: ['**entry** / display(memTimer)'] });
     const dim = measureState(state, false, theme, measurer, 'TB');
-    expect(dim.width).toBeCloseTo(154.7 + 20, 6);
+    // New jar: mefici svek-1.dot sh0010 width=2.533333in = 182.4px.
+    expect(dim.width).toBeCloseTo(182.4, 4);
 
     const svg = renderNormal(leafGeo(state), theme);
     expect(svg).toContain('font-weight="700"');
@@ -101,7 +104,8 @@ describe('G1/1a — inline creole markup in a state DISPLAY name', () => {
   it('renders a bare `[[url]]` as its label inside an `<a href>` (xasoka-58-temi462)', () => {
     const state = makeState({ description: ['foo [[http://plantuml.com]] bar'] });
     const dim = measureState(state, false, theme, measurer, 'TB');
-    expect(dim.width).toBeCloseTo(157.675 + 20, 6);
+    // New jar: xasoka svek-1.dot sh0006 width=2.574653in = 185.375px.
+    expect(dim.width).toBeCloseTo(185.375, 4);
 
     const geo = leafGeo(state);
     // The sizer's own line width is exactly the sum of the runs the
@@ -113,7 +117,7 @@ describe('G1/1a — inline creole markup in a state DISPLAY name', () => {
     expect(svg).toContain('href="http://plantuml.com"');
     expect(svg).toContain('text-decoration="underline"');
     expect(svg).not.toContain('[[');
-    expect(svg).toContain('textLength="118.038"');
+    expect(svg).toContain('textLength="118.037"'); // xasoka in.svg;
   });
 
   it('resolves an inline `[[S1]]` link label in a display name, clamping to MIN_WIDTH (feziva-71-gufo538)', () => {
@@ -143,14 +147,14 @@ describe('G1/1b — `skinparam wrapWidth` threading (Style.java:292)', () => {
       description: ['aaaaaaa bbbbbbbbbb ccccccccc ddddddddd eeeeeeeee ffffffffff ggggggggg hhhhhhhh'],
     });
     const dim = measureState(state, false, wrapTheme, measurer, 'TB');
-    // jar: 153.088 x 90 (`svek-1.dot` 2.126215 x 1.25 in).
-    expect(dim.width).toBeCloseTo(153.088, 3);
+    // New jar: kubona svek-1.dot sh0007 2.179688 x 1.25 in = 156.9375 x 90 px.
+    expect(dim.width).toBeCloseTo(156.9375, 3);
     expect(dim.height).toBe(90);
 
     const geo = leafGeo(state, wrapTheme);
     expect(geo.bodyLines).toHaveLength(4);
     const svg = renderNormal(geo, wrapTheme);
-    expect(svg).toContain('textLength="54.512"');
+    expect(svg).toContain('textLength="54.513"'); // kubona in.svg;
   });
 
   it('wraps a long DISPLAY NAME through the same `create8` argument (rejike-58-rote606)', () => {
@@ -160,8 +164,8 @@ describe('G1/1b — `skinparam wrapWidth` threading (Style.java:292)', () => {
         'In my humble opinion this is definitively too long for a state name one liner and would benefit from wrapping',
     });
     const dim = measureState(state, false, wrapTheme, measurer, 'TB');
-    // jar: 2.3 x 1.25 in = 165.6 x 90 px.
-    expect(dim.width).toBeCloseTo(165.6, 3);
+    // New jar: rejike svek-1.dot sh0007 2.14566 x 1.25 in = 154.4875 x 90 px.
+    expect(dim.width).toBeCloseTo(154.4875, 3);
     expect(dim.height).toBe(90);
     // 5 rows x 14 + MARGIN*2 + 2*MARGIN_LINE = 90, the jar's own height.
     expect(leafGeo(state, wrapTheme).headerLines).toHaveLength(5);
@@ -186,22 +190,24 @@ describe('G1/1b — `skinparam wrapWidth` threading (Style.java:292)', () => {
 // ---------------------------------------------------------------------------
 
 describe('G1/1c — tab-stop snap', () => {
-  it('snaps each `\\t` to the next `skinparam tabSize` stop and draws the shifted run (lokija-02-dipe348)', () => {
+  it('snaps each `\\t` to the FIXED 8-space stop, ignoring `skinparam tabSize` (lokija-02-dipe348)', () => {
     const tabTheme = deepMergeTheme(defaultTheme, { tabSize: 2 });
     const state = makeState({ id: 's1', display: 's1', description: ['line1', '\tline2', '\t\tline3'] });
     const dim = measureState(state, false, tabTheme, measurer, 'TB');
-    // jar: 2.245313in = 161.6625px — line3 starts at the SECOND tab stop
-    // (124 - 12 = 112) and adds "line3" (29.6625), + MARGIN*2 + 2*MARGIN_LINE.
-    expect(dim.width).toBeCloseTo(161.6625, 3);
+    // New jar: lokija svek-1.dot width=1.545312in = 111.2625px -- line3
+    // starts at the SECOND stop of tabSize 8 (FontConfiguration.java:229-231,
+    // 2 x 8 spaces x 3.85 = 61.6; `skinparam tabSize 2` is ignored by state)
+    // and adds "line3" (29.6625), + MARGIN*2 + 2*MARGIN_LINE.
+    expect(dim.width).toBeCloseTo(111.2625, 3);
 
     const geo = leafGeo(state, tabTheme);
     const line3 = geo.bodyLines![2] as unknown as { width: number };
-    expect(line3.width).toBeCloseTo(112 + 29.6625, 3);
-    // jar draws `line2` at x=68 and `line3` at x=124 -- the tab's advance is
+    expect(line3.width).toBeCloseTo(61.6 + 29.6625, 3);
+    // jar draws `line2` at x=42.8 and `line3` at x=73.6 (in.svg) -- the tab's advance is
     // a per-token x SHIFT (`AtomText#drawU`), never a stretched `textLength`.
     const svg = renderNormal(geo, tabTheme);
-    expect(svg).toContain('<text x="68" y="60.889" font-size="14" fill="#000" textLength="29.662">line2</text>');
-    expect(svg).toContain('<text x="124" y="74.889" font-size="14" fill="#000" textLength="29.662">line3</text>');
+    expect(svg).toContain('<text x="42.8" y="60.889" font-size="14" fill="#000" textLength="29.663">line2</text>');
+    expect(svg).toContain('<text x="73.6" y="74.889" font-size="14" fill="#000" textLength="29.663">line3</text>');
   });
 });
 
@@ -247,13 +253,13 @@ describe('G23 — creole table (`StripeTable`/`AtomTable`) in a composite descri
 
   it('sizes the wrapper from the real grid box, not the raw markup (kinuca-03-nice683)', () => {
     const wrapper = measureAutonomWrapper(composite, { width: 50, height: 50 }, theme, measurer);
-    // jar: 2.487326in = 179.0875px wide -- attr = 154.0875 (the real grid
-    // box) + MARGIN*2 + 2*MARGIN_LINE + marginForFields = 25. Height here
+    // New jar: kinuca svek-2.dot width=2.968576in = 213.7375px wide -- attr =
+    // 188.7375 (the real grid box, 3 columns of 62.912) + 25. Height here
     // uses a synthetic 50px childImg (the real fixture's inner pass image is
     // 65px, giving the jar's own 14 + 46 + 65 + 25 = 150); what this asserts
     // is the ATTR term: 14 + 46 + 50 + 25 = 135, four px more than the 42
     // the raw-markup model produced (`AtomWithMargin(table, 2, 2)`).
-    expect(wrapper.width).toBeCloseTo(179.0875, 4);
+    expect(wrapper.width).toBeCloseTo(213.7375, 4);
     expect(wrapper.height).toBeCloseTo(135, 6);
   });
 
@@ -273,12 +279,14 @@ describe('G23 — creole table (`StripeTable`/`AtomTable`) in a composite descri
     };
     const svg = renderComposite(geo, theme);
     expect(svg).not.toContain('|=');
-    // jar's own cell columns / baselines / grid rules.
-    expect(svg).toContain('<text x="12" y="43.889"');
-    expect(svg).toContain('<text x="63.363" y="57.889"');
-    expect(svg).toContain('<text x="114.725" y="71.889"');
-    expect(svg).toContain('<line x1="12" y1="33" x2="166.087" y2="33"');
-    expect(svg).toContain('<line x1="166.087" y1="33" x2="166.087" y2="75"');
+    // jar's own cell columns / baselines / grid rules (re-captured
+    // test-results/dot-cache/state/kinuca-03-nice683/in.svg: leading-space shift
+    // 3.85 on A/abc/def; the blank B cell has none, so x=137.825).
+    expect(svg).toContain('<text x="15.85" y="43.889"');
+    expect(svg).toContain('<text x="78.762" y="57.889"');
+    expect(svg).toContain('<text x="137.825" y="71.889"');
+    expect(svg).toContain('<line x1="12" y1="33" x2="200.737" y2="33"');
+    expect(svg).toContain('<line x1="200.737" y1="33" x2="200.737" y2="75"');
     expect(svg).toContain('font-weight="700"');
   });
 });
@@ -292,8 +300,8 @@ describe('SI30 D2/D3 — <sup>/<sub> per-run size+dy (T5)', () => {
   it('juvagu-33-dupa212: a tab-then-<sup> description line draws the sup run at its OWN muted size after the jar-exact tab advance', () => {
     const state = makeState({ id: 'one', display: 'one', description: ['\t<sup>1</sup>'] });
     const dim = measureState(state, false, theme, measurer, 'TB');
-    // jar: svek-1.dot sh0006 width=1.140538in height=0.708333in (*72).
-    expect(dim.width).toBeCloseTo(1.140538 * 72, 3);
+    // New jar: svek-1.dot sh0006 width=0.790538in height=0.708333in (*72).
+    expect(dim.width).toBeCloseTo(0.790538 * 72, 3);
     expect(dim.height).toBeCloseTo(0.708333 * 72, 3);
 
     const geo = leafGeo(state);
@@ -306,10 +314,10 @@ describe('SI30 D2/D3 — <sup>/<sub> per-run size+dy (T5)', () => {
     ]);
 
     const svg = renderNormal(geo, theme);
-    // jar draws the sup at x=68 (12 + the 56px tab stop) -- unaffected by
+    // jar draws the sup at x=42.8 (12 + the 30.8px tab stop, in.svg) -- unaffected by
     // this task, already jar-exact since T6. The `<text>` now carries the
     // RUN's own font-size (11), not the line's shared 14.
-    expect(svg).toContain('<text x="68" y="45.222" font-size="11" fill="#000">1</text>');
+    expect(svg).toContain('<text x="42.8" y="45.222" font-size="11" fill="#000">1</text>');
   });
 
   it('exposant-03-state: H<sub>2</sub>O draws the SUB run at its own muted size/width, and the flanking NORMAL runs stay jar-exact (dy=-3)', () => {

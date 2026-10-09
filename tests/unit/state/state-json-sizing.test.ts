@@ -34,7 +34,10 @@ describe('measureJsonState', () => {
       entries: [{ key: 'foo2', value: { kind: 'scalar', value: 'foo3' } }],
     };
     const dim = measureJsonState(jsonState('foo1', value), defaultTheme, measurer);
-    expect(dim).toEqual({ width: 74.42500000000001, height: 36 });
+    // Re-captured oracle test-results/dot-cache/state/maruju-55-soko478/in.svg:
+    // rect width="74.425" height="36". Widths are float32-rounded (seam #4).
+    expect(dim.width).toBeCloseTo(74.425, 4);
+    expect(dim.height).toBe(36);
   });
 
   it('falls back to the empty-object formula when jsonValue is absent (unparsed/never-set body)', () => {

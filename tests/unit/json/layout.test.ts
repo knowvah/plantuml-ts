@@ -430,7 +430,10 @@ describe('layoutJson', () => {
     const geo = layoutJson(ast, defaultTheme, measurer);
     const row = geo.nodes[0]!.rows.find((r) => r.key === 'k');
     expect(row).toBeDefined();
-    expect(row!.valueLines).toEqual(['', '']);
+    // Each empty stripe is one space atom (`StripeSimple.java:124-129`); the
+    // re-captured oracle test-results/dot-cache/json/nujuke-14-nabo073/in.svg
+    // draws both as NBSP texts.
+    expect(row!.valueLines).toEqual([' ', ' ']);
   });
 
   it('\\t in string value produces a tab character', () => {
