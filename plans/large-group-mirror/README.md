@@ -103,7 +103,7 @@ gates every merge on stop 15 and runs the D5 element check after it.
 |---|---|---|---|---|
 | [0](batch-0/overview.md) | branch, b0 survey, A1 audit | T0a, T0b (+T0c) | T0b after T0a | [x] |
 | [1](batch-1/overview.md) | A2 mainframe, A3 projection cluster | T1a, T1b (+T1c, T1d) | ∥ | [x] |
-| [2](batch-2/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
+| [2](batch-2/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [x] |
 
 ## Documents
 
@@ -125,4 +125,26 @@ dot, comparesvg-count-not-monotonic, weightedscore-antimonotone-under-growth.
 
 ## Status
 
-Not started.
+**DONE 2026-10-08.** Tasks: T0a, T0b, T1a, T1b planned; T0c, T1c, T1d, T1e
+added (push-forward / user-ordered); T1f added then dropped by user ruling.
+21+ journal rows; flagged for review: row 11 (stop 1 resolved by sequencing),
+row 14 (T1c mechanism landed as one WIP commit), rows 13/16 (user-authorized
+fork edit + oracle re-capture, stops 8/9), row 20 (instrument ruling).
+
+D6, clause by clause (evidence: `measurements/final-*`, `fixtures.md`):
+- Every `fixtures.md` row final — yes (0 empty `final` cells).
+- Three entries retired — yes: A1, A2, A3 (and the 42x42 slot) RETIRED in
+  `DIVERGENCES.md`; none narrowed. A new measurement-artefact entry records
+  the deterministic-mode crash on a lone space.
+- Four gates green, collected = on-disk — see the close-out commit body.
+- 0 conformant losses b0→final in any engine — yes (12 movers, all
+  →conformant); elements b0→final away=0; sequence 0 rises.
+- Five sequence mainframe fixtures: frame rect + tab equal the jar's — 4 of 5
+  (gunecu, zidova exact; futaxe, jutomu equal inside the 0.01 comparator,
+  0.001 last digit). **decace-28 not met:** frame 1 px narrow, caused by its
+  `note left` sizing (separate mechanism, next-missions item 9).
+- pesita / viroxo / authored A3 clipped endpoints equal the jar's — pesita
+  and all 8 authored state fixtures yes. **viroxo-69 not met:** nodes differ
+  before any clip (state DOT member order, next-missions item 3); the
+  description authored fixture is blocked on port-cluster DOT wrappers
+  (item 4).
