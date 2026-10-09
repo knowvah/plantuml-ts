@@ -1,11 +1,10 @@
 /**
- * desc-embed-ensure-visible.test.ts — cdd6 T3b (journal row 47): a
- * description-label `{{ }}` embed reaches the canvas ONLY through
+ * desc-embed-ensure-visible.test.ts — cdd6 T3b (journal row 47), amended
+ * lgm-T1e: a description-label `{{ }}` embed reaches the canvas through
  * `SvgGraphics#ensureVisible` (`SvgGraphics.java:129-133,1033-1034`:
- * `(int)(x + w + 1)`), never through the `LimitFinder` ink pass, whose
- * `matchesProperty("SVG")` is false (`LimitFinder.java:99-100`), so
- * `EmbeddedDiagram#drawU`'s raster arm throws and its catch draws nothing
- * (`EmbeddedDiagram.java:169-193`).
+ * `(int)(x + w + 1)`). The stock jar's ink pass takes the SVG arm too
+ * (`LimitFinder.java:99-100,201-204`); T3b's "the ink pass skips the embed"
+ * fitted the oracle's old `matchesProperty("SVG") = false` (oracle seam #3).
  *
  * Jar canvases (`test-results/dot-cache/unknown/<slug>/in.svg`, re-captured
  * after oracle seam #3 so the embed slot is the nested document's own
