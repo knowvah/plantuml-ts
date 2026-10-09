@@ -13,7 +13,7 @@ sh0008 [shape=rect,label="",width=1.771528,height=0.666667,color="#000008"];
 sh0009 [shape=rect,label="",width=1.771528,height=0.861111,color="#000009"];
 sh0010 [shape=rect,label="",width=1.771528,height=0.861111,color="#00000A"];
 sh0011 [shape=rect,label="",width=1.771528,height=0.861111,color="#00000B"];
-sh0012 [shape=rect,label="",width=2.724826,height=0.861111,color="#00000C"];
+sh0012 [shape=rect,label="",width=2.885243,height=0.861111,color="#00000C"];
 sh0013 [shape=rect,label="",width=0.674219,height=0.319444,color="#00000D"];
 sh0014 [shape=rect,label="",width=0.774653,height=0.319444,color="#00000E"];
 sh0011->sh0012[arrowtail=none,arrowhead=none,minlen=1,color="#00000F"];
