@@ -1,0 +1,48 @@
+From 2fd5dac7adf308518128e073f24ea93b00d581a1 Mon Sep 17 00:00:00 2001
+From: Scott Seely <scott@seely.io>
+Date: Fri, 9 Oct 2026 07:19:51 -0500
+Subject: [PATCH] fix(oracle): width-table bounder measures U+0020 as 44, not 0
+
+UnicodeFontWidthSansSerif block 0 gives the space width 0, so a lone space
+is zero-wide and crashes SlotFinder (Slot.java:44-45) under
+PLANTUML_DETERMINISTIC_TEXT. The table's own entries for the identical
+advance, U+0021 and U+00A0, are 44, as are Helvetica and Arial. Add 4.4 per
+space at size/16. Only the property-gated bounder changes.
+---
+ .../net/sourceforge/plantuml/FileFormat.java  | 20 +++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/src/main/java/net/sourceforge/plantuml/FileFormat.java b/src/main/java/net/sourceforge/plantuml/FileFormat.java
+index dddf0d280d8..dde407c0588 100644
+--- a/src/main/java/net/sourceforge/plantuml/FileFormat.java
++++ b/src/main/java/net/sourceforge/plantuml/FileFormat.java
+@@ -194,6 +194,26 @@ public enum FileFormat {
+ 				public boolean matchesProperty(String propertyName) {
+ 					return "SVG".equalsIgnoreCase(propertyName);
+ 				}
++
++				// [plantuml-ts oracle seam #4] The table gives U+0020 width 0
++				// (UnicodeFontWidthSansSerif block 0, index 0x20), so a lone space
++				// measures 0-wide and crashes SlotFinder (Slot.java:44-45). The
++				// table's own entries for the identical advance are U+0021 '!' = 44
++				// and U+00A0 NO-BREAK SPACE = 44 (tenths of a 16pt em); Helvetica
++				// (Adobe Core14 AFM: C 32 ; WX 278 ; N space = C 33 ; WX 278 ; N
++				// exclam) and Arial (569/2048 for space, '!', no-break space) agree.
++				// Add 4.4 (44/10, as UnicodeBlock.getWidth) per U+0020 at
++				// size/REFERENCE_SIZE (16), the same factor calculateDimension uses.
++				// Stock without the property is untouched.
++				@Override
++				public XDimension2D calculateDimension(UFont font, String text) {
++					final XDimension2D dim = super.calculateDimension(font, text);
++					final long spaces = text.chars().filter(c -> c == ' ').count();
++					if (spaces == 0)
++						return dim;
++					return new XDimension2D(dim.getWidth() + spaces * 4.4 * font.getSize2D() / 16.0,
++							dim.getHeight());
++				}
+ 			};
+ 
+ 
+-- 
+2.54.0 (Apple Git-157)
+
