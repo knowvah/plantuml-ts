@@ -63,10 +63,8 @@ import type { Theme } from '../../core/theme.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import type { StateTextLine } from './state-geo-types.js';
 
-/** `SkinParam#getTabSize` default (`SkinParam.java:1073`,
- *  `getAsInt("tabsize", 8)`) — the same default the core seam applies when
- *  `opts.tabSize` is absent, restated here because this module resolves the
- *  value from `Theme` before the call. */
+/** `FontConfiguration.create`'s fixed tab size (`FontConfiguration.java:
+ *  229-231`) — what every state text uses (see {@link stateCreoleOpts}). */
 const DEFAULT_TAB_SIZE = 8;
 
 /**
@@ -183,7 +181,13 @@ export interface StateCreoleOpts {
 }
 
 /**
- * `skinparam tabSize` always applies (`FontConfiguration#getTabSize`);
+ * `skinparam tabSize` does NOT apply to state text: every state text goes
+ * through `Style#getFontConfiguration` (`Style.java:259-268`), which calls
+ * `FontConfiguration.create(font, color, hyperlink, stroke)`
+ * (`FontConfiguration.java:229-231`) -> tabSize 8, never
+ * `SkinParam#getTabSize` (`EntityImageState.java:95-99`,
+ * `EntityImageStateCommon.java:74-81`, `InnerStateAutonom.java:96-97`).
+ * jar-verified `lokija-02-dipe348` with and without `skinparam tabSize 2`.
  * `skinparam wrapWidth` applies ONLY where upstream threads
  * `getStyleState().wrapWidth()` into the text block — the leaf
  * `EntityImageState`/`EntityImageStateEmptyDescription` name and fields
@@ -196,7 +200,7 @@ export interface StateCreoleOpts {
 export function stateCreoleOpts(theme: Theme, wrap: boolean): StateCreoleOpts {
   return {
     ...(wrap && theme.wrapWidth !== undefined ? { wrapWidth: theme.wrapWidth } : {}),
-    tabSize: theme.tabSize ?? DEFAULT_TAB_SIZE,
+    tabSize: DEFAULT_TAB_SIZE,
     ...(theme.sprites !== undefined ? { spriteRegistry: theme.sprites } : {}),
   };
 }
