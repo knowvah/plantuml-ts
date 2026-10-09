@@ -9,7 +9,8 @@
  * (tests of the verbatim table port, and this guard) may reference it.
  */
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -47,19 +48,25 @@ export function findViolations(files: readonly ScannedFile[], allow: ReadonlySet
     .map((f) => f.path);
 }
 
-function collect(dir: string, out: string[]): void {
-  for (const name of readdirSync(dir)) {
-    if (SKIPPED_DIRS.has(name)) continue;
-    const p = join(dir, name);
-    if (statSync(p).isDirectory()) collect(p, out);
-    else if (SCANNED_EXTENSIONS.some((e) => name.endsWith(e))) out.push(p);
-  }
-}
-
+/**
+ * Tracked plus untracked-but-not-ignored files under the scanned roots
+ * (`git ls-files --cached --others --exclude-standard`). Gitignored scratch
+ * (e.g. `plans/*\/diagnosis/scratch/`) is out of scope: it never ships and
+ * is absent from every worktree, so a filesystem walk made the guard depend
+ * on which checkout ran it.
+ */
 function loadRepoFiles(): ScannedFile[] {
-  const paths: string[] = [];
-  for (const root of SCANNED_ROOTS) collect(join(REPO, root), paths);
-  return paths.map((p) => ({ path: p.slice(REPO.length + 1), content: readFileSync(p, 'utf-8') }));
+  const out = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '--', ...SCANNED_ROOTS], {
+    cwd: REPO,
+    encoding: 'utf-8',
+    maxBuffer: 64 * 1024 * 1024,
+  });
+  return out
+    .split('\n')
+    .filter((p) => p !== '' && SCANNED_EXTENSIONS.some((e) => p.endsWith(e)))
+    .filter((p) => !p.split('/').some((seg) => SKIPPED_DIRS.has(seg)))
+    .filter((p) => existsSync(join(REPO, p)))
+    .map((p) => ({ path: p, content: readFileSync(join(REPO, p), 'utf-8') }));
 }
 
 describe('isw-measurer: harnesses use DeterministicMeasurer', () => {
