@@ -124,7 +124,7 @@ function stereotypeSpriteLabel(
   return resolved === undefined ? {} : { stereotypeSprite: resolved };
 }
 
-function buildUSymbolEntityParams(
+export function buildUSymbolEntityParams(
   classifier: ClassifierGeo,
   theme: ScaledTheme,
   sprites: SpriteRegistry | undefined,

@@ -50,3 +50,18 @@ describe('lgm-T1e -- embedded {{ }} slot equals the jar', () => {
     expect(logged).toBe(0);
   });
 });
+
+describe('lgm-T1e -- package leaf magnetic border (SvekEdge.java:922-937)', () => {
+  const LINK = /<path d="([^"]*)"[^>]*id="ClientInterface-to-LibraryImplementation"/;
+  it('rojida-14-fuli428: an end right of the tab is pushed down by the tab height, like the jar', () => {
+    const dir = join(
+      dirname(fileURLToPath(import.meta.url)),
+      '../../../test-results/dot-cache/unknown/rojida-14-fuli428',
+    );
+    const ours = renderSync(readFileSync(join(dir, 'in.puml'), 'utf8'), { measurer: new DeterministicMeasurer() });
+    const jar = readFileSync(join(dir, 'in.svg'), 'utf8');
+    const want = LINK.exec(jar)?.[1];
+    expect(want).toBe('M218.75,276.39 C202.31,295.25 186.996,332.811 170.466,351.771');
+    expect((LINK.exec(ours) ?? [])[1]).toBe(want);
+  });
+});
