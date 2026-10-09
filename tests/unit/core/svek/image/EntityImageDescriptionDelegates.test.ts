@@ -169,8 +169,10 @@ describe('buildDesc — {{ }} embed in a description label (cdd5-T4d)', () => {
 // ---------------------------------------------------------------------------
 // cdd5-T4d: `AtomText#drawU`'s tab tokenizer (`AtomText.java:210-231`) --
 // rizisu-50-liza998's `\ttext` / `\t\ttext` lines draw each token at the
-// advanced x: tab stop = `getSize2D() * 4` = 56 (java:270-275, the space
-// glyph measures 0 under the width table), so x = 56 and 112.
+// advanced x: tab stop = 8 spaces = 8 * 3.85 = 30.8 at 14pt (java:270-275; the
+// `getSize2D() * 4` fallback only applies to a 0-wide space), so x = 30.8 and
+// 61.6 -- jar, re-captured under oracle seam #4 v2 (unknown/rizisu-50-liza998
+// in.svg): `<text x="17">`, `x="47.8"`, `x="78.6"` = 17 + {0, 30.8, 61.6}.
 // ---------------------------------------------------------------------------
 
 describe('descAtomOps — tab-indented text draws at tab stops (cdd5-T4d)', () => {
@@ -181,8 +183,8 @@ describe('descAtomOps — tab-indented text draws at tab stops (cdd5-T4d)', () =
     const xs = [...ug.getSvgString().matchAll(/<text[^>]*x="([\d.]+)"[^>]*>([^<]*)<\/text>/g)].map((m) => [m[1], m[2]]);
     expect(xs).toEqual([
       ['0', 'text'],
-      ['56', 'text'],
-      ['112', 'text'],
+      ['30.8', 'text'],
+      ['61.6', 'text'],
     ]);
   });
 });

@@ -298,14 +298,17 @@ describe('creoleTextLines — FontPosition runs through Sea (SI30 D1/D2)', () =>
 
     expect(line.runs.map((r) => r.text)).toEqual(['\t', '1']);
     expect(line.runs.map((r) => r.size)).toEqual([font.size, muted(font.size)]);
-    // Tab stop = `getFont().getSize2D() * 4` (`AtomText.java:273` — the
-    // zero-width-space fallback that always fires under the deterministic
-    // width table), on the NORMAL run's own font: 14*4 = 56. Then the sup
-    // glyph at its muted size.
-    expect(line.width).toBeCloseTo(font.size * 4 + measurer.measure('1', { ...font, size: 11 }).width, 10);
+    // Tab stop = 8 spaces of the NORMAL run's own font (`AtomText.java:271-273`;
+    // the `getSize2D() * 4` fallback only fires for a 0-wide space): 8 * 3.85 =
+    // 30.8 at 14pt, then the sup glyph at its muted size. Jar (state/juvagu-33-
+    // dupa212 in.svg, re-captured under oracle seam #4 v2): the `1` is drawn at
+    // x=42.8 = 12 (box left + margin) + 30.8.
+    const tabStop = 8 * measurer.measure(' ', font).width;
+    expect(tabStop).toBeCloseTo(30.8, 4);
+    expect(line.width).toBeCloseTo(tabStop + measurer.measure('1', { ...font, size: 11 }).width, 4);
     // Pre-mute this line measured `'1'` at 14 — 1.67px wider, exactly the
     // jar delta T0 recorded for `s1 width idx1` (1.163715in vs 1.140538in).
-    expect(line.width).toBeLessThan(font.size * 4 + measurer.measure('1', font).width);
+    expect(line.width).toBeLessThan(tabStop + measurer.measure('1', font).width);
   });
 
   it("juvagu-33's line: Sea grows the line to the sup's box + its raise, and dy is the sup's own baseline (Sea.java:72-80, AtomText.java:213-215,321-323)", () => {

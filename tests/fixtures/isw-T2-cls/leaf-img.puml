@@ -1,0 +1,3 @@
+@startuml
+rectangle "<img:does-not-exist.png>" as r
+@enduml
