@@ -129,7 +129,7 @@ function trySimpleKeyword(ctx: ParseContext, idx: number, _line: string, lc: str
 function tryAction(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const actionMatch = RE_ACTION.exec(line);
   if (actionMatch === null) return null;
-  const label = decodeNewlineSentinels(actionMatch[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n'));
+  const label = decodeNewlineSentinels(actionMatch[1]!.replace(RE_ESCAPED_NEWLINE, '\n'));
   const stereotype = stereogroupStereotype(actionMatch[2]);
   const color = stereogroupBackColor(actionMatch[2]);
   const node: ActivityAction = {
@@ -178,8 +178,8 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
   const whileMatch = RE_WHILE.exec(line);
   if (whileMatch === null) return null;
   const { lines } = ctx;
-  const condition = whileMatch[1]!.trim();
-  const yesLabel = whileMatch[2]?.trim();
+  const condition = whileMatch[1]!;
+  const yesLabel = whileMatch[2];
   // Mission `activity-lane-capture` D1/T4: read BEFORE the body parses, so
   // a lane switch inside the body never leaks into this node's own
   // `swimlane`.
@@ -194,7 +194,7 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
   if (cursor < lines.length) {
     const endLine = lines[cursor]!.trim();
     const endwhileMatch = RE_ENDWHILE.exec(endLine);
-    if (endwhileMatch !== null) exitLabel = endwhileMatch[1]?.trim();
+    if (endwhileMatch !== null) exitLabel = endwhileMatch[1];
     cursor++;
   }
   // `InstructionWhile#addNote` (`InstructionWhile.java:162-167`): a note
@@ -240,7 +240,7 @@ function parseRepeatEntry(ctx: ParseContext, inlineRest: string | undefined): Ac
   const restLine = RE_REPEAT_INLINE_TERMINATOR.test(inlineRest) ? inlineRest : inlineRest + ';';
   const actionM = RE_ACTION.exec(restLine);
   if (actionM === null) return undefined;
-  const label = decodeNewlineSentinels(actionM[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n'));
+  const label = decodeNewlineSentinels(actionM[1]!.replace(RE_ESCAPED_NEWLINE, '\n'));
   const stereotype = stereogroupStereotype(actionM[2]);
   const color = stereogroupBackColor(actionM[2]);
   return {
@@ -274,9 +274,9 @@ function parseRepeatClose(lines: readonly string[], cursor: number): RepeatClose
   if (cursor >= lines.length) return { condition: '', yesLabel: undefined, outLabel: undefined, nextIdx: cursor };
   const endLine = lines[cursor]!.trim();
   const repeatMatch = RE_REPEATWHILE.exec(endLine);
-  const condition = unescapeLabelNewlines(repeatMatch?.[1]?.trim() ?? '');
-  const yesLabel = unescapeLabel(repeatMatch?.[2]?.trim());
-  const outLabel = unescapeLabel(repeatMatch?.[3]?.trim());
+  const condition = unescapeLabelNewlines(repeatMatch?.[1] ?? '');
+  const yesLabel = unescapeLabel(repeatMatch?.[2]);
+  const outLabel = unescapeLabel(repeatMatch?.[3]);
   return { condition, yesLabel, outLabel, nextIdx: cursor + 1 };
 }
 

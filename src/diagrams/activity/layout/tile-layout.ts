@@ -18,6 +18,7 @@ import type { DiamondConditionTile } from '../tiles/gtile-diamond-inside.js';
 import { GtileDiamondSquare } from '../tiles/gtile-diamond-square.js';
 import { GtileDiamondEmpty } from '../tiles/gtile-diamond-empty.js';
 import { GtileWhile } from '../tiles/gtile-while.js';
+import { nonWhiteTest } from './display-white.js';
 import { GtileRepeat, RepeatConditionEmpty } from '../tiles/gtile-repeat.js';
 import type { RepeatConditionTile } from '../tiles/gtile-repeat.js';
 import { GtileRepeatEntry } from '../tiles/gtile-repeat-entry.js';
@@ -241,11 +242,11 @@ function buildWhileHeader(
     const emptyLabels: { south?: string; west?: string } = {};
     if (node.yesLabel !== undefined) emptyLabels.south = node.yesLabel;
     if (node.exitLabel !== undefined) emptyLabels.west = node.exitLabel;
-    return new GtileDiamondEmpty(node.condition, emptyLabels, bounder, theme, CreoleMode.FULL);
+    return new GtileDiamondEmpty(nonWhiteTest(node.condition), emptyLabels, bounder, theme, CreoleMode.FULL);
   }
   if (theme.conditionStyle === 'insideDiamond')
-    return new GtileDiamondSquare(node.condition, labels, bounder, theme, CreoleMode.FULL);
-  return new GtileDiamondInside(node.condition, labels, bounder, theme, CreoleMode.FULL);
+    return new GtileDiamondSquare(nonWhiteTest(node.condition), labels, bounder, theme, CreoleMode.FULL);
+  return new GtileDiamondInside(nonWhiteTest(node.condition), labels, bounder, theme, CreoleMode.FULL);
 }
 
 function tileWhile(
@@ -348,11 +349,11 @@ function tileRepeatCondition(
   // own EMPTY_DIAMOND call never leaving `testLabel` unset the way this
   // one always does).
   if (theme.conditionStyle === 'emptyDiamond')
-    return new GtileDiamondEmpty('', { east: node.condition }, bounder, theme, CreoleMode.FULL);
+    return new GtileDiamondEmpty('', { east: nonWhiteTest(node.condition) }, bounder, theme, CreoleMode.FULL);
   // CSTYLE (add2 T3i): FtileRepeat.java:159-161.
   if (theme.conditionStyle === 'insideDiamond')
-    return new GtileDiamondSquare(node.condition, labels, bounder, theme, CreoleMode.FULL);
-  return new GtileDiamondInside(node.condition, labels, bounder, theme, CreoleMode.FULL);
+    return new GtileDiamondSquare(nonWhiteTest(node.condition), labels, bounder, theme, CreoleMode.FULL);
+  return new GtileDiamondInside(nonWhiteTest(node.condition), labels, bounder, theme, CreoleMode.FULL);
 }
 
 /**

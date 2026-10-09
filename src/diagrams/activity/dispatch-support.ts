@@ -87,8 +87,10 @@ export const RE_ACTIVITY_LIST = /^[-*]\s?(.*?)\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?
  *   -- the full `(INCOMING)? backward : LABEL ; <<stereo>>* (OUTCOMING)?`
  *   shape; both decoration groups are `RegexOptional`.
  */
+// isw-T2-act F2: `":" LABEL(.*?) ";"` with no space leaf on either side of
+// LABEL (`CommandBackward3.java:77-79`), so its spaces stay in the label.
 export const RE_BACKWARD =
-  /^(?:\(([^)]*)\)\s*)?backward\s*:\s*(.+?)\s*;\s*(<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*(?:\(([^)]*)\))?\s*$/i;
+  /^(?:\(([^)]*)\)\s*)?backward\s*:(.*?);\s*(<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*(?:\(([^)]*)\))?\s*$/i;
 
 /** `backward:` with no closing `;` on the same line -- the multiline
  *  opener `node-dispatch.ts#tryBackward` checks after {@link RE_BACKWARD}

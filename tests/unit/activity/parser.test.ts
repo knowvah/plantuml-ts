@@ -809,7 +809,11 @@ describe('arrow label bracket style and newline handling', () => {
   it('a label without ; opens a multi-line label closed by the next ; line', () => {
     const ast = parse(['-> first', '  second;', ':b;']);
     const node = firstNode(ast) as ActivityArrowLabel;
-    expect(node.label).toBe('first\nsecond');
+    // isw-T2-act F2: only the shared indentation goes (`BlocLines
+    // #removeEmptyColumns`); the seam-#4 re-capture of
+    // `tests/fixtures/activity/add4-T3i/arrow-long-multiline.svg` draws
+    // `  line two` two spaces (6.05 at 11pt) right of `line one`.
+    expect(node.label).toBe('first\n  second');
   });
 });
 

@@ -215,7 +215,7 @@ export function pushParsedNode(nodes: ActivityNode[], node: ActivityNode | undef
 export function tryActivityList(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const m = RE_ACTIVITY_LIST.exec(line);
   if (m === null) return null;
-  const node: ActivityAction = { kind: 'action', label: m[1]!.trim(), ...swimlaneSpread(ctx) };
+  const node: ActivityAction = { kind: 'action', label: m[1]!, ...swimlaneSpread(ctx) };
   return { idx: idx + 1, node };
 }
 
@@ -233,8 +233,8 @@ export function tryActivityList(ctx: ParseContext, idx: number, line: string): D
  *  a freshly-widened `string | undefined` call result). */
 function backArrowSpread<K extends string>(key: K, raw: string | undefined): { [P in K]?: string } {
   if (raw === undefined) return {};
-  const trimmed = unescapeLabelNewlines(raw.trim());
-  return trimmed === '' ? {} : ({ [key]: trimmed } as { [P in K]?: string });
+  const label = unescapeLabelNewlines(raw);
+  return label === '' ? {} : ({ [key]: label } as { [P in K]?: string });
 }
 
 function stereoSpread(stereotype: string | undefined): { stereotype?: string } {
@@ -244,7 +244,7 @@ function stereoSpread(stereotype: string | undefined): { stereotype?: string } {
 export function tryBackward(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const single = RE_BACKWARD.exec(line);
   if (single !== null) {
-    const label = single[2]!.trim().replace(RE_ESCAPED_NEWLINE, '\n');
+    const label = single[2]!.replace(RE_ESCAPED_NEWLINE, '\n');
     const node: ActivityBackward = {
       kind: 'backward',
       label,

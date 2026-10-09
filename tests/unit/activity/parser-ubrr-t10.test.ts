@@ -189,7 +189,9 @@ describe('M3 — CommandBackward3 (backward:LABEL;)', () => {
     const node = firstNode(ast) as ActivityWhile;
     expect(node.kind).toBe('while');
     expect(node.body.map((n) => n.kind)).toEqual(['action', 'backward']);
-    expect((node.body[1] as ActivityBackward).label).toBe('test');
+    // isw-T2-act F2: `":" LABEL(.*?) ";"` keeps the space
+    // (`CommandBackward3.java:77-79`); kenizo-43-siro273 is jar-conformant.
+    expect((node.body[1] as ActivityBackward).label).toBe(' test');
   });
 
   it('two single-line backward: statements: the second (last) wins, closer still parses (debofa-60-mude568 shape)', () => {
@@ -206,7 +208,8 @@ describe('M3 — CommandBackward3 (backward:LABEL;)', () => {
     expect(repeat.condition).toBe('you want to');
     const backwards = repeat.body.filter((n): n is ActivityBackward => n.kind === 'backward');
     expect(backwards).toHaveLength(2);
-    expect(backwards[1]!.label).toBe('second statement replaces first statement');
+    // isw-T2-act F2: the space after `:` is kept (`CommandBackward3.java:77-79`).
+    expect(backwards[1]!.label).toBe(' second statement replaces first statement');
   });
 });
 
@@ -265,7 +268,7 @@ describe('M2 — CommandSwitch/CommandCase/CommandEndSwitch (doveka-76-fiza931)'
     expect(node.cases[2]?.body[0]?.kind).toBe('end');
   });
 
-  it('spaced parens "case ( 503 )" trim to the bare value (xaxene-93-doka767)', () => {
+  it('spaced parens "case ( 503 )" keep their spaces (xaxene-93-doka767)', () => {
     const ast = parse([
       'switch (Q2)',
       'case ( 503 )',
@@ -277,7 +280,9 @@ describe('M2 — CommandSwitch/CommandCase/CommandEndSwitch (doveka-76-fiza931)'
       'endswitch',
     ]);
     const node = firstNode(ast) as ActivitySwitch;
-    expect(node.cases.map((c) => c.label)).toEqual(['503', '500']);
+    // isw-T2-act F2: `\\(` TEST(.*?) `\\)` is kept verbatim (`CommandCase.java:61,82-86`);
+    // xaxene-93-doka767 is jar-conformant with the spaces measured.
+    expect(node.cases.map((c) => c.label)).toEqual([' 503 ', ' 500 ']);
   });
 });
 
