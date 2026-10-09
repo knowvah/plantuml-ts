@@ -32,7 +32,7 @@
 
 import type { FontSpec, StringMeasurer } from '../measurer.js';
 import { rect } from '../svg.js';
-import { emittedTextForm } from '../svg-text-font.js';
+import { driverTextPlacement } from '../svg-text-font.js';
 import type { PSystemError } from './PSystemError.js';
 import {
   BLACK,
@@ -181,15 +181,17 @@ function drawSegmentLines(seg: ErrorSegment, left: number, boxTop: number, measu
   let lineTop = boxTop + seg.marginTop;
   for (const line of seg.lines) {
     const baseline = lineTop + seg.font.size;
-    const display = emittedTextForm(line, seg.font.family);
+    // DriverTextSvg.java:114-126 — leading spaces move x, textLength is the
+    // trimmed text's width.
+    const { text, dx } = driverTextPlacement(line, measurer.measure(' ', seg.font).width);
     const run: Run = {
       content: line,
       font: seg.font,
       fill: seg.fill,
-      textLength: measurer.measure(display, seg.font).width,
+      textLength: measurer.measure(text, seg.font).width,
       ...(seg.decoration === undefined ? {} : { decoration: seg.decoration }),
     };
-    svg.push(drawRun(run, x, baseline));
+    svg.push(drawRun(run, x + dx, baseline));
     lineTop += seg.font.size;
   }
   return svg;

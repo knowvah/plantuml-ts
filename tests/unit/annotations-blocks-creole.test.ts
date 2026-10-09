@@ -91,9 +91,10 @@ describe('chrome creole — terede-92-fuka839 (<style> legend { MaximumWidth } w
   const ours = chromeGroup(render('unknown', 'terede-92-fuka839'), 'legend');
   const jar = chromeGroup(golden('unknown', 'terede-92-fuka839'), 'legend');
 
-  it("wraps the paragraph into the jar's 142 <text> lines, not one unwrapped run", () => {
-    expect(childTags(jar).filter((t) => t === 'text').length).toBe(142);
-    expect(childTags(ours).filter((t) => t === 'text').length).toBe(142);
+  // 139 = the golden's own count after the seam #4 v2 re-capture (was 142).
+  it("wraps the paragraph into the jar's 139 <text> lines, not one unwrapped run", () => {
+    expect(childTags(jar).filter((t) => t === 'text').length).toBe(139);
+    expect(childTags(ours).filter((t) => t === 'text').length).toBe(139);
   });
 
   it('ends the wrapped paragraph on "facilisi." like the jar', () => {

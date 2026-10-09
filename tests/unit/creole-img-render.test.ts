@@ -665,7 +665,7 @@ describe('buildTextBlock — the <img> cannot-decode fallback is hardcoded (ADR-
   // A second, DIFFERENT element font (serif, size 8, not 14) -- proves the
   // fallback ignores whatever reaches it via `font`.
   const OTHER_ELEMENT_FONT: FontConfiguration = { family: 'serif', size: 8, color: '#ff0000', styles: new Set() };
-  const FALLBACK_TEXT_WIDTH = 100.3625; // jar-verified: "(Cannot decode)" at monospace 14.
+  const FALLBACK_TEXT_WIDTH = 104.2125; // jar-verified: "(Cannot decode)" at monospace 14 (textLength="104.213" in test-results/dot-cache/class/jabama-09-kago823/in.svg, seam #4 v2: the space is 3.85).
 
   test('fallback measures at the hardcoded monospace(14) font, not the element font', () => {
     const dim = buildTextBlock(MALFORMED_IMG, FONT, HorizontalAlignment.LEFT).calculateDimension(
