@@ -64,11 +64,12 @@ describe('participant labels against the jar', () => {
     const rows = labels(render('birocu-87-xubi808')).filter((r) => r.text.includes('«') || r.text === 'OnlyLabel');
     const stereotype = rows.find((r) => r.text === '«APIGateway»')!;
     const name = rows.find((r) => r.text === 'OnlyLabel')!;
-    // JAR: x=62.575 w=93.363 and x=77.713 w=63.087, both centred on 109.2565.
+    // JAR (re-captured oracle, test-results/dot-cache/sequence/birocu-87-xubi808/
+    // in.svg): x=62.575 w=93.363 and x=77.713 w=63.088, both centred on 109.2565.
     expect(stereotype.x).toBe('62.575');
     expect(stereotype.textLength).toBe('93.363');
     expect(name.x).toBe('77.713');
-    expect(name.textLength).toBe('63.087');
+    expect(name.textLength).toBe('63.088');
     const centreOf = (r: typeof name): number => Number(r.x) + Number(r.textLength) / 2;
     expect(centreOf(stereotype)).toBeCloseTo(centreOf(name), 3);
   });
@@ -145,12 +146,18 @@ function runs(svg: string): Array<{
   });
 }
 
+/** One space at 28pt under oracle seam #4: U+0021 = 44 tenths of a 16pt em. */
+const SPACE_AT_28 = 7.7;
+
 describe('participant labels through creole', () => {
   it('splits one row into the jar’s three runs and advances x by each width', () => {
-    // JAR: x=297.594 "The " 48.3 | x=345.894 "Famous" 101.15 weight 700 |
-    //      x=447.044 " Bob" 49.875 — all at font-size 28 (`scale 2`). The
-    // separating spaces are in the WIDTHS and not in the emitted strings: the
-    // jar's own bytes are `textLength="48.3">The</text>`.
+    // JAR (re-captured, kofuti-29-goti188/in.svg): x=318.769 "The " 48.3 |
+    //      x=374.769 "Famous" 101.15 weight 700 | x=483.619 " Bob" 49.875 — all
+    //      at font-size 28 (`scale 2`). The separating spaces are in neither the
+    // emitted strings nor `textLength` (`DriverTextSvg.java:113-126` trims then
+    // measures; leading spaces move `x`), but they ARE in the ADVANCE:
+    // 374.769 = 318.769 + 48.3 + 7.7, 483.619 = 374.769 + 101.15 + 7.7, where
+    // 7.7 is one space at 28pt (44/16 em x 28, oracle seam #4).
     const row = runs(render('kofuti-29-goti188')).filter((r) => r.size === '28' && r.y < 100);
     expect(row.map((r) => r.text)).toEqual(['Alice', 'The', 'Famous', 'Bob']);
     const [, the, famous, bob] = row;
@@ -158,22 +165,23 @@ describe('participant labels through creole', () => {
     expect(famous!.weight).toBe('700');
     expect(the!.weight).toBeUndefined();
     // x advances by the PRECEDING run's own width, never by a shared stride.
-    expect(famous!.x).toBeCloseTo(the!.x + the!.textLength!, 6);
-    expect(bob!.x).toBeCloseTo(famous!.x + famous!.textLength!, 6);
+    expect(famous!.x).toBeCloseTo(the!.x + the!.textLength! + SPACE_AT_28, 6);
+    expect(bob!.x).toBeCloseTo(famous!.x + famous!.textLength! + SPACE_AT_28, 6);
     // …and all three share the row's baseline.
     expect([famous!.y, bob!.y]).toEqual([the!.y, the!.y]);
   });
 
   it('centres a multi-run row as a BLOCK on the name-block centre', () => {
-    // JAR box 2: x=283.594 w=227.325 -> centre 397.2565, and the three runs
-    // span 297.594..496.919, whose midpoint is that same centre.
+    // JAR box 2 (kofuti-29-goti188/in.svg): x=304.769 w=242.725 -> centre
+    // 426.1315, and the three runs span 318.769..533.494, whose midpoint is
+    // that same centre.
     const svg = render('kofuti-29-goti188');
     const row = runs(svg)
       .filter((r) => r.size === '28' && r.y < 100)
       .slice(1);
     const left = row[0]!.x;
     const right = row.at(-1)!.x + row.at(-1)!.textLength!;
-    expect(right - left).toBeCloseTo(199.325, 3);
+    expect(right - left).toBeCloseTo(214.725, 3);
     // The jar's box is `x=283.594 y=20 w=227.325`. Since C3 landed the
     // document's top margin this port's head row starts at 10 too; this
     // fixture's tallest head is taller than Bob's, so Bob's own box is
@@ -199,16 +207,16 @@ describe('participant labels through creole', () => {
   });
 
   it('measures a `""mono""` row at its own family, and moves the box with it', () => {
-    // JAR: rect x=10 w=84.087, <text x="17" font-family="monospace"
-    // textLength="70.087">MySubTitle</text>. The raw line measures 90.038, so
+    // JAR (re-captured, jozomu-87-tajo507/in.svg): <text x="17"
+    // font-family="monospace" textLength="70.088">MySubTitle</text>. The raw line measures 90.038, so
     // a box built from the unparsed text is 20 too wide.
     const svg = render('jozomu-87-tajo507');
     const mono = runs(svg).find((r) => r.text === 'MySubTitle')!;
     expect(mono.family).toBe('monospace');
-    expect(mono.textLength).toBe(70.087);
+    expect(mono.textLength).toBe(70.088);
     expect(mono.x).toBe(17);
     // y=10 since C3: the jar's own head-row origin (`TOP_MARGIN`).
-    expect(svg).toContain('<rect x="10" y="10" width="84.087"');
+    expect(svg).toContain('<rect x="10" y="10" width="84.088"');
   });
 
   it('emits a markup-free name byte-for-byte as it did before the seam', () => {
