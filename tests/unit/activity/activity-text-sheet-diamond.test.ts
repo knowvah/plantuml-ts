@@ -44,7 +44,9 @@ describe('hexagonAsStencil', () => {
 describe('diamondTestBlock / renderDiamondTestLabel', () => {
   it('sizes one 11px line at its own width and the 11px font height', () => {
     const dim = diamondTestBlock('test?', MEASURED_DEFAULT).calculateDimension(BOUNDER);
-    expect([dim.getWidth(), dim.getHeight()]).toEqual([23.7875, 11]);
+    // isw-T2-act: seam #4 float-rounds each width (`Rectangle2D.Float`),
+    // `DeterministicMeasurer` mirrors it; the jar prints `textLength="23.788"`.
+    expect([dim.getWidth(), dim.getHeight()]).toEqual([Math.fround(23.7875), 11]);
   });
 
   it('centres the block in the hexagon box (FtileDiamondInside.java:94-96)', () => {
