@@ -1,17 +1,13 @@
 /**
  * Unit tests for `scripts/rebaseline-svg-goldens.ts`'s pure functions (T2,
- * mission svg-output-size-reduction). Most of the jar-capture and
- * git-plumbing I/O is exercised by the manual report-only run documented in
- * the task's return report, not by a JVM- or git-dependent test --
- * `captureBatch` is the one exception, exercised below with a mocked
- * `spawnSync` to prove it routes through the D9 minute guard (cdd6 T0c).
+ * mission svg-output-size-reduction). The jar-capture and git-plumbing I/O is
+ * exercised by the manual report-only run, not by a JVM- or git-dependent
+ * test -- `captureEach` is the one exception, exercised below with an
+ * INJECTED renderer to prove it renders one fixture per call (isw-T0b: a
+ * batched JVM is not byte-identical to solo renders) and routes the minute
+ * guard's clock/sleep through to the renderer (cdd6 T0c).
  */
-import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
-import { spawnSync } from 'node:child_process';
-import type * as ChildProcess from 'node:child_process';
+import { describe, it, expect, vi } from 'vitest';
 import {
   compareCapture,
   summarize,
@@ -19,19 +15,10 @@ import {
   formatOutcomeLine,
   describeOutcome,
   evaluateDrift,
-  parseErroredFiles,
-  captureBatch,
+  captureEach,
   type FixtureOutcome,
 } from '../../../scripts/rebaseline-svg-goldens.js';
-
-vi.mock('node:child_process', async (importOriginal) => ({
-  ...(await importOriginal<typeof ChildProcess>()),
-  spawnSync: vi.fn(),
-}));
-
-afterEach(() => {
-  vi.mocked(spawnSync).mockReset();
-});
+import type { Renderer } from '../../../scripts/lib/recapture-render.js';
 
 describe('compareCapture', () => {
   it('is SAME for byte-identical buffers', () => {
@@ -138,29 +125,6 @@ describe('formatOutcomeLine — jar-error visibility', () => {
   });
 });
 
-describe('parseErroredFiles', () => {
-  // A batched jar run returns ONE exit code, so per-fixture error status has
-  // to come from stderr. Without this the ERROR-DIAGRAM signal would vanish
-  // the moment more than one fixture shares a JVM.
-  it('attributes each error to the file the jar named', () => {
-    const stderr = [
-      'Error line 13 in file: /scratch/svg-class/a/in.puml',
-      'Some diagram description contains errors',
-      'Error line 4 in file: /scratch/svg-state/b/in.puml',
-    ].join('\n');
-    expect([...parseErroredFiles(stderr)]).toEqual(['/scratch/svg-class/a/in.puml', '/scratch/svg-state/b/in.puml']);
-  });
-
-  it('is empty for a clean run', () => {
-    expect(parseErroredFiles('').size).toBe(0);
-    expect(parseErroredFiles('Some unrelated warning\n').size).toBe(0);
-  });
-
-  it('handles a path containing spaces', () => {
-    expect([...parseErroredFiles('Error line 1 in file: /a b/c d/in.puml')]).toEqual(['/a b/c d/in.puml']);
-  });
-});
-
 describe('evaluateDrift', () => {
   it('is ok when the base tree matches the pinned tree', () => {
     expect(evaluateDrift({ pinTree: 'abc', baseTree: 'abc', allowOverride: false })).toEqual({
@@ -191,71 +155,58 @@ describe('evaluateDrift', () => {
 });
 
 // ---------------------------------------------------------------------------
-// captureBatch — proves the jar call is routed through the D9 minute guard
-// (cdd6 T0c). spawnSync is mocked; no jar output is produced, so the
-// resulting Capture is always `{ bytes: undefined, exitCode: 0 }` here --
-// only the guard wiring is under test.
+// captureEach -- one renderer call (one JVM) per fixture.
 // ---------------------------------------------------------------------------
 
-describe('captureBatch', () => {
-  let tmp: string;
+describe('captureEach', () => {
+  const fixtures = [
+    { relPath: 'svg-class/a', fixtureDir: '/src/a' },
+    { relPath: 'svg-dot/b', fixtureDir: '/src/b' },
+  ];
 
-  beforeEach(() => {
-    tmp = mkdtempSync(join(tmpdir(), 'rsg-t0c-'));
+  it('calls the renderer once per fixture, never with several inputs', async () => {
+    const render = vi.fn<Renderer>((puml) =>
+      Promise.resolve({ files: new Map([['in.svg', Buffer.from(`svg for ${puml}`)]]), exitCode: 0, timedOut: false }),
+    );
+
+    const result = await captureEach(fixtures, '/scratch', {}, render);
+
+    expect(render).toHaveBeenCalledTimes(2);
+    expect(render.mock.calls.map((c) => c[0]).sort()).toEqual(['/src/a/in.puml', '/src/b/in.puml']);
+    expect(result.get('svg-class/a')).toEqual({ bytes: Buffer.from('svg for /src/a/in.puml'), exitCode: 0 });
+    expect(result.get('svg-dot/b')?.bytes).toEqual(Buffer.from('svg for /src/b/in.puml'));
   });
 
-  afterEach(() => {
-    rmSync(tmp, { recursive: true, force: true });
+  it('keeps the real per-JVM exit code beside the bytes of an error diagram', async () => {
+    const render: Renderer = () =>
+      Promise.resolve({ files: new Map([['in.svg', Buffer.from('err')]]), exitCode: 200, timedOut: false });
+
+    const result = await captureEach([fixtures[0]!], '/scratch', {}, render);
+
+    expect(result.get('svg-class/a')).toEqual({ bytes: Buffer.from('err'), exitCode: 200 });
   });
 
-  function makeFixtureDir(name: string): string {
-    const dir = join(tmp, 'src', name);
-    mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, 'in.puml'), '@startuml\n@enduml\n', 'utf-8');
-    return dir;
-  }
+  it('reports no bytes (FAILED) when the jar wrote nothing or timed out', async () => {
+    const empty: Renderer = () => Promise.resolve({ files: new Map(), exitCode: 1, timedOut: false });
+    const timedOut: Renderer = () => Promise.resolve({ files: new Map(), exitCode: null, timedOut: true });
 
-  function mockCleanJarRun(): void {
-    vi.mocked(spawnSync).mockReturnValue({
-      stderr: '',
-      stdout: '',
-      status: 0,
-      signal: null,
-      pid: 1,
-      output: [],
+    expect((await captureEach([fixtures[0]!], '/s', {}, empty)).get('svg-class/a')).toEqual({
+      bytes: undefined,
+      exitCode: 1,
     });
-  }
-
-  it('waits out a decorated start minute before calling the jar (D9)', async () => {
-    mockCleanJarRun();
-    const fixtureDir = makeFixtureDir('foo');
-    let now = 30 * 60_000; // minute 30 -- decorated (dedication banner)
-    const sleep = vi.fn((): Promise<void> => {
-      now = 31 * 60_000; // plain
-      return Promise.resolve();
+    expect((await captureEach([fixtures[0]!], '/s', {}, timedOut)).get('svg-class/a')).toEqual({
+      bytes: undefined,
+      exitCode: -1,
     });
-
-    const result = await captureBatch([{ relPath: 'svg-class/foo', fixtureDir }], join(tmp, 'scratch'), {
-      now: () => now,
-      sleep,
-    });
-
-    expect(sleep).toHaveBeenCalledTimes(1);
-    expect(spawnSync).toHaveBeenCalledTimes(1);
-    expect(result.get('svg-class/foo')).toEqual({ bytes: undefined, exitCode: 0 });
   });
 
-  it('calls the jar without waiting when the minute is already plain', async () => {
-    mockCleanJarRun();
-    const fixtureDir = makeFixtureDir('bar');
-    const sleep = vi.fn((): Promise<void> => Promise.resolve());
+  it('hands the minute-guard clock and sleep to the renderer (D9)', async () => {
+    const now = (): number => 10 * 60_000;
+    const sleep = (): Promise<void> => Promise.resolve();
+    const render = vi.fn<Renderer>(() => Promise.resolve({ files: new Map(), exitCode: 0, timedOut: false }));
 
-    await captureBatch([{ relPath: 'svg-class/bar', fixtureDir }], join(tmp, 'scratch2'), {
-      now: () => 10 * 60_000,
-      sleep,
-    });
+    await captureEach([fixtures[0]!], '/scratch', { now, sleep }, render);
 
-    expect(sleep).not.toHaveBeenCalled();
-    expect(spawnSync).toHaveBeenCalledTimes(1);
+    expect(render.mock.calls[0]![1]).toMatchObject({ scratchRoot: '/scratch', now, sleep });
   });
 });
