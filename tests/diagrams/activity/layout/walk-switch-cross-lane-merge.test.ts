@@ -66,6 +66,13 @@ endswitch
 :postAct;
 @enduml`;
 
+// isw-T2-act: seam #4 float-rounds every width (`Math.fround`), so layout
+// coordinates carry float noise; they are compared at the jar's printed
+// precision, values from the re-captured
+// `test-results/dot-cache/activity/mojezi-43-gamu360/in.svg` lines.
+const r3 = (n: number): number => Math.round(n * 1000) / 1000;
+const pts3 = (ps: readonly { x: number; y: number }[]) => ps.map((p) => ({ x: r3(p.x), y: r3(p.y) }));
+
 describe('switch outgoing connector, last case crosses lane mid-branch', () => {
   const geo = layout(MOJEZI_PUML);
 
@@ -73,24 +80,24 @@ describe('switch outgoing connector, last case crosses lane mid-branch', () => {
     // Case 0 (!S2, same lane throughout) gets this shape unconditionally;
     // case 1 (Aba1 -> |S1|) must get the analogous one, not be dropped.
     const sameLaneCaseOut = geo.edges.find(
-      (e) => e.points.length === 3 && e.points[0]!.x === 131.36249999999998 && e.points[0]!.y === 180.5,
+      (e) => e.points.length === 3 && r3(e.points[0]!.x) === 131.363 && e.points[0]!.y === 180.5,
     );
     expect(sameLaneCaseOut).toBeDefined();
 
     const crossLaneCaseOut = geo.edges.find(
-      (e) => e.points.length === 3 && e.points[0]!.x === 58.0125 && e.points[0]!.y === 180.5,
+      (e) => e.points.length === 3 && r3(e.points[0]!.x) === 58.013 && e.points[0]!.y === 180.5,
     );
     expect(crossLaneCaseOut).toBeDefined();
-    expect(crossLaneCaseOut!.points).toEqual([
-      { x: 58.0125, y: 180.5 },
-      { x: 58.0125, y: 202.5 },
+    expect(pts3(crossLaneCaseOut!.points)).toEqual([
+      { x: 58.013, y: 180.5 },
+      { x: 58.013, y: 202.5 },
       { x: 161.375, y: 202.5 },
     ]);
   });
 
   it('carries no label on the cross-lane case-out connector (no `.withLabel()` call on `ConnectionVerticalThenHorizontalCrossSwimlane`)', () => {
     const crossLaneCaseOut = geo.edges.find(
-      (e) => e.points.length === 3 && e.points[0]!.x === 58.0125 && e.points[0]!.y === 180.5,
+      (e) => e.points.length === 3 && r3(e.points[0]!.x) === 58.013 && e.points[0]!.y === 180.5,
     );
     expect(crossLaneCaseOut!.label).toBeUndefined();
   });

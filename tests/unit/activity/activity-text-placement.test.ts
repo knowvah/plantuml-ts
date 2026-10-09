@@ -5,8 +5,9 @@
 import { describe, it, expect } from 'vitest';
 import { measureLineWidth } from '../../../src/diagrams/activity/activity-text-placement.js';
 import { resolveTheme } from '../../../src/core/theme.js';
+import { measured } from './measured-theme.js';
 
-const theme = resolveTheme('default');
+const theme = measured(resolveTheme('default'));
 
 describe('measureLineWidth', () => {
   it('matches WidthTableMeasurer directly (the deterministic conformance metric)', () => {

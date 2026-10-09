@@ -31,8 +31,12 @@ function dividerXs(name: string, y2 = '258.5'): number[] {
   return lines.map((l) => Number(/x1="([^"]*)"/.exec(l)![1]));
 }
 
-const JAR_UNPADDED = [20, 58.338, 239.163, 277.163];
-const JAR_PADDED = [33, 80.675, 272.5, 319.5];
+// isw-T2-act: re-read from one-JVM `scripts/oracle-render.sh` renders of
+// each fixture under seam #4 (spaces non-zero), 2026-10-09: the lane
+// titles' `" "` and the special lane's `""` title (one space) move the
+// later dividers.
+const JAR_UNPADDED = [20, 58.338, 255.662, 293.662];
+const JAR_PADDED = [33, 80.675, 289, 336];
 
 describe('swimlaneWidth A/B fixtures — divider x vs the jar', () => {
   it.each(['swimw-absent.puml', 'swimw-0.puml'])('%s: no floor, dividers exact', (name) => {
@@ -40,7 +44,7 @@ describe('swimlaneWidth A/B fixtures — divider x vs the jar', () => {
   });
 
   it('wide titles: divider half-margins widen, dividers exact', () => {
-    expect(dividerXs('swimw-wide-titles.puml')).toEqual([20, 296.288, 332.963, 541.188]);
+    expect(dividerXs('swimw-wide-titles.puml')).toEqual([20, 330.938, 367.613, 595.637]);
   });
 
   it.each(['swimw-100.puml', 'swimw-400.puml', 'swimw-9000.puml', 'swimw-same.puml', 'swimw-block-same.puml'])(
@@ -62,19 +66,19 @@ describe('swimlaneWidth A/B fixtures — divider x vs the jar', () => {
  */
 describe('elseif ConnectionHline lane ink — divider x vs the jar', () => {
   it('laneink-d: elseif branch with a point out', () => {
-    expect(dividerXs('laneink-d.puml', '320.556')).toEqual([20, 94.3, 311.225]);
+    expect(dividerXs('laneink-d.puml', '320.556')).toEqual([20, 94.3, 318.816]);
   });
 
   it('laneink-g: nested if (else) under an elseif', () => {
-    expect(dividerXs('laneink-g.puml', '452.056')).toEqual([20, 157.6, 395.841]);
+    expect(dividerXs('laneink-g.puml', '452.056')).toEqual([20, 157.6, 404.5]);
   });
 
   it('laneink-h: nested if (no else) under an elseif', () => {
-    expect(dividerXs('laneink-h.puml', '452.056')).toEqual([20, 157.6, 394.722]);
+    expect(dividerXs('laneink-h.puml', '452.056')).toEqual([20, 157.6, 403.381]);
   });
 
   it('laneink-e: no branch has a point out, so no bar and no widening', () => {
-    expect(dividerXs('laneink-e.puml', '[0-9.]+')).toEqual([20, 146.6, 346.391]);
+    expect(dividerXs('laneink-e.puml', '[0-9.]+')).toEqual([20, 146.6, 353.116]);
   });
 });
 
@@ -93,9 +97,10 @@ describe('cross-lane else branch exit', () => {
       readFileSync(join(DIR, 'lastelse-out-xlane.puml'), 'utf8'),
       new DeterministicMeasurer(),
     );
+    // isw-T2-act: x 303.1 from a seam-#4 one-JVM render of the fixture.
     const at = (x: string): string[] => svg.match(new RegExp(`<line x1="${x}"[^>]*>`, 'g')) ?? [];
-    const ys = at('299.8').map((l) => /y1="([^"]*)" x2="([^"]*)" y2="([^"]*)"/.exec(l)!.slice(1));
-    expect(ys).toContainEqual(['211.5', '299.8', '231.5']);
-    expect(ys).not.toContainEqual(['211.5', '299.8', '216.5']);
+    const ys = at('303.1').map((l) => /y1="([^"]*)" x2="([^"]*)" y2="([^"]*)"/.exec(l)!.slice(1));
+    expect(ys).toContainEqual(['211.5', '303.1', '231.5']);
+    expect(ys).not.toContainEqual(['211.5', '303.1', '216.5']);
   });
 });

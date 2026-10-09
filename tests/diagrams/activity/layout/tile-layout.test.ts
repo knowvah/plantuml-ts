@@ -15,6 +15,7 @@ import { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-
 import { buildBlockUmls } from '../../../../src/core/BlockUmlBuilder.js';
 import { parseActivity } from '../../../../src/diagrams/activity/parser.js';
 import { astOrThrow } from '../../../helpers/parse-ast.js';
+import { measured } from '../../../unit/activity/measured-theme.js';
 
 const measurer = new FormulaMeasurer();
 // A REAL resolved theme, not a `{ fontSize, fontFamily } as unknown as
@@ -23,7 +24,7 @@ const measurer = new FormulaMeasurer();
 // `theme.colors.elements` -- a partial cast had no `colors` at all and
 // threw. `fontSize` is kept at 13 so every assertion below that depends
 // on the ROOT font is unchanged.
-const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
+const theme: Theme = measured({ ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' });
 
 describe('layoutActivity — empty AST', () => {
   const ast: ActivityDiagramAST = { nodes: [], swimlanes: [] };

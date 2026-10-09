@@ -57,6 +57,7 @@ import {
 import { shapesOf, type CompressShape } from '../../../../../src/diagrams/activity/layout/compress/shapes-of.js';
 import { occupiesOn, overlaps } from '../../../../../src/diagrams/activity/layout/compress/slot-finder.js';
 import type { Reservation } from '../../../../../src/diagrams/activity/layout/hexagon-reservations.js';
+import { measured } from '../../../../unit/activity/measured-theme.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const MANIFEST_PATH = join(HERE, '../../../../../oracle/goldens/svg-activity/diff-baseline.json');
@@ -106,7 +107,7 @@ function buildThemeForFixture(preprocessed: PreprocessorResult): Theme {
   }, new Map());
   const flatRoot = styleMap.get('') ?? new Map<string, string>();
   const withStyles = resolveSkinparam(flatRoot, withSkinparam).theme;
-  return applyStyleMap(styleMap, withStyles);
+  return measured(applyStyleMap(styleMap, withStyles));
 }
 
 function makeBounder(measurer: DeterministicMeasurer, theme: Theme): StringBounder {
@@ -710,12 +711,10 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     //   xovigi [15,18], [28,31] (label WEST of the hexagon): text right
     //     145.9875 = hexagon x 145.9875 -> 134.71250000000003 vs 134.7125
     // All six rows are pinned byte-equal to the jar's golden.
-    'boxoto-53-sifo232 [32,35] polygon×text',
-    'boxoto-53-sifo232 [45,48] polygon×text',
-    'kotiso-16-vizi552 [20,23] polygon×text',
-    'tobajo-64-mipi810 [19,21] polygon×text',
-    'xovigi-85-rufa987 [15,18] polygon×text',
-    'xovigi-85-rufa987 [28,31] polygon×text',
+    // isw-T2-act: RETIRED, all six. Under seam #4 every label measures its
+    // spaces and float-rounds (`Math.fround`), so none of the six pairs
+    // touches exactly any more and `overlaps(after)` reports none of them;
+    // the run with the measurer injected (F1) collects `allowedHard = []`.
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

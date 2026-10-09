@@ -3,9 +3,8 @@ import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOO
 import type { StringBounder } from './tile.js';
 import { TileLeaf } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
-import type { DiamondConditionTile, DiamondInsideLabels, DiamondSide } from './gtile-diamond-inside.js';
-import { measureCondition, measureSide } from './gtile-diamond-inside.js';
-import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
+import type { DiamondConditionTile, DiamondInsideLabels, DiamondSide, DiamondText } from './gtile-diamond-inside.js';
+import { CONDITIONAL_TEXT, measureCondition, measureSide } from './gtile-diamond-inside.js';
 
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
@@ -53,6 +52,7 @@ interface LabelDim {
 export class GtileDiamondEmpty extends TileLeaf implements DiamondConditionTile {
   readonly kind = 'gtile-diamond-empty' as const;
   readonly label = '';
+  readonly wrapped: boolean;
   readonly width = HEXAGON_HALF_SIZE * 2;
   readonly height: number;
   /** `suppY1`/`inY` (`FtileDiamond.java:109,111`): the diamond polygon's
@@ -66,7 +66,7 @@ export class GtileDiamondEmpty extends TileLeaf implements DiamondConditionTile 
   private east: LabelDim;
 
   /**
-   * @param sideMode the side slots' creole mode: `SIMPLE_LINE` for an `if`
+   * @param text (isw-T2-act F5: {@link DiamondText}, `sideMode` + wrap) the side slots' creole mode: `SIMPLE_LINE` for an `if`
    *   (`ConditionalBuilder.java:280-283` `getLabelPositive`), `FULL` for a
    *   while's `create(fontArrow)` yes/out blocks (`FtileWhile.java:123,127-128`)
    *   and a repeat's tbTest (`FtileRepeat.java:127-129`).
@@ -76,18 +76,19 @@ export class GtileDiamondEmpty extends TileLeaf implements DiamondConditionTile 
     labels: DiamondInsideLabels,
     bounder: StringBounder,
     theme: Theme,
-    sideMode: CreoleMode = CreoleMode.SIMPLE_LINE,
+    text: DiamondText = CONDITIONAL_TEXT,
   ) {
     super();
+    this.wrapped = text.wrapped;
     // add4-T3j: each slot is the block drawn there -- branch labels the
     // arrow-font block in `sideMode`, the test the condition Sheet
     // (`ConditionalBuilder.java:240-247`, `FtileDiamond.withNorth(tbTest)`;
     // the while's `test.create(fcTest)`, `FtileWhile.java:124-126`, has the
     // same extent).
-    this.south = measureSide(labels.south, bounder, theme, sideMode);
-    this.west = measureSide(labels.west, bounder, theme, sideMode);
-    this.east = measureSide(labels.east, bounder, theme, sideMode);
-    this.north = measureCondition(testLabel, bounder, theme);
+    this.south = measureSide(labels.south, bounder, theme, text.sideMode, text.wrapped);
+    this.west = measureSide(labels.west, bounder, theme, text.sideMode, text.wrapped);
+    this.east = measureSide(labels.east, bounder, theme, text.sideMode, text.wrapped);
+    this.north = measureCondition(testLabel, bounder, theme, text.wrapped);
     this.inY = this.north.height;
     // `FtileDiamond.java:109-111`: `dim = (24, 24 + suppY1)`.
     this.height = HEXAGON_HALF_SIZE * 2 + this.inY;

@@ -14,6 +14,8 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { XDimension2D } from '../../../src/core/klimt/geom/XDimension2D.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { TextBlock } from '../../../src/core/klimt/shape/TextBlock.js';
+import { measured } from './measured-theme.js';
+const MEASURED_DEFAULT = measured(defaultTheme);
 
 const BOUNDER = klimtStringBounder(new DeterministicMeasurer(), { family: 'sans-serif', size: 11 });
 
@@ -41,18 +43,20 @@ describe('hexagonAsStencil', () => {
 
 describe('diamondTestBlock / renderDiamondTestLabel', () => {
   it('sizes one 11px line at its own width and the 11px font height', () => {
-    const dim = diamondTestBlock('test?', defaultTheme).calculateDimension(BOUNDER);
-    expect([dim.getWidth(), dim.getHeight()]).toEqual([23.7875, 11]);
+    const dim = diamondTestBlock('test?', MEASURED_DEFAULT).calculateDimension(BOUNDER);
+    // isw-T2-act: seam #4 float-rounds each width (`Rectangle2D.Float`),
+    // `DeterministicMeasurer` mirrors it; the jar prints `textLength="23.788"`.
+    expect([dim.getWidth(), dim.getHeight()]).toEqual([Math.fround(23.7875), 11]);
   });
 
   it('centres the block in the hexagon box (FtileDiamondInside.java:94-96)', () => {
-    const svg = renderDiamondTestLabel('test?', defaultTheme, { x: 100, y: 50, width: 48, height: 24 });
+    const svg = renderDiamondTestLabel('test?', MEASURED_DEFAULT, { x: 100, y: 50, width: 48, height: 24 });
     // lx = (48 - 23.7875) / 2; ly = (24 - 11) / 2, baseline = ly + 11 - 11 / 4.5.
     expect(svg).toBe('<text x="112.106" y="65.056" fill="#000" font-size="11" textLength="23.788">test?</text>');
   });
 
   it('draws a `**bold**` run as its own <text>', () => {
-    const svg = renderDiamondTestLabel('**a** b', defaultTheme, { x: 0, y: 0, width: 40, height: 24 });
+    const svg = renderDiamondTestLabel('**a** b', MEASURED_DEFAULT, { x: 0, y: 0, width: 40, height: 24 });
     expect(svg).toContain('font-weight="700">a</text>');
   });
 });

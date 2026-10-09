@@ -16,8 +16,9 @@ import {
   swimlaneTitleFontSize,
 } from '../../../../../src/diagrams/activity/activity-style-defaults.js';
 import { measureLineWidth } from '../../../../../src/diagrams/activity/activity-text-placement.js';
+import { measured } from '../../../../unit/activity/measured-theme.js';
 
-const theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
+const theme = measured({ ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' });
 const bounder: StringBounder = { getDimension: (text: string) => ({ width: text.length * 6, height: 11 }) };
 
 function baseInput(overrides: Partial<ShapesOfInput> = {}): ShapesOfInput {

@@ -3,10 +3,8 @@ import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOO
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
-import { activityFontSize } from '../activity-style-defaults.js';
-import { creoleTextLines } from '../../../core/svek/image/creole-text-lines.js';
 import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
-import { measurerAdapterOf } from './gtile-action.js';
+import { measureSide } from './gtile-diamond-inside.js';
 import type { CaseDim } from './gtile-switch-geometry.js';
 import {
   caseDimOf,
@@ -18,37 +16,18 @@ import {
   SWITCH_YDELTA1B,
 } from './gtile-switch-geometry.js';
 
-/** `AtomText#calculateDimensionSlow`'s own per-line height floor (L).
- *  @see net/sourceforge/plantuml/klimt/creole/legacy/AtomText.java:179-181 */
-const ATOM_TEXT_MIN_HEIGHT = 10;
-
-/** `Branch#getTextBlock` (`Branch.java:248-258`): the arrow-font
- *  `display.create0(...)` block -- `EMPTY_TEXT_BLOCK` (0x0) for a null
- *  display, else widest line by summed per-line heights, each line folded
- *  the same way `gtile-diamond-inside.ts#measureLabel` does.
- *
- *  add4-T3b: each line's width is its `CreoleMode.SIMPLE_LINE` creole width
- *  (`Branch.java:255-256`) -- `**bold**` resolves to its text, while
- *  `__underline__` stays literal (`CommandCreoleBuilder.java:85-86` registers
- *  it only under FULL). The tile `StringBounder` is family-blind
- *  (`getDimension(text, size)`), so the family is left empty.
- *  @see net/sourceforge/plantuml/activitydiagram3/Branch.java:248-266 */
+/** `Branch#getTextBlock` (`Branch.java:248-258`): `EMPTY_TEXT_BLOCK` (0x0)
+ *  for a null display, else `display.create0(fcArrow, LEFT, skinParam,
+ *  style.wrapWidth(), CreoleMode.SIMPLE_LINE)` -- the arrow-font SIMPLE_LINE
+ *  block {@link measureSide} builds, wrapped at the arrow style's
+ *  `wrapWidth()` (isw-T2-act F5: was a per-line width sum that could not
+ *  wrap). */
 function measureLabel(
   text: string | undefined,
   bounder: StringBounder,
-  fontSize: number,
+  theme: Theme,
 ): { width: number; height: number } {
-  if (text === undefined || text === '') return { width: 0, height: 0 };
-  const measurer = measurerAdapterOf(bounder);
-  const font = { family: '', size: fontSize };
-  let width = 0;
-  let height = 0;
-  for (const line of text.split('\n')) {
-    const dim = bounder.getDimension(line, fontSize);
-    const lineWidth = creoleTextLines(line, font, measurer, { mode: CreoleMode.SIMPLE_LINE })[0]?.width ?? 0;
-    if (lineWidth > width) width = lineWidth;
-    height += Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT);
-  }
+  const { width, height } = measureSide(text, bounder, theme, CreoleMode.SIMPLE_LINE, true);
   return { width, height };
 }
 
@@ -72,10 +51,10 @@ interface DecoratedCase extends CaseDim {
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDecorateInLabel.java
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDecorateOutLabel.java
  */
-function decorateCase(tile: Tile, label: string | undefined, bounder: StringBounder, fontSize: number): DecoratedCase {
+function decorateCase(tile: Tile, label: string | undefined, bounder: StringBounder, theme: Theme): DecoratedCase {
   const body = caseDimOf(tile);
-  const dimIn = measureLabel(label, bounder, fontSize);
-  const dimOut = measureLabel(tile.outLabel?.label, bounder, fontSize);
+  const dimIn = measureLabel(label, bounder, theme);
+  const dimOut = measureLabel(tile.outLabel?.label, bounder, theme);
   let width = body.width;
   width += Math.max(0, dimIn.width - (width - body.left));
   width += Math.max(0, dimOut.width - (width - body.left));
@@ -111,13 +90,12 @@ function computeSwitchLayout(
   bounder: StringBounder,
   theme: Theme,
 ): SwitchLayout {
-  const arrowSize = activityFontSize(theme, 'arrow');
-  const decorated = caseTiles.map((tile, i) => decorateCase(tile, caseLabels[i], bounder, arrowSize));
+  const decorated = caseTiles.map((tile, i) => decorateCase(tile, caseLabels[i], bounder, theme));
   const mode = computeSwitchMode(diamond1.width, decorated);
   const nude = computeNudeDimensions(decorated);
   let maxPositiveLabelHeight = 0;
   for (const label of caseLabels) {
-    const h = measureLabel(label, bounder, arrowSize).height;
+    const h = measureLabel(label, bounder, theme).height;
     if (h > maxPositiveLabelHeight) maxPositiveLabelHeight = h;
   }
   const yDelta1a = computeYdelta1a({

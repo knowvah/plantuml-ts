@@ -21,6 +21,7 @@ import type { DiamondConditionTile, DiamondSide } from '../tiles/gtile-diamond-i
 import type { GPoint } from '../tiles/points.js';
 import type { Out } from './tile-coordinates.js';
 import { pushNode } from './tile-coordinates.js';
+import { wrappedSpread } from './diamond-wrap.js';
 
 /** `ActivityNodeGeo.onDiamondBack` for a slot of `diamond`: every diamond
  *  but the EMPTY one draws its slots over its own back (that field's doc). */
@@ -86,5 +87,6 @@ export function emitDiamondOwnLabel(
   out: Out,
 ): void {
   if (diamond.label === '') return;
-  pushNode(out, { id: out.nextId('if-own-label'), kind: 'if-own-label', ...box, label: diamond.label }, lane);
+  const node = { id: out.nextId('if-own-label'), kind: 'if-own-label', ...box, label: diamond.label };
+  pushNode(out, { ...node, ...wrappedSpread(diamond) }, lane);
 }

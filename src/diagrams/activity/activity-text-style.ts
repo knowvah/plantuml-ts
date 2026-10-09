@@ -16,7 +16,8 @@
  * are each a separate task in this mission that wires one of them in.
  */
 import type { Theme } from '../../core/theme.js';
-import { resolveElementMinimumWidth } from '../../core/theme-element-resolve.js';
+import { resolveElementMaximumWidth, resolveElementMinimumWidth } from '../../core/theme-element-resolve.js';
+import { LineBreakStrategy } from '../../core/klimt/LineBreakStrategy.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import type { ActivitySName } from './activity-style-defaults.js';
@@ -59,6 +60,19 @@ import { bucketKey, resolveSolidBucketColor } from './activity-style-defaults.js
  */
 export function activityMinimumWidth(theme: Theme): number {
   return resolveElementMinimumWidth(theme, 'activity') ?? 0;
+}
+
+/**
+ * isw-T2-act F5: `style.wrapWidth()` (`Style.java:330-333`,
+ * `PName.MaximumWidth`) for one activity SName -- the bucket's own
+ * `MaximumWidth`, else `skinparam wrapWidth`, which
+ * `FromSkinparamToStyle.java:250` registers on `SName.element` (a member
+ * of every activity signature). No `plantuml.skin` block sets it, so
+ * absent is `LineBreakStrategy.NONE`.
+ */
+export function activityWrapWidth(theme: Theme, sname: ActivitySName): LineBreakStrategy {
+  const width = resolveElementMaximumWidth(theme, bucketKey(sname));
+  return width === undefined ? LineBreakStrategy.NONE : new LineBreakStrategy(String(width));
 }
 
 // ---------------------------------------------------------------------------

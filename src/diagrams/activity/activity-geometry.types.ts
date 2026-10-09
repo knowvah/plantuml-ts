@@ -11,6 +11,7 @@
 
 import type { SnakeTextAlign } from './layout/snake-text-position.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 
 // ---------------------------------------------------------------------------
 // Public geometry types
@@ -51,6 +52,12 @@ export interface ActivityNodeGeo {
    * elseif hexagon's slots (`FtileIfLongHorizontal.java:172-173,186`).
    */
   ifLabelRole?: 'test' | 'full';
+  /** isw-T2-act F5: an `'if-label'`/`'if-own-label'` whose block carries the
+   *  style `wrapWidth()` -- `ConditionalBuilder`'s test and SIMPLE_LINE
+   *  branch labels, the switch's and horizontal elseif's tests
+   *  (`ConditionalBuilder.java:120-121`, `FtileFactoryDelegatorSwitch.java:134`,
+   *  `FtileIfLongHorizontal.java:174`). Absent: `LineBreakStrategy.NONE`. */
+  wrapped?: true;
   /**
    * unwind2-S11: an `'if-label'` in a north/south/west/east slot of a
    * `FtileDiamondInside`/`FtileDiamondInside2`/`FtileDiamondSquare`, whose
@@ -88,6 +95,10 @@ export type CompositeUSymbol = 'package' | 'card' | 'rectangle';
 export interface ActivityEdgeGeo {
   points: Array<{ x: number; y: number }>;
   label?: string;
+  /** isw-T2-act F5: {@link label} is a `Branch#getTextBlock` block, wrapped
+   *  at the arrow style's `wrapWidth()` (`Branch.java:248-258`) -- a switch
+   *  case's in/out label. Absent: `create7`'s `LineBreakStrategy.NONE`. */
+  labelWrapped?: true;
   /**
    * How {@link label} is positioned, mirroring `Snake#withLabel`'s two
    * overloads (`ftile/Snake.java:124-136`) -- a pushed label carries
@@ -224,6 +235,13 @@ export interface SwimlaneGeo {
    */
   display?: string;
   /**
+   * The LAST lane only: `getHalfMissingSpace(n + 1)` (`Swimlanes.java:
+   * 436-449`), the appended special lane's half-space -- `5`, or more when
+   * its `""` title (one space at the title font) overflows `min`. The
+   * title band's right edge is that lane's translate (`:363`).
+   */
+  trailingHalfMissingSpace?: number;
+  /**
    * O (add2 T3i): `|#color|name|`'s own background -- `x`/`width` above
    * already span exactly the jar's background-rect bounds (verified
    * against `cejupe-34-muti621`'s oracle SVG: both divider lines land
@@ -290,4 +308,9 @@ export interface ActivityGeometry {
    *  `<$sprite>` resolves there too (`Theme#sprites`, `SkinParam.java:
    *  799-817`). */
   sprites?: SpriteRegistry;
+  /** isw-T2-act F1: the measurer the layout sized every text block with,
+   *  carried to the draw so `drawU` re-measures through the SAME bounder
+   *  (`Swimlanes.java:239,246` -- `ug.getStringBounder()` sizes and draws).
+   *  Optional only for hand-built `ActivityGeometry` test literals. */
+  measurer?: StringMeasurer;
 }

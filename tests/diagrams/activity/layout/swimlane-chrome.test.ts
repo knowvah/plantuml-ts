@@ -40,6 +40,15 @@ describe('computeSwimlaneChrome — bandX', () => {
     expect(band.width).toBeCloseTo(285.5, 9);
   });
 
+  it("extends the right edge by the special lane's overflowing half-space", () => {
+    // isw-T2-act F3: `swimlanesSpecial().last().getTranslate().getDx() - 2*5
+    // - 1` (`Swimlanes.java:363`); a 7.475 trailing half-space (the `""`
+    // title, 4.95 at 18pt, over min 0) moves it 2.475 right of the 5 case.
+    const last = { ...lanes[2]!, trailingHalfMissingSpace: 7.475 };
+    const band = computeSwimlaneChrome([lanes[0]!, lanes[1]!, last], 17.5, 18, 200, 16).swimlaneBand!;
+    expect(band.width).toBeCloseTo(304.975, 9);
+  });
+
   it('uses the upstream inset of 5', () => {
     expect(SWIMLANE_BAND_INSET_X).toBe(5);
   });
@@ -66,22 +75,24 @@ function chromeOf(name: string): { band: number[]; dividers: readonly number[] }
   return { band: [b.x, b.width], dividers: c.dividerXs };
 }
 
+// isw-T2-act: band/divider values re-read from one-JVM seam-#4 renders of
+// each fixture (`scripts/oracle-render.sh`, 2026-10-09).
 describe('swimlaneWidth fixtures — band and dividers vs the jar', () => {
   it.each(['swimw-100.puml', 'swimw-400.puml', 'swimw-9000.puml', 'swimw-same.puml', 'swimw-block-same.puml'])(
     '%s: floored lanes put the band at 16 and the first divider at 33',
     (name) => {
-      expect(chromeOf(name)).toEqual({ band: [16, 302.5], dividers: [33, 80.675, 272.5, 319.5] });
+      expect(chromeOf(name)).toEqual({ band: [16, 319], dividers: [33, 80.675, 289, 336] });
     },
   );
 
   it.each(['swimw-absent.puml', 'swimw-0.puml'])('%s: unfloored, band == first divider', (name) => {
-    expect(chromeOf(name)).toEqual({ band: [20, 256.163], dividers: [20, 58.338, 239.163, 277.163] });
+    expect(chromeOf(name)).toEqual({ band: [20, 275.137], dividers: [20, 58.338, 255.662, 293.662] });
   });
 
   it('wide titles: band == first divider', () => {
     expect(chromeOf('swimw-wide-titles.puml')).toEqual({
-      band: [20, 520.188],
-      dividers: [20, 296.288, 332.963, 541.188],
+      band: [20, 577.112],
+      dividers: [20, 330.938, 367.613, 595.637],
     });
   });
 });

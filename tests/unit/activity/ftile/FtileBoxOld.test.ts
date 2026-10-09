@@ -10,6 +10,13 @@
  * sits at the origin (the golden's root box is drawn at (10, 20)).
  * Alignment arms: authored `fixtures/root-align-*-min-width.puml`, rendered
  * with `scripts/oracle-render.sh` and dumped with `DumpProbe walk`.
+ *
+ * isw-T2-act: every expectation re-read from the seam-#4 jar -- the
+ * re-captured `test-results/dot-cache/mindmap/<slug>/in.svg` and one-JVM
+ * `scripts/oracle-render.sh` renders of `fixtures/*.puml`. Spaces now
+ * measure, and each width is float-rounded (`Rectangle2D.Float`,
+ * mirrored by `DeterministicMeasurer`), so a box width is `2 * Padding +
+ * Math.fround(text)` and the jar prints it to three decimals.
  */
 import { describe, expect, it } from 'vitest';
 import { FtileBoxOld } from '../../../../src/diagrams/activity/ftile/vertical/FtileBoxOld.js';
@@ -62,6 +69,9 @@ function rootStyle(extra: DumpedStyle['values'] = {}, snames: readonly string[] 
 
 const measurer = new DeterministicMeasurer();
 
+/** `2 * Padding(10) + ` the float-rounded text width. */
+const boxWidth = (text: number): number => 20 + Math.fround(text);
+
 function stringBounder(): StringBounder {
   const driver = {
     calculateDimension: (font: { family: string; size: number }, text: string) => measurer.measure(text, font),
@@ -94,17 +104,17 @@ const STROKE = 'style="stroke:#181818;stroke-width:1.5;" rx="12.5" ry="12.5"/>';
 describe('FtileBoxOld.createMindMap — plain root (bepinu-34-tiji715 "first node")', () => {
   const box = mindMapBox(rootStyle(), Display.create('first node'));
 
-  it('sizes the box as the jar: 73.6375 x 34 (LayoutProbe phalanxElongation; thickness 54 - 2*10)', () => {
+  it('sizes the box as the jar: 77.487 x 34 (LayoutProbe phalanxElongation; thickness 54 - 2*10)', () => {
     const dim = box.calculateDimension(stringBounder());
-    expect(dim.getWidth()).toBeCloseTo(73.6375, 10);
+    expect(dim.getWidth()).toBe(boxWidth(57.4875));
     expect(dim.getHeight()).toBe(34);
   });
 
   it('draws the rect and text of in.svg (box at (10,20) there)', () => {
     const svg = svgOf(box);
-    expect(elements(svg, 'rect')).toEqual([`<rect x="0" y="0" width="73.637" height="34" fill="#F1F1F1" ${STROKE}`]);
+    expect(elements(svg, 'rect')).toEqual([`<rect x="0" y="0" width="77.487" height="34" fill="#F1F1F1" ${STROKE}`]);
     expect(elements(svg, 'text')).toEqual([
-      '<text x="10" y="20.889" fill="#000" font-size="14" textLength="53.637">first node</text>',
+      '<text x="10" y="20.889" fill="#000" font-size="14" textLength="57.487">first node</text>',
     ]);
   });
 });
@@ -114,17 +124,17 @@ describe('FtileBoxOld.createMindMap — [#color] root (zenigi-93-gofu307 "*[#dd0
   const back = HColorSet.instance().getColor('#dd01a4');
   const box = mindMapBox(rootStyle(), Display.create('one'), Colors.empty().add(ColorType.BACK, back));
 
-  it('sizes the box as the jar: 43.3625 x 34', () => {
+  it('sizes the box as the jar: 43.362 x 34', () => {
     const dim = box.calculateDimension(stringBounder());
-    expect(dim.getWidth()).toBeCloseTo(43.3625, 10);
+    expect(dim.getWidth()).toBe(boxWidth(23.3625));
     expect(dim.getHeight()).toBe(34);
   });
 
   it('fills with the SkinParamColors BACK colour (style.eventuallyOverride(specBack))', () => {
     const svg = svgOf(box);
-    expect(elements(svg, 'rect')).toEqual([`<rect x="0" y="0" width="43.363" height="34" fill="#DD01A4" ${STROKE}`]);
+    expect(elements(svg, 'rect')).toEqual([`<rect x="0" y="0" width="43.362" height="34" fill="#DD01A4" ${STROKE}`]);
     expect(elements(svg, 'text')).toEqual([
-      '<text x="10" y="20.889" fill="#000" font-size="14" textLength="23.363">one</text>',
+      '<text x="10" y="20.889" fill="#000" font-size="14" textLength="23.362">one</text>',
     ]);
   });
 });
@@ -132,18 +142,18 @@ describe('FtileBoxOld.createMindMap — [#color] root (zenigi-93-gofu307 "*[#dd0
 describe('FtileBoxOld.createMindMap — multi-line node (rinamu-56-tabi421 "Linux Mint / Open Source")', () => {
   const box = mindMapBox(rootStyle(), Display.create('Linux Mint', 'Open Source'));
 
-  it('sizes the box as the jar: 98.575 x 48 (phalanxThickness 68 - 2*10)', () => {
+  it('sizes the box as the jar: 102.425 x 48 (phalanxThickness 68 - 2*10)', () => {
     const dim = box.calculateDimension(stringBounder());
-    expect(dim.getWidth()).toBeCloseTo(98.575, 10);
+    expect(dim.getWidth()).toBe(boxWidth(82.425));
     expect(dim.getHeight()).toBe(48);
   });
 
   it('draws the rect and both lines of in.svg (box at (262.267,20) there)', () => {
     const svg = svgOf(box);
-    expect(elements(svg, 'rect')).toEqual([`<rect x="0" y="0" width="98.575" height="48" fill="#F1F1F1" ${STROKE}`]);
+    expect(elements(svg, 'rect')).toEqual([`<rect x="0" y="0" width="102.425" height="48" fill="#F1F1F1" ${STROKE}`]);
     expect(elements(svg, 'text')).toEqual([
-      '<text x="10" y="20.889" fill="#000" font-size="14" textLength="59.938">Linux Mint</text>',
-      '<text x="10" y="34.889" fill="#000" font-size="14" textLength="78.575">Open Source</text>',
+      '<text x="10" y="20.889" fill="#000" font-size="14" textLength="63.787">Linux Mint</text>',
+      '<text x="10" y="34.889" fill="#000" font-size="14" textLength="82.425">Open Source</text>',
     ]);
   });
 });
@@ -155,21 +165,21 @@ describe('FtileBoxOld — horizontal alignment arms with MinimumWidth 200 (autho
     HorizontalAlignment: [align, null, 326],
   });
 
-  it('RIGHT: 200 wide box, text shifted by SheetBlock2 to x=136.363 (jar 146.363 at box x=10)', () => {
+  it('RIGHT: 200 wide box, text shifted by SheetBlock2 to x=132.513 (jar 142.513 at box x=10)', () => {
     const box = mindMapBox(rootStyle(extra('right'), snames), Display.create('first node'));
     expect(box.calculateDimension(stringBounder()).getWidth()).toBe(200);
     const svg = svgOf(box);
     expect(elements(svg, 'rect')).toEqual([`<rect x="0" y="0" width="200" height="34" fill="#F1F1F1" ${STROKE}`]);
     expect(elements(svg, 'text')).toEqual([
-      '<text x="136.363" y="20.889" fill="#000" font-size="14" textLength="53.637">first node</text>',
+      '<text x="132.513" y="20.889" fill="#000" font-size="14" textLength="57.487">first node</text>',
     ]);
   });
 
-  it('CENTER: 200 wide box, text at x=73.181 (jar 83.181 at box x=10)', () => {
+  it('CENTER: 200 wide box, text at x=71.256 (jar 81.256 at box x=10)', () => {
     const box = mindMapBox(rootStyle(extra('center'), snames), Display.create('first node'));
     const svg = svgOf(box);
     expect(elements(svg, 'text')).toEqual([
-      '<text x="73.181" y="20.889" fill="#000" font-size="14" textLength="53.637">first node</text>',
+      '<text x="71.256" y="20.889" fill="#000" font-size="14" textLength="57.487">first node</text>',
     ]);
   });
 });
@@ -180,7 +190,7 @@ describe('FtileBoxOld.createWbs', () => {
     const atomOps = atomOpsFor(style);
     const box = FtileBoxOld.createWbs(style, testSkinParam(atomOps), Display.create('first node'), atomOps);
     expect(box).toBeInstanceOf(FtileBoxOld);
-    expect(box.calculateDimension(stringBounder()).getWidth()).toBeCloseTo(73.6375, 10);
+    expect(box.calculateDimension(stringBounder()).getWidth()).toBe(boxWidth(57.4875));
     expect(box.toString()).toBe(Display.create('first node').toString());
   });
 
@@ -189,7 +199,7 @@ describe('FtileBoxOld.createWbs', () => {
     const atomOps = atomOpsFor(style);
     const box = FtileBoxOld.createWbs(style, testSkinParam(atomOps), Display.create('first node'), atomOps);
     const sb = stringBounder();
-    expect(box.calculateDimension(sb).getWidth()).toBeCloseTo(73.6375, 10);
+    expect(box.calculateDimension(sb).getWidth()).toBe(boxWidth(57.4875));
     box.setMinimumWidth(120);
     box.setMinimumWidth(90);
     expect(box.calculateDimension(sb).getWidth()).toBe(120);
@@ -210,24 +220,24 @@ describe('FtileBoxOld — AbstractFtile slice (AbstractFtile.java:64-82)', () =>
 
 describe('FtileBoxOld — MyStencil and a null alignment (authored fixtures)', () => {
   it('a creole "----" rule spans the box via MyStencil 0 .. box width (fixtures/root-horizontal-line.puml)', () => {
-    // jar: rect 96.3 x 58 at (10,20); <line x1="10" y1="49" x2="106.3" y2="49" style="stroke:#181818;stroke-width:1;"/>
+    // jar: rect 100.15 x 58 at (10,20); <line x1="10" y1="49" x2="110.15" y2="49" style="stroke:#181818;stroke-width:1;"/>
     const box = mindMapBox(rootStyle(), Display.create('first', '----', 'second node'));
     const dim = box.calculateDimension(stringBounder());
-    expect([dim.getWidth(), dim.getHeight()]).toEqual([96.3, 58]);
+    expect([dim.getWidth(), dim.getHeight()]).toEqual([boxWidth(80.15), 58]);
     const svg = svgOf(box);
     expect(svg.match(/<line[^>]*\/>/g)).toEqual([
-      '<line x1="0" y1="29" x2="96.3" y2="29" style="stroke:#181818;stroke-width:1;"/>',
+      '<line x1="0" y1="29" x2="100.15" y2="29" style="stroke:#181818;stroke-width:1;"/>',
     ]);
     expect(elements(svg, 'text')).toEqual([
-      '<text x="10" y="20.889" fill="#000" font-size="14" textLength="22.488">first</text>',
-      '<text x="10" y="44.889" fill="#000" font-size="14" textLength="76.3">second node</text>',
+      '<text x="10" y="20.889" fill="#000" font-size="14" textLength="22.487">first</text>',
+      '<text x="10" y="44.889" fill="#000" font-size="14" textLength="80.15">second node</text>',
     ]);
   });
 
   it('HorizontalAlignment foo: no drawU arm matches, so only the box is drawn (fixtures/root-align-invalid.puml)', () => {
     const style = rootStyle({ HorizontalAlignment: ['foo', null, 326] }, [...ROOT_SNAMES, 'rootNode']);
     const svg = svgOf(mindMapBox(style, Display.create('first node')));
-    expect(elements(svg, 'rect')).toEqual([`<rect x="0" y="0" width="73.637" height="34" fill="#F1F1F1" ${STROKE}`]);
+    expect(elements(svg, 'rect')).toEqual([`<rect x="0" y="0" width="77.487" height="34" fill="#F1F1F1" ${STROKE}`]);
     expect(elements(svg, 'text')).toEqual([]);
   });
 });

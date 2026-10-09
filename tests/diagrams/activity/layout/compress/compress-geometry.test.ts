@@ -13,8 +13,9 @@ import type { EdgeMeta } from '../../../../../src/diagrams/activity/layout/swiml
 import type { Reservation } from '../../../../../src/diagrams/activity/layout/hexagon-reservations.js';
 import type { StringBounder } from '../../../../../src/diagrams/activity/tiles/tile.js';
 import { resolveTheme } from '../../../../../src/core/theme.js';
+import { measured } from '../../../../unit/activity/measured-theme.js';
 
-const theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
+const theme = measured({ ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' });
 const bounder: StringBounder = { getDimension: (text: string) => ({ width: text.length * 6, height: 11 }) };
 
 function node(id: string, kind: string, x: number, y: number, width: number, height: number): ActivityNodeGeo {

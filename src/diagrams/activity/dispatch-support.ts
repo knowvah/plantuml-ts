@@ -87,8 +87,10 @@ export const RE_ACTIVITY_LIST = /^[-*]\s?(.*?)\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?
  *   -- the full `(INCOMING)? backward : LABEL ; <<stereo>>* (OUTCOMING)?`
  *   shape; both decoration groups are `RegexOptional`.
  */
+// isw-T2-act F2: `":" LABEL(.*?) ";"` with no space leaf on either side of
+// LABEL (`CommandBackward3.java:77-79`), so its spaces stay in the label.
 export const RE_BACKWARD =
-  /^(?:\(([^)]*)\)\s*)?backward\s*:\s*(.+?)\s*;\s*(<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*(?:\(([^)]*)\))?\s*$/i;
+  /^(?:\(([^)]*)\)\s*)?backward\s*:(.*?);\s*(<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*(?:\(([^)]*)\))?\s*$/i;
 
 /** `backward:` with no closing `;` on the same line -- the multiline
  *  opener `node-dispatch.ts#tryBackward` checks after {@link RE_BACKWARD}
@@ -363,12 +365,6 @@ export const RE_REPEAT_HEAD = new RegExp('^repeat(?:\\s+(.*))?$', 'i');
  *  additionally contains `<`/`>`, which the project's regex-hoisting
  *  convention also requires building from a string. */
 export const RE_REPEAT_INLINE_TERMINATOR = new RegExp(';\\s*(?:<<[^>]*>>)?\\s*(?:#\\w+)?\\s*$');
-
-/** Literal `\n` (backslash-n) escape inside an action label -> real
- *  newline. Hoisted alongside the constants above for the same lizard
- *  brace-depth workaround (empirically, this one also contributed to the
- *  false truncation even though it carries none of `$<>{}`). */
-export const RE_ESCAPED_NEWLINE = /\\n/g;
 
 /**
  * `!pragma NAME [VALUE]` (D12/T1p-b, `dispatch-common-commands.ts#tryPragma`)

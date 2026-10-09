@@ -78,11 +78,13 @@ describe('withWarningBanner (DiagramChromeFactory.java:176-266)', () => {
     expect(bannerH).toBe(20);
     expect(out.body).toContain('cy="45"');
     expect(out.height).toBe(Math.floor(30 + bannerH + 20 + 1));
-    // the banner (210.25 + 20) is wider than the 40px body: the stack takes
-    // its width, and the rect spans it less 10 (java:234).
-    expect(out.preChromeWidth).toBeCloseTo(230.25, 9);
-    expect(out.body).toContain('width="220.25" height="15"');
-    expect(out.width).toBe(251); // floor(230.25 + 2 * 10 + 1)
+    // the banner (229.5 + 20) is wider than the 40px body: the stack takes
+    // its width, and the rect spans it less 10 (java:234). isw-T2-act: values
+    // from a one-JVM seam-#4 jar render of `skinparam padding 15` + `start`
+    // (`textLength="229.5"`, `<rect ... width="239.5" height="15"`, svg 270).
+    expect(out.preChromeWidth).toBeCloseTo(249.5, 9);
+    expect(out.body).toContain('width="239.5" height="15"');
+    expect(out.width).toBe(270); // floor(249.5 + 2 * 10 + 1)
   });
 });
 

@@ -7,9 +7,10 @@ import type { ActivityDiagramAST, ActivityIf } from '../../../../src/diagrams/ac
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../../src/core/measurer.js';
+import { withActivityMeasurer } from '../../../../src/diagrams/activity/activity-string-bounder.js';
 
 const measurer = new FormulaMeasurer();
-const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
+const theme: Theme = withActivityMeasurer({ ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' }, measurer);
 const emptyAst: ActivityDiagramAST = { nodes: [], swimlanes: [] };
 const bounder: StringBounder = { getDimension: (t: string) => ({ width: t.length * 7, height: 14 }) };
 // T1a (D2): see `edge-draw-order.test.ts`'s own identical comment -- the

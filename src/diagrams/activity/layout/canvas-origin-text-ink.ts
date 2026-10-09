@@ -15,9 +15,8 @@ import { edgeLabelBlockSize } from './compress/edge-label-anchor.js';
 import { floorActionLineHeight } from '../tiles/gtile-action.js';
 import { ifLabelBlock } from '../activity-text-sheet-diamond.js';
 import { klimtStringBounder } from '../activity-creole-sheet.js';
-import { WidthTableMeasurer } from '../../../core/measurer.js';
+import { activityMeasurer } from '../activity-string-bounder.js';
 
-const INK_MEASURER = new WidthTableMeasurer();
 import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from './snake-text-position.js';
 import type { MutableInkBounds } from './canvas-origin.js';
@@ -55,7 +54,7 @@ export function extendForIfLabelText(acc: MutableInkBounds, node: ActivityNodeGe
   const fontSize = fc.size;
   const pad = theme.padding ?? 0;
   const width = tb
-    .calculateDimension(klimtStringBounder(INK_MEASURER, { family: fc.family, size: fontSize }))
+    .calculateDimension(klimtStringBounder(activityMeasurer(theme), { family: fc.family, size: fontSize }))
     .getWidth();
   acc.minX = Math.min(acc.minX, node.x + pad);
   acc.maxX = Math.max(acc.maxX, node.x + width - pad);
@@ -122,7 +121,7 @@ export function extendForEdgeLabelText(acc: MutableInkBounds, edge: ActivityEdge
   // (`SheetBlock1.java:209-210`), so the LEFT block's ink spans
   // `[x + p, x + width - p]`.
   const pad = theme.padding ?? 0;
-  const dim = edgeLabelBlockSize(edge.label, theme);
+  const dim = edgeLabelBlockSize(edge.label, theme, undefined, edge.labelWrapped === true);
   const position = getTextBlockPosition(edge.points, dim, edge.labelAlign ?? DEFAULT_LABEL_ALIGN);
   const baselineY = position.y + pad + fontSize * TITLE_ASCENT_FRACTION;
   acc.minX = Math.min(acc.minX, position.x + pad);

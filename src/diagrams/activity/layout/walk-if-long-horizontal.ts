@@ -25,6 +25,7 @@ import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import type { HlineCandidate } from './swimlane-hline.js';
 import { compositeLaneGate, nonTranslatableConnectionDrawn } from './swimlane-connection-gate.js';
 import { applyOutLabel } from './tile-layout-inlabel.js';
+import { wrappedSpread } from './diamond-wrap.js';
 
 /** `arrowHorizontalAlignment()`'s own resolved default (`AbstractFtile
  *  .java:108-110`, `AlignmentParam.java:42`) -- the alignment BOTH
@@ -112,6 +113,7 @@ function pushDiamondOwnLabel(ctx: LhCtx, diamond: GtileDiamondInside2, origin: G
       width: diamond.hexWidth,
       height: diamond.hexHeight,
       label: diamond.label,
+      ...wrappedSpread(diamond),
     },
     ctx.myLane,
   );

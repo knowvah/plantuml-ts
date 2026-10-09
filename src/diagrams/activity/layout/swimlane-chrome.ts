@@ -9,6 +9,7 @@
 
 import type { SwimlaneBandGeo, SwimlaneDividerY, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { Reservation } from './hexagon-reservations.js';
+import { SWIMLANE_HALF_MISSING_SPACE } from './swimlane-context.js';
 
 export interface SwimlaneChrome {
   swimlaneBand: SwimlaneBandGeo;
@@ -51,7 +52,10 @@ export const SWIMLANE_BAND_INSET_X = 5;
  * content width are 0 and its actual width is `min`), and its divider's
  * line sits at `xpos_n + x1_n + min/2` = the last lane's `x + width`
  * (`swimlane-lane-origins.ts#trailingDivider`). The right edge is
- * therefore `last.x + last.width - 1`, independent of `bandX`.
+ * therefore `last.x + last.width + x2_n - 6`, independent of `bandX`;
+ * `x2_n = getHalfMissingSpace(n + 1)` is the special lane's
+ * (`trailingHalfMissingSpace`), 5 only when its `""` title -- one space at
+ * the title font -- fits `min` (isw-T2-act F3).
  * Verified against the pinned jar's `pakema-21-xema183` (band 20 / 348.275,
  * dividers 20 .. 369.275) and the add4-T1b `swimw-*` A/B fixtures (floored:
  * band 16 / 302.5, dividers 33 .. 319.5).
@@ -75,8 +79,10 @@ export function computeSwimlaneChrome(
   const first = swimlanes[0]!;
   const last = swimlanes[swimlanes.length - 1]!;
   const x = bandX ?? first.x;
+  const x2n = last.trailingHalfMissingSpace ?? SWIMLANE_HALF_MISSING_SPACE;
+  const right = last.x + last.width + x2n - 2 * SWIMLANE_BAND_INSET_X - 1 + SWIMLANE_BAND_INSET_X;
   return {
-    swimlaneBand: { x, y: baseY, width: last.x + last.width - 1 - x, height: titlesHeight },
+    swimlaneBand: { x, y: baseY, width: right - x, height: titlesHeight },
     swimlaneDividerY: { y1: baseY, y2: contentBottomY },
   };
 }

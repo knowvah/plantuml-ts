@@ -24,13 +24,11 @@
  *   -- same `+4`/`-14` shapes for the split's in/out connectors.
  */
 
-import type { StringBounder } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
 import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { GPoint } from '../tiles/points.js';
-import { swimlaneTitleText } from './swimlane-title.js';
+import { SPECIAL_SWIMLANE_DISPLAY, swimlaneTitleWidth } from './swimlane-title.js';
 import { laneReservationItems, shiftLaneReservations } from './swimlane-reservation-lane.js';
-import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import {
   computeLaneWidths,
   measureLaneExtents,
@@ -322,7 +320,6 @@ export interface PlacementInput {
    *  (`Swimlanes.java:337`'s divider draw takes no `dy`). Mission
    *  `activity-klimt-compress` T3. */
   readonly baseY: number;
-  readonly bounder: StringBounder;
   readonly theme: Theme;
   /** `|name|LABEL` displays keyed by lane name (`ast.swimlaneDisplays`). */
   readonly laneDisplays?: Readonly<Record<string, string>> | undefined;
@@ -339,7 +336,6 @@ interface MeasureLanesInput {
   readonly edges: readonly ActivityEdgeGeo[];
   readonly edgeMeta: readonly EdgeMeta[];
   readonly laneNames: readonly string[];
-  readonly bounder: StringBounder;
   readonly theme: Theme;
   readonly laneDisplays?: Readonly<Record<string, string>> | undefined;
   readonly walkReservations?: readonly Reservation[];
@@ -391,26 +387,32 @@ function laneItemsOf(node: ActivityNodeGeo, laneNames: readonly string[]): LaneI
  * each lane's content extent and title width, then resolves the lane
  * width floor once so both `computeLaneWidths` and the origin loop reuse
  * the SAME resolved value (upstream does too, `:399` then `:409,441`).
- * SLURL: title width uses `resolveInlineLinks`, not raw `|[[url]]|`
- * markup (`getTitle`, `Swimlanes.java:285-293`); `nesozi-09-zezu092`.
+ * Title widths are `getTitle(swimlane)`'s creole block
+ * (`Swimlanes.java:442`, `swimlane-title.ts`) -- a `[[url label]]` measures
+ * its label (SLURL, `nesozi-09-zezu092`); `specialTitleWidth` is the
+ * appended `""` lane's (`:116-123`), which `getHalfMissingSpace(n + 1)`
+ * reads (isw-T2-act F3).
  */
-function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth>; min: number } {
-  const { nodes, edges, edgeMeta, laneNames, bounder, theme, laneDisplays } = input;
+function measureLanes(input: MeasureLanesInput): {
+  widths: Map<string, LaneWidth>;
+  min: number;
+  specialTitleWidth: number;
+} {
+  const { nodes, edges, edgeMeta, laneNames, theme, laneDisplays } = input;
   const items: LaneItem[] = nodes.flatMap((n) => laneItemsOf(n, laneNames));
   items.push(...laneReservationItems(input.walkReservations ?? []));
   const extents = measureLaneExtents(items, sameLaneEdges(edges, edgeMeta), laneNames);
 
-  const titleFontSize = swimlaneTitleFontSize(theme);
   const titleWidths = new Map<string, number>();
-  for (const name of laneNames)
-    titleWidths.set(name, bounder.getDimension(swimlaneTitleText(name, laneDisplays?.[name]), titleFontSize).width);
+  for (const name of laneNames) titleWidths.set(name, swimlaneTitleWidth(laneDisplays?.[name] ?? name, theme));
 
   // `skinparam swimlaneWidth` (`Swimlanes.java:399`); absent reads `0`,
   // not the `"same"` sentinel (`SkinParam.java:1121-1130`).
   const contentWidths = [...extents.values()].map((e) => e.maxX - e.minX);
   const min = resolveSwimlaneMinWidth(contentWidths, theme.swimlaneWidth ?? 0);
 
-  return { widths: computeLaneWidths(extents, titleWidths, min), min };
+  const specialTitleWidth = swimlaneTitleWidth(SPECIAL_SWIMLANE_DISPLAY, theme);
+  return { widths: computeLaneWidths(extents, titleWidths, min), min, specialTitleWidth };
 }
 
 /** Each lane's placement delta and geometry, carrying its `|name|LABEL`
@@ -456,8 +458,8 @@ export function placeSwimlanes(input: PlacementInput): PlacementResult {
     return { nodes: [...nodes], edges: [...edges], edgeMeta: [...edgeMeta], swimlanes: [], reservations };
   }
 
-  const { widths, min } = measureLanes(input);
-  const { origins, dividerReservations } = computeLaneOrigins(laneNames, widths, min, baseX);
+  const { widths, min, specialTitleWidth } = measureLanes(input);
+  const { origins, dividerReservations } = computeLaneOrigins(laneNames, widths, { min, specialTitleWidth }, baseX);
 
   const { deltas, swimlanes } = laneGeosOf(laneNames, origins, laneDisplays);
 

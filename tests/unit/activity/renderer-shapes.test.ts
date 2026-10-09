@@ -37,8 +37,10 @@ import { resolveTheme, deepMergeTheme, defaultTheme } from '../../../src/core/th
 import type { Theme } from '../../../src/core/theme.js';
 import { ACTIVITY_FONT_COLOR } from '../../../src/diagrams/activity/activity-text-style.js';
 import { measureLineWidth } from '../../../src/diagrams/activity/activity-text-placement.js';
+import { measured } from './measured-theme.js';
+const measuredMerge = (...a: Parameters<typeof deepMergeTheme>): Theme => measured(deepMergeTheme(...a));
 
-const theme = resolveTheme('default');
+const theme = measured(resolveTheme('default'));
 
 /** add4-T3e: the SDL/UML outlines are dispatched by `renderNode` from the
  *  node's stereotype (`BoxStyle.fromString`, `BoxStyle.java:126-133`); these
@@ -88,7 +90,7 @@ describe('renderStart', () => {
     // only shortens an ALREADY-hex string; it does not resolve a raw CSS
     // name like "blue". `renderStart` pre-resolves via `resolvePaint` so
     // this stays byte-identical to what `circle()` produced.
-    const activityTheme = deepMergeTheme(defaultTheme, {
+    const activityTheme = measuredMerge(defaultTheme, {
       colors: {
         ...defaultTheme.colors,
         graph: {
@@ -105,7 +107,7 @@ describe('renderStart', () => {
   // never the fixed light-mode `CIRCLE_INK` constant -- jar-verified
   // against `levuma-67-cego489`'s own dark-mode SVG (`stroke="#DDD"`).
   it('strokes in `theme.colors.graph.activity.circleInk` when set, not the fixed light default', () => {
-    const activityTheme = deepMergeTheme(defaultTheme, {
+    const activityTheme = measuredMerge(defaultTheme, {
       colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, activity: { circleInk: '#DDDDDD' } } },
     });
     const svg = renderStart(makeNode({ kind: 'start' }), activityTheme);
@@ -167,7 +169,7 @@ describe('renderStop', () => {
     // here made `stop` wrongly red under `skinparam ActivityEndColor red`
     // with no `ActivityStopColor` set (T2f mechanism 7, jar-verified on
     // `poraji-17-goke817`: `stop` stays `#222`).
-    const activityTheme = deepMergeTheme(defaultTheme, {
+    const activityTheme = measuredMerge(defaultTheme, {
       colors: {
         ...defaultTheme.colors,
         graph: { ...defaultTheme.colors.graph, activity: { endColor: 'yellow' } },
@@ -184,7 +186,7 @@ describe('renderStop', () => {
   // jar-verified against `levuma-67-cego489`'s own dark-mode SVG (both
   // ellipses `fill`/`stroke` `#DDD`).
   it('both ellipses follow `theme.colors.graph.activity.circleInk` when set', () => {
-    const activityTheme = deepMergeTheme(defaultTheme, {
+    const activityTheme = measuredMerge(defaultTheme, {
       colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, activity: { circleInk: '#DDDDDD' } } },
     });
     const svg = renderStop(makeNode({ kind: 'stop', width: 22, height: 22 }), activityTheme);
@@ -563,9 +565,11 @@ describe('T4 — text colour cascade (D3)', () => {
 // T2f — `AtomTable` grid lines for an all-table-rows action label
 // (`AtomTable.java:150-158`). Jar-verified against `niletu-83-lego826`/
 // `activity-creole-table` (`:|Creole Table Line1|\n|Line2|;`, box
-// x=16 y=16 width=114.875 height=48): 3 horizontal rules (row boundaries
-// at y=28/40/52) + 2 vertical rules (x=26/120.875) bounding the single
-// column.
+// x=16 y=16 width=121.475 height=48): 3 horizontal rules (row boundaries
+// at y=28/40/52) + 2 vertical rules (x=26/127.475) bounding the single
+// column. isw-T2-act: values re-read from the seam-#4 re-capture,
+// test-results/dot-cache/activity/niletu-83-lego826/in.svg (the two
+// spaces now measure 3.3 each at 12pt).
 // ---------------------------------------------------------------------------
 
 describe('renderAction — AtomTable grid (T2f)', () => {
@@ -575,15 +579,15 @@ describe('renderAction — AtomTable grid (T2f)', () => {
       label: '|Creole Table Line1|\n|Line2|',
       x: 16,
       y: 16,
-      width: 114.875,
+      width: 121.475,
       height: 48,
     });
     const svg = renderAction(node, theme);
-    expect(svg).toContain('x1="26" y1="28" x2="120.875" y2="28"');
-    expect(svg).toContain('x1="26" y1="40" x2="120.875" y2="40"');
-    expect(svg).toContain('x1="26" y1="52" x2="120.875" y2="52"');
+    expect(svg).toContain('x1="26" y1="28" x2="127.475" y2="28"');
+    expect(svg).toContain('x1="26" y1="40" x2="127.475" y2="40"');
+    expect(svg).toContain('x1="26" y1="52" x2="127.475" y2="52"');
     expect(svg).toContain('x1="26" y1="28" x2="26" y2="52"');
-    expect(svg).toContain('x1="120.875" y1="28" x2="120.875" y2="52"');
+    expect(svg).toContain('x1="127.475" y1="28" x2="127.475" y2="52"');
     expect((svg.match(/<line/g) ?? []).length).toBe(5);
     expect(svg).toContain('>Creole Table Line1<');
     expect(svg).toContain('>Line2<');
