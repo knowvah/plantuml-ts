@@ -85,7 +85,7 @@ describe('description/layout.ts layoutDescription — edge-label font size (site
     // measurement, not the (now correct, but node-irrelevant) size-13
     // edge-label default.
     const expectedBodyAt14 = measurer.measure('can be used by a', { family: 'sans-serif', size: 14 }).width;
-    expect(expectedBodyAt14).toBeCloseTo(91.0875, 3);
+    expect(expectedBodyAt14).toBeCloseTo(106.4875, 3);
     expect(node!.width).toBeGreaterThanOrEqual(expectedBodyAt14);
   });
 });

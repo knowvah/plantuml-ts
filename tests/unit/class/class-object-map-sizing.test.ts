@@ -53,7 +53,7 @@ describe('measureObjectClassifier — plain object, no stereo/fields (beleso-08-
     const ast = makeAST([objectClassifier('k', 'Kannada : bambu')]);
     const geo = layoutClass(ast, theme, measurer);
     const c = classifierLeaves(geo.leaves)[0]!;
-    expect(c.width).toBeCloseTo(116.725, 3);
+    expect(c.width).toBeCloseTo(124.425, 3);
     expect(c.height).toBeCloseTo(34, 5);
   });
 });
@@ -74,7 +74,7 @@ describe('measureObjectClassifier — object with fields, no stereo (figeze-77-f
     ]);
     const geo = layoutClass(ast, theme, measurer);
     const c = classifierLeaves(geo.leaves)[0]!;
-    expect(c.width).toBeCloseTo(113.4125, 3);
+    expect(c.width).toBeCloseTo(121.1125, 3);
     expect(c.height).toBeCloseTo(54, 5);
     // header + 2 field rows, "name = value" text (no visibility icon)
     expect(c.rows).toHaveLength(3);
@@ -103,8 +103,8 @@ describe('measureObjectClassifier — object with fields, no stereo (figeze-77-f
     const c = classifierLeaves(geo.leaves)[0]!;
     const nameRow = c.rows[1]!;
     const idRow = c.rows[2]!;
-    expect(nameRow.width).toBeCloseTo(101.4125, 3);
-    expect(idRow.width).toBeCloseTo(42.525, 3);
+    expect(nameRow.width).toBeCloseTo(109.1125, 3);
+    expect(idRow.width).toBeCloseTo(50.225, 3);
     // title.height(18) + OBJECT_FIELD_MARGIN_Y(4) + baselineOffset(10.8889)
     // -- jar's y=39.8889 minus rect y=7
     expect(nameRow.y).toBeCloseTo(32.8889, 3);
@@ -174,7 +174,7 @@ describe('measureObjectClassifier — 4 explicit-visibility field rows (nukera-0
     expect(ys[3]).toBeCloseTo(74.8889, 3);
     // every row shares the SAME textLength (identical post-strip text) --
     // 107.7125, the oracle's own value
-    for (const r of c.rows.slice(1)) expect(r.width).toBeCloseTo(107.7125, 3);
+    for (const r of c.rows.slice(1)) expect(r.width).toBeCloseTo(119.2625, 3);
   });
 });
 
@@ -551,13 +551,13 @@ describe('measureObjectClassifier — skinparam tabSize field-text expansion (nu
   }
 
   it(
-    'sizes the box to the oracle width (157.5125 x 82), tabSize 20 folding to the ' +
-      'default 8-space (width-0) fallback -> fontSize*4 = 56px tab stop',
+    'sizes the box to the oracle width (137.9125 x 82), tabSize 20 folding to the ' +
+      'default 8-space tab stop = 8 x 3.85 = 30.8px (a space has width now)',
     () => {
       const themeWithTabSize = { ...theme, tabSize: 20 };
       const geo = layoutClass(tabAst(), themeWithTabSize, measurer);
       const c = classifierLeaves(geo.leaves)[0]!;
-      expect(c.width).toBeCloseTo(157.5125, 3);
+      expect(c.width).toBeCloseTo(137.9125, 3);
       expect(c.height).toBeCloseTo(82, 5);
     },
   );
@@ -573,15 +573,16 @@ describe('measureObjectClassifier — skinparam tabSize field-text expansion (nu
       expect(c.rows).toHaveLength(6);
       const [, r1, r2, r3, r5, r6] = c.rows;
       for (const r of [r1!, r2!, r3!, r5!]) {
-        expect(r.indent).toBeCloseTo(62, 3); // OBJECT_FIELD_MARGIN_X(6) + tabStop(56)
+        expect(r.indent).toBeCloseTo(36.8, 3); // OBJECT_FIELD_MARGIN_X(6) + tabStop(30.8); jar nufoju-44 text x 43.8 = rect x 7 + 36.8
         expect(r.width).toBeCloseTo(33.5125, 3);
       }
       expect(r1!.text).toBe('field1');
       expect(r5!.text).toBe('field5');
       expect(r6!.text).toBe('field6');
-      // field5's own tab stop (56) + field6's own post-field5 tab stop (56
-      // more, jar's `ceil(33.5125/56)*56`) = 112 relative -> +6 margin = 118
-      expect(r6!.indent).toBeCloseTo(118, 3);
+      // field5's own tab stop (30.8) + field6's own post-field5 tab stop (jar's
+      // `ceil(33.5125/30.8)*30.8` = 61.6) = 92.4 relative -> +6 margin = 98.4
+      // (jar nufoju-44: field6 text x 105.4 = rect x 7 + 98.4)
+      expect(r6!.indent).toBeCloseTo(98.4, 3);
       // field5/field6 share the SAME row y (one source line, two runs)
       expect(r5!.y).toBeCloseTo(r6!.y, 6);
     },
@@ -589,12 +590,12 @@ describe('measureObjectClassifier — skinparam tabSize field-text expansion (nu
 
   it(
     'falls back to the upstream default (8) when `skinparam tabSize` is unset -- ' +
-      'SAME tab stop (56px), since 8 also folds to the width-0 fallback',
+      'SAME 8-space tab stop (30.8px) as tabSize 20, which folds to the default 8',
     () => {
       const geo = layoutClass(tabAst(), theme, measurer);
       const c = classifierLeaves(geo.leaves)[0]!;
-      expect(c.width).toBeCloseTo(157.5125, 3);
-      expect(c.rows[1]!.indent).toBeCloseTo(62, 3);
+      expect(c.width).toBeCloseTo(137.9125, 3);
+      expect(c.rows[1]!.indent).toBeCloseTo(36.8, 3);
     },
   );
 
@@ -643,15 +644,21 @@ describe('measureObjectClassifier — skinparam style strictuml underline (jotag
       const [nameRow, typeRow] = c.rows;
       expect(nameRow!.text).toBe('instance name');
       expect(nameRow!.underline).toBe(true);
-      expect(nameRow!.width).toBeCloseTo(87.15, 3);
-      expect(typeRow!.text).toBe(': type'); // leading space stripped
+      expect(nameRow!.width).toBeCloseTo(91, 3);
+      // New jar (test-results/dot-cache/object/jotaga-99-fatu830/in.svg): the
+      // type run is Display#underlinedName's group 2 `\s*:.+` = ' : type' (its
+      // leading space is KEPT, Display.java:471-479), drawn shifted right by one
+      // space (DriverTextSvg.java:118-124) with the TRIMMED textLength 34.125.
+      expect(typeRow!.text).toBe(' : type');
       expect(typeRow!.underline).toBeUndefined();
-      expect(typeRow!.width).toBeCloseTo(30.275, 3);
+      expect(typeRow!.width).toBeCloseTo(37.975, 3); // raw layout advance
+      expect(typeRow!.renderWidth).toBeCloseTo(34.125, 3);
+      expect(typeRow!.renderDx).toBeCloseTo(3.85, 3);
       expect(typeRow!.y).toBeCloseTo(nameRow!.y, 6);
-      // jar-verified: rect x=118.74 -> name text x=125.74 (indent 7), type
-      // text x=212.89 (indent 94.15 = 7 + 87.15, immediately adjacent)
+      // name text x = rect x + 7; the type run starts right after the 91px name
+      // (jar: 125.97 + 91 + 3.85 = 220.82 once renderDx is added)
       expect(nameRow!.indent).toBeCloseTo(7, 3);
-      expect(typeRow!.indent).toBeCloseTo(94.15, 3);
+      expect(typeRow!.indent).toBeCloseTo(98, 3);
     },
   );
 

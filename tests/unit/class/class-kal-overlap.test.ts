@@ -201,10 +201,12 @@ describe('computeKal at fixture level — ririlu-13-zipi740 (cdd4-T10)', () => {
     .map((b) => b!.x)
     .sort((a, b) => a - b);
 
+  // isw-T2-cls: jar x re-read from test-results/dot-cache/class/ririlu-13-zipi740/
+  // in.svg (oracle seam #4 v2): <rect x="434.765"/"500.04"/"543.527" y="54.81">.
   it("lands MoreComplex's three DOWN boxes on the jar's x", () => {
     expect(down).toHaveLength(3);
-    expect(down[0]!).toBeCloseTo(440.54, 2);
-    expect(down[1]!).toBeCloseTo(501.965, 2);
-    expect(down[2]!).toBeCloseTo(541.602, 2);
+    expect(down[0]!).toBeCloseTo(434.765, 2);
+    expect(down[1]!).toBeCloseTo(500.04, 2);
+    expect(down[2]!).toBeCloseTo(543.527, 2);
   });
 });

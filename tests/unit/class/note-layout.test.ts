@@ -699,12 +699,14 @@ describe('buildNoteGraphParts — item 35-note, MaximumWidth word-wrap (G2 N66)'
 
   // Jar-verified BYTE-EXACT against `rubecu-40-cixu870`'s real cached DOT
   // (`test-results/dot-cache/class/rubecu-40-cixu870/svek-1.dot`): the note
-  // node (`sh0007`) is `width=1.659375in height=0.861111in` -- 119.475 x
-  // 62.0 px (`* 72`, `core/graph-layout.ts#PX_PER_INCH`) -- via `element {
+  // node (`sh0007`) is `width=1.424653in height=1.041667in` -- 102.575 x
+  // 75.0 px (`* 72`, `core/graph-layout.ts#PX_PER_INCH`; re-captured under
+  // oracle seam #4 v2: with a real space width the text wraps to 5 lines,
+  // it was 119.475 x 62.0 / 4 lines) -- via `element {
   // MaximumWidth 100 } }` (ancestor cascade, NOT a `note {}` block).
   it(
-    'rubecu-40-cixu870: wraps to 4 lines, node dims BYTE-EXACT against the ' +
-      "jar's real cached DOT (119.475 x 62.0 px)",
+    'rubecu-40-cixu870: wraps to 5 lines, node dims BYTE-EXACT against the ' +
+      "jar's real cached DOT (102.575 x 75.0 px)",
     () => {
       const det = new DeterministicMeasurer();
       const theme = deepMergeTheme(defaultTheme, { colors: { graph: { noteCascadeMaximumWidth: 100 } } });
@@ -716,9 +718,9 @@ describe('buildNoteGraphParts — item 35-note, MaximumWidth word-wrap (G2 N66)'
       };
       const { measurements } = buildNoteGraphParts([n], theme, det, noAnchors);
       const m = measurements.get('__note_0')!;
-      expect(m.lines).toHaveLength(4);
-      expect(m.width).toBeCloseTo(119.475, 4);
-      expect(m.height).toBe(62);
+      expect(m.lines).toHaveLength(5);
+      expect(m.width).toBeCloseTo(102.575, 3);
+      expect(m.height).toBe(75);
     },
   );
 });

@@ -43,8 +43,9 @@ describe('T6FU: multi-line generic clause', () => {
   });
 
   it('measures each line on its own (no joined textLength)', () => {
-    // Jar: 114.75 / 125.4 / 98.1 at 12pt italic.
-    expect(generic.map((t) => t.length)).toEqual([114.75, 125.4, 98.1]);
+    // Jar (zubevi-64-fume582 in.svg, re-captured under oracle seam #4 v2 where a
+    // space is 3.3 wide at 12pt): 121.35 / 132 / 101.4 at 12pt italic.
+    expect(generic.map((t) => t.length)).toEqual([121.35, 132, 101.4]);
   });
 
   it('centres every line on the widest one (HorizontalAlignment.CENTER)', () => {

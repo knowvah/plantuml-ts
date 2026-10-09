@@ -47,10 +47,11 @@ describe('T17 (M8) — computeMultiplicityAttrs additive case: multiplicity wins
       font,
       measurer,
     );
-    // jar: taillabel box width 127.319 (DeterministicMeasurer.measure confirms
-    // the SAME value -- see class-edge-label-anchor.test.ts's own citation).
+    // jar (re-captured, oracle seam #4 v2): taillabel `<text textLength=
+    // "141.619">` / svek-1.dot label TABLE WIDTH="141", headlabel 21.612 / "21"
+    // (a space is no longer 0 wide: 127.319 -> 141.619).
     expect(attrs.tailLabel).toBe('owner which is very long');
-    expect(attrs.tailLabelWidth).toBe(127); // Math.floor(127.31875)
+    expect(attrs.tailLabelWidth).toBe(141); // Math.floor(141.619)
     expect(attrs.headLabel).toBe('0..n');
     expect(attrs.headLabelWidth).toBe(21); // Math.floor(21.6125)
   });

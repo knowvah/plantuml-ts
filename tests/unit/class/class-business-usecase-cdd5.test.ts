@@ -47,6 +47,7 @@ describe('business usecase', () => {
     const first = texts.find((t) => t.label === 'test 15');
     const second = texts.find((t) => t.label === 'multiline with alias');
     expect(first?.x).toBeGreaterThan(second!.x + 30);
-    expect(first?.mid).toBeCloseTo(second!.mid, 3);
+    // x and textLength are both printed at 3 dp, so the centres agree to ~5e-4
+    expect(first?.mid).toBeCloseTo(second!.mid, 2);
   });
 });

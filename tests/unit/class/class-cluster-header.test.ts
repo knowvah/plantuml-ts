@@ -125,20 +125,23 @@ describe('visible stereotype labels (CucaDiagram.java:596-620)', () => {
 describe('ClusterHeader#getStereoBlock dimensions', () => {
   const ast = parse(XENERE);
 
-  it('pack1: legend (63 = 38+1+24) over «st» (14), width 204.6+1+24', () => {
+  // isw-T2-cls: all numbers below re-read from the re-captured xenere-07-kuji864
+  // (oracle seam #4 v2): legend rect width 227.7 (text 217.7 + 10), svek-1.dot
+  // title tables WIDTH="252", pack1 folder 83.61..351.61 (268 wide).
+  it('pack1: legend (63 = 38+1+24) over «st» (14), width 227.7+1+24', () => {
     const h = buildClusterHeaderStereo(ns(ast, 'pack1'), ast, defaultTheme, measurer);
-    expect(h?.width).toBeCloseTo(229.6, 6);
+    expect(h?.width).toBeCloseTo(252.7, 4);
     expect(h?.height).toBe(77);
   });
 
   it('pack1 body: legend rect at margin 12, «st» centred below the legend', () => {
     const h = buildClusterHeaderStereo(ns(ast, 'pack1'), ast, defaultTheme, measurer)!;
-    // Jar box x=83.61 w=245 draws the block at 4 + (245-229.6)/2 = 11.7
-    // (USymbolFolder#asBig), so the rect's local x is 107.31-83.61-11.7 = 12.
-    expect(h.body).toContain('<rect x="12" y="12" width="204.6" height="38"');
-    // «st»: x (229.6-26.425)/2 = 101.5875; baseline 63 + 14 - descent.
+    // Jar box x=83.61 w=268 draws the block at 4 + (268-252.7)/2 = 11.65
+    // (USymbolFolder#asBig), so the rect's local x is 107.26-83.61-11.65 = 12.
+    expect(h.body).toContain('<rect x="12" y="12" width="227.7" height="38"');
+    // «st»: x (252.7-26.425)/2 = 113.1375; baseline 63 + 14 - descent.
     const st = /<text x="([\d.]+)" y="([\d.]+)"[^>]*font-style="italic"[^>]*>«st»<\/text>/.exec(h.body);
-    expect(Number(st?.[1])).toBeCloseTo(101.5875, 6);
+    expect(Number(st?.[1])).toBeCloseTo(113.1375, 4);
     expect(Number(st?.[2])).toBeCloseTo(73.889, 6);
   });
 
@@ -151,21 +154,21 @@ describe('ClusterHeader#getStereoBlock dimensions', () => {
 describe('ClusterHeader title table (ClusterHeader.java:78-94) -> svek-1.dot', () => {
   const ast = parse(XENERE);
 
-  it('pack1: WIDTH 229, HEIGHT 86', () => {
+  it('pack1: WIDTH 252, HEIGHT 86', () => {
     const header = buildClusterHeaderStereo(ns(ast, 'pack1'), ast, defaultTheme, measurer);
     const dims = namespaceTitleTableDims('pack1', defaultTheme, measurer, undefined, header);
-    expect(Math.floor(dims.width)).toBe(229);
+    expect(Math.floor(dims.width)).toBe(252);
     expect(dims.height).toBe(86);
   });
 
-  it('pack2 (rectangle <<ddd>>): WIDTH 229, HEIGHT 72', () => {
+  it('pack2 (rectangle <<ddd>>): WIDTH 252, HEIGHT 72', () => {
     const header = buildClusterHeaderStereo(ns(ast, 'pack2'), ast, defaultTheme, measurer);
     const dims = namespaceTitleTableDims('pack2', defaultTheme, measurer, 'rectangle', header);
-    expect(Math.floor(dims.width)).toBe(229);
+    expect(Math.floor(dims.width)).toBe(252);
     expect(dims.height).toBe(72);
   });
 
-  it('sijoba pack2 (no stereotype): WIDTH 229, HEIGHT 58', () => {
+  it('sijoba pack2 (no stereotype): WIDTH 252, HEIGHT 58', () => {
     const sij = parse([
       'package pack2 {',
       'legend',
@@ -176,7 +179,7 @@ describe('ClusterHeader title table (ClusterHeader.java:78-94) -> svek-1.dot', (
     ]);
     const header = buildClusterHeaderStereo(ns(sij, 'pack2'), sij, defaultTheme, measurer);
     const dims = namespaceTitleTableDims('pack2', defaultTheme, measurer, undefined, header);
-    expect(Math.floor(dims.width)).toBe(229);
+    expect(Math.floor(dims.width)).toBe(252);
     expect(dims.height).toBe(58);
   });
 });
@@ -200,20 +203,20 @@ describe('draw sites place the header block (USymbolFolder / USymbolRectangle #a
     };
   }
 
-  it('folder: legend rect at (107.31, 40), «st» at x 196.897 after the title', () => {
-    const svg = renderNamespaceFolder(geoFor('pack1', { x: 83.61, y: 6, width: 245, height: 174 }), theme, measurer);
-    const [rx, ry] = xyOf(svg, 'rect', 'width="204.6" height="38"');
-    expect(rx).toBeCloseTo(107.31, 6);
+  it('folder: legend rect at (107.26, 40), «st» at x 208.398 after the title', () => {
+    const svg = renderNamespaceFolder(geoFor('pack1', { x: 83.61, y: 6, width: 268, height: 174 }), theme, measurer);
+    const [rx, ry] = xyOf(svg, 'rect', 'width="227.7" height="38"');
+    expect(rx).toBeCloseTo(107.26, 4);
     expect(ry).toBeCloseTo(40, 6);
     expect(svg.indexOf('>pack1<')).toBeLessThan(svg.indexOf('«st»'));
     const st = /<text x="([\d.]+)" y="([\d.]+)"[^>]*>«st»/.exec(svg);
-    expect(Number(st?.[1])).toBeCloseTo(196.8975, 3);
+    expect(Number(st?.[1])).toBeCloseTo(208.398, 3);
     expect(Number(st?.[2])).toBeCloseTo(101.889, 6);
   });
 
-  it('rectangle USymbol: legend rect at (372.31, 34), «ddd» then pack2 centred below it', () => {
+  it('rectangle USymbol: legend rect at (395.26, 34), «ddd» then pack2 centred below it', () => {
     const svg = renderNamespaceUSymbol(
-      geoFor('pack2', { x: 352.61, y: 20, width: 245, height: 160 }),
+      geoFor('pack2', { x: 375.61, y: 20, width: 268, height: 160 }),
       theme,
       measurer,
       {
@@ -223,21 +226,23 @@ describe('draw sites place the header block (USymbolFolder / USymbolRectangle #a
         fontColor: '#000000',
       },
     )!;
-    const [rx, ry] = xyOf(svg, 'rect', 'width="204.6" height="24"');
-    expect(rx).toBeCloseTo(372.31, 6);
+    const [rx, ry] = xyOf(svg, 'rect', 'width="227.7" height="24"');
+    expect(rx).toBeCloseTo(395.26, 4);
     expect(ry).toBeCloseTo(34, 6);
     expect(svg).not.toContain('<!--');
     expect(svg.indexOf('«ddd»')).toBeLessThan(svg.indexOf('>pack2<'));
     const [dx, dy] = xyOf(svg, 'text', '>«ddd»');
-    expect(dx).toBeCloseTo(455.641, 2);
+    expect(dx).toBeCloseTo(490.141, 2);
     expect(dy).toBeCloseTo(81.889, 6);
-    expect(xyOf(svg, 'text', '>pack2')).toEqual([456.429, 95.889]);
+    expect(xyOf(svg, 'text', '>pack2')).toEqual([490.929, 95.889]);
   });
 
   it('packageStyle rect: stereo block at y+2, title pushed down by its height', () => {
-    const svg = renderNamespaceRect(geoFor('pack1', { x: 0, y: 0, width: 245, height: 174 }), theme, measurer);
-    const [rx, ry] = xyOf(svg, 'rect', 'width="204.6" height="38"');
-    expect(rx).toBeCloseTo(19.7, 6);
+    const svg = renderNamespaceRect(geoFor('pack1', { x: 0, y: 0, width: 268, height: 174 }), theme, measurer);
+    // x = (268 - 252.7)/2 + 12 (same USymbolRectangle#asBig formula as before,
+    // with the new 252.7 block; no jar fixture draws packageStyle rect here).
+    const [rx, ry] = xyOf(svg, 'rect', 'width="227.7" height="38"');
+    expect(rx).toBeCloseTo(19.65, 4);
     expect(ry).toBeCloseTo(14, 6);
     const title = /<text x="[\d.]+" y="([\d.]+)"[^>]*>pack1/.exec(svg);
     expect(Number(title?.[1])).toBeCloseTo(77 + 12.889, 6);

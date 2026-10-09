@@ -57,9 +57,12 @@ describe('enhanced-body blank rows (A2s R2d)', () => {
     const rows = rowsParts(c.enhancedBody!.parts).at(-1)!.rows;
     expect(baseRows).toHaveLength(1);
     expect(rows).toHaveLength(2);
-    // ...that is empty, width 0, one standard row-pitch below its neighbor.
+    // ...that is empty, one standard row-pitch below its neighbor. Its width is
+    // a lone " " atom (StripeSimple#getAtoms, StripeSimple.java:123-126:
+    // `if (atoms.size() == 0) atoms.add(createLegacy(" ", ...))`), i.e. one
+    // 14pt space = 3.85 now that a space has width.
     expect(rows[1]!.text).toBe('');
-    expect(rows[1]!.width).toBe(0);
+    expect(rows[1]!.width).toBeCloseTo(3.85, 4);
     const pitch = rows[1]!.y - rows[0]!.y;
     expect(pitch).toBeGreaterThan(0);
     // Total node height grows by exactly that row pitch.

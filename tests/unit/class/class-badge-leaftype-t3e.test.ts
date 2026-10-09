@@ -148,9 +148,11 @@ describe('doboco-09-doba683 — dataclass badge exact scrape', () => {
     );
     const snippet = badgeSnippet(svg);
     expect(snippet).toBeDefined();
-    // jar-scraped: `<ellipse cx="69.388" cy="25" ... fill="#7E57C2"/>`.
-    expect(snippet).toMatchObject({ cx: '69.388', cy: '25', fill: '#7E57C2' });
-    expect(snippet!.d).toBe(badgeGlyphPath('dataclass', 69.388, 25));
+    // jar-scraped (unknown/doboco-09-doba683 in.svg, re-captured under oracle
+    // seam #4 v2; was 69.388 while a space measured 0):
+    // `<ellipse cx="73.238" cy="25" ... fill="#7E57C2"/>`.
+    expect(snippet).toMatchObject({ cx: '73.238', cy: '25', fill: '#7E57C2' });
+    expect(snippet!.d).toBe(badgeGlyphPath('dataclass', 73.238, 25));
   });
 });
 

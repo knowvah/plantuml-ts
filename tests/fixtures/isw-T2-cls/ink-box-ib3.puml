@@ -1,0 +1,6 @@
+@startuml
+skinparam packageFontSize 40
+package "Line one\nsecond" {
+class foo
+}
+@enduml

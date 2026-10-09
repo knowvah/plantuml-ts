@@ -53,12 +53,13 @@ describe("measureUsecaseOrActor routes through the description engine's faithful
     };
     const measured = measureUsecaseOrActor(classifier, fontSpec, measurer);
 
-    // Literal numbers captured from a real run (jiti probe, 2026-08-02) --
-    // these are the SAME numbers leaf-sizing-widen-routing.test.ts (T1)
-    // pins for the identical display/font via measureUsecaseOrActorLeaf,
-    // confirming the class engine now derives the identical figure.
-    expect(measured.width).toBe(103.01505037879433);
-    expect(measured.height).toBe(25.79898987322333);
+    // Jar numbers (tests/fixtures/isw-T2-cls/usecase-hello.svg, `usecase
+    // "Hello World" as u`, oracle seam #4 v2): the ellipse is rx 53.371 x ry
+    // 13.074, i.e. 106.742 x 26.148 (it was 103.015 x 25.799 while a space was
+    // 0 wide). leaf-sizing-widen-routing.test.ts (T1) pins the same figures for
+    // the identical display/font via measureUsecaseOrActorLeaf.
+    expect(measured.width).toBeCloseTo(106.742, 3);
+    expect(measured.height).toBeCloseTo(26.148, 3);
 
     // Equals the description engine's own entry point for the same input --
     // proves the ROUTE, not just a coincidentally-matching literal.

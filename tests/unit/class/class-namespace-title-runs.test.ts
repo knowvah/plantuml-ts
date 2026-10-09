@@ -80,8 +80,12 @@ describe('namespaceTitleWidth', () => {
     expect(namespaceTitleWidth(measurer, defaultTheme, 'foo')).toBeCloseTo(19.425, 3);
   });
 
-  it('sums the bold-name run and the monospace fallback run (jar: 130.725 + 100.363)', () => {
-    expect(namespaceTitleWidth(measurer, defaultTheme, IMG_LABEL)).toBeCloseTo(130.725 + 100.363, 2);
+  // jabama-09-kago823 in.svg (re-captured, oracle seam #4 v2): the bold run
+  // `MyNamespaceName ` is 130.725 trimmed + 3.85 (its trailing space, which
+  // advances the pen), then the 104.213 monospace run at x 144.575; DOT
+  // WIDTH="238" = floor(238.788).
+  it('sums the bold-name run and the monospace fallback run (jar: 130.725 + 3.85 + 104.213)', () => {
+    expect(namespaceTitleWidth(measurer, defaultTheme, IMG_LABEL)).toBeCloseTo(130.725 + 3.85 + 104.213, 2);
   });
 });
 
@@ -92,7 +96,7 @@ describe('renderNamespaceTitleRuns', () => {
     expect(svg).toContain('<text x="10" y="18.889"');
     expect(svg).toContain('font-weight="700"');
     expect(svg).toContain('>MyNamespaceName</text>');
-    expect(svg).toContain('<text x="140.725"');
+    expect(svg).toContain('<text x="144.575"'); // jabama-09 in.svg: 10 + 130.725 + 3.85
     expect(svg).toContain('font-family="monospace"');
     // The fallback run's family is `monospace`/`courier` -- `emittedTextForm`
     // swaps its internal space for NBSP (U+00A0) at emit time
@@ -149,7 +153,7 @@ describe('namespaceTitleTableDims — cdd-T26 DOT-graph sizing', () => {
 
   it('sums the bold-name run and the monospace fallback run, not one raw bold measure', () => {
     const dims = namespaceTitleTableDims(IMG_LABEL, defaultTheme, measurer);
-    expect(dims.width).toBeCloseTo(130.725 + 100.363, 2);
+    expect(dims.width).toBeCloseTo(130.725 + 3.85 + 104.213, 2); // jabama-09 svek-1.dot WIDTH="238"
   });
 });
 
@@ -173,7 +177,7 @@ describe('namespaceTitleLines — cdd-T26 residual round (daxeno-00-kasu166)', (
   });
 
   it('sums per-line widths to the jar-verified block width (93.45, DOT WIDTH="93")', () => {
-    expect(namespaceTitleWidth(measurer, defaultTheme, DAXENO_LABEL)).toBeCloseTo(93.45, 2);
+    expect(namespaceTitleWidth(measurer, defaultTheme, DAXENO_LABEL)).toBeCloseTo(101.15, 2);
   });
 
   it('sums per-line heights to the jar-verified block height (18+14=32)', () => {
@@ -334,7 +338,7 @@ describe('namespace title creole (cdd5-T5c)', () => {
     const runs = namespaceTitleRuns(GUILLEMET_LABEL, defaultTheme);
     expect(runs).toHaveLength(1);
     expect(asText(runs[0]).text).toBe('«profile» profile');
-    expect(namespaceTitleWidth(measurer, defaultTheme, GUILLEMET_LABEL)).toBeCloseTo(91.875, 3);
+    expect(namespaceTitleWidth(measurer, defaultTheme, GUILLEMET_LABEL)).toBeCloseTo(95.725, 3);
   });
 
   it('draws the guillemet-managed text, not the raw label', () => {
@@ -344,7 +348,7 @@ describe('namespace title creole (cdd5-T5c)', () => {
       wtitle: getWTitle(measurer, defaultTheme, GUILLEMET_LABEL, 0),
     };
     const svg = renderNamespaceFolder(geo, scaleClassTheme(defaultTheme, 1), measurer);
-    expect(svg).toMatch(/<text x="10" y="18.889"[^>]*textLength="91.875">«profile» profile<\/text>/u);
+    expect(svg).toMatch(/<text x="10" y="18.889"[^>]*textLength="95.725">«profile» profile<\/text>/u);
   });
 
   it('keeps a [[url label]] run as a linked, underlined run', () => {

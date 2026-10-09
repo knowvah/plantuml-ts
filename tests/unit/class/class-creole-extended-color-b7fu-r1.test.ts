@@ -89,8 +89,8 @@ describe('cdd-B7FU-R1 — coloured underline/strike lines (ziripa-77-zizo842)', 
 
   test('`<u:#FF0000>` draws a shortened-stroke rule at baseline + size/14', () => {
     const a = lineAttrs('#F00');
-    expect(a.x1).toBeCloseTo(39.544, 3);
-    expect(a.x2).toBeCloseTo(61.156, 3);
+    expect(a.x1).toBeCloseTo(43.119, 3);
+    expect(a.x2).toBeCloseTo(64.731, 3);
     expect(a.y1).toBeCloseTo(81.54, 3);
     expect(a.y2).toBeCloseTo(81.54, 3);
     expect(a.strokeWidth).toBeCloseTo(0.464, 3);
@@ -98,8 +98,8 @@ describe('cdd-B7FU-R1 — coloured underline/strike lines (ziripa-77-zizo842)', 
 
   test('`<s:#00FFFF>` draws its rule ABOVE the baseline, at -size/4', () => {
     const a = lineAttrs('#0FF');
-    expect(a.x1).toBeCloseTo(137.775, 3);
-    expect(a.x2).toBeCloseTo(168.812, 3);
+    expect(a.x1).toBeCloseTo(155.65, 3);
+    expect(a.x2).toBeCloseTo(186.688, 3);
     expect(a.y1).toBeCloseTo(77.361, 3);
     expect(a.strokeWidth).toBeCloseTo(0.464, 3);
   });
