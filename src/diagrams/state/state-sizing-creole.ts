@@ -58,6 +58,7 @@ import {
   tokenizeOnTabs,
 } from '../../core/klimt/creole/legacy/AtomText.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
+import { driverTextPlacement } from '../../core/svg-text-font.js';
 import type { Theme } from '../../core/theme.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import type { StateTextLine } from './state-geo-types.js';
@@ -91,6 +92,13 @@ export interface StateTextRun {
    *  advance its preceding tab(s) consumed. jar-verified `lokija-02-dipe348`:
    *  `line2` drawn at x=68 (12 + 56), `line3` at x=124 (12 + 112). */
   readonly dx?: number;
+  /** `DriverTextSvg#draw`'s leading-space `x` shift (`DriverTextSvg.java:
+   *  118-124`): one space width per leading space of the token. The ADVANCE
+   *  stays the untrimmed {@link width} (`AtomText.java:222-231`). */
+  readonly drawDx?: number;
+  /** The emitted `textLength`: the width of the TRIMMED text
+   *  (`DriverTextSvg.java:126`). Absent = the run draws {@link width}. */
+  readonly drawWidth?: number;
   readonly bold: boolean;
   readonly italic: boolean;
   readonly underline: boolean;
@@ -193,11 +201,31 @@ export function stateCreoleOpts(theme: Theme, wrap: boolean): StateCreoleOpts {
   };
 }
 
-function toRun(run: CreoleTextRun, text: string, width: number, dx: number): StateTextRun {
+/** `DriverTextSvg#draw`'s preamble for one token (`:114-126`), via the shared
+ *  {@link driverTextPlacement}: `drawDx`/`drawWidth` only when they differ
+ *  from the plain advance. */
+function placeToken(text: string, width: number, measure: (s: string) => number): Partial<StateTextRun> {
+  if (text === '') return {};
+  const placed = driverTextPlacement(text, measure(' '));
+  const drawWidth = placed.text === text ? width : measure(placed.text);
+  return {
+    ...(placed.dx > 0 ? { drawDx: placed.dx } : {}),
+    ...(drawWidth !== width ? { drawWidth } : {}),
+  };
+}
+
+function toRun(
+  run: CreoleTextRun,
+  text: string,
+  width: number,
+  dx: number,
+  placement: Partial<StateTextRun> = {},
+): StateTextRun {
   return {
     text,
     width,
     ...(dx > 0 ? { dx } : {}),
+    ...placement,
     bold: run.style.bold,
     italic: run.style.italic,
     underline: run.style.underline,
@@ -235,7 +263,10 @@ function expandRun(run: CreoleTextRun, font: FontSpec, measurer: StringMeasurer,
   // (empty) text — `AtomMath#calculateDimensionSlow` is the image's own box
   // (`AtomMath.java:64-71`). It carries no text, so it can carry no tab.
   if (run.image !== undefined) return [toRun(run, '', run.image.width, 0)];
-  if (!hasTabulation(run.text)) return [toRun(run, run.text, measure(run.text), 0)];
+  if (!hasTabulation(run.text)) {
+    const width = measure(run.text);
+    return [toRun(run, run.text, width, 0, placeToken(run.text, width, measure))];
+  }
   const tabStop = tabStopWidth(measure(tabStringFor(tabSizeNb)), runFont.size);
   const out: StateTextRun[] = [];
   let x = 0;
@@ -248,7 +279,7 @@ function expandRun(run: CreoleTextRun, font: FontSpec, measurer: StringMeasurer,
       continue;
     }
     const width = measure(token.text);
-    out.push(toRun(run, token.text, width, pendingDx));
+    out.push(toRun(run, token.text, width, pendingDx, placeToken(token.text, width, measure)));
     pendingDx = 0;
     x += width;
   }
