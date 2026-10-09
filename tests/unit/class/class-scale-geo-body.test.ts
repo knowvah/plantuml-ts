@@ -24,10 +24,10 @@ import type { JsonBodyItem } from '../../../src/diagrams/class/class-geo-types.j
 const THEME_FONT_SIZE = 14;
 
 describe('scaleEmbeddedBlock', () => {
-  it('multiplies y/width/height/sizingWidth/sizingHeight by k, leaves href untouched', () => {
-    const block: EmbeddedBlockGeo = { y: 4, width: 20, height: 10, href: 'data:x', sizingWidth: 18, sizingHeight: 8 };
+  it('multiplies y/width/height by k, leaves href untouched', () => {
+    const block: EmbeddedBlockGeo = { y: 4, width: 20, height: 10, href: 'data:x' };
     const scaled = scaleEmbeddedBlock(block, 0.5);
-    expect(scaled).toEqual({ y: 2, width: 10, height: 5, href: 'data:x', sizingWidth: 9, sizingHeight: 4 });
+    expect(scaled).toEqual({ y: 2, width: 10, height: 5, href: 'data:x' });
   });
 });
 
@@ -68,7 +68,7 @@ describe('scaleEnhancedBody — rows part', () => {
     const rows: EnhancedRowsPart = {
       kind: 'rows',
       rows: [{ text: 'a', y: 10, indent: 4 }],
-      embeds: [{ y: 2, width: 10, height: 6, sizingWidth: 10, sizingHeight: 6 }],
+      embeds: [{ y: 2, width: 10, height: 6 }],
       portMembers: [{ text: 'a', top: 10, height: 12 }],
     };
     const body: EnhancedBodyGeo = {
@@ -81,7 +81,7 @@ describe('scaleEnhancedBody — rows part', () => {
     const part = scaled.parts[0] as EnhancedRowsPart;
     expect(part.rows[0]!.y).toBe(5);
     expect(part.rows[0]!.fontSize).toBe(7);
-    expect(part.embeds![0]).toEqual({ y: 1, width: 5, height: 3, sizingWidth: 5, sizingHeight: 3 });
+    expect(part.embeds![0]).toEqual({ y: 1, width: 5, height: 3 });
     expect(part.portMembers![0]).toEqual({ text: 'a', top: 5, height: 6 });
     expect(scaled.portMembers[0]).toEqual({ text: 'a', top: 5, height: 6 });
   });

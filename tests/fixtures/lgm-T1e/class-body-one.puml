@@ -1,0 +1,8 @@
+@startuml
+class A {
+  field
+  {{
+  class B
+  }}
+}
+@enduml

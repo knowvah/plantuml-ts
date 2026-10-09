@@ -16,7 +16,8 @@ import type { MemberRenderAtom } from './class-member-creole.js';
 import type { NoteTableDraw } from './note-layout-measure-table.js';
 import { atomTextLineHeight } from './class-stereotype-layout.js';
 import { EmbeddedDiagram, type NestedDiagramRenderer } from '../../core/EmbeddedDiagram.js';
-import { getClassNestedDiagramRenderer } from './class-nested-diagram-renderer.js';
+import { getClassNestedDiagramRenderer, type RenderedEmbeddedImage } from './class-nested-diagram-renderer.js';
+import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
@@ -203,35 +204,11 @@ function noteLineHeightEntry(atom: MemberRenderAtom): { altitude: number; height
   return undefined;
 }
 
-/**
- * R2b: the nested-diagram seam left deliberately UNWIRED for measurement.
- * `EmbeddedDiagram#calculateDimensionSlow` (java:125-151) catches ANY
- * failure to produce the nested image/text-block and returns `new
- * XDimension2D(42, 42)` (java:150) — and that catch path is exactly what
- * the oracle jar itself takes in the deterministic DOT-dump environment
- * (jar-probe 2026-08-05: `PortableImageAwt.getWidth` NPEs from
- * `EmbeddedDiagram.calculateDimensionSlow`, and the resulting svek DOT is
- * byte-identical to the pinned `xadado-92-lazo250` golden: both embedded
- * notes 0.875in x 0.902778in == (42+6+15) x (42+13+2*5) px). Wiring a real
- * renderer here (full parse -> layout -> render recursion) is the
- * follow-up the seam exists for; when it lands, this constant stays as the
- * upstream-faithful failure fallback.
- */
-const UNWIRED_NESTED_RENDERER: NestedDiagramRenderer = {
-  render(): never {
-    throw new Error(
-      'note-layout-measure: no NestedDiagramRenderer wired for {{...}} embedded-diagram ' +
-        'note regions yet (see EmbeddedDiagram.ts#NestedDiagramRenderer, the seam to implement)',
-    );
-  },
-};
-
 /** `StringBounder` adapter over this module family's `StringMeasurer`, for
  *  `EmbeddedDiagram#calculateDimension`. Height mirrors `noteLineHeight`'s
- *  per-line rule (`max(size, 10)`). Today the unwired renderer throws
- *  before any text is measured (the 42x42 catch path, above); this adapter
- *  exists so a future wired renderer measures through the SAME width
- *  tables the rest of the note pipeline uses. */
+ *  per-line rule (`max(size, 10)`). The SVG-arm renderer below sizes from
+ *  the exported document, so no text is measured through it; the adapter is
+ *  `EmbeddedDiagram#calculateDimension`'s required argument. */
 function embeddedStringBounder(measurer: StringMeasurer): StringBounder {
   return {
     calculateDimension: (font, text) => new XDimension2D(measurer.measure(text, font).width, Math.max(font.size, 10)),
@@ -239,58 +216,20 @@ function embeddedStringBounder(measurer: StringMeasurer): StringBounder {
 }
 
 /**
- * CDD B7FU-R2: reconstructs the `@start<type>` / ... / `@end<type>` source
- * `EmbeddedDiagram.createAndSkip` (java:97-115) would hand a real renderer
- * — the SAME wrap `class-body-enhanced-embeds.ts#wrapEmbeddedSource`
- * builds for the class-body embed path, duplicated (not imported) per that
- * file's own module doc comment on cross-module-family duplication of a
- * small private helper (`renderer-note.ts#noteAtomDecoration`'s
- * precedent). `consumed` counts every line the counting iterator in
- * {@link consumeEmbeddedRow} yielded, INCLUDING the outermost closing
- * `}}` (the iterator must read it to detect the close) — so the body-only
- * slice drops it when present, matching `createAndSkip`'s own "consumed
- * but NOT appended to the collected block" rule for that one line.
- */
-function wrapEmbeddedNoteSource(
-  type: string,
-  blockLines: readonly string[],
-  start: number,
-  consumed: number,
-): string[] {
-  const body = blockLines.slice(start + 1, start + 1 + consumed);
-  const last = body.at(-1);
-  const hasCloser = last !== undefined && last.trim() === EmbeddedDiagram.EMBEDDED_END;
-  const inner = hasCloser ? body.slice(0, -1) : body;
-  return [`@start${type}`, ...inner, `@end${type}`];
-}
-
-/**
- * R2b/CDD B7FU-R2: consume one `{{ ... }}` embedded-diagram region starting
- * at `blockLines[start]` (whose `getEmbeddedType` already matched) and
- * build its single row. Region collection delegates to the REAL ported
- * `EmbeddedDiagram.createAndSkip` (java:97-115 — nesting-aware: an inner
+ * R2b/CDD B7FU-R2/lgm-T1e: consume one `{{ ... }}` embedded-diagram region
+ * starting at `blockLines[start]` (whose `getEmbeddedType` already matched)
+ * and build its single row. Region collection delegates to the REAL ported
+ * `EmbeddedDiagram.createAndSkip` (java:97-115 -- nesting-aware: an inner
  * `{{` increments depth, a bare `}}` decrements, only the outermost `}}`
  * is swallowed) via a counting iterator, so measurement consumes exactly
  * the lines upstream's creole parser would.
  *
- * The row's SIZING (`width`/`height`, i.e. the note box's own geometry
- * contribution) stays the java:150 `XDimension2D(42, 42)` catch fallback
- * (`UNWIRED_NESTED_RENDERER`, unconditionally) — jar-verified: xadado-92-
- * lazo250's own two note boxes (63x65, matching `(42+6+15) x (42+13+2*5)`
- * exactly) size THIS way even though their DRAWN images are real 122x124/
- * 105x96 renders, the identical sizing/drawing asymmetry `class-body-
- * enhanced-embeds.ts#renderEmbed`'s own doc comment documents for class
- * bodies (`EmbeddedDiagram.java:126-152`'s two independent `isSvg`-gated
- * branches: the LAYOUT pass's `StringBounder` never carries the SVG hint
- * in this port's deterministic oracle-render environment and always takes
- * the catch; the SEPARATE draw pass's real `UGraphic` does and always
- * succeeds). `atoms` carries ONE `'image'` atom when the registered
- * renderer (`class-nested-diagram-renderer.ts#getClassNestedDiagramRenderer`)
- * produces a real image — a render failure (no renderer registered, an
- * unsupported diagram type, e.g. no salt engine) leaves `atoms: []`,
- * matching the table/separator-row convention (nothing to draw) and
- * `EmbeddedDiagram.java:191-193`'s own independent `drawU` catch (draws
- * nothing on failure, logged not swallowed).
+ * The row's SIZING is `EmbeddedDiagram#calculateDimensionSlow`'s SVG arm
+ * (java:129-133): the exported nested document's `UImageSvg` width/height,
+ * which is also the DRAWN image's size. {@link nestedImageRenderer} runs the
+ * registered renderer once and keeps the image for the row's `'image'` atom.
+ * No renderer registered, or a render failure, takes java:148-152's catch:
+ * `(42, 42)` and `atoms: []` (nothing drawn, `drawU`'s own catch, java:191-193).
  */
 export function consumeEmbeddedRow(
   blockLines: readonly string[],
@@ -307,12 +246,13 @@ export function consumeEmbeddedRow(
       return step;
     },
   };
-  const embedded = EmbeddedDiagram.createAndSkip(type, counting, null, UNWIRED_NESTED_RENDERER);
+  const capture = nestedImageRenderer();
+  const embedded = EmbeddedDiagram.createAndSkip(type, counting, null, capture.renderer);
   const dim = embedded.calculateDimension(embeddedStringBounder(ctx.measurer));
   const nextIndex = start + consumed;
-  const atoms: readonly MemberRenderAtom[] = buildEmbeddedNoteImageAtom(
-    wrapEmbeddedNoteSource(type, blockLines, start, consumed),
-  );
+  const image = capture.image();
+  const atoms: readonly MemberRenderAtom[] =
+    image === undefined ? [] : [{ kind: 'image', href: image.href, width: image.width, height: image.height }];
   return {
     row: {
       text: blockLines.slice(start, nextIndex + 1).join('\n'),
@@ -324,18 +264,26 @@ export function consumeEmbeddedRow(
   };
 }
 
-/** Renders the embedded diagram's REAL `<image>`, independent of {@link
- *  consumeEmbeddedRow}'s own SIZING (which stays the fallback -- see that
- *  function's own doc comment). Logged-not-swallowed on failure, mirroring
- *  `class-body-enhanced-embeds.ts#renderEmbed`'s identical catch. */
-function buildEmbeddedNoteImageAtom(source: readonly string[]): readonly MemberRenderAtom[] {
-  const renderer = getClassNestedDiagramRenderer();
-  if (renderer === undefined) return [];
-  try {
-    const img = renderer.renderImage(source);
-    return [{ kind: 'image', href: img.href, width: img.width, height: img.height }];
-  } catch (err) {
-    console.error('consumeEmbeddedRow: nested-diagram render failed', err);
-    return [];
-  }
+/** A {@link NestedDiagramRenderer} over the class engine's registered
+ *  renderer that renders ONCE and remembers the image, so the row's size
+ *  (`EmbeddedDiagram#calculateDimension`) and its drawn `'image'` atom come
+ *  from the same render. Unregistered: throws into `EmbeddedDiagram`'s
+ *  java:148-152 catch. */
+function nestedImageRenderer(): { renderer: NestedDiagramRenderer; image: () => RenderedEmbeddedImage | undefined } {
+  let rendered: RenderedEmbeddedImage | undefined;
+  return {
+    renderer: {
+      render(source): TextBlock {
+        const registered = getClassNestedDiagramRenderer();
+        if (registered === undefined) throw new Error('note-layout-measure: no nested-diagram renderer registered');
+        const image = registered.renderImage(source);
+        rendered = image;
+        return {
+          calculateDimension: () => new XDimension2D(image.width, image.height),
+          drawU: () => undefined,
+        };
+      },
+    },
+    image: () => rendered,
+  };
 }

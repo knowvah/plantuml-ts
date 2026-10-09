@@ -8,6 +8,7 @@ import { resolveConditionalColor } from '../klimt/color/HColorSet.js';
 import type { AnnotationBoxStyle, AnnotationElement } from './annotation-style-types.js';
 import { expandGrayShorthand, resolveChromeColor } from './annotation-color.js';
 import { parseClockwise } from './annotation-clockwise.js';
+import { lineStyleDash } from '../style-line-style.js';
 
 type StyleSetter = (style: AnnotationBoxStyle, value: string) => void;
 
@@ -65,6 +66,13 @@ const STYLE_PROPERTY_SETTERS: ReadonlyArray<readonly [key: string, apply: StyleS
     (s, v) => {
       const n = Number.parseFloat(v.trim());
       if (Number.isFinite(n)) s.lineThickness = n;
+    },
+  ],
+  [
+    // lgm-T1a: `PName.LineStyle`, parsed the way `Style#getStroke` does.
+    'linestyle',
+    (s, v) => {
+      s.lineStyle = lineStyleDash(v.trim());
     },
   ],
   [

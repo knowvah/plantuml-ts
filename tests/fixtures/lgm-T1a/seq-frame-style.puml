@@ -1,0 +1,18 @@
+@startuml
+<style>
+mainframe {
+  BackGroundColor aliceblue
+  LineColor blue
+  LineThickness 2.0
+  LineStyle 2
+  FontColor blue
+  FontSize 15
+  FontStyle italic
+  Margin 30
+  Padding 20
+}
+</style>
+mainframe This is a **mainframe**
+participant alpha
+alpha -> beta : a1
+@enduml

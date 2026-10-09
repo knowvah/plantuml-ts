@@ -7,8 +7,8 @@
   "forkTreeIdenticalToUpstream": true,
   "plantumlVersion": "1.2026.8beta1",
   "seamBranch": "dot-output",
-  "seamCommit": "377fbd12dce2b91846c5e92bc9ba550b36f9d8db",
-  "seamCommitCount": 2,
+  "seamCommit": "37c07dce45a4b4935559c3d3d02352be5da79dba",
+  "seamCommitCount": 3,
   "patch": "patches/0001-oracle-dot-dump.patch",
   "dumpProperty": "PLANTUML_DUMP_DOT",
   "note": "Re-baseline DOT/SVG goldens whenever upstreamSha changes (sync master, rebase dot-output, rebuild jar). seamCommitCount is the number of oracle-only commits stacked on the pristine base -- build-oracle.sh derives the base as dot-output~seamCommitCount, so ADD TO IT when adding a seam commit or the drift guard silently stops working.",
@@ -26,5 +26,18 @@
       "why": "The checkout had drifted 59 commits ahead of this pin and a port task (S1L-f part 2b, SpriteSvg Math.ceil) implemented post-pin behaviour against a pre-pin oracle. Advancing the pin changed exactly 5 of 1194 DOT goldens; see plans/s1l-tail-fix/findings/svg-sprite-ceil-vs-floor.md.",
       "svgSuitesNotRebaselined": "The svg-* suites (402 byte-compared goldens) were NOT re-baselined with this bump -- two 'reduce SVG output size' commits are in range. Tracked as its own follow-up."
     }
-  }
+  },
+  "patches": [
+    "patches/0001-oracle-dot-dump.patch",
+    "patches/0002-oracle-deterministic-text.patch",
+    "patches/0003-oracle-svg-property.patch"
+  ],
+  "seamHistory": [
+    {
+      "seamCommit": "377fbd12dce2b91846c5e92bc9ba550b36f9d8db",
+      "seamCommitCount": 2,
+      "retiredOn": "2026-10-08",
+      "why": "seam #3 (lgm, user-ordered): the width-table bounder answered matchesProperty(SVG)=false, so EmbeddedDiagram.java:129-152 reserved 42x42 for every {{ }} diagram; re-captured the fixtures with embedded diagrams only (EmbeddedDiagram is the sole StringBounder caller of matchesProperty(SVG))."
+    }
+  ]
 }

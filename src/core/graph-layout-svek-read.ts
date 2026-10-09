@@ -184,6 +184,26 @@ export function svekEdge(
 }
 
 /**
+ * A cluster title's placed box as `DotStringFactory#solve` reads it
+ * (`:438-440`): `cluster.setTitlePosition(SvekUtils.getMinXY(pointsTitle))`
+ * over the polygon after the title colour, i.e. the `BGCOLOR` polygon of the
+ * `FIXEDSIZE` title table (`Cluster.java:274-276` stores it; graphviz draws the
+ * whole `w x h` table centred on the label position, `htmltable.c:519-554`).
+ * Same corner-then-recentre step as an edge label table (`svekLabel`).
+ */
+function svekClusterTitle(
+  frame: SvekFrame,
+  l: { x: number; y: number; width: number; height: number },
+): { x: number; y: number; width: number; height: number } {
+  return {
+    x: svgDouble(l.x - l.width / 2) + l.width / 2,
+    y: svekY(frame, l.y + l.height / 2) + l.height / 2,
+    width: l.width,
+    height: l.height,
+  };
+}
+
+/**
  * A cluster box as `DotStringFactory#solve` reads it (`:429-436`): min and max
  * of its parsed polygon, returned in the top-left/`width`/`height` shape of
  * the `yAxis:'down'` snapshot.
@@ -197,6 +217,6 @@ export function svekCluster(
   const top = svekY(frame, c.y + c.height);
   const bottom = svekY(frame, c.y);
   const out: LayoutSnapshot['clusters'][number] = { name: c.name, x: x1, y: top, width: x2 - x1, height: bottom - top };
-  if (c.label !== undefined) out.label = { ...c.label, y: frame.fullHeight - c.label.y };
+  if (c.label !== undefined) out.label = svekClusterTitle(frame, c.label);
   return out;
 }

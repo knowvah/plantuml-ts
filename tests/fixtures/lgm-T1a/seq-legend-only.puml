@@ -1,0 +1,6 @@
+@startuml
+legend left
+The legend
+end legend
+Alice -> Bob : hello
+@enduml

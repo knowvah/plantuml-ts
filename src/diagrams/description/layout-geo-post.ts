@@ -6,7 +6,7 @@
  * keep each module within the complexity budget.
  *
  * G1b/J1 write-set expansion (journaled, mechanism C): Phase 4 (the global
- * coordinate shift) moved to `layout-ink-shift.ts#computeInkShift` — it now
+ * coordinate shift) moved to `layout-ink-shift.ts#placeBody` — it now
  * needs the theme-aware draw primitives (`renderer-draw-sequence.ts`) to
  * mirror `SvekResult#calculateDimension`'s real ink-extent walk, which this
  * module deliberately stays free of (pure geometry only — see
@@ -25,6 +25,7 @@ import {
 } from './layout-helpers.js';
 import { clipSplineStart, clipSplineEnd } from '../../core/spline-clip.js';
 import { resolveOpaleConnector } from '../../core/svek/image/Opale.js';
+import { DescriptionSolveRects } from './frontier-cluster-bbox.js';
 
 /** One edge from the graphviz layout result. */
 export type ResultEdge = DotLayoutResult['edges'][number];
@@ -40,28 +41,27 @@ export interface EdgeMapping {
 
 // ── Phase 5: edge geo construction ──
 
+/** `lhead`/`ltail.getRectangleArea()` for a container endpoint: the port
+ *  cluster's rectangle as `manageEntryExitPoint` has left it
+ *  (`Cluster.java:430`), else the container's geo box. */
+function clipRectOf(g: DescriptionNodeGeo, solve: DescriptionSolveRects): Bbox {
+  return solve.rectangleAreaOf(g) ?? { x: g.x, y: g.y, width: g.width, height: g.height };
+}
+
 function clipEdgePoints(
   pts: Array<{ x: number; y: number }>,
   info: EdgeContainerEndpoints | undefined,
   geoIndex: Map<string, DescriptionNodeGeo>,
+  solve: DescriptionSolveRects,
 ): Array<{ x: number; y: number }> {
+  const tail = info?.fromContainerAstId === undefined ? undefined : geoIndex.get(info.fromContainerAstId);
+  const head = info?.toContainerAstId === undefined ? undefined : geoIndex.get(info.toContainerAstId);
+  // `SvekEdge.java:660-663`: the projection cluster's rectangle is reassigned
+  // before the compound clip reads `lhead`/`ltail`.
+  solve.manageEntryExitPoint([tail, head]);
   let result = pts;
-  const fromId = info?.fromContainerAstId;
-  if (fromId !== undefined) {
-    const g = geoIndex.get(fromId);
-    if (g !== undefined) {
-      const b: Bbox = { x: g.x, y: g.y, width: g.width, height: g.height };
-      result = clipSplineStart(result, b);
-    }
-  }
-  const toId = info?.toContainerAstId;
-  if (toId !== undefined) {
-    const g = geoIndex.get(toId);
-    if (g !== undefined) {
-      const b: Bbox = { x: g.x, y: g.y, width: g.width, height: g.height };
-      result = clipSplineEnd(result, b);
-    }
-  }
+  if (tail !== undefined) result = clipSplineStart(result, clipRectOf(tail, solve));
+  if (head !== undefined) result = clipSplineEnd(result, clipRectOf(head, solve));
   return result;
 }
 
@@ -168,12 +168,19 @@ export function buildEdgeGeos(
   hidden: ReadonlySet<string> = new Set(),
 ): DescriptionEdgeGeo[] {
   const byIdx = new Map<number, DescriptionEdgeGeo>();
-  for (const re of resultEdges) {
-    const linkIdx = m.dotEdgeToLinkIdx.get(re.id);
-    if (linkIdx === undefined) continue;
+  // `DotStringFactory#solve` walks `allLines()` in link-creation order
+  // (`:465-466`), and each line's `manageEntryExitPoint` mutates the cluster
+  // rectangle the next line clips against -- so the loop runs in link order,
+  // not in graphviz's edge order (lgm T1b).
+  const solve = new DescriptionSolveRects(m.geoIndex);
+  const inLinkOrder = resultEdges
+    .map((re) => ({ re, linkIdx: m.dotEdgeToLinkIdx.get(re.id) }))
+    .filter((e): e is { re: ResultEdge; linkIdx: number } => e.linkIdx !== undefined)
+    .sort((a, b) => a.linkIdx - b.linkIdx);
+  for (const { re, linkIdx } of inLinkOrder) {
     const link = links[linkIdx];
     if (link === undefined) continue;
-    const clipped = clipEdgePoints(re.points, m.edgeContainerEndpoints.get(re.id), m.geoIndex);
+    const clipped = clipEdgePoints(re.points, m.edgeContainerEndpoints.get(re.id), m.geoIndex, solve);
     const pts = clipped.map((p) => ({ x: p.x + m.dx, y: p.y + m.dy }));
     const geo = assembleEdgeGeo(linkIdx, link, pts, hidden);
     addEdgeLabel(geo, link, re, m.dx, m.dy);

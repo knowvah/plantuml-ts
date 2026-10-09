@@ -17,7 +17,6 @@ import { namespaceFolderTitle } from './class-namespace-title-table.js';
 import { buildClusterHeaderStereo } from './class-cluster-header.js';
 import { stereotypeLabelFields, splitStereotypeStyleTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
-import { drawnEnhancedBodyEmbeds } from './class-ink-box.js';
 import { namespaceDrawnInk } from './class-namespace-title-ink.js';
 import { degenerateNoteGeo, DEGENERATE_NEAR_MARGIN } from './class-geo-builders-degenerate-note.js';
 import { degenerateEnsureVisibleInk } from './class-geo-builders-degenerate-ink.js';
@@ -352,28 +351,15 @@ function buildDegenerateClassifierLeaf(classifier: Classifier, measured: Measure
  * `totalHeight`'s OWN numeric value is unchanged for every no-chrome
  * degenerate fixture (jar-verified unchanged: `bovuze-89-noja934`).
  *
- * CDD B7FU-R2 item (e): a body whose DRAWN embedded `{{ }}` diagram
- * overflows its own (42,42)-fallback-sized row reservation still pushes the
- * canvas out to its real footprint -- `SvgGraphics#svgImageUnsecure`'s own
- * `ensureVisible` calls (`klimt/drawing/svg/SvgGraphics.java:987-999`) track
- * a drawn embed's REAL absolute corner directly, `Math.floor(v)+1`,
- * independent of the `CucaDiagram`-margin recipe `applyClassDocumentMargin`
- * folds into `totalDims` -- so the embed's contribution is a MAX against
- * the box-driven total, never routed through that recipe a second time
- * (jar-verified `zikabo-17-gugi332`/`gadufu-56-votu808`). `drawnEnhanced
- * BodyEmbeds` returns `[]` (a no-op) for every classifier with no drawn
- * embed -- the overwhelming majority of degenerate diagrams.
- *
  * cdd5-T4a/cdd6-T2c (D4, degenerate-text-ensurevisible): the SAME
  * `ensureVisible` mechanism (`SvgGraphics.java:129-133`,`:757-758`) ALSO
  * tracks a `symbolInk`-bearing leaf's own real drawn corner -- e.g. a
  * `circle`/`() "name"` interface's label drawn BELOW its fixed 18x18 icon
  * (`measureCircleInterfaceInk`), or a `frame X [ {{ nested }} ]`'s embedded
  * raster -- which the box-only `rawDims` below never sees. Folded into the
- * SAME embed-right/embed-bottom max via {@link degenerateEnsureVisibleInk}
- * (NOT `symbolInk` directly -- see that function's own doc comment for why
- * the two disagree); `undefined` contributes `0`, a no-op matching
- * `drawnEnhancedBodyEmbeds`'s established contract. `rawWidth`/`rawHeight`
+ * SAME max via {@link degenerateEnsureVisibleInk} (NOT `symbolInk` directly --
+ * see that function's own doc comment for why the two disagree); `undefined`
+ * contributes `0`, a no-op. `rawWidth`/`rawHeight`
  * stay box-only: no fixture combines a title/chrome with a symbolInk
  * overflow, so extending them the same way would be unverified.
  */
@@ -383,15 +369,12 @@ function degenerateClassifierDims(geo: ClassifierGeo, measured: MeasuredClassifi
     height: measured.height + DEGENERATE_NEAR_MARGIN * 2,
   };
   const totalDims = applyClassDocumentMargin(rawDims);
-  const embeds = drawnEnhancedBodyEmbeds(geo);
-  const embedRight = Math.max(0, ...embeds.map((e) => e.x + e.width));
-  const embedBottom = Math.max(0, ...embeds.map((e) => e.y + e.height));
   const ensureVisible = degenerateEnsureVisibleInk(measured);
   const inkRight = ensureVisible !== undefined ? geo.x + ensureVisible.maxX : 0;
   const inkBottom = ensureVisible !== undefined ? geo.y + ensureVisible.maxY : 0;
   return {
-    totalWidth: Math.max(totalDims.width, Math.floor(embedRight) + 1, Math.floor(inkRight) + 1),
-    totalHeight: Math.max(totalDims.height, Math.floor(embedBottom) + 1, Math.floor(inkBottom) + 1),
+    totalWidth: Math.max(totalDims.width, Math.floor(inkRight) + 1),
+    totalHeight: Math.max(totalDims.height, Math.floor(inkBottom) + 1),
     rawWidth: rawDims.width,
     rawHeight: rawDims.height,
     leaves: [geo],

@@ -7,7 +7,7 @@
  */
 
 import type { UmlSource } from '../../core/block-extractor.js';
-import type { SyncPlugin, CompleteSvg } from '../../core/dispatcher.js';
+import type { SyncPlugin, CompleteSvg, RenderFragment } from '../../core/dispatcher.js';
 import { internalSpriteStoreFrom } from '../../core/internal-sprite-store.js';
 import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
 import type { DescriptionDiagramAST } from './ast.js';
@@ -15,7 +15,8 @@ import type { DescriptionGeometry } from './layout.js';
 import { seedOf } from '../../core/klimt/drawing/svg/svg-graphics-core.js';
 import { parseDescription } from './parser.js';
 import { layoutDescription } from './layout.js';
-import { renderDescription } from './renderer.js';
+import { renderDescription, unwrapKlimtSvg } from './renderer.js';
+import { isEmpty } from '../../core/annotations/index.js';
 
 /**
  * Reconstructs the raw `@start.../@end...` block text `UmlSource.seed()`
@@ -77,15 +78,26 @@ export const descriptionPlugin: SyncPlugin<DescriptionDiagramAST, DescriptionGeo
   // `SyncPlugin#render(geo, theme)` has no measurer parameter (the class
   // plugin carries it the same way, `class/index.ts#layoutSync`).
   layoutSync(ast, theme, measurer) {
-    return { ...layoutDescription(ast, theme, measurer), measurer };
+    const chromed = ast.annotations !== undefined && !isEmpty(ast.annotations);
+    return { ...layoutDescription(ast, theme, measurer), measurer, ...(chromed ? { chromed: true as const } : {}) };
   },
 
-  render(geo, theme): CompleteSvg {
+  render(geo, theme): CompleteSvg | RenderFragment {
     // klimt (renderDescription) emits a complete document itself and does
     // not route through the shared svgRoot assembler (decisions.md D2) —
     // its chrome, when T7 lands, applies inside its own klimt pipeline.
     const svg =
       geo.measurer === undefined ? renderDescription(geo, theme) : renderDescription(geo, theme, geo.measurer);
-    return { completeSvg: svg };
+    if (geo.chromed !== true) return { completeSvg: svg };
+    // lgm-T1c: chrome is composed around the margin-less block, so the klimt
+    // document is unwrapped here and declares that block -- see
+    // `DescriptionGeometry#chromed`.
+    return {
+      ...unwrapKlimtSvg(svg, theme.colors.background),
+      ...(geo.preChromeWidth !== undefined && geo.preChromeHeight !== undefined
+        ? { preChromeWidth: geo.preChromeWidth, preChromeHeight: geo.preChromeHeight }
+        : {}),
+      ...(geo.frameInk !== undefined ? { frameInk: geo.frameInk } : {}),
+    };
   },
 };

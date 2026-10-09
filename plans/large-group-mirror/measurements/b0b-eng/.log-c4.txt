@@ -1,0 +1,4 @@
+surveying 11 c4 fixtures (concurrency 6)
+[xmldom fatalError]	comment is not well-formed at position 1041 
+@#[line:1,col:1042]
+wrote plans/large-group-mirror/measurements/b0b-eng/parity-c4.json — {"conformant":1,"structural-match":0,"diverged":10,"errored":0,"timeout":0,"oracle-error":0}

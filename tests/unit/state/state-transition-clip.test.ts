@@ -156,6 +156,7 @@ function accumulator(label?: string): PassAccumulator {
   return {
     nodes: [],
     clusters: CLUSTERS_WITH_ANCHOR,
+    borderPointClusters: [],
     edges: [{ id: 'edge-0', from: zaentId('A'), to: 'Y' }],
     edgeSources: [{ t: { from: 'A', to: 'Y', ...(label !== undefined ? { label } : {}) }, edgeId: 'edge-0' }],
   };

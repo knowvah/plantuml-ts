@@ -181,43 +181,9 @@ decision, landed.
 
 ---
 
-### `mainframe <label>` — rendered via a ported `BigFrame` (CDD T34); non-class engines carry a sizing residual
+### ~~`mainframe <label>` — rendered via a ported `BigFrame` (CDD T34); non-class engines carry a sizing residual~~ — RETIRED (lgm-T1a/T1c, 2026-10-08)
 
-**Upstream:** `mainframe <label>` (`command/CommandMainframe.java`) wraps the
-whole diagram in a bordered frame with a folded-corner tab carrying the
-label, drawn by `DiagramChromeFactory.decorateWithFrame`
-(`core/DiagramChromeFactory.java:126-133,275-336`) + `BigFrame`
-(`klimt/shape/BigFrame.java`), applied as the innermost chrome layer.
-
-**This port (since class-divergence-drive T34, 2026-09-23):**
-`src/core/klimt/shape/big-frame.ts#buildBigFrame` ports `BigFrame.java`
-(rect plus the folder-tab title cutout; constants from `plantuml.skin:85-89`)
-and `src/core/annotations/chrome.ts#addMainframe` wraps the diagram body
-before legend/title/caption/header/footer, for every engine that routes
-through `applyChrome`. The frame's unset `BackGroundColor` does not inherit
-`root {}`'s the way `LineColor`/`FontColor`/`RoundCorner` do; it resolves as
-`style.backgroundColor ?? style.documentBackground` (probed against three
-oracle renders; `plans/class-divergence-drive/decision-journal.md` rows
-202-206).
-
-**Status by engine:** class is byte-exact (`jakaja-15-faze022`). The five
-sequence and three unknown-bucket corpus fixtures that carry `mainframe`
-(`decace-28-majo724`, `futaxe-10-xonu513`, `gunecu-53-jebu067`,
-`jutomu-49-kemi074`, `zidova-39-bapi223`; `miveni-64-rexo238`,
-`rivino-95-midu088`, `soseka-43-riru110`) now draw the frame and moved
-toward the jar (their structural childCount gap closed) but are not exact:
-those engines' fragments lack the ink-corrected `preChromeWidth`/
-`preChromeHeight` the class engine carries (G2 N46), so the frame's outer
-box is off by the chrome-margin delta the class path re-applies after
-chrome.
-
-**Category:** limitation (residual on the non-class engines only).
-
-**Revisit:** port the pre-chrome ink correction into the klimt
-document-shell path so every engine sizes the frame from real ink; the
-earlier history of this entry (the missing `LimitFinder` primitive, mission
-G0's port of it, the description-engine style-resolution blocker) is in git
-history under this heading.
+Every engine now sizes the frame as the jar does. `UgDiagram#getExporter` (`UgDiagram.java:124-128`) composes chrome around the margin-less block and `TextBlockExporter` adds the document margin after (`core/TextBlockExporter.java:159-203`); `core/document-margin.ts` + `core/annotations/chrome-export.ts#applyExportedChrome` apply that order once. The frame is sized from the block's `LimitFinder` ink (`BigFrame.java:77-91`, `DiagramChromeFactory.java:332-337`; `core/annotations/body-ink.ts`, mindmap `RenderFragment.frameInk`). Under a frame `decorateWithFrame` never runs `SvekResult.java:130-135`'s `moveDelta`, so state and description draw the raw svek frame (`state/layout.ts#applyMainframePlacement`, `description/layout-ink-shift.ts#placeBody`, composite `originShift`). Pinned by `tests/oracle/svg-conformance/lgm-t1a-mainframe.test.ts` and `lgm-t1c-svek-chrome.test.ts`. Residual: `sequence/decace-28-majo724`'s frame is 1 px narrow because its `note left` is 1 px narrow — a sequence-note mechanism, not the frame.
 
 ### ~~Default element skin — grey (`#F1F1F1`), not legacy yellow (`#FEFECE`)~~ — RETIRED (unwind-U4, 2026-10-08)
 
@@ -314,63 +280,9 @@ Consumer impact: no API change, but the bytes differ. Anyone
 byte-comparing or snapshotting this library's SVG must re-baseline. See
 `CHANGELOG.md` for the full rule list.
 
-### Edge geometry carries more precision than the jar's, because the jar reads graphviz as text
+### ~~Edge geometry carries more precision than the jar's, because the jar reads graphviz as text~~ — RETIRED (lgm-T0b, 2026-10-08)
 
-**Status:** accepted, permanent. **Cause corrected 2026-08-13** — this was
-previously filed as a graphviz-2.38-vs-modern *version* gap. It is not a
-version gap; the two engines agree exactly. See "What this is not" below.
-
-The jar obtains edge splines by shelling out to the external `dot` binary
-and **scraping its SVG text**: `svek/DotStringFactory.java:316` calls
-`create(skinParam, dotString, "svg")`, and
-`GraphvizRuntimeEnvironment#create` dispatches to `GraphvizLinux`. The
-`dot -Tsvg` writer prints coordinates to **2 decimals**, so every control
-point the jar ever sees is already quantized to 0.01 before PlantUML does
-any clipping. This port calls `@knowvah/dot-engine` in-process and
-receives full-precision doubles.
-
-So the divergence is one of **serialization precision, not layout**: we
-clip from exact control points where the jar clips from values rounded to
-2dp, and that quantization error (≤0.005 per point) propagates through
-clipping.
-
-Measured on `oracle/goldens/svg-class/bipudo-23-xavu432`, whose four
-classes and four inheritance edges make it the minimal case:
-
-| control point | this port / real graphviz | what `dot -Tsvg` prints |
-|---|---|---|
-| 3 | `76.189044, 90.132030` | `76.19, 90.13` |
-| 4 | `90.183850, 107.792146` | `90.18, 107.79` |
-| vertical edge x | `24.575004` | `24.58` |
-
-Clipping the trimmed end amplifies that into roughly **0.0097pt**.
-
-**Verified rather than assumed.** Fed the jar's own dumped `svek-1.dot`,
-this port's engine returns exactly what real graphviz 15.1.1 returns.
-Rounding this port's control points to 2dp reproduces the jar's spline
-**byte-for-byte** — `M61.184,69.372 C75.184,87.052 83.19,97.13 97.18,114.79`
-— and takes the whole fixture to zero diffs.
-
-**What this is not.** It is not Smetana, and not a graphviz version gap.
-This fixture has a `svek-1.dot`, and Smetana paths emit none — the jar
-shelled out to real graphviz here. Because both sides agree at full
-precision and differ only in what `-Tsvg` can print, **this will not
-disappear when the jar updates its graphviz.** The
-[`!pragma layout smetana|vizjs`](#pragma-layout-smetanavizjs--always-laid-out-with-graphviz)
-ruling is a separate matter and does not apply to this path.
-
-**Consequence for conformance.** The harness compares against jar output
-with a **0.01pt** tolerance (`tests/oracle/svg-conformance/compare.ts`).
-That tolerance absorbs the quantization for every fixture measured: across
-802 class and object fixtures, quantizing our own points to 2dp changes
-only 3 of them, by 1–2 diffs each, and flips none to zero. `bipudo-23-
-xavu432` was believed to cross the band and was un-pinned on 2026-08-08;
-it does not — ~0.0097 is inside 0.01, and it failed only because 3-decimal
-emission rounded the gap to exactly 0.010 and the comparator then rejected
-that on a floating-point boundary defect. That defect is fixed
-(`compare.ts#exceedsTolerance`), the fixture measures zero diffs, and it is
-re-pinned; the accepted divergence is retired in
-`oracle/accepted-divergences.json`.
+Filed 2026-08-13 as accepted/permanent: the jar parses `dot -Tsvg` text (`svek/DotStringFactory.java:370-437`, `SvekEdge.java:618-637`), which prints every coordinate through `gvprintdouble` (`%.02f`, `lib/gvc/gvdevice.c:513-528`). cdd3-T-D3 (2026-09-26) ported that read at the one seam (`src/core/graph-layout-svek-read.ts`, defaulted for every caller at `graph-layout.ts#layoutGraph`): ties-to-even 2-dp rounding, the `|v| < 0.005` zero band, `YDelta(fullHeight)`, node/cluster/edge/label reads; lgm-T0b added the cluster-title read. Nothing is library-forced: fed the jar's own `svek-N.dot` (1698 cached dots), `@knowvah/dot-engine`'s `-Tsvg` text carries the same read values as real `dot -Tsvg` 16.1.0 on all but 11, which differ in the engine's edge routing, not in printing (filed as `docs/graphviz-issues/28-35`). `bipudo-23-xavu432` and three exact-tie fixtures (`tests/fixtures/lgm-T0b/`) render with 0 diffs.
 
 ## Preprocessor (TIM)
 
@@ -487,7 +399,7 @@ ported") and `.agent-notes/cdd-T25.md`, which traced the same finding from the
 
 ### ~~Embedded `{{ }}` sub-diagrams — SVG source, not a re-encoded raster~~ — RETIRED (unwind-U4, 2026-10-08)
 
-The payload is now `UImageSvg#getSvg` plus the `SvgGraphics#svgImage` wrapper (`UImageSvg.java:65-146`; `SvgGraphics.java:1015-1029`; `src/core/klimt/shape/UImageSvg.ts`), byte-identical in structure to the jar's; the nested bytes are this port's own render of the nested diagram and differ only where that engine differs at top level. (The deterministic oracle's 42x42 slot and its `<text>` spot letter in nested class diagrams are instrument artefacts, see below.)
+The payload is now `UImageSvg#getSvg` plus the `SvgGraphics#svgImage` wrapper (`UImageSvg.java:65-146`; `SvgGraphics.java:1015-1029`; `src/core/klimt/shape/UImageSvg.ts`), byte-identical in structure to the jar's; the nested bytes are this port's own render of the nested diagram and differ only where that engine differs at top level. (The 42x42 slot was an instrument artefact of the deterministic oracle, retired by oracle seam #3 / lgm-T1e; the `<text>` spot letter in nested class diagrams is unverified since.)
 
 ### `!includedef` reads the store; `!import` registers a lookup prefix
 
@@ -789,55 +701,9 @@ Upstream fixed the crash (11ed6720, #2797): `sonyxperiadev.skin` is the jar's st
 
 ## State diagrams
 
-### Composite-anchor transitions: clip-rect family unported for border-point children
+### ~~Composite-anchor transitions: clip-rect family unported for border-point children~~ — RETIRED (lgm-T1b/T1d, 2026-10-08)
 
-**Divergence.** Upstream clips a cluster-sourced edge against
-`lhead.getRectangleArea()` / `ltail.getRectangleArea()`
-(`SvekEdge.java:671-672`), and for most composites that rect is the raw
-graphviz cluster bounding box (`DotStringFactory.java:425-434`,
-`Cluster.java:511-512`) — which is exactly what this port's
-`state-transition-clip.ts` derives from `result.clusters` (SI32 T2). But for
-composites with border-point children, `SvekEdge.java:660-663` first calls
-`projectionCluster.manageEntryExitPoint(stringBounder)`, and
-`Cluster.java:410-430` reassigns `this.rectangleArea =
-frontierCalculator.getSuggestedPosition()` — applying `ensureMinWidth(
-getTitleAndAttributeWidth() + 10)` when the cluster is titled — before the
-`:671` clip runs. `ClusterDotString.java:101-105` sets `projectionCluster`
-only when `entityPositionsExceptNormal().size() > 0` (a composite with
-border-point children), on every line that cluster is `lhead`/`ltail` for. It
-is an order-dependent mutation of shared cluster state inside the per-line
-loop: a later line clipping against the same cluster sees the already-
-adjusted rect. This port always clips against the raw box; it does not port
-`FrontierCalculator` or the projection-cluster mutation.
-
-**Reachability, measured.** Of the 41 fixtures SI32 T2's clip fires on,
-exactly two have a clipped-anchor composite with a direct border-point
-child, determined with the port's own `hasDirectBorderPointChild` (not
-inferred from the `.puml`): `pesita-10-dene726`'s `AA` and
-`viroxo-69-fito663`'s `comp1`.
-
-**Measured rect delta** (raw box vs the frontier-adjusted box
-`state-composite-geo.ts#borderPointBox` already computes, shift-invariant):
-`AA` 156x118.720 raw vs 126x104.720 adjusted (30 px wider, 14.000012 px
-taller); `comp1` 123x277.000 vs 109x277.000 (14 px wider).
-
-**Consequence.** Both fixtures still move TOWARD the jar under T2's clip
-(orchestrator-measured summed path-endpoint distance: `pesita` 761.735 ->
-663.541, `viroxo` 121.133 -> 77.401), so the unported adjustment narrows the
-error without closing it. `pesita` retains the largest residual of any
-fixture spot-checked in this mission, consistent with the unported
-adjustment being a real remaining term there. **What is NOT known:** nobody
-has measured what the frontier-adjusted rect would do to the clip *result*
-on these two fixtures — only what the rects themselves are. The residual is
-not fully explained by this gap; it is a candidate contributor.
-
-**Why it is here rather than fixed.** Porting `FrontierCalculator` is a
-second port of upstream arithmetic (a distinct geometry algorithm from the
-clip itself) and was out of SI32 T2's scope.
-
-**Affects:** state diagrams whose clipped-anchor composite has a direct
-border-point child (`<<exitpoint>>`/`<<entrypoint>>`-style member).
-
+`SvekEdge.java:660-663` runs `projectionCluster.manageEntryExitPoint` before each line's `simulateCompound` (`:671-672`), and `Cluster.java:430` reassigns the shared `rectangleArea`, so the Nth line through a border-point composite clips against the result of N calls, and the composite is drawn after L solve-loop calls plus two draw passes (`Cluster.java:344-345`, `SvekResult.java:130-136`). Ported once in `src/core/svek/FrontierCalculator.ts` (`ClusterRectangles`, `entryExitPointRect`, `projectionClusterOf`), driven in `allLines()` order by `state/state-transition-clip.ts#clipLinesInSolveOrder` and `description/layout-geo-post.ts#buildEdgeGeos`, and drawn by `state/state-composite-drawn-rects.ts#drawnClusterRects`. Clipped link ends and the drawn box equal the jar's on `pesita-10-dene726` and eight authored state fixtures (`tests/fixtures/lgm-T1b/`, `lgm-T1d/`). Not this entry: `viroxo-69-fito663` differs before any clip (DOT member order inside a state cluster), and the description port-cluster DOT lacks the jar's `a`/`i` wrapper subgraphs (`ClusterDotString.java:91-96`) — both in `planning/next-missions.md`.
 
 ---
 
@@ -1206,23 +1072,10 @@ on a file, prints `[From in.puml (line N) ]` (`renderSync` receives markup,
 never a path; `src/core/error/error-renderer.ts:29`). The line number itself
 matches since T6f (`refusalLineOf`, `MindMapDiagramFactory.ts`).
 
-### Embedded `{{ }}` diagram slots: the deterministic-text oracle reserves 42×42
+### ~~Embedded `{{ }}` diagram slots: the deterministic-text oracle reserves 42×42~~ — RETIRED (lgm, oracle seam #3 + T1e, 2026-10-08)
 
-**Category:** measurement artefact, not a port divergence. Under
-`-DPLANTUML_DETERMINISTIC_TEXT=true` the fork's `StringBounderFromWidthTable`
-inherits `matchesProperty` = false (`klimt/font/StringBounder.java:43-45`), so
-`EmbeddedDiagram#calculateDimensionSlow` takes the PNG branch, throws at
-`EmbeddedDiagram.java:139` and returns `42×42` (`:150-152`) while `drawU`
-still draws the real image. The stock jar reserves the real size, as this
-port does. `unknown/semutu-45-zeno907`'s 16×26 px canvas gap is that slot;
-it is accepted until the seam is fixed in the fork and the affected goldens
-re-rendered (a maintainer change: fork edits and oracle re-renders are
-mission stops).
+Oracle seam #3 (fork `37c07dce45a`, `oracle/patches/0003-oracle-svg-property.patch`) makes the width-table bounder answer `matchesProperty("SVG")` like `StringBounderSvg.java:67-69`; `EmbeddedDiagram#calculateDimensionSlow` now takes the SVG arm (`EmbeddedDiagram.java:129-133`) and the ink pass `LimitFinder#drawImageSvg` (`LimitFinder.java:99-100,201-204`). The 38 cached fixtures with `{{` were re-captured. The port had fitted the old slot in the description and class embed paths; every `{{ }}` slot is now the nested document's `UImageSvg` size in every engine (`tests/fixtures/lgm-T1e/`). The `svg-unknown/semutu-45-zeno907` ledger entry is withdrawn (moved to `retired`).
 
-**Ledgered (cdd7 D8, 2026-09-30, revocable):** `svg-unknown/semutu-45-zeno907`
-is signed in `oracle/accepted-divergences.json` with
-`until: "oracle seam fixed in fork; re-render goldens with embedded {{ }}
-diagrams"`. The entry is withdrawn — moved to `retired` — the moment the fork's
-`StringBounderFromWidthTable` reports `matchesProperty` correctly and the
-goldens with embedded `{{ }}` diagrams are re-rendered; it is the only entry
-in the ledger that names its own expiry.
+### Deterministic-text oracle crashes on a lone space (measurement artefact)
+
+**Category:** measurement artefact, not a port divergence. Under `-DPLANTUML_DETERMINISTIC_TEXT=true` the oracle measures text with upstream's `UnicodeFontWidthSansSerif`, which gives U+0020 width 0 (block 0, index 32). A `UText` of a single space then yields an empty slot and `klimt/compress/Slot.java:44-45` throws from `SlotFinder.drawText` (`SlotFinder.java:127-133`); the jar draws its crash page with a random `IconLoader` icon (`fun/IconLoader.java:55-74`, unseeded shuffle), so the render changes on every run. Affected: `usecase/kovaxi-11-reti348`, `usecase/zidebi-71-nocu387` (nested `{{ }}` only), `activity/runima-82-jigi009`, `activity/pixisi-38-kixa563`. With real metrics the same jar renders all four, as this port does. They are excluded from equality claims (`tests/oracle/description-parity.ratchet.test.ts#ORACLE_CRASH_FIXTURES`). The zero space width affects every oracle text (538/538 sampled `textLength`s), so the maintainer ruled (2026-10-08) to fix the instrument as its own mission: `planning/next-missions.md`.

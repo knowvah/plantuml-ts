@@ -922,11 +922,11 @@
     {
       "type": "activity",
       "slug": "fikuki-99-kulu790",
-      "status": "baseline",
-      "weightedScore": 14,
-      "diffCount": 14,
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "1916ce34"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "4181c68d"
     },
     {
       "type": "activity",
@@ -1327,11 +1327,11 @@
     {
       "type": "activity",
       "slug": "gufuma-85-zoce945",
-      "status": "baseline",
-      "weightedScore": 29,
-      "diffCount": 29,
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "4181c68d"
     },
     {
       "type": "activity",
@@ -2227,11 +2227,11 @@
     {
       "type": "activity",
       "slug": "mufixi-71-koma752",
-      "status": "baseline",
-      "diffCount": 34,
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "1916ce34",
-      "weightedScore": 34
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "4181c68d",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -2821,11 +2821,11 @@
     {
       "type": "activity",
       "slug": "pufuzi-99-vone170",
-      "status": "baseline",
-      "diffCount": 29,
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251",
-      "weightedScore": 29
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "4181c68d",
+      "weightedScore": 0
     },
     {
       "type": "activity",

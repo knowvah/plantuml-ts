@@ -1,0 +1,10 @@
+@startuml
+rectangle R [
+{{
+class Foo
+class Bar
+}}
+]
+rectangle S
+R --> S
+@enduml

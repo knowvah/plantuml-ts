@@ -73,7 +73,8 @@ import { buildAnnotationBlock, type AnnotationBlock } from './blocks.js';
 import { mergeFragmentDefs } from '../klimt/document-shell.js';
 import type { SpriteRegistry } from '../sprite-commands.js';
 import { shiftFragmentBody } from './coord-shift.js';
-import { addMainframe, nonNullDisplay, type ChromeTextContext } from './chrome-mainframe.js';
+import { addMainframe, nonNullDisplay, type ChromeTextContext, type FramedOriginal } from './chrome-mainframe.js';
+import { inkOfBody, type InkBox } from './body-ink.js';
 
 /** T2's `resolveAnnotationStyles` return shape, re-exported under the name
  *  T4's interface contract (`plans/g0b-annotations/batch-2/T4-chrome-core.md`)
@@ -298,6 +299,30 @@ function applyChromeSlots(
   return { block, decorated };
 }
 
+/**
+ * `RenderFragment.diagramType`s whose `body` is the block's own drawing in
+ * the block's own coordinates, so the `LimitFinder` ink `decorateWithFrame`
+ * frames it by can be recovered from the serialized body ({@link
+ * inkOfBody}). Not listed, on purpose: CLASS (its producer already hands over
+ * BigFrame's `ww`/`hh`, `klimt/shape/big-frame.ts`); STATE and DESCRIPTION
+ * (a `SvekResult` framed by `decorateWithFrame` is drawn UN-normalized --
+ * `SvekResult.java:130-135` never runs -- while this port's body is the
+ * `moveDelta`'d one, so its ink is not the jar's; see `DIVERGENCES.md`).
+ */
+const FRAME_INK_FROM_BODY: ReadonlySet<string> = new Set(['SEQUENCE', 'ACTIVITY']);
+
+/** The `ink` {@link FramedOriginal} carries, when the mainframe needs it. */
+function frameInkOf(
+  fragment: RenderFragment,
+  annotations: DiagramAnnotations,
+  measurer: StringMeasurer,
+): { readonly ink?: InkBox } {
+  if (isDisplayPositionedNull(annotations.mainFrame)) return {};
+  if (fragment.frameInk !== undefined) return { ink: fragment.frameInk };
+  if (fragment.diagramType === undefined || !FRAME_INK_FROM_BODY.has(fragment.diagramType)) return {};
+  return { ink: inkOfBody(fragment.body, measurer) };
+}
+
 export function applyChrome(
   fragment: RenderFragment,
   annotations: DiagramAnnotations,
@@ -313,10 +338,11 @@ export function applyChrome(
   // doc comment for the jar-verified mechanism and citation). Every other
   // engine leaves these `undefined`, so `?? fragment.width/height` is a
   // no-op for them -- zero behavior change outside class.
-  const initial: AnnotationBlock = {
+  const initial: FramedOriginal = {
     body: fragment.body,
     width: fragment.preChromeWidth ?? fragment.width,
     height: fragment.preChromeHeight ?? fragment.height,
+    ...frameInkOf(fragment, annotations, measurer),
   };
   // cdd-T34: mainframe applies FIRST (`DiagramChromeFactory.create`'s own
   // step order, java:126-133) -- it WRAPS `initial` rather than stacking

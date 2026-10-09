@@ -56,6 +56,9 @@ export interface BigFrameStyle {
   readonly lineThickness: number;
   readonly roundCorner: number;
   readonly padding: Sides;
+  /** `symbolContext`'s `UStroke` dash (`Style#getStroke`): `dashVisible,
+   *  dashSpace` as the SVG `stroke-dasharray`, absent for a solid stroke. */
+  readonly dashArray?: string;
 }
 
 /**
@@ -139,6 +142,10 @@ const SVG_ROUND_CORNER_DIVISOR = 2;
  * only the frame's own bottom margin below the diagram content, not
  * `original`'s position.
  */
+function dashAttrs(style: BigFrameStyle): { strokeDasharray?: string } {
+  return style.dashArray === undefined ? {} : { strokeDasharray: style.dashArray };
+}
+
 /** The border rect, at the frame's own `(0,0)`-origin size. */
 function frameRect(width: number, height: number, style: BigFrameStyle): string {
   const roundedAttrs =
@@ -149,6 +156,7 @@ function frameRect(width: number, height: number, style: BigFrameStyle): string 
     fill: style.fillColor,
     stroke: style.lineColor,
     strokeWidth: style.lineThickness,
+    ...dashAttrs(style),
     ...roundedAttrs,
   });
 }
@@ -161,7 +169,7 @@ function titleCutoutPath(width: number, dimTitle: Dim, style: BigFrameStyle): st
   const cornerSize = dimTitle.width === 0 ? 7 : 10;
   const cutoutHeight = titleCutoutHeight(dimTitle);
   const d = `M${textWidth},0 L${textWidth},${cutoutHeight - cornerSize} L${textWidth - cornerSize},${cutoutHeight} L0,${cutoutHeight}`;
-  return path(d, { stroke: style.lineColor, strokeWidth: style.lineThickness });
+  return path(d, { stroke: style.lineColor, strokeWidth: style.lineThickness, ...dashAttrs(style) });
 }
 
 export function buildBigFrame(dimTitle: Dim, originalDim: Dim, style: BigFrameStyle): BigFrameLayout {

@@ -1,0 +1,6 @@
+@startuml
+title The Title
+component A
+component B
+A --> B
+@enduml

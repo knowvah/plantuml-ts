@@ -1,0 +1,8 @@
+@startuml
+class A
+note right of A
+  {{
+  class B
+  }}
+end note
+@enduml

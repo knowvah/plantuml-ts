@@ -20,7 +20,7 @@ import { splitStateDisplayLines } from './state-sizing.js';
 import { measureLines, measureClusterTitle, titleAndAttributeWidth } from './state-composite-header.js';
 import { computeTitleTableHeight } from '../../core/cluster-title-table.js';
 import { zaentId } from './state-composite-classify.js';
-import { isGroupTouched } from './state-composite-detect.js';
+import { isGroupTouched, recordBorderPointCluster } from './state-composite-detect.js';
 import { getEntityPosition, isInputPosition, isOutputPosition } from './state-entity-position.js';
 import { concurrentRegionScopeId } from './state-parse-state.js';
 import {
@@ -375,7 +375,7 @@ export function resolveClusterComposite(
   // staying UNSET for this family (protection0/1 forced off,
   // `ClusterDotString.java:107-112`); (b) `addClusters`'s ee/i-wrapped
   // branch (`portRanksLabelOnEe`); (c) the FrontierCalculator correction
-  // pass (`borderPointMemberIds`/`frontierMinWidth` below).
+  // pass (`borderPointMemberIds` below).
   //
   // `ctx.theme.fontSize === 14` is DELIBERATELY NOT relaxed -- unverified at
   // non-default font sizes, left gated per diagnosis discipline. Ineligible
@@ -427,6 +427,7 @@ export function resolveClusterComposite(
     ...(parentClusterId !== undefined ? { parentId: parentClusterId } : {}),
   };
   acc.clusters.push(cluster);
+  if (hasBorderPointChildren) recordBorderPointCluster(acc, ctx.rankdir, s.id, cluster, borderPointMemberIds);
 
   const childSpecs = directMembers.map((c) => resolveMember(c, acc, ctx, clusterId));
   for (const c of directMembers) {
@@ -473,21 +474,13 @@ export function resolveClusterComposite(
             : CLUSTER_TITLE_BASELINE_MARGIN,
         }
       : {}),
-    // G7 T14b: `Cluster#manageEntryExitPoint`'s own inputs, threaded onto the
-    // GeoSpec so `state-composite-geo.ts#materializeCluster` can run
-    // `frontierCalculator`/`ensureMinWidth` (`state-composite-frontier.ts`)
-    // once this pass's real `DotLayoutResult` is available -- `Math.floor`
-    // matches G8/T1c's own jar-verified truncation rule (`SvekEdge
-    // .appendTable`'s `(int)` cast), the SAME rounding convention
-    // `titleTableWidth` above already uses at the `addClusters` seam.
-    ...(hasBorderPointChildren
-      ? { borderPointMemberIds, frontierMinWidth: Math.floor(headerWidth) + 10, rankdir: ctx.rankdir }
-      : {}),
+    // lgm-T1d: `solveAcc` lets `materializeCluster` replay this pass's
+    // `Cluster#manageEntryExitPoint` calls (`state-composite-drawn-rects.ts`).
+    ...(hasBorderPointChildren ? { borderPointMemberIds, solveAcc: acc } : {}),
     ...(s.creationIndex !== undefined ? { creationIndex: s.creationIndex } : {}),
   };
-  // #lizard forgives -- faithful port of ClusterDotString's envelope
-  // assembly; each block below is one independently-conditional layer
-  // (§2 of mechanisms.md), not decision complexity to simplify.
+  // #lizard forgives -- faithful port of ClusterDotString's envelope assembly;
+  // each block is one independently-conditional layer (mechanisms.md §2).
 }
 
 /** Group a non-autonom composite's DIRECT border-point (entry/exit/pin)

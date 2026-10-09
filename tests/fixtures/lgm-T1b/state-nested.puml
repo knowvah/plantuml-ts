@@ -1,0 +1,15 @@
+@startuml
+state Outer {
+        Outer: entry / o()
+        state "oex" as oex <<exitpoint>>
+        state Inner {
+                Inner: entry / i()
+                state "iex" as iex <<exitpoint>>
+        }
+}
+iex --> oex
+oex --> After
+Before --> Inner
+After --> Outer
+Outer --> Before
+@enduml

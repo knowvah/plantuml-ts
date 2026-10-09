@@ -21,7 +21,8 @@ import type { StateNodeGeo, StateGeometry, StateRegionGeo } from './state-geo-ty
 import type { StateDiagramAST } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import { frontierCalculator, ensureMinWidth, type Box } from './state-composite-frontier.js';
+import { fromRect, type Box } from './state-composite-frontier.js';
+import { drawnClusterRects } from './state-composite-drawn-rects.js';
 import { shiftGeo, shiftTransition, boundingBox } from './state-composite-geo-shift.js';
 
 /** Exported (mission G4 S4): `state-composite-autonom.ts#buildPlainAutonomSpec`
@@ -158,117 +159,49 @@ function materializeAutonom(
  *  pre-C3 shape, unchanged, whenever the lookup misses (ineligible this
  *  iteration, or a hand-built test geometry). */
 /**
- * G7 T14b (`Cluster#manageEntryExitPoint`, `Cluster.java:410-436`): a
- * border-point (`hasBorderPointChildren`) composite's final box is NOT
- * graphviz's raw cluster polygon directly -- it is that polygon corrected
- * by `frontierCalculator`/`ensureMinWidth` (`core/svek/FrontierCalculator
- * .ts` via this engine's own `state-composite-frontier.ts` Box adapter).
- * `children` are already materialized
- * (absolute-frame `StateNodeGeo`s) by the time this runs, so this partitions
- * them by `borderPointMemberIds` into the SAME two terms jar's own
- * `Cluster.entityPositions(NORMAL)`/`entityPositionsExceptNormal()` split
- * computes: `insides` (every OTHER child -- normal members, nested
- * clusters, already bottom-up-corrected if they are themselves
- * border-point) and `points` (these ids' own centers). This naturally
- * satisfies "bottom-up correction order" (T8 edit-list item 8): a nested
- * child cluster's own box is already final by the time its PARENT's
- * `materializeCluster` call reads it here, since `materializeSpecs(spec
- * .children, ...)` above runs before this function computes its own box.
+ * G7 T14b / lgm-T1d (`Cluster#manageEntryExitPoint`, `Cluster.java:410-436`):
+ * a border-point (`hasBorderPointChildren`) composite is NOT drawn at
+ * graphviz's raw cluster polygon. `manageEntryExitPoint` reassigns the one
+ * shared `rectangleArea` on every call (`:430`) -- once per projecting line in
+ * the solve loop, then once per `drawU` -- so the DRAWN box is the rectangle
+ * after L + 2 calls and the INK pass sees the one after L + 1
+ * (`state-composite-drawn-rects.ts`, which replays that sequence).
+ *
+ * The ink pass's box is returned as an OVERFLOW over the drawn one so it
+ * survives the shift passes (`shiftGeo`, `layout.ts#shiftStateNode`)
+ * untouched -- see `StateNodeGeo.inkOverflow`. Jar-verified on
+ * `temuxi-28-cega322`: a parent's first draw pass reads its children's
+ * not-yet-corrected rectangles, so its ink box can reach above anything drawn
+ * (jar's ink minimum lands at `rawTop - 1`).
+ *
+ * G9/T7: `EntityImageStateBorder#upPosition` (`:70-77`) -- a border point draws
+ * its name label ABOVE its symbol when the symbol's TOP edge is above the
+ * vertical centre of the parent cluster's FINAL rectangle. Upstream reads
+ * `parent.getRectangleArea()` at draw time; that rectangle is the drawn box,
+ * which only exists here, so the answer is recorded on each border-point
+ * child now (see `StateNodeGeo.borderPointLabelAbove`).
  */
 function borderPointBox(
-  initial: Box,
-  children: readonly StateNodeGeo[],
-  borderPointMemberIds: readonly string[],
-  minWidth: number,
-  rankdir: 'TB' | 'LR',
-): Box {
-  const borderSet = new Set(borderPointMemberIds);
-  const insides: Box[] = [];
-  const points: { x: number; y: number }[] = [];
-  for (const c of children) {
-    if (borderSet.has(c.id)) {
-      points.push({ x: c.x + c.width / 2, y: c.y + c.height / 2 });
-    } else {
-      insides.push({ x: c.x, y: c.y, width: c.width, height: c.height });
-    }
-  }
-  const core = frontierCalculator(initial, insides, points, rankdir);
-  const box = ensureMinWidth(core, minWidth, initial);
-  // G9/T7: `EntityImageStateBorder#upPosition` (`:70-77`) — a border point
-  // draws its name label ABOVE its symbol when the symbol's TOP edge is above
-  // the vertical centre of the parent cluster's FINAL rectangle, below
-  // otherwise. Upstream reads `parent.getRectangleArea()` at draw time; that
-  // rectangle is exactly `box`, which only exists here, so the answer is
-  // recorded on each border-point child now (see `StateNodeGeo
-  // .borderPointLabelAbove`). Mutating the child is how every other
-  // post-correction field in this pass is threaded.
-  const centerY = box.y + box.height / 2;
-  for (const c of children) if (borderSet.has(c.id)) c.borderPointLabelAbove = c.y < centerY;
-  return box;
-}
-
-/**
- * G9/T8: the box jar's INK pass sees for a border-point composite, which is
- * NOT the one it draws.
- *
- * `Cluster#drawU` calls `manageEntryExitPoint` (`Cluster.java:344-345,410-436`)
- * on every invocation, and that method REASSIGNS `this.rectangleArea` from a
- * `FrontierCalculator` seeded with `in.getRectangleArea()` of each child
- * cluster (`:419-423`). `drawU` runs at least twice — once through
- * `TextBlockUtils.getMinMax` inside `SvekResult#calculateDimension`
- * (`SvekResult.java:130-136`), then again for the real render — and
- * `SvekResult#drawU` walks `allCluster()` in CREATION order, parents first.
- * So on the first pass a parent's frontier reads its children's RAW graphviz
- * boxes, and only on the second does it read their corrected ones.
- *
- * The consequence is a canvas taller than anything drawn on it: with raw
- * children the union of `insides` reaches above every border point, no point
- * sits on that edge, and the frontier's touch rule resets the boundary to the
- * cluster's own RAW box (`state-composite-frontier.ts` step 3). Jar-verified
- * on `temuxi-28-cega322`: its module frame draws at y=88 with the raw box 81px
- * higher, and jar's own ink minimum lands at 6 — `rawTop - 1`, the standard
- * rect inset — putting 50px of reserved-but-empty space above the topmost
- * label. A composite whose children are all LEAVES is unaffected (the leaf
- * rects sit inside, the pins extend the core, the touch rule keeps them), so
- * `lulozu-10-bopu547` and `cinoni-00-sere847` see no such band — which is
- * exactly what their oracles show.
- *
- * Returned as an OVERFLOW rather than a box so it survives the shift passes
- * (`shiftGeo`, `layout.ts#shiftStateNode`) untouched — see
- * `StateNodeGeo.inkOverflow`.
- */
-function borderPointInkOverflow(
   spec: Extract<GeoSpec, { kind: 'cluster' }>,
   children: readonly StateNodeGeo[],
+  posMap: PosMap,
   clusterPosMap: ClusterPosMap,
-  drawn: Box,
-): StateNodeGeo['inkOverflow'] {
-  const rawById = new Map<string, Box>();
-  for (const child of spec.children) {
-    const id = child.kind === 'cluster' ? child.clusterId : undefined;
-    const raw = id !== undefined ? clusterPosMap.get(id) : undefined;
-    if (raw !== undefined) rawById.set(child.id, raw);
-  }
-  if (rawById.size === 0) return undefined;
-  const rawChildren = children.map((c) => {
-    const raw = rawById.get(c.id);
-    return raw === undefined ? c : { ...c, x: raw.x, y: raw.y, width: raw.width, height: raw.height };
-  });
-  const ink = borderPointBox(
-    clusterPosMap.get(spec.clusterId!)!,
-    rawChildren,
-    spec.borderPointMemberIds ?? [],
-    spec.frontierMinWidth ?? 0,
-    spec.rankdir ?? 'TB',
-  );
+): { box: Box; inkOverflow: StateNodeGeo['inkOverflow'] } | undefined {
+  const rects = drawnClusterRects(spec.solveAcc!, posMap, clusterPosMap).get(spec.clusterId!);
+  if (rects === undefined) return undefined;
+  const box = fromRect(rects.drawn);
+  const ink = fromRect(rects.ink);
+  const centerY = box.y + box.height / 2;
+  const borderSet = new Set(spec.borderPointMemberIds);
+  for (const c of children) if (borderSet.has(c.id)) c.borderPointLabelAbove = c.y < centerY;
   const overflow = {
-    top: Math.max(0, drawn.y - ink.y),
-    left: Math.max(0, drawn.x - ink.x),
-    bottom: Math.max(0, ink.y + ink.height - (drawn.y + drawn.height)),
-    right: Math.max(0, ink.x + ink.width - (drawn.x + drawn.width)),
+    top: Math.max(0, box.y - ink.y),
+    left: Math.max(0, box.x - ink.x),
+    bottom: Math.max(0, ink.y + ink.height - (box.y + box.height)),
+    right: Math.max(0, ink.x + ink.width - (box.x + box.width)),
   };
   const empty = overflow.top === 0 && overflow.left === 0 && overflow.bottom === 0 && overflow.right === 0;
-  return empty ? undefined : overflow;
+  return { box, inkOverflow: empty ? undefined : overflow };
 }
 
 function materializeCluster(
@@ -292,11 +225,9 @@ function materializeCluster(
     // every other cluster (the pre-T14b path) keeps using `real` directly,
     // byte-identical to before this task.
     const hasBorderPoints = spec.borderPointMemberIds !== undefined && spec.borderPointMemberIds.length > 0;
-    const box = hasBorderPoints
-      ? borderPointBox(real, children, spec.borderPointMemberIds!, spec.frontierMinWidth ?? 0, spec.rankdir ?? 'TB')
-      : real;
-    // G9/T8 -- see `borderPointInkOverflow`'s own doc comment.
-    const inkOverflow = hasBorderPoints ? borderPointInkOverflow(spec, children, clusterPosMap, box) : undefined;
+    const corrected = hasBorderPoints ? borderPointBox(spec, children, posMap, clusterPosMap) : undefined;
+    const box = corrected?.box ?? real;
+    const inkOverflow = corrected?.inkOverflow;
     return {
       id: spec.id,
       kind: 'normal',
@@ -440,5 +371,13 @@ export function layoutComposite(ast: StateDiagramAST, theme: Theme, measurer: St
   // own doc comment.
   const states = materializeSpecs(specs, posMap, clusterPosMapOf(result), theme.shadowing ?? 0);
   const transitions = buildLevelTransitionGeos(acc, result);
-  return { totalWidth: result.width, totalHeight: result.height, states, transitions };
+  // lgm-T1c: a framed diagram draws the raw svek frame (DiagramChromeFactory.java:278-337
+  // never runs SvekResult.java:130-135's moveDelta), so layout.ts needs the top pass's shift.
+  return {
+    totalWidth: result.width,
+    totalHeight: result.height,
+    states,
+    transitions,
+    ...(result.originShift !== undefined ? { originShift: result.originShift } : {}),
+  };
 }

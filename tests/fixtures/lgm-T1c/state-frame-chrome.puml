@@ -1,0 +1,11 @@
+@startuml
+mainframe Frame
+title The Title
+legend right
+  a legend
+end legend
+footer Foot
+[*] --> A
+A --> B : go
+B --> [*]
+@enduml

@@ -1,0 +1,7 @@
+@startuml
+frame FooBar [
+{{
+class Foo
+}}
+]
+@enduml

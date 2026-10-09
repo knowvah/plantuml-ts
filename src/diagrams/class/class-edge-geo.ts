@@ -401,8 +401,17 @@ export function buildEdgeGeos(
   const m = result.originShift ?? { x: 0, y: 0 };
   computeKal(placedKals, m);
   for (const end of leafEnds) attachLeafContacts(end, text.protectedIds);
+  // `SvekEdge.java:922-941`: a node end asks the node's image, a cluster end
+  // the cluster -- one lookup, ids are disjoint (`class-leaf-magnetic-border.ts`).
+  const magneticRects = new Map([...clusterRects, ...(text.leafMagnetic ?? [])]);
   for (const { edgeGeo, startId, endId } of clusterEnds) {
-    edgeGeo.points = applyClusterMagneticBorders(edgeGeo.points, startId, endId, clusterRects);
+    edgeGeo.points = applyClusterMagneticBorders(
+      edgeGeo.points,
+      startId,
+      endId,
+      magneticRects,
+      drawnEdgePoints(edgeGeo),
+    );
   }
   const label = { measurer: text.measurer, font: text.labelFont };
   return { edges, svek: svekPass0(m, placedKals, toConstraintLinks(constrained), label) };

@@ -421,7 +421,7 @@ function buildBlockRows(blockLines: readonly string[], ctx: NoteLineBuildContext
     // R2b: a line opening a `{{ ... }}` embedded-diagram region collapses,
     // with everything through its matching `}}`, into ONE row
     // (`EmbeddedDiagram.getEmbeddedType` gate, java:257-366; region walk +
-    // 42x42 dimension in `note-layout-measure-rows.ts#consumeEmbeddedRow`).
+    // SVG-arm dimension in `note-layout-measure-rows.ts#consumeEmbeddedRow`).
     const embeddedType = getEmbeddedType(ln);
     if (embeddedType !== null) {
       const consumed = consumeEmbeddedRow(blockLines, i, embeddedType, ctx);

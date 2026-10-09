@@ -86,16 +86,17 @@ describe('svekCluster — min/max of the parsed cluster polygon (:429-436)', () 
     expect(c.height).toBeCloseTo(40, 12);
   });
 
-  it('moves the cluster label into the YDelta frame unparsed', () => {
+  it('reads the cluster title at its parsed polygon corner (:438-440)', () => {
     const c = svekCluster(FRAME, {
       name: 'cluster1',
       x: 0,
       y: 0,
       width: 1,
       height: 1,
-      label: { x: 3.3333, y: 7.7777, width: 5, height: 6 },
+      label: { x: 82.5, y: 8.5004, width: 15, height: 9 },
     });
-    expect(c.label).toEqual({ x: 3.3333, y: 108 - 7.7777, width: 5, height: 6 });
+    // corner x 75 -> 75; corner y -(8.5004 + 4.5) = -13.0004 -> -13, YDelta
+    expect(c.label).toEqual({ x: 82.5, y: 108 - 13 + 4.5, width: 15, height: 9 });
   });
 });
 

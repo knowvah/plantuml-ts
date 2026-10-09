@@ -28,10 +28,38 @@ import type { ConcurrentRegionPassResult } from './state-composite-concurrent.js
 import type { TransitionGeo, StateTextLine } from './state-geo-types.js';
 import type { NoteEdgeCandidate, ScopeNoteParts } from './state-note-layout.js';
 
+/**
+ * One composite cluster of a pass that has border-point (entry/exit/pin)
+ * members — the clusters `ClusterDotString#printInternal` makes the
+ * `projectionCluster` of every line touching them
+ * (`svek/ClusterDotString.java:101-105`, gated on
+ * `entityPositionsExceptNormal().size() > 0`). Recorded in the order
+ * `resolveClusterComposite` visits them, which is `printInternal`'s own
+ * parent-before-child print order.
+ */
+export interface BorderPointClusterInfo {
+  /** The composite's state id (what a `__zaent_<id>` endpoint addresses). */
+  stateId: string;
+  /** The pass's `DotInputCluster.id` for it. */
+  clusterId: string;
+  /** Direct border-point member node ids (`Cluster.nodes` that are not
+   *  `EntityPosition.NORMAL`). */
+  portNodeIds: readonly string[];
+  /** `Cluster.getTitleAndAttributeWidth()` (`Math.floor` of the measured
+   *  header width, `SvekEdge.appendTable`'s `(int)` cast) and
+   *  `getTitleAndAttributeHeight()`. */
+  titleAndAttributeWidth: number;
+  titleAndAttributeHeight: number;
+  rankdir: 'TB' | 'LR';
+}
+
 export interface PassAccumulator {
   nodes: DotInputNode[];
   edges: DotInputEdge[];
   clusters: DotInputCluster[];
+  /** The composites among `clusters` with border-point members, in print
+   *  order — see {@link BorderPointClusterInfo}. */
+  borderPointClusters: BorderPointClusterInfo[];
   /** (transition, edgeId) pairs for THIS pass — used post-layout to build
    *  TransitionGeo entries (label placement needs the routed points).
    *  `reversed` mirrors whether this edge's DOT `from`/`to` were swapped
@@ -258,20 +286,13 @@ export type GeoSpec =
        *  (mirrors `hasBorderPointChildren`); absent means the plain
        *  `real`-bbox-direct shape applies unchanged. */
       borderPointMemberIds?: readonly string[];
-      /** G7 T14b: `Cluster.java:427-428`'s `frontierCalculator.ensureMinWidth(
-       *  getTitleAndAttributeWidth() + 10)` -- `Math.floor(headerWidth) + 10`
-       *  (G8/T1c's own truncation rule, the SAME `titleTableWidth` above
-       *  already uses at the `addClusters` seam). Always set together with
-       *  `borderPointMemberIds`. */
-      frontierMinWidth?: number;
-      /** G7 T14b: `ctx.rankdir`, threaded through so `materializeCluster`'s
-       *  `frontierCalculator` call uses the SAME axis convention this specific
-       *  pass laid out under (`FrontierCalculator`'s own rankdir-dependent
-       *  corner-exclusion step, §2c step 5) -- every fixture verified this
-       *  mission is `'TB'`; `'LR'` is ported faithfully in
-       *  `state-composite-frontier.ts` but has zero fixture coverage. Always
-       *  set together with `borderPointMemberIds`. */
-      rankdir?: 'TB' | 'LR';
+      /** lgm-T1d: the pass accumulator this composite was resolved into --
+       *  what `state-composite-drawn-rects.ts#drawnClusterRects` replays
+       *  (solve-loop `manageEntryExitPoint` calls + the two draw passes) to
+       *  get the rectangle the jar draws. Set together with
+       *  `borderPointMemberIds`; absent on a hand-built test geometry, which
+       *  then keeps the single-call frontier. */
+      solveAcc?: PassAccumulator;
       /** SI31 T4 (G5) -- see `StateNodeGeo.southCapInk`'s own doc comment
        *  (state-geo-types.ts) for the full jar derivation. Attached in
        *  `state-composite-pass.ts#resolveMember`, copied straight through by

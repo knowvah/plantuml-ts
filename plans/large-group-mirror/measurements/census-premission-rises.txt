@@ -1,0 +1,16 @@
+component bagoze-78-lada681 41 -> 46
+component fidati-41-kofe029 2817 -> 2830
+component foboxa-33-menu312 169 -> 177
+component josoxo-49-taci997 355 -> 536
+component kofovu-01-niti223 2817 -> 2830
+component nibige-54-voki590 171 -> 179
+component repite-70-vabe533 205 -> 244
+component repoge-41-demu604 47 -> 56
+component siseda-71-napu395 187 -> 188
+component tojitu-03-ruto643 2688 -> 2694
+component tuliba-37-liza126 46 -> 67
+component xufexu-38-fola855 12 -> 25
+component ziniso-08-damu446 27 -> 40
+usecase sotine-10-lore970 19 -> 24
+usecase zavitu-69-cemu013 318 -> 329
+usecase zotiru-33-legi180 34 -> 49

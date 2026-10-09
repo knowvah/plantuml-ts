@@ -35,6 +35,78 @@ post-D7 measurements.
 
 ---
 
+## `large-group-mirror` (lgm) — DONE 2026-10-08 (T0a–T1e + T-exit/T-close-out, batches 0–2)
+
+Retired three `DIVERGENCES.md` entries (A1 edge precision, A2 non-class
+`mainframe` sizing, A3 composite-anchor clip rect) plus, by user order, the
+42x42 `{{ }}` slot via oracle seam #3 (fork `37c07dce45a`). b0→final: 12
+fixtures →conformant, 0 losses, 0 element moves away from the jar, 112
+sequence rows fell / 0 rose (Σ 306549→304703). Follow-ons, each with its
+mechanism:
+
+1. **`instrument-space-width` (user ruling 2026-10-08, option 1) — next.**
+   The deterministic-text oracle installs upstream's `UnicodeFontWidthSansSerif`,
+   which gives U+0020 width 0 (block 0, index 32); every oracle text with a
+   space is narrower than the stock jar draws it (538/538 sampled
+   `textLength`s), and `WidthTableMeasurer` mirrors it (production
+   `jarMeasurer`: 3.797 px @12pt). A lone-space UText crashes the jar
+   (`Slot.java:44-45` via `SlotFinder.drawText`) → kovaxi-11, zidebi-71,
+   runima-82, pixisi-38 are crash pages with a random `IconLoader` icon.
+   Scope: fork seam #4 + the identical `WidthTableMeasurer` change, a space
+   width DERIVED from upstream data (first candidate: the table's own U+00A0
+   entry, 3.3 px @12pt — verify against real metrics, never fit); full
+   corpus re-capture, one JVM per `{{ }}` fixture; every ratchet re-pinned;
+   then drop `ORACLE_CRASH_FIXTURES` from `description-parity.ratchet.test.ts`.
+   Needs `/plan-mission`.
+2. **`rebaseline-svg-goldens.ts` batching is unsafe.** It renders 120
+   fixtures per JVM and claims byte-identical output; measured false for
+   `@startdot` (5 svg-dot goldens report CHANGED batched, equal solo) and
+   `{{ }}` (zidebi 875 px batched vs 895 solo — JVM static state). Make it
+   one JVM per fixture for those classes, or per fixture outright.
+3. **State DOT member order** (`viroxo-69-fito663`, 90 diffs): the jar emits
+   `comp1`'s members (`[*]`, chk, end, zaent) in a different DOT order than
+   ours, so graphviz places nodes 2-3 px away before any clip; structural DOT
+   parity cannot see order. Owner: `state-composite-cluster.ts` emission.
+4. **Description port-cluster DOT wrappers**: our DOT lacks the `a`/`i`
+   wrapper subgraphs the jar writes for a port cluster that is a link
+   endpoint (`ClusterDotString.java:91-96`); moves DOT parity. Pinned by
+   `tests/unit/description/lgm-T1b-port-cluster-clip.test.ts` (`it.fails`).
+   Then replace the `frontier-cluster-bbox.ts#registerPortCluster` WeakMap
+   with an `EdgeMapping` field.
+5. **One-call frontier boxes still drawn in class and description**
+   (`class-geo-builders-port.ts#portFrontierBox`, `class-edge-geo.ts`,
+   `description/frontier-cluster-bbox.ts#computePortClusterBbox`): each needs
+   the L+2 replay state got in `state-composite-drawn-rects.ts`
+   (`Cluster.java:344-345,430`).
+6. **Description leaf magnetic border** — not inspected. Class got the leaf
+   arm (`SvekNode.java:486-492` → `EntityImageDescription.java:362-366` →
+   `USymbolFolder.java:185-209`); check whether description reaches it.
+7. **Hexagon/octagon polygon unread** (`DotStringFactory.java:413-418`,
+   drawn at `EntityImageDescription.java:336-342`; ours
+   `renderer-entity.ts:288` `hexagonPolygon: null`): bisedo-29 (component),
+   nejuge-86, vasuka-21, xucura-15, xagomi-49 (unknown). KERMOR cluster notes
+   (`DotStringFactory.java:446-461`) unported: fojamu-08, siseda-71,
+   zubujo-87.
+8. **Class tail port + decorated tail** (`[x]` with `o.d.>`, `<|-u->`,
+   `+-l->`): the jar puts the tail polygon 13.69 px (diamond) / 6.78 px
+   (plus) left of the path start; ours on it. Mechanism not isolated (lead:
+   Kal offset in `SvekEdge#getExtremitySimplier`).
+9. **`decace-28-majo724` `note left` is 1 px narrow** (sequence note sizing);
+   it makes the mainframe 1 px narrow.
+10. **`romuru-66-samu329`** surveys conformant via `renderSync` but is
+    `status: error` in `oracle/goldens/svg-activity/diff-baseline.json` —
+    check `render-fixture-activity.ts` against `src/index.ts`
+    (conformance-harness-mirrors-index-ts) and promote it.
+11. **Census pins stale since 2026-09-20**: `census-component.json` /
+    `census-usecase.json` are 16 rows lower than b0 (pre-lgm rises, listed in
+    `plans/large-group-mirror/measurements/census-premission-rises.txt`); the
+    census renders without chrome. Attribute each rise before refreshing.
+12. **Two `src` files over 500 lines** after the 2026-10-08 prettier fix:
+    `src/diagrams/activity/dispatch-support.ts` (523, pre-existing),
+    `src/core/svek/image/EntityImageDescriptionTextBlock.ts` (504).
+13. **dot-engine routing differences** filed as `docs/graphviz-issues/28-35`
+    (11 of 1698 cached dots): candidates for the engine owner.
+
 ## `unwind2` small groups 1–3 — DONE 2026-10-08 (branch `fix/unwind-small`, S1–S11)
 
 Mirror-the-jar unwinds, by user ruling: the packet spanning stub, HCL styles

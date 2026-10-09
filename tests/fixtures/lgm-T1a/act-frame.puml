@@ -1,0 +1,7 @@
+@startuml
+mainframe Frame
+start
+:Hello;
+:World;
+stop
+@enduml

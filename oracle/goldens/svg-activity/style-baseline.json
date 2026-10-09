@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-08",
-  "measuredAgainstCommit": "3a8d04fe",
+  "measuredAgainstCommit": "4181c68d",
   "fixtures": [
     {
       "type": "activity",
@@ -1038,11 +1038,11 @@
           "12.5": 3
         },
         "textCount": 3,
-        "width": "343",
-        "height": "419"
+        "width": "372",
+        "height": "654"
       },
       "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "3672452f"
+      "measuredAgainstCommit": "4181c68d"
     },
     {
       "type": "activity",
@@ -3877,11 +3877,11 @@
           "12.5": 1
         },
         "textCount": 2,
-        "width": "234",
-        "height": "203"
+        "width": "230",
+        "height": "273"
       },
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "1916ce34"
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "4181c68d"
     },
     {
       "type": "activity",
@@ -5498,11 +5498,11 @@
           "12.5": 1
         },
         "textCount": 1,
-        "width": "98",
-        "height": "191"
+        "width": "113",
+        "height": "189"
       },
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251"
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "4181c68d"
     },
     {
       "type": "activity",
@@ -9091,8 +9091,8 @@
       "type": "activity",
       "slug": "mufixi-71-koma752",
       "status": "baseline",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "1916ce34",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "4181c68d",
       "ours": {
         "fontSize": {
           "12": 2
@@ -9118,8 +9118,8 @@
           "12.5": 1
         },
         "textCount": 2,
-        "width": "322",
-        "height": "567"
+        "width": "334",
+        "height": "779"
       }
     },
     {
@@ -11344,8 +11344,8 @@
       "type": "activity",
       "slug": "pufuzi-99-vone170",
       "status": "baseline",
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "4181c68d",
       "ours": {
         "fontSize": {
           "12": 1
@@ -11371,8 +11371,8 @@
           "12.5": 1
         },
         "textCount": 1,
-        "width": "98",
-        "height": "227"
+        "width": "125",
+        "height": "298"
       }
     },
     {

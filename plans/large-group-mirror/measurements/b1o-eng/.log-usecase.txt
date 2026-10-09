@@ -1,0 +1,7 @@
+surveying 94 usecase fixtures (concurrency 6)
+[xmldom fatalError]	comment is not well-formed at position 3144 
+@#[line:1,col:3145]
+  25/93
+  50/93
+  75/93
+wrote plans/large-group-mirror/measurements/b1o-eng/parity-usecase.json — {"conformant":29,"structural-match":18,"diverged":46,"errored":0,"timeout":0,"oracle-error":1}

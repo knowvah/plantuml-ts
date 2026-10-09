@@ -175,10 +175,10 @@ export function measureFolderLeaf(
  * COINCIDENCE (a 4-line embed measured 56, not 42 -- the jar-verified
  * regression `decisions.md` D5 names). Routing through the real
  * `EmbeddedDiagram.calculateDimension` (via {@link descEmbeddedRenderer},
- * this port's `NestedDiagramRenderer`) reaches the SAME try/catch that
- * always resolves to `(42, 42)` today (its own doc comment), independent
- * of the embed's line count, matching upstream regardless of what the
- * embed source eventually contains.
+ * this port's `NestedDiagramRenderer`) takes the SVG arm
+ * (`EmbeddedDiagram.java:129-133`): the slot is the nested document's own
+ * `UImageSvg` width/height, as the jar reports it once the oracle's
+ * bounder says `matchesProperty("SVG")`.
  */
 function folderTextBlock(
   text: string,

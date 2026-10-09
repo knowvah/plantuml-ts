@@ -231,10 +231,10 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     const svg = renderFixture(src);
     const height = /height="(\d+)px"/.exec(svg)?.[1];
     const width = /width="(\d+)px"/.exec(svg)?.[1];
-    // Width stays box-dominated (102) regardless of the correction -- only
-    // height is ink-dominated for this fixture, moving 95 -> 96 once the
-    // embed's drawn corner (not its LimitFinder-shrunk ink) is used.
-    expect(width).toBe('102');
-    expect(height).toBe('96');
+    // The jar's canvas (tests/fixtures/lgm-T1e/desc-frame-degenerate.svg):
+    // the embed slot is the nested document's own 76x68 (oracle seam #3,
+    // EmbeddedDiagram.java:129-133), not the (42, 42) catch.
+    expect(width).toBe('136');
+    expect(height).toBe('118');
   });
 });

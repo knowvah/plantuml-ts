@@ -14,6 +14,7 @@ import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
 import type { StringMeasurer } from '../../core/measurer.js';
+import type { InkBox } from '../../core/annotations/body-ink.js';
 import type { OpaleDirection, OpalePoint } from '../../core/svek/image/Opale.js';
 
 // ---------------------------------------------------------------------------
@@ -229,6 +230,17 @@ export interface DescriptionGeometry {
   totalHeight: number;
   nodes: DescriptionNodeGeo[];
   edges: DescriptionEdgeGeo[];
+  /**
+   * lgm-T1c: the margin-less block `DiagramChromeFactory.create` is handed
+   * (`SvekResult#calculateDimension`, `svek/SvekResult.java:130-135`: ink +
+   * 15), and -- under a `mainframe` only -- the `LimitFinder` ink of the
+   * UN-normalized svek body (`decorateWithFrame` never reaches
+   * `calculateDimension`, `DiagramChromeFactory.java:278-337`). Absent for a
+   * degenerate single-leaf geometry. Mirrors `state-geo-types.ts`.
+   */
+  preChromeWidth?: number;
+  preChromeHeight?: number;
+  frameInk?: InkBox;
   /** T17 seed thread — see `DescriptionDiagramAST.seed`'s doc comment.
    *  Copied straight through from the AST by `layout.ts`; no layout math
    *  reads it. Consumed by `renderDescription`'s `UGraphicSvg.build` call. */
@@ -266,6 +278,16 @@ export interface DescriptionGeometry {
    * hand-built geometries, where `renderDescription` keeps its default.
    */
   measurer?: StringMeasurer;
+  /**
+   * lgm-T1c: the diagram carries title/legend/caption/header/footer/
+   * mainframe chrome. `descriptionPlugin.render` then hands `src/index.ts` a
+   * `RenderFragment` (the klimt document unwrapped, with {@link
+   * preChromeWidth}/{@link frameInk}) instead of a `CompleteSvg`, so chrome
+   * is composed around the margin-less block as `UgDiagram#getExporter`
+   * does (`UgDiagram.java:124-128`); an unchromed diagram stays a complete
+   * document, byte for byte.
+   */
+  chromed?: true;
 }
 
 // ---------------------------------------------------------------------------

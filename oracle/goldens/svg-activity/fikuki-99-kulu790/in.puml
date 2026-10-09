@@ -1,0 +1,21 @@
+@startuml
+skinparam defaultTextAlignment center
+
+start
+
+:«foreach»
+Network interface controllers (NIC)
+{{json
+#highlight "message"
+{
+   "NIC": "$name",
+   "port": "$i",
+   "message": "$error",
+   "time": "$time",
+   "date": "$date"
+}
+}}
+;
+
+stop
+@enduml

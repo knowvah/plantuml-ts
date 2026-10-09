@@ -3,10 +3,10 @@
   "totals": {
     "missing-element": 186,
     "extra-element": 93,
-    "geometry": 222883,
+    "geometry": 221039,
     "text-metrics": 1900,
     "format-units": 59,
-    "other": 35446
+    "other": 35444
   },
   "fixtures": [
     {
@@ -323,11 +323,11 @@
     },
     {
       "slug": "bedaja-09-gezu912",
-      "diffCount": 25,
+      "diffCount": 21,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 16,
+        "geometry": 12,
         "text-metrics": 0,
         "format-units": 0,
         "other": 9
@@ -623,11 +623,11 @@
     },
     {
       "slug": "boparo-11-pema294",
-      "diffCount": 51,
+      "diffCount": 12,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 47,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 4
@@ -719,11 +719,11 @@
     },
     {
       "slug": "bozuru-10-rajo382",
-      "diffCount": 67,
+      "diffCount": 16,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 61,
+        "geometry": 10,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -779,11 +779,11 @@
     },
     {
       "slug": "bugaju-81-ciko758",
-      "diffCount": 40,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 34,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -983,11 +983,11 @@
     },
     {
       "slug": "cakelu-69-muza643",
-      "diffCount": 195,
+      "diffCount": 191,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 179,
+        "geometry": 175,
         "text-metrics": 0,
         "format-units": 0,
         "other": 16
@@ -1427,11 +1427,11 @@
     },
     {
       "slug": "cizifu-56-giku099",
-      "diffCount": 18,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 12,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -1607,11 +1607,11 @@
     },
     {
       "slug": "cusiro-03-mebe823",
-      "diffCount": 124,
+      "diffCount": 123,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 110,
+        "geometry": 109,
         "text-metrics": 0,
         "format-units": 0,
         "other": 14
@@ -1643,11 +1643,11 @@
     },
     {
       "slug": "dabozi-63-zuco354",
-      "diffCount": 17,
+      "diffCount": 15,
       "buckets": {
         "missing-element": 1,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -1787,11 +1787,11 @@
     },
     {
       "slug": "davipu-63-veta505",
-      "diffCount": 19,
+      "diffCount": 15,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 12,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 7
@@ -1823,11 +1823,11 @@
     },
     {
       "slug": "decace-28-majo724",
-      "diffCount": 40,
+      "diffCount": 25,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 35,
+        "geometry": 20,
         "text-metrics": 0,
         "format-units": 0,
         "other": 5
@@ -2039,11 +2039,11 @@
     },
     {
       "slug": "digula-66-dipe776",
-      "diffCount": 136,
+      "diffCount": 130,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 127,
+        "geometry": 121,
         "text-metrics": 0,
         "format-units": 0,
         "other": 9
@@ -2087,11 +2087,11 @@
     },
     {
       "slug": "dinita-73-tige486",
-      "diffCount": 39,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 33,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -2147,11 +2147,11 @@
     },
     {
       "slug": "dofuru-22-zuga032",
-      "diffCount": 44,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 38,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -2267,11 +2267,11 @@
     },
     {
       "slug": "dopisa-88-pazo292",
-      "diffCount": 51,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 45,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -2411,11 +2411,11 @@
     },
     {
       "slug": "dugeki-47-celo546",
-      "diffCount": 2494,
+      "diffCount": 2493,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 2099,
+        "geometry": 2098,
         "text-metrics": 86,
         "format-units": 0,
         "other": 309
@@ -2591,11 +2591,11 @@
     },
     {
       "slug": "falolu-20-sepu020",
-      "diffCount": 21,
+      "diffCount": 17,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 14,
+        "geometry": 10,
         "text-metrics": 0,
         "format-units": 0,
         "other": 7
@@ -2675,11 +2675,11 @@
     },
     {
       "slug": "fazaba-22-nusi829",
-      "diffCount": 46,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 40,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -2711,11 +2711,11 @@
     },
     {
       "slug": "fekatu-96-kele513",
-      "diffCount": 16,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -2819,11 +2819,11 @@
     },
     {
       "slug": "fexoko-32-feso446",
-      "diffCount": 17,
+      "diffCount": 15,
       "buckets": {
         "missing-element": 1,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -2915,11 +2915,11 @@
     },
     {
       "slug": "fijeco-97-zozu841",
-      "diffCount": 20,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 14,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -2939,11 +2939,11 @@
     },
     {
       "slug": "fixecu-74-kote876",
-      "diffCount": 19,
+      "diffCount": 15,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 12,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 7
@@ -2951,11 +2951,11 @@
     },
     {
       "slug": "fobapo-56-moko401",
-      "diffCount": 29,
+      "diffCount": 8,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 25,
+        "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
         "other": 4
@@ -3047,11 +3047,11 @@
     },
     {
       "slug": "fonope-49-jodi834",
-      "diffCount": 43,
+      "diffCount": 15,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 37,
+        "geometry": 9,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -3059,11 +3059,11 @@
     },
     {
       "slug": "foporo-86-nego484",
-      "diffCount": 20,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 14,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -3155,11 +3155,11 @@
     },
     {
       "slug": "funado-58-dene546",
-      "diffCount": 51,
+      "diffCount": 17,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 42,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 9
@@ -3215,11 +3215,11 @@
     },
     {
       "slug": "futaxe-10-xonu513",
-      "diffCount": 32,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 26,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -3299,11 +3299,11 @@
     },
     {
       "slug": "gadasu-04-kada675",
-      "diffCount": 20,
+      "diffCount": 18,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 4,
         "format-units": 0,
         "other": 6
@@ -3335,11 +3335,11 @@
     },
     {
       "slug": "ganefo-61-leka777",
-      "diffCount": 42,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 36,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -3359,11 +3359,11 @@
     },
     {
       "slug": "gaxera-69-muma363",
-      "diffCount": 62,
+      "diffCount": 16,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 54,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 8
@@ -3371,11 +3371,11 @@
     },
     {
       "slug": "gazave-48-zapu688",
-      "diffCount": 18,
+      "diffCount": 16,
       "buckets": {
         "missing-element": 0,
         "extra-element": 1,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 7
@@ -3407,11 +3407,11 @@
     },
     {
       "slug": "gefobi-11-jena493",
-      "diffCount": 45,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 39,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -3419,11 +3419,11 @@
     },
     {
       "slug": "gejeji-12-zofa866",
-      "diffCount": 284,
+      "diffCount": 35,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 270,
+        "geometry": 21,
         "text-metrics": 0,
         "format-units": 0,
         "other": 14
@@ -3467,11 +3467,11 @@
     },
     {
       "slug": "gekuko-59-muta575",
-      "diffCount": 39,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 33,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -3647,11 +3647,11 @@
     },
     {
       "slug": "gijamu-35-vale058",
-      "diffCount": 784,
+      "diffCount": 783,
       "buckets": {
         "missing-element": 1,
         "extra-element": 0,
-        "geometry": 736,
+        "geometry": 735,
         "text-metrics": 18,
         "format-units": 0,
         "other": 29
@@ -3671,11 +3671,11 @@
     },
     {
       "slug": "giloko-85-gapa789",
-      "diffCount": 109,
+      "diffCount": 108,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 87,
+        "geometry": 86,
         "text-metrics": 0,
         "format-units": 0,
         "other": 22
@@ -3827,11 +3827,11 @@
     },
     {
       "slug": "gorido-98-taje926",
-      "diffCount": 16,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -3887,11 +3887,11 @@
     },
     {
       "slug": "gucare-93-petu502",
-      "diffCount": 514,
+      "diffCount": 513,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 480,
+        "geometry": 479,
         "text-metrics": 12,
         "format-units": 0,
         "other": 22
@@ -3971,23 +3971,23 @@
     },
     {
       "slug": "gunecu-53-jebu067",
-      "diffCount": 44,
+      "diffCount": 16,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 36,
+        "geometry": 10,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 8
+        "other": 6
       }
     },
     {
       "slug": "gupaki-93-vupa807",
-      "diffCount": 51,
+      "diffCount": 17,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 42,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 9
@@ -4019,11 +4019,11 @@
     },
     {
       "slug": "guroti-56-konu524",
-      "diffCount": 42,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 36,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -4055,11 +4055,11 @@
     },
     {
       "slug": "guzoco-99-ginu686",
-      "diffCount": 72,
+      "diffCount": 68,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 66,
+        "geometry": 62,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -4127,11 +4127,11 @@
     },
     {
       "slug": "jafufe-08-begu830",
-      "diffCount": 79,
+      "diffCount": 73,
       "buckets": {
         "missing-element": 1,
         "extra-element": 0,
-        "geometry": 65,
+        "geometry": 59,
         "text-metrics": 2,
         "format-units": 0,
         "other": 11
@@ -4199,11 +4199,11 @@
     },
     {
       "slug": "janodo-62-pave893",
-      "diffCount": 40,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 34,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -4259,11 +4259,11 @@
     },
     {
       "slug": "javiki-44-cija459",
-      "diffCount": 93,
+      "diffCount": 92,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 76,
+        "geometry": 75,
         "text-metrics": 3,
         "format-units": 0,
         "other": 14
@@ -4331,11 +4331,11 @@
     },
     {
       "slug": "jerika-28-senu049",
-      "diffCount": 16,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -4463,11 +4463,11 @@
     },
     {
       "slug": "jogeto-89-zaco078",
-      "diffCount": 16,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -4511,11 +4511,11 @@
     },
     {
       "slug": "jonoja-01-zani191",
-      "diffCount": 12,
+      "diffCount": 10,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 2
@@ -4643,11 +4643,11 @@
     },
     {
       "slug": "junaxa-14-biko373",
-      "diffCount": 30,
+      "diffCount": 28,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 18,
+        "geometry": 16,
         "text-metrics": 0,
         "format-units": 0,
         "other": 12
@@ -4679,11 +4679,11 @@
     },
     {
       "slug": "jutomu-49-kemi074",
-      "diffCount": 39,
+      "diffCount": 15,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 32,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 7
@@ -4763,11 +4763,11 @@
     },
     {
       "slug": "kaporo-80-vace949",
-      "diffCount": 70,
+      "diffCount": 18,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 60,
+        "geometry": 8,
         "text-metrics": 4,
         "format-units": 0,
         "other": 6
@@ -4907,11 +4907,11 @@
     },
     {
       "slug": "kerezi-79-cepe665",
-      "diffCount": 27,
+      "diffCount": 21,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 18,
+        "geometry": 12,
         "text-metrics": 0,
         "format-units": 0,
         "other": 9
@@ -5471,11 +5471,11 @@
     },
     {
       "slug": "kugete-25-poba470",
-      "diffCount": 40,
+      "diffCount": 5,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 39,
+        "geometry": 4,
         "text-metrics": 0,
         "format-units": 0,
         "other": 1
@@ -5543,11 +5543,11 @@
     },
     {
       "slug": "kuputa-52-caxa434",
-      "diffCount": 64,
+      "diffCount": 18,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 54,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 10
@@ -5567,11 +5567,11 @@
     },
     {
       "slug": "kuzoba-85-fabe034",
-      "diffCount": 14,
+      "diffCount": 12,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 4
@@ -5795,11 +5795,11 @@
     },
     {
       "slug": "lemevu-44-gupu133",
-      "diffCount": 45,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 39,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -6047,11 +6047,11 @@
     },
     {
       "slug": "lojami-06-ligu429",
-      "diffCount": 26,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 20,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -6119,11 +6119,11 @@
     },
     {
       "slug": "losefo-71-dovi176",
-      "diffCount": 113,
+      "diffCount": 112,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 99,
+        "geometry": 98,
         "text-metrics": 0,
         "format-units": 0,
         "other": 14
@@ -6131,11 +6131,11 @@
     },
     {
       "slug": "losilu-30-ridu614",
-      "diffCount": 19,
+      "diffCount": 15,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 12,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 7
@@ -6419,11 +6419,11 @@
     },
     {
       "slug": "makigi-01-zeni607",
-      "diffCount": 34,
+      "diffCount": 33,
       "buckets": {
         "missing-element": 1,
         "extra-element": 0,
-        "geometry": 25,
+        "geometry": 24,
         "text-metrics": 2,
         "format-units": 0,
         "other": 6
@@ -6575,11 +6575,11 @@
     },
     {
       "slug": "mefone-86-soca963",
-      "diffCount": 39,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 33,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -6683,11 +6683,11 @@
     },
     {
       "slug": "merosa-99-nico816",
-      "diffCount": 20,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 14,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -6971,11 +6971,11 @@
     },
     {
       "slug": "modamu-43-juci519",
-      "diffCount": 24,
+      "diffCount": 22,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 14
@@ -7151,11 +7151,11 @@
     },
     {
       "slug": "mufote-89-buka575",
-      "diffCount": 16,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -7199,11 +7199,11 @@
     },
     {
       "slug": "mumagu-62-jicu083",
-      "diffCount": 18,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 12,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -7283,11 +7283,11 @@
     },
     {
       "slug": "muvaxa-46-teze620",
-      "diffCount": 37,
+      "diffCount": 12,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 33,
+        "geometry": 8,
         "text-metrics": 2,
         "format-units": 0,
         "other": 2
@@ -7331,11 +7331,11 @@
     },
     {
       "slug": "najuro-83-tuze073",
-      "diffCount": 18,
+      "diffCount": 12,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 12,
+        "geometry": 6,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -7355,11 +7355,11 @@
     },
     {
       "slug": "naliba-15-rari769",
-      "diffCount": 19,
+      "diffCount": 15,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 12,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 7
@@ -7535,11 +7535,11 @@
     },
     {
       "slug": "nereka-67-deco609",
-      "diffCount": 66,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 60,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -7871,11 +7871,11 @@
     },
     {
       "slug": "nosebu-15-fasu691",
-      "diffCount": 1324,
+      "diffCount": 1323,
       "buckets": {
         "missing-element": 1,
         "extra-element": 0,
-        "geometry": 1056,
+        "geometry": 1055,
         "text-metrics": 78,
         "format-units": 0,
         "other": 189
@@ -7883,11 +7883,11 @@
     },
     {
       "slug": "nosixi-41-rizu505",
-      "diffCount": 16,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -8123,11 +8123,11 @@
     },
     {
       "slug": "pagujo-10-pafe397",
-      "diffCount": 48,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 42,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -8207,11 +8207,11 @@
     },
     {
       "slug": "parimu-89-nemi931",
-      "diffCount": 22,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 16,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -8519,11 +8519,11 @@
     },
     {
       "slug": "pomoxu-05-luco302",
-      "diffCount": 910,
+      "diffCount": 909,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 869,
+        "geometry": 868,
         "text-metrics": 0,
         "format-units": 0,
         "other": 41
@@ -8795,11 +8795,11 @@
     },
     {
       "slug": "rabulu-15-mesu419",
-      "diffCount": 38,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 32,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -8867,11 +8867,11 @@
     },
     {
       "slug": "ramive-48-vabu271",
-      "diffCount": 91,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 85,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -8915,11 +8915,11 @@
     },
     {
       "slug": "ratufa-96-xagu210",
-      "diffCount": 20,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 14,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -9119,11 +9119,11 @@
     },
     {
       "slug": "rilefo-62-jedi773",
-      "diffCount": 78,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 72,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -9203,11 +9203,11 @@
     },
     {
       "slug": "rocipu-63-zafu641",
-      "diffCount": 18,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 12,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -9263,11 +9263,11 @@
     },
     {
       "slug": "rokava-82-kavo091",
-      "diffCount": 49,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 43,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -9311,11 +9311,11 @@
     },
     {
       "slug": "ropame-50-funo509",
-      "diffCount": 50,
+      "diffCount": 46,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 41,
+        "geometry": 37,
         "text-metrics": 0,
         "format-units": 0,
         "other": 9
@@ -9455,11 +9455,11 @@
     },
     {
       "slug": "rujapu-71-bidi404",
-      "diffCount": 683,
+      "diffCount": 682,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 630,
+        "geometry": 629,
         "text-metrics": 3,
         "format-units": 0,
         "other": 50
@@ -9779,11 +9779,11 @@
     },
     {
       "slug": "sefako-72-jono850",
-      "diffCount": 92,
+      "diffCount": 91,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 59,
+        "geometry": 58,
         "text-metrics": 0,
         "format-units": 0,
         "other": 33
@@ -10007,11 +10007,11 @@
     },
     {
       "slug": "sisena-47-nivo837",
-      "diffCount": 23,
+      "diffCount": 21,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 15,
+        "geometry": 13,
         "text-metrics": 0,
         "format-units": 0,
         "other": 8
@@ -10103,11 +10103,11 @@
     },
     {
       "slug": "sofavo-23-xuxi628",
-      "diffCount": 89,
+      "diffCount": 83,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 62,
+        "geometry": 56,
         "text-metrics": 0,
         "format-units": 0,
         "other": 27
@@ -10127,11 +10127,11 @@
     },
     {
       "slug": "sojufi-84-bexi933",
-      "diffCount": 68,
+      "diffCount": 67,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 33,
+        "geometry": 32,
         "text-metrics": 0,
         "format-units": 0,
         "other": 35
@@ -10139,11 +10139,11 @@
     },
     {
       "slug": "solivu-37-vika919",
-      "diffCount": 22,
+      "diffCount": 20,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 12
@@ -10175,11 +10175,11 @@
     },
     {
       "slug": "sopapu-09-riza536",
-      "diffCount": 20,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 14,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -10199,11 +10199,11 @@
     },
     {
       "slug": "soxata-16-kafi688",
-      "diffCount": 16,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -10283,11 +10283,11 @@
     },
     {
       "slug": "sukugi-55-kagi800",
-      "diffCount": 20,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 14,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -10559,11 +10559,11 @@
     },
     {
       "slug": "taxoza-93-sugi547",
-      "diffCount": 16,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -10571,11 +10571,11 @@
     },
     {
       "slug": "taxude-25-lamo370",
-      "diffCount": 17,
+      "diffCount": 15,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 7
@@ -10607,11 +10607,11 @@
     },
     {
       "slug": "tejuzi-96-fano922",
-      "diffCount": 111,
+      "diffCount": 110,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 90,
+        "geometry": 89,
         "text-metrics": 0,
         "format-units": 0,
         "other": 21
@@ -11063,11 +11063,11 @@
     },
     {
       "slug": "tukobo-89-zebi935",
-      "diffCount": 214,
+      "diffCount": 213,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 183,
+        "geometry": 182,
         "text-metrics": 6,
         "format-units": 0,
         "other": 25
@@ -11087,11 +11087,11 @@
     },
     {
       "slug": "tumega-91-dadu356",
-      "diffCount": 20,
+      "diffCount": 16,
       "buckets": {
         "missing-element": 1,
         "extra-element": 0,
-        "geometry": 12,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 7
@@ -11123,11 +11123,11 @@
     },
     {
       "slug": "tupolo-75-ziku881",
-      "diffCount": 46,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 40,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -11171,11 +11171,11 @@
     },
     {
       "slug": "tuzaga-87-gene496",
-      "diffCount": 41,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 35,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -11411,11 +11411,11 @@
     },
     {
       "slug": "vemako-00-lecu427",
-      "diffCount": 107,
+      "diffCount": 106,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 82,
+        "geometry": 81,
         "text-metrics": 0,
         "format-units": 0,
         "other": 25
@@ -11507,11 +11507,11 @@
     },
     {
       "slug": "vicevi-92-zeda652",
-      "diffCount": 44,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 38,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -12203,11 +12203,11 @@
     },
     {
       "slug": "xejeta-41-boje080",
-      "diffCount": 20,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 14,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -12215,11 +12215,11 @@
     },
     {
       "slug": "xejojo-44-besu904",
-      "diffCount": 18,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 12,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -12239,11 +12239,11 @@
     },
     {
       "slug": "xepoda-56-xema668",
-      "diffCount": 24,
+      "diffCount": 22,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 14
@@ -12263,11 +12263,11 @@
     },
     {
       "slug": "xerugu-77-tapu134",
-      "diffCount": 12,
+      "diffCount": 10,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 2
@@ -12275,11 +12275,11 @@
     },
     {
       "slug": "xesame-35-puka061",
-      "diffCount": 19,
+      "diffCount": 15,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 12,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 7
@@ -12287,11 +12287,11 @@
     },
     {
       "slug": "xevovo-09-jeja818",
-      "diffCount": 43,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 37,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -12707,11 +12707,11 @@
     },
     {
       "slug": "xurenu-86-nezu467",
-      "diffCount": 41,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 35,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -12911,11 +12911,11 @@
     },
     {
       "slug": "zariro-57-fogu131",
-      "diffCount": 46,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 40,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -12947,11 +12947,11 @@
     },
     {
       "slug": "zaviru-83-xixa466",
-      "diffCount": 45,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 39,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -13067,11 +13067,11 @@
     },
     {
       "slug": "zerovu-57-cumo773",
-      "diffCount": 18,
+      "diffCount": 16,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 10,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 8
@@ -13151,11 +13151,11 @@
     },
     {
       "slug": "zidova-39-bapi223",
-      "diffCount": 32,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 26,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -13367,11 +13367,11 @@
     },
     {
       "slug": "zucesu-12-neno978",
-      "diffCount": 42,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 36,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
@@ -13379,11 +13379,11 @@
     },
     {
       "slug": "zudize-61-vomi445",
-      "diffCount": 178875,
+      "diffCount": 178874,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 157924,
+        "geometry": 157923,
         "text-metrics": 1,
         "format-units": 58,
         "other": 20892
@@ -13391,11 +13391,11 @@
     },
     {
       "slug": "zufido-27-laru296",
-      "diffCount": 18,
+      "diffCount": 14,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 12,
+        "geometry": 8,
         "text-metrics": 0,
         "format-units": 0,
         "other": 6

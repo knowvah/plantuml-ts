@@ -34,7 +34,12 @@ import {
   portTablePad,
   measureTitleLabel,
 } from './layout-helpers.js';
-import { computePortClusterBbox, type PortClusterInfo, type ClusterSpacing } from './frontier-cluster-bbox.js';
+import {
+  computePortClusterBbox,
+  registerPortCluster,
+  type PortClusterInfo,
+  type ClusterSpacing,
+} from './frontier-cluster-bbox.js';
 import { buildLinkEdgeAttributes, type EdgeFontSpecs } from './link-edge-attrs.js';
 import { visibleStereotypeLabels, nodeWithVisibleStereotype } from './element-grammar.js';
 import { dotKeyFor } from './namespace-groups.js';
@@ -442,6 +447,9 @@ function buildGeoNode(
   // `Entity#isHidden` parent short-circuit makes that combination
   // structurally impossible).
   if (hidden.has(key)) geo.hidden = true;
+  if (portInfo !== undefined) {
+    registerPortCluster(geo, portInfo, portClusterCtx.spacing, [...portClusterCtx.infoByAstId.keys()].indexOf(key));
+  }
   return geo;
   // #lizard forgives -- pre-existing (NLOC 49, CCN 17, 8 params): two
   // parallel leaf/container branches (upstream's own EMPTY_PACKAGE-demote

@@ -1,0 +1,3 @@
+surveying 44 ebnf fixtures (concurrency 6)
+  25/44
+wrote plans/large-group-mirror/measurements/final-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}

@@ -128,3 +128,64 @@ describe('mainframe — drawn via BigFrame (cdd-T34)', () => {
     expect(result.body).toContain('<rect x="5" y="10"');
   });
 });
+
+describe('mainframe -- LineStyle (lgm-T1a, gunecu-53-jebu067: `mainframe { LineStyle 2 }`)', () => {
+  it('a dashed style draws stroke-dasharray on the frame rect AND the tab path', () => {
+    const annotations = createAnnotations();
+    setMainFrame(annotations, singleDisplayPositioned(['demo'], null, null, 0));
+    const styles = plainStyles();
+    styles.mainframe = { ...styles.mainframe, lineStyle: { dashVisible: 2, dashSpace: 2 } };
+
+    const result = applyChrome(makeFragment(70, 107), annotations, styles, MEASURER);
+
+    expect(result.body.match(/stroke-dasharray="2,2"/g)).toHaveLength(2);
+  });
+
+  it('a solid style (dashVisible 0) draws no stroke-dasharray', () => {
+    const annotations = createAnnotations();
+    setMainFrame(annotations, singleDisplayPositioned(['demo'], null, null, 0));
+    const styles = plainStyles();
+    styles.mainframe = { ...styles.mainframe, lineStyle: { dashVisible: 0, dashSpace: 0 } };
+
+    expect(applyChrome(makeFragment(70, 107), annotations, styles, MEASURER).body).not.toContain('stroke-dasharray');
+  });
+});
+
+describe('mainframe -- sized from ink, not dimension (lgm-T1a)', () => {
+  /** SEQUENCE bodies are scanned: `ww` = the rect's ink maxX (x + w - 1), `hh` likewise. */
+  it('frames a SEQUENCE body by its LimitFinder ink', () => {
+    const annotations = createAnnotations();
+    setMainFrame(annotations, singleDisplayPositioned(['demo'], null, null, 0));
+    const fragment: RenderFragment = {
+      body: '<rect x="10" y="20" width="30" height="40" fill="#FFF"/>',
+      width: 500,
+      height: 500,
+      diagramType: 'SEQUENCE',
+    };
+
+    const result = applyChrome(fragment, annotations, plainStyles(), MEASURER);
+
+    // ink = (9,19)..(39,59): ww = 39, hh = 59. BigFrame: width = padding.left 5
+    // + max(ww + 12, titleW + 10) + padding.right 5 = 61; the +margin 5/5 => 71.
+    expect(result.width).toBe(5 + 61 + 5);
+    // height = padding.top (1 + titleH + 10) + titleH + hh + padding.bottom 1, margin 10/10.
+    const titleH = 10; // FixedMeasurer(10, 10)
+    expect(result.height).toBe(10 + (1 + titleH + 10) + titleH + 59 + 1 + 10);
+  });
+
+  it('a producer-exported frameInk wins over the body, and an ink reaching x < 0 is moved back by computeDelta', () => {
+    const annotations = createAnnotations();
+    setMainFrame(annotations, singleDisplayPositioned(['demo'], null, null, 0));
+    const fragment: RenderFragment = {
+      body: '<g id="ANCHOR"/>',
+      width: 500,
+      height: 500,
+      frameInk: { minX: -1, minY: 0, maxX: 100, maxY: 50 },
+    };
+
+    const result = applyChrome(fragment, annotations, plainStyles(), MEASURER);
+
+    // ww = maxX - minX = 101 (BigFrame.java:81, minX < 0): 5 + (101 + 12) + 5.
+    expect(result.width).toBe(5 + (5 + 113 + 5) + 5);
+  });
+});
