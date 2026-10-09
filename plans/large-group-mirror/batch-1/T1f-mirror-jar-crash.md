@@ -1,5 +1,7 @@
 # T1f — mirror the jar's deterministic-mode crash (user ruling 2026-10-08)
 
+**DROPPED 2026-10-08 (journal row 19):** user reversed the ruling — "if we render as full diagrams, then maybe we're OK". Kept for the facts section only.
+
 **Agent:** typescript-pro (sonnet, high). Runs after T1e merges (both may touch
 `src/index.ts`). Worktree `measurements/mkwt.sh T1f`.
 

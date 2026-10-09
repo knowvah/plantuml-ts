@@ -14,4 +14,4 @@ T1a must not edit `src/core/svek/**`; T1b must not edit `src/index.ts`,
 | [T1c](T1c-svek-mainframe-raw.md) | state + description draw the framed SvekResult un-normalized (T1a remainder) | typescript-pro | see T1c file (disjoint from T1b) | T1a | [x] |
 | [T1d](T1d-drawn-cluster-rect.md) | draw the border-point composite at the rect after L+2 mutations (T1b remainder) | typescript-pro | see T1d file (disjoint from T1c) | T1b | [x] |
 | [T1e](T1e-embedded-svg-arm.md) | `{{ }}` slots sized by the jar SVG arm after oracle seam #3 (user-ordered) | typescript-pro | see T1e file | b92305594 | [ ] |
-| [T1f](T1f-mirror-jar-crash.md) | mirror the jar deterministic-mode crash: error page where the jar crashes (user ruling) | typescript-pro | see T1f file | T1e | [ ] |
+| ~~[T1f](T1f-mirror-jar-crash.md)~~ | DROPPED (user, row 19): rendering full diagrams is acceptable | — | — | — | n/a |
