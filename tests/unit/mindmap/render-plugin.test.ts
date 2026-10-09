@@ -58,7 +58,7 @@ describe('mindmap plugin — renderSync equals the jar golden', () => {
   it('dezuza: the title sits inside the top margin (y 41.889 under the header), not at the canvas edge', () => {
     const svg = renderSync(fixture('mindmap', 'dezuza-88-gige110').markup, { measurer });
     const title = /<g class="title"[^>]*><text x="([\d.]+)" y="([\d.]+)"/.exec(svg);
-    expect(Number(title?.[1])).toBeCloseTo(181.3, 3);
+    expect(Number(title?.[1])).toBeCloseTo(177.45, 3); // dezuza in.svg title x (re-captured, seam #4 v2)
     expect(Number(title?.[2])).toBeCloseTo(41.889, 3);
     expect(rootAttr(svg, 'viewBox')).toBe('0 0 440 230');
   });

@@ -73,10 +73,11 @@ mindmapDiagram {
 ** a
 @endmindmap`;
 
-  /** The jar render of `* r` / `** a` (`scripts/oracle-render.sh`), boxes only. */
+  /** The jar render of `* r` / `** a` (`scripts/oracle-render.sh`, re-rendered under
+   *  seam #4 v2 -- widths are float32, hence .637 not .638), boxes only. */
   const JAR_BOXES = [
-    '<rect x="10" y="20" width="24.638" height="34" fill="#F1F1F1" style="stroke:#181818;stroke-width:1.5;" rx="12.5" ry="12.5"/>',
-    '<rect x="84.638" y="20" width="27.788" height="34" fill="#F1F1F1" style="stroke:#181818;stroke-width:1.5;" rx="12.5" ry="12.5"/>',
+    '<rect x="10" y="20" width="24.637" height="34" fill="#F1F1F1" style="stroke:#181818;stroke-width:1.5;" rx="12.5" ry="12.5"/>',
+    '<rect x="84.637" y="20" width="27.787" height="34" fill="#F1F1F1" style="stroke:#181818;stroke-width:1.5;" rx="12.5" ry="12.5"/>',
   ];
 
   it('a transparent arrow LineColor draws no link, only the two boxes (jar render)', () => {
@@ -88,7 +89,7 @@ mindmapDiagram {
     const elements = drawn(onlyMindMap('@startmindmap\n* r\n** a\n@endmindmap', Rankdir.LEFT_TO_RIGHT));
     expect(elements.filter((e) => !e.startsWith('<text'))).toEqual([
       ...JAR_BOXES,
-      '<path d="M34.638,37 L44.638,37 C59.638,37 59.638,37 74.638,37 L84.638,37" style="stroke:#181818;stroke-width:1;" fill="none"/>',
+      '<path d="M34.637,37 L44.637,37 C59.637,37 59.637,37 74.637,37 L84.637,37" style="stroke:#181818;stroke-width:1;" fill="none"/>',
     ]);
   });
 });
