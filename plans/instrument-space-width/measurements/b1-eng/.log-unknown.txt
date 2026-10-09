@@ -34,4 +34,4 @@ surveying 825 unknown fixtures (concurrency 6)
   825/825
 [xmldom fatalError]	comment is not well-formed at position 1360 
 @#[line:1,col:1361]
-wrote plans/instrument-space-width/measurements/b1-eng/parity-unknown.json — {"conformant":338,"structural-match":65,"diverged":417,"errored":0,"timeout":5,"oracle-error":0}
+wrote plans/instrument-space-width/measurements/b1-eng/parity-unknown.json — {"conformant":340,"structural-match":66,"diverged":419,"errored":0,"timeout":0,"oracle-error":0}

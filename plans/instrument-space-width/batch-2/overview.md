@@ -1,45 +1,21 @@
-# Batch 2..N — fix every reveal family (D8, template)
+# Batch 2a — fix every reveal family (on isw/T1b, before the T1b merge)
 
-Tasks are created by the orchestrator from `measurements/families.md` after
-T1b. One task per family (push-forward: split/merge families when the census
-shows a shared/distinct mechanism). Batches repeat (2a, 2b, …) until
-`measurements/owed.json` is empty. Stop 13: 3 fix batches without the owed
-count halving.
+Created from the b1 census (journal rows 16–20; `diagnosis/diag-*.md`). Runs on
+task worktrees off `isw/T1b` (journal row 17: fix before merge, residue owed).
+Rule 12 per-agent all-engine surveys are replaced by: each agent surveys ONLY
+its own engine(s), foreground, `--maxWorkers=2`; the orchestrator runs the
+all-engine survey, elements, seq-scores and the production manifest at merge.
+Production changes are expected and must be attributed (D10-AMEND RULED):
+each agent lists which families change production output.
 
-| ID | Family | Agent | Writes | Depends On | Done |
-|---|---|---|---|---|---|
-| (from census) | | typescript-pro | named per family; disjoint within a batch | b1 / previous batch | |
+| ID | Families | Agent | Writes (exclusive) | Done |
+|---|---|---|---|---|
+| T2-act | F1 (inject measurer, 9 sites), F2-act (parser trims), F3-act (trailing special swimlane), F5 (wrapWidth), F6/F7 diagnose+fix, activity S/P tests; the 19 ACTIVITY-typed `unknown/` rows | typescript-pro (opus) | `src/diagrams/activity/**`, `tests/diagrams/activity/**`, `tests/unit/activity/**`, `tests/oracle/svg-conformance/activity-*.test.ts` (non-baseline logic only) | [ ] |
+| T2-seq | F1 site (renderer-participant-symbol.ts:201), F2-seq (trim-then-measure: drawWidth + leading shift), F3-seq (divider greedy label), F4-seq (ref per-line trim), F5-seq (autonumber block in span), X (ComponentRoseNote int note width), seq S/P tests | typescript-pro (sonnet) | `src/diagrams/sequence/**`, `tests/unit/sequence/**` | [ ] |
+| T2-cls | F2a–F2f (class atoms/rows/notes/table cells/edge labels/namespace titles), F3 (note/legend bodies: removeEmptyColumns not trim), F3d + F4 (description notes, `[ .. ]` label), F7 (multiline element trimSmart), lisepi object `<style>`, class/description/object/core-svek S/P tests | typescript-pro (sonnet) | `src/diagrams/class/**`, `src/diagrams/description/**`, `src/diagrams/object/**`, `tests/unit/class/**`, `tests/unit/description/**`, `tests/unit/core/svek/**` | [ ] |
+| T2-smj | F2-state (per-run drawDx + trimmed textLength), F3-state (tabSize always 8), F4-mm (multiline orgmode keeps spaces), F5-json (empty stripe " "), Smetana allow-list tests, state/mindmap/json S/P tests | typescript-pro (sonnet) | `src/diagrams/{state,mindmap,json}/**`, `tests/unit/{state,mindmap,json}/**`, `tests/unit/json/**`, `tests/oracle/svg-conformance/json-family-structural*.ts` | [ ] |
+| T2-core | F2-core (svg-text-font.ts leading-space shift helper + doc; error pages graphic-strings.ts / error-page-exact.ts / error-text.ts / PSystemError.ts), F2-table-cell (creole-table.ts keeps cell spaces), core/misc S/P tests | typescript-pro (sonnet) | `src/core/**` (except measurer files), `tests/unit/core/**` (except svek), `tests/unit/*.test.ts`, `tests/oracle/svg-conformance/unwind*.test.ts` | [ ] |
 
-Close each batch per [close-procedure.md](../close-procedure.md); clear rows
-from `owed.json` only when re-measured at the close (never on an agent's word).
-
-## Task file template — `batch-2/T2<x>-<family>.md`
-
-```
-# T2<x> — <family>: <one-line symptom>
-
-Agent: typescript-pro (sonnet, high). Prompt = common-rules.md + this file.
-Worktree: measurements/mkwt.sh T2<x>.
-
-## Why (measured at b1 — re-take, do not trust)
-Signature: <diff path>. Fixtures (<n>): <list or measurements/families.md#anchor>.
-b0 → b1 per fixture: <verdict / ws>. Hypothesis is NOT given: find the Java.
-
-## Write-set
-<files>; tests/fixtures/isw-T2<x>/; its tests; .agent-notes/isw-T2<x>.md.
-
-## Do
-1. Render 3 family fixtures with the jar; locate where ours first departs.
-2. Read the Java that produces that value under real-width spaces; quote it.
-3. Port the mechanism once at its origin (no per-engine copy); author jar
-   fixtures isolating it (single space, runs of spaces, leading/trailing).
-4. Rule-12 survey; report which owed rows clear and any new movement.
-
-## Acceptance
-- Given every fixture in the family, when surveyed, then conformant (or ≤ its
-  b0 score with 0 elements AWAY).
-- Given the all-engine survey, when diffed against the batch's prev, then 0
-  losses outside owed and 0 new owed rows.
-
-Observability: N/A. Rollback: reversible.
-```
+Orchestrator-only: every baseline/pin JSON (ratchets, census, routing/refusal,
+size/direction backlogs), `owed.json`, `tests/fixtures/**` jar renders (the
+re-capture tool missed multi-page `_00N.svg` — orchestrator fixes and re-runs).

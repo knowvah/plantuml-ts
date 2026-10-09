@@ -133,17 +133,17 @@
  "activity/begivo-34-sicu289": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[5]/@textLength"
   }
  },
  "activity/bejeta-45-sotu349": {
@@ -166,7 +166,20 @@
   }
  },
  "activity/besaga-58-poli497": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength"
+  }
  },
  "activity/bideta-97-cezo697": {
   "cls": "owed",
@@ -277,7 +290,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[11]/@textLength"
+   "firstDiff": "svg/g[1]/text[10]/@textLength"
   }
  },
  "activity/bizono-61-sasa740": {
@@ -544,12 +557,9 @@
  "activity/cemagu-66-vazo965": {
   "cls": "owed",
   "why": [
-   "verdict conformant->diverged",
-   "element <image> away 0->2",
-   "element <rect> away 0->1",
-   "element <text> away 0->59"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:svg/@background",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
@@ -557,7 +567,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/@background"
+   "firstDiff": "svg/g[1]/text[1]/@textLength"
   }
  },
  "activity/cemipu-87-dinu624": {
@@ -614,23 +624,23 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[5]/@textLength"
+   "firstDiff": "svg/g[1]/text[4]/@textLength"
   }
  },
  "activity/ciloke-34-pumi198": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[3]/@textLength"
   }
  },
  "activity/citire-32-mive114": {
@@ -669,7 +679,20 @@
   "cls": "unchanged"
  },
  "activity/cofubo-18-koju711": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength"
+  }
  },
  "activity/cokoja-48-luki109": {
   "cls": "owed",
@@ -684,7 +707,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[4]/@textLength"
+   "firstDiff": "svg/g[1]/text[2]/@textLength"
   }
  },
  "activity/copisa-69-xisi273": {
@@ -862,17 +885,17 @@
  "activity/decudi-92-bisu741": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[8]/@textLength"
   }
  },
  "activity/delide-30-teva601": {
@@ -990,7 +1013,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[8]/@textLength"
+   "firstDiff": "svg/g[1]/text[3]/@textLength"
   }
  },
  "activity/dixiku-28-guzo497": {
@@ -1025,7 +1048,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[4]/@textLength"
+   "firstDiff": "svg/g[1]/text[3]/@textLength"
   }
  },
  "activity/doziki-93-rosi997": {
@@ -1057,7 +1080,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[6]/@textLength"
+   "firstDiff": "svg/g[1]/text[2]/@textLength"
   }
  },
  "activity/dulezi-77-sana210": {
@@ -1196,17 +1219,17 @@
  "activity/felega-00-saxi785": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[2]/@textLength"
   }
  },
  "activity/femaco-88-bufe808": {
@@ -1334,7 +1357,20 @@
   "cls": "unchanged"
  },
  "activity/foludi-80-gilo247": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength"
+  }
  },
  "activity/fomapa-90-bore251": {
   "cls": "owed",
@@ -1362,7 +1398,20 @@
   "cls": "unchanged"
  },
  "activity/fovaja-48-leso567": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength"
+  }
  },
  "activity/fufefa-17-faje066": {
   "cls": "owed",
@@ -1419,7 +1468,20 @@
   "cls": "unchanged"
  },
  "activity/gacaja-15-keko600": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[17]/@textLength"
+  }
  },
  "activity/gafuxi-23-kexi909": {
   "cls": "owed",
@@ -1521,7 +1583,20 @@
   }
  },
  "activity/gelono-70-zuce760": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[6]/@textLength"
+  }
  },
  "activity/gepetu-15-seba834": {
   "cls": "unchanged"
@@ -1740,7 +1815,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[5]/@textLength"
+   "firstDiff": "svg/g[1]/text[4]/@textLength"
   }
  },
  "activity/gufuma-85-zoce945": {
@@ -1829,17 +1904,17 @@
  "activity/jakuco-69-dari135": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[4]/@textLength"
   }
  },
  "activity/jamana-83-gige126": {
@@ -1859,7 +1934,20 @@
   }
  },
  "activity/japeku-46-kulo799": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength"
+  }
  },
  "activity/japeru-28-guku001": {
   "cls": "owed",
@@ -1931,7 +2019,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[4]/@textLength"
+   "firstDiff": "svg/g[1]/text[2]/@textLength"
   }
  },
  "activity/jevofu-58-fazo194": {
@@ -1982,7 +2070,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[4]/@textLength"
+   "firstDiff": "svg/g[1]/text[2]/@textLength"
   }
  },
  "activity/jodagi-12-xatu540": {
@@ -2122,7 +2210,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[4]/@textLength"
+   "firstDiff": "svg/g[1]/text[2]/@textLength"
   }
  },
  "activity/kafevi-44-tesu096": {
@@ -2158,7 +2246,20 @@
   }
  },
  "activity/katime-87-vole867": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength"
+  }
  },
  "activity/katopo-68-xajo866": {
   "cls": "owed",
@@ -2409,7 +2510,20 @@
   "cls": "unchanged"
  },
  "activity/lacuci-13-nogo718": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength"
+  }
  },
  "activity/lafilo-69-tuti771": {
   "cls": "owed",
@@ -2606,7 +2720,20 @@
   }
  },
  "activity/lopone-15-xiki477": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength"
+  }
  },
  "activity/loxija-71-joku558": {
   "cls": "owed",
@@ -2700,17 +2827,17 @@
  "activity/maduja-30-xiri319": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[1]/@textLength"
   }
  },
  "activity/mafete-03-rapa918": {
@@ -2732,33 +2859,33 @@
  "activity/maketa-43-juja264": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[5]/@textLength"
   }
  },
  "activity/manata-12-rido730": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[9]/@textLength"
   }
  },
  "activity/mazoka-64-nixi123": {
@@ -2866,33 +2993,33 @@
  "activity/misiji-27-buje656": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[6]/@textLength"
   }
  },
  "activity/mojezi-43-gamu360": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[7]/@textLength"
   }
  },
  "activity/molexa-46-redi999": {
@@ -3057,15 +3184,9 @@
  "activity/nerete-42-save418": {
   "cls": "owed",
   "why": [
-   "verdict conformant->diverged",
-   "element <ellipse> away 0->1",
-   "element <image> away 0->2",
-   "element <line> away 0->22",
-   "element <polygon> away 0->16",
-   "element <rect> away 0->2",
-   "element <text> away 0->66"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:svg/g/text/@font-size",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
@@ -3073,7 +3194,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[1]/@font-size"
+   "firstDiff": "svg/g[1]/text[3]/@textLength"
   }
  },
  "activity/nesozi-09-zezu092": {
@@ -3261,7 +3382,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[6]/@textLength"
+   "firstDiff": "svg/g[1]/text[2]/@textLength"
   }
  },
  "activity/nomeco-93-minu967": {
@@ -3281,7 +3402,20 @@
   }
  },
  "activity/nonusu-50-nute147": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength"
+  }
  },
  "activity/norire-15-taka956": {
   "cls": "owed",
@@ -3385,7 +3519,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[5]/@textLength"
+   "firstDiff": "svg/g[1]/text[2]/@textLength"
   }
  },
  "activity/nusajo-97-bemo713": {
@@ -3442,17 +3576,17 @@
  "activity/pakema-21-xema183": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[4]/@textLength"
   }
  },
  "activity/patagi-39-jone354": {
@@ -3729,17 +3863,17 @@
  "activity/povoju-50-raxi136": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[4]/@textLength"
   }
  },
  "activity/pubeza-23-jaza106": {
@@ -3933,7 +4067,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[5]/@textLength"
+   "firstDiff": "svg/g[1]/text[2]/@textLength"
   }
  },
  "activity/romuru-66-samu329": {
@@ -3945,15 +4079,9 @@
  "activity/rosepa-78-xivi448": {
   "cls": "owed",
   "why": [
-   "verdict conformant->diverged",
-   "element <ellipse> away 0->7",
-   "element <image> away 0->2",
-   "element <line> away 0->17",
-   "element <polygon> away 0->15",
-   "element <rect> away 0->2",
-   "element <text> away 0->60"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:svg/g/text/@font-size",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
@@ -3961,7 +4089,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[1]/@font-size"
+   "firstDiff": "svg/g[1]/text[3]/@textLength"
   }
  },
  "activity/rosizo-69-mera514": {
@@ -4018,17 +4146,17 @@
  "activity/rujuxa-07-neco067": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[6]/@textLength"
   }
  },
  "activity/runima-82-jigi009": {
@@ -4347,7 +4475,20 @@
   }
  },
  "activity/suluni-73-lotu140": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength"
+  }
  },
  "activity/sutura-08-zeme419": {
   "cls": "owed",
@@ -4366,7 +4507,20 @@
   }
  },
  "activity/suzuci-53-biku826": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength"
+  }
  },
  "activity/tagixo-41-gapo816": {
   "cls": "owed",
@@ -4454,17 +4608,17 @@
  "activity/tefuga-86-xefe850": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[3]/@textLength"
   }
  },
  "activity/tepivu-88-reze603": {
@@ -4591,7 +4745,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[2]/@textLength"
+   "firstDiff": "svg/g[1]/text[1]/@textLength"
   }
  },
  "activity/vafupe-19-cima350": {
@@ -4616,24 +4770,50 @@
  "activity/vatame-42-dege160": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[12]/@textLength"
   }
  },
  "activity/vaxiki-78-nice114": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength"
+  }
  },
  "activity/vaxuta-95-cico162": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[8]/@textLength"
+  }
  },
  "activity/vebala-15-tade547": {
   "cls": "owed",
@@ -4738,7 +4918,20 @@
   }
  },
  "activity/vimoxa-78-zucu656": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength"
+  }
  },
  "activity/vipixe-71-rika369": {
   "cls": "unchanged"
@@ -4792,7 +4985,20 @@
   }
  },
  "activity/volefo-41-tolo996": {
-  "cls": "unchanged"
+  "cls": "owed",
+  "why": [
+   "verdict conformant->diverged"
+  ],
+  "family": "activity:svg/g/text/@textLength",
+  "b0": {
+   "verdict": "conformant",
+   "dotEqual": true
+  },
+  "b1": {
+   "verdict": "diverged",
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength"
+  }
  },
  "activity/vopidi-45-jitu863": {
   "cls": "owed",
@@ -4903,7 +5109,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[4]/@textLength"
+   "firstDiff": "svg/g[1]/text[3]/@textLength"
   }
  },
  "activity/xaxene-93-doka767": {
@@ -5253,17 +5459,17 @@
  "activity/zinelo-77-losu727": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[6]/@textLength"
   }
  },
  "activity/zivege-92-rise076": {
@@ -5336,17 +5542,17 @@
  "activity/zokodi-10-dexu703": {
   "cls": "owed",
   "why": [
-   "verdict conformant->structural-match"
+   "verdict conformant->diverged"
   ],
-  "family": "activity:verdict",
+  "family": "activity:svg/g/text/@textLength",
   "b0": {
    "verdict": "conformant",
    "dotEqual": true
   },
   "b1": {
-   "verdict": "structural-match",
+   "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": null
+   "firstDiff": "svg/g[1]/text[1]/@textLength"
   }
  },
  "activity/zokuni-21-sapu966": {
@@ -11270,92 +11476,22 @@
   "cls": "unchanged"
  },
  "sequence/bacupi-77-fuke586": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "sequence:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "sequence/badoba-13-cuba151": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "sequence:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "sequence/badolo-34-lesi912": {
   "cls": "unchanged"
  },
  "sequence/bafego-76-loru892": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "sequence:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "sequence/bagexe-03-bozo133": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "sequence:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "sequence/bajapi-70-tevi384": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "sequence:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "sequence/bajocu-67-ciki049": {
   "cls": "unchanged"
@@ -16388,92 +16524,22 @@
   "cls": "unchanged"
  },
  "state/bajelo-54-dixe684": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "state:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "state/bapoja-80-lori225": {
-  "cls": "owed",
-  "why": [
-   "verdict conformant->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "state:verdict",
-  "b0": {
-   "verdict": "conformant",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "state/beguxu-19-tize774": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "state:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "state/bemena-23-zebu249": {
   "cls": "unchanged"
  },
  "state/bilare-19-fufe539": {
-  "cls": "owed",
-  "why": [
-   "verdict conformant->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "state:verdict",
-  "b0": {
-   "verdict": "conformant",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "state/bitaxo-18-tamo974": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "state:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "state/bujuta-44-rovo666": {
   "cls": "unchanged"
@@ -17422,89 +17488,19 @@
   "cls": "unchanged"
  },
  "timing/bejilu-38-kaje288": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "timing:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "timing/biduxi-87-tomu388": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "timing:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "timing/bigadu-24-tuli587": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "timing:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "timing/bipocu-94-koce204": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "timing:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "timing/bixutu-58-kofa364": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "timing:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "timing/bogube-37-dire976": {
   "cls": "unchanged"
@@ -18827,21 +18823,7 @@
   "cls": "unchanged"
  },
  "unknown/jivufi-79-simi298": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "unknown:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "unknown/jixibu-01-xave465": {
   "cls": "unchanged"
@@ -18899,71 +18881,16 @@
   }
  },
  "unknown/josebu-55-seje426": {
-  "cls": "owed",
-  "why": [
-   "verdict conformant->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "unknown:verdict",
-  "b0": {
-   "verdict": "conformant",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "unknown/jubaba-44-tole509": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "unknown:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "unknown/jubete-32-sutu417": {
-  "cls": "owed",
-  "why": [
-   "verdict structural-match->timeout"
-  ],
-  "family": "unknown:verdict",
-  "b0": {
-   "verdict": "structural-match",
-   "dotEqual": false
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "unknown/judelo-10-teca860": {
-  "cls": "owed",
-  "why": [
-   "verdict conformant->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "unknown:verdict",
-  "b0": {
-   "verdict": "conformant",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "unknown/jugepi-77-xude968": {
   "cls": "unchanged"
@@ -20239,7 +20166,7 @@
   "b1": {
    "verdict": "diverged",
    "dotEqual": true,
-   "firstDiff": "svg/g[1]/text[15]/@textLength"
+   "firstDiff": "svg/g[1]/text[14]/@textLength"
   }
  },
  "unknown/vabobu-24-temi990": {
@@ -20766,89 +20693,19 @@
   "cls": "unchanged"
  },
  "usecase/berufi-69-dara369": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "usecase:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "usecase/bivira-53-boja685": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "usecase:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "usecase/bixofa-44-siso224": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "usecase:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "usecase/bobije-35-nigi914": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "usecase:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "usecase/bootstrap-0": {
-  "cls": "owed",
-  "why": [
-   "verdict conformant->timeout",
-   "dotEqual true->false"
-  ],
-  "family": "usecase:verdict",
-  "b0": {
-   "verdict": "conformant",
-   "dotEqual": true
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "usecase/camevo-41-suki094": {
   "cls": "unchanged"
@@ -21790,100 +21647,22 @@
   "cls": "unchanged"
  },
  "yaml/bafemu-96-luji978": {
-  "cls": "owed",
-  "why": [
-   "verdict diverged->timeout"
-  ],
-  "family": "yaml:verdict",
-  "b0": {
-   "verdict": "diverged",
-   "dotEqual": false
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "yaml/bedega-54-romu926": {
-  "cls": "owed",
-  "why": [
-   "verdict conformant->timeout"
-  ],
-  "family": "yaml:verdict",
-  "b0": {
-   "verdict": "conformant",
-   "dotEqual": false
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "yaml/coxima-79-gano159": {
-  "cls": "owed",
-  "why": [
-   "verdict conformant->timeout"
-  ],
-  "family": "yaml:verdict",
-  "b0": {
-   "verdict": "conformant",
-   "dotEqual": false
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "yaml/finofu-94-daso450": {
-  "cls": "owed",
-  "why": [
-   "verdict conformant->timeout"
-  ],
-  "family": "yaml:verdict",
-  "b0": {
-   "verdict": "conformant",
-   "dotEqual": false
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "yaml/gabalo-23-tefe408": {
-  "cls": "owed",
-  "why": [
-   "verdict structural-match->timeout"
-  ],
-  "family": "yaml:verdict",
-  "b0": {
-   "verdict": "structural-match",
-   "dotEqual": false
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "yaml/gatuva-87-futo104": {
-  "cls": "owed",
-  "why": [
-   "verdict structural-match->timeout"
-  ],
-  "family": "yaml:verdict",
-  "b0": {
-   "verdict": "structural-match",
-   "dotEqual": false
-  },
-  "b1": {
-   "verdict": "timeout",
-   "dotEqual": false,
-   "firstDiff": null
-  }
+  "cls": "unchanged"
  },
  "yaml/gipoxa-19-bico146": {
   "cls": "unchanged"

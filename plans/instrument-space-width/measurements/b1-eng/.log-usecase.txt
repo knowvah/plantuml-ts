@@ -4,4 +4,4 @@ surveying 94 usecase fixtures (concurrency 6)
   25/93
   50/93
   75/93
-wrote plans/instrument-space-width/measurements/b1-eng/parity-usecase.json — {"conformant":28,"structural-match":18,"diverged":42,"errored":0,"timeout":5,"oracle-error":1}
+wrote plans/instrument-space-width/measurements/b1-eng/parity-usecase.json — {"conformant":29,"structural-match":18,"diverged":46,"errored":0,"timeout":0,"oracle-error":1}

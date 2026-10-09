@@ -17,4 +17,4 @@ surveying 451 activity fixtures (concurrency 6)
   400/451
   425/451
   450/451
-wrote plans/instrument-space-width/measurements/b1-eng/parity-activity.json — {"conformant":107,"structural-match":40,"diverged":304,"errored":0,"timeout":0,"oracle-error":0}
+wrote plans/instrument-space-width/measurements/b1-eng/parity-activity.json — {"conformant":90,"structural-match":23,"diverged":338,"errored":0,"timeout":0,"oracle-error":0}

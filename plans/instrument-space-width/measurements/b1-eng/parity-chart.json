@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T13:37:00.178Z",
+  "generatedAt": "2026-10-09T20:54:11.347Z",
   "fixtures": [
     {
       "slug": "babadu-29-gexe909",
@@ -168,7 +168,7 @@
       "type": "chart",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 638.913,
+      "maxDelta": 638.912,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/g[1]/rect[1]/@width"
     },

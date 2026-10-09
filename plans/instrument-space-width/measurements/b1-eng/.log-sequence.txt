@@ -44,4 +44,4 @@ surveying 1141 sequence fixtures (concurrency 6)
   1075/1141
   1100/1141
   1125/1141
-wrote plans/instrument-space-width/measurements/b1-eng/parity-sequence.json — {"conformant":0,"structural-match":0,"diverged":1136,"errored":0,"timeout":5,"oracle-error":0}
+wrote plans/instrument-space-width/measurements/b1-eng/parity-sequence.json — {"conformant":0,"structural-match":0,"diverged":1141,"errored":0,"timeout":0,"oracle-error":0}

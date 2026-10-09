@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T13:41:11.652Z",
+  "generatedAt": "2026-10-09T20:58:25.605Z",
   "fixtures": [
     {
       "slug": "baloca-83-nadu916",
@@ -255,7 +255,7 @@
       "type": "object",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 596.062,
+      "maxDelta": 596.0630000000001,
       "firstDiff": "svg/g[1]/g[1]/rect[1]/@stroke",
       "maxDeltaPath": "svg/g[1]/g[2]/line[1]/@x2"
     },

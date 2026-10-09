@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T13:41:32.899Z",
+  "generatedAt": "2026-10-09T20:58:46.944Z",
   "fixtures": [
     {
       "slug": "packet-auto-position",
@@ -24,7 +24,7 @@
       "type": "packet",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 49.78800000000001,
+      "maxDelta": 49.787000000000006,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/g[1]/text[4]/@x"
     },

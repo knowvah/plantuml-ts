@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T13:36:38.920Z",
+  "generatedAt": "2026-10-09T20:53:50.018Z",
   "fixtures": [
     {
       "slug": "biluko-70-licu481",
@@ -77,7 +77,7 @@
       "type": "c4",
       "dotEqual": false,
       "verdict": "diverged",
-      "maxDelta": 360.70000000000005,
+      "maxDelta": 360.701,
       "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
       "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@x",
       "oracleBlind": true

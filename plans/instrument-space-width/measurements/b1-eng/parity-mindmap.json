@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T13:40:31.571Z",
+  "generatedAt": "2026-10-09T20:57:45.017Z",
   "fixtures": [
     {
       "slug": "bepinu-34-tiji715",
@@ -343,7 +343,7 @@
       "type": "mindmap",
       "dotEqual": true,
       "verdict": "structural-match",
-      "maxDelta": 3.0249999999999915,
+      "maxDelta": 3.0250000000000057,
       "maxDeltaPath": "svg/g[1]/text[4]/@x"
     },
     {
@@ -705,7 +705,7 @@
       "type": "mindmap",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 503,
+      "maxDelta": 573,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },

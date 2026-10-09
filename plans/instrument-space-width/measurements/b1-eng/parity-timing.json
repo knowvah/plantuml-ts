@@ -1,35 +1,50 @@
 {
-  "generatedAt": "2026-10-09T14:32:10.714Z",
+  "generatedAt": "2026-10-09T21:00:40.707Z",
   "fixtures": [
     {
       "slug": "bejilu-38-kaje288",
       "type": "timing",
-      "verdict": "timeout",
-      "dotEqual": false
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 220.222,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
     },
     {
       "slug": "biduxi-87-tomu388",
       "type": "timing",
-      "verdict": "timeout",
-      "dotEqual": false
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 220.222,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
     },
     {
       "slug": "bigadu-24-tuli587",
       "type": "timing",
-      "verdict": "timeout",
-      "dotEqual": false
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 130,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[2]/@x"
     },
     {
       "slug": "bipocu-94-koce204",
       "type": "timing",
-      "verdict": "timeout",
-      "dotEqual": false
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 1568.88,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
     },
     {
       "slug": "bixutu-58-kofa364",
       "type": "timing",
-      "verdict": "timeout",
-      "dotEqual": false
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 146,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
       "slug": "bogube-37-dire976",
@@ -612,7 +627,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 145.08700000000002,
+      "maxDelta": 145.08800000000002,
       "firstDiff": "svg/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/rect[1]/@width"
     },

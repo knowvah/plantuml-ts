@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T13:39:30.602Z",
+  "generatedAt": "2026-10-09T20:56:43.136Z",
   "fixtures": [
     {
       "slug": "bafilu-92-tafa086",
@@ -1788,7 +1788,7 @@
       "type": "gantt",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 235,
+      "maxDelta": 236,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@width"
     },

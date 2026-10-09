@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T14:51:45.081Z",
+  "generatedAt": "2026-10-09T21:01:51.572Z",
   "fixtures": [
     {
       "slug": "bacole-35-fiki903",
@@ -510,7 +510,7 @@
       "type": "wbs",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 755,
+      "maxDelta": 754,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@width"
     },

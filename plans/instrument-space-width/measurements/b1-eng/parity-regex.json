@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T13:41:54.261Z",
+  "generatedAt": "2026-10-09T20:59:08.398Z",
   "fixtures": [
     {
       "slug": "bafake-97-xuse174",
@@ -123,7 +123,7 @@
       "type": "regex",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 127,
+      "maxDelta": 128,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@width"
     },

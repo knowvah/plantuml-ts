@@ -157,14 +157,61 @@ function trin(text: string): string {
  * (`dim = calculateDimension(font, trimmed)`, `:126`). Any caller computing a
  * width for a label it will emit through {@link text} has to agree with it.
  *
- * Not ported: `leadingSpaceAdjust`'s conversion of leading spaces into an `x`
- * advance (`:118-124`). It needs a measurer, which these emitters do not have.
- * Verified unexercised by the current corpus — across 3,548 jar `<text>`
- * elements in the json/yaml goldens, ZERO carry leading or trailing
- * whitespace, so nothing in it survives to be positioned.
+ * The leading-space conversion into an `x` advance (`:118-124`) needs the
+ * run's space width, which these emitters do not have: a caller that can
+ * measure uses {@link driverTextPlacement}, which returns both the emitted
+ * form and the `x` shift.
  */
 export function emittedTextForm(content: string, fontFamily?: string): string {
   return nbspIfMonospace(trin(nbspIfBlank(content)), fontFamily);
+}
+
+/** The emitted text of a run and how far its `x` moves, given the width of one
+ *  space in the run's font. */
+export interface DriverTextPlacement {
+  /** What goes inside the `<text>`; `textLength` is measured from THIS. */
+  readonly text: string;
+  /** Added to the run's `x`: one space width per leading space. */
+  readonly dx: number;
+}
+
+/**
+ * `DriverTextSvg#draw`'s text preamble, whole (`:114-126`):
+ *
+ * ```java
+ * String text = shape.getText();
+ * if (text.matches("^\\s*$"))
+ *     text = text.replace(' ', (char) 160);
+ * if (text.startsWith(" ")) {
+ *     final double space = stringBounder.calculateDimension(font, " ").getWidth();
+ *     while (text.startsWith(" ")) {
+ *         x += space;
+ *         text = text.substring(1);
+ *     }
+ * }
+ * text = StringUtils.trin(text);
+ * final XDimension2D dim = stringBounder.calculateDimension(font, text);
+ * ```
+ *
+ * So a run's `textLength` is the width of the TRIMMED text, and each leading
+ * space moves `x` by one space width, while the atom's layout advance (its
+ * `calculateDimension` on the untrimmed text, `AtomText.java:222-231`) is
+ * unchanged. Invisible while the deterministic instrument measured U+0020 as
+ * 0 (isw); with seam #4 a space is 44 tenths. The klimt driver carries the
+ * same steps inline (`klimt/drawing/svg/driver-text-svg.ts#leadingSpaceAdjust`);
+ * this is the shared form for every emitter outside klimt. `spaceWidth` is
+ * `calculateDimension(font, " ").getWidth()` in the run's own font.
+ *
+ * @see .../klimt/drawing/svg/DriverTextSvg.java:114-126
+ */
+export function driverTextPlacement(rawText: string, spaceWidth: number): DriverTextPlacement {
+  let text = nbspIfBlank(rawText);
+  let dx = 0;
+  while (text.startsWith(' ')) {
+    dx += spaceWidth;
+    text = text.slice(1);
+  }
+  return { text: trin(text), dx };
 }
 
 /**

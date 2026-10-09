@@ -1,41 +1,48 @@
 {
-  "generatedAt": "2026-10-09T14:59:06.909Z",
+  "generatedAt": "2026-10-09T21:02:34.757Z",
   "fixtures": [
     {
       "slug": "bafemu-96-luji978",
       "type": "yaml",
-      "verdict": "timeout",
-      "dotEqual": false
+      "dotEqual": false,
+      "verdict": "diverged",
+      "maxDelta": 2161.053,
+      "firstDiff": "svg/g[1]/path[1]/@d",
+      "maxDeltaPath": "svg/g[1]/path[9]/@d[8]"
     },
     {
       "slug": "bedega-54-romu926",
       "type": "yaml",
-      "verdict": "timeout",
-      "dotEqual": false
+      "dotEqual": false,
+      "verdict": "conformant"
     },
     {
       "slug": "coxima-79-gano159",
       "type": "yaml",
-      "verdict": "timeout",
-      "dotEqual": false
+      "dotEqual": false,
+      "verdict": "conformant"
     },
     {
       "slug": "finofu-94-daso450",
       "type": "yaml",
-      "verdict": "timeout",
-      "dotEqual": false
+      "dotEqual": false,
+      "verdict": "conformant"
     },
     {
       "slug": "gabalo-23-tefe408",
       "type": "yaml",
-      "verdict": "timeout",
-      "dotEqual": false
+      "dotEqual": false,
+      "verdict": "structural-match",
+      "maxDelta": 160.623,
+      "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
     },
     {
       "slug": "gatuva-87-futo104",
       "type": "yaml",
-      "verdict": "timeout",
-      "dotEqual": false
+      "dotEqual": false,
+      "verdict": "structural-match",
+      "maxDelta": 1.9864999999999995,
+      "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
     },
     {
       "slug": "gipoxa-19-bico146",

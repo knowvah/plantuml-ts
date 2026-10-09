@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T13:37:39.984Z",
+  "generatedAt": "2026-10-09T20:54:51.597Z",
   "fixtures": [
     {
       "slug": "bajotu-30-soku184",
@@ -272,7 +272,7 @@
       "verdict": "diverged",
       "maxDelta": 91.66300000000001,
       "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/g[4]/rect[1]/@x",
+      "maxDeltaPath": "svg/g[1]/g[4]/path[1]/@d[2]",
       "oracleBlind": true
     },
     {
@@ -1303,7 +1303,7 @@
       "type": "class",
       "dotEqual": false,
       "verdict": "diverged",
-      "maxDelta": 116.637,
+      "maxDelta": 116.638,
       "firstDiff": "svg/g[1]/g[1]/@class",
       "maxDeltaPath": "svg/g[1]/g[1]/line[1]/@x2",
       "oracleBlind": true
@@ -1772,8 +1772,8 @@
       "type": "class",
       "dotEqual": true,
       "verdict": "structural-match",
-      "maxDelta": 7.570000000000022,
-      "maxDeltaPath": "svg/g[1]/g[2]/path[1]/@d[17]"
+      "maxDelta": 7.570000000000007,
+      "maxDeltaPath": "svg/g[1]/g[2]/text[2]/@x"
     },
     {
       "slug": "kipure-14-suli112",
@@ -1894,9 +1894,9 @@
       "type": "class",
       "dotEqual": false,
       "verdict": "diverged",
-      "maxDelta": 204.44000000000003,
+      "maxDelta": 204.44,
       "firstDiff": "svg/g[1]/g[2]/text[2]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[3]/line[1]/@x2",
+      "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@x",
       "oracleBlind": true
     },
     {
@@ -3576,9 +3576,9 @@
       "type": "class",
       "dotEqual": false,
       "verdict": "diverged",
-      "maxDelta": 214.407,
+      "maxDelta": 214.40700000000004,
       "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/g[5]/path[1]/@d[40]",
+      "maxDeltaPath": "svg/g[1]/g[5]/line[1]/@x2",
       "oracleBlind": true
     },
     {
@@ -4432,7 +4432,7 @@
       "type": "class",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 650,
+      "maxDelta": 707,
       "firstDiff": "svg/g[1]/text[1]/@font-size",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
