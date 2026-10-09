@@ -21,7 +21,7 @@ sh0022->sh0018[arrowtail=none,arrowhead=none,minlen=0,color="#00004C",label=<<TA
 sh0023->sh0020[arrowtail=none,arrowhead=none,minlen=0,color="#000054",label=<<TABLE BGCOLOR="#000055" FIXEDSIZE="TRUE" WIDTH="65" HEIGHT="15"><TR><TD></TD></TR></TABLE>>];
 sh0022->sh0023[arrowtail=none,arrowhead=none,minlen=0,color="#00005C",label=<<TABLE BGCOLOR="#00005D" FIXEDSIZE="TRUE" WIDTH="65" HEIGHT="15"><TR><TD></TD></TR></TABLE>>];
 sh0006 [shape=rect,label="",width=0.888021,height=0.666667,color="#000006"];
-sh0007 [shape=rect,label="",width=1.157813,height=0.666667,color="#000007"];
+sh0007 [shape=rect,label="",width=1.157812,height=0.666667,color="#000007"];
 sh0008 [shape=rect,label="",width=0.779861,height=0.666667,color="#000008"];
 sh0009 [shape=rect,label="",width=0.888021,height=0.666667,color="#000009"];
 sh0010 [shape=rect,label="",width=1.137153,height=0.666667,color="#00000A"];

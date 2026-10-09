@@ -7,7 +7,7 @@
   "forkTreeIdenticalToUpstream": true,
   "plantumlVersion": "1.2026.8beta1",
   "seamBranch": "dot-output",
-  "seamCommit": "2fd5dac7adf308518128e073f24ea93b00d581a1",
+  "seamCommit": "eb0f3cff7df7b48100bd2fc00b0a2e8812574199",
   "seamCommitCount": 4,
   "patch": "patches/0001-oracle-dot-dump.patch",
   "dumpProperty": "PLANTUML_DUMP_DOT",
@@ -45,6 +45,12 @@
       "seamCommitCount": 3,
       "retiredOn": "2026-10-09",
       "why": "seam #4 (isw, user ruling 2026-10-08 lgm row 20): UnicodeFontWidthSansSerif block 0 gives U+0020 width 0, so under PLANTUML_DETERMINISTIC_TEXT every space was zero-wide and a lone-space UText crashed SlotFinder (Slot.java:44-45). Seam #4 adds 44 tenths per U+0020 (the table's own U+0021/U+00A0 advance; Helvetica/Arial agree); the whole oracle was re-captured one JVM per fixture (scripts/recapture-oracles.ts)."
+    },
+    {
+      "seamCommit": "2fd5dac7adf308518128e073f24ea93b00d581a1",
+      "seamCommitCount": 4,
+      "retiredOn": "2026-10-09",
+      "why": "seam #4 v1 (spaces*4.4*size/16 added after the scaled sum) crashed the jar on activity cemagu-66/nerete-42/rosepa-78 (Direction.java:128 via Worm.mergeMe); amended in place to eb0f3cff7df (U+0020 measured as U+0021, width rounded to float like the stock bounder). Never re-captured into a merged oracle."
     }
   ]
 }

@@ -1,22 +1,26 @@
-From 2fd5dac7adf308518128e073f24ea93b00d581a1 Mon Sep 17 00:00:00 2001
+From eb0f3cff7df7b48100bd2fc00b0a2e8812574199 Mon Sep 17 00:00:00 2001
 From: Scott Seely <scott@seely.io>
 Date: Fri, 9 Oct 2026 07:19:51 -0500
-Subject: [PATCH] fix(oracle): width-table bounder measures U+0020 as 44, not 0
+Subject: [PATCH] fix(oracle): width-table bounder measures U+0020 as 44, float
+ widths
 
 UnicodeFontWidthSansSerif block 0 gives the space width 0, so a lone space
 is zero-wide and crashes SlotFinder (Slot.java:44-45) under
-PLANTUML_DETERMINISTIC_TEXT. The table's own entries for the identical
-advance, U+0021 and U+00A0, are 44, as are Helvetica and Arial. Add 4.4 per
-space at size/16. Only the property-gated bounder changes.
+PLANTUML_DETERMINISTIC_TEXT. Measure each U+0020 as U+0021 (the table's own
+44, the advance Helvetica and Arial give space) and round the width to
+float like the stock SVG bounder (FontMetrics.getStringBounds is a
+Rectangle2D.Float); double table widths reached one activity coordinate by
+two routes and failed Direction.fromVector (Direction.java:128). Only the
+property-gated bounder changes.
 ---
- .../net/sourceforge/plantuml/FileFormat.java  | 20 +++++++++++++++++++
- 1 file changed, 20 insertions(+)
+ .../net/sourceforge/plantuml/FileFormat.java  | 26 +++++++++++++++++++
+ 1 file changed, 26 insertions(+)
 
 diff --git a/src/main/java/net/sourceforge/plantuml/FileFormat.java b/src/main/java/net/sourceforge/plantuml/FileFormat.java
-index dddf0d280d8..dde407c0588 100644
+index dddf0d280d8..cece3102a31 100644
 --- a/src/main/java/net/sourceforge/plantuml/FileFormat.java
 +++ b/src/main/java/net/sourceforge/plantuml/FileFormat.java
-@@ -194,6 +194,26 @@ public enum FileFormat {
+@@ -194,6 +194,32 @@ public enum FileFormat {
  				public boolean matchesProperty(String propertyName) {
  					return "SVG".equalsIgnoreCase(propertyName);
  				}
@@ -28,17 +32,23 @@ index dddf0d280d8..dde407c0588 100644
 +				// and U+00A0 NO-BREAK SPACE = 44 (tenths of a 16pt em); Helvetica
 +				// (Adobe Core14 AFM: C 32 ; WX 278 ; N space = C 33 ; WX 278 ; N
 +				// exclam) and Arial (569/2048 for space, '!', no-break space) agree.
-+				// Add 4.4 (44/10, as UnicodeBlock.getWidth) per U+0020 at
-+				// size/REFERENCE_SIZE (16), the same factor calculateDimension uses.
++				// Measure each U+0020 as U+0021: the same table entry (44), summed
++				// in the same loop and scaled by the same size/REFERENCE_SIZE factor
++				// as every other glyph -- exactly a table with 44 at index 0x20.
++				// (Adding spaces * 4.4 * size/16 after the scaled sum produced
++				// widths no table arithmetic yields, and activity Worm.mergeMe then
++				// failed Direction.fromVector's exact equality, Direction.java:128.)
++				// The width is then rounded to float, as the stock SVG bounder's is:
++				// FileFormat.getJavaDimension reads FontMetrics.getStringBounds, a
++				// Rectangle2D.Float. A double-precision table width reaches the
++				// same activity coordinate by two routes with different rounding
++				// (126.75000000000001 vs 126.75), which Snake.same accepts
++				// (Snake.java:299-300) and Direction.fromVector rejects.
 +				// Stock without the property is untouched.
 +				@Override
 +				public XDimension2D calculateDimension(UFont font, String text) {
-+					final XDimension2D dim = super.calculateDimension(font, text);
-+					final long spaces = text.chars().filter(c -> c == ' ').count();
-+					if (spaces == 0)
-+						return dim;
-+					return new XDimension2D(dim.getWidth() + spaces * 4.4 * font.getSize2D() / 16.0,
-+							dim.getHeight());
++					final XDimension2D dim = super.calculateDimension(font, text.replace(' ', '!'));
++					return new XDimension2D((float) dim.getWidth(), dim.getHeight());
 +				}
  			};
  

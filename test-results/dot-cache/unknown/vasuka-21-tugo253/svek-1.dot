@@ -5,7 +5,7 @@ remincross=true;
 searchsize=500;
 subgraph cluster6p0 {label="";subgraph cluster6 {style=solid;color="#000006";labeljust="c";label=<<TABLE BGCOLOR="#000007" FIXEDSIZE="TRUE" WIDTH="12" HEIGHT="9"><TR><TD></TD></TR></TABLE>>;
 subgraph cluster6p1 {label="";
-sh0010 [shape=hexagon,label="",width=6.958681,height=1.111111,color="#00000A"];
+sh0010 [shape=hexagon,label="",width=6.958680,height=1.111111,color="#00000A"];
 
 }}}
 

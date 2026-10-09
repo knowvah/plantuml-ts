@@ -12,7 +12,7 @@ subgraph cluster6p0 {label="";subgraph cluster6 {style=solid;color="#000006";lab
 subgraph cluster6p1 {label="";
 sh0010 [shape=ellipse,label="",width=2.112940,height=0.489255,color="#00000A"];
 sh0011 [shape=ellipse,label="",width=3.118059,height=1.794544,color="#00000B"];
-sh0012 [shape=ellipse,label="",width=3.530064,height=0.772679,color="#00000C"];
+sh0012 [shape=ellipse,label="",width=3.530063,height=0.772679,color="#00000C"];
 sh0013 [shape=ellipse,label="",width=3.042133,height=1.226926,color="#00000D"];
 sh0014 [shape=ellipse,label="",width=3.292976,height=0.725262,color="#00000E"];
 sh0015 [shape=rect,label="",width=3.499913,height=0.500000,color="#00000F"];

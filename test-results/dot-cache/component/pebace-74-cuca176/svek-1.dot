@@ -4,6 +4,6 @@ ranksep=0.833333;
 remincross=true;
 searchsize=500;
 sh0006 [shape=rect,label="",width=7.338021,height=0.611111,color="#000006"];
-sh0007 [shape=rect,label="",width=7.209201,height=0.611111,color="#000007"];
+sh0007 [shape=rect,label="",width=7.209202,height=0.611111,color="#000007"];
 
 }

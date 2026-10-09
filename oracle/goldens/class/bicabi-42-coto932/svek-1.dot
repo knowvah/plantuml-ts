@@ -4,9 +4,9 @@ ranksep=0.833333;
 remincross=true;
 searchsize=500;
 sh0006 [shape=rect,label="",width=2.261806,height=1.638889,color="#000006"];
-sh0007 [shape=plaintext,label=<<TABLE BGCOLOR="#000007" BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD  FIXEDSIZE="TRUE" WIDTH="53.7" HEIGHT="48"></TD></TR></TABLE>>];
+sh0007 [shape=plaintext,label=<<TABLE BGCOLOR="#000007" BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="0"><TR><TD  FIXEDSIZE="TRUE" WIDTH="53.70000076293945" HEIGHT="48"></TD></TR></TABLE>>];
 
-sh0008 [shape=rect,label="",width=1.201562,height=0.666667,color="#000008"];
+sh0008 [shape=rect,label="",width=1.201563,height=0.666667,color="#000008"];
 sh0009 [shape=rect,label="",width=1.903993,height=0.666667,color="#000009"];
 sh0010 [shape=rect,label="",width=3.593750,height=1.444444,color="#00000A"];
 sh0011 [shape=rect,label="",width=1.517535,height=0.666667,color="#00000B"];

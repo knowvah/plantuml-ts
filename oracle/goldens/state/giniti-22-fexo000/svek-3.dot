@@ -16,7 +16,7 @@ zaent0005 [shape=point,width=.01,label=""];subgraph cluster17i {label="";subgrap
 sh0021 [shape=rect,style=rounded,label="",width=5.421007,height=3.583333,color="#000015"];
 subgraph cluster22a {label="";subgraph cluster22p0 {label="";subgraph cluster22 {style=solid;color="#000016";labeljust="c";label=<<TABLE BGCOLOR="#000017" FIXEDSIZE="TRUE" WIDTH="335" HEIGHT="126"><TR><TD></TD></TR></TABLE>>;
 zaent0006 [shape=point,width=.01,label=""];subgraph cluster22i {label="";subgraph cluster22p1 {label="";
-sh0026 [shape=rect,style=rounded,label="",width=2.442188,height=0.694444,color="#00001A"];
+sh0026 [shape=rect,style=rounded,label="",width=2.442187,height=0.694444,color="#00001A"];
 sh0027 [shape=circle,label="",width=0.277778,height=0.277778,color="#00001B"];
 
 }}}}}
