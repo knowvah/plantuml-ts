@@ -30,6 +30,7 @@ import {
 } from './sequence-parse-helpers.js';
 import { SEQUENCE_COMMANDS } from './sequence-command-registry.js';
 import { newLifeState } from './sequence-life-state.js';
+import { removeEmptyColumns } from './remove-empty-columns.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 
 // ---------------------------------------------------------------------------
@@ -112,16 +113,21 @@ function handlePendingNote(state: ParseState, lines: readonly string[], i: numbe
  * text lands on `FrameEvent.label`, not a `NoteEvent.text`.
  * @see command/sequencediagram/command/CommandReferenceMultilinesOverSeveral.java:79-80
  */
-function handlePendingRef(state: ParseState, line: string): boolean {
+function handlePendingRef(state: ParseState, line: string, rawLine: string): boolean {
   if (state.pendingRef === null) return false;
 
   if (/^end\s*(?:ref)?\s*$/i.test(line)) {
+    // `lines.removeEmptyColumns()` is the ONLY normalisation upstream gives the
+    // body (`CommandReferenceMultilinesOverSeveral.java:142`): no per-line trim.
+    const body = removeEmptyColumns(state.pendingRef.label.split('\n')).join('\n');
+    state.pendingRef.label = body;
+    state.pendingRef.branchLabels[0] = body;
     emit(state, state.pendingRef);
     state.pendingRef = null;
     return true;
   }
 
-  state.pendingRef.label = state.pendingRef.label === '' ? line : `${state.pendingRef.label}\n${line}`;
+  state.pendingRef.label = state.pendingRef.label === '' ? rawLine : `${state.pendingRef.label}\n${rawLine}`;
   state.pendingRef.branchLabels[0] = state.pendingRef.label;
   return true;
 }
@@ -286,6 +292,7 @@ function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefu
 
   for (let i = 0; i < trimmedLines.length; i++) {
     const line = trimmedLines[i]!;
+    const rawLine = lines[trimmedEntries[i]!.origIndex] ?? line;
 
     // If we are accumulating a multi-line note, any line that is not
     // "end note" gets appended to the note text. Checked FIRST, before the
@@ -296,7 +303,7 @@ function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefu
       i += noteConsumed - 1;
       continue;
     }
-    if (handlePendingRef(state, line)) continue;
+    if (handlePendingRef(state, line, rawLine)) continue;
 
     const consumed = dispatchAnnotationOrSprite(state, trimmedLines, i, rawAlignedLines);
     if (consumed !== null) {
