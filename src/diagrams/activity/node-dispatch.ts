@@ -151,9 +151,10 @@ export { readMultilineActionBody, type MultilineActionBody } from './dispatch-mu
  *  close the block (`CommandActivityLong3.java:79-82`). */
 function tryMultilineAction(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   if (!line.startsWith(':')) return null;
-  const firstPart = line.slice(1).trim();
-  const labelParts: string[] = [];
-  if (firstPart !== '') labelParts.push(firstPart);
+  // isw-T2-act F2: `":" DATA(.*)` with no space leaf (`CommandActivityLong3
+  // .java:81-82`), and `removeStartingAndEnding(DATA, 0)` (`:139`) keeps it
+  // as the first line even when empty -- the jar draws that line.
+  const labelParts: string[] = [line.slice(1)];
   const body = readMultilineActionBody(ctx, idx + 1, labelParts);
   const node: ActivityAction = {
     kind: 'action',
