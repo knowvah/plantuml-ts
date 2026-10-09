@@ -1,7 +1,7 @@
 {
   "$comment": "Text census (fill, anchor, inset) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): insets move where a label's box shifted with the compressed geometry; no fill/anchor change is expected.",
-  "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "53d01279",
+  "measuredAt": "2026-10-08",
+  "measuredAgainstCommit": "4181c68d",
   "fixtures": [
     {
       "type": "activity",
@@ -7391,8 +7391,8 @@
       "type": "activity",
       "slug": "mufixi-71-koma752",
       "status": "baseline",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "1916ce34",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "4181c68d",
       "ours": {
         "fill": {
           "#000": 2
@@ -7413,7 +7413,7 @@
           "(absent)": 2
         },
         "inset": {
-          "70.338": 1
+          "122.338": 1
         },
         "textCount": 2
       }

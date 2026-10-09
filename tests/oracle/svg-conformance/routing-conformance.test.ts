@@ -975,10 +975,15 @@ describe('routing conformance — jar-error classification', () => {
     //
     // 5620 -> 5621 / 6600 -> 6601 at add4/fix-jucidi: 1
     // svg-activity clone rows (zero-diff pins). Derivation: 5621 + 870 + 110 = 6601.
-    expect(pinnedAgree.length).toBe(5621);
+    //
+    // 5621 -> 5625 / 6601 -> 6605 at lgm/close-b1e: 4 svg-activity clone rows
+    // (zero-diff pins after oracle seam #3). Derivation: 5625 + 870 + 110 = 6605.
+    // 5625 -> 5626 / 6605 -> 6606 at lgm/close-b1e: 1 svg-class clone row
+    // (xadado-92-lazo250). Derivation: 5626 + 870 + 110 = 6606.
+    expect(pinnedAgree.length).toBe(5626);
     expect(pinnedMisroutes.length).toBe(870);
     expect(pinnedJarErrors.length).toBe(110);
-    expect(manifest.fixtures.length).toBe(6601);
+    expect(manifest.fixtures.length).toBe(6606);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

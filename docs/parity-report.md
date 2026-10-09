@@ -12,12 +12,12 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 
 | type | engine | corpus | oracle | DOT equal | survey conformant / structural / diverged | census 0-diff | ratchet pins | diff-baseline (n · ΣweightedScore) | routing agree | refusal ok |
 | --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
-| activity | activity | 771 | 451 | n/a (no DOT stage (non-svek)) | 409 / 5 / 37 | 0 | 410 | 6 · 178 | 423/451 | 447/451 |
+| activity | activity | 771 | 451 | n/a (no DOT stage (non-svek)) | 409 / 5 / 37 | 0 | 414 | 2 · 72 | 423/451 | 447/451 |
 | board | board | 4 | 4 | n/a (no DOT stage (non-svek)) | 0 / 0 / 4 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/4 | 4/4 |
 | c4 | description | 11 | 11 | n/a (no data-diagram-type classification) | 0 / 1 / 10 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 9/11 | 7/11 |
 | chart | chart | 29 | 29 | n/a (no DOT stage (non-svek)) | 0 / 0 / 29 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/29 | 29/29 |
 | chronology | chronology | 1 | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) |
-| class | class | 768 | 723 | 710/711 (100%) | 708 / 3 / 12 | 982 | 982 | n/a (no diff-baseline yet) | 720/723 | 723/723 |
+| class | class | 768 | 723 | 710/711 (100%) | 708 / 3 / 12 | 982 | 983 | n/a (no diff-baseline yet) | 720/723 | 723/723 |
 | component | description | 384 | 266 | 259/263 (98%) | 0 / 13 / 253 | 44 | 32 | 15 · 868 | 266/266 | 266/266 |
 | ditaa | n/a (no engine (D8 todo)) | 2 | 2 | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) |
 | dot | dot | 62 | 5 | n/a (no DOT stage (non-svek)) | 5 / 0 / 0 | 5 | 5 | n/a (no diff-baseline yet) | 5/5 | 5/5 |
@@ -50,7 +50,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | c4 | — | 2026-09-28T00:14:11.120Z | — | — | — | 2026-09-30 | 2026-09-28 |
 | chart | — | 2026-09-28T00:14:28.408Z | — | — | — | 2026-09-20 | 2026-09-20 |
 | chronology | — | — | — | — | — | — | — |
-| class | 2026-09-21T01:49:10.211Z | 2026-09-30T23:22:05.607Z | 2026-09-30T23:31:47.701Z | 2026-09-30 | — | 2026-08-24 | 2026-08-24 |
+| class | 2026-09-21T01:49:10.211Z | 2026-09-30T23:22:05.607Z | 2026-09-30T23:31:47.701Z | 2026-10-08 | — | 2026-08-24 | 2026-08-24 |
 | component | 2026-09-21T01:49:10.211Z | 2026-09-21T12:34:26.597Z | 2026-09-20T18:49:14.773Z | 2026-07-15 | 2026-09-30 | 2026-08-26 | 2026-08-26 |
 | ditaa | — | — | — | — | — | — | — |
 | dot | — | 2026-09-28T00:15:43.373Z | 2026-09-20T18:50:23.645Z | 2026-08-08 | — | 2026-08-23 | 2026-08-24 |

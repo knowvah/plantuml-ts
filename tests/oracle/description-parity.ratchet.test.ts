@@ -76,8 +76,19 @@ let captured: DotInputGraph[] = [];
 beforeAll(() => setLayoutInputObserver(({ graph: g }) => captured.push(g)));
 afterAll(() => setLayoutInputObserver(undefined));
 
+/** lgm (journal rows 18-20): under PLANTUML_DETERMINISTIC_TEXT the jar's nested
+ *  `{{ }}` diagram crashes on a zero-width space (`Slot.java:44-45` via
+ *  `SlotFinder.drawText`) and embeds a crash page whose random `IconLoader`
+ *  icon (`fun/IconLoader.java:55-74`) sizes the node, so `svek-1.dot` changes on
+ *  every capture. Excluded until the instrument's space width is fixed (memory
+ *  instrument-space-width-zero); stock metrics render these without crashing. */
+const ORACLE_CRASH_FIXTURES: ReadonlySet<string> = new Set(['kovaxi-11-reti348', 'zidebi-71-nocu387']);
+
 describe.skipIf(fixtures.length === 0)('oracle DOT-parity ratchet — description diagrams', () => {
-  for (const name of fixtures) {
+  for (const name of fixtures.filter((f) => ORACLE_CRASH_FIXTURES.has(f))) {
+    it.skip(`${name}: excluded — the deterministic-text oracle crashes on it`, () => {});
+  }
+  for (const name of fixtures.filter((f) => !ORACLE_CRASH_FIXTURES.has(f))) {
     it(`${name}: stays structurally EQUAL to the pinned oracle DOT`, () => {
       const files = svekFiles(name);
       captured = [];
