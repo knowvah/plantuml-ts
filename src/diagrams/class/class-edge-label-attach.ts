@@ -6,6 +6,7 @@
  */
 import { resolveSpriteLabelRuns, spriteRunsLabelAnchor } from './class-edge-label-sprite-runs.js';
 import type { Relationship } from './ast.js';
+import type { ClipRect } from './class-shield-helpers.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import {
@@ -143,6 +144,9 @@ export interface EdgeGeoTextContext {
    *  protected leaf's classifier id -- `class-dot-graph.ts
    *  #DotGraphParts.protectedIds`'s own doc comment. */
   readonly protectedIds?: ReadonlySet<string> | undefined;
+  /** lgm-T1e (`SvekEdge.java:922-926,933-937`): the leaf arm of the magnetic
+   *  force, keyed by classifier id -- `class-leaf-magnetic-border.ts`. */
+  readonly leafMagnetic?: ReadonlyMap<string, ClipRect> | undefined;
 }
 
 /**

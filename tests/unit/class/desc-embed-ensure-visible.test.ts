@@ -1,15 +1,16 @@
 /**
- * desc-embed-ensure-visible.test.ts — cdd6 T3b (journal row 47): a
- * description-label `{{ }}` embed reaches the canvas ONLY through
+ * desc-embed-ensure-visible.test.ts — cdd6 T3b (journal row 47), amended
+ * lgm-T1e: a description-label `{{ }}` embed reaches the canvas through
  * `SvgGraphics#ensureVisible` (`SvgGraphics.java:129-133,1033-1034`:
- * `(int)(x + w + 1)`), never through the `LimitFinder` ink pass, whose
- * `matchesProperty("SVG")` is false (`LimitFinder.java:99-100`), so
- * `EmbeddedDiagram#drawU`'s raster arm throws and its catch draws nothing
- * (`EmbeddedDiagram.java:169-193`).
+ * `(int)(x + w + 1)`). The stock jar's ink pass takes the SVG arm too
+ * (`LimitFinder.java:99-100,201-204`); T3b's "the ink pass skips the embed"
+ * fitted the oracle's old `matchesProperty("SVG") = false` (oracle seam #3).
  *
- * Jar canvases (`test-results/dot-cache/unknown/<slug>/in.svg`):
- * rozugu-82 190x136 (image y 17 + h 118 -> 136); rojida-14 475x382 (image
- * 231.65 + 243 -> 475, 311 + 70 -> 382).
+ * Jar canvases (`test-results/dot-cache/unknown/<slug>/in.svg`, re-captured
+ * after oracle seam #3 so the embed slot is the nested document's own
+ * size, `EmbeddedDiagram.java:129-133`): rozugu-82 293x159 (image y 17 +
+ * h 118 -> 135, slot-driven box -> 159); rojida-14 558x458 (image
+ * 280.5 + 243 -> 524, 363 + 70 -> 433, slot-driven -> 558x458).
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
@@ -75,11 +76,11 @@ const ROJIDA = [
 ].join('\n');
 
 describe('description-label embed: canvas via ensureVisible, not ink', () => {
-  it('unknown/rozugu-82: the embed is not in the ink (height 136, not ink + 15 + 5)', () => {
-    expect(canvas(renderSync(ROZUGU, { measurer }))).toBe('190x136');
+  it('unknown/rozugu-82: the embed is not in the ink (canvas 293x159, not ink + 15 + 5)', () => {
+    expect(canvas(renderSync(ROZUGU, { measurer }))).toBe('293x159');
   });
 
   it('unknown/rojida-14: package-leaf embeds stretch the canvas to (int)(x + w + 1)', () => {
-    expect(canvas(renderSync(ROJIDA, { measurer }))).toBe('475x382');
+    expect(canvas(renderSync(ROJIDA, { measurer }))).toBe('558x458');
   });
 });

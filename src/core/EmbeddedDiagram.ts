@@ -415,13 +415,18 @@ export class EmbeddedDiagram extends TextBlockMemoized implements Line, Atom {
   }
 
   /**
-   * java:126-152's TeaVM branch (java:142-146): delegates to the rendered
-   * nested diagram's own `calculateDimension`. Upstream's `catch
+   * java:126-152's SVG arm (java:129-133): `new XDimension2D(svg.getWidth(),
+   * svg.getHeight())` of `new UImageSvg(getImageSvg(fileFormat), 1)`. The
+   * jar's `StringBounder#matchesProperty("SVG")` (java:129) is true for the
+   * oracle (`FileFormat.java:185-187` after oracle seam #3) and for every
+   * `-tsvg` export, so this is the only arm taken here. This port's
+   * {@link NestedDiagramRenderer} contract delivers exactly that: the
+   * renderer exports the nested diagram, wraps it as a `UImageSvg`
+   * (`class-nested-diagram-renderer.ts#createNestedDiagramRenderer`) and
+   * its `TextBlock` reports that image's width/height. Upstream's `catch
    * (Exception e) { Logme.error(e); } return new XDimension2D(42, 42);`
-   * fallback is preserved — a renderer failure degrades to a fixed-size
-   * placeholder rather than propagating and breaking the enclosing
-   * diagram's own layout pass, matching upstream's own resilience
-   * contract for this one call.
+   * (java:148-152) is preserved for a renderer that FAILS -- never the
+   * normal path.
    */
   protected calculateDimensionSlow(stringBounder: StringBounder): XDimension2D {
     try {

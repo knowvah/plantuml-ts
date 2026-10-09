@@ -1,0 +1,7 @@
+@startuml
+start
+:{{
+class Foo
+}};
+stop
+@enduml

@@ -49,6 +49,8 @@ import { applyTopUrlToClassifiers } from './class-url.js';
 import { resolveClassScaleFactor } from './class-layout-scale-resolve.js';
 import { scaleClassGeometry } from './class-scale-geo.js';
 import { clusterClipRect } from './class-shield-helpers.js';
+import { leafMagneticRects } from './class-leaf-magnetic-border.js';
+import { scaleClassTheme } from './class-scale-geo.js';
 import {
   buildClassifierGeos,
   buildNamespaceGeos,
@@ -364,6 +366,8 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
       // cdd-T16b (E11): every protected leaf's classifier id -- see
       // `EdgeGeoTextContext.protectedIds`.
       protectedIds,
+      // lgm-T1e (`SvekEdge.java:922-926`): the leaf arm of the magnetic force.
+      leafMagnetic: leafMagneticRects(classifiers, scaleClassTheme(theme, 1), measurer, effAst.sprites),
     },
     posMap,
     anchors,

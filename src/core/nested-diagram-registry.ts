@@ -28,7 +28,8 @@ import type { NestedDiagramRenderer } from './EmbeddedDiagram.js';
  *  that imports `blocks-creole.ts` directly, bypassing `src/index.ts`,
  *  sees `undefined` and falls back to the pre-existing unconditional
  *  throw, which `EmbeddedDiagram.ts`'s own `calculateDimensionSlow`/`drawU`
- *  catch degrades to the `(42, 42)` fixed-size fallback. */
+ *  catch degrades to the `(42, 42)` fixed-size fallback (java:148-152 --
+ *  a failed render only, never a registered renderer's normal path). */
 let registeredRenderer: NestedDiagramRenderer | undefined;
 
 /** Populates the chrome-seam nested-diagram renderer slot. Called once per

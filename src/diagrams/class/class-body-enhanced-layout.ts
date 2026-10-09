@@ -276,17 +276,16 @@ function buildRowsBlockRows(lines: readonly string[], ctx: EnhancedLayoutCtx, co
   });
   const embeds = stackEmbeds(embedSources, ctx, rowTop);
   const portMembers = buildPortMembers(members, texts, builds, contentTop);
-  // Box geometry uses each embed's SIZING contribution (`sizingWidth`/
-  // `sizingHeight`), not its drawn `width`/`height` (`class-body-enhanced-
-  // embeds.ts#renderEmbed`'s "sizing/drawing asymmetry"). Width margin
+  // Box geometry uses each embed's size -- the SAME `UImageSvg` size that is
+  // drawn (`class-body-enhanced-embeds.ts#renderEmbed`). Width margin
   // mirrors `TextBlockUtils.withMargin(this, 6, 4)` (`MethodsOrFieldsArea
   // .java:87`) -- margin distributes over `Math.max` identically to
   // `sectionWidth`'s own `+ NAME_MARGIN_TOTAL * 2`, so adding it here is
   // equivalent to wrapping the combined area once (`BODY_ENHANCED_MARGIN_X`
   // = `BodyEnhanced1.getMarginX()`); zero when the block has no embed.
-  const embedsHeight = embeds.reduce((sum, e) => sum + e.sizingHeight, 0);
+  const embedsHeight = embeds.reduce((sum, e) => sum + e.height, 0);
   const embedsWidth =
-    embeds.length === 0 ? 0 : embeds.reduce((max, e) => Math.max(max, e.sizingWidth), 0) + BODY_ENHANCED_MARGIN_X * 2;
+    embeds.length === 0 ? 0 : embeds.reduce((max, e) => Math.max(max, e.width), 0) + BODY_ENHANCED_MARGIN_X * 2;
   return {
     rows,
     width: Math.max(sectionWidth(builds, hasIcon), embedsWidth),

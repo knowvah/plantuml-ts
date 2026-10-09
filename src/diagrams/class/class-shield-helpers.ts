@@ -207,22 +207,28 @@ export function clusterClipRect(
  * it follows. A `MagneticBorderNone` cluster still moves by `(0, 0)`, as
  * upstream does (observable only through the removal branch on a zero-chord
  * first bezier).
+ *
+ * `at`: the end points the force is EVALUATED at -- `todraw` is `dotPath` AFTER
+ * the extremity trim (`SvekEdge.java:558-563,922-937`), so a leaf's tab test
+ * (`USymbolFolder.java:195-206`) sees the trimmed end; the force itself moves
+ * `points` (the trim is a rigid end move, so the two commute).
  */
 export function applyClusterMagneticBorders(
   points: Array<{ x: number; y: number }>,
   startId: string | undefined,
   endId: string | undefined,
   clusterRects: ReadonlyMap<string, ClipRect>,
+  at: ReadonlyArray<{ x: number; y: number }> = points,
 ): Array<{ x: number; y: number }> {
   let result = points;
   const tail = startId !== undefined ? clusterRects.get(startId) : undefined;
   if (tail !== undefined) {
-    const f = forceAt(tail, result[0]!);
+    const f = forceAt(tail, at[0]!);
     result = movePointsStart(result, f.dx, f.dy);
   }
   const head = endId !== undefined ? clusterRects.get(endId) : undefined;
   if (head !== undefined) {
-    const f = forceAt(head, result[result.length - 1]!);
+    const f = forceAt(head, at[at.length - 1]!);
     result = movePointsEnd(result, f.dx, f.dy);
   }
   return result;
