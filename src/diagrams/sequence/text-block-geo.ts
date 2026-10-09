@@ -265,7 +265,19 @@ export {
 /** `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` -- the right margin between a
  *  leading `MessageNumber` and the label beside it
  *  (`Display.java:706`). */
-const MESSAGE_NUMBER_MARGIN = 4;
+export const MESSAGE_NUMBER_MARGIN = 4;
+
+/** The autonumber run's text, when a message carries one.
+ *  `getLabelNumbered` prepends it as a `MessageNumber`
+ *  (`AbstractMessage.java:200-206`); the formatted `sequenceLabel` wins over
+ *  the bare `sequenceNumber` when both are present. */
+export function numberTextOf(event: {
+  readonly sequenceLabel?: string | undefined;
+  readonly sequenceNumber?: number | undefined;
+}): string | undefined {
+  if (event.sequenceLabel !== undefined) return event.sequenceLabel;
+  return event.sequenceNumber === undefined ? undefined : String(event.sequenceNumber);
+}
 
 /**
  * `AbstractComponentRoseArrow`'s own padding:
