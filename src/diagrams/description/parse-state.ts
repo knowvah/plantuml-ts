@@ -17,6 +17,7 @@ import type { DescriptionDiagramAST, DescriptiveLink, DescriptiveNode } from './
 import { makeNode, resolveNewlineEscapes } from './parse-helpers.js';
 import { joinCurrentTogether } from './together.js';
 import type { EndpointShape } from './link-grammar.js';
+import { removeEmptyColumns } from './note-columns.js';
 import {
   noteAttachment,
   resolvePosition,
@@ -482,10 +483,10 @@ export function closePendingNote(state: ParseState): void {
   if (pending === undefined) return;
   state.pendingNote = undefined;
   if (pending.kind === 'on-link') {
-    attachNoteToLastLink(state, pending.lines.join('\n'), pending.position);
+    attachNoteToLastLink(state, removeEmptyColumns(pending.lines).join('\n'), pending.position);
     return;
   }
-  const text = pending.lines.join('\n');
+  const text = removeEmptyColumns(pending.lines).join('\n');
   if (pending.kind === 'floating') {
     emitNoteLeaf(state, pending.id, text);
     return;

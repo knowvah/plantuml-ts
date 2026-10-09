@@ -418,7 +418,7 @@ function processLine(
   const skinResult = trySkinparamBlock(lines, i, line);
   if (skinResult !== null) return skinResult;
 
-  const noteResult = tryNoteHandling(state, line, i, rawLine);
+  const noteResult = tryNoteHandling(state, line, i, rawLine, lines[i]);
   if (noteResult !== null) return noteResult;
 
   const archimateResult = tryArchimate(state, line);
