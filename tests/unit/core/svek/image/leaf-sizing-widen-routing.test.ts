@@ -33,7 +33,7 @@ import {
   measureUsecase,
   measureUsecaseOrActorLeaf,
 } from '../../../../../src/core/svek/image/leaf-sizing.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 import type { FontSpec } from '../../../../../src/core/measurer.js';
 import type { DescriptiveNode } from '../../../../../src/diagrams/description/ast.js';
 import type { SpriteDims, SpriteDimsLookup } from '../../../../../src/core/creole-atoms.js';
@@ -41,7 +41,7 @@ import { createSpriteRegistry, addSprite, spriteDimsLookupFor } from '../../../.
 import { SpriteSvg } from '../../../../../src/core/klimt/sprite/SpriteSvg.js';
 
 const fontSpec: FontSpec = { family: 'Helvetica', size: 14 };
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 /** A lookup NOT backed by a real registry (no `svg`) — for assertions made
  *  directly against `measureUsecase`, which never routes through T10's

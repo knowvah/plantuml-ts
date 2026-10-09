@@ -31,14 +31,14 @@ import { UGraphicSvg } from '../../../../../src/core/klimt/drawing/svg/u-graphic
 import { basicSvgOption } from '../../../../../src/core/klimt/drawing/svg/svg-graphics.js';
 import type { StringBounder as DriverStringBounder } from '../../../../../src/core/klimt/drawing/svg/driver-text-svg.js';
 import { MeasurerStringBounder } from '../../../../../src/core/measurer-bounder.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 import { registerNestedDiagramRenderer } from '../../../../../src/core/nested-diagram-registry.js';
 import type { NestedDiagramRenderer } from '../../../../../src/core/EmbeddedDiagram.js';
 import type { TextBlock } from '../../../../../src/core/klimt/shape/TextBlock.js';
 import { XDimension2D } from '../../../../../src/core/klimt/geom/XDimension2D.js';
 import { UImage } from '../../../../../src/core/klimt/shape/UImage.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const driverBounder: DriverStringBounder = {
   calculateDimension(font, text) {
     return measurer.measure(text, font);

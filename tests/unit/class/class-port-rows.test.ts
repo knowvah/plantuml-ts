@@ -17,7 +17,7 @@ import { Ports } from '../../../src/core/svek/Ports.js';
 import type { ClassDiagramAST, ClassifierKind } from '../../../src/diagrams/class/ast.js';
 import { isRowPortKind } from '../../../src/diagrams/class/class-shield-helpers.js';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver, type DotInputGraph } from '../../../src/core/graph-layout.js';
 import { toSvekDot } from '../../../src/core/svek-dot-emit.js';
 
@@ -348,7 +348,7 @@ describe('applyShapeAndPorts — json leaf (T3d, json-node-shield)', () => {
     const captured: DotInputGraph[] = [];
     setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
-      renderSync(puml, { measurer: new WidthTableMeasurer() });
+      renderSync(puml, { measurer: new DeterministicMeasurer() });
     } finally {
       setLayoutInputObserver(undefined);
     }

@@ -33,14 +33,14 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { parseSvekDot, dotInputToStructural, compareStructural } from '../../oracle/svek-dot.js';
 
 const GOLDENS = join(dirname(fileURLToPath(import.meta.url)), '../../../oracle/goldens/state');
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function readPuml(slug: string): string {
   return readFileSync(join(GOLDENS, slug, 'input.puml'), 'utf8');

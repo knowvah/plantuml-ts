@@ -33,9 +33,9 @@ import { renderComposite } from '../../../src/diagrams/state/renderer-composite-
 import type { State } from '../../../src/diagrams/state/ast.js';
 import type { StateNodeGeo } from '../../../src/diagrams/state/state-geo-types.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const theme = defaultTheme;
 
 function makeState(overrides: Partial<State> = {}): State {

@@ -30,13 +30,13 @@ import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 import { layoutState } from '../../../src/diagrams/state/layout.js';
 import { computeRemovedIds, filterRemovedEntities } from '../../../src/diagrams/state/state-directives.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { StateDiagramAST, State } from '../../../src/diagrams/state/ast.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function parse(source: string): StateDiagramAST {
   const lines = source

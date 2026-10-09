@@ -28,7 +28,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { measureUsecase, measureUsecaseOrActorLeaf } from '../../../src/core/svek/image/leaf-sizing.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { FontSpec } from '../../../src/core/measurer.js';
 import type { SpriteDimsLookup } from '../../../src/core/creole-atoms.js';
 import { createSpriteRegistry, addSprite, spriteDimsLookupFor } from '../../../src/core/sprite-commands.js';
@@ -39,7 +39,7 @@ import { SpriteSvg } from '../../../src/core/klimt/sprite/SpriteSvg.js';
 const PARITY_TOLERANCE_PX = 5e-4;
 
 const fontSpec: FontSpec = { family: 'Helvetica', size: 14 };
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 /** The stdlib `bootstrap1.13.1` `bi-globe` sprite -- the SAME icon
  *  `usecase-footprint.ts`'s header cited by name for its own jar

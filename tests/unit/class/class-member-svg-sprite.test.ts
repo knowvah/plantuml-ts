@@ -17,7 +17,7 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/DriverPathSvg.java
  */
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { createSpriteRegistry, addSprite } from '../../../src/core/sprite-commands.js';
 import { SpriteSvg } from '../../../src/core/klimt/sprite/SpriteSvg.js';
 import { getSpriteSvg, spriteDimsLookupFor } from '../../../src/core/sprite-registry.js';
@@ -30,7 +30,7 @@ import {
 } from '../../../src/diagrams/class/class-member-creole.js';
 import { renderMemberRowDrawable } from '../../../src/diagrams/class/class-member-sprite-render.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const FONT = memberBaseFont({ family: 'sans-serif', size: 14 }, {});
 
 /** A minimal one-`<path>` SVG sprite, 20x20 declared box, no `fill=`/

@@ -25,10 +25,10 @@
  */
 import { describe, expect, test } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 function svgOf(source: string): string {
-  return renderSync(source, { measurer: new WidthTableMeasurer() });
+  return renderSync(source, { measurer: new DeterministicMeasurer() });
 }
 
 function defsOf(svg: string): string {

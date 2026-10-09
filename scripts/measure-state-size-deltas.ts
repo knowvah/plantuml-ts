@@ -30,7 +30,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { renderSync } from '../src/index.js';
 import { setLayoutInputObserver } from '../src/core/graph-layout.js';
-import { WidthTableMeasurer } from '../src/core/measurer.js';
+import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import type { DotInputGraph } from '../src/core/graph-layout.js';
 import { parseSvekDot, dotInputToStructural, compareStructural } from '../tests/oracle/svek-dot.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';
@@ -87,7 +87,7 @@ function captureBacklogGraphs(dir: string): DotInputGraph[] {
   setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(readFileSync(join(dir, 'input.puml'), 'utf8'), {
-      measurer: new WidthTableMeasurer(),
+      measurer: new DeterministicMeasurer(),
     });
   } finally {
     setLayoutInputObserver(undefined);
@@ -155,7 +155,7 @@ function measurePinFixture(slug: string): DeltaResult {
   const dir = join(SVG_STATE_GOLDENS, slug);
   const golden = readFileSync(join(dir, 'golden.svg'), 'utf8');
   const markup = readFileSync(join(dir, 'in.puml'), 'utf8');
-  const ours = renderFixtureState(markup, new WidthTableMeasurer());
+  const ours = renderFixtureState(markup, new DeterministicMeasurer());
   const { diffs } = compareSvg(ours, golden, 'deterministic');
   const delta = diffs.length;
   const status = classifyDelta(delta, 0);

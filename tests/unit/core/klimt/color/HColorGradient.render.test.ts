@@ -7,14 +7,14 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 import { renderSync } from '../../../../../src/index.js';
 
 const VACOFO_DIR = 'test-results/dot-cache/mindmap/vacofo-66-puno159';
 
 describe('vacofo-66-puno159: a gradient node BackgroundColor draws the jar def', () => {
   const golden = readFileSync(`${VACOFO_DIR}/in.svg`, 'utf8');
-  const svg = renderSync(readFileSync(`${VACOFO_DIR}/in.puml`, 'utf8'), { measurer: new WidthTableMeasurer() });
+  const svg = renderSync(readFileSync(`${VACOFO_DIR}/in.puml`, 'utf8'), { measurer: new DeterministicMeasurer() });
   const gradientDef = (s: string): string | undefined => /<linearGradient[^>]*>.*?<\/linearGradient>/.exec(s)?.[0];
   const urlFills = (s: string): string[] => [...s.matchAll(/fill="(url\([^"]*\))"/g)].map((m) => m[1] as string);
 

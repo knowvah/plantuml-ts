@@ -17,12 +17,12 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { layoutFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 import { widenMeasuredClassifier } from '../../../src/diagrams/class/class-layout-generic-classifier.js';
 import type { MeasuredClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function leafRows(slug: string, id: string) {
   const markup = readFileSync(`test-results/dot-cache/class/${slug}/in.puml`, 'utf8');

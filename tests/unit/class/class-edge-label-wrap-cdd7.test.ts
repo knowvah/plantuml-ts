@@ -17,12 +17,12 @@
  * `center` inputs are the label centres those jar positions imply.
  */
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { multiLineLabelAnchorWrapped } from '../../../src/diagrams/class/class-edge-label-lines.js';
 import { multiLineLabelAnchor } from '../../../src/diagrams/class/class-edge-label-anchor.js';
 import { computeMeasuredLabelAttrs } from '../../../src/diagrams/class/class-edge-label-measure.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const font = { family: 'sans-serif', size: 13 };
 const LINES = ['**Label**', '//[Optional Technology]//'];
 const LABEL = '**Label**\\n//[Optional Technology]//';
@@ -92,7 +92,7 @@ describe('computeMeasuredLabelAttrs -- the reservation measures the wrapped line
 describe('end to end -- maxMessageSize wraps a class edge label into Fission atoms', () => {
   it('draws word/space atoms per physical row at the jar coordinates', async () => {
     const { renderSync } = await import('../../../src/index.js');
-    const { WidthTableMeasurer } = await import('../../../src/core/measurer.js');
+    const { DeterministicMeasurer } = await import('../../../src/core/measurer-deterministic.js');
     const src = [
       '@startuml',
       'skinparam maxMessageSize 60',
@@ -101,7 +101,7 @@ describe('end to end -- maxMessageSize wraps a class edge label into Fission ato
       'A --> B : alpha beta\\ngamma delta epsilon',
       '@enduml',
     ].join('\n');
-    const svg = renderSync(src, { measurer: new WidthTableMeasurer() });
+    const svg = renderSync(src, { measurer: new DeterministicMeasurer() });
     expect(svg).toContain('width="101px" height="232px"');
     expect(svg).toContain('<text x="28.68" y="96.111" font-size="13" fill="#000" textLength="31.85">alpha</text>');
     // The space atom is U+00A0 on both sides (the jar's `AtomText` emits nbsp).

@@ -39,14 +39,14 @@ import { parseAst } from '../../helpers/parse-ast.js';
 import type { StateDiagramAST } from '../../../src/diagrams/state/ast.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { parseSvekDot, dotInputToStructural, compareStructural } from '../../oracle/svek-dot.js';
 
 const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/state');
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const theme = defaultTheme; // fontFamily 'sans-serif', fontSize 14 — matches the oracle capture
 
 function readFixture(slug: string): { puml: string; oracleDot: string } {

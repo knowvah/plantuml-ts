@@ -22,13 +22,13 @@
  */
 import { describe, expect, test } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { FontConfiguration } from '../../../src/core/klimt/shape/UText.js';
 import { renderLatexAsImage } from '../../../src/core/latex.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../../src/core/decoration/symbol/usymbol-resolve.js';
 import { buildMemberAtoms, resolveMemberAtoms } from '../../../src/diagrams/class/class-member-creole.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const FONT: FontConfiguration = { family: 'sans-serif', size: 14, color: null, styles: new Set() };
 
 /** The regression source: a member row AND a note, each carrying one
@@ -44,7 +44,7 @@ const REPRO = [
 ].join('\n');
 
 function svgOf(source: string): string {
-  const out = renderSync(source, { measurer: new WidthTableMeasurer() });
+  const out = renderSync(source, { measurer: new DeterministicMeasurer() });
   return typeof out === 'string' ? out : (out as { svg: string }).svg;
 }
 

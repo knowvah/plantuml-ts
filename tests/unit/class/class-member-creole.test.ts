@@ -20,7 +20,8 @@ import {
 import { FontStyle, getFont } from '../../../src/core/klimt/shape/UText.js';
 import type { FontConfiguration } from '../../../src/core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from '../../../src/diagrams/class/class-member-creole.js';
-import { FormulaMeasurer, WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { FormulaMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderLatexAsImage } from '../../../src/core/latex.js';
 import { createSpriteRegistry, addSprite } from '../../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../../src/core/klimt/sprite/SpriteMonochrome.js';
@@ -312,7 +313,7 @@ describe('resolveMemberAtoms — a latex atom draws its image', () => {
 // differ, via the new `renderText`/`renderWidth` fields.
 describe('resolveMemberAtoms — whitespace-only run renders as NBSP (G2 N57, item 38)', () => {
   test('a lone-space atom: layout width stays 0, renderText is NBSP, renderWidth is the NBSP width', () => {
-    const wtMeasurer = new WidthTableMeasurer();
+    const wtMeasurer = new DeterministicMeasurer();
     const font: FontConfiguration = { family: 'sans-serif', size: 13, color: null, styles: new Set() };
     const atoms = [{ kind: 'text' as const, text: ' ', font }];
     const build = resolveMemberAtoms(atoms, font, wtMeasurer);
@@ -328,7 +329,7 @@ describe('resolveMemberAtoms — whitespace-only run renders as NBSP (G2 N57, it
   });
 
   test('a multi-space run ("   ") also substitutes every space to NBSP', () => {
-    const wtMeasurer = new WidthTableMeasurer();
+    const wtMeasurer = new DeterministicMeasurer();
     const font: FontConfiguration = { family: 'sans-serif', size: 13, color: null, styles: new Set() };
     const atoms = [{ kind: 'text' as const, text: '   ', font }];
     const build = resolveMemberAtoms(atoms, font, wtMeasurer);
@@ -392,7 +393,7 @@ describe('resolveMemberAtoms — whitespace-only run renders as NBSP (G2 N57, it
 // comment) -- jar-verified: gekope's `PK ID      \t\t Integer` row draws
 // "Integer" at x=135 = 23 (icon+margin) + 2*56 (two 14pt tab stops).
 describe('buildWrappedMemberRows — tab-stop expansion (T26)', () => {
-  const widthTable = new WidthTableMeasurer();
+  const widthTable = new DeterministicMeasurer();
   const font14 = { family: 'sans-serif', size: 14 };
 
   test('two consecutive tabs draw as two SEPARATE runs, second at 2 tab-stops out', () => {

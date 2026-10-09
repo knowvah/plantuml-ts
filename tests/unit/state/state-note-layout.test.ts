@@ -19,12 +19,12 @@ import {
 import { renderStateNoteFreestanding } from '../../../src/diagrams/state/renderer-note.js';
 import type { StateNodeGeo } from '../../../src/diagrams/state/state-geo-types.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { statePlugin } from '../../../src/diagrams/state/index.js';
 import { parseAst } from '../../helpers/parse-ast.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function parse(source: string): StateDiagramAST {
   const block: UmlSource = { lines: source.trim().split('\n'), type: 'state' };

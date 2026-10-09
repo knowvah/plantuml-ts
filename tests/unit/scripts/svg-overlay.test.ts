@@ -12,7 +12,7 @@ import {
 } from '../../../scripts/svg-overlay-report.js';
 import type { ParityFile, FixtureRef } from '../../../scripts/svg-overlay-report.js';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 /** A tiny, deterministic component-diagram fixture used across the
  *  integration-style tests — renderSync is a pure function of (markup,
@@ -21,7 +21,7 @@ import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 const FIXTURE_MARKUP = '@startuml\n[Foo] --> [Bar]\n@enduml';
 
 function render(): string {
-  return renderSync(FIXTURE_MARKUP, { measurer: new WidthTableMeasurer() });
+  return renderSync(FIXTURE_MARKUP, { measurer: new DeterministicMeasurer() });
 }
 
 function seedCache(cacheDir: string, ref: FixtureRef, markup: string, jarSvg: string): void {

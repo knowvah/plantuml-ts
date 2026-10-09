@@ -15,10 +15,10 @@ import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 import type { Theme } from '../../../src/core/theme.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { measureJsonClassifier } from '../../../src/diagrams/class/class-json-sizing.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const LOREM =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
 

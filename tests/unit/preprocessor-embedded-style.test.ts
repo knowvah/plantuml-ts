@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { preprocess } from '../../src/core/preprocessor.js';
 import { renderSync } from '../../src/index.js';
-import { WidthTableMeasurer } from '../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
 
 /**
  * mmp-T6g: a `<style>` block INSIDE an embedded `{{ ... }}` diagram belongs
@@ -61,7 +61,7 @@ describe('preprocessor: <style> inside an embedded {{ }} block', () => {
   });
 
   it('styles the embedded mindmap of semutu-45-zeno907 like the jar', () => {
-    const inner = embeddedImageSvg(renderSync(SEMUTU, { measurer: new WidthTableMeasurer() }));
+    const inner = embeddedImageSvg(renderSync(SEMUTU, { measurer: new DeterministicMeasurer() }));
     // Jar golden (test-results/dot-cache/unknown/semutu-45-zeno907/in.svg,
     // decoded image): node "a" box and label.
     expect(inner).toContain(

@@ -21,12 +21,12 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { computeClassRawInkDims } from '../../../src/diagrams/class/layout-ink-extent.js';
 import type { ClassifierGeo, EdgeGeo } from '../../../src/diagrams/class/layout.js';
 
 function svgDims(lines: readonly string[]): string {
-  const svg = renderSync(['@startuml', ...lines, '@enduml'].join('\n'), { measurer: new WidthTableMeasurer() });
+  const svg = renderSync(['@startuml', ...lines, '@enduml'].join('\n'), { measurer: new DeterministicMeasurer() });
   const root = /<svg[^>]*>/.exec(svg)?.[0] ?? '';
   return `${/\bwidth="([^"]+)"/.exec(root)?.[1]}x${/\bheight="([^"]+)"/.exec(root)?.[1]}`;
 }

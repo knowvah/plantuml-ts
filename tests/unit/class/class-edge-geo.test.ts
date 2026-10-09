@@ -18,13 +18,13 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { layoutFixtureClass, renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 import { drawnEdgePoints } from '../../../src/diagrams/class/class-ink-dot-path.js';
 import type { ClassGeometry } from '../../../src/diagrams/class/layout.js';
 import { noteLeaves } from '../../../src/diagrams/class/class-geo-types.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function fixture(slug: string): ClassGeometry {
   const markup = readFileSync(`test-results/dot-cache/class/${slug}/in.puml`, 'utf8');

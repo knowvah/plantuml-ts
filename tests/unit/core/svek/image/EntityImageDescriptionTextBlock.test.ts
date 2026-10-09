@@ -13,7 +13,7 @@
  * `text[2]/@y` (no size override) already matched exactly. This suite
  * reproduces the same shape with `DeterministicMeasurer` (`WidthTableMeasurer`,
  * the SAME `getDescent(font) = font.size / 4.5` formula the oracle corpus
- * measures under, `measurer.ts#WidthTableMeasurer.getDescent`) so the
+ * measures under, `measurer.ts#DeterministicMeasurer.getDescent`) so the
  * expected numbers are exact, not tolerant.
  *
  * @see EntityImageDescriptionSupport.test.ts for the `newGraphic()`/

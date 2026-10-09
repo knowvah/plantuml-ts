@@ -22,10 +22,10 @@ import {
 } from '../../../src/diagrams/class/class-kal-overlap.js';
 import type { Kal } from '../../../src/diagrams/class/class-kal.js';
 import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { layoutFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const W = 63.938;
 
 function box(x: number) {

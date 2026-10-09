@@ -31,7 +31,7 @@ import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 
@@ -52,7 +52,7 @@ function decodeHref(href: string): string {
 }
 
 describe('xadado-92-lazo250 — class-body note {{ }} regions draw real <image>s (CDD B7FU-R2)', () => {
-  const svg = renderSync(cachedPuml('xadado-92-lazo250'), { measurer: new WidthTableMeasurer() });
+  const svg = renderSync(cachedPuml('xadado-92-lazo250'), { measurer: new DeterministicMeasurer() });
   const images = imageTags(svg);
 
   it('draws exactly two <image> elements (one per {{ }} note region)', () => {

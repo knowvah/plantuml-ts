@@ -13,9 +13,9 @@
 import { describe, it, expect } from 'vitest';
 import { measureNote } from '../../../src/diagrams/class/note-layout-measure.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 /** `skinparam WrapWidth 300` — style-cascade-class.ts:205 routes it into
  *  `noteCascadeMaximumWidth` for note text. */
 const wrapTheme = deepMergeTheme(defaultTheme, {

@@ -15,12 +15,11 @@ import { describe, it, expect } from 'vitest';
 import { buildNamespaceGeos } from '../../../src/diagrams/class/class-geo-builders.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
-import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { computeGuideLinesBox, magicArrowTriSize } from '../../../src/diagrams/class/class-magic-arrow.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function makeAST(overrides?: Partial<ClassDiagramAST>): ClassDiagramAST {
   return {
@@ -465,7 +464,7 @@ describe('buildEdgeGeos — magic-arrow edge label (G2 item 44)', () => {
     // rewritten string -- proves the render width isn't left over from
     // measuring the raw `<<alias>>` token (jar's own tebore-53-tese080
     // golden: `textLength="41.275"` on `«alias»` at font-size 13).
-    const expectedWidth = new WidthTableMeasurer().measure('«alias»', {
+    const expectedWidth = new DeterministicMeasurer().measure('«alias»', {
       family: defaultTheme.fontFamily,
       size: 13,
     }).width;

@@ -12,7 +12,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
@@ -22,7 +22,7 @@ function nodeDims(markup: string): { width: number; height: number }[] {
   const graphs: DotInputGraph[] = [];
   setLayoutInputObserver(({ graph: g }) => graphs.push(g));
   try {
-    renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore: buildSpriteAssetsStore() });
+    renderSync(markup, { measurer: new DeterministicMeasurer(), assetStore: buildSpriteAssetsStore() });
   } finally {
     setLayoutInputObserver(undefined);
   }

@@ -11,12 +11,12 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { svekPass0, runSvekPass1, type ConstraintLink } from '../../../src/diagrams/class/class-svek-pass0.js';
 import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
 import { layoutFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const LABEL = { measurer, font: { family: 'SansSerif', size: 13 } };
 const M = { x: 10, y: 20 };
 const D = { x: 4, y: 0 };

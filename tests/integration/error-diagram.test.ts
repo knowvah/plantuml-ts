@@ -13,10 +13,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { renderSync, renderAll } from '../../src/index.js';
-import { WidthTableMeasurer } from '../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
 import { ERROR_BANNER, WELCOME_MARKER, expectErrorDiagram } from '../helpers/error-diagram.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const opts = { measurer };
 
 /** The text content of every `<text>` element, in document order, unescaped. */

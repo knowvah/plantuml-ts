@@ -23,10 +23,10 @@ import {
 import type { ClassifierGeo } from '../../../src/diagrams/class/class-geo-types.js';
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { parseClass } from './parse-helper.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 const BONACO = ['allowmixing', 'Package Pa {', 'portin Pi', 'component C {', '}', '}'];
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import {
   getWTitle,
@@ -15,7 +15,7 @@ import {
 import type { NamespaceGeo } from '../../../src/diagrams/class/layout.js';
 import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 // ---------------------------------------------------------------------------
 // G2 N17: jar-verified against test-results/dot-cache/class/finono-05-cuvu171

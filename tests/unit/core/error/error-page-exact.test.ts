@@ -23,12 +23,12 @@ import { PSystemErrorEmpty } from '../../../../src/core/error/PSystemErrorEmpty.
 import { PSystemErrorPreprocessor } from '../../../../src/core/error/PSystemErrorPreprocessor.js';
 import { umlSourceOf } from '../../../../src/core/error/UmlSource.js';
 import { renderPSystemError } from '../../../../src/core/error/error-renderer.js';
-import { WidthTableMeasurer } from '../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
 import { readLines } from '../../../../src/core/tim/ReadLineReader.js';
 import { LineLocationImpl } from '../../../../src/core/tim/LineLocationImpl.js';
 import { StringLocated } from '../../../../src/core/tim/StringLocated.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 /** A source (>= 5 lines, so no Welcome block) and a trace failing on its
  *  last line — mirrors `PSystemError.test.ts`'s own `failing()` helper. */

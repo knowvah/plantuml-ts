@@ -10,7 +10,7 @@ import { describe, it, expect } from 'vitest';
 import { parseRelColors } from '../../../src/diagrams/class/class-relationship-colors.js';
 import { parseRelationshipLine } from '../../../src/diagrams/class/class-relationship-parser.js';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 describe('parseRelColors (Colors.java:95-124, mainType LINE)', () => {
   it('returns nothing for an absent spec', () => {
@@ -60,14 +60,14 @@ describe('parseRelationshipLine trailing ;text:COLOR (CommandLinkClass.java:368)
 describe('link label drawn in the muted font colour (SvekEdge.java:260-262)', () => {
   it('fills the label text with text:COLOR (xoxuni `cl1 --> cl2 #red;text:blue : foo3`)', () => {
     const svg = renderSync('@startuml\nclass cl1\nclass cl2\ncl1 --> cl2 #red;text:blue : foo3\n@enduml', {
-      measurer: new WidthTableMeasurer(),
+      measurer: new DeterministicMeasurer(),
     });
     expect(svg).toMatch(/<text[^>]*fill="#00F"[^>]*>foo3<\/text>/);
   });
 
   it('keeps the default label fill without a text: token', () => {
     const svg = renderSync('@startuml\nclass cl1\nclass cl2\ncl1 --> cl2 #red : foo3\n@enduml', {
-      measurer: new WidthTableMeasurer(),
+      measurer: new DeterministicMeasurer(),
     });
     expect(svg).toMatch(/<text[^>]*fill="#000"[^>]*>foo3<\/text>/);
   });

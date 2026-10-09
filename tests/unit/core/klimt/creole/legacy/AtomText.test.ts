@@ -21,7 +21,7 @@ import {
   layoutTabbedText,
   tabStopWidth,
 } from '../../../../../../src/core/klimt/creole/legacy/AtomText.js';
-import { WidthTableMeasurer } from '../../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../../src/core/measurer-deterministic.js';
 
 const FONT_SIZE = 14;
 /** `getSize2D() * 4` at the default font size — the jar-probed advance. */
@@ -34,7 +34,7 @@ const tenPerChar = (s: string): number => s.length * 10;
 
 describe('the premise: the deterministic width table measures spaces at zero', () => {
   test('TAB_STRING measures 0, which is what forces the fontSize*4 fallback', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const font = { family: 'SansSerif', size: FONT_SIZE };
     expect(measurer.measure(' ', font).width).toBe(0);
     expect(measurer.measure(TAB_STRING, font).width).toBe(0);
@@ -236,7 +236,7 @@ describe('layoutTabbedText (AtomText.java:210-256, drawU + getWidth)', () => {
   });
 
   test('under the width table the stop is fontSize * 4 (52 at 13pt)', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const font = { family: 'SansSerif', size: 13 };
     const layout = layoutTabbedText('a\tb', 13, (s) => measurer.measure(s, font).width);
     expect(layout.tokens.map((t) => t.x)).toEqual([0, 52]);

@@ -9,7 +9,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver, layoutGraph } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
@@ -33,7 +33,7 @@ function renderCapturing(): { svg: string; inputs: DotInputGraph[] } {
   const inputs: DotInputGraph[] = [];
   setLayoutInputObserver(({ graph: g }) => inputs.push(g));
   try {
-    return { svg: renderSync(SOKEVU, { measurer: new WidthTableMeasurer() }), inputs };
+    return { svg: renderSync(SOKEVU, { measurer: new DeterministicMeasurer() }), inputs };
   } finally {
     setLayoutInputObserver(undefined);
   }

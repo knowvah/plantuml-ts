@@ -16,7 +16,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { applySeededDefIds, seededDefIdRenames, getSeed } from '../../../src/core/svg-defs-seeded.js';
 import { seedOf } from '../../../src/core/klimt/drawing/svg/svg-seed.js';
 import { seedOfUmlSource } from '../../../src/core/assemble-svg.js';
@@ -27,7 +27,7 @@ const CACHE = 'test-results/dot-cache/class';
 function seededRenderOf(slug: string): { seeded: string; jar: string } {
   const source = readFileSync(`${CACHE}/${slug}/in.puml`, 'utf8');
   return {
-    seeded: renderSync(source, { measurer: new WidthTableMeasurer() }),
+    seeded: renderSync(source, { measurer: new DeterministicMeasurer() }),
     jar: readFileSync(`${CACHE}/${slug}/in.svg`, 'utf8'),
   };
 }
@@ -179,7 +179,7 @@ describe('seedOfUmlSource — the deferred src/index.ts hunk, minus the line', (
       lines: block.source.lines,
       rawSourceLines: block.rawSource.map((line) => line.getString()),
     };
-    const plain = renderSync(source, { measurer: new WidthTableMeasurer() });
+    const plain = renderSync(source, { measurer: new DeterministicMeasurer() });
     expect(defIdsOf(applySeededDefIds(plain, seedOfUmlSource(umlSource)))[0]).toBe(firstId);
   });
 

@@ -17,9 +17,9 @@ import { renderNote } from '../../../src/diagrams/class/renderer-note.js';
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout-types.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const theme = scaleClassTheme(defaultTheme, 1);
 const NUVEJI_NOTE =
   'This is working also in notes\nYou can also add title in all these lines\n==Title==\n--Another title--';

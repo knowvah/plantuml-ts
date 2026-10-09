@@ -26,9 +26,9 @@ import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layou
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST, Classifier } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const theme = defaultTheme; // fontFamily 'sans-serif', fontSize 14 — matches the oracle capture
 
 // ---------------------------------------------------------------------------

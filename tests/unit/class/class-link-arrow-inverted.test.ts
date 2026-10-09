@@ -12,11 +12,11 @@
 import { describe, it, expect } from 'vitest';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { DotInputGraph, DotLayoutResult } from '../../../src/core/graph-layout.js';
 import { inNodeMapOrder } from '../../../src/diagrams/class/class-node-map-order.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 /** The magic-arrow glyph: the label-arrow `<polygon>` with 4 point pairs. */
 function glyphTipAndBase(svg: string): { tipY: number; baseY: number } {

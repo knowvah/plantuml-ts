@@ -15,7 +15,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { measureLeafNode } from '../../../../../src/core/svek/image/leaf-sizing.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 import type { FontSpec, StringMeasurer } from '../../../../../src/core/measurer.js';
 import type { DescriptiveNode } from '../../../../../src/diagrams/description/ast.js';
 
@@ -47,7 +47,7 @@ describe('leaf-sizing — shared sizer/renderer creole lexer (creole-lexer-unifi
     // measures) the visible 22-codepoint form below.
     const display = '<b>this is also <U+221E> <font Segoe UI Emoji><U+1F680><U+263A></font> long';
     const strippedDecoded = 'this is also ∞ 🚀☺ long';
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
 
     const sizerWidth = boxWidth(display, measurer);
     const groundTruthWidth = boxWidth(strippedDecoded, measurer);

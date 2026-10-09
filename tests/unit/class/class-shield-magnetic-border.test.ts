@@ -15,12 +15,12 @@ import {
   clusterMagneticBorder,
   type ClipRect,
 } from '../../../src/diagrams/class/class-shield-helpers.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { getWTitle } from '../../../src/diagrams/class/class-namespace-shape.js';
 import { renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 // A "p1" folder at (100, 200), 150 x 100.
 const NS = { x: 100, y: 200, width: 150, height: 100, label: 'p1' };

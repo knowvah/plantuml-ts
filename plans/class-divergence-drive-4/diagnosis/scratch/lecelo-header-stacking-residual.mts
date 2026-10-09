@@ -9,7 +9,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { renderSync } from '../../../../src/index.js';
-import { WidthTableMeasurer } from '../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
 import { combineAssetStores } from '../../../../src/core/asset-store.js';
 import { buildSpriteAssetsStore } from '../../../../scripts/sprite-assets-store.js';
 import { buildEmojiAssetsStore } from '../../../../scripts/emoji-assets-store.js';
@@ -20,7 +20,7 @@ const dir = 'test-results/dot-cache/class/lecelo-92-loma110';
 const markup = readFileSync(`${dir}/in.puml`, 'utf-8');
 const jar = readFileSync(`${dir}/in.svg`, 'utf-8');
 const store = combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore());
-const svg = renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore: store, includeStore: fixtureIncludeStore() });
+const svg = renderSync(markup, { measurer: new DeterministicMeasurer(), assetStore: store, includeStore: fixtureIncludeStore() });
 const { diffs } = compareSvg(svg, jar, 'deterministic');
 for (const d of diffs.slice(0, 30)) console.log(JSON.stringify(d));
 console.log('total', diffs.length);

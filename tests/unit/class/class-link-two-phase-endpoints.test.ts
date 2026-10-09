@@ -9,7 +9,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
@@ -55,7 +55,7 @@ describe('two-phase link endpoint creation (CommandLinkClass.java:320-333)', () 
   });
 
   it('xumofu-43-fode658: rendered uids equal the jar', () => {
-    const svg = renderSync(`@startuml\n${XUMOFU}\n@enduml`, { measurer: new WidthTableMeasurer() });
+    const svg = renderSync(`@startuml\n${XUMOFU}\n@enduml`, { measurer: new DeterministicMeasurer() });
     const ids = [...svg.matchAll(/data-qualified-name="([^"]*)" id="([^"]*)"/g)].map((m) => `${m[1]!}=${m[2]!}`);
     expect(ids).toEqual([
       'java=ent0002',

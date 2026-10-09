@@ -37,7 +37,7 @@ import { registry } from '../src/core/dispatcher.js';
 import { MapIncludeStore } from '../src/core/tim/IncludeStore.js';
 import { withStdlib } from '../src/core/tim/StdlibStore.js';
 import { buildStdlibAssetsStore } from '../tests/helpers/stdlib-assets-store.js';
-import { WidthTableMeasurer } from '../src/core/measurer.js';
+import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import type { FontSpec, StringMeasurer } from '../src/core/measurer.js';
 import { measureLineWithAtoms } from '../src/core/creole-atoms-measure.js';
 import { parseCreole } from '../src/core/creole.js';
@@ -258,7 +258,7 @@ function measureFixture(slug: string, measurer: StringMeasurer): FixtureResult |
 }
 
 function runMeasurement(): { results: FixtureResult[]; skipped: number } {
-  const measurer = new WidthTableMeasurer();
+  const measurer = new DeterministicMeasurer();
   const results: FixtureResult[] = [];
   let skipped = 0;
   for (const slug of goldenSlugs()) {

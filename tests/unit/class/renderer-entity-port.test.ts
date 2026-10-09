@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import {
   renderClassEntityPort,
   isClassEntityPort,
@@ -17,7 +17,7 @@ import type { ClassifierGeo } from '../../../src/diagrams/class/class-geo-types.
 import type { ScaledTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const BONACO = '@startuml\nallowmixing\n\nPackage Pa {\n    portin Pi\n    component C {\n    }\n}\n@enduml\n';
 
 function port(overrides: Partial<ClassifierGeo> = {}): ClassifierGeo {

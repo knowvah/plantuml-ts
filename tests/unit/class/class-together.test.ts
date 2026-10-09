@@ -12,7 +12,7 @@ import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
@@ -70,7 +70,7 @@ describe('class together membership (CucaDiagram.java:188-194,232,339-353)', () 
     setLayoutInputObserver(({ graph: input }) => inputs.push(input));
     try {
       renderSync('@startuml\nclass A\ntogether {\nclass t1\npackage p1 {\nclass pp1\n}\n}\n@enduml\n', {
-        measurer: new WidthTableMeasurer(),
+        measurer: new DeterministicMeasurer(),
       });
     } finally {
       setLayoutInputObserver(undefined);

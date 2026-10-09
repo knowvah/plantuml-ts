@@ -9,7 +9,7 @@ import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from 'node:fs';
 import { join } from 'node:path';
 const REPO = '/Users/scottseely/git/knowvah/plantuml-ts';
 const { renderSync } = await import(REPO + '/src/index.ts');
-const { WidthTableMeasurer } = await import(REPO + '/src/core/measurer.ts');
+const { DeterministicMeasurer } = await import(REPO + '/src/core/measurer-deterministic.ts');
 const { buildSpriteAssetsStore } = await import(REPO + '/scripts/sprite-assets-store.ts');
 const { compareSvg } = await import(REPO + '/tests/oracle/svg-conformance/compare.ts');
 const OUT = join(import.meta.dirname ?? new URL('.', import.meta.url).pathname, 'out');
@@ -19,7 +19,7 @@ for (const slug of process.argv.slice(2)) {
   const dir = join(REPO, 'test-results/dot-cache/class', slug);
   const markup = readFileSync(join(dir, 'in.puml'), 'utf-8');
   const oracle = readFileSync(join(dir, 'in.svg'), 'utf-8');
-  const svg = renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore: store });
+  const svg = renderSync(markup, { measurer: new DeterministicMeasurer(), assetStore: store });
   writeFileSync(join(OUT, slug + '.ours.svg'), svg);
   copyFileSync(join(dir, 'in.svg'), join(OUT, slug + '.jar.svg'));
   const cmp = compareSvg(svg, oracle, 'deterministic');

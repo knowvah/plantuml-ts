@@ -14,7 +14,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseDescription } from '../../../src/diagrams/description/parser.js';
 import { measureLeafNode } from '../../../src/core/svek/image/leaf-sizing.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { FontSpec } from '../../../src/core/measurer.js';
 import { effectiveRemovedIds } from '../../../src/diagrams/description/element-grammar.js';
 import { scopedKey } from '../../../src/diagrams/description/namespace-groups.js';
@@ -340,7 +340,7 @@ describe('archimate keyword (CommandArchimate single-line form)', () => {
     // <rect width="52.025" height="34"/>.
     const node = firstNode('archimate #Business "Hello"');
     const font: FontSpec = { family: 'sans-serif', size: 14 };
-    const dim = measureLeafNode(node, font, new WidthTableMeasurer());
+    const dim = measureLeafNode(node, font, new DeterministicMeasurer());
     expect(dim.width).toBeCloseTo(52.025, 3);
     expect(dim.height).toBeCloseTo(34, 3);
   });
@@ -2986,7 +2986,7 @@ describe('G6-a: no-SYMBOL bare CODE declaration (CommandCreateElementFull CODE1)
     // max(«Human» 60.725 + 2, 27, "User" 29.575) x (14 + 60 + 14).
     const node = firstNode('User << Human >>\n(Use)');
     const font: FontSpec = { family: 'sans-serif', size: 14 };
-    const dim = measureLeafNode(node, font, new WidthTableMeasurer());
+    const dim = measureLeafNode(node, font, new DeterministicMeasurer());
     expect(dim.width).toBeCloseTo(62.725, 3);
     expect(dim.height).toBeCloseTo(88, 3);
   });

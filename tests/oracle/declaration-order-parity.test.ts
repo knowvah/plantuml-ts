@@ -28,7 +28,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { renderSync } from '../../src/index.js';
-import { WidthTableMeasurer } from '../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../src/core/graph-layout.js';
 import { firstEncounterOrder } from '../../src/core/graph-layout-build.js';
@@ -77,7 +77,7 @@ describe.skipIf(fixtures.length === 0)('declaration order — builder and emitte
     it(`${name}: registers nodes in the order the DOT text creates them`, () => {
       captured = [];
       renderSync(readFileSync(join(GOLDENS, name, 'input.puml'), 'utf8'), {
-        measurer: new WidthTableMeasurer(),
+        measurer: new DeterministicMeasurer(),
       });
       for (const [n, input] of captured.entries()) {
         const { recs } = assignSequence(input, buildClusterTree(input.clusters ?? []));

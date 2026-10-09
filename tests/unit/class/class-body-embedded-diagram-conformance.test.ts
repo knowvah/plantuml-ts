@@ -27,7 +27,7 @@ import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { measureEnhancedBody, type EnhancedLayoutCtx } from '../../../src/diagrams/class/class-body-enhanced-layout.js';
 import { createNestedDiagramRenderer } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
 
@@ -61,7 +61,7 @@ function decodeHref(href: string): string {
 }
 
 describe('gadufu-56-votu808 — end-to-end, real renderSync, isEnhancedBody already true', () => {
-  const svg = renderSync(cachedPuml('gadufu-56-votu808'), { measurer: new WidthTableMeasurer() });
+  const svg = renderSync(cachedPuml('gadufu-56-votu808'), { measurer: new DeterministicMeasurer() });
   const group = entityGroup(svg, '<g class="entity"');
 
   it('draws exactly one <image> for the {{ start / :Использовать; }} block', () => {
@@ -92,7 +92,7 @@ describe('gadufu-56-votu808 — end-to-end, real renderSync, isEnhancedBody alre
 
 describe('moxobo/zikabo — the extraction+render mechanism, byte-exact, called directly (blocked end-to-end on isEnhancedBody)', () => {
   function ctx(): EnhancedLayoutCtx {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     return {
       fontSpec: { family: 'sans-serif', size: 14 },
       measurer,
@@ -143,7 +143,7 @@ describe('moxobo/zikabo — the extraction+render mechanism, byte-exact, called 
 
 describe('moxobo/zikabo — end-to-end, real renderSync, isEnhancedBody now true (CDD B7FU-R2)', () => {
   it('moxobo-16-tipo829 draws one jar-verified 43x54 <image> at (13, 43), fully conformant', () => {
-    const svg = renderSync(cachedPuml('moxobo-16-tipo829'), { measurer: new WidthTableMeasurer() });
+    const svg = renderSync(cachedPuml('moxobo-16-tipo829'), { measurer: new DeterministicMeasurer() });
     const group = entityGroup(svg, '<g class="entity"');
     const tags = imageTags(group);
     expect(tags).toHaveLength(1);
@@ -160,7 +160,7 @@ describe('moxobo/zikabo — end-to-end, real renderSync, isEnhancedBody now true
   });
 
   it('zikabo-17-gugi332 draws "- field" then one jar-verified 67x64 <image> at (13, 57)', () => {
-    const svg = renderSync(cachedPuml('zikabo-17-gugi332'), { measurer: new WidthTableMeasurer() });
+    const svg = renderSync(cachedPuml('zikabo-17-gugi332'), { measurer: new DeterministicMeasurer() });
     const group = entityGroup(svg, '<g class="entity"');
     const tags = imageTags(group);
     expect(tags).toHaveLength(1);

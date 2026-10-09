@@ -56,7 +56,7 @@ import { fileURLToPath } from 'node:url';
 
 import { renderSync } from '../src/index.js';
 import { setLayoutInputObserver } from '../src/core/graph-layout.js';
-import { WidthTableMeasurer } from '../src/core/measurer.js';
+import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import type { DotInputGraph } from '../src/core/graph-layout.js';
 import { parseSvekDot, dotInputToStructural } from '../tests/oracle/svek-dot.js';
 import type { StructuralGraph } from '../tests/oracle/svek-dot.js';
@@ -93,7 +93,7 @@ function ourInputs(markup: string): DotInputGraph[] {
   const inputs: DotInputGraph[] = [];
   setLayoutInputObserver(({ graph: g }) => inputs.push(g));
   try {
-    renderSync(markup, { measurer: new WidthTableMeasurer() });
+    renderSync(markup, { measurer: new DeterministicMeasurer() });
   } catch {
     /* fixture that does not render is reported as unmatched below */
   } finally {

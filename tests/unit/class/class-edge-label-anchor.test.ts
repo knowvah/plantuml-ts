@@ -24,11 +24,11 @@ import {
   multiLineLabelAnchor,
   spriteLabelAnchor,
 } from '../../../src/diagrams/class/class-edge-label-anchor.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { parseRelationshipLine } from '../../../src/diagrams/class/class-relationship-parser.js';
 import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const font = { family: 'sans-serif', size: 13 };
 
 function baseEdgeGeo(points: Array<{ x: number; y: number }>): EdgeGeo {

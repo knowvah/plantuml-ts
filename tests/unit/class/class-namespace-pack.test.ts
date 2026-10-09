@@ -15,7 +15,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
@@ -33,7 +33,7 @@ function parse(source: string): ClassDiagramAST {
 }
 
 function render(body: string): string {
-  return renderSync(`@startuml\n${body}\n@enduml`, { measurer: new WidthTableMeasurer() });
+  return renderSync(`@startuml\n${body}\n@enduml`, { measurer: new DeterministicMeasurer() });
 }
 
 /** Every `<g class="...">` open tag's (class, qualified-name, id) triple. */

@@ -23,7 +23,7 @@
  */
 import { describe, expect, test } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 const DISEKA_SOURCE = [
   '@startuml',
@@ -33,7 +33,7 @@ const DISEKA_SOURCE = [
 ].join('\n');
 
 function svgOf(source: string): string {
-  const out = renderSync(source, { measurer: new WidthTableMeasurer() });
+  const out = renderSync(source, { measurer: new DeterministicMeasurer() });
   return typeof out === 'string' ? out : (out as { svg: string }).svg;
 }
 

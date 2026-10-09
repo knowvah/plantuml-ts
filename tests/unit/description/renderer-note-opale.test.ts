@@ -21,14 +21,14 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 /** Same deterministic-text call `scripts/oracle-render.sh`'s jar flag and
  *  `plans/class-divergence-drive/tools/render-diff.mts#renderFixture`
  *  both target — without it, text-derived numbers measure real platform
  *  font metrics, not the port (`CLAUDE.md`'s "Render oracles" note). */
 function render(src: string): string {
-  return renderSync(src, { measurer: new WidthTableMeasurer() });
+  return renderSync(src, { measurer: new DeterministicMeasurer() });
 }
 
 describe('description note — Opale connector (T1e)', () => {

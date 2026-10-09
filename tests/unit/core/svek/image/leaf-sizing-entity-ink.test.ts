@@ -23,9 +23,9 @@ import {
   measureUsecaseOrActorLeafInk,
 } from '../../../../../src/core/svek/image/leaf-sizing-entity.js';
 import type { LeafSizingSubject } from '../../../../../src/core/svek/image/LeafSizingSubject.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const fontSpec = { family: 'sans-serif', size: 14 };
 
 describe('measureEntityLeafInk (cdd3-T8, R-LEAF)', () => {

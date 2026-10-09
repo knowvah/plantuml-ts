@@ -16,10 +16,10 @@
 import { describe, expect, test } from 'vitest';
 import { descriptionLeafSymbolInk } from '../../../src/diagrams/class/class-layout-description-leaf-ink.js';
 import type { LeafSizingSubject } from '../../../src/core/svek/image/LeafSizingSubject.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { BoxSizingOpts } from '../../../src/core/svek/image/leaf-sizing.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const baseFont = { family: 'sans-serif', size: 14 };
 const emptyOpts: BoxSizingOpts = {};
 

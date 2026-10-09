@@ -25,7 +25,7 @@ import { parseStyleBlock, resolveSkinparam } from '../../../src/core/skinparam.j
 import type { StyleMap } from '../../../src/core/skinparam.js';
 import { defaultTheme, deepMergeTheme, resolveElementFontSize } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { FontSpec } from '../../../src/core/measurer.js';
 import { measureLeafNode } from '../../../src/core/svek/image/leaf-sizing.js';
 import type { DescriptiveNode } from '../../../src/diagrams/description/ast.js';
@@ -49,8 +49,8 @@ const LOROTO_STYLE = `node {
 
 const BASE_FONT: FontSpec = { family: 'sans-serif', size: 14 };
 
-function measurer(): WidthTableMeasurer {
-  return new WidthTableMeasurer();
+function measurer(): DeterministicMeasurer {
+  return new DeterministicMeasurer();
 }
 
 function nodeLeaf(id: string, stereotype: readonly string[]): DescriptiveNode {

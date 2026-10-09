@@ -5,7 +5,7 @@ import {
   dedentRawLines,
 } from '../../../src/diagrams/class/class-body-enhanced.js';
 import { measureEnhancedBody, type EnhancedRowsPart } from '../../../src/diagrams/class/class-body-enhanced-layout.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { createSpriteRegistry, addSprite } from '../../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../../src/core/klimt/sprite/SpriteMonochrome.js';
 
@@ -253,7 +253,7 @@ describe('measureEnhancedBody — row y bottom-anchor is gated on an image atom'
   function ctx(sprites?: ReturnType<typeof createSpriteRegistry>) {
     return {
       fontSpec: { family: 'sans-serif', size: 14 },
-      measurer: new WidthTableMeasurer(),
+      measurer: new DeterministicMeasurer(),
       sprites,
       baselineOffset: 11,
       bodyTop: 0,
@@ -319,7 +319,7 @@ describe('measureEnhancedBody — visibilityBlockHeight/visibilityBlockTopDy on 
   function ctx() {
     return {
       fontSpec: { family: 'sans-serif', size: 14 },
-      measurer: new WidthTableMeasurer(),
+      measurer: new DeterministicMeasurer(),
       sprites: undefined,
       baselineOffset,
       bodyTop: 0,

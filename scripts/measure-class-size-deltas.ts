@@ -20,7 +20,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { renderSync } from '../src/index.js';
 import { setLayoutInputObserver } from '../src/core/graph-layout.js';
-import { WidthTableMeasurer } from '../src/core/measurer.js';
+import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import type { DotInputGraph } from '../src/core/graph-layout.js';
 import {
   parseSvekDot,
@@ -53,7 +53,7 @@ function captureGraphs(markup: string): DotInputGraph[] {
   const captured: DotInputGraph[] = [];
   setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
-    renderSync(markup, { measurer: new WidthTableMeasurer() });
+    renderSync(markup, { measurer: new DeterministicMeasurer() });
   } finally {
     setLayoutInputObserver(undefined);
   }

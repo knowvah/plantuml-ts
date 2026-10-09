@@ -13,12 +13,12 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { parseClassifierDecl } from '../../../src/diagrams/class/class-declaration-parser.js';
 import { parseClass } from './parse-helper.js';
 
 function render(...body: string[]): string {
-  return renderSync(['@startuml', ...body, '@enduml'].join('\n'), { measurer: new WidthTableMeasurer() });
+  return renderSync(['@startuml', ...body, '@enduml'].join('\n'), { measurer: new DeterministicMeasurer() });
 }
 
 function parse(...lines: string[]): ReturnType<typeof parseClass> {

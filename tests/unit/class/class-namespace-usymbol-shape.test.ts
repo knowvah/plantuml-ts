@@ -25,7 +25,7 @@
  * i.e. exactly ONE cluster child (`svek/Cluster.java:337-341,379-382`).
  */
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderSync } from '../../../src/index.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import type { NamespaceGeo } from '../../../src/diagrams/class/layout.js';
@@ -41,7 +41,7 @@ import { wrapCluster } from '../../../src/diagrams/class/renderer-group.js';
 import { namespaceTitleTableDims } from '../../../src/diagrams/class/class-namespace-title-table.js';
 import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const scaledDefaultTheme = scaleClassTheme(defaultTheme, 1);
 
 const NODE_PAINT = {
@@ -273,7 +273,7 @@ describe('cluster border reaches the merged group style (cdd5-T5c)', () => {
   it('strokes a rectangle cluster with skinparam packageBorderColor', () => {
     const svg = renderSync(
       ['@startuml', 'skinparam packageBorderColor red', 'rectangle R {', 'class b', '}', '@enduml'].join('\n'),
-      { measurer: new WidthTableMeasurer() },
+      { measurer: new DeterministicMeasurer() },
     );
     expect(svg).toContain('<rect x="7" y="7" width="72" height="97" fill="none" style="stroke:#F00;stroke-width:1;"');
   });
@@ -292,7 +292,7 @@ describe('cluster border reaches the merged group style (cdd5-T5c)', () => {
         '}',
         '@enduml',
       ].join('\n'),
-      { measurer: new WidthTableMeasurer() },
+      { measurer: new DeterministicMeasurer() },
     );
     expect(svg).toMatch(
       /<path d="M8\.5,[^"]*" fill="none" stroke="#F00" stroke-width="1\.5"\/><line [^>]*stroke="#F00"/u,

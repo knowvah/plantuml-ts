@@ -22,11 +22,11 @@
  */
 import { describe, it, expect } from 'vitest';
 import { measureLinkNoteDim } from '../../../../../src/core/svek/image/EntityImageNoteLink.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 import { NOTE_FONT_SIZE } from '../../../../../src/core/klimt/font/FontParam.js';
 import { OPALE_MARGIN_X1, OPALE_MARGIN_X2, OPALE_MARGIN_Y } from '../../../../../src/core/svek/image/Opale.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const FONT_FAMILY = 'sans-serif';
 /** `Rose.java:65-66` -- `paddingX`/`paddingY`, both 5. */
 const ROSE_NOTE_PADDING = 5;

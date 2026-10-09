@@ -16,10 +16,10 @@ import { movePointsStart, movePointsEnd } from '../../../src/diagrams/class/rend
 import { applyDecorTrim, buildEdgeArrowheads } from '../../../src/diagrams/class/renderer-arrowhead.js';
 import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 /** Every `<g class="link">`'s first `<path d>`, as number arrays. */
 function linkPaths(slug: string): number[][] {
