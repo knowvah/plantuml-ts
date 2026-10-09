@@ -16,20 +16,22 @@
  * `x += tabSize - (x % tabSize)`. A tab that lands exactly on a stop boundary
  * therefore advances a FULL stop (remainder 0 -> `x += tabSize`), never zero.
  *
- * ## Why the stop is `fontSize * 4`, not "8 spaces wide"
+ * ## The stop is the measured width of `tabString()`; `fontSize * 4` is the zero fallback
  *
  * `getTabSize` measures `tabString()` — 8 spaces on this port's paths, see
- * below — and falls back to `getFont().getSize2D() * 4` **when that
- * measurement is zero** (java:272-274). Under the deterministic width table
- * both this port and the oracle jar run on
- * (`-DPLANTUML_DETERMINISTIC_TEXT=true`, `StringBounderFromWidthTable`) the
- * SPACE glyph has width 0, so `measure("        ") === 0` and the fallback is
- * the branch that always fires. Measured here 2026-08-07:
- * `new WidthTableMeasurer().measure(" ", { size: 14 }).width === 0`. At the
- * default font size 14 that yields **56px**, which is exactly the tab advance
- * jar-probed for `fariba-82-xolu802` (`plans/s1l-tail-diagnosis/findings/
- * container-cluster.md`, ruledOut (e)). The 56 is therefore NOT a constant —
- * it is `14 * 4`, and it scales with the run's font size.
+ * below — and falls back to `getFont().getSize2D() * 4` **only when that
+ * measurement is zero** (java:272-274). Under the deterministic
+ * measurement both this port and the oracle jar run on
+ * (`-DPLANTUML_DETERMINISTIC_TEXT=true`) a space is 44 tenths of a 16 pt em
+ * (`DeterministicMeasurer`; the oracle's seam #4,
+ * `oracle/patches/0004-oracle-space-width.patch`), so 8 spaces measure
+ * `8 * 4.4 * size / 16` and the fallback does NOT fire. (The upstream table
+ * itself gives U+0020 width 0, `UnicodeFontWidthSansSerif.java` block 0
+ * index 0x20 — which made the fallback always fire before seam #4: 14 * 4 =
+ * 56 px at the default size, jar-probed for `fariba-82-xolu802`, `plans/
+ * s1l-tail-diagnosis/findings/container-cluster.md`, ruledOut (e). That 56
+ * was an artefact of the zero-wide space, not of the layout.) The fallback
+ * remains reachable only for a measurer that returns 0 for spaces.
  *
  * ## Why `skinparam tabSize` cannot move it
  *
@@ -40,9 +42,9 @@
  *    (`klimt/font/FontConfiguration.java:229-232`). `skinparam tabSize`
  *    (`SkinParam#getTabSize`, default 8) never reaches a description-engine
  *    run at all.
- * 2. Even if it did, `tabString()` only varies for `1 <= nb < 7`, and its
- *    width is 0 for EVERY length under the deterministic width table — so the
- *    `getSize2D() * 4` fallback is taken regardless of the string's length.
+ * 2. Even if it did, `tabString()` only varies for `1 <= nb < 7`; the
+ *    description-engine runs here all carry `nb == 8`, so the string is
+ *    always the full 8 spaces.
  *
  * This is why {@link atomTextWidth} takes no tab-size parameter: threading one
  * would be a lever upstream does not have on this path.
@@ -116,8 +118,8 @@ export function hasTabulation(text: string): boolean {
 
 /** Upstream `AtomText#getTabSize` (java:270-275). `tabStringWidth` is the
  *  caller's measurement of {@link TAB_STRING} in the run's own font; a zero
- *  measurement (always, under the deterministic width table — see this
- *  module's doc comment) falls back to `fontSize * 4`. `fontSize` is the
+ *  measurement (not produced by `DeterministicMeasurer`, whose space is
+ *  non-zero — see this module's doc comment) falls back to `fontSize * 4`. `fontSize` is the
  *  MUTED size (`getFont(fc).size`) — see this module's doc comment. */
 export function tabStopWidth(tabStringWidth: number, fontSize: number): number {
   return tabStringWidth === 0 ? fontSize * TAB_STOP_FONT_SIZE_FACTOR : tabStringWidth;

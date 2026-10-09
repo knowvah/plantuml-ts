@@ -15,7 +15,7 @@
  *    all, because `drawU` (:210-234) only emits for non-tab tokens. That is
  *    the element this port had 11 of against the jar's 10.
  *
- * ## Why the stop is 56px and not the width of eight spaces
+ * ## The stop is the measured width of eight spaces; `fontSize * 4` is the zero fallback
  *
  * `getTabSize` measures {@link tabString} and falls back when that measures
  * zero:
@@ -27,14 +27,16 @@
  * return width;
  * ```
  *
- * Under the deterministic width table a SPACE is 0 wide
- * (`UnicodeFontWidthSansSerif` block 0, cp 0x20 → 0), so `tabString()` — which
- * is only ever spaces — measures 0 and the guard always fires. The stop is
- * therefore `fontSize * 4`: 56 at the default 14. That is the whole of
- * `nujuke`'s otherwise unexplained 66px node (56 + the 5+5 cell margin), and
- * it is a branch that fires ONLY under deterministic metrics — a real font
- * gives a space non-zero width and takes the other path. No measurement of
- * rendered output could have revealed it.
+ * `tabString()` is only ever spaces. The upstream width table gives a SPACE
+ * width 0 (`UnicodeFontWidthSansSerif` block 0, cp 0x20 -> 0), which made the
+ * guard always fire under deterministic metrics: `fontSize * 4`, 56 at the
+ * default 14 — the whole of `nujuke`'s once-unexplained 66px node (56 + the
+ * 5+5 cell margin). The oracle's seam #4 and `DeterministicMeasurer` now give
+ * a space 44 tenths of a 16 pt em (the width of `!` and U+00A0 in the same
+ * table), so eight spaces measure `8 * 4.4 * size / 16` and the guard does
+ * not fire; the 56 was an artefact of the zero-wide space, the same branch a
+ * real font never takes. This code is unchanged: it measures, and falls back
+ * only on 0.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/legacy/AtomText.java#getTabSize
  */
@@ -54,8 +56,8 @@ const FALLBACK_STOPS_PER_EM = 4;
 
 /**
  * The tab stop in pixels: the measured width of {@link tabString}, or
- * `fontSize * 4` when that measures zero (which it always does under the
- * deterministic table, since a space is 0 wide there).
+ * `fontSize * 4` when that measures zero (not the case for
+ * `DeterministicMeasurer`, whose space is non-zero).
  */
 export function tabStopWidth(measure: (s: string) => number, fontSize: number, tabSize: number | undefined): number {
   const width = measure(tabString(tabSize));
