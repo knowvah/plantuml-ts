@@ -44,8 +44,6 @@ export function scaleEmbeddedBlock(block: EmbeddedBlockGeo, k: number): Embedded
     y: block.y * k,
     width: block.width * k,
     height: block.height * k,
-    sizingWidth: block.sizingWidth * k,
-    sizingHeight: block.sizingHeight * k,
   };
 }
 

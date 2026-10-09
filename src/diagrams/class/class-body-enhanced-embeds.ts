@@ -34,18 +34,15 @@ import {
  * nothing is drawn, matching that method's own `drawU` catch (java:191-193)
  * failing independently and drawing nothing.
  *
- * `sizingWidth`/`sizingHeight` are the enclosing box's geometry contribution
- * and the NEXT embed's Y-stacking offset (`EmbeddedDiagram#calculateDimension`,
- * `TextBlockMemoized`-cached). With the SVG arm taken (lgm-T1e) they equal
- * `width`/`height`; see {@link renderEmbed}.
+ * The same `width`/`height` size the enclosing box and the next embed's
+ * Y-stacking (`EmbeddedDiagram#calculateDimension`, `TextBlockMemoized`-cached);
+ * see {@link renderEmbed}.
  */
 export interface EmbeddedBlockGeo {
   readonly y: number;
   readonly width: number;
   readonly height: number;
   readonly href?: string;
-  readonly sizingWidth: number;
-  readonly sizingHeight: number;
 }
 
 /**
@@ -109,10 +106,7 @@ const EMBEDDED_FALLBACK_SIZE = 42;
  * threw, and every embed reserved the (42, 42) catch fallback; this port
  * had fitted that artefact.
  */
-function renderEmbed(
-  source: readonly string[],
-  renderer: EmbeddedRenderer | undefined,
-): Omit<EmbeddedBlockGeo, 'y' | 'sizingWidth' | 'sizingHeight'> {
+function renderEmbed(source: readonly string[], renderer: EmbeddedRenderer | undefined): Omit<EmbeddedBlockGeo, 'y'> {
   if (renderer === undefined) return { width: EMBEDDED_FALLBACK_SIZE, height: EMBEDDED_FALLBACK_SIZE };
   try {
     return renderer.renderImage(source);
@@ -149,7 +143,7 @@ export function stackEmbeds(
   let y = startY;
   return sources.map((source) => {
     const geo = renderEmbed(source, renderer);
-    const positioned: EmbeddedBlockGeo = { ...geo, y, sizingWidth: geo.width, sizingHeight: geo.height };
+    const positioned: EmbeddedBlockGeo = { ...geo, y };
     y += geo.height;
     return positioned;
   });

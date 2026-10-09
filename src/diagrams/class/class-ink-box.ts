@@ -25,10 +25,8 @@ import {
   addPlainInk,
   addNamespaceRectInk,
   addClassicRectInk,
-  addEmbedImageInk,
   addJsonBodyInk,
 } from './class-ink-shapes.js';
-import { BODY_ENHANCED_MARGIN_X } from './class-body-enhanced-geometry.js';
 import { protectedInnerBox } from './class-dot-graph.js';
 export type { InkBox } from './class-ink-shapes.js';
 
@@ -126,53 +124,6 @@ function addClassifierBoxInk(box: InkBox, c: ClassifierGeo): void {
   // included). The empty-but-SHOWN arm above does NOT collapse (its max-Y
   // is `y+h-1`, not `y+h`); disabling IT drops the census 35 -> 29.
   addRectInk(box, c);
-}
-
-/** One DRAWN (`href !== undefined`) embed's absolute position/size. */
-interface DrawnEmbedGeo {
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-}
-
-/**
- * CDD B7FU-R2 item (e): every DRAWN embedded `{{ }}` diagram's own absolute
- * position/size in `c`'s enhanced body -- shared by this file's own ink walk
- * ({@link addEnhancedBodyEmbedInk}) and `class-geo-builders.ts
- * #degenerateSingleClassifier`'s canvas-overflow check (the degenerate path
- * never calls {@link buildInkBox} at all -- `layout.ts`'s own "skip
- * graphviz entirely" doc comment -- so it needs these absolute corners
- * directly rather than through an `InkBox` walk). A failed/no-renderer embed
- * (`href === undefined`) draws nothing upstream (`renderEmbed`'s own doc
- * comment) and is excluded. Absolute position mirrors `renderer-body-
- * enhanced.ts`'s own draw call exactly: `x = c.x + BODY_ENHANCED_MARGIN_X`,
- * `y = c.y + embed.y` (`embed.y` is local to its own rows-part,
- * `EmbeddedBlockGeo`'s own doc comment). Empty for every classifier with no
- * enhanced body / no embeds (`c.enhancedBody` absent, or every part's
- * `embeds` empty).
- */
-export function drawnEnhancedBodyEmbeds(c: Pick<ClassifierGeo, 'x' | 'y' | 'enhancedBody'>): readonly DrawnEmbedGeo[] {
-  if (c.enhancedBody === undefined) return [];
-  const drawn: DrawnEmbedGeo[] = [];
-  for (const part of c.enhancedBody.parts) {
-    if (part.kind !== 'rows') continue;
-    for (const embed of part.embeds ?? []) {
-      if (embed.href === undefined) continue;
-      drawn.push({ x: c.x + BODY_ENHANCED_MARGIN_X, y: c.y + embed.y, width: embed.width, height: embed.height });
-    }
-  }
-  return drawn;
-}
-
-/** A DRAWN embed's own real corner -- {@link addEmbedImageInk}'s own doc
- *  comment for the jar mechanism (`SvgGraphics#svgImageUnsecure`,
- *  independent of the classifier box's own (42,42)-fallback-sized
- *  reservation for it). See {@link drawnEnhancedBodyEmbeds}'s own doc
- *  comment for the shared corner-collection this and `class-geo-builders.ts
- *  #degenerateSingleClassifier` both read from. */
-function addEnhancedBodyEmbedInk(box: InkBox, c: ClassifierGeo): void {
-  for (const e of drawnEnhancedBodyEmbeds(c)) addEmbedImageInk(box, e.x, e.y, e.width, e.height);
 }
 
 /**
@@ -273,11 +224,11 @@ function addClassifierInk(box: InkBox, outerC: ClassifierGeo, iconSize: number):
   // font/sprite context already exist — SI14's "share the measurement
   // OBJECT" shape. See `ClassifierGeo.symbolInk`.
   if (c.symbolInk !== undefined) {
-    // cdd6 T3b: a leaf whose ink pass drew nothing (a description label that
-    // is only a `{{ }}` embed -- `EntityImageDescriptionEmbed.ts`) reports
-    // `LimitFinder`'s untouched `±MAX_VALUE` sentinel, minX > maxX. Upstream
-    // it adds nothing to the one shared `SvekResult` walk
-    // (`svek/SvekResult.java:130-135`).
+    // A leaf whose ink pass drew nothing reports `LimitFinder`'s untouched
+    // `±MAX_VALUE` sentinel, minX > maxX; upstream it adds nothing to the one
+    // shared `SvekResult` walk (`svek/SvekResult.java:130-135`). (cdd6 T3b's
+    // `{{ }}`-only label was this case only through the oracle's old
+    // `matchesProperty("SVG") = false`; the embed now draws in the ink pass.)
     if (c.symbolInk.minX > c.symbolInk.maxX) return;
     addPoint(box, c.x + c.symbolInk.minX, c.y + c.symbolInk.minY);
     addPoint(box, c.x + c.symbolInk.maxX, c.y + c.symbolInk.maxY);
@@ -285,7 +236,6 @@ function addClassifierInk(box: InkBox, outerC: ClassifierGeo, iconSize: number):
   }
   addClassifierBoxInk(box, c);
   addVisibilityIconInk(box, c, iconSize);
-  addEnhancedBodyEmbedInk(box, c);
   // G2 N32: `class Foo<T>`'s generic type-parameter tag box is drawn
   // OUTSIDE the classifier's own rect (above-right, `class-stereotype.ts
   // #buildGenericTagGeo`'s doc comment) via a plain stroked `URectangle`
