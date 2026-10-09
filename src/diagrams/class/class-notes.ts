@@ -5,6 +5,7 @@
  * helpers operate only on the public `ClassDiagramAST` (no parse state).
  */
 
+import { removeEmptyColumns } from './class-note-columns.js';
 import type { ClassDiagramAST, NotePosition } from './ast.js';
 import type { UrlInfo } from './class-url.js';
 import { registerInNamespace } from './class-namespace.js';
@@ -419,7 +420,10 @@ export function finalizePendingNote(
   counter?: NoteCreationCounter,
   tipGroupsSeen?: TipGroupSeenSet,
 ): string | undefined {
-  const text = note.textLines.join('\n');
+  // isw-T2-cls F3: BlocLines#removeEmptyColumns only -- trailing and interior
+  // whitespace survive (the lines are the RAW source lines, see
+  // handlePendingNoteLine).
+  const text = removeEmptyColumns(note.textLines).join('\n');
   if (note.kind === 'attached') return finalizeAttachedNote(ast, note, text, counter, tipGroupsSeen);
   if (note.kind === 'link') {
     applyNoteOnLink(ast, note.position, text, note.color);
@@ -449,7 +453,7 @@ export function handlePendingNoteLine(state: ParseState, line: string): boolean 
     state.pendingNote = null;
     state.pendingNoteTags = [];
   } else {
-    state.pendingNote.textLines.push(line);
+    state.pendingNote.textLines.push(state.currentRawLine ?? line);
   }
   return true;
 }
