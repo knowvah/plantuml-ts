@@ -36,6 +36,7 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 // structural rather than a convention.
 import { rect, line, noteBox } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
+import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import { REFERENCE_FONT_SIZE, type TextRun } from './text-block-geo.js';
 import { NOTE_FONT_SIZE } from './sequence-layout-shared.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
@@ -67,10 +68,10 @@ import { NEWPAGE_DASH_UNIT, NEWPAGE_LINE_COLOR, NEWPAGE_LINE_THICKNESS, NEWPAGE_
  * as `renderBranchSeparators` resolves the group style's. */
 export function creoleRunText(run: TextRun, theme: ScaledTheme, fontSize: number, boldFallback = false): string {
   return sequenceText({
-    leftX: run.x,
+    leftX: drawnLeftX(run),
     baselineY: run.y,
     text: run.text,
-    width: run.textWidth,
+    width: drawnWidth(run),
     fontFamily: run.fontFamily ?? theme.fontFamily,
     fontSize: run.fontSize ?? fontSize,
     fill: run.color ?? theme.colors.text,
@@ -200,10 +201,10 @@ function renderBranchSeparators(frame: FrameGeo, theme: ScaledTheme): string {
         sep.runs
           .map((run) =>
             sequenceText({
-              leftX: run.x,
+              leftX: drawnLeftX(run),
               baselineY: run.y,
               text: run.text,
-              width: run.textWidth,
+              width: drawnWidth(run),
               fontFamily: run.fontFamily ?? theme.fontFamily,
               fontSize: run.fontSize ?? labelFontSize,
               // `ComponentRoseGroupingElse` reads the GROUP style, whose

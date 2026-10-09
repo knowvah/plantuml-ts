@@ -32,6 +32,7 @@ import type { ScaledTheme } from './scale-geo.js';
 import type { ParticipantBadge, ParticipantGeo, ParticipantType, TextRun } from './ast.js';
 import { ellipse, image, rect, linkWrap } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
+import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import { participantBadgeGeo, participantLabelCy } from './sequence-layout-participant-sizing.js';
 import { participantBoxOf } from './sequence-layout-participants.js';
 import { sequenceShadowFilter } from './sequence-shadow.js';
@@ -122,10 +123,10 @@ function renderSymbolShape(p: ParticipantGeo, blockTopY: number, head: boolean, 
  */
 function renderLabelRun(run: TextRun, dy: number, theme: Theme): string {
   return sequenceText({
-    leftX: run.x,
+    leftX: drawnLeftX(run),
     baselineY: run.y + dy,
     text: run.text,
-    width: run.textWidth,
+    width: drawnWidth(run),
     // `""mono""` sets its own family; `=heading`/`<size:N>` its own size.
     fontFamily: run.fontFamily ?? theme.fontFamily,
     fontSize: run.fontSize ?? theme.fontSize,

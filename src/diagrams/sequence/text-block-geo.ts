@@ -19,6 +19,7 @@
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
+import { runDrawMetrics } from './run-draw-metrics.js';
 import { arrowFontSpecOf } from './sequence-layout-shared.js';
 import { sequenceAtomContext, sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
@@ -121,6 +122,7 @@ export function textBlockRuns(
     x: leftX,
     y: top + ascent + i * lineHeight,
     textWidth: measurer.measure(line, spec).width,
+    ...runDrawMetrics(line, spec, measurer),
     textAscent: ascent,
     textLineHeight: lineHeight,
   }));
@@ -159,6 +161,11 @@ export interface TextRun {
   /** `measure(text, font).width` at this run's OWN font. Reaches `textLength`
    *  subject to `svg-shapes.ts#textLengthOf`'s `text.length() > 1` guard. */
   readonly textWidth: number;
+  /** `DriverTextSvg`'s TRIMMED width (`:113-126`), set only when the draw
+   *  would trim the run; see `run-draw-metrics.ts`. Absent = `textWidth`. */
+  readonly drawWidth?: number;
+  /** `DriverTextSvg`'s leading-space `x` shift. Absent = 0. */
+  readonly drawDx?: number;
   /** `measure(text, font).height - getDescent(font, text)` — the distance from
    *  the line box's top to the baseline. Measured rather than derived: the
    *  `size - size/4.5` shorthand in `renderer-frame-header.ts` disagrees with
