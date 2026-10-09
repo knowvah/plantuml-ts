@@ -151,6 +151,7 @@ describe('computeKal — two draw passes (cdd4-T10, ririlu-13-zipi740)', () => {
         width,
         height: 16,
         textWidth: width - 4,
+        textDx: 0,
         baselineOffset: 11,
         position: 'DOWN',
       };
