@@ -6,10 +6,11 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
  * (`measurer-deterministic.ts`'s doc comment table) — real output from
  * `java -DPLANTUML_DETERMINISTIC_TEXT=true -jar plantuml-1.2026.7beta3.jar
  * -tsvg -pipe` (openjdk 21.0.1), read off each `<text>` element's
- * `textLength` attribute. `DeterministicMeasurer` is a re-export of
+ * `textLength` attribute. `DeterministicMeasurer` extends
  * `WidthTableMeasurer` (see that module's own test file for full
- * per-glyph/table coverage) — this file's job is only to pin the exact
- * jar-observed values under the stable `DeterministicMeasurer` name.
+ * per-glyph/table coverage) and overrides only U+0020 (oracle seam #4, isw
+ * D1; `isw-space-width.test.ts`) — none of the texts below contains a space,
+ * so these jar-observed values hold before and after seam #4.
  */
 describe('DeterministicMeasurer — jar-golden verification (2026-07-10)', () => {
   const m = new DeterministicMeasurer();

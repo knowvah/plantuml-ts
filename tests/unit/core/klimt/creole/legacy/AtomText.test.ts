@@ -29,17 +29,19 @@ const TAB_STOP_AT_14 = FONT_SIZE * TAB_STOP_FONT_SIZE_FACTOR;
 
 /** A measurer whose widths are trivially checkable: every character is 10
  *  units wide, spaces included. Used for the branch where `tabString()` DOES
- *  measure non-zero, which the deterministic width table never reaches. */
+ *  measure non-zero (the deterministic measurer now reaches it too, seam #4). */
 const tenPerChar = (s: string): number => s.length * 10;
 
-describe('the premise: the deterministic width table measures spaces at zero', () => {
-  test('TAB_STRING measures 0, which is what forces the fontSize*4 fallback', () => {
+describe('the premise: the deterministic measurer gives spaces a width (seam #4)', () => {
+  test('TAB_STRING measures 8 spaces (seam #4), so the fontSize*4 fallback does not fire', () => {
+    // AtomText.java:270-274: getTabSize returns calculateDimension(tabString())
+    // and falls back to getSize2D() * 4 only `if (width == 0)`. Under oracle
+    // seam #4 (isw D1) U+0020 is 44 tenths, so 8 spaces = 8 * 4.4 * size / 16.
     const measurer = new DeterministicMeasurer();
     const font = { family: 'SansSerif', size: FONT_SIZE };
-    expect(measurer.measure(' ', font).width).toBe(0);
-    expect(measurer.measure(TAB_STRING, font).width).toBe(0);
-    // A non-space glyph is NOT zero — the zero is specific to the space.
-    expect(measurer.measure('a', font).width).toBeGreaterThan(0);
+    expect(measurer.measure(' ', font).width).toBeCloseTo((4.4 * FONT_SIZE) / 16, 12);
+    expect(measurer.measure(TAB_STRING, font).width).toBeCloseTo((8 * 4.4 * FONT_SIZE) / 16, 12);
+    expect(measurer.measure(TAB_STRING, font).width).not.toBe(0);
   });
 
   test("TAB_STRING is upstream tabString()'s 8-space default", () => {
@@ -235,10 +237,12 @@ describe('layoutTabbedText (AtomText.java:210-256, drawU + getWidth)', () => {
     expect(layoutTabbedText('a\tb', FONT_SIZE, tenPerChar, 4).tokens[1]).toEqual({ text: 'b', x: 40, width: 10 });
   });
 
-  test('under the width table the stop is fontSize * 4 (52 at 13pt)', () => {
+  test('under the deterministic measurer the stop is tabString() = 8 spaces (28.6 at 13pt)', () => {
+    // AtomText.java:270-274 (getTabSize): the measured width wins when non-zero.
     const measurer = new DeterministicMeasurer();
     const font = { family: 'SansSerif', size: 13 };
     const layout = layoutTabbedText('a\tb', 13, (s) => measurer.measure(s, font).width);
-    expect(layout.tokens.map((t) => t.x)).toEqual([0, 52]);
+    expect(layout.tokens.map((t) => t.x)).toEqual([0, measurer.measure(TAB_STRING, font).width]);
+    expect(layout.tokens[1]!.x).toBeCloseTo(28.6, 12);
   });
 });
