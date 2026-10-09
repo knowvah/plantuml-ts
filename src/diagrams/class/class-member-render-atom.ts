@@ -59,6 +59,13 @@ export type MemberRenderAtom =
        *  `width` (which stays the RAW/layout width, see above). Always
        *  set together with `renderText` (never independently). */
       readonly renderWidth?: number;
+      /** isw-T2: `DriverTextSvg.java:118-124` -- one space width (in this
+       *  atom's own muted font) per LEADING space the draw strips; the run is
+       *  drawn at `x + renderDx` while the layout advance stays `width`.
+       *  Present only when the raw text starts with a space. Also moves any
+       *  custom-colour underline/strike line (`:177`, `extraLines.drawAll(x,..)`
+       *  after the shift). */
+      readonly renderDx?: number;
       /** G2 N40: set when this run came from a `[[url]]` creole command's
        *  captured label (`core/klimt/creole/atom/Atom.ts#CreoleAtomUrl`) --
        *  `renderer-classifier-box.ts#renderRowAtoms` wraps the emitted

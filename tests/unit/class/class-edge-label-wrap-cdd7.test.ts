@@ -20,6 +20,7 @@ import { describe, it, expect } from 'vitest';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { multiLineLabelAnchorWrapped } from '../../../src/diagrams/class/class-edge-label-lines.js';
 import { multiLineLabelAnchor } from '../../../src/diagrams/class/class-edge-label-anchor.js';
+import { diffsAgainstJar } from '../../helpers/isw-t2-cls-fixture.js';
 import { computeMeasuredLabelAttrs } from '../../../src/diagrams/class/class-edge-label-measure.js';
 
 const measurer = new DeterministicMeasurer();
@@ -33,12 +34,17 @@ function positions(anchors: ReadonlyArray<{ text: string; x: number; y: number; 
 
 describe('multiLineLabelAnchorWrapped -- Fission atoms per physical line', () => {
   it('splits a fitting line into word/space atoms (maxMessageSize 150)', () => {
-    const ctx = { center: { x: 89.68, y: 99 }, measurer, labelFont: font, maxWidth: 150 };
+    // isw-T2-cls: re-probed under oracle seam #4 v2 (tests/fixtures/isw-T2-cls/
+    // wrap150.svg, wrap150.dot): a space is 3.575 wide at 13pt, so the line is
+    // 52 + 3.575 + 70.85 = 126.425 wide from x 28.68 (the block is centred on
+    // its truncated width: 28.68 + 126/2 = 91.68), `Label` sits at 75.967 and
+    // `Technology]` at 84.255.
+    const ctx = { center: { x: 91.68, y: 99 }, measurer, labelFont: font, maxWidth: 150 };
     expect(positions(multiLineLabelAnchorWrapped(LINES, 'center', ctx))).toEqual([
-      ['Label', 74.18, 96.111, 31.85],
+      ['Label', 75.967, 96.111, 31.85],
       ['[Optional', 28.68, 109.111, 52],
-      [' ', 80.68, 109.111, 0],
-      ['Technology]', 80.68, 109.111, 70.85],
+      [' ', 80.68, 109.111, 3.575],
+      ['Technology]', 84.255, 109.111, 70.85],
     ]);
   });
 
@@ -72,13 +78,16 @@ describe('multiLineLabelAnchorWrapped -- Fission atoms per physical line', () =>
 describe('computeMeasuredLabelAttrs -- the reservation measures the wrapped lines', () => {
   it('reserves three rows at the widest physical line (maxMessageSize 60)', () => {
     const attrs = computeMeasuredLabelAttrs(LABEL, font, measurer, { maxWidth: 60 });
-    expect(attrs.labelWidth).toBeCloseTo(70.85, 6);
+    // 70.85 float32-rounded by the measurer (oracle seam #4 v2): compare at the
+    // jar DOT's printed precision.
+    expect(attrs.labelWidth).toBeCloseTo(70.85, 4);
     expect(attrs.labelHeight).toBe(39);
   });
 
   it('reserves the unwrapped box when every line fits (maxMessageSize 150)', () => {
     const attrs = computeMeasuredLabelAttrs(LABEL, font, measurer, { maxWidth: 150 });
-    expect(attrs.labelWidth).toBeCloseTo(122.85, 6);
+    // wrap150.dot: label TABLE WIDTH="128" = 126.425 + marginLabel 1 per side.
+    expect(attrs.labelWidth).toBeCloseTo(126.425, 4);
     expect(attrs.labelHeight).toBe(26);
   });
 });
@@ -90,25 +99,10 @@ describe('computeMeasuredLabelAttrs -- the reservation measures the wrapped line
 // `wrapWidth`, else `skinParam.maxMessageSize()`). Values: oracle probe of
 // this exact source (1.2026.8beta1, deterministic text).
 describe('end to end -- maxMessageSize wraps a class edge label into Fission atoms', () => {
-  it('draws word/space atoms per physical row at the jar coordinates', async () => {
-    const { renderSync } = await import('../../../src/index.js');
-    const { DeterministicMeasurer } = await import('../../../src/core/measurer-deterministic.js');
-    const src = [
-      '@startuml',
-      'skinparam maxMessageSize 60',
-      'class A',
-      'class B',
-      'A --> B : alpha beta\\ngamma delta epsilon',
-      '@enduml',
-    ].join('\n');
-    const svg = renderSync(src, { measurer: new DeterministicMeasurer() });
-    expect(svg).toContain('width="101px" height="232px"');
-    expect(svg).toContain('<text x="28.68" y="96.111" font-size="13" fill="#000" textLength="31.85">alpha</text>');
-    // The space atom is U+00A0 on both sides (the jar's `AtomText` emits nbsp).
-    expect(svg).toContain('<text x="60.53" y="96.111" font-size="13" fill="#000">\u00a0</text>');
-    expect(svg).toContain('<text x="60.53" y="96.111" font-size="13" fill="#000" textLength="25.269">beta</text>');
-    expect(svg).toContain('<text x="35.586" y="109.111" font-size="13" fill="#000" textLength="43.306">gamma</text>');
-    expect(svg).toContain('<text x="43.143" y="122.111" font-size="13" fill="#000" textLength="28.194">delta</text>');
-    expect(svg).toContain('<text x="36.602" y="135.111" font-size="13" fill="#000" textLength="41.275">epsilon</text>');
+  it('draws word/space atoms per physical row at the jar coordinates', () => {
+    // New jar (tests/fixtures/isw-T2-cls/wrapalpha.svg): with a 3.575 space,
+    // `alpha beta` is 60.694 > 60 and wraps, so the label is five rows
+    // (alpha / beta / gamma / delta / epsilon) in an 87x245 canvas.
+    expect(diffsAgainstJar('wrapalpha')).toEqual([]);
   });
 });

@@ -84,7 +84,7 @@ describe('json — baloca-83-nadu916 shape', () => {
     const ast = parse(BALOCA_SOURCE);
     const geo = layoutClass(ast, theme, measurer);
     const jsonGeo = classifierLeaves(geo.leaves).find((c) => c.kind === 'json')!;
-    expect(jsonGeo.width).toBeCloseTo(73.9375, 3);
+    expect(jsonGeo.width).toBeCloseTo(77.7875, 3);
     expect(jsonGeo.height).toBeCloseTo(36, 5);
   });
 });
@@ -140,7 +140,7 @@ describe('json — bepafe-03-teda035 shape (nested braces on one line)', () => {
     const ast = parse(BEPAFE_JSON_SOURCE);
     const geo = layoutClass(ast, theme, measurer);
     const jsonGeo = classifierLeaves(geo.leaves).find((c) => c.kind === 'json')!;
-    expect(jsonGeo.width).toBeCloseTo(143.025, 3);
+    expect(jsonGeo.width).toBeCloseTo(146.875, 3);
     expect(jsonGeo.height).toBeCloseTo(144, 5);
   });
 
@@ -156,7 +156,7 @@ describe('json — bepafe-03-teda035 shape (nested braces on one line)', () => {
     expect(nameRow.text).toBe('A');
     expect(nameRow.width).toBeCloseTo(9.3625, 3);
     // (143.025 - 9.3625) / 2 = 66.83125 -- jar's text x=275.8313 minus rect x=209
-    expect(nameRow.indent).toBeCloseTo(66.83125, 3);
+    expect(nameRow.indent).toBeCloseTo(68.75625, 3);
     // JSON_NAME_MARGIN(2) + baselineOffset(14) -- jar's text y=19.8889 minus rect y=7
     expect(nameRow.y).toBeCloseTo(12.8889, 3);
   });
@@ -183,7 +183,7 @@ describe('json — bepafe-03-teda035 shape (nested braces on one line)', () => {
       expect(nameKey!.width).toBeCloseTo(35, 3);
       expect(nameKey!.y).toBeCloseTo(30.8889, 3);
       expect(nameValue!.text).toBe('component c1');
-      expect(nameValue!.width).toBeCloseTo(84, 3);
+      expect(nameValue!.width).toBeCloseTo(87.85, 3);
       expect(nameValue!.y).toBeCloseTo(30.8889, 3);
 
       // "color" key row -- jar y=55.8889, rect y=7 -> relative 48.8889
@@ -363,8 +363,9 @@ describe('json — single-line form (CommandCreateJsonSingleLine)', () => {
 // width (`this.jsonTotalWidth - width1` is handed down at `:171`), not the
 // full box.
 //
-// Oracle: test-results/dot-cache/object/bepafe-03-teda035/in.svg, entity
-// `A` at rect x=209 y=7 (width 143.025, height 144).
+// Oracle: test-results/dot-cache/object/bepafe-03-teda035/in.svg (re-captured,
+// oracle seam #4 v2), entity `A` at rect x=209.5 y=7 (width 146.875, height 144).
+// The measurer float32-rounds (49.025 is 49.025001...), so x/width compare to 4 dp.
 // ---------------------------------------------------------------------------
 
 describe('json — TextBlockJson#drawU line geometry (bepafe-03-teda035)', () => {
@@ -382,13 +383,13 @@ describe('json — TextBlockJson#drawU line geometry (bepafe-03-teda035)', () =>
   const NESTED_VLINE_HEIGHT = 36;
   /** jar `<line x1="209" y1="25" x2="352.025" y2="25"/>` — a TOP-level
    *  member's hline spans the whole box. */
-  const ROOT_HLINE_WIDTH = 143.025;
+  const ROOT_HLINE_WIDTH = 146.875; // jar x1 209.5 -> x2 356.375
   /** jar `<line x1="258.025" ... />` at y=61, 79 (the `color` ARRAY's two
    *  between-element hlines) and y=115, 133 (the `user` object's two
    *  per-member hlines) — a nested table's hline spans
    *  `jsonTotalWidth - width1` only. */
   const NESTED_HLINE_X = 49.025;
-  const NESTED_HLINE_WIDTH = 94;
+  const NESTED_HLINE_WIDTH = 97.85; // jar x1 258.525 -> x2 356.375
 
   function bodyOf() {
     const geo = layoutClass(parse(BEPAFE_JSON_SOURCE), theme, measurer);
@@ -397,26 +398,25 @@ describe('json — TextBlockJson#drawU line geometry (bepafe-03-teda035)', () =>
 
   it("emits the object vline FIRST, before that object's first hline", () => {
     const body = bodyOf();
-    expect(body[0]).toEqual({ kind: 'vline', x: ROOT_VLINE_X, y: ROOT_VLINE_Y, height: ROOT_VLINE_HEIGHT });
-    expect(body[1]).toMatchObject({ kind: 'hline', y: ROOT_VLINE_Y, width: ROOT_HLINE_WIDTH });
+    expect(body[0]).toMatchObject({ kind: 'vline', y: ROOT_VLINE_Y, height: ROOT_VLINE_HEIGHT });
+    expect((body[0] as { x: number }).x).toBeCloseTo(ROOT_VLINE_X, 4);
+    expect(body[1]).toMatchObject({ kind: 'hline', y: ROOT_VLINE_Y });
+    expect((body[1] as { width: number }).width).toBeCloseTo(ROOT_HLINE_WIDTH, 4);
   });
 
   it("emits a nested object's OWN vline, at its own x/height", () => {
     const body = bodyOf();
     const vlines = body.filter((i) => i.kind === 'vline');
     expect(vlines).toHaveLength(2);
-    expect(vlines[1]).toEqual({
-      kind: 'vline',
-      x: NESTED_VLINE_X,
-      y: NESTED_VLINE_Y,
-      height: NESTED_VLINE_HEIGHT,
-    });
+    expect(vlines[1]).toMatchObject({ kind: 'vline', y: NESTED_VLINE_Y, height: NESTED_VLINE_HEIGHT });
+    expect((vlines[1] as { x: number }).x).toBeCloseTo(NESTED_VLINE_X, 4);
   });
 
   it("scopes a nested table's hlines to its own width, not the full box", () => {
     const body = bodyOf();
     const hlines = body.filter((i) => i.kind === 'hline');
-    expect(hlines.filter((h) => h.width === ROOT_HLINE_WIDTH && h.x === 0)).toHaveLength(4);
-    expect(hlines.filter((h) => h.width === NESTED_HLINE_WIDTH && h.x === NESTED_HLINE_X)).toHaveLength(4);
+    const near = (a: number, b: number): boolean => Math.abs(a - b) < 1e-4;
+    expect(hlines.filter((h) => near(h.width, ROOT_HLINE_WIDTH) && h.x === 0)).toHaveLength(4);
+    expect(hlines.filter((h) => near(h.width, NESTED_HLINE_WIDTH) && near(h.x, NESTED_HLINE_X))).toHaveLength(4);
   });
 });

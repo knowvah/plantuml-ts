@@ -219,7 +219,12 @@ export function extractDecorations(rest: string): {
       tags.push(m.slice(1));
       return '';
     })
-    .replace(/\s+/g, ' ')
+    .split('"')
+    // isw-T2-cls: the gap left by a removed tag collapses to one space, but NEVER
+    // inside a quoted display -- `class "  Padded  " as P` keeps both spaces
+    // (jar probe: the box is 2 spaces wider than the collapsed form).
+    .map((seg, i) => (i % 2 === 0 ? seg.replace(/\s+/g, ' ') : seg))
+    .join('"')
     .trim();
   let color: string | undefined;
   const lineColorMatch = LINECOLOR_RE.exec(out);

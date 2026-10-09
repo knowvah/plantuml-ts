@@ -1,0 +1,12 @@
+@startuml
+allowmixing
+class A
+skinparam rectangle<<person>> {
+  RoundCorner 0
+}
+rectangle P <<person>> [
+wide line here
+x
+]
+rectangle "plain" as Q
+@enduml

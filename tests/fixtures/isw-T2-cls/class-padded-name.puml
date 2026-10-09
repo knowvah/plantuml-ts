@@ -1,0 +1,3 @@
+@startuml
+class "  Padded name  " as P
+@enduml

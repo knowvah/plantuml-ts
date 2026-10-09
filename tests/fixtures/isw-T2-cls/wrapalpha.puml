@@ -1,0 +1,6 @@
+@startuml
+skinparam maxMessageSize 60
+class A
+class B
+A --> B : alpha beta\ngamma delta epsilon
+@enduml

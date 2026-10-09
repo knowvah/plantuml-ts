@@ -147,7 +147,14 @@ export function buildDotClusters(
     // (`ClusterHeader.java:80`) covers `mergeTB(stereo, title)`, so a header
     // stereo block (displayed stereotype / group legend) counts too.
     const header = buildClusterHeaderStereo(ns, ast, theme, measurer);
-    const isLabel = ns.display.length > 0 || header !== undefined;
+    // isw-T2-cls: `ClusterHeader#getTitleBlock` returns the empty block ONLY
+    // for `label == null` (`ClusterHeader.java:116-118`); an EMPTY Display
+    // lexes to one " " atom (`StripeSimple.java:125-126`), which is 3.85 wide
+    // at 14pt, so `dimLabel.getWidth() > 0` (`:83`) holds and the title table
+    // exists. Jar probe `package "" as p {...}`: svek-1.dot carries
+    // `<TABLE ... WIDTH="3" HEIGHT="9">`, exactly as for `package " "`.
+    // `Namespace.display` is never null in this port.
+    const isLabel = true;
     const portRanks = clusterPortRanks(members, ast);
     if (portRanks.length > 0) {
       const dims = isLabel ? namespaceTitleTableDimsFor(ns, theme, measurer, header) : undefined;

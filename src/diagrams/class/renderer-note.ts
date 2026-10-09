@@ -177,7 +177,7 @@ function renderNoteLineAtoms(
       // comment) -- the DRAWN text/textLength use them when present, but
       // x-advance below stays on `atom.width` (the LAYOUT value) always.
       // SI30 D1: drawn at the EFFECTIVE (muted) size (`getFont`).
-      const rendered = text(x, y, atom.renderText ?? atom.text, {
+      const rendered = text(x + (atom.renderDx ?? 0), y, atom.renderText ?? atom.text, {
         fontFamily: atom.font.family,
         fontSize: getFont(atom.font).size,
         fill: atom.font.color ?? theme.colors.graph.noteCascadeFontColor ?? '#000000',
@@ -190,7 +190,13 @@ function renderNoteLineAtoms(
       });
       out += atom.url !== undefined ? linkWrap(rendered, atom.url) : rendered;
       // Upstream java:180: drawn AFTER the `<text>` it decorates.
-      out += decorationLines(deco.extraLines, x, y, atom.renderWidth ?? atom.width, getFont(atom.font).size);
+      out += decorationLines(
+        deco.extraLines,
+        x + (atom.renderDx ?? 0),
+        y,
+        atom.renderWidth ?? atom.width,
+        getFont(atom.font).size,
+      );
       x += atom.width;
       continue;
     }

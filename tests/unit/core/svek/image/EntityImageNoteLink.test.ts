@@ -50,7 +50,7 @@ describe('measureLinkNoteDim -- fontFamily-only shape (state engine, no pureText
     const expected = stateFormerDim('Should be red');
     const actual = measureLinkNoteDim('Should be red', { family: FONT_FAMILY }, measurer);
     expect(actual).toEqual(expected);
-    expect(Math.floor(actual.width)).toBe(104); // oracle svek-1.dot WIDTH="104"
+    expect(Math.floor(actual.width)).toBe(111); // re-captured oracle svek-1.dot WIDTH="111" (was 104 while a space was 0)
     expect(actual.height).toBe(33); // oracle svek-1.dot HEIGHT="33"
   });
 
@@ -58,7 +58,7 @@ describe('measureLinkNoteDim -- fontFamily-only shape (state engine, no pureText
     const expected = stateFormerDim('Should be blue');
     const actual = measureLinkNoteDim('Should be blue', { family: FONT_FAMILY }, measurer);
     expect(actual).toEqual(expected);
-    expect(Math.floor(actual.width)).toBe(110); // oracle svek-1.dot WIDTH="110"
+    expect(Math.floor(actual.width)).toBe(117); // re-captured oracle svek-1.dot WIDTH="117" (was 110)
     expect(actual.height).toBe(33); // oracle svek-1.dot HEIGHT="33"
   });
 });

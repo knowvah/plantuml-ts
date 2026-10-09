@@ -43,7 +43,7 @@ describe('addClassifierInk — assoc-circle is a bare UEllipse (R-1)', () => {
     expect(dims).toEqual({ width: 3 + 15, height: 3 + 15 });
   });
 
-  it('jixamu-89-ribo225: jar canvas width 326 (the circle is the rightmost ink)', () => {
+  it('jixamu-89-ribo225: jar canvas width 334 (the circle is the rightmost ink)', () => {
     const markup = [
       '@startuml',
       'class Station {',
@@ -59,7 +59,7 @@ describe('addClassifierInk — assoc-circle is a bare UEllipse (R-1)', () => {
       '',
       '@enduml',
     ].join('\n');
-    expect(svgDims(markup).width).toBe('326px');
+    expect(svgDims(markup).width).toBe('334px');
   });
 });
 

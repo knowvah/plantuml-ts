@@ -12,6 +12,7 @@ import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import type { ScaledTheme } from './class-scale-geo.js';
 import type { EdgeGeo } from './layout.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
+import { placeDriverRun } from './class-driver-text-placement.js';
 import { hasTabulation, layoutTabbedText } from '../../core/klimt/creole/legacy/AtomText.js';
 
 type LabelFontAttrs = ReturnType<typeof arrowLabelTextAttrs>;
@@ -37,15 +38,36 @@ function labelTextRuns(
   font: LabelFontAttrs,
   measurer: StringMeasurer | undefined,
 ): readonly LabelTextRun[] {
-  if (measurer === undefined || !hasTabulation(line.text)) return [line];
-  const spec: FontSpec = {
+  if (measurer === undefined) return [line];
+  const spec = labelFontSpec(font);
+  const measure = (s: string): number => measurer.measure(s, spec).width;
+  const runs = hasTabulation(line.text)
+    ? layoutTabbedText(line.text, spec.size, measure).tokens.map((t) => ({
+        text: t.text,
+        x: line.x + t.x,
+        width: t.width,
+      }))
+    : [line];
+  return runs.map((run) => placeLabelRun(run, measure));
+}
+
+/** The label font as a measurer spec (the SCALED font -- see above). */
+function labelFontSpec(font: LabelFontAttrs): FontSpec {
+  return {
     family: font.fontFamily,
     size: font.fontSize,
     ...(font.fontWeight === '700' ? { weight: 'bold' as const } : {}),
     ...(font.fontStyle === 'italic' ? { style: 'italic' as const } : {}),
   };
-  const { tokens } = layoutTabbedText(line.text, spec.size, (s) => measurer.measure(s, spec).width);
-  return tokens.map((t) => ({ text: t.text, x: line.x + t.x, width: t.width }));
+}
+
+/** isw-T2-cls F2e: `DriverTextSvg.java:113-126` on one drawn run -- each
+ *  leading space moves `x`, `width` becomes the TRIMMED text's `textLength`
+ *  (every consumer reads `run.width` only as `textLength`; the pen advance
+ *  of a sprite-label run is taken from the raw width separately). */
+function placeLabelRun(run: LabelTextRun, measure: (s: string) => number): LabelTextRun {
+  const placed = placeDriverRun(run.x, run.text, measure);
+  return { text: placed.text, x: placed.x, width: placed.textLength };
 }
 
 export function arrowLabelTextAttrs(theme: ScaledTheme): {
@@ -214,7 +236,7 @@ export function renderEdgeSingleLabel(
 ): string[] {
   const font: LabelFontAttrs =
     label.fontSize !== undefined ? { ...labelFontAttrs, fontSize: label.fontSize } : labelFontAttrs;
-  if (label.runs !== undefined) return renderSpriteLabelRuns(label, label.runs, font, labelColor);
+  if (label.runs !== undefined) return renderSpriteLabelRuns(label, label.runs, font, labelColor, measurer);
   return labelTextRuns(label, font, measurer).map((run) =>
     text(run.x, label.y, run.text, {
       fill: labelColor,
@@ -246,6 +268,7 @@ function renderSpriteLabelRuns(
   runs: readonly EdgeLabelRun[],
   font: LabelFontAttrs,
   labelColor: string,
+  measurer?: StringMeasurer,
 ): string[] {
   const parts: string[] = [];
   let x = label.x;
@@ -253,8 +276,16 @@ function renderSpriteLabelRuns(
     if (run.kind === 'image') {
       parts.push(image(x, label.y + run.dy, Math.round(run.width), Math.round(run.height), runHref(run, labelColor)));
     } else if (run.text.trim() !== '') {
+      const raw = { text: run.text, x, width: run.width };
+      const drawn =
+        measurer === undefined ? raw : placeLabelRun(raw, (t) => measurer.measure(t, labelFontSpec(font)).width);
       parts.push(
-        text(x, label.y, run.text, { fill: labelColor, ...font, lengthAdjust: 'spacing', textLength: run.width }),
+        text(drawn.x, label.y, drawn.text, {
+          fill: labelColor,
+          ...font,
+          lengthAdjust: 'spacing',
+          textLength: drawn.width,
+        }),
       );
     }
     x += run.width;

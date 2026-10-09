@@ -219,7 +219,7 @@ export function renderRowText(
     const atoms = atomsOverBack(row.atoms, classifierRowBack(geo, theme, isHeader));
     return renderRowAtoms(atoms, geo.x + row.indent, geo.y + row.y, theme, fontColor);
   }
-  return text(geo.x + row.indent, geo.y + row.y, row.text, {
+  return text(geo.x + row.indent + (row.renderDx ?? 0), geo.y + row.y, row.text, {
     // G2 N23: `row.fontFamily`/`row.fontSize` (set only on the header row
     // when `skinparam class { AttributeFontSize/AttributeFontName }` is in
     // effect) override the theme default -- see `layout.ts`'s `rows[]`
@@ -245,7 +245,7 @@ export function renderRowText(
     // different `text-anchor="start"` that a raw-string comparator (this
     // attribute is not on `compareSvg`'s numeric-tolerance allowlist)
     // would flag as a spurious diff.
-    ...(row.width !== undefined ? { lengthAdjust: 'spacing' as const, textLength: row.width } : {}),
+    ...(row.width !== undefined ? { lengthAdjust: 'spacing' as const, textLength: row.renderWidth ?? row.width } : {}),
     ...(row.italic === true ? { fontStyle: 'italic' as const } : {}),
     // G2 N32: `skinparam classFontStyle bold` -- header-only, mirrors the
     // creole atom engine's identical `FontStyle.BOLD` -> `font-weight="700"`
@@ -330,7 +330,7 @@ function renderTextRowAtom(
   // row's own baseline `y` PLUS the atom's own Sea correction
   // ({@link textAtomRowY} -- 0 for every atom of an all-NORMAL row, the
   // identity property `creole-sea-line.ts`'s doc comment names).
-  const rendered = text(x, textAtomRowY(y, atom), atom.renderText ?? atom.text, {
+  const rendered = text(x + (atom.renderDx ?? 0), textAtomRowY(y, atom), atom.renderText ?? atom.text, {
     fontFamily: resolveAtomFontFamily(atom.font.family, theme),
     fontSize: getFont(atom.font).size,
     fill: atom.font.color ?? fallbackFontColor,
@@ -348,7 +348,7 @@ function renderTextRowAtom(
   // Upstream java:180: the extra lines are drawn AFTER the `<text>`.
   const extra = decorationLines(
     deco.extraLines,
-    x,
+    x + (atom.renderDx ?? 0),
     textAtomRowY(y, atom),
     atom.renderWidth ?? atom.width,
     getFont(atom.font).size,

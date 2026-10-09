@@ -83,17 +83,18 @@ const TIVEZU_SOURCE = [
 ].join('\n');
 
 describe('tivezu-91-bevu722 — sprite badge offset (h1 > 0, arithmetic-exact)', () => {
-  it("Foo's own $foo1 badge sits at the oracle's h1-shifted (12.475, 14), not the fixed (11, 12)", () => {
+  it("Foo's own $foo1 badge sits at the oracle's h1-shifted (15.94, 14), not the fixed (11, 12)", () => {
     const svg = renderFixtureClass(TIVEZU_SOURCE, measurer);
     const images = imageAttrs(svg);
     const badge = images[0]!;
-    // jar-scraped (tivezu-91-bevu722/in.svg): `<image width="28" height="10"
-    // x="12.475" y="14" .../>`. h1 = 1.4755, yCircle = 2 -- see this file's
+    // jar-scraped (tivezu-91-bevu722/in.svg, re-captured under oracle seam #4
+    // v2; was x=12.475 while a space was 0 wide): `<image width="28"
+    // height="10" x="15.94" y="14" .../>`. yCircle = 2 -- see this file's
     // own header doc comment / `renderer-classifier-badge-tag.ts
     // #renderBadgeSpriteImage`'s derivation.
     expect(badge.width).toBe('28');
     expect(badge.height).toBe('10');
-    expect(badge.x).toBe('12.475');
+    expect(badge.x).toBe('15.94');
     expect(badge.y).toBe('14');
   });
 });
@@ -132,15 +133,16 @@ const JAJEBE_REDUCED_SOURCE = [
 ].join('\n');
 
 describe('jajebe-95-jomo899 (reduced) — sprite badge offset, relative to own box', () => {
-  it("Foo's WIDE member row gives h1 = 28.781 -> badge sits at box + (32.781, 5), matching the oracle's own relative offset exactly", () => {
+  it("Foo's WIDE member row gives h1 -> badge sits at box + (38.556, 5), matching the oracle's own relative offset exactly", () => {
     const svg = renderFixtureClass(JAJEBE_REDUCED_SOURCE, measurer);
     const [foo] = entityBadgeOffsets(svg);
-    // jar-scraped (jajebe-95-jomo899/in.svg): box `(7, 44.154)`, badge
-    // `(39.781, 49.154)` -> offset `(32.781, 5)`. This reduced fixture's OWN
+    // jar-scraped (jajebe-95-jomo899/in.svg, re-captured under oracle seam #4
+    // v2): box `(7, 44.154)`, badge `(45.556, 49.154)` -> offset `(38.556, 5)`
+    // (was (32.781, 5) while a space was 0 wide). This reduced fixture's OWN
     // box lands at a different absolute position (no title chrome above
     // it), but the badge's OFFSET from its own box is the SAME upstream
     // formula and reproduces byte-exact.
-    expect(foo).toEqual({ dx: 32.781, dy: 5 });
+    expect(foo).toEqual({ dx: 38.556, dy: 5 });
   });
 
   it('Foo2 (no member content -- h1 === 0) keeps the pre-fix (+4, +5) offset, unchanged (regression guard)', () => {

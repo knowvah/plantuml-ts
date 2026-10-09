@@ -57,7 +57,9 @@ describe('leaf-sizing — shared sizer/renderer creole lexer (creole-lexer-unifi
     // form accumulates across several atoms while the plain form is one
     // `measure` call -- a ~1e-14 floating-point association difference, not a
     // behavioural one.
-    expect(sizerWidth).toBeCloseTo(groundTruthWidth, 10);
+    // (4 digits: the measurer now float32-rounds each atom -- oracle seam #4 v2 --
+    // so the per-atom sum differs from the one-shot measure at ~1e-5.)
+    expect(sizerWidth).toBeCloseTo(groundTruthWidth, 4);
 
     // Had the sizer left the tags/escapes literal (the pre-fix `parseCreole`
     // behavior), the box would measure at least the RAW literal text's own

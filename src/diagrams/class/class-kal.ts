@@ -37,6 +37,7 @@
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { Relationship } from './class-relationship-ast.js';
 import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
+import { placeDriverRun } from './class-driver-text-placement.js';
 
 /** `UStroke.withThickness(0.5)` — `Kal.java:142`. */
 export const KAL_STROKE_THICKNESS = 0.5;
@@ -67,6 +68,10 @@ export interface Kal {
   height: number;
   /** The measured text width alone (the jar's `textLength`). */
   textWidth: number;
+  /** isw-T2-cls F2e: `DriverTextSvg.java:118-124` -- one space width per
+   *  leading space of `text`, added to the drawn `x`; with it `textWidth` is
+   *  the TRIMMED text's width (`:125-126`). */
+  textDx: number;
   /** `font.size - measurer.getDescent(font, text)` -- the baseline offset
    *  inside the text block, resolved here (where the `class.qualified`
    *  font lives) so {@link kalBoxAt} needs no measurer at the geometry
@@ -199,12 +204,14 @@ export function computeKals(relationships: readonly Relationship[], font: FontSp
       // the grammar cannot produce an empty bracket (`([^\[\]]+)`).
       if (text === undefined || text === '') continue;
       const m = measurer.measure(text, font);
+      const placed = placeDriverRun(0, text, (t) => measurer.measure(t, font).width);
       kals.push({
         entityId,
         relIndex,
         end,
         text,
-        textWidth: m.width,
+        textWidth: placed.textLength,
+        textDx: placed.x,
         baselineOffset: font.size - measurer.getDescent(font, text),
         width: m.width + KAL_PAD_X,
         height: font.size + KAL_PAD_Y,
@@ -267,7 +274,7 @@ export function kalBoxAt(kal: Kal, anchor: { x: number; y: number }): KalBox {
     width: kal.width,
     height: kal.height,
     text: kal.text,
-    textX: x + KAL_TEXT_DX,
+    textX: x + KAL_TEXT_DX + kal.textDx,
     textY: y + KAL_TEXT_DY + kal.baselineOffset,
     textWidth: kal.textWidth,
     position: kal.position,

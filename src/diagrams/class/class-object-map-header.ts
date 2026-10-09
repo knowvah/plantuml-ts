@@ -44,6 +44,7 @@ import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
 import { splitStereotypeLabels, measureStereoLabelWidths } from './class-stereotype.js';
 import { objectDisplayText } from './class-object-display.js';
+import { plainRowRender } from './class-driver-text-placement.js';
 
 // ---------------------------------------------------------------------------
 // Local interfaces (grouped at top — a declaration sitting between two
@@ -208,18 +209,30 @@ function buildUnderlinedNameRows(
         y,
         indent,
         width: measurer.measure(display, nameFontSpec).width,
+        ...plainRowRender(display, (s) => measurer.measure(s, nameFontSpec).width),
         underline: true,
         ...fontSizeField,
       },
     ];
   }
   const namePart = match[1]!;
-  const typePart = match[2]!.replace(/^\s+/, '');
-  const nameRawWidth = measurer.measure(namePart, nameFontSpec).width;
-  const typeRawWidth = measurer.measure(typePart, nameFontSpec).width;
+  // Display.java:471-479: group 2 is `\s*:.+` -- its leading spaces stay in the
+  // `<u>name</u> : type` run and DriverTextSvg.java:118-124 turns each into an
+  // x advance (isw-T2-cls F2b, jotaga: type run x = name + width + one space).
+  const typePart = match[2]!;
+  const measure = (s: string): number => measurer.measure(s, nameFontSpec).width;
+  const nameRawWidth = measure(namePart);
+  const typeRawWidth = measure(typePart);
   return [
     { text: namePart, y, indent, width: nameRawWidth, underline: true, ...fontSizeField },
-    { text: typePart, y, indent: indent + nameRawWidth, width: typeRawWidth, ...fontSizeField },
+    {
+      text: typePart,
+      y,
+      indent: indent + nameRawWidth,
+      width: typeRawWidth,
+      ...plainRowRender(typePart, measure),
+      ...fontSizeField,
+    },
   ];
 }
 
@@ -371,6 +384,7 @@ export function headerRows(
       y: nameY,
       indent: nameIndent,
       width: nameWidth,
+      ...plainRowRender(displayText, (s) => measurer.measure(s, nameFontSpec).width),
       ...(nameFontSizeOverride !== undefined ? { fontSize: nameFontSizeOverride } : {}),
     });
   }

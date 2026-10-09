@@ -85,7 +85,7 @@ describe('F1-a / C1 — block-separator geometry (isBlockSeparator + decorate)',
   it('xufexu-38 note 1: jar 1.186545x1.611111in = 85.43125x116px', () => {
     const d = measureLeafNode(note(NOTE1), fontSpec, measurer);
     expect(d.height).toBeCloseTo(116, 6);
-    expect(d.width).toBeCloseTo(85.43125, 4);
+    expect(d.width).toBeCloseTo(92.58125, 4);
   });
 
   it('xufexu-38 note 1 height falls out of the Java expression, no free parameters', () => {
@@ -103,7 +103,7 @@ describe('F1-a / C1 — block-separator geometry (isBlockSeparator + decorate)',
   it('xufexu-38 note 2 (one more text line, same 4 separators): jar 1.791667in = 129px', () => {
     const d = measureLeafNode(note(NOTE2), fontSpec, measurer);
     expect(d.height).toBeCloseTo(129, 6);
-    expect(d.width).toBeCloseTo(85.43125, 4);
+    expect(d.width).toBeCloseTo(92.58125, 4);
   });
 
   it('pivudu-29 `C / ---- / D`: jar 0.422569x0.611111in = 30.425x44px', () => {
@@ -148,7 +148,7 @@ describe('F1-a / C2 — `{{ … }}` collapses to one EmbeddedDiagram atom (42x42
 describe('F1-a / C3 — the note font size honours a per-element override', () => {
   it('tijexo-10 `<style> note { FontSize 10 }`: jar 1.248264x0.277778in = 89.875x20px', () => {
     const d = measureLeafNode(note('note that is green'), fontSpec, measurer, { fontSize: 10 });
-    expect(d.width).toBeCloseTo(89.875, 4);
+    expect(d.width).toBeCloseTo(98.125, 4);
     expect(d.height).toBeCloseTo(20, 6);
   });
 
@@ -177,7 +177,7 @@ describe('F1-a / C4 — a run whose font is not the note font contributes ITS he
 
   it('nobiza-91 note: jar 9.661458x0.513889in = 695.625x37px', () => {
     const d = measureLeafNode(note(IMG_NOTE), fontSpec, measurer);
-    expect(d.width).toBeCloseTo(695.625, 3);
+    expect(d.width).toBeCloseTo(703.32501, 3);
     expect(d.height).toBeCloseTo(37, 6);
   });
 

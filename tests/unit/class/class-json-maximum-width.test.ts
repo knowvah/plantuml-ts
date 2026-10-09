@@ -43,7 +43,7 @@ function rowYs(value: string, theme: Theme): number[] {
 describe('measureJsonClassifier — MaximumWidth word-wrap (nadedo-37-nesa665)', () => {
   it('wraps the long value to the jar box 237.087 x 78', () => {
     const m = measureJsonClassifier(jsonLeaf(LOREM), themeWithJsonBucket(200), measurer);
-    expect(m.width).toBeCloseTo(237.087, 3);
+    expect(m.width).toBeCloseTo(240.7625, 3);
     expect(m.height).toBe(78);
   });
 

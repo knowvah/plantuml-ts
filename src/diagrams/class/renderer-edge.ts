@@ -421,7 +421,7 @@ export function renderEdge(
   } else {
     parts.push(...labelParts, noteBoxResult.body);
   }
-  parts.push(...renderEdgeCardinalityLabels(geo, theme));
+  parts.push(...renderEdgeCardinalityLabels(geo, theme, measurer));
   // cdd-T7 (A5/M4, A2a/M6): the `-0)-` family's mid-link decoration --
   // `SvekEdge.java:982-988` draws it AFTER the tail/head cardinality text,
   // over the TRIMMED point list (the same `dotPath` object the earlier

@@ -68,7 +68,7 @@ describe('A2a/M2 — the link label`s visibility character is stripped and iconi
     // Golden `<text x="168.32" textLength="39">entries</text>`.
     const edge = byPair.get('Aaa->Entry')!;
     expect(edge.label?.text).toBe('entries');
-    expect(edge.label?.x).toBeCloseTo(168.32, 2);
+    expect(edge.label?.x).toBeCloseTo(176.66, 2);
   });
 
   it('anchors the icon block 12px (classAttributeIconSize + 2) left of the text', () => {
@@ -77,7 +77,7 @@ describe('A2a/M2 — the link label`s visibility character is stripped and iconi
     // (+2,+2) from the block origin, so the block sits at 156.32,158.
     const edge = byPair.get('Aaa->Entry')!;
     expect(edge.visibilityIcon?.modifier).toBe('PRIVATE_METHOD');
-    expect(edge.visibilityIcon?.x).toBeCloseTo(156.32, 2);
+    expect(edge.visibilityIcon?.x).toBeCloseTo(164.66, 2);
     expect(edge.visibilityIcon?.y).toBeCloseTo(158, 2);
   });
 
@@ -87,7 +87,7 @@ describe('A2a/M2 — the link label`s visibility character is stripped and iconi
     const protectedEdge = byPair.get('Aaa->Factory')!;
     expect(protectedEdge.label?.text).toBe('factory');
     expect(protectedEdge.visibilityIcon?.modifier).toBe('PROTECTED_METHOD');
-    expect(protectedEdge.visibilityIcon?.x).toBeCloseTo(96.32, 2);
+    expect(protectedEdge.visibilityIcon?.x).toBeCloseTo(101.39, 2);
     expect(protectedEdge.visibilityIcon?.y).toBeCloseTo(158, 2);
     const publicEdge = byPair.get('Aaa->Parent')!;
     expect(publicEdge.label?.text).toBe('parent');
@@ -182,24 +182,24 @@ describe('A2a/M5 — the note operand of the merged label block', () => {
   // labelOnly, CENTER)` (left) at `SvekEdge.java:318-325`, laid out by
   // `TextBlockVertical#drawU` (`klimt/shape/TextBlockVertical.java:77-99`) /
   // `TextBlockHorizontal#drawU` (`TextBlockHorizontal.java:78-93`). Jar
-  // offsets from lipazi's golden: bottom note path M164.98,105 vs label
-  // text (188.48, 96.111); left note path M264.92,91 vs label (415.501,
-  // 112.611).
+  // offsets from lipazi's golden (re-captured, oracle seam #4 v2): bottom
+  // note path M172.56,105 vs label text (197.847, 96.111); left note path
+  // M272.79,91 vs label (444.821, 112.611).
   it('places a bottom-note link`s label ABOVE the note, centred (lipazi toto->titi)', () => {
     const edge = geo.edges.find((e) => e.to === 'titi')!;
-    expect(edge.label!.x - edge.noteBox!.inkBox.x).toBeCloseTo(23.5, 2);
+    expect(edge.label!.x - edge.noteBox!.inkBox.x).toBeCloseTo(25.2875, 2);
     expect(edge.label!.y - edge.noteBox!.inkBox.y).toBeCloseTo(-8.889, 2);
   });
 
   it('places a left-note link`s label RIGHT of the note, centred vertically (lipazi toto->titi1)', () => {
     const edge = geo.edges.find((e) => e.to === 'titi1')!;
-    expect(edge.label!.x - edge.noteBox!.inkBox.x).toBeCloseTo(150.581, 2);
+    expect(edge.label!.x - edge.noteBox!.inkBox.x).toBeCloseTo(172.03125, 2);
     expect(edge.label!.y - edge.noteBox!.inkBox.y).toBeCloseTo(21.611, 2);
   });
 
-  it('paints lipazi`s second note 144 x 36, as the jar (path L264.92 -> L408.92)', () => {
+  it('paints lipazi`s second note 166 x 36, as the jar (path L272.79 -> L438.79)', () => {
     const edge = geo.edges.find((e) => e.to === 'titi1')!;
-    expect(edge.noteBox!.inkBox.width).toBe(144);
+    expect(edge.noteBox!.inkBox.width).toBe(166);
     expect(edge.noteBox!.inkBox.height).toBe(36);
   });
 

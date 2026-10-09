@@ -33,13 +33,15 @@ const PONONO_NOTE = [
 ].join('\n');
 
 describe('R2h — Fission counts the Bullet header on every wrapped stripe', () => {
-  it('matches the ponono-25/sumocu-27 jar note node width (4.454253in = 320.7062px)', () => {
-    // Jar svek DOT: the note node is 4.454253x1.583333in. Width = maxRow +
-    // Opale margins (6+15); jar maxRow = 12 (bullet) + 287.7062 (text wrapped
-    // at 300-12=288). Pre-fix the port wrapped at the FULL 300 (row 304.5).
+  it('matches the ponono-25/sumocu-27 jar note node (4.166493 x 1.944444in)', () => {
+    // Jar svek DOT (re-captured under oracle seam #4 v2, test-results/dot-cache/
+    // class/ponono-25-fevo574/svek-1.dot): the note node is 4.166493x1.944444in.
+    // A space now has width, so the text wraps at 300-12=288 into more rows
+    // (height 1.583333 -> 1.944444in) and the widest row is narrower (was
+    // 4.454253in). Pre-fix the port wrapped at the FULL 300.
     const m = measureNote(PONONO_NOTE, wrapTheme, measurer);
-    expect(m.width / 72).toBeCloseTo(4.454253, 4);
-    expect(m.height / 72).toBeCloseTo(1.583333, 4);
+    expect(m.width / 72).toBeCloseTo(4.16649, 4);
+    expect(m.height / 72).toBeCloseTo(1.94444, 4);
   });
 
   it('indents every wrapped continuation row by the bullet width', () => {

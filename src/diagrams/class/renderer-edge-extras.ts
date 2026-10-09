@@ -11,6 +11,7 @@ import { scaleDashArrayString } from './class-scale-geo-row.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { Visibility } from './class-member-ast.js';
 import { text, line, rect } from '../../core/svg.js';
+import { placeDriverRun } from './class-driver-text-placement.js';
 import { renderLinkNoteBox } from './renderer-note-link-box.js';
 import { colorsFor, iconSizeOf } from './class-visibility-icon.js';
 import { VisibilityModifier } from '../../core/skin/VisibilityModifier.js';
@@ -199,13 +200,14 @@ export function renderEdgeConstraint(geo: EdgeGeo, theme: ScaledTheme, measurer:
     const w = widths[i] ?? 0;
     const baseline = top + i * font.size + ascent;
     const left = cx - blockWidth / 2 + (blockWidth - w) / 2;
+    const placed = placeDriverRun(left, ln, (t) => measurer.measure(t, { family: font.family, size: font.size }).width);
     parts.push(
-      text(left, baseline, ln, {
+      text(placed.x, baseline, placed.text, {
         fill: '#000',
         fontSize: font.size,
         fontFamily: font.family,
         lengthAdjust: 'spacing',
-        textLength: w,
+        textLength: placed.textLength,
       }),
     );
   });
@@ -235,7 +237,7 @@ export function renderEdgeConstraint(geo: EdgeGeo, theme: ScaledTheme, measurer:
  * conversion (the raw numeric weight jar's deterministic-text SVG emits).
  * jar-verified `camuna-58-veca254`/`nafiki-56-jixu680`.
  */
-export function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: ScaledTheme): string[] {
+export function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: ScaledTheme, measurer?: StringMeasurer): string[] {
   const parts: string[] = [];
   const cardinalityFont = resolveCardinalityFont(theme);
   const font = {
@@ -245,6 +247,23 @@ export function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: ScaledTheme): s
     ...(cardinalityFont.weight === 'bold' ? { fontWeight: '700' as const } : {}),
     ...(cardinalityFont.style === 'italic' ? { fontStyle: 'italic' as const } : {}),
   };
+  // isw-T2-cls F2e: `DriverTextSvg.java:113-126` on each label run -- a
+  // leading space shifts x, textLength is the trimmed width.
+  const spec = {
+    family: font.fontFamily,
+    size: font.fontSize,
+    ...(cardinalityFont.weight === 'bold' ? { weight: 'bold' as const } : {}),
+    ...(cardinalityFont.style === 'italic' ? { style: 'italic' as const } : {}),
+  };
+  const drawRun = (l: { x: number; y: number; text: string; width: number }): string => {
+    const placed =
+      measurer === undefined ? undefined : placeDriverRun(l.x, l.text, (t) => measurer.measure(t, spec).width);
+    return text(placed?.x ?? l.x, l.y, placed?.text ?? l.text, {
+      ...font,
+      lengthAdjust: 'spacing',
+      textLength: placed?.textLength ?? l.width,
+    });
+  };
   if (geo.quantifierLines !== undefined) {
     // cdd-T17 (M8): draw each end's ADDITIVE role lines right after that
     // SAME end's quantifier lines -- `SvekEdge.java:956-980`'s draw order
@@ -253,20 +272,14 @@ export function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: ScaledTheme): s
     // `geo.roleLines` uses the SAME `[tail, head]` shape as `quantifierLines`
     // itself, so indexing both arrays by the same `i` keeps the two paired.
     for (let i = 0; i < geo.quantifierLines.length; i++) {
-      for (const l of geo.quantifierLines[i]!) {
-        parts.push(text(l.x, l.y, l.text, { ...font, lengthAdjust: 'spacing', textLength: l.width }));
-      }
-      for (const l of geo.roleLines?.[i] ?? []) {
-        parts.push(text(l.x, l.y, l.text, { ...font, lengthAdjust: 'spacing', textLength: l.width }));
-      }
+      for (const l of geo.quantifierLines[i]!) parts.push(drawRun(l));
+      for (const l of geo.roleLines?.[i] ?? []) parts.push(drawRun(l));
     }
     return parts;
   }
   for (const portLabel of [geo.tailLabel, geo.headLabel]) {
     if (portLabel === undefined) continue;
-    parts.push(
-      text(portLabel.x, portLabel.y, portLabel.text, { ...font, lengthAdjust: 'spacing', textLength: portLabel.width }),
-    );
+    parts.push(drawRun(portLabel));
   }
   return parts;
 }
