@@ -34,13 +34,10 @@ import {
  * nothing is drawn, matching that method's own `drawU` catch (java:191-193)
  * failing independently and drawing nothing.
  *
- * `sizingWidth`/`sizingHeight` are a SEPARATE pair: the enclosing box's
- * geometry contribution and the NEXT embed's own Y-stacking offset both come
- * from `EmbeddedDiagram#calculateDimension` (`TextBlockMemoized`-cached),
- * NOT from the drawn image's own size -- see this file's `EMBEDDED_FALLBACK_
- * SIZE` doc comment for why, in this port's deterministic oracle-render
- * environment, that memoized value is ALWAYS the `(42, 42)` catch fallback,
- * confirmed byte-exact across three independent fixtures.
+ * `sizingWidth`/`sizingHeight` are the enclosing box's geometry contribution
+ * and the NEXT embed's Y-stacking offset (`EmbeddedDiagram#calculateDimension`,
+ * `TextBlockMemoized`-cached). With the SVG arm taken (lgm-T1e) they equal
+ * `width`/`height`; see {@link renderEmbed}.
  */
 export interface EmbeddedBlockGeo {
   readonly y: number;
@@ -92,49 +89,25 @@ function wrapEmbeddedSource(type: string, block: readonly string[]): string[] {
   return [`@start${type}`, ...body, `@end${type}`];
 }
 
-/** `EmbeddedDiagram.java:150-152`'s own fixed-size catch fallback -- not an
- *  upstream constant to cite differently, this IS the literal upstream
- *  value, reused here for the class engine's own no-renderer/render-failure
- *  case (as the DRAWN size, since a failed render has no image to draw) AND,
- *  unconditionally, as every embed's SIZING contribution -- see {@link
- *  EmbeddedBlockGeo}'s own doc comment and "The sizing/drawing asymmetry"
- *  below. A recursion-guard trip ({@link EmbeddedDiagramDepthError}) is
- *  RE-THROWN, never swallowed into this fallback -- task item 3's own
- *  contract ("throws ... rather than recursing") means a self-embedding
- *  block is malformed input the caller must fix, not a transient render
- *  failure to hide. */
+/** `EmbeddedDiagram.java:150-152`'s own fixed-size catch fallback -- the
+ *  literal upstream value, used ONLY when no renderer is registered or the
+ *  render threw (the image then has no size to report). A recursion-guard
+ *  trip ({@link EmbeddedDiagramDepthError}) is RE-THROWN, never swallowed
+ *  into this fallback -- task item 3's own contract ("throws ... rather
+ *  than recursing") means a self-embedding block is malformed input the
+ *  caller must fix, not a transient render failure to hide. */
 const EMBEDDED_FALLBACK_SIZE = 42;
 
 /**
- * The sizing/drawing asymmetry (CDD B7FU-R2, `.agent-notes/cdd-B7FU-R2.md`):
- * `EmbeddedDiagram#calculateDimensionSlow` (`EmbeddedDiagram.java:126-148`)
- * and `#drawU` (`java:161-196`) each independently branch on `ug.matchesProperty
- * ("SVG")` -- `calculateDimensionSlow` runs during the classifier's LAYOUT
- * pass, whose `StringBounder` is a generic, AWT/`PortableImage`-oriented
- * measurer (`getImage` -> `SImageIO.read`, java:237-245) that does NOT carry
- * the final export format; `drawU` runs during the SEPARATE draw pass with
- * the real SVG-target `UGraphic`, whose `matchesProperty("SVG")` IS true, so
- * it takes the `getImageSvg` branch (java:169-176) and succeeds. In this
- * port's deterministic oracle-render environment the AWT path always throws
- * (headless -- no `PortableImage` producer), so `calculateDimensionSlow`
- * ALWAYS falls to its `catch` -> `(42, 42)` (java:148-152), while `drawU`
- * ALWAYS succeeds and draws the real nested SVG. Confirmed byte-exact, not
- * fitted, across three independent fixtures (moxobo-16-tipo829 43x54,
- * zikabo-17-gugi332 67x64, gadufu-56-votu808 133x107 -- every one's box
- * width/height matches EXACTLY when the embed's SIZING contribution is
- * hardcoded to (42, 42) regardless of its real, successfully-drawn size).
- * `MethodsOrFieldsArea#drawU`'s own Y-translate between successive embeds
- * (`java:436`) reads `embedded.calculateDimension(stringBounder).getHeight()`
- * -- the SAME `TextBlockMemoized`-cached call `calculateDimensionSlow`
- * populated, i.e. the FALLBACK height, not the real one -- so {@link
- * stackEmbeds}'s own Y-stacking below mirrors that, not `width`/`height`.
- * Per CLAUDE.md ("preserve... behavior that looks like a bug... never fix
- * an apparent upstream bug inline"): this is upstream's own real,
- * deterministic (in this environment) behavior, reproduced faithfully, not
- * papered over -- distinct from gadufu-56-votu808's SEPARATE, out-of-scope
- * residual named in `.agent-notes/cdd-B7FU-R2.md` (the drawn image's own
- * Δ12/Δ11 width/height, an ACTIVITY-engine Cyrillic-text measurement gap,
- * not this mechanism).
+ * Sizing and drawing agree (lgm-T1e): `EmbeddedDiagram#calculateDimensionSlow`
+ * takes its SVG arm (`EmbeddedDiagram.java:129-133`) because the oracle's
+ * bounder reports `matchesProperty("SVG")` (oracle seam #3), so the embed
+ * contributes the exported document's own `UImageSvg` width/height -- the
+ * SAME size `drawU` (java:169-174) draws. `MethodsOrFieldsArea#drawU`'s
+ * Y-translate between successive embeds (`java:436`) reads that same
+ * memoized dimension. Before seam #3 the bounder said false, the raster arm
+ * threw, and every embed reserved the (42, 42) catch fallback; this port
+ * had fitted that artefact.
  */
 function renderEmbed(
   source: readonly string[],
@@ -164,8 +137,7 @@ export interface EmbedStackingContext {
 /** `MethodsOrFieldsArea.java:141-152`'s dimension loop (`y +=
  *  dim.getHeight()`) and `:429-440`'s draw order (each embed translated
  *  down by the PRIOR one's own `calculateDimension(...).getHeight()`, the
- *  SAME memoized/fallback value the sizing pass used -- NOT the real drawn
- *  height, see {@link renderEmbed}'s "sizing/drawing asymmetry" doc comment)
+ *  SAME memoized value the sizing pass used, see {@link renderEmbed})
  *  -- stacked immediately below the block's own member rows, starting at
  *  `startY` (that block's post-member content top). */
 export function stackEmbeds(
@@ -177,13 +149,8 @@ export function stackEmbeds(
   let y = startY;
   return sources.map((source) => {
     const geo = renderEmbed(source, renderer);
-    const positioned: EmbeddedBlockGeo = {
-      ...geo,
-      y,
-      sizingWidth: EMBEDDED_FALLBACK_SIZE,
-      sizingHeight: EMBEDDED_FALLBACK_SIZE,
-    };
-    y += EMBEDDED_FALLBACK_SIZE;
+    const positioned: EmbeddedBlockGeo = { ...geo, y, sizingWidth: geo.width, sizingHeight: geo.height };
+    y += geo.height;
     return positioned;
   });
 }
