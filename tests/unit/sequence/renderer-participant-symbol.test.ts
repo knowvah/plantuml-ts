@@ -31,10 +31,12 @@ import {
   type SymbolParticipantType,
   type ParticipantSymbolGeo,
 } from '../../../src/diagrams/sequence/renderer-participant-symbol.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { scaleSequenceTheme } from '../../../src/diagrams/sequence/scale-geo.js';
 
 const THEME = scaleSequenceTheme(defaultTheme, 1);
+const MEASURER = new DeterministicMeasurer();
 
 /** Box wide enough that `dx = (136 - 36) / 2 = 50` and tall enough that the
  *  tail flip's `dy = 66 - 46 = 20` are both integers. */
@@ -152,30 +154,30 @@ describe('measureParticipantSymbol', () => {
   it('returns asSmall(null, empty(16,17), empty(0,0)) for database', () => {
     // Margin(10,10,24,5) + (16,17) = (36,46) — the dimension the junaxa
     // golden's own path arithmetic independently fixes.
-    expect(measureParticipantSymbol('database', THEME)).toEqual({ width: 36, height: 46 });
+    expect(measureParticipantSymbol('database', THEME, MEASURER)).toEqual({ width: 36, height: 46 });
   });
 
   it('returns the svek drawing dimensions for boundary, control and entity', () => {
     // Boundary.java:97-98 — radius*2 + left + 2*margin, radius*2 + 2*margin.
-    expect(measureParticipantSymbol('boundary', THEME)).toEqual({ width: 49, height: 32 });
+    expect(measureParticipantSymbol('boundary', THEME, MEASURER)).toEqual({ width: 49, height: 32 });
     // Control.java:87-88 and EntityDomain.java:74-75 — radius*2 + 2*margin.
-    expect(measureParticipantSymbol('control', THEME)).toEqual({ width: 32, height: 32 });
-    expect(measureParticipantSymbol('entity', THEME)).toEqual({ width: 32, height: 32 });
+    expect(measureParticipantSymbol('control', THEME, MEASURER)).toEqual({ width: 32, height: 32 });
+    expect(measureParticipantSymbol('entity', THEME, MEASURER)).toEqual({ width: 32, height: 32 });
   });
 
   it('returns USymbolQueue#getMargin for queue', () => {
     // Margin(5,15,5,5) — the extent the label is composed INTO, not a glyph.
-    expect(measureParticipantSymbol('queue', THEME)).toEqual({ width: 20, height: 10 });
+    expect(measureParticipantSymbol('queue', THEME, MEASURER)).toEqual({ width: 20, height: 10 });
   });
 
   it('returns getDeltaCollection() for collections', () => {
-    expect(measureParticipantSymbol('collections', THEME)).toEqual({ width: 4, height: 4 });
+    expect(measureParticipantSymbol('collections', THEME, MEASURER)).toEqual({ width: 4, height: 4 });
   });
 
   it('is independent of the theme', () => {
     for (const type of ALL_TYPES) {
-      expect(measureParticipantSymbol(type, scaleSequenceTheme(defaultTheme, 3))).toEqual(
-        measureParticipantSymbol(type, THEME),
+      expect(measureParticipantSymbol(type, scaleSequenceTheme(defaultTheme, 3), MEASURER)).toEqual(
+        measureParticipantSymbol(type, THEME, MEASURER),
       );
     }
   });

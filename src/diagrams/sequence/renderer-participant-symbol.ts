@@ -80,13 +80,12 @@ import type { Theme } from '../../core/theme.js';
 import { resolveElementLineThickness } from '../../core/theme.js';
 import { sequenceShadowFilter } from './sequence-shadow.js';
 import { attrs } from '../../core/svg.js';
-import { WidthTableMeasurer } from '../../core/measurer.js';
+import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
 import type { ScaledTheme } from './scale-geo.js';
 
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
-import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { URectangle } from '../../core/klimt/shape/URectangle.js';
@@ -198,8 +197,20 @@ const NO_PAINT = new SymbolContext(null, null);
  *  are field arithmetic), and the seam's own glyphs that DO read geo
  *  (`queue`, `collections`) never take this path. */
 const ZERO_GEO: ParticipantSymbolGeo = { x: 0, y: 0, width: 0, height: 0 };
-const MEASURER = new WidthTableMeasurer();
-const NO_BOUNDER: StringBounder = new MeasurerStringBounder(MEASURER);
+
+/** The DRAW path holds no measurer (D1: layout resolves every metric; the
+ *  plugin's `render(geo, theme)` is handed none). No glyph draws a `UText`, so
+ *  this is never reached; if one ever does it fails loudly rather than
+ *  answering from a second, private metric. */
+const UNCONSULTED: StringMeasurer = {
+  measure(text: string): never {
+    throw new Error(`participant glyph drew text ${JSON.stringify(text)} without a render measurer`);
+  },
+  getDescent(_font: FontSpec, text: string): never {
+    throw new Error(`participant glyph measured ${JSON.stringify(text)} without a render measurer`);
+  },
+};
+const MEASURER = UNCONSULTED;
 
 /** `DriverTextSvg`'s own width-only seam. Every consumer of it defines its own
  *  local adapter (`document-shell.ts#driverBounderFor`,
@@ -330,6 +341,7 @@ function glyphOffset(
 export function measureParticipantSymbol(
   type: GlyphParticipantType,
   theme: Theme,
+  measurer: StringMeasurer,
   shadow = 0,
 ): { width: number; height: number } {
   if (type === 'actor') {
@@ -338,7 +350,9 @@ export function measureParticipantSymbol(
     // `skinparam actorStyle` (`ActorStyle.java:60-71`) -- and
     // shadow-dependent: the stick man and the hollow actor add the delta to
     // their height (`ActorStickMan.java:121`, `ActorHollow.java:110`).
-    const probe = glyphFor('actor', { ...ZERO_GEO, shadow }, theme).calculateDimension(NO_BOUNDER);
+    const probe = glyphFor('actor', { ...ZERO_GEO, shadow }, theme).calculateDimension(
+      new MeasurerStringBounder(measurer),
+    );
     return { width: probe.getWidth(), height: probe.getHeight() };
   }
   if (type === 'collections') return { width: COLLECTIONS_DELTA, height: COLLECTIONS_DELTA };
@@ -347,7 +361,7 @@ export function measureParticipantSymbol(
     return { width: margin.getWidth(), height: margin.getHeight() };
   }
   if (type === 'boundary' || type === 'control' || type === 'entity') {
-    const probe = simpleGlyph(type, NO_PAINT).calculateDimension(NO_BOUNDER);
+    const probe = simpleGlyph(type, NO_PAINT).calculateDimension(new MeasurerStringBounder(measurer));
     return { width: probe.getWidth(), height: probe.getHeight() };
   }
   const margin = databaseMargin();
