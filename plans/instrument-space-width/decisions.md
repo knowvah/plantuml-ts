@@ -71,3 +71,14 @@ elements b0→final away = 0; production manifest unchanged; the four lgm crash
 fixtures (kovaxi-11, zidebi-71, runima-82, pixisi-38) render as real diagrams
 on the new jar and `ORACLE_CRASH_FIXTURES` is removed; four gates green;
 `DIVERGENCES.md` lone-space entry retired; ADR-001 addendum.
+
+## D10-AMEND (PROPOSED 2026-10-09, journal row 12 — awaiting user)
+Finding: the production manifest stays unchanged across the instrument step
+(b0→b1: 0 changes), but the revealed families F1 (10 production sites build
+their own `WidthTableMeasurer`) and F2 (leading/trailing-space trim and x
+shift) are port defects production already has — `jarMeasurer` gives spaces
+width — so every fix moves production output toward the jar. "Production
+manifest unchanged" (D10, stop 6) contradicts D8. Proposed: stop 6 becomes
+"every production manifest change is attributed to a named family fix and
+journaled; no change outside a family". F3 (seam-#4-only jar crash pages,
+`Direction.java:128` float equality) proposed excluded like lgm's four.
