@@ -39,8 +39,8 @@ describe('the premise: the deterministic measurer gives spaces a width (seam #4)
     // seam #4 (isw D1) U+0020 is 44 tenths, so 8 spaces = 8 * 4.4 * size / 16.
     const measurer = new DeterministicMeasurer();
     const font = { family: 'SansSerif', size: FONT_SIZE };
-    expect(measurer.measure(' ', font).width).toBeCloseTo((4.4 * FONT_SIZE) / 16, 12);
-    expect(measurer.measure(TAB_STRING, font).width).toBeCloseTo((8 * 4.4 * FONT_SIZE) / 16, 12);
+    expect(measurer.measure(' ', font).width).toBe(Math.fround((4.4 * FONT_SIZE) / 16));
+    expect(measurer.measure(TAB_STRING, font).width).toBe(Math.fround((8 * 4.4 * FONT_SIZE) / 16));
     expect(measurer.measure(TAB_STRING, font).width).not.toBe(0);
   });
 
@@ -243,6 +243,6 @@ describe('layoutTabbedText (AtomText.java:210-256, drawU + getWidth)', () => {
     const font = { family: 'SansSerif', size: 13 };
     const layout = layoutTabbedText('a\tb', 13, (s) => measurer.measure(s, font).width);
     expect(layout.tokens.map((t) => t.x)).toEqual([0, measurer.measure(TAB_STRING, font).width]);
-    expect(layout.tokens[1]!.x).toBeCloseTo(28.6, 12);
+    expect(layout.tokens[1]!.x).toBe(Math.fround(28.6));
   });
 });
