@@ -131,12 +131,18 @@ export function computeHeaderNameGeo(
   // straight off the SAME `MeasuredClassifier`.
   const { badgeCharField, badgeColorField } = buildBadgeCharFields(classifier);
   const { headerLines, headerAlign } = splitHeaderLines(header.headerText);
-  const { headerLineWidths, headerDisplayLines, nameBlockHeight, headerLineAtoms, headerLineHeights } =
-    buildHeaderLineMetrics(headerLines, headerFont, measurer, {
-      sprites,
-      headerItalic: header.headerItalic,
-      maxWidth: headerMaxWidth,
-    });
+  const {
+    headerLineWidths,
+    headerDisplayLines,
+    nameBlockHeight,
+    headerLineAtoms,
+    headerLineHeights,
+    headerLineRender,
+  } = buildHeaderLineMetrics(headerLines, headerFont, measurer, {
+    sprites,
+    headerItalic: header.headerItalic,
+    maxWidth: headerMaxWidth,
+  });
   const headerTextWidth = Math.max(...headerLineWidths);
   // cdd5-T4b: nameWidth/nameBlockHeight are EntityImageClassHeader.java:120's merged block.
   const merged = mergeNameWithVisibility(
@@ -167,6 +173,7 @@ export function computeHeaderNameGeo(
     blankLineRenderWidth,
     headerLineAtoms,
     headerLineHeights,
+    headerLineRender,
   };
 }
 
@@ -466,6 +473,7 @@ function buildHeaderNameRowsGeo(
     blankLineRenderWidth: headerNameGeo.blankLineRenderWidth,
     lineAtoms: headerNameGeo.headerLineAtoms,
     lineHeights: headerNameGeo.headerLineHeights,
+    lineRender: headerNameGeo.headerLineRender,
   });
   return attachHeaderVisibilityIcon(rows, headerNameGeo, nameTop);
 }

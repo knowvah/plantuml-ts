@@ -219,7 +219,7 @@ export function renderRowText(
     const atoms = atomsOverBack(row.atoms, classifierRowBack(geo, theme, isHeader));
     return renderRowAtoms(atoms, geo.x + row.indent, geo.y + row.y, theme, fontColor);
   }
-  return text(geo.x + row.indent, geo.y + row.y, row.text, {
+  return text(geo.x + row.indent + (row.renderDx ?? 0), geo.y + row.y, row.text, {
     // G2 N23: `row.fontFamily`/`row.fontSize` (set only on the header row
     // when `skinparam class { AttributeFontSize/AttributeFontName }` is in
     // effect) override the theme default -- see `layout.ts`'s `rows[]`
@@ -245,7 +245,7 @@ export function renderRowText(
     // different `text-anchor="start"` that a raw-string comparator (this
     // attribute is not on `compareSvg`'s numeric-tolerance allowlist)
     // would flag as a spurious diff.
-    ...(row.width !== undefined ? { lengthAdjust: 'spacing' as const, textLength: row.width } : {}),
+    ...(row.width !== undefined ? { lengthAdjust: 'spacing' as const, textLength: row.renderWidth ?? row.width } : {}),
     ...(row.italic === true ? { fontStyle: 'italic' as const } : {}),
     // G2 N32: `skinparam classFontStyle bold` -- header-only, mirrors the
     // creole atom engine's identical `FontStyle.BOLD` -> `font-weight="700"`

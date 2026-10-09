@@ -179,10 +179,12 @@ export function buildHeaderRows(input: {
    *  -- feeds the bottom-anchor `y` shift below for a sprite-bearing
    *  line, the SAME gate `class-member-rows.ts#buildSectionRows` carries. */
   lineHeights?: readonly number[];
+  /** isw-T2-cls F2b: per-line `DriverTextSvg.java:113-126` fields for a plain row. */
+  lineRender?: ReadonlyArray<{ renderDx?: number; renderWidth?: number } | undefined>;
 }): ClassifierGeo['rows'] {
   const { header, lines, lineWidths, align, circleWidth, widthStereoAndName, nameWidth, h1, h2 } = input;
   const { nameTop, baselineOffset, fontSpec, headerTextWidth, badgeRadius, blankLineRenderWidth, lineAtoms } = input;
-  const { lineHeights } = input;
+  const { lineHeights, lineRender } = input;
   const indent = circleWidth + (widthStereoAndName - nameWidth) / 2 + h1 + h2 + NAME_LEFT_MARGIN;
   const badgeIndent = h1 + BADGE_LEFT_MARGIN + badgeRadius;
   const lastIndex = lines.length - 1;
@@ -245,6 +247,7 @@ export function buildHeaderRows(input: {
       italic: header.headerItalic || fontSpec.italic === true,
       ...(fontSpec.bold === true ? { bold: true as const } : {}),
       width: isBlank ? blankLineRenderWidth : lineWidth,
+      ...(isBlank ? {} : (lineRender?.[i] ?? {})),
       // G2 N64: badgeIndent lives ONLY on the LAST name-line row -- matches
       // `renderer-classifier-box.ts#renderBadge`'s own `nameRowIndex =
       // headerRowCount - 1` read (unchanged by this generalization).

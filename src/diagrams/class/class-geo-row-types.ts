@@ -32,6 +32,13 @@ export interface ClassifierRowGeo {
    *  jar's `-DPLANTUML_DETERMINISTIC_TEXT=true` output. Optional: hand-
    *  built test rows omit it (additive on `core/svg.ts#text()`). */
   width?: number;
+  /** isw-T2-cls F2b: `DriverTextSvg.java:113-126` for a plain-text row --
+   *  the drawn run is shifted right by one space width per LEADING space
+   *  (`renderDx`) and its `textLength` is the TRIMMED text's width
+   *  (`renderWidth`); `width` stays the layout advance. Absent when the text
+   *  draws as written. */
+  renderDx?: number;
+  renderWidth?: number;
   /** G2 N16: this row's source member's OWN parsed `[[url]]`/`[[[url]]]`
    *  link suffix -- `Member.ownUrl`'s doc comment (N15 tracked presence
    *  only via a boolean `hasUrl`; N16 carries the full value so the
