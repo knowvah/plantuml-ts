@@ -58,13 +58,12 @@ import {
   tokenizeOnTabs,
 } from '../../core/klimt/creole/legacy/AtomText.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
-import { driverTextPlacement } from '../../core/svg-text-font.js';
 import type { Theme } from '../../core/theme.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import type { StateTextLine } from './state-geo-types.js';
+import { placeToken, type RunPlacement } from './state-run-placement.js';
 
-/** `FontConfiguration.create`'s fixed tab size (`FontConfiguration.java:
- *  229-231`) — what every state text uses (see {@link stateCreoleOpts}). */
+/** `FontConfiguration.create`'s fixed tab size (`FontConfiguration.java:229-231`). */
 const DEFAULT_TAB_SIZE = 8;
 
 /**
@@ -90,12 +89,8 @@ export interface StateTextRun {
    *  advance its preceding tab(s) consumed. jar-verified `lokija-02-dipe348`:
    *  `line2` drawn at x=68 (12 + 56), `line3` at x=124 (12 + 112). */
   readonly dx?: number;
-  /** `DriverTextSvg#draw`'s leading-space `x` shift (`DriverTextSvg.java:
-   *  118-124`): one space width per leading space of the token. The ADVANCE
-   *  stays the untrimmed {@link width} (`AtomText.java:222-231`). */
+  /** Leading-space `x` shift / trimmed `textLength` (see `placeToken`). */
   readonly drawDx?: number;
-  /** The emitted `textLength`: the width of the TRIMMED text
-   *  (`DriverTextSvg.java:126`). Absent = the run draws {@link width}. */
   readonly drawWidth?: number;
   readonly bold: boolean;
   readonly italic: boolean;
@@ -181,13 +176,9 @@ export interface StateCreoleOpts {
 }
 
 /**
- * `skinparam tabSize` does NOT apply to state text: every state text goes
- * through `Style#getFontConfiguration` (`Style.java:259-268`), which calls
- * `FontConfiguration.create(font, color, hyperlink, stroke)`
- * (`FontConfiguration.java:229-231`) -> tabSize 8, never
- * `SkinParam#getTabSize` (`EntityImageState.java:95-99`,
- * `EntityImageStateCommon.java:74-81`, `InnerStateAutonom.java:96-97`).
- * jar-verified `lokija-02-dipe348` with and without `skinparam tabSize 2`.
+ * `skinparam tabSize` does NOT apply to state text: `Style#getFontConfiguration`
+ * (`Style.java:259-268`) -> `FontConfiguration.create(..)` fixes tabSize 8
+ * (`FontConfiguration.java:229-231`); jar-verified `lokija-02-dipe348`.
  * `skinparam wrapWidth` applies ONLY where upstream threads
  * `getStyleState().wrapWidth()` into the text block — the leaf
  * `EntityImageState`/`EntityImageStateEmptyDescription` name and fields
@@ -205,31 +196,12 @@ export function stateCreoleOpts(theme: Theme, wrap: boolean): StateCreoleOpts {
   };
 }
 
-/** `DriverTextSvg#draw`'s preamble for one token (`:114-126`), via the shared
- *  {@link driverTextPlacement}: `drawDx`/`drawWidth` only when they differ
- *  from the plain advance. */
-function placeToken(text: string, width: number, measure: (s: string) => number): Partial<StateTextRun> {
-  if (text === '') return {};
-  const placed = driverTextPlacement(text, measure(' '));
-  const drawWidth = placed.text === text ? width : measure(placed.text);
-  return {
-    ...(placed.dx > 0 ? { drawDx: placed.dx } : {}),
-    ...(drawWidth !== width ? { drawWidth } : {}),
-  };
-}
-
-function toRun(
-  run: CreoleTextRun,
-  text: string,
-  width: number,
-  dx: number,
-  placement: Partial<StateTextRun> = {},
-): StateTextRun {
+function toRun(run: CreoleTextRun, text: string, width: number, dx: number, place: RunPlacement = {}): StateTextRun {
   return {
     text,
     width,
     ...(dx > 0 ? { dx } : {}),
-    ...placement,
+    ...place,
     bold: run.style.bold,
     italic: run.style.italic,
     underline: run.style.underline,
@@ -267,10 +239,8 @@ function expandRun(run: CreoleTextRun, font: FontSpec, measurer: StringMeasurer,
   // (empty) text — `AtomMath#calculateDimensionSlow` is the image's own box
   // (`AtomMath.java:64-71`). It carries no text, so it can carry no tab.
   if (run.image !== undefined) return [toRun(run, '', run.image.width, 0)];
-  if (!hasTabulation(run.text)) {
-    const width = measure(run.text);
-    return [toRun(run, run.text, width, 0, placeToken(run.text, width, measure))];
-  }
+  const whole = measure(run.text);
+  if (!hasTabulation(run.text)) return [toRun(run, run.text, whole, 0, placeToken(run.text, whole, measure))];
   const tabStop = tabStopWidth(measure(tabStringFor(tabSizeNb)), runFont.size);
   const out: StateTextRun[] = [];
   let x = 0;
