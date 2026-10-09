@@ -367,11 +367,13 @@ export function stripUrl(rest: string): string {
   let out = '';
   let i = 0;
   let quote: string | undefined;
+  let bracket = false;
   while (i < rest.length) {
     const ch = rest[i]!;
-    if (quote !== undefined) {
+    if (quote !== undefined || bracket) {
       out += ch;
       if (ch === quote) quote = undefined;
+      else if (bracket && ch === ']') bracket = false;
       i += 1;
       continue;
     }
@@ -387,10 +389,15 @@ export function stripUrl(rest: string): string {
       i += m[0].length;
       continue;
     }
-    out += ch;
+    // isw-T2-cls F4: a `[ ... ]` span is CODE_CORE's `\[[^\[\]]+\]`
+    // (CommandCreateElementFull.java:126) -- captured verbatim, so its
+    // inner whitespace (a leading/trailing/double space) is display text and
+    // survives; only the gaps BETWEEN tokens collapse to one space.
+    if (ch === '[') bracket = true;
+    out += /\s/.test(ch) ? (out.endsWith(' ') ? '' : ' ') : ch;
     i += 1;
   }
-  return out.replace(/\s+/g, ' ').trim();
+  return out.trim();
 }
 
 /**
@@ -453,7 +460,9 @@ export function extractTags(rest: string): TagsResult {
     if (RE_TAG_TOKEN.test(tok)) tags.push(tok.slice(1));
     else remainder.push(tok);
   }
-  return { tags, remainder: remainder.join(' ') };
+  // isw-T2-cls F4: with no tag present the text is returned VERBATIM -- a
+  // `[ A  B ]` code keeps its inner whitespace (CODE_CORE, java:126).
+  return { tags, remainder: tags.length === 0 ? rest : remainder.join(' ') };
 }
 
 /** Extract angle-bracket stereotype from a link label string. */
