@@ -1,0 +1,310 @@
+{
+  "fixtures": [
+    {
+      "slug": "buduni-98-bima526",
+      "type": "component",
+      "addedAt": "2026-07-10",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "vacuxi-18-baxu582",
+      "type": "component",
+      "addedAt": "2026-07-10",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "vumija-03-xise495",
+      "type": "component",
+      "addedAt": "2026-07-10",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "majuma-84-loma401",
+      "type": "usecase",
+      "addedAt": "2026-07-10",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "kevipe-39-gaji640",
+      "type": "usecase",
+      "addedAt": "2026-07-10",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "pamake-46-sadu464",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "sipuma-82-fene185",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "cifaki-66-boxa005",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "jesibe-85-sozu187",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "vapalu-27-muxa300",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "dipixi-71-nuga611",
+      "type": "usecase",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "berome-43-xini276",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "zarabi-01-koka785",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "zijase-36-cice967",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "ciboso-93-romi495",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "sufedi-40-baki261",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "balotu-54-tuxu203",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "buduxo-54-tubo525",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "fafeze-50-jomi091",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "fanija-24-xogo706",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "gotofu-80-joku316",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "jebovo-64-rasa849",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "jolaru-18-dofi669",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "katane-80-xeka153",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "kavico-81-sonu694",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "lopite-93-vevo106",
+      "type": "component",
+      "addedAt": "2026-07-14",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "cimare-47-deke334",
+      "type": "usecase",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "cizolo-88-lake154",
+      "type": "usecase",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "nidome-87-xesa939",
+      "type": "component",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "samicu-23-rula038",
+      "type": "usecase",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "sivamo-20-gaga179",
+      "type": "usecase",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "xegapu-80-damu730",
+      "type": "usecase",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "xevidu-92-texu148",
+      "type": "component",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "xonafo-10-moki423",
+      "type": "usecase",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "zanibo-14-sami874",
+      "type": "component",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "mamase-39-buto560",
+      "type": "component",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "norebe-58-bixu182",
+      "type": "usecase",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "sidame-35-cozu078",
+      "type": "usecase",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "zoriso-46-vata931",
+      "type": "usecase",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "komivo-22-toki497",
+      "type": "usecase",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "rabida-94-kula497",
+      "type": "usecase",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "cedosa-23-nini915",
+      "type": "component",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "cusubu-18-xacu379",
+      "type": "component",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "veboxo-36-nupe102",
+      "type": "component",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "vonipa-26-pudo091",
+      "type": "component",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "zijaro-25-kufa588",
+      "type": "component",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "dijico-15-cabu824",
+      "type": "usecase",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "mofuba-79-came821",
+      "type": "usecase",
+      "addedAt": "2026-07-15",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "sprite-svg-bootstrap-0",
+      "type": "usecase",
+      "addedAt": "2026-07-31",
+      "source": "authored"
+    },
+    {
+      "slug": "sprite-svg-archimate-0",
+      "type": "usecase",
+      "addedAt": "2026-07-31",
+      "source": "authored"
+    },
+    {
+      "slug": "sprite-svg-multiline-0",
+      "type": "usecase",
+      "addedAt": "2026-07-31",
+      "source": "authored"
+    }
+  ]
+}

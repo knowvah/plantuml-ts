@@ -1,0 +1,38 @@
+{
+  "generatedAt": "2026-09-20T18:50:23.645Z",
+  "measuredAgainstCommit": "993cc2ae",
+  "type": "dot+tests/oracle/svg-conformance/census-dot.json",
+  "measurer": "deterministic",
+  "fixtures": [
+    {
+      "slug": "bemepi-16-kuzo249",
+      "status": "ok",
+      "diffCount": 0,
+      "bucket": "0"
+    },
+    {
+      "slug": "chain-expansion",
+      "status": "ok",
+      "diffCount": 0,
+      "bucket": "0"
+    },
+    {
+      "slug": "ciditi-21-xacu710",
+      "status": "ok",
+      "diffCount": 0,
+      "bucket": "0"
+    },
+    {
+      "slug": "cluster-basic",
+      "status": "ok",
+      "diffCount": 0,
+      "bucket": "0"
+    },
+    {
+      "slug": "cluster-nested",
+      "status": "ok",
+      "diffCount": 0,
+      "bucket": "0"
+    }
+  ]
+}
