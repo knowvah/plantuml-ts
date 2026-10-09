@@ -19,7 +19,6 @@ import {
   RE_ACTION,
   RE_ARROW_LABEL,
   RE_ENDWHILE,
-  RE_ESCAPED_NEWLINE,
   RE_REPEAT_HEAD,
   RE_REPEAT_INLINE_TERMINATOR,
   RE_REPEATWHILE,
@@ -47,7 +46,7 @@ import {
   pushParsedNode,
 } from './list-backward-dispatch.js';
 import { singleLineArrowLabel, tryArrowLong } from './dispatch-arrow-long.js';
-import { decodeNewlineSentinels } from './dispatch-newline-sentinels.js';
+import { displayWithNewlines } from './dispatch-newline-sentinels.js';
 import { readMultilineActionBody } from './dispatch-multiline-body.js';
 import { extractLeadingCaseNotes, tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
@@ -129,7 +128,7 @@ function trySimpleKeyword(ctx: ParseContext, idx: number, _line: string, lc: str
 function tryAction(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const actionMatch = RE_ACTION.exec(line);
   if (actionMatch === null) return null;
-  const label = decodeNewlineSentinels(actionMatch[1]!.replace(RE_ESCAPED_NEWLINE, '\n'));
+  const label = displayWithNewlines(ctx.pragma, actionMatch[1]!);
   const stereotype = stereogroupStereotype(actionMatch[2]);
   const color = stereogroupBackColor(actionMatch[2]);
   const node: ActivityAction = {
@@ -158,7 +157,11 @@ function tryMultilineAction(ctx: ParseContext, idx: number, line: string): Dispa
   const body = readMultilineActionBody(ctx, idx + 1, labelParts);
   const node: ActivityAction = {
     kind: 'action',
-    label: decodeNewlineSentinels(body.labelParts.join('\n')),
+    // isw-T2-act F7: `lines.toDisplay()` is `Display.createFoo` (`BlocLines.java:
+    // 124-128`, `Display.java:185-198`) -- no newline scan; a `%newline()`
+    // sentinel reaches the creole parser, which splits a plain line on it
+    // (`CreoleStripeSimpleParser.java:164`) and a table cell keeps it.
+    label: body.labelParts.join('\n'),
     ...(body.multiStereo !== undefined ? { stereotype: body.multiStereo } : {}),
     ...(body.multiColor !== undefined ? { color: body.multiColor } : {}),
     ...swimlaneSpread(ctx),
@@ -241,7 +244,7 @@ function parseRepeatEntry(ctx: ParseContext, inlineRest: string | undefined): Ac
   const restLine = RE_REPEAT_INLINE_TERMINATOR.test(inlineRest) ? inlineRest : inlineRest + ';';
   const actionM = RE_ACTION.exec(restLine);
   if (actionM === null) return undefined;
-  const label = decodeNewlineSentinels(actionM[1]!.replace(RE_ESCAPED_NEWLINE, '\n'));
+  const label = displayWithNewlines(ctx.pragma, actionM[1]!);
   const stereotype = stereogroupStereotype(actionM[2]);
   const color = stereogroupBackColor(actionM[2]);
   return {

@@ -19,7 +19,6 @@ import {
   RE_ACTIVITY_LIST,
   RE_BACKWARD,
   RE_BACKWARD_HEAD,
-  RE_ESCAPED_NEWLINE,
   swimlaneSpread,
   type DispatchResult,
   type ParseContext,
@@ -28,6 +27,7 @@ import { stereogroupStereotype } from './dispatch-stereogroup.js';
 import { readMultilineActionBody } from './node-dispatch.js';
 import { unescapeLabelNewlines } from './if-dispatch.js';
 import { redirectNoteOntoSwitch } from './note-dispatch.js';
+import { displayWithNewlines } from './dispatch-newline-sentinels.js';
 
 // ---------------------------------------------------------------------------
 // `containsBreak` (mission add2-T3b, family WSPEC) -- node-dispatch.ts's
@@ -244,7 +244,7 @@ function stereoSpread(stereotype: string | undefined): { stereotype?: string } {
 export function tryBackward(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const single = RE_BACKWARD.exec(line);
   if (single !== null) {
-    const label = single[2]!.replace(RE_ESCAPED_NEWLINE, '\n');
+    const label = displayWithNewlines(ctx.pragma, single[2]!);
     const node: ActivityBackward = {
       kind: 'backward',
       label,

@@ -85,11 +85,15 @@ describe('parses :action; syntax', () => {
 // PCTN, the two other `node-dispatch.ts` label sites `tryAction` shares
 // the sentinel decode with: a multi-line `:...` body, and `repeat`'s own
 // inline entry action.
-describe('PCTN decodes BLOCK_E1_NEWLINE in the multiline-action and repeat-entry label sites too', () => {
-  it('a multi-line action body decodes the sentinel on its own joined label', () => {
+describe('PCTN: BLOCK_E1_NEWLINE in the multiline-action and repeat-entry label sites', () => {
+  it('a multi-line action body keeps the sentinel for the creole parser', () => {
+    // isw-T2-act F7: `lines.toDisplay()` is `Display.createFoo` (`BlocLines
+    // .java:124-128`) -- no newline scan; the sentinel splits a plain line at
+    // the creole stage (`CreoleStripeSimpleParser.java:164`) and stays inside
+    // a table cell (filela-40-rumo296 / putega-59-fuzi707, jar-conformant).
     const ast = parse([':a', `b${BLOCK_E1_NEWLINE}c;`]);
     const node = firstNode(ast) as ActivityAction;
-    expect(node.label).toBe('a\nb\nc');
+    expect(node.label).toBe(`a\nb${BLOCK_E1_NEWLINE}c`);
   });
 
   it("repeat's inline entry action decodes the sentinel", () => {

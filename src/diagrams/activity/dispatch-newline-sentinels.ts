@@ -1,36 +1,21 @@
 /**
- * `%n()`/`%newline()` -> a real line break in an activity action label
- * (mission `activity-divergence-drive-3` T2a, family PCTN). Split into
+ * The activity label line splitter (`Display#getWithNewlines`), split into
  * its own file purely to keep `dispatch-support.ts`/`node-dispatch.ts`
- * under the project's 500-line cap -- a one-function module, not a
- * structural seam.
+ * under the project's 500-line cap. isw-T2-act F7: replaced the earlier
+ * `%n()`-sentinel-only decoder, which upstream has no counterpart for --
+ * a multiline action's sentinels reach the creole parser undecoded.
  */
-
-import {
-  BLOCK_E1_NEWLINE,
-  BLOCK_E1_NEWLINE_LEFT_ALIGN,
-  BLOCK_E1_NEWLINE_RIGHT_ALIGN,
-} from '../../core/tim/builtin/jaws-constants.js';
-
-const RE_NEWLINE_SENTINEL = new RegExp(
-  `[${BLOCK_E1_NEWLINE}${BLOCK_E1_NEWLINE_LEFT_ALIGN}${BLOCK_E1_NEWLINE_RIGHT_ALIGN}]`,
-  'g',
-);
+import type { Pragma } from '../../core/skin/Pragma.js';
+import { parseWithNewlines } from '../../core/klimt/creole/DisplayNewlines.js';
 
 /**
- * `%n()`/`%newline()` (`NewlineShort.java`/`Newline.java`, both lowercase
- * spellings) already expand to {@link BLOCK_E1_NEWLINE} at the TIM/
- * preprocessor stage (`preprocessor.ts`'s own doc: "decoding the sentinel
- * into a label line break is the Jaws/Creole display layer's job, which
- * this port does not have yet") -- an activity action label is exactly
- * that FOLLOW-UP. `Display#getWithNewlines`'s own `_LEFT_ALIGN`/
- * `_RIGHT_ALIGN` sentinel variants (`\r`/`\l` natural-alignment escapes)
- * decode to the same plain line break here -- the alignment HINT itself
- * is the same out-of-scope gap `if-dispatch.ts#unescapeLabelNewlines`'s
- * own doc already names for branch labels, not re-guessed into existence
- * here.
- * @see net/sourceforge/plantuml/klimt/creole/Display.java:315-339
+ * isw-T2-act F7: `Display.getWithNewlines2(pragma, LABEL)` (`Display.java:
+ * 227-231` -> `getWithNewlines`, `:262-345`) -- the full backslash/sentinel
+ * scan (`\\` is ONE literal backslash, so `\\n` stays a literal `\n`
+ * for the creole table cell to break on), joined back with real line
+ * breaks. What `CommandActivity3.java:139`, `CommandRepeat3.java:117` and
+ * `CommandBackward3.java:141` hand `addActivity`/`backward`.
  */
-export function decodeNewlineSentinels(text: string): string {
-  return text.replace(RE_NEWLINE_SENTINEL, '\n');
+export function displayWithNewlines(pragma: Pragma, text: string): string {
+  return parseWithNewlines(pragma, text)?.lines.join('\n') ?? '';
 }

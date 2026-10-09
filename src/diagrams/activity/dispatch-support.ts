@@ -366,12 +366,6 @@ export const RE_REPEAT_HEAD = new RegExp('^repeat(?:\\s+(.*))?$', 'i');
  *  convention also requires building from a string. */
 export const RE_REPEAT_INLINE_TERMINATOR = new RegExp(';\\s*(?:<<[^>]*>>)?\\s*(?:#\\w+)?\\s*$');
 
-/** Literal `\n` (backslash-n) escape inside an action label -> real
- *  newline. Hoisted alongside the constants above for the same lizard
- *  brace-depth workaround (empirically, this one also contributed to the
- *  false truncation even though it carries none of `$<>{}`). */
-export const RE_ESCAPED_NEWLINE = /\\n/g;
-
 /**
  * `!pragma NAME [VALUE]` (D12/T1p-b, `dispatch-common-commands.ts#tryPragma`)
  * -- mirrors `CommandPragma.getRegexConcat()` exactly: NAME is
