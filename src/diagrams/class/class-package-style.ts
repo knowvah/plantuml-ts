@@ -268,8 +268,12 @@ export function emptyPackageStereoFontColor(theme: Theme, tags: readonly string[
  * physical line's own height (cdd-T26, `daxeno-00-kasu166`).
  */
 export function getHTitle(measurer: StringMeasurer, theme: Theme, label: string): number {
-  const dim = measurer.measure(label, titleFont(theme));
-  if (dim.width === 0) return 10;
+  // isw-T2-cls: the SAME title block `getWTitle` tests (`USymbolFolder.java:
+  // 127-143` reads `dimTitle.getWidth()` in both). An empty label is one " "
+  // atom (`StripeSimple.java:125-126`), 3.85 wide at 14pt, so it takes the
+  // `height + marginTitleY1 + marginTitleY2` branch (jar probe `package "" as
+  // p`: tab bottom at 26, not 16).
+  if (namespaceTitleWidth(measurer, theme, label) === 0) return 10;
   return namespaceTitleHeight(measurer, theme, label) + MARGIN_TITLE_Y1 + MARGIN_TITLE_Y2;
 }
 
