@@ -22,9 +22,10 @@ jobs:
     name: gates
     runs-on: ubuntu-latest
     # Hard backstop for a hang, not a performance budget — that is the soft
-    # check at the end of the job. Observed 4.0-5.8 min total across runs
-    # 30702971624 and 30703745724; 20 is ~3.5x the slow end.
-    timeout-minutes: 20
+    # check at the end of the job. Observed 11.8 min total in run 38077059229
+    # (2026-10-10), ~3.2 min of it outside the test step; 25 leaves the test
+    # step its full 20-minute cap plus the other steps.
+    timeout-minutes: 25
 
     steps:
       # Wall-clock for the soft budget below. First step, so it covers
