@@ -715,6 +715,16 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // spaces and float-rounds (`Math.fround`), so none of the six pairs
     // touches exactly any more and `overlaps(after)` reports none of them;
     // the run with the measurer injected (F1) collects `allowedHard = []`.
+    // isw/close: juleki-83-xusi470 and mijoso-20-sato362 were jar crash pages
+    // until seam #4 (a zero-width lone space crashed SlotFinder) and were
+    // never in this sweep. They now render and are pinned byte-equal to the
+    // jar's golden (pin-goldens.mts verifies zero compareSvg diffs), so the
+    // [7,8] pair -- two consecutive one-glyph 11pt `<text>` lines stacked
+    // edge to edge -- is exactly what the jar draws. Overlap magnitude not
+    // separately dumped; the zero-diff pin is the evidence, as for the six
+    // retired rows above.
+    'juleki-83-xusi470 [7,8] text×text',
+    'mijoso-20-sato362 [7,8] text×text',
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {
