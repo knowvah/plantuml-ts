@@ -164,6 +164,519 @@
       "acceptedAt": "2026-09-30",
       "acceptedBy": "maintainer",
       "reason": "The description leaf embeds a `{{yaml ...}}` sub-diagram. cdd6 T2b made the outer canvas exact (0/5 -> 0/3, `svg/@width` 211 = jar) and cdd6 T3b/T5e closed the ink family; the residual is the embedded `<image>` width/height, off by 1 px, which is the nested yaml diagram's OWN size. `@startyaml` is a JsonDiagram laid out by Smetana in the jar and by @knowvah/dot-engine here (CLAUDE.md, one layout engine, ruling 2026-08-09; DIVERGENCES.md `Smetana-backed diagram types`), so the delta is the accepted Smetana geometry delta of the nested diagram, surfaced through the embed slot -- not a class or description defect. Mechanism: cdd6 decision-journal row 73 (T3b) and the cdd6 ledger row for jixibu (`open -> cdd7 (nested yaml image Δ1, Smetana path)`). Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30). The survey keeps printing `structural-match`; a fix in the yaml engine that makes the row conformant retires this entry via the ledger gate. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=11. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
+    },
+    {
+      "match": {
+        "id": "svg-c4/gikaju-64-bari602"
+      },
+      "scope": "svg-conformance c4 ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 72, \"Use 'allowmixing' if you want to mix classes and other UML elements. (Assumed diagram type: class)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-chronology/lenudo-53-nade902"
+      },
+      "scope": "svg-conformance chronology ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line or label; stdrpt prints only \"Some diagram description contains errors\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-ebnf/ladifa-97-keme950"
+      },
+      "scope": "svg-conformance ebnf ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 5, \"Syntax Error? (Assumed diagram type: ebnf)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-gantt/fobeda-14-tori503"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 3, \"No starting date for the project (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-gantt/furubu-23-mecu777"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 2, \"No starting date for the project (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-gantt/govacu-51-puti316"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 4, \"Syntax Error? (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-gantt/lituri-55-caju105"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 8, \"No such task T2 (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-gantt/mogafu-27-jeci360"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 5, \"Bad argument for resource (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-gantt/nakude-77-suji787"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 2, \"Gantt diagrams cannot last more than 20 years (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-gantt/papava-92-geve698"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 2, \"Syntax Error? (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-gantt/recufa-28-desi167"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 8, \"No such P_start2 task (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-gantt/saricu-01-funu594"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 4, \"No such task Production 0.2 (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-gantt/votofi-06-rolo321"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 8, \"No group to be closed (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-regex/bakuza-41-bulo451"
+      },
+      "scope": "svg-conformance regex ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 2, \"Error parsing: Bad quantifier {([^{} (Assumed diagram type: regex)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-regex/tajefa-31-pefi801"
+      },
+      "scope": "svg-conformance regex ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 2, \"Error parsing: Bad quantifier {([^{} (Assumed diagram type: regex)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-salt/lakari-33-mone874"
+      },
+      "scope": "svg-conformance salt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line; the jar crashes writing the SVG: java.lang.IllegalArgumentException at ElementMenuBar.java:87. Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/dagugu-60-zuli109"
+      },
+      "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"This element (A) is already defined (Assumed diagram type: component)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/gibapi-78-fote878"
+      },
+      "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line or label; stdrpt prints only \"Some diagram description contains errors\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/gujeku-90-jisa609"
+      },
+      "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 5, \"Syntax Error? (Assumed diagram type: sequence)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/jifoke-84-jude859"
+      },
+      "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 40, \"Syntax Error? (Assumed diagram type: nwdiag)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/kijaro-77-vomi552"
+      },
+      "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line or label; stdrpt prints only \"Some diagram description contains errors\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/ligalo-62-suvu444"
+      },
+      "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 3, \"Syntax Error? (Assumed diagram type: nwdiag)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/lonome-59-lego635"
+      },
+      "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line or label; stdrpt prints only \"Some diagram description contains errors\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/lulanu-89-tase004"
+      },
+      "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line or label; stdrpt prints only \"Some diagram description contains errors\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/micono-65-juka195"
+      },
+      "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line or label; stdrpt prints only \"Some diagram description contains errors\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/nixuje-20-bobu879"
+      },
+      "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 2, \"No such internal sprite: archimate/strategy-value-stream (Assumed diagram type: sequence)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/torazi-09-gago377"
+      },
+      "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 13, \"Element already in another group. (Assumed diagram type: nwdiag)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/zeceme-22-rade890"
+      },
+      "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Cannot nest group (Assumed diagram type: nwdiag)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/zugazo-84-raju675"
+      },
+      "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line or label; stdrpt prints only \"Some diagram description contains errors\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/bujigo-66-zepu613"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/cesoke-21-muro498"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/cofele-91-sanu676"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/cupuri-11-piru303"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 30, \"Bad tree structure (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/fasuti-82-dire353"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/kifona-80-bufa102"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/konipe-99-jafu307"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/lagoda-51-zuna611"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/ledama-83-xoko366"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line; the jar crashes writing the SVG: java.lang.IllegalArgumentException: character to be escaped is missing at SvgGraphics.java:1156. Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/link-URL-tooltip-0"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line; the jar crashes writing the SVG: java.lang.IllegalArgumentException: character to be escaped is missing at SvgGraphics.java:1156. Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/sefoxo-37-zuvo274"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/sipuja-30-deto581"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 3, \"Bad tree structure (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/solive-57-nola542"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/tojixi-05-lusu056"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 3, \"WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/tubeli-58-kadi729"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 4, \"WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/vavibi-10-maso573"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/WBS-monoline-def-0-11"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/WBS-monoline-def-0-17"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/WBS-monoline-def-0-18"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/WBS-monoline-def-0-24"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/WBS-monoline-def-0-3"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 3, \"Bad tree structure (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/WBS-monoline-def-0-6"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/WBS-multiline-def-1-14"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/WBS-multiline-def-1-15"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/WBS-multiline-def-1-21"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/WBS-multiline-def-1-3"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/WBS-multiline-def-1-8"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 6, \"Syntax Error? (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/zecavo-98-kini554"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 3, \"WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
     }
   ],
   "retired": [

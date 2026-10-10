@@ -1074,6 +1074,17 @@ matches since T6f (`refusalLineOf`, `MindMapDiagramFactory.ts`).
 
 **No longer measured (user ruling 2026-10-10).** Error pages are not compared element-by-element: when the stock jar errors and we render our own error page the fixture is conformant (`docs/svg-conformance.md`, "Error pages"). The version and source-name differences therefore appear in no survey; the ruling above still holds for production output.
 
+### We draw where the jar errors
+
+**Category:** kept by user ruling (2026-10-10). No library forces it. The diagram parses fine for us, and the maintainer accepts drawing it over mirroring the jar's error. The row stands only once the **primary PlantUML release** also errors on it: the official `plantuml.jar` from the latest GitHub release, run as the stock record runs it (no `-D` flags, `-stdrpt:1`, exit 200 = `ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR`).
+
+On 2026-10-10 all 57 such rows errored under v1.2026.8 (`149874a`): wbs 28, unknown 13, gantt 10, regex 2, and c4, chronology, ebnf and salt 1 each.
+- **47 rows:** same line and message as the stock record in `oracle/goldens/stock-error-pages.json`.
+- **9 rows:** stdrpt reports no line on either jar.
+- **1 row (`wbs/link-URL-tooltip-0`):** the jar crashes writing the SVG (`IllegalArgumentException` at `SvgGraphics.java:1156`).
+
+Each row is signed in `oracle/accepted-divergences.json`. The survey still prints these rows `diverged` with `firstDiff: 'error-page'`. A new row of this kind needs the same release check before it is signed.
+
 ### ~~Embedded `{{ }}` diagram slots: the deterministic-text oracle reserves 42×42~~ — RETIRED (lgm, oracle seam #3 + T1e, 2026-10-08)
 
 Oracle seam #3 (fork `37c07dce45a`, `oracle/patches/0003-oracle-svg-property.patch`) makes the width-table bounder answer `matchesProperty("SVG")` like `StringBounderSvg.java:67-69`; `EmbeddedDiagram#calculateDimensionSlow` now takes the SVG arm (`EmbeddedDiagram.java:129-133`) and the ink pass `LimitFinder#drawImageSvg` (`LimitFinder.java:99-100,201-204`). The 38 cached fixtures with `{{` were re-captured. The port had fitted the old slot in the description and class embed paths; every `{{ }}` slot is now the nested document's `UImageSvg` size in every engine (`tests/fixtures/lgm-T1e/`). The `svg-unknown/semutu-45-zeno907` ledger entry is withdrawn (moved to `retired`).

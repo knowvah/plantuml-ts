@@ -45,7 +45,9 @@ a fast numeric loop feels like evidence. **Stop and open the Java** before you
   an upstream bug inline. An element the jar omits is a defect in ours:
   remove it with the Java quote. "Never drop a note/label/connector" rules
   protect what the JAR draws, never our extras. Error pages: stock jar errors
-  + we render our own = conformant (2026-10-10); docs/svg-conformance.md.
+  + we render our own = conformant (2026-10-10); we draw where it errors =
+  accepted divergence once the latest release jar also errors (ruling
+  2026-10-10, signed per row); docs/svg-conformance.md.
 - **A divergence exists only where a library forces it**: dot-engine instead
   of Smetana (below), KaTeX instead of JLaTeXMath, the oracle seam for
   `{{ }}` and platform glyph outlines. Each is named in `DIVERGENCES.md` with

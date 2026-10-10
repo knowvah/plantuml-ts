@@ -52,10 +52,9 @@ post-D7 measurements.
 Follow-ons:
 
 1. **bozido-07-geze049 (D4).** It waits on the wbs, salt and gantt engines, each its own engine-port mission. Its mindmap slot is already exact.
-2. **Jar errors, we draw (57 rows, `firstDiff: 'error-page'`).** Each needs our engine to refuse where upstream does.
+2. ~~**Jar errors, we draw (57 rows, `firstDiff: 'error-page'`).**~~ CLOSED by user ruling 2026-10-10: accepted divergences. All 57 also error on the official v1.2026.8 release jar, and each is signed in `oracle/accepted-divergences.json`. See DIVERGENCES.md, "We draw where the jar errors".
    - wbs 28, unknown 13, gantt 10, regex 2, and c4/chronology/ebnf/salt 1 each.
-   - Slugs are in `final-error-rows.txt`.
-   - Error-page rule: refuse there; never match the jar's message.
+   - A new row of this kind needs the same release check before it is signed.
 3. **Oracle-widths crashes.**
    - class/zuduxu and unknown/rubebe crash only under `-DPLANTUML_DETERMINISTIC_TEXT` (graphviz loses the `sametail` edge, then `Neighborhood.java:72-80,151`).
    - They are admitted with `provenance: 'oracle-widths'` by user ruling. Re-run `scripts/stock-jar-verify.sh` on every pin or seam change, because the set can grow or shrink.

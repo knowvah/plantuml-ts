@@ -102,9 +102,18 @@ alone produces proves nothing about upstream.
 | Jar (stock record) | Ours | Verdict |
 |---|---|---|
 | errors | our error page | `conformant`, `errorPage: true` |
-| errors | a diagram | `diverged`, `firstDiff: 'error-page'` |
+| errors | a diagram | `diverged`, `firstDiff: 'error-page'`; accepted divergence once the release also errors (below) |
 | draws | anything | compared exactly, as for any fixture |
 | oracle errors, stock not in record | anything | compared exactly (seam artifact) |
+
+**We draw where the jar errors (user ruling 2026-10-10).** Such a row is an
+accepted divergence, because the diagram parses fine for us, provided the
+**primary release** of PlantUML (the official `plantuml.jar` from the latest
+GitHub release, not a source build) also errors. Run it with the stock
+invocation (no `-D` flags, `-stdrpt:1`, exit 200) and sign the row in
+`oracle/accepted-divergences.json`. The survey still prints it `diverged` with
+`firstDiff: 'error-page'`; the ledger declares it, nothing special-cases it.
+All 57 such rows were verified against v1.2026.8 on 2026-10-10.
 
 **The stock-jar record.** `scripts/stock-jar-verify.sh` builds stock upstream
 at `oracle/pin.json#upstreamSha`, caches the jar under the gitignored
