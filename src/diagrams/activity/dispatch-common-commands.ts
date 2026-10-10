@@ -102,10 +102,24 @@ export const RE_FOOTBOX_IGNORED = /^(?:(?:hide|show)\s*)?footbox$/i;
  * `hide|show [GENDER] [empty] PORTION` (`CommandHideShowByGender.java:59-69`);
  * `executeArg` dispatches on class/description/sequence diagrams and "Just
  * ignored" otherwise (`:154-159`, the activity case).
+ *
+ * Only `.test()` reads this (the activity case captures nothing), so GENDER
+ * is rewritten to an equivalent language that matches in polynomial time.
+ * Upstream's `(?:(keywords|[%pLN_.]+|"…"|<<.*>>)[%s]+)*?` (`:76`)
+ * backtracks exponentially (CodeQL js/redos, alert 25): every keyword also
+ * matches `[%pLN_.]+`, and `<<.*>>` can match one stereotype or span
+ * several. Both rewrites keep the matched language unchanged:
+ * - the keywords are dropped, because each is already a `[%pLN_.]+` word;
+ * - the `<<.*>>` tokens collapse to ONE `<<.*>>`. Its `.*` runs from the
+ *   first `<<` to the last `>>` and absorbs the tokens between them.
+ *   `ReadLineReader` leaves no `\r`/`\n` in a line for `.` to stop at. A
+ *   ` `/` ` separator between stereotypes now fails. The jar
+ *   fails there too: its `[%s]` is ASCII `\s` plus U+00A0 (Pattern2.java:57).
  */
+const GENDER_WORD = '(?:[\\p{L}\\p{N}_.]+|"[^"]+")\\s+';
 export const RE_HIDE_SHOW_BY_GENDER = new RegExp(
   '^(?:hide|show)\\s+' +
-    '(?:(?:class|object|interface|enum|annotation|dataclass|record|abstract|[\\p{L}\\p{N}_.]+|"[^"]+"|<<.*>>)\\s+)*?' +
+    `(?:${GENDER_WORD})*(?:<<.*>>\\s+(?:${GENDER_WORD})*)?` +
     '(?:empty\\s+)?' +
     '(?:members?|attributes?|fields?|methods?|circles?|circled?|stereotypes?)$',
   'iu',
