@@ -19,79 +19,7 @@ import {
   parseFontStyleFlags,
 } from './skinparam-key-handlers-shared.js';
 import { ActorStyle } from './skin/ActorStyle.js';
-import type { ElementColors } from './theme-graph-colors.js';
-import { parseColor } from './paint.js';
-import { convertBorderStyleValue, lineStyleDash } from './style-line-style.js';
-
-/**
- * cdd6 T1a: every `addMagic(SName)` registration's clean name, lowercased as
- * `normaliseKey` delivers it (`sname.name().replace("_", "")`,
- * `FromSkinparamToStyle.java:271`). Each registers `<name>BorderStyle` as
- * `PName.LineStyle` on `{<sname>}` (`:277`).
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:78-85,129,210-230,270-285
- */
-const ADD_MAGIC_CLEAN_NAMES = [
-  'participant',
-  'boundary',
-  'control',
-  'collections',
-  'actor',
-  'database',
-  'entity',
-  'package',
-  'agent',
-  'artifact',
-  'card',
-  'interface',
-  'cloud',
-  'component',
-  'file',
-  'folder',
-  'frame',
-  'hexagon',
-  'node',
-  'person',
-  'queue',
-  'rectangle',
-  'stack',
-  'storage',
-  'usecase',
-  'map',
-  'archimate',
-  'hnote',
-  'rnote',
-] as const;
-
-/** `<sname>BorderStyle X` -> the `{<sname>}` bucket: the LineStyle, plus the
- *  `bold` (LineThickness 2) and `text:` (FontColor) side effects a complex
- *  value registers on the same signature (`convertBorderStyleValue`). */
-function applyBorderStyle(bucket: ElementColors, value: string): void {
-  const converted = convertBorderStyleValue(value.trim());
-  if (converted.lineThickness !== undefined) bucket.lineThickness = converted.lineThickness;
-  if (converted.fontColor !== undefined) bucket.font = parseColor(converted.fontColor);
-  if (converted.lineStyle !== undefined) bucket.lineStyle = lineStyleDash(converted.lineStyle);
-}
-
-const BORDER_STYLE_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> =
-  ADD_MAGIC_CLEAN_NAMES.map((sname) => [
-    [`${sname}borderstyle`],
-    (acc, value) => {
-      applyBorderStyle((acc.elements[sname] ??= {}), value);
-    },
-  ]);
-
-/** `<sname>RoundCorner N` -> `PName.RoundCorner` on `{<sname>}`
- *  (`addMagic`, `FromSkinparamToStyle.java:275`), RAW and unhalved like the
- *  `<style>` path (`style-map-element.ts:350`). Like the bare `roundcorner`
- *  handler, 0 is a real value; only a non-number is rejected. */
-const ROUND_CORNER_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> =
-  ADD_MAGIC_CLEAN_NAMES.map((sname) => [
-    [`${sname}roundcorner`],
-    (acc, value) => {
-      const v = parseFiniteInt(value);
-      if (v !== undefined) (acc.elements[sname] ??= {}).roundCorner = v;
-    },
-  ]);
+import { ADD_MAGIC_HANDLERS } from './skinparam-key-handlers-add-magic.js';
 
 export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> = [
   [
@@ -509,6 +437,5 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   ],
   // cdd6 T1a: `<sname>BorderStyle` for every addMagic SName (new keys, so
   // appending cannot reorder any existing entry).
-  ...BORDER_STYLE_HANDLERS,
-  ...ROUND_CORNER_HANDLERS,
+  ...ADD_MAGIC_HANDLERS,
 ];
