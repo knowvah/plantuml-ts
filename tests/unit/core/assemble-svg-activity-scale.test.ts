@@ -72,4 +72,13 @@ describe('finalizeActivityFragment — document scale', () => {
       'textLength="20.83125"',
     );
   });
+
+  // isw-T2c-scale: `finalizeRootAttributes` (`SvgGraphics.java:800-813`)
+  // truncates `maxX * scale` for `style`/`viewBox` but prints the root
+  // `width`/`height` attributes through `format(maxX)`, which scales.
+  it('prints the root width/height attributes as format(maxX * scale)', () => {
+    const svg = assembleSvg(fragment({ width: 631, height: 228, scaleSpec: { kind: 'simple', factor: 1.5 } }));
+    expect(svg).toContain('style="width:946px;height:342px;');
+    expect(svg).toContain('width="946.5px" height="342px" viewBox="0 0 946 342"');
+  });
 });

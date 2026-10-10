@@ -184,6 +184,7 @@ export function finalizeActivityFragment(fragment: RenderFragment): RenderFragme
   return {
     ...canonical,
     body: scaleActivityBody(body, factor),
+    scaledCanvas: true,
     width: fragment.width * factor,
     height: fragment.height * factor,
   };

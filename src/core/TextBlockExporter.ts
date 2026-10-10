@@ -289,6 +289,8 @@ export function finalizeTitledDiagramFragment(fragment: RenderFragment): RenderF
   return {
     ...fragment,
     body: scaleChromedBody(fragment, scale),
+    // isw-T2c-scale: root `width`/`height` attributes are `format(maxX)`.
+    scaledCanvas: true,
     width: unscaledWidth * scale,
     height: unscaledHeight * scale,
   };
