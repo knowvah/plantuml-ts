@@ -124,6 +124,7 @@ const DIAGRAM_TYPE_SELECTOR_NAMES = [
  */
 function resolveElementBucketSelector(selector: string): string | undefined {
   if (isBucketSName(selector)) return selector;
+  if (isDiagramTypeSelector(selector)) return selector;
   for (const diagramType of DIAGRAM_TYPE_SELECTOR_NAMES) {
     const prefix = `${diagramType}.`;
     if (!selector.startsWith(prefix)) continue;
@@ -131,6 +132,22 @@ function resolveElementBucketSelector(selector: string): string | undefined {
     if (isBucketSName(sname)) return sname;
   }
   return undefined;
+}
+
+/**
+ * isw-T2b-ca: a BARE diagram-type selector (`activityDiagram { MaximumWidth
+ * 100 }`) is its own bucket, keyed by the diagram SName. Upstream the
+ * block's own declarations become a `Style` signed `{activityDiagram}`
+ * (`style/parser/Context.java:68-100,127-139`), and
+ * `StyleStorage#computeMergedStyle` (`StyleStorage.java:102-116`) merges it
+ * into every element whose signature `containsAll` its SNames
+ * (`StyleSignatureBasic.java:194-220`) -- every element of that diagram.
+ * The flat bucket map cannot express that scope, so the diagram's own
+ * engine reads this bucket as the tier under the element's own
+ * (`activity-text-style.ts#activityWrapWidth`).
+ */
+function isDiagramTypeSelector(selector: string): boolean {
+  return (DIAGRAM_TYPE_SELECTOR_NAMES as readonly string[]).includes(selector);
 }
 
 function isBucketSName(sname: string): boolean {

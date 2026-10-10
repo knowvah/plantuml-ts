@@ -1,0 +1,14 @@
+@startuml
+<style>
+activityDiagram {
+  MaximumWidth 60
+  activity {
+    MaximumWidth 150
+  }
+}
+</style>
+start
+:a long action label that wraps somewhere later on;
+note right: a long note that wraps too
+stop
+@enduml

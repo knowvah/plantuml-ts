@@ -66,3 +66,20 @@ describe('resolveElementMaximumWidth (Style#wrapWidth)', () => {
     expect(resolveElementMaximumWidth(withJson(undefined, undefined), 'json')).toBeUndefined();
   });
 });
+
+// isw-T2b-ca: a bare diagram-type selector's own declarations are signed
+// `{<diagram>}` (`style/parser/Context.java:68-100,127-139`) and reach every
+// element of that diagram (`StyleStorage.java:102-116`) -- collected into a
+// bucket keyed by the diagram SName, beside (not into) the nested buckets.
+describe('collectElementStyleBuckets — bare diagram-type selector', () => {
+  it('activityDiagram { MaximumWidth N } -> the activitydiagram bucket', () => {
+    const b = buckets('activityDiagram {\n  MaximumWidth 100\n  diamond {\n    FontColor green\n  }\n}');
+    expect(b.activitydiagram).toEqual({ maximumWidth: 100 });
+    expect(b.diamond?.maximumWidth).toBeUndefined();
+    expect(b.diamond?.font).toBe('green');
+  });
+
+  it('a nested-only block creates no diagram bucket', () => {
+    expect(buckets('activityDiagram {\n  diamond {\n    FontColor green\n  }\n}').activitydiagram).toBeUndefined();
+  });
+});
