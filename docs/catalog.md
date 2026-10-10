@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1464 modules · 5557 exported names.
+1465 modules · 5559 exported names.
 
 ## `src/`
 
@@ -92,6 +92,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `skin-loader.ts` | `skinRunsOf`, `applySkinRun`, `applySkinLayer` | `skin <name>` directive resolution — skin-file-loading mission, Batch 1 (decisions D1/D2/D6); unwind2-S8. |
 | `skinparam-accumulator.ts` | `SkinparamAccumulator`, `createSkinparamAccumulator` | Mutable accumulator threaded through the resolveSkinparam key-processing loop (skinparam-key-handlers.ts, skinparam-stereo-keys.ts) and consumed by the theme-partial builder (skinparam-theme-builder.ts). |
 | `skinparam-element-buckets.ts` | `ELEMENT_BUCKET_SNAMES`, `ElementColorRole`, `matchElementColorKey`, `matchStereotypeSpotColorKey`, `matchElementFontSizeKey`, `matchElementShadowingKey`, `parseShadowingValue`, `matchElementLineThicknessKey` | Per-element (SName) style-bucket matching for the skinparam pipeline. |
+| `skinparam-key-handlers-add-magic.ts` | `ADD_MAGIC_HANDLERS` | The per-`addMagic(SName)` skinparam handlers (`<sname>BorderStyle`, `<sname>RoundCorner`) -- split out of skinparam-key-handlers-table-a.ts (aepp-T1d) when RoundCorner took that file over the 500-line cap. |
 | `skinparam-key-handlers-shared.ts` | `arrowFontColorValue`, `KeyHandler`, `parseFiniteNumber`, `parseFiniteFloat`, `parseFiniteInt`, `parseNonZeroInt`, `parseFontStyleFlags`, `applyGuillemet` | Shared `KeyHandler` type + parse helpers for the skinparam key→handler table. |
 | `skinparam-key-handlers-table-a.ts` | `KEY_HANDLERS_A` | Key -> handler table, half A (entries 1-36 of 73: backgroundcolor through style) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this project's 5 |
 | `skinparam-key-handlers-table-b.ts` | `parseHorizontalAlignment`, `KEY_HANDLERS_B` | Key -> handler table, half B (entries 37-73 of 73: footbox through swimlanebordercolor) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this proj |
@@ -1346,7 +1347,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-driver-text-placement.ts` | `PlacedRun`, `plainRowRender`, `placeDriverRun` | class-driver-text-placement.ts -- `DriverTextSvg.java:113-126` for the class emitters that draw a plain `<text>` run (row text, edge-label runs, namespace titles): each leading space moves `x` by one space width, the emitted text is the NBS |
 | `class-edge-constraint.ts` | `constraintSquare`, `sampleEdgePath`, `constraintAnchor` | cdd-T6 (A2a/M9): `constraint on links: text`. |
 | `class-edge-geo.ts` | `EdgeGeoTextContext`, `SvekEdgeGeos`, `buildEdgeGeos` | Class-diagram edge geometry: edge-label / magic-arrow / port-label anchors, stroke override, point normalization, and buildEdgeGeos. |
-| `class-edge-group-inheritance.ts` | `EDGE_DECORATION_MAP`, `buildStrokeOverride`, `groupInheritanceOverride`, `computeLeafContacts`, `ResolvedEdgeDecor`, `resolveEdgeDecor` | cdd-T16/T16b (M7/E11): `skinparam groupInheritance` decor/dashed/ stroke-override resolution + the `allButSametails` contact-point computation. |
+| `class-edge-group-inheritance.ts` | `EDGE_DECORATION_MAP`, `buildStrokeOverride`, `MissingSametailContactError`, `groupInheritanceOverride`, `computeLeafContacts`, `ResolvedEdgeDecor`, `resolveEdgeDecor` | cdd-T16/T16b (M7/E11): `skinparam groupInheritance` decor/dashed/ stroke-override resolution + the `allButSametails` contact-point computation. |
 | `class-edge-label-anchor.ts` | `multiLineLabelAnchor`, `LabelAnchorContext`, `LabelLineGeo`, `guideLinesAnchor`, `portLabelAnchor`, `PortLabelContext`, `measureLabelLines`, `labelLinesFromTopLeft`, `placeQuantifierBox`, `quantifierLineAnchors`, `roleLabelAnchors`, `attachPortLabels`, `spriteLabelAnchor` | Edge-label anchoring for the class engine: converting the CENTER points `core/graph-layout.ts` extracts into the left/baseline anchors jar's `<text>` elements carry, and applying the port-label collision pass that sits between the two. |
 | `class-edge-label-attach.ts` | `EdgeGeoTextContext`, `attachEdgeLabel` | Class-diagram edge LABEL attachment: the main label's plain, multi-line, guide-line and magic-arrow arms, plus the text context every anchor shares. |
 | `class-edge-label-lines.ts` | `wrapPlainTextLine`, `splitPlainTextAtoms`, `stripCreoleShorthand`, `stripLabelLines`, `wrappedLabelRows`, `multiLineLabelAnchorWrapped` | Per-line word-wrap for class-engine edge labels: `wrapPlainTextLine`, and (cdd7 T2b) the multi-line main label's wrapped rows/anchors (`wrappedLabelRows`, `multiLineLabelAnchorWrapped`) plus the shared creole-shorthand strip they and the re |
