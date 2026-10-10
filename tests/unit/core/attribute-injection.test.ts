@@ -98,6 +98,15 @@ describe('attribute injection via skinparam colors', () => {
     expect(svg).not.toContain('onload="alert');
     expect(svg).toContain('background:x&quot;onload=&quot;alert(1);');
   });
+
+  // CodeQL alert 24: the activity renderer forwards `skinparam
+  // preserveAspectRatio` verbatim into the root `<svg>`. The jar escapes it
+  // at DOM serialization (oracle-verified 2026-10-10: same source renders
+  // `preserveAspectRatio="x&quot;onload=&quot;alert(1)"`).
+  it('skinparam preserveAspectRatio is escaped in the root attribute, as the jar does', () => {
+    const svg = expectSafe(`@startuml\nskinparam preserveAspectRatio ${PAYLOAD}\nstart\n:a;\nstop\n@enduml`);
+    expect(svg).toContain('preserveAspectRatio="x&quot;onload=&quot;alert(1)"');
+  });
 });
 
 // One probe per user-text path in `plans/svg-attribute-escaping-audit/

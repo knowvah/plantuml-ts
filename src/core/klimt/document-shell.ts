@@ -258,7 +258,9 @@ export function assembleDocumentShell(fragment: ShellFragment, diagramType?: str
     DQUOTE +
     ' preserveAspectRatio=' +
     DQUOTE +
-    (fragment.preserveAspectRatio ?? DEFAULT_PRESERVE_ASPECT_RATIO) +
+    // Verbatim `skinparam preserveAspectRatio` text; the jar escapes it at
+    // serialization (XmlWriter.java:90-96 -> #escapeAttribute, :265-284).
+    escapeAttribute(fragment.preserveAspectRatio ?? DEFAULT_PRESERVE_ASPECT_RATIO) +
     DQUOTE +
     ' contentStyleType=' +
     DQUOTE +
