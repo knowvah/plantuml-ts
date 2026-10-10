@@ -82,6 +82,7 @@ import type {
   LifelineSegment,
   TextRun,
 } from './ast.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import type { ArrowCircle, ArrowSegment, HeadGeometry } from './sequence-arrowhead.js';
 import type { Point2D } from '../../core/klimt/UTranslate.js';
@@ -336,6 +337,11 @@ export function scaleSequenceGeometry(geo: SequenceGeometry, k: number): Sequenc
  */
 export interface ScaledTheme extends Theme {
   readonly scaleK: number;
+  /** The render's own measurer (`DiagramPlugin.render`'s third argument), the
+   *  same instrument layout measured with. Rides here for the reason `scaleK`
+   *  does: every draw function already receives the theme, so no signature
+   *  grows. Only the participant glyph seam's `UGraphicSvg` reads it. */
+  readonly measurer: StringMeasurer;
 }
 
 /**
@@ -347,8 +353,8 @@ export interface ScaledTheme extends Theme {
  * `scaleNodeStyle`: applied to the RESOLVED theme, matching upstream's
  * single `format(fontSize)` call (`SvgGraphics.java:693`).
  */
-export function scaleSequenceTheme(theme: Theme, k: number): ScaledTheme {
-  return { ...theme, fontSize: theme.fontSize * k, scaleK: k };
+export function scaleSequenceTheme(theme: Theme, k: number, measurer: StringMeasurer): ScaledTheme {
+  return { ...theme, fontSize: theme.fontSize * k, scaleK: k, measurer };
 }
 
 // ---------------------------------------------------------------------------

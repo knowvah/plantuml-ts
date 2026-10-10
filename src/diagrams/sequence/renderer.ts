@@ -29,6 +29,7 @@ import type {
   DelayGeo,
 } from './ast.js';
 import { DELAY_FONT_SIZE } from './sequence-delay.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 // No `text` import: D3 -- every `<text>` this file emits goes through
@@ -359,8 +360,13 @@ const DIAGRAM_TYPE_SEQUENCE = 'SEQUENCE';
  * `paginateSequence` returns `geo` by reference when the document has no
  * `newpage`, which is every document but 35 of the oracle corpus.
  */
-export function renderSequencePage(geo: SequenceGeometry, theme: Theme, pageIndex: number): RenderFragment {
-  return renderPaginated(paginateSequence(geo, pageIndex), theme);
+export function renderSequencePage(
+  geo: SequenceGeometry,
+  theme: Theme,
+  pageIndex: number,
+  measurer: StringMeasurer,
+): RenderFragment {
+  return renderPaginated(paginateSequence(geo, pageIndex), theme, measurer);
 }
 
 /**
@@ -416,18 +422,18 @@ function preChromeDims(geo: SequenceGeometry, k: number): Pick<RenderFragment, '
  * page and {@link renderSequencePage} reaches the rest. See
  * `plans/sequence-newpage-pagination/decisions.md` D5.
  */
-export function renderSequence(geo: SequenceGeometry, theme: Theme): RenderFragment {
-  return renderSequencePage(geo, theme, 0);
+export function renderSequence(geo: SequenceGeometry, theme: Theme, measurer: StringMeasurer): RenderFragment {
+  return renderSequencePage(geo, theme, 0, measurer);
 }
 
-function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
+function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMeasurer): RenderFragment {
   // T13: `resolveScaleFactor` needs the UNSCALED document dims -- `geo`
   // itself, before `scaleSequenceGeometry` runs below. cdd-T30: `theme.dpi`
   // -- `skinParam.getDpi()` (`core/TextBlockExporter.java:206`), default 96
   // when `skinparam dpi` was never declared (`Theme.dpi`'s own doc comment).
   const k = resolveScaleFactor(geo.scale, geo.totalWidth, geo.totalHeight, theme.dpi);
   const scaledGeo = scaleSequenceGeometry(geo, k);
-  const scaledTheme = scaleSequenceTheme(theme, k);
+  const scaledTheme = scaleSequenceTheme(theme, k, measurer);
   const children: string[] = [];
 
   // 0. Box backgrounds (lowest z-order — behind lifelines and participants)

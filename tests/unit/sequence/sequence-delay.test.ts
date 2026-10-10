@@ -28,9 +28,10 @@ import type {
   ParticipantGeo,
   SequenceGeometry,
 } from '../../../src/diagrams/sequence/ast.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
 
-const theme: ScaledTheme = { ...defaultTheme, scaleK: 1 };
+const theme: ScaledTheme = { ...defaultTheme, scaleK: 1, measurer: new DeterministicMeasurer() };
 
 function delay(y: number, height = 28): DelayGeo {
   return { kind: 'delay', y, height, middleX: 100, textWidth: 0, labelRuns: [] };

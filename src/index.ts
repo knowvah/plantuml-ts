@@ -318,11 +318,14 @@ function assembleOnePage(ctx: PageContext, fragment: AssembledSvg, ast: unknown)
 function assemblePagesUnscoped(ctx: PageContext, geo: unknown, ast: unknown): string[] {
   const { plugin } = ctx;
   const count = plugin.getNbPages?.(geo) ?? 1;
-  if (count <= 1 || plugin.renderPage === undefined) return [assembleOnePage(ctx, plugin.render(geo, ctx.theme), ast)];
+  if (count <= 1 || plugin.renderPage === undefined)
+    return [assembleOnePage(ctx, plugin.render(geo, ctx.theme, ctx.measurer), ast)];
 
   const pages: string[] = [];
   for (let index = 0; index < count; index++)
-    pages.push(assembleOnePage(ctx, plugin.renderPage(geo, ctx.theme, index), plugin.pageAst?.(ast, index) ?? ast));
+    pages.push(
+      assembleOnePage(ctx, plugin.renderPage(geo, ctx.theme, index, ctx.measurer), plugin.pageAst?.(ast, index) ?? ast),
+    );
   return pages;
 }
 
