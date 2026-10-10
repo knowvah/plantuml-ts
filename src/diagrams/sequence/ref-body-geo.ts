@@ -85,11 +85,14 @@ const REFERENCE_HEADER_FONT_SIZE = 13;
  */
 export function refBodyLines(frameType: string, label: string): readonly string[] {
   if (frameType !== 'ref') return [];
-  const body = label.trim();
   // `CommandReferenceOverSeveral.java:132` builds `reference.getStrings()`
   // with `Display.getWithNewlines`, so a single-line `ref over A : a\nb` is a
   // two-line body exactly as the `ref … end ref` block form is.
-  return body === '' ? [] : displayLines(body).map((l) => l.trim());
+  // The single-line form `trin`s the WHOLE text once at parse
+  // (`CommandReferenceOverSeveral.java:125`), the block form only drops the
+  // common indent (`CommandReferenceMultilinesOverSeveral.java:142`); neither
+  // trims each line, so an inner line keeps its spaces.
+  return label.trim() === '' ? [] : displayLines(label);
 }
 
 /** `getHeaderHeight` -- the header text's height plus `2 * 1`

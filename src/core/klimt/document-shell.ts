@@ -20,7 +20,7 @@
 
 import { collectDocumentDefs } from '../svg-defs.js';
 import { ROOT_GROUP_OPEN } from '../svg.js';
-import { escapeAttribute } from '../svg-format.js';
+import { escapeAttribute, fmt } from '../svg-format.js';
 import type { Gradient } from '../paint.js';
 
 /**
@@ -84,6 +84,8 @@ export interface ShellFragment {
    *  root `preserveAspectRatio` attribute value. `undefined` takes the jar
    *  default. */
   readonly preserveAspectRatio?: string;
+  /** See `RenderFragment.scaledCanvas` (`dispatcher.ts`). */
+  readonly scaledCanvas?: true;
 }
 
 /**
@@ -193,9 +195,22 @@ function hasBackgroundStyle(fragment: ShellFragment, background: string): boolea
   );
 }
 
+/** The root `width`/`height` attribute values: `format(maxX)` -- scaled,
+ *  3 decimals -- for a {@link ShellFragment.scaledCanvas} fragment
+ *  (`SvgGraphics.java:808-811`); the truncated integers otherwise. */
+function rootSizeAttributes(
+  fragment: ShellFragment,
+  width: number,
+  height: number,
+): { readonly widthAttr: string; readonly heightAttr: string } {
+  if (fragment.scaledCanvas !== true) return { widthAttr: String(width), heightAttr: String(height) };
+  return { widthAttr: fmt(fragment.width), heightAttr: fmt(fragment.height) };
+}
+
 export function assembleDocumentShell(fragment: ShellFragment, diagramType?: string): string {
   const width = Math.trunc(fragment.width);
   const height = Math.trunc(fragment.height);
+  const { widthAttr, heightAttr } = rootSizeAttributes(fragment, width, height);
   const background = fragment.background ?? '#FFFFFF';
   const extraDefs = fragment.extraDefs ?? '';
   const isSolid = hasBackgroundStyle(fragment, background);
@@ -225,12 +240,12 @@ export function assembleDocumentShell(fragment: ShellFragment, diagramType?: str
     DQUOTE +
     ' width=' +
     DQUOTE +
-    String(width) +
+    widthAttr +
     'px' +
     DQUOTE +
     ' height=' +
     DQUOTE +
-    String(height) +
+    heightAttr +
     'px' +
     DQUOTE +
     ' viewBox=' +

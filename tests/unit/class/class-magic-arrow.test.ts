@@ -15,7 +15,7 @@ import {
   computeGuideLinesBox,
   splitGuideLines,
 } from '../../../src/diagrams/class/class-magic-arrow.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 describe('parseMagicArrowLabel (G2 item 44)', () => {
   it('returns undefined for a plain label with no arrow token', () => {
@@ -166,7 +166,7 @@ describe('hasSeveralGuideLines (D6, Display.java:715-740)', () => {
 });
 
 describe('computeGuideLinesBox (D6, StringWithArrow.java:115-127)', () => {
-  const measurer = new WidthTableMeasurer();
+  const measurer = new DeterministicMeasurer();
   const font = { family: 'sans-serif', size: 13 };
 
   // jar-verified structurally EQUAL against gobuco-16-ruke239/lapoma-04-
@@ -192,7 +192,7 @@ describe('computeGuideLinesBox (D6, StringWithArrow.java:115-127)', () => {
 });
 
 describe('splitGuideLines (D3, StringWithArrow.java:115-127)', () => {
-  const measurer = new WidthTableMeasurer();
+  const measurer = new DeterministicMeasurer();
   const font = { family: 'sans-serif', size: 13 };
   const gobuco = ['ab >', 'cd <', '< ef', '> gh'];
 

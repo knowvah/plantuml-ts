@@ -18,7 +18,7 @@
  *   zuduxu-90-kosi876. Theme field is the same pending-plumbing seam.
  */
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
 import type { Classifier, ClassifierKind, ClassDiagramAST, Relationship } from '../../../src/diagrams/class/ast.js';
@@ -31,7 +31,7 @@ import {
   type ThemeSameClassWidth,
 } from '../../../src/diagrams/class/class-dot-graph.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const SUPPRESS = { fields: false, methods: false };
 
 function classifier(id: string, kind: ClassifierKind, usymbol?: string): Classifier {
@@ -83,7 +83,7 @@ describe('A2 — USymbol descriptive leaves route to EntityImageDescription sizi
     // sides) + USymbolFolder margin [30, 23]; label slot empty (id==display,
     // upstream's empty-desc package branch).
     expect(p).toBeDefined();
-    expect(p!.width).toBeCloseTo(171.9375, 3);
+    expect(p!.width).toBeCloseTo(175.78751, 3);
     expect(p!.height).toBeCloseTo(37, 3);
     // folder fb jar probe (SI1 T12): fixed 40x15 tab floors a short label —
     // 70x52px = max(40, 11.6375) + 30, 15 + 14 + 23.

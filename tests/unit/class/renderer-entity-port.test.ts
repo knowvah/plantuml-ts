@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import {
   renderClassEntityPort,
   isClassEntityPort,
@@ -17,7 +17,7 @@ import type { ClassifierGeo } from '../../../src/diagrams/class/class-geo-types.
 import type { ScaledTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const BONACO = '@startuml\nallowmixing\n\nPackage Pa {\n    portin Pi\n    component C {\n    }\n}\n@enduml\n';
 
 function port(overrides: Partial<ClassifierGeo> = {}): ClassifierGeo {
@@ -39,8 +39,9 @@ const THEME: ScaledTheme = { ...defaultTheme, scaleK: 1 };
 
 describe('renderClassEntityPort (EntityImagePort#drawU)', () => {
   it('draws the desc above the symbol when upPosition()', () => {
+    // textLength 12.512: bonaco in.svg, re-captured (the measurer float32-rounds 12.5125).
     const { body } = renderClassEntityPort(port({ entityPortUp: true }), THEME, measurer, 'ent0002');
-    expect(body).toContain('<text x="17.744" y="18.5" fill="#000" font-size="14" textLength="12.513">Pi</text>');
+    expect(body).toContain('<text x="17.744" y="18.5" fill="#000" font-size="14" textLength="12.512">Pi</text>');
     expect(body).toContain(
       '<rect x="18" y="33.611" width="12" height="12" fill="#F1F1F1" style="stroke:#181818;stroke-width:1.5;"/>',
     );

@@ -18,6 +18,7 @@ import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import type { SpriteDimsLookup, DrawablePrimitive } from '../../core/creole-atoms.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 import { atomFontSpec } from './class-member-creole-sea.js';
+import { placeDriverRun } from './class-driver-text-placement.js';
 import { resolveInlineAtom } from './class-member-atom-resolve.js';
 import { text, linkWrap } from '../../core/svg.js';
 import { manageGuillemet } from '../../core/text/Guillemet.js';
@@ -393,9 +394,9 @@ export function renderNamespaceTitleRuns(
       x += run.width;
       continue;
     }
-    const width = measurer.measure(run.text, atomFontSpec(run.font)).width;
-    out += renderTextRun(x, y, run, width);
-    x += width;
+    const measure = (t: string): number => measurer.measure(t, atomFontSpec(run.font)).width;
+    out += renderTextRun(x, y, run, measure);
+    x += measure(run.text);
   }
   return out;
 }
@@ -403,10 +404,18 @@ export function renderNamespaceTitleRuns(
 /** One text run of {@link renderNamespaceTitleRuns}. cdd3-T21:
  *  `DriverTextSvg.java:92-94` emits nothing for a transparent font colour
  *  (the caller still advances the pen). */
-function renderTextRun(x: number, y: number, run: Extract<NamespaceTitleRun, { kind: 'text' }>, width: number): string {
+function renderTextRun(
+  x: number,
+  y: number,
+  run: Extract<NamespaceTitleRun, { kind: 'text' }>,
+  measure: (s: string) => number,
+): string {
   const fill = run.font.color ?? '#000000';
   if (isTransparentColor(fill)) return '';
-  const drawn = text(x, y, run.text, {
+  // isw-T2-cls F2f: DriverTextSvg.java:113-126 -- leading spaces shift x,
+  // textLength is the trimmed width (the pen advance stays the raw width).
+  const placed = placeDriverRun(x, run.text, measure);
+  const drawn = text(placed.x, y, placed.text, {
     fontFamily: run.font.family,
     fontSize: run.font.size,
     ...(run.font.styles.has(FontStyle.BOLD) ? { fontWeight: '700' } : {}),
@@ -416,7 +425,7 @@ function renderTextRun(x: number, y: number, run: Extract<NamespaceTitleRun, { k
     ...(run.font.styles.has(FontStyle.UNDERLINE) ? { textDecoration: 'underline' } : {}),
     fill,
     lengthAdjust: 'spacing' as const,
-    textLength: width,
+    textLength: placed.textLength,
   });
   return run.url !== undefined ? linkWrap(drawn, run.url) : drawn;
 }
@@ -478,14 +487,20 @@ export function renderNamespaceTitleAuto(
     if (isTransparentColor(fallback.fontColor)) return '';
     const faces = packageTitleFaces(theme);
     const drawnText = soleRun?.kind === 'text' ? soleRun.text : label;
-    return text(fallback.x, fallback.y, drawnText, {
+    // isw-T2-cls F2f: DriverTextSvg.java:113-126 on the sole run (rakuci
+    // ` XY `: x + one space, textLength of `XY`).
+    const placed =
+      soleRun?.kind === 'text' && measurer !== undefined
+        ? placeDriverRun(fallback.x, drawnText, (t) => measurer.measure(t, atomFontSpec(soleRun.font)).width)
+        : undefined;
+    return text(placed?.x ?? fallback.x, fallback.y, placed?.text ?? drawnText, {
       fontFamily: fallback.fontFamily,
       fontSize: fallback.fontSize,
       ...(faces.bold ? { fontWeight: '700' as const } : {}),
       ...(faces.italic ? { fontStyle: 'italic' as const } : {}),
       fill: fallback.fontColor,
       ...(fallback.textLength !== undefined
-        ? { lengthAdjust: 'spacing' as const, textLength: fallback.textLength }
+        ? { lengthAdjust: 'spacing' as const, textLength: placed?.textLength ?? fallback.textLength }
         : {}),
     });
   }

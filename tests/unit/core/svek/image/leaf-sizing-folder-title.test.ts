@@ -16,12 +16,12 @@
 import { describe, it, expect } from 'vitest';
 import { measureLeafNode } from '../../../../../src/core/svek/image/leaf-sizing.js';
 import { measureShownFolderTitle } from '../../../../../src/core/svek/image/leaf-sizing-folder-title.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 import type { FontSpec } from '../../../../../src/core/measurer.js';
 import type { DescriptiveNode } from '../../../../../src/diagrams/description/ast.js';
 
 const fontSpec: FontSpec = { family: 'Helvetica', size: 14 };
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function node(id: string, display: string, symbol: DescriptiveNode['symbol']): DescriptiveNode {
   return { id, display, symbol, children: [] };
@@ -33,7 +33,7 @@ describe('SI1 T12 — folder/package title via create2/BodyEnhanced1 (jar-pinned
     // sides); label slot EMPTY (upstream's empty-desc package branch);
     // + USymbolFolder margin [30, 23]; height 14 + 23.
     const d = measureLeafNode(node('Elektronisk dokument', 'Elektronisk dokument', 'package'), fontSpec, measurer);
-    expect(d.width).toBeCloseTo(171.9375, 3);
+    expect(d.width).toBeCloseTo(175.78751, 3);
     expect(d.height).toBeCloseTo(37, 3);
   });
 
@@ -41,7 +41,7 @@ describe('SI1 T12 — folder/package title via create2/BodyEnhanced1 (jar-pinned
     // title = 15.575 ("pp") + 12; label = 76.3875 ("Display Here") WINS the
     // mergeTB width max; height 14 + 14 + 23.
     const d = measureLeafNode(node('pp', 'Display Here', 'package'), fontSpec, measurer);
-    expect(d.width).toBeCloseTo(106.3875, 3);
+    expect(d.width).toBeCloseTo(110.2375, 3);
     expect(d.height).toBeCloseTo(51, 3);
   });
 

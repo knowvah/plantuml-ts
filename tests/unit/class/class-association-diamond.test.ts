@@ -9,13 +9,13 @@
  * @see ~/git/plantuml/.../svek/image/EntityImageAssociation.java:54,60-62
  */
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 import { measureClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
 import { parseClass } from './parse-helper.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const SUPPRESS = { fields: false, methods: false };
 
 function association(display: string): Classifier {

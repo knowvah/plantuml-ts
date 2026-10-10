@@ -24,7 +24,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph, DotInputNode } from '../../../src/core/graph-layout.js';
 import { Ports } from '../../../src/core/svek/Ports.js';
@@ -32,7 +32,7 @@ import { classPortShortNamesById } from '../../../src/diagrams/class/class-port-
 import { shieldedClassifierIds } from '../../../src/diagrams/class/class-shield-helpers.js';
 import type { ClassDiagramAST, Classifier, ClassifierKind } from '../../../src/diagrams/class/ast.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function captureAll(puml: string): DotInputGraph[] {
   const captured: DotInputGraph[] = [];

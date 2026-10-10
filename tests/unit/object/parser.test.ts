@@ -215,7 +215,10 @@ describe('parseClass (object diagram) — parse loop edge cases', () => {
 describe('parseClass (object diagram) — stereotype and color', () => {
   it('parses stereotype on object declaration', () => {
     const ast = parseClass(src(['object Foo << entity >>']));
-    expect(ast.classifiers[0]!.stereotype).toBe('entity');
+    // StereotypePattern.java:68 captures the `<<..>>` label verbatim; the
+    // single padding space per side is consumed only when it is drawn
+    // (Guillemet.java:87-100, Stereotype.java:122-133) -- isw T2b-obj.
+    expect(ast.classifiers[0]!.stereotype).toBe(' entity ');
   });
 
   it('parses color on object declaration', () => {

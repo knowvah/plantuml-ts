@@ -46,8 +46,13 @@ function alignOffset(align: 'left' | 'center' | 'right', diff: number): number {
 }
 
 /** The drawn condition Sheet's dimension for `label`. */
-function sheetDim(label: string, theme: Theme, sb: KlimtStringBounder): { width: number; height: number } {
-  const dim = diamondTestBlock(label, theme).calculateDimension(sb);
+function sheetDim(
+  label: string,
+  theme: Theme,
+  sb: KlimtStringBounder,
+  wrapped: boolean,
+): { width: number; height: number } {
+  const dim = diamondTestBlock(label, theme, wrapped).calculateDimension(sb);
   return { width: dim.getWidth(), height: dim.getHeight() };
 }
 
@@ -57,9 +62,9 @@ export function ifOwnLabelShapes(node: ActivityNodeGeo, bounder: StringBounder, 
   const pad = theme.padding ?? 0;
   const label = node.label ?? '';
   const sb = klimtStringBounder(measurerAdapterOf(bounder), { family: theme.fontFamily, size });
-  const block = sheetDim(label, theme, sb);
+  const block = sheetDim(label, theme, sb, node.wrapped === true);
   const stripes = label.split('\n').map((ln) => {
-    const d = sheetDim(ln, theme, sb);
+    const d = sheetDim(ln, theme, sb, node.wrapped === true);
     return { width: d.width - 2 * pad, height: d.height - 2 * pad, inkHeight: bounder.getDimension(ln, size).height };
   });
   const maxWidth = block.width - 2 * pad;

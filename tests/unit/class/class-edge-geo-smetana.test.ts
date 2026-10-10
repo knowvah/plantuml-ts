@@ -14,10 +14,10 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { layoutFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 describe('buildEdgeGeos — EdgeGeo.smetana carry (T3c, D8)', () => {
   it('carries smetana: true onto every edge when the diagram has !pragma layout smetana (fakone-16-boro774)', () => {

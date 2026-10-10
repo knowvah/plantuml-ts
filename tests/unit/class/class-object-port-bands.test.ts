@@ -17,9 +17,9 @@ import { describe, it, expect } from 'vitest';
 import { measureObjectClassifier } from '../../../src/diagrams/class/class-object-sizing.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const theme = defaultTheme; // fontFamily 'sans-serif', fontSize 14
 
 function objectClassifier(id: string, display: string, overrides?: Partial<Classifier>): Classifier {

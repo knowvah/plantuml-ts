@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { getOrderedLinks } from '../../../src/diagrams/class/class-dot-edge-order.js';
 import type { Relationship } from '../../../src/diagrams/class/class-relationship-ast.js';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
@@ -111,7 +111,7 @@ describe('class-dot-edge-order.ts getOrderedLinks', () => {
 });
 
 describe('class-dot-edge-order.ts getOrderedLinks — wired into class-dot-graph.ts', () => {
-  const measurer = new WidthTableMeasurer();
+  const measurer = new DeterministicMeasurer();
 
   function captureGraphs(puml: string): DotInputGraph[] {
     const captured: DotInputGraph[] = [];

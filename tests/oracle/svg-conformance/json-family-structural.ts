@@ -80,6 +80,21 @@ const ROOT_DIMENSION_RE = new RegExp('^svg/@(width|height|viewBox)');
  *  regex literal containing brackets (see `svg.ts#GRADIENT_DEF_RE`). */
 const TRAILING_ATTR_RE = new RegExp('@([A-Za-z0-9-]+)(\\[\\d+\\])?$');
 
+/**
+ * Fixtures whose canvas BACKGROUND rect (`svg/g[1]/rect[1]`, present because a
+ * `!theme` paints one) is a degree wider/taller only through Smetana's integer
+ * node sizing: it rounds every node's width/height to whole points
+ * (`POINTS(ND_width(n))`, shapes__c.java:253-254, 1807-1808; `Macro.POINTS` =
+ * ROUND, Macro.java:1560-1562). `yaml/vapoda-87-piku740`: the first node is
+ * 21.55 wide, the jar lays its child at 5+22+37 = 64, ours at 63.55, so the
+ * canvas is 216 vs 215. Same accepted delta as the root `svg/@width` already
+ * excluded (CLAUDE.md "One layout engine", ruling 2026-08-09). Per fixture, not
+ * by path: in other fixtures `rect[1]` is a node, whose size must stay gated.
+ */
+const SMETANA_ROUNDED_CANVAS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
+  ['yaml/vapoda-87-piku740', new Set(['svg/g[1]/rect[1]/@width'])],
+]);
+
 export function isPositionalDiff(path: string): boolean {
   if (ROOT_DIMENSION_RE.test(path)) return true;
   const m = TRAILING_ATTR_RE.exec(path);
@@ -97,9 +112,10 @@ export function structuralDiffs(type: string, slug: string): StructuralResult {
   const actual = renderFixtureJson(readFileSync(join(dir, 'in.puml'), 'utf8'), new DeterministicMeasurer());
   const golden = readFileSync(join(dir, 'in.svg'), 'utf8');
   const { diffs } = compareSvg(actual, golden, 'deterministic');
+  const rounded = SMETANA_ROUNDED_CANVAS.get(`${type}/${slug}`);
   return {
     diffs: diffs
-      .filter((d) => !isPositionalDiff(d.path))
+      .filter((d) => !isPositionalDiff(d.path) && !rounded?.has(d.path))
       .map((d) => `${d.path}: ${String(d.actual)} != ${String(d.expected)}`),
   };
 }

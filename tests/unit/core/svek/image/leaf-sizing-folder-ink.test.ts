@@ -15,9 +15,9 @@
 import { describe, expect, test } from 'vitest';
 import { measureFolderLeaf, measureFolderLeafInk } from '../../../../../src/core/svek/image/leaf-sizing-folder.js';
 import type { LeafSizingSubject } from '../../../../../src/core/svek/image/LeafSizingSubject.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const fontSpec = { family: 'sans-serif', size: 14 };
 
 describe('measureFolderLeafInk (T2b)', () => {

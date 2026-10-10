@@ -11,7 +11,8 @@ import {
   type MemberRenderAtom,
 } from '../../../src/diagrams/class/class-member-creole.js';
 import { noteLineAtomDy } from '../../../src/diagrams/class/class-member-creole-sea.js';
-import { FormulaMeasurer, WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { FormulaMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { measureNote } from '../../../src/diagrams/class/note-layout-measure.js';
 import { deepMergeTheme } from '../../../src/core/theme.js';
 
@@ -393,7 +394,7 @@ describe('renderNote — <sub> note line: measure and render share the same runs
 // hand-built literal) -- mirrors the `<sub>` block above's "measure and
 // render use the same runs" construction.
 describe('renderNote — C-1 wrapped bullet draws its ellipse ONCE, not per wrapped row', () => {
-  const measurer = new WidthTableMeasurer();
+  const measurer = new DeterministicMeasurer();
   const wrapTheme = scaleClassTheme(
     deepMergeTheme(defaultTheme, { colors: { graph: { noteCascadeMaximumWidth: 300 } } }),
     1,
@@ -423,7 +424,7 @@ describe('renderNote — C-1 wrapped bullet draws its ellipse ONCE, not per wrap
 });
 
 describe('renderNote — C-2 numbered-list header renders "N." at x=12, textLength jar-matched', () => {
-  const measurer = new WidthTableMeasurer();
+  const measurer = new DeterministicMeasurer();
 
   it('draws "1." then the trimmed content, jar-shaped x/textLength', () => {
     const m = measureNote('# here', defaultTheme, measurer);

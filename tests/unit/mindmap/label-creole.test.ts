@@ -14,7 +14,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { MeasurerStringBounder } from '../../../src/core/measurer-bounder.js';
 import { renderSync } from '../../../src/index.js';
 import type { CreoleAtom } from '../../../src/core/klimt/creole/atom/Atom.js';
@@ -23,7 +23,7 @@ import { getSplitted } from '../../../src/core/klimt/creole/Fission.js';
 import { asAtomOpenIconic } from '../../../src/core/klimt/creole/atom/AtomOpenIconic.js';
 import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const FIXTURES = 'tests/unit/mindmap/fixtures';
 
 function render(body: string): string {
@@ -119,13 +119,14 @@ describe('mindmap label: [[url]] under MaximumWidth (Fission keeps the url)', ()
 // `scripts/oracle-render.sh` (1.2026.8beta1). `CommandMindMapOrgmode.java:55`
 // is `super(false, …)` (doTrim=false, SingleLineCommand2.java:74-79), so the
 // label is `**1** ` and the jar draws bold `1` then a separate ` ` atom of
-// width 0 (no textLength) — kijaru-67-buco967.
+// width 3.85 (no textLength, NBSP) — kijaru-67-buco967. The .jar.svg fixtures
+// were re-rendered under seam #4 v2 (space = U+0021 width, float32 widths).
 describe('doTrim=false keeps the trailing space (T6i)', () => {
-  it('draws bold 1 plus a width-0 space text, equal to the authored jar oracle', () => {
+  it('draws bold 1 plus a space text, equal to the authored jar oracle', () => {
     const svg = renderSync(readFileSync(`${FIXTURES}/trailing-space.puml`, 'utf8'), { measurer });
     const jar = readFileSync(`${FIXTURES}/trailing-space.jar.svg`, 'utf8');
     // The jar writes the space as U+00A0 (no textLength: width 0).
-    expect(svg).toContain('<text x="27.788" y="40.889" fill="#000" font-size="14">\u00a0</text>');
+    expect(svg).toContain('<text x="27.787" y="40.889" fill="#000" font-size="14">\u00a0</text>');
     expect(compareSvg(svg, jar, 'deterministic').diffs).toEqual([]);
   });
 

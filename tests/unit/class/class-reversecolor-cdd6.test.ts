@@ -18,7 +18,7 @@ import {
 import { renderClass } from '../../../src/diagrams/class/renderer.js';
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { parseClass } from './parse-helper.js';
 
 describe('ColorUtils#getReversed port', () => {
@@ -104,7 +104,7 @@ describe('renderClass applies the reversecolor mapper (tozizu-96-voka262)', () =
   it('maps the document background and every drawn colour', () => {
     const theme = { ...defaultTheme, reverseColor: 'dark' };
     const ast = parseClass({ lines: ['class A'], type: 'class' });
-    const fragment = renderClass(layoutClass(ast, theme, new WidthTableMeasurer()), theme);
+    const fragment = renderClass(layoutClass(ast, theme, new DeterministicMeasurer()), theme);
     // jar tozizu: `background:#010101`, class body `fill="#111"`, border `#E7E7E7`.
     expect(fragment.background).toBe('#010101');
     expect(fragment.body).toContain('fill="#111"');

@@ -34,12 +34,12 @@ import { UTranslate } from '../../../src/core/klimt/UTranslate.js';
 import { UGraphicHandwritten } from '../../../src/core/klimt/drawing/hand/UGraphicHandwritten.js';
 import { basicSvgOption } from '../../../src/core/klimt/drawing/svg/svg-graphics.js';
 import { UGraphicSvg } from '../../../src/core/klimt/drawing/svg/u-graphic-svg.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { Rankdir } from '../../../src/core/klimt/geom/Rankdir.js';
 import { renderSync } from '../../../src/index.js';
 import { parseMindMap } from './helpers/mindmap-skin.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 /** `TitledDiagram#getDefaultMargins` = `same(10)` (TitledDiagram.java:274-277). */
 const MARGIN = 10;
 

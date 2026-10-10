@@ -1,6 +1,6 @@
 /**
  * class-member-creole-render-text.ts — the DRAWN-text side of
- * `DriverTextSvg.java:112-125`'s two RENDER-time-only branches, plus the
+ * `DriverTextSvg.java:113-126`'s RENDER-time-only preamble, plus the
  * TAB-STOP expansion `AtomText.java:210-256` applies to a member row's
  * `'text'` atom before any of that. Split out of `class-member-creole.ts`
  * purely to keep that file under this project's 500-line cap (A4 2a / T26).
@@ -22,81 +22,46 @@ import {
   TAB_STRING,
 } from '../../core/klimt/creole/legacy/AtomText.js';
 import type { CreoleAtomUrl } from '../../core/klimt/creole/atom/Atom.js';
-
-/** `StringUtils#trin` (java `StringUtils.java:505-534`): trims every char
- *  `<= ' '` (ASCII 32 -- space, tab, newline, ...) from BOTH ends, unlike
- *  JS's own `trim()` which uses Unicode whitespace. `DriverTextSvg.java
- *  :125` calls this UNCONDITIONALLY on every non-whitespace-only drawn run,
- *  after the leading-space strip below -- a no-op (returns `arg` itself,
- *  matching upstream's own `start === 0 && end === len - 1` fast path) for
- *  the common case of a run with no incidental leading/trailing whitespace. */
-function trin(s: string): string {
-  let start = 0;
-  let end = s.length - 1;
-  while (start <= end) {
-    if (s.charCodeAt(start) <= 32) {
-      start++;
-      continue;
-    }
-    if (s.charCodeAt(end) <= 32) {
-      end--;
-      continue;
-    }
-    break;
-  }
-  return start > end ? '' : s.slice(start, end + 1);
-}
+import { driverTextPlacement } from '../../core/svg-text-font.js';
 
 /**
- * A4 2a: `DriverTextSvg.java:118-125`'s MIXED-content branch (a run with
- * SOME non-whitespace content that starts with one or more literal space
- * characters) -- distinct from the whitespace-ONLY NBSP branch
- * (`textRenderOverride`, mutually exclusive there: the jar's own
- * `text.matches("^\\s*$")` check runs first and short-circuits). Upstream
- * strips each leading `' '` one at a time, advancing its own local `x` by
- * that char's measured width each time (`x += space`) -- NOT ported here as
- * a positional adjustment: this port's width table reports a bare space as
- * 0-wide (`SANS_SERIF_BLOCKS[0][32]`, `MemberRenderAtom`'s own doc
- * comment), so upstream's `x += space` is a no-op under the SAME table this
- * port's `StringMeasurer`s use, and `atom.width` (the RAW/layout
- * measurement, unchanged) already reflects that -- `resolveOneAtom`'s
- * caller advances the row's `x` cursor by `atom.width`, never by this
- * function's output. Finally mirrors upstream's own unconditional trailing
- * `trin` (`:125`), which also fires for a run with no leading space at all.
- */
-function stripLeadingSpacesAndTrin(text: string): string {
-  let t = text;
-  while (t.startsWith(' ')) t = t.slice(1);
-  return trin(t);
-}
-
-/**
- * `DriverTextSvg.java:112-125`'s per-atom RENDER-time text override --
- * NBSP substitution for a whitespace-ONLY atom (`:115-116`), else the
- * leading-space-strip + trailing `trin` for a MIXED atom (`:118-125`).
- * `undefined` when the drawn text is byte-identical to `text` (the common
- * case), matching this file's own "renderText only set when it differs"
- * convention.
+ * `DriverTextSvg.java:113-126`'s per-atom RENDER-time text, whole: NBSP for a
+ * whitespace-only run (`:115-116`), each leading `' '` removed with `x +=
+ * space` (`:118-124`, `space` = `calculateDimension(font, " ")`), then the
+ * unconditional `StringUtils.trin` (`:125`) and a SECOND measurement of what is
+ * left (`:126`) -- the drawn `textLength`. The atom's own layout `width` stays
+ * the RAW run (`AtomText.java:222-231`), so a leading space costs layout
+ * advance but draws shifted: {@link TextRenderFields.renderDx}. Delegates the
+ * string steps to the shared `driverTextPlacement`.
  *
- * Guarded off a raw `\t`: a tab-bearing atom is handled ENTIRELY by
- * {@link resolveTabbedTextRuns} (this function is called per SPLIT token
- * there, each of which is tab-free by construction) or, for a caller that
- * doesn't opt into tab expansion, is `class-object-member-creole.ts#
- * buildObjectMemberRow`'s own OWN atom to re-tokenize downstream (its
- * SKINPARAM-tabSize-aware pass) -- see that module's doc comment. A
- * `renderText` computed here on the WHOLE untokenized blob would leak,
- * unchanged, onto every one of ITS OWN per-token results (spread via
- * `{ ...atom, text: token, width }`) once this branch fired on a leading
- * tab char (`trin` strips `\t` same as space, ASCII <= 32) --
- * `object/nufoju-44-dabi767`'s ratchet caught exactly this: two
- * "field5\tfield6" runs, both re-measured as one.
+ * `undefined` when the drawn text is byte-identical to `text` (the common
+ * case), matching this file's "render fields only set when they differ"
+ * convention. Guarded off a raw `\t`: a tab-bearing atom is handled ENTIRELY by
+ * {@link resolveTabbedTextRuns} (this is called per SPLIT token there, each
+ * tab-free by construction) or by `class-object-member-creole.ts#
+ * buildObjectMemberRow`'s own tab-size-aware re-tokenizing pass, which a
+ * `renderText` computed on the whole blob would leak into
+ * (`object/nufoju-44-dabi767`).
+ *
+ * @see ~/git/plantuml/.../klimt/drawing/svg/DriverTextSvg.java:113-126
+ * @see ~/git/plantuml/.../StringUtils.java:505-534 (`trin`)
  */
-export function textRenderOverride(text: string): string | undefined {
-  const isWhitespaceOnly = text.length > 0 && /^\s*$/.test(text);
-  if (isWhitespaceOnly) return text.split(' ').join(' ');
-  if (text.includes('\t')) return undefined;
-  const stripped = stripLeadingSpacesAndTrin(text);
-  return stripped !== text ? stripped : undefined;
+export interface TextRenderFields {
+  readonly renderText: string;
+  readonly renderWidth: number;
+  /** One space width per leading space; absent when 0. */
+  readonly renderDx?: number;
+}
+
+export function textRenderFields(text: string, measure: (s: string) => number): TextRenderFields | undefined {
+  if (text.length === 0 || (text.includes('\t') && !/^\s*$/.test(text))) return undefined;
+  const placed = driverTextPlacement(text, text.startsWith(' ') ? measure(' ') : 0);
+  if (placed.text === text) return undefined;
+  return {
+    renderText: placed.text,
+    renderWidth: measure(placed.text),
+    ...(placed.dx !== 0 ? { renderDx: placed.dx } : {}),
+  };
 }
 
 /** One non-tab token's resolved run, before {@link resolveTabbedTextRuns}
@@ -151,16 +116,16 @@ export function resolveTabbedTextRuns(
   }
   return runs.map((run, i) => {
     const outerWidth = i < runs.length - 1 ? runs[i + 1]!.startX - run.startX : measure(run.text);
-    const override = textRenderOverride(run.text);
-    const drawnText = override ?? run.text;
+    const fields = textRenderFields(run.text, measure);
+    const drawnText = fields?.renderText ?? run.text;
     // A non-LAST run's `width` (the outer x-advance) folds in the gap to the
     // NEXT tab stop -- its own glyph must still draw at its natural width,
     // never stretched across that gap, so `renderWidth`/`renderText` are
     // forced here whenever `outerWidth` differs from the run's own natural
     // measured width, not only when {@link textRenderOverride} itself fires
     // (the bare no-tab per-atom path's own, narrower condition).
-    const naturalWidth = measure(drawnText);
-    const needsRenderFields = override !== undefined || outerWidth !== naturalWidth;
+    const naturalWidth = fields?.renderWidth ?? measure(drawnText);
+    const needsRenderFields = fields !== undefined || outerWidth !== naturalWidth;
     return {
       atom: {
         kind: 'text' as const,
@@ -168,6 +133,7 @@ export function resolveTabbedTextRuns(
         font,
         width: outerWidth,
         ...(needsRenderFields ? { renderText: drawnText, renderWidth: naturalWidth } : {}),
+        ...(fields?.renderDx !== undefined ? { renderDx: fields.renderDx } : {}),
         ...(url !== undefined ? { url } : {}),
       },
       width: outerWidth,

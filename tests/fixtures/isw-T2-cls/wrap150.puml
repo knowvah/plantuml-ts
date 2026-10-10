@@ -1,0 +1,6 @@
+@startuml
+class A
+class B
+skinparam maxMessageSize 150
+A --> B : **Label**\n//[Optional Technology]//
+@enduml

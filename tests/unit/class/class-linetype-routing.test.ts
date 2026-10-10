@@ -16,14 +16,14 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { toSvekDot } from '../../../src/core/svek-dot-emit.js';
 
 const GOLDENS = join(dirname(fileURLToPath(import.meta.url)), '../../../oracle/goldens/class');
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function captureFirst(puml: string): DotInputGraph {
   const captured: DotInputGraph[] = [];

@@ -36,10 +36,11 @@ describe('note bodies', () => {
   const svg = render('bocusa-16-ciju126');
 
   it('measures and draws at note { FontSize 13 }, not the ambient 14', () => {
-    // JAR: <text x="111.9" y="67.111" font-size="13" textLength="36.075">1. right</text>
+    // JAR (re-captured oracle, space = 3.575@13; test-results/dot-cache/sequence/
+    // bocusa-16-ciju126/in.svg): <text x="115.475" ... textLength="39.65">1. right
     const note = textFor(svg, '1. right');
     expect(note['font-size']).toBe('13');
-    expect(note['textLength']).toBe('36.075');
+    expect(note['textLength']).toBe('39.65');
   });
 
   it('left-aligns the body rather than centring it', () => {
@@ -58,7 +59,8 @@ describe('note bodies', () => {
     // Two different strings in two different boxes: if either were centred,
     // its x would depend on its own width. Both sit one padding in.
     expect(Number(left['x'])).toBeLessThan(Number(over['x']));
-    expect(left['textLength']).toBe('28.113');
+    // JAR (re-captured): bocusa-16-ciju126/in.svg `3. left` textLength="31.688".
+    expect(left['textLength']).toBe('31.688');
   });
 
   it('emits no text-anchor on a note body', () => {
@@ -82,9 +84,9 @@ describe('else-branch conditions', () => {
 
 describe('divider labels', () => {
   it('carries a textLength and no hanging baseline', () => {
-    // JAR: textLength="177.288" font-weight="700" at font-size 13.
+    // JAR (re-captured, degire-21-dujo330/in.svg): textLength="180.863" font-weight="700" at font-size 13.
     const label = textFor(render('degire-21-dujo330'), 'Resource AllocationAllocationX');
-    expect(label['textLength']).toBe('177.288');
+    expect(label['textLength']).toBe('180.863');
     expect(label['font-weight']).toBe('700');
     expect(label['dominant-baseline']).toBeUndefined();
   });
@@ -152,21 +154,16 @@ describe('note bodies through creole (C6)', () => {
     // `getTextWidth` is the TEXT BLOCK's own calculated width plus the padding
     // (`AbstractTextualComponent.java:100-108`), and the block is built from
     // the creole `Display` (`:89-92`) — so `<b>bold</b>` reserves the width of
-    // `bold`, not of the ten markup characters around it. The jar's own box
-    // for that note runs 86.163..131.163; this port's is one padding pair
-    // around the same 24.619 run, at a left edge that carries the note-x
-    // divergence `.agent-notes/A1-sequence-geo-text-metric-fields.md` records
-    // — so the assertion is the WIDTH, which is this task's, not the origin.
+    // `bold`, not of the ten markup characters around it.
     const bold = svg.indexOf('>bold</text>');
     expect(bold).toBeGreaterThan(-1);
-    // The y pair is the JAR's exactly since the vertical terms landed: its
-    // own box for this note runs 85..108, `blockH + 10` tall
-    // (`ComponentRoseNote:104-118`) and drawn 5 below its tile top
-    // (`Rose.paddingY`, `AbstractComponent#drawU:142-143`).
-    const box = /<path d="M91\.163,85 L125\.781,85 L135\.781,95 L135\.781,108 L91\.163,108 Z"/;
+    // The jar's own box for this note runs 86.163..131.163 x 85..108
+    // (`test-results/dot-cache/sequence/moxope-92-roco972/in.svg`; the same
+    // vertices in the polygon's own order). 131.163 - 86.163 = 45 =
+    // (int) (24.619 + 6 + 15): `ComponentRoseNote.java:70-72` pads 6 + 15, and
+    // the box starts `getPaddingX` (5) right of its tile (`NoteTile#getX`).
+    const box = /<path d="M86\.163,85 L121\.163,85 L131\.163,95 L131\.163,108 L86\.163,108 Z"/;
     expect(box.test(svg)).toBe(true);
-    // 135.781 - 91.163 = 44.618 = the 24.619-wide run plus 10 of padding each
-    // side. Before C6 the same box was sized from `<b>bold</b>`, 20 wider.
     expect(textFor(svg, 'bold')['textLength']).toBe('24.619');
   });
 });
@@ -211,7 +208,7 @@ describe('divider labels through creole (C6)', () => {
     // The seam's measurement identity: one atom, the original string, the
     // original width. `degire-21-dujo330` has no markup at all.
     const label = textFor(render('degire-21-dujo330'), 'Resource AllocationAllocationX');
-    expect(label['textLength']).toBe('177.288');
+    expect(label['textLength']).toBe('180.863');
     expect(label['font-weight']).toBe('700');
   });
 });

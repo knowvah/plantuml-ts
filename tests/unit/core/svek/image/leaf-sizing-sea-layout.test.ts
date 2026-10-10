@@ -9,7 +9,7 @@
 import { describe, it, expect } from 'vitest';
 import { leafTextLineLayout, lineCount } from '../../../../../src/core/svek/image/leaf-sizing-text.js';
 import { layoutLineThroughSea } from '../../../../../src/core/svek/image/creole-sea-line.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 import type { FontSpec } from '../../../../../src/core/measurer.js';
 
 /** The class engine's own default member font size (`skinparam
@@ -17,7 +17,7 @@ import type { FontSpec } from '../../../../../src/core/measurer.js';
  *  `AtomText.java:178-179`'s 10px floor, which is the case this seam has to
  *  get right for `exposant-01-class`. */
 const classFont: FontSpec = { family: 'Helvetica', size: 12 };
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const descent = (size: number): number => measurer.getDescent({ family: 'Helvetica', size }, 'x');
 
 describe('leafTextLineLayout', () => {
@@ -84,7 +84,9 @@ describe('leafTextLineLayout', () => {
     const layout = leafTextLineLayout('', classFont, measurer);
 
     expect(layout.atoms.map((a) => (a.kind === 'text' ? a.text : a.kind))).toEqual([' ']);
-    expect(layout.width).toBe(0); // the deterministic width table's SPACE is 0
+    // the lone " " atom (StripeSimple.java:123-126) is one space wide: 3.3 at
+    // 12pt under oracle seam #4 v2 (it was 0 while the table's SPACE was 0)
+    expect(layout.width).toBeCloseTo(3.3, 4);
     expect(layout.height).toBe(classFont.size);
     expect(layout.placements[0]!.dy).toBe(0);
     // The pre-existing empty-DISPLAY contract (no lines at all) is a

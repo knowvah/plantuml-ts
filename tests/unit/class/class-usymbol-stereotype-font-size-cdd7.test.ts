@@ -16,7 +16,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver, type DotInputGraph } from '../../../src/core/graph-layout.js';
 
 const SOURCE = [
@@ -35,7 +35,7 @@ function nodeDims(markup: string): { width: number; height: number }[] {
   const graphs: DotInputGraph[] = [];
   setLayoutInputObserver(({ graph }) => graphs.push(graph));
   try {
-    renderSync(markup, { measurer: new WidthTableMeasurer() });
+    renderSync(markup, { measurer: new DeterministicMeasurer() });
   } finally {
     setLayoutInputObserver(undefined);
   }

@@ -8,8 +8,9 @@
  * `drawLineInternal` (`UHorizontalLine.java:84-98`) draws the first half,
  * the centred title (`drawTitleInternal`, `y - titleH/2 - 0.5`), then the
  * second half. Every expected number is the jar's own
- * (`test-results/dot-cache/unknown/nuveji-19-jabi587/in.svg`, the note at
- * x=221.86, y=39).
+ * (`test-results/dot-cache/unknown/nuveji-19-jabi587/in.svg`, re-captured
+ * under oracle seam #4 v2 -- the note is wider now that its spaces count --
+ * the note at x=237.26, y=39).
  */
 import { describe, it, expect } from 'vitest';
 import { measureNote } from '../../../src/diagrams/class/note-layout-measure.js';
@@ -17,13 +18,13 @@ import { renderNote } from '../../../src/diagrams/class/renderer-note.js';
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout-types.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const theme = scaleClassTheme(defaultTheme, 1);
 const NUVEJI_NOTE =
   'This is working also in notes\nYou can also add title in all these lines\n==Title==\n--Another title--';
-const NOTE_X = 221.86;
+const NOTE_X = 237.26;
 const NOTE_Y = 39;
 
 function nuvejiGeo(text: string = NUVEJI_NOTE): NoteGeo {
@@ -53,24 +54,24 @@ function drawn(svg: string): string[] {
 }
 
 describe('note titled block separator (nuveji-19-jabi587)', () => {
-  it('keeps the jar note size 212.75 x 75', () => {
+  it('keeps the jar note size 241.35 x 75', () => {
     const geo = nuvejiGeo();
-    expect(geo.width).toBeCloseTo(212.75, 3);
+    expect(geo.width).toBeCloseTo(241.35, 3);
     expect(geo.height).toBe(75);
   });
 
   it('draws both titled separators at the jar positions, in the jar order', () => {
     expect(drawn(renderNote(nuvejiGeo(), theme))).toEqual([
-      'text 227.86,54.111 This is working also in notes',
-      'text 227.86,67.111 You can also add title in all these lines',
-      'line 222.86,76.5-315.926',
-      'line 222.86,78.5-315.926',
-      'text 315.926,79.611 Title',
-      'line 340.544,76.5-433.61',
-      'line 340.544,78.5-433.61',
-      'line 222.86,96-295.369',
-      'text 295.369,99.111 Another title',
-      'line 361.101,96-433.61',
+      'text 243.26,54.111 This is working also in notes',
+      'text 243.26,67.111 You can also add title in all these lines',
+      'line 238.26,76.5-345.626',
+      'line 238.26,78.5-345.626',
+      'text 345.626,79.611 Title',
+      'line 370.244,76.5-477.61',
+      'line 370.244,78.5-477.61',
+      'line 238.26,96-323.282',
+      'text 323.282,99.111 Another title',
+      'line 392.588,96-477.61',
     ]);
   });
 

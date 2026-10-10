@@ -20,7 +20,8 @@ import {
 import { FontStyle, getFont } from '../../../src/core/klimt/shape/UText.js';
 import type { FontConfiguration } from '../../../src/core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from '../../../src/diagrams/class/class-member-creole.js';
-import { FormulaMeasurer, WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { FormulaMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderLatexAsImage } from '../../../src/core/latex.js';
 import { createSpriteRegistry, addSprite } from '../../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../../src/core/klimt/sprite/SpriteMonochrome.js';
@@ -304,31 +305,31 @@ describe('resolveMemberAtoms — a latex atom draws its image', () => {
 // NBSP (U+00A0), matching `DriverTextSvg.java`'s `text.matches("^\\s*$")`
 // branch -- jar-verified against `vicuro-37-tese143`'s real golden SVG
 // (`textLength="3.575"` for a bare 13pt space run split off by a
-// `<size:18>`/`<u>` boundary). The width-TABLE entry for the space
-// character itself (`SANS_SERIF_BLOCKS[0][32] === 0`) is confirmed correct
-// -- a byte-exact match of upstream's own `UnicodeFontWidthSansSerif.java`
-// (full 255-block comparison, not just this one entry) -- so `width` (the
-// LAYOUT/x-advance value) must stay 0; only the RENDER-time text/textLength
-// differ, via the new `renderText`/`renderWidth` fields.
+// `<size:18>`/`<u>` boundary). isw: under oracle seam #4 v2 a space has width
+// (44 tenths of a 16pt em), so the LAYOUT/x-advance value (`AtomText#
+// calculateDimension` of the RAW run, AtomText.java:222-231) is that width too
+// -- 3.575 at 13pt -- and equals the re-measured NBSP `renderWidth`; it used to
+// be 0 while the table's SPACE entry was 0.
 describe('resolveMemberAtoms — whitespace-only run renders as NBSP (G2 N57, item 38)', () => {
-  test('a lone-space atom: layout width stays 0, renderText is NBSP, renderWidth is the NBSP width', () => {
-    const wtMeasurer = new WidthTableMeasurer();
+  test('a lone-space atom: layout width is one space, renderText is NBSP, renderWidth is the NBSP width', () => {
+    const wtMeasurer = new DeterministicMeasurer();
     const font: FontConfiguration = { family: 'sans-serif', size: 13, color: null, styles: new Set() };
     const atoms = [{ kind: 'text' as const, text: ' ', font }];
     const build = resolveMemberAtoms(atoms, font, wtMeasurer);
     expect(build.atoms).toHaveLength(1);
     const atom = build.atoms[0]!;
-    expect(atom).toMatchObject({ kind: 'text', text: ' ', width: 0 });
+    expect(atom).toMatchObject({ kind: 'text', text: ' ' });
+    expect((atom as { width: number }).width).toBeCloseTo(3.575, 4);
     expect((atom as { renderText?: string }).renderText).toBe('\u00A0');
     expect((atom as { renderWidth?: number }).renderWidth).toBeCloseTo(3.575, 6);
-    // Layout total (line-width sum) stays 0 for a lone space -- unchanged by
-    // this fix, matches jar's own `AtomText#drawU`/`calculateDimensionSlow`
-    // x-advance path (RAW width, no substitution).
-    expect(build.width).toBe(0);
+    // Layout total (line-width sum) is the RAW width of the lone space, matching
+    // jar's own `AtomText#drawU`/`calculateDimensionSlow` x-advance path (no
+    // NBSP substitution there).
+    expect(build.width).toBeCloseTo(3.575, 4);
   });
 
   test('a multi-space run ("   ") also substitutes every space to NBSP', () => {
-    const wtMeasurer = new WidthTableMeasurer();
+    const wtMeasurer = new DeterministicMeasurer();
     const font: FontConfiguration = { family: 'sans-serif', size: 13, color: null, styles: new Set() };
     const atoms = [{ kind: 'text' as const, text: '   ', font }];
     const build = resolveMemberAtoms(atoms, font, wtMeasurer);
@@ -386,28 +387,30 @@ describe('resolveMemberAtoms — whitespace-only run renders as NBSP (G2 N57, it
 // callers of the shared `resolveMemberAtoms` do NOT (own/no tab handling,
 // `resolveMemberAtoms`'s own doc comment) so this suite uses the CLASS
 // entry points, never a bare `resolveMemberAtoms(..., true)` call as its
-// only coverage. `WidthTableMeasurer` matches the deterministic table the
-// oracle jar and `gekope-01-ricu859`'s own golden run on (space glyph = 0,
-// so the tab stop falls back to `fontSize * 4`, `AtomText.ts`'s own doc
-// comment) -- jar-verified: gekope's `PK ID      \t\t Integer` row draws
-// "Integer" at x=135 = 23 (icon+margin) + 2*56 (two 14pt tab stops).
+// only coverage. The deterministic measurer matches the oracle jar
+// (`gekope-01-ricu859`'s own golden runs on it): a 14pt space is 3.85, so the
+// tab stop is 8 spaces = 30.8 (`AtomText.java:272-274`; the `fontSize * 4`
+// fallback only applies to a 0-wide space) -- jar-verified, re-captured:
+// gekope's `PK ID      \t\t Integer` row draws "ID" at x=26.85 and "Integer"
+// at x=119.25, 92.4 = 3 * 30.8 apart.
 describe('buildWrappedMemberRows — tab-stop expansion (T26)', () => {
-  const widthTable = new WidthTableMeasurer();
+  const widthTable = new DeterministicMeasurer();
   const font14 = { family: 'sans-serif', size: 14 };
 
   test('two consecutive tabs draw as two SEPARATE runs, second at 2 tab-stops out', () => {
     const [row] = buildWrappedMemberRows('ID\t\tInteger', {}, font14, widthTable, 0);
     const texts = row!.atoms.filter((a): a is Extract<typeof a, { kind: 'text' }> => a.kind === 'text');
     expect(texts).toHaveLength(2);
-    expect(texts[0]).toMatchObject({ text: 'ID', width: 56 * 2 });
+    expect(texts[0]).toMatchObject({ text: 'ID' });
+    expect(texts[0]!.width).toBeCloseTo(30.8 * 2, 4);
     expect(texts[1]).toMatchObject({ text: 'Integer' });
     // First run's OWN glyph draws compact (its natural width), not
     // stretched across the folded-in gap -- `renderWidth`/`textLength`
     // stays the natural measured width even though `width` (x-advance)
     // carries the full two-tab-stop gap.
     expect(texts[0]!.renderWidth ?? texts[0]!.width).toBeCloseTo(widthTable.measure('ID', font14).width, 6);
-    // Cumulative x: 0 (row start) + 112 (ID's folded width) = 112 = 2*56.
-    expect(texts[0]!.width + 0).toBe(112);
+    // Cumulative x: 0 (row start) + 61.6 (ID's folded width) = 2 * 30.8.
+    expect(texts[0]!.width + 0).toBeCloseTo(61.6, 4);
   });
 
   test('a tab-free row is byte-identical to the pre-T26 single-atom path', () => {

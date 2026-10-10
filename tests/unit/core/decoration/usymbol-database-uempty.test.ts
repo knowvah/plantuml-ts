@@ -9,11 +9,11 @@ import { describe, it, expect } from 'vitest';
 import { drawDatabase } from '../../../../src/core/decoration/symbol/USymbolDatabase.js';
 import { LimitFinder } from '../../../../src/core/klimt/drawing/LimitFinder.js';
 import { MeasurerStringBounder } from '../../../../src/core/measurer-bounder.js';
-import { WidthTableMeasurer } from '../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
 
 describe('drawDatabase — trailing UEmpty(10, 10) (USymbolDatabase.java:77)', () => {
   it('extends the LimitFinder extent to (width + 10, height + 10)', () => {
-    const finder = LimitFinder.create(new MeasurerStringBounder(new WidthTableMeasurer()), false);
+    const finder = LimitFinder.create(new MeasurerStringBounder(new DeterministicMeasurer()), false);
     drawDatabase(finder, 80, 50, 0);
     expect([finder.getMinX(), finder.getMinY(), finder.getMaxX(), finder.getMaxY()]).toEqual([0, 0, 90, 60]);
   });

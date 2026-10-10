@@ -60,7 +60,9 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { WidthTableMeasurer, FormulaMeasurer } from '../src/core/measurer.js';
+import { FormulaMeasurer } from '../src/core/measurer.js';
+
+import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import type { FontSpec, StringMeasurer } from '../src/core/measurer.js';
 import { jarMeasurer } from '../src/core/measurer-jar.js';
 
@@ -209,7 +211,7 @@ interface MeasurerEntry {
 }
 
 const MEASURERS: readonly MeasurerEntry[] = [
-  { name: 'WidthTableMeasurer (ratchet/conformance path)', measurer: new WidthTableMeasurer() },
+  { name: 'DeterministicMeasurer (ratchet/conformance path)', measurer: new DeterministicMeasurer() },
   { name: 'jarMeasurer (production default, D12 AWT table)', measurer: jarMeasurer },
   { name: 'FormulaMeasurer (StringBounderFixed approximation)', measurer: new FormulaMeasurer() },
 ];

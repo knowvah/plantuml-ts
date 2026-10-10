@@ -30,6 +30,7 @@ import { laneAt, laneIn, laneOut } from './swimlane-lanes.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { childDrawnInLanes, compositeLaneGate, nonTranslatableConnectionDrawn } from './swimlane-connection-gate.js';
+import { wrappedSpread } from './diamond-wrap.js';
 
 interface LvCtx {
   readonly t: GtileIfLongVertical;
@@ -144,6 +145,7 @@ function pushDiamondOwnLabel(ctx: LvCtx, diamond: GtileDiamondInside2, origin: G
       width: diamond.hexWidth,
       height: diamond.hexHeight,
       label: diamond.label,
+      ...wrappedSpread(diamond),
     },
     ctx.myLane,
   );

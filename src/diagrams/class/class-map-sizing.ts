@@ -31,6 +31,8 @@ import type { ClassifierGeo } from './layout.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import type { Dim } from './class-object-map-sizing.js';
 import { floorAtMinimumWidth } from './class-object-map-sizing.js';
+import { headerFontSpec, resolveHeaderFontOverride, resolveObjectBodyFont } from './object-kind-style.js';
+import { resolveStyleStereotypeTags } from './class-stereotype.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-sizing.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
@@ -254,8 +256,11 @@ export function measureMapClassifier(
   theme: Theme,
   measurer: StringMeasurer,
 ): MeasuredClassifier {
-  const fontSpec = { family: theme.fontFamily, size: theme.fontSize };
-  const nameM = measurer.measure(classifier.display, fontSpec);
+  const tags = resolveStyleStereotypeTags(classifier);
+  const bodyFont = resolveObjectBodyFont(theme, 'map', tags);
+  const fontSpec = { family: bodyFont.family, size: bodyFont.size };
+  const nameFont = resolveHeaderFontOverride(theme, 'map', tags);
+  const nameM = measurer.measure(classifier.display, headerFontSpec(theme, nameFont));
   const nameDim: Dim = { width: nameM.width + MAP_NAME_MARGIN * 2, height: nameM.height + MAP_NAME_MARGIN * 2 };
   const stereoDim = measureStereo(classifier, theme, measurer);
   const title = titleDimension(nameDim, stereoDim);
@@ -265,7 +270,7 @@ export function measureMapClassifier(
   // `FontConfiguration` (not the bare `FontSpec` the header still uses) is
   // what `TextBlockMap#getTextBlock` hands `create0`. No `{abstract}`/
   // `{static}` modifiers exist on a map row, hence the empty member.
-  const cellFont = memberBaseFont(fontSpec, {});
+  const cellFont = memberBaseFont(bodyFont, {});
   const metrics = rows.map((r) => measureMapRow(r, cellFont, measurer));
   const colA = metrics.length === 0 ? 0 : Math.max(...metrics.map((m) => m.keyWidth));
   const colB = metrics.length === 0 ? 0 : Math.max(...metrics.map((m) => m.valueWidth));
@@ -279,7 +284,11 @@ export function measureMapClassifier(
   // titleHeight + the raw (possibly zero, for an empty map body) fields height.
   const height = title.height + fieldsHeight;
 
-  const headerGeo = headerRows(classifier, theme, measurer, { boxWidth: width, namePadding: MAP_NAME_MARGIN });
+  const headerGeo = headerRows(classifier, theme, measurer, {
+    nameFont,
+    boxWidth: width,
+    namePadding: MAP_NAME_MARGIN,
+  });
   const baselineOffset = baselineOffsetFor(fontSpec, measurer);
   const { rows: rowGeo, dividerYs } = buildMapRowGeo(rows, metrics, title.height, {
     colAWidth: colA,

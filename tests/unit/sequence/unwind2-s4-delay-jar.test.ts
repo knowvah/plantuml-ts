@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { renderPagesSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/unwind2-S4');
 
@@ -67,7 +67,7 @@ function jarPage(name: string, index: number): string {
 
 function ourPages(name: string): string[] {
   const source = readFileSync(join(FIXTURES, `${name}.puml`), 'utf-8');
-  return renderPagesSync(source, { measurer: new WidthTableMeasurer() });
+  return renderPagesSync(source, { measurer: new DeterministicMeasurer() });
 }
 
 function expectDelayInkLikeJar(name: string, pageCount: number, withX = true): void {

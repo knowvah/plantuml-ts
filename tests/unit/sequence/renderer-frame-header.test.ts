@@ -10,7 +10,7 @@ import {
   frameHeaderCornerPath,
 } from '../../../src/diagrams/sequence/renderer-frame-header.js';
 
-const theme: ScaledTheme = scaleSequenceTheme(defaultTheme, 1);
+const theme: ScaledTheme = scaleSequenceTheme(defaultTheme, 1, new DeterministicMeasurer());
 
 /**
  * The tab's runs, built the way `sequence-layout-events.ts#buildTabRuns`

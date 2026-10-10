@@ -11,14 +11,14 @@
  * `margin + padding + delta` (`:301`, `computeDelta` `:332-337`).
  *
  * `unknown/rivino-95-midu088`: jar body `a` rect at (11, 43), `b` at y 151,
- * frame rect height 204, canvas 146x230 (`test-results/dot-cache/unknown/
+ * frame rect height 204, canvas 158x230 (`test-results/dot-cache/unknown/
  * rivino-95-midu088/in.svg`) — raw svek a (0, 8), b (0, 116).
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 const RIVINO = ['@startuml', 'mainframe This is a **mainframe**', '', 'a -- b', '@enduml'].join('\n');
 
@@ -35,10 +35,10 @@ describe('mainframe frames the raw svek body (SvekResult.java:130-135 never runs
     expect(entityRect(svg, 'b')).toEqual({ x: 11, y: 151 });
   });
 
-  it('unknown/rivino-95: frame height = 25 + 14 + raw maxY 164 + 1, canvas 146x230', () => {
+  it('unknown/rivino-95: frame height = 25 + 14 + raw maxY 164 + 1, canvas 158x230', () => {
     const svg = renderSync(RIVINO, { measurer });
-    expect(svg).toMatch(/<rect x="5" y="10" width="130\.513" height="204"/);
-    expect(svg).toContain('width="146px" height="230px"');
+    expect(svg).toMatch(/<rect x="5" y="10" width="142\.063" height="204"/);
+    expect(svg).toContain('width="158px" height="230px"');
   });
 
   it('without a mainframe the body is still moveDelta-normalized (rect at 7, 7)', () => {

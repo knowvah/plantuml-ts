@@ -14,11 +14,11 @@
 import { describe, it, expect } from 'vitest';
 import { measureNote } from '../../../src/diagrams/class/note-layout-measure.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { createSpriteRegistry, addSprite } from '../../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../../src/core/klimt/sprite/SpriteMonochrome.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 /** A 15x15 monochrome sprite — the same dims as rotisi-30's `$printer4`. */
 function registryWith15x15(name: string): ReturnType<typeof createSpriteRegistry> {

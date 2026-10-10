@@ -11,7 +11,7 @@ import { describe, it, expect } from 'vitest';
 import { renderGroupInheritanceNeighborhood } from '../../../src/diagrams/class/renderer-group.js';
 import type { ClassifierGeo, EdgeGeo } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureClass, layoutFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 import { classifierLeaves } from '../../../src/diagrams/class/class-geo-types.js';
 
@@ -110,7 +110,7 @@ describe('renderGroupInheritanceNeighborhood — hand-built geometry', () => {
 
 describe('cdd-T16 — lazeju-60-boki114 full pipeline', () => {
   const markup = readFileSync('test-results/dot-cache/class/lazeju-60-boki114/in.puml', 'utf8');
-  const measurer = new WidthTableMeasurer();
+  const measurer = new DeterministicMeasurer();
 
   it('draws exactly one shared triangle + stub for A3 and for A4, at their real merged contact', () => {
     const { geo } = layoutFixtureClass(markup, measurer);
@@ -148,7 +148,7 @@ describe('cdd-T16 — lazeju-60-boki114 full pipeline', () => {
 // o-- Group`, `Group o-- Activity`).
 describe('cdd-T16b — jakapi-64-tine258 full pipeline (allButSametails)', () => {
   const markup = readFileSync('test-results/dot-cache/class/jakapi-64-tine258/in.puml', 'utf8');
-  const measurer = new WidthTableMeasurer();
+  const measurer = new DeterministicMeasurer();
 
   it('draws 2 triangle+stub pairs THEN 2 plain allButSametails stubs for Group, in that order', () => {
     const { geo } = layoutFixtureClass(markup, measurer);

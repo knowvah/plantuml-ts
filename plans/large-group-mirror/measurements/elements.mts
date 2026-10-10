@@ -7,7 +7,7 @@
 import { readFileSync, readdirSync, existsSync, writeFileSync } from 'node:fs';
 const root = process.cwd();
 const { renderSync } = await import(`${root}/src/index.ts`);
-const { WidthTableMeasurer } = await import(`${root}/src/core/measurer.ts`);
+const { DeterministicMeasurer } = await import(`${root}/src/core/measurer-deterministic.ts`);
 const { combineAssetStores } = await import(`${root}/src/core/asset-store.ts`);
 const { buildSpriteAssetsStore } = await import(`${root}/scripts/sprite-assets-store.ts`);
 const { buildEmojiAssetsStore } = await import(`${root}/scripts/emoji-assets-store.ts`);
@@ -32,7 +32,7 @@ for (const e of engines) {
     const key = `${e}/${slug}`;
     try {
       const svg = renderSync(readFileSync(`${dir}/in.puml`, 'utf8'), {
-        measurer: new WidthTableMeasurer(), assetStore, includeStore,
+        measurer: new DeterministicMeasurer(), assetStore, includeStore,
       });
       res[key] = { o: tags(svg), j: tags(readFileSync(`${dir}/in.svg`, 'utf8')) };
     } catch (err) { res[key] = { err: String(err).slice(0, 200) }; }

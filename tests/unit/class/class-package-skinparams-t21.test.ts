@@ -11,13 +11,13 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { preprocess } from '../../../src/core/preprocessor.js';
 import { resolveSkinparam } from '../../../src/core/skinparam.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 
 function render(src: string): string {
-  return renderSync(src, { measurer: new WidthTableMeasurer() });
+  return renderSync(src, { measurer: new DeterministicMeasurer() });
 }
 
 function unknownKeys(src: string): string[] {
@@ -111,9 +111,10 @@ describe('E3-2: packageStereotypeFontColor (FromSkinparamToStyle.java:283)', () 
 
 describe('E3-6: empty-package leaf draws ClusterDecoration with its stereo block (EntityImageEmptyPackage.java:126-171)', () => {
   it('dojanu-92: p3 draws «Dummy» at (21, 87.889), #F00 italic, 14pt', () => {
+    // textLength 63.787: dojanu-92 in.svg, re-captured (float32-rounded 63.7875).
     const svg = render(DOJANU);
     expect(svg).toMatch(
-      /<text x="21" y="87.889" font-size="14" font-style="italic" fill="#F00" textLength="63.788">«Dummy»<\/text>/,
+      /<text x="21" y="87.889" font-size="14" font-style="italic" fill="#F00" textLength="63.787">«Dummy»<\/text>/,
     );
   });
 

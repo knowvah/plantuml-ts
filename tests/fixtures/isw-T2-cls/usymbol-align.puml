@@ -1,0 +1,13 @@
+@startuml
+allowmixing
+class A
+skinparam defaultTextAlignment center
+rectangle P [
+wide line here
+x
+]
+usecase U [
+wide line here
+x
+]
+@enduml

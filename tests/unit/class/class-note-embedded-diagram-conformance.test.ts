@@ -9,7 +9,7 @@
  * the ONLY class-corpus fixture with a `{{ }}` note region (grepped every
  * cached `in.puml` under `test-results/dot-cache/class/`). Its jar golden
  * holds TWO real nested renders (`detailsNote1` 122x124 sequence diagram,
- * `detailsNote2` 105x96 class diagram) — R2b's original "42x42 catch
+ * `detailsNote2` 112x96 class diagram (re-captured jar; 105x96 while a space was 0)) — R2b's original "42x42 catch
  * fallback" finding is CORRECT for the note's own SIZING (box geometry,
  * `.agent-notes/cdd-B7FU-R2.md`'s "sizing/drawing asymmetry" section, the
  * SAME mechanism `class-body-enhanced-embeds.ts#renderEmbed` documents for
@@ -31,7 +31,7 @@ import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 
@@ -52,7 +52,7 @@ function decodeHref(href: string): string {
 }
 
 describe('xadado-92-lazo250 — class-body note {{ }} regions draw real <image>s (CDD B7FU-R2)', () => {
-  const svg = renderSync(cachedPuml('xadado-92-lazo250'), { measurer: new WidthTableMeasurer() });
+  const svg = renderSync(cachedPuml('xadado-92-lazo250'), { measurer: new DeterministicMeasurer() });
   const images = imageTags(svg);
 
   it('draws exactly two <image> elements (one per {{ }} note region)', () => {
@@ -67,8 +67,8 @@ describe('xadado-92-lazo250 — class-body note {{ }} regions draw real <image>s
     expect(decoded).toContain('title>MyA');
   });
 
-  it('detailsNote2 embeds a real 105x96 CLASS render (class Object), not the (42,42) fallback', () => {
-    const cls = images.find((tag) => attr(tag, 'width') === '105');
+  it('detailsNote2 embeds a real 112x96 CLASS render (class Object), not the (42,42) fallback', () => {
+    const cls = images.find((tag) => attr(tag, 'width') === '112');
     expect(cls).toBeDefined();
     expect(attr(cls!, 'height')).toBe('96');
     const decoded = decodeHref(attr(cls!, 'xlink:href')!);

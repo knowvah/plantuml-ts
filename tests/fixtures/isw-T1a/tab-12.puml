@@ -1,0 +1,6 @@
+@startuml
+skinparam defaultFontSize 12
+rectangle "x\ty z" as R
+rectangle "a\tb  c" as S
+R --> S
+@enduml

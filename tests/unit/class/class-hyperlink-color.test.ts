@@ -10,7 +10,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 const BODY = `
 class uno <<normal>> {
@@ -27,7 +27,7 @@ class TRES AS "[[http://www.plantuml.com tres]]" <<otro>> {
 
 function linkFills(style: string): string[] {
   const svg = renderSync(`@startuml\n<style>\n${style}\n</style>\n${BODY}\n@enduml`, {
-    measurer: new WidthTableMeasurer(),
+    measurer: new DeterministicMeasurer(),
   });
   return [...svg.matchAll(/<a [^>]*><text [^>]*fill="([^"]+)"/g)].map((m) => m[1]!);
 }

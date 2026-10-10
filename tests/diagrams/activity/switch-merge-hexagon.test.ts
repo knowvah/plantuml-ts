@@ -27,9 +27,11 @@ describe('switch diamonds are FtileDiamondInside hexagons', () => {
     it(`${name}: diamond1 and the 7-point merge hexagon equal the jar's`, () => {
       const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, name);
       const jar = diamondPoints(golden);
+      // isw-T2-act: the seam-#4 re-capture of `<case>/in.svg` (`case ( A )`'s
+      // kept spaces now measure 3.3 each, shifting the column 3.3 right).
       expect(jar).toEqual([
-        '64,55,88,55,100,67,88,79,64,79,52,67,64,55',
-        '76,153,76,153,88,165,76,177,76,177,64,165,76,153',
+        '67.3,55,91.3,55,103.3,67,91.3,79,67.3,79,55.3,67,67.3,55',
+        '79.3,153,79.3,153,91.3,165,79.3,177,79.3,177,67.3,165,79.3,153',
       ]);
       expect(diamondPoints(ours)).toEqual(jar);
     });

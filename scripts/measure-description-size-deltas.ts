@@ -43,7 +43,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { renderSync } from '../src/index.js';
 import { setLayoutInputObserver } from '../src/core/graph-layout.js';
-import { WidthTableMeasurer } from '../src/core/measurer.js';
+import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import type { DotInputGraph } from '../src/core/graph-layout.js';
 import { MapIncludeStore } from '../src/core/tim/IncludeStore.js';
 import { withStdlib } from '../src/core/tim/StdlibStore.js';
@@ -181,7 +181,7 @@ function captureGraphs(markup: string): DotInputGraph[] {
   setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(markup, {
-      measurer: new WidthTableMeasurer(),
+      measurer: new DeterministicMeasurer(),
       includeStore: withStdlib(new MapIncludeStore(), buildStdlibAssetsStore()),
       // F4-f piece 1 (ADR-2: "the harness measures the same code path users
       // get"). The jar resolves `<<$archimate/x>>` and `sprite $N jar:…` off

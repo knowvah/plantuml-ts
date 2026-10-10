@@ -15,14 +15,14 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { resolveSkinparam } from '../../../src/core/skinparam.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { computeHeaderInfo } from '../../../src/diagrams/class/class-stereotype.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 
 function render(src: string): string {
-  return renderSync(src, { measurer: new WidthTableMeasurer() });
+  return renderSync(src, { measurer: new DeterministicMeasurer() });
 }
 
 /** Every `<text ...>...</text>` element's attributes + content, order- and

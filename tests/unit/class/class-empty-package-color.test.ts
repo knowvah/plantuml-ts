@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { parseClass } from './parse-helper.js';
 import { collapseEmptyNamespacesFinal } from '../../../src/diagrams/class/class-namespace.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
@@ -27,14 +27,14 @@ describe('empty package leaf back colour (EntityImageEmptyPackage.java:97-112)',
   });
 
   it('rojoxi-79-vimu822: the empty-package icon and the cluster are both filled #DDD', () => {
-    const svg = renderSync(`@startuml\n${ROJOXI}\n@enduml`, { measurer: new WidthTableMeasurer() });
+    const svg = renderSync(`@startuml\n${ROJOXI}\n@enduml`, { measurer: new DeterministicMeasurer() });
     const fills = [...svg.matchAll(/<path d="[^"]*" fill="([^"]*)"/g)].map((m) => m[1]);
     // Cluster outline, then the empty-package leaf (edges' own paths follow).
     expect(fills.slice(0, 2)).toEqual(['#DDD', '#DDD']);
   });
 
   it('keeps the theme fill when no colour was written', () => {
-    const svg = renderSync('@startuml\npackage P {}\n@enduml', { measurer: new WidthTableMeasurer() });
+    const svg = renderSync('@startuml\npackage P {}\n@enduml', { measurer: new DeterministicMeasurer() });
     expect(svg).toContain('fill="#F1F1F1"');
   });
 });

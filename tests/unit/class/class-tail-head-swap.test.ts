@@ -34,7 +34,8 @@ import { dotEdgeRunsReversed } from '../../../src/diagrams/class/class-dot-edge-
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import type { ClassDiagramAST, Relationship } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { FormulaMeasurer, WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { FormulaMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { attachPortLabels } from '../../../src/diagrams/class/class-edge-label-anchor.js';
@@ -117,7 +118,7 @@ describe('T11 — quantifier pair follows the swapped DOT tail/head (DOT reserva
     const captured: DotInputGraph[] = [];
     setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
-      renderSync(puml, { measurer: new WidthTableMeasurer() });
+      renderSync(puml, { measurer: new DeterministicMeasurer() });
     } finally {
       setLayoutInputObserver(undefined);
     }
@@ -198,7 +199,7 @@ describe('T17 fix — role pair follows the swapped DOT tail/head (fallback rese
     const captured: DotInputGraph[] = [];
     setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
-      renderSync(puml, { measurer: new WidthTableMeasurer() });
+      renderSync(puml, { measurer: new DeterministicMeasurer() });
     } finally {
       setLayoutInputObserver(undefined);
     }

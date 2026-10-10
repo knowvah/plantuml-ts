@@ -76,6 +76,7 @@ function hexagonAlone(dimLabel: { width: number; height: number }): { width: num
 export class GtileDiamondInside2 extends TileLeaf {
   readonly kind = 'gtile-diamond-inside2' as const;
   readonly label: string;
+  readonly wrapped: boolean;
   readonly width: number;
   readonly height: number;
   readonly left: number;
@@ -85,9 +86,13 @@ export class GtileDiamondInside2 extends TileLeaf {
   private readonly west: LabelDim;
   private readonly east: LabelDim;
 
-  constructor(label: string, labels: DiamondInside2Labels, bounder: StringBounder, theme: Theme) {
+  /** @param wrapped isw-T2-act F5: the horizontal builder's test carries
+   *  `styleDiamond.wrapWidth()` (`FtileIfLongHorizontal.java:174-177`); the
+   *  vertical one's is a `Display#create` (`FtileIfLongVertical.java:144-146`). */
+  constructor(label: string, labels: DiamondInside2Labels, bounder: StringBounder, theme: Theme, wrapped = false) {
     super();
     this.label = label;
+    this.wrapped = wrapped;
     // add4-T3j: every slot is a `Display#create(fcArrow, LEFT, skinParam)`
     // FULL block (`FtileIfLongHorizontal.java:172-173,186`,
     // `FtileIfLongVertical.java:142-143`, `FtileSwitch.java:110-111,123`);
@@ -102,7 +107,7 @@ export class GtileDiamondInside2 extends TileLeaf {
     this.west = measureSide(labels.west, bounder, theme, CreoleMode.FULL);
     this.east = measureSide(labels.east, bounder, theme, CreoleMode.FULL);
 
-    const dimLabel = measureCondition(label, bounder, theme);
+    const dimLabel = measureCondition(label, bounder, theme, wrapped);
     const hex = hexagonAlone(dimLabel);
     this.hexWidth = hex.width;
     this.hexHeight = hex.height;

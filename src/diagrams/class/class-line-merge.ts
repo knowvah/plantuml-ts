@@ -33,8 +33,9 @@ export interface MergedLines {
    *  "peek at the next line" merge (the logical line's source position is
    *  the opener's, per `SingleLineCommand2.java:83-100`). */
   readonly positions: (number | undefined)[];
-  /** G2 N42: parallel to `lines` -- the SAME line with ONLY trailing
-   *  whitespace stripped (`trimEnd`, not `trim`) -- `lines` itself is
+  /** G2 N42: parallel to `lines` -- the SAME line UNTRIMMED (isw-T2-cls F3:
+   *  it used to be `trimEnd`ed, which dropped the trailing space of a note or
+   *  legend body line that upstream keeps) -- `lines` itself is
    *  FULLY trimmed (`raw.trim()` below), which destroys the leading
    *  indentation `class-body-enhanced.ts`'s `|_` tree-list level
    *  computation needs (`Classifier.rawBodyLines`'s own doc comment).
@@ -102,7 +103,7 @@ export function mergeStandaloneBraces(
     }
     merged.push(trimmed);
     mergedPositions.push(positions[idx]);
-    mergedRaw.push(raw.trimEnd());
+    mergedRaw.push(raw);
   }
   return { lines: merged, positions: mergedPositions, rawLines: mergedRaw };
 }

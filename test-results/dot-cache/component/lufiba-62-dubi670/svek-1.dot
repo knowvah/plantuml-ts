@@ -8,7 +8,7 @@ sh0012->sh0013[arrowtail=none,arrowhead=none,minlen=0,color="#000016",style=invi
 sh0014->sh0015[arrowtail=none,arrowhead=none,minlen=0,color="#00001E",style=invis];
 sh0015->sh0016[arrowtail=none,arrowhead=none,minlen=0,color="#000022",style=invis];
 sh0011 [shape=rect,label="",width=0.815625,height=0.611111,color="#00000B"];
-sh0012 [shape=rect,label="",width=1.589583,height=0.805556,color="#00000C"];
+sh0012 [shape=rect,label="",width=1.643056,height=0.805556,color="#00000C"];
 sh0013 [shape=rect,label="",width=0.837500,height=0.611111,color="#00000D"];
 sh0014 [shape=rect,label="",width=1.096354,height=0.611111,color="#00000E"];
 sh0015 [shape=rect,label="",width=1.096354,height=0.611111,color="#00000F"];

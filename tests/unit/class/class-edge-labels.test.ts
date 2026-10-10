@@ -200,11 +200,12 @@ describe('M4 cause C — guillemet rewrite (xopuku-46-nefa571, tebore-53-tese080
 // fix(label-size-tag-height) -- magic-arrow branch resolves a leading
 // <size:N> tag (xamule-03-jeda376: `Book - Foo : <size:30>to Foo >`).
 // Jar oracle (test-results/dot-cache/class/xamule-03-jeda376/svek-1.dot):
-// WIDTH="91" HEIGHT="32". Arithmetic: "to Foo" at size 30 = 76.6875x30
-// (WidthTableMeasurer); arrow block stays at the BASE font, 13x13
+// WIDTH="99" HEIGHT="32" (re-captured under oracle seam #4 v2; was 91 while a
+// space measured 0). Arithmetic: "to Foo" at size 30 now carries its 8.25
+// space: 84.9375x30; arrow block stays at the BASE font, 13x13
 // (`TextBlockArrow2.calculateDimension`, `klimt/shape/TextBlockArrow2.java
-// :57,87`); mergeLR sums width/maxes height = 89.6875x30; + 2*marginLabel(1)
-// = 91.6875x32; width floors to 91 (`SvekEdge.java:504-507`).
+// :57,87`); mergeLR sums width/maxes height = 97.9375x30; + 2*marginLabel(1)
+// = 99.9375x32; width floors to 99 (`SvekEdge.java:504-507`).
 // ---------------------------------------------------------------------------
 
 describe('fix(label-size-tag-height) — magic-arrow <size:N> (xamule-03-jeda376)', () => {
@@ -215,9 +216,9 @@ describe('fix(label-size-tag-height) — magic-arrow <size:N> (xamule-03-jeda376
     return { from: 'Book', to: 'Foo', type: 'association', label };
   }
 
-  it('<size:30>to Foo > reserves the oracle box 91x32', () => {
+  it('<size:30>to Foo > reserves the oracle box 99x32', () => {
     const attrs = edgeLabelAttrs(magicRel('<size:30>to Foo >'), font, font, oracleMeasurer);
-    expect(Math.floor(attrs.labelWidth!)).toBe(91);
+    expect(Math.floor(attrs.labelWidth!)).toBe(99);
     expect(Math.floor(attrs.labelHeight!)).toBe(32);
   });
 

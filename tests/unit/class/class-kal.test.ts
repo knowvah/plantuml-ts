@@ -20,7 +20,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { layoutFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 import type { ClassGeometry } from '../../../src/diagrams/class/layout.js';
 import {
@@ -36,7 +36,7 @@ import {
 import { parseRelationshipLine } from '../../../src/diagrams/class/class-relationship-parser.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function markupOf(slug: string): string {
   return readFileSync(`test-results/dot-cache/class/${slug}/in.puml`, 'utf8');
@@ -75,7 +75,10 @@ describe('Kal — measure (Kal.java:104, textDim.delta(4,2))', () => {
   });
 
   it('places a DOWN box at dx = -width/2, dy = 0 (Kal.java:165-166)', () => {
-    expect(kalTextDelta(kals[0]!)).toEqual({ dx: -56.15 / 2, dy: 0 });
+    // float32-rounded measurer (oracle seam #4 v2): -28.075000762..., not -28.075
+    const delta = kalTextDelta(kals[0]!);
+    expect(delta.dx).toBeCloseTo(-56.15 / 2, 5);
+    expect(delta.dy).toBe(0);
   });
 
   it('pushes the DOWN extremity out by the box height (Kal.java:72-85)', () => {
@@ -107,7 +110,7 @@ describe('Kal — margins and the node-width floor (camuna-58-veca254)', () => {
 
   it('counts only UP/DOWN boxes toward getKalWidth (EntityImageClass.java:117-127)', () => {
     const widths = kalWidthByEntity(kals);
-    expect(widths.get('Shop')).toBeCloseTo(103.488, 3);
+    expect(widths.get('Shop')).toBeCloseTo(107.3375, 3);
     // `HashMap`'s only box is a RIGHT one, so it contributes no width.
     expect(widths.get('HashMap') ?? 0).toBe(0);
   });

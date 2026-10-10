@@ -34,6 +34,7 @@ import { tileNodes, withSwimlane, withSwimlaneOut } from './tile-layout.js';
 import { tileSimpleLeaf } from './tile-layout-leaves.js';
 import { withInLabel, withOutLabel } from './tile-layout-inlabel.js';
 import { groupInnerInkMaxX } from './canvas-origin-group-ink.js';
+import { nonWhiteTest } from './display-white.js';
 
 /**
  * `FtileFactoryDelegatorAddNote#addNote` (`vcompact/FtileFactoryDelegator
@@ -348,7 +349,7 @@ export function tileSwitch(
   // `FtileDiamondInside` hexagons (no `.withNorth`/`.withWest`/`.withEast`
   // call anywhere in that file) -- diamond1 carries the switch's own
   // condition label, diamond2 is always empty.
-  const diamond = new GtileDiamondInside(node.condition, {}, bounder, theme);
+  const diamond = new GtileDiamondInside(nonWhiteTest(node.condition), {}, bounder, theme);
   const cases = node.cases.map((kase) => tileSwitchCase(kase, bounder, theme, laneOrder, pragma));
   const mergeDiamond = new GtileDiamondInside('', {}, bounder, theme);
   const tile = withSwimlane(new GtileSwitch(diamond, cases, mergeDiamond, bounder, theme), node.swimlane);

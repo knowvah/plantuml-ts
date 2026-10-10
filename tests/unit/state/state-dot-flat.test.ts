@@ -39,14 +39,14 @@ import { parseAst } from '../../helpers/parse-ast.js';
 import type { StateDiagramAST } from '../../../src/diagrams/state/ast.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { parseSvekDot, dotInputToStructural, compareStructural } from '../../oracle/svek-dot.js';
 
 const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/state');
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const theme = defaultTheme; // fontFamily 'sans-serif', fontSize 14 — matches the oracle capture
 
 function readFixture(slug: string): { puml: string; oracleDot: string } {
@@ -134,10 +134,12 @@ describe('layoutState — gizati-67-kora187 (3-line body, exact px)', () => {
     expect(ast.states[0]!.description).toHaveLength(1);
   });
 
-  it('sizes "s1" to the oracle dims (50 x 76 — 0.694444in x 1.055556in @72dpi)', () => {
+  it('sizes "s1" to the oracle dims (65.0625 x 76 — 0.903646in x 1.055556in @72dpi)', () => {
     const geo = layoutState(ast, theme, measurer);
     const s = geo.states.find((n) => n.id === 's1')!;
-    expect(s.width).toBeCloseTo(50, 5);
+    // Re-captured oracle (seam #4 v2): gizati-67-kora187 svek-1.dot sh0006
+    // width=0.903646 (the 3 body lines now carry real space widths).
+    expect(s.width).toBeCloseTo(0.903646 * 72, 3);
     expect(s.height).toBeCloseTo(76, 5);
   });
 });

@@ -17,9 +17,9 @@ import { renderClass } from '../../../src/diagrams/class/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const theme = defaultTheme;
 
 function src(lines: string[]): UmlSource {

@@ -28,7 +28,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { renderSync } from '../src/index.js';
 import { setLayoutInputObserver } from '../src/core/graph-layout.js';
-import { WidthTableMeasurer } from '../src/core/measurer.js';
+import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { MapIncludeStore } from '../src/core/tim/IncludeStore.js';
 import { withStdlib } from '../src/core/tim/StdlibStore.js';
 import { combineAssetStores } from '../src/core/asset-store.js';
@@ -168,7 +168,7 @@ function captureGraphs(type: BacklogType, markup: string): DotInputGraph[] {
   setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(markup, {
-      measurer: new WidthTableMeasurer(),
+      measurer: new DeterministicMeasurer(),
       ...(type === 'description'
         ? {
             includeStore: withStdlib(new MapIncludeStore(), buildStdlibAssetsStore()),

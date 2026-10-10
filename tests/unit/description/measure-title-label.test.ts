@@ -9,10 +9,10 @@
  */
 import { describe, test, expect } from 'vitest';
 import { measureTitleLabel } from '../../../src/diagrams/description/layout-helpers.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { FontSpec } from '../../../src/core/measurer.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const font: FontSpec = { family: 'sans-serif', size: 14 };
 
 describe('measureTitleLabel', () => {

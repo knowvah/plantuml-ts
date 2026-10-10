@@ -841,11 +841,11 @@
     {
       "type": "activity",
       "slug": "fakece-07-koga025",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 3 (syntax): Syntax Error?",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -931,11 +931,11 @@
     {
       "type": "activity",
       "slug": "filela-40-rumo296",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -1426,11 +1426,11 @@
     {
       "type": "activity",
       "slug": "javivi-33-poma496",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -1570,11 +1570,11 @@
     {
       "type": "activity",
       "slug": "juleki-83-xusi470",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -1750,11 +1750,11 @@
     {
       "type": "activity",
       "slug": "kivada-26-koti213",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -1894,11 +1894,11 @@
     {
       "type": "activity",
       "slug": "lefobe-62-gipe702",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -2164,11 +2164,11 @@
     {
       "type": "activity",
       "slug": "mijoso-20-sato362",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -2236,11 +2236,11 @@
     {
       "type": "activity",
       "slug": "mukaxi-27-xero900",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -2524,11 +2524,11 @@
     {
       "type": "activity",
       "slug": "nudonu-37-kaja626",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -2542,11 +2542,11 @@
     {
       "type": "activity",
       "slug": "nupiko-03-cezu269",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -2722,11 +2722,11 @@
     {
       "type": "activity",
       "slug": "pixisi-38-kixa563",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 13 (syntax): Syntax Error?",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -2848,11 +2848,11 @@
     {
       "type": "activity",
       "slug": "putega-59-fuzi707",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -2965,11 +2965,11 @@
     {
       "type": "activity",
       "slug": "roroko-26-coje324",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3028,11 +3028,11 @@
     {
       "type": "activity",
       "slug": "runima-82-jigi009",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 30 (syntax): Syntax Error?",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3118,11 +3118,11 @@
     {
       "type": "activity",
       "slug": "sesodi-22-lupe361",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3307,11 +3307,11 @@
     {
       "type": "activity",
       "slug": "tajiri-57-sepu092",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render SUCCEEDED (we accept a source the jar rejects; open -> add4)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "measuredAgainstCommit": "87727a9c",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3415,11 +3415,11 @@
     {
       "type": "activity",
       "slug": "tirizu-79-niza262",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3469,11 +3469,11 @@
     {
       "type": "activity",
       "slug": "vafupe-19-cima350",
-      "status": "jar-error",
-      "diffCount": null,
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
     },
     {
       "type": "activity",

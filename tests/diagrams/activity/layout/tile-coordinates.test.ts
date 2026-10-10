@@ -21,6 +21,7 @@ import { DeterministicMeasurer } from '../../../../src/core/measurer-determinist
 import { parseActivity } from '../../../../src/diagrams/activity/parser.js';
 import { layoutActivity } from '../../../../src/diagrams/activity/layout/tile-layout.js';
 import { astOrThrow } from '../../../helpers/parse-ast.js';
+import { measured } from '../../../unit/activity/measured-theme.js';
 
 const bounder: StringBounder = {
   getDimension: (_text: string, _size: number) => ({ width: 60, height: 16 }),
@@ -32,7 +33,7 @@ const bounder: StringBounder = {
 // `theme.colors.elements` -- a partial cast had no `colors` at all and
 // threw. `fontSize` is kept at 13 so every assertion below that depends
 // on the ROOT font is unchanged.
-const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
+const theme: Theme = measured({ ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' });
 
 const emptyAst: ActivityDiagramAST = { nodes: [], swimlanes: [] };
 // T1a (D2): `LAYOUT_MARGIN` was deleted from production -- the canvas
@@ -863,7 +864,7 @@ describe('dedupeAdjacentPoints — Worm#addPoint exact-equality collapse (D2)', 
 // :202-216`) is gated on `geo.hasPointOut()`.
 describe('assignCoordinates — fork/split branch connectors are vertical drops at the branch x (D1)', () => {
   const bounder: StringBounder = { getDimension: () => ({ width: 60, height: 16 }) };
-  const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
+  const theme: Theme = measured({ ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' });
 
   // North/south hooks intentionally off-centre (not width/2) so a test
   // asserting on the LITERAL branch-x, not an accidental bar-centre
@@ -940,7 +941,7 @@ describe('assignCoordinates — fork/split branch connectors are vertical drops 
 // branch continues.
 describe('assignCoordinates — fork/split bar and split-line geometry (D4)', () => {
   const bounder: StringBounder = { getDimension: () => ({ width: 60, height: 16 }) };
-  const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
+  const theme: Theme = measured({ ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' });
 
   // North hook x=7, south hook x=11 for every branch -- off-centre so a
   // span computed from the hook actually differs from a bar-centre guess.

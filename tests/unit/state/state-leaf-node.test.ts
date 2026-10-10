@@ -18,13 +18,13 @@ import { fileURLToPath } from 'node:url';
 import type { State } from '../../../src/diagrams/state/ast.js';
 import { buildLeafNode, type LeafNodeCtx } from '../../../src/diagrams/state/state-leaf-node.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderSync } from '../../../src/index.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
 const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/state');
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function makeState(overrides: Partial<State> = {}): State {
   return {

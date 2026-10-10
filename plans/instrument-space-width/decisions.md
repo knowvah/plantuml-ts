@@ -71,3 +71,39 @@ elements b0→final away = 0; production manifest unchanged; the four lgm crash
 fixtures (kovaxi-11, zidebi-71, runima-82, pixisi-38) render as real diagrams
 on the new jar and `ORACLE_CRASH_FIXTURES` is removed; four gates green;
 `DIVERGENCES.md` lone-space entry retired; ADR-001 addendum.
+
+## D10-AMEND (PROPOSED 2026-10-09, journal row 12 — awaiting user)
+Finding: the production manifest stays unchanged across the instrument step
+(b0→b1: 0 changes), but the revealed families F1 (10 production sites build
+their own `WidthTableMeasurer`) and F2 (leading/trailing-space trim and x
+shift) are port defects production already has — `jarMeasurer` gives spaces
+width — so every fix moves production output toward the jar. "Production
+manifest unchanged" (D10, stop 6) contradicts D8. Proposed: stop 6 becomes
+"every production manifest change is attributed to a named family fix and
+journaled; no change outside a family". F3 (seam-#4-only jar crash pages,
+`Direction.java:128` float equality) proposed excluded like lgm's four.
+
+## D10-AMEND — RULED 2026-10-09 (user)
+1. Production bar: changes allowed only when every changed fixture is
+   attributed to a named family fix and journaled; any unattributed change
+   still fires stop 6.
+2. F1: inject the render's measurer at every site (upstream
+   `ug.getStringBounder()`); production activity text becomes AWT-measured.
+3. F3: "If this works without the seam exercised, then we need to fix our
+   injection to do better. We shouldn't crash if PlantUML unaltered JAR
+   works." Seam #4 must not crash where stock metrics render. Not excluded.
+
+## D2/D3-AMEND (2026-10-09, implements the user's F3 ruling; flagged for review)
+Seam #4 as first built (`super.width + spaces*4.4*size/16`) made the jar crash
+on activity cemagu-66/nerete-42/rosepa-78 where stock metrics and seam #3
+render: `Snake.same` merges points within 0.001 (`Snake.java:299-300`), then
+`Direction.fromVector` demands exact H/V equality (`Direction.java:118-128`);
+cemagu reached x by two routes, 126.75000000000001 vs 126.75. Seam #4 now:
+(a) measures each U+0020 as U+0021 (same table entry 44, summed in-loop —
+exactly a table with 44 at 0x20; fixed nerete + rosepa), and (b) rounds the
+width to float, as the stock SVG bounder's is (`FileFormat.getJavaDimension`
+reads `FontMetrics.getStringBounds`, verified `Rectangle2D$Float` in jshell
+2026-10-09; fixed cemagu). (b) touches every width, not only spaces — D2's
+"only U+0020 changes" now reads "only U+0020's table entry changes; every
+width is float-rounded like stock". Port: `DeterministicMeasurer` mirrors
+both (`' '`→`'!'`, `Math.fround`). The 4 lgm + 3 new fixtures all render.

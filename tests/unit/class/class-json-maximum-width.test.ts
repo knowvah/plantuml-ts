@@ -15,10 +15,10 @@ import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 import type { Theme } from '../../../src/core/theme.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { measureJsonClassifier } from '../../../src/diagrams/class/class-json-sizing.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const LOREM =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
 
@@ -43,7 +43,7 @@ function rowYs(value: string, theme: Theme): number[] {
 describe('measureJsonClassifier — MaximumWidth word-wrap (nadedo-37-nesa665)', () => {
   it('wraps the long value to the jar box 237.087 x 78', () => {
     const m = measureJsonClassifier(jsonLeaf(LOREM), themeWithJsonBucket(200), measurer);
-    expect(m.width).toBeCloseTo(237.087, 3);
+    expect(m.width).toBeCloseTo(240.7625, 3);
     expect(m.height).toBe(78);
   });
 

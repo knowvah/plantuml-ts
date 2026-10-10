@@ -7,19 +7,19 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import {
   headerInkReservation,
   compartmentReservationWidth,
 } from '../../../src/diagrams/class/class-classifier-ink-reservation.js';
 
 function svgWidth(body: string[]): string | undefined {
-  const svg = renderSync(['@startuml', ...body, '@enduml'].join('\n'), { measurer: new WidthTableMeasurer() });
+  const svg = renderSync(['@startuml', ...body, '@enduml'].join('\n'), { measurer: new DeterministicMeasurer() });
   return /<svg[^>]*\bwidth="([^"]+)"/.exec(svg)?.[1];
 }
 
 function svgHeight(body: string[]): string | undefined {
-  const svg = renderSync(['@startuml', ...body, '@enduml'].join('\n'), { measurer: new WidthTableMeasurer() });
+  const svg = renderSync(['@startuml', ...body, '@enduml'].join('\n'), { measurer: new DeterministicMeasurer() });
   return /<svg[^>]*\bheight="([^"]+)"/.exec(svg)?.[1];
 }
 
@@ -113,9 +113,9 @@ describe('Q-11: a widened class box is bounded by its rect corner x + w - 1', ()
     expect(svgWidth(body)).toBe('372px');
   });
 
-  it('xoxega-30-vuju324: jar width 373', () => {
+  it('xoxega-30-vuju324: jar width 388', () => {
     const body = ['class top', 'class class2', 'class class3', 'class class4', ''];
     for (const n of [2, 3, 4]) body.push(`top [long Qualifier${n}] -- [Qualifier${n}] class${n}`);
-    expect(svgWidth(body)).toBe('373px');
+    expect(svgWidth(body)).toBe('388px');
   });
 });

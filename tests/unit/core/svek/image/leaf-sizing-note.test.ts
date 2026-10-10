@@ -51,7 +51,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../../../src/index.js';
 import { measureLeafNode } from '../../../../../src/core/svek/image/leaf-sizing.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 import type { FontSpec } from '../../../../../src/core/measurer.js';
 import type { DescriptiveNode } from '../../../../../src/diagrams/description/ast.js';
 
@@ -60,7 +60,7 @@ import type { DescriptiveNode } from '../../../../../src/diagrams/description/as
  *  override" into this value, which is exactly why `measureNote` may not
  *  derive the note font from it (ADR-4). */
 const fontSpec: FontSpec = { family: 'SansSerif', size: 14 };
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function note(display: string): DescriptiveNode {
   return { id: 'n', display, symbol: 'note', children: [] };
@@ -85,7 +85,7 @@ describe('F1-a / C1 — block-separator geometry (isBlockSeparator + decorate)',
   it('xufexu-38 note 1: jar 1.186545x1.611111in = 85.43125x116px', () => {
     const d = measureLeafNode(note(NOTE1), fontSpec, measurer);
     expect(d.height).toBeCloseTo(116, 6);
-    expect(d.width).toBeCloseTo(85.43125, 4);
+    expect(d.width).toBeCloseTo(92.58125, 4);
   });
 
   it('xufexu-38 note 1 height falls out of the Java expression, no free parameters', () => {
@@ -103,7 +103,7 @@ describe('F1-a / C1 — block-separator geometry (isBlockSeparator + decorate)',
   it('xufexu-38 note 2 (one more text line, same 4 separators): jar 1.791667in = 129px', () => {
     const d = measureLeafNode(note(NOTE2), fontSpec, measurer);
     expect(d.height).toBeCloseTo(129, 6);
-    expect(d.width).toBeCloseTo(85.43125, 4);
+    expect(d.width).toBeCloseTo(92.58125, 4);
   });
 
   it('pivudu-29 `C / ---- / D`: jar 0.422569x0.611111in = 30.425x44px', () => {
@@ -148,7 +148,7 @@ describe('F1-a / C2 — `{{ … }}` collapses to one EmbeddedDiagram atom (42x42
 describe('F1-a / C3 — the note font size honours a per-element override', () => {
   it('tijexo-10 `<style> note { FontSize 10 }`: jar 1.248264x0.277778in = 89.875x20px', () => {
     const d = measureLeafNode(note('note that is green'), fontSpec, measurer, { fontSize: 10 });
-    expect(d.width).toBeCloseTo(89.875, 4);
+    expect(d.width).toBeCloseTo(98.125, 4);
     expect(d.height).toBeCloseTo(20, 6);
   });
 
@@ -177,7 +177,7 @@ describe('F1-a / C4 — a run whose font is not the note font contributes ITS he
 
   it('nobiza-91 note: jar 9.661458x0.513889in = 695.625x37px', () => {
     const d = measureLeafNode(note(IMG_NOTE), fontSpec, measurer);
-    expect(d.width).toBeCloseTo(695.625, 3);
+    expect(d.width).toBeCloseTo(703.32501, 3);
     expect(d.height).toBeCloseTo(37, 6);
   });
 
@@ -202,7 +202,7 @@ function render(style: string): string {
   // DOT at all (`isDegeneratedWithFewEntities`). `UC` shares no substring with
   // any note line, so the assertions below cannot match it by accident.
   return renderSync(`@startuml\n${style}usecase UC\n${NOTE_SOURCE}\nN .. UC\n@enduml`, {
-    measurer: new WidthTableMeasurer(),
+    measurer: new DeterministicMeasurer(),
   });
 }
 

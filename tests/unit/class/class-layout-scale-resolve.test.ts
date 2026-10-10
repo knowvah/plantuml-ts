@@ -12,9 +12,9 @@
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function fixtureSource(slug: string): string {
   return readFileSync(`test-results/dot-cache/class/${slug}/in.puml`, 'utf8');

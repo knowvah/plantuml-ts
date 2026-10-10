@@ -48,4 +48,37 @@ describe('finalizeActivityFragment — document scale', () => {
     expect(svg).toContain('viewBox="0 0 440 298"');
     expect(svg).toContain('stroke-width="2"');
   });
+
+  // isw-T2c-scale: a deferred body carries lossless doubles; the scale pass
+  // is their one `SvgGraphics#format` (`SvgGraphics.java:468-475`).
+  it('formats a deferred body once, after the scale (fround(20.83125) * 1.5 -> 31.247)', () => {
+    const body = '<text x="7.0000005" y="8" font-size="11" textLength="20.83125">a</text>';
+    const svg = assembleSvg(fragment({ body, numbersDeferred: true, scaleSpec: { kind: 'simple', factor: 1.5 } }));
+    expect(svg).toContain('<text x="10.5" y="12" font-size="16.5" textLength="31.247">a</text>');
+  });
+
+  it('formats a deferred body at factor 1 too (every scalable attribute, once)', () => {
+    const body =
+      '<rect x="1.23456" y="2" width="20.83125" height="3.0004" rx="1.00049" style="stroke-width:0.50051;"/>' +
+      '<line x1="0.12345" y1="1" x2="2" y2="3" stroke-dasharray="7.12345,7.12345"/>';
+    const svg = assembleSvg(fragment({ body, numbersDeferred: true, scaleSpec: { kind: 'simple', factor: 1 } }));
+    expect(svg).toContain('<rect x="1.235" y="2" width="20.831" height="3" rx="1" style="stroke-width:0.501;"/>');
+    expect(svg).toContain('<line x1="0.123" y1="1" x2="2" y2="3" stroke-dasharray="7.123,7.123"/>');
+  });
+
+  it('leaves a non-deferred body at factor 1 byte-identical', () => {
+    const body = '<text x="1" y="2" textLength="20.83125">a</text>';
+    expect(assembleSvg(fragment({ body, scaleSpec: { kind: 'simple', factor: 1 } }))).toContain(
+      'textLength="20.83125"',
+    );
+  });
+
+  // isw-T2c-scale: `finalizeRootAttributes` (`SvgGraphics.java:800-813`)
+  // truncates `maxX * scale` for `style`/`viewBox` but prints the root
+  // `width`/`height` attributes through `format(maxX)`, which scales.
+  it('prints the root width/height attributes as format(maxX * scale)', () => {
+    const svg = assembleSvg(fragment({ width: 631, height: 228, scaleSpec: { kind: 'simple', factor: 1.5 } }));
+    expect(svg).toContain('style="width:946px;height:342px;');
+    expect(svg).toContain('width="946.5px" height="342px" viewBox="0 0 946 342"');
+  });
 });

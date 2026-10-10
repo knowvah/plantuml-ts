@@ -1,0 +1,10 @@
+@startuml
+skinparam swimlaneWidth same
+skinparam wrapWidth 150
+skinparam swimlaneWrapTitleWidth auto
+ 
+| this is an exceptionally long title  which now wrap at 100 pixels|
+:You fixed it so this will wrap at 150 pixels thank you!;
+|Ignore Me|
+:ignore me;
+@enduml

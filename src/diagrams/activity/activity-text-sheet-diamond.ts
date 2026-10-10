@@ -11,7 +11,7 @@
  */
 import type { Theme } from '../../core/theme.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
-import { activityHorizontalAlignment } from './activity-text-style.js';
+import { activityHorizontalAlignment, activityWrapWidth } from './activity-text-style.js';
 import { actColors } from './activity-renderer-shapes.js';
 import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js';
 import {
@@ -30,7 +30,7 @@ import { UStroke } from '../../core/klimt/UStroke.js';
 import { Fore } from '../../core/klimt/Fore.js';
 import { Back } from '../../core/klimt/Back.js';
 import { chromeAtomOps } from '../../core/annotations/blocks-creole.js';
-import { WidthTableMeasurer } from '../../core/measurer.js';
+import { activityMeasurer } from './activity-string-bounder.js';
 import type { Stencil } from '../../core/klimt/creole/Stencil.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
 import type { Paint } from '../../core/paint.js';
@@ -41,8 +41,6 @@ const ALIGNMENT_MAP: Record<'left' | 'center' | 'right', HorizontalAlignment> = 
   center: HorizontalAlignment.CENTER,
   right: HorizontalAlignment.RIGHT,
 };
-
-const MEASURER = new WidthTableMeasurer();
 
 /** `Hexagon.asStencil(tb)` (`ftile/Hexagon.java:84-104`): the stencil
  *  widens by `hexagonHalfSize * p` toward the middle row (`p = y / h * 2`,
@@ -68,17 +66,21 @@ export function hexagonAsStencil(tb: TextBlock): Stencil {
  * CreoleMode.FULL).createSheet(labelTest)` in a `SheetBlock1(sheet,
  * diamondLineBreak, skinParam.getPadding())`, wrapped as `new
  * SheetBlock2(sheetBlock1, Hexagon.asStencil(sheetBlock1), thickness)` with
- * the diamond style's stroke. `diamondLineBreak` (`style.wrapWidth()`) is
- * `LineBreakStrategy.NONE`: no activity diamond `MaximumWidth` is modelled.
+ * the diamond style's stroke. `wrapped` (isw-T2-act F5): `diamondLineBreak =
+ * styleDiamond.wrapWidth()` (`ConditionalBuilder.java:120,244`; the switch's
+ * `FtileFactoryDelegatorSwitch.java:134`, the elseif's
+ * `FtileIfLongHorizontal.java:174`); a `Display#create` test (while,
+ * repeat, vertical elseif) is `LineBreakStrategy.NONE` (`Display.java:614-623`).
  */
-export function diamondTestBlock(label: string, theme: Theme): SheetBlock2 {
+export function diamondTestBlock(label: string, theme: Theme, wrapped = false): SheetBlock2 {
   const fc = activityTextFontConfiguration(theme, activityFontSize(theme, 'diamond'), 'diamond');
   const sheet = activitySheet(label, theme, {
     fontConfiguration: fc,
     horizontalAlignment: ALIGNMENT_MAP[activityHorizontalAlignment(theme)],
     creoleMode: CreoleMode.FULL,
   });
-  const sheet1 = new SheetBlock1(sheet, LineBreakStrategy.NONE, chromeAtomOps(theme.sprites, fc), theme.padding ?? 0);
+  const lineBreak = wrapped ? activityWrapWidth(theme, 'diamond') : LineBreakStrategy.NONE;
+  const sheet1 = new SheetBlock1(sheet, lineBreak, chromeAtomOps(theme.sprites, fc), theme.padding ?? 0);
   return new SheetBlock2(
     sheet1,
     hexagonAsStencil(sheet1),
@@ -93,6 +95,8 @@ export interface DiamondLabelBox {
   readonly width: number;
   readonly height: number;
   readonly fill?: Paint;
+  /** isw-T2-act F5: see `ActivityNodeGeo.wrapped`. */
+  readonly wrapped?: true;
 }
 
 /**
@@ -103,9 +107,9 @@ export interface DiamondLabelBox {
  * dimLabel.height) / 2` in the hexagon's own frame.
  */
 export function renderDiamondTestLabel(label: string, theme: Theme, box: DiamondLabelBox): string {
-  const tb = diamondTestBlock(label, theme);
+  const tb = diamondTestBlock(label, theme, box.wrapped === true);
   const fc = activityTextFontConfiguration(theme, activityFontSize(theme, 'diamond'), 'diamond');
-  const dim = tb.calculateDimension(klimtStringBounder(MEASURER, { family: fc.family, size: fc.size }));
+  const dim = tb.calculateDimension(klimtStringBounder(activityMeasurer(theme), { family: fc.family, size: fc.size }));
   const lx = (box.width - dim.getWidth()) / 2;
   const ly = (box.height - dim.getHeight()) / 2;
   const c = actColors(theme);
@@ -121,6 +125,7 @@ export function renderDiamondTestLabel(label: string, theme: Theme, box: Diamond
 export interface IfLabelNode {
   readonly label?: string | undefined;
   readonly ifLabelRole?: 'test' | 'full' | undefined;
+  readonly wrapped?: true | undefined;
 }
 
 function ifLabelSName(node: IfLabelNode): 'diamond' | 'arrow' {
@@ -146,11 +151,14 @@ export function ifLabelBlock(
 ): { readonly tb: TextBlock; readonly fc: FontConfiguration } {
   const label = node.label ?? '';
   const fc = activityTextFontConfiguration(theme, ifLabelFontSize(node, theme), ifLabelSName(node));
-  if (node.ifLabelRole === 'test') return { tb: diamondTestBlock(label, theme), fc };
+  const wrapped = node.wrapped === true;
+  if (node.ifLabelRole === 'test') return { tb: diamondTestBlock(label, theme, wrapped), fc };
   const tb = activityDisplayBlock(label, theme, {
     fontConfiguration: fc,
     horizontalAlignment: HorizontalAlignment.LEFT,
     creoleMode: node.ifLabelRole === 'full' ? CreoleMode.FULL : CreoleMode.SIMPLE_LINE,
+    // isw-T2-act F5: `getLabelPositive`'s `labelLineBreak` (`ConditionalBuilder.java:121,280-283`).
+    ...(wrapped ? { maxMessageSize: activityWrapWidth(theme, 'arrow') } : {}),
   });
   return { tb, fc };
 }

@@ -11,6 +11,9 @@
  * dev-build version banner) and are asserted against OUR OWN content, not
  * the jar's — every other line is asserted against the jar's literal number.
  *
+ * Values re-read 2026-10 from the seam #4 v2 re-capture of those same two
+ * goldens (a space is now 44 tenths, widths float-rounded).
+ *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/error/PSystemError.java#getGraphicalFormatted
  */
 
@@ -23,12 +26,12 @@ import { PSystemErrorEmpty } from '../../../../src/core/error/PSystemErrorEmpty.
 import { PSystemErrorPreprocessor } from '../../../../src/core/error/PSystemErrorPreprocessor.js';
 import { umlSourceOf } from '../../../../src/core/error/UmlSource.js';
 import { renderPSystemError } from '../../../../src/core/error/error-renderer.js';
-import { WidthTableMeasurer } from '../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
 import { readLines } from '../../../../src/core/tim/ReadLineReader.js';
 import { LineLocationImpl } from '../../../../src/core/tim/LineLocationImpl.js';
 import { StringLocated } from '../../../../src/core/tim/StringLocated.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 /** A source (>= 5 lines, so no Welcome block) and a trace failing on its
  *  last line — mirrors `PSystemError.test.ts`'s own `failing()` helper. */
@@ -70,21 +73,21 @@ describe('error page geometry — C-17: height === font size, baseline === box t
     expect(ys(svg)).toEqual([17, 40, 58, 72, 86, 100, 114, 128, 142, 156, 170, 184, 198, 212]);
   });
 
-  it('sizes the canvas to `(int)(declaredDimension + 1)` — jar 389×218 (SvgGraphics.java:129-136,143)', () => {
+  it('sizes the canvas to `(int)(declaredDimension + 1)` — jar 419×218 (SvgGraphics.java:129-136,143)', () => {
     const svg = renderPSystemError(failing(luziveSource, luziveMessage), measurer);
-    expect(svg).toContain('width="389px"');
+    expect(svg).toContain('width="419px"');
     expect(svg).toContain('height="218px"');
-    expect(svg).toContain('viewBox="0 0 389 218"');
+    expect(svg).toContain('viewBox="0 0 419 218"');
   });
 
-  it('sizes the green band rect to the widest of its own line and the listing (jar rect x=5 y=25 width=135.45 height=19)', () => {
+  it('sizes the green band rect to the widest of its own line and the listing (jar rect x=5 y=25 width=143.15 height=19)', () => {
     const svg = renderPSystemError(failing(luziveSource, luziveMessage), measurer);
-    expect(svg).toContain('<rect x="5" y="25" width="135.45" height="19"');
+    expect(svg).toContain('<rect x="5" y="25" width="143.15" height="19"');
   });
 
   it('emits textLength on every multi-character listing/message line, matching the jar exactly (its content is unaffected by C-18)', () => {
     const svg = renderPSystemError(failing(luziveSource, luziveMessage), measurer);
-    for (const expected of ['63.962', '80.15', '81.288', '135.45', '114.713', '115.325', '378.175']) {
+    for (const expected of ['63.963', '87.85', '85.137', '143.15', '118.563', '119.175', '405.125']) {
       expect(svg).toContain(`textLength="${expected}"`);
     }
   });
@@ -109,7 +112,7 @@ describe('error page geometry — C-17: height === font size, baseline === box t
   // its own first 8 SOURCE lines (tests/corpus/class/sadamo-18-siva346.puml,
   // read verbatim rather than transcribed: line 8 is a ~9400-char pathological
   // backtick run that `PSystemError#addToResult`'s 120-char truncation cuts
-  // down to the jar's own `textLength="591.587"` line) — pinning the SAME
+  // down to the jar's own `textLength="603.138"` line) — pinning the SAME
   // formulas against a different line count/error message/truncation.
   const sadamoCorpusPath = join(
     dirname(fileURLToPath(import.meta.url)),
@@ -132,23 +135,23 @@ describe('error page geometry — C-17: height === font size, baseline === box t
     expect(ys(sadamoSvg())).toEqual([17, 40, 58, 72, 86, 100, 114, 128, 142, 156, 170, 184]);
   });
 
-  it('sizes the canvas to 602×190, per the jar golden', () => {
+  it('sizes the canvas to 614×190, per the jar golden', () => {
     if (sadamoSource === undefined) {
       console.warn(`skip: corpus fixture not found at ${sadamoCorpusPath}`);
       return;
     }
     const svg = sadamoSvg();
-    expect(svg).toContain('width="602px"');
+    expect(svg).toContain('width="614px"');
     expect(svg).toContain('height="190px"');
   });
 
-  it('truncates the pathological last line at 120 chars + " ..." and sizes it to the jar textLength (591.587)', () => {
+  it('truncates the pathological last line at 120 chars + " ..." and sizes it to the jar textLength (603.138)', () => {
     if (sadamoSource === undefined) {
       console.warn(`skip: corpus fixture not found at ${sadamoCorpusPath}`);
       return;
     }
     const svg = sadamoSvg();
-    expect(svg).toContain('textLength="591.587"');
+    expect(svg).toContain('textLength="603.138"');
   });
 });
 

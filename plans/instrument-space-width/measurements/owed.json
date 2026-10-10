@@ -1,0 +1,9103 @@
+{
+ "activity/activity-creole-table": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bakopu-96-pudu086": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[6]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/barada-07-veca157": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bareka-88-fusu160": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bazize-75-dedo568": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bazuma-86-metu353": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/becanu-19-diti597": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bedezo-44-more709": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/begivo-34-sicu289": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bepuku-07-vebe062": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/besaga-58-poli497": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bideta-97-cezo697": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bidosa-98-veca008": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bigide-91-bise382": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/biguku-39-voxu233": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/biredi-08-bama025": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bixefi-77-moki051": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bizeti-00-mido821": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[10]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bolizi-92-pele824": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/boxefe-81-situ725": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/boxoto-53-sifo232": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bozuro-33-celo170": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bubefi-32-fike915": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bugaja-31-jaso630": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bulasi-17-vafa634": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bumaca-51-kece901": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/bunoxu-10-jabe604": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/caburo-70-buki284": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/caciva-80-kene990": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/cagoze-40-tete366": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/cakeca-72-kara622": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/camavo-50-kaku123": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/cejupe-34-muti621": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/cemagu-66-vazo965": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/cemipu-87-dinu624": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/cezabi-50-cege262": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/cigagu-31-rime196": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/ciloke-34-pumi198": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/citire-32-mive114": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/cixave-47-milo698": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/cofubo-18-koju711": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/cokoja-48-luki109": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/copisa-69-xisi273": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/covage-54-pine573": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[9]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/cubida-55-meku256": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/cugezi-99-tire097": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/cutabu-59-cilo276": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/dabulu-96-feco908": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[9]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/dacuga-41-popo038": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/dajoge-59-cusa859": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/darote-51-kuta407": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/debofa-60-mude568": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/decudi-92-bisu741": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[8]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/delide-30-teva601": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/demibe-40-moda439": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/dexero-99-ziru660": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/digexe-63-zifu774": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/dikaze-62-xibe813": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/dimuco-32-niro540": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/divinu-75-busu278": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/dotuzi-75-nape254": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/dozaxu-98-xetu961": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/doziki-93-rosi997": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/dulate-94-bupu593": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/dunejo-33-divo189": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/dupopo-44-deto131": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/duvole-80-meda461": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/fabexi-81-dife869": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/fabule-54-pili300": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/famiki-74-fedu284": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/fatuzu-07-cevu894": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/felega-00-saxi785": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/femaco-88-bufe808": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/fetizo-39-jace641": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/fikuki-99-kulu790": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/firibi-00-puki721": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/fisaca-74-deco063": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/fitega-67-kupi183": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/fivone-96-nalo453": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/foludi-80-gilo247": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/fomapa-90-bore251": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/fovaja-48-leso567": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/fufefa-17-faje066": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/fukika-81-gite897": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/fuleno-34-boni528": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gacaja-15-keko600": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[17]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gafuxi-23-kexi909": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gakelo-29-neno787": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/ganaku-47-muko252": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gaxezi-48-zesa921": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/gebuzi-30-nulo391": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gelixa-02-sele970": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gelono-70-zuce760": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[6]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/geremo-94-tecu179": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gesogi-81-xoma900": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/getene-72-dido571": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gexuko-22-dumi059": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gimegi-77-xidu727": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/giteso-65-mefo026": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gitoke-38-beme495": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[8]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/givanu-33-kire967": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gizore-52-fode894": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gofebi-87-zeka817": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gokagi-91-mise154": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/guceja-66-tola192": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gudute-55-nulo344": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gufuma-85-zoce945": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/gugala-11-suce270": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jafuli-91-sota277": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jageti-56-kume076": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jagove-43-nako107": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jakuco-69-dari135": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jamana-83-gige126": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/japeku-46-kulo799": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/japeru-28-guku001": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/javedu-70-vaxo310": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jazedo-50-meka611": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/jevoce-05-mumi686": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jevofu-58-fazo194": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jipapo-14-kevu587": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jisema-42-rapa121": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jogami-42-jaji869": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jonave-00-xabi793": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jucidi-98-zato093": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/judatu-15-xize591": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jufefu-66-josa392": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jupivo-67-gidi531": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jupoxe-15-sugo110": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/jusama-23-bojo989": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kafevi-44-tesu096": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kasadu-53-tuki533": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/katime-87-vole867": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/katopo-68-xajo866": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kavoro-11-jife299": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kemedu-83-vipa115": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kenizo-43-siro273": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kepavi-26-sasu141": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kerada-15-fofu049": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/ketiro-31-nazo312": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kiceze-91-luke737": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kijazo-83-kipu485": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kitupi-32-jexo155": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kodaku-19-moni161": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kojivo-44-ceti956": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kotiso-16-vizi552": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/kudedo-31-pafi082": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[6]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/lacuci-13-nogo718": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/lafilo-69-tuti771": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[6]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/lebile-91-veto202": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/leduvi-16-voli986": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[6]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/letuke-04-poza319": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/levuma-67-cego489": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/lidefe-01-vaki092": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/lipiki-79-fapu237": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/lisade-37-vuri519": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/liteza-62-nopo771": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/livigo-47-negi605": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/lokane-30-dinu378": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/lopone-15-xiki477": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/loxija-71-joku558": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/lukoxa-16-cecu095": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/lukuxe-26-gemu804": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/luxido-91-covi016": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/mabuke-20-muco282": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/maduja-30-xiri319": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/mafete-03-rapa918": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/maketa-43-juja264": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/manata-12-rido730": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[9]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/mazoka-64-nixi123": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/megara-21-rumi574": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/meguta-71-pimi823": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/mepeze-15-nuge493": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/mezuce-12-gemi988": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/mifejo-31-sovi184": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/misiji-27-buje656": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[6]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/mojezi-43-gamu360": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[7]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/molexa-46-redi999": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/momala-42-luvu884": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/movexa-27-rexe388": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/mudobi-07-biji996": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/mufixi-71-koma752": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/mukigo-10-dixi626": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/mulida-55-ceja768": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nafaxo-62-boso912": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/navene-45-cozo466": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nerete-42-save418": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nesozi-09-zezu092": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/a[2]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/a/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nijipa-25-pede639": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nikinu-06-sace939": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nikivo-06-kaxa873": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/niletu-83-lego826": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/ninago-40-dalo726": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/nisexe-68-vabu320": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/nivese-34-zavo418": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/niviji-21-maco613": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nojije-35-teta491": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nolubo-93-rula384": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nomeco-93-minu967": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nonusu-50-nute147": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/norire-15-taka956": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nosape-69-jato240": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/notuli-49-xugi698": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/novata-87-muti352": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/noxasi-06-nejo322": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nupose-71-vido428": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nusajo-97-bemo713": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nuvumi-83-tose343": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/nuzugu-44-pega793": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/pakema-21-xema183": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/patagi-39-jone354": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/pateca-54-lija084": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/pedoco-30-mose082": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/pekefu-66-mepa144": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/pekuxe-00-bovi270": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/perate-09-gale335": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/pezubu-98-niba240": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/pifoni-76-duxa505": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/pipupe-81-ladi581": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/pirofe-41-xama594": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/pixako-75-kumi821": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/podelo-13-jaja314": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/podobi-57-zoso040": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/pokoro-73-bili712": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/popofi-03-momo442": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/popome-26-zufo950": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/povoju-50-raxi136": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/pubeza-23-jaza106": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/pucinu-80-nopo009": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/pujozo-36-nino158": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/pujumu-36-nelo283": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/racana-82-zece676": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/raruzu-62-giro837": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/razuzu-32-faje125": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/rekuxa-78-lidi292": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/relufo-04-fezo835": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/ribapo-84-xudu593": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/roboja-69-susa752": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/rosepa-78-xivi448": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/rosizo-69-mera514": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/rucuga-83-tosu408": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/rujixe-89-sumo552": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/rujuxa-07-neco067": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[6]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/rurake-60-licu592": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/ruzazu-94-meso880": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/ruzica-16-deli877": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/sadovu-51-fata536": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/samavi-13-fuku339": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/saxuro-16-tezu631": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/secepo-00-febi326": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/sifite-87-ziti434": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/sigofi-46-gaja158": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/sikino-19-vuca111": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/sipibi-62-koku509": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/sisate-06-jage259": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/sojono-24-tufe806": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/sokafe-69-jita472": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/sokapa-71-tifi543": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[7]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/sopape-11-laxo488": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/sucice-41-pebi088": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/sufupo-40-fuke080": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/suluni-73-lotu140": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/sutura-08-zeme419": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/suzuci-53-biku826": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/tagixo-41-gapo816": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/tajiri-57-sepu092": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "element <text> away 73->78"
+  ]
+ },
+ "activity/tajuxe-32-sexo680": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/tamaxe-36-mono574": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[6]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/taredi-65-vero960": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[7]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/tefuga-86-xefe850": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/tepivu-88-reze603": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/tetaja-40-niki277": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/ticeka-12-buli543": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/tobajo-64-mipi810": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/todufa-81-gavo441": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/tozecu-08-ride878": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[7]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/tuneta-22-mega154": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vamazo-19-tufu812": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vatame-42-dege160": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[12]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vaxiki-78-nice114": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vaxuta-95-cico162": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[8]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vebala-15-tade547": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vexula-75-noko098": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[4]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vidada-17-xuse810": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vilecu-41-tete416": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vimako-25-mega336": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vimena-17-poju626": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vimoxa-78-zucu656": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vivate-04-guso306": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vodobe-33-kefa909": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vokibe-29-vepe451": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/volefo-41-tolo996": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vopidi-45-jitu863": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vozane-63-kepe177": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vubolo-48-cubu499": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[6]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vupuse-73-nuso490": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/vuruti-49-jeje300": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/xabesu-51-dimi831": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/xarumo-26-zinu467": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/xaxene-93-doka767": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "activity:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "activity/xefalo-73-sabi101": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/xekame-27-geba281": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[8]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/xenofo-81-rame803": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/xidamu-85-xoti640": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/xirixi-47-laxe350": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/xizola-97-sizu458": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/xolazi-74-vamu265": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/xoreko-43-noto860": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/xovano-23-tazo278": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/xovigi-85-rufa987": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zafoxu-20-xofe568": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zakuke-30-sobi867": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zaloze-31-jibo311": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zaxati-90-xacu660": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zedoco-71-guge507": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zejuso-92-kexo870": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zepima-96-peco612": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[5]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zeporo-46-zicu301": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/ziboco-73-kazu841": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zinelo-77-losu727": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[6]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zivege-92-rise076": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zivocu-77-kopa900": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zizumo-48-taku661": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zocifu-52-miga192": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/a[2]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/a/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zokodi-10-dexu703": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zokuni-21-sapu966": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zoxazu-64-vebi280": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zucile-04-duga040": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "activity/zuxute-46-daku634": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "activity:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "class/besepi-37-rori892": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/bidusa-22-jutu505": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/cokeje-99-gede231": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/cuzoga-39-tufu259": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/dofima-22-kofe334": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[3]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "class:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "class/exposant-01-class": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/fecolo-08-gepu579": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/fogexa-30-zupo141": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/foxiki-17-kosa114": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/gekope-01-ricu859": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/jabama-09-kago823": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "class:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "class/jajebo-21-dada557": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/jerime-86-note748": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/jevuvi-65-dipo437": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/jireze-84-loti743": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[3]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "class:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "class/jovigo-38-tuni063": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/juxora-90-fisu720": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/kikera-73-zoxa983": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/lecelo-92-loma110": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/pacagu-24-nune023": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/pacuve-18-gaso238": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/pejone-71-tige404": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/pofime-55-nana952": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/puvono-84-doro361": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/rakuci-96-tuti371": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/a[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "class:svg/g/g/a/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "class/rexexi-22-soga527": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/rideze-59-lizu265": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/rotisi-30-loge424": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/ruliki-78-biji661": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/sacacu-34-dobo091": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[5]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "class:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "class/sejuzo-42-fini523": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/sekame-22-meze147": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/sisolu-74-minu975": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/sonoci-68-ciza059": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/vicuro-37-tese143": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/vubofi-17-dedi529": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/xadado-92-lazo250": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/xicipi-57-bibe032": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/xonamo-50-podo529": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "class/ziripa-77-zizo842": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "class:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "json/cazuru-97-jala040": {
+  "b0": {
+   "dotEqual": false,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": false,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "json:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "json/tacizo-43-dige090": {
+  "b0": {
+   "dotEqual": false,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": false,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "json:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "mindmap/geketu-70-xegu078": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "mindmap:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "mindmap/kijafe-43-tati619": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "mindmap:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "object/jotaga-99-fatu830": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "object:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "object/tujasu-04-nota700": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[5]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "object:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "sequence/SequenceArrows_0001_Test": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 410,
+    "w": 759
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 495,
+    "w": 844
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 759->844"
+  ]
+ },
+ "sequence/SequenceArrows_0002_Test": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 1185,
+    "w": 1534
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 1267,
+    "w": 1616
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 1534->1616"
+  ]
+ },
+ "sequence/baketu-62-cumu838": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 168,
+    "w": 168
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/text[1]/@font-size",
+   "seq": {
+    "d": 173,
+    "w": 173
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/text/@font-size",
+  "why": [
+   "seq w 168->173"
+  ]
+ },
+ "sequence/bakuba-09-fica741": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 73,
+    "w": 167
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 87,
+    "w": 181
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 167->181"
+  ]
+ },
+ "sequence/busexe-78-ruzu110": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 241,
+    "w": 353
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 271,
+    "w": 383
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 353->383"
+  ]
+ },
+ "sequence/caluni-22-noci624": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 663,
+    "w": 694
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/title[1]/text()[1]",
+   "seq": {
+    "d": 675,
+    "w": 706
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/title/text()",
+  "why": [
+   "seq w 694->706"
+  ]
+ },
+ "sequence/camebe-75-mujo573": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 270,
+    "w": 396
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 300,
+    "w": 426
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 396->426"
+  ]
+ },
+ "sequence/camuxi-33-nopo108": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 59,
+    "w": 59
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 60,
+    "w": 60
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 59->60"
+  ]
+ },
+ "sequence/cejoxe-28-zeba572": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 76,
+    "w": 76
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 77,
+    "w": 77
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 76->77"
+  ]
+ },
+ "sequence/cexasu-11-fuja087": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 17,
+    "w": 17
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->17"
+  ]
+ },
+ "sequence/cikoca-19-feji527": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 111,
+    "w": 111
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 114,
+    "w": 114
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 111->114"
+  ]
+ },
+ "sequence/cukexe-08-gana131": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 18,
+    "w": 18
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 20,
+    "w": 20
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 18->20"
+  ]
+ },
+ "sequence/cusiro-03-mebe823": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 123,
+    "w": 123
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[2]/line[1]/@stroke-width",
+   "seq": {
+    "d": 124,
+    "w": 124
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 123->124"
+  ]
+ },
+ "sequence/dakeve-06-cici445": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 46,
+    "w": 46
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 47,
+    "w": 47
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 46->47"
+  ]
+ },
+ "sequence/damoge-62-riso387": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/degire-21-dujo330": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 42,
+    "w": 42
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 43,
+    "w": 43
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 42->43"
+  ]
+ },
+ "sequence/devamo-31-coji129": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/digula-66-dipe776": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 130,
+    "w": 130
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[2]/line[1]/@stroke-width",
+   "seq": {
+    "d": 133,
+    "w": 133
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 130->133"
+  ]
+ },
+ "sequence/diruxe-35-xujo142": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 199,
+    "w": 482
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 200,
+    "w": 483
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 482->483"
+  ]
+ },
+ "sequence/dojapu-42-sali914": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 15->16"
+  ]
+ },
+ "sequence/dolefo-13-kovu702": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 329,
+    "w": 329
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/text[1]/@font-size",
+   "seq": {
+    "d": 335,
+    "w": 335
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/text/@font-size",
+  "why": [
+   "seq w 329->335"
+  ]
+ },
+ "sequence/domaji-70-zini725": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 15->16"
+  ]
+ },
+ "sequence/dugata-50-koxo354": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/dugeki-47-celo546": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 2493,
+    "w": 2493
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/rect[1]/@stroke-width",
+   "seq": {
+    "d": 2525,
+    "w": 2525
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/rect/@stroke-width",
+  "why": [
+   "seq w 2493->2525"
+  ]
+ },
+ "sequence/fifasu-62-pipo979": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 57,
+    "w": 70
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 58,
+    "w": 71
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 70->71"
+  ]
+ },
+ "sequence/fozeva-08-tife475": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 114,
+    "w": 114
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/title[1]/text()[1]",
+   "seq": {
+    "d": 115,
+    "w": 115
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/title/text()",
+  "why": [
+   "seq w 114->115"
+  ]
+ },
+ "sequence/fuliko-66-mulo559": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 10,
+    "w": 10
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 10->14"
+  ]
+ },
+ "sequence/gacujo-48-leto751": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 205,
+    "w": 205
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/title[1]/text()[1]",
+   "seq": {
+    "d": 211,
+    "w": 211
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/title/text()",
+  "why": [
+   "seq w 205->211"
+  ]
+ },
+ "sequence/gadasu-04-kada675": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 18,
+    "w": 18
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[2]/line[1]/@stroke-width",
+   "seq": {
+    "d": 38,
+    "w": 38
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 18->38"
+  ]
+ },
+ "sequence/gadiva-05-pogi376": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 19,
+    "w": 25
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/@background",
+   "seq": {
+    "d": 20,
+    "w": 26
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/@background",
+  "why": [
+   "seq w 25->26"
+  ]
+ },
+ "sequence/gejeji-12-zofa866": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 35,
+    "w": 35
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[2]/line[1]/@stroke-width",
+   "seq": {
+    "d": 82,
+    "w": 82
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 35->82"
+  ]
+ },
+ "sequence/gejoko-46-pogi886": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 17,
+    "w": 17
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 16->17"
+  ]
+ },
+ "sequence/gibaro-25-sibu619": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 21,
+    "w": 34
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 23,
+    "w": 36
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 34->36"
+  ]
+ },
+ "sequence/gibola-54-cave865": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/gifosu-53-fodu296": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 24,
+    "w": 24
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 27,
+    "w": 27
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 24->27"
+  ]
+ },
+ "sequence/gijamu-35-vale058": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 783,
+    "w": 929
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/rect[1]/@fill",
+   "seq": {
+    "d": 785,
+    "w": 931
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/rect/@fill",
+  "why": [
+   "seq w 929->931"
+  ]
+ },
+ "sequence/gogise-40-juro428": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 15->16"
+  ]
+ },
+ "sequence/jebole-52-cuvo164": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 15->16"
+  ]
+ },
+ "sequence/jitesa-41-cara967": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/kakune-11-vusu073": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/kaporo-80-vace949": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 18,
+    "w": 18
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[2]/line[1]/@stroke-width",
+   "seq": {
+    "d": 64,
+    "w": 64
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 18->64"
+  ]
+ },
+ "sequence/kapuva-33-nomi771": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 15->16"
+  ]
+ },
+ "sequence/kevaru-04-faka914": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 40,
+    "w": 40
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 41,
+    "w": 41
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 40->41"
+  ]
+ },
+ "sequence/kipabe-50-guti652": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 59,
+    "w": 59
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 60,
+    "w": 60
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 59->60"
+  ]
+ },
+ "sequence/kivavu-72-goju233": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 15->16"
+  ]
+ },
+ "sequence/kofuti-29-goti188": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 128,
+    "w": 141
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 136,
+    "w": 149
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 141->149"
+  ]
+ },
+ "sequence/koleji-09-doni016": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 166,
+    "w": 190
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/rect[1]/@fill",
+   "seq": {
+    "d": 169,
+    "w": 193
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/rect/@fill",
+  "why": [
+   "seq w 190->193"
+  ]
+ },
+ "sequence/kopaxi-36-dedo317": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/kugati-67-nuzu852": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 15->16"
+  ]
+ },
+ "sequence/lejafe-21-niga299": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 64,
+    "w": 64
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 65,
+    "w": 65
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 64->65"
+  ]
+ },
+ "sequence/lenoki-81-nofo984": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 104,
+    "w": 104
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 105,
+    "w": 105
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 104->105"
+  ]
+ },
+ "sequence/licole-34-vejo527": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 17,
+    "w": 17
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->17"
+  ]
+ },
+ "sequence/lidupe-72-cexa425": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 226,
+    "w": 387
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/title[1]/text()[1]",
+   "seq": {
+    "d": 227,
+    "w": 388
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/title/text()",
+  "why": [
+   "seq w 387->388"
+  ]
+ },
+ "sequence/liguma-77-mume567": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 48,
+    "w": 53
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 50,
+    "w": 55
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 53->55"
+  ]
+ },
+ "sequence/liluca-64-muva178": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 51,
+    "w": 51
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 55,
+    "w": 55
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 51->55"
+  ]
+ },
+ "sequence/lipuci-81-vovi162": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 131,
+    "w": 131
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 132,
+    "w": 132
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 131->132"
+  ]
+ },
+ "sequence/lokavu-60-peku948": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 731,
+    "w": 748
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 739,
+    "w": 756
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 748->756"
+  ]
+ },
+ "sequence/losefo-71-dovi176": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 112,
+    "w": 112
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[2]/line[1]/@stroke-width",
+   "seq": {
+    "d": 115,
+    "w": 115
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 112->115"
+  ]
+ },
+ "sequence/lozuru-10-poba814": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 15->16"
+  ]
+ },
+ "sequence/lugika-07-rozo911": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 311,
+    "w": 328
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 313,
+    "w": 330
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 328->330"
+  ]
+ },
+ "sequence/masibi-28-tidi862": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 308,
+    "w": 331
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 309,
+    "w": 332
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 331->332"
+  ]
+ },
+ "sequence/mebidu-16-ruve297": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 197,
+    "w": 309
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 225,
+    "w": 337
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 309->337"
+  ]
+ },
+ "sequence/mefeke-43-xotu192": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 50,
+    "w": 50
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 52,
+    "w": 52
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 50->52"
+  ]
+ },
+ "sequence/mezaxa-44-siju322": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 79,
+    "w": 79
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 81,
+    "w": 81
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 79->81"
+  ]
+ },
+ "sequence/migodo-28-fodi331": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 54,
+    "w": 67
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 58,
+    "w": 71
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 67->71"
+  ]
+ },
+ "sequence/mitefi-27-cubo687": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 486,
+    "w": 668
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 489,
+    "w": 671
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 668->671"
+  ]
+ },
+ "sequence/mitire-01-voga923": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/mivuke-79-fujo526": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 41,
+    "w": 41
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 43,
+    "w": 43
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 41->43"
+  ]
+ },
+ "sequence/mizugi-66-desi413": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 94,
+    "w": 94
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 96,
+    "w": 96
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 94->96"
+  ]
+ },
+ "sequence/mobava-88-teja491": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 18,
+    "w": 18
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 15->18"
+  ]
+ },
+ "sequence/momuxe-95-bugu296": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 15->16"
+  ]
+ },
+ "sequence/moxazi-74-bosi297": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 46,
+    "w": 46
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 47,
+    "w": 47
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 46->47"
+  ]
+ },
+ "sequence/mudiga-14-sage351": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 53,
+    "w": 53
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 56,
+    "w": 56
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 53->56"
+  ]
+ },
+ "sequence/mufomi-43-vaso140": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/mukebo-35-xoju095": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 474,
+    "w": 578
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/rect[1]/@stroke-width",
+   "seq": {
+    "d": 479,
+    "w": 583
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/rect/@stroke-width",
+  "why": [
+   "seq w 578->583"
+  ]
+ },
+ "sequence/mulofu-90-voka382": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/nanoza-23-fija616": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 15->16"
+  ]
+ },
+ "sequence/nenika-09-domu220": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 48,
+    "w": 48
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 50,
+    "w": 50
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 48->50"
+  ]
+ },
+ "sequence/nibiju-55-kavu710": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 82,
+    "w": 158
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 83,
+    "w": 159
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 158->159"
+  ]
+ },
+ "sequence/nisogu-21-zixe139": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/nofegi-58-kilo738": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 166,
+    "w": 190
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/rect[1]/@fill",
+   "seq": {
+    "d": 169,
+    "w": 193
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/rect/@fill",
+  "why": [
+   "seq w 190->193"
+  ]
+ },
+ "sequence/nukona-00-jaro456": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/nunozo-09-zoce623": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 124,
+    "w": 137
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 132,
+    "w": 145
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 137->145"
+  ]
+ },
+ "sequence/peduzi-80-giki495": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 487,
+    "w": 669
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/@lengthAdjust",
+   "seq": {
+    "d": 490,
+    "w": 672
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/@lengthAdjust",
+  "why": [
+   "seq w 669->672"
+  ]
+ },
+ "sequence/pigifu-13-kele137": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 24,
+    "w": 24
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 25,
+    "w": 25
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 24->25"
+  ]
+ },
+ "sequence/pomoxu-05-luco302": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 909,
+    "w": 909
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[2]/line[1]/@stroke-width",
+   "seq": {
+    "d": 950,
+    "w": 950
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 909->950"
+  ]
+ },
+ "sequence/popoda-09-xavi089": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 102,
+    "w": 133
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 104,
+    "w": 135
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 133->135"
+  ]
+ },
+ "sequence/povuju-50-pido564": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 54,
+    "w": 54
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 60,
+    "w": 60
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 54->60"
+  ]
+ },
+ "sequence/rapoto-38-neca900": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 244,
+    "w": 379
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 247,
+    "w": 382
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 379->382"
+  ]
+ },
+ "sequence/ravire-24-jaju542": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 99,
+    "w": 124
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/defs[1][childCount]",
+   "seq": {
+    "d": 102,
+    "w": 127
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/defs[childCount]",
+  "why": [
+   "seq w 124->127"
+  ]
+ },
+ "sequence/rudola-01-bibi608": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 128,
+    "w": 141
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 136,
+    "w": 149
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 141->149"
+  ]
+ },
+ "sequence/rulepa-49-pisa733": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->15"
+  ]
+ },
+ "sequence/ruxuxu-75-jilu612": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 223,
+    "w": 223
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 229,
+    "w": 229
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 223->229"
+  ]
+ },
+ "sequence/sedule-54-falo457": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 25,
+    "w": 48
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/defs[1][childCount]",
+   "seq": {
+    "d": 28,
+    "w": 51
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/defs[childCount]",
+  "why": [
+   "seq w 48->51"
+  ]
+ },
+ "sequence/sefako-72-jono850": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 91,
+    "w": 91
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[2]/line[1]/@stroke-width",
+   "seq": {
+    "d": 94,
+    "w": 94
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 91->94"
+  ]
+ },
+ "sequence/sisele-83-gebe678": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 92,
+    "w": 92
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 97,
+    "w": 97
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 92->97"
+  ]
+ },
+ "sequence/sixafa-45-faxi184": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/soxaxu-96-ceco932": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->15"
+  ]
+ },
+ "sequence/sulipe-44-jeta861": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 60,
+    "w": 60
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 66,
+    "w": 66
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 60->66"
+  ]
+ },
+ "sequence/tapije-66-runu046": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 40,
+    "w": 40
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 42,
+    "w": 42
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 40->42"
+  ]
+ },
+ "sequence/taraxa-93-reno112": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 396,
+    "w": 557
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/rect[1]/@fill",
+   "seq": {
+    "d": 397,
+    "w": 558
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/rect/@fill",
+  "why": [
+   "seq w 557->558"
+  ]
+ },
+ "sequence/tifexe-26-caza420": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 40,
+    "w": 40
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 41,
+    "w": 41
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 40->41"
+  ]
+ },
+ "sequence/todetu-82-rupo943": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 189,
+    "w": 189
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 197,
+    "w": 197
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 189->197"
+  ]
+ },
+ "sequence/tugonu-44-file000": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 133,
+    "w": 200
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 134,
+    "w": 201
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 200->201"
+  ]
+ },
+ "sequence/tukobo-89-zebi935": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 213,
+    "w": 330
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/rect[1]/@rx",
+   "seq": {
+    "d": 214,
+    "w": 331
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/rect/@rx",
+  "why": [
+   "seq w 330->331"
+  ]
+ },
+ "sequence/tumuke-16-xomo243": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 168,
+    "w": 168
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/text[1]/@font-size",
+   "seq": {
+    "d": 173,
+    "w": 173
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/text/@font-size",
+  "why": [
+   "seq w 168->173"
+  ]
+ },
+ "sequence/vafedo-17-xuke155": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/valiva-41-fabo221": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 45,
+    "w": 45
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 46,
+    "w": 46
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 45->46"
+  ]
+ },
+ "sequence/vativa-83-bisa518": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 24,
+    "w": 24
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 25,
+    "w": 25
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 24->25"
+  ]
+ },
+ "sequence/vibazo-85-safi630": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 143,
+    "w": 143
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 147,
+    "w": 147
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 143->147"
+  ]
+ },
+ "sequence/vigoga-79-pita532": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/vogegu-91-mave762": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 28,
+    "w": 28
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 31,
+    "w": 31
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 28->31"
+  ]
+ },
+ "sequence/vujiba-78-foga414": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 42,
+    "w": 42
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 43,
+    "w": 43
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 42->43"
+  ]
+ },
+ "sequence/xalofe-61-vala300": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/xedomi-77-libu804": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 21,
+    "w": 21
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 27,
+    "w": 27
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 21->27"
+  ]
+ },
+ "sequence/xeneru-44-kuma826": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 166,
+    "w": 190
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/rect[1]/@fill",
+   "seq": {
+    "d": 169,
+    "w": 193
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/rect/@fill",
+  "why": [
+   "seq w 190->193"
+  ]
+ },
+ "sequence/xigoxi-25-paro589": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/xikuro-71-cadu306": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 25,
+    "w": 25
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 27,
+    "w": 27
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 25->27"
+  ]
+ },
+ "sequence/xizeto-03-nuke395": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 70,
+    "w": 70
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 74,
+    "w": 74
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 70->74"
+  ]
+ },
+ "sequence/xolebu-95-cage107": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 202,
+    "w": 257
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 215,
+    "w": 270
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 257->270"
+  ]
+ },
+ "sequence/xonili-01-pure946": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/xuzedu-97-femo595": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 158,
+    "w": 158
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/rect[1]/@fill",
+   "seq": {
+    "d": 161,
+    "w": 161
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/rect/@fill",
+  "why": [
+   "seq w 158->161"
+  ]
+ },
+ "sequence/zedepi-36-come743": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 37,
+    "w": 37
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 40,
+    "w": 40
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 37->40"
+  ]
+ },
+ "sequence/zetenu-41-rece091": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 149,
+    "w": 149
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 150,
+    "w": 150
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 149->150"
+  ]
+ },
+ "sequence/zofeda-77-xiba744": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 15,
+    "w": 15
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 15->16"
+  ]
+ },
+ "sequence/zosulu-72-fati889": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 14,
+    "w": 14
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+   "seq": {
+    "d": 16,
+    "w": 16
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/line/@stroke-width",
+  "why": [
+   "seq w 14->16"
+  ]
+ },
+ "sequence/zudize-61-vomi445": {
+  "b0": {
+   "dotEqual": true,
+   "seq": {
+    "d": 178874,
+    "w": 203346
+   },
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[2]/title[1]/text()[1]",
+   "seq": {
+    "d": 203338,
+    "w": 227810
+   },
+   "verdict": "diverged"
+  },
+  "family": "sequence:svg/g/g/title/text()",
+  "why": [
+   "seq w 203346->227810"
+  ]
+ },
+ "state/coteta-47-mare883": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "state:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "state/duzazu-41-telu529": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "state:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "state/fibudu-53-bode309": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "state:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "state/gizati-67-kora187": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "state:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "state/kinuca-03-nice683": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "state:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "state/lokija-02-dipe348": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "state:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "state/mazuzu-54-mene929": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "state:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "state/vixobo-14-jole910": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "state:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "state/votoki-67-gufa610": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "state:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "state/xasoka-58-temi462": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "state:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "unknown/barada-07-veca157": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "unknown/cagoze-40-tete366": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "unknown/cezeje-11-roxe484": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "element <text> away 61->77"
+  ]
+ },
+ "unknown/cimice-03-zata362": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "unknown/colede-79-give418": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "unknown:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "unknown/dedumo-33-paco879": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "unknown:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "unknown/doveka-76-fiza931": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "unknown/febuci-08-zogi253": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "element <text> away 61->94"
+  ]
+ },
+ "unknown/gejuvu-17-vufu851": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "unknown:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "unknown/gujuga-46-vifa350": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "unknown:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "unknown/jajebe-95-jomo899": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "unknown:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "unknown/jipapo-14-kevu587": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "unknown/jopisi-58-rika067": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "unknown:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "unknown/kakitu-70-kuvi013": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "diverged"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "element <text> away 56->142"
+  ]
+ },
+ "unknown/lipiki-79-fapu237": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "unknown/lonosi-76-xoka469": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "unknown/nijipa-25-pede639": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "unknown/pajeki-99-bezu928": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "unknown:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "unknown/punofe-33-loji825": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "unknown:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "unknown/rexobo-28-rite508": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/g[5]/text[2]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "unknown/rucuga-83-tosu408": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "unknown/taliti-27-vuzo488": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "unknown:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "unknown/tonake-05-zibo183": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "unknown:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "unknown/tuvigo-52-redo102": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[14]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "unknown/vesuzo-97-jelo022": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "unknown:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "unknown/vezozu-78-pici074": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[3]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ },
+ "unknown/xaxene-93-doka767": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": null,
+   "verdict": "structural-match"
+  },
+  "family": "unknown:verdict",
+  "why": [
+   "verdict conformant->structural-match"
+  ]
+ },
+ "unknown/zakuke-30-sobi867": {
+  "b0": {
+   "dotEqual": true,
+   "verdict": "conformant"
+  },
+  "b1": {
+   "dotEqual": true,
+   "firstDiff": "svg/g[1]/text[1]/@textLength",
+   "verdict": "diverged"
+  },
+  "family": "unknown:svg/g/text/@textLength",
+  "why": [
+   "verdict conformant->diverged"
+  ]
+ }
+}

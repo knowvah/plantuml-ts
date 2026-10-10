@@ -15,6 +15,7 @@
  * 500-line cap once more -- another pure move, re-exported/imported back
  * here unchanged.
  */
+import { isObjectKind } from './object-kind-style.js';
 import { roundedTopRectD } from '../../core/svg-path-builder.js';
 import type { ClassifierGeo, JsonBodyItem } from './layout.js';
 import { ROW_TEXT_LEFT_MARGIN } from './layout.js';
@@ -42,6 +43,7 @@ import {
   classBorderLine,
   classBorderStrokeWidth,
   classBorderStrokeDasharray,
+  classDividerDasharray,
   MAP_JSON_DIVIDER_STROKE_WIDTH,
 } from './renderer-classifier-colors.js';
 import { renderRow, renderRowText, wrappedVisibilityIconOriginY } from './renderer-classifier-rows.js';
@@ -100,7 +102,7 @@ function headerBackgroundPath(geo: ClassifierGeo, theme: ScaledTheme, roundCorne
   const x1 = geo.x + geo.width;
   const y1 = geo.y + headerHeight;
   const d = roundedTopRectD(x0, y0, x1, y1, r);
-  const dasharray = classBorderStrokeDasharray(geo, theme.scaleK);
+  const dasharray = classBorderStrokeDasharray(geo, theme, theme.scaleK);
   return path(d, {
     fill,
     stroke: classBorder(geo, theme),
@@ -139,7 +141,7 @@ function buildBoxShape(geo: ClassifierGeo, theme: ScaledTheme, roundCorner: numb
   const bodyFill = classifierFill(geo, theme);
   const border = classBorder(geo, theme);
   const strokeWidth = classBorderStrokeWidth(geo, theme);
-  const dasharray = classBorderStrokeDasharray(geo, theme.scaleK);
+  const dasharray = classBorderStrokeDasharray(geo, theme, theme.scaleK);
   const filter = boxShadowFilter(geo);
   const headerFill =
     roundCorner !== 0 && CLASS_HEADER_SPLIT_KINDS.has(geo.kind)
@@ -177,8 +179,12 @@ function buildHeaderPrimitive(geo: ClassifierGeo, theme: ScaledTheme): UrlTagged
   // RoundCorner declaration.
   // cdd-T29 R2: `rx`/`ry` scale like any coordinate (`SvgGraphics.java:
   // 466-472`) -- scaled ONCE here so downstream readers need no changes.
+  // object/map/json: `getStyle().value(PName.RoundCorner)` of their OWN
+  // signature (`EntityImageObject.java:96`, `EntityImageMap.java:92`).
+  const kindRoundCorner = isObjectKind(geo.kind) ? theme.colors.elements?.[geo.kind]?.roundCorner : undefined;
   const roundCorner =
-    (resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.roundCorner ??
+    (kindRoundCorner ??
+      resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.roundCorner ??
       theme.colors.graph.classCascadeRoundCorner ??
       5) * theme.scaleK;
   let body = buildBoxShape(geo, theme, roundCorner);
@@ -258,7 +264,7 @@ function dividerLine(geo: ClassifierGeo, theme: ScaledTheme, divY: number, isMap
       strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH * theme.scaleK,
     });
   }
-  const dasharray = classBorderStrokeDasharray(geo, theme.scaleK);
+  const dasharray = classDividerDasharray(geo, theme, theme.scaleK);
   // cdd-T29 R2: the 1px inset is a render-time pixel-literal constant, not
   // geo-sourced -- scaled here like every other local literal this round's
   // audit found (D4/journal row 175).

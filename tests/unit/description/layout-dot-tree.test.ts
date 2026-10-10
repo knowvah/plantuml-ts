@@ -31,13 +31,13 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
 const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/component');
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function captureAll(puml: string): DotInputGraph[] {
   const captured: DotInputGraph[] = [];
@@ -85,7 +85,7 @@ describe('description/layout.ts layoutDescription — edge-label font size (site
     // measurement, not the (now correct, but node-irrelevant) size-13
     // edge-label default.
     const expectedBodyAt14 = measurer.measure('can be used by a', { family: 'sans-serif', size: 14 }).width;
-    expect(expectedBodyAt14).toBeCloseTo(91.0875, 3);
+    expect(expectedBodyAt14).toBeCloseTo(106.4875, 3);
     expect(node!.width).toBeGreaterThanOrEqual(expectedBodyAt14);
   });
 });

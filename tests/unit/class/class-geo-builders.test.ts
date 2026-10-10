@@ -15,12 +15,11 @@ import { describe, it, expect } from 'vitest';
 import { buildNamespaceGeos } from '../../../src/diagrams/class/class-geo-builders.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
-import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { computeGuideLinesBox, magicArrowTriSize } from '../../../src/diagrams/class/class-magic-arrow.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function makeAST(overrides?: Partial<ClassDiagramAST>): ClassDiagramAST {
   return {
@@ -166,8 +165,10 @@ describe('buildEdgeGeos — tail/head multiplicity-label width stays unrounded (
     const edge = geo.edges[0]!;
     expect(edge.tailLabel).toBeDefined();
     expect(edge.headLabel).toBeDefined();
-    expect(edge.tailLabel!.width).toBe(7.23125);
-    expect(edge.headLabel!.width).toBe(19.418750000000003);
+    // isw-T2-cls: the measurer now float32-rounds (oracle seam #4 v2), so the
+    // sums carry fround noise at ~1e-7; the jar DOT prints 6 dp.
+    expect(edge.tailLabel!.width).toBeCloseTo(7.23125, 5);
+    expect(edge.headLabel!.width).toBeCloseTo(19.41875, 5);
   });
 });
 
@@ -465,7 +466,7 @@ describe('buildEdgeGeos — magic-arrow edge label (G2 item 44)', () => {
     // rewritten string -- proves the render width isn't left over from
     // measuring the raw `<<alias>>` token (jar's own tebore-53-tese080
     // golden: `textLength="41.275"` on `«alias»` at font-size 13).
-    const expectedWidth = new WidthTableMeasurer().measure('«alias»', {
+    const expectedWidth = new DeterministicMeasurer().measure('«alias»', {
       family: defaultTheme.fontFamily,
       size: 13,
     }).width;
@@ -581,11 +582,14 @@ describe('buildEdgeGeos — per-line guide-line glyphs (SI25 D1/D3/D4)', () => {
     // (M8): `multiLineLabelAnchor`'s `blockLeft` now floors `maxWidth`
     // (`sacacu-34-dobo091` jar-verified) -- see that function's own doc
     // comment.
-    expect(lines.map((l) => [l.text, l.x, l.y, l.width])).toEqual([
-      // cdd3-T-D3: the label table corner is now the 2-dp `-Tsvg` read.
-      ['this is', 42.045625, 96.11111111111111, 29.65625],
-      ['on several', 28.68, 109.11111111111111, 56.387499999999996],
-      ['lines', 43.4675, 122.11111111111111, 26.8125],
+    // isw-T2-cls: re-read from the new jar (tests/fixtures/isw-T2-cls/lab3.svg,
+    // `A -- B : this is\non several\nlines`, oracle seam #4 v2): a space is 3.575
+    // at 13pt, so `this is` is 33.231 wide and `on several` 59.963; the jar
+    // prints x/textLength at 3 dp and the measurer float32-rounds.
+    expect(lines.map((l) => [l.text, +l.x.toFixed(3), +l.y.toFixed(3), +l.width.toFixed(3)])).toEqual([
+      ['this is', 42.046, 96.111, 33.231],
+      ['on several', 28.68, 109.111, 59.963],
+      ['lines', 45.255, 122.111, 26.813],
     ]);
   });
 
@@ -598,7 +602,11 @@ describe('buildEdgeGeos — per-line guide-line glyphs (SI25 D1/D3/D4)', () => {
     // hybrid already reconciles it against jar (see that task's fix doc
     // comment on `attachMagicArrow`, `class-edge-label-attach.ts`).
     // cdd3-T-D3: label corner read at graphviz's 2-dp `-Tsvg` precision.
-    expect(edge.label).toEqual({ text: 'ok', x: 41.68, y: 96.11111111111111, width: 13.73125 });
+    // isw-T2-cls: tests/fixtures/isw-T2-cls/labok.svg -- `ok` x 41.68, textLength
+    // 13.731 (the measurer float32-rounds 13.73125).
+    expect(edge.label).toMatchObject({ text: 'ok', x: 41.68 });
+    expect(edge.label!.width).toBeCloseTo(13.73125, 4);
+    expect(edge.label!.y).toBeCloseTo(96.111, 3);
     // cdd-T37 (M8): the GLYPH origin moved -- jar's real oracle
     // (`lojepe-37-liri985`) confirms these are the byte-exact values
     // (`plans/class-divergence-drive/decision-journal.md` rows 225+):

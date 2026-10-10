@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { renderSync } from '../../../../src/index.js';
-import { WidthTableMeasurer } from '../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
 import { fixtureIncludeStore } from '../../../helpers/fixture-include-store.js';
 import { compareSvg } from '../../../oracle/svg-conformance/compare.js';
 
@@ -36,7 +36,7 @@ const RE_FROM_LINE = /\(line (\d+)\)/;
 
 function load(name: string): { ours: string; jar: string } {
   const source = readFileSync(join(FIXTURES, `${name}.puml`), 'utf-8');
-  const ours = renderSync(source, { measurer: new WidthTableMeasurer(), includeStore: fixtureIncludeStore() });
+  const ours = renderSync(source, { measurer: new DeterministicMeasurer(), includeStore: fixtureIncludeStore() });
   return { ours, jar: readFileSync(join(FIXTURES, `${name}.svg`), 'utf-8') };
 }
 

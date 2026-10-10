@@ -14,14 +14,15 @@
  *   `root { HorizontalAlignment left }`; `usecase` keeps its own CENTER
  *   (`plantuml.skin:452-454`, the more specific selector).
  *
- * Expected values: oracle probes (`scripts/oracle-render.sh`,
- * 1.2026.8beta1) of the exact sources below.
+ * Expected values: oracle probes (`scripts/oracle-render.sh`, 1.2026.8beta1,
+ * re-run under oracle seam #4 v2 -- a space has width) of the exact sources
+ * below; tests/fixtures/isw-T2-cls/usymbol-{corners,align}.{puml,svg}.
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 const CORNERS = [
   '@startuml',
@@ -109,13 +110,13 @@ describe('class USymbol leaf corners follow <sname>RoundCorner/DiagonalCorner<<l
 
   it('squares the <<person>> leaf (no rx/ry)', () => {
     expect(leafOf(svg, 'P')).toContain(
-      '<rect x="87.46" y="7" width="98.75" height="62" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>',
+      '<rect x="87.61" y="7" width="106.45" height="62" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;"/>',
     );
   });
 
   it('keeps the default rounded corner on an unlabelled leaf', () => {
     expect(leafOf(svg, 'Q')).toContain(
-      '<rect x="7" y="129" width="49.662" height="34" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>',
+      '<rect x="7" y="129" width="49.663" height="34" fill="#F1F1F1" style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>',
     );
   });
 
@@ -136,12 +137,12 @@ describe('class USymbol leaf title follows skinparam defaultTextAlignment', () =
 
   it('centres a rectangle leaf body under the root alignment', () => {
     expect(texts(leafOf(svg, 'P'))).toEqual([
-      ['123.89', '27.889', 'wide line here'],
-      ['159.765', '41.889', 'x'],
+      ['128.85', '27.889', 'wide line here'],
+      ['168.575', '41.889', 'x'],
     ]);
   });
 
   it('keeps the usecase leaf centred (its own skin selector)', () => {
-    expect(texts(leafOf(svg, 'U')).map((t) => t[0])).toEqual(['18.89', '54.765']);
+    expect(texts(leafOf(svg, 'U')).map((t) => t[0])).toEqual(['19.849', '59.574']);
   });
 });

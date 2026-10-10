@@ -1,0 +1,10 @@
+@startuml
+skinparam wrapWidth 60
+start
+while (a long while condition here?) is (long yes label here)
+  :one;
+endwhile (long exit label here)
+repeat
+  :two;
+repeat while (a long repeat condition here?) is (long yes label) not (long no label)
+@enduml

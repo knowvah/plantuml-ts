@@ -47,6 +47,24 @@ interface HeaderLineBuild {
   displayText: string;
   atoms: MemberRowBuild['atoms'];
   hasMarkup: boolean;
+  /** isw-T2-cls F2b: for a markup-FREE line (drawn as a plain `<text>` row,
+   *  not through the atoms), the sole atom's DriverTextSvg render fields
+   *  (`DriverTextSvg.java:113-126`) -- `class-geo-row-types.ts` `renderDx`/
+   *  `renderWidth`. `undefined` when the text draws as written. */
+  plainRender?: PlainRowRender;
+}
+
+/** `ClassifierRowGeo['renderDx'|'renderWidth']` carrier. */
+export interface PlainRowRender {
+  readonly renderDx?: number;
+  readonly renderWidth?: number;
+}
+
+/** The sole atom of a markup-free line, as {@link PlainRowRender}. */
+function plainRenderOf(atoms: MemberRowBuild['atoms']): PlainRowRender | undefined {
+  const sole = atoms[0];
+  if (sole?.kind !== 'text' || sole.renderWidth === undefined) return undefined;
+  return { renderWidth: sole.renderWidth, ...(sole.renderDx !== undefined ? { renderDx: sole.renderDx } : {}) };
 }
 
 /** Resolves one already-built creole atom group (a full line, or ONE of
@@ -82,12 +100,14 @@ function resolveHeaderAtoms(
     rawLine === undefined
       ? true
       : !(resolved.atoms.length === 1 && resolved.atoms[0]!.kind === 'text' && resolved.atoms[0]!.text === rawLine);
+  const plainRender = hasMarkup ? undefined : plainRenderOf(resolved.atoms);
   return {
     width: resolved.width,
     height: resolved.height,
     displayText: atomsToPlainText(resolved.atoms),
     atoms: resolved.atoms,
     hasMarkup,
+    ...(plainRender !== undefined ? { plainRender } : {}),
   };
 }
 
@@ -232,6 +252,8 @@ export interface HeaderLineMetrics {
    *  #buildSectionRows`/`class-body-enhanced-layout.ts#buildRowsBlockRows`
    *  already carry. */
   headerLineHeights: number[];
+  /** isw-T2-cls F2b: per-line {@link HeaderLineBuild.plainRender}. */
+  headerLineRender: Array<PlainRowRender | undefined>;
 }
 
 /** {@link buildHeaderLineMetrics}'s trailing options -- bundled to keep
@@ -310,5 +332,6 @@ export function buildHeaderLineMetrics(
     nameBlockHeight: builds.reduce((acc, b) => acc + b.height, 0),
     headerLineAtoms: builds.map((b) => (b.hasMarkup ? b.atoms : undefined)),
     headerLineHeights: builds.map((b) => b.height),
+    headerLineRender: builds.map((b) => b.plainRender),
   };
 }

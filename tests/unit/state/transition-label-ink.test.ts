@@ -29,7 +29,7 @@ import { computeSvekResultGeometry, computeStateDocumentDims } from '../../../sr
 import { layoutState } from '../../../src/diagrams/state/layout.js';
 import { renderState } from '../../../src/diagrams/state/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { FontSpec } from '../../../src/core/measurer.js';
 import { computeReservedLabelBox } from '../../../src/core/edge-label-box.js';
 import { resolveArrowLabelFont } from '../../../src/core/arrow-label-font.js';
@@ -39,7 +39,7 @@ import { defaultTheme } from '../../../src/core/theme.js';
 import type { TransitionGeo } from '../../../src/diagrams/state/state-geo-types.js';
 import type { Transition, StateDiagramAST, State } from '../../../src/diagrams/state/ast.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 /** The transition-label font every state fixture uses (13pt sans). */
 const FONT: FontSpec = { family: 'sans-serif', size: 13 };
 
@@ -68,8 +68,9 @@ describe('attachTransitionLabel — the marged-box ink extent', () => {
     expect(l.width).toBe(Math.floor(MEASURED_WIDTH + 2 * MARGIN_LABEL));
     expect(l.width).toBe(113);
     // ...and the ink keeps the UNfloored dimension.
-    expect(l.inkBox!.width).toBeCloseTo(MEASURED_WIDTH + 2 * MARGIN_LABEL, 10);
-    expect(l.inkBox!.width).toBeCloseTo(113.475, 10);
+    // Widths are float32-rounded (seam #4 v2): 1.5e-6 off the decimal, hence 4.
+    expect(l.inkBox!.width).toBeCloseTo(MEASURED_WIDTH + 2 * MARGIN_LABEL, 4);
+    expect(l.inkBox!.width).toBeCloseTo(113.475, 4);
   });
 
   it('anchors the ink box one marginLabel left of the glyphs, at the reserved box corner', () => {
@@ -111,7 +112,7 @@ describe('computeSvekResultGeometry — the composite ink folds that box', () =>
   it('folds corner and corner+dimension (LimitFinder#drawEmpty), not the reserved box at the glyph anchor', () => {
     // ink minX is the `points` entry at 0; maxX is the box right edge.
     // 243.86 + 113.475 = 357.335, and SvekResult adds delta(15,15).
-    expect(computeSvekResultGeometry([], [geo()]).width).toBeCloseTo(357.335 + 15, 6);
+    expect(computeSvekResultGeometry([], [geo()]).width).toBeCloseTo(357.335 + 15, 4); // float32-rounded widths;
   });
 
   it('is 0.527 narrower than the pre-mission reserved-box-at-glyph-anchor fold', () => {
@@ -167,7 +168,7 @@ describe('state engine — <style> arrow { FontSize 20 } reaches both the DOT bo
   });
 
   it('the DOT box (layoutState -> layout.ts:buildFlatTransitionGeos) reserves the SAME box computeReservedLabelBox gives the resolved font', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const geo = layoutState(ast(), theme, measurer);
     const label = geo.transitions.find((t) => t.label !== undefined)!.label!;
     const expectedBox = computeReservedLabelBox('trigger', resolveArrowLabelFont(theme), measurer, false);
@@ -180,7 +181,7 @@ describe('state engine — <style> arrow { FontSize 20 } reaches both the DOT bo
   });
 
   it('the SVG <text> (renderState -> state-renderer-transitions.ts) draws the label at the SAME resolved size, from the SAME geometry the DOT box test used', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     const geo = layoutState(ast(), theme, measurer);
     const svg = assembleSvg(renderState(geo, theme));
     expect(svg).toContain('trigger');

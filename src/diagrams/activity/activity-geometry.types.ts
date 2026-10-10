@@ -11,6 +11,7 @@
 
 import type { SnakeTextAlign } from './layout/snake-text-position.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 
 // ---------------------------------------------------------------------------
 // Public geometry types
@@ -51,6 +52,12 @@ export interface ActivityNodeGeo {
    * elseif hexagon's slots (`FtileIfLongHorizontal.java:172-173,186`).
    */
   ifLabelRole?: 'test' | 'full';
+  /** isw-T2-act F5: an `'if-label'`/`'if-own-label'` whose block carries the
+   *  style `wrapWidth()` -- `ConditionalBuilder`'s test and SIMPLE_LINE
+   *  branch labels, the switch's and horizontal elseif's tests
+   *  (`ConditionalBuilder.java:120-121`, `FtileFactoryDelegatorSwitch.java:134`,
+   *  `FtileIfLongHorizontal.java:174`). Absent: `LineBreakStrategy.NONE`. */
+  wrapped?: true;
   /**
    * unwind2-S11: an `'if-label'` in a north/south/west/east slot of a
    * `FtileDiamondInside`/`FtileDiamondInside2`/`FtileDiamondSquare`, whose
@@ -88,6 +95,10 @@ export type CompositeUSymbol = 'package' | 'card' | 'rectangle';
 export interface ActivityEdgeGeo {
   points: Array<{ x: number; y: number }>;
   label?: string;
+  /** isw-T2-act F5: {@link label} is a `Branch#getTextBlock` block, wrapped
+   *  at the arrow style's `wrapWidth()` (`Branch.java:248-258`) -- a switch
+   *  case's in/out label. Absent: `create7`'s `LineBreakStrategy.NONE`. */
+  labelWrapped?: true;
   /**
    * How {@link label} is positioned, mirroring `Snake#withLabel`'s two
    * overloads (`ftile/Snake.java:124-136`) -- a pushed label carries
@@ -218,11 +229,25 @@ export interface SwimlaneGeo {
    */
   contentX?: number;
   /**
+   * `swimlane.getActualWidth()` -- `max(min, contentWidth)`, set by
+   * `computeSizeInternal` (`Swimlanes.java:407-411`) before compression and
+   * never revisited; an `auto` title wrap reads it (`:290-291`). Optional
+   * for the same reason as {@link contentWidth}.
+   */
+  actualWidth?: number;
+  /**
    * `|name|LABEL`'s display label, which the title draws and measures
    * instead of the name (`Swimlane#getDisplay`). Absent: the name.
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:163-164,285-293
    */
   display?: string;
+  /**
+   * The LAST lane only: `getHalfMissingSpace(n + 1)` (`Swimlanes.java:
+   * 436-449`), the appended special lane's half-space -- `5`, or more when
+   * its `""` title (one space at the title font) overflows `min`. The
+   * title band's right edge is that lane's translate (`:363`).
+   */
+  trailingHalfMissingSpace?: number;
   /**
    * O (add2 T3i): `|#color|name|`'s own background -- `x`/`width` above
    * already span exactly the jar's background-rect bounds (verified
@@ -290,4 +315,14 @@ export interface ActivityGeometry {
    *  `<$sprite>` resolves there too (`Theme#sprites`, `SkinParam.java:
    *  799-817`). */
   sprites?: SpriteRegistry;
+  /** isw-T2-act F1: the measurer the layout sized every text block with,
+   *  carried to the draw so `drawU` re-measures through the SAME bounder
+   *  (`Swimlanes.java:239,246` -- `ug.getStringBounder()` sizes and draws).
+   *  Optional only for hand-built `ActivityGeometry` test literals. */
+  measurer?: StringMeasurer;
+  /** isw-T2c-scale: the export will scale this document
+   *  (`scale-command.ts#isExportScaled` of `ast.scale` and the theme's dpi),
+   *  so the draw defers number formatting to the scale pass
+   *  (`SvgGraphics.java:468-475` formats once, after the scale). */
+  exportScaled?: true;
 }

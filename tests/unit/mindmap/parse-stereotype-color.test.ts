@@ -61,7 +61,10 @@ describe('createMindMapDiagram — [#color] and <<stereotype>>', () => {
         .getLabel()
         .asList()
         .map((e) => (typeof e === 'string' ? e : String(e))),
-    ).toEqual(['c', '(OK)']);
+      // The DATA group keeps its leading space (BlocLines.java:271-277); the
+      // re-captured kijafe oracle draws it as an x shift of 1 space (3.025 @11pt,
+      // test-results/dot-cache/mindmap/kijafe-43-tati619/in.svg).
+    ).toEqual([' c', '(OK)']);
     expect(child.getStereotype1()?.toString()).toBe('<<test>>');
   });
 

@@ -6,7 +6,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { renderSync } from '../../../../src/index.js';
-import { WidthTableMeasurer } from '../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
 import { combineAssetStores } from '../../../../src/core/asset-store.js';
 import { buildSpriteAssetsStore } from '../../../../scripts/sprite-assets-store.js';
 import { buildEmojiAssetsStore } from '../../../../scripts/emoji-assets-store.js';
@@ -22,7 +22,7 @@ const stores = {
   'sprites+emoji': combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore()),
 };
 for (const [name, store] of Object.entries(stores)) {
-  const svg = renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore: store, includeStore: fixtureIncludeStore() });
+  const svg = renderSync(markup, { measurer: new DeterministicMeasurer(), assetStore: store, includeStore: fixtureIncludeStore() });
   const { diffs } = compareSvg(svg, jar, 'deterministic');
   const s = diffs.filter((d) => d.delta === undefined).length;
   const i = svg.indexOf('id="ent0003"');

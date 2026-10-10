@@ -22,7 +22,7 @@ import type { UDrawable } from '../../../../src/core/klimt/shape/UDrawable.js';
 import type { StringBounder } from '../../../../src/core/klimt/font/StringBounder.js';
 import { makeAtomImageResolverFor } from '../../../../src/core/creole-atoms-image-resolver.js';
 import { measureUsecaseOrActorLeaf } from '../../../../src/core/svek/image/leaf-sizing.js';
-import { WidthTableMeasurer } from '../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
 import { createSpriteRegistry, addSprite, spriteDimsLookupFor } from '../../../../src/core/sprite-commands.js';
 import { SpriteMonochrome } from '../../../../src/core/klimt/sprite/SpriteMonochrome.js';
 import type { FontConfiguration } from '../../../../src/core/klimt/shape/UText.js';
@@ -188,7 +188,7 @@ describe('sizing-path reachability — SI15 T6 (`.agent-notes/si15-ink-offset.md
       '<$inkbox>\ninkbox',
       'usecase',
       fontSpec,
-      new WidthTableMeasurer(),
+      new DeterministicMeasurer(),
       inkboxSprites(),
     );
     expect(Math.abs(dim.width - 56.2184)).toBeLessThanOrEqual(JAR_TOLERANCE_PX);
@@ -200,7 +200,7 @@ describe('sizing-path reachability — SI15 T6 (`.agent-notes/si15-ink-offset.md
       'inkbox\n<$inkbox>',
       'usecase',
       fontSpec,
-      new WidthTableMeasurer(),
+      new DeterministicMeasurer(),
       inkboxSprites(),
     );
     expect(Math.abs(dim.width - 58.132)).toBeLessThanOrEqual(JAR_TOLERANCE_PX);

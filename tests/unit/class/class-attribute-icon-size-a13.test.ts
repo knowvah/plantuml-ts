@@ -28,7 +28,7 @@
  * byte-identical when the skinparam is absent.
  */
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
 import { resolveSkinparam } from '../../../src/core/skinparam.js';
@@ -36,7 +36,7 @@ import { parseClass } from './parse-helper.js';
 import { measureClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const SUPPRESS = { fields: false, methods: false };
 
 /** zakufi-53-sofe736's classe1 (5 fields + 5 methods, one modifier-less

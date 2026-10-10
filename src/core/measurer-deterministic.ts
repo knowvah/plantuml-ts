@@ -21,14 +21,24 @@
  * This module does not re-port `StringBounderFromWidthTable` +
  * `UnicodeFontWidthSansSerif` a second time — that port already exists as
  * `WidthTableMeasurer` (`measurer.ts`, backed by `measurer-width-table.data.ts`),
- * built and jar-verified under an earlier mission (ADR-001, "S1-impl").
- * Duplicating ~717 lines of width-table data a second time under a new name
- * would violate this project's own no-duplicate-logic principle for zero
- * benefit — `WidthTableMeasurer` IS `StringBounderFromWidthTable`, verbatim.
- * This module re-exports it under the `DeterministicMeasurer` name the
- * dual-measurer mission brief specifies, as the stable import path the
- * conformance/ratchet scripts (`scripts/dot-sync-report.ts`, the SVG
- * conformance census) are expected to use.
+ * which stays the VERBATIM port of the table (including its U+0020 = 0).
+ * `DeterministicMeasurer` extends it and overrides two things -- the
+ * width of U+0020 and float rounding of every width -- matching the oracle
+ * jar's seam #4
+ * (`FileFormat.getDefaultStringBounder`, patch
+ * `oracle/patches/0004-oracle-space-width.patch`).
+ *
+ * ## Why the space differs from the table (D1)
+ *
+ * The table gives U+0020 width 0 (`UnicodeFontWidthSansSerif.java` block 0,
+ * index 0x20). That is an instrument artefact: a lone space measures
+ * zero-wide, which crashes `SlotFinder` (`Slot.java:44-45`, `start >= end`).
+ * The table's own entries for the identical advance — U+0021 `!` and U+00A0
+ * NO-BREAK SPACE — are 44 tenths of a 16 pt em, and so are Helvetica
+ * (Adobe Core14 AFM: `C 32 ; WX 278 ; N space`, `C 33 ; WX 278 ; N exclam`)
+ * and Arial (569/2048 for all three). Space = 44 -> 4.4 px at 16 pt, 3.3 px
+ * at 12 pt. Only U+0020's entry changes; block 0's other zeros (0x09-0x0D,
+ * 0x1D, 0xAD) stay 0.
  *
  * Re-verified against the real jar (2026-07-10, `-DPLANTUML_DETERMINISTIC_TEXT=true`,
  * `plantuml-1.2026.7beta3.jar`, openjdk 21.0.1) as part of this task's own
@@ -51,4 +61,38 @@
  * — verified against the jar and fixed in `measurer.ts` as part of this
  * task (see that file's `WidthTableMeasurer.charWidth` doc comment).
  */
-export { WidthTableMeasurer as DeterministicMeasurer } from './measurer.js';
+import { WidthTableMeasurer } from './measurer.js';
+import type { FontSpec } from './measurer.js';
+
+/** U+0020, measured as `SPACE_STAND_IN` (seam #4). */
+const SPACE = / /g;
+
+/** U+0021 `!` -- the table's own 44-tenth entry, the advance seam #4 gives
+ *  U+0020 (D1). */
+const SPACE_STAND_IN = '!';
+
+/**
+ * The deterministic-mode measurer: `WidthTableMeasurer` with U+0020 = 44,
+ * width rounded to float.
+ *
+ * Mirrors the oracle's seam #4 exactly (the anonymous subclass's
+ * `calculateDimension` override in `FileFormat.getDefaultStringBounder`):
+ * `super.calculateDimension(font, text.replace(' ', '!'))`, then
+ * `(float) width`. Measuring each space as U+0021 sums the same 44-tenth
+ * entry in the same loop as every other glyph -- a table with 44 at 0x20.
+ * The float rounding is the stock SVG bounder's own precision
+ * (`FileFormat.getJavaDimension` reads `FontMetrics.getStringBounds`, a
+ * `Rectangle2D.Float`); without it a double table width reached one activity
+ * coordinate by two routes (126.75000000000001 vs 126.75), which
+ * `Snake.same` accepts (`Snake.java:299-300`) and `Direction.fromVector`
+ * rejects (`Direction.java:128`), crashing the jar (isw D2/D3-AMEND).
+ *
+ * @see oracle/patches/0004-oracle-space-width.patch (seam #4)
+ * @see WidthTableMeasurer
+ */
+export class DeterministicMeasurer extends WidthTableMeasurer {
+  override measure(text: string, font: FontSpec): { width: number; height: number } {
+    const dim = super.measure(text.replace(SPACE, SPACE_STAND_IN), font);
+    return { width: Math.fround(dim.width), height: dim.height };
+  }
+}

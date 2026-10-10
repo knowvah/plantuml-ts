@@ -1,0 +1,4 @@
+@startuml
+cloud cloud
+note right: cloud's note
+@enduml

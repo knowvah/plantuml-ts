@@ -17,12 +17,12 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { layoutFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 import { widenMeasuredClassifier } from '../../../src/diagrams/class/class-layout-generic-classifier.js';
 import type { MeasuredClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function leafRows(slug: string, id: string) {
   const markup = readFileSync(`test-results/dot-cache/class/${slug}/in.puml`, 'utf8');
@@ -31,17 +31,21 @@ function leafRows(slug: string, id: string) {
   return { width: leaf.width, row: leaf.rows[0]! };
 }
 
+// isw-T2-cls: the measurer now float32-rounds every width (oracle seam #4 v2 /
+// Math.fround, like FontMetrics.getStringBounds -> Rectangle2D.Float), so 72.995
+// is 72.99500198...; the jar's own DOT prints it at 6 decimals. Compare at the
+// jar's printed precision (4 digits), not at 1e-7.
 describe('applyKalWidthFloor re-runs HeaderLayout on the widened box (baneru-00-kuro607)', () => {
   it('widens class1 to the Kal floor 72.995 (EntityImageClass.java:113)', () => {
-    expect(leafRows('baneru-00-kuro607', 'class1').width).toBeCloseTo(72.995, 6);
+    expect(leafRows('baneru-00-kuro607', 'class1').width).toBeCloseTo(72.995, 4);
   });
 
   it('re-centres the badge on the final width: jar cx 22.572 - x 7 (HeaderLayout.java:98-101)', () => {
-    expect(leafRows('baneru-00-kuro607', 'class1').row.badgeIndent).toBeCloseTo(15.5715, 6);
+    expect(leafRows('baneru-00-kuro607', 'class1').row.badgeIndent).toBeCloseTo(15.5715, 4);
   });
 
   it('re-centres the name on the final width: jar x 36.698 - x 7 (HeaderLayout.java:108-110)', () => {
-    expect(leafRows('baneru-00-kuro607', 'class1').row.indent).toBeCloseTo(29.6985, 6);
+    expect(leafRows('baneru-00-kuro607', 'class1').row.indent).toBeCloseTo(29.6985, 4);
   });
 
   it('leaves the un-widened class2 at zero slack (jar badge 22.14, name 36.14, x 7.14)', () => {

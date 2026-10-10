@@ -7,12 +7,12 @@
  */
 import { describe, it, expect } from 'vitest';
 import { measureJsonState } from '../../../src/diagrams/state/state-json-sizing.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { State } from '../../../src/diagrams/state/ast.js';
 import type { JsonNode } from '../../../src/core/command/JsonNode.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function jsonState(id: string, jsonValue?: JsonNode, extra: Partial<State> = {}): State {
   return {
@@ -34,7 +34,10 @@ describe('measureJsonState', () => {
       entries: [{ key: 'foo2', value: { kind: 'scalar', value: 'foo3' } }],
     };
     const dim = measureJsonState(jsonState('foo1', value), defaultTheme, measurer);
-    expect(dim).toEqual({ width: 74.42500000000001, height: 36 });
+    // Re-captured oracle test-results/dot-cache/state/maruju-55-soko478/in.svg:
+    // rect width="74.425" height="36". Widths are float32-rounded (seam #4).
+    expect(dim.width).toBeCloseTo(74.425, 4);
+    expect(dim.height).toBe(36);
   });
 
   it('falls back to the empty-object formula when jsonValue is absent (unparsed/never-set body)', () => {

@@ -35,7 +35,7 @@ import { fileURLToPath } from 'node:url';
 import { renderSync } from '../../src/index.js';
 import { setLayoutInputObserver } from '../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../src/core/graph-layout.js';
-import { WidthTableMeasurer } from '../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
 import { dotInputToStructural } from '../oracle/svek-dot.js';
 import { spriteAtomScale, spriteScale, measureInlineAtom } from '../../src/core/creole-atoms-measure.js';
 import type { SpriteAtomToken, SpriteDimsLookup } from '../../src/core/creole-atoms.js';
@@ -73,7 +73,7 @@ function dotNodeDims(markup: string): { width: number; height: number }[] {
   const captured: DotInputGraph[] = [];
   setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
-    renderSync(markup, { measurer: new WidthTableMeasurer() });
+    renderSync(markup, { measurer: new DeterministicMeasurer() });
   } finally {
     setLayoutInputObserver(undefined);
   }
@@ -85,7 +85,7 @@ function dotNodeDims(markup: string): { width: number; height: number }[] {
 
 /** Every `<image>` element's declared box in the rendered SVG. */
 function svgImageBoxes(markup: string): { width: number; height: number }[] {
-  const svg = renderSync(markup, { measurer: new WidthTableMeasurer() });
+  const svg = renderSync(markup, { measurer: new DeterministicMeasurer() });
   return [...svg.matchAll(/<image\s[^>]*?width="([0-9.]+)"[^>]*?height="([0-9.]+)"/g)].map((m) => ({
     width: Number(m[1]),
     height: Number(m[2]),
@@ -218,9 +218,12 @@ describe('buildLineAtoms — url provenance on the inline atom token', () => {
 // ---------------------------------------------------------------------------
 
 describe('url-label sprite — measured DOT node dimensions', () => {
-  it('a display whose second line is [[url <$maxime>]] matches the jar at 1.316840 x 1.138889in', () => {
+  it('a display whose second line is [[url <$maxime>]] matches the jar at 1.423785 x 1.138889in', () => {
     const [node] = dotNodeDims(URL_LABEL_SPRITE);
-    expect(node!.width).toBeCloseTo(1.31684, 6);
+    // Width from a one-JVM jar render of this exact diagram under seam #4 v2
+    // (svek-1.dot, R1: width=1.423785): "You can click" now counts its two
+    // spaces at 3.85 each (was 1.31684 with a 0-wide space).
+    expect(node!.width).toBeCloseTo(1.423785, 6);
     // 82px = 48 (raw sprite) + 14 (line 1) + 20 (margin). Pre-fix: 85.692,
     // i.e. +3.692 = 51.6923 - 48 exactly.
     expect(node!.height).toBeCloseTo(1.138889, 6);

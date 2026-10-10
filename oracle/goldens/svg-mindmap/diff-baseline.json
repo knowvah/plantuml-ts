@@ -40,10 +40,12 @@
       "type": "mindmap",
       "slug": "susipa-95-tedu015",
       "status": "baseline",
-      "weightedScore": 318,
-      "diffCount": 133,
-      "measuredAt": "2026-09-30",
-      "measuredAgainstCommit": "c5dc64471"
+      "weightedScore": 337,
+      "diffCount": 152,
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "8f12d0060",
+      "reason": "isw/close (user ruling 2026-10-09): RAISED 318 -> 337 from a fresh measurement. Our output is unchanged; the jar's own page moved: it draws its NPE crash report (ReportLog.java:105-125, empty mindmap root) whose 20 stack lines carry 2 leading spaces, now shifted 2 spaces right in x by DriverTextSvg.java:118-124 under oracle seam #4 (space = 44 tenths). We draw a syntax-error page (crash report unported, JVM/stack content cannot match)."
     }
-  ]
+  ],
+  "$comment": " isw/close (2026-10-09): susipa-95-tedu015 raised 318 -> 337 by user ruling (oracle crash-page text moved, ours unchanged)."
 }

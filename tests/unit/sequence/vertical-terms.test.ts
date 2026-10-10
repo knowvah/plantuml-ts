@@ -300,23 +300,26 @@ describe('a group frame — the four terms that differ from its gauge', () => {
   // `lenamo-57-fano574`, whose golden puts the frame border at y=51 with
   // height 96, its tab 51..66, its two arrows at 95 and 139, its `else` rule
   // at 104 and its footbox at 171.
+  // Widths/x2 re-captured under oracle seam #4 (one space = 3.575@13): the
+  // jar's own frame is `width="196.156"` and both arrows end at x2=187.625
+  // (test-results/dot-cache/sequence/lenamo-57-fano574/in.svg).
   const ours = oursFor('lenamo-57-fano574');
 
   it('draws the border `EXTERNAL_MARGINY` below the chaining point', () => {
     // The gauge min is 47 (body top 39 + startingY 8); the border is at 51.
-    expect(ours).toContain('<rect x="13.469" y="51" width="192.581" height="96"');
+    expect(ours).toContain('<rect x="13.469" y="51" width="196.156" height="96"');
   });
 
   it('opens the body `headerH + MARGINY_MAGIC / 2 + EXTERNAL_MARGINY` down', () => {
     // 47 + 15 + 10 + 4 = 76, and the first arrow sits `blockH + 6` inside it.
-    expect(ours).toContain('<line x1="29.469" y1="95" x2="184.05" y2="95"');
+    expect(ours).toContain('<line x1="29.469" y1="95" x2="187.625" y2="95"');
   });
 
   it('reserves `blockH + 6` for the `else` separator, not a flat 20', () => {
     // `ComponentRoseGroupingElse#getPreferredHeight:115-121` on the teoz arm.
     // The separator tile opens at 103 and the second arrow lands 17 + 19
     // lower, at 139.
-    expect(ours).toContain('<line x1="29.469" y1="139" x2="184.05" y2="139"');
+    expect(ours).toContain('<line x1="29.469" y1="139" x2="187.625" y2="139"');
   });
 
   it('leaves `EXTERNAL_MARGINY + MARGINY_MAGIC / 2` of slack under it', () => {

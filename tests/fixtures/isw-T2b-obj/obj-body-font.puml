@@ -1,0 +1,13 @@
+@startuml
+<style>
+object {
+  FontSize 12
+  FontStyle italic
+  FontName Helvetica
+}
+</style>
+object Alpha {
+  name = "Dummy"
+  id = 123
+}
+@enduml

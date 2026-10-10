@@ -143,6 +143,7 @@ export function scaleAtom(atom: MemberRenderAtom, k: number): MemberRenderAtom {
         font: scaleFontConfig(atom.font, k),
         width: atom.width * k,
         ...(atom.renderWidth !== undefined ? { renderWidth: atom.renderWidth * k } : {}),
+        ...(atom.renderDx !== undefined ? { renderDx: atom.renderDx * k } : {}),
         ...(atom.dy !== undefined ? { dy: atom.dy * k } : {}),
       };
     case 'image':
@@ -168,6 +169,8 @@ export function scaleRow(row: RowGeo, k: number, themeFontSize: number): RowGeo 
     indent: row.indent * k,
     fontSize: (row.fontSize ?? themeFontSize) * k,
     ...(row.width !== undefined ? { width: row.width * k } : {}),
+    ...(row.renderWidth !== undefined ? { renderWidth: row.renderWidth * k } : {}),
+    ...(row.renderDx !== undefined ? { renderDx: row.renderDx * k } : {}),
     ...(row.badgeIndent !== undefined ? { badgeIndent: row.badgeIndent * k } : {}),
     ...(row.visibilityBlockHeight !== undefined ? { visibilityBlockHeight: row.visibilityBlockHeight * k } : {}),
     ...(row.visibilityBlockTopDy !== undefined ? { visibilityBlockTopDy: row.visibilityBlockTopDy * k } : {}),

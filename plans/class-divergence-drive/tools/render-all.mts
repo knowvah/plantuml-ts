@@ -35,7 +35,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { AssetStore } from '../../../src/core/asset-store.js';
 import { buildSpriteAssetsStore } from '../../../scripts/sprite-assets-store.js';
 // cdd4-T9 / close-b2: the jar always has its Twemoji artwork too, so this
@@ -153,7 +153,7 @@ export function renderRow(f: FixtureDir, store: AssetStore, tree: string): Rende
   try {
     const markup = readFileSync(join(f.dir, 'in.puml'), 'utf-8');
     const oracle = readFileSync(join(f.dir, 'in.svg'), 'utf-8');
-    const svg = renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore: store, includeStore: fixtureIncludeStore() });
+    const svg = renderSync(markup, { measurer: new DeterministicMeasurer(), assetStore: store, includeStore: fixtureIncludeStore() });
     const { structural, numeric } = countDiffs(svg, oracle);
     const v = diffVerdict(svg, oracle);
     const firstDiff = v.firstDiff !== undefined ? { firstDiff: v.firstDiff } : {};

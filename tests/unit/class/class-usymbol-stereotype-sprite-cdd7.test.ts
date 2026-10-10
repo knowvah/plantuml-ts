@@ -13,12 +13,12 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
 import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const SPRITE = 'archimate/business-actor';
 /** The shared `extractNodeStereotype` ref -- `Stereotype#getHtmlColor` as
  *  the description engine's own producer returns it for a bare `<<$name>>`. */
@@ -83,7 +83,9 @@ describe('class USymbol leaf stereotype sprite (EntityImageDescription.java:192-
 
   it('draws the sprite, not the «label» text, for a multi-line leaf', () => {
     const leaf = leafOf(render(MULTI), 'Y');
-    expect(leaf).toContain('<rect x="83.57" y="7" width="40.213" height="68"');
+    // width 40.212: re-read from the new jar (tests/fixtures/isw-T2-cls/
+    // sprite-multi.svg; the measurer float32-rounds 40.2125 -> 40.212).
+    expect(leaf).toContain('<rect x="83.57" y="7" width="40.212" height="68"');
     expect(leaf).toContain('<path d="M103.572,17.95 ');
     expect(leaf).not.toContain('«business-actor»');
     expect(leaf).toContain('<text x="93.57" y="47.889" fill="#000" font-size="14" textLength="19.425">foo</text>');

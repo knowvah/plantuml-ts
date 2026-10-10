@@ -31,7 +31,9 @@ import { pushLaneReservation } from './swimlane-reservation-lane.js';
  *  doc, `tiles/tile.ts`). `label` is `''` for a style-only arrow
  *  (`-[#red]->`); `color` is `CommandArrow3`'s COLOR group verbatim, the
  *  next arrow's `Rainbow` definition (`CommandArrow3.java:99-103`). */
-export type PendingInLabel = { label: string; color?: string };
+/** `wrapped` (isw-T2-act F5): a `Branch#getTextBlock` label, built with the
+ *  arrow style's `wrapWidth()` (`Branch.java:248-258`). */
+export type PendingInLabel = { label: string; color?: string; wrapped?: true };
 
 /**
  * `CommandArrow3#executeArg` (`CommandArrow3.java:96-110`): the COLOR group
@@ -107,7 +109,7 @@ function inLabelReservation(
   const lines = inLabel.label.split('\n');
   const fontSize = activityFontSize(theme, 'arrow');
   const pad = theme.padding ?? 0;
-  const dim = edgeLabelBlockSize(inLabel.label, theme);
+  const dim = edgeLabelBlockSize(inLabel.label, theme, undefined, inLabel.wrapped === true);
   const position = getTextBlockPosition(points, dim, align);
   const baselineY = position.y + pad + fontSize * TITLE_ASCENT_FRACTION;
   const top = baselineY - (fontSize - 1.5);
@@ -155,6 +157,7 @@ function applyPendingLabelToLastEdge(out: Out, pending: PendingInLabel | undefin
   if (pending.label === '') return;
   edge.label = pending.label;
   edge.labelAlign = align;
+  if (pending.wrapped === true) edge.labelWrapped = true;
   const r = inLabelReservation(edge.points, pending, align, out.theme);
   pushLaneReservation(out.reservations, r, labelLane(out.edgeMeta[out.edgeMeta.length - 1]!));
 }

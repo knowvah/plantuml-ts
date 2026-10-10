@@ -19,12 +19,12 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 
 const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/class');
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function capture(puml: string): { graph: DotInputGraph; svg: string } {
   const captured: DotInputGraph[] = [];

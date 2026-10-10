@@ -38,6 +38,15 @@ interface LaneDividers {
   readonly dividerX: number[];
   readonly contentLeft: number[];
   readonly dividerReservations: DividerReservation[];
+  /** `getHalfMissingSpace(n + 1)`: the special lane's own half-space. */
+  readonly trailingX2: number;
+}
+
+/** `computeSizeInternal`'s resolved `min` (`Swimlanes.java:399-403`) and
+ *  the special lane's title width (`swimlane-title.ts`). */
+export interface LaneSizing {
+  readonly min: number;
+  readonly specialTitleWidth: number;
 }
 
 /**
@@ -56,10 +65,10 @@ function trailingDivider(
   inputs: readonly LaneWidthInput[],
   min: number,
   xpos: number,
-): { dividerX: number; reservation: DividerReservation } {
+): { dividerX: number; reservation: DividerReservation; x2n: number } {
   const x1n = halfMissingSpace(laneNames.length, inputs, min);
   const x2n = halfMissingSpace(laneNames.length + 1, inputs, min);
-  return { dividerX: xpos + x1n + min / 2, reservation: { x: xpos + min / 2, width: x1n + x2n } };
+  return { dividerX: xpos + x1n + min / 2, reservation: { x: xpos + min / 2, width: x1n + x2n }, x2n };
 }
 
 /**
@@ -108,7 +117,7 @@ function computeDividers(
   const trailing = trailingDivider(laneNames, inputs, min, xpos);
   dividerX.push(trailing.dividerX);
   dividerReservations.push(trailing.reservation);
-  return { dividerX, contentLeft, dividerReservations };
+  return { dividerX, contentLeft, dividerReservations, trailingX2: trailing.x2n };
 }
 
 /** One lane's {@link LaneOrigin}, split from {@link computeLaneOrigins}
@@ -124,6 +133,7 @@ function buildLaneOrigin(name: string, w: LaneWidth, x: number, width: number, l
       titleWidth: w.titleWidth,
       contentMinX: w.contentMinX,
       contentX: left,
+      actualWidth: w.width,
     },
   };
 }
@@ -143,21 +153,32 @@ function buildLaneOrigin(name: string, w: LaneWidth, x: number, width: number, l
 export function computeLaneOrigins(
   laneNames: readonly string[],
   widths: ReadonlyMap<string, LaneWidth>,
-  min: number,
+  sizing: LaneSizing,
   blockOriginX: number,
 ): LaneOrigins {
+  const { min } = sizing;
+  // `swimlanesSpecial()` (`Swimlanes.java:116-123`): the real lanes plus
+  // the appended `""` lane, `MinMax.getEmpty(true)` (content width 0),
+  // whose title `getHalfMissingSpace(n + 1)` measures (isw-T2-act F3).
   const inputs: LaneWidthInput[] = laneNames.map((name) => {
     const w = widths.get(name)!;
     return { contentWidth: w.contentWidth, titleWidth: w.titleWidth };
   });
-  const { dividerX, contentLeft, dividerReservations } = computeDividers(laneNames, widths, inputs, min, blockOriginX);
+  inputs.push({ contentWidth: 0, titleWidth: sizing.specialTitleWidth });
+  const dividers = computeDividers(laneNames, widths, inputs, min, blockOriginX);
+  const { dividerX, contentLeft, dividerReservations } = dividers;
 
   const origins = new Map<string, LaneOrigin>();
   for (let i = 0; i < laneNames.length; i++) {
     const name = laneNames[i]!;
     const w = widths.get(name)!;
     const width = dividerX[i + 1]! - dividerX[i]!;
-    origins.set(name, buildLaneOrigin(name, w, dividerX[i]!, width, contentLeft[i]!));
+    const origin = buildLaneOrigin(name, w, dividerX[i]!, width, contentLeft[i]!);
+    const isLast = i === laneNames.length - 1;
+    origins.set(
+      name,
+      isLast ? { ...origin, geo: { ...origin.geo, trailingHalfMissingSpace: dividers.trailingX2 } } : origin,
+    );
   }
   return { origins, dividerReservations };
 }

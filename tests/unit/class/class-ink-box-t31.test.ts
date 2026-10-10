@@ -21,16 +21,21 @@
  */
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { computeClassRawInkDims } from '../../../src/diagrams/class/layout-ink-extent.js';
 import type { ClassifierGeo, EdgeGeo } from '../../../src/diagrams/class/layout.js';
 
 function svgDims(lines: readonly string[]): string {
-  const svg = renderSync(['@startuml', ...lines, '@enduml'].join('\n'), { measurer: new WidthTableMeasurer() });
+  const svg = renderSync(['@startuml', ...lines, '@enduml'].join('\n'), { measurer: new DeterministicMeasurer() });
   const root = /<svg[^>]*>/.exec(svg)?.[0] ?? '';
   return `${/\bwidth="([^"]+)"/.exec(root)?.[1]}x${/\bheight="([^"]+)"/.exec(root)?.[1]}`;
 }
 
+// isw-T2-cls: canvas sizes re-read from the new jar -- pixexi-81 / focaci-80 from
+// test-results/dot-cache/class/<slug>/in.svg, the three authored sources from
+// tests/fixtures/isw-T2-cls/ink-box-ib{1,2,3}.svg (ib3 is the multi-line title;
+// its second line is CENTRED by the jar, x 22.25, which ours draws left: a
+// pre-existing alignment gap, see .agent-notes/isw-T2-cls.md).
 describe('E1-2/E2-8 — namespace title UText ink (LimitFinder.java:217-224)', () => {
   it('cocube-46-tusu692: jar 318x537 (30pt title rises 3.167 above the tab)', () => {
     expect(
@@ -48,7 +53,7 @@ describe('E1-2/E2-8 — namespace title UText ink (LimitFinder.java:217-224)', (
     ).toBe('318pxx537px');
   });
 
-  it('pixexi-81-sete111: jar 346x149 (40pt title rises 5.389 above the frame)', () => {
+  it('pixexi-81-sete111: jar 357x149 (40pt title rises 5.389 above the frame)', () => {
     expect(
       svgDims([
         'skinparam package {',
@@ -62,10 +67,10 @@ describe('E1-2/E2-8 — namespace title UText ink (LimitFinder.java:217-224)', (
         'class foo',
         '}',
       ]),
-    ).toBe('346pxx149px');
+    ).toBe('357pxx149px');
   });
 
-  it('packageStyle rect: jar 346x148 (USymbolRectangle#asBig title, centred)', () => {
+  it('packageStyle rect: jar 357x148 (USymbolRectangle#asBig title, centred)', () => {
     expect(
       svgDims([
         'skinparam packageStyle rect',
@@ -74,16 +79,16 @@ describe('E1-2/E2-8 — namespace title UText ink (LimitFinder.java:217-224)', (
         'class foo',
         '}',
       ]),
-    ).toBe('346pxx148px');
+    ).toBe('357pxx148px');
   });
 
-  it('empty-package leaf: jar 307x126 (EntityImageEmptyPackage title, same folder asBig)', () => {
-    expect(svgDims(['skinparam packageFontSize 40', 'package "Empty one" {', '}', 'class foo'])).toBe('307pxx126px');
+  it('empty-package leaf: jar 318x126 (EntityImageEmptyPackage title, same folder asBig)', () => {
+    expect(svgDims(['skinparam packageFontSize 40', 'package "Empty one" {', '}', 'class foo'])).toBe('318pxx126px');
   });
 
-  it('multi-line title: jar 179x189 (one UText per physical line)', () => {
+  it('multi-line title: jar 190x189 (one UText per physical line)', () => {
     expect(svgDims(['skinparam packageFontSize 40', 'package "Line one\\nsecond" {', 'class foo', '}'])).toBe(
-      '179pxx189px',
+      '190pxx189px',
     );
   });
 });
@@ -111,10 +116,10 @@ describe('E1-5 — USymbol container walked as drawn (UPath.java:84-92)', () => 
 });
 
 describe('B-3 — drawn quantifier lines, not the raw quantifier (SvekEdge.java:969-973)', () => {
-  it('focaci-80-suzu938: jar 135x178', () => {
+  it('focaci-80-suzu938: jar 138x178', () => {
     expect(
       svgDims(['class Transaction ', 'class ActorRole', 'Transaction "1 initiating" --> "~* initiators" ActorRole']),
-    ).toBe('135pxx178px');
+    ).toBe('138pxx178px');
   });
 
   it('bounds each QuantifierLineGeo, ignoring the unsplit headLabel anchor', () => {

@@ -25,7 +25,7 @@ import { homedir } from 'node:os';
 
 import { renderSync } from '../src/index.js';
 import { setLayoutInputObserver } from '../src/core/graph-layout.js';
-import { WidthTableMeasurer } from '../src/core/measurer.js';
+import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { MapIncludeStore } from '../src/core/tim/IncludeStore.js';
 import { withStdlib } from '../src/core/tim/StdlibStore.js';
 import { buildStdlibAssetsStore } from './stdlib-assets-store.js';
@@ -144,7 +144,7 @@ function ourInputs(type: string, markup: string): DotInputGraph[] {
   setLayoutInputObserver(({ graph: g }) => inputs.push(g));
   try {
     renderSync(markup, {
-      measurer: new WidthTableMeasurer(),
+      measurer: new DeterministicMeasurer(),
       ...(STDLIB_WIRED_TYPES.has(type)
         ? { includeStore: withStdlib(new MapIncludeStore(), buildStdlibAssetsStore()) }
         : {}),

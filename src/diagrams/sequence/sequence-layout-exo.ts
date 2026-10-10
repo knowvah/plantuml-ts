@@ -43,7 +43,7 @@ import type { EventCursor, EventProcessingContext } from './sequence-layout-even
 import { activationLevel } from './sequence-layout-events.js';
 import { ARROW_PADDING_X, arrowFontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
 import { messageTileAdvance } from './sequence-layout-message.js';
-import { messageLabelBlock, messageLabelRows } from './text-block-geo.js';
+import { MESSAGE_NUMBER_MARGIN, messageLabelBlock, messageLabelRows, numberTextOf } from './text-block-geo.js';
 import { ARROW_DELTA_X, DIAM_CIRCLE } from './sequence-arrowhead.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
 import { sequenceAtomContext, sequenceLabelBlockWidth } from './sequence-creole.js';
@@ -51,12 +51,6 @@ import { sequenceAtomContext, sequenceLabelBlockWidth } from './sequence-creole.
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-
-/** The right margin between a leading `MessageNumber` and the label beside it
- *  — `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` (`Display.java:706`). Same
- *  value `text-block-geo.ts` places the number with; duplicated rather than
- *  imported because that module is not this task's to widen. */
-const MESSAGE_NUMBER_MARGIN = 4;
 
 /** How far a matching-side `ArrowDecoration.CIRCLE` pulls the border end in.
  *  @see teoz/CommunicationExoTile.java:138-147 */
@@ -117,14 +111,6 @@ function rightCircleInset(arrow: ArrowConfiguration, type: MessageExoType): numb
 // ---------------------------------------------------------------------------
 // Widths
 // ---------------------------------------------------------------------------
-
-/** The autonumber run's text, when the message carries one. Mirrors
- *  `sequence-layout-message.ts#numberTextOf`, which is private to the module
- *  another task owns this batch. */
-function numberTextOf(event: MessageExoEvent): string | undefined {
-  if (event.sequenceLabel !== undefined) return event.sequenceLabel;
-  return event.sequenceNumber === undefined ? undefined : String(event.sequenceNumber);
-}
 
 /** The label block's own width — the number, its margin and the widest label
  *  line, exactly as `messageLabelBlock` lays them out. */

@@ -35,6 +35,42 @@ post-D7 measurements.
 
 ---
 
+## `instrument-space-width` (isw) — DONE 2026-10-09 (batches 0, 1, 2a–2c, final)
+
+Oracle seam #4 (fork `eb0f3cff7df`) measures U+0020 as U+0021 (44 tenths)
+and float-rounds widths like the stock bounder; `DeterministicMeasurer`
+mirrors it; whole oracle re-captured one JVM per fixture. Instrument exact
+(47,920/47,920), 539 owed rows at b1 → 0, 0 conformant losses, 0 elements
+away; crash pages 33 → 6; sequence Σ 304,703 → 150,933. Production output
+changed by attributed family fixes (user ruling). Follow-ons — none is
+space-revealed or owed; each found during the mission with its mechanism:
+
+1. **Re-capture tool: multi-page fixtures.** `scripts/lib/recapture-manifest.ts`
+   lists only `<name>.svg`; `<name>_NNN.svg` pages (tests/fixtures/unwind2-S4)
+   were re-captured by hand (isw journal row 22).
+2. **Unscaled activity double rounding** hidden by the 0.01 tolerance
+   (lidefe-01, zejuso-92: a translate applied to already-rounded strings) —
+   format activity once at export, ungated (isw T2c-scale note).
+3. **Scaled root width/height** (`SvgGraphics.java:800-813` format(maxX)) in
+   mindmap-without-chrome, class, json, sequence, state, description.
+4. **Sequence notes:** top/bottom/self/exo tiles, reverse-arrow anchoring
+   (TileBuilder swap), note outline vertex order / hnote polygon, `/ note`
+   NotesTile stacking (isw T2b-seq note).
+5. **json/map `MaximumWidth` wrapping** unported (object/maxosa-84: jar 98
+   `<text>`, ours 63).
+6. **Class:** collapsed empty package ignores `hide <<q>> stereotype`
+   (layout order, EntityImageEmptyPackage.java:126-128); folder-package
+   multi-line title centring; 3 stereotyped json leaves +0.167 y.
+7. **Description:** stereotype style tags (`.pad {}`) unapplied; link
+   label/note positions; a fourth `removeEmptyColumns` copy (dedupe into core).
+8. **susipa-95** (mindmap, empty tree): the jar draws its NPE crash report
+   (ReportLog.java:105-125); ours a syntax-error page — re-pinned 337 by ruling.
+9. **Unknown ACTIVITY-typed fixtures** have no ratchet tree: cezeje-11,
+   febuci-08, godixi-01, kakitu-70, nunema-69, nupiko-03 are conformant but
+   unpinned.
+10. **Sequence draw-side plugin seam:** `render(geo, theme, measurer?)` is
+    optional for every other engine; sequence requires it.
+
 ## `large-group-mirror` (lgm) — DONE 2026-10-08 (T0a–T1e + T-exit/T-close-out, batches 0–2)
 
 Retired three `DIVERGENCES.md` entries (A1 edge precision, A2 non-class
@@ -44,7 +80,7 @@ fixtures →conformant, 0 losses, 0 element moves away from the jar, 112
 sequence rows fell / 0 rose (Σ 306549→304703). Follow-ons, each with its
 mechanism:
 
-1. **`instrument-space-width` (user ruling 2026-10-08, option 1) — next.**
+1. ~~**`instrument-space-width` (user ruling 2026-10-08, option 1)**~~ — DONE 2026-10-09 (see the isw section above).
    The deterministic-text oracle installs upstream's `UnicodeFontWidthSansSerif`,
    which gives U+0020 width 0 (block 0, index 32); every oracle text with a
    space is narrower than the stock jar draws it (538/538 sampled

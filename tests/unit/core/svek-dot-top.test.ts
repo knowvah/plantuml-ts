@@ -16,7 +16,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
 import { firstEncounterOrder } from '../../../src/core/svek-dot-order.js';
@@ -69,7 +69,7 @@ function captureClass(puml: string): DotInputGraph {
   const captured: DotInputGraph[] = [];
   setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
-    renderSync(puml, { measurer: new WidthTableMeasurer() });
+    renderSync(puml, { measurer: new DeterministicMeasurer() });
   } finally {
     setLayoutInputObserver(undefined);
   }

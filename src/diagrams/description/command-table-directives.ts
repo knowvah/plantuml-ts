@@ -48,7 +48,7 @@ const RE_SET_SEPARATOR = /^set\s+(?:separator|namespaceseparator)\s+(\S+)\s*$/i;
  *  `cmds.add(new CommandHideShow2())`), so a line ending in a PORTION
  *  keyword is claimed by this rule first. */
 const RE_HIDE_SHOW_PORTION =
-  /^(hide|show)\s+(?:<<\s*([^>]+?)\s*>>\s+)?(?:empty\s+)?(members?|attributes?|fields?|methods?|circles?|circled?|stereotypes?)\s*$/i;
+  /^(hide|show)\s+(?:<<(.*)>>\s+)?(?:empty\s+)?(members?|attributes?|fields?|methods?|circles?|circled?|stereotypes?)\s*$/i;
 
 /** `hide|show WHAT` entity-visibility form (classdiagram/command/
  *  CommandHideShow2.java) -- `*` (whole diagram), `$tag`
@@ -217,7 +217,9 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
       const portion = match[3]!.toLowerCase();
       if (!portion.startsWith('ste')) return;
       const show = match[1]!.toLowerCase() === 'show';
-      const pattern = match[2]?.trim();
+      // GENDER `\<\<.*\>\>` is compared verbatim against the label
+      // (CucaDiagram.java:608-616 `gender.equals(label)`), so no trim.
+      const pattern = match[2];
       state.ast.stereotypeVisibilityRules ??= [];
       const rule: { pattern?: string; show: boolean } = { show };
       if (pattern !== undefined) rule.pattern = pattern;

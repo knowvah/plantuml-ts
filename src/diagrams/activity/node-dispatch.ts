@@ -19,7 +19,6 @@ import {
   RE_ACTION,
   RE_ARROW_LABEL,
   RE_ENDWHILE,
-  RE_ESCAPED_NEWLINE,
   RE_REPEAT_HEAD,
   RE_REPEAT_INLINE_TERMINATOR,
   RE_REPEATWHILE,
@@ -47,7 +46,7 @@ import {
   pushParsedNode,
 } from './list-backward-dispatch.js';
 import { singleLineArrowLabel, tryArrowLong } from './dispatch-arrow-long.js';
-import { decodeNewlineSentinels } from './dispatch-newline-sentinels.js';
+import { displayWithNewlines } from './dispatch-newline-sentinels.js';
 import { readMultilineActionBody } from './dispatch-multiline-body.js';
 import { extractLeadingCaseNotes, tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
@@ -129,7 +128,7 @@ function trySimpleKeyword(ctx: ParseContext, idx: number, _line: string, lc: str
 function tryAction(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const actionMatch = RE_ACTION.exec(line);
   if (actionMatch === null) return null;
-  const label = decodeNewlineSentinels(actionMatch[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n'));
+  const label = displayWithNewlines(ctx.pragma, actionMatch[1]!);
   const stereotype = stereogroupStereotype(actionMatch[2]);
   const color = stereogroupBackColor(actionMatch[2]);
   const node: ActivityAction = {
@@ -151,13 +150,18 @@ export { readMultilineActionBody, type MultilineActionBody } from './dispatch-mu
  *  close the block (`CommandActivityLong3.java:79-82`). */
 function tryMultilineAction(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   if (!line.startsWith(':')) return null;
-  const firstPart = line.slice(1).trim();
-  const labelParts: string[] = [];
-  if (firstPart !== '') labelParts.push(firstPart);
+  // isw-T2-act F2: `":" DATA(.*)` with no space leaf (`CommandActivityLong3
+  // .java:81-82`), and `removeStartingAndEnding(DATA, 0)` (`:139`) keeps it
+  // as the first line even when empty -- the jar draws that line.
+  const labelParts: string[] = [line.slice(1)];
   const body = readMultilineActionBody(ctx, idx + 1, labelParts);
   const node: ActivityAction = {
     kind: 'action',
-    label: decodeNewlineSentinels(body.labelParts.join('\n')),
+    // isw-T2-act F7: `lines.toDisplay()` is `Display.createFoo` (`BlocLines.java:
+    // 124-128`, `Display.java:185-198`) -- no newline scan; a `%newline()`
+    // sentinel reaches the creole parser, which splits a plain line on it
+    // (`CreoleStripeSimpleParser.java:164`) and a table cell keeps it.
+    label: body.labelParts.join('\n'),
     ...(body.multiStereo !== undefined ? { stereotype: body.multiStereo } : {}),
     ...(body.multiColor !== undefined ? { color: body.multiColor } : {}),
     ...swimlaneSpread(ctx),
@@ -178,8 +182,8 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
   const whileMatch = RE_WHILE.exec(line);
   if (whileMatch === null) return null;
   const { lines } = ctx;
-  const condition = whileMatch[1]!.trim();
-  const yesLabel = whileMatch[2]?.trim();
+  const condition = whileMatch[1]!;
+  const yesLabel = whileMatch[2];
   // Mission `activity-lane-capture` D1/T4: read BEFORE the body parses, so
   // a lane switch inside the body never leaks into this node's own
   // `swimlane`.
@@ -194,7 +198,7 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
   if (cursor < lines.length) {
     const endLine = lines[cursor]!.trim();
     const endwhileMatch = RE_ENDWHILE.exec(endLine);
-    if (endwhileMatch !== null) exitLabel = endwhileMatch[1]?.trim();
+    if (endwhileMatch !== null) exitLabel = endwhileMatch[1];
     cursor++;
   }
   // `InstructionWhile#addNote` (`InstructionWhile.java:162-167`): a note
@@ -240,7 +244,7 @@ function parseRepeatEntry(ctx: ParseContext, inlineRest: string | undefined): Ac
   const restLine = RE_REPEAT_INLINE_TERMINATOR.test(inlineRest) ? inlineRest : inlineRest + ';';
   const actionM = RE_ACTION.exec(restLine);
   if (actionM === null) return undefined;
-  const label = decodeNewlineSentinels(actionM[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n'));
+  const label = displayWithNewlines(ctx.pragma, actionM[1]!);
   const stereotype = stereogroupStereotype(actionM[2]);
   const color = stereogroupBackColor(actionM[2]);
   return {
@@ -274,9 +278,9 @@ function parseRepeatClose(lines: readonly string[], cursor: number): RepeatClose
   if (cursor >= lines.length) return { condition: '', yesLabel: undefined, outLabel: undefined, nextIdx: cursor };
   const endLine = lines[cursor]!.trim();
   const repeatMatch = RE_REPEATWHILE.exec(endLine);
-  const condition = unescapeLabelNewlines(repeatMatch?.[1]?.trim() ?? '');
-  const yesLabel = unescapeLabel(repeatMatch?.[2]?.trim());
-  const outLabel = unescapeLabel(repeatMatch?.[3]?.trim());
+  const condition = unescapeLabelNewlines(repeatMatch?.[1] ?? '');
+  const yesLabel = unescapeLabel(repeatMatch?.[2]);
+  const outLabel = unescapeLabel(repeatMatch?.[3]);
   return { condition, yesLabel, outLabel, nextIdx: cursor + 1 };
 }
 

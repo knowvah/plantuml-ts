@@ -36,6 +36,9 @@
  *     `HeaderLayout#drawU`'s nested-centering read.
  */
 import type { Classifier, ClassDiagramAST, HideStereotypeDirective } from './ast.js';
+import { Stereotype } from '../../core/stereo/Stereotype.js';
+import { GUILLEMET_DOUBLE_COMPARATOR } from '../../core/stereo/StereotypeDecoration.js';
+import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
 import type { LeafSizingStereotypeSprite } from '../../core/svek/image/LeafSizingSubject.js';
@@ -231,9 +234,8 @@ export type { HeaderInfo, GenericTagDim, GenericTagGeo } from './class-stereotyp
  * only the `GENDER` slot's `<<...>>`-stereotype-pattern form (or no gender
  * at all) is matched here; a bare type keyword (`hide class stereotype`) or
  * entity-id gender is a distinct, unported sub-case of the same upstream
- * command. `pattern` is stored WITHOUT its `<<`/`>>` brackets, trimmed —
- * the same shape {@link splitStereotypeLabels} produces for a classifier's
- * own labels, so {@link isStereotypeLabelHidden} can compare them directly.
+ * command. `pattern` is stored WITHOUT its `<<`/`>>` brackets and NOT trimmed;
+ * {@link isStereotypeLabelHidden} compares `<<pattern>>` with the raw label.
  */
 const STEREOTYPE_HIDESHOW_RE = /^(hide|show)\s+(?:(<<.*>>)\s+)?stereotypes?\s*$/i;
 
@@ -244,8 +246,24 @@ export function parseHideStereotypeDirective(line: string): HideStereotypeDirect
   const action: 'hide' | 'show' = /^hide/i.test(m[1]!) ? 'hide' : 'show';
   const bracketed = m[2];
   if (bracketed === undefined) return { kind: 'hidestereotype', action };
-  const pattern = bracketed.slice(2, -2).trim();
+  // GENDER is compared verbatim (CucaDiagram.java:608-616 `gender.equals(
+  // label)`): `hide << x >> stereotype` does not match `<<x>>`.
+  const pattern = bracketed.slice(2, -2);
   return { kind: 'hidestereotype', action, pattern };
+}
+
+/**
+ * `Stereotype#getLabels(Guillemet.DOUBLE_COMPARATOR)` of a classifier's
+ * stereotype blob (`Classifier.stereotype` is the text between the outermost
+ * `<<` and `>>`): the raw `<<...>>` runs, padding included, because
+ * `manageGuillemetStrict` is the identity for DOUBLE_COMPARATOR
+ * (Guillemet.java:87-89). These are what `hide|show <<p>>` compares
+ * (EntityGenderUtils.java:68-82, CucaDiagram.java:608-616). Aligned index for
+ * index with {@link splitStereotypeLabels} (same `cutLabels` over the same
+ * decoration-stripped label).
+ */
+export function rawStereotypeLabels(stereotype: string): string[] {
+  return Stereotype.build(`<<${stereotype}>>`, 0, undefined, parseSimpleColor).getLabels(GUILLEMET_DOUBLE_COMPARATOR);
 }
 
 /**
@@ -255,10 +273,10 @@ export function parseHideStereotypeDirective(line: string): HideStereotypeDirect
  * (no directive matches) is VISIBLE — mirrors upstream's `result = true`
  * seed.
  */
-export function isStereotypeLabelHidden(label: string, directives: readonly HideStereotypeDirective[]): boolean {
+export function isStereotypeLabelHidden(rawLabel: string, directives: readonly HideStereotypeDirective[]): boolean {
   let shown = true;
   for (const d of directives) {
-    if (d.pattern === undefined || d.pattern === label) shown = d.action === 'show';
+    if (d.pattern === undefined || `<<${d.pattern}>>` === rawLabel) shown = d.action === 'show';
   }
   return !shown;
 }
@@ -278,8 +296,14 @@ export function applyStereotypeHideShow(ast: ClassDiagramAST): void {
   for (const classifier of ast.classifiers) {
     if (classifier.stereotype === undefined) continue;
     const labels = splitStereotypeLabels(classifier.stereotype);
-    classifier.visibleStereotypeLabels =
-      directives.length === 0 ? labels : labels.filter((l) => !isStereotypeLabelHidden(l, directives));
+    if (directives.length === 0) {
+      classifier.visibleStereotypeLabels = labels;
+      continue;
+    }
+    const raw = rawStereotypeLabels(classifier.stereotype);
+    classifier.visibleStereotypeLabels = labels.filter(
+      (l, i) => !isStereotypeLabelHidden(raw[i] ?? `<<${l}>>`, directives),
+    );
   }
 }
 

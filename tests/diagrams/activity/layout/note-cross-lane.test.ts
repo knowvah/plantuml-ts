@@ -22,6 +22,7 @@ import {
 import { resolveTheme } from '../../../../src/core/theme.js';
 import { renderActivityFixture } from '../../../helpers/activity-text-position.js';
 import { compareSvg } from '../../../oracle/svg-conformance/compare.js';
+import { measured } from '../../../unit/activity/measured-theme.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURE_ROOT = join(HERE, '../../../fixtures/activity/add4-T2c');
@@ -43,8 +44,7 @@ function laneAWidth(nodes: readonly ActivityNodeGeo[]): number {
     laneNames: LANES,
     baseX: BASE_X,
     baseY: 0,
-    bounder: { getDimension: () => ({ width: 0, height: 0 }) },
-    theme: resolveTheme('default'),
+    theme: measured(resolveTheme('default')),
   });
   return result.swimlanes[0]!.width;
 }

@@ -9,7 +9,7 @@
  * `<g class="entity">`).
  */
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 // CDD T18: `classBackground` is a `Paint` since D8; these assertions are
 // about its FLAT default value (`HColors#noGradient`, `core/paint.ts`).
@@ -18,11 +18,10 @@ import {
   measureEmptyPackageLeafDim,
   renderEmptyPackageIcon,
 } from '../../../src/diagrams/class/class-namespace-shape.js';
-import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 import { renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const detMeasurer = new DeterministicMeasurer();
 
 describe('measureEmptyPackageLeafDim', () => {

@@ -31,14 +31,14 @@ import { UGraphicSvg } from '../../../../../src/core/klimt/drawing/svg/u-graphic
 import { basicSvgOption } from '../../../../../src/core/klimt/drawing/svg/svg-graphics.js';
 import type { StringBounder as DriverStringBounder } from '../../../../../src/core/klimt/drawing/svg/driver-text-svg.js';
 import { MeasurerStringBounder } from '../../../../../src/core/measurer-bounder.js';
-import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../../src/core/measurer-deterministic.js';
 import { registerNestedDiagramRenderer } from '../../../../../src/core/nested-diagram-registry.js';
 import type { NestedDiagramRenderer } from '../../../../../src/core/EmbeddedDiagram.js';
 import type { TextBlock } from '../../../../../src/core/klimt/shape/TextBlock.js';
 import { XDimension2D } from '../../../../../src/core/klimt/geom/XDimension2D.js';
 import { UImage } from '../../../../../src/core/klimt/shape/UImage.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const driverBounder: DriverStringBounder = {
   calculateDimension(font, text) {
     return measurer.measure(text, font);
@@ -169,8 +169,10 @@ describe('buildDesc — {{ }} embed in a description label (cdd5-T4d)', () => {
 // ---------------------------------------------------------------------------
 // cdd5-T4d: `AtomText#drawU`'s tab tokenizer (`AtomText.java:210-231`) --
 // rizisu-50-liza998's `\ttext` / `\t\ttext` lines draw each token at the
-// advanced x: tab stop = `getSize2D() * 4` = 56 (java:270-275, the space
-// glyph measures 0 under the width table), so x = 56 and 112.
+// advanced x: tab stop = 8 spaces = 8 * 3.85 = 30.8 at 14pt (java:270-275; the
+// `getSize2D() * 4` fallback only applies to a 0-wide space), so x = 30.8 and
+// 61.6 -- jar, re-captured under oracle seam #4 v2 (unknown/rizisu-50-liza998
+// in.svg): `<text x="17">`, `x="47.8"`, `x="78.6"` = 17 + {0, 30.8, 61.6}.
 // ---------------------------------------------------------------------------
 
 describe('descAtomOps — tab-indented text draws at tab stops (cdd5-T4d)', () => {
@@ -181,8 +183,8 @@ describe('descAtomOps — tab-indented text draws at tab stops (cdd5-T4d)', () =
     const xs = [...ug.getSvgString().matchAll(/<text[^>]*x="([\d.]+)"[^>]*>([^<]*)<\/text>/g)].map((m) => [m[1], m[2]]);
     expect(xs).toEqual([
       ['0', 'text'],
-      ['56', 'text'],
-      ['112', 'text'],
+      ['30.8', 'text'],
+      ['61.6', 'text'],
     ]);
   });
 });

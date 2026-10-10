@@ -24,6 +24,7 @@ import { astOrThrow } from '../../../helpers/parse-ast.js';
 import { applyInLabel } from '../../../../src/diagrams/activity/layout/tile-layout-inlabel.js';
 import type { Out } from '../../../../src/diagrams/activity/layout/tile-coordinates.js';
 import { ARROW_FONT_SIZE } from '../../../../src/diagrams/activity/activity-style-defaults.js';
+import { measured } from '../../../unit/activity/measured-theme.js';
 
 function layout(markup: string) {
   const first = buildBlockUmls(markup)[0];
@@ -187,7 +188,7 @@ describe('applyInLabel reservation width is the SIMPLE_LINE creole width', () =>
       ],
       edgeMeta: [{ lane1: undefined, lane2: undefined, shape: 'default' }],
       reservations: [],
-      theme: resolveTheme('default'),
+      theme: measured(resolveTheme('default')),
       nextId: (p: string) => p,
     } as unknown as Out;
     applyInLabel(out, { inLabel: { label } }, { horizontal: 'LEFT' });

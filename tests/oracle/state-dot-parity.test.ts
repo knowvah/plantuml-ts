@@ -23,7 +23,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { renderSync } from '../../src/index.js';
-import { WidthTableMeasurer } from '../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../src/core/graph-layout.js';
 import { parseSvekDot, dotInputToStructural, compareStructural } from './svek-dot.js';
@@ -82,7 +82,7 @@ describe.skipIf(ratchetFixtures.length === 0)('oracle DOT-parity ratchet — sta
       // legitimate EQUAL per dot-sync-report.ts's classification; the
       // captured-graph-count assertion is the structural check.
       renderSync(readFileSync(join(GOLDENS, name, 'input.puml'), 'utf8'), {
-        measurer: new WidthTableMeasurer(),
+        measurer: new DeterministicMeasurer(),
       });
       expect(
         captured.length,

@@ -179,7 +179,7 @@ export interface ClassFixtureRenderOptions {
  * `parseClass` directly and skips the dispatcher's entity-collision guard
  * (`src/index.ts`'s `render`/`renderSync` route every source through the
  * block dispatcher FIRST), which disagreed with the survey's own
- * `renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore,
+ * `renderSync(markup, { measurer: new DeterministicMeasurer(), assetStore,
  * includeStore })` (`scripts/svg-parity-survey.ts:278-282`) on any fixture an
  * entity-collision guard or a parse refusal touches (luzive, sadamo, sokevu
  * -- cdd4 journal 22-23, T4, T13). `renderClassFixture` is a thin wrapper

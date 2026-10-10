@@ -1,0 +1,9 @@
+@startuml
+:
+foo
+bar;
+:  
+baz;
+: lead
+qux;
+@enduml

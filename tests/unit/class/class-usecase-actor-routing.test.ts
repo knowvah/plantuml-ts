@@ -19,7 +19,7 @@ import { describe, it, expect } from 'vitest';
 import { measureUsecaseOrActor } from '../../../src/diagrams/class/class-layout-leaf-shapes.js';
 import { measureClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
 import { measureUsecaseOrActorLeaf, measureLeafNode } from '../../../src/core/svek/image/leaf-sizing.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { createSpriteRegistry, addSprite, spriteDimsLookupFor } from '../../../src/core/sprite-commands.js';
 import { SpriteSvg } from '../../../src/core/klimt/sprite/SpriteSvg.js';
 import { defaultTheme } from '../../../src/core/theme.js';
@@ -27,7 +27,7 @@ import type { Classifier } from '../../../src/diagrams/class/ast.js';
 import type { DescriptiveNode } from '../../../src/diagrams/description/ast.js';
 
 const fontSpec = { family: 'Helvetica', size: 14 };
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 /** Declared 16x16, ink rectangle [1,11]x[1,9] (10x8 at offset 1,1) -- the
  *  same fixture `leaf-sizing-widen-routing.test.ts` (T1) uses for its own
@@ -53,12 +53,13 @@ describe("measureUsecaseOrActor routes through the description engine's faithful
     };
     const measured = measureUsecaseOrActor(classifier, fontSpec, measurer);
 
-    // Literal numbers captured from a real run (jiti probe, 2026-08-02) --
-    // these are the SAME numbers leaf-sizing-widen-routing.test.ts (T1)
-    // pins for the identical display/font via measureUsecaseOrActorLeaf,
-    // confirming the class engine now derives the identical figure.
-    expect(measured.width).toBe(103.01505037879433);
-    expect(measured.height).toBe(25.79898987322333);
+    // Jar numbers (tests/fixtures/isw-T2-cls/usecase-hello.svg, `usecase
+    // "Hello World" as u`, oracle seam #4 v2): the ellipse is rx 53.371 x ry
+    // 13.074, i.e. 106.742 x 26.148 (it was 103.015 x 25.799 while a space was
+    // 0 wide). leaf-sizing-widen-routing.test.ts (T1) pins the same figures for
+    // the identical display/font via measureUsecaseOrActorLeaf.
+    expect(measured.width).toBeCloseTo(106.742, 3);
+    expect(measured.height).toBeCloseTo(26.148, 3);
 
     // Equals the description engine's own entry point for the same input --
     // proves the ROUTE, not just a coincidentally-matching literal.

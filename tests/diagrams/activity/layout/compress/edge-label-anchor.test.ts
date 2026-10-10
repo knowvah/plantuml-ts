@@ -9,8 +9,9 @@ import {
 import type { ActivityEdgeGeo } from '../../../../../src/diagrams/activity/activity-geometry.types.js';
 import type { PiecewiseAffineTransform } from '../../../../../src/diagrams/activity/layout/compress/compression-transform.js';
 import { resolveTheme } from '../../../../../src/core/theme.js';
+import { measured } from '../../../../unit/activity/measured-theme.js';
 
-const theme = resolveTheme('default');
+const theme = measured(resolveTheme('default'));
 /** The activity arrow font is 11 (`plantuml.skin:373`); its first baseline
  *  sits `11 * (1 - 1/4.5)` below the block top. */
 const ASCENT = 11 * (1 - 1 / 4.5);

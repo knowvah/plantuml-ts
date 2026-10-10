@@ -1,0 +1,5 @@
+surveying 80 object fixtures (concurrency 6)
+  25/80
+  50/80
+  75/80
+wrote plans/instrument-space-width/measurements/b1-eng/parity-object.json — {"conformant":61,"structural-match":9,"diverged":10,"errored":0,"timeout":0,"oracle-error":0}

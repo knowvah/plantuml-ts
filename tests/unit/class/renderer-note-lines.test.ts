@@ -16,9 +16,9 @@ import { renderNoteRowExtra } from '../../../src/diagrams/class/renderer-note-li
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout-types.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const theme = scaleClassTheme(defaultTheme, 1);
 const NOTE_BASELINE_OFFSET = 13 - 13 / 4.5; // theme default note font size 13
 
@@ -140,29 +140,35 @@ describe('renderNoteText wiring fix — creole table (jovigo-38-tuni063)', () =>
   // THAT path's 0.5 stroke). The freestanding path's own jar-verified value
   // is 1 (`colede-79-give418`), not jovigo's 0.5 -- corrected from the
   // former shared (and wrong, for this path) 0.5 constant.
+  // jovigo-38-tuni063 in.svg, re-captured under oracle seam #4 v2 (a space has
+  // width, so every cell's leading space shifts its text by 3.575): the note is
+  // at x=83.75, y=6; grid lines x 89.75 -> 166.613 (stroke 0.5 there: the jar's
+  // note is attached/opale -- the freestanding path draws the same geometry at 1).
+  const JOVIGO_X = 83.75;
+
   it('draws the jar-exact grid lines and cell text', () => {
-    const geo = geoAt(JOVIGO, 82.94, 6);
+    const geo = geoAt(JOVIGO, JOVIGO_X, 6);
     const svg = renderNote(geo, theme);
-    expect(svg).toContain('<line x1="88.94" y1="13" x2="141.428" y2="13" stroke="#000" stroke-width="1"/>');
-    expect(svg).toContain('<line x1="88.94" y1="52" x2="141.428" y2="52" stroke="#000" stroke-width="1"/>');
-    expect(svg).toContain('<line x1="88.94" y1="13" x2="88.94" y2="52" stroke="#000" stroke-width="1"/>');
-    expect(svg).toContain('<text x="88.94" y="23.111" font-size="13" fill="#000">A</text>');
-    expect(svg).toContain('<text x="128.509" y="23.111" font-size="13" fill="#000">B</text>');
-    expect(svg).toContain('<text x="88.94" y="49.111" font-size="13" fill="#000" textLength="39.569">P(C|D)</text>');
+    expect(svg).toContain('<line x1="89.75" y1="13" x2="166.613" y2="13" stroke="#000" stroke-width="1"/>');
+    expect(svg).toContain('<line x1="89.75" y1="52" x2="166.613" y2="52" stroke="#000" stroke-width="1"/>');
+    expect(svg).toContain('<line x1="89.75" y1="13" x2="89.75" y2="52" stroke="#000" stroke-width="1"/>');
+    expect(svg).toContain('<text x="93.325" y="23.111" font-size="13" fill="#000">A</text>');
+    expect(svg).toContain('<text x="147.194" y="23.111" font-size="13" fill="#000">B</text>');
+    expect(svg).toContain('<text x="93.325" y="49.111" font-size="13" fill="#000" textLength="39.569">P(C|D)</text>');
   });
 
   it('T2d: renderTipNote (the opale path) draws the SAME table at 0.5 -- the note style stroke', () => {
-    const geo = geoAt(JOVIGO, 82.94, 6);
+    const geo = geoAt(JOVIGO, JOVIGO_X, 6);
     const tip = { direction: 'left' as const, pp1: { x: 0, y: 10 }, pp2: { x: -5, y: 15 } };
     const svg = renderTipNote(geo, tip, theme);
-    expect(svg).toContain('<line x1="88.94" y1="13" x2="141.428" y2="13" stroke="#000" stroke-width="0.5"/>');
+    expect(svg).toContain('<line x1="89.75" y1="13" x2="166.613" y2="13" stroke="#000" stroke-width="0.5"/>');
   });
 
   it('draws the markdown-separator row as struck creole text, not a skipped row', () => {
-    const geo = geoAt(JOVIGO, 82.94, 6);
+    const geo = geoAt(JOVIGO, JOVIGO_X, 6);
     const svg = renderNote(geo, theme);
     expect(svg).toContain(
-      '<text x="88.94" y="36.111" font-size="13" fill="#000" text-decoration="line-through">-</text>',
+      '<text x="93.325" y="36.111" font-size="13" fill="#000" text-decoration="line-through">-</text>',
     );
   });
 });

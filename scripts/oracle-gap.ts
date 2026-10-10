@@ -18,7 +18,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { renderSync } from '../src/index.js';
-import { WidthTableMeasurer } from '../src/core/measurer.js';
+import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../src/core/graph-layout.js';
 import type { DotInputGraph } from '../src/core/graph-layout.js';
 import {
@@ -50,7 +50,7 @@ function captureInputs(puml: string): DotInputGraph[] {
   const inputs: DotInputGraph[] = [];
   setLayoutInputObserver(({ graph: g }) => inputs.push(g));
   try {
-    renderSync(puml, { measurer: new WidthTableMeasurer() });
+    renderSync(puml, { measurer: new DeterministicMeasurer() });
   } catch {
     /* a fixture that fails to render produces no candidate */
   } finally {

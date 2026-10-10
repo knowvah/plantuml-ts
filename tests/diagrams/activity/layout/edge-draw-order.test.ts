@@ -15,9 +15,10 @@ import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tile
 import type { ActivityDiagramAST } from '../../../../src/diagrams/activity/ast.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
+import { measured } from '../../../unit/activity/measured-theme.js';
 
 const bounder: StringBounder = { getDimension: () => ({ width: 60, height: 16 }) };
-const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
+const theme: Theme = measured({ ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' });
 // T1a (D2): `LAYOUT_MARGIN` was deleted from production -- the canvas
 // origin is now computed dynamically from the placed geometry's own ink
 // extent (`assign-coordinates-full.ts#computeCanvasOrigin`), which makes

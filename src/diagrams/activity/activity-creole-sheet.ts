@@ -27,7 +27,12 @@
  */
 import type { Theme } from '../../core/theme.js';
 import type { ActivitySName } from './activity-style-defaults.js';
-import { activityFontColor, activityFontFamily, activityHyperlinkColor } from './activity-text-style.js';
+import {
+  activityFontColor,
+  activityFontFamily,
+  activityHyperlinkColor,
+  activityWrapWidth,
+} from './activity-text-style.js';
 import {
   activityHorizontalAlignment,
   activityMinimumWidth,
@@ -39,7 +44,6 @@ import { NOTE_MARGIN_X1, NOTE_MARGIN_X2, NOTE_MARGIN_Y } from './activity-layout
 import { Display } from '../../core/klimt/creole/Display.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
-import { LineBreakStrategy } from '../../core/klimt/LineBreakStrategy.js';
 import { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 import { CreoleParser } from '../../core/klimt/creole/legacy/CreoleParser.js';
 import { SheetBlock1 } from '../../core/klimt/creole/SheetBlock1.js';
@@ -63,7 +67,7 @@ import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { extractFlatContent } from '../../core/klimt/document-shell-fragment.js';
-import { WidthTableMeasurer } from '../../core/measurer.js';
+import { activityMeasurer } from './activity-string-bounder.js';
 import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import type { Sheet } from '../../core/klimt/creole/Sheet.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
@@ -196,7 +200,14 @@ export function buildActionTextBlock(
 ): SheetBlock2 {
   const fc = activityFontConfiguration(theme, fontSize, sname);
   const sheet = createSheet(label, fc, ALIGNMENT_MAP[activityHorizontalAlignment(theme)], theme.sprites);
-  const sheet1 = new SheetBlock1(sheet, LineBreakStrategy.NONE, chromeAtomOps(theme.sprites, fc), theme.padding ?? 0);
+  // isw-T2-act F5: `new SheetBlock1(sheet, wrapWidth, ...)`, `wrapWidth =
+  // style.wrapWidth()` (`FtileBox.java:175,180`).
+  const sheet1 = new SheetBlock1(
+    sheet,
+    activityWrapWidth(theme, sname),
+    chromeAtomOps(theme.sprites, fc),
+    theme.padding ?? 0,
+  );
   const padding = activityPadding(sname);
   return new SheetBlock2(
     sheet1,
@@ -254,18 +265,17 @@ interface DrawContext {
  */
 export function drawActionTextBlock(tb: TextBlock, x: number, y: number, ctx: DrawContext): string {
   const { font, theme } = ctx;
+  const measurer = activityMeasurer(theme);
   const driverBounder = {
     calculateDimension(fc: { readonly size: number }, text: string) {
-      return { width: DRAW_MEASURER.measure(text, { ...font, size: fc.size }).width };
+      return { width: measurer.measure(text, { ...font, size: fc.size }).width };
     },
   };
   const option = basicSvgOption(theme.svgLinkTarget === undefined ? {} : { linkTarget: theme.svgLinkTarget });
-  const ug = UGraphicSvg.build(0, option, THROWAWAY_VERSION, driverBounder, DRAW_MEASURER);
+  const ug = UGraphicSvg.build(0, option, THROWAWAY_VERSION, driverBounder, measurer);
   tb.drawU(ctx.changes.reduce<UGraphic>((g, c) => g.apply(c), ug.apply(new UTranslate(x, y))));
   return extractFlatContent(ug.getSvgString()).body;
 }
-
-const DRAW_MEASURER = new WidthTableMeasurer();
 
 /**
  * The `renderAction` entry point: `FtileBox#drawU`'s `tb.drawU(...)`
@@ -289,7 +299,7 @@ export function renderActionLabel(
 ): string {
   const tb = buildActionTextBlock(label, theme, fontSize, 'activity', box.shield ?? 0);
   const font = { family: activityFontFamily(theme, 'activity'), size: fontSize };
-  const tbWidth = tb.calculateDimension(klimtStringBounder(DRAW_MEASURER, font)).getWidth();
+  const tbWidth = tb.calculateDimension(klimtStringBounder(activityMeasurer(theme), font)).getWidth();
   const t = actionTextTranslate(theme, box.width, tbWidth, activityPadding('activity'));
   // `FtileBox#drawU` (`FtileBox.java:205-217`): `ug.apply(borderColor)`, then
   // `ug.apply(style.getStroke())`, before `tb.drawU` -- the ink a stencilled
@@ -343,7 +353,9 @@ export function renderActionLabel(
 export function buildNoteTextBlock(text: string, theme: Theme): SheetBlock1 {
   const fc = activityFontConfiguration(theme, activityFontSize(theme, 'note'), 'note');
   const sheet = createSheet(text, fc, ALIGNMENT_MAP[activityNoteHorizontalAlignment(theme)], theme.sprites);
-  return new SheetBlock1(sheet, LineBreakStrategy.NONE, chromeAtomOps(theme.sprites, fc));
+  // isw-T2-act F5: the note style's `wrapWidth()` (`FtileWithNoteOpale.java:143,149`,
+  // `FtileNoteAlone.java:109,117`, `FtileWithNotes.java:115,121`).
+  return new SheetBlock1(sheet, activityWrapWidth(theme, 'note'), chromeAtomOps(theme.sprites, fc));
 }
 
 /**

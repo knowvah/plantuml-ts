@@ -24,7 +24,7 @@
  * compiled summary entry.
  */
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { buildTheme } from '../../../src/core/build-theme.js';
 import { preprocess } from '../../../src/core/preprocessor.js';
@@ -33,7 +33,7 @@ import { parseClass } from './parse-helper.js';
 import { measureClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const SUPPRESS = { fields: false, methods: false };
 
 function bareClass(name: string): ReturnType<typeof parseClass>['classifiers'][number] {

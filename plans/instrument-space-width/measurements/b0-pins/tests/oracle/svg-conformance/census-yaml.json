@@ -1,0 +1,242 @@
+{
+  "generatedAt": "2026-09-20T18:50:12.452Z",
+  "measuredAgainstCommit": "993cc2ae",
+  "type": "yaml+tests/oracle/svg-conformance/census-yaml.json",
+  "measurer": "deterministic",
+  "fixtures": [
+    {
+      "slug": "bafemu-96-luji978",
+      "status": "ok",
+      "diffCount": 1834,
+      "bucket": "31+"
+    },
+    {
+      "slug": "bedega-54-romu926",
+      "status": "ok",
+      "diffCount": 0,
+      "bucket": "0"
+    },
+    {
+      "slug": "coxima-79-gano159",
+      "status": "ok",
+      "diffCount": 0,
+      "bucket": "0"
+    },
+    {
+      "slug": "finofu-94-daso450",
+      "status": "ok",
+      "diffCount": 0,
+      "bucket": "0"
+    },
+    {
+      "slug": "gabalo-23-tefe408",
+      "status": "ok",
+      "diffCount": 115,
+      "bucket": "31+"
+    },
+    {
+      "slug": "gatuva-87-futo104",
+      "status": "ok",
+      "diffCount": 48,
+      "bucket": "31+"
+    },
+    {
+      "slug": "gipoxa-19-bico146",
+      "status": "ok",
+      "diffCount": 0,
+      "bucket": "0"
+    },
+    {
+      "slug": "gobavi-45-guna544",
+      "status": "ok",
+      "diffCount": 22,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "jozapu-14-datu953",
+      "status": "ok",
+      "diffCount": 3277,
+      "bucket": "31+"
+    },
+    {
+      "slug": "jukejo-54-pope427",
+      "status": "ok",
+      "diffCount": 115,
+      "bucket": "31+"
+    },
+    {
+      "slug": "ketunu-15-poli031",
+      "status": "ok",
+      "diffCount": 85,
+      "bucket": "31+"
+    },
+    {
+      "slug": "kotize-70-nuze855",
+      "status": "ok",
+      "diffCount": 48,
+      "bucket": "31+"
+    },
+    {
+      "slug": "lelofi-17-cafo004",
+      "status": "ok",
+      "diffCount": 48,
+      "bucket": "31+"
+    },
+    {
+      "slug": "lifuxe-66-maxu442",
+      "status": "ok",
+      "diffCount": 0,
+      "bucket": "0"
+    },
+    {
+      "slug": "lipoka-75-rigo326",
+      "status": "ok",
+      "diffCount": 48,
+      "bucket": "31+"
+    },
+    {
+      "slug": "litife-43-novo083",
+      "status": "ok",
+      "diffCount": 241,
+      "bucket": "31+"
+    },
+    {
+      "slug": "medosa-24-jugi124",
+      "status": "ok",
+      "diffCount": 47,
+      "bucket": "31+"
+    },
+    {
+      "slug": "mudeno-46-rado553",
+      "status": "ok",
+      "diffCount": 185,
+      "bucket": "31+"
+    },
+    {
+      "slug": "najoba-05-nino350",
+      "status": "ok",
+      "diffCount": 23,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "nuzaje-74-kenu009",
+      "status": "ok",
+      "diffCount": 30,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "polela-38-mopu631",
+      "status": "ok",
+      "diffCount": 48,
+      "bucket": "31+"
+    },
+    {
+      "slug": "poxedu-72-bite327",
+      "status": "ok",
+      "diffCount": 192,
+      "bucket": "31+"
+    },
+    {
+      "slug": "sozafu-05-xeka661",
+      "status": "ok",
+      "diffCount": 64,
+      "bucket": "31+"
+    },
+    {
+      "slug": "sudabi-56-dedu341",
+      "status": "ok",
+      "diffCount": 22,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "tadari-70-nare798",
+      "status": "ok",
+      "diffCount": 25,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "vaceci-80-lezo436",
+      "status": "ok",
+      "diffCount": 123,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vapoda-87-piku740",
+      "status": "ok",
+      "diffCount": 50,
+      "bucket": "31+"
+    },
+    {
+      "slug": "vugalo-43-mose807",
+      "status": "ok",
+      "diffCount": 26,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "vuzosu-08-pake421",
+      "status": "ok",
+      "diffCount": 0,
+      "bucket": "0"
+    },
+    {
+      "slug": "xacali-26-mazu431",
+      "status": "ok",
+      "diffCount": 52,
+      "bucket": "31+"
+    },
+    {
+      "slug": "xatato-75-mora801",
+      "status": "ok",
+      "diffCount": 0,
+      "bucket": "0"
+    },
+    {
+      "slug": "xofilu-53-tazi162",
+      "status": "ok",
+      "diffCount": 75,
+      "bucket": "31+"
+    },
+    {
+      "slug": "xubife-72-runi076",
+      "status": "ok",
+      "diffCount": 206,
+      "bucket": "31+"
+    },
+    {
+      "slug": "YAML-attribute-hierarchy",
+      "status": "ok",
+      "diffCount": 44,
+      "bucket": "31+"
+    },
+    {
+      "slug": "YAML-list-key-value-pair",
+      "status": "ok",
+      "diffCount": 22,
+      "bucket": "11-30"
+    },
+    {
+      "slug": "YAML-space-indent",
+      "status": "ok",
+      "diffCount": 75,
+      "bucket": "31+"
+    },
+    {
+      "slug": "zebapi-77-zasu051",
+      "status": "ok",
+      "diffCount": 48,
+      "bucket": "31+"
+    },
+    {
+      "slug": "zeduse-06-fidi174",
+      "status": "ok",
+      "diffCount": 44,
+      "bucket": "31+"
+    },
+    {
+      "slug": "zomime-61-sase339",
+      "status": "ok",
+      "diffCount": 92,
+      "bucket": "31+"
+    }
+  ]
+}

@@ -25,7 +25,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURES = join(HERE, '../../fixtures/unwind2-S9b');
@@ -41,7 +41,7 @@ function jarOf(name: string): string {
 }
 
 function oursOf(name: string, dir = FIXTURES): string {
-  return renderSync(readFileSync(join(dir, `${name}.puml`), 'utf-8'), { measurer: new WidthTableMeasurer() });
+  return renderSync(readFileSync(join(dir, `${name}.puml`), 'utf-8'), { measurer: new DeterministicMeasurer() });
 }
 
 /** The shadowed elements' tags, in document order. */

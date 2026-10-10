@@ -101,6 +101,15 @@ export const KEY_HANDLERS_C: ReadonlyArray<readonly [keys: readonly string[], ha
       acc.swimlaneWidth = parseSwimlaneWidth(value.trim());
     },
   ],
+  // isw-T2b-ca: `SkinParam#swimlaneWrapTitleWidth()` (`skin/SkinParam
+  // .java:980-984`) -- the raw `getValue`, already trimmed by `setParam`
+  // (`:229`); `LineBreakStrategy` interprets it at the reader.
+  [
+    ['swimlanewraptitlewidth'],
+    (acc, value) => {
+      acc.swimlaneWrapTitleWidth = value.trim();
+    },
+  ],
   // add4-T2b: `FromSkinparamToStyle.java:131-133` -- `PartitionBorderColor`
   // -> `LineColor`, `PartitionBackgroundColor` -> `BackGroundColor`,
   // `addConFont("Partition", ...)` -> `FontColor`/`FontSize`, all on

@@ -11,13 +11,14 @@
 import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
-import { edgeLabelBlockSize } from './compress/edge-label-anchor.js';
+import { edgeLabelBlock, edgeLabelBlockSize } from './compress/edge-label-anchor.js';
 import { floorActionLineHeight } from '../tiles/gtile-action.js';
-import { ifLabelBlock } from '../activity-text-sheet-diamond.js';
+import { diamondTestBlock, ifLabelBlock } from '../activity-text-sheet-diamond.js';
+import { activityTextFontConfiguration } from '../activity-text-sheet.js';
+import { TextBlockUtils } from '../../../core/klimt/shape/TextBlockUtils.js';
 import { klimtStringBounder } from '../activity-creole-sheet.js';
-import { WidthTableMeasurer } from '../../../core/measurer.js';
+import { activityMeasurer } from '../activity-string-bounder.js';
 
-const INK_MEASURER = new WidthTableMeasurer();
 import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from './snake-text-position.js';
 import type { MutableInkBounds } from './canvas-origin.js';
@@ -55,7 +56,7 @@ export function extendForIfLabelText(acc: MutableInkBounds, node: ActivityNodeGe
   const fontSize = fc.size;
   const pad = theme.padding ?? 0;
   const width = tb
-    .calculateDimension(klimtStringBounder(INK_MEASURER, { family: fc.family, size: fontSize }))
+    .calculateDimension(klimtStringBounder(activityMeasurer(theme), { family: fc.family, size: fontSize }))
     .getWidth();
   acc.minX = Math.min(acc.minX, node.x + pad);
   acc.maxX = Math.max(acc.maxX, node.x + width - pad);
@@ -63,6 +64,29 @@ export function extendForIfLabelText(acc: MutableInkBounds, node: ActivityNodeGe
   const lastBaselineY = firstBaselineY + (lineCount - 1) * floorActionLineHeight(fontSize);
   acc.minY = Math.min(acc.minY, firstBaselineY - (fontSize - 1.5));
   acc.maxY = Math.max(acc.maxY, lastBaselineY + 1.5);
+}
+
+/**
+ * isw-T2b-ca: an `if-own-label` (`FtileDiamondInside#drawU`'s label,
+ * `vertical/FtileDiamondInside.java:94-96`) is a `UText` per stripe of the
+ * drawn test block, drawn at `(lx, ly) = ((dimTotal - dimLabel) / 2)` in
+ * the hexagon; `LimitFinder#drawText` (`klimt/drawing/LimitFinder.java
+ * :216-224`) puts each line's ink at `[baseline - h + 1.5, baseline +
+ * 1.5]`, so a label filling its hexagon reaches `h - 1.5 - ascent` above
+ * the polygon (0.944 at 11pt) -- never the node's box.
+ */
+export function extendForIfOwnLabelText(acc: MutableInkBounds, node: ActivityNodeGeo, theme: Theme): void {
+  const tb = diamondTestBlock(node.label ?? '', theme, node.wrapped === true);
+  const fc = activityTextFontConfiguration(theme, activityFontSize(theme, 'diamond'), 'diamond');
+  const sb = klimtStringBounder(activityMeasurer(theme), { family: fc.family, size: fc.size });
+  const dim = tb.calculateDimension(sb);
+  const mm = TextBlockUtils.getMinMax(tb, sb, false);
+  const x = node.x + (node.width - dim.getWidth()) / 2;
+  const y = node.y + (node.height - dim.getHeight()) / 2;
+  acc.minX = Math.min(acc.minX, x + mm.getMinX());
+  acc.maxX = Math.max(acc.maxX, x + mm.getMaxX());
+  acc.minY = Math.min(acc.minY, y + mm.getMinY());
+  acc.maxY = Math.max(acc.maxY, y + mm.getMaxY());
 }
 
 /**
@@ -112,21 +136,20 @@ export function extendForEdgeLabelText(acc: MutableInkBounds, edge: ActivityEdge
   // (`AbstractFtile.java:108-110`, `AlignmentParam.java:42`); the renderer
   // resolves the SAME default, so ink and draw agree.
   if (edge.label === undefined) return;
-  const fontSize = activityFontSize(theme, 'arrow');
-  // add4-T1f (SWITCH-NL): one `UText` per Sheet line, stacked `fontSize`
-  // apart (`SheetBlock1.java:146-148`); the envelope runs first ink-top to
-  // last ink-bottom, matching `renderer.ts#renderEdgeLabelAligned`.
-  const lines = edge.label.split('\n');
-  // add4-T3h: the drawn block's own dimension (`edgeLabelBlockSize`,
-  // `Snake.java:247`); each `UText` sits inside `SheetBlock1`'s padding
-  // (`SheetBlock1.java:209-210`), so the LEFT block's ink spans
-  // `[x + p, x + width - p]`.
-  const pad = theme.padding ?? 0;
-  const dim = edgeLabelBlockSize(edge.label, theme);
+  // isw-T2b-ca: the ink is the drawn block's own `LimitFinder` extent --
+  // one `UText` per Sheet line (`SheetBlock1.java:146-148`), inside its
+  // padding (`SheetBlock1.java:209-210`) -- so a label wrapped by
+  // `style.wrapWidth()` (`Branch.java:248-258`) reaches its last wrapped
+  // line, not its last `\n` line.
+  const wrapped = edge.labelWrapped === true;
+  const fc = activityTextFontConfiguration(theme, activityFontSize(theme, 'arrow'), 'arrow');
+  const sb = klimtStringBounder(activityMeasurer(theme), { family: fc.family, size: fc.size });
+  const tb = edgeLabelBlock(edge.label, theme, wrapped);
+  const dim = edgeLabelBlockSize(edge.label, theme, undefined, wrapped);
   const position = getTextBlockPosition(edge.points, dim, edge.labelAlign ?? DEFAULT_LABEL_ALIGN);
-  const baselineY = position.y + pad + fontSize * TITLE_ASCENT_FRACTION;
-  acc.minX = Math.min(acc.minX, position.x + pad);
-  acc.maxX = Math.max(acc.maxX, position.x + dim.width - pad);
-  acc.minY = Math.min(acc.minY, baselineY - (fontSize - 1.5));
-  acc.maxY = Math.max(acc.maxY, baselineY + fontSize * (lines.length - 1) + 1.5);
+  const mm = TextBlockUtils.getMinMax(tb, sb, false);
+  acc.minX = Math.min(acc.minX, position.x + mm.getMinX());
+  acc.maxX = Math.max(acc.maxX, position.x + mm.getMaxX());
+  acc.minY = Math.min(acc.minY, position.y + mm.getMinY());
+  acc.maxY = Math.max(acc.maxY, position.y + mm.getMaxY());
 }

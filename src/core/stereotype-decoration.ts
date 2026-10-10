@@ -60,7 +60,7 @@ export function wrapGuillemet(label: string, guillemet: GuillemetPair = DEFAULT_
 // String-built (not a regex literal) purely so the complexity hook's lizard
 // parser doesn't mis-tokenize the literal and swallow the rest of the file
 // (see .agent-notes / memory: complexity-hook workarounds). Same pattern.
-const STRIP_CIRCLED_CHAR_RE = new RegExp(String.raw`^\(\s*\S\s*(?:,\s*(?:#[0-9a-fA-F]{6}|\w+)\s*)?\)\s*,?\s*(.*)$`);
+const STRIP_CIRCLED_CHAR_RE = new RegExp(String.raw`^\(\s*\S\s*(?:,\s*(?:#[0-9a-fA-F]{6}|\w+)\s*)?\)[,]?(.*)$`);
 
 /** A2s R2i (rotisi-30-loge424): `StereotypeDecoration`'s `circleSprite`
  *  sub-pattern (java:76-92), applied to one trimmed `<<...>>` chunk's inner
@@ -78,22 +78,41 @@ const CIRCLE_SPRITE_RE = new RegExp(
   'u',
 );
 
-function stripCircledCharDecoration(label: string): string {
+function stripCircledCharDecoration(label: string): string | undefined {
+  // `circleChar`/`circleSprite` both open with `<<` + `\s*`
+  // (StereotypeDecoration.java:60-62, 77-79), so the decoration is matched
+  // after the leading whitespace; the LABEL group they leave behind is NOT
+  // trimmed (`[,]?(.*?)` / `[),](.*?)`, :70, :90) -- `strictLabel` drops one
+  // padding space per side afterwards, exactly as `manageGuillemetStrict`.
+  // A LABEL that is empty or whitespace-only (`StringUtils.isNotEmpty`,
+  // StringUtils.java:164-178) makes the name "" (:196-199, :213-216): no
+  // label, reported as `undefined`.
+  const head = label.trimStart();
   // Sprite form first -- `buildComplex` tries `mCircleSprite` before
   // `mCircleChar` (StereotypeDecoration.java:190-206); its visible residue
   // is the LABEL group after the closing `)`/`,`.
-  const sm = CIRCLE_SPRITE_RE.exec(label);
-  if (sm !== null) return (sm[4] ?? '').trim();
-  const m = STRIP_CIRCLED_CHAR_RE.exec(label);
-  return m === null ? label : m[1]!.trim();
+  const sm = CIRCLE_SPRITE_RE.exec(head);
+  const m = sm === null ? STRIP_CIRCLED_CHAR_RE.exec(head) : null;
+  if (sm === null && m === null) return label;
+  const residue = sm !== null ? (sm[4] ?? '') : m![1]!;
+  return residue.trim() === '' ? undefined : residue;
+}
+
+/** `Guillemet#manageGuillemetStrict` (Guillemet.java:87-100) on a `<<X>>`
+ *  piece, seen from X: ONE padding space after `<<` and ONE before `>>` are
+ *  consumed, any further inner space stays (`<<  st  >>` -> ` st `). */
+function strictLabel(inner: string): string {
+  const head = inner.startsWith(' ') ? inner.slice(1) : inner;
+  return head.endsWith(' ') ? head.slice(0, -1) : head;
 }
 
 /**
  * `StereotypeDecoration#cutLabels`: splits a `Classifier.stereotype` blob
- * back into its individual per-stereotype label TOKENS, trimmed, then
+ * back into its individual per-stereotype label TOKENS, then
  * strips any `(CHAR[,COLOR])` circled-character decoration prefix ({@link
- * stripCircledCharDecoration}) and drops tokens that are empty afterward
- * (a pure spot-color/letter override with no visible text). The greedy
+ * stripCircledCharDecoration}) and drops tokens whose label is empty after
+ * it (a pure spot-color/letter override with no visible text). Each label
+ * loses ONE padding space per side, no more ({@link strictLabel}). The greedy
  * declaration-parser capture (`class-declaration-parser.ts#
  * extractDecorations`'s own doc comment) absorbs STACKED `<<A>><<B>>`
  * markup into one string spanning the first `<<` to the last `>>` — e.g.
@@ -119,16 +138,33 @@ function stripCircledCharDecoration(label: string): string {
  * regardless of bracket count, feeds `.tagname` style-cascade matching --
  * `style-map-element.ts#resolveStyleCascade`'s `stereotypeTags` param).
  */
-function splitStereotypeTokens(stereotype: string): Array<{ label: string; visible: boolean }> {
+function splitStereotypeTokens(stereotype: string): Array<{ label: string; raw: string; visible: boolean }> {
   const reconstructed = `<<${stereotype}>>`;
-  const tokens: Array<{ label: string; visible: boolean }> = [];
+  const tokens: Array<{ label: string; raw: string; visible: boolean }> = [];
   const re = /(<{2,3})(.*?)>{2,3}/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(reconstructed)) !== null) {
-    const stripped = stripCircledCharDecoration(m[2]!.trim());
-    if (stripped !== '') tokens.push({ label: stripped, visible: m[1]!.length === 2 });
+    const residue = stripCircledCharDecoration(m[2]!);
+    if (residue !== undefined) tokens.push({ label: strictLabel(residue), raw: residue, visible: m[1]!.length === 2 });
   }
   return tokens;
+}
+
+/** `Stereotype#getMultipleLabels` (Stereotype.java:122-133) -- the labels
+ *  `hide`/`show <<pattern>>` is matched against (HideOrShow.java:60-85
+ *  `isApplyableStereotype`): the pattern `<<\s?(..)\s?>>` run over the
+ *  decoration-stripped label (StereotypeDecoration.java:196-216), i.e. one
+ *  padding space per side is consumed and further ones stay. Unlike
+ *  {@link splitStereotypeTokens} it sees only `<<x>>` pieces (a `<<<x>>>`
+ *  tag is not part of the label, `cutLabels` :246-252). */
+const MULTIPLE_LABELS_RE = new RegExp(String.raw`<<\s?((?:<&\w+>|[^<>])+?)\s?>>`, 'g');
+
+export function hasMultipleLabel(stereotype: string, test: (label: string) => boolean): boolean {
+  const decorated = splitStereotypeTokens(stereotype)
+    .filter((t) => t.visible)
+    .map((t) => `<<${t.raw}>>`)
+    .join('');
+  return [...decorated.matchAll(MULTIPLE_LABELS_RE)].some((m) => test(m[1]!));
 }
 
 /** Visible-only labels (2-bracket `<<X>>`) -- feeds the RENDERED stacked

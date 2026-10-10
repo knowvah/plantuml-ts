@@ -23,7 +23,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
 import { setLayoutInputObserver, type DotInputGraph } from '../../../src/core/graph-layout.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { dotInputToStructural } from '../../oracle/svek-dot.js';
 
 /** `test-results/dot-cache/state/pacami-67-dafe414/in.puml`, verbatim. */
@@ -71,7 +71,9 @@ state parent {
 /** jar `svek-3.dot:6` — `A`'s declared box, in inches (G5, CLOSED by
  *  SI31 T4 on the height axis; the width residual is a separate ~0.0025px
  *  rounding gap, never part of G5). */
-const JAR_A = { width: 2.744931, height: 2.069444 };
+// Re-captured (seam #4 v2): test-results/dot-cache/state/pacami-67-dafe414/svek-3.dot:6
+// -- the width grew with the spaces now being measured; the height is unchanged.
+const JAR_A = { width: 2.799514, height: 2.069444 };
 /** jar `svek-2.dot:6` — `parent`'s declared box, in inches (G6, resolved). */
 const JAR_PARENT = { width: 1.463061, height: 1.375 };
 
@@ -79,7 +81,7 @@ function declaredScopes(markup: string): DotInputGraph[] {
   const inputs: DotInputGraph[] = [];
   setLayoutInputObserver(({ graph: g }) => inputs.push(g));
   try {
-    renderSync(markup, { measurer: new WidthTableMeasurer() });
+    renderSync(markup, { measurer: new DeterministicMeasurer() });
   } finally {
     setLayoutInputObserver(undefined);
   }

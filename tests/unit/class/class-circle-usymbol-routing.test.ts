@@ -20,14 +20,14 @@ import {
   renderClassUSymbolEntity,
 } from '../../../src/diagrams/class/renderer-usymbol-entity.js';
 import type { ClassifierGeo } from '../../../src/diagrams/class/class-geo-types.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 
 const theme = scaleClassTheme(defaultTheme, 1);
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 describe('measureCircleInterface (cdd-T22, E8)', () => {
   it('sizes a circle leaf as the fixed 18x18 interface-eye box, independent of label length', () => {
@@ -217,13 +217,14 @@ describe('renderClassUSymbolEntity draws circle and component through the faithf
       usymbol: 'rectangle',
       x: 0,
       y: 0,
-      width: 47.213,
+      width: 47.212,
       height: 34,
       dividerYs: [],
       rows: [{ text: 'foo3', y: 20, indent: 0 }],
     };
     const fragment = renderClassUSymbolEntity(geo, theme, measurer, undefined, 'U3');
-    // Literal output captured from a real run (jiti probe, 2026-09-25) --
+    // Literal output (jiti probe, 2026-09-25; widths re-read from the re-captured
+    // jar, oracle seam #4 v2: 47.212 / 27.212, the measurer float32-rounds) --
     // matches sijisi-94-ripu606's golden `foo3` leaf: a single plain rect
     // (no visibility-icon ellipse, no members divider) at the jar's own
     // `rx="2.5"` (ELEMENT_ROUND_CORNER, `USymbolRectangle.java:65-71`
@@ -231,9 +232,9 @@ describe('renderClassUSymbolEntity draws circle and component through the faithf
     // (`titleAlignmentFor`: only `usecase` gets CENTER).
     expect(fragment.body).toBe(
       '<!--entity r1--><g class="entity" data-qualified-name="r1" id="U3">' +
-        '<rect x="0" y="0" width="47.213" height="34" fill="#F1F1F1" ' +
+        '<rect x="0" y="0" width="47.212" height="34" fill="#F1F1F1" ' +
         'style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
-        '<text x="10" y="20.889" fill="#000" font-size="14" textLength="27.213">foo3</text></g>',
+        '<text x="10" y="20.889" fill="#000" font-size="14" textLength="27.212">foo3</text></g>',
     );
     expect((fragment.body.match(/<rect/g) ?? []).length).toBe(1);
     expect(fragment.body).not.toContain('<ellipse');

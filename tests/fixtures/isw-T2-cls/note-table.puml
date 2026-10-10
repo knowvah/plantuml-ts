@@ -1,0 +1,9 @@
+@startuml
+note as N
+|<r> a\nlonger line | x |
+| wide wide wide cell | y |
+|<c> mid | z |
+|<r>r | q |
+|<l><r>lr | w |
+end note
+@enduml

@@ -1,0 +1,7 @@
+@startuml
+participant A
+participant B
+A -> B : x
+note over A, B : this note text is much wider than the span between the two participants heads
+note over A : this note is wide and sits over a single participant at the left edge
+@enduml

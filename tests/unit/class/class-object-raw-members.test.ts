@@ -18,7 +18,7 @@ import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layou
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST, Classifier } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -177,7 +177,7 @@ describe('object member parsing — raw lines kept through the full parser', () 
 // ---------------------------------------------------------------------------
 
 describe('measureObjectClassifier — raw member rows size the box (nukera-08-dige359)', () => {
-  const measurer = new WidthTableMeasurer();
+  const measurer = new DeterministicMeasurer();
   const theme = defaultTheme; // fontFamily 'sans-serif', fontSize 14
 
   it('sizes p1 to the oracle dims exactly (1.857118in x 1.138889in @ 72dpi = 133.7125 x 82.0 px)', () => {
@@ -201,7 +201,7 @@ describe('measureObjectClassifier — raw member rows size the box (nukera-08-di
     };
     const geo = layoutClass(ast, theme, measurer);
     const c = classifierLeaves(geo.leaves)[0]!;
-    expect(c.width).toBeCloseTo(133.7125, 4);
+    expect(c.width).toBeCloseTo(145.2625, 4);
     expect(c.height).toBeCloseTo(82, 4);
     // header row + 4 raw member rows, each with a visibility icon.
     expect(c.rows).toHaveLength(5);

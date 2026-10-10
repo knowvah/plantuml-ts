@@ -1,0 +1,11 @@
+@startuml
+skinparam swimlaneWrapTitleWidth 60
+|a rather long swimlane title|
+start
+:one;
+|b| Display with two words here
+:two;
+|Short|
+:three;
+stop
+@enduml

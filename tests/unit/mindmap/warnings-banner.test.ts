@@ -17,12 +17,12 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { preprocess } from '../../../src/core/preprocessor.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderSync } from '../../../src/index.js';
 import { createMindMapDiagram } from '../../../src/diagrams/mindmap/MindMapDiagramFactory.js';
 import type { MindMapDiagram } from '../../../src/diagrams/mindmap/MindMapDiagram.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function fixture(slug: string): { markup: string; golden: string } {
   const dir = `test-results/dot-cache/mindmap/${slug}`;
@@ -92,7 +92,7 @@ describe('handwritten export with the warnings banner (zature-18-vidu755)', () =
 
   it('grows the canvas by the banner (+90 x +20 at dpi 96)', () => {
     expect(rootSize(ours)).toBe(rootSize(golden));
-    expect(rootSize(ours)).toBe('280px | 149px | 0 0 280 149');
+    expect(rootSize(ours)).toBe('302px | 149px | 0 0 302 149'); // zature-18-vidu755 in.svg (re-captured, seam #4 v2)
   });
 
   it('draws the banner and every node/link as the golden hand shapes', () => {
@@ -103,7 +103,7 @@ describe('handwritten export with the warnings banner (zature-18-vidu755)', () =
   it('draws the banner line in monospace 10 at (20, 22)', () => {
     expect(textTags(ours)).toEqual(textTags(golden));
     expect(textTags(ours)[0]).toBe(
-      '<text x="20" y="22" fill="#000" font-size="10" textLength="239.562" font-family="monospace">',
+      '<text x="20" y="22" fill="#000" font-size="10" textLength="258.813" font-family="monospace">',
     );
   });
 });

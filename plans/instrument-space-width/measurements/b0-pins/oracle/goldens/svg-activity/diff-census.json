@@ -1,0 +1,4801 @@
+{
+  "$comment": "Residual cause census for the committed ACTIVITY oracle corpus, RE-CENSUSED by activity-klimt-compress T6 (2026-09-10) after landing T1-T5 (ArrowsRegular; klimt/compress Slot/SlotSet/CompressionTransform, the shape adapter and SlotFinder, compressGeometry, wired into assignCoordinatesFull). Every number is a pure function of the committed corpus at measuredAgainstCommit: each of the 268 status:\"baseline\" fixtures in diff-baseline.json is rendered through render-fixture-activity.ts#renderFixtureActivity with a DeterministicMeasurer and fixtureIncludeStore(), and compared with compareSvg(ours, golden, 'deterministic'). Paths are normalised by replacing every positional index with [], so svg/g[1]/rect[3]/@x and svg/g[1]/rect[7]/@x are one family. RANKED BY WEIGHT, NOT COUNT. The narrative sections (geometryResidual, childCountResidual, namedFamilies) are carried forward from the prior census unchanged except where restated; descent, exitBarFamilies, paths and topFixturesByWeight are fresh. Prior re-census: activity-parallel-connectors T6 (47b86312).",
+  "measuredAt": "2026-09-10",
+  "measuredAgainstCommit": "63f73489",
+  "population": {
+    "total": 373,
+    "censused": 268,
+    "error": 82,
+    "jarError": 23
+  },
+  "descent": {
+    "note": "The activity-klimt-compress headline. Before = 42511, the figure activity-parallel-connectors T6 pinned (fa578b8a) and which this mission stated its exit bar against. After = this measurement, post T0-T5. The whole drawing is compressed ON_X then ON_Y after layout and before draw (ActivityDiagram3.java:205-213): every occupied interval is collected by a line-for-line SlotFinder port (SlotFinder.java:70-140; URectangle#drawWhenCompressed reserves 2 px at each end of an ignored rect, :193-206; a polygon whose compressionMode equals the axis is skipped, Worm.java:159-168; CenteredText titles occupy on Y only, through the ON_X UGraphicCompressOnXorY expansion, :100-112), the gaps between them become slots shrunk by 5 each side (CompressionXorYBuilder.java:56; SlotSet.java:83-118) and CompressionTransform removes them (CompressionTransform.java:49-66); rects narrow by ct(x+w)-ct(x), everything else translates (UGraphicCompressOnXorY.java:86-135); bounds are the transformed width/height (:63-69). ArrowsRegular (10 long, +-4, notch 4; ArrowsRegular.java:42-79) replaced the 3-point head first because occupancy depends on it. The score ROSE, not fell, and entirely at T1: our heads now pair per index with the jars (up to 8 diffs each instead of one count mismatch), and every tip stays offset by the unported root margin (Recentred, ActivityDiagram3.java:212; jar 16 vs ours 12), so T5s geometrically exact pass (zizaki bar 103.4, simuti branches 10 apart, bixefi lane 3 158.175 \u2014 all matching the jar) moved the score by -2 (52956 -> 52954). Mean absolute distance to the jar over the 32 fork/split fixtures: rect@x 57.65 -> 22.04 px, svg@width 106.72 -> 38.56, text@x 95.04 -> 38.57; y families flat. removed over 268: x 5827.175 (85 fixtures), y 2117 (160). 253 pins rose (T1s class, pre-named), 3 fell (strictuml fixtures where the jar draws ArrowsTriangle, filed); vs the post-T1 state 6 rose (racana +9, leduvi +5, cifafo +3, fatuzu +2, pujozo +2, sopape +1: small Y removals crossing the comparators positional pairing, each journaled) and 14 fell.",
+    "before": 42511,
+    "after": 52954,
+    "percentChange": 24.57,
+    "fixturesFell": 3,
+    "fixturesRose": 253,
+    "fixturesUnchanged": 12,
+    "postT1Reference": {
+      "before": 52956,
+      "after": 52954,
+      "fixturesFell": 14,
+      "fixturesRose": 6,
+      "fixturesUnchanged": 248
+    }
+  },
+  "exitBarFamilies": {
+    "note": "The families activity-klimt-compress named (README exit bar) over the 32 split/fork fixtures (subset) and all 268 (aggregate), before (fa578b8a) and after this re-pin. Weights sum every path ending in the family suffix; a positional index inside the attribute (polygon[]/@points[]) is a DIFFERENT key. polygon[]/@points (whole-attribute count mismatch) fell 300 -> 18 subset / 1722 -> 230 aggregate because ArrowsRegular gives our heads the jar's 4 points; the per-index family svg/g[]/polygon[]/@points[] appeared at 12033 aggregate in its place (T1, pre-named). rect[]/@width fell 55 -> 38 / 149 -> 132 (bars narrowed by ct(x+w)-ct(x)). rect[]/@x, text[]/@x, line[]/@x1, svg/@width are FLAT (920, 1455, 2705, 266 -> 265) although the geometry converged: the comparator is blind to magnitude, and every x still misses the jar's by the unported root margin (Recentred). The magnitude table in the decision journal (B4 gate row) is the evidence: mean |ours - jar| on the subset rect@x 57.65 -> 22.04 px, svg@width 106.72 -> 38.56, text@x 95.04 -> 38.57, line@x1 170.03 -> 108.03. line[]/@y1/@y2 rose 599/598 -> 605/603 on the subset: small Y removals (simuti's 1.5 per split line, the bar-gap 2s) crossing the positional pairing, each journaled at T5.",
+    "families": {
+      "svg/g[][childCount]": {
+        "subsetBefore": 2116,
+        "subsetAfter": 2116,
+        "aggregateBefore": 18038,
+        "aggregateAfter": 18038
+      },
+      "polygon[]/@points": {
+        "subsetBefore": 300,
+        "subsetAfter": 18,
+        "aggregateBefore": 1722,
+        "aggregateAfter": 230
+      },
+      "rect[]/@width": {
+        "subsetBefore": 55,
+        "subsetAfter": 38,
+        "aggregateBefore": 149,
+        "aggregateAfter": 132
+      },
+      "rect[]/@x": {
+        "subsetBefore": 180,
+        "subsetAfter": 180,
+        "aggregateBefore": 920,
+        "aggregateAfter": 920
+      },
+      "text[]/@x": {
+        "subsetBefore": 211,
+        "subsetAfter": 211,
+        "aggregateBefore": 1455,
+        "aggregateAfter": 1455
+      },
+      "line[]/@x1": {
+        "subsetBefore": 605,
+        "subsetAfter": 605,
+        "aggregateBefore": 2705,
+        "aggregateAfter": 2705
+      },
+      "line[]/@x2": {
+        "subsetBefore": 605,
+        "subsetAfter": 604,
+        "aggregateBefore": 2705,
+        "aggregateAfter": 2704
+      },
+      "svg/@width": {
+        "subsetBefore": 32,
+        "subsetAfter": 32,
+        "aggregateBefore": 266,
+        "aggregateAfter": 265
+      },
+      "svg/@viewBox[]": {
+        "subsetBefore": 64,
+        "subsetAfter": 64,
+        "aggregateBefore": 533,
+        "aggregateAfter": 533
+      },
+      "line[]/@y1": {
+        "subsetBefore": 599,
+        "subsetAfter": 605,
+        "aggregateBefore": 2697,
+        "aggregateAfter": 2702
+      },
+      "line[]/@y2": {
+        "subsetBefore": 598,
+        "subsetAfter": 603,
+        "aggregateBefore": 2697,
+        "aggregateAfter": 2703
+      },
+      "rect[]/@y": {
+        "subsetBefore": 180,
+        "subsetAfter": 180,
+        "aggregateBefore": 920,
+        "aggregateAfter": 918
+      },
+      "svg/@height": {
+        "subsetBefore": 32,
+        "subsetAfter": 32,
+        "aggregateBefore": 267,
+        "aggregateAfter": 268
+      }
+    },
+    "magnitudeSubset": {
+      "note": "mean |ours - jar| over the 32 fork/split fixtures, positional pairing, before T5 (38cdfb41) -> HEAD; scratch magnitude.ts",
+      "rect@x": [
+        57.652,
+        22.042
+      ],
+      "rect@width": [
+        78.59,
+        56.007
+      ],
+      "line@x1": [
+        170.027,
+        108.028
+      ],
+      "line@x2": [
+        167.057,
+        104.195
+      ],
+      "text@x": [
+        95.04,
+        38.565
+      ],
+      "svg@width": [
+        106.719,
+        38.563
+      ],
+      "rect@y": [
+        19.705,
+        19.573
+      ],
+      "line@y1": [
+        65.971,
+        65.886
+      ],
+      "svg@height": [
+        33.0,
+        32.594
+      ]
+    }
+  },
+  "paths": [
+    {
+      "path": "svg/g[][childCount]",
+      "weight": 18038,
+      "weightShare": 34.06,
+      "occurrences": 189,
+      "fixtures": 189
+    },
+    {
+      "path": "svg/g[]/polygon[]/@points[]",
+      "weight": 12033,
+      "weightShare": 22.72,
+      "occurrences": 12033,
+      "fixtures": 253
+    },
+    {
+      "path": "svg/g[]/line[]/@x1",
+      "weight": 2705,
+      "weightShare": 5.11,
+      "occurrences": 2705,
+      "fixtures": 256
+    },
+    {
+      "path": "svg/g[]/line[]/@x2",
+      "weight": 2704,
+      "weightShare": 5.11,
+      "occurrences": 2704,
+      "fixtures": 256
+    },
+    {
+      "path": "svg/g[]/line[]/@y2",
+      "weight": 2703,
+      "weightShare": 5.1,
+      "occurrences": 2703,
+      "fixtures": 256
+    },
+    {
+      "path": "svg/g[]/line[]/@y1",
+      "weight": 2702,
+      "weightShare": 5.1,
+      "occurrences": 2702,
+      "fixtures": 256
+    },
+    {
+      "path": "svg/g[]/text[]/@x",
+      "weight": 1433,
+      "weightShare": 2.71,
+      "occurrences": 1433,
+      "fixtures": 265
+    },
+    {
+      "path": "svg/g[]/text[]/@y",
+      "weight": 1433,
+      "weightShare": 2.71,
+      "occurrences": 1433,
+      "fixtures": 265
+    },
+    {
+      "path": "svg/g[]/text[]/@textLength",
+      "weight": 1277,
+      "weightShare": 2.41,
+      "occurrences": 1277,
+      "fixtures": 257
+    },
+    {
+      "path": "svg/g[]/rect[]/@x",
+      "weight": 918,
+      "weightShare": 1.73,
+      "occurrences": 918,
+      "fixtures": 240
+    },
+    {
+      "path": "svg/g[]/rect[]/@y",
+      "weight": 916,
+      "weightShare": 1.73,
+      "occurrences": 916,
+      "fixtures": 240
+    },
+    {
+      "path": "svg/@viewBox[]",
+      "weight": 533,
+      "weightShare": 1.01,
+      "occurrences": 533,
+      "fixtures": 268
+    },
+    {
+      "path": "svg/g[]/ellipse[]/@cx",
+      "weight": 464,
+      "weightShare": 0.88,
+      "occurrences": 464,
+      "fixtures": 190
+    },
+    {
+      "path": "svg/g[]/text[]/text()[]",
+      "weight": 451,
+      "weightShare": 0.85,
+      "occurrences": 451,
+      "fixtures": 141
+    },
+    {
+      "path": "svg/g[]/ellipse[]/@cy",
+      "weight": 442,
+      "weightShare": 0.83,
+      "occurrences": 442,
+      "fixtures": 190
+    },
+    {
+      "path": "svg/g[]/line[]",
+      "weight": 423,
+      "weightShare": 0.8,
+      "occurrences": 30,
+      "fixtures": 11
+    },
+    {
+      "path": "svg/g[]/polygon[]",
+      "weight": 409,
+      "weightShare": 0.77,
+      "occurrences": 29,
+      "fixtures": 11
+    },
+    {
+      "path": "svg/g[]/path[]/@d[]",
+      "weight": 304,
+      "weightShare": 0.57,
+      "occurrences": 304,
+      "fixtures": 26
+    },
+    {
+      "path": "svg/g[]/ellipse[]/@rx",
+      "weight": 291,
+      "weightShare": 0.55,
+      "occurrences": 291,
+      "fixtures": 137
+    },
+    {
+      "path": "svg/g[]/ellipse[]/@ry",
+      "weight": 291,
+      "weightShare": 0.55,
+      "occurrences": 291,
+      "fixtures": 137
+    },
+    {
+      "path": "svg/@height",
+      "weight": 268,
+      "weightShare": 0.51,
+      "occurrences": 268,
+      "fixtures": 268
+    },
+    {
+      "path": "svg/@width",
+      "weight": 265,
+      "weightShare": 0.5,
+      "occurrences": 265,
+      "fixtures": 265
+    },
+    {
+      "path": "svg/g[]/polygon[]/@points",
+      "weight": 230,
+      "weightShare": 0.43,
+      "occurrences": 230,
+      "fixtures": 139
+    },
+    {
+      "path": "svg/g[]/text[]/@font-size",
+      "weight": 224,
+      "weightShare": 0.42,
+      "occurrences": 224,
+      "fixtures": 96
+    },
+    {
+      "path": "svg/g[]/rect[]",
+      "weight": 135,
+      "weightShare": 0.25,
+      "occurrences": 8,
+      "fixtures": 5
+    },
+    {
+      "path": "svg/g[]/rect[]/@width",
+      "weight": 131,
+      "weightShare": 0.25,
+      "occurrences": 131,
+      "fixtures": 88
+    },
+    {
+      "path": "svg/g[]/ellipse[]/@stroke",
+      "weight": 130,
+      "weightShare": 0.25,
+      "occurrences": 130,
+      "fixtures": 107
+    },
+    {
+      "path": "svg/g[]/line[]/@stroke-width",
+      "weight": 127,
+      "weightShare": 0.24,
+      "occurrences": 127,
+      "fixtures": 55
+    },
+    {
+      "path": "svg/g[]/ellipse[]/@stroke-width",
+      "weight": 124,
+      "weightShare": 0.23,
+      "occurrences": 124,
+      "fixtures": 107
+    },
+    {
+      "path": "svg/g[]/text[]",
+      "weight": 124,
+      "weightShare": 0.23,
+      "occurrences": 9,
+      "fixtures": 4
+    },
+    {
+      "path": "svg/g[]/ellipse[]",
+      "weight": 99,
+      "weightShare": 0.19,
+      "occurrences": 7,
+      "fixtures": 3
+    },
+    {
+      "path": "svg/g[]/path[]",
+      "weight": 88,
+      "weightShare": 0.17,
+      "occurrences": 7,
+      "fixtures": 3
+    },
+    {
+      "path": "svg/g[]/path[]/@fill",
+      "weight": 77,
+      "weightShare": 0.15,
+      "occurrences": 77,
+      "fixtures": 27
+    },
+    {
+      "path": "svg/g[]/line[]/@stroke",
+      "weight": 63,
+      "weightShare": 0.12,
+      "occurrences": 63,
+      "fixtures": 30
+    },
+    {
+      "path": "svg/g[]/rect[]/@stroke-width",
+      "weight": 43,
+      "weightShare": 0.08,
+      "occurrences": 43,
+      "fixtures": 22
+    },
+    {
+      "path": "svg/g[]/g[][childCount]",
+      "weight": 42,
+      "weightShare": 0.08,
+      "occurrences": 2,
+      "fixtures": 2
+    },
+    {
+      "path": "svg/g[]/path[]/@d",
+      "weight": 39,
+      "weightShare": 0.07,
+      "occurrences": 39,
+      "fixtures": 27
+    },
+    {
+      "path": "svg/g[]/rect[]/@stroke",
+      "weight": 39,
+      "weightShare": 0.07,
+      "occurrences": 39,
+      "fixtures": 21
+    },
+    {
+      "path": "svg/g[]/rect[]/@height",
+      "weight": 38,
+      "weightShare": 0.07,
+      "occurrences": 38,
+      "fixtures": 23
+    },
+    {
+      "path": "svg/g[]/g[]/text[]/@x",
+      "weight": 22,
+      "weightShare": 0.04,
+      "occurrences": 22,
+      "fixtures": 16
+    },
+    {
+      "path": "svg/g[]/g[]/text[]/@y",
+      "weight": 22,
+      "weightShare": 0.04,
+      "occurrences": 22,
+      "fixtures": 16
+    },
+    {
+      "path": "svg/g[]/rect[]/@fill",
+      "weight": 16,
+      "weightShare": 0.03,
+      "occurrences": 16,
+      "fixtures": 11
+    },
+    {
+      "path": "svg/g[]/polygon[]/@stroke-width",
+      "weight": 15,
+      "weightShare": 0.03,
+      "occurrences": 15,
+      "fixtures": 11
+    },
+    {
+      "path": "svg/g[]/polygon[]/@fill",
+      "weight": 13,
+      "weightShare": 0.02,
+      "occurrences": 13,
+      "fixtures": 6
+    },
+    {
+      "path": "svg/defs[][childCount]",
+      "weight": 12,
+      "weightShare": 0.02,
+      "occurrences": 1,
+      "fixtures": 1
+    },
+    {
+      "path": "svg/g[]/polygon[]/@stroke",
+      "weight": 12,
+      "weightShare": 0.02,
+      "occurrences": 12,
+      "fixtures": 5
+    },
+    {
+      "path": "svg/g[]/text[]/@font-weight",
+      "weight": 11,
+      "weightShare": 0.02,
+      "occurrences": 11,
+      "fixtures": 7
+    },
+    {
+      "path": "svg/g[]/polygon[]/@stroke-linejoin",
+      "weight": 9,
+      "weightShare": 0.02,
+      "occurrences": 9,
+      "fixtures": 6
+    },
+    {
+      "path": "svg/g[]/polygon[]/@stroke-miterlimit",
+      "weight": 9,
+      "weightShare": 0.02,
+      "occurrences": 9,
+      "fixtures": 6
+    },
+    {
+      "path": "svg/g[]/rect[]/@rx",
+      "weight": 9,
+      "weightShare": 0.02,
+      "occurrences": 9,
+      "fixtures": 8
+    },
+    {
+      "path": "svg/g[]/rect[]/@ry",
+      "weight": 9,
+      "weightShare": 0.02,
+      "occurrences": 9,
+      "fixtures": 8
+    },
+    {
+      "path": "svg/g[]/text[]/@fill",
+      "weight": 8,
+      "weightShare": 0.02,
+      "occurrences": 8,
+      "fixtures": 5
+    },
+    {
+      "path": "svg/g[]/ellipse[]/@fill",
+      "weight": 7,
+      "weightShare": 0.01,
+      "occurrences": 7,
+      "fixtures": 5
+    },
+    {
+      "path": "svg/g[]/text[][childCount]",
+      "weight": 5,
+      "weightShare": 0.01,
+      "occurrences": 5,
+      "fixtures": 4
+    },
+    {
+      "path": "svg/g[]/text[]/@font-family",
+      "weight": 3,
+      "weightShare": 0.01,
+      "occurrences": 3,
+      "fixtures": 2
+    },
+    {
+      "path": "svg/g[]/g[]/text[]/@textLength",
+      "weight": 3,
+      "weightShare": 0.01,
+      "occurrences": 3,
+      "fixtures": 2
+    },
+    {
+      "path": "svg/g[]/text[]/@text-decoration",
+      "weight": 2,
+      "weightShare": 0,
+      "occurrences": 2,
+      "fixtures": 2
+    },
+    {
+      "path": "svg/g[]/g[]/rect[]/@x",
+      "weight": 2,
+      "weightShare": 0,
+      "occurrences": 2,
+      "fixtures": 2
+    },
+    {
+      "path": "svg/g[]/g[]/rect[]/@y",
+      "weight": 2,
+      "weightShare": 0,
+      "occurrences": 2,
+      "fixtures": 2
+    },
+    {
+      "path": "svg/g[]/g[]/text[]/text()[]",
+      "weight": 2,
+      "weightShare": 0,
+      "occurrences": 2,
+      "fixtures": 1
+    },
+    {
+      "path": "svg/g[]/g[]/rect[]/@height",
+      "weight": 1,
+      "weightShare": 0,
+      "occurrences": 1,
+      "fixtures": 1
+    },
+    {
+      "path": "svg/g[]/g[]/rect[]/@width",
+      "weight": 1,
+      "weightShare": 0,
+      "occurrences": 1,
+      "fixtures": 1
+    },
+    {
+      "path": "svg/@background",
+      "weight": 1,
+      "weightShare": 0,
+      "occurrences": 1,
+      "fixtures": 1
+    },
+    {
+      "path": "svg/g[]/g[]/text[][childCount]",
+      "weight": 1,
+      "weightShare": 0,
+      "occurrences": 1,
+      "fixtures": 1
+    },
+    {
+      "path": "svg/@preserveAspectRatio",
+      "weight": 1,
+      "weightShare": 0,
+      "occurrences": 1,
+      "fixtures": 1
+    }
+  ],
+  "geometryResidual": {
+    "note": "Re-derived by activity-min-box-width T6 from style-baseline.json's canvases. Width was wider=168 / narrower=99 / equal=1 and is now wider=72 / narrower=194 / equal=2; height was shorter=198 / taller=69 / equal=1 and is now shorter=188 / taller=79 / equal=1. Deleting the 120px floor moved the width residual from systematically too WIDE toward too NARROW; the remaining constant is LAYOUT_MARGIN 12 against the jar's 16 (activity-canvas-margin, filed earlier).",
+    "widthDirection": {
+      "wider": 72,
+      "narrower": 194,
+      "equal": 2
+    },
+    "heightDirection": {
+      "shorter": 188,
+      "taller": 79,
+      "equal": 1
+    },
+    "perFixture": [
+      {
+        "slug": "activity-creole-table",
+        "width": {
+          "ours": 145,
+          "jar": 150,
+          "delta": -5,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 68,
+          "jar": 84,
+          "delta": -16,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "bakopu-96-pudu086",
+        "width": {
+          "ours": 517,
+          "jar": 327,
+          "delta": 190,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 350,
+          "jar": 280,
+          "delta": 70,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "bareka-88-fusu160",
+        "width": {
+          "ours": 156,
+          "jar": 178,
+          "delta": -22,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 388,
+          "jar": 377,
+          "delta": 11,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "bazize-75-dedo568",
+        "width": {
+          "ours": 250,
+          "jar": 264,
+          "delta": -14,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 503,
+          "jar": 533,
+          "delta": -30,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "bazuma-86-metu353",
+        "width": {
+          "ours": 204,
+          "jar": 216,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 168,
+          "jar": 229,
+          "delta": -61,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "becaje-01-vaji284",
+        "width": {
+          "ours": 196,
+          "jar": 168,
+          "delta": 28,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 216,
+          "jar": 205,
+          "delta": 11,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "becanu-19-diti597",
+        "width": {
+          "ours": 146,
+          "jar": 183,
+          "delta": -37,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 351,
+          "jar": 367,
+          "delta": -16,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "bedezo-44-more709",
+        "width": {
+          "ours": 369,
+          "jar": 308,
+          "delta": 61,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 216,
+          "jar": 225,
+          "delta": -9,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "begivo-34-sicu289",
+        "width": {
+          "ours": 247,
+          "jar": 236,
+          "delta": 11,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 279,
+          "jar": 277,
+          "delta": 2,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "bepuku-07-vebe062",
+        "width": {
+          "ours": 449,
+          "jar": 493,
+          "delta": -44,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 252,
+          "jar": 280,
+          "delta": -28,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "besaga-58-poli497",
+        "width": {
+          "ours": 857,
+          "jar": 1296,
+          "delta": -439,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 347,
+          "jar": 391,
+          "delta": -44,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "bideta-97-cezo697",
+        "width": {
+          "ours": 199,
+          "jar": 267,
+          "delta": -68,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 227,
+          "jar": 265,
+          "delta": -38,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "bidosa-98-veca008",
+        "width": {
+          "ours": 258,
+          "jar": 323,
+          "delta": -65,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 270,
+          "jar": 222,
+          "delta": 48,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "bigide-91-bise382",
+        "width": {
+          "ours": 161,
+          "jar": 176,
+          "delta": -15,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 279,
+          "jar": 280,
+          "delta": -1,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "biguku-39-voxu233",
+        "width": {
+          "ours": 291,
+          "jar": 310,
+          "delta": -19,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 176,
+          "jar": 196,
+          "delta": -20,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "biredi-08-bama025",
+        "width": {
+          "ours": 295,
+          "jar": 285,
+          "delta": 10,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 316,
+          "jar": 340,
+          "delta": -24,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "bixefi-77-moki051",
+        "width": {
+          "ours": 628,
+          "jar": 420,
+          "delta": 208,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 135,
+          "jar": 145,
+          "delta": -10,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "bizono-61-sasa740",
+        "width": {
+          "ours": 104,
+          "jar": 144,
+          "delta": -40,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 372,
+          "jar": 415,
+          "delta": -43,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "bocaga-53-nale241",
+        "width": {
+          "ours": 128,
+          "jar": 168,
+          "delta": -40,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 264,
+          "jar": 205,
+          "delta": 59,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "bolizi-92-pele824",
+        "width": {
+          "ours": 215,
+          "jar": 278,
+          "delta": -63,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 593,
+          "jar": 333,
+          "delta": 260,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "boxoto-53-sifo232",
+        "width": {
+          "ours": 937,
+          "jar": 862,
+          "delta": 75,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 964,
+          "jar": 1126,
+          "delta": -162,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "bozido-07-geze049",
+        "width": {
+          "ours": 284,
+          "jar": 343,
+          "delta": -59,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 512,
+          "jar": 419,
+          "delta": 93,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "bozuro-33-celo170",
+        "width": {
+          "ours": 305,
+          "jar": 485,
+          "delta": -180,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 336,
+          "jar": 332,
+          "delta": 4,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "bugaja-31-jaso630",
+        "width": {
+          "ours": 751,
+          "jar": 483,
+          "delta": 268,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 227,
+          "jar": 225,
+          "delta": 2,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "bulasi-17-vafa634",
+        "width": {
+          "ours": 136,
+          "jar": 176,
+          "delta": -40,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 360,
+          "jar": 385,
+          "delta": -25,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "bumaca-51-kece901",
+        "width": {
+          "ours": 250,
+          "jar": 292,
+          "delta": -42,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 299,
+          "jar": 323,
+          "delta": -24,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "bunoxu-10-jabe604",
+        "width": {
+          "ours": 340,
+          "jar": 478,
+          "delta": -138,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 309,
+          "jar": 268,
+          "delta": 41,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "cagoze-40-tete366",
+        "width": {
+          "ours": 189,
+          "jar": 241,
+          "delta": -52,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 204,
+          "jar": 241,
+          "delta": -37,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "calenu-74-vigo098",
+        "width": {
+          "ours": 304,
+          "jar": 286,
+          "delta": 18,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 476,
+          "jar": 495,
+          "delta": -19,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "camavo-50-kaku123",
+        "width": {
+          "ours": 323,
+          "jar": 351,
+          "delta": -28,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 412,
+          "jar": 407,
+          "delta": 5,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "carapo-31-bisi880",
+        "width": {
+          "ours": 90,
+          "jar": 113,
+          "delta": -23,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 116,
+          "jar": 171,
+          "delta": -55,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "cemagu-66-vazo965",
+        "width": {
+          "ours": 227,
+          "jar": 339,
+          "delta": -112,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 240,
+          "jar": 247,
+          "delta": -7,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "cemipu-87-dinu624",
+        "width": {
+          "ours": 430,
+          "jar": 432,
+          "delta": -2,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 411,
+          "jar": 456,
+          "delta": -45,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "cetica-88-toke482",
+        "width": {
+          "ours": 373,
+          "jar": 385,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 304,
+          "jar": 315,
+          "delta": -11,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "ciceto-21-zanu057",
+        "width": {
+          "ours": 188,
+          "jar": 193,
+          "delta": -5,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 268,
+          "jar": 287,
+          "delta": -19,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "cifafo-49-jazi415",
+        "width": {
+          "ours": 250,
+          "jar": 271,
+          "delta": -21,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 287,
+          "jar": 276,
+          "delta": 11,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "cixave-47-milo698",
+        "width": {
+          "ours": 234,
+          "jar": 266,
+          "delta": -32,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 324,
+          "jar": 353,
+          "delta": -29,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "cizixu-00-koro700",
+        "width": {
+          "ours": 50,
+          "jar": 64,
+          "delta": -14,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 108,
+          "jar": 120,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "copisa-69-xisi273",
+        "width": {
+          "ours": 180,
+          "jar": 202,
+          "delta": -22,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 216,
+          "jar": 234,
+          "delta": -18,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "covage-54-pine573",
+        "width": {
+          "ours": 110,
+          "jar": 122,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 572,
+          "jar": 577,
+          "delta": -5,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "cubida-55-meku256",
+        "width": {
+          "ours": 126,
+          "jar": 167,
+          "delta": -41,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 153,
+          "jar": 107,
+          "delta": 46,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "cufega-65-beji958",
+        "width": {
+          "ours": 100,
+          "jar": 130,
+          "delta": -30,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 384,
+          "jar": 404,
+          "delta": -20,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "cugezi-99-tire097",
+        "width": {
+          "ours": 254,
+          "jar": 266,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 680,
+          "jar": 692,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "cujoni-21-somi079",
+        "width": {
+          "ours": 122,
+          "jar": 156,
+          "delta": -34,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 257,
+          "jar": 210,
+          "delta": 47,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "cutabu-59-cilo276",
+        "width": {
+          "ours": 85,
+          "jar": 144,
+          "delta": -59,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 224,
+          "jar": 189,
+          "delta": 35,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "dacuga-41-popo038",
+        "width": {
+          "ours": 159,
+          "jar": 203,
+          "delta": -44,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 340,
+          "jar": 394,
+          "delta": -54,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "dakesa-98-mano758",
+        "width": {
+          "ours": 80,
+          "jar": 92,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 56,
+          "jar": 68,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "darote-51-kuta407",
+        "width": {
+          "ours": 117,
+          "jar": 129,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 836,
+          "jar": 848,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "daxare-39-buci637",
+        "width": {
+          "ours": 197,
+          "jar": 189,
+          "delta": 8,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 364,
+          "jar": 379,
+          "delta": -15,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "decudi-92-bisu741",
+        "width": {
+          "ours": 459,
+          "jar": 335,
+          "delta": 124,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 474,
+          "jar": 398,
+          "delta": 76,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "dexero-99-ziru660",
+        "width": {
+          "ours": 74,
+          "jar": 86,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 316,
+          "jar": 328,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "digexe-63-zifu774",
+        "width": {
+          "ours": 240,
+          "jar": 283,
+          "delta": -43,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 455,
+          "jar": 343,
+          "delta": 112,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "dirame-64-cica627",
+        "width": {
+          "ours": 82,
+          "jar": 94,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 264,
+          "jar": 276,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "disemi-67-keva276",
+        "width": {
+          "ours": 60,
+          "jar": 72,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 96,
+          "jar": 107,
+          "delta": -11,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "dixiku-28-guzo497",
+        "width": {
+          "ours": 104,
+          "jar": 134,
+          "delta": -30,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 272,
+          "jar": 319,
+          "delta": -47,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "dotuzi-75-nape254",
+        "width": {
+          "ours": 215,
+          "jar": 205,
+          "delta": 10,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 422,
+          "jar": 330,
+          "delta": 92,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "dozaxu-98-xetu961",
+        "width": {
+          "ours": 185,
+          "jar": 467,
+          "delta": -282,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 292,
+          "jar": 301,
+          "delta": -9,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "doziki-93-rosi997",
+        "width": {
+          "ours": 153,
+          "jar": 207,
+          "delta": -54,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 476,
+          "jar": 521,
+          "delta": -45,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "dulezi-77-sana210",
+        "width": {
+          "ours": 167,
+          "jar": 189,
+          "delta": -22,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 308,
+          "jar": 317,
+          "delta": -9,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "dunejo-33-divo189",
+        "width": {
+          "ours": 181,
+          "jar": 193,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 80,
+          "jar": 92,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "dupopo-44-deto131",
+        "width": {
+          "ours": 348,
+          "jar": 365,
+          "delta": -17,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 339,
+          "jar": 353,
+          "delta": -14,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "duzumu-46-geve509",
+        "width": {
+          "ours": 60,
+          "jar": 72,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 104,
+          "jar": 110,
+          "delta": -6,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "fabexi-81-dife869",
+        "width": {
+          "ours": 102,
+          "jar": 114,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 196,
+          "jar": 199,
+          "delta": -3,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "fabule-54-pili300",
+        "width": {
+          "ours": 151,
+          "jar": 115,
+          "delta": 36,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 56,
+          "jar": 92,
+          "delta": -36,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "fabuli-92-vemo727",
+        "width": {
+          "ours": 63,
+          "jar": 75,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 96,
+          "jar": 107,
+          "delta": -11,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "farexi-86-xanu521",
+        "width": {
+          "ours": 81,
+          "jar": 93,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 108,
+          "jar": 120,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "fatuzu-07-cevu894",
+        "width": {
+          "ours": 462,
+          "jar": 456,
+          "delta": 6,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 368,
+          "jar": 368,
+          "delta": 0,
+          "direction": "equal"
+        }
+      },
+      {
+        "slug": "feceme-58-xodo415",
+        "width": {
+          "ours": 282,
+          "jar": 265,
+          "delta": 17,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 220,
+          "jar": 236,
+          "delta": -16,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "felega-00-saxi785",
+        "width": {
+          "ours": 128,
+          "jar": 189,
+          "delta": -61,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 303,
+          "jar": 301,
+          "delta": 2,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "femaco-88-bufe808",
+        "width": {
+          "ours": 137,
+          "jar": 149,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 144,
+          "jar": 149,
+          "delta": -5,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "fetizo-39-jace641",
+        "width": {
+          "ours": 254,
+          "jar": 285,
+          "delta": -31,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 304,
+          "jar": 316,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "fibafo-22-foze119",
+        "width": {
+          "ours": 312,
+          "jar": 244,
+          "delta": 68,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 532,
+          "jar": 709,
+          "delta": -177,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "fikuki-99-kulu790",
+        "width": {
+          "ours": 218,
+          "jar": 234,
+          "delta": -16,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 276,
+          "jar": 203,
+          "delta": 73,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "firibi-00-puki721",
+        "width": {
+          "ours": 430,
+          "jar": 355,
+          "delta": 75,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 431,
+          "jar": 468,
+          "delta": -37,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "fisaca-74-deco063",
+        "width": {
+          "ours": 117,
+          "jar": 129,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 160,
+          "jar": 172,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "fivama-51-cusa142",
+        "width": {
+          "ours": 237,
+          "jar": 241,
+          "delta": -4,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 260,
+          "jar": 207,
+          "delta": 53,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "fofele-65-lozo631",
+        "width": {
+          "ours": 81,
+          "jar": 93,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 108,
+          "jar": 120,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "foludi-80-gilo247",
+        "width": {
+          "ours": 87,
+          "jar": 136,
+          "delta": -49,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 192,
+          "jar": 149,
+          "delta": 43,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "fomapa-90-bore251",
+        "width": {
+          "ours": 959,
+          "jar": 921,
+          "delta": 38,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 216,
+          "jar": 228,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "fonabu-93-xama593",
+        "width": {
+          "ours": 107,
+          "jar": 120,
+          "delta": -13,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 208,
+          "jar": 247,
+          "delta": -39,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "fonebe-54-save009",
+        "width": {
+          "ours": 60,
+          "jar": 72,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 96,
+          "jar": 107,
+          "delta": -11,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "fotamo-01-rupi481",
+        "width": {
+          "ours": 52,
+          "jar": 65,
+          "delta": -13,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 144,
+          "jar": 149,
+          "delta": -5,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "fovaja-48-leso567",
+        "width": {
+          "ours": 264,
+          "jar": 310,
+          "delta": -46,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 280,
+          "jar": 277,
+          "delta": 3,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "fufefa-17-faje066",
+        "width": {
+          "ours": 206,
+          "jar": 218,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 524,
+          "jar": 536,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "gacaja-15-keko600",
+        "width": {
+          "ours": 297,
+          "jar": 293,
+          "delta": 4,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 560,
+          "jar": 497,
+          "delta": 63,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "gakelo-29-neno787",
+        "width": {
+          "ours": 181,
+          "jar": 187,
+          "delta": -6,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 268,
+          "jar": 312,
+          "delta": -44,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "ganaku-47-muko252",
+        "width": {
+          "ours": 215,
+          "jar": 203,
+          "delta": 12,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 422,
+          "jar": 330,
+          "delta": 92,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "garuga-34-debe901",
+        "width": {
+          "ours": 189,
+          "jar": 193,
+          "delta": -4,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 252,
+          "jar": 253,
+          "delta": -1,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "gaxezi-48-zesa921",
+        "width": {
+          "ours": 221,
+          "jar": 220,
+          "delta": 1,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 144,
+          "jar": 149,
+          "delta": -5,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "gebuzi-30-nulo391",
+        "width": {
+          "ours": 106,
+          "jar": 118,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 420,
+          "jar": 432,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "gelono-70-zuce760",
+        "width": {
+          "ours": 112,
+          "jar": 182,
+          "delta": -70,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 492,
+          "jar": 448,
+          "delta": 44,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "gepetu-15-seba834",
+        "width": {
+          "ours": 74,
+          "jar": 86,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 160,
+          "jar": 172,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "gesogi-81-xoma900",
+        "width": {
+          "ours": 654,
+          "jar": 485,
+          "delta": 169,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 267,
+          "jar": 316,
+          "delta": -49,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "gevaxi-80-tone223",
+        "width": {
+          "ours": 266,
+          "jar": 221,
+          "delta": 45,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 308,
+          "jar": 235,
+          "delta": 73,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "gimegi-77-xidu727",
+        "width": {
+          "ours": 160,
+          "jar": 172,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 96,
+          "jar": 107,
+          "delta": -11,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "gitoke-38-beme495",
+        "width": {
+          "ours": 836,
+          "jar": 3733,
+          "delta": -2897,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 343,
+          "jar": 362,
+          "delta": -19,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "givanu-33-kire967",
+        "width": {
+          "ours": 146,
+          "jar": 183,
+          "delta": -37,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 403,
+          "jar": 427,
+          "delta": -24,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "gizore-52-fode894",
+        "width": {
+          "ours": 181,
+          "jar": 193,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 80,
+          "jar": 92,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "gofebi-87-zeka817",
+        "width": {
+          "ours": 146,
+          "jar": 222,
+          "delta": -76,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 281,
+          "jar": 237,
+          "delta": 44,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "gonixe-93-zaza537",
+        "width": {
+          "ours": 57,
+          "jar": 69,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 56,
+          "jar": 68,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "goxoni-69-lemo511",
+        "width": {
+          "ours": 64,
+          "jar": 76,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 96,
+          "jar": 107,
+          "delta": -11,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "guceja-66-tola192",
+        "width": {
+          "ours": 160,
+          "jar": 179,
+          "delta": -19,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 276,
+          "jar": 296,
+          "delta": -20,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "gufuma-85-zoce945",
+        "width": {
+          "ours": 77,
+          "jar": 98,
+          "delta": -21,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 204,
+          "jar": 191,
+          "delta": 13,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "gugala-11-suce270",
+        "width": {
+          "ours": 276,
+          "jar": 288,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 379,
+          "jar": 386,
+          "delta": -7,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "jafuli-91-sota277",
+        "width": {
+          "ours": 641,
+          "jar": 680,
+          "delta": -39,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 312,
+          "jar": 339,
+          "delta": -27,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "jagove-43-nako107",
+        "width": {
+          "ours": 291,
+          "jar": 244,
+          "delta": 47,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 412,
+          "jar": 547,
+          "delta": -135,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "jakuco-69-dari135",
+        "width": {
+          "ours": 376,
+          "jar": 393,
+          "delta": -17,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 223,
+          "jar": 237,
+          "delta": -14,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "javedu-70-vaxo310",
+        "width": {
+          "ours": 162,
+          "jar": 227,
+          "delta": -65,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 261,
+          "jar": 226,
+          "delta": 35,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "jecoxu-17-zama003",
+        "width": {
+          "ours": 196,
+          "jar": 168,
+          "delta": 28,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 220,
+          "jar": 215,
+          "delta": 5,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "jevoce-05-mumi686",
+        "width": {
+          "ours": 1254,
+          "jar": 977,
+          "delta": 277,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 387,
+          "jar": 395,
+          "delta": -8,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "jidefi-14-kafe151",
+        "width": {
+          "ours": 81,
+          "jar": 93,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 108,
+          "jar": 120,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "jipapo-14-kevu587",
+        "width": {
+          "ours": 167,
+          "jar": 197,
+          "delta": -30,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 213,
+          "jar": 185,
+          "delta": 28,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "jisema-42-rapa121",
+        "width": {
+          "ours": 127,
+          "jar": 173,
+          "delta": -46,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 317,
+          "jar": 312,
+          "delta": 5,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "jodagi-12-xatu540",
+        "width": {
+          "ours": 67,
+          "jar": 79,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 160,
+          "jar": 172,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "jucidi-98-zato093",
+        "width": {
+          "ours": 375,
+          "jar": 369,
+          "delta": 6,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 279,
+          "jar": 292,
+          "delta": -13,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "judatu-15-xize591",
+        "width": {
+          "ours": 905,
+          "jar": 678,
+          "delta": 227,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 627,
+          "jar": 653,
+          "delta": -26,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "jupivo-67-gidi531",
+        "width": {
+          "ours": 224,
+          "jar": 265,
+          "delta": -41,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 380,
+          "jar": 367,
+          "delta": 13,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "jupoxe-15-sugo110",
+        "width": {
+          "ours": 7878,
+          "jar": 1937,
+          "delta": 5941,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 728,
+          "jar": 1390,
+          "delta": -662,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "kafevi-44-tesu096",
+        "width": {
+          "ours": 141,
+          "jar": 493,
+          "delta": -352,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 256,
+          "jar": 269,
+          "delta": -13,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "kasadu-53-tuki533",
+        "width": {
+          "ours": 817,
+          "jar": 851,
+          "delta": -34,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 299,
+          "jar": 321,
+          "delta": -22,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "katopo-68-xajo866",
+        "width": {
+          "ours": 145,
+          "jar": 162,
+          "delta": -17,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 304,
+          "jar": 303,
+          "delta": 1,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "kavoro-11-jife299",
+        "width": {
+          "ours": 208,
+          "jar": 342,
+          "delta": -134,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 245,
+          "jar": 151,
+          "delta": 94,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "kepavi-26-sasu141",
+        "width": {
+          "ours": 187,
+          "jar": 298,
+          "delta": -111,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 213,
+          "jar": 189,
+          "delta": 24,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "ketiro-31-nazo312",
+        "width": {
+          "ours": 106,
+          "jar": 118,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 368,
+          "jar": 380,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "kijazo-83-kipu485",
+        "width": {
+          "ours": 500,
+          "jar": 584,
+          "delta": -84,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 355,
+          "jar": 380,
+          "delta": -25,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "kitupi-32-jexo155",
+        "width": {
+          "ours": 699,
+          "jar": 765,
+          "delta": -66,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 221,
+          "jar": 173,
+          "delta": 48,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "kodaku-19-moni161",
+        "width": {
+          "ours": 160,
+          "jar": 215,
+          "delta": -55,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 460,
+          "jar": 426,
+          "delta": 34,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "kodiji-34-mofe202",
+        "width": {
+          "ours": 44,
+          "jar": 55,
+          "delta": -11,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 44,
+          "jar": 55,
+          "delta": -11,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "kojivo-44-ceti956",
+        "width": {
+          "ours": 106,
+          "jar": 118,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 368,
+          "jar": 380,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "kubaso-31-gaxu491",
+        "width": {
+          "ours": 57,
+          "jar": 69,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 56,
+          "jar": 68,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "kudedo-31-pafi082",
+        "width": {
+          "ours": 212,
+          "jar": 253,
+          "delta": -41,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 367,
+          "jar": 355,
+          "delta": 12,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "kuzeru-09-voke075",
+        "width": {
+          "ours": 67,
+          "jar": 79,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 316,
+          "jar": 328,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "labala-74-juki864",
+        "width": {
+          "ours": 189,
+          "jar": 183,
+          "delta": 6,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 252,
+          "jar": 243,
+          "delta": 9,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "lacuci-13-nogo718",
+        "width": {
+          "ours": 120,
+          "jar": 132,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 260,
+          "jar": 303,
+          "delta": -43,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "lafilo-69-tuti771",
+        "width": {
+          "ours": 274,
+          "jar": 274,
+          "delta": 0,
+          "direction": "equal"
+        },
+        "height": {
+          "ours": 256,
+          "jar": 302,
+          "delta": -46,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "lajuxi-63-nopo039",
+        "width": {
+          "ours": 71,
+          "jar": 83,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 96,
+          "jar": 107,
+          "delta": -11,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "laxibe-66-teme800",
+        "width": {
+          "ours": 220,
+          "jar": 219,
+          "delta": 1,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 160,
+          "jar": 172,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "leduvi-16-voli986",
+        "width": {
+          "ours": 402,
+          "jar": 453,
+          "delta": -51,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 256,
+          "jar": 334,
+          "delta": -78,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "letare-59-gore448",
+        "width": {
+          "ours": 345,
+          "jar": 212,
+          "delta": 133,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 167,
+          "jar": 185,
+          "delta": -18,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "letuke-04-poza319",
+        "width": {
+          "ours": 173,
+          "jar": 168,
+          "delta": 5,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 256,
+          "jar": 320,
+          "delta": -64,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "levuma-67-cego489",
+        "width": {
+          "ours": 240,
+          "jar": 250,
+          "delta": -10,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 236,
+          "jar": 274,
+          "delta": -38,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "lidefe-01-vaki092",
+        "width": {
+          "ours": 333,
+          "jar": 381,
+          "delta": -48,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 307,
+          "jar": 199,
+          "delta": 108,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "lifeve-53-zubi598",
+        "width": {
+          "ours": 104,
+          "jar": 190,
+          "delta": -86,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 124,
+          "jar": 130,
+          "delta": -6,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "livigo-47-negi605",
+        "width": {
+          "ours": 116,
+          "jar": 143,
+          "delta": -27,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 277,
+          "jar": 317,
+          "delta": -40,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "lokane-30-dinu378",
+        "width": {
+          "ours": 106,
+          "jar": 118,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 784,
+          "jar": 796,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "lopone-15-xiki477",
+        "width": {
+          "ours": 1274,
+          "jar": 1319,
+          "delta": -45,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 347,
+          "jar": 413,
+          "delta": -66,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "loxija-71-joku558",
+        "width": {
+          "ours": 182,
+          "jar": 171,
+          "delta": 11,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 320,
+          "jar": 387,
+          "delta": -67,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "lubapi-40-siji634",
+        "width": {
+          "ours": 63,
+          "jar": 75,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 144,
+          "jar": 147,
+          "delta": -3,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "lufamo-62-xavo766",
+        "width": {
+          "ours": 312,
+          "jar": 333,
+          "delta": -21,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 264,
+          "jar": 297,
+          "delta": -33,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "lukoxa-16-cecu095",
+        "width": {
+          "ours": 241,
+          "jar": 260,
+          "delta": -19,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 231,
+          "jar": 229,
+          "delta": 2,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "mabuke-20-muco282",
+        "width": {
+          "ours": 303,
+          "jar": 307,
+          "delta": -4,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 316,
+          "jar": 356,
+          "delta": -40,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "maduja-30-xiri319",
+        "width": {
+          "ours": 214,
+          "jar": 232,
+          "delta": -18,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 447,
+          "jar": 507,
+          "delta": -60,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "mafete-03-rapa918",
+        "width": {
+          "ours": 279,
+          "jar": 313,
+          "delta": -34,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 351,
+          "jar": 333,
+          "delta": 18,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "maketa-43-juja264",
+        "width": {
+          "ours": 413,
+          "jar": 311,
+          "delta": 102,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 331,
+          "jar": 271,
+          "delta": 60,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "manata-12-rido730",
+        "width": {
+          "ours": 325,
+          "jar": 384,
+          "delta": -59,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 463,
+          "jar": 466,
+          "delta": -3,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "megara-21-rumi574",
+        "width": {
+          "ours": 240,
+          "jar": 299,
+          "delta": -59,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 351,
+          "jar": 367,
+          "delta": -16,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "mifejo-31-sovi184",
+        "width": {
+          "ours": 314,
+          "jar": 224,
+          "delta": 90,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 206,
+          "jar": 189,
+          "delta": 17,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "misiji-27-buje656",
+        "width": {
+          "ours": 295,
+          "jar": 272,
+          "delta": 23,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 239,
+          "jar": 279,
+          "delta": -40,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "molexa-46-redi999",
+        "width": {
+          "ours": 176,
+          "jar": 188,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 156,
+          "jar": 159,
+          "delta": -3,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "movexa-27-rexe388",
+        "width": {
+          "ours": 198,
+          "jar": 267,
+          "delta": -69,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 227,
+          "jar": 265,
+          "delta": -38,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "mulida-55-ceja768",
+        "width": {
+          "ours": 109,
+          "jar": 121,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 680,
+          "jar": 692,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "nafaxo-62-boso912",
+        "width": {
+          "ours": 202,
+          "jar": 236,
+          "delta": -34,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 440,
+          "jar": 393,
+          "delta": 47,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "naroji-40-nuke022",
+        "width": {
+          "ours": 81,
+          "jar": 93,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 108,
+          "jar": 120,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "narota-16-bago100",
+        "width": {
+          "ours": 57,
+          "jar": 69,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 56,
+          "jar": 68,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "navene-45-cozo466",
+        "width": {
+          "ours": 532,
+          "jar": 610,
+          "delta": -78,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 955,
+          "jar": 1050,
+          "delta": -95,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "nesozi-09-zezu092",
+        "width": {
+          "ours": 388,
+          "jar": 234,
+          "delta": 154,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 219,
+          "jar": 227,
+          "delta": -8,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "nexitu-74-luga914",
+        "width": {
+          "ours": 228,
+          "jar": 169,
+          "delta": 59,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 368,
+          "jar": 193,
+          "delta": 175,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "nijipa-25-pede639",
+        "width": {
+          "ours": 167,
+          "jar": 197,
+          "delta": -30,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 173,
+          "jar": 183,
+          "delta": -10,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "nikinu-06-sace939",
+        "width": {
+          "ours": 398,
+          "jar": 445,
+          "delta": -47,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 399,
+          "jar": 441,
+          "delta": -42,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "niletu-83-lego826",
+        "width": {
+          "ours": 145,
+          "jar": 150,
+          "delta": -5,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 68,
+          "jar": 84,
+          "delta": -16,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "niluji-46-joma773",
+        "width": {
+          "ours": 63,
+          "jar": 75,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 148,
+          "jar": 159,
+          "delta": -11,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "nimusa-16-tiku252",
+        "width": {
+          "ours": 124,
+          "jar": 124,
+          "delta": 0,
+          "direction": "equal"
+        },
+        "height": {
+          "ours": 364,
+          "jar": 418,
+          "delta": -54,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "nisexe-68-vabu320",
+        "width": {
+          "ours": 221,
+          "jar": 220,
+          "delta": 1,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 144,
+          "jar": 149,
+          "delta": -5,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "nivese-34-zavo418",
+        "width": {
+          "ours": 374,
+          "jar": 451,
+          "delta": -77,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 505,
+          "jar": 419,
+          "delta": 86,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "nojije-35-teta491",
+        "width": {
+          "ours": 238,
+          "jar": 290,
+          "delta": -52,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 379,
+          "jar": 383,
+          "delta": -4,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "nomeco-93-minu967",
+        "width": {
+          "ours": 437,
+          "jar": 489,
+          "delta": -52,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 224,
+          "jar": 174,
+          "delta": 50,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "nonusu-50-nute147",
+        "width": {
+          "ours": 256,
+          "jar": 163,
+          "delta": 93,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 272,
+          "jar": 227,
+          "delta": 45,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "norire-15-taka956",
+        "width": {
+          "ours": 126,
+          "jar": 164,
+          "delta": -38,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 201,
+          "jar": 150,
+          "delta": 51,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "novata-87-muti352",
+        "width": {
+          "ours": 175,
+          "jar": 194,
+          "delta": -19,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 188,
+          "jar": 205,
+          "delta": -17,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "noxasi-06-nejo322",
+        "width": {
+          "ours": 276,
+          "jar": 285,
+          "delta": -9,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 379,
+          "jar": 398,
+          "delta": -19,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "numalo-91-pole243",
+        "width": {
+          "ours": 52,
+          "jar": 64,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 92,
+          "jar": 97,
+          "delta": -5,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "nupose-71-vido428",
+        "width": {
+          "ours": 1177,
+          "jar": 924,
+          "delta": 253,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 387,
+          "jar": 381,
+          "delta": 6,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "nusajo-97-bemo713",
+        "width": {
+          "ours": 116,
+          "jar": 143,
+          "delta": -27,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 277,
+          "jar": 317,
+          "delta": -40,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "nuzugu-44-pega793",
+        "width": {
+          "ours": 632,
+          "jar": 263,
+          "delta": 369,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 153,
+          "jar": 180,
+          "delta": -27,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "pakema-21-xema183",
+        "width": {
+          "ours": 376,
+          "jar": 395,
+          "delta": -19,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 171,
+          "jar": 185,
+          "delta": -14,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "patagi-39-jone354",
+        "width": {
+          "ours": 189,
+          "jar": 206,
+          "delta": -17,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 219,
+          "jar": 225,
+          "delta": -6,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "pedoco-30-mose082",
+        "width": {
+          "ours": 146,
+          "jar": 143,
+          "delta": 3,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 364,
+          "jar": 407,
+          "delta": -43,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "pekefu-66-mepa144",
+        "width": {
+          "ours": 194,
+          "jar": 244,
+          "delta": -50,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 156,
+          "jar": 183,
+          "delta": -27,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "pekuxe-00-bovi270",
+        "width": {
+          "ours": 221,
+          "jar": 220,
+          "delta": 1,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 144,
+          "jar": 149,
+          "delta": -5,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "perate-09-gale335",
+        "width": {
+          "ours": 108,
+          "jar": 140,
+          "delta": -32,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 380,
+          "jar": 418,
+          "delta": -38,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "pezubu-98-niba240",
+        "width": {
+          "ours": 217,
+          "jar": 226,
+          "delta": -9,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 331,
+          "jar": 343,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "pifoni-76-duxa505",
+        "width": {
+          "ours": 525,
+          "jar": 365,
+          "delta": 160,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 323,
+          "jar": 188,
+          "delta": 135,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "pirofe-41-xama594",
+        "width": {
+          "ours": 369,
+          "jar": 308,
+          "delta": 61,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 216,
+          "jar": 236,
+          "delta": -20,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "piruxe-91-zivi081",
+        "width": {
+          "ours": 67,
+          "jar": 79,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 208,
+          "jar": 162,
+          "delta": 46,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "pixako-75-kumi821",
+        "width": {
+          "ours": 160,
+          "jar": 254,
+          "delta": -94,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 396,
+          "jar": 287,
+          "delta": 109,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "podelo-13-jaja314",
+        "width": {
+          "ours": 160,
+          "jar": 172,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 200,
+          "jar": 211,
+          "delta": -11,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "pokoro-73-bili712",
+        "width": {
+          "ours": 257,
+          "jar": 403,
+          "delta": -146,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 482,
+          "jar": 417,
+          "delta": 65,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "popofi-03-momo442",
+        "width": {
+          "ours": 358,
+          "jar": 384,
+          "delta": -26,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 474,
+          "jar": 333,
+          "delta": 141,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "poraji-17-goke817",
+        "width": {
+          "ours": 52,
+          "jar": 64,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 140,
+          "jar": 127,
+          "delta": 13,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "povoju-50-raxi136",
+        "width": {
+          "ours": 987,
+          "jar": 1004,
+          "delta": -17,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 223,
+          "jar": 237,
+          "delta": -14,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "pujozo-36-nino158",
+        "width": {
+          "ours": 312,
+          "jar": 334,
+          "delta": -22,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 291,
+          "jar": 323,
+          "delta": -32,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "racana-82-zece676",
+        "width": {
+          "ours": 1304,
+          "jar": 520,
+          "delta": 784,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 135,
+          "jar": 130,
+          "delta": 5,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "rarodo-65-fudu505",
+        "width": {
+          "ours": 63,
+          "jar": 75,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 96,
+          "jar": 107,
+          "delta": -11,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "raruzu-62-giro837",
+        "width": {
+          "ours": 264,
+          "jar": 285,
+          "delta": -21,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 399,
+          "jar": 441,
+          "delta": -42,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "relufo-04-fezo835",
+        "width": {
+          "ours": 270,
+          "jar": 296,
+          "delta": -26,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 261,
+          "jar": 213,
+          "delta": 48,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "reluvi-59-pifi444",
+        "width": {
+          "ours": 86,
+          "jar": 105,
+          "delta": -19,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 280,
+          "jar": 306,
+          "delta": -26,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "rerovo-62-nazo755",
+        "width": {
+          "ours": 90,
+          "jar": 120,
+          "delta": -30,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 116,
+          "jar": 160,
+          "delta": -44,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "ribapo-84-xudu593",
+        "width": {
+          "ours": 108,
+          "jar": 140,
+          "delta": -32,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 380,
+          "jar": 410,
+          "delta": -30,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "roboja-69-susa752",
+        "width": {
+          "ours": 1271,
+          "jar": 1018,
+          "delta": 253,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 387,
+          "jar": 381,
+          "delta": 6,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "rosizo-69-mera514",
+        "width": {
+          "ours": 150,
+          "jar": 163,
+          "delta": -13,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 476,
+          "jar": 528,
+          "delta": -52,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "ruderu-68-dere287",
+        "width": {
+          "ours": 152,
+          "jar": 164,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 212,
+          "jar": 224,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "rujuxa-07-neco067",
+        "width": {
+          "ours": 502,
+          "jar": 471,
+          "delta": 31,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 583,
+          "jar": 558,
+          "delta": 25,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "rurake-60-licu592",
+        "width": {
+          "ours": 184,
+          "jar": 196,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 80,
+          "jar": 92,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "rurebu-12-nebi203",
+        "width": {
+          "ours": 174,
+          "jar": 220,
+          "delta": -46,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 224,
+          "jar": 174,
+          "delta": 50,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "ruzica-16-deli877",
+        "width": {
+          "ours": 366,
+          "jar": 528,
+          "delta": -162,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 595,
+          "jar": 607,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "samavi-13-fuku339",
+        "width": {
+          "ours": 260,
+          "jar": 269,
+          "delta": -9,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 227,
+          "jar": 251,
+          "delta": -24,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "saxeku-17-gume203",
+        "width": {
+          "ours": 120,
+          "jar": 133,
+          "delta": -13,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 308,
+          "jar": 305,
+          "delta": 3,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "saxuro-16-tezu631",
+        "width": {
+          "ours": 134,
+          "jar": 178,
+          "delta": -44,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 380,
+          "jar": 386,
+          "delta": -6,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "secepo-00-febi326",
+        "width": {
+          "ours": 229,
+          "jar": 203,
+          "delta": 26,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 424,
+          "jar": 477,
+          "delta": -53,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "setecu-78-cuko533",
+        "width": {
+          "ours": 67,
+          "jar": 79,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 144,
+          "jar": 149,
+          "delta": -5,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "sigofi-46-gaja158",
+        "width": {
+          "ours": 280,
+          "jar": 263,
+          "delta": 17,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 330,
+          "jar": 269,
+          "delta": 61,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "sikino-19-vuca111",
+        "width": {
+          "ours": 122,
+          "jar": 139,
+          "delta": -17,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 123,
+          "jar": 136,
+          "delta": -13,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "simuti-16-lece058",
+        "width": {
+          "ours": 224,
+          "jar": 156,
+          "delta": 68,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 248,
+          "jar": 187,
+          "delta": 61,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "sofoje-37-tila554",
+        "width": {
+          "ours": 224,
+          "jar": 179,
+          "delta": 45,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 252,
+          "jar": 255,
+          "delta": -3,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "sokafe-69-jita472",
+        "width": {
+          "ours": 188,
+          "jar": 271,
+          "delta": -83,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 268,
+          "jar": 287,
+          "delta": -19,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "sokapa-71-tifi543",
+        "width": {
+          "ours": 606,
+          "jar": 384,
+          "delta": 222,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 462,
+          "jar": 396,
+          "delta": 66,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "sopape-11-laxo488",
+        "width": {
+          "ours": 193,
+          "jar": 119,
+          "delta": 74,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 131,
+          "jar": 116,
+          "delta": 15,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "sucice-41-pebi088",
+        "width": {
+          "ours": 499,
+          "jar": 516,
+          "delta": -17,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 399,
+          "jar": 441,
+          "delta": -42,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "sufupo-40-fuke080",
+        "width": {
+          "ours": 82,
+          "jar": 94,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 168,
+          "jar": 173,
+          "delta": -5,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "sutura-08-zeme419",
+        "width": {
+          "ours": 278,
+          "jar": 283,
+          "delta": -5,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 324,
+          "jar": 281,
+          "delta": 43,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "suzuci-53-biku826",
+        "width": {
+          "ours": 152,
+          "jar": 148,
+          "delta": 4,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 156,
+          "jar": 172,
+          "delta": -16,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "tagixo-41-gapo816",
+        "width": {
+          "ours": 160,
+          "jar": 172,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 148,
+          "jar": 159,
+          "delta": -11,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "tamaxe-36-mono574",
+        "width": {
+          "ours": 146,
+          "jar": 178,
+          "delta": -32,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 520,
+          "jar": 563,
+          "delta": -43,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "taxeta-89-mapo546",
+        "width": {
+          "ours": 56,
+          "jar": 68,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 56,
+          "jar": 68,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "tefuga-86-xefe850",
+        "width": {
+          "ours": 650,
+          "jar": 667,
+          "delta": -17,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 171,
+          "jar": 185,
+          "delta": -14,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "tepivu-88-reze603",
+        "width": {
+          "ours": 227,
+          "jar": 307,
+          "delta": -80,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 240,
+          "jar": 252,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "tobajo-64-mipi810",
+        "width": {
+          "ours": 1169,
+          "jar": 629,
+          "delta": 540,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 558,
+          "jar": 637,
+          "delta": -79,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "topico-42-fuza478",
+        "width": {
+          "ours": 50,
+          "jar": 64,
+          "delta": -14,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 160,
+          "jar": 172,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "tuneta-22-mega154",
+        "width": {
+          "ours": 859,
+          "jar": 828,
+          "delta": 31,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 405,
+          "jar": 341,
+          "delta": 64,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "vamazo-19-tufu812",
+        "width": {
+          "ours": 194,
+          "jar": 256,
+          "delta": -62,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 443,
+          "jar": 402,
+          "delta": 41,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "vaxiki-78-nice114",
+        "width": {
+          "ours": 146,
+          "jar": 153,
+          "delta": -7,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 256,
+          "jar": 212,
+          "delta": 44,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "vaxuta-95-cico162",
+        "width": {
+          "ours": 266,
+          "jar": 154,
+          "delta": 112,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 376,
+          "jar": 352,
+          "delta": 24,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "vebala-15-tade547",
+        "width": {
+          "ours": 442,
+          "jar": 424,
+          "delta": 18,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 864,
+          "jar": 906,
+          "delta": -42,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "vidada-17-xuse810",
+        "width": {
+          "ours": 264,
+          "jar": 285,
+          "delta": -21,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 399,
+          "jar": 441,
+          "delta": -42,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "vimako-25-mega336",
+        "width": {
+          "ours": 152,
+          "jar": 224,
+          "delta": -72,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 116,
+          "jar": 170,
+          "delta": -54,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "vimoxa-78-zucu656",
+        "width": {
+          "ours": 290,
+          "jar": 194,
+          "delta": 96,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 153,
+          "jar": 116,
+          "delta": 37,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "vivate-04-guso306",
+        "width": {
+          "ours": 342,
+          "jar": 302,
+          "delta": 40,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 324,
+          "jar": 379,
+          "delta": -55,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "vokibe-29-vepe451",
+        "width": {
+          "ours": 213,
+          "jar": 289,
+          "delta": -76,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 209,
+          "jar": 159,
+          "delta": 50,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "volefo-41-tolo996",
+        "width": {
+          "ours": 92,
+          "jar": 85,
+          "delta": 7,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 113,
+          "jar": 110,
+          "delta": 3,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "vozane-63-kepe177",
+        "width": {
+          "ours": 181,
+          "jar": 187,
+          "delta": -6,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 320,
+          "jar": 364,
+          "delta": -44,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "vubolo-48-cubu499",
+        "width": {
+          "ours": 557,
+          "jar": 351,
+          "delta": 206,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 410,
+          "jar": 369,
+          "delta": 41,
+          "direction": "taller"
+        }
+      },
+      {
+        "slug": "vupuse-73-nuso490",
+        "width": {
+          "ours": 166,
+          "jar": 185,
+          "delta": -19,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 304,
+          "jar": 310,
+          "delta": -6,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "xabesu-51-dimi831",
+        "width": {
+          "ours": 280,
+          "jar": 181,
+          "delta": 99,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 300,
+          "jar": 357,
+          "delta": -57,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "xarumo-26-zinu467",
+        "width": {
+          "ours": 355,
+          "jar": 412,
+          "delta": -57,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 295,
+          "jar": 341,
+          "delta": -46,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "xefalo-73-sabi101",
+        "width": {
+          "ours": 442,
+          "jar": 424,
+          "delta": 18,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 864,
+          "jar": 936,
+          "delta": -72,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "xekame-27-geba281",
+        "width": {
+          "ours": 92,
+          "jar": 127,
+          "delta": -35,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 452,
+          "jar": 508,
+          "delta": -56,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "xenofo-81-rame803",
+        "width": {
+          "ours": 292,
+          "jar": 234,
+          "delta": 58,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 252,
+          "jar": 256,
+          "delta": -4,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "xigelo-67-sipi599",
+        "width": {
+          "ours": 223,
+          "jar": 213,
+          "delta": 10,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 264,
+          "jar": 277,
+          "delta": -13,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "xovano-23-tazo278",
+        "width": {
+          "ours": 318,
+          "jar": 372,
+          "delta": -54,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 507,
+          "jar": 509,
+          "delta": -2,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "zamagu-75-vape137",
+        "width": {
+          "ours": 220,
+          "jar": 94,
+          "delta": 126,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 160,
+          "jar": 172,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "zanudo-86-seco241",
+        "width": {
+          "ours": 81,
+          "jar": 93,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 108,
+          "jar": 120,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "zedoco-71-guge507",
+        "width": {
+          "ours": 172,
+          "jar": 184,
+          "delta": -12,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 144,
+          "jar": 156,
+          "delta": -12,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "zepima-96-peco612",
+        "width": {
+          "ours": 182,
+          "jar": 286,
+          "delta": -104,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 444,
+          "jar": 516,
+          "delta": -72,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "zeporo-46-zicu301",
+        "width": {
+          "ours": 373,
+          "jar": 421,
+          "delta": -48,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 526,
+          "jar": 560,
+          "delta": -34,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "ziboco-73-kazu841",
+        "width": {
+          "ours": 95,
+          "jar": 114,
+          "delta": -19,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 328,
+          "jar": 341,
+          "delta": -13,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "zivege-92-rise076",
+        "width": {
+          "ours": 338,
+          "jar": 380,
+          "delta": -42,
+          "direction": "narrower"
+        },
+        "height": {
+          "ours": 332,
+          "jar": 474,
+          "delta": -142,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "zizaki-04-guvi945",
+        "width": {
+          "ours": 153,
+          "jar": 139,
+          "delta": 14,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 216,
+          "jar": 254,
+          "delta": -38,
+          "direction": "shorter"
+        }
+      },
+      {
+        "slug": "zukori-83-fiso705",
+        "width": {
+          "ours": 170,
+          "jar": 145,
+          "delta": 25,
+          "direction": "wider"
+        },
+        "height": {
+          "ours": 476,
+          "jar": 543,
+          "delta": -67,
+          "direction": "shorter"
+        }
+      }
+    ]
+  },
+  "childCountResidual": {
+    "note": "svg/g[][childCount]'s share of total weight is 44.7% after this mission (39.9% before it; 91.6% at the aeg T0). 201 of 268 fixtures still carry a root-group child-count mismatch. The remaining weight is missing content and the defects named in .agent-notes/aeg-T1-8-exceptions.md, plus the zero-length split-connector segments the routing helper's float-equality shortcut emits once branch widths are text-fitted (filed).",
+    "recordsNow": 201,
+    "weightNow": 19655,
+    "shareOfAggregateNow": 0.4469
+  },
+  "namedFamilies": [
+    {
+      "family": "theme-resolution: skinparam mode dark",
+      "fixtures": [
+        "levuma-67-cego489"
+      ],
+      "count": 1,
+      "finding": "We resolve theme.colors.background to #FFFFFF where the jar resolves #1B1B1B, so the root style/background carries the wrong colour AND the background rect the jar paints under its own paintBackcolor guard (SvgGraphics.java:186-192) is correctly declined on our resolved white. The guard is faithful; its INPUT is wrong. Found by T5 while verifying the guard, handed to this census.",
+      "correction": "The T5 decision-journal entry names velodu-59-sada437 as a second instance of this family. It is NOT one: that fixture's golden is the jar's OWN graphical error page (green-on-black, PSystemError styling), it is pinned status:\"jar-error\" in diff-baseline.json, and it contributes no number to this census at all. Its #000000 background is the error page's, not a resolved theme. Verified at T6, not inherited. skinparam mode dark occurs on exactly ONE fixture in the whole 373-fixture corpus."
+    },
+    {
+      "family": "skinparam preserveAspectRatio",
+      "fixtures": [
+        "setecu-78-cuko533"
+      ],
+      "count": 1,
+      "finding": "The only surviving root-attribute VALUE diff besides background. Source sets `skinparam preserveAspectRatio xMinYMid slice`; the jar emits that verbatim on the root, we emit the hardcoded default `none`. Not a missing attribute -- the document shell emits all 7 root attributes on all 268 fixtures (verified) -- an unported skinparam."
+    },
+    {
+      "family": "gradient fill (defs)",
+      "fixtures": [
+        "dakesa-98-mano758"
+      ],
+      "count": 1,
+      "finding": "The only surviving svg/defs[1][childCount] diff, and the opposite of the pre-mission one: OUR defs is empty (0) and the JAR's holds 1 child. Source is `skinparam activity { BackgroundColor red-green }`; the jar expands the two-colour form into a <linearGradient> in defs and fills the rect with url(#...). We emit no gradient. Confirms the D6 change was right in general -- 267 of 268 goldens have an EMPTY defs, matching ours -- and isolates the one shape that needs it."
+    }
+  ],
+  "topFixturesByWeight": [
+    {
+      "slug": "jupoxe-15-sugo110",
+      "weightedScore": 1974,
+      "diffCount": 644
+    },
+    {
+      "slug": "boxoto-53-sifo232",
+      "weightedScore": 1033,
+      "diffCount": 572
+    },
+    {
+      "slug": "tobajo-64-mipi810",
+      "weightedScore": 970,
+      "diffCount": 611
+    },
+    {
+      "slug": "vebala-15-tade547",
+      "weightedScore": 704,
+      "diffCount": 406
+    },
+    {
+      "slug": "xefalo-73-sabi101",
+      "weightedScore": 704,
+      "diffCount": 406
+    },
+    {
+      "slug": "gitoke-38-beme495",
+      "weightedScore": 639,
+      "diffCount": 290
+    },
+    {
+      "slug": "navene-45-cozo466",
+      "weightedScore": 600,
+      "diffCount": 393
+    },
+    {
+      "slug": "judatu-15-xize591",
+      "weightedScore": 573,
+      "diffCount": 375
+    },
+    {
+      "slug": "ruzica-16-deli877",
+      "weightedScore": 516,
+      "diffCount": 338
+    },
+    {
+      "slug": "fibafo-22-foze119",
+      "weightedScore": 501,
+      "diffCount": 299
+    },
+    {
+      "slug": "rujuxa-07-neco067",
+      "weightedScore": 484,
+      "diffCount": 345
+    },
+    {
+      "slug": "gacaja-15-keko600",
+      "weightedScore": 443,
+      "diffCount": 297
+    },
+    {
+      "slug": "jevoce-05-mumi686",
+      "weightedScore": 439,
+      "diffCount": 301
+    },
+    {
+      "slug": "vubolo-48-cubu499",
+      "weightedScore": 408,
+      "diffCount": 82
+    },
+    {
+      "slug": "zeporo-46-zicu301",
+      "weightedScore": 405,
+      "diffCount": 260
+    },
+    {
+      "slug": "decudi-92-bisu741",
+      "weightedScore": 383,
+      "diffCount": 266
+    },
+    {
+      "slug": "nupose-71-vido428",
+      "weightedScore": 373,
+      "diffCount": 297
+    },
+    {
+      "slug": "roboja-69-susa752",
+      "weightedScore": 373,
+      "diffCount": 297
+    },
+    {
+      "slug": "jagove-43-nako107",
+      "weightedScore": 360,
+      "diffCount": 186
+    },
+    {
+      "slug": "lopone-15-xiki477",
+      "weightedScore": 358,
+      "diffCount": 177
+    },
+    {
+      "slug": "leduvi-16-voli986",
+      "weightedScore": 356,
+      "diffCount": 168
+    },
+    {
+      "slug": "zepima-96-peco612",
+      "weightedScore": 355,
+      "diffCount": 203
+    },
+    {
+      "slug": "bazize-75-dedo568",
+      "weightedScore": 354,
+      "diffCount": 230
+    },
+    {
+      "slug": "tuneta-22-mega154",
+      "weightedScore": 351,
+      "diffCount": 202
+    },
+    {
+      "slug": "xovano-23-tazo278",
+      "weightedScore": 351,
+      "diffCount": 228
+    }
+  ]
+}

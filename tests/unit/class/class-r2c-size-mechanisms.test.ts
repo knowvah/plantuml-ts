@@ -28,9 +28,9 @@ import { measureGenericTagDim, CLASS_STEREOTYPE_FONT_SIZE } from '../../../src/d
 import { measureClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const STEREO_FONT = { family: 'sans-serif', size: CLASS_STEREOTYPE_FONT_SIZE };
 
 function makeClassifier(overrides?: Partial<Classifier>): Classifier {

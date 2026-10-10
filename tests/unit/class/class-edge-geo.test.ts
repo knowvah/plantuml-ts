@@ -18,13 +18,13 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { layoutFixtureClass, renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 import { drawnEdgePoints } from '../../../src/diagrams/class/class-ink-dot-path.js';
 import type { ClassGeometry } from '../../../src/diagrams/class/layout.js';
 import { noteLeaves } from '../../../src/diagrams/class/class-geo-types.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function fixture(slug: string): ClassGeometry {
   const markup = readFileSync(`test-results/dot-cache/class/${slug}/in.puml`, 'utf8');
@@ -298,6 +298,6 @@ describe('cdd3-T32 — a HALF_PRINTED_FULL note-on-link is drawn at its half-wid
     expect(notes).toHaveLength(2);
     expect(Number(notes[0]![1])).toBeCloseTo(70.52, 2);
     expect(Number(notes[0]![2])).toBe(6);
-    expect(Number(notes[1]![1])).toBeCloseTo(303.52, 2);
+    expect(Number(notes[1]![1])).toBeCloseTo(328.52, 2);
   });
 });

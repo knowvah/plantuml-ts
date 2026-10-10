@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../../src/index.js';
-import { WidthTableMeasurer } from '../../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
 import { isAssumeTransparent } from '../../../../src/core/assume-transparent.js';
 import { expectNoErrorDiagram } from '../../../helpers/error-diagram.js';
 
@@ -33,7 +33,7 @@ describe('every engine accepts !assume transparent', () => {
   for (const [engine, [source, type]] of Object.entries(SOURCES)) {
     it(`${engine}: indented, as a theme emits it`, () => {
       const svg = renderSync(source.replace('{A}', '    !assume transparent light'), {
-        measurer: new WidthTableMeasurer(),
+        measurer: new DeterministicMeasurer(),
       });
       expectNoErrorDiagram(svg, engine);
       expect(svg).toContain(`data-diagram-type="${type}"`);
@@ -41,7 +41,7 @@ describe('every engine accepts !assume transparent', () => {
   }
 
   it('chart and packet too', () => {
-    const measurer = new WidthTableMeasurer();
+    const measurer = new DeterministicMeasurer();
     for (const source of [
       '@startchart\n!assume transparent dark\nbar "s" [1, 2]\n@endchart',
       '@startpacket\n!assume transparent dark\n0-7: a\n@endpacket',

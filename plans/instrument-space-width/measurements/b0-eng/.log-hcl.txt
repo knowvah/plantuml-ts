@@ -1,0 +1,2 @@
+surveying 3 hcl fixtures (concurrency 6)
+wrote plans/instrument-space-width/measurements/b0-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}

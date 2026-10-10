@@ -44,6 +44,7 @@ import {
   verticalTopPoints,
 } from './switch-connection-points.js';
 import type { HexagonCorners } from './switch-connection-points.js';
+import { wrappedSpread } from './diamond-wrap.js';
 
 /** Labels the edge `pushEdge` just pushed, when non-empty, with its own
  *  alignment ({@link caseInLabelAlign}) -- through {@link applyInLabel},
@@ -54,7 +55,7 @@ import type { HexagonCorners } from './switch-connection-points.js';
  *  real placed box, not the generic mid-point estimate. */
 function applyLastEdgeLabel(out: Out, label: string | undefined, align: SnakeTextAlign): void {
   if (label === undefined || label === '') return;
-  applyInLabel(out, { inLabel: { label } }, align);
+  applyInLabel(out, { inLabel: { label, wrapped: true } }, align);
 }
 
 /**
@@ -124,7 +125,8 @@ function pushSwitchDiamond(
   myLane: string | undefined,
   out: Out,
 ): void {
-  const label = kind === 'if-split' ? (diamond as unknown as { label: string }).label : '';
+  const own = diamond as unknown as { label: string; wrapped: boolean };
+  const label = kind === 'if-split' ? own.label : '';
   pushNode(
     out,
     {
@@ -150,6 +152,7 @@ function pushSwitchDiamond(
         width: diamond.width,
         height: diamond.height,
         label,
+        ...wrappedSpread(own),
       },
       myLane,
     );
@@ -333,7 +336,9 @@ function pushOneMergeEdge(step: MergeEdgeStep, c: Tile, cPos: GPoint, asFirstOrL
   // add4-T1f (R1): same-lane only -- the cross-lane class picks its own
   // LEFT/RIGHT arrow from the translated points (`:363-381`).
   if (vThenH !== undefined) out.edges[out.edges.length - 1]!.endDirection = vThenH.direction;
-  applyOutLabel(out, c, CASE_OUT_LABEL_ALIGN);
+  // isw-T2-act F5: `getTextBlockSpecial()` (`FtileSwitchWithManyLinks.java:455-462`).
+  if (c.outLabel !== undefined)
+    applyOutLabel(out, { outLabel: { ...c.outLabel, wrapped: true } }, CASE_OUT_LABEL_ALIGN);
 }
 
 /**

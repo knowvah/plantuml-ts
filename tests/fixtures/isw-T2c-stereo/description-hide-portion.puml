@@ -1,0 +1,8 @@
+@startuml
+component A <<  x  >>
+component B << y >>
+component C <<z>>
+hide << x >> stereotype
+hide << y >> stereotype
+hide <<z>> stereotype
+@enduml

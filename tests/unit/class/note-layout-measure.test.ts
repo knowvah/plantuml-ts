@@ -10,9 +10,9 @@
 import { describe, it, expect } from 'vitest';
 import { measureNote } from '../../../src/diagrams/class/note-layout-measure.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 const F13 = { family: defaultTheme.fontFamily, size: 13 };
 const w = (s: string): number => measurer.measure(s, F13).width;
 const wBold = (s: string): number => measurer.measure(s, { ...F13, weight: 'bold' }).width;
@@ -46,14 +46,15 @@ describe('A4 — creole bullet lines in notes (Bullet atom header)', () => {
   });
 
   it('matches temise-16 jar note widths (max bullet line + margins)', () => {
-    // temise-16-neco018 jar-only sizes: 2.033681in / 2.193924in / 2.355295in.
+    // temise-16-neco018 jar sizes (re-captured under oracle seam #4 v2, svek-1.dot
+    // 2.132986 / 2.293229 / 2.454601in; a space is no longer 0 wide).
     const worker = note('* Initialisiert die pView\n* berwacht die Ausf?hrung');
-    expect(worker.width / 72).toBeCloseTo(2.355295, 4);
+    expect(worker.width / 72).toBeCloseTo(2.454601, 4);
     expect(worker.height / 72).toBeCloseTo(0.5, 4);
     const queue = note('* Enthlt erledigte Jobs\n* Enth?lt n?chste Jobs');
-    expect(queue.width / 72).toBeCloseTo(2.033681, 4);
+    expect(queue.width / 72).toBeCloseTo(2.132986, 4);
     const n1 = note('* Initialisiert freie Worker\n* Lscht veraltete Entries');
-    expect(n1.width / 72).toBeCloseTo(2.193924, 4);
+    expect(n1.width / 72).toBeCloseTo(2.293229, 4);
   });
 
   it('does not treat a full-line "**bold**" creole run as a bullet', () => {
@@ -82,7 +83,7 @@ describe('B5-note — literal \\n in note text', () => {
 
   it('matches lejoga-79 jar note size', () => {
     const m = note('Concatenation of a part\\nand component line');
-    expect(m.width / 72).toBeCloseTo(2.017101, 4);
+    expect(m.width / 72).toBeCloseTo(2.166059, 4); // lejoga-79 svek-1.dot;
     expect(m.height / 72).toBeCloseTo(0.5, 4);
   });
 
@@ -168,9 +169,9 @@ describe('A11 — --/---- block separators in notes (BodyEnhanced2)', () => {
 describe('A12 — creole tables in notes (StripeTable/AtomTable geometry)', () => {
   const JOVIGO = '| A         | B   |\n| --------- | --- |\n| P(C\\|D)   | E   |';
 
-  it('matches jovigo-38 jar note size (1.02066in x 0.736111in)', () => {
+  it('matches jovigo-38 jar note size (1.359201in x 0.736111in, svek-1.dot)', () => {
     const m = note(JOVIGO);
-    expect(m.width / 72).toBeCloseTo(1.02066, 4);
+    expect(m.width / 72).toBeCloseTo(1.359201, 4);
     expect(m.height / 72).toBeCloseTo(0.736111, 4);
   });
 
@@ -203,10 +204,10 @@ describe('R2b — TIM BLOCK_E1 sentinels in single-line notes', () => {
   // node sizes (deterministic-text oracle).
   const E1 = '\u{e100}';
 
-  it('splits at BLOCK_E1_NEWLINE (roputo-88-fuxo199 golden 1.535243x0.861111)', () => {
+  it('splits at BLOCK_E1_NEWLINE (roputo-88-fuxo199 svek-1.dot 1.684201x0.861111)', () => {
     const m = note(`foo class Object {${E1}name : token${E1}name : flag${E1}} dummy`);
     expect(m.lines).toEqual(['foo class Object {', 'name : token', 'name : flag', '} dummy']);
-    expect(m.width / 72).toBeCloseTo(1.535243, 4);
+    expect(m.width / 72).toBeCloseTo(1.684201, 4);
     expect(m.height / 72).toBeCloseTo(0.861111, 4);
   });
 
@@ -217,10 +218,10 @@ describe('R2b — TIM BLOCK_E1 sentinels in single-line notes', () => {
     expect(m.height / 72).toBeCloseTo(0.680556, 4);
   });
 
-  it('matches xadado-92 note1 (quoted retrieve_procedure note, 1.284722x0.861111)', () => {
+  it('matches xadado-92 note1 (quoted retrieve_procedure note, svek-1.dot 1.432552x0.861111)', () => {
     const m = note(`class Object {${E1}  name : token${E1}  name : flag${E1}}`);
     expect(m.lines).toEqual(['class Object {', '  name : token', '  name : flag', '}']);
-    expect(m.width / 72).toBeCloseTo(1.284722, 4);
+    expect(m.width / 72).toBeCloseTo(1.432552, 4);
     expect(m.height / 72).toBeCloseTo(0.861111, 4);
   });
 });

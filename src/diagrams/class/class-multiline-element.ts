@@ -130,18 +130,16 @@ function pushDedentedBodyLine(pending: PendingMultilineElement, raw: string): vo
   pending.lines.push(removeStartingSpaces(raw, pending.baseIndent));
 }
 
-/** One raw body line of an open block — TYPE1 dedents relative to its own
- *  first body line; TYPE0 keeps the line as-is (`expandsNewline(false)`, no
- *  dedent upstream either). Mirrors `pushElementBody`. Every line is kept,
- *  blank ones included — see {@link pushDedentedBodyLine}'s citation, which
- *  applies identically here: `executeNow` never distinguishes TYPE0/TYPE1
- *  when it turns the interior `BlocLines` into `display`.
- *  @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementMultilines.java:192-193 */
+/** One raw body line of an open block -- BOTH TYPE0 and TYPE1 dedent relative
+ *  to their own first body line: `executeNow` starts with
+ *  `lines = lines.trimSmart(1).expandsNewline(false)` before it tells the two
+ *  apart (`CommandCreateElementMultilines.java:169`; `BlocLines.java:305-316`).
+ *  isw-T2-cls F7: TYPE0 used to keep its raw indent ("no dedent upstream
+ *  either"), which only showed once a space has width (gejuvu-17: the jar
+ *  draws `test 15` / `multiline with alias`). Every line is kept, blank ones
+ *  included -- see {@link pushDedentedBodyLine}'s citation.
+ *  @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementMultilines.java:169,192-193 */
 function pushBodyLine(pending: PendingMultilineElement, raw: string): void {
-  if (pending.terminator === 'quote') {
-    pending.lines.push(raw);
-    return;
-  }
   pushDedentedBodyLine(pending, raw);
 }
 

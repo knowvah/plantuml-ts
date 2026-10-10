@@ -173,12 +173,12 @@ export function renderStateRuns(
     if (run.text === '') continue;
     const decoration = runDecoration(run);
     const y = runBaseline(lineTop, lineHeight, run);
-    const drawn = text(x, y, run.text, {
+    const drawn = text(x + (run.drawDx ?? 0), y, run.text, {
       fill: run.color ?? style.fill,
       fontFamily: style.fontFamily,
       fontSize: run.size,
       lengthAdjust: 'spacing',
-      textLength: run.width,
+      textLength: run.drawWidth ?? run.width,
       ...(run.bold ? { fontWeight: '700' as const } : {}),
       ...(run.italic ? { fontStyle: 'italic' as const } : {}),
       ...(decoration !== undefined ? { textDecoration: decoration } : {}),

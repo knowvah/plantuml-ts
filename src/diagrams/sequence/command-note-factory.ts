@@ -250,6 +250,7 @@ export const noteOnArrowCommand: Command = {
       position,
       participants,
       style: style as 'note' | 'hnote' | 'rnote',
+      onMessage: true as const,
       ...shape,
       ...(color !== undefined ? { color } : {}),
       ...(stereotype !== undefined ? { stereotype } : {}),

@@ -21,7 +21,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { renderSync } from '../../src/index.js';
-import { WidthTableMeasurer } from '../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
 import { setLayoutInputObserver } from '../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../src/core/graph-layout.js';
 import { MapIncludeStore } from '../../src/core/tim/IncludeStore.js';
@@ -76,24 +76,17 @@ let captured: DotInputGraph[] = [];
 beforeAll(() => setLayoutInputObserver(({ graph: g }) => captured.push(g)));
 afterAll(() => setLayoutInputObserver(undefined));
 
-/** lgm (journal rows 18-20): under PLANTUML_DETERMINISTIC_TEXT the jar's nested
- *  `{{ }}` diagram crashes on a zero-width space (`Slot.java:44-45` via
- *  `SlotFinder.drawText`) and embeds a crash page whose random `IconLoader`
- *  icon (`fun/IconLoader.java:55-74`) sizes the node, so `svek-1.dot` changes on
- *  every capture. Excluded until the instrument's space width is fixed (memory
- *  instrument-space-width-zero); stock metrics render these without crashing. */
-const ORACLE_CRASH_FIXTURES: ReadonlySet<string> = new Set(['kovaxi-11-reti348', 'zidebi-71-nocu387']);
-
 describe.skipIf(fixtures.length === 0)('oracle DOT-parity ratchet — description diagrams', () => {
-  for (const name of fixtures.filter((f) => ORACLE_CRASH_FIXTURES.has(f))) {
-    it.skip(`${name}: excluded — the deterministic-text oracle crashes on it`, () => {});
-  }
-  for (const name of fixtures.filter((f) => !ORACLE_CRASH_FIXTURES.has(f))) {
+  // isw (D10): kovaxi-11-reti348 and zidebi-71-nocu387 were excluded here
+  // while the deterministic oracle crashed on a zero-width lone space
+  // (Slot.java:44-45). Oracle seam #4 gives U+0020 width, both render as real
+  // diagrams (deterministically) and are gated again like every fixture.
+  for (const name of fixtures) {
     it(`${name}: stays structurally EQUAL to the pinned oracle DOT`, () => {
       const files = svekFiles(name);
       captured = [];
       const svg = renderSync(readFileSync(join(GOLDENS, name, 'input.puml'), 'utf8'), {
-        measurer: new WidthTableMeasurer(),
+        measurer: new DeterministicMeasurer(),
         // T9: 6 pinned goldens use `!include <bundle/thing>` stdlib sprites
         // (cloudogu/awslib/bootstrap/tupadr3) -- an assets-backed store is
         // wired for every ratchet fixture (cheap: memoized after first use,

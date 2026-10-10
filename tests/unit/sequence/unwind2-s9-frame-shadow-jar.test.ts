@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/unwind2-S9');
 
@@ -48,7 +48,7 @@ function jar(name: string): string {
 }
 
 function ours(name: string): string {
-  return renderSync(readFileSync(join(FIXTURES, `${name}.puml`), 'utf-8'), { measurer: new WidthTableMeasurer() });
+  return renderSync(readFileSync(join(FIXTURES, `${name}.puml`), 'utf-8'), { measurer: new DeterministicMeasurer() });
 }
 
 describe('unwind2-S9 grouping-frame shadow (jar fixtures)', () => {

@@ -1,0 +1,29 @@
+{
+  "fixtures": [
+    {
+      "slug": "bemepi-16-kuzo249",
+      "addedAt": "2026-08-08",
+      "source": "D14 @startdot passthrough \u2014 zero-diff at seed"
+    },
+    {
+      "slug": "chain-expansion",
+      "addedAt": "2026-08-08",
+      "source": "D14 @startdot passthrough \u2014 zero-diff at seed"
+    },
+    {
+      "slug": "ciditi-21-xacu710",
+      "addedAt": "2026-08-08",
+      "source": "D14 @startdot passthrough \u2014 zero-diff at seed"
+    },
+    {
+      "slug": "cluster-basic",
+      "addedAt": "2026-08-08",
+      "source": "D14 @startdot passthrough \u2014 zero-diff at seed"
+    },
+    {
+      "slug": "cluster-nested",
+      "addedAt": "2026-08-08",
+      "source": "D14 @startdot passthrough \u2014 zero-diff at seed"
+    }
+  ]
+}

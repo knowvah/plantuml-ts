@@ -19,12 +19,12 @@ import {
 import { renderStateNoteFreestanding } from '../../../src/diagrams/state/renderer-note.js';
 import type { StateNodeGeo } from '../../../src/diagrams/state/state-geo-types.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { statePlugin } from '../../../src/diagrams/state/index.js';
 import { parseAst } from '../../helpers/parse-ast.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
-const measurer = new WidthTableMeasurer();
+const measurer = new DeterministicMeasurer();
 
 function parse(source: string): StateDiagramAST {
   const block: UmlSource = { lines: source.trim().split('\n'), type: 'state' };
@@ -154,8 +154,8 @@ end note
 `);
     const note = ast.notes![0]!;
     const m = measureNote(note.text, defaultTheme, measurer);
-    // oracle/goldens/state/fatupo-62-bemu777/svek-1.dot sh0007: width=2.278906in, height=0.736111in (*72 = px).
-    expect(m.width).toBeCloseTo(2.278906 * 72, 3);
+    // oracle/goldens/state/fatupo-62-bemu777/svek-1.dot sh0007 (re-captured, seam #4 v2): width=2.725781in, height=0.736111in (*72 = px).
+    expect(m.width).toBeCloseTo(2.725781 * 72, 3);
     expect(m.height).toBeCloseTo(0.736111 * 72, 3);
     // Render side: no raw pipe/header markup leaks into the drawn lines (was
     // "|= header 1 |= header 2 |= header 3 |" verbatim before this task).

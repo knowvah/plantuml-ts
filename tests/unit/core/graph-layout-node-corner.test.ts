@@ -12,7 +12,7 @@ import { describe, it, expect } from 'vitest';
 
 import { cornerSize } from '../../../src/core/graph-layout-node-corner.js';
 import { renderSync } from '../../../src/index.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { DotInputNode } from '../../../src/core/graph-layout.types.js';
 
 const port = (portPad: number): DotInputNode => ({
@@ -63,7 +63,7 @@ describe('sokevu-87-toce485 -- port rects sit on the cell polygon, as the jar dr
         'nwd --> firstportname',
         '@enduml',
       ].join('\n'),
-      { measurer: new WidthTableMeasurer() },
+      { measurer: new DeterministicMeasurer() },
     );
     expect(svg).toMatch(/>firstportname<\/text><rect x="93\.17" y="113" width="12" height="12"/);
     expect(svg).toMatch(/>name-with-dash<\/text><rect x="191\.17" y="113" width="12" height="12"/);

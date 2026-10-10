@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { preprocess } from '../../src/core/preprocessor.js';
 import { renderSync } from '../../src/index.js';
-import { WidthTableMeasurer } from '../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
 
 /**
  * mmp-T6g: a `<style>` block INSIDE an embedded `{{ ... }}` diagram belongs
@@ -61,11 +61,11 @@ describe('preprocessor: <style> inside an embedded {{ }} block', () => {
   });
 
   it('styles the embedded mindmap of semutu-45-zeno907 like the jar', () => {
-    const inner = embeddedImageSvg(renderSync(SEMUTU, { measurer: new WidthTableMeasurer() }));
+    const inner = embeddedImageSvg(renderSync(SEMUTU, { measurer: new DeterministicMeasurer() }));
     // Jar golden (test-results/dot-cache/unknown/semutu-45-zeno907/in.svg,
     // decoded image): node "a" box and label.
     expect(inner).toContain(
-      '<rect x="10" y="20" width="27.788" height="34" fill="none" style="stroke:#2FA4E7;stroke-width:1.5;" rx="12.5" ry="12.5"/>',
+      '<rect x="10" y="20" width="27.787" height="34" fill="none" style="stroke:#2FA4E7;stroke-width:1.5;" rx="12.5" ry="12.5"/>',
     );
     expect(inner).toContain('<text x="20" y="40.889" fill="#2FA4E7" font-size="14">a</text>');
   });

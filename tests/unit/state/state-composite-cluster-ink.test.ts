@@ -40,7 +40,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
 import { setLayoutInputObserver, type DotInputGraph } from '../../../src/core/graph-layout.js';
-import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { dotInputToStructural } from '../../oracle/svek-dot.js';
 
 /** `test-results/dot-cache/state/bajelo-54-dixe684/in.puml`, verbatim. */
@@ -99,7 +99,7 @@ function declaredScopes(markup: string): DotInputGraph[] {
   const inputs: DotInputGraph[] = [];
   setLayoutInputObserver(({ graph: g }) => inputs.push(g));
   try {
-    renderSync(markup, { measurer: new WidthTableMeasurer() });
+    renderSync(markup, { measurer: new DeterministicMeasurer() });
   } finally {
     setLayoutInputObserver(undefined);
   }
@@ -130,7 +130,7 @@ describe('nested cluster ink inside an autonom pass (SI29 F7)', () => {
   });
 
   it('draws both nested cluster rectangles exactly where jar drew them', () => {
-    const svg = renderSync(BAJELO, { measurer: new WidthTableMeasurer() });
+    const svg = renderSync(BAJELO, { measurer: new DeterministicMeasurer() });
     const rects = borderRects(svg);
     for (const jar of JAR_NESTED_CLUSTERS) {
       const ours = rects.find((r) => Math.abs(r.x - jar.x) < 0.01 && Math.abs(r.y - jar.y) < 0.01);
