@@ -6061,14 +6061,6 @@
     },
     {
       "type": "activity",
-      "slug": "jetigu-21-zaje860",
-      "status": "error",
-      "reason": "not an activity diagram: the jar renders data-diagram-type=SEQUENCE (teoz group/self-message; also captured under dot-cache/unknown) (TextBlockExporter.java:292-294) and routing agrees; misfiled in tests/corpus/activity, so the activity parser refuses it (activity parser refused this source at line 3 (syntax): Syntax Error?)",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
-    },
-    {
-      "type": "activity",
       "slug": "jevoce-05-mumi686",
       "status": "baseline",
       "ours": {
@@ -10720,14 +10712,6 @@
         "width": "170",
         "height": "268"
       }
-    },
-    {
-      "type": "activity",
-      "slug": "nuzise-60-temi305",
-      "status": "error",
-      "reason": "not an activity diagram: the jar renders data-diagram-type=SEQUENCE (teoz group/self-message; also captured under dot-cache/unknown) (TextBlockExporter.java:292-294) and routing agrees; misfiled in tests/corpus/activity, so the activity parser refuses it (activity parser refused this source at line 3 (syntax): Syntax Error?)",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
     },
     {
       "type": "activity",

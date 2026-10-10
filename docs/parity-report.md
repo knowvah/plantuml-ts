@@ -12,7 +12,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 
 | type | engine | corpus | oracle | DOT equal | survey conformant / structural / diverged | census 0-diff | ratchet pins | diff-baseline (n · ΣweightedScore) | routing agree | refusal ok |
 | --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
-| activity | activity | 771 | 451 | n/a (no DOT stage (non-svek)) | 409 / 5 / 37 | 0 | 432 | 2 · 72 | 441/451 | 447/451 |
+| activity | activity | 771 | 449 | n/a (no DOT stage (non-svek)) | 409 / 5 / 37 | 0 | 432 | 2 · 72 | 439/449 | 445/449 |
 | board | board | 4 | 4 | n/a (no DOT stage (non-svek)) | 0 / 0 / 4 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/4 | 4/4 |
 | c4 | description | 11 | 11 | n/a (no data-diagram-type classification) | 0 / 1 / 10 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 9/11 | 7/11 |
 | chart | chart | 29 | 29 | n/a (no DOT stage (non-svek)) | 0 / 0 / 29 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/29 | 29/29 |
@@ -32,7 +32,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | packet | packetdiag | 6 | 6 | n/a (no DOT stage (non-svek)) | 0 / 0 / 6 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/6 | 6/6 |
 | regex | n/a (no engine (D11 todo)) | 46 | 46 | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) |
 | salt | n/a (no engine (D7 todo)) | 51 | 51 | n/a (no engine (D7 todo)) | n/a (no engine (D7 todo)) | n/a (no engine (D7 todo)) | n/a (no engine (D7 todo)) | n/a (no engine (D7 todo)) | n/a (no engine (D7 todo)) | n/a (no engine (D7 todo)) |
-| sequence | sequence | 1271 | 1141 | n/a (no DOT stage (non-svek)) | 0 / 0 / 1135 | 0 | 0 | 1128 · 150933 | 1128/1141 | 1131/1141 |
+| sequence | sequence | 1271 | 1143 | n/a (no DOT stage (non-svek)) | 0 / 0 / 1135 | 0 | 0 | 1128 · 150933 | 1130/1143 | 1133/1143 |
 | state | state | 278 | 273 | 267/268 (100%) | 73 / 12 / 188 | 71 | 60 | n/a (no diff-baseline yet) | 269/273 | 273/273 |
 | timing | n/a (no engine (D1 todo)) | 126 | 126 | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) |
 | unknown | n/a (accounting bucket) | 825 | 825 | n/a (no data-diagram-type classification) | 364 / 55 / 406 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 696/825 | 766/825 |

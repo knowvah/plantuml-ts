@@ -65336,7 +65336,7 @@
     },
     {
       "tree": "dot-cache",
-      "type": "activity",
+      "type": "sequence",
       "slug": "jetigu-21-zaje860",
       "jarType": "SEQUENCE",
       "ourType": "SEQUENCE",
@@ -65527,7 +65527,7 @@
     },
     {
       "tree": "dot-cache",
-      "type": "activity",
+      "type": "sequence",
       "slug": "nuzise-60-temi305",
       "jarType": "SEQUENCE",
       "ourType": "SEQUENCE",

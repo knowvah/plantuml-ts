@@ -263,10 +263,13 @@ describe('svg-activity style census — corpus presence', () => {
     // Derivation: 373 - 1 = 372.
     // add4/T0b (2026-10-07): the 79 uncaptured tests/corpus/activity fixtures
     // captured (D1; tmp1 stays retired). Derivation: 372 + 79 = 451.
-    expect(manifest.fixtures.length).toBe(451);
+    // aepp/T1e (2026-10-10): jetigu-21-zaje860 + nuzise-60-temi305 moved to
+    // dot-cache/sequence -- the jar draws both as SEQUENCE (teoz;
+    // core/TextBlockExporter.java:292-294, aepp D3). Derivation: 451 - 2 = 449.
+    expect(manifest.fixtures.length).toBe(449);
   });
 
-  it('the partition matches the sibling ratchet: 416 baseline / 3 error / 32 jar-error', () => {
+  it('the partition matches the sibling ratchet: 434 baseline / 1 error / 14 jar-error', () => {
     // 268 -> 311 / 82 -> 39 at unknown-bucket-routing-repair/T10
     // (2026-09-20): 43 recorded parser-gap errors now render -- the activity
     // seam gained CommandActivityList, CommandSwitch/Case/EndSwitch,
@@ -297,8 +300,11 @@ describe('svg-activity style census — corpus presence', () => {
     // 155) -- promoted error -> baseline. Derivation: 412 + 4 = 416 / 7 - 4 = 3.
     // isw/close (2026-10-09): oracle seam #4 gives U+0020 width, so 18 activity goldens stopped being SlotFinder crash pages; promoted jar-error -> baseline from a fresh measurement (scripts/repin-activity-baselines.ts).
     // Derivation: 416 + 18 = 434 / 32 - 18 = 14.
+    // aepp/T1e (2026-10-10): the two misfiled SEQUENCE sources (jetigu,
+    // nuzise) moved to dot-cache/sequence (aepp D3); romuru (CLASS) stays.
+    // Derivation: 434 / 3 - 2 = 1 / 14.
     expect(baselineFixtures.length).toBe(434);
-    expect(errorFixtures.length).toBe(3);
+    expect(errorFixtures.length).toBe(1);
     expect(jarErrorFixtures.length).toBe(14);
   });
 });

@@ -71015,7 +71015,7 @@
     },
     {
       "tree": "dot-cache",
-      "type": "activity",
+      "type": "sequence",
       "slug": "jetigu-21-zaje860",
       "jarRendered": true,
       "weErrored": false,
@@ -71225,7 +71225,7 @@
     },
     {
       "tree": "dot-cache",
-      "type": "activity",
+      "type": "sequence",
       "slug": "nuzise-60-temi305",
       "jarRendered": true,
       "weErrored": false,
