@@ -9,18 +9,45 @@ import java.awt.geom.AffineTransform;
 import java.util.Random;
 public class Bl {
   public static void main(String[] a) {
-    int w = Integer.parseInt(a[0]), h = Integer.parseInt(a[1]); double s = Double.parseDouble(a[2]); long seed = Long.parseLong(a[3]);
+    int w, h;
+    double s;
+    long seed;
+    try {
+      w = Integer.parseInt(a[0]);
+      h = Integer.parseInt(a[1]);
+      s = Double.parseDouble(a[2]);
+      seed = Long.parseLong(a[3]);
+    } catch (NumberFormatException e) {
+      System.err.println("usage: java Bl <w> <h> <scale> <seed> [opaque|mixed]: " + e.getMessage());
+      System.exit(2);
+      return;
+    }
     Random r = new Random(seed);
     BufferedImage im = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
     StringBuilder sb = new StringBuilder();
-    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) { int v = r.nextInt(); if (a.length > 4) v = (v & 0x00ffffff) | (a[4].equals("opaque") ? 0xff000000 : (r.nextBoolean()? 0 : v & 0xff000000)); im.setRGB(x, y, v); sb.append(Integer.toHexString(im.getRGB(x,y))).append(' '); }
+    for (int y = 0; y < h; y++) {
+      for (int x = 0; x < w; x++) {
+        int v = r.nextInt();
+        if (a.length > 4) {
+          v = (v & 0x00ffffff) | (a[4].equals("opaque") ? 0xff000000 : (r.nextBoolean() ? 0 : v & 0xff000000));
+        }
+        im.setRGB(x, y, v);
+        sb.append(Integer.toHexString(im.getRGB(x, y))).append(' ');
+      }
+    }
     System.out.println(sb);
     int dw = (int) Math.round(w * s), dh = (int) Math.round(h * s);
     BufferedImage d = new BufferedImage(dw, dh, BufferedImage.TYPE_INT_ARGB);
-    AffineTransform at = new AffineTransform(); at.scale(s, s);
+    AffineTransform at = new AffineTransform();
+    at.scale(s, s);
     new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR).filter(im, d);
-    sb = new StringBuilder(); sb.append(dw).append(' ').append(dh).append('\n');
-    for (int y = 0; y < dh; y++) for (int x = 0; x < dw; x++) sb.append(Integer.toHexString(d.getRGB(x,y))).append(' ');
+    sb = new StringBuilder();
+    sb.append(dw).append(' ').append(dh).append('\n');
+    for (int y = 0; y < dh; y++) {
+      for (int x = 0; x < dw; x++) {
+        sb.append(Integer.toHexString(d.getRGB(x, y))).append(' ');
+      }
+    }
     System.out.println(sb);
   }
 }
