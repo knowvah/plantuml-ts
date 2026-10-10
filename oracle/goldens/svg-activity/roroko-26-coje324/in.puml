@@ -1,0 +1,18 @@
+@startuml
+title Split Bug (not working)
+|SDE|
+|Customer|
+|SDE|
+:Something;
+repeat
+     :Repeat Bug;
+     split
+          :something; 
+     split again
+|Customer|
+           :Something Else;
+      end split
+|SDE|
+repeat while(\nRepeat?\nYes=Down\nNo=Right\n)
+:something;
+@enduml

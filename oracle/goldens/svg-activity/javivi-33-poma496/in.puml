@@ -1,0 +1,4 @@
+@startuml
+skinparam wrapWidth 100
+:this is a very long long long long long activity description;
+@enduml

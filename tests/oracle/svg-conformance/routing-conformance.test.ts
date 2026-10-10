@@ -985,10 +985,12 @@ describe('routing conformance — jar-error classification', () => {
     // crash pages and route ACTIVITY on both sides (re-pinned from a fresh
     // measurement, plans/instrument-space-width/measurements/repin-jar-error.mts).
     // Derivation: 5650 + 870 + 86 = 6606.
-    expect(pinnedAgree.length).toBe(5650);
+    // 5650 -> 5668 / 6606 -> 6624 at isw/close: 18 svg-activity clone rows
+    // (the former crash pages, now zero-diff pins). Derivation: 5668 + 870 + 86 = 6624.
+    expect(pinnedAgree.length).toBe(5668);
     expect(pinnedMisroutes.length).toBe(870);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(6606);
+    expect(manifest.fixtures.length).toBe(6624);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

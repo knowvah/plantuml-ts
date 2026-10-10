@@ -1,7 +1,7 @@
 {
   "$comment": "Text census (fill, anchor, inset) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): insets move where a label's box shifted with the compressed geometry; no fill/anchor change is expected.",
-  "measuredAt": "2026-10-08",
-  "measuredAgainstCommit": "4181c68d",
+  "measuredAt": "2026-10-09",
+  "measuredAgainstCommit": "3d8988d8",
   "fixtures": [
     {
       "type": "activity",
@@ -139,7 +139,7 @@
           "(absent)": 14
         },
         "inset": {
-          "10": 5
+          "13.3": 5
         },
         "textCount": 14
       },
@@ -151,12 +151,12 @@
           "(absent)": 14
         },
         "inset": {
-          "10": 5
+          "13.3": 5
         },
         "textCount": 14
       },
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8"
     },
     {
       "type": "activity",
@@ -819,7 +819,8 @@
           "(absent)": 3
         },
         "inset": {
-          "10": 3
+          "10": 2,
+          "13.3": 1
         },
         "textCount": 3
       },
@@ -831,12 +832,13 @@
           "(absent)": 3
         },
         "inset": {
-          "10": 3
+          "10": 2,
+          "13.3": 1
         },
         "textCount": 3
       },
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8"
     },
     {
       "type": "activity",
@@ -1028,8 +1030,8 @@
       "type": "activity",
       "slug": "caburo-70-buki284",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
       "ours": {
         "fill": {
           "#000": 9
@@ -1038,7 +1040,8 @@
           "(absent)": 9
         },
         "inset": {
-          "10": 7
+          "10": 3,
+          "13.3": 4
         },
         "textCount": 9
       },
@@ -1050,7 +1053,8 @@
           "(absent)": 9
         },
         "inset": {
-          "10": 7
+          "10": 3,
+          "13.3": 4
         },
         "textCount": 9
       }
@@ -2105,8 +2109,8 @@
       "type": "activity",
       "slug": "debofa-60-mude568",
       "status": "baseline",
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
       "ours": {
         "fill": {
           "#000": 3
@@ -2115,7 +2119,8 @@
           "(absent)": 3
         },
         "inset": {
-          "10": 2
+          "10": 1,
+          "13.3": 1
         },
         "textCount": 3
       },
@@ -2127,7 +2132,8 @@
           "(absent)": 3
         },
         "inset": {
-          "10": 2
+          "10": 1,
+          "13.3": 1
         },
         "textCount": 3
       }
@@ -2879,10 +2885,33 @@
     {
       "type": "activity",
       "slug": "fakece-07-koga025",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 7
+      },
+      "jar": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 7
+      }
     },
     {
       "type": "activity",
@@ -3140,7 +3169,7 @@
           "(absent)": 2
         },
         "inset": {
-          "70.338": 1
+          "75.287": 1
         },
         "textCount": 2
       },
@@ -3152,20 +3181,45 @@
           "(absent)": 2
         },
         "inset": {
-          "70.338": 1
+          "75.287": 1
         },
         "textCount": 2
       },
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "1916ce34"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8"
     },
     {
       "type": "activity",
       "slug": "filela-40-rumo296",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 17
+        },
+        "anchor": {
+          "(absent)": 17
+        },
+        "inset": {
+          "10": 2,
+          "13.3": 1
+        },
+        "textCount": 17
+      },
+      "jar": {
+        "fill": {
+          "#000": 17
+        },
+        "anchor": {
+          "(absent)": 17
+        },
+        "inset": {
+          "10": 2,
+          "13.3": 1
+        },
+        "textCount": 17
+      }
     },
     {
       "type": "activity",
@@ -3210,7 +3264,7 @@
           "(absent)": 3
         },
         "inset": {
-          "10": 3
+          "13.3": 3
         },
         "textCount": 3
       },
@@ -3222,12 +3276,12 @@
           "(absent)": 3
         },
         "inset": {
-          "10": 3
+          "13.3": 3
         },
         "textCount": 3
       },
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "5859712e"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8"
     },
     {
       "type": "activity",
@@ -3601,8 +3655,8 @@
       "type": "activity",
       "slug": "fukika-81-gite897",
       "status": "baseline",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "76efedca",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
       "ours": {
         "fill": {
           "#000": 10
@@ -3612,7 +3666,8 @@
         },
         "inset": {
           "7": 1,
-          "25": 5
+          "25": 4,
+          "28.3": 1
         },
         "textCount": 10
       },
@@ -3625,7 +3680,8 @@
         },
         "inset": {
           "7": 1,
-          "25": 5
+          "25": 4,
+          "28.3": 1
         },
         "textCount": 10
       }
@@ -4821,10 +4877,33 @@
     {
       "type": "activity",
       "slug": "javivi-33-poma496",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 18
+        },
+        "anchor": {
+          "(absent)": 18
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 18
+      },
+      "jar": {
+        "fill": {
+          "#000": 18
+        },
+        "anchor": {
+          "(absent)": 18
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 18
+      }
     },
     {
       "type": "activity",
@@ -5248,10 +5327,33 @@
     {
       "type": "activity",
       "slug": "juleki-83-xusi470",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 20
+        },
+        "anchor": {
+          "(absent)": 20
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 20
+      },
+      "jar": {
+        "fill": {
+          "#000": 20
+        },
+        "anchor": {
+          "(absent)": 20
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 20
+      }
     },
     {
       "type": "activity",
@@ -5542,8 +5644,8 @@
       "type": "activity",
       "slug": "kenizo-43-siro273",
       "status": "baseline",
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
       "ours": {
         "fill": {
           "#000": 4
@@ -5552,7 +5654,8 @@
           "(absent)": 4
         },
         "inset": {
-          "10": 2
+          "10": 1,
+          "13.3": 1
         },
         "textCount": 4
       },
@@ -5564,7 +5667,8 @@
           "(absent)": 4
         },
         "inset": {
-          "10": 2
+          "10": 1,
+          "13.3": 1
         },
         "textCount": 4
       }
@@ -5697,8 +5801,8 @@
       "type": "activity",
       "slug": "kiceze-91-luke737",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
       "ours": {
         "fill": {
           "#000": 7
@@ -5707,7 +5811,8 @@
           "(absent)": 7
         },
         "inset": {
-          "10": 3
+          "10": 2,
+          "13.3": 1
         },
         "textCount": 7
       },
@@ -5719,7 +5824,8 @@
           "(absent)": 7
         },
         "inset": {
-          "10": 3
+          "10": 2,
+          "13.3": 1
         },
         "textCount": 7
       }
@@ -5820,10 +5926,33 @@
     {
       "type": "activity",
       "slug": "kivada-26-koti213",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 11
+        },
+        "anchor": {
+          "(absent)": 11
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 11
+      },
+      "jar": {
+        "fill": {
+          "#000": 11
+        },
+        "anchor": {
+          "(absent)": 11
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 11
+      }
     },
     {
       "type": "activity",
@@ -6283,10 +6412,33 @@
     {
       "type": "activity",
       "slug": "lefobe-62-gipe702",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 27
+        },
+        "anchor": {
+          "(absent)": 27
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 27
+      },
+      "jar": {
+        "fill": {
+          "#000": 27
+        },
+        "anchor": {
+          "(absent)": 27
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 27
+      }
     },
     {
       "type": "activity",
@@ -6478,8 +6630,8 @@
       "type": "activity",
       "slug": "lisade-37-vuri519",
       "status": "baseline",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "53d01279",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
       "ours": {
         "fill": {
           "#000": 2,
@@ -6489,7 +6641,7 @@
           "(absent)": 3
         },
         "inset": {
-          "22.766": 1
+          "22.102": 1
         },
         "textCount": 3
       },
@@ -6502,7 +6654,7 @@
           "(absent)": 3
         },
         "inset": {
-          "22.766": 1
+          "22.102": 1
         },
         "textCount": 3
       }
@@ -6794,8 +6946,8 @@
       "type": "activity",
       "slug": "luxido-91-covi016",
       "status": "baseline",
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
       "ours": {
         "fill": {
           "#000": 7
@@ -6804,7 +6956,8 @@
           "(absent)": 7
         },
         "inset": {
-          "10": 5
+          "10": 4,
+          "13.3": 1
         },
         "textCount": 7
       },
@@ -6816,7 +6969,8 @@
           "(absent)": 7
         },
         "inset": {
-          "10": 5
+          "10": 4,
+          "13.3": 1
         },
         "textCount": 7
       }
@@ -7194,10 +7348,33 @@
     {
       "type": "activity",
       "slug": "mijoso-20-sato362",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 19
+        },
+        "anchor": {
+          "(absent)": 19
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 19
+      },
+      "jar": {
+        "fill": {
+          "#000": 19
+        },
+        "anchor": {
+          "(absent)": 19
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 19
+      }
     },
     {
       "type": "activity",
@@ -7273,7 +7450,7 @@
           "(absent)": 2
         },
         "inset": {
-          "67.975": 1
+          "76.225": 1
         },
         "textCount": 2
       },
@@ -7285,12 +7462,12 @@
           "(absent)": 2
         },
         "inset": {
-          "67.975": 1
+          "76.225": 1
         },
         "textCount": 2
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8"
     },
     {
       "type": "activity",
@@ -7358,8 +7535,8 @@
       "type": "activity",
       "slug": "mudobi-07-biji996",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
       "ours": {
         "fill": {
           "#000": 14
@@ -7368,8 +7545,7 @@
           "(absent)": 14
         },
         "inset": {
-          "10": 7,
-          "10.001": 2
+          "10": 9
         },
         "textCount": 14
       },
@@ -7381,8 +7557,7 @@
           "(absent)": 14
         },
         "inset": {
-          "10": 7,
-          "10.001": 2
+          "10": 9
         },
         "textCount": 14
       }
@@ -7391,8 +7566,8 @@
       "type": "activity",
       "slug": "mufixi-71-koma752",
       "status": "baseline",
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "4181c68d",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
       "ours": {
         "fill": {
           "#000": 2
@@ -7401,7 +7576,7 @@
           "(absent)": 2
         },
         "inset": {
-          "122.338": 1
+          "122.337": 1
         },
         "textCount": 2
       },
@@ -7413,7 +7588,7 @@
           "(absent)": 2
         },
         "inset": {
-          "122.338": 1
+          "122.337": 1
         },
         "textCount": 2
       }
@@ -7421,10 +7596,33 @@
     {
       "type": "activity",
       "slug": "mukaxi-27-xero900",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 11
+        },
+        "anchor": {
+          "(absent)": 11
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 11
+      },
+      "jar": {
+        "fill": {
+          "#000": 11
+        },
+        "anchor": {
+          "(absent)": 11
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 11
+      }
     },
     {
       "type": "activity",
@@ -8076,7 +8274,8 @@
           "(absent)": 8
         },
         "inset": {
-          "10": 4
+          "10": 2,
+          "13.3": 2
         },
         "textCount": 8
       },
@@ -8088,12 +8287,13 @@
           "(absent)": 8
         },
         "inset": {
-          "10": 4
+          "10": 2,
+          "13.3": 2
         },
         "textCount": 8
       },
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8"
     },
     {
       "type": "activity",
@@ -8342,10 +8542,33 @@
     {
       "type": "activity",
       "slug": "nudonu-37-kaja626",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 15
+        },
+        "anchor": {
+          "(absent)": 15
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 15
+      },
+      "jar": {
+        "fill": {
+          "#000": 15
+        },
+        "anchor": {
+          "(absent)": 15
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 15
+      }
     },
     {
       "type": "activity",
@@ -8369,10 +8592,33 @@
     {
       "type": "activity",
       "slug": "nupiko-03-cezu269",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 7
+      },
+      "jar": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 7
+      }
     },
     {
       "type": "activity",
@@ -8922,10 +9168,33 @@
     {
       "type": "activity",
       "slug": "pixisi-38-kixa563",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 13 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "79.3": 1
+        },
+        "textCount": 4
+      },
+      "jar": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "79.3": 1
+        },
+        "textCount": 4
+      }
     },
     {
       "type": "activity",
@@ -9298,10 +9567,35 @@
     {
       "type": "activity",
       "slug": "putega-59-fuzi707",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 17
+        },
+        "anchor": {
+          "(absent)": 17
+        },
+        "inset": {
+          "10": 2,
+          "13.3": 1
+        },
+        "textCount": 17
+      },
+      "jar": {
+        "fill": {
+          "#000": 17
+        },
+        "anchor": {
+          "(absent)": 17
+        },
+        "inset": {
+          "10": 2,
+          "13.3": 1
+        },
+        "textCount": 17
+      }
     },
     {
       "type": "activity",
@@ -9655,10 +9949,33 @@
     {
       "type": "activity",
       "slug": "roroko-26-coje324",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 13
+        },
+        "anchor": {
+          "(absent)": 13
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 13
+      },
+      "jar": {
+        "fill": {
+          "#000": 13
+        },
+        "anchor": {
+          "(absent)": 13
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 13
+      }
     },
     {
       "type": "activity",
@@ -9849,10 +10166,33 @@
     {
       "type": "activity",
       "slug": "runima-82-jigi009",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 30 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "122.337": 1
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "122.337": 1
+        },
+        "textCount": 5
+      }
     },
     {
       "type": "activity",
@@ -10136,10 +10476,33 @@
     {
       "type": "activity",
       "slug": "sesodi-22-lupe361",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 49
+        },
+        "anchor": {
+          "(absent)": 49
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 49
+      },
+      "jar": {
+        "fill": {
+          "#000": 49
+        },
+        "anchor": {
+          "(absent)": 49
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 49
+      }
     },
     {
       "type": "activity",
@@ -10434,8 +10797,7 @@
           "(absent)": 10
         },
         "inset": {
-          "10": 3,
-          "10.001": 1
+          "10": 4
         },
         "textCount": 10
       },
@@ -10447,13 +10809,12 @@
           "(absent)": 10
         },
         "inset": {
-          "10": 3,
-          "10.001": 1
+          "10": 4
         },
         "textCount": 10
       },
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8"
     },
     {
       "type": "activity",
@@ -10768,10 +11129,33 @@
     {
       "type": "activity",
       "slug": "tajiri-57-sepu092",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render SUCCEEDED (we accept a source the jar rejects; open -> add4)",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 81
+        },
+        "anchor": {
+          "(absent)": 81
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 81
+      },
+      "jar": {
+        "fill": {
+          "#000": 81
+        },
+        "anchor": {
+          "(absent)": 81
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 81
+      }
     },
     {
       "type": "activity",
@@ -11092,10 +11476,33 @@
     {
       "type": "activity",
       "slug": "tirizu-79-niza262",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 68
+        },
+        "anchor": {
+          "(absent)": 68
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 68
+      },
+      "jar": {
+        "fill": {
+          "#000": 68
+        },
+        "anchor": {
+          "(absent)": 68
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 68
+      }
     },
     {
       "type": "activity",
@@ -11194,8 +11601,8 @@
       "type": "activity",
       "slug": "tozecu-08-ride878",
       "status": "baseline",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "3ec2d4cd",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
       "ours": {
         "fill": {
           "#000": 20
@@ -11206,7 +11613,7 @@
         "inset": {
           "7": 1,
           "10": 7,
-          "78.221": 1
+          "81.797": 1
         },
         "textCount": 20
       },
@@ -11220,7 +11627,7 @@
         "inset": {
           "7": 1,
           "10": 7,
-          "78.221": 1
+          "81.797": 1
         },
         "textCount": 20
       }
@@ -11259,10 +11666,33 @@
     {
       "type": "activity",
       "slug": "vafupe-19-cima350",
-      "status": "jar-error",
-      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
+      "ours": {
+        "fill": {
+          "#000": 23
+        },
+        "anchor": {
+          "(absent)": 23
+        },
+        "inset": {
+          "10": 7
+        },
+        "textCount": 23
+      },
+      "jar": {
+        "fill": {
+          "#000": 23
+        },
+        "anchor": {
+          "(absent)": 23
+        },
+        "inset": {
+          "10": 7
+        },
+        "textCount": 23
+      }
     },
     {
       "type": "activity",
@@ -12046,8 +12476,7 @@
           "(absent)": 11
         },
         "inset": {
-          "10": 1,
-          "10.001": 3
+          "10": 4
         },
         "textCount": 11
       },
@@ -12059,13 +12488,12 @@
           "(absent)": 11
         },
         "inset": {
-          "10": 1,
-          "10.001": 3
+          "10": 4
         },
         "textCount": 11
       },
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "77d50172"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8"
     },
     {
       "type": "activity",
@@ -12428,8 +12856,8 @@
       "type": "activity",
       "slug": "zafoxu-20-xofe568",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8",
       "ours": {
         "fill": {
           "#000": 3
@@ -12439,7 +12867,7 @@
         },
         "inset": {
           "10": 2,
-          "230.5": 1
+          "247": 1
         },
         "textCount": 3
       },
@@ -12452,7 +12880,7 @@
         },
         "inset": {
           "10": 2,
-          "230.5": 1
+          "247": 1
         },
         "textCount": 3
       }
@@ -12723,7 +13151,7 @@
           "(absent)": 16
         },
         "inset": {
-          "10": 5
+          "13.3": 5
         },
         "textCount": 16
       },
@@ -12735,12 +13163,12 @@
           "(absent)": 16
         },
         "inset": {
-          "10": 5
+          "13.3": 5
         },
         "textCount": 16
       },
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "3d8988d8"
     },
     {
       "type": "activity",

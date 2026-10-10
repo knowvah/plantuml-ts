@@ -860,7 +860,9 @@ describe('refusal coverage — baseline shape', () => {
     // being jar crash pages under oracle seam #4 (jarRendered true); 3 of them
     // (fakece-07, pixisi-38, runima-82) also render here now (weErrored
     // false). Derivation: 6372 + 234 = 6606.
-    expect(manifest.fixtures.length).toBe(6606);
+    // 6606 -> 6624 / 6372 -> 6390 at isw/close: 18 svg-activity clone rows,
+    // all rendering on both sides. Derivation: 6390 + 234 = 6624.
+    expect(manifest.fixtures.length).toBe(6624);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -959,7 +961,7 @@ describe('refusal coverage — baseline shape', () => {
     // 6363 -> 6364 at add4/fix-jucidi (1 svg-activity clones).
     // 6364 -> 6368 at lgm/close-b1e (4 svg-activity clones).
     // 6368 -> 6369 at lgm/close-b1e (1 svg-class clone).
-    expect(pinnedRendering.length).toBe(6372);
+    expect(pinnedRendering.length).toBe(6390);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
