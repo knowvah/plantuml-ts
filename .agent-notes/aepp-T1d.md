@@ -1,4 +1,4 @@
-# aepp-T1d — tidoda: group frame style keyed on the USymbol (PARTIAL, stop 8)
+# aepp-T1d — tidoda: group frame style keyed on the USymbol (DONE after resume)
 
 ## Verified mechanism
 add4's "rectangle group style not keyed on the USymbol" is true but incomplete.
@@ -30,3 +30,11 @@ The renderer already consumes `elements[usymbol].roundCorner`, so that handler l
 
 ## Movers
 Activity survey vs b0-eng: 451 rows, only tidoda moved (@fill -> @rx). 0 conformant losses. src/core untouched (no all-engine survey).
+
+## Resume: <sname>RoundCorner ported
+`skinparam-key-handlers-table-a.ts` ROUND_CORNER_HANDLERS: `<name>roundcorner` for every ADD_MAGIC_CLEAN_NAMES entry
+-> elements[name].roundCorner (raw, 0 allowed, NaN rejected); `FromSkinparamToStyle.java:275` inside addMagic :270-286.
+Other upstream RoundCorner registrations: `:164` bare roundCorner (already handled), `:169` titleBorderRoundCorner and
+`:175` legendBorderRoundCorner (SName.title/legend; no consumer reads elements.title/legend, NOT ported).
+All-engine survey (28) vs b0-eng: 1 mover, tidoda-12-juxu745 diverged -> conformant; 0 conformant losses. Census-away not run (no diff-baseline in the after dir).
+No corpus activity fixture sets package RoundCorner; package rounded folder remains a follow-on.

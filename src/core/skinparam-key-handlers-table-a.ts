@@ -80,6 +80,19 @@ const BORDER_STYLE_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], ha
     },
   ]);
 
+/** `<sname>RoundCorner N` -> `PName.RoundCorner` on `{<sname>}`
+ *  (`addMagic`, `FromSkinparamToStyle.java:275`), RAW and unhalved like the
+ *  `<style>` path (`style-map-element.ts:350`). Like the bare `roundcorner`
+ *  handler, 0 is a real value; only a non-number is rejected. */
+const ROUND_CORNER_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> =
+  ADD_MAGIC_CLEAN_NAMES.map((sname) => [
+    [`${sname}roundcorner`],
+    (acc, value) => {
+      const v = parseFiniteInt(value);
+      if (v !== undefined) (acc.elements[sname] ??= {}).roundCorner = v;
+    },
+  ]);
+
 export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> = [
   [
     ['backgroundcolor'],
@@ -497,4 +510,5 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   // cdd6 T1a: `<sname>BorderStyle` for every addMagic SName (new keys, so
   // appending cannot reorder any existing entry).
   ...BORDER_STYLE_HANDLERS,
+  ...ROUND_CORNER_HANDLERS,
 ];

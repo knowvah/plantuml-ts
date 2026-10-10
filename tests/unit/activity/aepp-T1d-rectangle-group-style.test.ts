@@ -35,7 +35,12 @@ describe('group frame style keyed on the USymbol', () => {
   // Blocked (stop 8): `skinparam <sname>RoundCorner` is not stored per element
   // by src/core (`skinparam-key-handlers-table-a.ts` handles only the bare
   // `roundcorner`), so rx/ry cannot reach this renderer. tidoda needs it.
-  it.todo('rectangle/card RoundCorner 25 draws rx=ry=12.5 (FtileGroup.java:103)');
+  it('rectangle and card RoundCorner 25 draw rx=ry=12.5 (FtileGroup.java:103)', () => {
+    for (const k of ['rectangle', 'card']) {
+      const svg = render([...block(k), `${k} ${BODY[0]}`, ...BODY.slice(1)]);
+      expect(first(svg, 'rect')).toContain('rx="12.5" ry="12.5"');
+    }
+  });
 
   it('tidoda: rectangle takes its own block (fill, stroke, thickness)', () => {
     const svg = render([
