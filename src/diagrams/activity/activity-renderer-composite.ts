@@ -11,6 +11,7 @@
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
+import { noGradient, type Paint } from '../../core/paint.js';
 import type { CompositeUSymbol } from './activity-geometry.types.js';
 import {
   compositeSymbolTitleOrigin,
@@ -72,6 +73,70 @@ function compositeStyle(theme: Theme): CompositeStyle {
   };
 }
 
+/** The per-symbol ink fields a `skinparam` can set, before the cascade. */
+interface SymbolInk {
+  readonly fill?: string;
+  readonly stroke?: string;
+  readonly strokeWidth?: number;
+  readonly roundCorner?: number;
+}
+
+const asString = (paint: Paint | undefined): string | undefined =>
+  paint === undefined ? undefined : noGradient(paint);
+
+/**
+ * What `FtileGroup.getStyleSignature(symbol)`'s signature
+ * (`FtileGroup.java:89-92`: `of(root, element, activityDiagram,
+ * symbol.getSNames(), composite)`) lets a `skinparam` reach, by keyword:
+ * `card`/`rectangle` -> their own `addMagic` block
+ * (`FromSkinparamToStyle.java:212,223`: colours, thickness, corner);
+ * `package` -> `addMagic(SName.package_)` (`:129`) via the `packageBackground`/
+ * `packageBorder`/`packageBorderThickness` theme fields; `group` ->
+ * `packageBackgroundColor`/`packageBorderColor` only, which upstream also
+ * converts onto `SName.group` (`:127-128`) -- no thickness or corner;
+ * `partition` -> none (its `Partition*` skinparams sit on `composite` itself,
+ * `:131-132`, and are read by {@link compositeInk} for every keyword).
+ */
+function symbolInk(node: ActivityNodeGeo, theme: Theme): SymbolInk {
+  const g = theme.colors.graph;
+  if (node.usymbol === 'card' || node.usymbol === 'rectangle') {
+    const b = theme.colors.elements?.[node.usymbol];
+    const strokeWidth = b?.lineThickness;
+    return {
+      ...(b?.background !== undefined ? { fill: asString(b.background)! } : {}),
+      ...(b?.border !== undefined ? { stroke: asString(b.border)! } : {}),
+      ...(strokeWidth !== undefined ? { strokeWidth } : {}),
+      ...(b?.roundCorner !== undefined ? { roundCorner: b.roundCorner } : {}),
+    };
+  }
+  if (node.usymbol !== 'package' && node.kind !== 'group') return {};
+  return {
+    ...(g.packageBackground !== undefined ? { fill: g.packageBackground } : {}),
+    ...(g.packageBorder !== undefined ? { stroke: g.packageBorder } : {}),
+    ...(node.usymbol === 'package' && g.packageBorderThickness !== undefined
+      ? { strokeWidth: g.packageBorderThickness }
+      : {}),
+  };
+}
+
+/** The resolved ink of one group frame: `Partition*` skinparams (on the
+ *  `composite` signature itself, the more specific match -- jar probe: a
+ *  `PartitionBackgroundColor` beats `rectangleBackgroundColor`), else the
+ *  symbol's own block, else the `plantuml.skin` composite default. */
+function compositeInk(node: ActivityNodeGeo, theme: Theme): CompositeInk {
+  const base = compositeStyle(theme);
+  const g = theme.colors.graph;
+  const sym = symbolInk(node, theme);
+  return {
+    // `FtileGroup.java:101`: the command's `#color`, else the style's `BackGroundColor`.
+    fill: node.color ?? g.partitionBackground ?? sym.fill ?? base.backColor,
+    stroke: g.partitionBorder ?? sym.stroke ?? base.borderColor,
+    strokeWidth: sym.strokeWidth ?? activityLineThickness(theme, 'composite'),
+    // `FtileGroup.java:103`: `style.value(PName.RoundCorner).asDouble()`.
+    roundCorner: sym.roundCorner ?? 0,
+  };
+}
+
 /**
  * `FtileGroup#drawU` (`:209-227`) + `USymbolFrame#asBig`'s `drawU`
  * (`:142-162`): the plain frame `rect` (unchanged from before this
@@ -86,12 +151,10 @@ function compositeStyle(theme: Theme): CompositeStyle {
  * `layout/compress/shapes-of-frame.ts#frameTitleShape` ports.
  */
 export function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
-  const strokeWidth = activityLineThickness(theme, 'composite');
-  const style = compositeStyle(theme);
-  // `FtileGroup.java:101`: the command's `#color`, else the style's `BackGroundColor`.
-  const fill = node.color ?? style.backColor;
-  if (node.usymbol !== undefined)
-    return renderSymbolComposite(node, node.usymbol, theme, { fill, stroke: style.borderColor, strokeWidth });
+  const ink = compositeInk(node, theme);
+  const { fill, strokeWidth } = ink;
+  const style = { borderColor: ink.stroke };
+  if (node.usymbol !== undefined) return renderSymbolComposite(node, node.usymbol, theme, ink);
   const body = rect(node.x, node.y, node.width, node.height, { fill, stroke: style.borderColor, strokeWidth });
 
   const fontSize = activityFontSize(theme, 'composite');
