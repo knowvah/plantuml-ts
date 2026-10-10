@@ -987,8 +987,10 @@ describe('routing conformance — jar-error classification', () => {
     // Derivation: 5650 + 870 + 86 = 6606.
     // 5650 -> 5668 / 6606 -> 6624 at isw/close: 18 svg-activity clone rows
     // (the former crash pages, now zero-diff pins). Derivation: 5668 + 870 + 86 = 6624.
-    expect(pinnedAgree.length).toBe(5668);
-    expect(pinnedMisroutes.length).toBe(870);
+    // 5668 -> 5670 / 870 -> 868 at isw/close: sequence licole-34-vejo527 (`+ XXX`) and loteba-26-konu854 (`& return`) render after the batch-2 sequence ports; re-pinned from a fresh measurement by scripts/repin-sequence-baselines.ts.
+    // Derivation: 5670 + 868 + 86 = 6624.
+    expect(pinnedAgree.length).toBe(5670);
+    expect(pinnedMisroutes.length).toBe(868);
     expect(pinnedJarErrors.length).toBe(86);
     expect(manifest.fixtures.length).toBe(6624);
   });
@@ -1050,7 +1052,8 @@ describe('routing conformance — jar-error classification', () => {
     // CommandLink3, CommandFootboxIgnored, CommandHideShowByGender).
     // 874 -> 873 at add4/merge-T3e-2: fukika's stale misroute retired.
     // 873 -> 869 at add4/merge-T3k: the 4 add4-T0b activity parser gaps fixed.
-    expect(censused.length).toBe(869);
+    // 869 -> 867 at isw/close: licole-34 and loteba-26 (sequence) now agree.
+    expect(censused.length).toBe(867);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

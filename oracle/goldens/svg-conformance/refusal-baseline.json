@@ -17776,12 +17776,11 @@
       "type": "sequence",
       "slug": "licole-34-vejo527",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- preprocessed line 4: ` + XXX`. NOT an unported command and NOT an unported `%newline()` (Newline.ts:31 ports it). Measured mechanism: `%newline()` written INSIDE a TIM double-quoted literal (`!$mixed0 = \"XXX + %newline() + XXX\"`) yields a real U+000A, where the same call outside a literal (`\"XXX\" + %newline() + \"XXX\"`) correctly yields the U+E100 sentinel. applyFunctionsAndVariablesInternal then splits the substituted message on \\n (TContext.ts:362, mirroring tim/TContext.java:512-517 whose gate Pragma.legacyReplaceBackslashNByNewline() is hardcoded true, skin/Pragma.java:95-97), so the label becomes two source lines and the continuation matches no Command. Upstream never splits because Newline#executeReturnFunction returns the sentinel in BOTH positions (tim/builtin/Newline.java:63-67 under JawsFlags.java:40)."
+      "status": "ok",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "tree": "dot-cache",
@@ -17997,12 +17996,11 @@
       "type": "sequence",
       "slug": "loteba-26-konu854",
       "jarRendered": true,
-      "weErrored": true,
+      "weErrored": false,
       "engine": "sequence",
-      "status": "known-gap",
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 22: `& return Hello44`. Unported: CommandReturn's PARALLEL group `(&[%s]*)?` (CommandReturn.java:68; SequenceDiagramFactory.java:129). The `/ note` VMERGE form its previous pin named now parses (line 10 is accepted)."
+      "status": "ok",
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "tree": "dot-cache",

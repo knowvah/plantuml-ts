@@ -32,10 +32,10 @@
       "type": "sequence",
       "slug": "TeozTimelineIssues_0002_Test",
       "status": "baseline",
-      "weightedScore": 220,
+      "weightedScore": 133,
       "diffCount": 220,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -50,10 +50,10 @@
       "type": "sequence",
       "slug": "TeozTimelineIssues_0004_Test",
       "status": "baseline",
-      "weightedScore": 115,
+      "weightedScore": 93,
       "diffCount": 115,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -77,10 +77,10 @@
       "type": "sequence",
       "slug": "TeozTimelineIssues_0007_Test",
       "status": "baseline",
-      "weightedScore": 177,
+      "weightedScore": 154,
       "diffCount": 177,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -131,10 +131,10 @@
       "type": "sequence",
       "slug": "bagexe-03-bozo133",
       "status": "baseline",
-      "weightedScore": 155,
+      "weightedScore": 137,
       "diffCount": 155,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -284,19 +284,19 @@
       "type": "sequence",
       "slug": "bepopi-29-dobu802",
       "status": "baseline",
-      "weightedScore": 62,
+      "weightedScore": 29,
       "diffCount": 62,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "bexoce-95-vibe195",
       "status": "baseline",
-      "weightedScore": 220,
+      "weightedScore": 133,
       "diffCount": 220,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -419,10 +419,10 @@
       "type": "sequence",
       "slug": "bocusa-16-ciju126",
       "status": "baseline",
-      "weightedScore": 101,
+      "weightedScore": 68,
       "diffCount": 101,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -446,10 +446,10 @@
       "type": "sequence",
       "slug": "boguvi-37-ralo631",
       "status": "baseline",
-      "weightedScore": 79,
+      "weightedScore": 34,
       "diffCount": 79,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -483,10 +483,10 @@
       "type": "sequence",
       "slug": "bopizu-70-rese737",
       "status": "baseline",
-      "weightedScore": 117,
+      "weightedScore": 40,
       "diffCount": 117,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -618,10 +618,10 @@
       "type": "sequence",
       "slug": "bulixe-06-boge494",
       "status": "baseline",
-      "weightedScore": 85,
+      "weightedScore": 36,
       "diffCount": 71,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -645,19 +645,19 @@
       "type": "sequence",
       "slug": "burujo-63-puti396",
       "status": "baseline",
-      "weightedScore": 47,
+      "weightedScore": 19,
       "diffCount": 47,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "busexe-78-ruzu110",
       "status": "baseline",
-      "weightedScore": 353,
+      "weightedScore": 337,
       "diffCount": 241,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -681,10 +681,10 @@
       "type": "sequence",
       "slug": "butosi-00-mali446",
       "status": "baseline",
-      "weightedScore": 59,
+      "weightedScore": 44,
       "diffCount": 59,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -744,10 +744,10 @@
       "type": "sequence",
       "slug": "cakelu-69-muza643",
       "status": "baseline",
-      "weightedScore": 191,
+      "weightedScore": 100,
       "diffCount": 191,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "500251d12"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -780,10 +780,10 @@
       "type": "sequence",
       "slug": "camebe-75-mujo573",
       "status": "baseline",
-      "weightedScore": 396,
+      "weightedScore": 379,
       "diffCount": 270,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -870,19 +870,19 @@
       "type": "sequence",
       "slug": "cecuku-78-kezo359",
       "status": "baseline",
-      "weightedScore": 23,
+      "weightedScore": 18,
       "diffCount": 23,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "cedeti-10-bufu072",
       "status": "baseline",
-      "weightedScore": 167,
+      "weightedScore": 155,
       "diffCount": 75,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -897,10 +897,10 @@
       "type": "sequence",
       "slug": "cejoxe-28-zeba572",
       "status": "baseline",
-      "weightedScore": 76,
+      "weightedScore": 74,
       "diffCount": 76,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -951,10 +951,10 @@
       "type": "sequence",
       "slug": "cetale-74-regu633",
       "status": "baseline",
-      "weightedScore": 169,
+      "weightedScore": 154,
       "diffCount": 169,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -996,19 +996,19 @@
       "type": "sequence",
       "slug": "cijaru-11-fele146",
       "status": "baseline",
-      "weightedScore": 75,
+      "weightedScore": 46,
       "diffCount": 61,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "cijozi-08-mavu547",
       "status": "baseline",
-      "weightedScore": 167,
+      "weightedScore": 158,
       "diffCount": 167,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -1041,10 +1041,10 @@
       "type": "sequence",
       "slug": "cinilo-67-macu207",
       "status": "baseline",
-      "weightedScore": 42,
+      "weightedScore": 29,
       "diffCount": 28,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -1086,10 +1086,10 @@
       "type": "sequence",
       "slug": "cocosu-02-vusu863",
       "status": "baseline",
-      "weightedScore": 50,
+      "weightedScore": 43,
       "diffCount": 50,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -1104,10 +1104,10 @@
       "type": "sequence",
       "slug": "cofuse-78-keri294",
       "status": "baseline",
-      "weightedScore": 74,
+      "weightedScore": 57,
       "diffCount": 74,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -1158,10 +1158,10 @@
       "type": "sequence",
       "slug": "coxefo-18-gopo887",
       "status": "baseline",
-      "weightedScore": 150,
+      "weightedScore": 88,
       "diffCount": 150,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -1203,10 +1203,10 @@
       "type": "sequence",
       "slug": "cusete-01-vusi466",
       "status": "baseline",
-      "weightedScore": 89,
+      "weightedScore": 87,
       "diffCount": 63,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -1320,19 +1320,19 @@
       "type": "sequence",
       "slug": "dasutu-58-saje713",
       "status": "baseline",
-      "weightedScore": 109,
+      "weightedScore": 80,
       "diffCount": 63,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "databu-25-mivu307",
       "status": "baseline",
-      "weightedScore": 69,
+      "weightedScore": 64,
       "diffCount": 69,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -1374,28 +1374,28 @@
       "type": "sequence",
       "slug": "decace-28-majo724",
       "status": "baseline",
-      "weightedScore": 25,
+      "weightedScore": 10,
       "diffCount": 25,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "500251d12"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "dedefa-06-muge830",
       "status": "baseline",
-      "weightedScore": 47,
+      "weightedScore": 19,
       "diffCount": 47,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "dedigi-45-zusi003",
       "status": "baseline",
-      "weightedScore": 43,
+      "weightedScore": 36,
       "diffCount": 43,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -1410,10 +1410,10 @@
       "type": "sequence",
       "slug": "defega-58-zepa649",
       "status": "baseline",
-      "weightedScore": 42,
+      "weightedScore": 37,
       "diffCount": 42,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -1599,10 +1599,10 @@
       "type": "sequence",
       "slug": "diruxe-35-xujo142",
       "status": "baseline",
-      "weightedScore": 482,
+      "weightedScore": 468,
       "diffCount": 199,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -1807,10 +1807,10 @@
       "type": "sequence",
       "slug": "dufupa-80-kavi440",
       "status": "baseline",
-      "weightedScore": 47,
+      "weightedScore": 19,
       "diffCount": 47,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -1825,10 +1825,10 @@
       "type": "sequence",
       "slug": "dugeki-47-celo546",
       "status": "baseline",
-      "weightedScore": 2493,
+      "weightedScore": 2471,
       "diffCount": 2493,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "500251d12"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2059,10 +2059,10 @@
       "type": "sequence",
       "slug": "felasa-37-jovu259",
       "status": "baseline",
-      "weightedScore": 92,
+      "weightedScore": 82,
       "diffCount": 48,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2122,10 +2122,10 @@
       "type": "sequence",
       "slug": "fevipu-45-xela421",
       "status": "baseline",
-      "weightedScore": 30,
+      "weightedScore": 24,
       "diffCount": 30,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2140,10 +2140,10 @@
       "type": "sequence",
       "slug": "ficiru-65-geda551",
       "status": "baseline",
-      "weightedScore": 67,
+      "weightedScore": 62,
       "diffCount": 67,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2185,19 +2185,19 @@
       "type": "sequence",
       "slug": "fifasu-62-pipo979",
       "status": "baseline",
-      "weightedScore": 70,
+      "weightedScore": 69,
       "diffCount": 57,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "figezi-68-zefe216",
       "status": "baseline",
-      "weightedScore": 138,
+      "weightedScore": 61,
       "diffCount": 138,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2248,10 +2248,10 @@
       "type": "sequence",
       "slug": "fobuke-12-dopi544",
       "status": "baseline",
-      "weightedScore": 73,
+      "weightedScore": 64,
       "diffCount": 73,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2303,10 +2303,10 @@
       "type": "sequence",
       "slug": "fonipa-05-lobe529",
       "status": "baseline",
-      "weightedScore": 23,
+      "weightedScore": 18,
       "diffCount": 23,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2349,10 +2349,10 @@
       "type": "sequence",
       "slug": "fozeva-08-tife475",
       "status": "baseline",
-      "weightedScore": 114,
+      "weightedScore": 109,
       "diffCount": 114,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2421,19 +2421,19 @@
       "type": "sequence",
       "slug": "furami-83-pome543",
       "status": "baseline",
-      "weightedScore": 30,
+      "weightedScore": 24,
       "diffCount": 30,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "furara-28-sode432",
       "status": "baseline",
-      "weightedScore": 77,
+      "weightedScore": 76,
       "diffCount": 77,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2466,10 +2466,10 @@
       "type": "sequence",
       "slug": "fuzove-69-bulo834",
       "status": "baseline",
-      "weightedScore": 70,
+      "weightedScore": 69,
       "diffCount": 70,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2502,10 +2502,10 @@
       "type": "sequence",
       "slug": "gacujo-48-leto751",
       "status": "baseline",
-      "weightedScore": 205,
+      "weightedScore": 199,
       "diffCount": 205,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2583,10 +2583,10 @@
       "type": "sequence",
       "slug": "gecopo-99-pude139",
       "status": "baseline",
-      "weightedScore": 79,
+      "weightedScore": 70,
       "diffCount": 79,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2673,10 +2673,10 @@
       "type": "sequence",
       "slug": "gepuce-64-pivu656",
       "status": "baseline",
-      "weightedScore": 261,
+      "weightedScore": 259,
       "diffCount": 29,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2727,28 +2727,28 @@
       "type": "sequence",
       "slug": "gibuxa-28-kale997",
       "status": "baseline",
-      "weightedScore": 124,
+      "weightedScore": 62,
       "diffCount": 124,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "gidibo-31-cugi403",
       "status": "baseline",
-      "weightedScore": 29,
+      "weightedScore": 22,
       "diffCount": 29,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "gifope-23-jufe872",
       "status": "baseline",
-      "weightedScore": 104,
+      "weightedScore": 75,
       "diffCount": 69,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2790,10 +2790,10 @@
       "type": "sequence",
       "slug": "giloko-85-gapa789",
       "status": "baseline",
-      "weightedScore": 108,
+      "weightedScore": 48,
       "diffCount": 108,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "500251d12"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -2916,10 +2916,10 @@
       "type": "sequence",
       "slug": "gosigu-85-raku124",
       "status": "baseline",
-      "weightedScore": 50,
+      "weightedScore": 24,
       "diffCount": 50,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -3060,10 +3060,10 @@
       "type": "sequence",
       "slug": "gutate-63-kane985",
       "status": "baseline",
-      "weightedScore": 54,
+      "weightedScore": 22,
       "diffCount": 54,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -3087,10 +3087,10 @@
       "type": "sequence",
       "slug": "h-rnote-style",
       "status": "baseline",
-      "weightedScore": 85,
+      "weightedScore": 36,
       "diffCount": 71,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -3105,10 +3105,10 @@
       "type": "sequence",
       "slug": "jacefu-29-didu005",
       "status": "baseline",
-      "weightedScore": 36,
+      "weightedScore": 31,
       "diffCount": 36,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -3132,10 +3132,10 @@
       "type": "sequence",
       "slug": "jafufe-08-begu830",
       "status": "baseline",
-      "weightedScore": 223,
+      "weightedScore": 203,
       "diffCount": 73,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "500251d12"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -3150,10 +3150,10 @@
       "type": "sequence",
       "slug": "jagusu-12-turu662",
       "status": "baseline",
-      "weightedScore": 79,
+      "weightedScore": 78,
       "diffCount": 79,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -3276,10 +3276,10 @@
       "type": "sequence",
       "slug": "jerevu-86-gojo026",
       "status": "baseline",
-      "weightedScore": 80,
+      "weightedScore": 44,
       "diffCount": 80,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -3466,10 +3466,10 @@
       "type": "sequence",
       "slug": "jotege-53-vira701",
       "status": "baseline",
-      "weightedScore": 30,
+      "weightedScore": 24,
       "diffCount": 30,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -3511,10 +3511,10 @@
       "type": "sequence",
       "slug": "jujigi-41-zodo151",
       "status": "baseline",
-      "weightedScore": 109,
+      "weightedScore": 77,
       "diffCount": 109,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -3647,10 +3647,10 @@
       "type": "sequence",
       "slug": "karaki-85-ketu935",
       "status": "baseline",
-      "weightedScore": 89,
+      "weightedScore": 88,
       "diffCount": 89,
-      "measuredAt": "2026-09-27",
-      "measuredAgainstCommit": "689f66a9"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -3782,10 +3782,10 @@
       "type": "sequence",
       "slug": "kibope-73-jezu646",
       "status": "baseline",
-      "weightedScore": 120,
+      "weightedScore": 68,
       "diffCount": 120,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -3809,10 +3809,10 @@
       "type": "sequence",
       "slug": "kikaso-48-karu319",
       "status": "baseline",
-      "weightedScore": 85,
+      "weightedScore": 46,
       "diffCount": 85,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -3944,10 +3944,10 @@
       "type": "sequence",
       "slug": "kocuso-22-ciri203",
       "status": "baseline",
-      "weightedScore": 55,
+      "weightedScore": 48,
       "diffCount": 55,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -3980,10 +3980,10 @@
       "type": "sequence",
       "slug": "kofuti-29-goti188",
       "status": "baseline",
-      "weightedScore": 141,
+      "weightedScore": 109,
       "diffCount": 128,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4088,10 +4088,10 @@
       "type": "sequence",
       "slug": "kotixe-11-cufa733",
       "status": "baseline",
-      "weightedScore": 85,
+      "weightedScore": 36,
       "diffCount": 71,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4115,10 +4115,10 @@
       "type": "sequence",
       "slug": "kovito-91-jonu992",
       "status": "baseline",
-      "weightedScore": 90,
+      "weightedScore": 67,
       "diffCount": 90,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4169,10 +4169,10 @@
       "type": "sequence",
       "slug": "kukeja-88-zida141",
       "status": "baseline",
-      "weightedScore": 275,
+      "weightedScore": 254,
       "diffCount": 275,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4332,10 +4332,10 @@
       "type": "sequence",
       "slug": "lavaba-76-lepi228",
       "status": "baseline",
-      "weightedScore": 79,
+      "weightedScore": 18,
       "diffCount": 79,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4359,19 +4359,19 @@
       "type": "sequence",
       "slug": "ledura-21-bavo866",
       "status": "baseline",
-      "weightedScore": 214,
+      "weightedScore": 200,
       "diffCount": 214,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "legeme-58-daxi851",
       "status": "baseline",
-      "weightedScore": 27,
+      "weightedScore": 19,
       "diffCount": 27,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4386,10 +4386,10 @@
       "type": "sequence",
       "slug": "lejafe-21-niga299",
       "status": "baseline",
-      "weightedScore": 64,
+      "weightedScore": 26,
       "diffCount": 64,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4512,10 +4512,10 @@
       "type": "sequence",
       "slug": "lidupe-72-cexa425",
       "status": "baseline",
-      "weightedScore": 387,
+      "weightedScore": 372,
       "diffCount": 226,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4548,10 +4548,10 @@
       "type": "sequence",
       "slug": "liluca-64-muva178",
       "status": "baseline",
-      "weightedScore": 51,
+      "weightedScore": 14,
       "diffCount": 51,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4611,10 +4611,10 @@
       "type": "sequence",
       "slug": "lojore-28-mano308",
       "status": "baseline",
-      "weightedScore": 40,
+      "weightedScore": 33,
       "diffCount": 40,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4674,10 +4674,10 @@
       "type": "sequence",
       "slug": "loteba-26-konu854",
       "status": "baseline",
-      "weightedScore": 243,
+      "weightedScore": 138,
       "diffCount": 243,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4836,10 +4836,10 @@
       "type": "sequence",
       "slug": "luxiti-90-beca090",
       "status": "baseline",
-      "weightedScore": 32,
+      "weightedScore": 17,
       "diffCount": 32,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4890,28 +4890,28 @@
       "type": "sequence",
       "slug": "makuzo-19-tine034",
       "status": "baseline",
-      "weightedScore": 122,
+      "weightedScore": 118,
       "diffCount": 122,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "mapeji-83-sebu002",
       "status": "baseline",
-      "weightedScore": 220,
+      "weightedScore": 133,
       "diffCount": 220,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "masibi-28-tidi862",
       "status": "baseline",
-      "weightedScore": 331,
+      "weightedScore": 221,
       "diffCount": 308,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4926,19 +4926,19 @@
       "type": "sequence",
       "slug": "matoka-21-jisu767",
       "status": "baseline",
-      "weightedScore": 80,
+      "weightedScore": 37,
       "diffCount": 80,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "matoke-25-kidu719",
       "status": "baseline",
-      "weightedScore": 177,
+      "weightedScore": 154,
       "diffCount": 177,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -4980,10 +4980,10 @@
       "type": "sequence",
       "slug": "mebidu-16-ruve297",
       "status": "baseline",
-      "weightedScore": 309,
+      "weightedScore": 293,
       "diffCount": 197,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5052,10 +5052,10 @@
       "type": "sequence",
       "slug": "menoke-22-luxo044",
       "status": "baseline",
-      "weightedScore": 210,
+      "weightedScore": 209,
       "diffCount": 22,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5088,10 +5088,10 @@
       "type": "sequence",
       "slug": "metano-36-gevu843",
       "status": "baseline",
-      "weightedScore": 60,
+      "weightedScore": 32,
       "diffCount": 60,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5115,10 +5115,10 @@
       "type": "sequence",
       "slug": "mezaxa-44-siju322",
       "status": "baseline",
-      "weightedScore": 79,
+      "weightedScore": 74,
       "diffCount": 79,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5133,10 +5133,10 @@
       "type": "sequence",
       "slug": "midipu-78-meva271",
       "status": "baseline",
-      "weightedScore": 126,
+      "weightedScore": 70,
       "diffCount": 126,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5160,10 +5160,10 @@
       "type": "sequence",
       "slug": "migodo-28-fodi331",
       "status": "baseline",
-      "weightedScore": 67,
+      "weightedScore": 33,
       "diffCount": 54,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5178,10 +5178,10 @@
       "type": "sequence",
       "slug": "mipope-41-daxa497",
       "status": "baseline",
-      "weightedScore": 65,
+      "weightedScore": 61,
       "diffCount": 65,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5205,10 +5205,10 @@
       "type": "sequence",
       "slug": "mitefi-27-cubo687",
       "status": "baseline",
-      "weightedScore": 668,
+      "weightedScore": 251,
       "diffCount": 486,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5232,10 +5232,10 @@
       "type": "sequence",
       "slug": "mivuke-79-fujo526",
       "status": "baseline",
-      "weightedScore": 41,
+      "weightedScore": 14,
       "diffCount": 41,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5250,10 +5250,10 @@
       "type": "sequence",
       "slug": "mizugi-66-desi413",
       "status": "baseline",
-      "weightedScore": 94,
+      "weightedScore": 50,
       "diffCount": 94,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5277,10 +5277,10 @@
       "type": "sequence",
       "slug": "mobobu-53-vita034",
       "status": "baseline",
-      "weightedScore": 54,
+      "weightedScore": 22,
       "diffCount": 54,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5304,10 +5304,10 @@
       "type": "sequence",
       "slug": "mokige-56-disi349",
       "status": "baseline",
-      "weightedScore": 86,
+      "weightedScore": 77,
       "diffCount": 86,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5349,10 +5349,10 @@
       "type": "sequence",
       "slug": "movaso-17-jomi483",
       "status": "baseline",
-      "weightedScore": 61,
+      "weightedScore": 28,
       "diffCount": 61,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5367,10 +5367,10 @@
       "type": "sequence",
       "slug": "moxope-92-roco972",
       "status": "baseline",
-      "weightedScore": 64,
+      "weightedScore": 32,
       "diffCount": 64,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5385,10 +5385,10 @@
       "type": "sequence",
       "slug": "mozofa-80-puru273",
       "status": "baseline",
-      "weightedScore": 68,
+      "weightedScore": 35,
       "diffCount": 68,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5403,10 +5403,10 @@
       "type": "sequence",
       "slug": "mucoji-36-bape235",
       "status": "baseline",
-      "weightedScore": 57,
+      "weightedScore": 50,
       "diffCount": 57,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5664,10 +5664,10 @@
       "type": "sequence",
       "slug": "nedaka-75-tiju705",
       "status": "baseline",
-      "weightedScore": 74,
+      "weightedScore": 67,
       "diffCount": 74,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5700,10 +5700,10 @@
       "type": "sequence",
       "slug": "nenika-09-domu220",
       "status": "baseline",
-      "weightedScore": 48,
+      "weightedScore": 17,
       "diffCount": 48,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5790,10 +5790,10 @@
       "type": "sequence",
       "slug": "nexuxi-32-gici059",
       "status": "baseline",
-      "weightedScore": 417,
+      "weightedScore": 412,
       "diffCount": 111,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5808,10 +5808,10 @@
       "type": "sequence",
       "slug": "nibiju-55-kavu710",
       "status": "baseline",
-      "weightedScore": 158,
+      "weightedScore": 124,
       "diffCount": 82,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5854,10 +5854,10 @@
       "type": "sequence",
       "slug": "nirolu-80-lobo780",
       "status": "baseline",
-      "weightedScore": 68,
+      "weightedScore": 61,
       "diffCount": 68,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5936,10 +5936,10 @@
       "type": "sequence",
       "slug": "nobase-02-zuvu172",
       "status": "baseline",
-      "weightedScore": 42,
+      "weightedScore": 35,
       "diffCount": 42,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -5972,10 +5972,10 @@
       "type": "sequence",
       "slug": "nojata-23-ropa545",
       "status": "baseline",
-      "weightedScore": 97,
+      "weightedScore": 66,
       "diffCount": 84,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6017,10 +6017,10 @@
       "type": "sequence",
       "slug": "note-color",
       "status": "baseline",
-      "weightedScore": 114,
+      "weightedScore": 57,
       "diffCount": 86,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6053,10 +6053,10 @@
       "type": "sequence",
       "slug": "nucumi-51-posa953",
       "status": "baseline",
-      "weightedScore": 392,
+      "weightedScore": 159,
       "diffCount": 294,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6089,19 +6089,19 @@
       "type": "sequence",
       "slug": "numugo-16-luca722",
       "status": "baseline",
-      "weightedScore": 79,
+      "weightedScore": 78,
       "diffCount": 79,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "nunozo-09-zoce623",
       "status": "baseline",
-      "weightedScore": 137,
+      "weightedScore": 100,
       "diffCount": 124,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6215,10 +6215,10 @@
       "type": "sequence",
       "slug": "pamuli-34-suxu083",
       "status": "baseline",
-      "weightedScore": 50,
+      "weightedScore": 24,
       "diffCount": 50,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6260,10 +6260,10 @@
       "type": "sequence",
       "slug": "paruvi-41-jano091",
       "status": "baseline",
-      "weightedScore": 64,
+      "weightedScore": 35,
       "diffCount": 64,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6278,10 +6278,10 @@
       "type": "sequence",
       "slug": "pebezu-05-dufi104",
       "status": "baseline",
-      "weightedScore": 23,
+      "weightedScore": 18,
       "diffCount": 23,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6296,10 +6296,10 @@
       "type": "sequence",
       "slug": "peduzi-80-giki495",
       "status": "baseline",
-      "weightedScore": 669,
+      "weightedScore": 252,
       "diffCount": 487,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6467,10 +6467,10 @@
       "type": "sequence",
       "slug": "pokici-03-lafi659",
       "status": "baseline",
-      "weightedScore": 152,
+      "weightedScore": 110,
       "diffCount": 152,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6503,19 +6503,19 @@
       "type": "sequence",
       "slug": "ponugi-73-xuzo000",
       "status": "baseline",
-      "weightedScore": 81,
+      "weightedScore": 39,
       "diffCount": 81,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "popoda-09-xavi089",
       "status": "baseline",
-      "weightedScore": 133,
+      "weightedScore": 63,
       "diffCount": 102,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6530,19 +6530,19 @@
       "type": "sequence",
       "slug": "porepe-36-nebi243",
       "status": "baseline",
-      "weightedScore": 52,
+      "weightedScore": 45,
       "diffCount": 52,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "porulu-24-ciga586",
       "status": "baseline",
-      "weightedScore": 25,
+      "weightedScore": 8,
       "diffCount": 25,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6557,10 +6557,10 @@
       "type": "sequence",
       "slug": "povuju-50-pido564",
       "status": "baseline",
-      "weightedScore": 54,
+      "weightedScore": 19,
       "diffCount": 54,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6584,10 +6584,10 @@
       "type": "sequence",
       "slug": "pucini-86-goti091",
       "status": "baseline",
-      "weightedScore": 137,
+      "weightedScore": 127,
       "diffCount": 94,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6665,10 +6665,10 @@
       "type": "sequence",
       "slug": "putici-74-zenu027",
       "status": "baseline",
-      "weightedScore": 346,
+      "weightedScore": 337,
       "diffCount": 271,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6791,28 +6791,28 @@
       "type": "sequence",
       "slug": "ravire-24-jaju542",
       "status": "baseline",
-      "weightedScore": 124,
+      "weightedScore": 81,
       "diffCount": 99,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "raxeca-83-rotu897",
       "status": "baseline",
-      "weightedScore": 131,
+      "weightedScore": 32,
       "diffCount": 131,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "recani-60-licu962",
       "status": "baseline",
-      "weightedScore": 171,
+      "weightedScore": 161,
       "diffCount": 128,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6836,10 +6836,10 @@
       "type": "sequence",
       "slug": "refoxa-14-rusi158",
       "status": "baseline",
-      "weightedScore": 30,
+      "weightedScore": 24,
       "diffCount": 30,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -6899,10 +6899,10 @@
       "type": "sequence",
       "slug": "rezoma-09-vixi307",
       "status": "baseline",
-      "weightedScore": 125,
+      "weightedScore": 120,
       "diffCount": 125,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7025,10 +7025,10 @@
       "type": "sequence",
       "slug": "rogube-67-sova611",
       "status": "baseline",
-      "weightedScore": 134,
+      "weightedScore": 61,
       "diffCount": 92,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7142,10 +7142,10 @@
       "type": "sequence",
       "slug": "rudola-01-bibi608",
       "status": "baseline",
-      "weightedScore": 141,
+      "weightedScore": 109,
       "diffCount": 128,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7241,10 +7241,10 @@
       "type": "sequence",
       "slug": "rusada-38-sopi026",
       "status": "baseline",
-      "weightedScore": 88,
+      "weightedScore": 48,
       "diffCount": 88,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7259,10 +7259,10 @@
       "type": "sequence",
       "slug": "ruxasu-79-puxa956",
       "status": "baseline",
-      "weightedScore": 69,
+      "weightedScore": 64,
       "diffCount": 69,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7295,19 +7295,19 @@
       "type": "sequence",
       "slug": "ruxuju-55-jitu721",
       "status": "baseline",
-      "weightedScore": 128,
+      "weightedScore": 96,
       "diffCount": 128,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "ruxuxu-75-jilu612",
       "status": "baseline",
-      "weightedScore": 223,
+      "weightedScore": 177,
       "diffCount": 223,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7322,10 +7322,10 @@
       "type": "sequence",
       "slug": "sameli-92-dape565",
       "status": "baseline",
-      "weightedScore": 117,
+      "weightedScore": 40,
       "diffCount": 117,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7412,10 +7412,10 @@
       "type": "sequence",
       "slug": "sedajo-92-docu424",
       "status": "baseline",
-      "weightedScore": 30,
+      "weightedScore": 24,
       "diffCount": 30,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7430,10 +7430,10 @@
       "type": "sequence",
       "slug": "sefako-72-jono850",
       "status": "baseline",
-      "weightedScore": 91,
+      "weightedScore": 56,
       "diffCount": 91,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "500251d12"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7466,10 +7466,10 @@
       "type": "sequence",
       "slug": "seloli-77-rixi778",
       "status": "baseline",
-      "weightedScore": 114,
+      "weightedScore": 57,
       "diffCount": 86,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7583,10 +7583,10 @@
       "type": "sequence",
       "slug": "sisege-95-labu547",
       "status": "baseline",
-      "weightedScore": 55,
+      "weightedScore": 47,
       "diffCount": 42,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7601,10 +7601,10 @@
       "type": "sequence",
       "slug": "sisena-47-nivo837",
       "status": "baseline",
-      "weightedScore": 21,
+      "weightedScore": 17,
       "diffCount": 21,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "500251d12"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7673,10 +7673,10 @@
       "type": "sequence",
       "slug": "sofavo-23-xuxi628",
       "status": "baseline",
-      "weightedScore": 83,
+      "weightedScore": 65,
       "diffCount": 83,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "500251d12"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7826,28 +7826,28 @@
       "type": "sequence",
       "slug": "suleta-28-lejo742",
       "status": "baseline",
-      "weightedScore": 82,
+      "weightedScore": 45,
       "diffCount": 82,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "sulipe-44-jeta861",
       "status": "baseline",
-      "weightedScore": 60,
+      "weightedScore": 32,
       "diffCount": 60,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "suneke-72-kexi504",
       "status": "baseline",
-      "weightedScore": 103,
+      "weightedScore": 97,
       "diffCount": 49,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7898,10 +7898,10 @@
       "type": "sequence",
       "slug": "suvodo-70-rogi494",
       "status": "baseline",
-      "weightedScore": 111,
+      "weightedScore": 109,
       "diffCount": 92,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -7943,10 +7943,10 @@
       "type": "sequence",
       "slug": "taboza-78-vali232",
       "status": "baseline",
-      "weightedScore": 129,
+      "weightedScore": 124,
       "diffCount": 53,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8033,19 +8033,19 @@
       "type": "sequence",
       "slug": "tefixi-07-xacu656",
       "status": "baseline",
-      "weightedScore": 81,
+      "weightedScore": 39,
       "diffCount": 81,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "tefunu-89-zece967",
       "status": "baseline",
-      "weightedScore": 103,
+      "weightedScore": 97,
       "diffCount": 49,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8061,10 +8061,10 @@
       "type": "sequence",
       "slug": "tejuzi-96-fano922",
       "status": "baseline",
-      "weightedScore": 110,
+      "weightedScore": 102,
       "diffCount": 110,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "500251d12"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8088,10 +8088,10 @@
       "type": "sequence",
       "slug": "telizo-11-pilo439",
       "status": "baseline",
-      "weightedScore": 39,
+      "weightedScore": 32,
       "diffCount": 39,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8133,19 +8133,19 @@
       "type": "sequence",
       "slug": "tetoxu-24-mupo410",
       "status": "baseline",
-      "weightedScore": 92,
+      "weightedScore": 82,
       "diffCount": 46,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "texopo-01-dibi658",
       "status": "baseline",
-      "weightedScore": 120,
+      "weightedScore": 69,
       "diffCount": 120,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8250,10 +8250,10 @@
       "type": "sequence",
       "slug": "titufa-76-tisa795",
       "status": "baseline",
-      "weightedScore": 62,
+      "weightedScore": 34,
       "diffCount": 62,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8268,10 +8268,10 @@
       "type": "sequence",
       "slug": "tixune-73-xoca786",
       "status": "baseline",
-      "weightedScore": 33,
+      "weightedScore": 14,
       "diffCount": 33,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8286,19 +8286,19 @@
       "type": "sequence",
       "slug": "todetu-82-rupo943",
       "status": "baseline",
-      "weightedScore": 189,
+      "weightedScore": 109,
       "diffCount": 189,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "todozi-34-jire490",
       "status": "baseline",
-      "weightedScore": 27,
+      "weightedScore": 12,
       "diffCount": 27,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8376,10 +8376,10 @@
       "type": "sequence",
       "slug": "tugaju-41-dovi584",
       "status": "baseline",
-      "weightedScore": 103,
+      "weightedScore": 97,
       "diffCount": 49,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8493,19 +8493,19 @@
       "type": "sequence",
       "slug": "tuzeli-17-cuko941",
       "status": "baseline",
-      "weightedScore": 299,
+      "weightedScore": 290,
       "diffCount": 224,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "tuzufi-65-xafe699",
       "status": "baseline",
-      "weightedScore": 81,
+      "weightedScore": 72,
       "diffCount": 81,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8547,10 +8547,10 @@
       "type": "sequence",
       "slug": "vamuge-84-degu929",
       "status": "baseline",
-      "weightedScore": 30,
+      "weightedScore": 24,
       "diffCount": 30,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8664,10 +8664,10 @@
       "type": "sequence",
       "slug": "vemako-00-lecu427",
       "status": "baseline",
-      "weightedScore": 106,
+      "weightedScore": 98,
       "diffCount": 106,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "500251d12"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8691,19 +8691,19 @@
       "type": "sequence",
       "slug": "vesaze-51-ceji187",
       "status": "baseline",
-      "weightedScore": 82,
+      "weightedScore": 64,
       "diffCount": 82,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "vetuvo-45-gaku910",
       "status": "baseline",
-      "weightedScore": 24,
+      "weightedScore": 11,
       "diffCount": 24,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8853,10 +8853,10 @@
       "type": "sequence",
       "slug": "vixapo-60-tuzu421",
       "status": "baseline",
-      "weightedScore": 72,
+      "weightedScore": 32,
       "diffCount": 72,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -8980,10 +8980,10 @@
       "type": "sequence",
       "slug": "vucomo-53-gicu658",
       "status": "baseline",
-      "weightedScore": 731,
+      "weightedScore": 314,
       "diffCount": 549,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9025,10 +9025,10 @@
       "type": "sequence",
       "slug": "vuniba-19-repo187",
       "status": "baseline",
-      "weightedScore": 107,
+      "weightedScore": 54,
       "diffCount": 93,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9043,19 +9043,19 @@
       "type": "sequence",
       "slug": "vutazu-28-xogu304",
       "status": "baseline",
-      "weightedScore": 64,
+      "weightedScore": 40,
       "diffCount": 50,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "vuvage-72-meru492",
       "status": "baseline",
-      "weightedScore": 30,
+      "weightedScore": 24,
       "diffCount": 30,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9097,19 +9097,19 @@
       "type": "sequence",
       "slug": "xacete-63-neke615",
       "status": "baseline",
-      "weightedScore": 48,
+      "weightedScore": 47,
       "diffCount": 48,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "xaduru-73-jani181",
       "status": "baseline",
-      "weightedScore": 30,
+      "weightedScore": 24,
       "diffCount": 30,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9187,10 +9187,10 @@
       "type": "sequence",
       "slug": "xaxile-75-soro580",
       "status": "baseline",
-      "weightedScore": 1294,
+      "weightedScore": 1132,
       "diffCount": 497,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9214,10 +9214,10 @@
       "type": "sequence",
       "slug": "xecopi-26-mego518",
       "status": "baseline",
-      "weightedScore": 131,
+      "weightedScore": 83,
       "diffCount": 131,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9475,19 +9475,19 @@
       "type": "sequence",
       "slug": "xogota-37-pele078",
       "status": "baseline",
-      "weightedScore": 166,
+      "weightedScore": 102,
       "diffCount": 166,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "xojavo-26-jezu088",
       "status": "baseline",
-      "weightedScore": 112,
+      "weightedScore": 107,
       "diffCount": 112,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9547,10 +9547,10 @@
       "type": "sequence",
       "slug": "xorixe-91-vaci569",
       "status": "baseline",
-      "weightedScore": 29,
+      "weightedScore": 24,
       "diffCount": 29,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9574,10 +9574,10 @@
       "type": "sequence",
       "slug": "xujavu-00-xodi798",
       "status": "baseline",
-      "weightedScore": 1122,
+      "weightedScore": 1111,
       "diffCount": 106,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9592,10 +9592,10 @@
       "type": "sequence",
       "slug": "xujoga-62-lacu610",
       "status": "baseline",
-      "weightedScore": 56,
+      "weightedScore": 47,
       "diffCount": 56,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9673,10 +9673,10 @@
       "type": "sequence",
       "slug": "xutuvu-44-zoko423",
       "status": "baseline",
-      "weightedScore": 64,
+      "weightedScore": 29,
       "diffCount": 50,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9700,10 +9700,10 @@
       "type": "sequence",
       "slug": "xuzoxu-26-kafe830",
       "status": "baseline",
-      "weightedScore": 50,
+      "weightedScore": 43,
       "diffCount": 50,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9727,19 +9727,19 @@
       "type": "sequence",
       "slug": "zacoco-81-robo032",
       "status": "baseline",
-      "weightedScore": 49,
+      "weightedScore": 32,
       "diffCount": 35,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
       "slug": "zajova-30-sagu653",
       "status": "baseline",
-      "weightedScore": 448,
+      "weightedScore": 444,
       "diffCount": 197,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9754,10 +9754,10 @@
       "type": "sequence",
       "slug": "zakuti-75-kute096",
       "status": "baseline",
-      "weightedScore": 36,
+      "weightedScore": 8,
       "diffCount": 36,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9835,10 +9835,10 @@
       "type": "sequence",
       "slug": "zazaje-27-roga410",
       "status": "baseline",
-      "weightedScore": 30,
+      "weightedScore": 24,
       "diffCount": 30,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9934,10 +9934,10 @@
       "type": "sequence",
       "slug": "zetenu-41-rece091",
       "status": "baseline",
-      "weightedScore": 149,
+      "weightedScore": 92,
       "diffCount": 149,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9970,10 +9970,10 @@
       "type": "sequence",
       "slug": "zicadi-21-koje636",
       "status": "baseline",
-      "weightedScore": 905,
+      "weightedScore": 900,
       "diffCount": 81,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -9997,10 +9997,10 @@
       "type": "sequence",
       "slug": "ziloke-42-lodi019",
       "status": "baseline",
-      "weightedScore": 84,
+      "weightedScore": 34,
       "diffCount": 84,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -10024,10 +10024,10 @@
       "type": "sequence",
       "slug": "zizeca-16-cavi659",
       "status": "baseline",
-      "weightedScore": 46,
+      "weightedScore": 44,
       "diffCount": 46,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -10060,10 +10060,10 @@
       "type": "sequence",
       "slug": "zofini-90-tuta329",
       "status": "baseline",
-      "weightedScore": 64,
+      "weightedScore": 34,
       "diffCount": 64,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -10160,10 +10160,10 @@
       "type": "sequence",
       "slug": "zudize-61-vomi445",
       "status": "baseline",
-      "weightedScore": 203346,
+      "weightedScore": 55923,
       "diffCount": 178874,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "500251d12"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
@@ -10241,10 +10241,10 @@
       "type": "sequence",
       "slug": "zupora-06-pazi006",
       "status": "baseline",
-      "weightedScore": 80,
+      "weightedScore": 37,
       "diffCount": 80,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "97feaee42"
+      "measuredAt": "2026-10-09",
+      "measuredAgainstCommit": "add42db0"
     },
     {
       "type": "sequence",
