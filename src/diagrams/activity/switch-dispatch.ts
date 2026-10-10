@@ -8,7 +8,7 @@
  * at the project's 500-line cap.
  */
 
-import type { ParseRefusal } from '../../core/parse-refusal.js';
+import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 import type { ActivityNode, ActivityNote, ActivitySwitch, ActivitySwitchCase } from './ast.js';
 import {
   RE_CASE,
@@ -27,6 +27,9 @@ import { tryNoteMulti, tryNoteSingle } from './note-dispatch.js';
 /** `case`/`endswitch` are both simple word-prefix stops -- the same
  *  mechanism `if`'s `['elseif', 'else', 'endif']` already relies on
  *  (`matchesStopKeyword`, dispatch-support.ts). */
+/** `InstructionSwitch.java:99`. */
+const NO_CASE_MESSAGE = "No 'case' in this switch";
+
 const SWITCH_INNER_STOPS: StopKeywords = ['case', 'endswitch'];
 
 type SwitchClauseStep =
@@ -111,6 +114,12 @@ function consumeSwitchCases(
   while (cursor < ctx.lines.length) {
     const step = classifySwitchClauseLine(ctx, cursor);
     if (isRefusal(step)) return step;
+    // aepp-T1c: any other line before the first `case` reaches
+    // `InstructionSwitch#add` with `current == null`
+    // (`InstructionSwitch.java:97-101`).
+    // Blank lines are not commands (`parseNodes` skips them likewise).
+    if (step.kind === 'unexpected' && cases.length === 0 && ctx.lines[cursor]!.trim() !== '')
+      return refuse('execution', cursor, cursor, NO_CASE_MESSAGE);
     cursor = step.cursor;
     if (step.kind === 'endswitch') break;
     if (step.kind === 'case') {

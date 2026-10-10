@@ -1072,6 +1072,8 @@ on a file, prints `[From in.puml (line N) ]` (`renderSync` receives markup,
 never a path; `src/core/error/error-renderer.ts:29`). The line number itself
 matches since T6f (`refusalLineOf`, `MindMapDiagramFactory.ts`).
 
+**No longer measured (user ruling 2026-10-10).** Error pages are not compared element-by-element: when the stock jar errors and we render our own error page the fixture is conformant (`docs/svg-conformance.md`, "Error pages"). The version and source-name differences therefore appear in no survey; the ruling above still holds for production output.
+
 ### ~~Embedded `{{ }}` diagram slots: the deterministic-text oracle reserves 42×42~~ — RETIRED (lgm, oracle seam #3 + T1e, 2026-10-08)
 
 Oracle seam #3 (fork `37c07dce45a`, `oracle/patches/0003-oracle-svg-property.patch`) makes the width-table bounder answer `matchesProperty("SVG")` like `StringBounderSvg.java:67-69`; `EmbeddedDiagram#calculateDimensionSlow` now takes the SVG arm (`EmbeddedDiagram.java:129-133`) and the ink pass `LimitFinder#drawImageSvg` (`LimitFinder.java:99-100,201-204`). The 38 cached fixtures with `{{` were re-captured. The port had fitted the old slot in the description and class embed paths; every `{{ }}` slot is now the nested document's `UImageSvg` size in every engine (`tests/fixtures/lgm-T1e/`). The `svg-unknown/semutu-45-zeno907` ledger entry is withdrawn (moved to `retired`).

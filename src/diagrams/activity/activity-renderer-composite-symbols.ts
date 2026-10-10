@@ -39,6 +39,16 @@ export interface CompositeInk {
   readonly fill: string;
   readonly stroke: string;
   readonly strokeWidth: number;
+  /** The style's RAW `RoundCorner` (`FtileGroup.java:103`); `rx`/`ry` are
+   *  each half (`URectangle#rounded`). Drawn by `card`/`rectangle` only. */
+  readonly roundCorner?: number;
+}
+
+/** `rx`/`ry` of the symbol's `URectangle` (`USymbolCard.java:60`,
+ *  `USymbolRectangle.java:67-69`): half the style's `RoundCorner`. */
+function cornerAttrs(ink: CompositeInk): { rx?: number; ry?: number } {
+  const half = (ink.roundCorner ?? 0) / 2;
+  return half === 0 ? {} : { rx: half, ry: half };
 }
 
 /** The title's measured block (`dimTitle`); `width === 0` for an empty title. */
@@ -97,7 +107,10 @@ function drawCard(node: ActivityNodeGeo, title: TitleDim, ink: CompositeInk): st
   const { x, y, width, height } = node;
   const stroke = { stroke: ink.stroke, strokeWidth: ink.strokeWidth };
   const top = title.height + CARD_TOP_EXTRA;
-  return rect(x, y, width, height, { fill: ink.fill, ...stroke }) + line(x, y + top, x + width, y + top, stroke);
+  return (
+    rect(x, y, width, height, { fill: ink.fill, ...stroke, ...cornerAttrs(ink) }) +
+    line(x, y + top, x + width, y + top, stroke)
+  );
 }
 
 /**
@@ -117,5 +130,6 @@ export function drawCompositeSymbol(
     fill: ink.fill,
     stroke: ink.stroke,
     strokeWidth: ink.strokeWidth,
+    ...cornerAttrs(ink),
   });
 }

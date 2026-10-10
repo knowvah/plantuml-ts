@@ -101,6 +101,7 @@ export function parseActivity(block: UmlSource, options?: ParseOptions): Activit
     swimlanes: [],
     swimlaneSet: new Set(),
     currentSwimlane: undefined,
+    swimlaneStrategy: undefined,
     swimlaneColors: new Map(),
     annotations: createAnnotations(),
     sprites: createSpriteRegistry(internalSprites, internalEmoji),

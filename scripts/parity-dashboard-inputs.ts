@@ -135,15 +135,22 @@ export interface SurveySummary {
   conformant: number;
   structural: number;
   diverged: number;
+  /** Rows that are conformant because both jar and we render an error page (D7). */
+  errorPage?: number;
   generatedAt: string;
 }
 
 /** Pure: verdict tally for one type's fixture rows. */
 export function tallySurvey(
   rows: readonly FixtureRow[],
-): Pick<SurveySummary, 'conformant' | 'structural' | 'diverged'> {
+): Pick<SurveySummary, 'conformant' | 'structural' | 'diverged'> & { errorPage: number } {
   const count = (v: Verdict): number => rows.filter((r) => r.verdict === v).length;
-  return { conformant: count('conformant'), structural: count('structural-match'), diverged: count('diverged') };
+  return {
+    conformant: count('conformant'),
+    structural: count('structural-match'),
+    diverged: count('diverged'),
+    errorPage: rows.filter((r) => r.errorPage === true).length,
+  };
 }
 
 const PARITY_FILE_RE = /^parity-([a-z0-9]+)\.json$/;

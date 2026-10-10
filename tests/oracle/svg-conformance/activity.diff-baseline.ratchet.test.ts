@@ -290,7 +290,10 @@ describe('svg-activity weighted-score baseline ratchet — corpus presence', () 
     // Derivation: 373 - 1 = 372.
     // add4/T0b (2026-10-07): the 79 uncaptured tests/corpus/activity fixtures
     // captured (D1; tmp1 stays retired). Derivation: 372 + 79 = 451.
-    expect(manifest.fixtures.length).toBe(451);
+    // aepp/T1e (2026-10-10): jetigu-21-zaje860 + nuzise-60-temi305 moved to
+    // dot-cache/sequence -- the jar draws both as SEQUENCE (teoz;
+    // core/TextBlockExporter.java:292-294, aepp D3). Derivation: 451 - 2 = 449.
+    expect(manifest.fixtures.length).toBe(449);
   });
 
   // add1-T0b: the three-status arithmetic (D8's README note) extends to a
@@ -299,7 +302,7 @@ describe('svg-activity weighted-score baseline ratchet — corpus presence', () 
   // than only checking `manifest.fixtures.length` above -- also catches an
   // unrecognized fifth status silently falling through every filter below
   // unexamined (at b0: 311 + 39 + 23 + 0 = 373; T0b pins no real row).
-  it('jar-error + error + baseline + pinned accounts for every one of the 451 fixtures', () => {
+  it('jar-error + error + baseline + pinned accounts for every one of the 449 fixtures', () => {
     expect(jarErrorFixtures.length + errorFixtures.length + baselineFixtures.length + pinnedFixtures.length).toBe(
       manifest.fixtures.length,
     );

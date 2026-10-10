@@ -33,6 +33,18 @@ TYPE_PATTERNS = [
 ]
 
 
+# Slugs whose jar-rendered type the regex classifier gets wrong, keyed by the
+# copied file name. Both are teoz sequence diagrams (`Test <- Test` has no
+# `->` for the sequence pattern, and `end` closes their `group`, which the
+# activity `end` pattern matches); the jar's own SVG carries
+# data-diagram-type="SEQUENCE" (core/TextBlockExporter.java:292-294). An
+# override, not a regex change: widening the sequence patterns would
+# reclassify unrelated fixtures (aepp D3).
+TYPE_OVERRIDES = {
+    "jetigu-21-zaje860.puml": "sequence",
+    "nuzise-60-temi305.puml": "sequence",
+}
+
 def detect_type(body: str) -> str | None:
     for dtype, patterns in TYPE_PATTERNS:
         for p in patterns:
@@ -53,7 +65,7 @@ def extract_diagram(raw: str) -> str | None:
 
 def copy_file(diagram: str, name: str, counts: dict, skipped_ref: list) -> None:
     body = diagram[len("@startuml"):diagram.rfind("@enduml")]
-    dtype = detect_type(body)
+    dtype = TYPE_OVERRIDES.get(name) or detect_type(body)
     if dtype is None:
         skipped_ref[0] += 1
         return

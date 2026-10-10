@@ -35,6 +35,39 @@ post-D7 measurements.
 
 ---
 
+## `activity-error-page-parity` (aepp) — DONE 2026-10-10 (batches 0–3)
+
+**What changed:**
+- The user's error-page rule landed: where the stock jar errors, we are conformant iff we render our own error page (`docs/svg-conformance.md`, "Error pages").
+- Stock-jar record: `oracle/goldens/stock-error-pages.json`, 114 rows, built by `scripts/stock-jar-verify.sh`.
+- Survey verdict: the survey reads `setErrorPageObserver`.
+- Activity went **433/1/17 → 448/1/0** (449 rows). All 14 jar-error rows are now `errorPage`; tidoda is conformant and pinned.
+- jetigu and nuzise moved to sequence.
+- All-engine survey b0 → final: 62 movers, **0 conformant losses**.
+
+**Error-conformant gains outside activity** (listed by name in `plans/activity-error-page-parity/measurements/final-error-rows.txt`):
+- unknown +25 (stop 6; user accepted)
+- timing +6, state +4, class +3, mindmap +3, c4 +1, gantt +1
+
+Follow-ons:
+
+1. **bozido-07-geze049 (D4).** It waits on the wbs, salt and gantt engines, each its own engine-port mission. Its mindmap slot is already exact.
+2. **Jar errors, we draw (57 rows, `firstDiff: 'error-page'`).** Each needs our engine to refuse where upstream does.
+   - wbs 28, unknown 13, gantt 10, regex 2, and c4/chronology/ebnf/salt 1 each.
+   - Slugs are in `final-error-rows.txt`.
+   - Error-page rule: refuse there; never match the jar's message.
+3. **Oracle-widths crashes.**
+   - class/zuduxu and unknown/rubebe crash only under `-DPLANTUML_DETERMINISTIC_TEXT` (graphviz loses the `sametail` edge, then `Neighborhood.java:72-80,151`).
+   - They are admitted with `provenance: 'oracle-widths'` by user ruling. Re-run `scripts/stock-jar-verify.sh` on every pin or seam change, because the set can grow or shrink.
+4. **RoundCorner ports not done (no consumer or fixture):**
+   - `titleBorderRoundCorner` and `legendBorderRoundCorner` (`FromSkinparamToStyle.java:169,175`)
+   - `package` rounded-folder RoundCorner (the `USymbolFolder` rounded path plus the canvas-origin shift)
+5. **T1g broadened relationship FullIds.** `requalifyFullIds` now applies to every namespaced relationship, not only the two fixtures; the all-engine survey showed 0 losses from it.
+   - Watch `class-assoc-subsume` and `dotEdgeReversed` if a namespaced-relationship regression appears.
+6. **Harness hygiene:**
+   - `measurements/survey-all.sh` hard-codes `cd` to the main checkout, so it is unusable from a worktree as-is. Fix it in the next mission's copy.
+   - `scripts/__pycache__/compile-themes.cpython-313.pyc` is tracked in git.
+
 ## `instrument-space-width` (isw) — DONE 2026-10-09 (batches 0, 1, 2a–2c, final)
 
 Oracle seam #4 (fork `eb0f3cff7df`) measures U+0020 as U+0021 (44 tenths)

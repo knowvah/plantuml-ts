@@ -33,6 +33,8 @@ export interface RenderedFixture {
   svg: string;
   dotEqual: boolean;
   oracleBlind: boolean;
+  /** Our renderer emitted its error page (`setErrorPageObserver`). */
+  errorPage: boolean;
 }
 
 /** What the pool observed for one fixture. Mirrors the three outcomes the
@@ -109,6 +111,7 @@ function parseFrame(line: string, stderr: string): WorkerOutcome {
         svg: parsed.svg,
         dotEqual: parsed.dotEqual === true,
         oracleBlind: parsed.oracleBlind === true,
+        errorPage: parsed.errorPage === true,
       },
     };
   } catch {

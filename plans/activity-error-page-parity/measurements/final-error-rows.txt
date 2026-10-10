@@ -1,0 +1,15 @@
+c4 error-conformant +1: kipive-74-lele070
+c4 jar-errors-we-draw 1: gikaju-64-bari602
+chronology jar-errors-we-draw 1: lenudo-53-nade902
+class error-conformant +3: luzive-62-zote562, sadamo-18-siva346, zuduxu-90-kosi876
+ebnf jar-errors-we-draw 1: ladifa-97-keme950
+gantt error-conformant +1: nejadu-63-nifo204
+gantt jar-errors-we-draw 10: fobeda-14-tori503, furubu-23-mecu777, govacu-51-puti316, lituri-55-caju105, mogafu-27-jeci360, nakude-77-suji787, papava-92-geve698, recufa-28-desi167, saricu-01-funu594, votofi-06-rolo321
+mindmap error-conformant +3: femiba-70-duvi238, fogari-75-febu345, susipa-95-tedu015
+regex jar-errors-we-draw 2: bakuza-41-bulo451, tajefa-31-pefi801
+salt jar-errors-we-draw 1: lakari-33-mone874
+state error-conformant +4: cagego-53-vemo516, fugedo-34-fice721, xacona-99-peze211, zecivu-62-pagu681
+timing error-conformant +6: fuseva-46-zare084, lamera-74-sago807, pebecu-20-deci596, pefana-89-modi000, sezuvo-55-nose464, vufija-57-xoda292
+unknown error-conformant +25: bupexo-79-sijo243, dakijo-89-mofa766, dobujo-29-rifo090, fikaka-55-jeva969, gumulo-94-ziva021, jamuxo-74-diji002, kokofa-47-deni140, kokote-73-revo347, komoso-43-xika169, kutazo-93-vumu267, nakavu-98-pela661, nifosu-42-gubi213, pajojo-12-kixi425, petiku-70-fogu777, pizegi-06-jiro383, rubebe-45-sura795, Timing-short-alias-7, Timing-short-alias-8, Timing-short-alias-9, tmp1-1, tumepe-28-zuma441, zelini-86-gelo257, zetebu-58-capa762, zicejo-69-teko349, zodude-13-tito074
+unknown jar-errors-we-draw 13: dagugu-60-zuli109, gibapi-78-fote878, gujeku-90-jisa609, jifoke-84-jude859, kijaro-77-vomi552, ligalo-62-suvu444, lonome-59-lego635, lulanu-89-tase004, micono-65-juka195, nixuje-20-bobu879, torazi-09-gago377, zeceme-22-rade890, zugazo-84-raju675
+wbs jar-errors-we-draw 28: bujigo-66-zepu613, cesoke-21-muro498, cofele-91-sanu676, cupuri-11-piru303, fasuti-82-dire353, kifona-80-bufa102, konipe-99-jafu307, lagoda-51-zuna611, ledama-83-xoko366, link-URL-tooltip-0, sefoxo-37-zuvo274, sipuja-30-deto581, solive-57-nola542, tojixi-05-lusu056, tubeli-58-kadi729, vavibi-10-maso573, WBS-monoline-def-0-11, WBS-monoline-def-0-17, WBS-monoline-def-0-18, WBS-monoline-def-0-24, WBS-monoline-def-0-3, WBS-monoline-def-0-6, WBS-multiline-def-1-14, WBS-multiline-def-1-15, WBS-multiline-def-1-21, WBS-multiline-def-1-3, WBS-multiline-def-1-8, zecavo-98-kini554

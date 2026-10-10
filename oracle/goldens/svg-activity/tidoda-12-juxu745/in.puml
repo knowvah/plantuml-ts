@@ -1,0 +1,11 @@
+@startuml
+skinparam  rectangle {
+    RoundCorner 25
+    BackgroundColor red
+    BorderColor blue
+}
+hide stereotype
+rectangle outerAction {
+:innerAction;
+}
+@enduml

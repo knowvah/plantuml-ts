@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
-  "measuredAt": "2026-10-09",
-  "measuredAgainstCommit": "3d8988d8",
+  "measuredAt": "2026-10-10",
+  "measuredAgainstCommit": "ebb7b943",
   "fixtures": [
     {
       "type": "activity",
@@ -6061,14 +6061,6 @@
     },
     {
       "type": "activity",
-      "slug": "jetigu-21-zaje860",
-      "status": "error",
-      "reason": "not an activity diagram: the jar renders data-diagram-type=SEQUENCE (teoz group/self-message; also captured under dot-cache/unknown) (TextBlockExporter.java:292-294) and routing agrees; misfiled in tests/corpus/activity, so the activity parser refuses it (activity parser refused this source at line 3 (syntax): Syntax Error?)",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
-    },
-    {
-      "type": "activity",
       "slug": "jevoce-05-mumi686",
       "status": "baseline",
       "ours": {
@@ -10723,14 +10715,6 @@
     },
     {
       "type": "activity",
-      "slug": "nuzise-60-temi305",
-      "status": "error",
-      "reason": "not an activity diagram: the jar renders data-diagram-type=SEQUENCE (teoz group/self-message; also captured under dot-cache/unknown) (TextBlockExporter.java:292-294) and routing agrees; misfiled in tests/corpus/activity, so the activity parser refuses it (activity parser refused this source at line 3 (syntax): Syntax Error?)",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
-    },
-    {
-      "type": "activity",
       "slug": "nuzugu-44-pega793",
       "status": "baseline",
       "ours": {
@@ -14128,8 +14112,8 @@
       "type": "activity",
       "slug": "tidoda-12-juxu745",
       "status": "baseline",
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "2686a257",
+      "measuredAt": "2026-10-10",
+      "measuredAgainstCommit": "ebb7b943",
       "ours": {
         "fontSize": {
           "12": 1,
@@ -14137,8 +14121,7 @@
         },
         "strokeWidth": {},
         "rx": {
-          "(absent)": 1,
-          "12.5": 1
+          "12.5": 2
         },
         "textCount": 2,
         "width": "136",

@@ -42,6 +42,13 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { renderSync } from '../src/index.js';
+import { setErrorPageObserver } from '../src/core/error/error-renderer.js';
+import {
+  errorPageVerdict,
+  installErrorPageFlag,
+  loadStockErrorRecord,
+  type StockErrorRecord,
+} from './lib/survey-error-verdict.js';
 import { setLayoutInputObserver, type LayoutInputEvent } from '../src/core/graph-layout.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { computeDotEqual, hasActiveSmetanaPragma } from './lib/survey-dot-equal.js';
@@ -125,6 +132,8 @@ export interface FixtureRow {
    *  safe `false` rather than a real judgment. See `hasActiveSmetanaPragma`
    *  (scripts/lib/survey-dot-equal.ts). */
   oracleBlind?: boolean;
+  /** Stock jar errors and so do we (D7): conformant without an SVG compare. */
+  errorPage?: true;
 }
 
 export interface ParityReport {
@@ -280,17 +289,20 @@ function renderFrame(dir: string): string {
   const svekDots = readSvekDots(dir);
   const events: LayoutInputEvent[] = [];
   setLayoutInputObserver((e) => events.push(e));
+  const isErrorPage = installErrorPageFlag();
   try {
     const svg = renderSync(markup, {
       measurer: new DeterministicMeasurer(),
       assetStore: SURVEY_ASSET_STORE,
       includeStore: fixtureIncludeStore(),
     });
-    return JSON.stringify({ svg, dotEqual: computeDotEqual(svekDots, events, oracleBlind, markup), oracleBlind });
+    const dotEqual = computeDotEqual(svekDots, events, oracleBlind, markup);
+    return JSON.stringify({ svg, dotEqual, oracleBlind, errorPage: isErrorPage() });
   } catch (err) {
     return JSON.stringify({ error: errText(err).split('\n')[0] });
   } finally {
     setLayoutInputObserver(undefined);
+    setErrorPageObserver(undefined);
   }
 }
 
@@ -339,12 +351,12 @@ function oracleErrorRow(type: string, f: FixtureDir, oracleSvg: string): Fixture
 }
 
 /** Folds one worker outcome plus its oracle SVG into the output row. */
-function rowFor(type: string, f: FixtureDir, oracleSvg: string, o: WorkerOutcome): FixtureRow {
+function rowFor(type: string, f: FixtureDir, oracleSvg: string, o: WorkerOutcome, rec: StockErrorRecord): FixtureRow {
   if (o.kind === 'timeout') return { slug: f.slug, type, verdict: 'timeout', dotEqual: false };
   if (o.kind === 'errored') {
     return { slug: f.slug, type, verdict: 'errored', dotEqual: false, errMsg: o.message };
   }
-  const verdict = diffVerdict(o.rendered.svg, oracleSvg);
+  const verdict = errorPageVerdict(type, f.slug, rec, o.rendered.errorPage) ?? diffVerdict(o.rendered.svg, oracleSvg);
   const blindField = o.rendered.oracleBlind ? { oracleBlind: true } : {};
   return { slug: f.slug, type, dotEqual: o.rendered.dotEqual, ...verdict, ...blindField };
 }
@@ -371,9 +383,10 @@ async function surveyType(
       if (done % 25 === 0) process.stderr.write(`  ${done}/${total}\n`);
     },
   });
+  const record = loadStockErrorRecord();
   const rows = [...pre] as (FixtureRow | undefined)[];
   todo.forEach(({ f, i }, k) => {
-    rows[i] = rowFor(type, f, svgs[i]!, outcomes[k]!);
+    rows[i] = rowFor(type, f, svgs[i]!, outcomes[k]!, record);
   });
   return rows as FixtureRow[];
 }

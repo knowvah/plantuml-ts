@@ -1,0 +1,4064 @@
+{
+  "$comment": "Per-fixture weightedScore pins for the ACTIVITY oracle corpus. RE-PINNED by activity-klimt-compress T6 (2026-09-10) after T1 (ArrowsRegular) and T5 (klimt/compress ON_X then ON_Y): 253 pins ROSE from T1's per-index arrowhead pairing (pre-named), 3 fell (strictuml/ArrowsTriangle), and T5 moved 6 up / 14 down against the post-T1 state with every riser journaled. The pinned score is comparable only within one comparator regime; see diff-census.json descent and plans/activity-klimt-compress/decision-journal.md. Prior re-pin: activity-parallel-connectors T6 (fa578b8a).",
+  "fixtures": [
+    {
+      "type": "activity",
+      "slug": "activity-creole-table",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
+    },
+    {
+      "type": "activity",
+      "slug": "bakopu-96-pudu086",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "barada-07-veca157",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "bareka-88-fusu160",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "bazize-75-dedo568",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "bazuma-86-metu353",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "becaje-01-vaji284",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "d018a56f"
+    },
+    {
+      "type": "activity",
+      "slug": "becanu-19-diti597",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "bedezo-44-more709",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "begivo-34-sicu289",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "bejeta-45-sotu349",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "a30245de",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "bepuku-07-vebe062",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "d018a56f"
+    },
+    {
+      "type": "activity",
+      "slug": "besaga-58-poli497",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "bideta-97-cezo697",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "bidosa-98-veca008",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "bigide-91-bise382",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1d2fb519"
+    },
+    {
+      "type": "activity",
+      "slug": "biguku-39-voxu233",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "biredi-08-bama025",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "bixefi-77-moki051",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "bizeti-00-mido821",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "6c788ec6",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "bizono-61-sasa740",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "bocaga-53-nale241",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "d018a56f"
+    },
+    {
+      "type": "activity",
+      "slug": "bolizi-92-pele824",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "bopele-45-bufo031",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "boxefe-81-situ725",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "0a21936b",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "boxoto-53-sifo232",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "bozido-07-geze049",
+      "status": "baseline",
+      "weightedScore": 68,
+      "diffCount": 68,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "3672452f"
+    },
+    {
+      "type": "activity",
+      "slug": "bozuro-33-celo170",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "bubefi-32-fike915",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "c4915f83",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "bugaja-31-jaso630",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "bulasi-17-vafa634",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "bumaca-51-kece901",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "bunoxu-10-jabe604",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "caburo-70-buki284",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "caciva-80-kene990",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "cagoze-40-tete366",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "cakeca-72-kara622",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "6c788ec6",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "calenu-74-vigo098",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "camavo-50-kaku123",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "carapo-31-bisi880",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "cebuci-75-zona564",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "cejupe-34-muti621",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "cemagu-66-vazo965",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "cemipu-87-dinu624",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1d2fb519"
+    },
+    {
+      "type": "activity",
+      "slug": "cetica-88-toke482",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "cezabi-50-cege262",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "ciceto-21-zanu057",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "cifafo-49-jazi415",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "cigagu-31-rime196",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "ciloke-34-pumi198",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "citire-32-mive114",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "cixave-47-milo698",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "cizixu-00-koro700",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "cofubo-18-koju711",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "3b36df73",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "cokoja-48-luki109",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "copisa-69-xisi273",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
+    },
+    {
+      "type": "activity",
+      "slug": "covage-54-pine573",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "8a8c1692"
+    },
+    {
+      "type": "activity",
+      "slug": "cubida-55-meku256",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "cufega-65-beji958",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "cugezi-99-tire097",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "cujoni-21-somi079",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "cutabu-59-cilo276",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "dabulu-96-feco908",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "dacuga-41-popo038",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "dajoge-59-cusa859",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "dakesa-98-mano758",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "darote-51-kuta407",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "daxare-39-buci637",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "debofa-60-mude568",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "decudi-92-bisu741",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
+    },
+    {
+      "type": "activity",
+      "slug": "delide-30-teva601",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "demibe-40-moda439",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "dexero-99-ziru660",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "digexe-63-zifu774",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
+    },
+    {
+      "type": "activity",
+      "slug": "dikaze-62-xibe813",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "dimuco-32-niro540",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "dirame-64-cica627",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "disemi-67-keva276",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "divinu-75-busu278",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "a30245de",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "dixiku-28-guzo497",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "dotuzi-75-nape254",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "dozaxu-98-xetu961",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "doziki-93-rosi997",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "dulate-94-bupu593",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "dulezi-77-sana210",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "dulusu-13-roka577",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "6c788ec6",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "dunejo-33-divo189",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "dupopo-44-deto131",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "duvole-80-meda461",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "duzumu-46-geve509",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "8a8c1692"
+    },
+    {
+      "type": "activity",
+      "slug": "fabexi-81-dife869",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "fabule-54-pili300",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "fabuli-92-vemo727",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "fakece-07-koga025",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "famiki-74-fedu284",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "c4915f83",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "farexi-86-xanu521",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
+    },
+    {
+      "type": "activity",
+      "slug": "fatuzu-07-cevu894",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "feceme-58-xodo415",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "felega-00-saxi785",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "femaco-88-bufe808",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "8a8c1692"
+    },
+    {
+      "type": "activity",
+      "slug": "fetizo-39-jace641",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "d018a56f"
+    },
+    {
+      "type": "activity",
+      "slug": "fibafo-22-foze119",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "d018a56f"
+    },
+    {
+      "type": "activity",
+      "slug": "fikuki-99-kulu790",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "4181c68d"
+    },
+    {
+      "type": "activity",
+      "slug": "filela-40-rumo296",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "firibi-00-puki721",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "fisaca-74-deco063",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "fitega-67-kupi183",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "fivama-51-cusa142",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "d018a56f"
+    },
+    {
+      "type": "activity",
+      "slug": "fivone-96-nalo453",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "fofele-65-lozo631",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
+    },
+    {
+      "type": "activity",
+      "slug": "foludi-80-gilo247",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "fomapa-90-bore251",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "fonabu-93-xama593",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "fonebe-54-save009",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "fotamo-01-rupi481",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "fovaja-48-leso567",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "fufefa-17-faje066",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "fugoko-04-lafo140",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "fukika-81-gite897",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "0996e889",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "fuleno-34-boni528",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "a30245de",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "gabeme-89-tiko230",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 10 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "gacaja-15-keko600",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "gafuxi-23-kexi909",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "a30245de",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "gakelo-29-neno787",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "ganaku-47-muko252",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "garuga-34-debe901",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "gaxezi-48-zesa921",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "gebuzi-30-nulo391",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "gelixa-02-sele970",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "a30245de",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "gelono-70-zuce760",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "gepetu-15-seba834",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "geremo-94-tecu179",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "gesogi-81-xoma900",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "c4915f83"
+    },
+    {
+      "type": "activity",
+      "slug": "getene-72-dido571",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "gevaxi-80-tone223",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "gexuko-22-dumi059",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "a30245de",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "gimegi-77-xidu727",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "giteso-65-mefo026",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "gitoke-38-beme495",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "givanu-33-kire967",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "gizore-52-fode894",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "gofebi-87-zeka817",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "gokagi-91-mise154",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "gonixe-93-zaza537",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "goxoni-69-lemo511",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "guceja-66-tola192",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "gudute-55-nulo344",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "gufuma-85-zoce945",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "4181c68d"
+    },
+    {
+      "type": "activity",
+      "slug": "gugala-11-suce270",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "gunuki-27-nixu177",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "fd2c3fa8",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "jafuli-91-sota277",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "d018a56f"
+    },
+    {
+      "type": "activity",
+      "slug": "jageti-56-kume076",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "jagove-43-nako107",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "jakuco-69-dari135",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "jamana-83-gige126",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "japeku-46-kulo799",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "3b36df73",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "japeru-28-guku001",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "javedu-70-vaxo310",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "javivi-33-poma496",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "jazedo-50-meka611",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "0a21936b",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "jecoxu-17-zama003",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "d018a56f"
+    },
+    {
+      "type": "activity",
+      "slug": "jetigu-21-zaje860",
+      "status": "error",
+      "diffCount": null,
+      "reason": "not an activity diagram: the jar renders data-diagram-type=SEQUENCE (teoz group/self-message; also captured under dot-cache/unknown) (TextBlockExporter.java:292-294) and routing agrees; misfiled in tests/corpus/activity, so the activity parser refuses it (activity parser refused this source at line 3 (syntax): Syntax Error?)",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
+      "slug": "jevoce-05-mumi686",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
+    },
+    {
+      "type": "activity",
+      "slug": "jevofu-58-fazo194",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "jidefi-14-kafe151",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "jipapo-14-kevu587",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
+    },
+    {
+      "type": "activity",
+      "slug": "jisema-42-rapa121",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
+    },
+    {
+      "type": "activity",
+      "slug": "jodagi-12-xatu540",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "jogami-42-jaji869",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "jokaxi-40-toko207",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 2 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "jonave-00-xabi793",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "jucidi-98-zato093",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2098d674"
+    },
+    {
+      "type": "activity",
+      "slug": "judatu-15-xize591",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "jufefu-66-josa392",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "juleki-83-xusi470",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "jupivo-67-gidi531",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
+    },
+    {
+      "type": "activity",
+      "slug": "jupoxe-15-sugo110",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "jusama-23-bojo989",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "kafevi-44-tesu096",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "kasadu-53-tuki533",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "katime-87-vole867",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "79c2bfb2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "katopo-68-xajo866",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "kavoro-11-jife299",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "3b36df73"
+    },
+    {
+      "type": "activity",
+      "slug": "kedozi-45-begu156",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: Cannot read properties of undefined (reading 'x')",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
+      "slug": "kemedu-83-vipa115",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "kenizo-43-siro273",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "kepavi-26-sasu141",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
+    },
+    {
+      "type": "activity",
+      "slug": "kerada-15-fofu049",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "ketajo-72-rula535",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "ketiro-31-nazo312",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "kiceze-91-luke737",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "kijazo-83-kipu485",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "50a347b2"
+    },
+    {
+      "type": "activity",
+      "slug": "kilavo-46-xumo547",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "6c788ec6",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "kitupi-32-jexo155",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "kivada-26-koti213",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "kodaku-19-moni161",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "kodiji-34-mofe202",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "kojivo-44-ceti956",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "kotiso-16-vizi552",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "kubaso-31-gaxu491",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "kudedo-31-pafi082",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "kuzeru-09-voke075",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "labala-74-juki864",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "12b567d9"
+    },
+    {
+      "type": "activity",
+      "slug": "lacuci-13-nogo718",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "lafilo-69-tuti771",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "lajuxi-63-nopo039",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "lapura-36-kavu144",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "laxibe-66-teme800",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
+    },
+    {
+      "type": "activity",
+      "slug": "lebile-91-veto202",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "22f819df",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "leduvi-16-voli986",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "lefobe-62-gipe702",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "letare-59-gore448",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "letuke-04-poza319",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "4ea823f1"
+    },
+    {
+      "type": "activity",
+      "slug": "levuma-67-cego489",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "lidefe-01-vaki092",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "lifeve-53-zubi598",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "d018a56f"
+    },
+    {
+      "type": "activity",
+      "slug": "lipiki-79-fapu237",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "lisade-37-vuri519",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "53d01279",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "liteza-62-nopo771",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "livigo-47-negi605",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "lokane-30-dinu378",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "lopone-15-xiki477",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "loxija-71-joku558",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c"
+    },
+    {
+      "type": "activity",
+      "slug": "lubapi-40-siji634",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "lufamo-62-xavo766",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "d018a56f"
+    },
+    {
+      "type": "activity",
+      "slug": "lukoxa-16-cecu095",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "lukuxe-26-gemu804",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "luxido-91-covi016",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "mabove-82-dozu233",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "6c788ec6",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "mabuke-20-muco282",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
+    },
+    {
+      "type": "activity",
+      "slug": "maduja-30-xiri319",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
+    },
+    {
+      "type": "activity",
+      "slug": "mafete-03-rapa918",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "maketa-43-juja264",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
+    },
+    {
+      "type": "activity",
+      "slug": "manata-12-rido730",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "mazoka-64-nixi123",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "ad64c122",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "megara-21-rumi574",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "meguta-71-pimi823",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "0a21936b",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "mepeze-15-nuge493",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "mezuce-12-gemi988",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "mifejo-31-sovi184",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "79c2bfb2"
+    },
+    {
+      "type": "activity",
+      "slug": "mijoso-20-sato362",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "misiji-27-buje656",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "mojezi-43-gamu360",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "molexa-46-redi999",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
+    },
+    {
+      "type": "activity",
+      "slug": "momala-42-luvu884",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "dc72942f",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "movexa-27-rexe388",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "mudobi-07-biji996",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "6c788ec6",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "mufixi-71-koma752",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "4181c68d",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "mukaxi-27-xero900",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "mukigo-10-dixi626",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "mulida-55-ceja768",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "nafaxo-62-boso912",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "nakavu-98-pela661",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 8 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "naroji-40-nuke022",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
+    },
+    {
+      "type": "activity",
+      "slug": "narota-16-bago100",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "navene-45-cozo466",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "nefume-98-leti603",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: Parsing syntax error about nota;number",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
+      "slug": "nerete-42-save418",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "nesozi-09-zezu092",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "4ea823f1"
+    },
+    {
+      "type": "activity",
+      "slug": "nexitu-74-luga914",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "nijipa-25-pede639",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
+    },
+    {
+      "type": "activity",
+      "slug": "nikinu-06-sace939",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "55b70149"
+    },
+    {
+      "type": "activity",
+      "slug": "nikivo-06-kaxa873",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "c6f501d9",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "niletu-83-lego826",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
+    },
+    {
+      "type": "activity",
+      "slug": "niluji-46-joma773",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "nimusa-16-tiku252",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "ninago-40-dalo726",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "nipuxu-11-tefa314",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "nisexe-68-vabu320",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "nivese-34-zavo418",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "niviji-21-maco613",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "nojije-35-teta491",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "50a347b2"
+    },
+    {
+      "type": "activity",
+      "slug": "nolubo-93-rula384",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "nomeco-93-minu967",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "nonusu-50-nute147",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "norire-15-taka956",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "nosape-69-jato240",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "notuli-49-xugi698",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "novata-87-muti352",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "noxasi-06-nejo322",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "nudonu-37-kaja626",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "numalo-91-pole243",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "nupiko-03-cezu269",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "nupose-71-vido428",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "nusajo-97-bemo713",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "nuvumi-83-tose343",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "fd2c3fa8",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "nuzise-60-temi305",
+      "status": "error",
+      "diffCount": null,
+      "reason": "not an activity diagram: the jar renders data-diagram-type=SEQUENCE (teoz group/self-message; also captured under dot-cache/unknown) (TextBlockExporter.java:292-294) and routing agrees; misfiled in tests/corpus/activity, so the activity parser refuses it (activity parser refused this source at line 3 (syntax): Syntax Error?)",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
+      "slug": "nuzugu-44-pega793",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
+    },
+    {
+      "type": "activity",
+      "slug": "pakema-21-xema183",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "patagi-39-jone354",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "pateca-54-lija084",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "pedoco-30-mose082",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "pejima-95-nuxu520",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "pekefu-66-mepa144",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "0a21936b"
+    },
+    {
+      "type": "activity",
+      "slug": "pekuxe-00-bovi270",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "perate-09-gale335",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "pezubu-98-niba240",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "55b70149"
+    },
+    {
+      "type": "activity",
+      "slug": "pifoni-76-duxa505",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
+    },
+    {
+      "type": "activity",
+      "slug": "pipupe-81-ladi581",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "pirofe-41-xama594",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "piruxe-91-zivi081",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "pixako-75-kumi821",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "pixisi-38-kixa563",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "pizuga-11-mabo948",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 1 (syntax): Syntax Error?",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
+      "slug": "podelo-13-jaja314",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "podobi-57-zoso040",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "c4915f83",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "pokoro-73-bili712",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "popofi-03-momo442",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "popome-26-zufo950",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "6c788ec6",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "poraji-17-goke817",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "povoju-50-raxi136",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "pubeza-23-jaza106",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "c4915f83",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "pucinu-80-nopo009",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "pufuzi-99-vone170",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "4181c68d",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "pujozo-36-nino158",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "pujumu-36-nelo283",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "putega-59-fuzi707",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "racana-82-zece676",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "rarodo-65-fudu505",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "raruzu-62-giro837",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "razuzu-32-faje125",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "3b36df73",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "rekuxa-78-lidi292",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "relufo-04-fezo835",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "reluvi-59-pifi444",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
+    },
+    {
+      "type": "activity",
+      "slug": "rerovo-62-nazo755",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "ribapo-84-xudu593",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "rirefa-62-kucu593",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "roboja-69-susa752",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "romuru-66-samu329",
+      "status": "error",
+      "diffCount": null,
+      "reason": "not an activity diagram: the jar renders data-diagram-type=CLASS (component + note with an embedded {{ }} activity) (TextBlockExporter.java:292-294) and routing agrees; misfiled in tests/corpus/activity, so the activity parser refuses it (activity parser refused this source at line 0 (syntax): Syntax Error?)",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
+      "slug": "roroko-26-coje324",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "rosepa-78-xivi448",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "rosizo-69-mera514",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "rucuga-83-tosu408",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "ruderu-68-dere287",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "rujixe-89-sumo552",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "rujuxa-07-neco067",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
+    },
+    {
+      "type": "activity",
+      "slug": "runima-82-jigi009",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "rurake-60-licu592",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "rurebu-12-nebi203",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "ruzazu-94-meso880",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "0a21936b",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "ruzica-16-deli877",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "50a347b2"
+    },
+    {
+      "type": "activity",
+      "slug": "sadovu-51-fata536",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "samavi-13-fuku339",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
+    },
+    {
+      "type": "activity",
+      "slug": "saxeku-17-gume203",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2"
+    },
+    {
+      "type": "activity",
+      "slug": "saxuro-16-tezu631",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "secepo-00-febi326",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "sesodi-22-lupe361",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "setecu-78-cuko533",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "sifite-87-ziti434",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "6c788ec6",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "sigofi-46-gaja158",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "sikino-19-vuca111",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "simuti-16-lece058",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "sipibi-62-koku509",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "sisate-06-jage259",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "dd289f64",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "sofoje-37-tila554",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "sojono-24-tufe806",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "sokafe-69-jita472",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "sokapa-71-tifi543",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "sokomu-20-five757",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "dc72942f",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "somome-34-nori033",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "3ec2d4cd",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "sopape-11-laxo488",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "sucice-41-pebi088",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "sufupo-40-fuke080",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "8a8c1692"
+    },
+    {
+      "type": "activity",
+      "slug": "suluni-73-lotu140",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "sutura-08-zeme419",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "d018a56f"
+    },
+    {
+      "type": "activity",
+      "slug": "suzuci-53-biku826",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "tagixo-41-gapo816",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "tajiri-57-sepu092",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "tajuxe-32-sexo680",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "79c2bfb2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "tamaxe-36-mono574",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "taredi-65-vero960",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "a30245de",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "taxeta-89-mapo546",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "tefuga-86-xefe850",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "tepivu-88-reze603",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
+    },
+    {
+      "type": "activity",
+      "slug": "tetaja-40-niki277",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "tetako-26-xeja109",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "6c788ec6",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "ticeka-12-buli543",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "ticoxo-71-jile893",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: Illegal call here. Is there a return directive in your function?",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
+      "slug": "tidoda-12-juxu745",
+      "status": "baseline",
+      "diffCount": 4,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "weightedScore": 4
+    },
+    {
+      "type": "activity",
+      "slug": "tirizu-79-niza262",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "tobajo-64-mipi810",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "fd2c3fa8"
+    },
+    {
+      "type": "activity",
+      "slug": "todufa-81-gavo441",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "topico-42-fuza478",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "tozecu-08-ride878",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "3ec2d4cd",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "tuneta-22-mega154",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "50a347b2"
+    },
+    {
+      "type": "activity",
+      "slug": "vafupe-19-cima350",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "vamazo-19-tufu812",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
+    },
+    {
+      "type": "activity",
+      "slug": "vatame-42-dege160",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "dd289f64",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "vaxiki-78-nice114",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "vaxuta-95-cico162",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "d018a56f"
+    },
+    {
+      "type": "activity",
+      "slug": "vebala-15-tade547",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "veducu-71-tika634",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
+      "slug": "velodu-59-sada437",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); the jar failing is no evidence about us (D12)",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "vexula-75-noko098",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "vidada-17-xuse810",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "vilecu-41-tete416",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "vimako-25-mega336",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "vimena-17-poju626",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "2b080518",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "vimoxa-78-zucu656",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
+    },
+    {
+      "type": "activity",
+      "slug": "vipixe-71-rika369",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: Infinite loop?",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
+      "slug": "vivate-04-guso306",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "vodobe-33-kefa909",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "50a347b2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "vokibe-29-vepe451",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "volefo-41-tolo996",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "vopidi-45-jitu863",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "79c2bfb2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "vozane-63-kepe177",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "vubolo-48-cubu499",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "vupuse-73-nuso490",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "vuruti-49-jeje300",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "xabesu-51-dimi831",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee"
+    },
+    {
+      "type": "activity",
+      "slug": "xarumo-26-zinu467",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "xaxene-93-doka767",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "0a21936b",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "xefalo-73-sabi101",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "6c788ec6"
+    },
+    {
+      "type": "activity",
+      "slug": "xekame-27-geba281",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "xenofo-81-rame803",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "xesoze-85-pugu865",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: A procedure cannot have !return directive. Declare it as a function instead ?",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
+      "slug": "xidamu-85-xoti640",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "xigelo-67-sipi599",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-01",
+      "measuredAgainstCommit": "b4b553c7"
+    },
+    {
+      "type": "activity",
+      "slug": "xirixi-47-laxe350",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "79c2bfb2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "xizola-97-sizu458",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "xolazi-74-vamu265",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "xomeje-49-bixe122",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "xoreko-43-noto860",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "xoreni-54-xoro817",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 10 (syntax): Syntax Error?",
+      "measuredAt": "2026-09-02",
+      "measuredAgainstCommit": "31d8168e"
+    },
+    {
+      "type": "activity",
+      "slug": "xovano-23-tazo278",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "76efedca"
+    },
+    {
+      "type": "activity",
+      "slug": "xovigi-85-rufa987",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "e1afb6d6",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "xucero-03-kixi746",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zafoxu-20-xofe568",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "9104b8ee",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zakuke-30-sobi867",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zaloze-31-jibo311",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zamagu-75-vape137",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
+    },
+    {
+      "type": "activity",
+      "slug": "zanudo-86-seco241",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
+    },
+    {
+      "type": "activity",
+      "slug": "zaxati-90-xacu660",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zedoco-71-guge507",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "zejuso-92-kexo870",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "e1afb6d6",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zepima-96-peco612",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c"
+    },
+    {
+      "type": "activity",
+      "slug": "zeporo-46-zicu301",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "50a347b2"
+    },
+    {
+      "type": "activity",
+      "slug": "zezaju-29-duni146",
+      "status": "jar-error",
+      "diffCount": null,
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 0 (syntax): Syntax Error?",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
+      "slug": "ziboco-73-kazu841",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
+    },
+    {
+      "type": "activity",
+      "slug": "zinelo-77-losu727",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zivege-92-rise076",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "790fee5a"
+    },
+    {
+      "type": "activity",
+      "slug": "zivocu-77-kopa900",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "2b080518",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zizaki-04-guvi945",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "zizumo-48-taku661",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zocifu-52-miga192",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "4ea823f1",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zokodi-10-dexu703",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zokuni-21-sapu966",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zoxazu-64-vebi280",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "6c788ec6",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zucile-04-duga040",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c",
+      "weightedScore": 0
+    },
+    {
+      "type": "activity",
+      "slug": "zukori-83-fiso705",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "zuxute-46-daku634",
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251",
+      "weightedScore": 0
+    }
+  ]
+}

@@ -146,18 +146,26 @@ describe('renderClassFixture — renders through renderSync (D3, cdd5-T1)', () =
     expect(viaFixture).toBe(viaProduction);
   });
 
-  it("luzive-62-zote562's verdict against the jar golden agrees with parity-class.json (diverged)", () => {
+  // aepp (error-page rule, user ruling 2026-10-10): the stock jar errors on
+  // this source and so do we, so the survey no longer diffs the two error
+  // pages -- parity-class.json reads conformant + errorPage while the raw
+  // SVG diff still differs (our version line, DIVERGENCES.md).
+  it("luzive-62-zote562's raw diff stays diverged while parity-class.json reads it error-conformant", () => {
     const rendered = renderClassFixture(readFixture('luzive-62-zote562'), new DeterministicMeasurer(), opts);
     const { verdict } = diffVerdict(rendered, readJarSvg('luzive-62-zote562'));
-    expect(verdict).toBe(parityVerdict('luzive-62-zote562'));
     expect(verdict).toBe('diverged');
+    expect(parityVerdict('luzive-62-zote562')).toBe('conformant');
   });
 
-  it("sadamo-18-siva346's verdict against the jar golden agrees with parity-class.json (diverged)", () => {
+  // aepp (error-page rule, user ruling 2026-10-10): the stock jar errors on
+  // this source and so do we, so the survey no longer diffs the two error
+  // pages -- parity-class.json reads conformant + errorPage while the raw
+  // SVG diff still differs (our version line, DIVERGENCES.md).
+  it("sadamo-18-siva346's raw diff stays diverged while parity-class.json reads it error-conformant", () => {
     const rendered = renderClassFixture(readFixture('sadamo-18-siva346'), new DeterministicMeasurer(), opts);
     const { verdict } = diffVerdict(rendered, readJarSvg('sadamo-18-siva346'));
-    expect(verdict).toBe(parityVerdict('sadamo-18-siva346'));
     expect(verdict).toBe('diverged');
+    expect(parityVerdict('sadamo-18-siva346')).toBe('conformant');
   });
 
   it("sokevu-87-toce485's verdict against the jar golden agrees with parity-class.json (conformant)", () => {

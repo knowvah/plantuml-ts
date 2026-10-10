@@ -1452,15 +1452,6 @@
     },
     {
       "type": "activity",
-      "slug": "jetigu-21-zaje860",
-      "status": "error",
-      "diffCount": null,
-      "reason": "not an activity diagram: the jar renders data-diagram-type=SEQUENCE (teoz group/self-message; also captured under dot-cache/unknown) (TextBlockExporter.java:292-294) and routing agrees; misfiled in tests/corpus/activity, so the activity parser refuses it (activity parser refused this source at line 3 (syntax): Syntax Error?)",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
-    },
-    {
-      "type": "activity",
       "slug": "jevoce-05-mumi686",
       "status": "pinned",
       "weightedScore": 0,
@@ -2577,15 +2568,6 @@
     },
     {
       "type": "activity",
-      "slug": "nuzise-60-temi305",
-      "status": "error",
-      "diffCount": null,
-      "reason": "not an activity diagram: the jar renders data-diagram-type=SEQUENCE (teoz group/self-message; also captured under dot-cache/unknown) (TextBlockExporter.java:292-294) and routing agrees; misfiled in tests/corpus/activity, so the activity parser refuses it (activity parser refused this source at line 3 (syntax): Syntax Error?)",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
-    },
-    {
-      "type": "activity",
       "slug": "nuzugu-44-pega793",
       "status": "pinned",
       "weightedScore": 0,
@@ -3406,11 +3388,11 @@
     {
       "type": "activity",
       "slug": "tidoda-12-juxu745",
-      "status": "baseline",
-      "diffCount": 4,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "2686a257",
-      "weightedScore": 4
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-10",
+      "measuredAgainstCommit": "ebb7b943",
+      "weightedScore": 0
     },
     {
       "type": "activity",

@@ -1,0 +1,464 @@
+{
+  "upstreamSha": "97a5992201a7b1bc5d4063a81da609fe7387fede",
+  "plantumlVersion": "1.2026.8beta1",
+  "errors": {
+    "activity/gabeme-89-tiko230": {
+      "line": 15,
+      "message": "Cannot find if (Assumed diagram type: activity)"
+    },
+    "activity/jokaxi-40-toko207": {
+      "line": 4,
+      "message": "Syntax Error? (Assumed diagram type: activity)"
+    },
+    "activity/kedozi-45-begu156": {
+      "line": 4,
+      "message": "No 'case' in this switch (Assumed diagram type: activity)"
+    },
+    "activity/nakavu-98-pela661": {
+      "line": 5,
+      "message": "This swimlane must be defined at the start of the diagram. (Assumed diagram type: activity)"
+    },
+    "activity/nefume-98-leti603": {
+      "line": 2,
+      "message": "Parsing syntax error about nota;number"
+    },
+    "activity/pejima-95-nuxu520": {
+      "line": 7,
+      "message": "Cannot find if (Assumed diagram type: activity)"
+    },
+    "activity/pizuga-11-mabo948": {
+      "line": 3,
+      "message": "Syntax Error? (Assumed diagram type: activity)"
+    },
+    "activity/ticoxo-71-jile893": {
+      "line": 21,
+      "message": "Illegal call here. Is there a return directive in your function?"
+    },
+    "activity/veducu-71-tika634": {
+      "line": 7,
+      "message": "Cannot find group (Assumed diagram type: activity)"
+    },
+    "activity/velodu-59-sada437": {
+      "line": 3,
+      "message": "This swimlane must be defined at the start of the diagram. (Assumed diagram type: activity)"
+    },
+    "activity/vipixe-71-rika369": {
+      "line": 6,
+      "message": "Infinite loop?"
+    },
+    "activity/xesoze-85-pugu865": {
+      "line": 15,
+      "message": "A procedure cannot have !return directive. Declare it as a function instead ?"
+    },
+    "activity/xoreni-54-xoro817": {
+      "line": 15,
+      "message": "Cannot find if (Assumed diagram type: activity)"
+    },
+    "activity/zezaju-29-duni146": {
+      "line": 7,
+      "message": "Syntax Error? (Assumed diagram type: activity)"
+    },
+    "c4/gikaju-64-bari602": {
+      "line": 72,
+      "message": "Use 'allowmixing' if you want to mix classes and other UML elements. (Assumed diagram type: class)"
+    },
+    "c4/kipive-74-lele070": {
+      "line": 5,
+      "message": "Syntax Error? (Assumed diagram type: class)"
+    },
+    "chronology/lenudo-53-nade902": {
+      "line": null,
+      "message": ""
+    },
+    "class/luzive-62-zote562": {
+      "line": 10,
+      "message": "Already existing : StationCrossing (Assumed diagram type: class)"
+    },
+    "class/sadamo-18-siva346": {
+      "line": 8,
+      "message": "Syntax Error? (Assumed diagram type: class)"
+    },
+    "class/zuduxu-90-kosi876": {
+      "line": null,
+      "message": "",
+      "provenance": "oracle-widths"
+    },
+    "ebnf/ladifa-97-keme950": {
+      "line": 5,
+      "message": "Syntax Error? (Assumed diagram type: ebnf)"
+    },
+    "gantt/fobeda-14-tori503": {
+      "line": 3,
+      "message": "No starting date for the project (Assumed diagram type: gantt)"
+    },
+    "gantt/furubu-23-mecu777": {
+      "line": 2,
+      "message": "No starting date for the project (Assumed diagram type: gantt)"
+    },
+    "gantt/govacu-51-puti316": {
+      "line": 4,
+      "message": "Syntax Error? (Assumed diagram type: gantt)"
+    },
+    "gantt/lituri-55-caju105": {
+      "line": 8,
+      "message": "No such task T2 (Assumed diagram type: gantt)"
+    },
+    "gantt/mogafu-27-jeci360": {
+      "line": 5,
+      "message": "Bad argument for resource (Assumed diagram type: gantt)"
+    },
+    "gantt/nakude-77-suji787": {
+      "line": 2,
+      "message": "Gantt diagrams cannot last more than 20 years (Assumed diagram type: gantt)"
+    },
+    "gantt/nejadu-63-nifo204": {
+      "line": 2,
+      "message": "Empty description (Assumed diagram type: gantt)"
+    },
+    "gantt/papava-92-geve698": {
+      "line": 2,
+      "message": "Syntax Error? (Assumed diagram type: gantt)"
+    },
+    "gantt/recufa-28-desi167": {
+      "line": 8,
+      "message": "No such P_start2 task (Assumed diagram type: gantt)"
+    },
+    "gantt/saricu-01-funu594": {
+      "line": 4,
+      "message": "No such task Production 0.2 (Assumed diagram type: gantt)"
+    },
+    "gantt/votofi-06-rolo321": {
+      "line": 8,
+      "message": "No group to be closed (Assumed diagram type: gantt)"
+    },
+    "mindmap/femiba-70-duvi238": {
+      "line": 4,
+      "message": "Syntax Error? (Assumed diagram type: mindmap)"
+    },
+    "mindmap/fogari-75-febu345": {
+      "line": 4,
+      "message": "Bad indentation (Assumed diagram type: mindmap)"
+    },
+    "mindmap/susipa-95-tedu015": {
+      "line": null,
+      "message": ""
+    },
+    "regex/bakuza-41-bulo451": {
+      "line": 2,
+      "message": "Error parsing: Bad quantifier {([^{} (Assumed diagram type: regex)"
+    },
+    "regex/tajefa-31-pefi801": {
+      "line": 2,
+      "message": "Error parsing: Bad quantifier {([^{} (Assumed diagram type: regex)"
+    },
+    "salt/lakari-33-mone874": {
+      "line": null,
+      "message": ""
+    },
+    "state/cagego-53-vemo516": {
+      "line": 8,
+      "message": "The state c cannot be used here. (Assumed diagram type: state)"
+    },
+    "state/fugedo-34-fice721": {
+      "line": 9,
+      "message": "The state ChildMode1.A cannot be used here. (Assumed diagram type: state)"
+    },
+    "state/xacona-99-peze211": {
+      "line": 44,
+      "message": "The state pUndetected cannot be used here. (Assumed diagram type: state)"
+    },
+    "state/zecivu-62-pagu681": {
+      "line": 3,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "timing/fuseva-46-zare084": {
+      "line": 10,
+      "message": "Syntax Error? (Assumed diagram type: timing)"
+    },
+    "timing/lamera-74-sago807": {
+      "line": 3,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "timing/pebecu-20-deci596": {
+      "line": 11,
+      "message": "No such element: A (Assumed diagram type: timing)"
+    },
+    "timing/pefana-89-modi000": {
+      "line": 5,
+      "message": "Syntax Error? (Assumed diagram type: timing)"
+    },
+    "timing/sezuvo-55-nose464": {
+      "line": 20,
+      "message": "No such participant WB (Assumed diagram type: timing)"
+    },
+    "timing/vufija-57-xoda292": {
+      "line": 11,
+      "message": "What time? (Assumed diagram type: timing)"
+    },
+    "unknown/Timing-short-alias-7": {
+      "line": 2,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/Timing-short-alias-8": {
+      "line": 2,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/Timing-short-alias-9": {
+      "line": 2,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/bupexo-79-sijo243": {
+      "line": 2,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/dagugu-60-zuli109": {
+      "line": 6,
+      "message": "This element (A) is already defined (Assumed diagram type: component)"
+    },
+    "unknown/dakijo-89-mofa766": {
+      "line": 10,
+      "message": "Unknown \"line\" (Assumed diagram type: timing)"
+    },
+    "unknown/dobujo-29-rifo090": {
+      "line": 2,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/fikaka-55-jeva969": {
+      "line": 2,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/gibapi-78-fote878": {
+      "line": null,
+      "message": ""
+    },
+    "unknown/gujeku-90-jisa609": {
+      "line": 5,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/gumulo-94-ziva021": {
+      "line": 5,
+      "message": "This looks like a DOT diagram. Please use @startdot instead of @startuml. (Assumed diagram type: sequence)"
+    },
+    "unknown/jamuxo-74-diji002": {
+      "line": 6,
+      "message": "This looks like a DOT diagram. Please use @startdot instead of @startuml. (Assumed diagram type: sequence)"
+    },
+    "unknown/jifoke-84-jude859": {
+      "line": 40,
+      "message": "Syntax Error? (Assumed diagram type: nwdiag)"
+    },
+    "unknown/kijaro-77-vomi552": {
+      "line": null,
+      "message": ""
+    },
+    "unknown/kokofa-47-deni140": {
+      "line": 7,
+      "message": "JSON already exists: J (Assumed diagram type: class)"
+    },
+    "unknown/kokote-73-revo347": {
+      "line": 3,
+      "message": "Port can only be used inside an element and not at root level (Assumed diagram type: component)"
+    },
+    "unknown/komoso-43-xika169": {
+      "line": 2,
+      "message": "Empty description (Assumed diagram type: sequence)"
+    },
+    "unknown/kutazo-93-vumu267": {
+      "line": 2,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/ligalo-62-suvu444": {
+      "line": 3,
+      "message": "Syntax Error? (Assumed diagram type: nwdiag)"
+    },
+    "unknown/lonome-59-lego635": {
+      "line": null,
+      "message": ""
+    },
+    "unknown/lulanu-89-tase004": {
+      "line": null,
+      "message": ""
+    },
+    "unknown/micono-65-juka195": {
+      "line": null,
+      "message": ""
+    },
+    "unknown/nakavu-98-pela661": {
+      "line": 5,
+      "message": "This swimlane must be defined at the start of the diagram. (Assumed diagram type: activity)"
+    },
+    "unknown/nifosu-42-gubi213": {
+      "line": 2,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/nixuje-20-bobu879": {
+      "line": 2,
+      "message": "No such internal sprite: archimate/strategy-value-stream (Assumed diagram type: sequence)"
+    },
+    "unknown/pajojo-12-kixi425": {
+      "line": 6,
+      "message": "This looks like a DOT diagram. Please use @startdot instead of @startuml. (Assumed diagram type: sequence)"
+    },
+    "unknown/petiku-70-fogu777": {
+      "line": 9,
+      "message": "Cannot create bar because it already exists (Assumed diagram type: class)"
+    },
+    "unknown/pizegi-06-jiro383": {
+      "line": 2,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/rubebe-45-sura795": {
+      "line": null,
+      "message": "",
+      "provenance": "oracle-widths"
+    },
+    "unknown/tmp1-1": {
+      "line": 5,
+      "message": "This swimlane must be defined at the start of the diagram. (Assumed diagram type: activity)"
+    },
+    "unknown/torazi-09-gago377": {
+      "line": 13,
+      "message": "Element already in another group. (Assumed diagram type: nwdiag)"
+    },
+    "unknown/tumepe-28-zuma441": {
+      "line": 2,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/zeceme-22-rade890": {
+      "line": 6,
+      "message": "Cannot nest group (Assumed diagram type: nwdiag)"
+    },
+    "unknown/zelini-86-gelo257": {
+      "line": 2,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/zetebu-58-capa762": {
+      "line": 4,
+      "message": "Parsing syntax error about |"
+    },
+    "unknown/zicejo-69-teko349": {
+      "line": 3,
+      "message": "Syntax Error? (Assumed diagram type: activity)"
+    },
+    "unknown/zodude-13-tito074": {
+      "line": 2,
+      "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/zugazo-84-raju675": {
+      "line": null,
+      "message": ""
+    },
+    "wbs/WBS-monoline-def-0-11": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/WBS-monoline-def-0-17": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/WBS-monoline-def-0-18": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/WBS-monoline-def-0-24": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/WBS-monoline-def-0-3": {
+      "line": 3,
+      "message": "Bad tree structure (Assumed diagram type: wbs)"
+    },
+    "wbs/WBS-monoline-def-0-6": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/WBS-multiline-def-1-14": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/WBS-multiline-def-1-15": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/WBS-multiline-def-1-21": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/WBS-multiline-def-1-3": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/WBS-multiline-def-1-8": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/bujigo-66-zepu613": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/cesoke-21-muro498": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/cofele-91-sanu676": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/cupuri-11-piru303": {
+      "line": 30,
+      "message": "Bad tree structure (Assumed diagram type: wbs)"
+    },
+    "wbs/fasuti-82-dire353": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/kifona-80-bufa102": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/konipe-99-jafu307": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/lagoda-51-zuna611": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/ledama-83-xoko366": {
+      "line": null,
+      "message": ""
+    },
+    "wbs/link-URL-tooltip-0": {
+      "line": null,
+      "message": ""
+    },
+    "wbs/sefoxo-37-zuvo274": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/sipuja-30-deto581": {
+      "line": 3,
+      "message": "Bad tree structure (Assumed diagram type: wbs)"
+    },
+    "wbs/solive-57-nola542": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/tojixi-05-lusu056": {
+      "line": 3,
+      "message": "WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)"
+    },
+    "wbs/tubeli-58-kadi729": {
+      "line": 4,
+      "message": "WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)"
+    },
+    "wbs/vavibi-10-maso573": {
+      "line": 6,
+      "message": "Syntax Error? (Assumed diagram type: wbs)"
+    },
+    "wbs/zecavo-98-kini554": {
+      "line": 3,
+      "message": "WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)"
+    }
+  }
+}
