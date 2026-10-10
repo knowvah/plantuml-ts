@@ -87,6 +87,54 @@ example, JVM float-formatting behavior that cannot be reproduced in JS) is
 proposed to the maintainer with its root cause and bound before it is
 accepted.
 
+## Error pages
+
+User ruling 2026-10-10: where the jar generates an error, conformance is
+looser. If we generate our own error result, we are conformant; we do not
+replicate the jar's error page (message, line or geometry), because our code
+differs from it in too many ways. Everything the jar draws is still compared
+exactly.
+
+The ruling carries a companion requirement: the page must also error from an
+**unaltered (stock) jar**. The oracle jar carries test seams, so an error it
+alone produces proves nothing about upstream.
+
+| Jar (stock record) | Ours | Verdict |
+|---|---|---|
+| errors | our error page | `conformant`, `errorPage: true` |
+| errors | a diagram | `diverged`, `firstDiff: 'error-page'` |
+| draws | anything | compared exactly, as for any fixture |
+| oracle errors, stock not in record | anything | compared exactly (seam artifact) |
+
+**The stock-jar record.** `scripts/stock-jar-verify.sh` builds stock upstream
+at `oracle/pin.json#upstreamSha`, caches the jar under the gitignored
+`oracle/dist/stock/`, renders every cached oracle fixture whose `in.svg` is an
+error page with no `-D` flags, and writes `oracle/goldens/stock-error-pages.json`.
+Re-run it on every pin change; a test fails when the record's SHA differs from
+`pin.json#upstreamSha`.
+
+**The `errorPage` field.** The survey worker reports `errorPage: boolean`,
+set by the internal `setErrorPageObserver` hook in
+`src/core/error/error-renderer.ts` (never exported from `src/index.ts`). It
+fires once per error page we draw (syntax, execution, empty, preprocessor,
+crash), never for the Welcome panel. `scripts/svg-parity-survey.ts` combines it
+with the stock record per the table above; the dashboard shows an
+error-conformant count per bucket.
+
+**Oracle-only errors are compared exactly.** An oracle error that stock does
+not share is a seam artifact, so the fixture is compared like any other. The one
+exception is a proven width-induced crash: the record admits an
+oracle-error/stock-draws fixture only when a controlled experiment shows (1)
+the oracle jar with no `-D` flags exits 0 and (2) the oracle jar with only
+`-DPLANTUML_DETERMINISTIC_TEXT=true` exits 200. Such rows carry
+`provenance: 'oracle-widths'` (today `class/zuduxu-90-kosi876`,
+`unknown/rubebe-45-sura795`); the upstream NPE is mirrored, so ours errors too.
+
+**Production is unchanged.** Error pages still print `plantuml-ts version`
+and source name `string` (DIVERGENCES.md, "Error pages print this port's
+version"); that ruling holds, and is now moot for conformance because the
+error page is not compared.
+
 ## Running the suite
 
 The conformance suite lives at `tests/oracle/svg-conformance/` and runs as
