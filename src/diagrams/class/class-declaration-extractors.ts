@@ -205,9 +205,12 @@ export function extractDecorations(rest: string): {
     .trim();
   let stereotype: string | undefined;
   // Greedy — stacked stereotypes (`<<A>><<B>>`) capture to the LAST `>>` as one blob, else the mis-split id spawns phantom nodes (gabejo-44-juki791).
-  const stereoMatch = /<<\s*(.+)\s*>>/.exec(out);
+  // The blob keeps its padding verbatim (StereotypePattern.java:68 `(\<\<.+?\>\>)`
+  // is untrimmed): Stereotype.java:122-133 / Guillemet.java:87-100 drop ONE space
+  // per side at use, so `<<  st  >>` must still carry both extra spaces.
+  const stereoMatch = /<<(.+)>>/.exec(out);
   if (stereoMatch !== null) {
-    stereotype = stereoMatch[1]!.trim(); // greedy `.+` can absorb trailing `\s*`
+    stereotype = stereoMatch[1]!;
     out = (out.slice(0, stereoMatch.index) + out.slice(stereoMatch.index + stereoMatch[0].length)).trim();
   }
   // Tags are stripped after the stereotype (so its `<< >>` delimiters no

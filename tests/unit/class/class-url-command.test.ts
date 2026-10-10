@@ -39,7 +39,8 @@ describe('inline `class Foo [[url]]` declaration suffix', () => {
     const ast = parse('class Foo << (R,#FF7700) >> #pink [[http://x.com]]');
     expect(ast.classifiers[0]).toMatchObject({
       id: 'Foo',
-      stereotype: '(R,#FF7700)',
+      // verbatim label (StereotypePattern.java:68); padding is consumed at draw time
+      stereotype: ' (R,#FF7700) ',
       color: '#pink',
       url: { url: 'http://x.com', tooltip: 'http://x.com', label: 'http://x.com' },
     });

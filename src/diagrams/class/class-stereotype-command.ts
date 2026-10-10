@@ -26,7 +26,7 @@ export const STEREOTYPE_STATEMENT_RE = /^(\w[\w.]*|"[^"]+")\s+(<<.*>>)\s*$/;
  * auto-creates, matching upstream's `entity == null` error branch and this
  * port's `applyUrlStatement`'s identical no-op-when-missing posture) and,
  * if found, sets its `stereotype` field from the bracket's inner text
- * (brackets stripped, trimmed — matches `Classifier.stereotype`'s existing
+ * (brackets stripped, padding kept — matches `Classifier.stereotype`'s existing
  * storage convention for the inline-declaration form,
  * `class-declaration-parser.ts#extractDecorations`'s own doc comment).
  */
@@ -42,5 +42,5 @@ export function applyStereotypeStatement(state: ParseState, rawName: string, bra
   });
   const idx = state.classifierIndex.get(id);
   if (idx === undefined) return;
-  state.ast.classifiers[idx]!.stereotype = bracket.slice(2, -2).trim();
+  state.ast.classifiers[idx]!.stereotype = bracket.slice(2, -2);
 }
