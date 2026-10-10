@@ -250,7 +250,9 @@ function minEventX(event: EventGeo): number {
     case 'message':
       return Math.min(event.fromX, event.toX);
     case 'note':
-      return event.x;
+      // `NoteTile#getMinX` (`teoz/NoteTile.java:278-286`): the tile, which
+      // starts `getPaddingX()` left of the drawn box.
+      return event.minX;
     case 'frame':
       // A `ref` is a `ReferenceTile`, whose `getMinX` is `first`, the
       // component origin `xMargin` left of its drawn box
@@ -397,7 +399,18 @@ function computeTotalWidth(participantGeos: ParticipantGeo[], eventGeos: EventGe
     dividerContentRight(eventGeos),
     delayContentRight(eventGeos, RIGHT_MARGIN),
     refContentRight(eventGeos) + RIGHT_MARGIN,
+    noteContentRight(eventGeos) + RIGHT_MARGIN,
   );
+}
+
+/** The rightmost `NoteTile#getMaxX` (`teoz/NoteTile.java:288-296`), which
+ *  `PlayingSpace` maxes with every other tile's to place the right border
+ *  (`teoz/PlayingSpace.java:75-96`). A note reaching past the last participant
+ *  widens the document. */
+function noteContentRight(eventGeos: readonly EventGeo[]): number {
+  let right = Number.NEGATIVE_INFINITY;
+  for (const e of eventGeos) if (e.kind === 'note') right = Math.max(right, e.maxX);
+  return right;
 }
 
 /** The rightmost `ReferenceTile#getMaxX` -- `last`, the component area's

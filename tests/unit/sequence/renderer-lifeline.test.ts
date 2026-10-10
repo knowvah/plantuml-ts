@@ -16,10 +16,11 @@ import {
   renderLifelinePass,
 } from '../../../src/diagrams/sequence/renderer-lifeline.js';
 import type { ParticipantGeo, ActivationGeo, LifelineSegment } from '../../../src/diagrams/sequence/ast.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 
-const theme: ScaledTheme = { ...defaultTheme, scaleK: 1 };
+const theme: ScaledTheme = { ...defaultTheme, scaleK: 1, measurer: new DeterministicMeasurer() };
 
 /**
  * The head ROW's bottom for these fixtures: a plain participant at `y=10`

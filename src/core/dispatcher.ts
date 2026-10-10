@@ -268,7 +268,7 @@ export type AssembledSvg = RenderFragment | CompleteSvg;
  */
 export interface PaginatedPlugin<AST = unknown, Geo = unknown> {
   getNbPages(geo: Geo): number;
-  renderPage(geo: Geo, theme: Theme, pageIndex: number): AssembledSvg;
+  renderPage(geo: Geo, theme: Theme, pageIndex: number, measurer?: StringMeasurer): AssembledSvg;
   pageAst(ast: AST, pageIndex: number): AST;
 }
 
@@ -280,7 +280,12 @@ export interface SyncPlugin<AST = unknown, Geo = unknown> extends Partial<Pagina
   readonly type: DiagramType;
   parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layoutSync(ast: AST, theme: Theme, measurer: StringMeasurer): Geo;
-  render(geo: Geo, theme: Theme): AssembledSvg;
+  /**
+   * `measurer` is the render's own measurer (the one `layout*` received),
+   * handed through additively so an engine's draw side measures with the
+   * same instrument as its layout side. Plugins that ignore it are unchanged.
+   */
+  render(geo: Geo, theme: Theme, measurer?: StringMeasurer): AssembledSvg;
   /**
    * The style sources this engine's theme is built from, for an engine that
    * does NOT execute every `skinparam`/`!theme` the preprocessor collected.
@@ -300,7 +305,12 @@ export interface AsyncPlugin<AST = unknown, Geo = unknown> extends Partial<Pagin
   readonly type: DiagramType;
   parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layout(ast: AST, theme: Theme, measurer: StringMeasurer): Promise<Geo>;
-  render(geo: Geo, theme: Theme): AssembledSvg;
+  /**
+   * `measurer` is the render's own measurer (the one `layout*` received),
+   * handed through additively so an engine's draw side measures with the
+   * same instrument as its layout side. Plugins that ignore it are unchanged.
+   */
+  render(geo: Geo, theme: Theme, measurer?: StringMeasurer): AssembledSvg;
   /** See {@link SyncPlugin.styleInput}. */
   styleInput?(preprocessed: PreprocessorResult, source: UmlSource): PreprocessorResult;
 }

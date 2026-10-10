@@ -103,7 +103,7 @@ export function renderFixtureSequence(
   }
   const ast = parsed;
   const geo = layoutSequence(ast, theme, measurer);
-  const fragment = renderSequence(geo, theme);
+  const fragment = renderSequence(geo, theme, measurer);
 
   const annotations = ast.annotations;
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);

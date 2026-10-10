@@ -91,7 +91,7 @@ function message(y: number, labelY?: number): MessageGeo {
 const note = (y: number, height: number): NoteGeo =>
   // A5: `textRuns` is placed in layout. This suite asserts pagination
   // y-arithmetic, never note text, so an empty body is enough.
-  ({ kind: 'note', x: 10, y, width: 80, height, text: 'n', textRuns: [] });
+  ({ kind: 'note', x: 10, y, width: 80, height, text: 'n', textRuns: [], minX: 5, maxX: 95 });
 const activation = (y: number, height: number): ActivationGeo => ({
   kind: 'activation',
   participantId: 'A',

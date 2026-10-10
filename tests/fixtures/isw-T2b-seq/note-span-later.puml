@@ -1,0 +1,7 @@
+@startuml
+participant Alice
+participant Bob
+participant Carol
+Alice -> Bob : hi
+note over Bob, Carol : short
+@enduml

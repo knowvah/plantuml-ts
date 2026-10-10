@@ -1,0 +1,9 @@
+@startuml
+skinparam noteTextAlignment center
+participant A
+participant B
+A -> B : x
+note left of A : centered
+note right of B : centered right
+note over A, B : over centered
+@enduml

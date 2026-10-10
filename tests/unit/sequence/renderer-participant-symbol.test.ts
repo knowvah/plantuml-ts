@@ -35,8 +35,8 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { defaultTheme } from '../../../src/core/theme.js';
 import { scaleSequenceTheme } from '../../../src/diagrams/sequence/scale-geo.js';
 
-const THEME = scaleSequenceTheme(defaultTheme, 1);
 const MEASURER = new DeterministicMeasurer();
+const THEME = scaleSequenceTheme(defaultTheme, 1, MEASURER);
 
 /** Box wide enough that `dx = (136 - 36) / 2 = 50` and tall enough that the
  *  tail flip's `dy = 66 - 46 = 20` are both integers. */
@@ -95,7 +95,7 @@ describe('renderParticipantSymbol — database', () => {
   });
 
   it('multiplies every coordinate by the render scale', () => {
-    const scaled = scaleSequenceTheme(defaultTheme, 2);
+    const scaled = scaleSequenceTheme(defaultTheme, 2, MEASURER);
     const svg = draw('database', true, { ...GEO, x: 200, y: 118, width: 272, height: 132 }, scaled);
     expect(dAttrs(svg)[0]).toBe(
       'M300,138 C300,118 336,118 336,118 C336,118 372,118 372,138 L372,190' +
@@ -176,7 +176,7 @@ describe('measureParticipantSymbol', () => {
 
   it('is independent of the theme', () => {
     for (const type of ALL_TYPES) {
-      expect(measureParticipantSymbol(type, scaleSequenceTheme(defaultTheme, 3), MEASURER)).toEqual(
+      expect(measureParticipantSymbol(type, scaleSequenceTheme(defaultTheme, 3, MEASURER), MEASURER)).toEqual(
         measureParticipantSymbol(type, THEME, MEASURER),
       );
     }
@@ -188,6 +188,7 @@ describe('renderParticipantSymbol — paint and stroke resolution', () => {
     const theme = scaleSequenceTheme(
       { ...defaultTheme, colors: { ...defaultTheme.colors, elements: { database: { lineThickness: 3 } } } },
       1,
+      MEASURER,
     );
     expect(draw('database', true, GEO, theme)).toContain('stroke-width:3;');
   });

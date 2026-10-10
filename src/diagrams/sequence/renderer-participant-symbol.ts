@@ -80,7 +80,7 @@ import type { Theme } from '../../core/theme.js';
 import { resolveElementLineThickness } from '../../core/theme.js';
 import { sequenceShadowFilter } from './sequence-shadow.js';
 import { attrs } from '../../core/svg.js';
-import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
 import type { ScaledTheme } from './scale-geo.js';
 
@@ -198,28 +198,14 @@ const NO_PAINT = new SymbolContext(null, null);
  *  (`queue`, `collections`) never take this path. */
 const ZERO_GEO: ParticipantSymbolGeo = { x: 0, y: 0, width: 0, height: 0 };
 
-/** The DRAW path holds no measurer (D1: layout resolves every metric; the
- *  plugin's `render(geo, theme)` is handed none). No glyph draws a `UText`, so
- *  this is never reached; if one ever does it fails loudly rather than
- *  answering from a second, private metric. */
-const UNCONSULTED: StringMeasurer = {
-  measure(text: string): never {
-    throw new Error(`participant glyph drew text ${JSON.stringify(text)} without a render measurer`);
-  },
-  getDescent(_font: FontSpec, text: string): never {
-    throw new Error(`participant glyph measured ${JSON.stringify(text)} without a render measurer`);
-  },
-};
-const MEASURER = UNCONSULTED;
-
-/** `DriverTextSvg`'s own width-only seam. Every consumer of it defines its own
- *  local adapter (`document-shell.ts#driverBounderFor`,
- *  `description/renderer-ink-extent.ts#driverBounderFor`) rather than sharing
- *  one; this is the third. It is never consulted in practice — no glyph here
- *  draws a `UText` — but `UGraphicSvg.build` requires one. */
-const DRIVER_BOUNDER: DriverStringBounder = {
-  calculateDimension: (font, text) => ({ width: MEASURER.measure(text, font).width }),
-};
+/** `DriverTextSvg`'s own width-only seam, over the render's injected measurer
+ *  (`ScaledTheme.measurer`). No glyph here draws a `UText`, so it is never
+ *  consulted in practice -- but `UGraphicSvg.build` requires one, and when a
+ *  glyph does draw text it must answer from the layout's metric, not a second
+ *  private one. */
+function driverBounderOf(measurer: StringMeasurer): DriverStringBounder {
+  return { calculateDimension: (font, text) => ({ width: measurer.measure(text, font).width }) };
+}
 
 /**
  * `ComponentRoseDatabase.java:66-69` — `new Fashion(biColor.getBackColor(),
@@ -422,8 +408,8 @@ export function renderParticipantSymbol(
     seedOf(`${type}:${geo.x},${geo.y}`),
     option,
     VERSION_PLACEHOLDER,
-    DRIVER_BOUNDER,
-    MEASURER,
+    driverBounderOf(opts.theme.measurer),
+    opts.theme.measurer,
   );
 
   const unscaled: ParticipantSymbolGeo = {

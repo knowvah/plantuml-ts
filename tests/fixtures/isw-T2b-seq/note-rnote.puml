@@ -1,0 +1,15 @@
+@startuml
+participant Alice
+participant Bob
+participant Carol
+Alice -> Bob : hello there
+rnote left of Alice : left line
+rnote right of Alice : right line
+rnote over Bob : over bob
+rnote over Alice, Carol : over several participants
+rnote right of Carol : a longer right note
+rnote left of Carol
+multi
+line
+end rnote
+@enduml
