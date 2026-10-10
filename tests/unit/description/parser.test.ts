@@ -86,9 +86,11 @@ describe('[Name] bracket shorthand', () => {
     expect(node.children).toHaveLength(0);
   });
 
-  it('strips leading/trailing whitespace from the bracketed name', () => {
+  // isw-T2-cls F4: the jar keeps the bracket content verbatim
+  // (`<!--entity ' E  F '-->` in tests/fixtures/isw-T2-cls/bracket-spaces.svg).
+  it('keeps leading/trailing whitespace of the bracketed name', () => {
     const node = firstNode('[ Padded ]');
-    expect(node.id).toBe('Padded');
+    expect(node.id).toBe(' Padded ');
   });
 
   it('attaches color when trailing #token is present', () => {

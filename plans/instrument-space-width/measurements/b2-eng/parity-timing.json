@@ -1,0 +1,1139 @@
+{
+  "generatedAt": "2026-10-10T02:44:45.814Z",
+  "fixtures": [
+    {
+      "slug": "bejilu-38-kaje288",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 220.222,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    },
+    {
+      "slug": "biduxi-87-tomu388",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 220.222,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    },
+    {
+      "slug": "bigadu-24-tuli587",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 130,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[2]/@x"
+    },
+    {
+      "slug": "bipocu-94-koce204",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 1565.0300000000002,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "bixutu-58-kofa364",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 146,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "bogube-37-dire976",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 790.031,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[8]/@x"
+    },
+    {
+      "slug": "bolana-93-roge199",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 781.072,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "bupubi-65-kigi561",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 381,
+      "firstDiff": "svg/g[1]/text[1]/@fill",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "caxozo-31-xoze876",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 377.54999999999995,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[10]/@x"
+    },
+    {
+      "slug": "cebaba-70-muva548",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 365.556,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[2]/@y"
+    },
+    {
+      "slug": "cecoju-52-ziva745",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 131,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[3]/@x"
+    },
+    {
+      "slug": "cegalu-96-fudo441",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 509.072,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "cocadi-98-loru291",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 397.022,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "cuboke-63-baba565",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 318.322,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "cufilu-05-mana736",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 2373.64,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "dabozu-14-licu973",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 216.372,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "desobo-70-beba449",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 3615,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "duxage-19-dolo014",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 216.372,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "fepalu-24-sadi657",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 328.5,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[2]/@x"
+    },
+    {
+      "slug": "fepise-09-reno486",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 515.031,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[10]/@x"
+    },
+    {
+      "slug": "filipe-27-tero835",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 281,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[2]/@x"
+    },
+    {
+      "slug": "fipise-84-sejo166",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 176,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "fitoza-67-dupi950",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 380.4,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[2]/@x"
+    },
+    {
+      "slug": "foluce-50-raji122",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 130,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[2]/@x"
+    },
+    {
+      "slug": "forabi-44-cici128",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 406.972,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "fujudu-35-varo102",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 381.4,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[1]/@x"
+    },
+    {
+      "slug": "funeki-67-rape222",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 126,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "fuseva-46-zare084",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 116,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/text[2]/@y"
+    },
+    {
+      "slug": "fuzego-03-loke498",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 145,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "gadaxi-44-cida305",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 4319,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "gobuxe-90-puce352",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 176,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "guzovi-99-rika076",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 353.066,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "jijalo-66-repo169",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 400.872,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[4]/@x"
+    },
+    {
+      "slug": "kecole-01-paco460",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 381.4,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[9]/@x"
+    },
+    {
+      "slug": "kegiji-17-levo769",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 2511.05,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "keseno-49-zeco490",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 375,
+      "firstDiff": "svg/g[1]/text[1]/@fill",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "keveju-13-vesu966",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 672.466,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "kodaxe-87-cosa352",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 256.972,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "kogelo-37-foxo527",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 332,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[3]/@x"
+    },
+    {
+      "slug": "kogido-13-juce229",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 515.031,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "komure-44-nuna929",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 380.4,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[2]/@x"
+    },
+    {
+      "slug": "kosizu-12-raki210",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 149,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "kucimo-85-jovo729",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 780.531,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    },
+    {
+      "slug": "kufaca-21-nevo659",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 282,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[1]/@x"
+    },
+    {
+      "slug": "labetu-19-raru466",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 213,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "lafogi-56-budi615",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 338.675,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    },
+    {
+      "slug": "lagumu-64-kobo620",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 187.51600000000002,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "lajeno-67-niku926",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 422.37199999999996,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "lajosa-05-tevo422",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 213.64700000000002,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "lamera-74-sago807",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 52,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "lasife-40-gupu919",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 516.706,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "lerupa-77-nocu465",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 441.181,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    },
+    {
+      "slug": "linoji-83-gilu629",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 213.64700000000002,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "lolafi-65-fife333",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 367.20599999999996,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[13]/@x"
+    },
+    {
+      "slug": "luceva-97-tere070",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 184,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "malodu-14-doli279",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 235.4,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[3]/@x"
+    },
+    {
+      "slug": "mekivo-95-xafe506",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 1283.7800000000002,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[8]/@x"
+    },
+    {
+      "slug": "mimovi-38-jezi407",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 704.556,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@y"
+    },
+    {
+      "slug": "momoxo-99-mota323",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 182,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[3]/@x"
+    },
+    {
+      "slug": "nafixu-73-daro620",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 188,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "nakasu-40-sogi881",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 211.8,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "narafo-91-mola103",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 281,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[2]/@x"
+    },
+    {
+      "slug": "nasegu-95-jezo493",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 3988.61,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "nicude-51-vibe561",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 422.37199999999996,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "nidole-67-satu304",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 3984.92,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "nubezi-56-jifa493",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 263.647,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "nufibe-39-dipi208",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 400.872,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[4]/@x"
+    },
+    {
+      "slug": "pebecu-20-deci596",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 130,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/text[2]/@y"
+    },
+    {
+      "slug": "pebexo-15-kago195",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 182.39700000000002,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "pefana-89-modi000",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 145.08800000000002,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/rect[1]/@width"
+    },
+    {
+      "slug": "pevaca-23-bado084",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 142.35,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[2]/@x"
+    },
+    {
+      "slug": "peviku-79-bisu764",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 684.456,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "poguko-27-tosi438",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 282,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[1]/@x"
+    },
+    {
+      "slug": "putaca-22-tudi583",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 138.675,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[1]/@x"
+    },
+    {
+      "slug": "ravaki-46-nipi192",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 447.4,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    },
+    {
+      "slug": "raxoge-71-kara739",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 339.791,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "rizili-63-jire956",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 260.222,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    },
+    {
+      "slug": "rucovu-22-mici178",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 366.37199999999996,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[13]/@x"
+    },
+    {
+      "slug": "rumoto-71-semi515",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 220.222,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    },
+    {
+      "slug": "ruzusi-11-maka311",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 1283.7800000000002,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[8]/@x"
+    },
+    {
+      "slug": "sazeba-78-sube885",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 220.222,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    },
+    {
+      "slug": "senero-21-galu417",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 281,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[2]/@x"
+    },
+    {
+      "slug": "sevaxi-41-roxi433",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 353.066,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[7]/@x"
+    },
+    {
+      "slug": "sezuvo-55-nose464",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 256,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/text[2]/@y"
+    },
+    {
+      "slug": "sogoca-93-faja981",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 366.37199999999996,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[13]/@x"
+    },
+    {
+      "slug": "sorojo-21-lipi827",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 429.4,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[4]/@x"
+    },
+    {
+      "slug": "sunuco-42-mocu207",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 176,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "takive-16-kimi467",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 156.972,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[12]/@x"
+    },
+    {
+      "slug": "tesumu-58-tinu638",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 126,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "tesusa-54-febi013",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 220.222,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[13]/@x"
+    },
+    {
+      "slug": "tezebi-99-vona351",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 220.222,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    },
+    {
+      "slug": "tifovo-88-kilo840",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 123.74100000000001,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "Timing-short-alias-0",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 168.091,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "Timing-short-alias-1",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 168.091,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    },
+    {
+      "slug": "Timing-short-alias-2",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 168.091,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[4]/@x"
+    },
+    {
+      "slug": "Timing-short-alias-3",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 216.372,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "Timing-short-alias-4",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 216.372,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "tivese-10-xoki588",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 138.675,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[1]/@x"
+    },
+    {
+      "slug": "totata-65-moca748",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 216.372,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "vacedi-77-vuva739",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 377.54999999999995,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[10]/@x"
+    },
+    {
+      "slug": "vamoce-24-bofa407",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 226,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "venaza-08-pufu261",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 381.4,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[1]/@x"
+    },
+    {
+      "slug": "vovisu-66-tava464",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 181,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "vufija-57-xoda292",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 130,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/text[2]/@y"
+    },
+    {
+      "slug": "vukuru-10-miva837",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 132.39700000000002,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "xebovu-06-dixo004",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 220.222,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[13]/@x"
+    },
+    {
+      "slug": "ximoda-06-zedo842",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 400.872,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[4]/@x"
+    },
+    {
+      "slug": "xipuko-74-mosu863",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 219,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@height"
+    },
+    {
+      "slug": "xozaki-50-gesa811",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 260.222,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    },
+    {
+      "slug": "xubigi-36-zari672",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 125,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "xubugu-65-fima109",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 381.4,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[10]/@x"
+    },
+    {
+      "slug": "xulopu-47-rinu976",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 213.64700000000002,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "zagebo-83-tode073",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 260.222,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[5]/@x"
+    },
+    {
+      "slug": "zavuza-92-xudu768",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 281,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[2]/@x"
+    },
+    {
+      "slug": "zeboxu-77-xola056",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 149,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "zezomi-36-dujo188",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 366,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[8]/@x"
+    },
+    {
+      "slug": "zibisi-54-nuda238",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 181,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "ziporo-25-libu365",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 235.4,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[3]/@x"
+    },
+    {
+      "slug": "zipufu-54-macu784",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 228.491,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "zipuri-87-dofu527",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 381,
+      "firstDiff": "svg/g[1]/text[1]/@fill",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "zodemo-73-rafe100",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 310.03099999999995,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    },
+    {
+      "slug": "zomeri-89-vafu816",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 427,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[3]/@x"
+    },
+    {
+      "slug": "zugelo-96-dato700",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 196,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "zupuse-88-mira023",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 381,
+      "firstDiff": "svg/g[1]/text[1]/@fill",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "zuzero-65-zubi417",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 139.5,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[4]/@x"
+    },
+    {
+      "slug": "zuzixe-63-sabi525",
+      "type": "timing",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 397.022,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
+    }
+  ]
+}

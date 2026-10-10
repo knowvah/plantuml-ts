@@ -16,7 +16,7 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/shape/GraphicStrings.java
  */
 import type { FontSpec, StringMeasurer } from '../measurer.js';
-import { emittedTextForm } from '../svg-text-font.js';
+import { driverTextPlacement } from '../svg-text-font.js';
 import type { ErrorBlock, Sink } from './error-block.js';
 import { drawImage } from './error-block.js';
 import { BLACK, drawRun, ERROR_PAGE_MARGIN, parseCreoleSubset, SANS, SIZE_12 } from './error-text.js';
@@ -57,10 +57,12 @@ function drawLine(sink: Sink, line: LaidLine, x: number, top: number, measurer: 
   for (const run of line.runs) {
     const dim = measurer.measure(run.content, run.font);
     const baseline = top + dim.height - measurer.getDescent(run.font, run.content);
-    // `DriverTextSvg.java:113-124`: measured blank-to-NBSP and trimmed, before
-    // `SvgGraphics` swaps a monospace run's spaces.
-    const textLength = measurer.measure(emittedTextForm(run.content), run.font).width;
-    sink.svg.push(drawRun({ ...run, textLength }, runX, baseline));
+    // `DriverTextSvg.java:114-126`: blank-to-NBSP, leading spaces into x, trin,
+    // then measured on the trimmed text, before `SvgGraphics` swaps a
+    // monospace run's spaces.
+    const { text, dx } = driverTextPlacement(run.content, measurer.measure(' ', run.font).width);
+    const textLength = measurer.measure(text, run.font).width;
+    sink.svg.push(drawRun({ ...run, textLength }, runX + dx, baseline));
     runX += dim.width;
   }
 }

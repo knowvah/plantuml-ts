@@ -1,0 +1,9 @@
+@startuml
+component [ A  B  ]
+[ E  F ]
+[ G  H ] as X
+component [ I ] as Y
+component [  J  ]
+component [ K  L ] as Z
+[ M ] --> [ E  F ]
+@enduml

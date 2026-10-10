@@ -80,13 +80,12 @@ import type { Theme } from '../../core/theme.js';
 import { resolveElementLineThickness } from '../../core/theme.js';
 import { sequenceShadowFilter } from './sequence-shadow.js';
 import { attrs } from '../../core/svg.js';
-import { WidthTableMeasurer } from '../../core/measurer.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
 import type { ScaledTheme } from './scale-geo.js';
 
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
-import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { URectangle } from '../../core/klimt/shape/URectangle.js';
@@ -198,17 +197,15 @@ const NO_PAINT = new SymbolContext(null, null);
  *  are field arithmetic), and the seam's own glyphs that DO read geo
  *  (`queue`, `collections`) never take this path. */
 const ZERO_GEO: ParticipantSymbolGeo = { x: 0, y: 0, width: 0, height: 0 };
-const MEASURER = new WidthTableMeasurer();
-const NO_BOUNDER: StringBounder = new MeasurerStringBounder(MEASURER);
 
-/** `DriverTextSvg`'s own width-only seam. Every consumer of it defines its own
- *  local adapter (`document-shell.ts#driverBounderFor`,
- *  `description/renderer-ink-extent.ts#driverBounderFor`) rather than sharing
- *  one; this is the third. It is never consulted in practice — no glyph here
- *  draws a `UText` — but `UGraphicSvg.build` requires one. */
-const DRIVER_BOUNDER: DriverStringBounder = {
-  calculateDimension: (font, text) => ({ width: MEASURER.measure(text, font).width }),
-};
+/** `DriverTextSvg`'s own width-only seam, over the render's injected measurer
+ *  (`ScaledTheme.measurer`). No glyph here draws a `UText`, so it is never
+ *  consulted in practice -- but `UGraphicSvg.build` requires one, and when a
+ *  glyph does draw text it must answer from the layout's metric, not a second
+ *  private one. */
+function driverBounderOf(measurer: StringMeasurer): DriverStringBounder {
+  return { calculateDimension: (font, text) => ({ width: measurer.measure(text, font).width }) };
+}
 
 /**
  * `ComponentRoseDatabase.java:66-69` — `new Fashion(biColor.getBackColor(),
@@ -330,6 +327,7 @@ function glyphOffset(
 export function measureParticipantSymbol(
   type: GlyphParticipantType,
   theme: Theme,
+  measurer: StringMeasurer,
   shadow = 0,
 ): { width: number; height: number } {
   if (type === 'actor') {
@@ -338,7 +336,9 @@ export function measureParticipantSymbol(
     // `skinparam actorStyle` (`ActorStyle.java:60-71`) -- and
     // shadow-dependent: the stick man and the hollow actor add the delta to
     // their height (`ActorStickMan.java:121`, `ActorHollow.java:110`).
-    const probe = glyphFor('actor', { ...ZERO_GEO, shadow }, theme).calculateDimension(NO_BOUNDER);
+    const probe = glyphFor('actor', { ...ZERO_GEO, shadow }, theme).calculateDimension(
+      new MeasurerStringBounder(measurer),
+    );
     return { width: probe.getWidth(), height: probe.getHeight() };
   }
   if (type === 'collections') return { width: COLLECTIONS_DELTA, height: COLLECTIONS_DELTA };
@@ -347,7 +347,7 @@ export function measureParticipantSymbol(
     return { width: margin.getWidth(), height: margin.getHeight() };
   }
   if (type === 'boundary' || type === 'control' || type === 'entity') {
-    const probe = simpleGlyph(type, NO_PAINT).calculateDimension(NO_BOUNDER);
+    const probe = simpleGlyph(type, NO_PAINT).calculateDimension(new MeasurerStringBounder(measurer));
     return { width: probe.getWidth(), height: probe.getHeight() };
   }
   const margin = databaseMargin();
@@ -408,8 +408,8 @@ export function renderParticipantSymbol(
     seedOf(`${type}:${geo.x},${geo.y}`),
     option,
     VERSION_PLACEHOLDER,
-    DRIVER_BOUNDER,
-    MEASURER,
+    driverBounderOf(opts.theme.measurer),
+    opts.theme.measurer,
   );
 
   const unscaled: ParticipantSymbolGeo = {

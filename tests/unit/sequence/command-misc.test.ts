@@ -19,6 +19,7 @@ import { makeDefaultAST, type ParseState } from '../../../src/diagrams/sequence/
 import type {
   DelayEvent,
   DividerEvent,
+  FrameEvent,
   SequenceDiagramAST,
   SequenceEvent,
   SpaceEvent,
@@ -99,7 +100,8 @@ describe('divider', () => {
     const ast = parse(['A -> B', '== test ==', 'A -> B']);
     const dividers = only<DividerEvent>(ast.events, 'divider');
     expect(dividers).toHaveLength(1);
-    expect(dividers[0]?.text).toBe('test');
+    // Greedy LABEL keeps the space before `==` (CommandDivider.java:57-62).
+    expect(dividers[0]?.text).toBe('test ');
   });
 
   it('parses an EMPTY-label divider (====)', () => {
@@ -216,7 +218,13 @@ describe('pinned corpus fixtures route SEQUENCE', () => {
   it('valiva-41-fabo221 shape: == test == then ====', () => {
     const ast = parse(['A -> B', '== test ==', 'A -> B', '====', 'A -> B']);
     const dividers = only<DividerEvent>(ast.events, 'divider');
-    expect(dividers.map((d) => d.text)).toEqual(['test', '']);
+    expect(dividers.map((d) => d.text)).toEqual(['test ', '']); // greedy LABEL, CommandDivider.java:57-62
+  });
+
+  it('keeps the spaces before the closing == in the label (greedy LABEL)', () => {
+    // CommandDivider.java:57-62: `(.*)` is greedy, `spaceZeroOrMore` after it matches nothing.
+    const ast = parse(['A -> B', '== diver 1 ==']);
+    expect(only<DividerEvent>(ast.events, 'divider').map((d) => d.text)).toEqual(['diver 1 ']);
   });
 
   it('loguci-83-mobe896 shape: bare … then …title…', () => {
@@ -232,5 +240,20 @@ describe('pinned corpus fixtures route SEQUENCE', () => {
     // it here would only prove the registration gap, not this task's port.
     const ast = parse(['a -> b: message', 'return answer']);
     expect(only<SequenceEvent>(ast.events, 'message')).toHaveLength(2);
+  });
+});
+
+describe('ref body normalisation', () => {
+  const refLabel = (lines: string[]): string | undefined =>
+    only<FrameEvent>(parse(['A -> B', ...lines]).events, 'frame')[0]?.label;
+
+  it('single line: trims the whole text once, not each inner line', () => {
+    // CommandReferenceOverSeveral.java:125 `StringUtils.trin(TEXT)`.
+    expect(refLabel(['ref over A, B :   first \\n second  '])).toBe('first \\n second');
+  });
+
+  it('block form: only the common indent goes, relative indent and trailing spaces stay', () => {
+    // CommandReferenceMultilinesOverSeveral.java:142 `removeEmptyColumns()`.
+    expect(refLabel(['ref over A, B', '    top ', '      nested', 'end ref'])).toBe('top \n  nested');
   });
 });

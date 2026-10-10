@@ -5,7 +5,9 @@
  * jar-deterministic metric the oracle uses; it may diverge from the raw
  * `WidthTableMeasurer` table port (U+0020 width). A harness that constructs
  * or imports `WidthTableMeasurer` directly would measure with a different
- * metric than the oracle. Only `src/core/` and the explicit allow-list below
+ * metric than the oracle, and production code that builds its own measurer
+ * ignores the render's injected one (isw F1: ten activity/sequence sites did,
+ * hiding a whole reveal family). Only `src/core/` and the explicit allow-list below
  * (tests of the verbatim table port, and this guard) may reference it.
  */
 import { describe, it, expect } from 'vitest';
@@ -16,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-const SCANNED_ROOTS = ['scripts', 'tests', 'plans'];
+const SCANNED_ROOTS = ['src', 'scripts', 'tests', 'plans'];
 const SCANNED_EXTENSIONS = ['.ts', '.mts', '.js', '.mjs', '.tsx'];
 const SKIPPED_DIRS = new Set(['node_modules', '.git']);
 

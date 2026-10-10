@@ -39,8 +39,9 @@ const THEME: ScaledTheme = { ...defaultTheme, scaleK: 1 };
 
 describe('renderClassEntityPort (EntityImagePort#drawU)', () => {
   it('draws the desc above the symbol when upPosition()', () => {
+    // textLength 12.512: bonaco in.svg, re-captured (the measurer float32-rounds 12.5125).
     const { body } = renderClassEntityPort(port({ entityPortUp: true }), THEME, measurer, 'ent0002');
-    expect(body).toContain('<text x="17.744" y="18.5" fill="#000" font-size="14" textLength="12.513">Pi</text>');
+    expect(body).toContain('<text x="17.744" y="18.5" fill="#000" font-size="14" textLength="12.512">Pi</text>');
     expect(body).toContain(
       '<rect x="18" y="33.611" width="12" height="12" fill="#F1F1F1" style="stroke:#181818;stroke-width:1.5;"/>',
     );

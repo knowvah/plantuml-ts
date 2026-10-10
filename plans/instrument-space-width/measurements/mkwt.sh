@@ -5,7 +5,7 @@
 # mission must carry its OWN copy).
 set -euo pipefail
 R="$(git rev-parse --show-toplevel)"; t="$1"; W="$R/.claude/worktrees/isw-$t"
-git -C "$R" worktree add -q -b "isw/$t" "$W" feat/instrument-space-width
+git -C "$R" worktree add -q -b "isw/$t" "$W" "${ISW_BASE:-feat/instrument-space-width}"
 cd "$W"
 for p in .husky/_ node_modules oracle/dist assets/stdlib tests/corpus plans/class-divergence-drive/tools/node_modules packages/emoji/assets packages/sprites-archimate/assets packages/stdlib-all/generated packages/stdlib-aws/assets packages/stdlib-aws/generated packages/stdlib-tupadr3/assets packages/stdlib-tupadr3/generated packages/stdlib/assets packages/stdlib/generated; do
   [ -e "$R/$p" ] && { rm -rf "$W/$p"; mkdir -p "$(dirname "$W/$p")"; ln -s "$R/$p" "$W/$p"; }

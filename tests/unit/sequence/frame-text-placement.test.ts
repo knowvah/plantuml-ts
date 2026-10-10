@@ -180,8 +180,10 @@ describe('frame text through creole', () => {
     expect(attr(els[i]!, 'text-decoration')).toBe('underline');
     const foo2 = els.find((e) => e.includes('>Foo2<'))!;
     expect(attr(foo2, 'textLength')).toBe('27.375');
-    // Adjacent: the label run starts exactly where the url run ends.
-    expect(Number(attr(foo2, 'x'))).toBeCloseTo(Number(attr(els[i]!, 'x')) + 121.275, 3);
+    // Adjacent: the label run starts where the url run ends, plus the one
+    // leading space `DriverTextSvg.java:114-120` moves `x` by (3.3 at 12pt):
+    // JAR cikoca-19-feji527/in.svg url x=16 textLength=121.275, `Foo2` x=140.575.
+    expect(Number(attr(foo2, 'x'))).toBeCloseTo(Number(attr(els[i]!, 'x')) + 121.275 + 3.3, 3);
     // Same baseline — one line, several runs.
     expect(attr(foo2, 'y')).toBe(attr(els[i]!, 'y'));
     expect(svg).not.toContain('[[http://www.google.com]]');

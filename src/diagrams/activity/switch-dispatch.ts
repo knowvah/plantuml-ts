@@ -87,7 +87,7 @@ function classifySwitchClauseLine(ctx: ParseContext, cursor: number): SwitchClau
   if (caseMatch !== null) {
     // add4-T1f (SWITCH-NL): `CommandCase#executeArg` hands the label through
     // `Display.getWithNewlines` (`CommandCase.java:87`), so `\n` is a line break.
-    const label = unescapeLabelNewlines(caseMatch[1]!.trim());
+    const label = unescapeLabelNewlines(caseMatch[1]!);
     const bodyResult = parseNodes(ctx, cursor + 1, SWITCH_INNER_STOPS);
     if (isRefusal(bodyResult)) return bodyResult;
     const { body, notes } = extractLeadingCaseNotes(bodyResult.nodes);
@@ -131,7 +131,7 @@ function consumeSwitchCases(
 export function tryOpenSwitch(ctx: ParseContext, idx: number, line: string): DispatchResult | ParseRefusal | null {
   const m = RE_SWITCH.exec(line);
   if (m === null) return null;
-  const condition = m[1]!.trim();
+  const condition = m[1]!;
   const openerSwimlane = swimlaneSpread(ctx);
 
   const result = consumeSwitchCases(ctx, idx + 1);

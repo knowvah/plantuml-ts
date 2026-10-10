@@ -31,12 +31,15 @@ export function tryNoteHandling(
   line: string,
   i: number,
   rawLine: number,
+  sourceLine: string = line,
 ): NoteLineOutcome | ParseRefusal {
   if (state.pendingNote !== undefined) {
     if (isNoteTerminator(line, state.pendingNote.terminator)) {
       closePendingNote(state);
     } else {
-      state.pendingNote.lines.push(line);
+      // isw-T2-cls F3d: the RAW source line -- BlocLines#removeEmptyColumns
+      // (applied in closePendingNote) keeps trailing/interior whitespace.
+      state.pendingNote.lines.push(sourceLine);
     }
     return 1;
   }

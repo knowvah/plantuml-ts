@@ -96,13 +96,15 @@ describe('message label placement against the jar', () => {
  * Alice -> Bob : ""x->  ""
  * ```
  *
- * The jar emits, in document order:
+ * The jar emits, in document order (re-captured under oracle seam #4, space =
+ * 3.575@13: `tests/fixtures/isw-T2-seq/message-label-creole.svg`, rendered by
+ * `scripts/oracle-render.sh`; `bold` and `label` sit one space further right):
  *
  * ```
  * <text x="39.225"  fill="#F00" textLength="28.844">[001]</text>
  * <text x="72.069"  fill="#000">a</text>
- * <text x="79.3"    fill="#000" textLength="24.619" font-weight="700">bold</text>
- * <text x="103.919" fill="#000" textLength="27.544">label</text>
+ * <text x="82.875"  fill="#000" textLength="24.619" font-weight="700">bold</text>
+ * <text x="111.069" fill="#000" textLength="27.544">label</text>
  * <text x="72.069"  fill="#000" textLength="18.444" font-family="monospace">x-></text>
  * ```
  *
@@ -136,7 +138,7 @@ describe('creole in a message label (C3)', () => {
   });
 
   it('places each run at the jar’s own x, the number’s width plus the 4px margin', () => {
-    expect(labels.slice(0, 4).map((l) => l.x)).toEqual(['39.225', '72.069', '79.3', '103.919']);
+    expect(labels.slice(0, 4).map((l) => l.x)).toEqual(['39.225', '72.069', '82.875', '111.069']);
   });
 
   it('gives each run its own textLength, and none to the single-character one', () => {

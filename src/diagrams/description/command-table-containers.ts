@@ -49,10 +49,13 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   // comment says it is "restricted to tag/stereotype/color tokens so link
   // lines never match" (`command-table-helpers.ts:16-19`).
   // @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementFull.java:83-115
+  // isw-T2-cls F4: the bracket content is passed UNTRIMMED -- CODE_CORE's
+  // `\\[[^\\[\\]]+\\]` capture is the display verbatim (java:126; jar probe: `[ G  H ] as X`
+  // draws a box 2 spaces wider than `[G  H] as X`).
   {
     pattern: new RegExp('^\\[([^\\]]+)\\]' + BRACKET_TRAILER + '$'),
     execute(state, match) {
-      const decl = parseBracketDeclaration(match[1]!.trim(), match[2] ?? '');
+      const decl = parseBracketDeclaration(match[1]!, match[2] ?? '');
       emitNode(
         state,
         makeNode(decl.id, decl.display, 'component', decl.stereotype, decl.color, undefined, decl.stereotypeSprite),
@@ -189,7 +192,7 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       // so it is intentionally NOT intercepted here.
       const bracketAs = /^\[([^\]]*)\]\s+(as\s+.+)$/i.exec(match[2]!.trim());
       if (bracketAs !== null) {
-        const bdecl = parseBracketDeclaration(bracketAs[1]!.trim(), bracketAs[2]!);
+        const bdecl = parseBracketDeclaration(bracketAs[1]!, bracketAs[2]!);
         emitNode(
           state,
           makeNode(bdecl.id, bdecl.display, symbol, bdecl.stereotype, bdecl.color, undefined, bdecl.stereotypeSprite),

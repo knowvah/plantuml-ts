@@ -1,0 +1,22 @@
+@startuml
+<style>
+json {
+  LineColor blue
+  LineThickness 2
+  LineStyle 10-5
+  RoundCorner 20
+  FontSize 12
+  FontStyle bold
+  FontName Helvetica
+  header {
+    FontSize 18
+    FontStyle italic
+    FontName Courier
+  }
+}
+</style>
+json "Data" as j {
+  "name": "Dummy",
+  "id": 123
+}
+@enduml

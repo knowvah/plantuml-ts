@@ -7,9 +7,11 @@
  * separately-drawn dashed connector (`SvekEdge#drawU`'s `if (opale)
  * return;`).
  *
- * Oracle-verified 2026-09-30 (`scripts/oracle-render.sh`, deterministic
- * text, `cloud cloud` / `note right: cloud's note`): the outline/corner
- * path coordinates below are byte-exact against the jar. The note's own
+ * Oracle-verified 2026-09-30, re-probed under oracle seam #4 v2
+ * (`scripts/oracle-render.sh`, deterministic text, `cloud cloud` / `note right:
+ * cloud's note`; tests/fixtures/isw-T2-cls/opale-note.svg -- the note is wider
+ * now that its space counts): the outline/corner path coordinates below are
+ * byte-exact against the jar. The note's own
  * `fill` color is NOT asserted here — `theme.colors.noteBackground`
  * (`#FEFECE`) already diverges from the jar's actual default (`#FEFFDD`,
  * confirmed via the same oracle probe on a floating note) for EVERY note
@@ -36,11 +38,11 @@ describe('description note — Opale connector (T1e)', () => {
     const svg = render("@startuml\ncloud cloud\nnote right: cloud's note\n@enduml");
 
     expect(svg).toContain(
-      'M108.488,15.195 L108.488,22.695 L73.918,26.695 L108.488,30.695 L108.488,38.195 ' +
-        'A0,0 0 0 0 108.488,38.195 L194.894,38.195 A0,0 0 0 0 194.894,38.195 ' +
-        'L194.894,25.195 L184.894,15.195 L108.488,15.195 A0,0 0 0 0 108.488,15.195',
+      'M108.708,15.195 L108.708,22.695 L73.628,26.695 L108.708,30.695 L108.708,38.195 ' +
+        'A0,0 0 0 0 108.708,38.195 L198.689,38.195 A0,0 0 0 0 198.689,38.195 ' +
+        'L198.689,25.195 L188.689,15.195 L108.708,15.195 A0,0 0 0 0 108.708,15.195',
     );
-    expect(svg).toContain('M184.894,15.195 L184.894,25.195 L194.894,25.195 L184.894,15.195');
+    expect(svg).toContain('M188.689,15.195 L188.689,25.195 L198.689,25.195 L188.689,15.195');
     expect(svg).toContain('stroke-width:0.5');
     expect(svg).toContain("cloud's note");
   });

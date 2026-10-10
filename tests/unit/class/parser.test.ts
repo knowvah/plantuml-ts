@@ -100,7 +100,8 @@ describe('classifier declarations', () => {
 
   it('parses stereotype — class Foo << Stereotype >>', () => {
     const c = firstClassifier('class Foo << Stereotype >>');
-    expect(c.stereotype).toBe('Stereotype');
+    // the label is kept verbatim between `<<` and `>>` (StereotypePattern.java:68); the jar draws the trimmed «...» (Guillemet.java:87-100 consumes one padding space per side)
+    expect(c.stereotype).toBe(' Stereotype ');
     expect(c.id).toBe('Foo');
   });
 

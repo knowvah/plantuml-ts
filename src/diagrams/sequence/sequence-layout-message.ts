@@ -25,6 +25,7 @@ import {
   ARROW_LABEL_PADDING_X1,
   messageLabelBlock,
   messageLabelRows,
+  numberTextOf,
 } from './text-block-geo.js';
 
 export function handleMessageEvent(
@@ -44,6 +45,9 @@ export function handleMessageEvent(
 
   const resolved = withCreateEnd(event, resolveMessageEndpoints(event, fromGeo, toGeo, ctx), toGeo);
   const endpoints = liveOffsetEndpoints(resolved, event, ctx, bound);
+  ctx.lastMessageLevels = new Map(
+    [event.from, event.to].map((id) => [id, liveLevelAt(id, event, ctx, bound)] as const),
+  );
   // The ARROW font (13), not the ambient 14. `messageLabelBlock` has always
   // DRAWN at 13 (`text-block-geo.ts:357-363`); reserving at 14 was the y half
   // of the sizer/renderer split `planning/sizer-renderer-parity.md` exists to
@@ -113,15 +117,6 @@ const ARROW_DELTA_Y = 4;
  *  the extra a self tile reserves over a flat one. `renderer-message.ts`'s
  *  `SELF_LOOP_HEIGHT` is the same number on the drawing side. */
 const SELF_ARROW_ONLY_HEIGHT = 13;
-
-/** The autonumber run's text, when the message carries one.
- *  `getLabelNumbered` prepends it as a `MessageNumber`
- *  (`AbstractMessage.java:200-206`); the formatted `sequenceLabel` wins over
- *  the bare `sequenceNumber` when both are present. */
-function numberTextOf(event: MessageEvent): string | undefined {
-  if (event.sequenceLabel !== undefined) return event.sequenceLabel;
-  return event.sequenceNumber === undefined ? undefined : String(event.sequenceNumber);
-}
 
 /**
  * Optional scalar fields carried from `event` onto its `MessageGeo`

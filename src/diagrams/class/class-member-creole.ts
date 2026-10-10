@@ -74,7 +74,7 @@ import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-comm
 import type { StringMeasurer } from '../../core/measurer.js';
 import { getSplitted } from '../../core/klimt/creole/Fission.js';
 import { manageGuillemet } from '../../core/text/Guillemet.js';
-import { textRenderOverride, resolveTabbedTextRuns } from './class-member-creole-render-text.js';
+import { textRenderFields, resolveTabbedTextRuns } from './class-member-creole-render-text.js';
 
 export type { MemberRenderAtom, MemberRowBuild } from './class-member-render-atom.js';
 import type { MemberRenderAtom, MemberRowBuild } from './class-member-render-atom.js';
@@ -327,8 +327,7 @@ export function resolveOneAtom(
     // why it is gated off a raw tab. `width` above (the LAYOUT value) stays
     // the RAW measurement always -- see `MemberRenderAtom`'s own doc
     // comment for why that is correct, not a bug.
-    const renderText = textRenderOverride(atom.text);
-    const renderWidth = renderText !== undefined ? measurer.measure(renderText, spec).width : undefined;
+    const render = textRenderFields(atom.text, (s) => measurer.measure(s, spec).width);
     // Per-atom width stored on the atom itself (not just summed into the row
     // total) so `renderer-classifier-box.ts` can emit each atom's OWN
     // `<text textLength>` and x-advance -- matches jar's real one-`<text>`-
@@ -342,7 +341,7 @@ export function resolveOneAtom(
         text: atom.text,
         font: atom.font,
         width,
-        ...(renderText !== undefined ? { renderText, renderWidth: renderWidth! } : {}),
+        ...(render ?? {}),
         ...(atom.url !== undefined ? { url: atom.url } : {}),
       },
       width,

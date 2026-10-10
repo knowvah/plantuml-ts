@@ -52,7 +52,7 @@ const NAME = '(?:"([^"]*)"\\s+as\\s+)?([\\w.]+)';
  *  class-declaration-parser.ts's `COLOR_RE`-adjacent grammar). Lazy `.+?`
  *  so stacked stereotypes capture as one blob via backtracking — see the
  *  object fragment's doc (fafozi-27-reja300). */
-const STEREO = '(?:\\s*<<\\s*(.+?)\\s*>>)?';
+const STEREO = '(?:\\s*<<(.+?)>>)?';
 
 /** `UrlBuilder.OPTIONAL` — matched and discarded, like the object opener's
  *  URL group (`Classifier` has no `url` field). */
@@ -141,7 +141,7 @@ function parseMapMatch(match: RegExpExecArray): MapMatch {
   return {
     rawCode: match[2]!,
     rawDisplay: match[1],
-    stereotype: match[3]?.trim(),
+    stereotype: match[3],
     color,
   };
 }

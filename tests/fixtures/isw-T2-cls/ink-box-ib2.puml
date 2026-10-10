@@ -1,0 +1,6 @@
+@startuml
+skinparam packageFontSize 40
+package "Empty one" {
+}
+class foo
+@enduml

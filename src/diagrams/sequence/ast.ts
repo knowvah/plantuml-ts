@@ -155,6 +155,11 @@ export interface NoteEvent {
    *  — upstream's `tryMerge` argument to `diagram.addNote(note, tryMerge)`
    *  (`:230,252`): merge this note vertically with the previous one. */
   vmerge?: boolean;
+  /** The note was written straight after a message (`note left|right|top|
+   *  bottom`, no `of X`): upstream's `Message#getNoteOnMessages`, drawn by the
+   *  `CommunicationTileNote*` wrappers (`teoz/TileBuilder.java:121-137`) rather
+   *  than by `NoteTile`. */
+  onMessage?: true;
   /** The `&` PARALLEL marker (`FactorySequenceNoteCommand.java:231,249-251`,
    *  `note.goParallel()`). Stored, not drawn — see
    *  {@link AbstractMessageEvent}'s doc comment and D4. */

@@ -15,6 +15,7 @@ import type { FrameGeo } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { rect, path } from '../../core/svg-shapes.js';
 import { sequenceText } from './sequence-text.js';
+import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
 import { frameShadowDelta, sequenceShadowFilter } from './sequence-shadow.js';
 import {
@@ -219,10 +220,10 @@ function renderHeaderText(frame: FrameGeo, theme: ScaledTheme): string {
   return frame.tabRuns
     .map((run) =>
       sequenceText({
-        leftX: run.x,
+        leftX: drawnLeftX(run),
         baselineY: run.y,
         text: run.text,
-        width: run.textWidth,
+        width: drawnWidth(run),
         fontFamily: run.fontFamily ?? theme.fontFamily,
         fontSize: run.fontSize ?? HEADER_FONT_SIZE * k,
         fontWeight: boldFontWeight(run.bold ?? HEADER_FONT_BOLD),

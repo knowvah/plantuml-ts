@@ -6,7 +6,7 @@ searchsize=500;
 subgraph cluster6 {style=solid;color="#000006";labeljust="c";{rank=sink;sh0010;}
 sh0010 [shape=rect,label="",width=0.166667,height=0.166667,color="#00000A"];
 
-subgraph cluster6ee {label=<<TABLE BGCOLOR="#000007" FIXEDSIZE="TRUE" WIDTH="75" HEIGHT="42"><TR><TD></TD></TR></TABLE>>;
+subgraph cluster6ee {label=<<TABLE BGCOLOR="#000007" FIXEDSIZE="TRUE" WIDTH="83" HEIGHT="42"><TR><TD></TD></TR></TABLE>>;
 sh0011 [shape=circle,label="",width=0.277778,height=0.277778,color="#00000B"];
 sh0012 [shape=rect,style=rounded,label="",width=1.542882,height=0.694444,color="#00000C"];
 sh0013 [shape=circle,label="",width=0.305556,height=0.305556,color="#00000D"];

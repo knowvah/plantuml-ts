@@ -29,6 +29,7 @@ import type {
   DelayGeo,
 } from './ast.js';
 import { DELAY_FONT_SIZE } from './sequence-delay.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 // No `text` import: D3 -- every `<text>` this file emits goes through
@@ -36,6 +37,7 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 // structural rather than a convention.
 import { rect, line, noteBox } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
+import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import { REFERENCE_FONT_SIZE, type TextRun } from './text-block-geo.js';
 import { NOTE_FONT_SIZE } from './sequence-layout-shared.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
@@ -67,10 +69,10 @@ import { NEWPAGE_DASH_UNIT, NEWPAGE_LINE_COLOR, NEWPAGE_LINE_THICKNESS, NEWPAGE_
  * as `renderBranchSeparators` resolves the group style's. */
 export function creoleRunText(run: TextRun, theme: ScaledTheme, fontSize: number, boldFallback = false): string {
   return sequenceText({
-    leftX: run.x,
+    leftX: drawnLeftX(run),
     baselineY: run.y,
     text: run.text,
-    width: run.textWidth,
+    width: drawnWidth(run),
     fontFamily: run.fontFamily ?? theme.fontFamily,
     fontSize: run.fontSize ?? fontSize,
     fill: run.color ?? theme.colors.text,
@@ -200,10 +202,10 @@ function renderBranchSeparators(frame: FrameGeo, theme: ScaledTheme): string {
         sep.runs
           .map((run) =>
             sequenceText({
-              leftX: run.x,
+              leftX: drawnLeftX(run),
               baselineY: run.y,
               text: run.text,
-              width: run.textWidth,
+              width: drawnWidth(run),
               fontFamily: run.fontFamily ?? theme.fontFamily,
               fontSize: run.fontSize ?? labelFontSize,
               // `ComponentRoseGroupingElse` reads the GROUP style, whose
@@ -358,8 +360,13 @@ const DIAGRAM_TYPE_SEQUENCE = 'SEQUENCE';
  * `paginateSequence` returns `geo` by reference when the document has no
  * `newpage`, which is every document but 35 of the oracle corpus.
  */
-export function renderSequencePage(geo: SequenceGeometry, theme: Theme, pageIndex: number): RenderFragment {
-  return renderPaginated(paginateSequence(geo, pageIndex), theme);
+export function renderSequencePage(
+  geo: SequenceGeometry,
+  theme: Theme,
+  pageIndex: number,
+  measurer: StringMeasurer,
+): RenderFragment {
+  return renderPaginated(paginateSequence(geo, pageIndex), theme, measurer);
 }
 
 /**
@@ -415,18 +422,18 @@ function preChromeDims(geo: SequenceGeometry, k: number): Pick<RenderFragment, '
  * page and {@link renderSequencePage} reaches the rest. See
  * `plans/sequence-newpage-pagination/decisions.md` D5.
  */
-export function renderSequence(geo: SequenceGeometry, theme: Theme): RenderFragment {
-  return renderSequencePage(geo, theme, 0);
+export function renderSequence(geo: SequenceGeometry, theme: Theme, measurer: StringMeasurer): RenderFragment {
+  return renderSequencePage(geo, theme, 0, measurer);
 }
 
-function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
+function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMeasurer): RenderFragment {
   // T13: `resolveScaleFactor` needs the UNSCALED document dims -- `geo`
   // itself, before `scaleSequenceGeometry` runs below. cdd-T30: `theme.dpi`
   // -- `skinParam.getDpi()` (`core/TextBlockExporter.java:206`), default 96
   // when `skinparam dpi` was never declared (`Theme.dpi`'s own doc comment).
   const k = resolveScaleFactor(geo.scale, geo.totalWidth, geo.totalHeight, theme.dpi);
   const scaledGeo = scaleSequenceGeometry(geo, k);
-  const scaledTheme = scaleSequenceTheme(theme, k);
+  const scaledTheme = scaleSequenceTheme(theme, k, measurer);
   const children: string[] = [];
 
   // 0. Box backgrounds (lowest z-order — behind lifelines and participants)

@@ -27,6 +27,7 @@ import {
   escapeAttribute,
   escapeText,
   escapeComment,
+  withDeferredFormat,
 } from '../../../src/core/svg-format.js';
 
 describe('svg-format', () => {
@@ -244,6 +245,31 @@ describe('svg-format', () => {
       // `x- -><script>evil()</script><!- - ` (trailing space from the
       // final `--` -> `- -` split, whose own trailing `-` gets padded).
       expect(escapeComment('x--><script>evil()</script><!--')).toBe('x- -><script>evil()</script><!- - ');
+    });
+  });
+
+  // isw-T2c-scale: a scaled document's numbers wait for the scale pass.
+  describe('withDeferredFormat', () => {
+    it('prints a lossless double inside a deferring scope', () => {
+      expect(withDeferredFormat(true, () => formatDecimal(Math.fround(20.83125), 3))).toBe('20.831249237060547');
+      expect(withDeferredFormat(true, () => formatDecimal(0.1 + 0.2, 3))).toBe('0.30000000000000004');
+    });
+
+    it('keeps 0 and sub-1e-6 values on the ordinary path (no exponent reaches the scale pass)', () => {
+      expect(withDeferredFormat(true, () => formatDecimal(0, 3))).toBe('0');
+      expect(withDeferredFormat(true, () => formatDecimal(1.4e-14, 3))).toBe('0');
+    });
+
+    it('rounds as usual with defer false, and restores the previous mode on exit (nested, throwing)', () => {
+      expect(withDeferredFormat(false, () => formatDecimal(20.83125, 3))).toBe('20.831');
+      const nested = withDeferredFormat(true, () => withDeferredFormat(false, () => formatDecimal(1.23456, 3)));
+      expect(nested).toBe('1.235');
+      expect(() =>
+        withDeferredFormat(true, () => {
+          throw new Error('boom');
+        }),
+      ).toThrow('boom');
+      expect(formatDecimal(1.23456, 3)).toBe('1.235');
     });
   });
 });

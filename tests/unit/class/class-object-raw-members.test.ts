@@ -201,7 +201,7 @@ describe('measureObjectClassifier — raw member rows size the box (nukera-08-di
     };
     const geo = layoutClass(ast, theme, measurer);
     const c = classifierLeaves(geo.leaves)[0]!;
-    expect(c.width).toBeCloseTo(133.7125, 4);
+    expect(c.width).toBeCloseTo(145.2625, 4);
     expect(c.height).toBeCloseTo(82, 4);
     // header row + 4 raw member rows, each with a visibility icon.
     expect(c.rows).toHaveLength(5);

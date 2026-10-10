@@ -45,7 +45,11 @@ export function collectOrgmodeMultilineBlock(
   startMatch: RegExpExecArray,
 ): OrgmodeMultilineBlock | undefined {
   const displayLines: string[] = [];
-  const firstLine = (startMatch[4] ?? '').trim();
+  // The start regex runs on the TRIMMED line (`lines.getFirst().getTrimmed()`,
+  // CommandMindMapOrgmodeMultiline.java:99) and `removeStartingAndEnding`
+  // keeps its DATA group as-is (BlocLines.java:271-283): leading spaces after
+  // the `:` survive. Only the raw line's trailing blanks are not part of it.
+  const firstLine = (startMatch[4] ?? '').trimEnd();
   const firstEnd = ORGMODE_MULTILINE_END_RE.exec(firstLine);
   if (firstEnd !== null) {
     displayLines.push(firstEnd[1] ?? '');
@@ -54,13 +58,17 @@ export function collectOrgmodeMultilineBlock(
   displayLines.push(firstLine);
 
   for (let i = startIndex + 1; i < lines.length; i++) {
-    const trimmed = lines[i]!.trim();
-    const endMatch = ORGMODE_MULTILINE_END_RE.exec(trimmed);
+    // Middle lines stay RAW: `Trim.BOTH` only trims the END-pattern probe
+    // (CommandMultilines2.java:98-103); the block keeps the line as read.
+    // The last line is the END group 1 of the UNTRIMMED string
+    // (`overrideLastLine(lineLast.get(0))`, java:107-116).
+    const raw = lines[i]!;
+    const endMatch = ORGMODE_MULTILINE_END_RE.exec(raw.trim());
     if (endMatch !== null) {
-      displayLines.push(endMatch[1] ?? '');
+      displayLines.push(ORGMODE_MULTILINE_END_RE.exec(raw)?.[1] ?? endMatch[1] ?? '');
       return { displayLines, stereotypeToken: endMatch[2], endIndex: i };
     }
-    displayLines.push(trimmed);
+    displayLines.push(raw);
   }
   return undefined;
 }

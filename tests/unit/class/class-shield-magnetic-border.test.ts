@@ -63,11 +63,15 @@ describe('clusterMagneticBorder — Cluster.java:726-757 + USymbolFolder.java:24
     expect(clusterMagneticBorder(NS, 'folder', defaultTheme, measurer)).toBeDefined();
   });
 
-  it('uses the rect width for an empty title (getWTitle: max(30, width/4))', () => {
+  // isw-T2-cls: an empty title is a lone " " atom, not a 0-wide block (jar
+  // probe tests/fixtures/isw-T2-cls/empty-package-title.svg): wtitle = 3.85 +
+  // 6 = 9.85 and htitle = 14 + 6 = 20 (USymbolFolder.java:127-143), so the
+  // `max(30, width/4)` arm is not taken even in a 400-wide cluster.
+  it('uses the " " atom title for an empty label (wtitle 9.85, htitle 20)', () => {
     const wide = clusterMagneticBorder({ ...NS, width: 400, label: '' }, undefined, defaultTheme, measurer)!;
-    // wtitle = 100, htitle = 10: x = 100 + 100 + 7 is the first full-force column.
-    expect(wide.getForceAt({ x: 100 + 107, y: 199 }).getDy()).toBe(10);
-    expect(wide.getForceAt({ x: 100 + 99, y: 199 }).getDy()).toBeLessThan(10);
+    // x = 100 + wtitle + marginTitleX3(7) is the first full-force column.
+    expect(wide.getForceAt({ x: 100 + 9.85 + 7, y: 199 }).getDy()).toBe(20);
+    expect(wide.getForceAt({ x: 100 + 9.85 + 6, y: 199 }).getDy()).toBeLessThan(20);
   });
 });
 

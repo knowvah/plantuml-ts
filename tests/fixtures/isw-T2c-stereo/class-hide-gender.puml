@@ -1,0 +1,14 @@
+@startuml
+class A <<  x  >> {
+  +f1
+}
+class B << y >> {
+  +f2
+}
+class C <<z>> {
+  +f3
+}
+hide << x >> members
+hide << y >> members
+hide <<z>> members
+@enduml

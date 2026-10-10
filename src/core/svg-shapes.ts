@@ -111,6 +111,12 @@ export function line(x1: number, y1: number, x2: number, y2: number, style: Line
  * drawn, never call this function; their own census stays byte-identical).
  *
  * Content is XML-escaped. Style attributes are placed on the outer `<text>`.
+ *
+ * Leading spaces are trimmed WITHOUT moving `x` (this emitter has no measurer).
+ * A caller whose run can start with a space must shift `x` by one space width
+ * per space and measure `textLength` on the trimmed text, via
+ * `driverTextPlacement` (DriverTextSvg.java:118-126); none of the core callers
+ * (usymbol icon labels, node labels, the dispatcher notice) emit such a run.
  */
 /**
  * Rule 5: a one-character label has no inter-character spacing to adjust, so

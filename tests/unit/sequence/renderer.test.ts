@@ -19,6 +19,8 @@ import { sequencePlugin } from '../../../src/diagrams/sequence/index.js';
 import { defaultTheme, darkTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer, FixedMeasurer } from '../../../src/core/measurer.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+
+const TEST_MEASURER = new DeterministicMeasurer();
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import { parseAst } from '../../helpers/parse-ast.js';
 import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo.js';
@@ -245,18 +247,18 @@ function makeSyncMessage(overrides?: Partial<MessageGeo>): MessageGeo {
 
 describe('renderSequence — participant boxes', () => {
   it('emits at least 2 rects for two participants', () => {
-    const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme));
+    const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme, TEST_MEASURER));
     const rectCount = (svg.match(/<rect/g) ?? []).length;
     expect(rectCount).toBeGreaterThanOrEqual(2);
   });
 
   it('uses theme background color for participant fill', () => {
-    const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme));
+    const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme, TEST_MEASURER));
     expect(svg).toContain(`fill="${shortenColor(defaultTheme.colors.background)}"`);
   });
 
   it('emits participant display text', () => {
-    const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme));
+    const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme, TEST_MEASURER));
     // Each participant has text with id used as display in makeGeo
     expect(svg).toContain('Alice');
     expect(svg).toContain('Bob');
@@ -270,14 +272,14 @@ describe('renderSequence — participant boxes', () => {
 describe('renderSequence — messages', () => {
   it('sync message produces a line or path element', () => {
     const geo = makeGeo({ events: [makeSyncMessage()] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     const hasLine = svg.includes('<line') || svg.includes('<path');
     expect(hasLine).toBe(true);
   });
 
   it('sync message includes label text', () => {
     const geo = makeGeo({ events: [makeSyncMessage({ label: 'doThing' })] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('doThing');
   });
 
@@ -285,7 +287,7 @@ describe('renderSequence — messages', () => {
     const geo = makeGeo({
       events: [makeSyncMessage({ arrow: arrowOf('reply'), arrowDirection: 'left', fromX: 220, toX: 80 })],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('stroke-dasharray');
   });
 
@@ -293,7 +295,7 @@ describe('renderSequence — messages', () => {
     const geo = makeGeo({
       events: [makeSyncMessage({ arrow: arrowOf('replyAsync'), arrowDirection: 'left', fromX: 220, toX: 80 })],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('stroke-dasharray');
   });
 
@@ -306,7 +308,7 @@ describe('renderSequence — messages', () => {
     const geo = makeGeo({
       events: [makeSyncMessage({ arrowDirection: 'self', fromX: 80, toX: 110 })],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).not.toContain('<path');
     expect(svg.match(/<line /g)?.length).toBeGreaterThanOrEqual(3);
   });
@@ -320,7 +322,7 @@ describe('renderSequence — messages', () => {
     const geo = makeGeo({
       events: [makeSyncMessage({ label: 'greet', sequenceNumber: 3 })],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).not.toContain('3: greet');
     expect(svg).toContain('>3</text>');
     expect(svg).toContain('>greet</text>');
@@ -350,7 +352,7 @@ describe('renderSequence — messages', () => {
     expect(msg.labelNumber).toBeUndefined();
     // `AbstractTextualComponent` maps an empty display to a `TextBlockEmpty`,
     // which draws nothing (`AbstractTextualComponent.java:84-85`).
-    expect(assembleSvg(renderSequence(geo, defaultTheme))).not.toContain('></text>');
+    expect(assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER))).not.toContain('></text>');
   });
 
   it('emits one text per line of a multi-line label, sharing one x', () => {
@@ -359,7 +361,7 @@ describe('renderSequence — messages', () => {
     expect(msg.labelLines.map((l) => l.text)).toEqual(['one', 'two', 'three']);
     // Lines are left-aligned WITHIN the block, exactly as upstream draws them.
     expect(new Set(msg.labelLines.map((l) => l.x)).size).toBe(1);
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('>one</text>');
     expect(svg).toContain('>three</text>');
     expect(svg).not.toContain('one\ntwo');
@@ -369,7 +371,7 @@ describe('renderSequence — messages', () => {
     const geo = makeGeo({
       events: [makeSyncMessage({ arrow: arrowOf('lost') })],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     // `lost` is a MessageExoType, which governs where the LINE terminates,
     // not what the head looks like -- `CommandExoArrowAny.java:90-91` builds
     // it from the same `withDirectionNormal()` as a plain `->`, so the head
@@ -383,7 +385,7 @@ describe('renderSequence — messages', () => {
     const geo = makeGeo({
       events: [makeSyncMessage({ arrow: arrowOf('found') })],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('<polygon points="208,76,218,80,208,84,212,80"');
     expect(svg).not.toContain('arrow-found');
   });
@@ -408,7 +410,7 @@ describe('renderSequence — message lifecolor, url and stereotype', () => {
     // resolves the NAMED token to its hex, then `shortenColor` collapses
     // `#FF0000` to `#F00` -- the SAME generic pipeline every other fill
     // goes through (`core/svg.ts:223-232`), reused here for free.
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('fill="#F00"');
   });
 
@@ -439,7 +441,7 @@ describe('renderSequence — message lifecolor, url and stereotype', () => {
     const geo = makeGeo({ events: [makeSyncMessage({ url: 'http://example.com' })] });
     const msg = geo.events[0] as MessageGeo;
     expect(msg.url).toBe('http://example.com');
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).not.toContain('<a ');
     expect(svg).not.toContain('http://example.com');
   });
@@ -456,7 +458,7 @@ describe('renderSequence — message lifecolor, url and stereotype', () => {
     const geo = makeGeo({ events: [makeSyncMessage({ stereotype: '<<stereo>>' })] });
     const msg = geo.events[0] as MessageGeo;
     expect(msg.stereotype).toBe('<<stereo>>');
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).not.toContain('&lt;&lt;');
   });
 
@@ -467,7 +469,7 @@ describe('renderSequence — message lifecolor, url and stereotype', () => {
     const msg = geo.events.find((e): e is MessageGeo => e.kind === 'message');
     expect(msg?.url).toBe('http://example.com');
     expect(msg?.stereotype).toBe('<<stereo>>');
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).not.toContain('<a ');
     expect(svg).not.toContain('&lt;&lt;');
   });
@@ -484,7 +486,7 @@ const ALL_MESSAGE_STYLES: readonly RenderStyle[] = ['sync', 'async', 'reply', 'r
 describe('renderSequence -- inline arrowheads (T3 AC1)', () => {
   it.each(ALL_MESSAGE_STYLES)('a %s message emits no <marker, markerEnd or markerStart token', (style) => {
     const geo = makeGeo({ events: [makeSyncMessage({ arrow: arrowOf(style) })] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).not.toContain('<marker');
     expect(svg).not.toContain('markerEnd');
     expect(svg).not.toContain('markerStart');
@@ -496,7 +498,7 @@ describe('renderSequence -- inline arrowheads (T3 AC1)', () => {
     const geo = makeGeo({
       events: [makeSyncMessage({ arrow: arrowOf(style), arrowDirection: 'self', fromX: 80, toX: 110 })],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).not.toContain('<marker');
     expect(svg).not.toContain('markerEnd');
     expect(svg).not.toContain('marker-end');
@@ -518,12 +520,12 @@ describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () =
   }
 
   it('puts a sync head tip at pos2 = width - 2, matching the jar exactly', () => {
-    const svg = assembleSvg(renderSequence(jarGeo(), defaultTheme));
+    const svg = assembleSvg(renderSequence(jarGeo(), defaultTheme, TEST_MEASURER));
     expect(svg).toContain('<polygon points="121.231,62,131.231,66,121.231,70,125.231,66"');
   });
 
   it('trims the line by arrowDeltaX / 2, matching the jar exactly', () => {
-    const svg = assembleSvg(renderSequence(jarGeo(), defaultTheme));
+    const svg = assembleSvg(renderSequence(jarGeo(), defaultTheme, TEST_MEASURER));
     // start = 0, len = width - 1 - arrowDeltaX / 2 (`ComponentRoseArrow
     // .java:96-97,126-127`) => 81.538 .. 127.231
     expect(svg).toContain('<line x1="81.538" y1="66" x2="127.231" y2="66"');
@@ -536,13 +538,13 @@ describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () =
     const geo = makeGeo({
       events: [makeSyncMessage({ fromX: ALICE_X, toX: BOB_X, y: MESSAGE_Y, arrowDirection: 'left' })],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('<polygon points="92.538,62,82.538,66,92.538,70,88.538,66"');
     expect(svg).toContain('<line x1="86.538" y1="66" x2="132.231" y2="66"');
   });
 
   it('draws an async head as two open strokes, not a polygon', () => {
-    const svg = assembleSvg(renderSequence(jarGeo({ arrow: arrowOf('async') }), defaultTheme));
+    const svg = assembleSvg(renderSequence(jarGeo({ arrow: arrowOf('async') }), defaultTheme, TEST_MEASURER));
     // `asyncLinesNormal` at pos2 = 131.231: two ULines to (-10, -+4).
     expect(svg).toContain('<line x1="131.231" y1="66" x2="121.231" y2="62"');
     expect(svg).toContain('<line x1="131.231" y1="66" x2="121.231" y2="70"');
@@ -550,13 +552,13 @@ describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () =
   });
 
   it('leaves an async line untrimmed -- only FULL+NORMAL trims', () => {
-    const svg = assembleSvg(renderSequence(jarGeo({ arrow: arrowOf('async') }), defaultTheme));
+    const svg = assembleSvg(renderSequence(jarGeo({ arrow: arrowOf('async') }), defaultTheme, TEST_MEASURER));
     // len = width - 1 only (`ComponentRoseArrow.java:97`; `:126` needs NORMAL)
     expect(svg).toContain('<line x1="81.538" y1="66" x2="132.231" y2="66"');
   });
 
   it('paints the head with the theme arrow colour, filled and stroked', () => {
-    const svg = assembleSvg(renderSequence(jarGeo(), defaultTheme));
+    const svg = assembleSvg(renderSequence(jarGeo(), defaultTheme, TEST_MEASURER));
     expect(svg).toContain(
       '<polygon points="121.231,62,131.231,66,121.231,70,125.231,66" ' +
         `fill="${shortenColor(noGradient(defaultTheme.colors.arrow))}" ` +
@@ -566,7 +568,7 @@ describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () =
 
   it('drops the nice-arrow notch under skinparam style strictuml', () => {
     // `Rose.java:340` passes `param.strictUmlStyle() == false` as niceArrow.
-    const svg = assembleSvg(renderSequence(jarGeo(), { ...defaultTheme, strictUml: true }));
+    const svg = assembleSvg(renderSequence(jarGeo(), { ...defaultTheme, strictUml: true }, TEST_MEASURER));
     expect(svg).toContain('<polygon points="121.231,62,131.231,66,121.231,70"');
   });
 });
@@ -594,7 +596,7 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   }
 
   it('emits the getPolygon() shape at the loop foot for a sync self message', () => {
-    const svg = assembleSvg(renderSequence(selfGeo('sync'), defaultTheme));
+    const svg = assembleSvg(renderSequence(selfGeo('sync'), defaultTheme, TEST_MEASURER));
     // direction = +1 (reverseDefine is unreachable from this parser), so
     // (10,-4) (0,0) (10,4) (6,0) about (80, 100).
     expect(svg).toContain('<polygon points="90,89,80,93,90,97,86,93"');
@@ -602,7 +604,7 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   });
 
   it("still draws the loop itself, as upstream's three strokes", () => {
-    const svg = assembleSvg(renderSequence(selfGeo('sync'), defaultTheme));
+    const svg = assembleSvg(renderSequence(selfGeo('sync'), defaultTheme, TEST_MEASURER));
     // Out, down, and back -- the third running left-to-right from the
     // returning x, which is `hline(xRight - x2)` translated to `x2`.
     expect(svg).toContain(`<line x1="${SELF_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${SELF_Y}"`);
@@ -611,7 +613,7 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   });
 
   it('draws a self async head as two open strokes', () => {
-    const svg = assembleSvg(renderSequence(selfGeo('async'), defaultTheme));
+    const svg = assembleSvg(renderSequence(selfGeo('async'), defaultTheme, TEST_MEASURER));
     // `ComponentRoseSelfArrow.java:161-169` -- ULine(+arrowDeltaX, -+arrowDeltaY)
     expect(svg).toContain('<line x1="80" y1="93" x2="90" y2="89"');
     expect(svg).toContain('<line x1="80" y1="93" x2="90" y2="97"');
@@ -619,7 +621,7 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   });
 
   it('dashes a self reply loop', () => {
-    const svg = assembleSvg(renderSequence(selfGeo('reply'), defaultTheme));
+    const svg = assembleSvg(renderSequence(selfGeo('reply'), defaultTheme, TEST_MEASURER));
     // The dash reaches all THREE strokes, not just the first: a reply loop
     // that dashed only its outgoing segment would look like two arrows.
     for (const seg of [
@@ -646,7 +648,7 @@ describe('renderSequence -- pass order (sequence-participant-g-wrapper T3)', () 
     // `playingSpace.drawForeground(ugBody)` at `:227` -- so an arrow paints
     // OVER a footbox, not under it. This renderer used to emit the footbox
     // last.
-    const { body } = renderSequence(makeGeo({ events: [makeSyncMessage()] }), defaultTheme);
+    const { body } = renderSequence(makeGeo({ events: [makeSyncMessage()] }), defaultTheme, TEST_MEASURER);
 
     const firstPolygon = body.indexOf('<polygon');
     const lastRect = body.lastIndexOf('<rect');
@@ -663,6 +665,7 @@ describe('renderSequence -- pass order (sequence-participant-g-wrapper T3)', () 
         ],
       }),
       defaultTheme,
+      TEST_MEASURER,
     );
 
     // Three titled groups lead: Alice's lifeline, Alice's livebox (empty
@@ -676,7 +679,11 @@ describe('renderSequence -- pass order (sequence-participant-g-wrapper T3)', () 
   });
 
   it('suppresses the footbox row without disturbing the other passes', () => {
-    const { body } = renderSequence(makeGeo({ showFootbox: false, events: [makeSyncMessage()] }), defaultTheme);
+    const { body } = renderSequence(
+      makeGeo({ showFootbox: false, events: [makeSyncMessage()] }),
+      defaultTheme,
+      TEST_MEASURER,
+    );
 
     const upToArrow = body.slice(0, body.indexOf('<polygon'));
     // Two lifeline hover rects + two head rects, and no footbox row.
@@ -686,7 +693,7 @@ describe('renderSequence -- pass order (sequence-participant-g-wrapper T3)', () 
 
 describe('renderSequence -- fragment shape (T3 AC4)', () => {
   it('tags the fragment SEQUENCE and leaves the body unwrapped', () => {
-    const fragment = renderSequence(makeGeo({ events: [makeSyncMessage()] }), defaultTheme);
+    const fragment = renderSequence(makeGeo({ events: [makeSyncMessage()] }), defaultTheme, TEST_MEASURER);
     expect(fragment.diagramType).toBe('SEQUENCE');
     // `assembleSvg` owns the ROOT content group; the fragment must not carry
     // one of its own. Asserted against `ROOT_GROUP_OPEN` itself rather than a
@@ -700,7 +707,7 @@ describe('renderSequence -- fragment shape (T3 AC4)', () => {
   });
 
   it('lets assembleSvg supply the content group and the background rect', () => {
-    const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme));
+    const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme, TEST_MEASURER));
     expect(svg).toContain('data-diagram-type="SEQUENCE"');
   });
 });
@@ -749,7 +756,7 @@ describe('renderSequence — activations', () => {
       level: 1,
     };
     const geo = makeGeo({ events: [activation] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     // Should have rects for participants + activation
     const rectCount = (svg.match(/<rect/g) ?? []).length;
     expect(rectCount).toBeGreaterThanOrEqual(3);
@@ -765,7 +772,7 @@ describe('renderSequence — activations', () => {
       level: 1,
     };
     const geo = makeGeo({ events: [activation] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     // x="75" since 80 - 5 = 75
     expect(svg).toContain('x="75"');
   });
@@ -781,7 +788,7 @@ describe('renderSequence — activations', () => {
       color: '#F00',
     };
     const geo = makeGeo({ events: [activation] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('#F00');
   });
 });
@@ -799,10 +806,12 @@ describe('renderSequence — notes', () => {
       width: 120,
       height: 40,
       text: 'remember this',
+      minX: 45,
+      maxX: 175,
       textRuns: noteRunsFor({ x: 50, y: 80, text: 'remember this' }),
     };
     const geo = makeGeo({ events: [note] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('<rect');
     expect(svg).toContain('remember this');
   });
@@ -815,10 +824,12 @@ describe('renderSequence — notes', () => {
       width: 120,
       height: 40,
       text: 'test note',
+      minX: 45,
+      maxX: 175,
       textRuns: noteRunsFor({ x: 50, y: 80, text: 'test note' }),
     };
     const geo = makeGeo({ events: [note] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain(defaultTheme.colors.noteBackground);
   });
 
@@ -830,10 +841,12 @@ describe('renderSequence — notes', () => {
       width: 120,
       height: 60,
       text: 'line one\nline two',
+      minX: 45,
+      maxX: 175,
       textRuns: noteRunsFor({ x: 50, y: 80, text: 'line one\nline two' }),
     };
     const geo = makeGeo({ events: [note] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('line one');
     expect(svg).toContain('line two');
   });
@@ -864,7 +877,7 @@ describe('renderSequence — frames', () => {
       tabHeight: 17,
     };
     const geo = makeGeo({ events: [frame] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('<rect');
     expect(svg).toContain('loop');
   });
@@ -892,7 +905,7 @@ describe('renderSequence — frames', () => {
       tabHeight: 17,
     };
     const geo = makeGeo({ events: [frame] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('stroke-dasharray');
   });
 
@@ -925,7 +938,7 @@ describe('renderSequence — frames', () => {
       tabHeight: 17,
     };
     const geo = makeGeo({ events: [frame] });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('opt');
     expect(svg).toContain('[condition]');
   });
@@ -951,6 +964,8 @@ describe('renderSequence — background pass (T6)', () => {
           width: 80,
           height: 30,
           text: 'hi',
+          minX: 35,
+          maxX: 125,
           textRuns: noteRunsFor({ x: 40, y: 120, text: 'hi' }),
         },
         {
@@ -967,7 +982,7 @@ describe('renderSequence — background pass (T6)', () => {
         },
       ],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     // One message arrowhead, one note text run, one divider text run --
     // none doubled by a background-pass echo.
     expect((svg.match(/<polygon/g) ?? []).length).toBe(1);
@@ -999,7 +1014,7 @@ describe('renderSequence — background pass (T6)', () => {
       tabHeight: 17,
     };
     const geo = makeGeo({ events: [frame] });
-    const { body } = renderSequence(geo, defaultTheme);
+    const { body } = renderSequence(geo, defaultTheme, TEST_MEASURER);
     const firstLifelineTitle = body.indexOf('<title>Alice</title>');
     const firstRect = body.indexOf('<rect');
     expect(firstRect).toBeGreaterThan(-1);
@@ -1044,7 +1059,7 @@ describe('renderSequence — background pass (T6)', () => {
       tabHeight: 17,
     };
     const geo = makeGeo({ events: [outer, inner] });
-    const { body } = renderSequence(geo, defaultTheme);
+    const { body } = renderSequence(geo, defaultTheme, TEST_MEASURER);
     // Two frames -> exactly 4 background-pass rects (band + outline each),
     // before any other renderSequence content: the outer band/outline are
     // opaque colour fills, so they must precede the inner ones to avoid
@@ -1061,8 +1076,8 @@ describe('renderSequence — background pass (T6)', () => {
 describe('renderSequence — theme colors', () => {
   it('participant rect fill differs between defaultTheme and darkTheme', () => {
     const geo = makeGeo();
-    const svgDefault = assembleSvg(renderSequence(geo, defaultTheme));
-    const svgDark = assembleSvg(renderSequence(geo, darkTheme));
+    const svgDefault = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
+    const svgDark = assembleSvg(renderSequence(geo, darkTheme, TEST_MEASURER));
     expect(defaultTheme.colors.background).not.toBe(darkTheme.colors.background);
     expect(svgDefault).toContain(shortenColor(defaultTheme.colors.background));
     expect(svgDark).toContain(shortenColor(darkTheme.colors.background));
@@ -1075,13 +1090,13 @@ describe('renderSequence — theme colors', () => {
 
 describe('renderSequence — SVG structure', () => {
   it('output starts with <svg and ends with </svg>', () => {
-    const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme));
+    const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme, TEST_MEASURER));
     expect(svg.trimStart()).toMatch(/^<svg/);
     expect(svg.trimEnd()).toMatch(/<\/svg>$/);
   });
 
   it('emits lifeline dashed lines for each participant', () => {
-    const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme));
+    const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme, TEST_MEASURER));
     // Should have dashed lines (stroke-dasharray) from lifelines
     expect(svg).toContain('stroke-dasharray');
   });
@@ -1097,7 +1112,8 @@ describe('renderSequence — [hidden] arrows', () => {
   // leaves the placed text stale.
   const msgWith = (extra?: Partial<MessageGeo>): MessageGeo => makeSyncMessage(extra);
   function bodyFor(m: MessageGeo): string {
-    return renderSequence(makeGeo({ events: [m], participants: [], showFootbox: false }), defaultTheme).body;
+    return renderSequence(makeGeo({ events: [m], participants: [], showFootbox: false }), defaultTheme, TEST_MEASURER)
+      .body;
   }
 
   it('draws nothing at all -- not the line, not the heads, not the label', () => {
@@ -1158,7 +1174,8 @@ describe('renderSequence — dividers', () => {
   /** Only the divider's own output: `makeGeo`'s default participants and
    *  footbox contribute rects and texts of their own. */
   function bodyFor(d: DividerGeo): string {
-    return renderSequence(makeGeo({ events: [d], participants: [], showFootbox: false }), defaultTheme).body;
+    return renderSequence(makeGeo({ events: [d], participants: [], showFootbox: false }), defaultTheme, TEST_MEASURER)
+      .body;
   }
 
   it('emits the band, its two rules, the label box and the text', () => {
@@ -1302,7 +1319,7 @@ describe('sequencePlugin integration', () => {
       type: 'sequence',
     });
     const geo = syncPlugin.layoutSync(ast, defaultTheme, measurer);
-    const svg = assembleSvg(syncPlugin.render(geo, defaultTheme));
+    const svg = assembleSvg(syncPlugin.render(geo, defaultTheme, measurer));
     expect(svg.trimStart()).toMatch(/^<svg/);
     expect(svg.trimEnd()).toMatch(/<\/svg>$/);
   });
@@ -1330,7 +1347,7 @@ describe('renderSequence — actor participant shape', () => {
         }),
       ],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     // The jar draws an actor head as an `<ellipse>` and its four strokes as
     // ONE `<path>` (`ActorStickMan.java:73,77-85`), not a `<circle>` and four
     // `<line>`s. Asserted on the element AND the path shape, since it is the
@@ -1359,7 +1376,7 @@ describe('renderSequence — actor participant shape', () => {
         }),
       ],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('User');
   });
 });
@@ -1386,7 +1403,7 @@ describe('renderSequence — skinparam actorStyle', () => {
   }
   function bodyFor(actorStyle?: 'AWESOME' | 'HOLLOW' | 'STICKMAN'): string {
     const theme = actorStyle === undefined ? defaultTheme : { ...defaultTheme, actorStyle };
-    return renderSequence(actorGeo(), theme).body;
+    return renderSequence(actorGeo(), theme, TEST_MEASURER).body;
   }
 
   it('draws ActorStickMan by default', () => {
@@ -1441,7 +1458,11 @@ describe('renderSequence — the five glyph kinds Rose.java dispatches', () => {
   /** The bare body, not `assembleSvg`'s document: the shell adds a background
    *  `<rect>` of its own that would inflate every rectangle count here. */
   function svgFor(type: Parameters<typeof participantOf>[0]): string {
-    return renderSequence(makeGeo({ showFootbox: false, participants: [participantOf(type)] }), defaultTheme).body;
+    return renderSequence(
+      makeGeo({ showFootbox: false, participants: [participantOf(type)] }),
+      defaultTheme,
+      TEST_MEASURER,
+    ).body;
   }
 
   it('gives each kind its own symbol geometry', () => {
@@ -1488,7 +1509,9 @@ describe('renderSequence — the five glyph kinds Rose.java dispatches', () => {
 
   it('flips the glyph and the text for a footer row', () => {
     const p = participantOf('boundary');
-    const svg = assembleSvg(renderSequence(makeGeo({ participants: [p], showFootbox: true }), defaultTheme));
+    const svg = assembleSvg(
+      renderSequence(makeGeo({ participants: [p], showFootbox: true }), defaultTheme, TEST_MEASURER),
+    );
     // The head glyph's circle sits above the footer glyph's; the two rows are
     // the `*_HEAD` / `*_TAIL` pair of `Rose.java:177-178`.
     const cys = [...svg.matchAll(/<ellipse[^>]*cy="([\d.]+)"/g)].map((m) => Number(m[1]));
@@ -1516,7 +1539,7 @@ describe('renderSequence — database participant shape', () => {
         }),
       ],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     // `USymbolDatabase#drawDatabase` (`USymbolDatabase.java:62-79`) draws a
     // body `UPath` and a `getClosingPath` lid -- two elements. This used to be
     // a hand-rolled `rect + line + line + ellipse`, and that four-vs-two
@@ -1538,7 +1561,9 @@ describe('renderSequence — database participant shape', () => {
       background: defaultTheme.colors.background,
       border: defaultTheme.colors.border,
     });
-    const svg = assembleSvg(renderSequence(makeGeo({ participants: [participant], showFootbox: true }), defaultTheme));
+    const svg = assembleSvg(
+      renderSequence(makeGeo({ participants: [participant], showFootbox: true }), defaultTheme, TEST_MEASURER),
+    );
     const starts = [...svg.matchAll(/<path d="M[\d.]+,([\d.]+) C/g)].map((m) => Number(m[1]));
     // head: glyph top at y = 0, so `moveTo(0, 10)` lands on 10
     // (`ComponentRoseDatabase.java:81-83`).
@@ -1565,7 +1590,7 @@ describe('renderSequence — database participant shape', () => {
         }),
       ],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('PostgreSQL');
   });
 });
@@ -1579,7 +1604,7 @@ describe('renderSequence — box backgrounds', () => {
     const geo = makeGeo({
       boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '#LightBlue', labelRuns: [] }],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     // G1c: named colors resolve to their canonical jar hex (LightBlue -> #ADD8E6).
     expect(svg).toContain('#ADD8E6');
     expect(svg).toContain('<rect');
@@ -1589,7 +1614,7 @@ describe('renderSequence — box backgrounds', () => {
     const geo = makeGeo({
       boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '', labelRuns: [] }],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('#EEE');
   });
 
@@ -1609,7 +1634,7 @@ describe('renderSequence — box backgrounds', () => {
         },
       ],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).toContain('Services');
     expect(svg).toContain('<text');
   });
@@ -1620,7 +1645,7 @@ describe('renderSequence — box backgrounds', () => {
       participants: [],
       boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '#yellow', labelRuns: [] }],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).not.toContain('<text');
   });
 
@@ -1628,7 +1653,7 @@ describe('renderSequence — box backgrounds', () => {
     const geo = makeGeo({
       boxes: [{ x: 22, y: 0, width: 216, height: 300, label: '', color: '#LightBlue', labelRuns: [] }],
     });
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     // After the defs block, box background must precede participant rects.
     // Anchored on `<defs/>`, not `</defs>`: the SEQUENCE fragment now routes
     // through `assembleDocumentShell`, whose empty defs block is
@@ -1665,7 +1690,7 @@ describe('renderSequence — box integration', () => {
     expect(ast.boxes[0]?.color).toBe('#LightBlue');
     const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
     expect(geo.boxes).toHaveLength(1);
-    const svg = assembleSvg(renderSequence(geo, defaultTheme));
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     // G1c: named colors resolve to their canonical jar hex (LightBlue -> #ADD8E6).
     expect(svg).toContain('#ADD8E6');
     expect(svg).toContain('Frontend');

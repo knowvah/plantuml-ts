@@ -298,6 +298,6 @@ describe('cdd3-T32 — a HALF_PRINTED_FULL note-on-link is drawn at its half-wid
     expect(notes).toHaveLength(2);
     expect(Number(notes[0]![1])).toBeCloseTo(70.52, 2);
     expect(Number(notes[0]![2])).toBe(6);
-    expect(Number(notes[1]![1])).toBeCloseTo(303.52, 2);
+    expect(Number(notes[1]![1])).toBeCloseTo(328.52, 2);
   });
 });

@@ -45,7 +45,7 @@ function separatorLines(body: string): string[] {
 
 describe('newpage separator', () => {
   it('draws exactly one dashed line per surviving tile', () => {
-    const { body } = renderSequence(layout(SOURCE), defaultTheme);
+    const { body } = renderSequence(layout(SOURCE), defaultTheme, measurer);
     expect(separatorLines(body)).toHaveLength(1);
   });
 
@@ -53,7 +53,7 @@ describe('newpage separator', () => {
    *  `newpage { LineStyle 2 }` — the three segments of
    *  `ComponentType.NEWPAGE.getStyleSignature()` that set anything. */
   it('carries the cascade`s stroke, thickness and dash unit', () => {
-    const { body } = renderSequence(layout(SOURCE), defaultTheme);
+    const { body } = renderSequence(layout(SOURCE), defaultTheme, measurer);
     const [sep] = separatorLines(body);
     expect(sep).toContain(`stroke="${NEWPAGE_LINE_COLOR}"`);
     expect(sep).toContain(`stroke-width="${String(NEWPAGE_LINE_THICKNESS)}"`);
@@ -63,7 +63,7 @@ describe('newpage separator', () => {
   it('sits MARGINY below the tile top and spans the tile band', () => {
     const geo = layout(SOURCE);
     const [tile] = newpageTilesOf(geo);
-    const { body } = renderSequence(geo, defaultTheme);
+    const { body } = renderSequence(geo, defaultTheme, measurer);
     const [sep] = separatorLines(body);
     // Page 0 of this document needs no translation: ymin is headHeight.
     const y = tile!.y + NEWPAGE_MARGIN_Y;
@@ -79,20 +79,20 @@ describe('newpage separator', () => {
    *  `PlayingSpaceWithParticipants.java:78-80`. */
   it('is drawn on BOTH pages the tile divides', () => {
     const geo = layout(SOURCE);
-    expect(separatorLines(renderSequencePage(geo, defaultTheme, 0).body)).toHaveLength(1);
-    expect(separatorLines(renderSequencePage(geo, defaultTheme, 1).body)).toHaveLength(1);
+    expect(separatorLines(renderSequencePage(geo, defaultTheme, 0, measurer).body)).toHaveLength(1);
+    expect(separatorLines(renderSequencePage(geo, defaultTheme, 1, measurer).body)).toHaveLength(1);
   });
 
   it('shows only its OWN separator on a middle page', () => {
     const geo = layout(['Alice -> Bob : a', 'newpage', 'Alice -> Bob : b', 'newpage', 'Alice -> Bob : c']);
     // Page 1 is bounded by both tiles, so both separators are on it.
-    expect(separatorLines(renderSequencePage(geo, defaultTheme, 1).body)).toHaveLength(2);
-    expect(separatorLines(renderSequencePage(geo, defaultTheme, 0).body)).toHaveLength(1);
-    expect(separatorLines(renderSequencePage(geo, defaultTheme, 2).body)).toHaveLength(1);
+    expect(separatorLines(renderSequencePage(geo, defaultTheme, 1, measurer).body)).toHaveLength(2);
+    expect(separatorLines(renderSequencePage(geo, defaultTheme, 0, measurer).body)).toHaveLength(1);
+    expect(separatorLines(renderSequencePage(geo, defaultTheme, 2, measurer).body)).toHaveLength(1);
   });
 
   it('draws nothing when the document has no newpage', () => {
-    const { body } = renderSequence(layout(['Alice -> Bob : a']), defaultTheme);
+    const { body } = renderSequence(layout(['Alice -> Bob : a']), defaultTheme, measurer);
     expect(separatorLines(body)).toEqual([]);
   });
 });

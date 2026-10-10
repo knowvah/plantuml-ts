@@ -336,12 +336,16 @@ describe('parseHideStereotypeDirective', () => {
     });
   });
 
-  it('"hide <<pattern>> stereotype" captures the trimmed pattern', () => {
+  it('"hide <<pattern>> stereotype" captures the pattern', () => {
     expect(parseHideStereotypeDirective('hide <<stereo1>> stereotype')).toEqual({
       kind: 'hidestereotype',
       action: 'hide',
       pattern: 'stereo1',
     });
+  });
+
+  it('keeps the pattern untrimmed (gender.equals(label))', () => {
+    expect(parseHideStereotypeDirective('hide << x >> stereotype')?.pattern).toBe(' x ');
   });
 
   it('returns null for an unrelated line', () => {
@@ -354,21 +358,22 @@ describe('parseHideStereotypeDirective', () => {
 // isStereotypeLabelHidden
 // ---------------------------------------------------------------------------
 
+// The label is the raw `<<...>>` DOUBLE_COMPARATOR label (CucaDiagram.java:608-616).
 describe('isStereotypeLabelHidden', () => {
   it('default (no directives) is visible', () => {
-    expect(isStereotypeLabelHidden('stereo1', [])).toBe(false);
+    expect(isStereotypeLabelHidden('<<stereo1>>', [])).toBe(false);
   });
 
   it('a pattern-less hide directive hides every label', () => {
     const directives: HideStereotypeDirective[] = [{ kind: 'hidestereotype', action: 'hide' }];
-    expect(isStereotypeLabelHidden('stereo1', directives)).toBe(true);
-    expect(isStereotypeLabelHidden('anything', directives)).toBe(true);
+    expect(isStereotypeLabelHidden('<<stereo1>>', directives)).toBe(true);
+    expect(isStereotypeLabelHidden('<<anything>>', directives)).toBe(true);
   });
 
   it('a patterned hide only hides the matching label', () => {
     const directives: HideStereotypeDirective[] = [{ kind: 'hidestereotype', action: 'hide', pattern: 'stereo1' }];
-    expect(isStereotypeLabelHidden('stereo1', directives)).toBe(true);
-    expect(isStereotypeLabelHidden('stereo2', directives)).toBe(false);
+    expect(isStereotypeLabelHidden('<<stereo1>>', directives)).toBe(true);
+    expect(isStereotypeLabelHidden('<<stereo2>>', directives)).toBe(false);
   });
 
   it('later directives win (last-match-wins scan)', () => {
@@ -376,8 +381,8 @@ describe('isStereotypeLabelHidden', () => {
       { kind: 'hidestereotype', action: 'hide' },
       { kind: 'hidestereotype', action: 'show', pattern: 'stereo1' },
     ];
-    expect(isStereotypeLabelHidden('stereo1', directives)).toBe(false);
-    expect(isStereotypeLabelHidden('stereo2', directives)).toBe(true);
+    expect(isStereotypeLabelHidden('<<stereo1>>', directives)).toBe(false);
+    expect(isStereotypeLabelHidden('<<stereo2>>', directives)).toBe(true);
   });
 });
 
@@ -543,7 +548,10 @@ describe('layoutClass — item 45, multi-line classifier display-name header', (
       // line CENTERS within that same block width — jar-verified x delta
       // (dofima's golden `75.3 - 32.95 === 42.35`).
       expect(geo.rows[1]!.indent).toBe(3);
-      expect(geo.rows[0]!.indent).toBeCloseTo(3 + (114.275 - 29.575) / 2, 4);
+      // (re-captured dofima-22-kofe334 in.svg: the widest line "(User in our
+      // system)" is textLength 125.825 now -- its 3 spaces count, 114.275 + 11.55
+      // -- "User" 29.575, and the jar's x delta is 77.225 - 29.1 = 48.125.)
+      expect(geo.rows[0]!.indent).toBeCloseTo(3 + (125.825 - 29.575) / 2, 3);
       // per-line y stacks by exactly headerFont.size (14) — jar-verified
       // (dofima's golden `36.8889 - 22.8889 === 14`).
       expect(geo.rows[1]!.y - geo.rows[0]!.y).toBeCloseTo(14, 4);
@@ -632,7 +640,7 @@ describe('layoutClass — item 45, multi-line classifier display-name header', (
   it(
     'a trailing blank line (post `<Generic>` extraction leaves `\\n` at ' +
       'the end of the base display) renders as a lone NBSP, LAYOUT-positioned ' +
-      "at its raw (zero) width -- jar-verified against julixi-10-jide878's " +
+      "at its lone-space width -- jar-verified against julixi-10-jide878's " +
       '`csprob2dtd`',
     () => {
       const detMeasurer = new DeterministicMeasurer();
@@ -653,12 +661,12 @@ describe('layoutClass — item 45, multi-line classifier display-name header', (
       expect(geo.rows[0]!.text).toBe('CuttingStockPrb');
       // U+00A0 (NBSP), not a plain space or an empty string.
       expect(geo.rows[1]!.text).toBe('\u00A0');
-      // jar's own drawn textLength for the NBSP glyph -- NOT 0 (the raw
-      // empty-string width the LAYOUT/indent math below still uses).
+      // the blank line is a lone " " atom (StripeSimple.java:123-126), one 14pt
+      // space = 3.85 wide both as layout advance and as drawn textLength.
       expect(geo.rows[1]!.width).toBeCloseTo(3.85, 4);
-      // jar-verified x delta (julixi's own golden: 242.955 - 192.38 = 50.575)
-      // -- computed from the RAW (zero) layout width, not the NBSP glyph's.
-      expect(geo.rows[1]!.indent - geo.rows[0]!.indent).toBeCloseTo(50.575, 4);
+      // jar-verified x delta (julixi-10-jide878 in.svg, re-captured under oracle
+      // seam #4 v2: 241.03 - 192.38 = 48.65 = (101.15 - 3.85) / 2).
+      expect(geo.rows[1]!.indent - geo.rows[0]!.indent).toBeCloseTo(48.65, 4);
     },
   );
 });
@@ -860,16 +868,20 @@ describe('layoutClass — generic type-parameter tag box end-to-end (G2 N32)', (
 // ---------------------------------------------------------------------------
 describe('layoutClass — item 35, MaximumWidth header word-wrap', () => {
   it(
-    'wraps a long header name into 4 lines at MaximumWidth 100, matching ' +
+    'wraps a long header name into 6 lines at MaximumWidth 100, matching ' +
       "nucite-98-kuga991's jar-verified box width/height exactly",
     () => {
       const ast = parse('class "Long Long Long Long Long Long Long Long Long Long **class**" as C1');
       const theme = deepMergeTheme(defaultTheme, { colors: { graph: { classCascadeHeaderMaximumWidth: 100 } } });
       const result = layoutClass(ast, theme, new DeterministicMeasurer());
       const geo = classifierLeaves(result.leaves)[0]!;
-      expect(geo.headerRowCount).toBe(4);
-      expect(geo.width).toBeCloseTo(125.45000000000003, 4);
-      expect(geo.height).toBe(82);
+      // nucite-98-kuga991 in.svg, re-captured under oracle seam #4 v2 (a space is
+      // 3.85 wide now, so each wrapped row holds two `Long`s): C1 is
+      // `<rect width="98.15" height="110">` over six rows (five `Long Long`
+      // rows + `class`); it was 125.45 x 82 / four rows while a space was 0.
+      expect(geo.headerRowCount).toBe(6);
+      expect(geo.width).toBeCloseTo(98.15, 3);
+      expect(geo.height).toBe(110);
     },
   );
 
@@ -891,7 +903,7 @@ describe('layoutClass — item 35, MaximumWidth header word-wrap', () => {
 // ---------------------------------------------------------------------------
 describe('layoutClass — item 35, MaximumWidth member-row word-wrap', () => {
   it(
-    'wraps a long method row into 4 rows at MaximumWidth 150, matching ' +
+    'wraps a long method row into 5 rows at MaximumWidth 100, matching ' +
       "nucite-98-kuga991's jar-verified box width/height exactly",
     () => {
       const ast = parse('class C2 {\nLong Long Long Long Long Long Long Long Long **Method()**\n}');
@@ -899,12 +911,13 @@ describe('layoutClass — item 35, MaximumWidth member-row word-wrap', () => {
       const theme = deepMergeTheme(defaultTheme, { colors: { graph: { classCascadeMaximumWidth: 100 } } });
       const result = layoutClass(ast, theme, new DeterministicMeasurer());
       const geo = classifierLeaves(result.leaves)[0]!;
-      // jar's real golden: <rect width="105.45" height="104"/>.
-      expect(geo.width).toBeCloseTo(105.45, 4);
-      expect(geo.height).toBe(104);
-      // header row + 4 wrapped body rows (3 "Long Long Long" lines + 1 bold
-      // "Method()" line).
-      expect(geo.rows).toHaveLength(5);
+      // nucite-98-kuga991 in.svg (re-captured, oracle seam #4 v2): C2 is
+      // <rect width="102.912" height="118"/> (was 105.45 x 104).
+      expect(geo.width).toBeCloseTo(102.912, 2);
+      expect(geo.height).toBe(118);
+      // header row + 5 wrapped body rows (4 "Long Long" lines + 1 "Long
+      // **Method()**" line).
+      expect(geo.rows).toHaveLength(6);
     },
   );
 

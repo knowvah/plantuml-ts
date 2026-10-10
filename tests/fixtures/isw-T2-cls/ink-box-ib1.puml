@@ -1,0 +1,7 @@
+@startuml
+skinparam packageStyle rect
+skinparam packageFontSize 40
+package "Configuration files" {
+class foo
+}
+@enduml

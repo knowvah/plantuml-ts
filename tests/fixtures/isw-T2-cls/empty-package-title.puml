@@ -1,0 +1,8 @@
+@startuml
+package "" as p {
+ class A
+}
+package " " as q {
+ class B
+}
+@enduml

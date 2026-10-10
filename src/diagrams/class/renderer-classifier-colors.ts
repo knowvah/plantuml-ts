@@ -14,6 +14,7 @@ import {} from '../../core/svg.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { noGradient, parseColor } from '../../core/paint.js';
 import type { Paint } from '../../core/paint.js';
+import { isObjectKind } from './object-kind-style.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
 import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import {} from './class-map-sizing.js';
@@ -311,6 +312,11 @@ export function classBorder(geo: ClassifierGeo, theme: Theme): Paint {
     const parsed = parseColor(inlineLine);
     return typeof parsed === 'string' ? resolveColorToSvgHex(parsed) : parsed;
   }
+  // `EntityImageObject.java:149` / `EntityImageMap.java:155`: object/map/json
+  // draw `style.value(PName.LineColor)` of their OWN signature, never the
+  // class cascade below.
+  const kindBorder = isObjectKind(geo.kind) ? theme.colors.elements?.[geo.kind]?.border : undefined;
+  if (kindBorder !== undefined) return typeof kindBorder === 'string' ? resolveColorToSvgHex(kindBorder) : kindBorder;
   // G2 N37: the `.tagname` sub-selector cascade wins over the plain
   // ancestor cascade -- see `classifierFill`'s identical precedent above.
   const tagBorder = resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.border;
@@ -410,6 +416,10 @@ export function classBorderStrokeWidth(geo: ClassifierGeo, theme: ScaledTheme): 
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/BodyEnhancedAbstract.java:121-122
  */
 export function classStyleLineThickness(geo: ClassifierGeo, theme: Theme): number {
+  // object/map/json: `getStyle().getStroke()` of their OWN signature
+  // (`EntityImageObject.java:158`, `EntityImageMap.java:158`).
+  const kindThickness = isObjectKind(geo.kind) ? theme.colors.elements?.[geo.kind]?.lineThickness : undefined;
+  if (kindThickness !== undefined) return kindThickness;
   const graph = theme.colors.graph;
   const byStereo = graph.classBorderThicknessByStereo;
   if (byStereo !== undefined && geo.stereotypeLabels !== undefined) {
@@ -432,11 +442,34 @@ export function classStyleLineThickness(geo: ClassifierGeo, theme: Theme): numbe
  * both halves" convention -- `undefined` (no attribute) for every
  * classifier with no inline line-style override, zero behavior change.
  */
-export function classBorderStrokeDasharray(geo: ClassifierGeo, k: number): string | undefined {
+export function classBorderStrokeDasharray(geo: ClassifierGeo, theme: Theme, k: number): string | undefined {
   const lineStyle = parseDeclarationColors(geo.color).lineStyle;
-  if (lineStyle === undefined) return undefined;
+  if (lineStyle === undefined) return objectKindDasharray(geo, theme, k);
   const dash = strokeForStyle(lineStyle).getDasharraySvg();
   return dash === undefined ? undefined : scaleDashArrayString(`${dash[0]},${dash[1]}`, k);
+}
+
+/**
+ * The dash of a body divider. object/map/json: the `<sname>` `LineStyle` dash
+ * reaches only the empty-fields placeholder divider (`EntityImageObject.java
+ * :110-113` `TextBlockLineBefore(thickness, TextBlockEmpty)`, drawn under the
+ * box's own stroke via `UGraphicStencil.create(ug, this, stroke)`, `:215`);
+ * a populated object's divider is `BodyEnhanced1`'s thickness-only stroke
+ * (jar `object/lisepi-64-mudo307`: `Object_user` line `stroke-width:2`, no
+ * dash; `London` placeholder line `stroke-width:2;stroke-dasharray:10,5`).
+ */
+export function classDividerDasharray(geo: ClassifierGeo, theme: Theme, k: number): string | undefined {
+  const inline = parseDeclarationColors(geo.color).lineStyle;
+  if (inline === undefined && geo.kind === 'object' && geo.emptyFieldPlaceholder !== true) return undefined;
+  return classBorderStrokeDasharray(geo, theme, k);
+}
+
+/** object/map/json `style.getStroke()` dash half: `<style> <sname> {
+ *  LineStyle 10-5 }` (`Style.java:299-320`); `{0,0}` is an explicit solid. */
+function objectKindDasharray(geo: ClassifierGeo, theme: Theme, k: number): string | undefined {
+  const dash = isObjectKind(geo.kind) ? theme.colors.elements?.[geo.kind]?.lineStyle : undefined;
+  if (dash === undefined || dash.dashVisible === 0) return undefined;
+  return scaleDashArrayString(`${dash.dashVisible},${dash.dashSpace}`, k);
 }
 
 /**

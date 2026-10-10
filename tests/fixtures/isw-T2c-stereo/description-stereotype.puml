@@ -1,0 +1,5 @@
+@startuml
+component Cmp <<  spaced  >>
+usecase (Uc) <<  spaced  >>
+node N <<  st  >>
+@enduml

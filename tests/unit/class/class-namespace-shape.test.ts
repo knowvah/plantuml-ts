@@ -38,9 +38,14 @@ describe('getWTitle', () => {
     expect(getWTitle(measurer, defaultTheme, 'a', 0)).toBeCloseTo(13.7875, 3);
   });
 
-  it('falls back to max(30, width/4) for an empty label', () => {
-    expect(getWTitle(measurer, defaultTheme, '', 200)).toBe(50);
-    expect(getWTitle(measurer, defaultTheme, '', 40)).toBe(30);
+  // isw-T2-cls: an empty label is a lone " " atom (3.85 @14pt), NOT a
+  // 0-wide title -- jar probe tests/fixtures/isw-T2-cls/empty-package-title.svg
+  // (`package "" as p`: tab path L13.35 = 6 + 9.85 - 2.5). The max(30, w/4)
+  // arm (USymbolFolder.java:130) needs `dimTitle.getWidth() == 0`, i.e. a
+  // null label, which no package declaration produces.
+  it('is 3.85 + 6 for an empty label (a lone space atom), whatever the width', () => {
+    expect(getWTitle(measurer, defaultTheme, '', 200)).toBeCloseTo(9.85, 3);
+    expect(getWTitle(measurer, defaultTheme, '', 40)).toBeCloseTo(9.85, 3);
   });
 });
 
@@ -54,8 +59,10 @@ describe('getHTitle', () => {
     expect(getHTitle(measurer, theme40, 'Configuration files')).toBe(46);
   });
 
-  it('falls back to 10 for an empty label', () => {
-    expect(getHTitle(measurer, defaultTheme, '')).toBe(10);
+  // isw-T2-cls: same probe -- the empty label's " " atom takes the
+  // height + marginTitleY1 + marginTitleY2 branch (tab bottom y 26 - top 6).
+  it('is 20 for an empty label (a lone space atom)', () => {
+    expect(getHTitle(measurer, defaultTheme, '')).toBe(20);
   });
 });
 
@@ -227,7 +234,9 @@ describe('renderNamespaceFolder — strictuml sharp-corner polygon (G2 N18, jini
 
   it('emits a <polygon>, not a <path>, when theme.strictUml is true', () => {
     const svg = renderNamespaceFolder(jinibeGeo(), scaleClassTheme(strictTheme, 1));
-    expect(svg).toContain('<polygon points="16,6,29.788,6,36.788,26,64,26,64,95,16,95,16,6"');
+    // New jar value (test-results/dot-cache/class/jinibe-02-tebi269/in.svg,
+    // seam #4 v2 float-rounds the width: 13.7875 -> 13.787499).
+    expect(svg).toContain('<polygon points="16,6,29.787,6,36.787,26,64,26,64,95,16,95,16,6"');
     expect(svg).not.toContain('<path');
   });
 

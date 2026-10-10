@@ -30,6 +30,11 @@ export interface NoteGeo {
   /** The body, one placed and measured run per line of {@link text} (A5).
    *  Measured at `note { FontSize 13 }`, not the ambient font. */
   textRuns: readonly TextRun[];
+  /** `NoteTile#getMinX`/`#getMaxX` (`teoz/NoteTile.java:278-296`): the TILE's
+   *  extent, which starts `getPaddingX()` (5) left of the drawn box and runs
+   *  the component's whole preferred width -- not the drawn polygon's. */
+  minX: number;
+  maxX: number;
 }
 
 export interface DividerGeo {

@@ -34,6 +34,15 @@ const DIR = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/unwind
  */
 const SMETANA_GEOMETRY: ReadonlySet<string> = new Set(['hcl-dup-module', 'json-dup-nested']);
 const SMETANA_POSITIONAL = /\/@(x|y|cx|cy|x1|x2|y1|y2|d\[\d+\])$/u;
+/**
+ * The canvas extent follows from node placement. Smetana rounds every node's
+ * width/height to whole points (`POINTS(ND_width(n))`, shapes__c.java:253-254,
+ * 1807-1808; `Macro.POINTS` = ROUND, Macro.java:1560-1562), so a fractional
+ * cell (nested `   ` = 11.55 under the seam #4 space width) shifts the ranks by
+ * < 0.5 and the canvas by 1; dot-engine keeps the fraction (CLAUDE.md "One
+ * layout engine", ruling 2026-08-09).
+ */
+const SMETANA_CANVAS = /^svg\/@(width|viewBox\[2\])$/u;
 
 const CASES = readdirSync(DIR)
   .filter((f) => f.endsWith('.puml'))
@@ -50,7 +59,9 @@ describe('unwind2-S2b — json-family key cells and object entries', () => {
     const jar = readFileSync(join(DIR, `${name}.svg`), 'utf8');
     const ours = renderSync(source, { measurer: new DeterministicMeasurer() });
     const paths = compareSvg(ours, jar, 'deterministic').diffs.map((d) => d.path);
-    const unexplained = SMETANA_GEOMETRY.has(name) ? paths.filter((p) => !SMETANA_POSITIONAL.test(p)) : paths;
+    const unexplained = SMETANA_GEOMETRY.has(name)
+      ? paths.filter((p) => !SMETANA_POSITIONAL.test(p) && !SMETANA_CANVAS.test(p))
+      : paths;
     expect(unexplained).toEqual([]);
   });
 });

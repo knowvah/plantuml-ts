@@ -79,8 +79,8 @@ describe('stripCreoleMarkup', () => {
  * `resolveLineFont` (fix `label-size-tag-height`, `xamule-03-jeda376`): a
  * leading `<size:N>` tag rewrites the font a line measures at, ported from
  * `CommandCreoleSizeChange.java:57,81-93`'s EOL form. The oracle arithmetic:
- * `"to Foo"` at size 30 measures 76.6875 x 30 via `WidthTableMeasurer`
- * (verified independently against `measurer.measure`, not assumed).
+ * `"to Foo"` at size 30 measures 84.9375 x 30 (jar: textLength="84.938" in
+ * `class/xamule-03-jeda376/in.svg`, seam #4 v2 — the space is 8.25 at 30pt).
  */
 describe('resolveLineFont — leading <size:N> resolves the per-run font', () => {
   const font = { family: 'SansSerif', size: 13 };
@@ -89,7 +89,7 @@ describe('resolveLineFont — leading <size:N> resolves the per-run font', () =>
     const r = resolveLineFont('<size:30>to Foo', font);
     expect(r.text).toBe('to Foo');
     expect(r.font).toEqual({ family: 'SansSerif', size: 30 });
-    expect(measurer.measure(r.text, r.font).width).toBeCloseTo(76.6875, 6);
+    expect(measurer.measure(r.text, r.font).width).toBeCloseTo(84.9375, 6);
     expect(measurer.measure(r.text, r.font).height).toBe(30);
   });
 
@@ -118,13 +118,16 @@ describe('computeReservedLabelBox — jar-measured cases', () => {
   it('two-line label with colour tags reserves the oracle box', () => {
     const label = String.raw`<color:green>Purchase Price\n<color:green>Payment of $100`;
     const box = computeReservedLabelBox(label, ARROW_FONT, measurer, false);
-    expect(box.reservedWidth).toBe(72);
+    // 77x22: `usecase/jecici-56-bimu826/svek-1.dot` WIDTH="77" HEIGHT="22"
+    // after the seam #4 v2 re-capture (was 72 with a 0-wide space).
+    expect(box.reservedWidth).toBe(77);
     expect(box.reservedHeight).toBe(22);
   });
 
   it('one-line label with a colour tag reserves the oracle box', () => {
     const box = computeReservedLabelBox('<color:blue>Sale of Widget 1', ARROW_FONT, measurer, false);
-    expect(box.reservedWidth).toBe(67);
+    // 75x12: same svek-1.dot, WIDTH="75" HEIGHT="12" (was 67).
+    expect(box.reservedWidth).toBe(75);
     expect(box.reservedHeight).toBe(12);
   });
 
@@ -169,7 +172,7 @@ describe('computeReservedLabelBox — jar-measured cases', () => {
    */
   it('measures a leading <size:N> line at its own font, not the base font', () => {
     const box = computeReservedLabelBox('<size:30>to Foo', LINK_FONT, measurer, false);
-    expect(box.measuredWidth).toBeCloseTo(76.6875, 6);
+    expect(box.measuredWidth).toBeCloseTo(84.9375, 6);
     expect(box.measuredHeight).toBe(30);
   });
 
@@ -293,8 +296,9 @@ describe('computeReservedLabelBox — M4 causes A+B, jar-measured cases', () => 
     ['~var4', 39],
     ['+OK', 32],
     ['-ok', 27],
-    ['+marche pas', 78],
-    ['-marche pas', 78],
+    // state/susena-02-gusa448/svek-1.dot: WIDTH="81" for both (was 78).
+    ['+marche pas', 81],
+    ['-marche pas', 81],
   ])('%s reserves the oracle width %i', (label, oracleWidth) => {
     const box = computeReservedLabelBox(label, LINK_FONT, measurer, false);
     expect(box.reservedWidth).toBe(oracleWidth);
@@ -381,7 +385,8 @@ describe('computeQuantifierBox — jar-measured cases, no shield/margin', () => 
  * `class/focaci-80-suzu938`'s headlabel `"~* initiators"` at the default
  * cardinality font (`CARDINALITY_FONT_SIZE`, `graph-layout-build-edges.ts
  * :19` = 13, `svek/SvekEdge.java` cardinality default) measures 61x13
- * unstripped vs the oracle's 53x13 — `~*` is `CharHidder`'s escape
+ * unstripped vs the oracle's 57x13 (`focaci-80-suzu938/svek-1.dot` after the
+ * seam #4 v2 re-capture; was 53x13) — `~*` is `CharHidder`'s escape
  * sequence (`utils/CharHidder.java:59-90`), not a `VisibilityModifier`
  * strip (see `stripLeadingEscapedChar`'s doc comment for the full
  * mechanism and the oracle renders that disprove the visibility reading).
@@ -392,7 +397,7 @@ describe('computeQuantifierBox — the CharHidder escape is not a visibility str
   it('strips a leading ~* escape, keeping the * as a literal glyph (focaci-80-suzu938)', () => {
     const box = computeQuantifierBox('~* initiators', DEFAULT_CARDINALITY_FONT, measurer);
     expect(box.lines).toEqual(['* initiators']);
-    expect(box.reservedWidth).toBe(53);
+    expect(box.reservedWidth).toBe(57);
     expect(box.reservedHeight).toBe(13);
   });
 
@@ -403,11 +408,12 @@ describe('computeQuantifierBox — the CharHidder escape is not a visibility str
   });
 
   it('does not strip a bare ~ before a non-escape character (space)', () => {
-    // Solo oracle render of "~ initiators": 56, tilde rendered literally —
+    // Solo one-JVM oracle render of "~ initiators" under seam #4 v2: 59
+    // (was 56 with a 0-wide space), tilde rendered literally —
     // `~` only escapes when immediately followed by an isToBeHidden char.
     const box = computeQuantifierBox('~ initiators', DEFAULT_CARDINALITY_FONT, measurer);
     expect(box.lines).toEqual(['~ initiators']);
-    expect(box.reservedWidth).toBe(56);
+    expect(box.reservedWidth).toBe(59);
   });
 
   it('does not strip a leading UML visibility char that is not a ~ escape', () => {
@@ -715,23 +721,22 @@ describe('roseNoteDim', () => {
  *
  * `usecase/kafexo-72-xupa679`: `skinparam maxMessageSize 100`,
  * `foo --> (Use case) : this is a very long sentence on one single line`.
- * Jar's own `svek-1.dot` reserves 90x41. Verified via `Fission#getSplitted`
- * (`getSplitted`, ported verbatim) against `WidthTableMeasurer` at font size
- * 13: greedy word-wrap breaks at
- *   "this is a very long"   86.04
- *   "sentence on one"       88.89   <- widest
- *   "single line"           54.36
- * `floor(88.8875 + 2*1) x (3*13 + 2*1)` = 90 x 41 (marginLabel 1, non-self
+ * Jar's own `svek-1.dot` reserves 100x41 (seam #4 v2 re-capture; was 90x41).
+ * The jar's `in.svg` draws the three lines at font size 13 as
+ *   "this is a very"
+ *   "long sentence on"      24.619+3.575+52.731+3.575+14.462 = 98.962 <- widest
+ *   "one single line"
+ * `floor(98.962 + 2*1) x (3*13 + 2*1)` = 100 x 41 (marginLabel 1, non-self
  * link, `computeReservedLabelBox`'s own formula).
  */
 describe('computeReservedLabelBox — maxWidth (G20 word-wrap)', () => {
   const KAFEXO_FONT = { family: 'sans-serif', size: 13 };
   const KAFEXO_LABEL = 'this is a very long sentence on one single line';
 
-  it('kafexo-72-xupa679: wraps to 3 lines and reserves 90x41', () => {
+  it('kafexo-72-xupa679: wraps to 3 lines and reserves 100x41', () => {
     const box = computeReservedLabelBox(KAFEXO_LABEL, KAFEXO_FONT, measurer, false, { maxWidth: 100 });
-    expect(box.lines).toEqual(['this is a very long', 'sentence on one', 'single line']);
-    expect(box.reservedWidth).toBe(90);
+    expect(box.lines).toEqual(['this is a very', 'long sentence on', 'one single line']);
+    expect(box.reservedWidth).toBe(100);
     expect(box.reservedHeight).toBe(41);
   });
 
@@ -754,6 +759,6 @@ describe('computeReservedLabelBox — maxWidth (G20 word-wrap)', () => {
     const box = computeReservedLabelBox(String.raw`${KAFEXO_LABEL}\nshort`, KAFEXO_FONT, measurer, false, {
       maxWidth: 100,
     });
-    expect(box.lines).toEqual(['this is a very long', 'sentence on one', 'single line', 'short']);
+    expect(box.lines).toEqual(['this is a very', 'long sentence on', 'one single line', 'short']);
   });
 });

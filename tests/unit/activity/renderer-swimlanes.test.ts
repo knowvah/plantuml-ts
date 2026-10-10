@@ -12,8 +12,11 @@ import {
 } from '../../../src/diagrams/activity/activity-renderer-swimlanes.js';
 import type { ActivityGeometry, ActivityNodeGeo } from '../../../src/diagrams/activity/activity-geometry.types.js';
 import { resolveTheme, deepMergeTheme, defaultTheme } from '../../../src/core/theme.js';
+import type { Theme } from '../../../src/core/theme.js';
+import { measured } from './measured-theme.js';
+const measuredMerge = (...a: Parameters<typeof deepMergeTheme>): Theme => measured(deepMergeTheme(...a));
 
-const theme = resolveTheme('default');
+const theme = measured(resolveTheme('default'));
 
 function node(overrides: Partial<ActivityNodeGeo> & Pick<ActivityNodeGeo, 'id' | 'swimlane'>): ActivityNodeGeo {
   return { kind: 'action', x: 0, y: 0, width: 20, height: 20, ...overrides };
@@ -63,7 +66,7 @@ describe('renderSwimlaneChrome', () => {
   });
 
   it('resolves divider stroke/thickness from SwimlaneBorderColor/Thickness', () => {
-    const customTheme = deepMergeTheme(defaultTheme, {
+    const customTheme = measuredMerge(defaultTheme, {
       colors: {
         ...defaultTheme.colors,
         graph: {
@@ -143,7 +146,7 @@ describe('renderSwimlaneBand (via renderSwimlaneChrome)', () => {
   });
 
   it('emits the resolved hex when SwimlaneTitleBackgroundColor is set', () => {
-    const customTheme = deepMergeTheme(defaultTheme, {
+    const customTheme = measuredMerge(defaultTheme, {
       colors: {
         ...defaultTheme.colors,
         graph: {
@@ -160,7 +163,7 @@ describe('renderSwimlaneBand (via renderSwimlaneChrome)', () => {
   // .apply(color)` paints the SAME resolved colour as both fill and stroke
   // (default UGraphic line thickness, 1) -- vidada-17-xuse810.
   it('stroke equals the resolved fill (not none) when a real override is set', () => {
-    const customTheme = deepMergeTheme(defaultTheme, {
+    const customTheme = measuredMerge(defaultTheme, {
       colors: {
         ...defaultTheme.colors,
         graph: {
@@ -193,7 +196,7 @@ describe('renderSwimlaneTitles', () => {
   });
 
   it('draws at the resolved SwimlaneTitleFontSize, not the boxed-header default', () => {
-    const customTheme = deepMergeTheme(defaultTheme, {
+    const customTheme = measuredMerge(defaultTheme, {
       colors: {
         ...defaultTheme.colors,
         graph: { ...defaultTheme.colors.graph, activity: { swimlaneTitleFontSize: 30 } },
@@ -215,7 +218,7 @@ describe('renderSwimlaneTitles', () => {
   });
 
   it('draws in the resolved SwimlaneTitleFontColor', () => {
-    const customTheme = deepMergeTheme(defaultTheme, {
+    const customTheme = measuredMerge(defaultTheme, {
       colors: {
         ...defaultTheme.colors,
         graph: { ...defaultTheme.colors.graph, activity: { swimlaneTitleFontColor: 'red' } },

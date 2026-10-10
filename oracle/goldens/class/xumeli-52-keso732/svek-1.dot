@@ -5,6 +5,6 @@ remincross=true;
 searchsize=500;
 sh0007->sh0006[arrowtail=none,arrowhead=none,minlen=0,color="#000008",style=invis];
 sh0006 [shape=rect,label="",width=0.574479,height=0.861111,color="#000006"];
-sh0007 [shape=rect,label="",width=1.092882,height=0.458333,color="#000007"];
+sh0007 [shape=rect,label="",width=1.192188,height=0.458333,color="#000007"];
 
 }

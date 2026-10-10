@@ -76,7 +76,7 @@ const NAME_AND_CODE =
  *  path replicates (extractDecorations, gabejo-44-juki791). `[^<>]` cannot
  *  span the inner `>> <<` and dropped the whole declaration
  *  (fafozi-27-reja300). */
-const STEREO = '(?:\\s*<<\\s*(.+?)\\s*>>)?';
+const STEREO = '(?:\\s*<<(.+?)>>)?';
 
 /**
  * `UrlBuilder.OPTIONAL`.
@@ -185,7 +185,7 @@ function parseObjectMatch(match: RegExpExecArray): ObjectMatch {
   return {
     rawId: (rawCode ?? rawDisplay)!,
     rawDisplay,
-    stereotype: match[7]?.trim(),
+    stereotype: match[7],
     url: match[8],
     color: match[9],
   };

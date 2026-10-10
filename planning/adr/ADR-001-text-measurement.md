@@ -129,3 +129,35 @@ unblocked, and should run **before** the class/state/object depth passes
 goldens that S1-impl would then invalidate. Cheapest order: finish A1
 (description) structurally, land S1-impl, re-baseline, then A2+ assert sizes
 from the start.
+
+## Addendum (2026-10-09): the instrument deviates from the verbatim table for U+0020
+
+Mission `instrument-space-width` (`plans/instrument-space-width/`, decisions
+D1–D4 and the D2/D3 amendment).
+
+- **What changed.** Upstream's `UnicodeFontWidthSansSerif` gives U+0020 width
+  0 (block 0, index 0x20), so under `-DPLANTUML_DETERMINISTIC_TEXT` every
+  space was zero-wide on both sides and a lone-space `UText` crashed the jar
+  (`Slot.java:44-45`). Oracle seam #4 (`FileFormat.getDefaultStringBounder`'s
+  anonymous `StringBounderFromWidthTable`, patch `0004-oracle-space-width`)
+  measures each U+0020 as U+0021 — the table's own 44-tenth entry, shared by
+  U+00A0 and matching Helvetica/Arial — and rounds the width to float, the
+  precision of the stock SVG bounder (`FontMetrics.getStringBounds` →
+  `Rectangle2D.Float`). The float rounding is what stops a double table width
+  from reaching one activity coordinate by two routes and failing
+  `Direction.fromVector`'s exact equality (`Direction.java:128`).
+- **Port.** `WidthTableMeasurer` remains the verbatim port of the table.
+  `DeterministicMeasurer extends WidthTableMeasurer` and mirrors seam #4
+  exactly (`' '` → `'!'`, `Math.fround`). Every harness, script and test
+  measures with `DeterministicMeasurer`; `tests/architecture/isw-measurer.test.ts`
+  forbids `WidthTableMeasurer` outside `src/core`. Production code never
+  constructs a measurer of its own — it uses the render's injected one (the
+  ten activity/sequence sites that did were the largest reveal family).
+- **Verification.** 47,920 of 47,920 unscaled space-bearing oracle text runs
+  equal `DeterministicMeasurer` (`measurements/instrument-probe.mts`); the jar
+  without the property is byte-identical to stock.
+- **Consequence.** Space-dependent geometry is now verified against the jar.
+  The mission fixed every port behaviour the new instrument revealed
+  (leading-space x shift and trimmed `textLength` per `DriverTextSvg.java:114-126`,
+  parser trims the jar does not do, the trailing special swimlane, wrap
+  widths, note padding, stereotype padding, …) and left `owed.json` empty.

@@ -203,6 +203,14 @@ function scaleFragmentAttr(name: string, value: string, factor: number): string 
  */
 export function scaleFragmentBody(body: string, factor: number): string {
   if (factor === 1) return body;
+  return formatScaledFragmentBody(body, factor);
+}
+
+/** {@link scaleFragmentBody} without its factor-1 fast path: every token is
+ *  re-formatted even at 1 -- for a body drawn with its numbers deferred
+ *  (`RenderFragment.numbersDeferred`), where this pass is the single
+ *  `SvgGraphics#format` (`SvgGraphics.java:468-475`). */
+export function formatScaledFragmentBody(body: string, factor: number): string {
   return mapOutsideInlineDefs(body, (segment) =>
     segment.replace(SCALABLE_ATTR_RE, (_match, name: string, value: string) => scaleFragmentAttr(name, value, factor)),
   );
@@ -281,6 +289,8 @@ export function finalizeTitledDiagramFragment(fragment: RenderFragment): RenderF
   return {
     ...fragment,
     body: scaleChromedBody(fragment, scale),
+    // isw-T2c-scale: root `width`/`height` attributes are `format(maxX)`.
+    scaledCanvas: true,
     width: unscaledWidth * scale,
     height: unscaledHeight * scale,
   };

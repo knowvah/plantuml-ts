@@ -61,11 +61,9 @@ import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-res
 import type { Theme } from '../../core/theme.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import type { StateTextLine } from './state-geo-types.js';
+import { placeToken, type RunPlacement } from './state-run-placement.js';
 
-/** `SkinParam#getTabSize` default (`SkinParam.java:1073`,
- *  `getAsInt("tabsize", 8)`) — the same default the core seam applies when
- *  `opts.tabSize` is absent, restated here because this module resolves the
- *  value from `Theme` before the call. */
+/** `FontConfiguration.create`'s fixed tab size (`FontConfiguration.java:229-231`). */
 const DEFAULT_TAB_SIZE = 8;
 
 /**
@@ -91,6 +89,9 @@ export interface StateTextRun {
    *  advance its preceding tab(s) consumed. jar-verified `lokija-02-dipe348`:
    *  `line2` drawn at x=68 (12 + 56), `line3` at x=124 (12 + 112). */
   readonly dx?: number;
+  /** Leading-space `x` shift / trimmed `textLength` (see `placeToken`). */
+  readonly drawDx?: number;
+  readonly drawWidth?: number;
   readonly bold: boolean;
   readonly italic: boolean;
   readonly underline: boolean;
@@ -175,7 +176,9 @@ export interface StateCreoleOpts {
 }
 
 /**
- * `skinparam tabSize` always applies (`FontConfiguration#getTabSize`);
+ * `skinparam tabSize` does NOT apply to state text: `Style#getFontConfiguration`
+ * (`Style.java:259-268`) -> `FontConfiguration.create(..)` fixes tabSize 8
+ * (`FontConfiguration.java:229-231`); jar-verified `lokija-02-dipe348`.
  * `skinparam wrapWidth` applies ONLY where upstream threads
  * `getStyleState().wrapWidth()` into the text block — the leaf
  * `EntityImageState`/`EntityImageStateEmptyDescription` name and fields
@@ -188,16 +191,17 @@ export interface StateCreoleOpts {
 export function stateCreoleOpts(theme: Theme, wrap: boolean): StateCreoleOpts {
   return {
     ...(wrap && theme.wrapWidth !== undefined ? { wrapWidth: theme.wrapWidth } : {}),
-    tabSize: theme.tabSize ?? DEFAULT_TAB_SIZE,
+    tabSize: DEFAULT_TAB_SIZE,
     ...(theme.sprites !== undefined ? { spriteRegistry: theme.sprites } : {}),
   };
 }
 
-function toRun(run: CreoleTextRun, text: string, width: number, dx: number): StateTextRun {
+function toRun(run: CreoleTextRun, text: string, width: number, dx: number, place: RunPlacement = {}): StateTextRun {
   return {
     text,
     width,
     ...(dx > 0 ? { dx } : {}),
+    ...place,
     bold: run.style.bold,
     italic: run.style.italic,
     underline: run.style.underline,
@@ -235,7 +239,8 @@ function expandRun(run: CreoleTextRun, font: FontSpec, measurer: StringMeasurer,
   // (empty) text — `AtomMath#calculateDimensionSlow` is the image's own box
   // (`AtomMath.java:64-71`). It carries no text, so it can carry no tab.
   if (run.image !== undefined) return [toRun(run, '', run.image.width, 0)];
-  if (!hasTabulation(run.text)) return [toRun(run, run.text, measure(run.text), 0)];
+  const whole = measure(run.text);
+  if (!hasTabulation(run.text)) return [toRun(run, run.text, whole, 0, placeToken(run.text, whole, measure))];
   const tabStop = tabStopWidth(measure(tabStringFor(tabSizeNb)), runFont.size);
   const out: StateTextRun[] = [];
   let x = 0;
@@ -248,7 +253,7 @@ function expandRun(run: CreoleTextRun, font: FontSpec, measurer: StringMeasurer,
       continue;
     }
     const width = measure(token.text);
-    out.push(toRun(run, token.text, width, pendingDx));
+    out.push(toRun(run, token.text, width, pendingDx, placeToken(token.text, width, measure)));
     pendingDx = 0;
     x += width;
   }

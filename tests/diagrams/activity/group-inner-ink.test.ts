@@ -19,9 +19,12 @@ import type { StringBounder } from '../../../src/diagrams/activity/tiles/tile.js
 import { tileNodes } from '../../../src/diagrams/activity/layout/tile-layout.js';
 import { GtileTopDown } from '../../../src/diagrams/activity/tiles/gtile-top-down.js';
 import { groupInnerInkMaxX } from '../../../src/diagrams/activity/layout/canvas-origin-group-ink.js';
+import { withActivityMeasurer } from '../../../src/diagrams/activity/activity-string-bounder.js';
 
 const measurer = new FormulaMeasurer();
-const theme = resolveTheme('default');
+// isw-T2b-ca: the while's own hexagon label inks through the render's
+// string bounder (`canvas-origin-text-ink.ts#extendForIfOwnLabelText`).
+const theme = withActivityMeasurer(resolveTheme('default'), measurer);
 const bounder: StringBounder = {
   getDimension: (text: string, fontSizePt: number) =>
     measurer.measure(text, { family: theme.fontFamily, size: fontSizePt }),

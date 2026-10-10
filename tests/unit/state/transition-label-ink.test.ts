@@ -68,8 +68,9 @@ describe('attachTransitionLabel — the marged-box ink extent', () => {
     expect(l.width).toBe(Math.floor(MEASURED_WIDTH + 2 * MARGIN_LABEL));
     expect(l.width).toBe(113);
     // ...and the ink keeps the UNfloored dimension.
-    expect(l.inkBox!.width).toBeCloseTo(MEASURED_WIDTH + 2 * MARGIN_LABEL, 10);
-    expect(l.inkBox!.width).toBeCloseTo(113.475, 10);
+    // Widths are float32-rounded (seam #4 v2): 1.5e-6 off the decimal, hence 4.
+    expect(l.inkBox!.width).toBeCloseTo(MEASURED_WIDTH + 2 * MARGIN_LABEL, 4);
+    expect(l.inkBox!.width).toBeCloseTo(113.475, 4);
   });
 
   it('anchors the ink box one marginLabel left of the glyphs, at the reserved box corner', () => {
@@ -111,7 +112,7 @@ describe('computeSvekResultGeometry — the composite ink folds that box', () =>
   it('folds corner and corner+dimension (LimitFinder#drawEmpty), not the reserved box at the glyph anchor', () => {
     // ink minX is the `points` entry at 0; maxX is the box right edge.
     // 243.86 + 113.475 = 357.335, and SvekResult adds delta(15,15).
-    expect(computeSvekResultGeometry([], [geo()]).width).toBeCloseTo(357.335 + 15, 6);
+    expect(computeSvekResultGeometry([], [geo()]).width).toBeCloseTo(357.335 + 15, 4); // float32-rounded widths;
   });
 
   it('is 0.527 narrower than the pre-mission reserved-box-at-glyph-anchor fold', () => {

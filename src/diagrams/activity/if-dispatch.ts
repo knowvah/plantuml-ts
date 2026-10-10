@@ -101,8 +101,9 @@ export function unescapeLabelNewlines(text: string): string {
 }
 
 /** {@link unescapeLabelNewlines} applied only when the captured group
- *  matched -- every call site below immediately follows an optional
- *  regex-group `.trim()`. */
+ *  matched. The capture is kept verbatim: upstream's `(.*?)` groups
+ *  (`CommandIf2.java`, `CommandElseIf2.java`, `CommandElse3.java`, ...)
+ *  reach `Display.getWithNewlines` untrimmed (isw-T2-act F2). */
 export function unescapeLabel(text: string | undefined): string | undefined {
   return text === undefined ? text : unescapeLabelNewlines(text);
 }
@@ -122,14 +123,14 @@ function consumeElseifClause(
   const elseifMatch = RE_ELSEIF.exec(clauseLine)!;
   // ELSEIFIN: group 1 is the leading `(incoming)` decoration -- shifts
   // condition/then-label to groups 2/3 (dispatch-support.ts's own doc).
-  const incomingLabel = unescapeLabel(elseifMatch[1]?.trim());
-  const eiLabel = unescapeLabel(elseifMatch[3]?.trim());
+  const incomingLabel = unescapeLabel(elseifMatch[1]);
+  const eiLabel = unescapeLabel(elseifMatch[3]);
   const eiResult = parseNodes(ctx, cursor + 1, ifInnerStops);
   if (isRefusal(eiResult)) return eiResult;
   return {
     cursor: eiResult.nextIdx,
     branch: {
-      condition: unescapeLabelNewlines(elseifMatch[2]!.trim()),
+      condition: unescapeLabelNewlines(elseifMatch[2]!),
       ...(eiLabel !== undefined && eiLabel !== '' ? { label: eiLabel } : {}),
       ...(incomingLabel !== undefined && incomingLabel !== '' ? { incomingLabel } : {}),
       body: eiResult.nodes,
@@ -199,7 +200,7 @@ function classifyClauseLine(ctx: ParseContext, cursor: number, ifInnerStops: Sto
   }
 
   if (RE_ELSE.test(clauseLine)) {
-    const step = consumeElseClause(ctx, cursor, unescapeLabel(RE_ELSE.exec(clauseLine)![1]?.trim()));
+    const step = consumeElseClause(ctx, cursor, unescapeLabel(RE_ELSE.exec(clauseLine)![1]));
     if (isRefusal(step)) return step;
     return { kind: 'else', cursor: step.cursor, branch: step.branch, label: step.label };
   }
@@ -271,14 +272,12 @@ interface IfHeader {
  */
 function matchIfHeader(line: string): IfHeader | null {
   const if4 = RE_IF4.exec(line);
-  if (if4 !== null)
-    return { condition: unescapeLabelNewlines(if4[1]!.trim()), thenLabel: unescapeLabel(if4[2]?.trim()) };
+  if (if4 !== null) return { condition: unescapeLabelNewlines(if4[1]!), thenLabel: unescapeLabel(if4[2]) };
   const if2 = RE_IF.exec(line);
-  if (if2 !== null)
-    return { condition: unescapeLabelNewlines(if2[1]!.trim()), thenLabel: unescapeLabel(if2[2]?.trim()) };
+  if (if2 !== null) return { condition: unescapeLabelNewlines(if2[1]!), thenLabel: unescapeLabel(if2[2]) };
   const legacy = RE_IF_LEGACY.exec(line);
   if (legacy !== null) {
-    return { condition: unescapeLabelNewlines(legacy[1]!.trim()), thenLabel: unescapeLabel(legacy[2]!.trim()) };
+    return { condition: unescapeLabelNewlines(legacy[1]!), thenLabel: unescapeLabel(legacy[2]!.trim()) };
   }
   return null;
 }

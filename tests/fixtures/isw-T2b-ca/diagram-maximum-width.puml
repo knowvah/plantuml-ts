@@ -1,0 +1,16 @@
+@startuml
+<style>
+activityDiagram {
+  MaximumWidth 60
+}
+</style>
+start
+:a long action label that wraps;
+note right: a long note that wraps too
+if (a long condition that wraps?) then (a long yes label)
+  :x;
+else (no)
+  :y;
+endif
+stop
+@enduml

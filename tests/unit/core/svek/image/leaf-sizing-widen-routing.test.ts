@@ -93,11 +93,14 @@ describe('T3 widened routing — usecase + <$sprite>', () => {
     const display = '<$icon>\nlabel text';
     const sprites = svgIconSprite(SHRUNK_INK_SVG);
     const routed = measureLeafNode(usecaseNode(display), fontSpec, measurer, undefined, sprites);
-    // Literal dimensions captured from a real run (jiti probe, 2026-08-02) —
-    // NOT derived from `measureUsecase` at test time (ADR-3: that comparison
-    // was tautological while the guard existed; asserting literals here
-    // means the test actually fails if the faithful path's geometry moves).
-    expect(routed).toEqual({ width: 68.5778265682734, height: 43.47562148642083 });
+    // Literal dimensions from the jar, NOT derived from `measureUsecase` at
+    // test time (ADR-3: that comparison was tautological while the guard
+    // existed; asserting literals here means the test actually fails if the
+    // faithful path's geometry moves). tests/fixtures/isw-T2-cls/leaf-ucs.svg
+    // (oracle seam #4 v2): `<ellipse rx="36.552" ry="21.712">` = 73.104 x
+    // 43.424 (was 68.578 x 43.476 while a space was 0 wide).
+    expect(routed.width).toBeCloseTo(73.104, 3);
+    expect(routed.height).toBeCloseTo(43.424, 2); // the jar prints ry at 3 dp
     // Sanity: the OLD analytic path lands within floating-point noise of the
     // SAME numbers for this fixture -- proof the guard's removal is size-
     // neutral here, not proof the two paths are the same mechanism (T10/
@@ -121,7 +124,10 @@ describe("SI10 — measureUsecaseOrActorLeaf matches the description engine's ow
     const sprites = svgIconSprite(SHRUNK_INK_SVG);
     const viaEntryPoint = measureUsecaseOrActorLeaf(display, 'usecase', fontSpec, measurer, sprites);
     const viaFaithfulPath = measureLeafNode(usecaseNode(display), fontSpec, measurer, undefined, sprites);
-    expect(viaEntryPoint).toEqual({ width: 103.01505037879433, height: 25.79898987322333 });
+    // jar: tests/fixtures/isw-T2-cls/usecase-hello.svg, `<ellipse rx="53.371"
+    // ry="13.074">` = 106.742 x 26.148 (was 103.015 x 25.799).
+    expect(viaEntryPoint.width).toBeCloseTo(106.742, 3);
+    expect(viaEntryPoint.height).toBeCloseTo(26.148, 3);
     expect(viaEntryPoint).toEqual(viaFaithfulPath);
   });
 
@@ -142,10 +148,13 @@ describe('T3 widened routing — box + <img> now routes through measureEntityLea
     const node: DescriptiveNode = { id: 'r', display, symbol: 'rectangle', children: [] };
     const routed = measureLeafNode(node, fontSpec, measurer);
     // Jar-verified fallback: `(Cannot decode)` at the hardcoded monospace(14)
-    // fallback font measures 100.362 wide; margins/icon bring the box to
-    // this exact value regardless of which routing path is taken (T1's
-    // font-independence finding holds here too).
-    expect(routed).toEqual({ width: 120.36250000000001, height: 34 });
+    // fallback font measures 104.212 wide now that its space counts (100.362
+    // before); margins/icon bring the box to the jar's `<rect width="124.213"
+    // height="34">` (tests/fixtures/isw-T2-cls/leaf-img.svg, oracle seam #4 v2)
+    // regardless of which routing path is taken (T1's font-independence finding
+    // holds here too).
+    expect(routed.width).toBeCloseTo(124.213, 3);
+    expect(routed.height).toBe(34);
   });
 });
 
@@ -185,7 +194,11 @@ describe('T3 coverage restoration — measureLegacyBoxFallback via <latex> (the 
       symbol: 'rectangle',
       children: [],
     };
-    expect(measureLeafNode(withStereo, fontSpec, measurer)).toEqual({ width: 61.725, height: 48 });
+    // 61.725 float32-rounded by the measurer (oracle seam #4 v2): compare at the
+    // jar DOT's printed precision.
+    const stereoDim = measureLeafNode(withStereo, fontSpec, measurer);
+    expect(stereoDim.width).toBeCloseTo(61.725, 4);
+    expect(stereoDim.height).toBe(48);
     expect(measureLeafNode(withoutStereo, fontSpec, measurer)).toEqual({ width: 20, height: 34 });
   });
 
@@ -198,8 +211,13 @@ describe('T3 coverage restoration — measureLegacyBoxFallback via <latex> (the 
     };
     const wrapped = measureLeafNode(node, fontSpec, measurer, { wrapWidth: 40 });
     const unwrapped = measureLeafNode(node, fontSpec, measurer);
-    expect(wrapped).toEqual({ width: 57.362500000000004, height: 76 });
-    expect(unwrapped).toEqual({ width: 145.3, height: 34 });
+    expect(wrapped.width).toBeCloseTo(57.3625, 4); // float32-rounded measurer
+    expect(wrapped.height).toBe(76);
+    // No jar render exists for a <latex> box (the jar's JLaTeXMath is a permanent
+    // divergence, DIVERGENCES.md); the value is the former 145.3 plus the display's
+    // four spaces at 3.85 (14pt, oracle seam #4 v2): 145.3 + 4 * 3.85 = 160.7.
+    expect(unwrapped.width).toBeCloseTo(145.3 + 4 * 3.85, 4);
+    expect(unwrapped.height).toBe(34);
     // Wrapping must narrow the box and grow its height (more lines) --
     // proves the wrapped branch actually ran, not a silent passthrough.
     expect(wrapped.width).toBeLessThan(unwrapped.width);

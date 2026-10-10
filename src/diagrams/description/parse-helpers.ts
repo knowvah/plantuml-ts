@@ -31,6 +31,7 @@ export {
   resolveNewlineEscapes,
   finalizeDisplay,
   extractNodeStereotype,
+  rawStereotypeLabels,
   stripUrl,
   resolveInlineLinks,
   extractColor,

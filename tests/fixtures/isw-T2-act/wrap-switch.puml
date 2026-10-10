@@ -1,0 +1,10 @@
+@startuml
+skinparam wrapWidth 60
+start
+switch (a long switch condition here?)
+case (first long case label)
+  :one;
+case (second long case label)
+  :two;
+endswitch
+@enduml

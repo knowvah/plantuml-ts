@@ -4,6 +4,7 @@
  */
 
 import type { DiagramPlugin, ParseOptions, RenderFragment } from '../../core/dispatcher.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import type { UmlSource } from '../../core/block-extractor.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { SequenceDiagramAST, SequenceGeometry } from './ast.js';
@@ -11,6 +12,13 @@ import { parseSequence } from './parser.js';
 import { layoutSequence } from './layout.js';
 import { renderSequence, renderSequencePage } from './renderer.js';
 import { sequencePageAst, sequencePageCount } from './sequence-page.js';
+
+/** The pipeline always hands `render` the measurer layout used
+ *  (`src/index.ts#assemblePagesUnscoped`); its absence is a caller bug. */
+function requireMeasurer(measurer: StringMeasurer | undefined): StringMeasurer {
+  if (measurer === undefined) throw new Error('sequence render requires the render measurer');
+  return measurer;
+}
 
 // ---------------------------------------------------------------------------
 // Plugin
@@ -36,8 +44,8 @@ export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequenceGeometry>
     return layoutSequence(ast, theme, measurer);
   },
 
-  render(geo: SequenceGeometry, theme): RenderFragment {
-    return renderSequence(geo, theme);
+  render(geo: SequenceGeometry, theme, measurer): RenderFragment {
+    return renderSequence(geo, theme, requireMeasurer(measurer));
   },
 
   // The `PaginatedPlugin` trio (`core/dispatcher.ts`). Sequence is the only
@@ -49,8 +57,8 @@ export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequenceGeometry>
     return sequencePageCount(geo);
   },
 
-  renderPage(geo: SequenceGeometry, theme, pageIndex: number): RenderFragment {
-    return renderSequencePage(geo, theme, pageIndex);
+  renderPage(geo: SequenceGeometry, theme, pageIndex: number, measurer): RenderFragment {
+    return renderSequencePage(geo, theme, pageIndex, requireMeasurer(measurer));
   },
 
   pageAst(ast: SequenceDiagramAST, pageIndex: number): SequenceDiagramAST {

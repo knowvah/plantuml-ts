@@ -14,6 +14,27 @@ import { parseColor } from './paint.js';
 import { lineStyleDash } from './style-line-style.js';
 import { cleanStereotypeToken } from './style-map-tag-cascade.js';
 import { parseHorizontalAlignment } from './skinparam-key-handlers-table-b.js';
+import { parseFontStyleFlags } from './skinparam-key-handlers-shared.js';
+
+/** The three SNames whose entity images read their own `FontName`/`FontStyle`
+ *  (`EntityImageObject/Map/Json` -> `Style.java:241-253 getUFont`). Other
+ *  buckets keep their skinparam-only `fontFamily`/`fontStyle` population. */
+const OBJECT_KIND_SNAMES: ReadonlySet<string> = new Set(['object', 'map', 'json']);
+
+/** `FontName`/`FontStyle` of an object/map/json bucket or its `header`
+ *  sub-selector, under the given field names. */
+function collectObjectKindFont(
+  sname: string,
+  props: ReadonlyMap<string, string>,
+  bucket: Partial<ElementColors>,
+  header: boolean,
+): void {
+  if (!OBJECT_KIND_SNAMES.has(sname)) return;
+  const family = props.get('fontname');
+  const style = props.get('fontstyle');
+  if (family !== undefined) bucket[header ? 'headerFontFamily' : 'fontFamily'] = family;
+  if (style !== undefined) bucket[header ? 'headerFontStyle' : 'fontStyle'] = parseFontStyleFlags(style);
+}
 
 /** `<sname>.stereotype` selector suffix (`<style> <sname> { stereotype {
  *  FontSize N } } }`) — G1 I4b. The per-stereotype-NAME sub-selector nested
@@ -124,6 +145,7 @@ const DIAGRAM_TYPE_SELECTOR_NAMES = [
  */
 function resolveElementBucketSelector(selector: string): string | undefined {
   if (isBucketSName(selector)) return selector;
+  if (isDiagramTypeSelector(selector)) return selector;
   for (const diagramType of DIAGRAM_TYPE_SELECTOR_NAMES) {
     const prefix = `${diagramType}.`;
     if (!selector.startsWith(prefix)) continue;
@@ -131,6 +153,22 @@ function resolveElementBucketSelector(selector: string): string | undefined {
     if (isBucketSName(sname)) return sname;
   }
   return undefined;
+}
+
+/**
+ * isw-T2b-ca: a BARE diagram-type selector (`activityDiagram { MaximumWidth
+ * 100 }`) is its own bucket, keyed by the diagram SName. Upstream the
+ * block's own declarations become a `Style` signed `{activityDiagram}`
+ * (`style/parser/Context.java:68-100,127-139`), and
+ * `StyleStorage#computeMergedStyle` (`StyleStorage.java:102-116`) merges it
+ * into every element whose signature `containsAll` its SNames
+ * (`StyleSignatureBasic.java:194-220`) -- every element of that diagram.
+ * The flat bucket map cannot express that scope, so the diagram's own
+ * engine reads this bucket as the tier under the element's own
+ * (`activity-text-style.ts#activityWrapWidth`).
+ */
+function isDiagramTypeSelector(selector: string): boolean {
+  return (DIAGRAM_TYPE_SELECTOR_NAMES as readonly string[]).includes(selector);
 }
 
 function isBucketSName(sname: string): boolean {
@@ -335,6 +373,7 @@ export function collectElementStyleBuckets(styleMap: StyleMap): Record<string, E
       const ls = props.get('linestyle');
       if (ls !== undefined) bucket.lineStyle = lineStyleDash(ls);
       collectT3gBucketProps(props, bucket);
+      collectObjectKindFont(bucketName, props, bucket, false);
       if (Object.keys(bucket).length > 0) {
         elements[bucketName] = { ...elements[bucketName], ...bucket };
       }
@@ -364,6 +403,7 @@ export function collectElementStyleBuckets(styleMap: StyleMap): Record<string, E
         const size = Number(fs);
         if (Number.isFinite(size)) bucket.headerFontSize = size;
       }
+      collectObjectKindFont(sname, props, bucket, true);
       if (Object.keys(bucket).length > 0) {
         elements[sname] = { ...elements[sname], ...bucket };
       }

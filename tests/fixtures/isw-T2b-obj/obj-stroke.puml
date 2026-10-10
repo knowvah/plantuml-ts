@@ -1,0 +1,14 @@
+@startuml
+<style>
+object {
+  LineColor blue
+  LineThickness 2
+  LineStyle 10-5
+  RoundCorner 20
+}
+</style>
+object Filled {
+  name = "Dummy"
+}
+object Empty
+@enduml

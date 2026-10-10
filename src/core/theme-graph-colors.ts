@@ -86,6 +86,12 @@ export interface ElementColors {
   headerBackground?: Paint;
   headerFont?: Paint;
   headerFontSize?: number;
+  /** `<style> <sname> { header { FontName/FontStyle } } }` -- the NAME row's
+   *  own font family and bold/italic flags (`EntityImageObject.java:132`
+   *  `getStyleHeader().getFontConfiguration` -> `Style.java:241-253
+   *  getUFont`). object/map/json only, like {@link headerFontSize}. */
+  headerFontFamily?: string;
+  headerFontStyle?: { readonly bold: boolean; readonly italic: boolean };
   /** `skinparam <sname>FontSize<<label>>` — the ELEMENT's own font size when
    *  it carries that stereotype, written by the flat key or by the nested
    *  `skinparam <sname> { <<label>> { FontSize N } }` block form (the

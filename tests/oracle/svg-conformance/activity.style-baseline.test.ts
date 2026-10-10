@@ -295,9 +295,11 @@ describe('svg-activity style census — corpus presence', () => {
     // CommandPage, CommandLink3, CommandFootboxIgnored and
     // CommandHideShowByGender are ported (ActivityDiagramFactory3.java:105,107,
     // 155) -- promoted error -> baseline. Derivation: 412 + 4 = 416 / 7 - 4 = 3.
-    expect(baselineFixtures.length).toBe(416);
+    // isw/close (2026-10-09): oracle seam #4 gives U+0020 width, so 18 activity goldens stopped being SlotFinder crash pages; promoted jar-error -> baseline from a fresh measurement (scripts/repin-activity-baselines.ts).
+    // Derivation: 416 + 18 = 434 / 32 - 18 = 14.
+    expect(baselineFixtures.length).toBe(434);
     expect(errorFixtures.length).toBe(3);
-    expect(jarErrorFixtures.length).toBe(32);
+    expect(jarErrorFixtures.length).toBe(14);
   });
 });
 

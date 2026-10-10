@@ -1,0 +1,17 @@
+@startuml
+class A <<  x  >>
+class B << y >>
+class C <<z>>
+class D << w >>
+package P1 <<  p  >> {
+  class E
+}
+package P2 << q >> {
+  class F
+}
+hide << x >> stereotype
+hide << y >> stereotype
+hide <<z>> stereotype
+hide << p >> stereotype
+hide << q >> stereotype
+@enduml

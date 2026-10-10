@@ -356,7 +356,7 @@ const USYMBOL_REGISTRY_TO_KEYWORD: ReadonlyMap<string, string> = new Map([
  * `tryMeasureDescriptionLeaf` -> `measureLeafNode`.
  * `CommandNamespace2` (quoted `"Display" as alias` form) passes
  * `gated: false`: upstream sets its stereotype unconditionally.
- * Stored as the inner text (`<<`/`>>` stripped, trimmed) -- the same
+ * Stored as the inner text (`<<`/`>>` stripped, padding kept) -- the same
  * convention as `Classifier.stereotype` (class-declaration-extractors.ts).
  * @see ~/git/plantuml/.../command/CommandPackage.java:178-191
  * @see ~/git/plantuml/.../command/CommandNamespace.java:113-124
@@ -389,7 +389,9 @@ export function setNamespaceStereotype(
     if (keyword !== undefined) applyNamespaceUsymbol(state, nsId, keyword);
     return;
   }
-  const inner = /<<\s*(.+)\s*>>/.exec(stereoRaw)?.[1]?.trim();
+  // Kept verbatim: StereotypePattern.java:68 captures `<<.+?>>` untrimmed and
+  // Guillemet.java:87-100 drops one padding space per side at use.
+  const inner = /<<(.+)>>/.exec(stereoRaw)?.[1];
   if (inner === undefined || inner.length === 0) return;
   const ns = state.ast.namespaces.find((n) => n.id === nsId);
   if (ns !== undefined) ns.stereotype = inner;

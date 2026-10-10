@@ -3,6 +3,6 @@ nodesep=0.486111;
 ranksep=0.833333;
 remincross=true;
 searchsize=500;
-sh0006 [shape=rect,style=rounded,label="",width=2.838542,height=2.027778,color="#000006"];
+sh0006 [shape=rect,style=rounded,label="",width=3.373264,height=2.027778,color="#000006"];
 
 }

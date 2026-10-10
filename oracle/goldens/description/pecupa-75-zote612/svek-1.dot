@@ -8,9 +8,9 @@ sh0007->sh0008[arrowtail=none,arrowhead=none,minlen=0,color="#00000F",style=invi
 sh0009->sh0010[arrowtail=none,arrowhead=none,minlen=0,color="#000017",style=invis];
 sh0006 [shape=ellipse,label="",width=0.635024,height=0.358319,color="#000006"];
 sh0007 [shape=ellipse,label="",width=0.635024,height=0.358319,color="#000007"];
-sh0008 [shape=ellipse,label="",width=1.544906,height=0.375648,color="#000008"];
-sh0009 [shape=ellipse,label="",width=1.544906,height=0.375648,color="#000009"];
-sh0010 [shape=ellipse,label="",width=1.818700,height=0.814014,color="#00000A"];
+sh0008 [shape=ellipse,label="",width=1.585253,height=0.383717,color="#000008"];
+sh0009 [shape=ellipse,label="",width=1.585253,height=0.383717,color="#000009"];
+sh0010 [shape=ellipse,label="",width=1.979648,height=0.798924,color="#00000A"];
 sh0006->sh0009[arrowtail=none,arrowhead=none,minlen=1,color="#000013",style=invis];
 
 }

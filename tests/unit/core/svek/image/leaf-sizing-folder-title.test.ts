@@ -33,7 +33,7 @@ describe('SI1 T12 — folder/package title via create2/BodyEnhanced1 (jar-pinned
     // sides); label slot EMPTY (upstream's empty-desc package branch);
     // + USymbolFolder margin [30, 23]; height 14 + 23.
     const d = measureLeafNode(node('Elektronisk dokument', 'Elektronisk dokument', 'package'), fontSpec, measurer);
-    expect(d.width).toBeCloseTo(171.9375, 3);
+    expect(d.width).toBeCloseTo(175.78751, 3);
     expect(d.height).toBeCloseTo(37, 3);
   });
 
@@ -41,7 +41,7 @@ describe('SI1 T12 — folder/package title via create2/BodyEnhanced1 (jar-pinned
     // title = 15.575 ("pp") + 12; label = 76.3875 ("Display Here") WINS the
     // mergeTB width max; height 14 + 14 + 23.
     const d = measureLeafNode(node('pp', 'Display Here', 'package'), fontSpec, measurer);
-    expect(d.width).toBeCloseTo(106.3875, 3);
+    expect(d.width).toBeCloseTo(110.2375, 3);
     expect(d.height).toBeCloseTo(51, 3);
   });
 

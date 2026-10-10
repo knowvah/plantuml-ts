@@ -51,7 +51,10 @@ import { activityDisplayBlock, activityTextFontConfiguration } from '../../activ
 import { klimtStringBounder } from '../../activity-creole-sheet.js';
 import { HorizontalAlignment } from '../../../../core/klimt/geom/HorizontalAlignment.js';
 import { CreoleMode } from '../../../../core/klimt/creole/CreoleMode.js';
-import { WidthTableMeasurer, type StringMeasurer } from '../../../../core/measurer.js';
+import type { StringMeasurer } from '../../../../core/measurer.js';
+import { activityMeasurer } from '../../activity-string-bounder.js';
+import { activityWrapWidth } from '../../activity-text-style.js';
+import type { TextBlock } from '../../../../core/klimt/shape/TextBlock.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from '../snake-text-position.js';
 
 /** A label's draw inputs: its lines, the arrow font size, the block width
@@ -71,7 +74,22 @@ export interface LabelAnchor {
   readonly y: number;
 }
 
-const BLOCK_MEASURER = new WidthTableMeasurer();
+/**
+ * The block an edge label draws: `FtileFactoryDelegator#getTextBlock`'s
+ * `create7(fc, LEFT, skinParam, SIMPLE_LINE)` (`FtileFactoryDelegator.java:
+ * 103-112`, `LineBreakStrategy.NONE`), or -- `wrapped`, a switch case's
+ * label -- `Branch#getTextBlock`'s `create0(fcArrow, LEFT, skinParam,
+ * style.wrapWidth(), SIMPLE_LINE)` (`Branch.java:248-258`, isw-T2-act F5).
+ */
+export function edgeLabelBlock(label: string, theme: Theme, wrapped: boolean): TextBlock {
+  const fc = activityTextFontConfiguration(theme, activityFontSize(theme, 'arrow'), 'arrow');
+  return activityDisplayBlock(label, theme, {
+    fontConfiguration: fc,
+    horizontalAlignment: HorizontalAlignment.LEFT,
+    creoleMode: CreoleMode.SIMPLE_LINE,
+    ...(wrapped ? { maxMessageSize: activityWrapWidth(theme, 'arrow') } : {}),
+  });
+}
 
 /**
  * `text.textBlock.calculateDimension(stringBounder)` (`Snake.java:247`) for
@@ -81,21 +99,18 @@ const BLOCK_MEASURER = new WidthTableMeasurer();
  * `AtomText` floor (`AtomText.java:179-181`) and `SheetBlock1`'s padding on
  * both axes (`SheetBlock1.java:194-197`) included. A `<back:color>` the
  * parser lifted into `edge.color` changes no extent. `measurer` is the
- * caller's `StringBounder` (the compressor's injected one); the renderer's
- * width table by default.
+ * caller's `StringBounder` (the compressor's injected one); the render's own
+ * (`activity-string-bounder.ts`) by default.
  */
 export function edgeLabelBlockSize(
   label: string,
   theme: Theme,
-  measurer: StringMeasurer = BLOCK_MEASURER,
+  measurer: StringMeasurer = activityMeasurer(theme),
+  wrapped = false,
 ): { width: number; height: number } {
   const size = activityFontSize(theme, 'arrow');
   const fc = activityTextFontConfiguration(theme, size, 'arrow');
-  const tb = activityDisplayBlock(label, theme, {
-    fontConfiguration: fc,
-    horizontalAlignment: HorizontalAlignment.LEFT,
-    creoleMode: CreoleMode.SIMPLE_LINE,
-  });
+  const tb = edgeLabelBlock(label, theme, wrapped);
   const dim = tb.calculateDimension(klimtStringBounder(measurer, { family: fc.family, size }));
   return { width: dim.getWidth(), height: dim.getHeight() };
 }
@@ -108,7 +123,7 @@ export function edgeLabelBlockSize(
 function placeOnPoints(edge: ActivityEdgeGeo, label: string, theme: Theme): EdgeLabelLayout {
   const size = activityFontSize(theme, 'arrow');
   const lines = label.split('\n');
-  const dim = edgeLabelBlockSize(label, theme);
+  const dim = edgeLabelBlockSize(label, theme, undefined, edge.labelWrapped === true);
   const position = getTextBlockPosition(edge.points, dim, edge.labelAlign ?? DEFAULT_LABEL_ALIGN);
   return { lines, size, width: dim.width, x: position.x, baselineY: position.y + size * ASCENT_FRACTION };
 }

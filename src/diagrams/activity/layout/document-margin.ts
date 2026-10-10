@@ -43,7 +43,7 @@ import {
   type DocumentMargin,
 } from '../activity-layout-constants.js';
 import type { AssembledSvg, RenderFragment } from '../../../core/dispatcher.js';
-import { resolveScaleFactor, type ScaleSpec } from '../../../core/scale-command.js';
+import { isExportScaled, resolveScaleFactor, type ScaleSpec } from '../../../core/scale-command.js';
 import type { Theme } from '../../../core/theme.js';
 import { shiftFragmentBody } from '../../../core/annotations/coord-shift.js';
 import { applyChrome, type AnnotationStyles } from '../../../core/annotations/chrome.js';
@@ -136,8 +136,8 @@ function withActivityScale(
   dimHeight: number,
   doc: ActivityDocumentContext,
 ): RenderFragment {
+  if (!isExportScaled(doc.scaleSpec, doc.dpi)) return fragment;
   const dpi = doc.dpi ?? DEFAULT_DPI;
-  if (doc.scaleSpec === undefined && dpi === DEFAULT_DPI) return fragment;
   const dpiPart = dpi === DEFAULT_DPI ? {} : { dpi };
   if (doc.scaleSpec === undefined) return { ...fragment, ...dpiPart };
   const factor = resolveScaleFactor(doc.scaleSpec, dimWidth, dimHeight);

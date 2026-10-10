@@ -59,8 +59,10 @@ const NAME_AND_CODE =
  *  ([%pLN_.]+)`. */
 const SINGLE_LINE_NAME = '(?:\x22([^\x22]*)\x22\\s+as\\s+)?([\\w.]+)';
 
-/** `StereotypePattern.optional("STEREO")`. */
-const STEREO = '(?:\\s*<<\\s*([^<>]+?)\\s*>>)?';
+/** `StereotypePattern.optional("STEREO")` — the label stays untrimmed
+ *  (StereotypePattern.java:68 captures `<<.+?>>`; padding is consumed later by
+ *  Guillemet/Stereotype, one space per side). */
+const STEREO = '(?:\\s*<<([^<>]+?)>>)?';
 
 /** `UrlBuilder.OPTIONAL` — matched and discarded. */
 const URL = '(?:\\s*\\[\\[[^\\]]*\\]\\])?';
@@ -308,7 +310,7 @@ function parseJsonMultilineMatch(match: RegExpExecArray): JsonHeaderMatch {
   return {
     rawId: (rawCode ?? rawDisplay)!,
     rawDisplay,
-    stereotype: match[7]?.trim(),
+    stereotype: match[7],
     color: match[8],
   };
 }
@@ -384,7 +386,7 @@ export function applyJsonMultilineOpen<E>(host: JsonCommandHost<E>, match: RegEx
 export function applyJsonSingleLine<E>(host: JsonCommandHost<E>, match: RegExpExecArray): void {
   const rawDisplay = match[1];
   const rawId = match[2]!;
-  const stereotype = match[3]?.trim();
+  const stereotype = match[3];
   const color = match[4];
   const dataText = match[5]!;
 

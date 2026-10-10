@@ -1,0 +1,6 @@
+@startuml
+autonumber "<font color=red>[000]</font>"
+Alice -> Bob : a <b>bold</b> label
+Alice -> Bob : plain
+Alice -> Bob : ""x->  ""
+@enduml

@@ -1,0 +1,101 @@
+{
+  "generatedAt": "2026-10-09T20:53:50.018Z",
+  "fixtures": [
+    {
+      "slug": "biluko-70-licu481",
+      "type": "c4",
+      "dotEqual": false,
+      "verdict": "diverged",
+      "maxDelta": 219.935,
+      "firstDiff": "svg/defs[1][childCount]",
+      "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
+    },
+    {
+      "slug": "favasu-27-fesa452",
+      "type": "c4",
+      "dotEqual": false,
+      "verdict": "diverged",
+      "maxDelta": 66,
+      "firstDiff": "svg/g[1]/g[1]/rect[1]/@rx",
+      "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
+    },
+    {
+      "slug": "gepuco-34-pira620",
+      "type": "c4",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 776,
+      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "gikaju-64-bari602",
+      "type": "c4",
+      "dotEqual": false,
+      "verdict": "diverged",
+      "firstDiff": "<compare-threw>",
+      "errMsg": "comment is not well-formed at position 1041"
+    },
+    {
+      "slug": "josimu-04-silu988",
+      "type": "c4",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 6,
+      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "kipive-74-lele070",
+      "type": "c4",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 326,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/text[2]/@y"
+    },
+    {
+      "slug": "ropexu-72-jecu171",
+      "type": "c4",
+      "dotEqual": false,
+      "verdict": "diverged",
+      "maxDelta": 860.5600000000001,
+      "firstDiff": "svg/g[1]/g[1]/@id",
+      "maxDeltaPath": "svg/g[1]/g[16]/polygon[1]/@points[0]"
+    },
+    {
+      "slug": "rosoga-84-vari641",
+      "type": "c4",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 16,
+      "firstDiff": "svg/g[1]/g[1]/text[1]/@fill",
+      "maxDeltaPath": "svg/@height"
+    },
+    {
+      "slug": "vakasu-51-xiza794",
+      "type": "c4",
+      "dotEqual": false,
+      "verdict": "diverged",
+      "maxDelta": 360.701,
+      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@x",
+      "oracleBlind": true
+    },
+    {
+      "slug": "xetego-25-dinu652",
+      "type": "c4",
+      "dotEqual": true,
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xizifu-87-siti076",
+      "type": "c4",
+      "dotEqual": false,
+      "verdict": "diverged",
+      "maxDelta": 219,
+      "firstDiff": "svg/g[1]/g[1]/rect[1]/@rx",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    }
+  ]
+}

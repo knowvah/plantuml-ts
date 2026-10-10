@@ -210,6 +210,25 @@ export interface RenderFragment {
   scaleSpec?: ScaleSpec;
   dpi?: number;
   /**
+   * isw-T2c-scale: `body` was drawn inside `svg-format.ts#withDeferredFormat`
+   * -- its numbers are lossless doubles, and the export's scale pass is
+   * their single `SvgGraphics#format` (`SvgGraphics.java:468-475`). Set by a
+   * producer whose document will be scaled (activity: `renderActivity`);
+   * every step that draws more into the body (warning banner, chrome) draws
+   * deferred too, and `assemble-svg-activity.ts#finalizeActivityFragment`
+   * formats even at factor 1.
+   */
+  numbersDeferred?: true;
+  /**
+   * isw-T2c-scale: `width`/`height` are `SvgGraphics`'s integer `maxX`/`maxY`
+   * times `option.getScale()`. `finalizeRootAttributes` truncates that
+   * product for `style` and `viewBox` but prints the root `width`/`height`
+   * attributes as `format(maxX) + "px"` -- scaled, at 3 decimals
+   * (`SvgGraphics.java:800-813`). Set by the finalizers that apply a
+   * document scale (`assemble-svg-activity.ts`, `TextBlockExporter.ts`).
+   */
+  scaledCanvas?: true;
+  /**
    * T6h: the raw text block drawn through ONE klimt `UGraphic` at the
    * resolved `scale`, translated by `(dx, dy)` BEFORE the scale
    * (TextBlockExporter.java:165-176) — for a MINDMAP fragment whose `body`
@@ -268,7 +287,7 @@ export type AssembledSvg = RenderFragment | CompleteSvg;
  */
 export interface PaginatedPlugin<AST = unknown, Geo = unknown> {
   getNbPages(geo: Geo): number;
-  renderPage(geo: Geo, theme: Theme, pageIndex: number): AssembledSvg;
+  renderPage(geo: Geo, theme: Theme, pageIndex: number, measurer?: StringMeasurer): AssembledSvg;
   pageAst(ast: AST, pageIndex: number): AST;
 }
 
@@ -280,7 +299,12 @@ export interface SyncPlugin<AST = unknown, Geo = unknown> extends Partial<Pagina
   readonly type: DiagramType;
   parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layoutSync(ast: AST, theme: Theme, measurer: StringMeasurer): Geo;
-  render(geo: Geo, theme: Theme): AssembledSvg;
+  /**
+   * `measurer` is the render's own measurer (the one `layout*` received),
+   * handed through additively so an engine's draw side measures with the
+   * same instrument as its layout side. Plugins that ignore it are unchanged.
+   */
+  render(geo: Geo, theme: Theme, measurer?: StringMeasurer): AssembledSvg;
   /**
    * The style sources this engine's theme is built from, for an engine that
    * does NOT execute every `skinparam`/`!theme` the preprocessor collected.
@@ -300,7 +324,12 @@ export interface AsyncPlugin<AST = unknown, Geo = unknown> extends Partial<Pagin
   readonly type: DiagramType;
   parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layout(ast: AST, theme: Theme, measurer: StringMeasurer): Promise<Geo>;
-  render(geo: Geo, theme: Theme): AssembledSvg;
+  /**
+   * `measurer` is the render's own measurer (the one `layout*` received),
+   * handed through additively so an engine's draw side measures with the
+   * same instrument as its layout side. Plugins that ignore it are unchanged.
+   */
+  render(geo: Geo, theme: Theme, measurer?: StringMeasurer): AssembledSvg;
   /** See {@link SyncPlugin.styleInput}. */
   styleInput?(preprocessed: PreprocessorResult, source: UmlSource): PreprocessorResult;
 }

@@ -1,0 +1,5 @@
+@startuml
+json J1 <<  st  >> {
+  "a": 1
+}
+@enduml

@@ -65,7 +65,7 @@ describe('preprocessor: <style> inside an embedded {{ }} block', () => {
     // Jar golden (test-results/dot-cache/unknown/semutu-45-zeno907/in.svg,
     // decoded image): node "a" box and label.
     expect(inner).toContain(
-      '<rect x="10" y="20" width="27.788" height="34" fill="none" style="stroke:#2FA4E7;stroke-width:1.5;" rx="12.5" ry="12.5"/>',
+      '<rect x="10" y="20" width="27.787" height="34" fill="none" style="stroke:#2FA4E7;stroke-width:1.5;" rx="12.5" ry="12.5"/>',
     );
     expect(inner).toContain('<text x="20" y="40.889" fill="#2FA4E7" font-size="14">a</text>');
   });

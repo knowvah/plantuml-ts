@@ -1,0 +1,5 @@
+@startuml
+skinparam wrapWidth 100
+start
+:this is a very long component description;
+@enduml

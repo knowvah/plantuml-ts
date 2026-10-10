@@ -24,7 +24,7 @@ import { activityDisplayBlock, activityTextFontConfiguration, drawActivityTextBl
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
-import { WidthTableMeasurer } from '../../core/measurer.js';
+import { activityMeasurer } from './activity-string-bounder.js';
 import { frameTitleWidth } from './tiles/gtile-group.js';
 
 /** `USymbolFrame#drawFrame` (`:68-97`): the title-tab underline, an OPEN
@@ -44,17 +44,13 @@ function compositeTabPath(x: number, y: number, textWidth: number, textHeight: n
   return `M${x1},${fmt(y)} L${x1},${y2} L${x2},${y3} L${fmt(x)},${y3}`;
 }
 
-/** The renderer's own width table -- the SAME `WidthTableMeasurer` class
- *  `activity-text-placement.ts#measureLineWidth` reads. */
-const TITLE_MEASURER = new WidthTableMeasurer();
-
 /**
  * `dimTitle.getWidth()` of the frame title (`USymbolFrame.java:146,150`),
  * shared by the renderer and the compression adapter
  * (`layout/compress/shapes-of-frame.ts`) so both read one width.
  */
 export function compositeTitleWidth(theme: Theme, title: string): number {
-  return frameTitleWidth(title, TITLE_MEASURER, theme);
+  return frameTitleWidth(title, activityMeasurer(theme), theme);
 }
 
 /** The frame's `<symbol>/composite` style colours (`FtileGroup.java:99-102`):

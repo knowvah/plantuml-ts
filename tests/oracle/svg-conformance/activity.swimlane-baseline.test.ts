@@ -178,9 +178,11 @@ describe('svg-activity swimlane census — population', () => {
     // add4/T0b (2026-10-07): 9 of the 63 newly captured, promoted fixtures
     // carry a swimlane line; none of the 9 new jar-error pages or 7 new
     // error rows do. Derivation: 83 + 9 = 92.
-    expect(baselineFixtures.length).toBe(92);
+    // isw/close (2026-10-09): oracle seam #4 gives U+0020 width, so 18 activity goldens stopped being SlotFinder crash pages; promoted jar-error -> baseline from a fresh measurement (scripts/repin-activity-baselines.ts).
+    // 6 of the 18 carry a swimlane line. Derivation: 92 + 6 = 98 / 8 - 6 = 2.
+    expect(baselineFixtures.length).toBe(98);
     expect(errorFixtures.length).toBe(0);
-    expect(jarErrorFixtures.length).toBe(8);
+    expect(jarErrorFixtures.length).toBe(2);
   });
 });
 
@@ -318,7 +320,10 @@ describe('svg-activity swimlane census — the instrument', () => {
     const golden = readFileSync(join(CACHE_ROOT, ACTIVITY_TYPE, 'pakema-21-xema183', 'in.svg'), 'utf8');
     const c = censusOf(golden);
     expect(c.dividerXs).toEqual([20, 58.338, 369.275]);
-    expect(c.bandRect).toEqual({ x: 20, y: 17.5, width: 348.275, height: 18, fill: 'none' });
+    // isw: the band now reaches the trailing special swimlane's half-missing
+    // space, whose "" title measures one 18pt space (Swimlanes.java:363,
+    // 436-449): 348.275 + 4.95 / 2 = 350.75, read from the re-captured golden.
+    expect(c.bandRect).toEqual({ x: 20, y: 17.5, width: 350.75, height: 18, fill: 'none' });
     expect(c.titles).toEqual([
       { fontSize: '18', x: '33.15', anchor: ABSENT },
       { fontSize: '18', x: '63.338', anchor: ABSENT },

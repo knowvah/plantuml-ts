@@ -19,22 +19,12 @@ import type { ActivityGeometry, ActivityNodeGeo } from './layout/tile-layout.js'
 import type { Theme } from '../../core/theme.js';
 import { line, rect } from '../../core/svg.js';
 import { renderNode } from './activity-renderer-shapes.js';
-import { activityDisplayBlock, drawActivityTextBlock, styleFontConfiguration } from './activity-text-sheet.js';
+import { drawActivityTextBlock } from './activity-text-sheet.js';
+import { swimlaneTitleBlock } from './layout/swimlane-title.js';
 import { klimtStringBounder } from './activity-creole-sheet.js';
-import { activityHyperlinkColor } from './activity-text-style.js';
-import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
-import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
-import { WidthTableMeasurer } from '../../core/measurer.js';
+import { activityMeasurer } from './activity-string-bounder.js';
 
-import {
-  swimlaneBorderColor,
-  swimlaneBorderThickness,
-  swimlaneHeaderBackground,
-  swimlaneTitleFontColor,
-  swimlaneTitleFontSize,
-} from './activity-style-defaults.js';
-
-const TITLE_MEASURER = new WidthTableMeasurer();
+import { swimlaneBorderColor, swimlaneBorderThickness, swimlaneHeaderBackground } from './activity-style-defaults.js';
 
 /**
  * The transparent (or user-coloured) title-band rect (D3). Emits
@@ -137,27 +127,21 @@ export function renderSwimlaneChrome(geo: ActivityGeometry, theme: Theme): strin
  * `SwimlaneGeo` fields, already measured at layout time.
  */
 /** The lane's raw title creole -- its `|name|LABEL` display, else its name
- *  (the same source `layout/swimlane-title.ts#swimlaneTitleText` resolves). */
+ *  (`Swimlane.java:60,74-80`). */
 function laneTitleSource(lane: ActivityGeometry['swimlanes'][number]): string {
   return lane.display ?? lane.name;
 }
 
 export function renderSwimlaneTitles(geo: ActivityGeometry, theme: Theme): string {
   if (geo.swimlaneBand === undefined) return '';
-  const font = { family: theme.fontFamily, size: swimlaneTitleFontSize(theme), color: swimlaneTitleFontColor(theme) };
-  const fc = styleFontConfiguration(theme, font, activityHyperlinkColor(theme));
-  const bounder = klimtStringBounder(TITLE_MEASURER, font);
   let out = '';
   for (const lane of geo.swimlanes) {
     // `Swimlanes#getTitle` (`Swimlanes.java:285-293`): `create9(fc, LEFT,
     // skinParam, wrap)` -- the display's default FULL creole Sheet, where a
     // `[[url label]]` is a real `<a>`-wrapped run in the swimlane style's
     // hyperlink colour (SLURL, add4-T3gates).
-    const tb = activityDisplayBlock(laneTitleSource(lane), theme, {
-      fontConfiguration: fc,
-      horizontalAlignment: HorizontalAlignment.LEFT,
-      creoleMode: CreoleMode.FULL,
-    });
+    const { tb, fc } = swimlaneTitleBlock(laneTitleSource(lane), theme, lane.actualWidth ?? lane.width);
+    const bounder = klimtStringBounder(activityMeasurer(theme), fc);
     // `UGraphicCompressOnXorY.java:100-112` (CenteredText): `pos =
     // (realSpaceWidth - textWidth) / 2` past the lane's content left.
     const contentX = lane.contentX ?? lane.x;

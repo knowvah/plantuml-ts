@@ -42,6 +42,7 @@
 
 import { attrs } from '../svg.js';
 import { mapOutsideInlineDefs } from '../svg-defs.js';
+import { DEFAULT_SVG_DECIMALS, fmt } from '../svg-format.js';
 
 /** Matches a JS-`Number`-parseable numeric token — integer, decimal, or
  *  exponential, optionally signed. Every numeric attribute value / path
@@ -173,6 +174,33 @@ export function shiftFragmentBody(body: string, dx: number, dy: number): string 
       if (name === 'points') return attrs([['points', shiftPoints(value, dx, dy)]]).trimStart();
       if (name === 'd') return attrs([['d', shiftPathD(value, dx, dy)]]).trimStart();
       return attrs([['transform', shiftTransform(value, dx, dy)]]).trimStart();
+    }),
+  );
+}
+
+/** A numeric token carrying more fractional digits than `SvgGraphics
+ *  #format` ever prints (`SvgOption.decimal`, 3). */
+const OVER_PRECISE_RE = new RegExp(`-?\\d+\\.\\d{${DEFAULT_SVG_DECIMALS + 1},}(?:[eE][-+]?\\d+)?`, 'g');
+
+const POSITION_ATTR_RE = /\b(x|y|cx|cy|x1|y1|x2|y2|points|d)="([^"]*)"/g;
+
+/**
+ * isw-T2b-ca: the deferred half of the eager translate above. Upstream
+ * applies a `UTranslate` to the double and formats ONCE, at emission
+ * (`SvgGraphics#format`, `klimt/drawing/svg/SvgGraphics.java:468-475`:
+ * `%.3f` then `trimZeros`). {@link shiftFragmentBody} keeps full precision
+ * so nested shifts compose exactly (rounding each would double-round:
+ * `113.13749999999999 + 95.26` must print `208.398`, not `208.397`), and
+ * the document assembler calls this once on the finished body: every
+ * position token with more than three decimals -- only ever a shift's raw
+ * sum, e.g. `x="53.32500219345093"` -- prints as the jar prints it. Inline
+ * `<defs>` keep their own units (`mapOutsideInlineDefs`).
+ */
+export function formatShiftedCoordinates(body: string): string {
+  return mapOutsideInlineDefs(body, (segment) =>
+    segment.replace(POSITION_ATTR_RE, (match, name: string, value: string) => {
+      const formatted = value.replace(OVER_PRECISE_RE, (token) => fmt(Number(token)));
+      return formatted === value ? match : attrs([[name, formatted]]).trimStart();
     }),
   );
 }

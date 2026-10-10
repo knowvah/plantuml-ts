@@ -1,0 +1,4 @@
+surveying 50 json fixtures (concurrency 6)
+  25/50
+  50/50
+wrote plans/instrument-space-width/measurements/b2-eng/parity-json.json — {"conformant":13,"structural-match":24,"diverged":13,"errored":0,"timeout":0,"oracle-error":0}

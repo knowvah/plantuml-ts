@@ -1,0 +1,7 @@
+@startuml
+scale 1.5
+title long title
+if (long long condition?) then (long)
+  :long long;
+endif
+@enduml
