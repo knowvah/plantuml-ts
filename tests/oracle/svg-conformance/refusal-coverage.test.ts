@@ -433,8 +433,15 @@ const pinnedJarErrors = manifest.fixtures.filter((f) => !f.jarRendered);
  *  (jiti, no coverage, 2026-08-24) against the sibling's 6,000 ms under the
  *  same conditions. The ~1.3 s delta is the full-document banner scan
  *  {@link weErroredIn} deliberately does not truncate. Same order, same
- *  ceiling; a hang still surfaces in two minutes, inside CI's 12-minute cap. */
-const CORPUS_BUDGET_MS = 120_000;
+ *  ceiling.
+ *
+ *  Re-derived on the runner with the sibling (2026-10-10; its CORPUS_BUDGET_MS
+ *  comment has the derivation, now 330,000 ms). This gate's own in-suite CI
+ *  samples sit in the same band: 108,222 ms (run 37856273415), 111,457 ms
+ *  (run 38046648955) and 102,491 ms (run 38075923903), 85-93% of the old
+ *  120,000 ms. That margin is too thin for a 4-vCPU runner, so the same
+ *  budget applies here. */
+const CORPUS_BUDGET_MS = 330_000;
 
 describe('refusal coverage — corpus completeness', () => {
   it(

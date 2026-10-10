@@ -421,16 +421,22 @@ const pinnedJarErrors = manifest.fixtures.filter((f) => f.status === 'jar-error'
  * condition is what previously turned a green ratchet red. Applying it here:
  * 15,492 ms x 2.70 = **~41,800 ms**.
  *
- * 120,000 ms is ~2.9x that ceiling -- wide for the reason that note gives
- * (the contended worker also runs the rest of its shard, so the tail lies
- * above the base), not because a smaller number went red. A hang still
- * surfaces in two minutes, well inside CI's 12-minute job cap.
+ * RE-DERIVED ON THE RUNNER (2026-10-10). The numbers above are a 12-core dev
+ * box at 3,158 renders; the manifest now holds 6,625 and CI runs vitest on a
+ * 4-vCPU `ubuntu-latest` (3 workers, the `.agent-notes/catalog-ci-budget.md`
+ * profile). In-suite on CI this test measured 108,816 ms (run 37856273415)
+ * and 109,175 ms (run 38075923903), and was aborted at 121,557 ms by the old
+ * 120,000 ms budget (run 38046648955) -- so that sample is a LOWER bound,
+ * and the old budget was grazed on every run rather than broken once.
+ * Ceiling: 121,557 ms x the same 2.70x contention step = **~328,200 ms**;
+ * the budget is that, rounded up to the next 10 s. A hang now surfaces at
+ * 5.5 min; CI's 12-minute `test` step cap remains the outer backstop.
  *
  * No PER-FIXTURE budget is needed or wanted. Unlike the sequence ratchet,
  * nothing here reads a whole golden: `readHead` takes the first 4 KB, so the
  * 8.26 MB `sequence/zudize-61-vomi445` golden that forced that budget costs
  * this gate the same as any other fixture. */
-const CORPUS_BUDGET_MS = 120_000;
+const CORPUS_BUDGET_MS = 330_000;
 
 describe('routing conformance — corpus completeness', () => {
   it(
