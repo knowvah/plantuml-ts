@@ -18,8 +18,6 @@ import type {
   FrameGeo,
   NewpageEvent,
   NewpageGeo,
-  NoteEvent,
-  NoteGeo,
   ParticipantGeo,
   SequenceEvent,
   SpaceEvent,
@@ -27,20 +25,13 @@ import type {
   TextRun,
 } from './ast.js';
 import type { FontSpec } from '../../core/measurer.js';
-import { noteShadowGeometry } from './sequence-layout-note-shadow.js';
-import { noteFontSpecOf } from './sequence-layout-shared.js';
+import { handleNoteEvent, noteTileExtent } from './sequence-layout-note.js';
 import { DIVIDER_PADDING, DIVIDER_LABEL_DELTA_X, dividerFontSpecOf, dividerPreferredHeight } from './divider-style.js';
 import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
 import { displayLines } from './text-block-geo.js';
 import type { MessageLabelEnv } from './text-block-geo.js';
 import { handleRefEvent } from './sequence-layout-ref.js';
-import {
-  offsetRun,
-  sequenceAtomContext,
-  sequenceCreoleFont,
-  sequenceCreoleRuns,
-  type SequenceAtomContext,
-} from './sequence-creole.js';
+import { sequenceCreoleFont, sequenceCreoleRuns, type SequenceAtomContext } from './sequence-creole.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
 import { layoutDelay } from './sequence-delay.js';
 import type { MessageLevels } from './sequence-layout-participants.js';
@@ -108,6 +99,11 @@ export interface EventProcessingContext extends MessageLabelEnv {
    *  participant row's next pass -- see `sequence-layout-participants.ts
    *  #MessageLevels`. */
   messageLevels?: MessageLevels;
+  /** The live level of the last message's two ends, as the tile wrappers of
+   *  a note written right after it read it: `getLevelAt(this,
+   *  IGNORE_FUTURE_DEACTIVATE)` (`teoz/CommunicationTileNoteRight.java:105`),
+   *  i.e. before that message's own `--` pops anything. */
+  lastMessageLevels?: ReadonlyMap<string, number>;
 }
 
 /** Running Y cursor plus the y of the most recent message arrow. */
@@ -202,50 +198,6 @@ function dispatchEvent(
   }
 }
 
-function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
-  // `note { FontSize 13 }` (`plantuml.skin:312-316`), NOT the ambient font —
-  // the box and its text must be sized from one measurement.
-  const fontSpec = noteFontSpecOf(ctx.theme);
-  const notePadding = 10;
-  const lines = event.text.split('\n');
-  const lineHeight = ctx.measurer.measure('M', fontSpec).height;
-  // C6: that ONE measurement is the CREOLE block's -- `getTextWidth` reads
-  // `textBlock.calculateDimension` plus the padding (`AbstractTextualComponent
-  // .java:100-108`) over the block `create0` built (`:89-92`), so `<b>bold</b>`
-  // reserves the width of `bold` (jar: `moxope-92-roco972`).
-  const rows = noteBodyRuns(lines, fontSpec, ctx, event.color ?? ctx.theme.colors.noteBackground);
-  const noteWidth = blockWidthOf(rows) + notePadding * 2;
-  // The DRAWN box is `getTextHeight` tall -- the block plus `padding.top` and
-  // `padding.bottom`, both 5 (`ComponentRoseNote:67-70,104-118`).
-  const noteHeight = lines.length * lineHeight + NOTE_PADDING_Y * 2;
-  // And the box is drawn `getPaddingY` BELOW the tile top -- `Rose.paddingY`
-  // = 5, handed to the component at `Rose:115` and applied by
-  // `AbstractComponent#drawU:142-143`. On `metano-36-gevu843` the jar's box is
-  // at y=52 against a tile top of 47.
-  const { shadow, reserve, drawnLess } = noteShadowGeometry(event, ctx.theme);
-  const noteGeo = buildNoteGeo(event, noteWidth + reserve, noteHeight, cursor.y + NOTE_PADDING_Y, ctx.participantMap);
-  // `ComponentRoseNote#drawInternalU:109,115,118` (and `...NoteBox:91,97`,
-  // `...NoteHexagonal:91,97`): the polygon is drawn `(int) getTextWidth` wide,
-  // or `(int) (area - 2 * paddingX)` when the area is wider than preferred.
-  noteGeo.width = Math.trunc(noteGeo.width - drawnLess);
-  if (shadow > 0) noteGeo.shadow = shadow;
-  const [dx, dy] = [noteGeo.x + notePadding, noteGeo.y + NOTE_PADDING_Y];
-  noteGeo.textRuns = rows.map((r) => offsetRun(r, dx, dy));
-  ctx.eventGeos.push(noteGeo);
-  // `NoteTile#getPreferredHeight:167-171` is the component's height and
-  // nothing else -- no spacing either side -- and that is `getTextHeight +
-  // 2 * getPaddingY + deltaShadow` (`ComponentRoseNote:88-91`) = `blockH + 20`
-  // plus the reserve (`sequence-layout-note-shadow.ts`).
-  cursor.y += noteHeight + NOTE_PADDING_Y * 2 + reserve;
-}
-
-/** `ComponentRoseNote`'s own vertical padding, `topRightBottomLeft(5, 15, 5,
- *  15)` (`:67-70`) — and, separately, `Rose.paddingY` (`Rose.java:66`, passed
- *  at `:115`), which is the same 5 and is what offsets the box below its tile
- *  top. The HORIZONTAL padding is 15 upstream against this port's 10; that is
- *  an x term and `findings/vertical-terms.md` §4 does not claim it. */
-const NOTE_PADDING_Y = 5;
-
 function handleActivateEvent(event: ActivationEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
   // Use the last message arrow y when available so the bar top aligns
   // with its triggering arrow, not with the post-arrow spacing position.
@@ -326,15 +278,34 @@ const FRAME_MARGIN_X = 16;
 /** A group frame's x and width -- participant column bounds only, so
  *  `handleFrameEvent` resolves them BEFORE the branch walk (D2). A `ref` is
  *  a different tile (`sequence-layout-ref.ts`). */
-function computeFrameBody(ctx: EventProcessingContext): { x: number; width: number } {
+function computeFrameBody(event: FrameEvent, ctx: EventProcessingContext): { x: number; width: number } {
   const { minCx, maxCx } = participantCenterXBounds(ctx.participantMap);
+  // A note inside the group is a child tile like any other: `min2.add(tile
+  // .getDrawnMinX().addFixed(-MARGINX))` and its max (`GroupingTile.java
+  // :204-207`), so one that reaches past the lifelines widens the frame.
+  const notes = groupNoteExtents(event, ctx);
+  const lo = Math.min(minCx, ...notes.map((n) => n.minX + FRAME_MARGIN_X));
+  const hi = Math.max(maxCx, ...notes.map((n) => n.maxX - FRAME_MARGIN_X));
   // `GroupingTile.MARGINX = 16` (`:89`), applied as
   // `tile.getMinX().addFixed(-MARGINX)` and `m.addFixed(MARGINX)` (`:204,207`).
   // Jar-verified on `bovugo-63-lazo401`: its `opt` frame is `x="13.469"`
   // against a leftmost lifeline centre of 29.469 -- 16, not the 20 this port
   // used, which was uncited and made the frame overhang the participant row
   // far enough to shift the whole document's origin.
-  return { x: minCx - FRAME_MARGIN_X, width: maxCx - minCx + 2 * FRAME_MARGIN_X };
+  return { x: lo - FRAME_MARGIN_X, width: hi - lo + 2 * FRAME_MARGIN_X };
+}
+
+/** The extent of every note in `event`'s branches, nested groups included. */
+function groupNoteExtents(event: FrameEvent, ctx: EventProcessingContext): { minX: number; maxX: number }[] {
+  const notes: { minX: number; maxX: number }[] = [];
+  const visit = (events: readonly SequenceEvent[]): void => {
+    for (const e of events) {
+      if (e.kind === 'note') notes.push(noteTileExtent(e, ctx));
+      else if (e.kind === 'frame') for (const branch of e.branches) visit(branch);
+    }
+  };
+  for (const branch of event.branches) visit(branch);
+  return notes;
 }
 
 /** A creole BLOCK's width -- the max over its stripes that
@@ -342,7 +313,7 @@ function computeFrameBody(ctx: EventProcessingContext): { x: number; width: numb
  *  .java:60-73`) and `AbstractTextualComponent#getTextWidth` pads (`:100-108`).
  *  Each run carries its line's offset in `x`, so one max IS that maximum; the
  *  `0` seed is the empty block. Cf. {@link creoleLineWidth}, for ONE line. */
-function blockWidthOf(runs: readonly TextRun[]): number {
+export function blockWidthOf(runs: readonly TextRun[]): number {
   return Math.max(0, ...runs.map((r) => r.x + r.textWidth));
 }
 
@@ -550,7 +521,7 @@ function handleFrameEvent(event: FrameEvent, cursor: EventCursor, ctx: EventProc
   // A `ref` is a `ReferenceTile`, not a `GroupingTile` (`sequence-layout-ref.ts`).
   if (event.frameType === 'ref') return handleRefEvent(event, cursor, ctx);
   const frameStartY = cursor.y;
-  const { x, width } = computeFrameBody(ctx);
+  const { x, width } = computeFrameBody(event, ctx);
   const tab = computeHeaderTab(event, ctx);
   // `final double h = dim1.getHeight() + MARGINY_MAGIC / 2 + EXTERNAL_MARGINY;`
   // (`GroupingTile.java:156`) -- the body starts below the frame's top margin
@@ -769,106 +740,6 @@ function participantCenterXBounds(participantMap: Map<string, ParticipantGeo>): 
   const centerXs = [...participantMap.values()].map((g) => g.centerX);
   if (centerXs.length === 0) return { minCx: 0, maxCx: 0 };
   return { minCx: Math.min(...centerXs), maxCx: Math.max(...centerXs) };
-}
-
-/** Resolved x offset and (possibly widened) width for a note. */
-interface NotePosition {
-  noteX: number;
-  finalNoteWidth: number;
-}
-
-/**
- * Resolve a note's x offset and width based on its position keyword
- * ('left' / 'right' / 'over') and referenced participants.
- */
-function computeNotePosition(
-  event: NoteEvent,
-  noteWidth: number,
-  participantMap: Map<string, ParticipantGeo>,
-): NotePosition {
-  const notePadding = 10;
-
-  if (event.position === 'left') {
-    // Safe: parser guarantees at least one participant for 'left' notes
-    const noteX = centerXOf(participantMap, event.participants[0]!) - noteWidth - notePadding;
-    return { noteX, finalNoteWidth: noteWidth };
-  }
-  if (event.position === 'right') {
-    // Safe: parser guarantees at least one participant for 'right' notes
-    const noteX = centerXOf(participantMap, event.participants[0]!) + notePadding;
-    return { noteX, finalNoteWidth: noteWidth };
-  }
-  return computeOverNotePosition(event, noteWidth, participantMap);
-}
-
-/** Resolve position/width for an 'over' note (one or many participants). */
-function computeOverNotePosition(
-  event: NoteEvent,
-  noteWidth: number,
-  participantMap: Map<string, ParticipantGeo>,
-): NotePosition {
-  const notePadding = 10;
-
-  if (event.participants.length === 1) {
-    // Safe: length === 1 means [0] is defined
-    const noteX = centerXOf(participantMap, event.participants[0]!) - noteWidth / 2;
-    return { noteX, finalNoteWidth: noteWidth };
-  }
-
-  // Span between two (or more) participants
-  const centers = event.participants.map((id) => centerXOf(participantMap, id)).filter((cx) => cx > 0);
-  const minCx = Math.min(...centers);
-  const maxCx = Math.max(...centers);
-  return { noteX: minCx - notePadding, finalNoteWidth: maxCx - minCx + notePadding * 2 };
-}
-
-/**
- * Build a NoteGeo from a NoteEvent given pre-computed note dimensions.
- * Extracted to isolate the position-branch logic and simplify processEvents.
- */
-function buildNoteGeo(
-  event: NoteEvent,
-  noteWidth: number,
-  noteHeight: number,
-  currentY: number,
-  participantMap: Map<string, ParticipantGeo>,
-): NoteGeo {
-  const { noteX, finalNoteWidth } = computeNotePosition(event, noteWidth, participantMap);
-
-  return {
-    kind: 'note',
-    x: noteX,
-    y: currentY,
-    width: finalNoteWidth,
-    height: noteHeight,
-    text: event.text,
-    // Filled in by the caller, which alone knows the padding it sized the box
-    // with; see `noteBodyRuns`.
-    textRuns: [],
-    ...(event.color !== undefined ? { color: event.color } : {}),
-    ...(event.shape !== undefined ? { shape: event.shape } : {}),
-  };
-}
-
-/**
- * A note body's lines, as placed and measured runs — one run per creole atom
- * (C6), RELATIVE to the block's own top-left.
- *
- * `ComponentRoseNoteBox#drawInternalU` draws the block at
- * `(getOldPaddingX1() + diffX / 2, getOldPaddingY())` (`:105`) — LEFT-aligned
- * inside the box. `diffX` is the slack when the drawn area is wider than the
- * component's preferred width; this port sizes the box to the text, so it is 0.
- * Relative because the box's own x derives FROM this block's width
- * (`handleNoteEvent`). `back` is the note fill the component applies before
- * drawing the text (`ComponentRoseNote.java:121,136`), a sprite's tint start. */
-function noteBodyRuns(lines: readonly string[], spec: FontSpec, ctx: EventProcessingContext, back: string) {
-  const font = sequenceCreoleFont(spec);
-  const lineHeight = ctx.measurer.measure('M', spec).height;
-  const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
-  const atoms = sequenceAtomContext(ctx.sprites, ctx.theme.colors.text, back);
-  return lines.flatMap((l, i) =>
-    sequenceCreoleRuns(l, font, { leftX: 0, baselineY: ascent + i * lineHeight }, ctx.measurer, atoms),
-  );
 }
 
 /**

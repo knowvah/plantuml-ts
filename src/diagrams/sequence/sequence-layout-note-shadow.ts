@@ -22,12 +22,10 @@
 import type { Theme } from '../../core/theme.js';
 import type { NoteEvent } from './ast.js';
 
-/** A note's shadow, the width/height it reserves, and how much of that
- *  reserve the DRAWN polygon leaves out. */
+/** A note's shadow and the width/height it reserves. */
 export interface NoteShadowGeometry {
   readonly shadow: number;
   readonly reserve: number;
-  readonly drawnLess: number;
 }
 
 /** See the module header. */
@@ -35,8 +33,5 @@ export function noteShadowGeometry(event: NoteEvent, theme: Theme): NoteShadowGe
   const style = event.style ?? 'note';
   const shadow = theme.colors.graph.sequenceShadowing?.note(style, event.stereotype) ?? 0;
   const reserve = style === 'note' ? shadow : 0;
-  // A note over several participants is drawn across their span, which the
-  // reserve never reaches; every other note's area IS its preferred width.
-  const singleAnchored = event.position !== 'over' || event.participants.length === 1;
-  return { shadow, reserve, drawnLess: singleAnchored ? reserve : 0 };
+  return { shadow, reserve };
 }

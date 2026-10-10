@@ -189,6 +189,8 @@ function scaleNote(n: NoteGeo, k: number): NoteGeo {
     y: n.y * k,
     width: n.width * k,
     height: n.height * k,
+    minX: n.minX * k,
+    maxX: n.maxX * k,
     textRuns: n.textRuns.map((r) => scaleRun(r, k)),
   };
 }

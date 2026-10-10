@@ -45,6 +45,9 @@ export function handleMessageEvent(
 
   const resolved = withCreateEnd(event, resolveMessageEndpoints(event, fromGeo, toGeo, ctx), toGeo);
   const endpoints = liveOffsetEndpoints(resolved, event, ctx, bound);
+  ctx.lastMessageLevels = new Map(
+    [event.from, event.to].map((id) => [id, liveLevelAt(id, event, ctx, bound)] as const),
+  );
   // The ARROW font (13), not the ambient 14. `messageLabelBlock` has always
   // DRAWN at 13 (`text-block-geo.ts:357-363`); reserving at 14 was the y half
   // of the sizer/renderer split `planning/sizer-renderer-parity.md` exists to

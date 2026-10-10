@@ -806,6 +806,8 @@ describe('renderSequence — notes', () => {
       width: 120,
       height: 40,
       text: 'remember this',
+      minX: 45,
+      maxX: 175,
       textRuns: noteRunsFor({ x: 50, y: 80, text: 'remember this' }),
     };
     const geo = makeGeo({ events: [note] });
@@ -822,6 +824,8 @@ describe('renderSequence — notes', () => {
       width: 120,
       height: 40,
       text: 'test note',
+      minX: 45,
+      maxX: 175,
       textRuns: noteRunsFor({ x: 50, y: 80, text: 'test note' }),
     };
     const geo = makeGeo({ events: [note] });
@@ -837,6 +841,8 @@ describe('renderSequence — notes', () => {
       width: 120,
       height: 60,
       text: 'line one\nline two',
+      minX: 45,
+      maxX: 175,
       textRuns: noteRunsFor({ x: 50, y: 80, text: 'line one\nline two' }),
     };
     const geo = makeGeo({ events: [note] });
@@ -958,6 +964,8 @@ describe('renderSequence — background pass (T6)', () => {
           width: 80,
           height: 30,
           text: 'hi',
+          minX: 35,
+          maxX: 125,
           textRuns: noteRunsFor({ x: 40, y: 120, text: 'hi' }),
         },
         {
