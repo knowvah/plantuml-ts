@@ -27,3 +27,10 @@ re-capture tool missed multi-page `_00N.svg` — orchestrator fixes and re-runs)
 | T2b-ca | `swimlaneWrapTitleWidth` theme field + activity use (sesodi-22, tirizu-79); `activityDiagram { MaximumWidth }` selector (cezeje-11, febuci-08, kakitu-70); wrap-switch `getYdelta1a` (FtileSwitchWithManyLinks.java:413-423, the it.fails test); assemble-svg.ts float formatting | typescript-pro (opus) | `src/core/**` except dispatcher.ts, measurer*, stereotype-decoration.ts; `src/diagrams/activity/**`; `tests/unit/core/**`, `tests/unit/*.test.ts`, `tests/diagrams/activity/**`, `tests/unit/activity/**` | [ ] |
 | T2b-seq | mezaxa: per-style note padding/position (NoteTile.java:289-296, ComponentRoseNote.java:70-72, NoteBox/Hexagonal :58, total-width note term); draw-side measurer injection through the plugin render seam | typescript-pro (sonnet) | `src/diagrams/sequence/**`, `src/core/dispatcher.ts`, `tests/unit/sequence/**` | [ ] |
 | T2b-obj | lisepi: object `<style> object/map/json`; Stereotype inner space (Stereotype.java:122-133) | typescript-pro (sonnet) | `src/diagrams/class/**`, `src/diagrams/object/**`, `src/core/stereotype-decoration.ts`, `tests/unit/class/**`, `tests/unit/object/**` | [ ] |
+
+# Batch 2c
+
+| ID | Scope | Agent | Writes (exclusive) | Done |
+|---|---|---|---|---|
+| T2c-scale | kakitu-70: activity body rounded before `scale` (assemble-svg-activity.ts#scaleActivityBody) — emit once at jar precision | typescript-pro (opus) | `src/core/**` except `src/core/command/CommandCreateJson.ts`, measurer*; `src/diagrams/activity/**`; `tests/unit/core/**`, `tests/diagrams/activity/**`, `tests/unit/activity/**` | [ ] |
+| T2c-stereo | json STEREO trim (CommandCreateJson.ts:63); description stereotype padding; class gender/hide exact match | typescript-pro (sonnet) | `src/core/command/CommandCreateJson.ts`, `src/diagrams/description/**`, `src/diagrams/class/**`, `tests/unit/description/**`, `tests/unit/class/**`, `tests/unit/json/**` | [ ] |
