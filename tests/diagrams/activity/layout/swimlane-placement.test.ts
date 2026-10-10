@@ -415,11 +415,13 @@ describe('placeSwimlanes — edge routing', () => {
       theme: themeWith(bounder),
     });
     const pts = result.edges[0]!.points;
+    // `result.vertical.dy`: the title band's translate (`Swimlanes.java:342-343`).
+    const dy = result.vertical.dy;
     expect(pts).toHaveLength(4);
-    expect(pts[0]).toEqual({ x: pts[0]!.x, y: 32 });
-    expect(pts[1]).toEqual({ x: pts[0]!.x, y: 36 });
-    expect(pts[2]).toEqual({ x: pts[3]!.x, y: 36 });
-    expect(pts[3]).toEqual({ x: pts[3]!.x, y: 60 });
+    expect(pts[0]).toEqual({ x: pts[0]!.x, y: 32 + dy });
+    expect(pts[1]).toEqual({ x: pts[0]!.x, y: 36 + dy });
+    expect(pts[2]).toEqual({ x: pts[3]!.x, y: 36 + dy });
+    expect(pts[3]).toEqual({ x: pts[3]!.x, y: 60 + dy });
   });
 
   /**
@@ -448,11 +450,13 @@ describe('placeSwimlanes — edge routing', () => {
       theme: themeWith(bounder),
     });
     const pts = result.edges[0]!.points;
+    // `result.vertical.dy`: the title band's translate (`Swimlanes.java:342-343`).
+    const dy = result.vertical.dy;
     expect(pts).toHaveLength(4);
-    expect(pts[0]).toEqual({ x: pts[0]!.x, y: 32 });
-    expect(pts[1]).toEqual({ x: pts[0]!.x, y: 66 });
-    expect(pts[2]).toEqual({ x: pts[3]!.x, y: 66 });
-    expect(pts[3]).toEqual({ x: pts[3]!.x, y: 80 });
+    expect(pts[0]).toEqual({ x: pts[0]!.x, y: 32 + dy });
+    expect(pts[1]).toEqual({ x: pts[0]!.x, y: 66 + dy });
+    expect(pts[2]).toEqual({ x: pts[3]!.x, y: 66 + dy });
+    expect(pts[3]).toEqual({ x: pts[3]!.x, y: 80 + dy });
   });
 });
 
@@ -503,16 +507,18 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
     // (lane translates are X-only, D2), so exact regardless of lane
     // arithmetic; X is asserted structurally (x1's vertical run, xx's
     // vertical run), matching this file's 'parallel-in'/'parallel-out' style.
-    expect(pts[0]!.y).toBe(32);
-    expect(pts[1]!.y).toBe(44);
-    expect(pts[2]!.y).toBe(44);
-    expect(pts[3]!.y).toBe(65);
-    expect(pts[4]!.y).toBe(65);
+    // `result.vertical.dy`: the title band's translate (`Swimlanes.java:342-343`).
+    const dy = result.vertical.dy;
+    expect(pts[0]!.y).toBe(32 + dy);
+    expect(pts[1]!.y).toBe(44 + dy);
+    expect(pts[2]!.y).toBe(44 + dy);
+    expect(pts[3]!.y).toBe(65 + dy);
+    expect(pts[4]!.y).toBe(65 + dy);
     expect(pts[0]!.x).toBe(pts[1]!.x);
     expect(pts[2]!.x).toBe(pts[3]!.x);
     // The mid-arrow anchor sits on the xx column, at (y1+y2)/2 (:307), and
     // `emphasize` is dropped -- no `emphasizeDirection` in `drawTranslate`.
-    expect(result.edges[0]!.midArrowAt).toEqual({ x: pts[2]!.x, y: 48.5, dir: 'up' });
+    expect(result.edges[0]!.midArrowAt).toEqual({ x: pts[2]!.x, y: 48.5 + dy, dir: 'up' });
     expect(result.edges[0]!.emphasize).toBeUndefined();
   });
 
@@ -664,8 +670,10 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
     // array. Y is delta-independent (D2) for the while-back stub; the
     // simple2 shape's own `y1 = p1.y + diamond2.height/2` is exact here too
     // (10 + 10/2 = 15, an X-independent term).
-    expect(result.edges[0]!.points[0]!.y).toBe(32);
-    expect(result.edges[1]!.points[0]!.y).toBe(15);
+    // `result.vertical.dy`: the title band's translate (`Swimlanes.java:342-343`).
+    const dy = result.vertical.dy;
+    expect(result.edges[0]!.points[0]!.y).toBe(32 + dy);
+    expect(result.edges[1]!.points[0]!.y).toBe(15 + dy);
     // T1b: `edgeMeta` stays parallel to `edges`, one entry per routed edge,
     // in the SAME order as the input `edgeMeta` array.
     expect(result.edgeMeta).toHaveLength(2);
@@ -710,7 +718,12 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
     expect(withLoop.reservations).toHaveLength(withoutLoop.reservations.length + 1);
     expect(withLoop.reservations.slice(0, withoutLoop.reservations.length)).toEqual(withoutLoop.reservations);
     const x1 = withLoop.edges[0]!.points[0]!.x;
-    expect(withLoop.reservations[withoutLoop.reservations.length]).toEqual({ x: x1, y: 44, width: 5, height: 12 });
+    expect(withLoop.reservations[withoutLoop.reservations.length]).toEqual({
+      x: x1,
+      y: 44 + withLoop.vertical.dy,
+      width: 5,
+      height: 12,
+    });
   });
 });
 
@@ -810,34 +823,42 @@ describe('placeSwimlanes — edgeMeta parallel to edges, one-edge cases end to e
 });
 
 // ---------------------------------------------------------------------------
-// measureSwimlaneTitlesHeight — D2, floored at 10 by AtomText (T6)
+// measureSwimlaneTitlesHeight — D2, the title block's height (T6, isw-T2b-ca)
 // ---------------------------------------------------------------------------
 
 describe('measureSwimlaneTitlesHeight', () => {
-  // `theme` here uses the default `SwimlaneTitleFontSize` (18,
-  // `activity-style-defaults.ts#swimlaneFontSize`); each fixture below
-  // overrides it via a bounder that reports that resolved size as height
-  // (mirrors `StringBounderFromWidthTable.java:71`: height === size).
-  function bounderAt(height: number) {
-    return { getDimension: () => ({ width: 0, height }) };
+  // A fake bounder reporting `height` for every run (mirrors
+  // `StringBounderFromWidthTable.java:71`: height === size) and 10 per char.
+  function themeAt(height: number, extra: Partial<Theme> = {}): Theme {
+    return withActivityMeasurer(
+      { ...theme, ...extra },
+      { measure: (text: string) => ({ width: 10 * text.length, height }), getDescent: () => 0 },
+    );
   }
+  const lanes = (...names: string[]) => names.map((name) => ({ name, x: 0, width: 100, actualWidth: 100 }));
 
   it('is unaffected when every lane title is already >= 10 (default 18)', () => {
-    expect(measureSwimlaneTitlesHeight(['A', 'B'], bounderAt(18), theme)).toBe(18);
+    expect(measureSwimlaneTitlesHeight(lanes('A', 'B'), themeAt(18))).toBe(18);
   });
 
-  it('floors a small title height at 10 (sikino-19-vuca111: FontSize 8 -> 10)', () => {
-    expect(measureSwimlaneTitlesHeight(['lane1', 'lane2'], bounderAt(8), theme)).toBe(10);
+  it('floors a small title height at 10 inside AtomText (sikino-19-vuca111: FontSize 8 -> 10)', () => {
+    expect(measureSwimlaneTitlesHeight(lanes('lane1', 'lane2'), themeAt(8))).toBe(10);
   });
 
   it('is unaffected by a large title height (cemipu-87-dinu624: FontSize 30 -> 30)', () => {
-    expect(measureSwimlaneTitlesHeight(['swimlane1', 'swimlane2'], bounderAt(30), theme)).toBe(30);
+    expect(measureSwimlaneTitlesHeight(lanes('swimlane1', 'swimlane2'), themeAt(30))).toBe(30);
   });
 
-  it('takes the MAX across lanes, not the last', () => {
-    let call = 0;
-    const bounder = { getDimension: () => ({ width: 0, height: ++call === 1 ? 8 : 22 }) };
-    expect(measureSwimlaneTitlesHeight(['short', 'tall'], bounder, theme)).toBe(22);
+  it('measures a `|name|LABEL` display, not the name (Swimlane.java:74-80)', () => {
+    const two = [{ name: 'A', display: 'one\ntwo', x: 0, width: 100, actualWidth: 100 }];
+    expect(measureSwimlaneTitlesHeight([...two, ...lanes('B')], themeAt(18))).toBe(36);
+  });
+
+  it('wraps at (int) getActualWidth() under swimlaneWrapTitleWidth auto (Swimlanes.java:289-291)', () => {
+    const lane = [{ name: 'aaaa bbbb', x: 0, width: 999, actualWidth: 45.9 }];
+    expect(measureSwimlaneTitlesHeight(lane, themeAt(18, { swimlaneWrapTitleWidth: 'auto' }))).toBe(36);
+    expect(measureSwimlaneTitlesHeight(lane, themeAt(18, { swimlaneWrapTitleWidth: '200' }))).toBe(18);
+    expect(measureSwimlaneTitlesHeight(lane, themeAt(18))).toBe(18);
   });
 });
 
@@ -846,18 +867,23 @@ describe('measureSwimlaneTitlesHeight', () => {
 // ---------------------------------------------------------------------------
 
 describe('resolveSwimlaneVertical', () => {
-  const bounder = { getDimension: () => ({ width: 0, height: 18 }) };
+  const t18 = themeWith({ getDimension: () => ({ width: 0, height: 18 }) });
+  const lane = (name: string) => ({ name, x: 0, width: 10, actualWidth: 10 });
 
   it('reserves no vertical space for a single lane', () => {
-    expect(resolveSwimlaneVertical(['A'], 12, bounder, theme)).toEqual({ contentY: 12, titlesHeight: 0 });
+    expect(resolveSwimlaneVertical([lane('A')], 12, t18)).toEqual({ contentY: 12, titlesHeight: 0, dy: 0 });
   });
 
   it('reserves no vertical space for zero lanes', () => {
-    expect(resolveSwimlaneVertical([], 12, bounder, theme)).toEqual({ contentY: 12, titlesHeight: 0 });
+    expect(resolveSwimlaneVertical([], 12, t18)).toEqual({ contentY: 12, titlesHeight: 0, dy: 0 });
   });
 
   it('pushes content down by titlesHeight + 5 for two or more lanes', () => {
-    expect(resolveSwimlaneVertical(['A', 'B'], 12, bounder, theme)).toEqual({ contentY: 35, titlesHeight: 18 });
+    expect(resolveSwimlaneVertical([lane('A'), lane('B')], 12, t18)).toEqual({
+      contentY: 35,
+      titlesHeight: 18,
+      dy: 23,
+    });
   });
 });
 
@@ -893,7 +919,7 @@ describe('computeSwimlaneChrome', () => {
 // same lane pass as the note (`FtileWithNoteOpale#drawU`), so the lane
 // translate moves it with the note.
 describe('placeSwimlanes — a note spikeTip shifts with its lane', () => {
-  it('adds the lane delta to spikeTip.x, leaving y alone', () => {
+  it('adds the lane delta to spikeTip.x; y moves only with the title band', () => {
     const a = node('a', 12, 40, 'A');
     const note: ActivityNodeGeo = { ...node('n', 12, 60, 'B'), kind: 'note', spikeTip: { x: 5, y: 9 } };
     const result = placeSwimlanes({
@@ -906,7 +932,7 @@ describe('placeSwimlanes — a note spikeTip shifts with its lane', () => {
       theme: themeWith({ getDimension: () => ({ width: 0, height: 0 }) }),
     });
     const placed = result.nodes.find((n) => n.id === 'n')!;
-    expect(placed.spikeTip).toEqual({ x: 5 + (placed.x - note.x), y: 9 });
+    expect(placed.spikeTip).toEqual({ x: 5 + (placed.x - note.x), y: 9 + result.vertical.dy });
     expect(placed.x - note.x).toBeGreaterThan(0);
   });
 });

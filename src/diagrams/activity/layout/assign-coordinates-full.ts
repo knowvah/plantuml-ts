@@ -27,7 +27,7 @@ import type { Theme } from '../../../core/theme.js';
 import type { Reservation } from './hexagon-reservations.js';
 import { walkTile } from './tile-coordinates.js';
 import type { Out } from './tile-coordinates.js';
-import { placeSwimlanes, resolveSwimlaneVertical, computeSwimlaneChrome } from './swimlane-placement.js';
+import { placeSwimlanes, computeSwimlaneChrome } from './swimlane-placement.js';
 import { SWIMLANE_BAND_INSET_X } from './swimlane-chrome.js';
 import type { EdgeMeta, PlacementResult } from './swimlane-placement.js';
 import { compressGeometry } from './compress/compress-geometry.js';
@@ -42,8 +42,8 @@ import { mergeSnakes } from './snake-merge.js';
  * real lane origins: the band's right edge (`lanes[0].x + Σwidth - 1`,
  * `swimlane-placement.ts#computeSwimlaneChrome`) is always `lanesRight -
  * 1`, so `lanesRight` alone bounds every drawn X extent. Y is untouched
- * here -- the title-band vertical reservation is folded into `baseY`
- * BEFORE this runs (see `assignCoordinatesFull`'s `contentY`).
+ * here -- `baseY` is the content's top AFTER the title-band translate
+ * (see `assignCoordinatesFull`'s `contentY`).
  */
 function computeBounds(
   root: Tile,
@@ -285,11 +285,14 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
   const { root, ast, baseX, baseY, bounder, theme, compress = true } = input;
   const out = buildOut(theme);
   const { nodes, edges, edgeMeta, reservations } = out;
-  const { contentY, titlesHeight } = resolveSwimlaneVertical(ast.swimlanes, baseY, bounder, theme);
-  walkTile(root, baseX, contentY, { kindHint: null, lane: undefined }, out);
+  walkTile(root, baseX, baseY, { kindHint: null, lane: undefined }, out);
 
   const lanes = { laneNames: ast.swimlanes, laneDisplays: ast.swimlaneDisplays, walkReservations: reservations };
+  // The content is walked at `baseY`; `placeSwimlanes` applies the title
+  // band's translate once the lane widths are known (`Swimlanes.java
+  // :304-307,342-343`).
   const placedRaw = placeSwimlanes({ nodes, edges, edgeMeta, ...lanes, baseX, baseY, theme });
+  const { contentY, titlesHeight } = placedRaw.vertical;
   const placed = mergeBeforeCompress(withLaneBackgrounds(placedRaw, ast.swimlaneColors), ast.swimlanes);
   const bounds = computeBounds(root, baseX, contentY, placed);
   // `drawTitlesBackground`'s `UTranslate.dx(5)` from the block origin, which

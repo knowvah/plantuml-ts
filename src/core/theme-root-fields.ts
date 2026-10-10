@@ -73,6 +73,16 @@ export interface ThemeRootFields {
    */
   swimlaneWidth?: number;
   /**
+   * `skinparam swimlaneWrapTitleWidth <value>`, kept raw --
+   * `SkinParam#swimlaneWrapTitleWidth()` (`skin/SkinParam.java:980-984`)
+   * returns `new LineBreakStrategy(getValue("swimlanewraptitlewidth"))`, so
+   * the reader decides: `"auto"` wraps at the lane's `(int)
+   * getActualWidth()`, digits at that width, anything else (or absent) not
+   * at all (`klimt/LineBreakStrategy.java`). Read only by
+   * `Swimlanes#getTitle` (`activitydiagram3/ftile/Swimlanes.java:285-302`).
+   */
+  swimlaneWrapTitleWidth?: string;
+  /**
    * `SkinParam#sprites` (`skin/SkinParam.java:799-817`): the per-diagram
    * `sprite` map every creole `<$name>` resolves through
    * (`StripeSimple.java:229`, `skinParam.getSprite(src)`). Upstream the

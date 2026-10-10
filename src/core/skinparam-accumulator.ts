@@ -39,6 +39,9 @@ export interface SkinparamAccumulator {
   /** add4-T1b: `skinparam swimlaneWidth` — see
    *  `theme-root-fields.ts#swimlaneWidth`'s own doc comment. */
   swimlaneWidth: number | undefined;
+  /** isw-T2b-ca: raw `skinparam swimlaneWrapTitleWidth` -- see
+   *  `theme-root-fields.ts#swimlaneWrapTitleWidth`'s own doc comment. */
+  swimlaneWrapTitleWidth: string | undefined;
   linetype: 'ortho' | 'polyline' | undefined;
   nodeSep: number | undefined;
   rankSep: number | undefined;
@@ -289,6 +292,7 @@ const SCALAR_FIELD_NAMES = [
   'defaultFontSize',
   'padding',
   'swimlaneWidth',
+  'swimlaneWrapTitleWidth',
   'linetype',
   'nodeSep',
   'rankSep',

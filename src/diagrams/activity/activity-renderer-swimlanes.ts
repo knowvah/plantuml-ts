@@ -140,7 +140,7 @@ export function renderSwimlaneTitles(geo: ActivityGeometry, theme: Theme): strin
     // skinParam, wrap)` -- the display's default FULL creole Sheet, where a
     // `[[url label]]` is a real `<a>`-wrapped run in the swimlane style's
     // hyperlink colour (SLURL, add4-T3gates).
-    const { tb, fc } = swimlaneTitleBlock(laneTitleSource(lane), theme);
+    const { tb, fc } = swimlaneTitleBlock(laneTitleSource(lane), theme, lane.actualWidth ?? lane.width);
     const bounder = klimtStringBounder(activityMeasurer(theme), fc);
     // `UGraphicCompressOnXorY.java:100-112` (CenteredText): `pos =
     // (realSpaceWidth - textWidth) / 2` past the lane's content left.

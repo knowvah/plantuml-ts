@@ -1,0 +1,17 @@
+@startuml
+skinparam swimlaneWidth 90
+skinparam swimlaneWrapTitleWidth AUTO
+|a rather long swimlane title that wraps|
+start
+:one;
+|b| Display with two words here and more
+:a much wider action label here;
+fork
+:x;
+fork again
+:y;
+end fork
+|c|
+:three;
+stop
+@enduml

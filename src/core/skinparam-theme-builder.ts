@@ -47,6 +47,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['defaultFontSize', (acc) => acc.defaultFontSize],
   ['padding', (acc) => acc.padding],
   ['swimlaneWidth', (acc) => acc.swimlaneWidth], // add4-T1b
+  ['swimlaneWrapTitleWidth', (acc) => acc.swimlaneWrapTitleWidth], // isw-T2b-ca
   ['linetype', (acc) => acc.linetype],
   ['nodeSep', (acc) => acc.nodeSep],
   ['rankSep', (acc) => acc.rankSep],

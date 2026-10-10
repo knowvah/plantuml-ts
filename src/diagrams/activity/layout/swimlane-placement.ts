@@ -125,6 +125,9 @@ export interface PlacementResult {
    * Internal to `layout/`; not part of the public `ActivityGeometry`.
    */
   reservations: Reservation[];
+  /** The title band's height and the content's `dy` (`swimlane-vertical.ts`),
+   *  already applied to `nodes`/`edges` and the content reservations. */
+  vertical: SwimlaneVertical;
 }
 
 /**
@@ -149,6 +152,8 @@ export const TITLE_ASCENT_FRACTION = 1 - 1 / 4.5;
 // untouched.
 export { measureSwimlaneTitlesHeight, resolveSwimlaneVertical } from './swimlane-vertical.js';
 export type { SwimlaneVertical } from './swimlane-vertical.js';
+import { resolveSwimlaneVertical, translateContentY } from './swimlane-vertical.js';
+import type { SwimlaneVertical } from './swimlane-vertical.js';
 
 // `SwimlaneChrome`/`computeSwimlaneChrome` moved to `swimlane-chrome.ts`
 // (add4-T1g, this file's own 500-line hook); re-exported so existing
@@ -403,15 +408,20 @@ function measureLanes(input: MeasureLanesInput): {
   items.push(...laneReservationItems(input.walkReservations ?? []));
   const extents = measureLaneExtents(items, sameLaneEdges(edges, edgeMeta), laneNames);
 
-  const titleWidths = new Map<string, number>();
-  for (const name of laneNames) titleWidths.set(name, swimlaneTitleWidth(laneDisplays?.[name] ?? name, theme));
-
   // `skinparam swimlaneWidth` (`Swimlanes.java:399`); absent reads `0`,
   // not the `"same"` sentinel (`SkinParam.java:1121-1130`).
   const contentWidths = [...extents.values()].map((e) => e.maxX - e.minX);
   const min = resolveSwimlaneMinWidth(contentWidths, theme.swimlaneWidth ?? 0);
 
-  const specialTitleWidth = swimlaneTitleWidth(SPECIAL_SWIMLANE_DISPLAY, theme);
+  // Titles are measured after every lane's `setWidth` (`Swimlanes.java
+  // :407-411`): an `auto` title wrap reads that `getActualWidth()`.
+  const titleWidths = new Map<string, number>();
+  for (const [name, e] of extents) {
+    const actualWidth = Math.max(min, e.maxX - e.minX);
+    titleWidths.set(name, swimlaneTitleWidth(laneDisplays?.[name] ?? name, theme, actualWidth));
+  }
+  // The special lane's `MinMax.getEmpty(true)` is 0 wide (`:119-120`).
+  const specialTitleWidth = swimlaneTitleWidth(SPECIAL_SWIMLANE_DISPLAY, theme, Math.max(min, 0));
   return { widths: computeLaneWidths(extents, titleWidths, min), min, specialTitleWidth };
 }
 
@@ -455,7 +465,8 @@ export function placeSwimlanes(input: PlacementInput): PlacementResult {
   const walkReservations = input.walkReservations ?? [];
   if (laneNames.length <= 1) {
     const reservations = [...walkReservations];
-    return { nodes: [...nodes], edges: [...edges], edgeMeta: [...edgeMeta], swimlanes: [], reservations };
+    const vertical = resolveSwimlaneVertical([], baseY, input.theme);
+    return { nodes: [...nodes], edges: [...edges], edgeMeta: [...edgeMeta], swimlanes: [], reservations, vertical };
   }
 
   const { widths, min, specialTitleWidth } = measureLanes(input);
@@ -466,16 +477,19 @@ export function placeSwimlanes(input: PlacementInput): PlacementResult {
   const dividerGeo: Reservation[] = dividerReservations.map((d) => ({ x: d.x, y: baseY, width: d.width, height: 1 }));
   // D3/D4: a routed edge may expand to >1 edge/reservation -- flat-map both.
   const routed = edges.map((e, i) => routeEdge(e, edgeMeta[i]!, deltas, laneNames));
-
-  return {
-    nodes: nodes.flatMap((n) => placeNode(n, laneNames, deltas)),
-    edges: routed.flatMap((r) => r.edges),
-    edgeMeta: routed.flatMap((r, i) => r.edgeMeta ?? repeatEdgeMeta(edgeMeta[i]!, r.edges.length)),
-    swimlanes,
-    reservations: [
-      ...shiftLaneReservations(walkReservations, deltas),
-      ...dividerGeo,
-      ...routed.flatMap((r) => r.reservations),
-    ],
-  };
+  // The content draws through `.apply(getTitleHeightTranslate(...))` too
+  // (`Swimlanes.java:342-343`); the dividers do not (`:346`).
+  const vertical = resolveSwimlaneVertical(swimlanes, baseY, input.theme);
+  const content = translateContentY(
+    {
+      nodes: nodes.flatMap((n) => placeNode(n, laneNames, deltas)),
+      edges: routed.flatMap((r) => r.edges),
+      before: shiftLaneReservations(walkReservations, deltas),
+      after: routed.flatMap((r) => r.reservations),
+    },
+    vertical.dy,
+  );
+  const edgeMetaOut = routed.flatMap((r, i) => r.edgeMeta ?? repeatEdgeMeta(edgeMeta[i]!, r.edges.length));
+  const reservations = [...content.before, ...dividerGeo, ...content.after];
+  return { nodes: content.nodes, edges: content.edges, edgeMeta: edgeMetaOut, swimlanes, reservations, vertical };
 }

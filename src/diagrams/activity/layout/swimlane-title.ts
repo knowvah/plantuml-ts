@@ -13,13 +13,15 @@
  * single `" "` atom (`StripeSimple.java:124-127`) -- so its title measures
  * one space at the title font, not zero.
  *
- * No `wrap` is passed: `getWrap` (`Swimlanes.java:296-301`) falls back to
+ * The wrap is `getWrap` (`Swimlanes.java:296-302`): it falls back to
  * `style.wrapWidth()` only when `swimlaneWrapTitleWidth()` `==
- * LineBreakStrategy.NONE`, a reference test that a fresh `new
- * LineBreakStrategy(null)` (`SkinParam.java:981-984`) never passes -- so
- * only `skinparam swimlaneWrapTitleWidth` wraps a title, and `Theme` does
- * not carry it yet (isw-T2-act F5, reported; jar fixture
- * `tests/fixtures/isw-T2-act/wrap-swimlane`).
+ * LineBreakStrategy.NONE`, a reference test a fresh `new
+ * LineBreakStrategy(value)` (`SkinParam.java:980-984`) never passes -- so
+ * only `skinparam swimlaneWrapTitleWidth` wraps a title (jar fixture
+ * `tests/fixtures/isw-T2-act/wrap-swimlane`). `"auto"` becomes `new
+ * LineBreakStrategy("" + ((int) swimlane.getActualWidth()))` (`:290-291`),
+ * the width `computeSizeInternal` set before any title is measured
+ * (`Swimlanes.java:407-411`).
  *
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:285-293
  */
@@ -33,26 +35,52 @@ import { activityHyperlinkColor } from '../activity-text-style.js';
 import { swimlaneTitleFontColor, swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import { klimtStringBounder } from '../activity-creole-sheet.js';
 import { activityMeasurer } from '../activity-string-bounder.js';
+import { LineBreakStrategy } from '../../../core/klimt/LineBreakStrategy.js';
 
 /** The display `new Swimlane("", ...)` gives the appended special lane
  *  (`Swimlanes.java:119`). */
 export const SPECIAL_SWIMLANE_DISPLAY = '';
 
-/** `getTitle(swimlane)` for a lane whose display creole is `display`. */
-export function swimlaneTitleBlock(display: string, theme: Theme): { tb: TextBlock; fc: FontConfiguration } {
+/** `getWrap()` then the `isAuto()` substitution (`Swimlanes.java:289-291,
+ *  296-302`); `actualWidth` is `swimlane.getActualWidth()`. */
+function titleWrap(theme: Theme, actualWidth: number): LineBreakStrategy {
+  const wrap = new LineBreakStrategy(theme.swimlaneWrapTitleWidth ?? null);
+  if (wrap.isAuto()) return new LineBreakStrategy(String(Math.trunc(actualWidth)));
+  return wrap;
+}
+
+/** `getTitle(swimlane)` for a lane whose display creole is `display` and
+ *  whose `getActualWidth()` is `actualWidth`. */
+export function swimlaneTitleBlock(
+  display: string,
+  theme: Theme,
+  actualWidth: number,
+): { tb: TextBlock; fc: FontConfiguration } {
   const font = { family: theme.fontFamily, size: swimlaneTitleFontSize(theme), color: swimlaneTitleFontColor(theme) };
   const fc = styleFontConfiguration(theme, font, activityHyperlinkColor(theme));
   const tb = activityDisplayBlock(display, theme, {
     fontConfiguration: fc,
     horizontalAlignment: HorizontalAlignment.LEFT,
     creoleMode: CreoleMode.FULL,
+    maxMessageSize: titleWrap(theme, actualWidth),
   });
   return { tb, fc };
 }
 
+/** `getTitle(swimlane).calculateDimension(stringBounder)`
+ *  (`Swimlanes.java:312,442`), through the render's own bounder. */
+export function swimlaneTitleDimension(
+  display: string,
+  theme: Theme,
+  actualWidth: number,
+): { width: number; height: number } {
+  const { tb, fc } = swimlaneTitleBlock(display, theme, actualWidth);
+  const dim = tb.calculateDimension(klimtStringBounder(activityMeasurer(theme), fc));
+  return { width: dim.getWidth(), height: dim.getHeight() };
+}
+
 /** `getTitle(swimlane).calculateDimension(stringBounder).getWidth()`
- *  (`Swimlanes.java:442`), through the render's own bounder. */
-export function swimlaneTitleWidth(display: string, theme: Theme): number {
-  const { tb, fc } = swimlaneTitleBlock(display, theme);
-  return tb.calculateDimension(klimtStringBounder(activityMeasurer(theme), fc)).getWidth();
+ *  (`Swimlanes.java:442`). */
+export function swimlaneTitleWidth(display: string, theme: Theme, actualWidth: number): number {
+  return swimlaneTitleDimension(display, theme, actualWidth).width;
 }
