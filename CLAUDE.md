@@ -40,11 +40,12 @@ a fast numeric loop feels like evidence. **Stop and open the Java** before you
 - **Test layer interactions, not features.** Prefer upstream fixtures to
   synthesized ones; theirs are combinatorial because real bugs were.
 - **Mirror the jar's output exactly** — every element it draws, and nothing
-  it doesn't — including behavior that looks like a bug or loses information
-  (a missing connector, a clipped label). Never "improve" on the jar, never
-  fix an upstream bug inline. An element the jar omits is a defect in ours:
+  it doesn't — even behavior that looks like a bug or loses information
+  (a missing connector, a clipped label). Never "improve" on the jar or fix
+  an upstream bug inline. An element the jar omits is a defect in ours:
   remove it with the Java quote. "Never drop a note/label/connector" rules
-  protect what the JAR draws; they never license keeping our extras.
+  protect what the JAR draws, never our extras. Error pages: stock jar errors
+  + we render our own = conformant (2026-10-10); docs/svg-conformance.md.
 - **A divergence exists only where a library forces it**: dot-engine instead
   of Smetana (below), KaTeX instead of JLaTeXMath, the oracle seam for
   `{{ }}` and platform glyph outlines. Each is named in `DIVERGENCES.md` with
