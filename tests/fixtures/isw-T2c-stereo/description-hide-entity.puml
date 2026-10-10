@@ -1,0 +1,8 @@
+@startuml
+component D <<  q  >>
+component E << r >>
+component F <<  s  >>
+hide << q >>
+hide <<r>>
+hide <<  s  >>
+@enduml
