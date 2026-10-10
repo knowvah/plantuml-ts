@@ -84,7 +84,7 @@ pinning routing/refusal before T1e's move commit.
 | [0](batch-0/overview.md) | T0 branch + b0 | orchestrator | [x] |
 | [1](batch-1/overview.md) | T1a stock verifier · T1b error observer · T1c refusals · T1d tidoda · T1e move (orch) | parallel worktrees | [x] |
 | [2](batch-2/overview.md) | T2a survey verdict + dashboard · T2b docs | parallel, after T1a+T1b | [x] |
-| [3](batch-3/overview.md) | T-exit · T-close | orchestrator | [ ] |
+| [3](batch-3/overview.md) | T-exit · T-close | orchestrator | [x] |
 
 ## Index
 
@@ -94,3 +94,22 @@ pinning routing/refusal before T1e's move commit.
 - [close-procedure.md](close-procedure.md) — batch close steps
 - [diagrams/data-flow.md](diagrams/data-flow.md) · [diagrams/component-map.md](diagrams/component-map.md)
 - [decision-journal.md](decision-journal.md)
+
+## Summary (2026-10-10)
+
+Tasks: 9 of 9 brief tasks done, plus T1g, which was added by user ruling.
+- **Activity:** 433/1/17 → **448/1/0** (449 rows). bozido is the only non-conformant row (D4).
+- **All engines:** 62 movers, 0 conformant losses.
+
+User rulings during the mission (flagged for review; journal rows):
+- Oracle-widths crashes: "fix in this mission" (rows 3, 4, 8).
+- RoundCorner ported in `src/core` (row 6).
+- T2a write-set expanded (row 12).
+- Stop 6 accepted for unknown +25 (row 15).
+
+Orchestrator decisions:
+- Early batch-2 start (row 11).
+- Two post-merge 500-line splits (row 14).
+- Six ledger retirements (row 17).
+
+Gates: all four green on the final tree. Follow-ons are in `planning/next-missions.md` under aepp.
