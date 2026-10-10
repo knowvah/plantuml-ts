@@ -12,6 +12,7 @@ import { applyLollipop, LOLLIPOP_RE } from './class-lollipop.js';
 import { parseMemberLine } from './class-member-parser.js';
 import { parseObjectField } from './class-object-commands.js';
 import { parseRelationshipLine, REL_DISPATCH_RE, stripQuotes } from './class-relationship-parser.js';
+import type { Relationship } from './ast.js';
 import type { Command } from './class-command-types.js';
 import { ensureClassifier, type ParseState } from './parser.js';
 import { materializeClassifier, registerPendingLeaf, resolveClassifierRef } from './class-ensure-classifier.js';
@@ -46,6 +47,25 @@ function resolveRelationshipEndpoints(state: ParseState, first: string, second: 
   const id1 = ref1 === undefined ? note1! : materializeClassifier(state, ref1, 'class', pending1 !== undefined).id;
   const id2 = ref2 === undefined ? note2! : materializeClassifier(state, ref2, 'class', pending2 !== undefined).id;
   return [id1, id2];
+}
+
+/**
+ * aepp-T1g: the parser stamps `idEntity1FullId`/`idEntity2FullId` from the
+ * RAW endpoint text (`class-relationship-field-builder.ts`), but `from`/`to`
+ * are rewritten to the resolved, namespace-qualified id just after. Upstream's
+ * `link.getEntity1()` (`dot/DotData.java:126`) is the resolved `Entity`, so a
+ * bare `Dependency <|-- Abstraction` written inside `package UML` groups under
+ * `UML.Dependency`. Re-point each FullId at the id its raw text resolved to.
+ *
+ * @see dot/DotData.java#removeIrrelevantSametail
+ */
+function requalifyFullIds(rel: Relationship, rawEnds: readonly [string, string]): void {
+  const resolve = (id: string | undefined): string | undefined =>
+    id === rawEnds[0] ? rel.from : id === rawEnds[1] ? rel.to : id;
+  const full1 = resolve(rel.idEntity1FullId);
+  const full2 = resolve(rel.idEntity2FullId);
+  if (full1 !== undefined) rel.idEntity1FullId = full1;
+  if (full2 !== undefined) rel.idEntity2FullId = full2;
 }
 
 /** A `Relationship` reduced to its two connection identities for the shared
@@ -134,11 +154,13 @@ export const RELATIONSHIP_COMMANDS: readonly Command[] = [
       // endpoint auto-created (the overwhelmingly common case -- both
       // already declared) is unaffected either way, since `ensureClassifier`
       // reuses the existing entry without re-stamping `creationIndex`.
+      const rawEnds = [rel.from, rel.to] as const;
       if (rel.swapDirection === true) {
         [rel.to, rel.from] = resolveRelationshipEndpoints(state, rel.to, rel.from);
       } else {
         [rel.from, rel.to] = resolveRelationshipEndpoints(state, rel.from, rel.to);
       }
+      requalifyFullIds(rel, rawEnds);
       // G2 N2 (mechanism 3): stamp AFTER both endpoints resolve/auto-create
       // -- matches upstream's shared-counter ordering (an auto-created
       // endpoint's own uid always precedes the link's), see
