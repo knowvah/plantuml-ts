@@ -5,7 +5,7 @@
  * deliberately leaves untouched (width/height/rx/ry/r/dx/dy).
  */
 import { describe, it, expect } from 'vitest';
-import { shiftFragmentBody } from '../../src/core/annotations/coord-shift.js';
+import { formatShiftedCoordinates, shiftFragmentBody } from '../../src/core/annotations/coord-shift.js';
 
 describe('shiftFragmentBody — fast path', () => {
   it('returns the body unchanged (byte-identical) when dx=0 and dy=0', () => {
@@ -129,5 +129,31 @@ describe('shiftFragmentBody — inline defs are not document coordinates', () =>
     expect(shiftFragmentBody(`${filter}<text x="1" y="2" filter="url(#bab)">a</text>`, 10, 20)).toBe(
       `${filter}<text x="11" y="22" filter="url(#bab)">a</text>`,
     );
+  });
+});
+
+/**
+ * isw-T2b-ca: `formatShiftedCoordinates` -- the once-at-emission
+ * `SvgGraphics#format` (`SvgGraphics.java:468-475`, `%.3f` + `trimZeros`)
+ * for the full-precision sums `shiftFragmentBody` bakes in. The jar prints
+ * sequence `bedaja-09-gezu912`'s header at `y="12.778"` (re-captured
+ * `test-results/dot-cache/sequence/bedaja-09-gezu912/in.svg`), where the raw
+ * sum was `12.777999999999999`.
+ */
+describe('formatShiftedCoordinates', () => {
+  it('prints an over-precise position the way the jar does', () => {
+    const body = '<text x="53.32500219345093" y="12.777999999999999" textLength="10.12345">t</text>';
+    expect(formatShiftedCoordinates(body)).toBe('<text x="53.325" y="12.778" textLength="10.12345">t</text>');
+  });
+
+  it('rounds nested shifts once, not per shift (1 + 0.0004 + 0.0004 prints 1.001)', () => {
+    const twice = shiftFragmentBody(shiftFragmentBody('<text x="1" y="1">s</text>', 0.0004, 0), 0.0004, 0);
+    expect(formatShiftedCoordinates(twice)).toBe('<text x="1.001" y="1">s</text>');
+  });
+
+  it('formats points and path data, leaves 3-decimal tokens and defs alone', () => {
+    const def = '<linearGradient id="g" x1="0.12345" y1="0%"><stop offset="0%"/></linearGradient>';
+    const body = `${def}<polygon points="1.00001,2.5 3.123,4"/><path d="M0.33333333,1 L2,2.0005"/>`;
+    expect(formatShiftedCoordinates(body)).toBe(`${def}<polygon points="1,2.5 3.123,4"/><path d="M0.333,1 L2,2.001"/>`);
   });
 });

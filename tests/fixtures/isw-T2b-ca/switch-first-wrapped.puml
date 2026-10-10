@@ -1,0 +1,11 @@
+@startuml
+skinparam wrapWidth 80
+switch (a rather long switch test that wraps?)
+case (a case label that wraps twice over here)
+  :one;
+case (b)
+  :two;
+case (another wrapping case label)
+  :three;
+endswitch
+@enduml

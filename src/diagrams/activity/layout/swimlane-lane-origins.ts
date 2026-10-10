@@ -133,6 +133,7 @@ function buildLaneOrigin(name: string, w: LaneWidth, x: number, width: number, l
       titleWidth: w.titleWidth,
       contentMinX: w.contentMinX,
       contentX: left,
+      actualWidth: w.width,
     },
   };
 }

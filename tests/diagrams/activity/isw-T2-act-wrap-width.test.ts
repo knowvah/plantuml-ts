@@ -17,10 +17,12 @@
  *   (`SkinParam.java:981-984`) to `LineBreakStrategy.NONE` by reference
  *   (`Swimlanes.java:296-301`), so the style fallback is unreachable.
  * - `wrap-switch`: the diamond test and the case labels wrap
- *   (`FtileFactoryDelegatorSwitch.java:110-111,131-134`, `Branch.java:248-258`)
- *   and draw where the jar draws them, but the jar's `getYdelta1a`
- *   (`FtileSwitchWithManyLinks.java:413-423`) still exceeds ours by 2.944
- *   for a two-line case label -- mechanism not yet isolated (reported).
+ *   (`FtileFactoryDelegatorSwitch.java:110-111,131-134`, `Branch.java:248-258`).
+ *   isw-T2b-ca: `getYdelta1a` was never the gap (an instrumented jar
+ *   reports the same 22 px label height and SMALL_DIAMOND as ours); the
+ *   Y compression boxed a wrapped label by its `\n` lines only, so it
+ *   removed the space under the label's second line
+ *   (`compress/shapes-of.ts#edgeLabelShape`).
  */
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -41,11 +43,10 @@ function diffPaths(name: string): string[] {
 }
 
 describe('activity wrapWidth (jar oracles)', () => {
-  it.each(['wrap-if', 'wrap-elseif', 'wrap-while', 'wrap-swimlane'])('%s renders equal to the jar', (name) => {
-    expect(diffPaths(name)).toEqual([]);
-  });
-
-  it.fails('wrap-switch renders equal to the jar (open: getYdelta1a residual)', () => {
-    expect(diffPaths('wrap-switch')).toEqual([]);
-  });
+  it.each(['wrap-if', 'wrap-elseif', 'wrap-while', 'wrap-swimlane', 'wrap-switch'])(
+    '%s renders equal to the jar',
+    (name) => {
+      expect(diffPaths(name)).toEqual([]);
+    },
+  );
 });

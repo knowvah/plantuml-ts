@@ -229,6 +229,13 @@ export interface SwimlaneGeo {
    */
   contentX?: number;
   /**
+   * `swimlane.getActualWidth()` -- `max(min, contentWidth)`, set by
+   * `computeSizeInternal` (`Swimlanes.java:407-411`) before compression and
+   * never revisited; an `auto` title wrap reads it (`:290-291`). Optional
+   * for the same reason as {@link contentWidth}.
+   */
+  actualWidth?: number;
+  /**
    * `|name|LABEL`'s display label, which the title draws and measures
    * instead of the name (`Swimlane#getDisplay`). Absent: the name.
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:163-164,285-293

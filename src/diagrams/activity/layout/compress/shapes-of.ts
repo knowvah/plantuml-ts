@@ -18,15 +18,17 @@ import type { StringBounder } from '../../tiles/tile.js';
 import type { Theme } from '../../../../core/theme.js';
 import type { CompressionMode } from './slot.js';
 import { arrowDirection, arrowHeadExtents } from '../../arrows-regular.js';
-import { swimlaneTitleFontSize } from '../../activity-style-defaults.js';
+import { titleShapes } from './shapes-of-swimlane-title.js';
 import { boxStyleBox, conditionBox, noteBox } from './shapes-of-boxes.js';
 import { edgeDecorationVector } from './shapes-of-terminal.js';
 import { frameShapes } from './shapes-of-frame.js';
-import { edgeLabelBlockSize, edgeLabelLayout } from './edge-label-anchor.js';
+import { edgeLabelBlock, edgeLabelLayout } from './edge-label-anchor.js';
 import { measurerAdapterOf } from '../../tiles/gtile-action.js';
 import { ifLabelBlock, ifLabelFontSize, type IfLabelNode } from '../../activity-text-sheet-diamond.js';
 import { klimtStringBounder } from '../../activity-creole-sheet.js';
 import { TextBlockUtils } from '../../../../core/klimt/shape/TextBlockUtils.js';
+import { ASCENT_FRACTION } from '../../activity-renderer-shapes.js';
+import { activityTextFontConfiguration } from '../../activity-text-sheet.js';
 import { TEXT_LIMIT_SHIFT } from './slot-finder.js';
 import { edgeLinkStyle } from '../edge-link-style.js';
 import { ifOwnLabelShapes } from './shapes-of-hexagon-label.js';
@@ -366,17 +368,23 @@ function midArrowShape(edge: ActivityEdgeGeo): CompressShape | undefined {
 function edgeLabelShape(edge: ActivityEdgeGeo, bounder: StringBounder, theme: Theme): CompressShape | undefined {
   const layout = edgeLabelLayout(edge, theme);
   if (layout === undefined) return undefined;
-  const { lines, size } = layout;
-  // add4-T3b SNAKE-LABEL-CREOLE / add4-T3h: `TextLimitFinder#drawText` boxes
-  // each `UText` of the drawn SIMPLE_LINE block, inside `SheetBlock1`'s
-  // padding (`SheetBlock1.java:209-210`): `[x + p, x + width - p]`.
-  const pad = theme.padding ?? 0;
-  const wrapped = edge.labelWrapped === true;
-  const width = edgeLabelBlockSize(lines.join('\n'), theme, measurerAdapterOf(bounder), wrapped).width - 2 * pad;
-  const first = layout.baselineY + pad;
-  const last = first + size * (lines.length - 1);
-  const height = last - first + bounder.getDimension(lines[0]!, size).height;
-  return { kind: 'text', x: layout.x + pad, y: last, width, height };
+  // isw-T2b-ca: the box is the DRAWN block's `LimitFinder` text extent
+  // (`LimitFinder.java:216-224`, `ifLabelShape`'s envelope), so a label
+  // wrapped by `style.wrapWidth()` (`Branch.java:248-258`) occupies every
+  // line it draws, not only its `\n` lines; `SheetBlock1`'s padding
+  // (`SheetBlock1.java:209-210`) is inside the block.
+  const tb = edgeLabelBlock(edge.label!, theme, edge.labelWrapped === true);
+  const fc = activityTextFontConfiguration(theme, layout.size, 'arrow');
+  const sheetBounder = klimtStringBounder(measurerAdapterOf(bounder), { family: fc.family, size: layout.size });
+  const mm = TextBlockUtils.getMinMax(tb, sheetBounder, false);
+  const top = layout.baselineY - layout.size * ASCENT_FRACTION;
+  return {
+    kind: 'text',
+    x: layout.x + mm.getMinX(),
+    y: top + mm.getMaxY() - TEXT_LIMIT_SHIFT,
+    width: mm.getMaxX() - mm.getMinX(),
+    height: mm.getMaxY() - mm.getMinY(),
+  };
 }
 
 /** Every `CompressShape` one `ActivityEdgeGeo` contributes -- never its
@@ -417,56 +425,9 @@ function shapeForReservation(r: Reservation): CompressShape {
   return { kind: 'empty', x: r.x, y: r.y, width: r.width, height: r.height };
 }
 
-/**
- * `Swimlanes#drawTitles` draws ONE `CenteredText` per lane
- * (`Swimlanes.java:369-375`), only when the band exists
- * (`:275`'s `size() > 1` guard -- `renderSwimlaneTitles`'s own
- * `geo.swimlaneBand === undefined` early return mirrors this). A
- * `CenteredText` is a bare `UShape` (`ftile/CenteredText.java:26`), not a
- * `UText` -- `SlotFinder#draw`'s dispatch chain (`SlotFinder.java:78-100`)
- * has no branch for it, so on the ON_X pass (the raw block drawn straight
- * into a fresh `SlotFinder`, `CompressionXorYBuilder.java:60-63`) it never
- * occupies. But the ON_Y builder wraps the ON_X builder
- * (`ActivityDiagram3.java:209-210`), so ON_Y's `SlotFinder` sees the raw
- * block drawn through `UGraphicCompressOnXorY.create(ON_X, ySlotFinder,
- * xAffine)` instead -- and that wrapper's OWN `CenteredText` branch
- * (`UGraphicCompressOnXorY.java:100-112`) does not forward the
- * `CenteredText` shape at all: it calls `text.drawU(...)` on the WRAPPED
- * title `TextBlock`, which emits a genuine `UText` straight into
- * `getUg()` -- here, `ySlotFinder` -- so the title occupies on Y exactly
- * like {@link edgeLabelShape}'s `'text'` kind (`TextLimitFinder`'s
- * `y - h + 1.5` shift, `collectSlots` applies it, not this adapter).
- *
- * Position/font mirror `activity-renderer-swimlanes.ts#renderSwimlaneTitles`
- * (`:115-126`, read-only -- never edited by this port's compress work):
- * `x = contentX + (contentWidth - titleWidth) / 2`, baseline `y =
- * band.y + fontSize * (1 - 1/4.5)` (`StringBounder#getDescent`,
- * `klimt/font/StringBounder.java:47`, the same ascent ratio the renderer
- * already cites). The ratio is duplicated here, not imported, because the
- * renderer module is read-only for this fix.
- */
+/** `ifLabelShape`'s baseline ascent (`StringBounder#getDescent`,
+ *  `klimt/font/StringBounder.java:47`). */
 const TITLE_BASELINE_ASCENT = 1 - 1 / 4.5;
-
-function titleShapes(
-  swimlanes: readonly SwimlaneGeo[],
-  band: SwimlaneBandGeo | undefined,
-  bounder: StringBounder,
-  theme: Theme,
-): CompressShape[] {
-  if (band === undefined) return [];
-  const fontSize = swimlaneTitleFontSize(theme);
-  const baselineY = band.y + fontSize * TITLE_BASELINE_ASCENT;
-  const shapes: CompressShape[] = [];
-  for (const lane of swimlanes) {
-    const contentX = lane.contentX ?? lane.x;
-    const contentWidth = lane.contentWidth ?? lane.width;
-    const titleWidth = lane.titleWidth ?? 0;
-    const titleX = contentX + (contentWidth - titleWidth) / 2;
-    const dim = bounder.getDimension(lane.name, fontSize);
-    shapes.push({ kind: 'centeredText', x: titleX, y: baselineY, width: dim.width, height: dim.height });
-  }
-  return shapes;
-}
 
 /**
  * D2: the single shape adapter feeding `collectSlots`. Combines every

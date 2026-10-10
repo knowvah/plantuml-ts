@@ -62,16 +62,25 @@ export function activityMinimumWidth(theme: Theme): number {
   return resolveElementMinimumWidth(theme, 'activity') ?? 0;
 }
 
+/** The bucket a bare `<style> activityDiagram { ... }` block feeds
+ *  (`style-map-element.ts#isDiagramTypeSelector`): `SName.activityDiagram`,
+ *  a member of every activity element's signature. */
+const ACTIVITY_DIAGRAM_BUCKET = 'activitydiagram';
+
 /**
  * isw-T2-act F5: `style.wrapWidth()` (`Style.java:330-333`,
  * `PName.MaximumWidth`) for one activity SName -- the bucket's own
- * `MaximumWidth`, else `skinparam wrapWidth`, which
- * `FromSkinparamToStyle.java:250` registers on `SName.element` (a member
- * of every activity signature). No `plantuml.skin` block sets it, so
+ * `MaximumWidth`, else a bare `activityDiagram { MaximumWidth N }`
+ * (isw-T2b-ca: signed `{activityDiagram}`, merged into every activity
+ * signature, `StyleStorage.java:102-116`), else `skinparam wrapWidth`,
+ * which `FromSkinparamToStyle.java:250` registers on `SName.element` (a
+ * member of every activity signature). No `plantuml.skin` block sets it, so
  * absent is `LineBreakStrategy.NONE`.
  */
 export function activityWrapWidth(theme: Theme, sname: ActivitySName): LineBreakStrategy {
-  const width = resolveElementMaximumWidth(theme, bucketKey(sname));
+  const own = theme.colors.elements?.[bucketKey(sname)]?.maximumWidth;
+  const diagram = theme.colors.elements?.[ACTIVITY_DIAGRAM_BUCKET]?.maximumWidth;
+  const width = own ?? diagram ?? resolveElementMaximumWidth(theme, bucketKey(sname));
   return width === undefined ? LineBreakStrategy.NONE : new LineBreakStrategy(String(width));
 }
 

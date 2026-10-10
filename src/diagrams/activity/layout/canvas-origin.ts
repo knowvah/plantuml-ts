@@ -81,6 +81,7 @@ import {
   SPLIT_LINE_KINDS,
   extendForEdgeLabelText,
   extendForIfLabelText,
+  extendForIfOwnLabelText,
   extendForLaneDivider,
 } from './canvas-origin-text-ink.js';
 import { NO_FUDGE, POLYGON_FUDGE_X, RECT_FUDGE, isInkless, nodeFudge } from './canvas-origin-fudge.js';
@@ -96,6 +97,10 @@ function extendForNode(acc: MutableInkBounds, node: ActivityNodeGeo, theme: Them
   if (isInkless(node.kind)) return;
   if (node.kind === 'if-label') {
     extendForIfLabelText(acc, node, theme);
+    return;
+  }
+  if (node.kind === 'if-own-label') {
+    extendForIfOwnLabelText(acc, node, theme);
     return;
   }
   const { x: fx, y: fy } = nodeFudge(node);
