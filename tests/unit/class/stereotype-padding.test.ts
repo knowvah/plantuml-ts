@@ -9,7 +9,11 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../src/index.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { splitStereotypeLabels, splitStereotypeStyleTags } from '../../../src/core/stereotype-decoration.js';
+import {
+  hasMultipleLabel,
+  splitStereotypeLabels,
+  splitStereotypeStyleTags,
+} from '../../../src/core/stereotype-decoration.js';
 import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 
 describe('stereotype label padding', () => {
@@ -42,6 +46,25 @@ describe('stereotype label padding', () => {
     const dir = new URL('../../fixtures/isw-T2b-obj/', import.meta.url);
     const puml = readFileSync(new URL('stereotype-spaces.puml', dir), 'utf8');
     const jar = readFileSync(new URL('stereotype-spaces.svg', dir), 'utf8');
+    const ours = renderSync(puml, { measurer: new DeterministicMeasurer() });
+    expect(compareSvg(ours, jar, 'deterministic').diffs).toEqual([]);
+  });
+});
+
+describe('hide <<pattern>> matches getMultipleLabels (Stereotype.java:122-133)', () => {
+  const equals = (want: string) => (label: string) => label === want;
+  it('consumes one padding space, keeps the rest', () => {
+    expect(hasMultipleLabel(' Pad ', equals('Pad'))).toBe(true);
+    expect(hasMultipleLabel('  Pad  ', equals('Pad'))).toBe(false);
+    expect(hasMultipleLabel('  Pad  ', equals(' Pad '))).toBe(true);
+  });
+  it('matches against the decoration-stripped label', () => {
+    expect(hasMultipleLabel('(C,#FF0000) Pad', equals('Pad'))).toBe(true);
+  });
+  it('draws exactly the jar svg: the padded A survives `hide << Pad >>`', () => {
+    const dir = new URL('../../fixtures/isw-T2b-obj/', import.meta.url);
+    const puml = readFileSync(new URL('stereotype-hide-padded.puml', dir), 'utf8');
+    const jar = readFileSync(new URL('stereotype-hide-padded.svg', dir), 'utf8');
     const ours = renderSync(puml, { measurer: new DeterministicMeasurer() });
     expect(compareSvg(ours, jar, 'deterministic').diffs).toEqual([]);
   });

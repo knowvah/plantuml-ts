@@ -2,10 +2,10 @@
  * Directive APPLICATION + removal/hidden-id computation for class diagrams
  * (applyDirectives, computeRemovedIds/HiddenIds, filterRemovedEntities and
  * their link/pattern helpers). Split out of `class-directives.ts` (line cap);
- * depends one-way on the parse cluster there. Re-exported from it so import
- * sites are unchanged.
+ * depends one-way on the parse cluster there. Re-exported from it.
  */
 
+import { hasMultipleLabel } from '../../core/stereotype-decoration.js';
 import type { ClassDiagramAST, ClassNote, HideTarget } from './ast.js';
 import { isMethodMember } from './class-layout-helpers.js';
 import { NEVER_UNLINKED, buildGroupUnlinkedPredicate, cascadeHidden } from './class-directives-hide-cascade.js';
@@ -242,7 +242,8 @@ function isApplyable(
     return (e.tags ?? []).some((t) => matchPattern(t, what.slice(1)));
   }
   if (what.startsWith('<<') && what.endsWith('>>')) {
-    return e.stereotype !== undefined && matchPattern(e.stereotype, what.slice(2, -2).trim());
+    const pattern = what.slice(2, -2).trim();
+    return e.stereotype !== undefined && hasMultipleLabel(e.stereotype, (l) => matchPattern(l, pattern));
   }
   if (isAboutUnlinked(what)) return unlinked(e.id);
   return matchEntityName(e.id, what, sep);

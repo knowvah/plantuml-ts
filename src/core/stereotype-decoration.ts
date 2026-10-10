@@ -138,16 +138,33 @@ function strictLabel(inner: string): string {
  * regardless of bracket count, feeds `.tagname` style-cascade matching --
  * `style-map-element.ts#resolveStyleCascade`'s `stereotypeTags` param).
  */
-function splitStereotypeTokens(stereotype: string): Array<{ label: string; visible: boolean }> {
+function splitStereotypeTokens(stereotype: string): Array<{ label: string; raw: string; visible: boolean }> {
   const reconstructed = `<<${stereotype}>>`;
-  const tokens: Array<{ label: string; visible: boolean }> = [];
+  const tokens: Array<{ label: string; raw: string; visible: boolean }> = [];
   const re = /(<{2,3})(.*?)>{2,3}/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(reconstructed)) !== null) {
     const residue = stripCircledCharDecoration(m[2]!);
-    if (residue !== undefined) tokens.push({ label: strictLabel(residue), visible: m[1]!.length === 2 });
+    if (residue !== undefined) tokens.push({ label: strictLabel(residue), raw: residue, visible: m[1]!.length === 2 });
   }
   return tokens;
+}
+
+/** `Stereotype#getMultipleLabels` (Stereotype.java:122-133) -- the labels
+ *  `hide`/`show <<pattern>>` is matched against (HideOrShow.java:60-85
+ *  `isApplyableStereotype`): the pattern `<<\s?(..)\s?>>` run over the
+ *  decoration-stripped label (StereotypeDecoration.java:196-216), i.e. one
+ *  padding space per side is consumed and further ones stay. Unlike
+ *  {@link splitStereotypeTokens} it sees only `<<x>>` pieces (a `<<<x>>>`
+ *  tag is not part of the label, `cutLabels` :246-252). */
+const MULTIPLE_LABELS_RE = new RegExp(String.raw`<<\s?((?:<&\w+>|[^<>])+?)\s?>>`, 'g');
+
+export function hasMultipleLabel(stereotype: string, test: (label: string) => boolean): boolean {
+  const decorated = splitStereotypeTokens(stereotype)
+    .filter((t) => t.visible)
+    .map((t) => `<<${t.raw}>>`)
+    .join('');
+  return [...decorated.matchAll(MULTIPLE_LABELS_RE)].some((m) => test(m[1]!));
 }
 
 /** Visible-only labels (2-bracket `<<X>>`) -- feeds the RENDERED stacked
