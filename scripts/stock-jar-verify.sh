@@ -18,7 +18,13 @@
 #    (CliFlag.java:226; StdrptV1.printInfo prints status=ERROR / lineNumber= /
 #    label= to stderr, Run.java:362). (`--check-syntax`, CliFlag.java:138-139,
 #    returns before printInfo at Run.java:347 and so yields no line/message.)
-# 5. Write oracle/goldens/stock-error-pages.json (deterministic, sorted).
+# 5. Fixtures the stock jar DRAWS go through a controlled experiment on the
+#    ORACLE jar (oracle/dist/plantuml-oracle.jar): run with no -D flags, then
+#    with only -DPLANTUML_DETERMINISTIC_TEXT=true. Exit 0 then 200 means the
+#    crash is upstream code reached only at the oracle's text widths; recorded
+#    with provenance 'oracle-widths'. Any other disagreement is not recorded
+#    and is listed via --draws-out.
+# 6. Write oracle/goldens/stock-error-pages.json (deterministic, sorted).
 #
 # Usage: scripts/stock-jar-verify.sh [--draws-out <file>]
 #   Env: PLANTUML_FORK (default ~/git/plantuml), STOCK_JOBS (default 4).
@@ -71,17 +77,25 @@ CANDIDATE_RE='PlantUML version|An error has occurred|Syntax Error|\[From '
 
 # One JVM per fixture; prints "<key>\t<exit>" and leaves stderr in $WORK/err/.
 run_one() {
-  local key="$1" jar="$2" cache="$3" work="$4" t
-  mkdir -p "$work/o/$key" "$work/err/$(dirname "$key")"
+  local key="$1" jar="$2" cache="$3" work="$4" tag="${5:-}" flag="${6:-}" t
+  mkdir -p "$work/o$tag/$key" "$work/err$tag/$(dirname "$key")"
   t=timeout; command -v timeout >/dev/null 2>&1 || t=gtimeout
   set +e
-  "$t" 60s java -Djava.awt.headless=true -cp "$jar" net.sourceforge.plantuml.Run \
-    -tsvg -stdrpt:1 -o "$work/o/$key" "$cache/$key/in.puml" 2> "$work/err/$key.txt" >/dev/null
-  echo "$?" > "$work/err/$key.exit"
+  "$t" 60s java -Djava.awt.headless=true $flag -cp "$jar" net.sourceforge.plantuml.Run \
+    -tsvg -stdrpt:1 -o "$work/o$tag/$key" "$cache/$key/in.puml" 2> "$work/err$tag/$key.txt" >/dev/null
+  echo "$?" > "$work/err$tag/$key.exit"
   set -e
 }
 export -f run_one
 xargs -P "$JOBS" -I{} bash -c 'run_one "$@"' _ {} "$JAR" "$CACHE" "$WORK" < "$WORK/candidates.txt"
+
+# Controlled experiment for the stock draws (step 5).
+ORACLE_JAR="$REPO/oracle/dist/plantuml-oracle.jar"
+for key in $(cat "$WORK/candidates.txt"); do
+  [ "$(cat "$WORK/err/$key.exit")" = "$EXIT_ERRORS" ] || echo "$key"
+done > "$WORK/stock-draws.txt"
+xargs -P "$JOBS" -I{} bash -c 'run_one "$@"' _ {} "$ORACLE_JAR" "$CACHE" "$WORK" .nod "" < "$WORK/stock-draws.txt"
+xargs -P "$JOBS" -I{} bash -c 'run_one "$@"' _ {} "$ORACLE_JAR" "$CACHE" "$WORK" .det -DPLANTUML_DETERMINISTIC_TEXT=true < "$WORK/stock-draws.txt"
 
 node --experimental-strip-types "$REPO/scripts/lib/stock-jar-record.ts" \
   "$WORK" "$SHA" "$VERSION" "$EXIT_ERRORS" "$OUT_JSON" "$DRAWS_OUT"

@@ -78,6 +78,11 @@
       "line": 8,
       "message": "Syntax Error? (Assumed diagram type: class)"
     },
+    "class/zuduxu-90-kosi876": {
+      "line": null,
+      "message": "",
+      "provenance": "oracle-widths"
+    },
     "ebnf/ladifa-97-keme950": {
       "line": 5,
       "message": "Syntax Error? (Assumed diagram type: ebnf)"
@@ -301,6 +306,11 @@
     "unknown/pizegi-06-jiro383": {
       "line": 2,
       "message": "Syntax Error? (Assumed diagram type: sequence)"
+    },
+    "unknown/rubebe-45-sura795": {
+      "line": null,
+      "message": "",
+      "provenance": "oracle-widths"
     },
     "unknown/tmp1-1": {
       "line": 5,

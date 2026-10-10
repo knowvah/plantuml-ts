@@ -46,3 +46,18 @@ None (no src/ edit; src/core untouched).
 - Planning counted 109 error fixtures; pre-filter finds 115 candidates / 112
   errors / 3 draws; differing candidate definitions, not a contradiction.
 - Quality gates run: stock-error-pages test 17/17, typecheck, eslint touched. Not run: npm test/build.
+
+## Resume: oracle-widths provenance (user ruling 2026-10-10)
+- Script now runs every stock-DRAWS fixture on the oracle jar twice (no -D;
+  only -DPLANTUML_DETERMINISTIC_TEXT=true). Exit 0 then 200 => recorded with
+  `provenance: 'oracle-widths'`, line/message from the det run's -stdrpt:1
+  (both null/'' : crash page). Stock-signal rows carry NO provenance field
+  (absent = 'stock'); chosen so the 112 prior rows stay byte-identical.
+- Added: class/zuduxu-90-kosi876, unknown/rubebe-45-sura795. Record now 114.
+- Not written (stop 9 list): unknown/jadavu-33-cono513 stock=0, oracle-noD=0,
+  oracle-det=0 -- a drawn class diagram with "PlantUML version" footer text;
+  not an oracle error at all (pre-filter false positive). No oracle-errors-
+  under-both case exists.
+- Candidate filter left as is: tightening to isJarErrorPage's regex would drop
+  the unsupported-page rows; the experiment already excludes jadavu.
+- Test pins the exact oracle-widths set; re-run byte-identical (cmp).

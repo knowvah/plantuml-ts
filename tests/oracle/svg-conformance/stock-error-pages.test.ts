@@ -11,6 +11,7 @@ import { describe, expect, it } from 'vitest';
 interface StockError {
   line: number | null;
   message: string;
+  provenance?: 'stock' | 'oracle-widths';
 }
 interface StockRecord {
   upstreamSha: string;
@@ -71,5 +72,12 @@ describe('stock-error-pages record', () => {
   it('lists exactly the 14 activity error fixtures', () => {
     const activity = Object.keys(record.errors).filter((k) => k.startsWith('activity/'));
     expect(activity.length).toBe(Object.keys(ACTIVITY_ROWS).length);
+  });
+
+  it('pins the exact oracle-widths set (stock draws, oracle crashes only under deterministic text)', () => {
+    const widths = Object.entries(record.errors)
+      .filter(([, e]) => e.provenance === 'oracle-widths')
+      .map(([k]) => k);
+    expect(widths).toEqual(['class/zuduxu-90-kosi876', 'unknown/rubebe-45-sura795']);
   });
 });

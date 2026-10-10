@@ -14,6 +14,8 @@ import { readFileSync, writeFileSync } from 'node:fs';
 export interface StockError {
   line: number | null;
   message: string;
+  /** Absent = 'stock'. 'oracle-widths': stock draws; oracle draws with no -D and crashes under deterministic text. */
+  provenance?: 'stock' | 'oracle-widths';
 }
 
 export interface StockRecord {
@@ -48,6 +50,28 @@ export function serialize(rec: StockRecord): string {
   return `${JSON.stringify({ upstreamSha: rec.upstreamSha, plantumlVersion: rec.plantumlVersion, errors }, null, 2)}\n`;
 }
 
+function exitOf(work: string, tag: string, key: string): string {
+  return readFileSync(`${work}/err${tag}/${key}.exit`, 'utf8').trim();
+}
+
+/** Controlled experiment on the oracle jar for a fixture the stock jar draws. */
+function classifyStockDraw(
+  work: string,
+  key: string,
+  stockExit: string,
+  errors: Record<string, StockError>,
+  draws: string[],
+  errorExit: string,
+): void {
+  const plain = exitOf(work, '.nod', key);
+  const det = exitOf(work, '.det', key);
+  if (plain === '0' && det === errorExit) {
+    errors[key] = { ...parseStdrpt(readFileSync(`${work}/err.det/${key}.txt`, 'utf8')), provenance: 'oracle-widths' };
+  } else {
+    draws.push(`${key}\tstock=${stockExit} oracle-noD=${plain} oracle-det=${det}`);
+  }
+}
+
 function main(argv: string[]): void {
   const [work, sha, version, errorExit, outJson, drawsOut] = argv;
   if (!work || !sha || !version || !errorExit || !outJson) throw new Error('usage: see header');
@@ -57,7 +81,7 @@ function main(argv: string[]): void {
   for (const key of keys) {
     const exit = readFileSync(`${work}/err/${key}.exit`, 'utf8').trim();
     if (exit === errorExit) errors[key] = parseStdrpt(readFileSync(`${work}/err/${key}.txt`, 'utf8'));
-    else draws.push(`${key}\texit=${exit}`);
+    else classifyStockDraw(work, key, exit, errors, draws, errorExit);
   }
   writeFileSync(outJson, serialize({ upstreamSha: sha, plantumlVersion: version, errors }));
   if (drawsOut) writeFileSync(drawsOut, `${draws.join('\n')}\n`);
