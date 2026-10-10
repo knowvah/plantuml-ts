@@ -224,7 +224,11 @@ export function formatScaledFragmentBody(body: string, factor: number): string {
  * margin shift it carries the block's final `(dx, dy)` in the document.
  */
 export const BODY_ANCHOR = '<g data-body-anchor="" transform="translate(0,0)"/>';
-const BODY_ANCHOR_RE = /<g data-body-anchor="" transform="translate\(([^,]+),([^)]+)\)"\/>/;
+// The captures exclude `"`, `<` and `)`: a translate value is a number, so
+// no real match changes. The exclusion stops a capture from running into
+// the next anchor, which made a scan quadratic in the anchor count
+// (CodeQL js/polynomial-redos, alert 23).
+const BODY_ANCHOR_RE = /<g data-body-anchor="" transform="translate\(([^,)"<]+),([^)"<]+)\)"\/>/;
 
 /**
  * The margin-shifted, scaled chromed body. With a
