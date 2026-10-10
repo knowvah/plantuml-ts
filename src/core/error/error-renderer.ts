@@ -32,6 +32,20 @@ import type { PSystemUnsupported } from './PSystemUnsupported.js';
 
 // --- Public API ---------------------------------------------------------
 
+// Instrumentation seam for the aepp error-page survey. When set, every
+// renderPSystemError() call (the single draw point of every upstream
+// `PSystemError` page: syntax error, Empty description, preprocessor, crash)
+// notifies it, so a harness learns "our render is an error page" from the
+// render path rather than by sniffing SVG text. Welcome and Unsupported pages
+// are not `PSystemError`s and never notify. Undefined (no-op) by default and in
+// every production path; deliberately not exported from `src/index.ts`.
+// Code review: errorPageObserver is a shared module-level global set via setErrorPageObserver; concurrent render() calls from the same process that both install an observer will race. Revisit if oracle/parity tests are ever parallelized within a single worker.
+let errorPageObserver: (() => void) | undefined;
+
+export function setErrorPageObserver(fn: (() => void) | undefined): void {
+  errorPageObserver = fn;
+}
+
 /** Welcome block placement on an error page (`PSystemError.java:255-258`). */
 const WELCOME_ON_ERROR: GraphicPosition = 'BACKGROUND_CORNER_TOP_RIGHT';
 
@@ -54,6 +68,7 @@ const ARECIBO = 'arecibo';
  * which is what every cached error-page golden shows.
  */
 export function renderPSystemError(system: PSystemError, measurer: StringMeasurer): string {
+  errorPageObserver?.();
   let result: ErrorBlock = errorPageBlock(system, measurer);
   if (system.getTotalLineCountLessThan5()) {
     const welcome = new PSystemWelcome(WELCOME_ON_ERROR);
