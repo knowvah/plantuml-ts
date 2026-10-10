@@ -22,11 +22,13 @@ import { titleShapes } from './shapes-of-swimlane-title.js';
 import { boxStyleBox, conditionBox, noteBox } from './shapes-of-boxes.js';
 import { edgeDecorationVector } from './shapes-of-terminal.js';
 import { frameShapes } from './shapes-of-frame.js';
-import { edgeLabelBlockSize, edgeLabelLayout } from './edge-label-anchor.js';
+import { edgeLabelBlock, edgeLabelLayout } from './edge-label-anchor.js';
 import { measurerAdapterOf } from '../../tiles/gtile-action.js';
 import { ifLabelBlock, ifLabelFontSize, type IfLabelNode } from '../../activity-text-sheet-diamond.js';
 import { klimtStringBounder } from '../../activity-creole-sheet.js';
 import { TextBlockUtils } from '../../../../core/klimt/shape/TextBlockUtils.js';
+import { ASCENT_FRACTION } from '../../activity-renderer-shapes.js';
+import { activityTextFontConfiguration } from '../../activity-text-sheet.js';
 import { TEXT_LIMIT_SHIFT } from './slot-finder.js';
 import { edgeLinkStyle } from '../edge-link-style.js';
 import { ifOwnLabelShapes } from './shapes-of-hexagon-label.js';
@@ -366,17 +368,23 @@ function midArrowShape(edge: ActivityEdgeGeo): CompressShape | undefined {
 function edgeLabelShape(edge: ActivityEdgeGeo, bounder: StringBounder, theme: Theme): CompressShape | undefined {
   const layout = edgeLabelLayout(edge, theme);
   if (layout === undefined) return undefined;
-  const { lines, size } = layout;
-  // add4-T3b SNAKE-LABEL-CREOLE / add4-T3h: `TextLimitFinder#drawText` boxes
-  // each `UText` of the drawn SIMPLE_LINE block, inside `SheetBlock1`'s
-  // padding (`SheetBlock1.java:209-210`): `[x + p, x + width - p]`.
-  const pad = theme.padding ?? 0;
-  const wrapped = edge.labelWrapped === true;
-  const width = edgeLabelBlockSize(lines.join('\n'), theme, measurerAdapterOf(bounder), wrapped).width - 2 * pad;
-  const first = layout.baselineY + pad;
-  const last = first + size * (lines.length - 1);
-  const height = last - first + bounder.getDimension(lines[0]!, size).height;
-  return { kind: 'text', x: layout.x + pad, y: last, width, height };
+  // isw-T2b-ca: the box is the DRAWN block's `LimitFinder` text extent
+  // (`LimitFinder.java:216-224`, `ifLabelShape`'s envelope), so a label
+  // wrapped by `style.wrapWidth()` (`Branch.java:248-258`) occupies every
+  // line it draws, not only its `\n` lines; `SheetBlock1`'s padding
+  // (`SheetBlock1.java:209-210`) is inside the block.
+  const tb = edgeLabelBlock(edge.label!, theme, edge.labelWrapped === true);
+  const fc = activityTextFontConfiguration(theme, layout.size, 'arrow');
+  const sheetBounder = klimtStringBounder(measurerAdapterOf(bounder), { family: fc.family, size: layout.size });
+  const mm = TextBlockUtils.getMinMax(tb, sheetBounder, false);
+  const top = layout.baselineY - layout.size * ASCENT_FRACTION;
+  return {
+    kind: 'text',
+    x: layout.x + mm.getMinX(),
+    y: top + mm.getMaxY() - TEXT_LIMIT_SHIFT,
+    width: mm.getMaxX() - mm.getMinX(),
+    height: mm.getMaxY() - mm.getMinY(),
+  };
 }
 
 /** Every `CompressShape` one `ActivityEdgeGeo` contributes -- never its
