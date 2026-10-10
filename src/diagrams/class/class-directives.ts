@@ -15,6 +15,7 @@ import type {
   HideTarget,
 } from './ast.js';
 import { directiveAppliesTo } from './class-directives-removal.js';
+import { rawStereotypeLabels } from './class-stereotype.js';
 export { parseHideStereotypeDirective, applyStereotypeHideShow } from './class-stereotype.js';
 
 /**
@@ -227,23 +228,13 @@ export function parseHideShowEntityDirective(line: string): HideShowEntityDirect
  * stereotype's `<<`-chunk list (`Stereotype#getLabels(DOUBLE_COMPARATOR)` →
  * `StereotypeDecoration#cutLabels`, which skips `<<<`-triple chunks) -- no
  * wildcard expansion, unlike `HideOrShow#match`'s `*` handling used by the
- * pattern/remove directives. Labels are compared with brackets stripped and
- * trimmed on BOTH sides because `Classifier.stereotype` stores the blob
- * outer-trimmed (see `class-stereotype.ts#splitStereotypeTokens`'s
- * reconstruction rationale).
+ * pattern/remove directives. The gender token and the labels are both the raw
+ * `<<...>>` text (`label.equals(gender)`, padding included): see
+ * `class-stereotype.ts#rawStereotypeLabels`.
  */
 function stereotypeGenderMatches(stereotype: string | undefined, what: string): boolean {
   if (stereotype === undefined) return false;
-  const pattern = what.slice(2, -2).trim();
-  const re = /(<{2,3})(.*?)>{2,3}/g;
-  const reconstructed = `<<${stereotype}>>`;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(reconstructed)) !== null) {
-    // cutLabels: `if (group.startsWith("<<<") == false) result.add(...)`.
-    if (m[1]!.length === 3) continue;
-    if (m[2]!.trim() === pattern) return true;
-  }
-  return false;
+  return rawStereotypeLabels(stereotype).includes(what);
 }
 
 /**

@@ -57,7 +57,12 @@ import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import { UComment } from '../../core/klimt/shape/UComment.js';
 import { TextBlockUtils } from '../../core/klimt/shape/TextBlockUtils.js';
 import { text, image } from '../../core/svg.js';
-import { StereotypeDecoration, cutLabels, GUILLEMET_NONE } from '../../core/stereo/StereotypeDecoration.js';
+import {
+  StereotypeDecoration,
+  cutLabels,
+  GUILLEMET_NONE,
+  GUILLEMET_DOUBLE_COMPARATOR,
+} from '../../core/stereo/StereotypeDecoration.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { getSpriteMonochrome, getSpriteColor4096 } from '../../core/sprite-registry.js';
 import {
@@ -108,7 +113,10 @@ export function visibleNamespaceStereotypeLabels(
   directives: readonly HideStereotypeDirective[],
 ): string[] {
   if (ns.stereotype === undefined) return [];
-  return cutLabels(`<<${ns.stereotype}>>`, GUILLEMET_NONE).filter((l) => !isStereotypeLabelHidden(l, directives));
+  const blob = `<<${ns.stereotype}>>`;
+  // Hide/show compares the DOUBLE_COMPARATOR (raw) label; display uses NONE.
+  const raw = cutLabels(blob, GUILLEMET_DOUBLE_COMPARATOR);
+  return cutLabels(blob, GUILLEMET_NONE).filter((l, i) => !isStereotypeLabelHidden(raw[i] ?? `<<${l}>>`, directives));
 }
 
 /**

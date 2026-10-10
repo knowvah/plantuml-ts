@@ -326,11 +326,22 @@ describe('applyHideShowEntityDirectives — <<stereotype>> gender (B2)', () => {
   });
 
   it('matches any one label of a stacked stereotype', () => {
-    const c = makeClassifier('C', { stereotype: 'Green >>  << Blue' });
+    // Source `<<Green>> <<Blue>>`: the blob is the text between the outermost `<<`/`>>`.
+    const c = makeClassifier('C', { stereotype: 'Green>> <<Blue' });
     const ast = makeAST([c]);
     ast.hideEntityDirectives = [{ kind: 'hideshowentity', action: 'hide', entityId: '<<Blue>>', target: 'fields' }];
     applyHideShowEntityDirectives(ast);
     expect(c.suppressFields).toBe(true);
+  });
+
+  it('compares the raw run, padding included (label.equals(gender), EntityGenderUtils.java:68-82)', () => {
+    // Source `<<Green >>  << Blue>>`: the label is `<< Blue>>`, not `<<Blue>>`
+    // (jar: tests/fixtures/isw-T2c-stereo/class-hide-gender).
+    const c = makeClassifier('C', { stereotype: 'Green >>  << Blue' });
+    const ast = makeAST([c]);
+    ast.hideEntityDirectives = [{ kind: 'hideshowentity', action: 'hide', entityId: '<<Blue>>', target: 'fields' }];
+    applyHideShowEntityDirectives(ast);
+    expect(c.suppressFields).toBeUndefined();
   });
 
   it('does not match a different label (exact equality, byStereotype has no wildcards)', () => {

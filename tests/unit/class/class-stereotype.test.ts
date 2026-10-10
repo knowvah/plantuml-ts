@@ -336,12 +336,16 @@ describe('parseHideStereotypeDirective', () => {
     });
   });
 
-  it('"hide <<pattern>> stereotype" captures the trimmed pattern', () => {
+  it('"hide <<pattern>> stereotype" captures the pattern', () => {
     expect(parseHideStereotypeDirective('hide <<stereo1>> stereotype')).toEqual({
       kind: 'hidestereotype',
       action: 'hide',
       pattern: 'stereo1',
     });
+  });
+
+  it('keeps the pattern untrimmed (gender.equals(label))', () => {
+    expect(parseHideStereotypeDirective('hide << x >> stereotype')?.pattern).toBe(' x ');
   });
 
   it('returns null for an unrelated line', () => {
@@ -354,21 +358,22 @@ describe('parseHideStereotypeDirective', () => {
 // isStereotypeLabelHidden
 // ---------------------------------------------------------------------------
 
+// The label is the raw `<<...>>` DOUBLE_COMPARATOR label (CucaDiagram.java:608-616).
 describe('isStereotypeLabelHidden', () => {
   it('default (no directives) is visible', () => {
-    expect(isStereotypeLabelHidden('stereo1', [])).toBe(false);
+    expect(isStereotypeLabelHidden('<<stereo1>>', [])).toBe(false);
   });
 
   it('a pattern-less hide directive hides every label', () => {
     const directives: HideStereotypeDirective[] = [{ kind: 'hidestereotype', action: 'hide' }];
-    expect(isStereotypeLabelHidden('stereo1', directives)).toBe(true);
-    expect(isStereotypeLabelHidden('anything', directives)).toBe(true);
+    expect(isStereotypeLabelHidden('<<stereo1>>', directives)).toBe(true);
+    expect(isStereotypeLabelHidden('<<anything>>', directives)).toBe(true);
   });
 
   it('a patterned hide only hides the matching label', () => {
     const directives: HideStereotypeDirective[] = [{ kind: 'hidestereotype', action: 'hide', pattern: 'stereo1' }];
-    expect(isStereotypeLabelHidden('stereo1', directives)).toBe(true);
-    expect(isStereotypeLabelHidden('stereo2', directives)).toBe(false);
+    expect(isStereotypeLabelHidden('<<stereo1>>', directives)).toBe(true);
+    expect(isStereotypeLabelHidden('<<stereo2>>', directives)).toBe(false);
   });
 
   it('later directives win (last-match-wins scan)', () => {
@@ -376,8 +381,8 @@ describe('isStereotypeLabelHidden', () => {
       { kind: 'hidestereotype', action: 'hide' },
       { kind: 'hidestereotype', action: 'show', pattern: 'stereo1' },
     ];
-    expect(isStereotypeLabelHidden('stereo1', directives)).toBe(false);
-    expect(isStereotypeLabelHidden('stereo2', directives)).toBe(true);
+    expect(isStereotypeLabelHidden('<<stereo1>>', directives)).toBe(false);
+    expect(isStereotypeLabelHidden('<<stereo2>>', directives)).toBe(true);
   });
 });
 
