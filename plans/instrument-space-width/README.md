@@ -99,9 +99,9 @@ every all-engine survey run with NO agents active (load).
 | Batch | Scope | Tasks | Parallel | Done |
 |---|---|---|---|---|
 | [0](batch-0/overview.md) | baseline, re-capture tool, harness rename | T0a, T0b, T0c | T0b ∥ T0a; T0c after T0b | [x] |
-| [1](batch-1/overview.md) | atomic instrument change + re-capture + classify | T1a, T1b | sequential | [ ] |
-| [2](batch-2/overview.md) | fix every reveal family (template; repeats) | from census | per batch | [ ] |
-| [final](batch-final/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
+| [1](batch-1/overview.md) | atomic instrument change + re-capture + classify | T1a, T1b | sequential | [x] |
+| [2](batch-2/overview.md) | fix every reveal family (template; repeats) | from census | per batch | [x] |
+| [final](batch-final/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [x] |
 
 ## Documents
 
@@ -125,4 +125,14 @@ conformance-harness-mirrors-index-ts.
 
 ## Status
 
-Not started.
+DONE 2026-10-09 (batches 0, 1, 2a, 2b, 2c, final). Exit bar (D10), each clause with evidence:
+
+- **Instrument exact:** 47,920 / 47,920 unscaled space-bearing oracle text runs equal `DeterministicMeasurer` (`measurements/instrument-probe.mts`; 557 runs in scaled diagrams excluded by construction — font-size printed at 3 decimals). Stop 4 never fired.
+- **`owed.json` empty:** classify b0 → final owed 0 (539 at b1).
+- **Every b0-conformant fixture conformant at final:** engdiff b0 → final 0 conformant losses; 24 new conformant (the former crash pages).
+- **0 elements away b0 → final:** away 0, toward 139.
+- **Production manifest:** b0 → b1 (the instrument change) 0 changes; b0 → final 1480 changed, every engine attributed to a named family fix (`measurements/b2a-prod-attribution.md`) per the D10-AMEND user ruling.
+- **The four lgm crash fixtures render as real diagrams; `ORACLE_CRASH_FIXTURES` removed.**
+- **Four gates green** (plus prettier); `DIVERGENCES.md` lone-space entry retired; ADR-001 addendum.
+
+Summary: tasks T0a–T0c, T1a–T1b, 5 + 3 + 2 fix tasks (batch 2a/2b/2c), T-exit, T-close-out — all done. Decisions flagged for review: D2/D3-AMEND (seam #4 float-rounds every width, not only spaces; implements the F3 user ruling), D10-AMEND (production changes allowed when attributed — user ruling), sequencing deviation (families fixed on `isw/T1b` before its merge, journal row 17), T2b-obj's write-set violation (row 26). Survey totals and families: `fixtures.md`. Follow-ons: `planning/next-missions.md` (isw section).

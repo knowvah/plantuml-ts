@@ -1,0 +1,12 @@
+surveying 265 gantt fixtures (concurrency 6)
+  25/265
+  50/265
+  75/265
+  100/265
+  125/265
+  150/265
+  175/265
+  200/265
+  225/265
+  250/265
+wrote plans/instrument-space-width/measurements/final-eng/parity-gantt.json — {"conformant":0,"structural-match":0,"diverged":265,"errored":0,"timeout":0,"oracle-error":0}
