@@ -20,7 +20,7 @@ import {
 } from '../../../scripts/parity-dashboard.js';
 import { tallySurvey, zeroDiffCount, registeredEngineTypes } from '../../../scripts/parity-dashboard-inputs.js';
 import { ratchetPinsOf, diffBaselineStatsOf, groupBaselineByType } from '../../../scripts/parity-dashboard-goldens.js';
-import { engineCell, noEngineColumn } from '../../../scripts/parity-dashboard-matrix.js';
+import { engineCell, noEngineColumn, surveyColumn } from '../../../scripts/parity-dashboard-matrix.js';
 import type { TypeRow } from '../../../scripts/dot-parity-rows.js';
 import type { FixtureRow } from '../../../scripts/svg-parity-survey.js';
 
@@ -322,7 +322,21 @@ describe('tallySurvey', () => {
       { verdict: 'diverged' },
       { verdict: 'errored' },
     ] as unknown as FixtureRow[];
-    expect(tallySurvey(rows)).toEqual({ conformant: 2, structural: 1, diverged: 1 });
+    expect(tallySurvey(rows)).toEqual({ conformant: 2, structural: 1, diverged: 1, errorPage: 0 });
+  });
+
+  it('counts errorPage rows, shown per bucket by surveyColumn', () => {
+    const rows = [
+      { verdict: 'conformant', errorPage: true },
+      { verdict: 'conformant' },
+      { verdict: 'diverged' },
+    ] as unknown as FixtureRow[];
+    const t = tallySurvey(rows);
+    expect(t.errorPage).toBe(1);
+    expect(surveyColumn({ ...t, generatedAt: 'g' }).cell).toBe('2 / 0 / 1 (1 error)');
+    expect(surveyColumn({ conformant: 3, structural: 0, diverged: 1, errorPage: 0, generatedAt: 'g' }).cell).toBe(
+      '3 / 0 / 1',
+    );
   });
 });
 
