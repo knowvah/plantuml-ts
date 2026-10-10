@@ -21,3 +21,7 @@ Method: per-engine counts from `production-manifest.mts --diff b0-prod.json`; ev
 | c4 | 1 | F2g error page |
 
 No unattributed change.
+
+# b2a -> b2: 696 more changed (sequence 315, unknown 108, activity 81, class 63, json 37, yaml 31, state 13, component 12, mindmap 12, object 10, usecase 7, c4 3, chart 2, hcl 2)
+
+Sampled 2 per engine (fc1b997a7 vs b2, production options): every non-sequence sample is T2b-ca M4 — coordinates moved by title/header/legend/chrome now printed once at 3 decimals (`formatShiftedCoordinates`, SvgGraphics.java:468-475; e.g. `x="105.50416666666663"` -> `105.504`). sequence + SEQUENCE-typed unknown: T2b-seq note tiles (canvas width, e.g. TeozTimelineIssues_0002 493 -> 687 px). Plus T2b-obj object/map/json `<style>` + stereotype padding, T2c-scale scaled activity numbers, T2c-stereo json/description stereotypes (per agent reports). No unattributed change.

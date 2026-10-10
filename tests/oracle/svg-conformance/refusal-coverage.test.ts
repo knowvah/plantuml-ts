@@ -856,8 +856,12 @@ describe('refusal coverage — baseline shape', () => {
     // rows. Derivation: 6368 + 237 = 6605.
     // 6605 -> 6606 / 6368 -> 6369 at lgm/close-b1e: 1 svg-class clone row.
     // Derivation: 6369 + 237 = 6606.
+    // 110 -> 86 / 237 -> 234 / 6369 -> 6372 at isw/T1b: 24 goldens stopped
+    // being jar crash pages under oracle seam #4 (jarRendered true); 3 of them
+    // (fakece-07, pixisi-38, runima-82) also render here now (weErrored
+    // false). Derivation: 6372 + 234 = 6606.
     expect(manifest.fixtures.length).toBe(6606);
-    expect(pinnedJarErrors.length).toBe(110);
+    expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
     // (2026-09-20): `sequence/recani-60-licu962` renders now that the
@@ -883,7 +887,7 @@ describe('refusal coverage — baseline shape', () => {
     // jar errors, we render -- refusal cohort jar-error).
     // 242 -> 241 at add4/merge-T3e-2: fukika-81-gite897 renders (stale pin retired).
     // 241 -> 237 at add4/merge-T3k: the 4 add4-T0b activity parser gaps render.
-    expect(pinnedErroring.length).toBe(237);
+    expect(pinnedErroring.length).toBe(234);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -955,7 +959,7 @@ describe('refusal coverage — baseline shape', () => {
     // 6363 -> 6364 at add4/fix-jucidi (1 svg-activity clones).
     // 6364 -> 6368 at lgm/close-b1e (4 svg-activity clones).
     // 6368 -> 6369 at lgm/close-b1e (1 svg-class clone).
-    expect(pinnedRendering.length).toBe(6369);
+    expect(pinnedRendering.length).toBe(6372);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

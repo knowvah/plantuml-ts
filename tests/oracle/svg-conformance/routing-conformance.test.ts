@@ -980,9 +980,14 @@ describe('routing conformance — jar-error classification', () => {
     // (zero-diff pins after oracle seam #3). Derivation: 5625 + 870 + 110 = 6605.
     // 5625 -> 5626 / 6605 -> 6606 at lgm/close-b1e: 1 svg-class clone row
     // (xadado-92-lazo250). Derivation: 5626 + 870 + 110 = 6606.
-    expect(pinnedAgree.length).toBe(5626);
+    // 5626 -> 5650 / 110 -> 86 at isw/T1b: oracle seam #4 gives U+0020 its
+    // width, so 24 goldens (18 activity, 6 unknown) stopped being SlotFinder
+    // crash pages and route ACTIVITY on both sides (re-pinned from a fresh
+    // measurement, plans/instrument-space-width/measurements/repin-jar-error.mts).
+    // Derivation: 5650 + 870 + 86 = 6606.
+    expect(pinnedAgree.length).toBe(5650);
     expect(pinnedMisroutes.length).toBe(870);
-    expect(pinnedJarErrors.length).toBe(110);
+    expect(pinnedJarErrors.length).toBe(86);
     expect(manifest.fixtures.length).toBe(6606);
   });
 

@@ -1,0 +1,10 @@
+surveying 204 wbs fixtures (concurrency 6)
+  25/204
+  50/204
+  75/204
+  100/204
+  125/204
+  150/204
+  175/204
+  200/204
+wrote plans/instrument-space-width/measurements/b2-eng/parity-wbs.json — {"conformant":0,"structural-match":0,"diverged":204,"errored":0,"timeout":0,"oracle-error":0}
