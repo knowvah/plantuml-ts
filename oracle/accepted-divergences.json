@@ -86,15 +86,6 @@
     },
     {
       "match": {
-        "id": "svg-class/gadufu-56-votu808"
-      },
-      "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
-      "acceptedAt": "2026-09-23",
-      "acceptedBy": "maintainer",
-      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=4, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=true structural=0 numeric=0. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
         "id": "svg-class/bixogo-47-xulu385"
       },
       "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
@@ -110,42 +101,6 @@
       "acceptedAt": "2026-09-23",
       "acceptedBy": "maintainer",
       "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=4, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=49. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
-        "id": "svg-class/xadado-92-lazo250"
-      },
-      "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
-      "acceptedAt": "2026-09-23",
-      "acceptedBy": "maintainer",
-      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=2, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=true structural=0 numeric=0. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
-        "id": "svg-class/luzive-62-zote562"
-      },
-      "scope": "svg-conformance class ledger (error page version/source identity -- cdd4 D6)",
-      "acceptedAt": "2026-09-26",
-      "acceptedBy": "maintainer",
-      "reason": "Error-page identity lines only. The fixture's jar output is PlantUML's syntax-error page, and after class-divergence-drive-3 T29 every number on it is exact except the two identity strings and their textLength: the version banner (jar `PlantUML version $version$ / $git.commit.id$`, ours `plantuml-ts version 0.1.0 / unknown`) and the source-name line (jar `[From in.puml (line N) ]`, ours `[From string (line N) ]`, because the port renders from a string, not a file). Re-verified 2026-09-26 (cdd4 T1) with render-diff: structural=4, numeric=0, all four on those two <text> elements. Evidence: plans/class-divergence-drive-3/diagnosis/C.md (C-17, C-18). Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=4 numeric=0, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=4 numeric=1. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
-        "id": "svg-class/sadamo-18-siva346"
-      },
-      "scope": "svg-conformance class ledger (error page version/source identity -- cdd4 D6)",
-      "acceptedAt": "2026-09-26",
-      "acceptedBy": "maintainer",
-      "reason": "Error-page identity lines only. The fixture's jar output is PlantUML's syntax-error page, and after class-divergence-drive-3 T29 every number on it is exact except the two identity strings and their textLength: the version banner (jar `PlantUML version $version$ / $git.commit.id$`, ours `plantuml-ts version 0.1.0 / unknown`) and the source-name line (jar `[From in.puml (line N) ]`, ours `[From string (line N) ]`, because the port renders from a string, not a file). Re-verified 2026-09-26 (cdd4 T1) with render-diff: structural=4, numeric=0, all four on those two <text> elements. Evidence: plans/class-divergence-drive-3/diagnosis/C.md (C-17, C-18). Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=4 numeric=0, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=4 numeric=0. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
-        "id": "svg-class/zuduxu-90-kosi876"
-      },
-      "scope": "svg-conformance class ledger (upstream crash page -- cdd4 D6)",
-      "acceptedAt": "2026-09-26",
-      "acceptedBy": "maintainer",
-      "reason": "The jar's output for this fixture is a CRASH page, not a diagram: graphviz 16.1.0 loses both `sh0006->sh0008` edges (`lost ... edge`), so `SvekEdge.getStartContactPoint()` is null, and `groupInheritance 2` wraps A in `EntityImageProtected`, whose `Neighborhood.drawU` sametail loop feeds the null point into `intersection` and throws a NullPointerException (`Neighborhood.java:80`, `:151`). The port draws the diagram. Precedent: DIVERGENCES.md, upstream crashes (deliberate). Re-verified 2026-09-26 (cdd4 T1): the jar in.svg is the QR-code error page (childCount 50 vs 7). Evidence: plans/class-divergence-drive-3/diagnosis/E3.md#zuduxu-90-kosi876 (E3-A). Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=4 numeric=6, identical to the 7beta11 measurement; the oracle's bytes changed only in the crash page's quote line, which QuoteUtils.java:340-349 draws by Collections.shuffle (random per run), so the premise stands. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=4 numeric=6. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
     },
     {
       "match": {
@@ -209,15 +164,6 @@
       "acceptedAt": "2026-09-30",
       "acceptedBy": "maintainer",
       "reason": "The description leaf embeds a `{{yaml ...}}` sub-diagram. cdd6 T2b made the outer canvas exact (0/5 -> 0/3, `svg/@width` 211 = jar) and cdd6 T3b/T5e closed the ink family; the residual is the embedded `<image>` width/height, off by 1 px, which is the nested yaml diagram's OWN size. `@startyaml` is a JsonDiagram laid out by Smetana in the jar and by @knowvah/dot-engine here (CLAUDE.md, one layout engine, ruling 2026-08-09; DIVERGENCES.md `Smetana-backed diagram types`), so the delta is the accepted Smetana geometry delta of the nested diagram, surfaced through the embed slot -- not a class or description defect. Mechanism: cdd6 decision-journal row 73 (T3b) and the cdd6 ledger row for jixibu (`open -> cdd7 (nested yaml image Δ1, Smetana path)`). Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30). The survey keeps printing `structural-match`; a fix in the yaml engine that makes the row conformant retires this entry via the ledger gate. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=11. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
-        "id": "svg-unknown/kokofa-47-deni140"
-      },
-      "scope": "svg-conformance unknown ledger (upstream crash page -- same identity class as rubebe, cdd4 D6; cdd7 D8)",
-      "acceptedAt": "2026-09-30",
-      "acceptedBy": "maintainer",
-      "reason": "The source declares the same JSON name twice. The jar throws on the duplicate (`CommandCreateJson.java:141-142,199-203` -> `IllegalStateException`) and emits its Java crash page (~60 text elements of stack trace). cdd6 T1c 11d12ed60 ported the refusal: `state-json-commands.ts#stateAlreadyExists` refuses the duplicate in pass one and the class refusal wins `mergeRefusals`, so this port renders its own `JSON already exists` error page. The two error pages can never byte-match: a JVM stack trace is not reproducible output (same identity class as `unknown/rubebe-45-sura795`, cdd4 D6 `upstream-crash`; DIVERGENCES.md `Refusal error page: shape and attributed engine`). render-diff 47/14 with `dotEqual` true (both sides skip graphviz). Mechanism: cdd6 ledger row kokofa (`accept-candidate`) and cdd6 T1c. Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30). Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=18 numeric=16. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
     }
   ],
   "retired": [
@@ -245,6 +191,78 @@
       "retiredAt": "2026-10-08",
       "retiredBy": "maintainer",
       "retiredReason": "Expired on its own `until`: the maintainer ordered the oracle seam fixed (2026-10-08). Fork seam #3 (37c07dce45a) makes StringBounderFromWidthTable answer matchesProperty(\"SVG\") like StringBounderSvg.java:67-69, the fixtures with embedded {{ }} diagrams were re-captured (lgm b92305594), and the fixture is conformant against the new oracle (lgm b1o and final surveys)."
+    },
+    {
+      "match": {
+        "id": "svg-class/gadufu-56-votu808"
+      },
+      "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
+      "acceptedAt": "2026-09-23",
+      "acceptedBy": "maintainer",
+      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=4, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=true structural=0 numeric=0. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-10",
+      "retiredBy": "maintainer",
+      "retiredReason": "Already conformant at aepp b0 (main 191253829, measurements/b0-eng): a change between 2026-09-30 (the committed parity-class.json, which still read structural-match) and 2026-10-09 closed it; the aepp final survey (de0ec0c8b) is the first committed survey to show it."
+    },
+    {
+      "match": {
+        "id": "svg-class/xadado-92-lazo250"
+      },
+      "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
+      "acceptedAt": "2026-09-23",
+      "acceptedBy": "maintainer",
+      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=2, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=true structural=0 numeric=0. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-10",
+      "retiredBy": "maintainer",
+      "retiredReason": "Already conformant at aepp b0 (main 191253829, measurements/b0-eng): a change between 2026-09-30 (the committed parity-class.json, which still read structural-match) and 2026-10-09 closed it; the aepp final survey (de0ec0c8b) is the first committed survey to show it."
+    },
+    {
+      "match": {
+        "id": "svg-class/luzive-62-zote562"
+      },
+      "scope": "svg-conformance class ledger (error page version/source identity -- cdd4 D6)",
+      "acceptedAt": "2026-09-26",
+      "acceptedBy": "maintainer",
+      "reason": "Error-page identity lines only. The fixture's jar output is PlantUML's syntax-error page, and after class-divergence-drive-3 T29 every number on it is exact except the two identity strings and their textLength: the version banner (jar `PlantUML version $version$ / $git.commit.id$`, ours `plantuml-ts version 0.1.0 / unknown`) and the source-name line (jar `[From in.puml (line N) ]`, ours `[From string (line N) ]`, because the port renders from a string, not a file). Re-verified 2026-09-26 (cdd4 T1) with render-diff: structural=4, numeric=0, all four on those two <text> elements. Evidence: plans/class-divergence-drive-3/diagnosis/C.md (C-17, C-18). Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=4 numeric=0, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=4 numeric=1. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-10",
+      "retiredBy": "maintainer",
+      "retiredReason": "Error-page rule (user ruling 2026-10-10, docs/svg-conformance.md \"Error pages\"): the stock jar errors (oracle/goldens/stock-error-pages.json) and we render our own error page, so the survey verdict is conformant with errorPage (aepp T2a 9d09e199a). The version-line ruling (DIVERGENCES.md) still holds in production."
+    },
+    {
+      "match": {
+        "id": "svg-class/sadamo-18-siva346"
+      },
+      "scope": "svg-conformance class ledger (error page version/source identity -- cdd4 D6)",
+      "acceptedAt": "2026-09-26",
+      "acceptedBy": "maintainer",
+      "reason": "Error-page identity lines only. The fixture's jar output is PlantUML's syntax-error page, and after class-divergence-drive-3 T29 every number on it is exact except the two identity strings and their textLength: the version banner (jar `PlantUML version $version$ / $git.commit.id$`, ours `plantuml-ts version 0.1.0 / unknown`) and the source-name line (jar `[From in.puml (line N) ]`, ours `[From string (line N) ]`, because the port renders from a string, not a file). Re-verified 2026-09-26 (cdd4 T1) with render-diff: structural=4, numeric=0, all four on those two <text> elements. Evidence: plans/class-divergence-drive-3/diagnosis/C.md (C-17, C-18). Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=4 numeric=0, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=4 numeric=0. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-10",
+      "retiredBy": "maintainer",
+      "retiredReason": "Error-page rule (user ruling 2026-10-10, docs/svg-conformance.md \"Error pages\"): the stock jar errors (oracle/goldens/stock-error-pages.json) and we render our own error page, so the survey verdict is conformant with errorPage (aepp T2a 9d09e199a). The version-line ruling (DIVERGENCES.md) still holds in production."
+    },
+    {
+      "match": {
+        "id": "svg-class/zuduxu-90-kosi876"
+      },
+      "scope": "svg-conformance class ledger (upstream crash page -- cdd4 D6)",
+      "acceptedAt": "2026-09-26",
+      "acceptedBy": "maintainer",
+      "reason": "The jar's output for this fixture is a CRASH page, not a diagram: graphviz 16.1.0 loses both `sh0006->sh0008` edges (`lost ... edge`), so `SvekEdge.getStartContactPoint()` is null, and `groupInheritance 2` wraps A in `EntityImageProtected`, whose `Neighborhood.drawU` sametail loop feeds the null point into `intersection` and throws a NullPointerException (`Neighborhood.java:80`, `:151`). The port draws the diagram. Precedent: DIVERGENCES.md, upstream crashes (deliberate). Re-verified 2026-09-26 (cdd4 T1): the jar in.svg is the QR-code error page (childCount 50 vs 7). Evidence: plans/class-divergence-drive-3/diagnosis/E3.md#zuduxu-90-kosi876 (E3-A). Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=4 numeric=6, identical to the 7beta11 measurement; the oracle's bytes changed only in the crash page's quote line, which QuoteUtils.java:340-349 draws by Collections.shuffle (random per run), so the premise stands. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=4 numeric=6. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-10",
+      "retiredBy": "maintainer",
+      "retiredReason": "Error-page rule (user ruling 2026-10-10): the oracle-regime jar crashes (provenance oracle-widths in oracle/goldens/stock-error-pages.json; graphviz loses the sametail edge, Neighborhood.java:72-80,151) and aepp T1g (e47070388) mirrors that crash, so the survey verdict is conformant with errorPage."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/kokofa-47-deni140"
+      },
+      "scope": "svg-conformance unknown ledger (upstream crash page -- same identity class as rubebe, cdd4 D6; cdd7 D8)",
+      "acceptedAt": "2026-09-30",
+      "acceptedBy": "maintainer",
+      "reason": "The source declares the same JSON name twice. The jar throws on the duplicate (`CommandCreateJson.java:141-142,199-203` -> `IllegalStateException`) and emits its Java crash page (~60 text elements of stack trace). cdd6 T1c 11d12ed60 ported the refusal: `state-json-commands.ts#stateAlreadyExists` refuses the duplicate in pass one and the class refusal wins `mergeRefusals`, so this port renders its own `JSON already exists` error page. The two error pages can never byte-match: a JVM stack trace is not reproducible output (same identity class as `unknown/rubebe-45-sura795`, cdd4 D6 `upstream-crash`; DIVERGENCES.md `Refusal error page: shape and attributed engine`). render-diff 47/14 with `dotEqual` true (both sides skip graphviz). Mechanism: cdd6 ledger row kokofa (`accept-candidate`) and cdd6 T1c. Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30). Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=18 numeric=16. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-10",
+      "retiredBy": "maintainer",
+      "retiredReason": "Error-page rule (user ruling 2026-10-10, docs/svg-conformance.md \"Error pages\"): the stock jar errors (oracle/goldens/stock-error-pages.json) and we render our own error page, so the survey verdict is conformant with errorPage (aepp T2a 9d09e199a)."
     }
   ]
 }

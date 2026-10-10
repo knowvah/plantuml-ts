@@ -989,10 +989,12 @@ describe('routing conformance — jar-error classification', () => {
     // (the former crash pages, now zero-diff pins). Derivation: 5668 + 870 + 86 = 6624.
     // 5668 -> 5670 / 870 -> 868 at isw/close: sequence licole-34-vejo527 (`+ XXX`) and loteba-26-konu854 (`& return`) render after the batch-2 sequence ports; re-pinned from a fresh measurement by scripts/repin-sequence-baselines.ts.
     // Derivation: 5670 + 868 + 86 = 6624.
-    expect(pinnedAgree.length).toBe(5670);
+    // 5670 -> 5671 / 6624 -> 6625 at aepp/exit: 1 svg-activity clone row
+    // (tidoda-12-juxu745, zero-diff pin). Derivation: 5671 + 868 + 86 = 6625.
+    expect(pinnedAgree.length).toBe(5671);
     expect(pinnedMisroutes.length).toBe(868);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(6624);
+    expect(manifest.fixtures.length).toBe(6625);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
