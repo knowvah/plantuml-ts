@@ -14,6 +14,7 @@ import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { Pragma } from '../../core/skin/Pragma.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
 import type { ActivityNode } from './ast.js';
+import type { SwimlaneStrategy } from './swimlane-strategy.js';
 import { LINE_STYLE } from '../../core/link-style-regex.js';
 
 // ---------------------------------------------------------------------------
@@ -419,6 +420,8 @@ export interface ParseContext {
   swimlanes: string[];
   swimlaneSet: Set<string>;
   currentSwimlane: string | undefined;
+  /** aepp-T1c: `ActivityDiagram3#swimlaneStrategy`, see `swimlane-strategy.ts`. */
+  swimlaneStrategy: SwimlaneStrategy | undefined;
   /** O (add2 T3i): `|#color|name|`'s background, keyed by lane name --
    *  `Swimlanes.java:160-161` (`setSpecificColorTOBEREMOVED(BACK, color)`)
    *  updates it on every occurrence that carries a color, never cleared
