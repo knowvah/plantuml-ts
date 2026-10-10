@@ -320,4 +320,9 @@ export interface ActivityGeometry {
    *  (`Swimlanes.java:239,246` -- `ug.getStringBounder()` sizes and draws).
    *  Optional only for hand-built `ActivityGeometry` test literals. */
   measurer?: StringMeasurer;
+  /** isw-T2c-scale: the export will scale this document
+   *  (`scale-command.ts#isExportScaled` of `ast.scale` and the theme's dpi),
+   *  so the draw defers number formatting to the scale pass
+   *  (`SvgGraphics.java:468-475` formats once, after the scale). */
+  exportScaled?: true;
 }

@@ -25,6 +25,7 @@ import { applyColorMapperToFragment, colorMapperOf } from '../../core/klimt/colo
 import { edgeDecorationVector } from './layout/compress/shapes-of-terminal.js';
 import { SVG_CANVAS_CEIL, activityDocumentMargin } from './activity-layout-constants.js';
 import { withActivityMeasurer } from './activity-string-bounder.js';
+import { withDeferredFormat } from '../../core/svg-format.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -426,46 +427,15 @@ export function renderActivity(geo: ActivityGeometry, skinTheme: Theme): RenderF
   const spriteTheme = geo.sprites === undefined ? skinTheme : { ...skinTheme, sprites: geo.sprites };
   // isw-T2-act F1: draw through the layout's own bounder (`Swimlanes.java:239,246`).
   const theme = geo.measurer === undefined ? spriteTheme : withActivityMeasurer(spriteTheme, geo.measurer);
-  const children: string[] = [];
-
-  // NO background rect here. The jar paints one from `SvgGraphics`'s own
-  // constructor, guarded (`klimt/drawing/svg/SvgGraphics.java:186-192`) so
-  // that `#FFFFFF`, `#000000` and `#00000000` paint NOTHING, and it is sized
-  // to the FINAL, post-chrome canvas -- neither of which `renderActivity` can
-  // see. Both live in `core/assemble-svg.ts#finalizeActivityFragment`
-  // alongside the identical sequence/state/json mechanisms. The background
-  // itself still reaches the document, via the root `style` attribute
-  // `assembleDocumentShell` builds from `fragment.background`
-  // (`SvgGraphics.java:805-806`).
-  const hasChrome = geo.swimlanes.length > 1;
-
-  if (hasChrome) {
-    children.push(renderSwimlaneChrome(geo, theme));
-  } else {
-    // add4-T3d: `TextBlockInterceptorUDrawable` (single lane only,
-    // `Swimlanes.java:251-258`) -- goto lines drawn as the nodes are.
-    children.push(...renderNodesDispatchingGotos(geo.nodes, theme));
-  }
-
-  // T3h: `Swimlanes.java:350-352`'s Cross pass draws a cross-lane
-  // connection's own non-`Snake` decoration immediately, BEFORE
-  // `cross.flushUg()` drains every deferred `Snake` below -- see
-  // `renderCrossLaneDecorations`'s own doc.
-  children.push(renderCrossLaneDecorations(geo, theme));
-
-  for (const edge of geo.edges) {
-    children.push(renderEdge(edge, theme));
-  }
-
-  if (hasChrome) {
-    children.push(renderSwimlaneTitles(geo, theme));
-  }
-
+  // isw-T2c-scale: scaled => formatted once, by the scale pass (SvgGraphics.java:468-475).
+  const deferred = geo.exportScaled === true;
+  const body = withDeferredFormat(deferred, () => drawActivityBody(geo, theme));
   const raw = preChromeDims(geo, theme);
   return {
+    ...(deferred ? { numbersDeferred: true as const } : {}),
     // add4-T3d: `TitledDiagram#muteColorMapper` maps EVERY drawn colour
     // (`ColorMapper.java:80-91`), applied once to the assembled body.
-    body: applyColorMapperToFragment(children.join(''), colorMapperOf(theme)),
+    body: applyColorMapperToFragment(body, colorMapperOf(theme)),
     width: geo.totalWidth,
     height: geo.totalHeight,
     background: theme.colors.background,
@@ -491,4 +461,40 @@ export function renderActivity(geo: ActivityGeometry, skinTheme: Theme): RenderF
     // `DEFAULT_PRESERVE_ASPECT_RATIO` ('none') at that consumer.
     ...(theme.preserveAspectRatio !== undefined ? { preserveAspectRatio: theme.preserveAspectRatio } : {}),
   };
+}
+
+/** {@link renderActivity}'s draw, in its documented order. */
+function drawActivityBody(geo: ActivityGeometry, theme: Theme): string {
+  const children: string[] = [];
+
+  // NO background rect here: the jar paints it from `SvgGraphics`'s
+  // constructor, guarded (`SvgGraphics.java:186-192`: white, black and
+  // transparent paint nothing) and sized to the FINAL canvas -- both in
+  // `core/assemble-svg-activity.ts#finalizeActivityFragment`. The colour
+  // still reaches the root `style` (`SvgGraphics.java:805-806`).
+  const hasChrome = geo.swimlanes.length > 1;
+
+  if (hasChrome) {
+    children.push(renderSwimlaneChrome(geo, theme));
+  } else {
+    // add4-T3d: `TextBlockInterceptorUDrawable` (single lane only,
+    // `Swimlanes.java:251-258`) -- goto lines drawn as the nodes are.
+    children.push(...renderNodesDispatchingGotos(geo.nodes, theme));
+  }
+
+  // T3h: `Swimlanes.java:350-352`'s Cross pass draws a cross-lane
+  // connection's own non-`Snake` decoration immediately, BEFORE
+  // `cross.flushUg()` drains every deferred `Snake` below -- see
+  // `renderCrossLaneDecorations`'s own doc.
+  children.push(renderCrossLaneDecorations(geo, theme));
+
+  for (const edge of geo.edges) {
+    children.push(renderEdge(edge, theme));
+  }
+
+  if (hasChrome) {
+    children.push(renderSwimlaneTitles(geo, theme));
+  }
+
+  return children.join('');
 }

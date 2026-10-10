@@ -30,6 +30,7 @@ import { tileFork, tileGroup, tileSplit, tileSwitch, tileNote, wrapWhileNotes } 
 import { consumeArrowLabel, withInLabel } from './tile-layout-inlabel.js';
 import type { PendingInLabel } from './tile-layout-inlabel.js';
 import { isEarlyLeafKind, isSimpleLeaf, tileEarlyLeaf, tileSimpleLeaf } from './tile-layout-leaves.js';
+import { isExportScaled } from '../../../core/scale-command.js';
 
 // Re-export geometry types so renderer and index can import from one place.
 export type { ActivityGeometry, ActivityNodeGeo, ActivityEdgeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
@@ -413,7 +414,8 @@ export function layoutActivity(ast: ActivityDiagramAST, skinTheme: Theme, measur
   // origin/size is derived AFTER layout, dynamically, from the placed
   // geometry's own ink extent (`assign-coordinates-full.ts
   // #computeCanvasOrigin`) -- never a flat baseX/baseY constant.
-  const geo = assignCoordinates(root, ast, { x: 0, y: 0 }, bounder, theme);
+  const placed = assignCoordinates(root, ast, { x: 0, y: 0 }, bounder, theme);
+  const geo = isExportScaled(ast.scale, skinTheme.dpi) ? { ...placed, exportScaled: true as const } : placed;
   return ast.sprites === undefined ? { ...geo, measurer } : { ...geo, sprites: ast.sprites, measurer };
 }
 

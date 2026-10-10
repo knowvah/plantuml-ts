@@ -42,6 +42,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import { Warning } from '../../core/warning/Warning.js';
 import type { ActivityDiagramAST } from './ast.js';
 import { SVG_CANVAS_CEIL, type DocumentMargin } from './activity-layout-constants.js';
+import { withDeferredFormat } from '../../core/svg-format.js';
 
 /** The `new Warning(...)` texts `CommandSkinParam#executeArg` adds, keyed by
  *  the lower-cased skin parameter name (`equalsIgnoreCase`).
@@ -129,7 +130,10 @@ export function withWarningBanner(
       banner.drawU(ug.apply(new UTranslate(margin.left, margin.top)), Math.max(bannerW, rawW));
     },
   };
-  const drawn = renderDrawableToFragment(drawable, { width: 0, height: 0, measurer, uid: BANNER_UID });
+  // isw-T2c-scale: drawn into a scaled document, formatted by its scale pass.
+  const drawn = withDeferredFormat(fragment.numbersDeferred === true, () =>
+    renderDrawableToFragment(drawable, { width: 0, height: 0, measurer, uid: BANNER_UID }),
+  );
   const stackW = Math.max(bannerW, rawW);
   const stackH = bannerH + rawH;
   return {

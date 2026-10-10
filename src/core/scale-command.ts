@@ -220,3 +220,19 @@ export function resolveScaleFactor(
       return clampScale(Math.min(1, Math.min(spec.width / width, spec.height / height))) * dpiFactor;
   }
 }
+
+/** `SkinParam#getDpi()`'s default (`skin/SkinParam.java:649-656`). */
+const DEFAULT_SCALE_DPI = 96;
+
+/**
+ * isw-T2c-scale: whether the export will multiply the document by a factor
+ * it resolves AFTER drawing -- a `scale` directive, or a `skinparam dpi`
+ * other than 96 (`TextBlockExporter#computeScaleFactor`, `core/
+ * TextBlockExporter.java:204-208`). Such a document is drawn with its
+ * numbers deferred (`svg-format.ts#withDeferredFormat`), so the scale pass
+ * formats each one once, as `SvgGraphics#format` does
+ * (`SvgGraphics.java:468-475`).
+ */
+export function isExportScaled(spec: ScaleSpec | undefined, dpi: number | undefined): boolean {
+  return spec !== undefined || (dpi ?? DEFAULT_SCALE_DPI) !== DEFAULT_SCALE_DPI;
+}

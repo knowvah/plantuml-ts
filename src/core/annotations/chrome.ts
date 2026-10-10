@@ -75,6 +75,7 @@ import type { SpriteRegistry } from '../sprite-commands.js';
 import { shiftFragmentBody } from './coord-shift.js';
 import { addMainframe, nonNullDisplay, type ChromeTextContext, type FramedOriginal } from './chrome-mainframe.js';
 import { inkOfBody, type InkBox } from './body-ink.js';
+import { withDeferredFormat } from '../svg-format.js';
 
 /** T2's `resolveAnnotationStyles` return shape, re-exported under the name
  *  T4's interface contract (`plans/g0b-annotations/batch-2/T4-chrome-core.md`)
@@ -323,12 +324,31 @@ function frameInkOf(
   return { ink: inkOfBody(fragment.body, measurer) };
 }
 
+/**
+ * Composes the annotation chrome around `fragment`. A `numbersDeferred`
+ * fragment (`RenderFragment.numbersDeferred`, isw-T2c-scale) has its chrome
+ * drawn deferred too: upstream draws chrome through the document's one
+ * scaled `UGraphic` (`TextBlockExporter.java:165-177`), so the scale pass
+ * formats its numbers once (`SvgGraphics.java:468-475`).
+ */
 export function applyChrome(
   fragment: RenderFragment,
   annotations: DiagramAnnotations,
   styles: AnnotationStyles,
   measurer: StringMeasurer,
   sprites?: SpriteRegistry,
+): RenderFragment {
+  return withDeferredFormat(fragment.numbersDeferred === true, () =>
+    composeChrome(fragment, annotations, styles, measurer, sprites),
+  );
+}
+
+function composeChrome(
+  fragment: RenderFragment,
+  annotations: DiagramAnnotations,
+  styles: AnnotationStyles,
+  measurer: StringMeasurer,
+  sprites: SpriteRegistry | undefined,
 ): RenderFragment {
   if (isEmpty(annotations)) return fragment;
 

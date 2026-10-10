@@ -13,7 +13,7 @@ import { attrs, group, rect } from './svg.js';
 import { paintToSvg } from './paint.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
 import { CONTENT_G_OPEN_RE } from './klimt/document-shell.js';
-import { scaleFragmentBody } from './TextBlockExporter.js';
+import { formatScaledFragmentBody } from './TextBlockExporter.js';
 import { resolveScaleFactor } from './scale-command.js';
 import { mapOutsideInlineDefs } from './svg-defs.js';
 import { DEFAULT_SVG_DECIMALS, formatDecimal } from './svg-format.js';
@@ -115,7 +115,7 @@ function spliceIntoActivityContentGroup(body: string, markup: string): string {
 }
 
 /**
- * add4-T3b (ACT-SCALE): the activity attributes `scaleFragmentBody`'s
+ * add4-T3b (ACT-SCALE): the activity attributes `formatScaledFragmentBody`'s
  * mindmap vocabulary (`TextBlockExporter.ts#SCALABLE_ATTR_RE`) does not
  * name. Every one is a `SvgGraphics#format`-ed length (`SvgGraphics.java:
  * 468-475`): ellipse centres, line endpoints, and the dash pattern
@@ -132,12 +132,13 @@ function scaleNumbers(value: string, factor: number): string {
 }
 
 /** The whole composed activity body at `factor` -- upstream draws it through
- *  ONE scaled `UGraphic` (`TextBlockExporter.java:165-177`). `factor === 1`
- *  is byte-identical. Inline defs are stepped over, as `scaleFragmentBody`
- *  does (gradient `x1`/`y1` are objectBoundingBox fractions). */
+ *  ONE scaled `UGraphic` (`TextBlockExporter.java:165-177`). Inline defs are
+ *  stepped over, as `scaleFragmentBody` does (gradient `x1`/`y1` are
+ *  objectBoundingBox fractions). Each number is formatted here, once, after
+ *  the multiply (`SvgGraphics.java:468-475`) -- the body was drawn deferred
+ *  (`RenderFragment.numbersDeferred`), so this runs at factor 1 too. */
 function scaleActivityBody(body: string, factor: number): string {
-  if (factor === 1) return body;
-  return mapOutsideInlineDefs(scaleFragmentBody(body, factor), (segment) =>
+  return mapOutsideInlineDefs(formatScaledFragmentBody(body, factor), (segment) =>
     segment.replace(ACTIVITY_EXTRA_SCALABLE_ATTR_RE, (_m, name: string, value: string) =>
       attrs([[name, scaleNumbers(value, factor)]]).trimStart(),
     ),
@@ -179,7 +180,7 @@ export function finalizeActivityFragment(fragment: RenderFragment): RenderFragme
   // the `ensureVisible` integers) and the background rect scale with the
   // body (`SvgGraphics.java:801-822`).
   const factor = resolveScaleFactor(fragment.scaleSpec, fragment.width, fragment.height, fragment.dpi);
-  if (factor === 1) return { ...canonical, body };
+  if (factor === 1 && fragment.numbersDeferred !== true) return { ...canonical, body };
   return {
     ...canonical,
     body: scaleActivityBody(body, factor),

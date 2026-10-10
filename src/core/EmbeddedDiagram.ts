@@ -157,6 +157,7 @@ import type { Atom } from './klimt/creole/SheetBlock1.js';
 import type { ISkinSimple } from './style/ISkinSimple.js';
 import type { Paint } from './paint.js';
 import { enterNestedDiagramLayout, exitNestedDiagramLayout } from './graph-layout.js';
+import { withDeferredFormat } from './svg-format.js';
 
 /** `klimt/shape/Line.java` (5 lines), ported inline — see the module doc
  *  comment's "`Line`" section for why this is not a separate file. */
@@ -406,7 +407,9 @@ export class EmbeddedDiagram extends TextBlockMemoized implements Line, Atom {
     if (this.textBlock === undefined) {
       enterNestedDiagramLayout();
       try {
-        this.textBlock = this.renderer.render(this.lines, this.skinParam);
+        // isw-T2c-scale: the nested diagram is its own document (its own
+        // `SvgGraphics`, so its own `format`) -- never the host's deferral.
+        this.textBlock = withDeferredFormat(false, () => this.renderer.render(this.lines, this.skinParam));
       } finally {
         exitNestedDiagramLayout();
       }
