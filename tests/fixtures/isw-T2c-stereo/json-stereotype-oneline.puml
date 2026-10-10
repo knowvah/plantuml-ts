@@ -1,0 +1,3 @@
+@startuml
+json J3 <<  sp  >> {"b": 2}
+@enduml
