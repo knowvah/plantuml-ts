@@ -58,6 +58,8 @@ import { floorAtMinimumWidth, objectBodyReportsPorts } from './class-object-map-
 import { objectDisplayText } from './class-object-display.js';
 import { measureObjectFields, methodOrFieldHeight } from './class-object-fields.js';
 import { resolveStyleStereotypeTags } from './class-stereotype.js';
+import { headerFontSpec, resolveHeaderFontOverride, resolveObjectBodyFont } from './object-kind-style.js';
+import type { HeaderFontOverride } from './object-kind-style.js';
 
 // ---------------------------------------------------------------------------
 // Local interfaces (grouped at top — a declaration sitting between two
@@ -69,7 +71,7 @@ import { resolveStyleStereotypeTags } from './class-stereotype.js';
  *  both needed by every branch of {@link measureObjectClassifier}. */
 interface ObjectTitleInfo {
   title: Dim;
-  nameFontSizeOverride: number | undefined;
+  nameFont: HeaderFontOverride;
 }
 
 /** Bundles {@link buildEnhancedObjectGeo}'s args -- introduced solely to
@@ -79,7 +81,7 @@ interface EnhancedObjectBranchParams {
   theme: Theme;
   measurer: StringMeasurer;
   title: Dim;
-  nameFontSizeOverride: number | undefined;
+  nameFont: HeaderFontOverride;
   enhancedBody: EnhancedBodyGeo;
 }
 
@@ -91,7 +93,7 @@ interface FieldBasedObjectGeoParams {
   measurer: StringMeasurer;
   showFields: boolean;
   title: Dim;
-  nameFontSizeOverride: number | undefined;
+  nameFont: HeaderFontOverride;
 }
 
 // ---------------------------------------------------------------------------
@@ -110,7 +112,7 @@ const OBJECT_X_MARGIN_CIRCLE = 5;
  *  change. `<style> object { header { FontSize N } } }` is resolved HERE
  *  (not inside `headerRows`) because it feeds `nameDim`/`title.width`,
  *  upstream of the box's own final `width` -- `headerRows`'s own
- *  `nameFontSizeOverride` doc comment (./class-object-map-header.ts). */
+ *  `nameFont` doc comment (./class-object-map-header.ts). */
 function computeObjectTitle(classifier: Classifier, theme: Theme, measurer: StringMeasurer): ObjectTitleInfo {
   // `headerFontSize` wins over the bucket's own `fontSize` for the NAME row,
   // but does not REPLACE it: `addConFont("object", SName.object)`
@@ -119,25 +121,11 @@ function computeObjectTitle(classifier: Classifier, theme: Theme, measurer: Stri
   // `{root, element, objectDiagram, object, header}`
   // (`EntityImageObject.java:132-134`) matches it by SET CONTAINMENT. So a
   // bare `skinparam object { FontSize 16 }` reaches the header even with no
-  // header-specific override. Reading only `headerFontSize` left the name at
-  // the diagram default -- jar draws `object/tenalu-53-meri239`'s B at 16
-  // where this port drew 14.
-  const objectBucket = theme.colors.elements?.['object'];
-  // A stereotype-scoped size wins over both: upstream's
-  // `getStyleHeader().withTOBECHANGED(stereotype)`
-  // (`EntityImageObject.java:132-134`) merges the stereotype-qualified style
-  // over the plain one. `object/tenalu-53-meri239` sets
-  // `object { FontSize 16, <<Foo1>> { FontSize 8 } }`: its `A` must draw at 8
-  // and its unstereotyped `B` at 16.
-  const byStereo = objectBucket?.fontSizeByStereo;
-  const stereoSize =
-    byStereo === undefined
-      ? undefined
-      : resolveStyleStereotypeTags(classifier)
-          .map((t) => byStereo[t.toLowerCase()])
-          .find((v) => v !== undefined);
-  const nameFontSizeOverride = stereoSize ?? objectBucket?.headerFontSize ?? objectBucket?.fontSize;
-  const nameFontSpec = { family: theme.fontFamily, size: nameFontSizeOverride ?? theme.fontSize };
+  // header-specific override; a stereotype-scoped size wins over both
+  // (`withTOBECHANGED(stereotype)`, jar `object/tenalu-53-meri239`).
+  // FontName / FontStyle resolve the same way (`object-kind-style.ts`).
+  const nameFont = resolveHeaderFontOverride(theme, 'object', resolveStyleStereotypeTags(classifier));
+  const nameFontSpec = headerFontSpec(theme, nameFont);
   // Tilde escapes resolved before measuring -- see `class-object-display.ts`.
   const nameM = measurer.measure(objectDisplayText(classifier.display), nameFontSpec);
   const nameDim: Dim = {
@@ -145,7 +133,7 @@ function computeObjectTitle(classifier: Classifier, theme: Theme, measurer: Stri
     height: nameM.height + OBJECT_NAME_PADDING * 2,
   };
   const stereoDim = measureStereo(classifier, theme, measurer);
-  return { title: titleDimension(nameDim, stereoDim), nameFontSizeOverride };
+  return { title: titleDimension(nameDim, stereoDim), nameFont };
 }
 
 /** The enhanced-body (separator/tree-list) branch of
@@ -154,7 +142,7 @@ function computeObjectTitle(classifier: Classifier, theme: Theme, measurer: Stri
  *  the branch's args (see {@link EnhancedObjectBranchParams}) solely to
  *  keep this function's own param count under the file's cap. */
 function buildEnhancedObjectGeo(params: EnhancedObjectBranchParams): MeasuredClassifier {
-  const { classifier, theme, measurer, title, nameFontSizeOverride, enhancedBody } = params;
+  const { classifier, theme, measurer, title, nameFont, enhancedBody } = params;
   const width = floorAtMinimumWidth(
     Math.max(enhancedBody.width, title.width + OBJECT_X_MARGIN_CIRCLE * 2),
     theme,
@@ -164,7 +152,7 @@ function buildEnhancedObjectGeo(params: EnhancedObjectBranchParams): MeasuredCla
     boxWidth: width,
     namePadding: OBJECT_NAME_PADDING,
     underlineName: theme.strictUml === true,
-    nameFontSizeOverride,
+    nameFont,
   });
   return {
     width,
@@ -191,8 +179,18 @@ function buildEnhancedObjectGeo(params: EnhancedObjectBranchParams): MeasuredCla
  *  whenever showFields is true, regardless of whether there are visible
  *  members (the empty-fields placeholder is ALSO wrapped in one). */
 function buildFieldBasedObjectGeo(params: FieldBasedObjectGeoParams): MeasuredClassifier {
-  const { classifier, theme, measurer, showFields, title, nameFontSizeOverride } = params;
-  const { dim: fieldsDim, rows: fieldRows, flat } = measureObjectFields(classifier, theme, measurer, showFields);
+  const { classifier, theme, measurer, showFields, title, nameFont } = params;
+  const {
+    dim: fieldsDim,
+    rows: fieldRows,
+    flat,
+  } = measureObjectFields(
+    classifier,
+    theme,
+    measurer,
+    showFields,
+    resolveObjectBodyFont(theme, 'object', resolveStyleStereotypeTags(classifier)),
+  );
   const fieldsHeight = methodOrFieldHeight(fieldsDim.height, showFields);
 
   const width = floorAtMinimumWidth(
@@ -206,7 +204,7 @@ function buildFieldBasedObjectGeo(params: FieldBasedObjectGeoParams): MeasuredCl
     boxWidth: width,
     namePadding: OBJECT_NAME_PADDING,
     underlineName: theme.strictUml === true,
-    nameFontSizeOverride,
+    nameFont,
   });
   for (const r of fieldRows) rows.push({ ...r, y: title.height + r.y });
 
@@ -269,7 +267,7 @@ export function measureObjectClassifier(
   // `sprites?: SpriteRegistry` optionality).
   sprites?: SpriteRegistry,
 ): MeasuredClassifier {
-  const { title, nameFontSizeOverride } = computeObjectTitle(classifier, theme, measurer);
+  const { title, nameFont } = computeObjectTitle(classifier, theme, measurer);
   const showFields = !suppressMemberSection;
 
   // G3/O4: `BodierLikeClassOrObject#getBody`'s OBJECT branch ALWAYS routes
@@ -285,7 +283,8 @@ export function measureObjectClassifier(
   // already-verified common case while adding ONLY the separator/tree
   // capability. `fontSpec` here is the FIELD font (theme default) -- the
   // header override above is name-row-only, unrelated.
-  const fontSpec = { family: theme.fontFamily, size: theme.fontSize };
+  const bodyFont = resolveObjectBodyFont(theme, 'object', resolveStyleStereotypeTags(classifier));
+  const fontSpec = { family: bodyFont.family, size: bodyFont.size };
   const enhancedBody =
     isEnhancedBody(classifier.rawBodyLines) && showFields
       ? measureEnhancedBody(classifier.rawBodyLines!, {
@@ -298,8 +297,8 @@ export function measureObjectClassifier(
       : undefined;
 
   if (enhancedBody !== undefined) {
-    return buildEnhancedObjectGeo({ classifier, theme, measurer, title, nameFontSizeOverride, enhancedBody });
+    return buildEnhancedObjectGeo({ classifier, theme, measurer, title, nameFont, enhancedBody });
   }
 
-  return buildFieldBasedObjectGeo({ classifier, theme, measurer, showFields, title, nameFontSizeOverride });
+  return buildFieldBasedObjectGeo({ classifier, theme, measurer, showFields, title, nameFont });
 }

@@ -29,7 +29,9 @@
 
 import type { Classifier, Member } from './ast.js';
 import type { Theme } from '../../core/theme.js';
-import type { StringMeasurer } from '../../core/measurer.js';
+import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
+import type { ObjectKindFont } from './object-kind-style.js';
+import { memberBaseFont } from './class-member-creole.js';
 import type { ClassifierGeo } from './layout.js';
 import type { Dim } from './class-object-map-header.js';
 import { baselineOffsetFor } from './class-object-map-header.js';
@@ -92,11 +94,11 @@ const OBJECT_SMALL_ICON = 14;
  * tabSize 20`, 14pt font -> tab stop 56 = 14*4, NOT a function of the
  * configured `20` at all).
  */
-function tabStopWidthPx(theme: Theme, measurer: StringMeasurer): number {
+function tabStopWidthPx(theme: Theme, measurer: StringMeasurer, fontSpec: FontSpec): number {
   const nb = theme.tabSize ?? 8;
   const spaces = nb >= 1 && nb < 7 ? ' '.repeat(nb) : '        ';
-  const width = measurer.measure(spaces, { family: theme.fontFamily, size: theme.fontSize }).width;
-  return width === 0 ? theme.fontSize * 4 : width;
+  const width = measurer.measure(spaces, fontSpec).width;
+  return width === 0 ? fontSpec.size * 4 : width;
 }
 
 /** Format a member text string for object diagram instances: the raw,
@@ -184,28 +186,24 @@ export function measureObjectFields(
   theme: Theme,
   measurer: StringMeasurer,
   showFields: boolean,
+  bodyFont: ObjectKindFont,
 ): FieldsResult {
   const visibleMembers = classifier.members.filter((m) => m.hidden !== true);
   if (!showFields) return { dim: { width: 0, height: 0 }, rows: [], flat: toFlatMemberRows([], [], []) };
   if (visibleMembers.length === 0) return { dim: OBJECT_EMPTY_FIELDS, rows: [], flat: toFlatMemberRows([], [], []) };
 
-  const fontSpec = { family: theme.fontFamily, size: theme.fontSize };
+  const fontSpec = { family: bodyFont.family, size: bodyFont.size };
   const texts = visibleMembers.map(formatObjectMemberText);
   // G3/O4: `\t` characters (`skinparam tabSize`) split a line into
   // multiple independently-positioned text runs -- see `layoutTabRuns`'s
   // own doc comment. `tabStopWidthPx` is computed once per block (font-
   // dependent only, not per-row).
-  const tabStopPx = tabStopWidthPx(theme, measurer);
+  const tabStopPx = tabStopWidthPx(theme, measurer, fontSpec);
   // Member rows are CREOLE lines upstream (`MethodsOrFieldsArea
   // #createTextBlock`, java:238-265, `CreoleMode.SIMPLE_LINE`), with tab
   // stops expanded inside the resulting text atoms rather than instead of
   // them -- see `class-object-member-creole.ts`.
-  const font: FontConfiguration = {
-    family: fontSpec.family,
-    size: fontSpec.size,
-    color: null,
-    styles: new Set(),
-  };
+  const font: FontConfiguration = memberBaseFont(bodyFont, {});
   const builds = texts.map((t) => buildObjectMemberRow(t, font, measurer, tabStopPx));
   const widths = builds.map((b) => b.width);
   const hasIcon = visibleMembers.some((m) => m.visibilityExplicit === true);
