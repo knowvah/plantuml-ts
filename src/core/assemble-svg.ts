@@ -38,6 +38,7 @@
  * `core/klimt/color/HColorSet.ts#resolveColorToSvgHex`) was already core,
  * imported by the per-engine shell files only for historical reasons.
  */
+import { formatShiftedCoordinates } from './annotations/coord-shift.js';
 import type { AssembledSvg, RenderFragment } from './dispatcher.js';
 import { svgRoot, group, rect } from './svg.js';
 import { finalizeActivityFragment } from './assemble-svg-activity.js';
@@ -431,9 +432,20 @@ export function assembleSvg(fragment: AssembledSvg, seed?: bigint): string {
 function assembleDocument(fragment: AssembledSvg): string {
   if ('completeSvg' in fragment) return fragment.completeSvg;
   if (fragment.diagramType !== undefined) {
-    return assembleDocumentShell(finalizeShellFragment(fragment), fragment.diagramType);
+    const finalized = finalizeShellFragment(fragment);
+    return assembleDocumentShell(withFormattedBody(finalized), fragment.diagramType);
   }
-  return svgRoot(fragment.width, fragment.height, [fragment.body], fragment.background, fragment.extraDefs);
+  const formatted = withFormattedBody(fragment);
+  return svgRoot(formatted.width, formatted.height, [formatted.body], formatted.background, formatted.extraDefs);
+}
+
+/** isw-T2b-ca: the chrome/margin translates were baked into the body at
+ *  full precision; upstream formats each coordinate once, at emission
+ *  (`SvgGraphics.java:468-475`) -- here, after the last translate
+ *  ({@link finalizeShellFragment}'s margin), where every fragment's
+ *  finished body passes. */
+function withFormattedBody(fragment: RenderFragment): RenderFragment {
+  return { ...fragment, body: formatShiftedCoordinates(fragment.body) };
 }
 
 /**
