@@ -132,7 +132,8 @@ export function dotColumn(row: TypeRow | undefined, generatedAt: string): Column
 
 export function surveyColumn(s: SurveySummary | undefined): ColumnResult {
   if (s === undefined) return NOT_STARTED('n/a (no survey yet)');
-  return { cell: `${s.conformant} / ${s.structural} / ${s.diverged}`, freshness: s.generatedAt };
+  const err = s.errorPage !== undefined && s.errorPage > 0 ? ` (${s.errorPage} error)` : '';
+  return { cell: `${s.conformant} / ${s.structural} / ${s.diverged}${err}`, freshness: s.generatedAt };
 }
 
 export function censusColumn(s: CensusSummary | undefined): ColumnResult {
