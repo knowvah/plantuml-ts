@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1463 modules · 5551 exported names.
+1464 modules · 5557 exported names.
 
 ## `src/`
 
@@ -364,7 +364,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `error-block.ts` | `Sink`, `ErrorBlock`, `mergeTB`, `mergeLR`, `drawImage`, `imageBlock`, `renderErrorBlock` | The `TextBlock` composition the error, Welcome and Unsupported pages are built from — unwind2-S8. |
 | `error-diagrams.ts` | `preprocessorErrorSvg`, `DiagramRefusal`, `errorSvg`, `welcomeSvg`, `emptySvg` | Error diagrams — upstream's `BlockUml#getDiagram`. |
 | `error-page-exact.ts` | `errorPageBlock` | Exact `PSystemError` page geometry (C-17) — split out of `error-renderer.ts` (500-line complexity hook). |
-| `error-renderer.ts` | `renderPSystemError`, `renderPSystemUnsupported`, `renderPSystemWelcome` | Draws a `PSystemError` (and the black-on-white Welcome / Unsupported pages) to SVG. |
+| `error-renderer.ts` | `setErrorPageObserver`, `renderPSystemError`, `renderPSystemUnsupported`, `renderPSystemWelcome` | Draws a `PSystemError` (and the black-on-white Welcome / Unsupported pages) to SVG. |
 | `error-text.ts` | `BLACK`, `RED`, `MY_GREEN`, `SANS`, `SIZE_12`, `SIZE_14`, `ERROR_PAGE_MARGIN`, `BAND_PAD_X`, `BAND_PAD_TOP`, `BAND_PAD_BOTTOM`, `HEADER_PAD_RIGHT`, `HEADER_PAD_BOTTOM`, `Run`, `parseCreoleSubset`, `drawRun` | The text primitives the error, Welcome and Unsupported pages share: the `HColors` and `GraphicStrings` font constants, the margins of `PSystemError#getGraphicalFormatted`, the Creole subset the Welcome and Unsupported strings use, and the o |
 | `ErrorUml.ts` | `ErrorUmlType`, `AssumedDiagramType`, `ErrorUml` | One error, as the error diagram prints it: the message, the line it was raised on, a score (used to pick the "best" error when several diagram parsers each fail on the same source), and — when the parser had already committed to a diagram t |
 | `graphic-strings.ts` | `GraphicPosition`, `blackOnWhite` | `GraphicStrings.createBlackOnWhite` — the Welcome and Unsupported blocks, with the PlantUML logo in a corner (unwind2-S8). |
@@ -1098,6 +1098,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `parallel-dispatch.ts` | `tryFork`, `trySplit` | `fork` / `fork again` / `end fork` and `split` / `split again` / `end split` dispatch for the activity diagram parser. |
 | `parser.ts` | `parseActivity` | Parser for PlantUML activity diagrams (new syntax). |
 | `renderer.ts` | `renderActivity` | Activity diagram SVG renderer. |
+| `swimlane-strategy.ts` | `SwimlaneStrategy`, `SWIMLANE_AT_START_MESSAGE`, `manageSwimlaneStrategy`, `enterSwimlane`, `isInstructionHandler` | Upstream's one-way swimlane gate: the first thing added to the diagram decides whether lanes are still legal. |
 | `switch-dispatch.ts` | `extractLeadingCaseNotes`, `tryOpenSwitch` | `switch (test) / case (v) / endswitch` dispatch (mission ubrr-T10 M2). |
 
 ## `src/diagrams/activity/ftile/`
