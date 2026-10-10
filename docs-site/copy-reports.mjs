@@ -44,6 +44,11 @@ for (const { src, dst, rewrites } of REPORTS) {
   const note =
     `<!-- Mirrored from ${src.replace(/^\.\.\//, '')} by docs-site/copy-reports.mjs ` +
     `at docs build time. Edit the source report, not this copy. -->\n`;
-  writeFileSync(here(dst), note + md);
+  // VitePress compiles each page into a Vue template, and inline code spans
+  // are NOT exempt from `{{ }}` interpolation: DIVERGENCES.md quotes PlantUML's
+  // `{{ }}` embed syntax, so an unclosed `{{` broke the build and a closed
+  // one rendered as an empty expression. The reports are prose, never Vue, so
+  // the whole mirrored body goes inside VitePress's built-in `v-pre` container.
+  writeFileSync(here(dst), `${note}\n::: v-pre\n\n${md}\n:::\n`);
   process.stderr.write(`copy-reports: wrote docs-site/${dst}\n`);
 }
