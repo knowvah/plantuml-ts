@@ -210,6 +210,25 @@ export interface RenderFragment {
   scaleSpec?: ScaleSpec;
   dpi?: number;
   /**
+   * isw-T2c-scale: `body` was drawn inside `svg-format.ts#withDeferredFormat`
+   * -- its numbers are lossless doubles, and the export's scale pass is
+   * their single `SvgGraphics#format` (`SvgGraphics.java:468-475`). Set by a
+   * producer whose document will be scaled (activity: `renderActivity`);
+   * every step that draws more into the body (warning banner, chrome) draws
+   * deferred too, and `assemble-svg-activity.ts#finalizeActivityFragment`
+   * formats even at factor 1.
+   */
+  numbersDeferred?: true;
+  /**
+   * isw-T2c-scale: `width`/`height` are `SvgGraphics`'s integer `maxX`/`maxY`
+   * times `option.getScale()`. `finalizeRootAttributes` truncates that
+   * product for `style` and `viewBox` but prints the root `width`/`height`
+   * attributes as `format(maxX) + "px"` -- scaled, at 3 decimals
+   * (`SvgGraphics.java:800-813`). Set by the finalizers that apply a
+   * document scale (`assemble-svg-activity.ts`, `TextBlockExporter.ts`).
+   */
+  scaledCanvas?: true;
+  /**
    * T6h: the raw text block drawn through ONE klimt `UGraphic` at the
    * resolved `scale`, translated by `(dx, dy)` BEFORE the scale
    * (TextBlockExporter.java:165-176) — for a MINDMAP fragment whose `body`

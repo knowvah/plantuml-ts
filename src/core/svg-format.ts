@@ -86,6 +86,14 @@ export function trimZeros(s: string): string {
 }
 
 /**
+ * Whether {@link formatDecimal} currently defers its rounding -- see
+ * {@link withDeferredFormat}. Module state, like `SecurityUtils.ts
+ * #withAllowJavascriptInLink`'s: rendering is synchronous, and the setter
+ * restores the previous value on the way out, so nested scopes compose.
+ */
+let deferredFormat = false;
+
+/**
  * Formats a coordinate/length value at `decimals` places. `x === 0` short-
  * circuits to `"0"` (upstream keeps this even though the general path would
  * also reduce to `"0"`, matching upstream's own short-circuit exactly).
@@ -95,7 +103,42 @@ export function trimZeros(s: string): string {
  */
 export function formatDecimal(x: number, decimals: number): string {
   if (x === 0) return '0';
+  if (deferredFormat) {
+    const lossless = String(x);
+    // `String(x)` goes exponential only below 1e-6 (geometry never reaches
+    // 1e21); such a value prints `0` at every realistic scale, so it takes
+    // the ordinary path and the scale pass's number regexes never meet an
+    // exponent.
+    if (!lossless.includes('e')) return lossless;
+  }
   return trimZeros(javaFixedN(x, decimals));
+}
+
+/**
+ * Runs `emit` with {@link formatDecimal} printing every number losslessly
+ * (`String(x)`, which reads back to the same double) instead of at its
+ * `decimals`, when `defer` is true.
+ *
+ * Upstream formats a coordinate ONCE, after the document scale:
+ * `SvgGraphics#format` is `String.format("%.3f", xx * option.getScale())`
+ * (`klimt/drawing/svg/SvgGraphics.java:468-475`), the scale being the
+ * `UGraphic`'s own (`TextBlockExporter.java:165-169`). This port composes a
+ * scaled document as strings and only learns the factor after chrome has
+ * composed (`TextBlockExporter#computeScaleFactor` reads the chrome-included
+ * dimension, `:198-209`), so its scale is a pass over the finished body.
+ * Rounding at emission AND after that pass double-rounds (`20.83125` prints
+ * `20.831`, times 1.5 prints `31.246`; the jar prints `31.247`). A producer
+ * whose document will be scaled draws inside this scope, and the scale
+ * pass is the single format step.
+ */
+export function withDeferredFormat<T>(defer: boolean, emit: () => T): T {
+  const previous = deferredFormat;
+  deferredFormat = defer;
+  try {
+    return emit();
+  } finally {
+    deferredFormat = previous;
+  }
 }
 
 /**
