@@ -82,8 +82,8 @@ pinning routing/refusal before T1e's move commit.
 | Batch | Tasks | Mode | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | T0 branch + b0 | orchestrator | [x] |
-| [1](batch-1/overview.md) | T1a stock verifier · T1b error observer · T1c refusals · T1d tidoda · T1e move (orch) | parallel worktrees | [ ] |
-| [2](batch-2/overview.md) | T2a survey verdict + dashboard · T2b docs | parallel, after T1a+T1b | [ ] |
+| [1](batch-1/overview.md) | T1a stock verifier · T1b error observer · T1c refusals · T1d tidoda · T1e move (orch) | parallel worktrees | [x] |
+| [2](batch-2/overview.md) | T2a survey verdict + dashboard · T2b docs | parallel, after T1a+T1b | [x] |
 | [3](batch-3/overview.md) | T-exit · T-close | orchestrator | [ ] |
 
 ## Index

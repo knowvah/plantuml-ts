@@ -1,0 +1,19 @@
+surveying 449 activity fixtures (concurrency 6)
+  25/449
+  50/449
+  75/449
+  100/449
+  125/449
+  150/449
+  175/449
+  200/449
+  225/449
+  250/449
+  275/449
+  300/449
+  325/449
+  350/449
+  375/449
+  400/449
+  425/449
+wrote plans/activity-error-page-parity/measurements/b12-eng/parity-activity.json — {"conformant":448,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}

@@ -3388,11 +3388,11 @@
     {
       "type": "activity",
       "slug": "tidoda-12-juxu745",
-      "status": "baseline",
-      "diffCount": 4,
-      "measuredAt": "2026-10-08",
-      "measuredAgainstCommit": "2686a257",
-      "weightedScore": 4
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-10",
+      "measuredAgainstCommit": "ebb7b943",
+      "weightedScore": 0
     },
     {
       "type": "activity",
