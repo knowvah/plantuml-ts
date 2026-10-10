@@ -1,0 +1,10 @@
+@startuml
+class A <<  spaced  >>
+class B << (C,#FF0000)  lbl  >>
+class C <<tight>>
+class D << one >>
+package p <<  st  >> {
+  class E
+}
+object O <<  obj  >>
+@enduml

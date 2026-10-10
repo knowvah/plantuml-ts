@@ -87,7 +87,8 @@ describe('$tag parsing on classifier declarations', () => {
     const c = ast.classifiers[0]!;
     expect(c.id).toBe('Foo');
     expect(c.tags).toEqual(['v2']);
-    expect(c.stereotype).toBe('data');
+    // the label is kept verbatim between `<<` and `>>` (StereotypePattern.java:68); the jar draws the trimmed «...» (Guillemet.java:87-100 consumes one padding space per side)
+    expect(c.stereotype).toBe(' data ');
     expect(c.color).toBe('#pink');
   });
 

@@ -45,6 +45,7 @@ import type { ClassifierGeo } from './layout.js';
 import { splitStereotypeLabels, measureStereoLabelWidths } from './class-stereotype.js';
 import { objectDisplayText } from './class-object-display.js';
 import { plainRowRender } from './class-driver-text-placement.js';
+import { headerFontSpec, type HeaderFontOverride } from './object-kind-style.js';
 
 // ---------------------------------------------------------------------------
 // Local interfaces (grouped at top — a declaration sitting between two
@@ -63,7 +64,7 @@ export interface Dim {
 interface UnderlinedNameContext {
   fontSpec: FontSpec;
   measurer: StringMeasurer;
-  fontSizeOverride?: number | undefined;
+  font: HeaderFontOverride;
 }
 
 /** Bundles {@link headerRows}'s box-layout args — introduced solely to keep
@@ -85,6 +86,22 @@ export interface HeaderRowsOptions {
    *  baseline use the SAME size the caller already measured with, rather
    *  than re-deriving it here. */
   nameFontSizeOverride?: number | undefined;
+  /** The full header font override (`object-kind-style.ts
+   *  #resolveHeaderFontOverride`): family / bold / italic as well as size.
+   *  Wins over {@link nameFontSizeOverride} when given. */
+  nameFont?: HeaderFontOverride | undefined;
+}
+
+/** The row fields a header font override puts on a name row. */
+function nameRowFont(
+  font: HeaderFontOverride,
+): Pick<ClassifierGeo['rows'][number], 'fontFamily' | 'fontSize' | 'bold' | 'italic'> {
+  return {
+    ...(font.family !== undefined ? { fontFamily: font.family } : {}),
+    ...(font.size !== undefined ? { fontSize: font.size } : {}),
+    ...(font.bold === true ? { bold: true } : {}),
+    ...(font.italic === true ? { italic: true } : {}),
+  };
 }
 
 /** Result of {@link buildStereoHeaderRows} — the stacked stereotype row(s)
@@ -199,8 +216,8 @@ function buildUnderlinedNameRows(
   // single-FontConfiguration construction above.
   ctx: UnderlinedNameContext,
 ): ClassifierGeo['rows'] {
-  const { fontSpec: nameFontSpec, measurer, fontSizeOverride } = ctx;
-  const fontSizeField = fontSizeOverride !== undefined ? { fontSize: fontSizeOverride } : {};
+  const { fontSpec: nameFontSpec, measurer, font } = ctx;
+  const fontSizeField = nameRowFont(font);
   const match = INSTANCE_NAME_TYPE_PATTERN.exec(display);
   if (match === null) {
     return [
@@ -361,7 +378,9 @@ export function headerRows(
   options: HeaderRowsOptions,
 ): ClassifierGeo['rows'] {
   const { boxWidth, namePadding, underlineName = false, nameFontSizeOverride } = options;
-  const nameFontSpec = { family: theme.fontFamily, size: nameFontSizeOverride ?? theme.fontSize };
+  const nameFont: HeaderFontOverride =
+    options.nameFont ?? (nameFontSizeOverride !== undefined ? { size: nameFontSizeOverride } : {});
+  const nameFontSpec = headerFontSpec(theme, nameFont);
   const { rows, stereoHeight } = buildStereoHeaderRows(classifier, theme, measurer, boxWidth);
   // Same resolved text the sizer measures (`class-object-display.ts`); the
   // two are gated in lock-step by the sizer<->renderer parity test.
@@ -375,7 +394,7 @@ export function headerRows(
       ...buildUnderlinedNameRows(displayText, nameY, nameIndent, {
         fontSpec: nameFontSpec,
         measurer,
-        fontSizeOverride: nameFontSizeOverride,
+        font: nameFont,
       }),
     );
   } else {
@@ -385,7 +404,7 @@ export function headerRows(
       indent: nameIndent,
       width: nameWidth,
       ...plainRowRender(displayText, (s) => measurer.measure(s, nameFontSpec).width),
-      ...(nameFontSizeOverride !== undefined ? { fontSize: nameFontSizeOverride } : {}),
+      ...nameRowFont(nameFont),
     });
   }
   return rows;

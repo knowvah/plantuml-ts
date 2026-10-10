@@ -1,0 +1,14 @@
+@startuml
+<style>
+object {
+  header {
+    FontSize 18
+    FontStyle bold
+    FontName Courier
+  }
+}
+</style>
+object Alpha {
+  name = "Dummy"
+}
+@enduml

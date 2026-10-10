@@ -14,6 +14,27 @@ import { parseColor } from './paint.js';
 import { lineStyleDash } from './style-line-style.js';
 import { cleanStereotypeToken } from './style-map-tag-cascade.js';
 import { parseHorizontalAlignment } from './skinparam-key-handlers-table-b.js';
+import { parseFontStyleFlags } from './skinparam-key-handlers-shared.js';
+
+/** The three SNames whose entity images read their own `FontName`/`FontStyle`
+ *  (`EntityImageObject/Map/Json` -> `Style.java:241-253 getUFont`). Other
+ *  buckets keep their skinparam-only `fontFamily`/`fontStyle` population. */
+const OBJECT_KIND_SNAMES: ReadonlySet<string> = new Set(['object', 'map', 'json']);
+
+/** `FontName`/`FontStyle` of an object/map/json bucket or its `header`
+ *  sub-selector, under the given field names. */
+function collectObjectKindFont(
+  sname: string,
+  props: ReadonlyMap<string, string>,
+  bucket: Partial<ElementColors>,
+  header: boolean,
+): void {
+  if (!OBJECT_KIND_SNAMES.has(sname)) return;
+  const family = props.get('fontname');
+  const style = props.get('fontstyle');
+  if (family !== undefined) bucket[header ? 'headerFontFamily' : 'fontFamily'] = family;
+  if (style !== undefined) bucket[header ? 'headerFontStyle' : 'fontStyle'] = parseFontStyleFlags(style);
+}
 
 /** `<sname>.stereotype` selector suffix (`<style> <sname> { stereotype {
  *  FontSize N } } }`) — G1 I4b. The per-stereotype-NAME sub-selector nested
@@ -352,6 +373,7 @@ export function collectElementStyleBuckets(styleMap: StyleMap): Record<string, E
       const ls = props.get('linestyle');
       if (ls !== undefined) bucket.lineStyle = lineStyleDash(ls);
       collectT3gBucketProps(props, bucket);
+      collectObjectKindFont(bucketName, props, bucket, false);
       if (Object.keys(bucket).length > 0) {
         elements[bucketName] = { ...elements[bucketName], ...bucket };
       }
@@ -381,6 +403,7 @@ export function collectElementStyleBuckets(styleMap: StyleMap): Record<string, E
         const size = Number(fs);
         if (Number.isFinite(size)) bucket.headerFontSize = size;
       }
+      collectObjectKindFont(sname, props, bucket, true);
       if (Object.keys(bucket).length > 0) {
         elements[sname] = { ...elements[sname], ...bucket };
       }

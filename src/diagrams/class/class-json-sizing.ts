@@ -58,6 +58,13 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { JsonBodyItem } from './layout.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
+import {
+  headerFontSpec,
+  resolveHeaderFontOverride,
+  resolveObjectBodyFont,
+  type ObjectKindFont,
+} from './object-kind-style.js';
+import { resolveStyleStereotypeTags } from './class-stereotype.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-sizing.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
@@ -330,12 +337,8 @@ function buildJsonItems(node: JsonDimNode, cur: JsonDrawCursor): JsonBodyItem[] 
  *  (`memberBaseFont`, no member modifiers on a json entry) and cdd6 T3g's
  *  wrap width -- `BodierJSon.java:85` passes `style.wrapWidth()`
  *  (`resolveElementMaximumWidth`; absent = 0 = no wrap). */
-function jsonCellContext(
-  theme: Theme,
-  fontSpec: { family: string; size: number },
-  measurer: StringMeasurer,
-): JsonCellContext {
-  return { font: memberBaseFont(fontSpec, {}), measurer, maxWidth: resolveElementMaximumWidth(theme, 'json') ?? 0 };
+function jsonCellContext(theme: Theme, bodyFont: ObjectKindFont, measurer: StringMeasurer): JsonCellContext {
+  return { font: memberBaseFont(bodyFont, {}), measurer, maxWidth: resolveElementMaximumWidth(theme, 'json') ?? 0 };
 }
 
 /**
@@ -349,8 +352,11 @@ export function measureJsonClassifier(
   theme: Theme,
   measurer: StringMeasurer,
 ): MeasuredClassifier {
-  const fontSpec = { family: theme.fontFamily, size: theme.fontSize };
-  const nameM = measurer.measure(classifier.display, fontSpec);
+  const tags = resolveStyleStereotypeTags(classifier);
+  const bodyFont = resolveObjectBodyFont(theme, 'json', tags);
+  const fontSpec = { family: bodyFont.family, size: bodyFont.size };
+  const nameFont = resolveHeaderFontOverride(theme, 'json', tags);
+  const nameM = measurer.measure(classifier.display, headerFontSpec(theme, nameFont));
   const nameDim: Dim = {
     width: nameM.width + JSON_NAME_MARGIN * 2,
     height: nameM.height + JSON_NAME_MARGIN * 2,
@@ -362,7 +368,7 @@ export function measureJsonClassifier(
   // carries the base `FontConfiguration` rather than the bare `FontSpec`
   // the header still uses. A json entry has no `{abstract}`/`{static}`
   // member modifiers, hence the empty member.
-  const cellCtx = jsonCellContext(theme, fontSpec, measurer);
+  const cellCtx = jsonCellContext(theme, bodyFont, measurer);
   const dimNode = measureJsonNode(classifier.jsonValue ?? EMPTY_OBJECT_NODE, cellCtx);
   const fieldsHeight = dimNode.height === 0 ? JSON_EMPTY_HEIGHT_FALLBACK : dimNode.height;
 
@@ -371,7 +377,11 @@ export function measureJsonClassifier(
   const width = floorAtMinimumWidth(Math.max(dimNode.width, title.width + JSON_X_MARGIN_CIRCLE * 2), theme, 'json');
   const height = title.height + fieldsHeight;
 
-  const headerGeo = headerRows(classifier, theme, measurer, { boxWidth: width, namePadding: JSON_NAME_MARGIN });
+  const headerGeo = headerRows(classifier, theme, measurer, {
+    nameFont,
+    boxWidth: width,
+    namePadding: JSON_NAME_MARGIN,
+  });
   const baselineOffset = baselineOffsetFor(fontSpec, measurer);
   // `EntityImageJson#drawU` seeds the ROOT block's own `jsonTotalWidth` with
   // the finished box width (`setTotalWidth(dimTotal.getWidth())`,

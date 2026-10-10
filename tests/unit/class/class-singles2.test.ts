@@ -90,7 +90,8 @@ describe('gabejo-44-juki791: stacked stereotypes <<A>><<B>> on one declaration',
     const d = parseClassifierDecl('class Foo << Stereotype >>');
     expect(d).not.toBeNull();
     expect(d!.id).toBe('Foo');
-    expect(d!.stereotype).toBe('Stereotype');
+    // the label is kept verbatim between `<<` and `>>` (StereotypePattern.java:68); the jar draws the trimmed «...» (Guillemet.java:87-100 consumes one padding space per side)
+    expect(d!.stereotype).toBe(' Stereotype ');
   });
 });
 
