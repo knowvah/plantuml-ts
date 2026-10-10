@@ -50,6 +50,7 @@ import { displayWithNewlines } from './dispatch-newline-sentinels.js';
 import { readMultilineActionBody } from './dispatch-multiline-body.js';
 import { extractLeadingCaseNotes, tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
+import { enterSwimlane, isInstructionHandler, manageSwimlaneStrategy } from './swimlane-strategy.js';
 import { redirectNoteOntoGroup, redirectNoteOntoWhile, tryNoteMulti, tryNoteSingle } from './note-dispatch.js';
 import {
   tryAnnotation,
@@ -64,9 +65,12 @@ import { stereogroupBackColor, stereogroupStereotype } from './dispatch-stereogr
 // ---------------------------------------------------------------------------
 // Swimlane header: |name| or |[#color]name|
 // ---------------------------------------------------------------------------
-function trySwimlane(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+function trySwimlane(ctx: ParseContext, idx: number, line: string): DispatchResult | ParseRefusal | null {
   const m = RE_SWIMLANE.exec(line);
   if (m === null) return null;
+  // aepp-T1c: `ActivityDiagram3.java:86-91`.
+  const forbidden = enterSwimlane(ctx, idx);
+  if (forbidden !== null) return forbidden;
   // `CommandSwimlane.java:63` `([^|]+)`, untrimmed: `Swimlanes#getOrCreate`
   // (`Swimlanes.java:168-176`) matches it by exact `equals`, and
   // `Swimlane.java:60` displays it verbatim.
@@ -389,6 +393,22 @@ const LINE_HANDLERS: readonly LineHandler[] = [
   tryGoto,
 ];
 
+/** Handlers whose upstream method calls `manageSwimlaneStrategy`
+ *  (`swimlane-strategy.ts` header); `trySimpleKeyword` is gated by keyword. */
+const INSTRUCTION_HANDLERS: ReadonlySet<LineHandler> = new Set<LineHandler>([
+  tryCircleSpot,
+  tryAction,
+  tryMultilineAction,
+  tryOpenGroup,
+  tryBackward,
+  tryIf,
+  tryOpenSwitch,
+  tryWhile,
+  tryRepeat,
+  tryFork,
+  tryActivityList,
+]);
+
 /**
  * Dispatch one non-blank, pre-stripped line: the first handler in
  * {@link LINE_HANDLERS} that recognizes it wins (same priority order as
@@ -408,8 +428,14 @@ const LINE_HANDLERS: readonly LineHandler[] = [
  */
 function dispatchLine(ctx: ParseContext, idx: number, line: string, lc: string): DispatchResult | ParseRefusal {
   for (const handler of LINE_HANDLERS) {
+    // aepp-T1c: upstream's `manageSwimlaneStrategy()` runs when the command
+    // executes, before any nested body -- so it is set ahead of the handler
+    // (whose body may declare lanes) and undone if the handler declines.
+    const before = ctx.swimlaneStrategy;
+    if (isInstructionHandler(handler, lc, INSTRUCTION_HANDLERS, trySimpleKeyword)) manageSwimlaneStrategy(ctx);
     const result = handler(ctx, idx, line, lc);
     if (result !== null) return result;
+    ctx.swimlaneStrategy = before;
   }
   return refuse('syntax', idx, idx, 'Syntax Error?');
 }
