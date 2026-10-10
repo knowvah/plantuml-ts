@@ -1,32 +1,35 @@
-# aepp-T2a report — STOPPED at rule 7 (write-set), nothing implemented
+# aepp-T2a report — DONE (supersedes the earlier STOPPED note)
 
-Commits: none besides this note.
+Commits: feat(survey): error-page verdict and dashboard error count (code +
+tests); this note. Write-set expanded by the user: svg-parity-workers.ts,
+new scripts/lib/survey-error-verdict.ts. svg-parity.test.ts needed no change.
 
-## Blocker 1: scripts/svg-parity-workers.ts is outside the write-set
-Mechanism: the frame protocol is parsed by parseFrame
-(scripts/svg-parity-workers.ts:100-118) into RenderedFixture
-(:32-36 = {svg, dotEqual, oracleBlind}); any other frame field is dropped.
-renderFrame (scripts/svg-parity-survey.ts:276-292) can emit `errorPage`, but
-rowFor (:342-350) never sees it. Fix needed there: add `errorPage: boolean`
-to RenderedFixture and `errorPage: parsed.errorPage === true` in parseFrame.
-Owner: orchestrator (add the file to T2a write-set, or apply the 2-line edit).
-Related unit tests (tests/unit/scripts/*workers*) may need the field.
+Java -> ours: none (harness only). Rule: decisions.md verdict table (D7).
+Mechanism: renderFrame installs setErrorPageObserver -> frame.errorPage ->
+RenderedFixture.errorPage (workers parseFrame) -> rowFor ->
+errorPageVerdict(type, slug, record, errorPage) ?? diffVerdict.
+Dashboard: tallySurvey counts errorPage; surveyColumn "c / s / d (N error)"
+only when N>0. scripts/parity-dashboard.ts not touched.
+svg-parity-survey.ts is exactly 500 lines.
 
-## Blocker 2: file size
-scripts/svg-parity-survey.ts is 482 lines; the planned change (observer,
-record loader, pure verdict fn, FixtureRow field) adds ~30-40 -> >500 hook
-limit. Needs a new module, e.g. scripts/lib/survey-error-verdict.ts (pure
-`errorPageVerdict(key, record, errorPage)`, record loader), also outside the
-write-set. Recommend adding it to the write-set.
+Gates: scripts unit dir 559 pass; typecheck, eslint, prettier clean.
+No src/core edit => no all-engine survey required.
 
-## Plan once unblocked (unchanged from the brief)
-- survey: renderFrame installs setErrorPageObserver, clears in finally; row
-  keyed "<type>/<slug>": in record+errorPage -> conformant/errorPage:true;
-  in record+drawn -> diverged/firstDiff 'error-page'; else diffVerdict.
-- tallySurvey adds `errorPage` count (existing toEqual at
-  parity-dashboard.test.ts:325 must gain errorPage: 0); SurveySummary gets
-  optional errorPage; surveyColumn appends ` (N error)` when N>0.
-- Expect class/zuduxu-90-kosi876 and unknown/rubebe-45-sura795 diverged
-  'error-page' until T1g.
-
-Rows before -> after: not measured. Survey/census movers: none.
+## Surveys (temp --out, /private/tmp/claude-501/aepp-T2a/)
+activity vs measurements/t1e/parity-activity.json (449 rows): exactly 14
+changed, all diverged -> conformant+errorPage: gabeme jokaxi kedozi nakavu
+nefume pejima pizuga ticoxo veducu velodu vipixe xesoze xoreni zezaju.
+No drawn row changed. Totals 447 conformant / 1 structural / 1 diverged.
+class vs committed parity-class.json: record rows 3: luzive, sadamo ->
+conformant+errorPage; zuduxu-90-kosi876 -> diverged 'error-page' (expected,
+T1g). Four non-record rows moved (bixogo diverged->structural, roxosu
+diverged->structural, gadufu & xadado structural->conformant); none is in the
+record, none has errorPage, so errorPageVerdict returned undefined for them:
+the committed pin is stale vs current code, not caused by this change.
+unknown vs committed parity-unknown.json: record rows 38: 24 ->
+conformant+errorPage; 14 -> diverged 'error-page' (jar errors, we draw):
+dagugu gibapi gujeku jifoke kijaro ligalo lonome lulanu micono nixuje rubebe
+(expected, T1g) torazi zeceme zugazo. The other 13 are unexpected beyond the
+brief: owner = whichever task makes those engines error. 7 non-record rows
+moved (cezeje febuci godixi kakitu nunema nupiko diverged->conformant, semutu
+structural->conformant), no errorPage: stale pins as above.
