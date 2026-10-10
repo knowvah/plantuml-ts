@@ -13,7 +13,13 @@
  */
 
 import type { DescriptiveLink, DescriptiveNode } from './ast.js';
-import { cleanId, extractColor, extractNodeStereotype, resolveNewlineEscapes } from './parse-helpers.js';
+import {
+  cleanId,
+  extractColor,
+  extractNodeStereotype,
+  rawStereotypeLabels,
+  resolveNewlineEscapes,
+} from './parse-helpers.js';
 import type { StereotypeSpriteRef } from './parse-helpers.js';
 
 // ---------------------------------------------------------------------------
@@ -352,10 +358,14 @@ export function visibleStereotypeLabels(
   rules: ReadonlyArray<{ pattern?: string; show: boolean }>,
 ): readonly string[] | undefined {
   if (labels === undefined || labels.length === 0 || rules.length === 0) return labels;
-  return labels.filter((label) => {
+  // `gender.equals(label)` compares the DOUBLE_COMPARATOR label (the raw
+  // `<<...>>` run, padding included), not the display form.
+  const raw = rawStereotypeLabels(labels);
+  return labels.filter((label, i) => {
+    const rawLabel = raw?.[i] ?? `<<${label}>>`;
     let shown = true;
     for (const rule of rules) {
-      if (rule.pattern === undefined || rule.pattern === label) shown = rule.show;
+      if (rule.pattern === undefined || `<<${rule.pattern}>>` === rawLabel) shown = rule.show;
     }
     return shown;
   });

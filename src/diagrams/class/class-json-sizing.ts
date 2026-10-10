@@ -396,5 +396,9 @@ export function measureJsonClassifier(
   const entryRows = jsonBody.flatMap((i) => (i.kind === 'text' ? [i.row] : []));
   const dividerYs = jsonBody.flatMap((i) => (i.kind === 'hline' ? [i.y] : []));
 
-  return { width, height, rows: [...headerGeo, ...entryRows], dividerYs, jsonBody };
+  // The renderer draws `rows[0..headerRowCount)` as the header and takes the
+  // entries from `jsonBody`, so a stacked stereotype row + name row must be
+  // counted or the name is never drawn (jar: stereotype row, then name).
+  const headerRowCountField = headerGeo.length > 1 ? { headerRowCount: headerGeo.length } : {};
+  return { width, height, rows: [...headerGeo, ...entryRows], dividerYs, jsonBody, ...headerRowCountField };
 }

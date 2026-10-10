@@ -19,7 +19,7 @@
 
 import { resolveTextEscapes } from '../../core/text-escapes.js';
 import { Stereotype } from '../../core/stereo/Stereotype.js';
-import { GUILLEMET_NONE } from '../../core/stereo/StereotypeDecoration.js';
+import { GUILLEMET_DOUBLE_COMPARATOR, GUILLEMET_NONE } from '../../core/stereo/StereotypeDecoration.js';
 import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
 import type { StereotypeSpriteRef } from './ast.js';
 import { resolveInlineLinks } from '../../core/url/inline-links.js';
@@ -272,6 +272,25 @@ export function finalizeDisplay(display: string): string {
 // ---------------------------------------------------------------------------
 
 /**
+ * The labels `Stereotype#getLabels(Guillemet.DOUBLE_COMPARATOR)` returns for
+ * each array {@link extractNodeStereotype} produced, keyed by that array's
+ * identity. `manageGuillemetStrict` is the identity for DOUBLE_COMPARATOR
+ * (Guillemet.java:87-89), so these keep the source padding (`<<  x  >>`
+ * stays `<<  x  >>`): `hide <<pattern>> stereotype` compares against them
+ * verbatim (CucaDiagram.java:608-616 `gender.equals(label)`), while the
+ * public `stereotype` array carries the display form (one padding space per
+ * side consumed). The two lists are cut from the same label by `cutLabels`,
+ * so they align index for index.
+ */
+const RAW_LABELS = new WeakMap<readonly string[], readonly string[]>();
+
+/** The `<<...>>` source labels behind a stereotype array from
+ *  {@link extractNodeStereotype}; `undefined` for any other array. */
+export function rawStereotypeLabels(labels: readonly string[]): readonly string[] | undefined {
+  return RAW_LABELS.get(labels);
+}
+
+/**
  * Extract angle-bracket stereotype(s) from a node-declaration remainder.
  *
  * `CommandCreateElementFull.java`'s single `StereotypePattern.optional
@@ -330,6 +349,7 @@ export function extractNodeStereotype(rest: string): StereotypeResult | undefine
   if (run === null) return undefined;
   const stereotype = Stereotype.build(run[0].trimEnd(), 0, undefined, parseSimpleColor);
   const stereotypes = stereotype.getLabels(GUILLEMET_NONE).map((label) => resolveTextEscapes(label));
+  RAW_LABELS.set(stereotypes, stereotype.getLabels(GUILLEMET_DOUBLE_COMPARATOR));
   // `getSprite(...)` (java:193) beats the label block, so the name travels.
   const spriteName = stereotype.getSpriteName();
   const before = rest.slice(0, run.index).trimEnd();
@@ -345,8 +365,27 @@ export function extractNodeStereotype(rest: string): StereotypeResult | undefine
   return { stereotypes, sprite, remainder };
 }
 
+/** A `<<...>>` run at the start of the slice (StereotypePattern.java:68). */
+const RE_STEREOTYPE_SPAN = /<<.+?>>/y;
+
 /** `[[url]]` / `[[url label]]` hyperlink token (UrlBuilder.OPTIONAL). */
 const RE_URL_TOKEN_G = /\[\[[^\]]*(?:\][^\]]+)*\]\]/g;
+
+/**
+ * The token {@link stripUrl} handles at `index`, or `undefined` for ordinary
+ * text: a `<<...>>` run is kept verbatim (StereotypePattern.java:68 captures
+ * `<<.+?>>` untouched; Guillemet/Stereotype consume ONE padding space per
+ * side later, so collapsing its spaces here dropped them); a url token is
+ * dropped (`keep: ''`).
+ */
+function stripUrlTokenAt(rest: string, index: number): { keep: string; length: number } | undefined {
+  RE_STEREOTYPE_SPAN.lastIndex = index;
+  const stereo = RE_STEREOTYPE_SPAN.exec(rest)?.[0];
+  if (stereo !== undefined) return { keep: stereo, length: stereo.length };
+  RE_URL_TOKEN_G.lastIndex = index;
+  const m = RE_URL_TOKEN_G.exec(rest);
+  return m !== null && m.index === index ? { keep: '', length: m[0].length } : undefined;
+}
 
 /**
  * Strip an element's `[[url]]` / `[[url label]]` hyperlink token — it
@@ -383,10 +422,10 @@ export function stripUrl(rest: string): string {
       i += 1;
       continue;
     }
-    RE_URL_TOKEN_G.lastIndex = i;
-    const m = RE_URL_TOKEN_G.exec(rest);
-    if (m !== null && m.index === i) {
-      i += m[0].length;
+    const token = stripUrlTokenAt(rest, i);
+    if (token !== undefined) {
+      out += token.keep;
+      i += token.length;
       continue;
     }
     // isw-T2-cls F4: a `[ ... ]` span is CODE_CORE's `\[[^\[\]]+\]`
