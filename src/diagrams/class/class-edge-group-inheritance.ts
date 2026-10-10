@@ -68,6 +68,20 @@ export function buildStrokeOverride(
 }
 
 /**
+ * A grouped (`skinparam groupInheritance`) link whose graphviz edge was lost
+ * has no start contact point; upstream NPEs there
+ * (`dot/Neighborhood.java:72-80,151`), so the port fails the render too.
+ *
+ * @see dot/Neighborhood.java#drawU
+ */
+export class MissingSametailContactError extends Error {
+  constructor(from: string, to: string) {
+    super(`Cannot draw grouped inheritance: no route was found for the link ${from} -> ${to}`);
+    this.name = 'MissingSametailContactError';
+  }
+}
+
+/**
  * cdd-T16 (M7): `Link.java:238-239`'s `getSametail() != null` guard --
  * forces BOTH decors to `LinkDecor.NONE` and the style to
  * `LinkStyle.NORMAL()` (`decoration/LinkType.java:71-72`'s 2-arg ctor,
@@ -90,8 +104,16 @@ export function groupInheritanceOverride(
   const strokeExtra =
     rel.stereotypeTags !== undefined && rel.stereotypeTags.length > 0 ? { stereotypeTags: rel.stereotypeTags } : {};
   const contact = normalizedPts[0];
-  const sametail =
-    rel.idEntity1FullId !== undefined && contact !== undefined ? { parentId: rel.idEntity1FullId, contact } : undefined;
+  // aepp-T1g: `Neighborhood.drawU` (`dot/Neighborhood.java:72-80`) adds
+  // `line.getStartContactPoint()` to `contactPoints` with NO null guard
+  // (the `allButSametails` loop at `:95-98` has one). A sametail link graphviz
+  // lost ("Pshortestpath failed") never gets a `dotPath`
+  // (`svek/SvekEdge.java:618-626`, `solveLine` returns at `idx == -1`), so
+  // `getStartContactPoint()` (`:1314-1316`) is null and `intersection(rect,
+  // center, null)` throws (`Neighborhood.java:151`) -- the jar's crash page.
+  // The port's lost edge is an empty point list (`dot-engine` result).
+  if (contact === undefined) throw new MissingSametailContactError(rel.from, rel.to);
+  const sametail = rel.idEntity1FullId !== undefined ? { parentId: rel.idEntity1FullId, contact } : undefined;
   return { dashed: false, decor: 'none', strokeExtra, ...(sametail !== undefined ? { sametail } : {}) };
 }
 
