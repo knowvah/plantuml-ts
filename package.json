@@ -73,7 +73,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@knowvah/dot-engine": "https://registry.npmjs.org/@knowvah/dot-engine/-/dot-engine-1.6.1.tgz",
+    "@knowvah/dot-engine": "https://registry.npmjs.org/@knowvah/dot-engine/-/dot-engine-2.3.0.tgz",
     "jsonc-parser": "^3.3.1",
     "katex": "^0.19.0",
     "pako": "^3.0.2"
