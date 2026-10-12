@@ -80,7 +80,9 @@ describe('loadUnknownClassSlugs / listUnknownClassFixtureDirs (routing filter, T
     expect(slugs.size).toBe(expected);
     expect(dirs.length).toBe(expected);
     // Sanity pin at time of writing (T4-tools-tree.md: "currently 288").
-    expect(expected).toBe(288);
+    // 288 -> 287: the routing baseline already held 287 such rows at main
+    // 84bd0c3f4 (cdd8 b0); found stale by cdd8 T2e (journal row 20).
+    expect(expected).toBe(287);
   });
 
   test('excludes unknown-tree rows whose jar type is not CLASS', () => {
