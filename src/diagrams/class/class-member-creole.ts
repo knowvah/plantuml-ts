@@ -313,6 +313,9 @@ export function resolveOneAtom(
   spriteDims: SpriteDimsLookup | undefined,
 ): ResolvedMemberAtom | undefined {
   if (atom.kind === 'emoji') return resolveEmojiAtom(atom, sprites?.emoji);
+  // `AtomSpace` has no member-row render variant (class `MemberRenderAtom`);
+  // it contributes nothing here rather than falling into the 'inline' path.
+  if (atom.kind === 'space') return undefined;
   if (atom.kind === 'text') {
     // SI30 D1: measure at the EFFECTIVE (muted) size -- `getFont(atom.font)`
     // shrinks a `<sup>`/`<sub>` run by 3 (floor 2) before either the layout

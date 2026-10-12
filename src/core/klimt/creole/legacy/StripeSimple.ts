@@ -162,6 +162,11 @@ class StripeAtomBuilder implements StripeBuilder {
     this.activeUrl = saved;
   }
 
+  /** Upstream: `StripeSimple#addSpace` -> `AtomSpace.create(width)`. */
+  addSpace(width: number): void {
+    this.built.push({ kind: 'space', width });
+  }
+
   pushLatexAtom(expr: string): void {
     this.built.push({ kind: 'latex', expr, color: this.font.color });
   }

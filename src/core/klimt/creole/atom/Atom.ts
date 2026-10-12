@@ -67,6 +67,9 @@ export type CreoleAtom =
        */
       readonly ambientFont?: FontConfiguration;
     }
+  /** `AtomSpace` (`<space:N>`): `calculateDimensionSlow` = (width, 1), `getStartingAltitude` 0, empty `drawU`
+   *  (AtomSpace.java; see `atom/AtomSpace.ts`). */
+  | { readonly kind: 'space'; readonly width: number }
   | { readonly kind: 'latex'; readonly expr: string; readonly color: string | null }
   /** A2s R2i: a `<:name:>` emoji (upstream `CommandCreoleEmoji` ->
    *  `StripeSimple#addEmoji` -> `AtomEmoji`). `name` is the RESOLVED

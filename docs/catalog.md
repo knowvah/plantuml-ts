@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1582 modules · 5864 exported names.
+1584 modules · 5868 exported names.
 
 ## `src/`
 
@@ -532,6 +532,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `AtomEmoji.ts` | `EMOJI_MAGIC`, `EMOJI_BOX_FACTOR`, `EMOJI_ALTITUDE_FACTOR`, `EMOJI_LINE_HEIGHT_FACTOR`, `emojiLineHeightFactor`, `emojiFactor`, `emojiBoxDim`, `emojiSquareDim`, `emojiStartingAltitude`, `emojiRenderRun` | AtomEmoji — sizing constants for one `<:name:>` creole emoji atom. |
 | `AtomMath.ts` | `AtomMath` | AtomMath — upstream: klimt/creole/atom/AtomMath.java (`extends AbstractAtom implements Atom`, 107 lines). |
 | `AtomOpenIconic.ts` | `AtomOpenIconic`, `asAtomOpenIconic` | `AtomOpenIconic` — an OpenIconic `<&name>` glyph inside a creole line (`StripeSimple#addOpenIcon`, StripeSimple.java:239-243), as the polymorphic `Atom` `Sea`/`SheetBlock1` lay out: `calculateDimensionSlow` (`openIconic.asTextBlock` padded |
+| `AtomSpace.ts` | `SPACE_ATOM_HEIGHT`, `SPACE_ATOM_STARTING_ALTITUDE`, `spaceAtomDim` | AtomSpace — the creole `<space:N>` atom: N pixels of horizontal advance, nothing drawn. |
 | `AtomTable.ts` | `AtomTable` | AtomTable — the drawable/measurable creole table `StripeTable` builds: a grid of `Atom` cells (each itself a `SheetBlock1` wrapping one cell's own nested `Sheet`), laid out column-width/row-height-first (every cell in a column shares that c |
 | `AtomTree.ts` | `AtomTree` | AtomTree — a stack of `Atom` cells, each tagged with an integer nesting `level`, measured/drawn top-to-bottom with a `Skeleton2` bullet/hline/ vline connector drawn beside each cell at its own vertical midpoint. |
 | `AtomWithMargin.ts` | `AtomWithMargin` | AtomWithMargin — wraps another `Atom`, adding a fixed top/bottom margin to its measured height (`marginY1`/`marginY2`) and translating it down by `marginY1` at draw time. |
@@ -553,6 +554,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `CommandCreoleMath.ts` | `createMathCommand` | CommandCreoleMath — `<math>expr</math>`. |
 | `CommandCreoleMonospaced.ts` | `createMonospacedCommand` | CommandCreoleMonospaced — the creole `""text""` monospace run. |
 | `CommandCreoleSizeChange.ts` | `createSizeChangeCommands` | CommandCreoleSizeChange — `<size:N>text</size>` and `<size:N>text to end of line` (no closing tag needed). |
+| `CommandCreoleSpace.ts` | `createSpaceCommand` | CommandCreoleSpace — the creole `<space:N>` / `<space:N/>` tag. |
 | `CommandCreoleStyle.ts` | `createStyleCommands`, `createStyleCommandsWithoutCreoleForm`, `createBackcolorCommands` | CommandCreoleStyle — the BOLD/ITALIC/UNDERLINE/STRIKE/WAVE inline style commands: `**text**`/`//text//`/`__text__`/`--text--`/`~~text~~` (pure Creole double-punctuation) and `<b>text</b>`/`<b>text to end of line` (HTML-tag-style, with or wi |
 | `CommandCreoleUrl.ts` | `HYPERLINK_COLOR`, `createUrlCommand` | CommandCreoleUrl — `[[url]]` / `[[url label]]` / `[[url {tooltip}]]` / `[[url {tooltip} label]]` link atom-splitting: the jar draws the resolved LABEL as its own text atom, in the hyperlink color (blue, `SkinParamUtils.getFontHyperlinkColor |
 | `Splitter.ts` | `Splitter` | Splitter — the creole `htmlTag` alternation and `purgeAllTag`, which strips every tag it matches (salt's `AbstractElementText#getCharNumber`). |
