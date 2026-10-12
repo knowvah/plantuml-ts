@@ -393,6 +393,11 @@ export interface ClassDiagramAST {
    * report.
    * @see ~/git/plantuml/.../command/CommandPragma.java:104-117
    * @see ~/git/plantuml/.../net/atmp/CucaDiagram.java:480-481
+   *
+   * cdd8 T1b: `'elk'` is `!pragma layout elk` -- `CommandPragma.java:128-129`
+   * (`setUseElk(true)`), read first by `CucaDiagram.java:478-479` to swap in
+   * `CucaDiagramFileMakerElk`. `classPlugin.requiresElk` reports it; T3a routes
+   * the layout. Wins over `'smetana'` (upstream tests `isUseElk()` first).
    */
-  layoutEngine?: 'smetana';
+  layoutEngine?: 'smetana' | 'elk';
 }
