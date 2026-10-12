@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1568 modules · 5844 exported names.
+1572 modules · 5848 exported names.
 
 ## `src/`
 
@@ -1825,9 +1825,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `AbstractElementFactoryComplex.ts` | `AbstractElementFactoryComplex` |  |
 | `ElementFactory.ts` | `ElementFactory` |  |
 | `ElementFactoryButton.ts` | `ElementFactoryButton` |  |
+| `ElementFactoryCheckboxOff.ts` | `ElementFactoryCheckboxOff` |  |
+| `ElementFactoryCheckboxOn.ts` | `ElementFactoryCheckboxOn` |  |
 | `ElementFactoryDroplist.ts` | `ElementFactoryDroplist` |  |
 | `ElementFactoryImage.ts` | `ElementFactoryImage` |  |
 | `ElementFactoryLine.ts` | `ElementFactoryLine` |  |
+| `ElementFactoryRadioOff.ts` | `ElementFactoryRadioOff` |  |
+| `ElementFactoryRadioOn.ts` | `ElementFactoryRadioOn` |  |
 | `ElementFactoryRetrieveFromDictonnary.ts` | `ElementFactoryRetrieveFromDictonnary` |  |
 | `ElementFactoryText.ts` | `ElementFactoryText` |  |
 | `ElementFactoryTextField.ts` | `ElementFactoryTextField` |  |
