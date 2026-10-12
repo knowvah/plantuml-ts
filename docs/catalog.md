@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1465 modules · 5559 exported names.
+1466 modules · 5560 exported names.
 
 ## `src/`
 
@@ -1535,6 +1535,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `annotation-line-trim.ts` | `trimLineForAnnotationMatch` | `matchAnnotationCommand`'s single-line matchers (`matchTitle` et al., `core/annotations/commands.ts`'s `ORDERED_MATCHERS`) read `lines[i]` verbatim, no internal trim — they require an already-trimmed line, like `state/parser.ts:147-149`'s ` |
 | `ast-stereotype-sprite.ts` | `StereotypeSpriteRef` | `StereotypeSpriteRef` -- moved out of `./ast.ts` (cdd3-T18, pure move, to keep that file under the 500-line cap); re-exported from there. |
 | `ast.ts` | `StereotypeSpriteRef`, `DescriptiveNode`, `DescriptiveLinkStyle`, `DescriptiveLink`, `DescriptionDiagramAST` | AST type definitions for PlantUML descriptive diagrams (component / use-case / deployment). |
+| `command-archimate.ts` | `tryArchimate` | `CommandArchimate.java`'s single-line leaf form, moved out of `parser.ts` (file cap) by cdd8-T1c when it gained the `<<$archimate/icon>>` rewrite. |
 | `command-table-containers.ts` | `CONTAINER_COMMANDS` | Bracket/paren shorthand, container-block, and generic keyword-dispatch commands for the descriptive diagram dispatch table (rules 10-15 of the original command-table.ts COMMANDS array): `[Name]` bracket shorthand, `(Name)` use-case shorthan |
 | `command-table-directives.ts` | `DIRECTIVE_COMMANDS` | Directive-style commands for the descriptive diagram dispatch table (rules 1-4 of the original command-table.ts COMMANDS array): comment lines, `newpage`, direction directives, `skinparam linetype`, `set separator`, `!pragma kermor`, `scale |
 | `command-table-helpers.ts` | `SHORTHAND_TRAILER`, `BRACKET_TRAILER`, `shorthandNode`, `resolveEndpointNamespace` | Shared helpers for the descriptive diagram dispatch table (command-table.ts and its command-group modules). |
