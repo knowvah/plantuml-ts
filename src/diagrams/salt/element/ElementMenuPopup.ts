@@ -59,10 +59,10 @@ export class ElementMenuPopup extends AbstractElement {
   drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D | null): void {
     if (zIndex !== POPUP_Z_INDEX) return;
 
-    ug = ug.apply(new Fore(this.getBlack().asPaint()));
+    ug = ug.apply(new Fore(this.getBlack()));
 
     // Unguarded like upstream: a null dimToUse is ElementMenuPopup.java:82's NullPointerException.
-    ug.apply(new Back(this.getColorDD().asPaint())).draw(URectangle.build(dimToUse!.getWidth(), dimToUse!.getHeight()));
+    ug.apply(new Back(this.getColorDD())).draw(URectangle.build(dimToUse!.getWidth(), dimToUse!.getHeight()));
 
     let y1 = 0;
     for (const entry of this.entries) {

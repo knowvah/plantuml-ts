@@ -56,7 +56,7 @@ export class ElementPyramidScrolled extends ElementPyramid {
   /** `ug.apply(getBlack())` sets the foreground (`Fore`). @see ElementPyramidScrolled.java:73-84 */
   override drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D | null): void {
     super.drawU(ug, zIndex, dimToUse);
-    ug = ug.apply(new Fore(this.getBlack().asPaint()));
+    ug = ug.apply(new Fore(this.getBlack()));
     const dim = super.getPreferredDimension(ug.getStringBounder(), 0, 0);
     if (this.scrollStrategy === ScrollStrategy.BOTH || this.scrollStrategy === ScrollStrategy.VERTICAL_ONLY)
       this.drawV(ug.apply(UTranslate.dx(dim.getWidth() + BAR_GAP)), this.v1, dim.getHeight());
@@ -111,7 +111,7 @@ export class ElementPyramidScrolled extends ElementPyramid {
 
   /** `getBlack().bg()` is `Back`. @see ElementPyramidScrolled.java:126-132 */
   private drawV(ug: UGraphic, width: number, height: number): void {
-    const black = new Back(this.getBlack().asPaint());
+    const black = new Back(this.getBlack());
     ug.draw(URectangle.build(width, height));
     ug.apply(UTranslate.dy(this.v2)).draw(ULine.hline(width));
     ug.apply(UTranslate.dy(height - this.v2)).draw(ULine.hline(width));
@@ -123,7 +123,7 @@ export class ElementPyramidScrolled extends ElementPyramid {
 
   /** `getBlack().bg()` is `Back`. @see ElementPyramidScrolled.java:134-140 */
   private drawH(ug: UGraphic, width: number, height: number): void {
-    const black = new Back(this.getBlack().asPaint());
+    const black = new Back(this.getBlack());
     ug.draw(URectangle.build(width, height));
     ug.apply(UTranslate.dx(this.v2)).draw(ULine.vline(height));
     ug.apply(UTranslate.dx(width - this.v2)).draw(ULine.vline(height));

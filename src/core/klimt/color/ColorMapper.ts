@@ -1,19 +1,23 @@
 import type { Gradient, Paint } from '../../paint.js';
+import { getReverse, type ColorOrder } from './ColorOrder.js';
 import { getGrayScaleColor, getGrayScaleColorReverse } from './ColorUtils.js';
+import { getReversed } from './fragment-color-mapper.js';
 import { HColorGradient } from './HColorGradient.js';
 import { parseSimpleColor, toSvgHex, type ResolvedColor } from './HColorSet.js';
 import { HColorSimple } from './HColorSimple.js';
+
+/** `XColor(int r, int g, int b)`'s alpha. */
+const OPAQUE = 255;
 
 /**
  * ColorMapper — the last step every drawn colour passes through
  * (`HColorSimple#toColor(mapper)` → `mapper.fromColorSimple(this)`,
  * HColorSimple.java:172-176).
  *
- * Ported arms: `IDENTITY`, `DARK_MODE`, `MONOCHROME`, `MONOCHROME_REVERSE`
- * — the ones `TitledDiagram#muteColorMapper` returns for `skinparam mode
- * dark` / `monochrome true|reverse` (TitledDiagram.java:291-297). Not
- * ported: `TEAVM_LIGHT`, `TEAVM_DARK`, `LIGTHNESS_INVERSE`,
- * `reverse(ColorOrder)` (the `reversecolor` arms, java:300-311).
+ * Ported arms: `IDENTITY`, `DARK_MODE`, `LIGTHNESS_INVERSE`, `MONOCHROME`,
+ * `MONOCHROME_REVERSE` and `reverse(ColorOrder)` — every mapper
+ * `TitledDiagram#muteColorMapper` returns (TitledDiagram.java:291-313). Not
+ * ported: `TEAVM_LIGHT`, `TEAVM_DARK` (TeaVM runtime only).
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/ColorMapper.java:42-101
  */
@@ -22,7 +26,7 @@ export interface ColorMapper {
 }
 
 /** The as-const table of upstream's `public static final` mappers. */
-export const ColorMapper = {
+const MAPPERS = {
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/ColorMapper.java:47-52 */
   IDENTITY: {
     fromColorSimple: (simple: HColorSimple): ResolvedColor => simple.getAwtColor(),
@@ -31,6 +35,12 @@ export const ColorMapper = {
    *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/ColorMapper.java:68-73 */
   DARK_MODE: {
     fromColorSimple: (simple: HColorSimple): ResolvedColor => (simple.darkSchemeTheme() as HColorSimple).getAwtColor(),
+  },
+  /** `ColorUtils.getReversed` (HSLuv lightness flip), opaque: `new XColor(r, g, b)`,
+   *  ColorUtils.java:139-167.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/ColorMapper.java:74-79 */
+  LIGTHNESS_INVERSE: {
+    fromColorSimple: (simple: HColorSimple): ResolvedColor => ({ ...getReversed(simple.getAwtColor()), a: OPAQUE }),
   },
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/ColorMapper.java:80-85 */
   MONOCHROME: {
@@ -41,6 +51,21 @@ export const ColorMapper = {
     fromColorSimple: (simple: HColorSimple): ResolvedColor => getGrayScaleColorReverse(simple.getAwtColor()),
   },
 } as const satisfies Record<string, ColorMapper>;
+
+/** `public static ColorMapper reverse(ColorOrder)`: `order.getReverse(awtColor)`,
+ *  opaque (`new XColor(...)`, ColorOrder.java:66-69).
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/ColorMapper.java:93-100 */
+function reverse(order: ColorOrder): ColorMapper {
+  return {
+    fromColorSimple: (simple: HColorSimple): ResolvedColor => ({
+      ...getReverse(order, simple.getAwtColor()),
+      a: OPAQUE,
+    }),
+  };
+}
+
+/** Upstream's `ColorMapper` statics: the constant mappers plus `reverse(order)`. */
+export const ColorMapper = { ...MAPPERS, reverse } as const;
 
 /** `HColor#toSvg(mapper)` for one solid colour string: transparent stays
  *  `#00000000` without consulting the mapper (HColor.java:74-79); a string

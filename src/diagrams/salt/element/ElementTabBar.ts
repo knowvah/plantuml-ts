@@ -73,7 +73,7 @@ export class ElementTabBar extends AbstractElement {
   /** @see ElementTabBar.java:91-101 */
   drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D | null): void {
     if (zIndex !== TAB_BAR_Z_INDEX) return;
-    ug = ug.apply(new Fore(this.getBlack().asPaint()));
+    ug = ug.apply(new Fore(this.getBlack()));
 
     if (this.vertical) this.drawUVertical(ug, 0, 0, zIndex, dimToUse);
     else this.drawUHorizontal(ug, 0, 0, zIndex, dimToUse);

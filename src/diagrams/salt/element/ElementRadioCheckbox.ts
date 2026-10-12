@@ -72,7 +72,7 @@ export class ElementRadioCheckbox extends AbstractElement {
   drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D | null): void {
     if (zIndex !== 0) return;
 
-    ug = ug.apply(new Fore(this.getBlack().asPaint()));
+    ug = ug.apply(new Fore(this.getBlack()));
     this.block.drawU(ug.apply(UTranslate.dx(this.margin)));
 
     const dim = this.getPreferredDimension(ug.getStringBounder(), 0, 0);

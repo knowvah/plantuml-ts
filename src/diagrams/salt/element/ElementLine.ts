@@ -48,7 +48,7 @@ export class ElementLine extends AbstractElement {
     if (zIndex !== 0) {
       return;
     }
-    ug = ug.apply(new Fore(this.getColorAA().asPaint()));
+    ug = ug.apply(new Fore(this.getColorAA()));
     // Unguarded like upstream: a null dimToUse is ElementLine.java:62's NullPointerException.
     let y2 = dimToUse!.getHeight() / 2;
     if (this.separator === DOUBLE) {

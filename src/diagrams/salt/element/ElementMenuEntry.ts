@@ -28,8 +28,8 @@ const SEPARATOR_HEIGHT = 5;
  * draws its popups).
  *
  * The background is typed `HColorSimple` (upstream: `HColor`), the class
- * `AbstractElement#getColorBB` builds, so it can be painted
- * (`HColorSimple#asPaint`) where upstream applies `background.bg()`.
+ * `AbstractElement#getColorBB` builds; `new Back(background)` is upstream's
+ * `background.bg()`, mapped with its dark partner by the klimt driver.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/salt/element/ElementMenuEntry.java:50-98
  */
@@ -68,10 +68,10 @@ export class ElementMenuEntry extends AbstractElement {
 
   /** Draws at every z-index (no zIndex test upstream). @see ElementMenuEntry.java:70-77 */
   drawU(ug: UGraphic, _zIndex: number, _dimToUse: XDimension2D | null): void {
-    ug = ug.apply(new Fore(this.getBlack().asPaint()));
+    ug = ug.apply(new Fore(this.getBlack()));
     if (this.background !== undefined) {
       const dim = this.getPreferredDimension(ug.getStringBounder(), 0, 0);
-      ug.apply(new Back(this.background.asPaint())).draw(URectangle.build(dim.getWidth(), dim.getHeight()));
+      ug.apply(new Back(this.background)).draw(URectangle.build(dim.getWidth(), dim.getHeight()));
     }
     this.block.drawU(ug);
   }

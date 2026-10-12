@@ -223,7 +223,7 @@ export class PSystemSalt extends TitledDiagram {
     const size = salt.getPreferredDimension(stringBounder, 0, 0);
     return {
       drawU(ug: UGraphic): void {
-        ug = ug.apply(new Fore(HColors.BLACK.asPaint()));
+        ug = ug.apply(new Fore(HColors.BLACK));
         salt.drawU(ug, 0, new XDimension2D(size.getWidth(), size.getHeight()));
         salt.drawU(ug, 1, new XDimension2D(size.getWidth(), size.getHeight()));
       },

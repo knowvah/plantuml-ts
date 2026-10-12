@@ -169,10 +169,7 @@ export class Grid {
 
     if (dim.getWidth() > 0 && dim.getHeight() > 0) {
       const ug2 = ug.apply(new UTranslate(x + 6, y - dim.getHeight() * 0));
-      ug2
-        .apply(new Back(white.asPaint()))
-        .apply(new Fore(white.asPaint()))
-        .draw(URectangle.build(dim.getWidth(), dim.getHeight()));
+      ug2.apply(new Back(white)).apply(new Fore(white)).draw(URectangle.build(dim.getWidth(), dim.getHeight()));
       this.title.drawU(ug2);
     }
   }

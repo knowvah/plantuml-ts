@@ -27,16 +27,8 @@ import { isDisplayPositionedNull, isEmpty } from '../../core/annotations/index.j
 import type { InkBox } from '../../core/annotations/body-ink.js';
 import { addWarnings } from '../../core/annotations/WarningBannerBlock.js';
 import type { RenderFragment, SyncPlugin } from '../../core/dispatcher.js';
-import { ColorMapper, mapPaint } from '../../core/klimt/color/ColorMapper.js';
-import { HColorGradient } from '../../core/klimt/color/HColorGradient.js';
-import { toSvgHex } from '../../core/klimt/color/HColorSet.js';
-import type { HColorSimple } from '../../core/klimt/color/HColorSimple.js';
-import {
-  applyColorMapperToFragment,
-  colorMapperOf,
-  type HexColorMapper,
-  type MonochromeMode,
-} from '../../core/klimt/color/fragment-color-mapper.js';
+import { ColorMapper, toSvgPaint } from '../../core/klimt/color/ColorMapper.js';
+import { fromString as colorOrderFromString } from '../../core/klimt/color/ColorOrder.js';
 import { extractFlatContent, extractViewBoxDims, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
 import { UGraphicHandwritten } from '../../core/klimt/drawing/hand/UGraphicHandwritten.js';
 import type { StringBounder as DriverStringBounder } from '../../core/klimt/drawing/svg/driver-text-svg.js';
@@ -50,7 +42,6 @@ import { TextBlockUtils } from '../../core/klimt/shape/TextBlockUtils.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import type { Paint } from '../../core/paint.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { StyleSignatureBasic } from '../../core/style/StyleSignatureBasic.js';
 import { BODY_ANCHOR } from '../../core/TextBlockExporter.js';
@@ -60,9 +51,6 @@ import { createSaltDiagram } from './PSystemSaltFactory.js';
 /** `DiagramType.SALT.name()`, the root `data-diagram-type` value.
  *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/TextBlockExporter.java:292-294 */
 const DIAGRAM_TYPE_SALT = 'SALT';
-
-/** `HColor#toSvg`'s transparent answer, never mapped (HColor.java:74-79). */
-const TRANSPARENT = '#00000000';
 
 /** The parsed diagram and the measurer its text is sized with. */
 export interface SaltGeometry {
@@ -97,61 +85,30 @@ function isDark(diagram: PSystemSalt): boolean {
   return diagram.getSkinParam().getValue('mode')?.toLowerCase() === 'dark';
 }
 
-/** `"true".equals(monochrome)` / `"reverse".equals(monochrome)`. */
-function monochromeOf(diagram: PSystemSalt): MonochromeMode | undefined {
-  const monochrome = diagram.getSkinParam().getValue('monochrome');
-  return monochrome === 'true' || monochrome === 'reverse' ? monochrome : undefined;
+/** `reversecolor`'s arms: `dark` (any case) is `LIGTHNESS_INVERSE`, a
+ *  `ColorOrder` name is `reverse(order)`, anything else (or unset) `init`.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:300-313 */
+function reverseColorMapper(reversecolor: string | null | undefined): ColorMapper {
+  if (reversecolor === null || reversecolor === undefined) return ColorMapper.IDENTITY;
+  if (reversecolor.toLowerCase() === 'dark') return ColorMapper.LIGTHNESS_INVERSE;
+  const order = colorOrderFromString(reversecolor);
+  return order === undefined ? ColorMapper.IDENTITY : ColorMapper.reverse(order);
 }
 
 /**
- * `TitledDiagram#muteColorMapper`'s arms the klimt `ColorMapper` port has:
- * `mode dark`, `monochrome true|reverse`, else the identity. The
- * `reversecolor` arms are {@link reverseColorMapper}.
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:291-311
+ * `TitledDiagram#muteColorMapper(init)` with `init` the identity (the
+ * `FileFormatOption` default): `mode dark`, else `monochrome true|reverse`,
+ * else the `reversecolor` arms. The klimt `UGraphicSvg` carries the result
+ * (`fileFormatOption.withColorMapper(mutedMapper)`, UgDiagram.java:134-135;
+ * `UGraphicSvg.java:91`) and maps every drawn colour and the background with it.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:291-313
  */
 function muteColorMapper(diagram: PSystemSalt): ColorMapper {
   if (isDark(diagram)) return ColorMapper.DARK_MODE;
-  const monochrome = monochromeOf(diagram);
+  const monochrome = diagram.getSkinParam().getValue('monochrome');
   if (monochrome === 'true') return ColorMapper.MONOCHROME;
   if (monochrome === 'reverse') return ColorMapper.MONOCHROME_REVERSE;
-  return ColorMapper.IDENTITY;
-}
-
-/** `muteColorMapper`'s `reversecolor` arms (java:300-311), reached only when
- *  neither `mode dark` nor `monochrome` answered first, as hex mappers
- *  (`fragment-color-mapper.ts#colorMapperOf`). */
-function reverseColorMapper(diagram: PSystemSalt): HexColorMapper | undefined {
-  if (isDark(diagram) || monochromeOf(diagram) !== undefined) return undefined;
-  return colorMapperOf({ reverseColor: diagram.getSkinParam().getValue('reversecolor') ?? undefined });
-}
-
-/**
- * The drawing half of `muteColorMapper`: the klimt `UGraphic` carries no
- * `ColorMapper` in this port, so the muted mapper reaches the drawn colours
- * through the shared whole-fragment post-process the class and activity
- * engines use (`fragment-color-mapper.ts`). `mode dark` is that file's
- * unmodeled arm.
- */
-function drawingColorMapper(diagram: PSystemSalt): HexColorMapper | undefined {
-  const monochrome = isDark(diagram) ? undefined : monochromeOf(diagram);
-  if (monochrome !== undefined) return colorMapperOf({ monochrome });
-  return reverseColorMapper(diagram);
-}
-
-/** `HColor#toSvg(mapper)`: transparent is never mapped (HColor.java:74-79);
- *  a simple colour maps WITH its dark partner (`ColorMapper.DARK_MODE`). */
-function toSvgPaint(color: HColorSimple | HColorGradient, mapper: ColorMapper): Paint {
-  if (color instanceof HColorGradient) return mapPaint(color.asPaint(), mapper);
-  if (color.isTransparent()) return TRANSPARENT;
-  return toSvgHex(mapper.fromColorSimple(color));
-}
-
-/** The SVG background: `backcolor.toSvg(option.getColorMapper())`
- *  (SvgGraphics.java:176-188), through whichever mapper arm answered. */
-function mappedBackcolor(diagram: PSystemSalt): Paint {
-  const muted = toSvgPaint(diagram.calculateBackColor(), muteColorMapper(diagram));
-  const reverse = reverseColorMapper(diagram);
-  return reverse !== undefined && typeof muted === 'string' && muted !== TRANSPARENT ? reverse(muted) : muted;
+  return reverseColorMapper(diagram.getSkinParam().getValue('reversecolor'));
 }
 
 /** `TitledDiagram#isHandwritten`: `skinParam.handwritten()`.
@@ -168,10 +125,11 @@ interface DrawPass {
   readonly translate: UTranslate;
 }
 
-function svgGraphic(measurer: StringMeasurer, pass: DrawPass, backcolor: Paint | undefined): UGraphicSvg {
+function svgGraphic(diagram: PSystemSalt, measurer: StringMeasurer, pass: DrawPass): UGraphicSvg {
   const option = basicSvgOption({
     minDim: { width: pass.minDim.getWidth(), height: pass.minDim.getHeight() },
-    backcolor,
+    backcolor: diagram.calculateBackColor(),
+    colorMapper: muteColorMapper(diagram),
     scale: pass.scale,
     rootAttributes: new Map([['data-diagram-type', DIAGRAM_TYPE_SALT]]),
   });
@@ -180,8 +138,8 @@ function svgGraphic(measurer: StringMeasurer, pass: DrawPass, backcolor: Paint |
 
 /** The text block drawn per `pass` (TextBlockExporter.java:165-176): the
  *  margin translate, then `UGraphicHandwritten` when handwritten. */
-function drawSvg(diagram: PSystemSalt, measurer: StringMeasurer, pass: DrawPass, backcolor: Paint | undefined): string {
-  const ug = svgGraphic(measurer, pass, backcolor);
+function drawSvg(diagram: PSystemSalt, measurer: StringMeasurer, pass: DrawPass): string {
+  const ug = svgGraphic(diagram, measurer, pass);
   let drawn: UGraphic = ug.apply(pass.translate);
   if (isHandwritten(diagram)) drawn = new UGraphicHandwritten(drawn);
   pass.textBlock.drawU(drawn);
@@ -190,27 +148,16 @@ function drawSvg(diagram: PSystemSalt, measurer: StringMeasurer, pass: DrawPass,
 
 /**
  * Draws the text block per `pass` and unwraps the document to a fragment
- * whose body is the flat drawing (no content `<g>`).
- *
- * With a hex {@link drawingColorMapper} the drawing is made WITHOUT the
- * background and mapped, and the background (already mapped,
- * {@link mappedBackcolor}) is painted by its own empty klimt document: the
- * jar maps every colour once, so the painted background rect must not pass
- * through the drawing's mapper a second time.
+ * whose body is the flat drawing (no content `<g>`). The klimt graphic maps
+ * every colour, background included, once (SvgGraphics.java:176-188); the
+ * fragment's `background` is that same `backcolor.toSvg(mapper)`.
  * @see TextBlockExporter.java:159-176
  */
 function drawFragment(diagram: PSystemSalt, measurer: StringMeasurer, pass: DrawPass): RenderFragment {
-  const backcolor = mappedBackcolor(diagram);
-  const mapper = drawingColorMapper(diagram);
-  const svg = drawSvg(diagram, measurer, pass, mapper === undefined ? backcolor : undefined);
+  const backcolor = toSvgPaint(diagram.calculateBackColor(), muteColorMapper(diagram));
+  const svg = drawSvg(diagram, measurer, pass);
   const { width, height } = extractViewBoxDims(svg);
-  const drawn = extractFlatContent(svg);
-  const background =
-    mapper === undefined
-      ? { body: '', extraDefs: '' }
-      : extractFlatContent(svgGraphic(measurer, pass, backcolor).getSvgString());
-  const body = background.body + applyColorMapperToFragment(drawn.body, mapper);
-  const extraDefs = background.extraDefs + drawn.extraDefs;
+  const { body, extraDefs } = extractFlatContent(svg);
   const fragment: RenderFragment = { body, width, height, diagramType: DIAGRAM_TYPE_SALT };
   const withBackground = typeof backcolor === 'string' ? { ...fragment, background: backcolor } : fragment;
   return extraDefs.length > 0 ? { ...withBackground, extraDefs } : withBackground;
