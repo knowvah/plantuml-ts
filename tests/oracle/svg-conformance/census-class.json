@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-12T02:25:06.064Z",
-  "measuredAgainstCommit": "9a2ac1c50",
+  "generatedAt": "2026-10-12T03:02:41.360Z",
+  "measuredAgainstCommit": "55fc8a415",
   "type": "class+tests/oracle/svg-conformance/census-class.json",
   "measurer": "deterministic",
   "fixtures": [
@@ -407,7 +407,7 @@
       "slug": "cadutu-02-lazu601",
       "tree": "class",
       "status": "ok",
-      "diffCount": 70,
+      "diffCount": 415,
       "bucket": "31+"
     },
     {
@@ -624,8 +624,8 @@
       "slug": "cirojo-62-dubo306",
       "tree": "class",
       "status": "ok",
-      "diffCount": 26,
-      "bucket": "11-30"
+      "diffCount": 276,
+      "bucket": "31+"
     },
     {
       "slug": "cisipo-98-dire511",
@@ -1996,8 +1996,8 @@
       "slug": "gokoru-18-daba136",
       "tree": "class",
       "status": "ok",
-      "diffCount": 13,
-      "bucket": "11-30"
+      "diffCount": 276,
+      "bucket": "31+"
     },
     {
       "slug": "goloxu-09-nero458",
@@ -2906,8 +2906,8 @@
       "slug": "lagudi-03-rucu383",
       "tree": "class",
       "status": "ok",
-      "diffCount": 6,
-      "bucket": "4-10"
+      "diffCount": 509,
+      "bucket": "31+"
     },
     {
       "slug": "lakivi-73-vuko958",
@@ -5069,8 +5069,8 @@
       "slug": "rutefe-49-xeju709",
       "tree": "class",
       "status": "ok",
-      "diffCount": 6,
-      "bucket": "4-10"
+      "diffCount": 169,
+      "bucket": "31+"
     },
     {
       "slug": "ruzibe-92-doti700",
@@ -5608,7 +5608,7 @@
       "slug": "tegefa-14-koxo759",
       "tree": "class",
       "status": "ok",
-      "diffCount": 79,
+      "diffCount": 474,
       "bucket": "31+"
     },
     {
@@ -5657,8 +5657,8 @@
       "slug": "temofi-63-vega763",
       "tree": "class",
       "status": "ok",
-      "diffCount": 13,
-      "bucket": "11-30"
+      "diffCount": 415,
+      "bucket": "31+"
     },
     {
       "slug": "tenava-30-cele768",

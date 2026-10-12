@@ -1,0 +1,159 @@
+rendering 1010 all fixtures
+  25/1010
+  50/1010
+  75/1010
+  100/1010
+  125/1010
+  150/1010
+  175/1010
+  200/1010
+  225/1010
+  250/1010
+  275/1010
+Warning: no hard-coded metrics for 'Times,serif'.  Falling back to 'Times' metrics
+  300/1010
+  325/1010
+  350/1010
+  375/1010
+  400/1010
+  425/1010
+  450/1010
+  475/1010
+  500/1010
+  525/1010
+  550/1010
+  575/1010
+  600/1010
+  625/1010
+[Log] vlookup on cm
+  650/1010
+  675/1010
+  700/1010
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+lost UML.Class_ UML.Stereotype edge
+lost UML.Class_ UML.Behavior edge
+lost UML.Class_ UML.AssociationClass edge
+lost UML.Class_ UML.Component edge
+lost UML.Class_ UML.Node edge
+lost UML.NamedElement UML.PackageableElement edge
+lost UML.NamedElement UML.Namespace edge
+lost UML.NamedElement UML.TypedElement edge
+lost UML.NamedElement UML.RedefinableElement edge
+lost UML.NamedElement UML.DeploymentTarget edge
+lost UML.NamedElement UML.DeployedArtifact edge
+lost UML.NamedElement UML.Vertex edge
+lost UML.NamedElement UML.Trigger edge
+lost UML.NamedElement UML.ParameterSet edge
+lost UML.NamedElement UML.CollaborationUse edge
+lost UML.NamedElement UML.Extend edge
+lost UML.NamedElement UML.Include edge
+lost UML.NamedElement UML.ActivityGroup edge
+lost UML.NamedElement UML.InteractionFragment edge
+lost UML.NamedElement UML.Lifeline edge
+lost UML.NamedElement UML.MessageEnd edge
+lost UML.NamedElement UML.Message edge
+lost UML.NamedElement UML.GeneralOrdering edge
+lost UML.Behavior UML.StateMachine edge
+lost UML.Behavior UML.Activity edge
+lost UML.Behavior UML.Interaction edge
+lost UML.Behavior UML.OpaqueBehavior edge
+lost UML.StructuredActivityNode UML.ConditionalNode edge
+lost UML.StructuredActivityNode UML.ExpansionRegion edge
+lost UML.StructuredActivityNode UML.LoopNode edge
+lost UML.StructuredActivityNode UML.SequenceNode edge
+lost UML.CallAction UML.CallBehaviorAction edge
+lost UML.CallAction UML.CallOperationAction edge
+lost UML.CallAction UML.StartObjectBehaviorAction edge
+  725/1010
+  750/1010
+  775/1010
+[Log] SUBMODULE _not_ defined
+  800/1010
+  825/1010
+  850/1010
+  875/1010
+  900/1010
+  925/1010
+  950/1010
+  975/1010
+  1000/1010
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+lost A B edge
+lost A B edge
+wrote plans/class-divergence-drive-8/measurements/b2a.json — 1010 rows
