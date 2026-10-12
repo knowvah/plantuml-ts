@@ -1,0 +1,9 @@
+@startsalt
+{
+{* File | Edit | View | Help
+File | New | Open | Close
+Edit | Undo | Redo
+View | Zoom in | Zoom out | Grid }
+Document body
+}
+@endsalt

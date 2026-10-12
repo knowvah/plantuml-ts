@@ -1,0 +1,577 @@
+[
+  {
+    "slug": "common-commands",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-include-procedure",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-menu-three-popups",
+    "pass": false,
+    "weightedScore": 47,
+    "diffCount": 19,
+    "structural": 10,
+    "numeric": 9,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[2]/@height",
+        "actual": "36",
+        "expected": "24",
+        "delta": 12,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[2]/@width",
+        "actual": "30.75",
+        "expected": "28.725",
+        "delta": 2.0249999999999986,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[2]/@x",
+        "actual": "6",
+        "expected": "35.425",
+        "delta": 29.424999999999997,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[6]/@textLength",
+        "actual": "24.075",
+        "expected": "28.725",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[6]/@x",
+        "actual": "6",
+        "expected": "35.425",
+        "delta": 29.424999999999997,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[6]/text()[1]",
+        "actual": "New",
+        "expected": "Undo",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[7]/@textLength",
+        "actual": "29.325",
+        "expected": "28.725",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[7]/@x",
+        "actual": "6",
+        "expected": "35.425",
+        "delta": 29.424999999999997,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-pseudo-sprite-twice",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-scale-2",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-scroll-both",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-scroll-horizontal",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-scroll-vertical",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-separators-every-column",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-space-in-cell",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-sprite-block",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-startuml-salt-keyword",
+    "pass": false,
+    "weightedScore": 54,
+    "diffCount": 25,
+    "structural": 14,
+    "numeric": 11,
+    "first": [
+      {
+        "path": "svg/@height",
+        "actual": "106",
+        "expected": "162",
+        "delta": 56,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "332",
+        "expected": "699",
+        "delta": 367,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "106",
+        "expected": "162",
+        "delta": 56,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "332",
+        "expected": "699",
+        "delta": 367,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/text()[1]",
+        "actual": "plantuml-ts version 0.1.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[1]/@width",
+        "actual": "130.887",
+        "expected": "290.225",
+        "delta": 159.33800000000002,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[2]/@fill",
+        "actual": "#000",
+        "expected": "#33FF02",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-tab-in-border",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-tab-vertical",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-title-caption",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-titled-border-creole",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-tree-in-border",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-tree-table-columns",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "dpi-192",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "hide-stereotype-dropped",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "legend-embedded-salt",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "mainframe",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "mode-line-is-data",
+    "pass": false,
+    "weightedScore": 302,
+    "diffCount": 82,
+    "structural": 57,
+    "numeric": 25,
+    "first": [
+      {
+        "path": "svg/@background",
+        "actual": "#000000",
+        "expected": "#FFFFFF",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@height",
+        "actual": "176",
+        "expected": "578",
+        "delta": 402,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "332",
+        "expected": "653",
+        "delta": 321,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "176",
+        "expected": "578",
+        "delta": 402,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "332",
+        "expected": "653",
+        "delta": 321,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@fill",
+        "actual": "#33FF02",
+        "expected": "#000",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@font-style",
+        "actual": "italic",
+        "expected": "",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@font-weight",
+        "actual": "700",
+        "expected": "",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "monochrome-reverse",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "monochrome-true",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "no-factory-ready",
+    "pass": false,
+    "weightedScore": 273,
+    "diffCount": 121,
+    "structural": 74,
+    "numeric": 47,
+    "first": [
+      {
+        "path": "svg/@height",
+        "actual": "298",
+        "expected": "554",
+        "delta": 256,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "532",
+        "expected": "723",
+        "delta": 191,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "298",
+        "expected": "554",
+        "delta": 256,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "532",
+        "expected": "723",
+        "delta": 191,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@font-weight",
+        "actual": "700",
+        "expected": "",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@textLength",
+        "actual": "122.625",
+        "expected": "10.65",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@x",
+        "actual": "5",
+        "expected": "376.475",
+        "delta": 371.475,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@y",
+        "actual": "14.333",
+        "expected": "194.333",
+        "delta": 180,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "reversecolor-dark",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "salt-first-line",
+    "pass": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 4,
+    "numeric": 3,
+    "first": [
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "377",
+        "expected": "384",
+        "delta": 7,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "377",
+        "expected": "384",
+        "delta": 7,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/text()[1]",
+        "actual": "plantuml-ts version 0.1.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[1]/@width",
+        "actual": "130.887",
+        "expected": "206.313",
+        "delta": 75.42599999999999,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[2]/@textLength",
+        "actual": "128.887",
+        "expected": "204.313",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[2]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From salt-first-line.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "salt-not-first-line",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "skinparam-mode-dark",
+    "pass": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 7,
+    "numeric": 0,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[2]/@fill",
+        "actual": "#EEE",
+        "expected": "#222",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[2]/@stroke",
+        "actual": "#000",
+        "expected": "#FFF",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@fill",
+        "actual": "#000",
+        "expected": "#FFF",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[2]/@fill",
+        "actual": "#000",
+        "expected": "#FFF",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/line[1]/@stroke",
+        "actual": "#000",
+        "expected": "#FFF",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/line[2]/@stroke",
+        "actual": "#000",
+        "expected": "#FFF",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/line[3]/@stroke",
+        "actual": "#000",
+        "expected": "#FFF",
+        "tolerance": 0.01
+      }
+    ]
+  }
+]
