@@ -1,4 +1,4 @@
-# T2g: `UPixel` driver + `dimToUse` nullability (DRAFT — needs maintainer approval, journal row 22)
+# T2g: `UPixel` driver + `dimToUse` nullability (maintainer-approved 2026-10-12, journal row 24)
 
 Prepend [../batch-1/task-preamble.md](../batch-1/task-preamble.md).
 

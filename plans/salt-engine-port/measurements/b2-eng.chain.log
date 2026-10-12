@@ -1,0 +1,52 @@
+wait load 26.71
+wait load 19.28
+wait load 14.04
+wait load 10.74
+wait load 8.83
+wait load 8.07
+== activity 11:23:58 { 7.77 20.34 18.18 }
+wrote plans/salt-engine-port/measurements/b2-eng/parity-activity.json — {"conformant":448,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 10.67
+wait load 9.51
+wait load 8.39
+== board 11:26:02 { 7.62 16.31 16.88 }
+wrote plans/salt-engine-port/measurements/b2-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.71
+wait load 8.83
+wait load 8.20
+== c4 11:27:58 { 7.63 13.75 15.81 }
+wrote plans/salt-engine-port/measurements/b2-eng/parity-c4.json — {"conformant":2,"structural-match":0,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+wait load 12.75
+wait load 11.29
+wait load 10.39
+wait load 9.63
+wait load 9.60
+wait load 9.02
+wait load 8.67
+wait load 9.68
+wait load 8.97
+wait load 9.25
+wait load 8.50
+== chart 11:34:02 { 7.79 10.36 13.52 }
+wrote plans/salt-engine-port/measurements/b2-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+wait load 10.58
+wait load 9.87
+wait load 9.22
+wait load 9.84
+wait load 12.57
+wait load 11.71
+wait load 17.76
+wait load 17.21
+wait load 18.65
+wait load 14.41
+wait load 15.53
+wait load 12.72
+wait load 17.70
+wait load 15.64
+wait load 12.89
+wait load 11.27
+wait load 13.25
+wait load 12.09
+wait load 19.85
+wait load 27.84
+wait load 36.17
