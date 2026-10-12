@@ -1,0 +1,244 @@
+{
+ "date": "2026-10-12",
+ "base": "f82073a67",
+ "branch": "feat/salt-engine-port",
+ "salt": {
+  "conformant": 0,
+  "structural-match": 0,
+  "diverged": 51,
+  "errored": 0,
+  "rows": 51
+ },
+ "engines": {
+  "activity": {
+   "conformant": 448,
+   "structural-match": 1,
+   "diverged": 0,
+   "errored": 0,
+   "rows": 449
+  },
+  "board": {
+   "conformant": 0,
+   "structural-match": 0,
+   "diverged": 4,
+   "errored": 0,
+   "rows": 4
+  },
+  "c4": {
+   "conformant": 2,
+   "structural-match": 0,
+   "diverged": 9,
+   "errored": 0,
+   "rows": 11
+  },
+  "chart": {
+   "conformant": 0,
+   "structural-match": 0,
+   "diverged": 29,
+   "errored": 0,
+   "rows": 29
+  },
+  "chronology": {
+   "conformant": 0,
+   "structural-match": 0,
+   "diverged": 1,
+   "errored": 0,
+   "rows": 1
+  },
+  "class": {
+   "conformant": 720,
+   "structural-match": 3,
+   "diverged": 0,
+   "errored": 0,
+   "rows": 723
+  },
+  "component": {
+   "conformant": 69,
+   "structural-match": 66,
+   "diverged": 131,
+   "errored": 0,
+   "rows": 266
+  },
+  "ditaa": {
+   "conformant": 0,
+   "structural-match": 0,
+   "diverged": 0,
+   "errored": 0,
+   "rows": 2
+  },
+  "dot": {
+   "conformant": 5,
+   "structural-match": 0,
+   "diverged": 0,
+   "errored": 0,
+   "rows": 5
+  },
+  "ebnf": {
+   "conformant": 0,
+   "structural-match": 0,
+   "diverged": 44,
+   "errored": 0,
+   "rows": 44
+  },
+  "files": {
+   "conformant": 0,
+   "structural-match": 0,
+   "diverged": 1,
+   "errored": 0,
+   "rows": 1
+  },
+  "gantt": {
+   "conformant": 1,
+   "structural-match": 0,
+   "diverged": 264,
+   "errored": 0,
+   "rows": 265
+  },
+  "hcl": {
+   "conformant": 1,
+   "structural-match": 2,
+   "diverged": 0,
+   "errored": 0,
+   "rows": 3
+  },
+  "json": {
+   "conformant": 13,
+   "structural-match": 24,
+   "diverged": 13,
+   "errored": 0,
+   "rows": 50
+  },
+  "mindmap": {
+   "conformant": 142,
+   "structural-match": 0,
+   "diverged": 0,
+   "errored": 0,
+   "rows": 142
+  },
+  "network": {
+   "conformant": 0,
+   "structural-match": 0,
+   "diverged": 3,
+   "errored": 0,
+   "rows": 3
+  },
+  "object": {
+   "conformant": 63,
+   "structural-match": 8,
+   "diverged": 9,
+   "errored": 0,
+   "rows": 80
+  },
+  "packet": {
+   "conformant": 0,
+   "structural-match": 0,
+   "diverged": 6,
+   "errored": 0,
+   "rows": 6
+  },
+  "regex": {
+   "conformant": 0,
+   "structural-match": 0,
+   "diverged": 46,
+   "errored": 0,
+   "rows": 46
+  },
+  "salt": {
+   "conformant": 0,
+   "structural-match": 0,
+   "diverged": 51,
+   "errored": 0,
+   "rows": 51
+  },
+  "sequence": {
+   "conformant": 0,
+   "structural-match": 0,
+   "diverged": 1143,
+   "errored": 0,
+   "rows": 1143
+  },
+  "state": {
+   "conformant": 78,
+   "structural-match": 11,
+   "diverged": 184,
+   "errored": 0,
+   "rows": 273
+  },
+  "timing": {
+   "conformant": 6,
+   "structural-match": 0,
+   "diverged": 120,
+   "errored": 0,
+   "rows": 126
+  },
+  "unknown": {
+   "conformant": 407,
+   "structural-match": 48,
+   "diverged": 370,
+   "errored": 0,
+   "rows": 825
+  },
+  "usecase": {
+   "conformant": 29,
+   "structural-match": 18,
+   "diverged": 46,
+   "errored": 0,
+   "rows": 94
+  },
+  "wbs": {
+   "conformant": 0,
+   "structural-match": 0,
+   "diverged": 204,
+   "errored": 0,
+   "rows": 204
+  },
+  "wire": {
+   "conformant": 0,
+   "structural-match": 0,
+   "diverged": 18,
+   "errored": 0,
+   "rows": 18
+  },
+  "yaml": {
+   "conformant": 7,
+   "structural-match": 28,
+   "diverged": 4,
+   "errored": 0,
+   "rows": 39
+  }
+ },
+ "routing": {
+  "salt": {
+   "SALT->NONE": 50,
+   "NONE->NONE (jar-error)": 1
+  }
+ },
+ "refusal": {
+  "salt": {
+   "ok": 51
+  }
+ },
+ "embeds": {
+  "unknown/lubicu-73-fule059": [
+   0,
+   37
+  ],
+  "class/bixogo-47-xulu385": [
+   0,
+   49
+  ],
+  "class/roxosu-00-pini153": [
+   0,
+   49
+  ],
+  "activity/bozido-07-geze049": [
+   0,
+   68
+  ],
+  "gantt/duxuce-04-fozu747": [
+   9,
+   2
+  ]
+ },
+ "saltKeywordRows": 0
+}
