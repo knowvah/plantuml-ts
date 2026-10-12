@@ -1,18 +1,16 @@
 # cdd8 T2d: MyElkEdge
 
-## Observation: ExtremityFactoryExtends / ExtremityExtends are unported
+## Observation: the ELK EXTENDS head is not the svek one
 - **Context**: porting `MyElkEdge#getDecors` (`MyElkEdge.java:229-239`).
 - **Finding**: the ELK path draws `LinkDecor.EXTENDS` through
-  `new ExtremityFactoryExtends(backColor).createUDrawable(...)` (`:231-232`):
-  `ExtremityExtends.java` is a 19/7 polygon, `angle - PI/2` then
-  `manageround`, filled `backgroundColor` (white here), decoration length 18.
-  The port has only the svek path's `getExtremityFactoryComplete` EXTENDS
-  triangle (18/6/18, `ExtremityTriangle`), which is a different shape.
-  `src/core/svek/extremity/` was outside T2d's write-set, so
-  `MyElkEdge.getDecors` throws for EXTENDS until the class lands.
-- **Impact**: every `<|--` link on an ELK diagram fails until
-  `ExtremityFactoryExtends` is ported.
-- **Confidence**: High
+  `ExtremityFactoryExtends` -> `ExtremityExtends` (19/7 polygon, angle - PI/2,
+  `manageround`, filled white), not the svek path's 18/6/18
+  `ExtremityTriangle`. Ported in `src/core/svek/extremity/` (residual round);
+  oracle probes `A <|-- B`, `A --|> B`, `A <|.. B` under `!pragma layout elk`
+  match byte-for-byte. The dashed link's head is undashed (onlyThickness).
+- **Impact**: only `MyElkEdge` imports these two classes; svek output is
+  unaffected.
+- **Confidence**: High (oracle-rendered)
 
 ## Observation: 3 dp jar widths are not enough to place ELK ports exactly
 - **Context**: cadutu end-to-end through elkjs + MyElkEdge.

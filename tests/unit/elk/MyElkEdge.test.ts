@@ -452,18 +452,6 @@ describe('MyElkEdge extremities', () => {
     );
     expect(shapes(svg)).toHaveLength(1);
   });
-
-  it('builds EXTENDS through ExtremityFactoryExtends, which this port lacks (:231-232)', () => {
-    const extendsType = new LinkType(LinkDecor.EXTENDS, LinkDecor.NONE);
-    const myElkEdge = new MyElkEdge(
-      linkAdapter({ type: extendsType }),
-      'classDiagram',
-      LINK,
-      edge([section([0, 0], [], [0, 9])]),
-      args(),
-    );
-    expect(() => myElkEdge.drawU(newGraphic())).toThrow('ExtremityFactoryExtends');
-  });
 });
 
 // ---------------------------------------------------------------------------
@@ -648,38 +636,46 @@ const CADUTU_LINKS: Readonly<Record<string, CadutuLink>> = {
   },
 };
 
-function cadutuLink(id: string): CadutuLink {
-  const found = CADUTU_LINKS[id];
+interface ElkFixture {
+  readonly leaves: Readonly<Record<string, Pt>>;
+  readonly links: Readonly<Record<string, CadutuLink>>;
+}
+
+const CADUTU: ElkFixture = { leaves: CADUTU_LEAVES, links: CADUTU_LINKS };
+
+function fixtureLink(fixture: ElkFixture, id: string): CadutuLink {
+  const found = fixture.links[id];
   if (found === undefined) throw new Error(`no link ${id}`);
   return found;
 }
 
-function cadutuAdapter(): ElkDiagramAdapter {
-  const leafDim = (id: string): Pt => CADUTU_LEAVES[id] ?? [0, 0];
-  const quantifier = (id: string, n: 1 | 2): Pt | undefined => (n === 1 ? cadutuLink(id).q1 : cadutuLink(id).q2);
+function fixtureAdapter(fixture: ElkFixture): ElkDiagramAdapter {
+  const link = (id: string): CadutuLink => fixtureLink(fixture, id);
+  const leafDim = (id: string): Pt => fixture.leaves[id] ?? [0, 0];
+  const quantifier = (id: string, n: 1 | 2): Pt | undefined => (n === 1 ? link(id).q1 : link(id).q2);
   return {
     ...linkAdapter(),
     getDefaultStringBounder: () => ({ calculateDimension: notRead('stringBounder') }),
     getRootGroup: () => 'root',
-    leafs: () => Object.keys(CADUTU_LEAVES),
+    leafs: () => Object.keys(fixture.leaves),
     getChildrenGroups: () => [],
-    getLinks: () => Object.keys(CADUTU_LINKS),
+    getLinks: () => Object.keys(fixture.links),
     isRemoved: () => false,
     getParentContainer: () => 'root',
     calculateDimension: (id) => new XDimension2D(...leafDim(id)),
-    getEntity1: (id) => cadutuLink(id).from,
-    getEntity2: (id) => cadutuLink(id).to,
-    getQuantifier1: (id) => (cadutuLink(id).q1 === undefined ? null : 'q'),
-    getQuantifier2: (id) => (cadutuLink(id).q2 === undefined ? null : 'q'),
+    getEntity1: (id) => link(id).from,
+    getEntity2: (id) => link(id).to,
+    getQuantifier1: (id) => (link(id).q1 === undefined ? null : 'q'),
+    getQuantifier2: (id) => (link(id).q2 === undefined ? null : 'q'),
     getRole1: () => null,
     getRole2: () => null,
-    getLabel: (id) => block(...cadutuLink(id).label),
+    getLabel: (id) => block(...link(id).label),
     getQuantifier: (id, n) => {
       const dim = quantifier(id, n);
       return dim === undefined ? null : block(...dim);
     },
     getRoleLabel: () => null,
-    getType: (id) => cadutuLink(id).type,
+    getType: (id) => link(id).type,
   };
 }
 
@@ -724,9 +720,9 @@ function recordAs(tb: TextBlock | null, name: string, sink: Map<string, Pt>): Te
   };
 }
 
-/** elkjs layout of cadutu, then every edge through MyElkEdge as `MyElkDrawing.java:178-206` builds it. */
-async function drawCadutu(labels: Map<string, Pt>): Promise<string> {
-  const adapter = cadutuAdapter();
+/** elkjs layout of `fixture`, then every edge through MyElkEdge as `MyElkDrawing.java:178-206` builds it. */
+async function drawThroughElk(fixture: ElkFixture, labels: Map<string, Pt>): Promise<string> {
+  const adapter = fixtureAdapter(fixture);
   const sb = adapter.getDefaultStringBounder();
   const result = makeElkLayout(adapter, await loadElk(), () => ({ drawU: () => undefined }));
   const nodeImages = new Map([...result.nodes.keys()].map((id) => [id, nodeImage(new MagneticBorderNone())]));
@@ -753,12 +749,60 @@ async function drawCadutu(labels: Map<string, Pt>): Promise<string> {
 
 describe('MyElkEdge: cadutu-02-lazu601 through elkjs', () => {
   it("draws the jar's edge lines and arrowheads", async () => {
-    expect(shapes(await drawCadutu(new Map()))).toEqual(CADUTU_EDGE_SHAPES);
+    expect(shapes(await drawThroughElk(CADUTU, new Map()))).toEqual(CADUTU_EDGE_SHAPES);
   });
 
   it("places every label block where the jar's text sits", async () => {
     const labels = new Map<string, Pt>();
-    await drawCadutu(labels);
+    await drawThroughElk(CADUTU, labels);
     expect(Object.fromEntries(labels)).toEqual(CADUTU_LABEL_TRANSLATES);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// EXTENDS through ExtremityFactoryExtends, against the jar
+// ---------------------------------------------------------------------------
+
+/**
+ * `class A` / `class B` under `!pragma layout elk`: 14 pt "A" and "B" are
+ * 9.362500190734863 wide (DeterministicMeasurer, the jar's width table), so
+ * each class is that + 32 wide (in.svg rect 41.363) and 48 high.
+ */
+const A_B_LEAVES: Readonly<Record<string, Pt>> = {
+  A: [9.362500190734863 + CLASS_HEADER_EXTRA, CLASS_HEIGHT],
+  B: [9.362500190734863 + CLASS_HEADER_EXTRA, CLASS_HEIGHT],
+};
+
+function aToB(type: LinkType): ElkFixture {
+  return { leaves: A_B_LEAVES, links: { lnk: { from: 'A', to: 'B', type, label: [0, 0] } } };
+}
+
+const EXTENDS_STYLE = 'style="stroke:#181818;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/>';
+const SOLID_LINE = '<line x1="32.681" y1="60" x2="32.681" y2="100" style="stroke:#181818;stroke-width:1;"/>';
+
+describe('MyElkEdge: EXTENDS through elkjs, against the jar (oracle probes, 1.2026.8beta1)', () => {
+  it('A <|-- B: decor2 EXTENDS at the section start (:210, :219-224)', async () => {
+    const svg = await drawThroughElk(aToB(new LinkType(LinkDecor.NONE, LinkDecor.EXTENDS)), new Map());
+    expect(shapes(svg)).toEqual([
+      SOLID_LINE,
+      `<polygon points="32.681,60,25.681,79,39.681,79,32.681,60" fill="#FFF" ${EXTENDS_STYLE}`,
+    ]);
+  });
+
+  it('A --|> B: decor1 EXTENDS at the section end (:209, :212-217)', async () => {
+    const svg = await drawThroughElk(aToB(new LinkType(LinkDecor.EXTENDS, LinkDecor.NONE)), new Map());
+    expect(shapes(svg)).toEqual([
+      SOLID_LINE,
+      `<polygon points="32.681,100,39.681,81,25.681,81,32.681,100" fill="#FFF" ${EXTENDS_STYLE}`,
+    ]);
+  });
+
+  it('A <|.. B: dashed line, undashed EXTENDS (stroke.onlyThickness, :223)', async () => {
+    const dotted = new LinkType(LinkDecor.NONE, LinkDecor.EXTENDS, LinkMiddleDecor.NONE, LinkStyle.DASHED());
+    const svg = await drawThroughElk(aToB(dotted), new Map());
+    expect(shapes(svg)).toEqual([
+      '<line x1="32.681" y1="60" x2="32.681" y2="100" style="stroke:#181818;stroke-width:1;stroke-dasharray:7,7;"/>',
+      `<polygon points="32.681,60,25.681,79,39.681,79,32.681,60" fill="#FFF" ${EXTENDS_STYLE}`,
+    ]);
   });
 });

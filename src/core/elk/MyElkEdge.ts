@@ -23,12 +23,6 @@
  *   one's argument calls `edge.isHierarchical()`, which throws in upstream's
  *   proxy (`proxy/graph/ElkEdge.java:38-40`), and that call is kept.
  *
- * Blocked (cdd8 T2d stop): `LinkDecor.EXTENDS` draws through
- * `ExtremityFactoryExtends` / `ExtremityExtends` (`:231-232`), which this port
- * does not have (`src/core/svek/extremity/` has only the 18/6/18
- * `getExtremityFactoryComplete` triangle the svek path uses). That branch
- * throws until the class lands.
- *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/elk/MyElkEdge.java
  */
 import { ColorType } from '../abel/ColorType.js';
@@ -47,6 +41,7 @@ import type { UGraphic } from '../klimt/UGraphic.js';
 import type { UStroke } from '../klimt/UStroke.js';
 import { UTranslate, type Point2D } from '../klimt/UTranslate.js';
 import type { Paint } from '../paint.js';
+import { ExtremityFactoryExtends } from '../svek/extremity/ExtremityFactoryExtends.js';
 import type { SName } from '../style/SName.js';
 import type { ElkArrowStyle, ElkDiagramAdapter } from './ElkDiagramAdapter.js';
 import type { ElkEdge } from './proxy/graph/ElkEdge.js';
@@ -322,9 +317,7 @@ export class MyElkEdge implements UDrawable {
   private getDecors(decors: LinkDecor, angle: number, backColor: Paint): UDrawable | null {
     // For legacy reason, extends are treated differently
     if (decors === LinkDecor.EXTENDS)
-      throw new Error(
-        'ExtremityFactoryExtends is not ported: MyElkEdge.java:231-232 draws EXTENDS through it (cdd8 T2d stop)',
-      );
+      return new ExtremityFactoryExtends(backColor).createUDrawable(new XPoint2D(0, 0), angle, null);
 
     const extremityFactory = getExtremityFactoryLegacy(decors, backColor);
     if (extremityFactory === null) return null;

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1505 modules · 5743 exported names.
+1507 modules · 5745 exported names.
 
 ## `src/`
 
@@ -866,8 +866,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ExtremityCrowfoot.ts` | `ExtremityCrowfoot`, `ExtremityFactoryCrowfoot` |  |
 | `ExtremityDiamond.ts` | `ExtremityDiamond`, `ExtremityFactoryDiamond` |  |
 | `ExtremityDoubleLine.ts` | `ExtremityDoubleLine`, `ExtremityFactoryDoubleLine` |  |
+| `ExtremityExtends.ts` | `ExtremityExtends` |  |
 | `ExtremityExtendsLike.ts` | `ExtremityExtendsLike`, `ExtremityExtendsLikeRedefines`, `ExtremityExtendsLikeDefinedBy`, `ExtremityFactoryExtendsLike` |  |
 | `ExtremityFactory.ts` | `ExtremityFactory` |  |
+| `ExtremityFactoryExtends.ts` | `ExtremityFactoryExtends` |  |
 | `ExtremityHalfArrow.ts` | `ExtremityHalfArrow`, `ExtremityFactoryHalfArrow` |  |
 | `ExtremityLineCrowfoot.ts` | `ExtremityLineCrowfoot`, `ExtremityFactoryLineCrowfoot` |  |
 | `ExtremityNotNavigable.ts` | `ExtremityNotNavigable`, `ExtremityFactoryNotNavigable` |  |
