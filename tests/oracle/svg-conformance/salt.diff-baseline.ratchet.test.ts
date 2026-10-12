@@ -44,8 +44,23 @@
  * `diffCount`/`weightedScore` are `null` (never a number) on every row
  * today: the manifest was seeded with EVERY row already in the error state.
  *
+ * AUTHORED ROOT (sep T5-cov). `tests/fixtures/salt/` holds original fixtures
+ * (`<slug>.puml` + the jar's `<slug>.svg` beside it, flat), tracked by a
+ * SEPARATE manifest, `authored-baseline.json`, rather than a second array in
+ * `diff-baseline.json`: the cached manifest's shape invariant ("rows + pins =
+ * the 51 cached slugs") then stays byte-for-byte what it was, the pin tool
+ * (`pin-salt.mts`, which copies from `test-results/dot-cache/`) never sees an
+ * authored row, and the authored root gets its own invariant ("rows = the
+ * `.puml` files on disk"). An authored row is `baseline` (gated by the same
+ * never-rises rule; a 0 score is conformant and gated at 0) or `jar-flake`
+ * (the jar's own output is run-dependent -- excluded from the gate, with the
+ * observed variants in its `reason`). `jarError` records an error-page
+ * oracle in `oracle/goldens/stock-error-pages.json`'s `{ line, message }`
+ * shape (`line: null, message: ""` for a crash page).
+ *
  * Re-measure by hand:
  *   npx vitest run tests/oracle/svg-conformance/salt.diff-baseline.ratchet.test.ts
+ *   npx jiti plans/salt-engine-port/measurements/T5-cov/measure-authored.mts <out.json>
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
@@ -55,7 +70,13 @@ import { fileURLToPath } from 'node:url';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { compareSvg, weightedScore } from './compare.js';
-import { renderFixtureSalt } from './render-fixture-salt.js';
+import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
+import {
+  authoredSaltIncludeStore,
+  listAuthoredSaltSlugs,
+  readAuthoredSaltFixture,
+  renderFixtureSalt,
+} from './render-fixture-salt.js';
 
 interface BaselineFixture {
   readonly type: string;
@@ -78,6 +99,7 @@ interface BaselineManifest {
 const HERE = dirname(fileURLToPath(import.meta.url));
 const GOLDENS_DIR = join(HERE, '../../../oracle/goldens/svg-salt');
 const MANIFEST_PATH = join(GOLDENS_DIR, 'diff-baseline.json');
+const AUTHORED_MANIFEST_PATH = join(GOLDENS_DIR, 'authored-baseline.json');
 const RATCHET_PATH = join(GOLDENS_DIR, 'ratchet.json');
 const CACHE_ROOT = join(HERE, '../../../test-results/dot-cache');
 const SALT_CACHE_DIR = join(CACHE_ROOT, 'salt');
@@ -88,6 +110,25 @@ const SALT_CACHED_SLUG_COUNT = 51;
 const JAR_CRASH_SLUG = 'lakari-33-mone874';
 
 const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')) as BaselineManifest;
+
+/** An authored-root row (`authored-baseline.json`) -- see the header doc comment. */
+interface AuthoredFixture {
+  readonly type: string;
+  readonly slug: string;
+  readonly topic: string;
+  readonly status: 'baseline' | 'jar-flake';
+  readonly weightedScore: number | null;
+  readonly diffCount: number | null;
+  readonly reason?: string;
+  /** `stock-error-pages.json`'s row shape, for an error-page oracle. */
+  readonly jarError?: { readonly line: number | null; readonly message: string };
+  readonly measuredAt: string;
+  readonly measuredAgainstCommit: string;
+}
+
+const authoredManifest = JSON.parse(readFileSync(AUTHORED_MANIFEST_PATH, 'utf8')) as {
+  readonly fixtures: readonly AuthoredFixture[];
+};
 
 type FixtureRef = Pick<BaselineFixture, 'type' | 'slug'>;
 
@@ -117,12 +158,23 @@ type MeasureResult =
  * baseline over unrelated geometry. */
 function measure(f: FixtureRef): MeasureResult {
   const dir = fixtureDir(f);
-  const markup = readFileSync(join(dir, 'in.puml'), 'utf8');
-  const golden = readFileSync(join(dir, 'in.svg'), 'utf8');
+  return measureMarkup(
+    readFileSync(join(dir, 'in.puml'), 'utf8'),
+    readFileSync(join(dir, 'in.svg'), 'utf8'),
+    fixtureIncludeStore(),
+  );
+}
+
+/** Same as {@link measure}, for an authored-root fixture (its jar oracle sits beside it). */
+function measureAuthored(slug: string): MeasureResult {
+  const { markup, golden } = readAuthoredSaltFixture(slug);
+  if (golden === undefined) return { errored: true, reason: `tests/fixtures/salt/${slug}.svg is missing` };
+  return measureMarkup(markup, golden, authoredSaltIncludeStore());
+}
+
+function measureMarkup(markup: string, golden: string, includeStore: IncludeStore): MeasureResult {
   try {
-    const ours = renderFixtureSalt(markup, new DeterministicMeasurer(), {
-      includeStore: fixtureIncludeStore(),
-    });
+    const ours = renderFixtureSalt(markup, new DeterministicMeasurer(), { includeStore });
     if (ours.includes(ERROR_SENTINEL_MARKER)) {
       return {
         errored: true,
@@ -352,4 +404,57 @@ describe('svg-salt weighted-score baseline ratchet — promotion is never automa
       'a 0-diff entry in diff-baseline.json is a promotion candidate, not a promotion',
     ).toEqual([]);
   });
+});
+
+// ---------------------------------------------------------------------------
+// AUTHORED ROOT (sep T5-cov) -- `tests/fixtures/salt/` + `authored-baseline
+// .json`. Shape: one row per `.puml` on disk, each with its jar `.svg`
+// beside it, disjoint from the cached slugs. Gate: the same never-rises rule
+// over every `baseline` row; `jar-flake` rows are excluded and must say why.
+// ---------------------------------------------------------------------------
+
+const authoredBaseline = authoredManifest.fixtures.filter((f) => f.status === 'baseline');
+const authoredFlakes = authoredManifest.fixtures.filter((f) => f.status === 'jar-flake');
+
+describe('svg-salt authored fixtures — manifest shape', () => {
+  it('authored rows are exactly one per tests/fixtures/salt/*.puml on disk, each with its jar .svg', () => {
+    const onDisk = listAuthoredSaltSlugs();
+    expect(authoredManifest.fixtures.map((f) => f.slug).sort()).toEqual(onDisk);
+    expect(onDisk.filter((slug) => readAuthoredSaltFixture(slug).golden === undefined)).toEqual([]);
+  });
+
+  it('authored slugs are disjoint from the cached corpus slugs and the ratchet pins', () => {
+    const ratchet = JSON.parse(readFileSync(RATCHET_PATH, 'utf8')) as { fixtures: { slug: string }[] };
+    const taken = new Set([...readdirSync(SALT_CACHE_DIR), ...ratchet.fixtures.map((f) => f.slug)]);
+    expect(authoredManifest.fixtures.filter((f) => taken.has(f.slug)).map((f) => f.slug)).toEqual([]);
+  });
+
+  it('every row is a numeric baseline or a reasoned jar-flake with no number', () => {
+    expect(authoredBaseline.length + authoredFlakes.length).toBe(authoredManifest.fixtures.length);
+    for (const f of authoredBaseline) expect(f.weightedScore, f.slug).toEqual(expect.any(Number));
+    for (const f of authoredFlakes) {
+      expect(f.weightedScore, f.slug).toBeNull();
+      expect(f.reason, f.slug).toMatch(/^jar-flake: /);
+    }
+  });
+
+  it("every jarError row has stock-error-pages.json's { line, message } shape", () => {
+    const rows = authoredManifest.fixtures.filter((f) => f.jarError !== undefined);
+    expect(rows.length).toBeGreaterThan(0);
+    for (const f of rows) {
+      expect(Object.keys(f.jarError!).sort(), f.slug).toEqual(['line', 'message']);
+      expect(f.jarError!.line === null || Number.isInteger(f.jarError!.line), f.slug).toBe(true);
+    }
+  });
+});
+
+describe('svg-salt authored fixtures — weighted score never rises', () => {
+  for (const f of authoredBaseline) {
+    it(`authored/${f.slug}: weighted score never rises above its baseline (${String(f.weightedScore)})`, () => {
+      const result = measureAuthored(f.slug);
+      if (result.errored) throw new Error(`authored/${f.slug}: rendering/comparison errored: ${result.reason}`);
+      const { ok, message } = checkNoRise(f, f.weightedScore, result.weightedScore);
+      expect(ok, message).toBe(true);
+    });
+  }
 });

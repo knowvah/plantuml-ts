@@ -1,0 +1,4 @@
+' shared fragment for cov-include-procedure.puml (an include target, not a fixture)
+!procedure $buttonRow($left, $right)
+[$left] | [$right]
+!endprocedure
