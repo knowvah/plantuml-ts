@@ -1,0 +1,19 @@
+@startsalt
+{s-
+{si
+{SI
+a | 
+| b
+\| x \{ y \} z
+a|b}c
+{+}{-}
+   
+{T#
+[[url\{tip\}]] | x
+{ab{cd
+x{^"t"
+{*} | {!
+p\\|q
+	tab	|	cell	
+}}
+@endsalt
