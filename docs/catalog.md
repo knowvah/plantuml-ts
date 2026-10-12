@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1559 modules · 5836 exported names.
+1565 modules · 5842 exported names.
 
 ## `src/`
 
@@ -1822,6 +1822,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `AbstractElementFactoryComplex.ts` | `AbstractElementFactoryComplex` |  |
 | `ElementFactory.ts` | `ElementFactory` |  |
+| `ElementFactoryBorder.ts` | `ElementFactoryBorder` |  |
+| `ElementFactoryMenu.ts` | `ElementFactoryMenu` |  |
+| `ElementFactoryPyramid.ts` | `ElementFactoryPyramid` |  |
+| `ElementFactoryScroll.ts` | `ElementFactoryScroll` |  |
+| `ElementFactoryTab.ts` | `ElementFactoryTab` |  |
+| `ElementFactoryTree.ts` | `ElementFactoryTree` |  |
 | `ScrollStrategy.ts` | `ScrollStrategy`, `fromDesc` | ScrollStrategy — which scroll bars a `{S` scrolled pyramid draws: both, vertical only (`{SI`) or horizontal only (`{S-`); read by `ElementPyramidScrolled.java:64`. |
 
 ## `src/diagrams/sequence/`
