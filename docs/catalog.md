@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1523 modules · 5795 exported names.
+1530 modules · 5804 exported names.
 
 ## `src/`
 
@@ -1777,6 +1777,23 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Position.ts` | `Position` | Position — an immutable (row, col) pair with Java value semantics. |
 | `Terminated.ts` | `Terminated` |  |
 | `Terminator.ts` | `Terminator` | Terminator — what ends a salt token: the end of its source line (`NEWLINE`) or a column/structure delimiter after it on the same line (`NEWCOL`). |
+
+## `src/diagrams/salt/element/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Grid2.ts` | `Grid2` | Grid2 — the `{T` tree-table lines over the given row and column starts, per `TableStrategy`: the outline for `DRAW_OUTSIDE`/ `DRAW_OUTSIDE_WITH_TITLE`, every row line for `DRAW_HORIZONTAL`/ `DRAW_ALL`, every column line for `DRAW_VERTICAL`/ |
+| `ListWidth.ts` | `ListWidth` | ListWidth — one width per "other" column of a `{T` tree row; `ElementTree#getWidthOther` folds every row's list with `mergeMax` (`ElementTree.java:100-107`). |
+| `Segment.ts` | `Segment` | Segment — a (row, col) cell edge `Grid` collects in its `horizontals` / `verticals` hash sets (`Grid.java:57-58`). |
+| `Skeleton.ts` | `Skeleton` | Skeleton — the `{T` tree-guide lines: a 2x2 bullet under every entry that has a deeper next entry, and an L-shaped vertical + horizontal guide from each entry's parent down and across to it. |
+| `Skeleton2.ts` | `Skeleton2` | Skeleton2 — the `\|_` creole tree guides. |
+| `TableStrategy.ts` | `TableStrategy`, `fromChar` | TableStrategy — which lines a salt table/tree draws: none, the outline, the outline under a title, every row line, every column line, or all. |
+
+## `src/diagrams/salt/factory/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ScrollStrategy.ts` | `ScrollStrategy`, `fromDesc` | ScrollStrategy — which scroll bars a `{S` scrolled pyramid draws: both, vertical only (`{SI`) or horizontal only (`{S-`); read by `ElementPyramidScrolled.java:64`. |
 
 ## `src/diagrams/sequence/`
 
