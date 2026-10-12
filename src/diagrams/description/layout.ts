@@ -313,6 +313,40 @@ function buildGeoAndEdges(
 
 // ── Public API ──
 
+/**
+ * The `ClassifyCtx` both the dot path (`layoutDescription`) and the ELK path
+ * (`description-elk-adapter.ts`) classify the AST into -- a pure move out of
+ * `layoutDescription` (cdd8 T3b), no behavior change.
+ */
+export function createClassifyCtx(ast: DescriptionDiagramAST, theme: Theme): ClassifyCtx {
+  const collidingIds = findCollidingIds(ast.nodes);
+  return {
+    leafIdSet: new Set(),
+    containers: [],
+    containerById: new Map(),
+    astNodeById: new Map(),
+    counter: { n: 0 },
+    componentStyle: theme.componentStyle,
+    actorStyle: theme.actorStyle,
+    minimumWidthFor: (sname) => resolveElementMinimumWidth(theme, sname),
+    fontSizeFor: (sname) => resolveElementFontSize(theme, sname, 'title'),
+    stereotypeFontSizeFor: (sname, stereo) => resolveElementFontSize(theme, sname, 'stereotype', stereo),
+    lineThicknessFor: (sname) => resolveElementLineThickness(theme, sname),
+    wrapWidth: theme.wrapWidth ?? 0,
+    guillemet: {
+      start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,
+      end: theme.colors.graph.guillemetEnd ?? GUILLEMET_DEFAULT.end,
+    },
+    collidingIds,
+    qualifiedPathToDotKey: new Map(),
+    sprites: ast.sprites !== undefined ? spriteDimsLookupFor(ast.sprites) : undefined,
+    // Separate channel from `sprites` above — `spriteDimsLookupFor` keeps only
+    // sprite DIMS and drops the registry's emoji store. See `ClassifyCtx
+    // .emojiArtwork` for why the SIZER needs it and not just the renderer.
+    emojiArtwork: emojiArtworkResolverFor(ast.sprites?.emoji),
+  };
+}
+
 /** Lay out a descriptive diagram; pixel geometry for all nodes and edges
  *  (see the file-header algorithm summary above). */
 export function layoutDescription(
@@ -378,32 +412,8 @@ export function layoutDescription(
   // (namespace-groups.ts) are always fully-qualified-unique synthetic
   // strings, so omitting them from this scan cannot introduce a false
   // collision. See namespace-groups.ts's `dotKeyFor` doc.
-  const collidingIds = findCollidingIds(ast.nodes);
-  const ctx: ClassifyCtx = {
-    leafIdSet: new Set(),
-    containers: [],
-    containerById: new Map(),
-    astNodeById: new Map(),
-    counter: { n: 0 },
-    componentStyle: theme.componentStyle,
-    actorStyle: theme.actorStyle,
-    minimumWidthFor: (sname) => resolveElementMinimumWidth(theme, sname),
-    fontSizeFor: (sname) => resolveElementFontSize(theme, sname, 'title'),
-    stereotypeFontSizeFor: (sname, stereo) => resolveElementFontSize(theme, sname, 'stereotype', stereo),
-    lineThicknessFor: (sname) => resolveElementLineThickness(theme, sname),
-    wrapWidth: theme.wrapWidth ?? 0,
-    guillemet: {
-      start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,
-      end: theme.colors.graph.guillemetEnd ?? GUILLEMET_DEFAULT.end,
-    },
-    collidingIds,
-    qualifiedPathToDotKey: new Map(),
-    sprites: ast.sprites !== undefined ? spriteDimsLookupFor(ast.sprites) : undefined,
-    // Separate channel from `sprites` above — `spriteDimsLookupFor` keeps only
-    // sprite DIMS and drops the registry's emoji store. See `ClassifyCtx
-    // .emojiArtwork` for why the SIZER needs it and not just the renderer.
-    emojiArtwork: emojiArtworkResolverFor(ast.sprites?.emoji),
-  };
+  const ctx = createClassifyCtx(ast, theme);
+  const collidingIds = ctx.collidingIds;
   const removed = effectiveRemovedIds(ast.nodes, ast.links, ast.removeUnlinked === true);
   // Phantom `set separator`-derived package nesting (namespace-groups.ts) is
   // synthesized HERE, at layout time, mirroring upstream's own

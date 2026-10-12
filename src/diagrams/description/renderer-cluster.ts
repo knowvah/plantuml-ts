@@ -21,6 +21,8 @@ import {
   type ClusterSymbolInfo,
 } from '../../core/svek/Cluster.js';
 import { PackageStyle } from '../../core/svek/PackageStyle.js';
+import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
+import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { DescriptionNodeGeo } from './layout-helpers.js';
 import { resolveSymbol, textFont } from '../../core/decoration/symbol/usymbol-resolve.js';
@@ -88,8 +90,24 @@ function isFolderStyled(symbol: USymbol): boolean {
   return symbol === 'package' || symbol === 'folder';
 }
 
-function buildHeader(node: DescriptionNodeGeo, theme: Theme): ClusterHeaderInfo {
-  const title = buildTextBlock(node.display, textFont(theme, node.symbol, 0, TITLE_STYLES), HorizontalAlignment.LEFT);
+/** What the ELK path adds to {@link buildHeader}: the diagram's sprites and the title block's own alignment. */
+export interface ElkHeaderOptions {
+  readonly sprites: SpriteRegistry | undefined;
+  readonly alignment: HorizontalAlignment;
+}
+
+export function buildHeader(node: DescriptionNodeGeo, theme: Theme, elk?: ElkHeaderOptions): ClusterHeaderInfo {
+  const titleFont = textFont(theme, node.symbol, 0, TITLE_STYLES);
+  // `elk` is the ELK path's (cdd8 T3b): `ClusterHeader.java:117-119` builds the title with the full
+  // `Display#create` under `style.getHorizontalAlignment()`, so a `<$sprite>` in a group's label draws and
+  // `skinparam defaultTextAlignment` (root) aligns its lines. The svek path passes none and is unchanged.
+  const alignment = elk?.alignment ?? HorizontalAlignment.LEFT;
+  const title = buildTextBlock(
+    node.display,
+    titleFont,
+    alignment,
+    elk === undefined ? undefined : makeAtomImageResolverFor(elk.sprites)(titleFont),
+  );
   // G1 I5b: one guillemet line per stereotype tag, same convention as
   // `EntityImageDescriptionSupport.ts#buildStereo` -- ClusterHeader.java
   // :197-207 (`Display.create(visibleStereotypes)`) stacks ALL tags, not
@@ -105,7 +123,7 @@ function buildHeader(node: DescriptionNodeGeo, theme: Theme): ClusterHeaderInfo 
   return { title, stereo, titleHorizontalAlignment: HorizontalAlignment.LEFT };
 }
 
-function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleDefaults {
+export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleDefaults {
   const folder = isFolderStyled(symbol);
   return {
     // mission skin-file-loading (deferred D3 item): was hardcoded 0 --

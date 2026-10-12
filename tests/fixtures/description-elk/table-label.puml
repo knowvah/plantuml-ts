@@ -1,0 +1,7 @@
+@startuml
+!pragma layout elk
+rectangle A
+rectangle B
+A -[#orange,dashed]-> B
+A -[#blue,dotted]-> B : "**Te**st\n|= Property |= Value |\n| PropC1 | ValueC1 |\n| PropC2 | ValueC2 |"
+@enduml

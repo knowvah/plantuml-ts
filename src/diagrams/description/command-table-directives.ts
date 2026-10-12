@@ -150,6 +150,19 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
     },
   },
 
+  // 2e1. `!pragma layout elk` (cdd8 T3b) -- `CommandPragma#executeArg` calls
+  //      `system.setUseElk(true)` (CommandPragma.java:128-129, inside
+  //      `!TeaVM.isTeaVM()`), which `CucaDiagram#getCucaDiagramFileMaker`
+  //      reads first (CucaDiagram.java:478-479) to swap in
+  //      `CucaDiagramFileMakerElk`. Captured onto `ast.layoutEngine`. Must
+  //      precede the general `!pragma NAME` fallback below.
+  {
+    pattern: /^!pragma\s+layout\s+elk\s*$/i,
+    execute(state) {
+      state.ast.layoutEngine = 'elk';
+    },
+  },
+
   // 2e2. `!pragma NAME [VALUE]` — CommandPragma, registered on EVERY factory
   //      via CommonCommands.addCommonCommands1 (DescriptionDiagramFactory
   //      .java:87). T13 (dispatch-by-parse-attempt): `!pragma svek_trace on`

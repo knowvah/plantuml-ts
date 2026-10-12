@@ -148,6 +148,50 @@ function isDegenerateGeo(geo: DescriptionGeometry): boolean {
   return only.children.length === 0 && only.symbol !== 'hexagon';
 }
 
+/** What a body contributes to the document: its draw pass and its dimension. */
+interface DocumentBody {
+  readonly draw: (target: UGraphic, respectHidden: boolean) => void;
+  readonly dims: { readonly width: number; readonly height: number };
+}
+
+/**
+ * The svek body: `SvekResult#drawU` (clusters, leaves, edges) and the document dimension recipe (see
+ * `renderDescription`'s doc comment). Moved out of `renderDescription` verbatim (cdd8 T3b).
+ */
+function svekBody(geo: DescriptionGeometry, theme: Theme, measurer: StringMeasurer): DocumentBody {
+  const plan = buildUidPlan(geo);
+  const { containers, leaves } = collectByKind(geo.nodes);
+  // G1 I-hideshow: `respectHidden` distinguishes the LimitFinder ink-extent
+  // pass (`false` -- see `drawClusters`'s doc comment for why jar's own
+  // `LimitFinder`/`UGraphicNo` structurally cannot see a hidden flag at
+  // all) from the real `UGraphicSvg` pass (`true` -- content-visible
+  // suppression). Same `draw` closure either way, matching upstream's own
+  // single shared `SvekResult#drawU` call site for both purposes.
+  const draw = (target: UGraphic, respectHidden: boolean): void => {
+    drawClusters(target, containers, theme, plan, respectHidden);
+    // T1e write-set expansion (journaled): `geo.edges` threaded through so
+    // a note leaf can find its own Opale connector — see
+    // `renderer-draw-sequence.ts#drawEntities`'s own doc comment.
+    drawEntities(target, leaves, theme, plan, geo.sprites, respectHidden, geo.edges);
+    drawEdges(target, geo.edges, theme, plan, respectHidden);
+  };
+
+  const driverBounder = driverBounderFor(measurer);
+  const dims = isDegenerateGeo(geo)
+    ? { width: geo.totalWidth, height: geo.totalHeight }
+    : computeDocumentDims((target) => draw(target, false), driverBounder, measurer);
+
+  return { draw, dims };
+}
+
+/**
+ * The ELK body: `MyElkDrawing#drawU` (clusters, nodes, edges; `MyElkDrawing.java:110-114`) with the document
+ * dimension the geometry already carries (`MyElkDrawing#calculateDimension` plus the `CucaDiagram` margins).
+ */
+function elkBody(elk: NonNullable<DescriptionGeometry['elk']>, geo: DescriptionGeometry): DocumentBody {
+  return { draw: (target) => elk.drawU(target), dims: { width: geo.totalWidth, height: geo.totalHeight } };
+}
+
 /**
  * Render a descriptive diagram geometry into an SVG document string.
  *
@@ -174,27 +218,9 @@ export function renderDescription(
   theme: Theme,
   measurer: StringMeasurer = jarMeasurer,
 ): string {
-  const plan = buildUidPlan(geo);
-  const { containers, leaves } = collectByKind(geo.nodes);
-  // G1 I-hideshow: `respectHidden` distinguishes the LimitFinder ink-extent
-  // pass (`false` -- see `drawClusters`'s doc comment for why jar's own
-  // `LimitFinder`/`UGraphicNo` structurally cannot see a hidden flag at
-  // all) from the real `UGraphicSvg` pass (`true` -- content-visible
-  // suppression). Same `draw` closure either way, matching upstream's own
-  // single shared `SvekResult#drawU` call site for both purposes.
-  const draw = (target: UGraphic, respectHidden: boolean): void => {
-    drawClusters(target, containers, theme, plan, respectHidden);
-    // T1e write-set expansion (journaled): `geo.edges` threaded through so
-    // a note leaf can find its own Opale connector — see
-    // `renderer-draw-sequence.ts#drawEntities`'s own doc comment.
-    drawEntities(target, leaves, theme, plan, geo.sprites, respectHidden, geo.edges);
-    drawEdges(target, geo.edges, theme, plan, respectHidden);
-  };
-
+  const { draw, dims } = geo.elk === undefined ? svekBody(geo, theme, measurer) : elkBody(geo.elk, geo);
+  const { width, height } = dims;
   const driverBounder = driverBounderFor(measurer);
-  const { width, height } = isDegenerateGeo(geo)
-    ? { width: geo.totalWidth, height: geo.totalHeight }
-    : computeDocumentDims((target) => draw(target, false), driverBounder, measurer);
 
   // Mission G1 I-scale: `geo.scale` (the `scale ...` directive, if any) is
   // resolved against the UNSCALED document dims above -- mirrors
