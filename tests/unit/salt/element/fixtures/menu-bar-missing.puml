@@ -1,0 +1,6 @@
+@startsalt
+{
+{* A | B
+ C | x }
+}
+@endsalt
