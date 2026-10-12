@@ -85,7 +85,7 @@ Batch close: [close-procedure.md](close-procedure.md).
 
 | Batch | Tasks | Status |
 |---|---|---|
-| [0](batch-0/overview.md): branch, b0, harness | T0a, T0b | [ ] |
+| [0](batch-0/overview.md): branch, b0, harness | T0a, T0b | [x] |
 | [1](batch-1/overview.md): foundations | T1a data source, T1b strategies, T1c element base | [ ] |
 | [2](batch-2/overview.md): elements + factory base | T2a widgets, T2b menus/tabs, T2c containers, T2d tree, T2e factory base | [ ] |
 | [3](batch-3/overview.md): factories | T3a simple, T3b check/radio, T3c complex | [ ] |
