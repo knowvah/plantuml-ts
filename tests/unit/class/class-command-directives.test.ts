@@ -40,8 +40,8 @@ describe('!pragma layout smetana (T3c, D8)', () => {
     expect(ast.layoutEngine).toBeUndefined();
   });
 
-  it('leaves layoutEngine unset for a DIFFERENT layout engine value (elk falls through to the general no-op)', () => {
-    const ast = parse('!pragma layout elk\nclass A');
+  it('leaves layoutEngine unset for a DIFFERENT layout engine value (vizjs falls through to the general no-op)', () => {
+    const ast = parse('!pragma layout vizjs\nclass A');
     expect(ast.layoutEngine).toBeUndefined();
   });
 
@@ -49,5 +49,27 @@ describe('!pragma layout smetana (T3c, D8)', () => {
     const ast = parse('!pragma layout smetana\nclass A\nclass B\nA --> B');
     expect(ast.classifiers.map((c) => c.id)).toEqual(['A', 'B']);
     expect(ast.relationships).toHaveLength(1);
+  });
+});
+
+describe('!pragma layout elk (cdd8 T1b)', () => {
+  it.each(['!pragma layout elk', '!PRAGMA LAYOUT ELK', '!pragma Layout Elk  '])(
+    'sets ast.layoutEngine to elk for %j',
+    (line) => {
+      expect(parse(`${line}\nclass A`).layoutEngine).toBe('elk');
+    },
+  );
+
+  it('keeps smetana for !pragma layout smetana', () => {
+    expect(parse('!pragma layout smetana\nclass A').layoutEngine).toBe('smetana');
+  });
+
+  it('elk wins over smetana in either order (CucaDiagram.java:478-481 tests isUseElk first)', () => {
+    expect(parse('!pragma layout elk\n!pragma layout smetana\nclass A').layoutEngine).toBe('elk');
+    expect(parse('!pragma layout smetana\n!pragma layout elk\nclass A').layoutEngine).toBe('elk');
+  });
+
+  it('leaves other layout values unset', () => {
+    expect(parse('!pragma layout vizjs\nclass A').layoutEngine).toBeUndefined();
   });
 });

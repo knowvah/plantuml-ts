@@ -9,6 +9,7 @@ import type { ClassGeometry } from './layout.js';
 import { parseClass } from './parser.js';
 import { layoutClass, classPageAst, classPageCount } from './layout.js';
 import { renderClass, renderClassPage } from './renderer.js';
+import { ELK_RENDER_SYNC_UNSUPPORTED } from '../../core/elk/layout-services.js';
 import { DiagramRefusal } from '../../core/error/error-diagrams.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 
@@ -65,7 +66,15 @@ export const classPlugin: SyncPlugin<ClassDiagramAST, ClassGeometry> = {
   // has no other seam to get one, so it too is carried from here onto the
   // geometry rather than threaded through the `SyncPlugin` contract (ADR-1,
   // `plans/si14-usymbol-measurement-sharing/decisions.md`).
-  layoutSync(ast, theme, measurer) {
+  // cdd8 T1b: `!pragma layout elk` (CucaDiagram.java:478-479, 950-952). T3a
+  // routes the layout through `services.elk`; until then a diagram that
+  // requires ELK must not silently fall back to dot-engine.
+  requiresElk(ast) {
+    return ast.layoutEngine === 'elk';
+  },
+
+  layoutSync(ast, theme, measurer, services) {
+    if (ast.layoutEngine === 'elk' && services?.elk === undefined) throw new Error(ELK_RENDER_SYNC_UNSUPPORTED);
     const geo = layoutClass(ast, theme, measurer);
     const errors = ast.errors ?? [];
     const spritesField = ast.sprites !== undefined ? { sprites: ast.sprites } : {};
