@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1538 modules · 5815 exported names.
+1542 modules · 5819 exported names.
 
 ## `src/`
 
@@ -1788,6 +1788,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `AbstractElementText.ts` | `AbstractElementText` |  |
 | `Element.ts` | `Element` |  |
 | `ElementEmpty.ts` | `ElementEmpty` |  |
+| `ElementMenuBar.ts` | `ElementMenuBar` |  |
+| `ElementMenuEntry.ts` | `ElementMenuEntry` |  |
+| `ElementMenuPopup.ts` | `ElementMenuPopup` |  |
+| `ElementTabBar.ts` | `ElementTabBar` |  |
 | `ElementText.ts` | `ElementText` |  |
 | `Grid2.ts` | `Grid2` | Grid2 — the `{T` tree-table lines over the given row and column starts, per `TableStrategy`: the outline for `DRAW_OUTSIDE`/ `DRAW_OUTSIDE_WITH_TITLE`, every row line for `DRAW_HORIZONTAL`/ `DRAW_ALL`, every column line for `DRAW_VERTICAL`/ |
 | `ListWidth.ts` | `ListWidth` | ListWidth — one width per "other" column of a `{T` tree row; `ElementTree#getWidthOther` folds every row's list with `mergeMax` (`ElementTree.java:100-107`). |
