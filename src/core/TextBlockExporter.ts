@@ -45,6 +45,7 @@ import {
 } from './atmp/CucaDiagram.js';
 import { shiftFragmentBody } from './annotations/coord-shift.js';
 import type { RenderFragment } from './dispatcher.js';
+import type { ClockwiseTopRightBottomLeft } from './klimt/geom/ClockwiseTopRightBottomLeft.js';
 import { attrs, group } from './svg.js';
 import { mapOutsideInlineDefs } from './svg-defs.js';
 import { DEFAULT_SVG_DECIMALS, formatDecimal } from './svg-format.js';
@@ -74,11 +75,6 @@ export function applyCucaDocumentMargin(dims: DocumentDims): DocumentDims {
     height: Math.floor(height + 1),
   };
 }
-
-/** `TitledDiagram#getDefaultMargins()` — `ClockwiseTopRightBottomLeft.same(10)`
- *  (`TitledDiagram.java:274-277`), the margin every non-cuca `TitledDiagram`
- *  (mindmap) exports with. */
-const TITLED_DIAGRAM_MARGIN = 10;
 
 /** `SvgGraphics#ensureVisible`'s `maxX = (int) (x + 1)` bump
  *  (`klimt/drawing/svg/SvgGraphics.java:129-135`); `document-shell.ts`
@@ -239,8 +235,8 @@ const BODY_ANCHOR_RE = /<g data-body-anchor="" transform="translate\(([^,)"<]+),
  * `UGraphic` (TextBlockExporter.java:165-176), so the body's numbers are
  * rounded once, after the scale.
  */
-function scaleChromedBody(fragment: RenderFragment, scale: number): string {
-  const shifted = shiftFragmentBody(fragment.body, TITLED_DIAGRAM_MARGIN, TITLED_DIAGRAM_MARGIN);
+function scaleChromedBody(fragment: RenderFragment, margin: ClockwiseTopRightBottomLeft, scale: number): string {
+  const shifted = shiftFragmentBody(fragment.body, margin.getLeft(), margin.getTop());
   if (fragment.drawBodyAt === undefined) return scaleFragmentBody(shifted, scale);
   const anchor = BODY_ANCHOR_RE.exec(shifted);
   if (anchor === null) throw new Error('finalizeTitledDiagramFragment: drawBodyAt set but the body anchor is missing');
@@ -261,7 +257,11 @@ function scaleChromedBody(fragment: RenderFragment, scale: number): string {
  *   `DiagramChromeFactory.create` receives it, and the margin comes after —
  *   `ug.apply(new UTranslate(margin.getLeft(), margin.getTop()))`
  *   (`TextBlockExporter.java:173`) and `calculateFinalDimension`
- *   (`:198-202`), then `ensureVisible`. `scaleFragmentBody` (T6d) runs
+ *   (`:198-202`), then `ensureVisible`. The margin is the producer's
+ *   `Builder#calculateMargin` result (`:510-516`: style `Margin`, else
+ *   `getDefaultMargins()` — `same(10)` for mindmap, `TitledDiagram.java:274-277`;
+ *   `same(5)` for salt, `PSystemSalt.java:238-240`), carried as
+ *   `RenderFragment.exportMargin`. `scaleFragmentBody` (T6d) runs
  *   LAST, after the margin shift — matching upstream's own ordering, since
  *   `computeScaleFactor` reads `calculateFinalDimension()`'s (i.e. the
  *   POST-margin, POST-chrome) dimension, NOT the raw pre-chrome text
@@ -285,14 +285,16 @@ function scaleChromedBody(fragment: RenderFragment, scale: number): string {
  */
 export function finalizeTitledDiagramFragment(fragment: RenderFragment): RenderFragment {
   if (fragment.bodyWrapped !== true) return { ...fragment, body: group(fragment.body) };
-  const dimWidth = fragment.width + 2 * TITLED_DIAGRAM_MARGIN;
-  const dimHeight = fragment.height + 2 * TITLED_DIAGRAM_MARGIN;
+  const margin = fragment.exportMargin;
+  if (margin === undefined) throw new Error('finalizeTitledDiagramFragment: chromed fragment without exportMargin');
+  const dimWidth = fragment.width + margin.getLeft() + margin.getRight();
+  const dimHeight = fragment.height + margin.getTop() + margin.getBottom();
   const unscaledWidth = Math.trunc(dimWidth + ENSURE_VISIBLE_BUMP);
   const unscaledHeight = Math.trunc(dimHeight + ENSURE_VISIBLE_BUMP);
   const scale = resolveScaleFactor(fragment.scaleSpec, dimWidth, dimHeight, fragment.dpi);
   return {
     ...fragment,
-    body: scaleChromedBody(fragment, scale),
+    body: scaleChromedBody(fragment, margin, scale),
     // isw-T2c-scale: root `width`/`height` attributes are `format(maxX)`.
     scaledCanvas: true,
     width: unscaledWidth * scale,

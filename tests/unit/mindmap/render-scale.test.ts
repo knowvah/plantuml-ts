@@ -29,6 +29,7 @@
 import { describe, expect, it } from 'vitest';
 import { BODY_ANCHOR, finalizeTitledDiagramFragment, scaleFragmentBody } from '../../../src/core/TextBlockExporter.js';
 import type { RenderFragment } from '../../../src/core/dispatcher.js';
+import { ClockwiseTopRightBottomLeft } from '../../../src/core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 import type { ScaleSpec } from '../../../src/core/scale-command.js';
 
 /** `{ kind: 'simple', factor }` resolves to exactly `factor` at dpi 96
@@ -47,6 +48,9 @@ function wrappedFragment(overrides: Partial<RenderFragment>): RenderFragment {
     height: 50,
     diagramType: DIAGRAM_TYPE_MINDMAP,
     bodyWrapped: true,
+    // sep-T5a: the producer's margin -- mindmap's `TitledDiagram#getDefaultMargins()`
+    // = same(10) (TitledDiagram.java:274-277).
+    exportMargin: ClockwiseTopRightBottomLeft.same(10),
     ...overrides,
   };
 }
