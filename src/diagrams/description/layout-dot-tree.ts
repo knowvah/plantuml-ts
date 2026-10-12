@@ -397,6 +397,9 @@ function buildGeoNode(
     };
     const visibleStereotype = visibleStereotypeLabels(astNode.stereotype, stereotypeRules);
     if (visibleStereotype !== undefined && visibleStereotype.length > 0) geo.stereotype = visibleStereotype;
+    // cdd8-T1c: mirrors `layout-helpers.ts:251` -- the sizer measured this
+    // sprite, so the renderer must draw it (`EntityImageDescription.java:194-195`).
+    if (astNode.stereotypeSprite !== undefined) geo.stereotypeSprite = astNode.stereotypeSprite;
     if (astNode.color !== undefined) geo.color = astNode.color;
     if (astNode.creationIndex !== undefined) geo.creationIndex = astNode.creationIndex;
     if (astNode.declaredAsGroup === true) geo.declaredAsGroup = true;
