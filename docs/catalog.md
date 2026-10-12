@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1503 modules · 5732 exported names.
+1504 modules · 5738 exported names.
 
 ## `src/`
 
@@ -362,6 +362,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `CucaDiagramFileMakerElk.ts` | `ElkMakerMaps`, `ElkMakerResult`, `MyElkDrawingFactory`, `getPosition`, `CucaDiagramFileMakerElk`, `makeElkLayout` | The ELK maker: builds the ELK graph of a cuca diagram, lays it out through an {@link ElkBackend}, and returns what upstream hands to `new MyElkDrawing(...)` (cdd8 D3, D13). |
 | `elk-backend.ts` | `ElkBackend`, `LayoutServices`, `ElkBackendError` | The ELK seam (cdd8 D2): one interface that a layout backend implements and the ELK maker (`CucaDiagramFileMakerElk` port) calls. |
 | `elk-object.ts` | `ELK_CORE_OPTIONS_PACKAGE`, `ELK_PROXY_OPTIONS_PACKAGE`, `ELK_OPTION_TYPE`, `ElkOptionType`, `IProperty`, `ElkEnumObject`, `ElkPaddingObject`, `ElkProxyEnumSetObject`, `ElkTrueObject`, `ElkPropertyValue`, `elkEnum`, `elkProperty` | The objects upstream's ELK proxy layer hands to ELK itself, named backend-neutrally. |
 | `ElkDiagramAdapter.ts` | `ElkClusterHeader`, `ElkClusterStyle`, `ElkArrowStyle`, `ElkColors`, `ElkDiagramAdapter` | The engine-supplied diagram the ELK maker reads (cdd8 D13). |

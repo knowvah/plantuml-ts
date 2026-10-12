@@ -214,7 +214,11 @@ export interface ElkDiagramAdapter {
    * The maker's private `getLabel(stringBounder, link)` (`CucaDiagramFileMakerElk.java:189-248`,
    * duplicated at `MyElkDrawing.java:244-306`): the arrow-styled label, its
    * visibility modifier and margins, merged with the link's note. Never null:
-   * `TextBlockUtils.EMPTY_TEXT_BLOCK` when the link has no label and no note.
+   * upstream returns `TextBlockUtils.EMPTY_TEXT_BLOCK`, i.e. `empty(0, 0)`
+   * (`TextBlockUtils.java:57`), when the link has no label and no note. Return
+   * `TextBlockUtils.empty(0, 0)` for it: this port's `EMPTY_TEXT_BLOCK` constant
+   * is `undefined` (`src/core/klimt/shape/TextBlockUtils.ts:60`), which the maker
+   * cannot measure.
    */
   getLabel(linkId: string, stringBounder: StringBounder): TextBlock;
   /**
