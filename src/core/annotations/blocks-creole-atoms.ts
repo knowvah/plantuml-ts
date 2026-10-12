@@ -21,6 +21,7 @@ import { drawEmojiAtom } from '../svek/image/EntityImageDescriptionEmoji.js';
 import { atomTextWidth, layoutTabbedText } from '../klimt/creole/legacy/AtomText.js';
 import type { AtomImageResolver } from '../creole-atoms.js';
 import type { CreoleAtom, CreoleAtomUrl } from '../klimt/creole/atom/Atom.js';
+import { SPACE_ATOM_HEIGHT } from '../klimt/creole/atom/AtomSpace.js';
 import type { Atom } from '../klimt/creole/SheetBlock1.js';
 import type { StringBounder } from '../klimt/font/StringBounder.js';
 import type { UGraphic } from '../klimt/UGraphic.js';
@@ -103,6 +104,7 @@ export function atomDim(
   resolveAtomImage: AtomImageResolver | undefined,
 ): XDimension2D {
   if (atom.kind === 'text') return textDim(atom, stringBounder);
+  if (atom.kind === 'space') return new XDimension2D(atom.width, SPACE_ATOM_HEIGHT);
   if (atom.kind === 'latex') {
     const r = renderLatexAsImage(atom.expr, atom.color ?? LATEX_DEFAULT_COLOR);
     return new XDimension2D(r.width, r.height);
@@ -195,6 +197,7 @@ export function drawAtom(atom: CreoleAtom, ug: UGraphic, resolveAtomImage: AtomI
     ug.draw(UImage.build(r.width, r.height, r.href));
     return;
   }
+  if (atom.kind === 'space') return;
   if (atom.kind === 'emoji') return drawEmojiAtom(ug, atom, undefined);
   drawAtomImage(atomImageOf(atom, resolveAtomImage), ug);
 }

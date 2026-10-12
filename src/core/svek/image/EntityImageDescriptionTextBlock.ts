@@ -31,6 +31,7 @@ import { UHorizontalLine } from '../../klimt/shape/UHorizontalLine.js';
 import type { TextBlock } from '../../klimt/shape/TextBlock.js';
 import type { AtomImageResolver } from '../../creole-atoms.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
+import { SPACE_ATOM_HEIGHT } from '../../klimt/creole/atom/AtomSpace.js';
 import { buildLineAtoms, type LineBuildAtoms } from '../../klimt/creole/legacy/StripeSimple.js';
 import { getSplitted } from '../../klimt/creole/Fission.js';
 import { atomTextWidth } from '../../klimt/creole/legacy/AtomText.js';
@@ -231,6 +232,12 @@ function measureAtomsWidthHeight(
       if (lineHeight > height) height = lineHeight;
       continue;
     }
+    // `AtomSpace#calculateDimensionSlow`: (width, 1).
+    if (atom.kind === 'space') {
+      width += atom.width;
+      if (SPACE_ATOM_HEIGHT > height) height = SPACE_ATOM_HEIGHT;
+      continue;
+    }
     const resolved = resolveAtomImage?.(atom.atom);
     if (resolved === undefined) continue;
     width += resolved.width;
@@ -265,6 +272,7 @@ function measureSingleAtomWidth(
   if (atom.kind === 'latex') return renderLatexAsImage(atom.expr, atom.color ?? '#000000').width;
   // A2s R2i: emoji x-advance is the 36*factor box (see measureAtomsWidthHeight).
   if (atom.kind === 'emoji') return emojiBoxDim(atom.factor).width;
+  if (atom.kind === 'space') return atom.width;
   const resolved = resolveAtomImage?.(atom.atom);
   return resolved === undefined ? 0 : resolved.width;
 }
@@ -366,6 +374,11 @@ function drawAtoms(
       const run = emojiRenderRun(atom);
       ug.apply(new UTranslate(x, origin.y + baselineDy)).draw(UText.build(run.text, run.font));
       x += emojiBoxDim(atom.factor).width;
+      continue;
+    }
+    // `AtomSpace#drawU` is empty; the cursor still advances its width.
+    if (atom.kind === 'space') {
+      x += atom.width;
       continue;
     }
     // ADR-2: cursor advances by DECLARED width, never ink.

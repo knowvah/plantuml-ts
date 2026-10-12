@@ -39,6 +39,8 @@ export interface StripeBuilder {
    *  `stripe.addEmoji(emoji, scale, colorName)`, StripeSimple.java:245-266)
    *  under the CURRENT font (factor + `#black`-family color fallback both
    *  read it) — or the `¿name?` red error text run for an unknown name. */
+  /** Upstream: `stripe.addSpace(size)` (CommandCreoleSpace.java) -- pushes an `AtomSpace` (`atom/AtomSpace.ts`). */
+  addSpace(width: number): void;
   addEmoji(name: string, scale: number, forcedColor: string | null): void;
   /** G2 N40: recursion entry for a `[[url]]` command's captured LABEL text
    *  -- the SAME recursive engine as {@link analyzeAndAddInline}, but every
