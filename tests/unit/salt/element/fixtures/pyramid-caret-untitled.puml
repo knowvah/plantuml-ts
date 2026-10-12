@@ -1,0 +1,6 @@
+@startsalt
+{^
+  Login    | Password
+  A        | B
+}
+@endsalt
