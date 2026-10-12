@@ -17,23 +17,37 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# ----------------------------------------------------------------------------
+# Shape (2026-10-12): the single `gates` job measured 12.9 min in run
+# 38313948530, 9.4 min of it `npm test` on a 4-vCPU runner, with typecheck /
+# lint / format / build sequential ahead of it. The suite is now split into
+# TEST_SHARDS vitest shards (vitest splits test FILES, not cases) that run in
+# parallel with the static gates; a `merge` job combines the shards' blob
+# reports, and that is the ONE place the 90/90/90 coverage thresholds and the
+# collected-file-count guard are enforced. Each shard keeps a short, linear
+# log; `npm test` locally is unchanged.
+#
+# Per-shard coverage is collected (`--coverage`, the blob carries it) but its
+# thresholds are zeroed: a quarter of the files cannot meet a whole-suite
+# threshold, and vitest otherwise fails every shard on the numbers the merge
+# is about to recompute (measured: shard 1/16 alone reads 46% lines).
+# ----------------------------------------------------------------------------
+
+env:
+  TEST_SHARDS: 4
+
 jobs:
-  gates:
-    name: gates
+  # --------------------------------------------------------------------------
+  # Cheap gates. None of them need the vendored stdlib, so a type error or a
+  # lint failure costs ~1 min instead of a 285 MB download. Runs alongside the
+  # test shards instead of ahead of them.
+  # --------------------------------------------------------------------------
+  static:
+    name: static gates
     runs-on: ubuntu-latest
-    # Hard backstop for a hang, not a performance budget — that is the soft
-    # check at the end of the job. Observed 11.8 min total in run 38077059229
-    # (2026-10-10), ~3.2 min of it outside the test step; 25 leaves the test
-    # step its full 20-minute cap plus the other steps.
-    timeout-minutes: 25
-
+    # Observed 2.3 min for these steps in run 38313948530.
+    timeout-minutes: 10
     steps:
-      # Wall-clock for the soft budget below. First step, so it covers
-      # everything including checkout.
-      - name: start the clock
-        id: timer
-        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
-
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
@@ -52,11 +66,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # ----------------------------------------------------------------------
-      # Cheap gates first. None of them need the vendored stdlib, so a type
-      # error or a lint failure costs ~1 min instead of a 285 MB download.
-      # ----------------------------------------------------------------------
-
       - name: typecheck
         run: npm run typecheck
 
@@ -71,69 +80,151 @@ jobs:
       - name: build
         run: npm run build
 
-      # ----------------------------------------------------------------------
-      # The vendored stdlib payload (`assets/stdlib/`, 34,587 files / 285 MB) is
-      # gitignored — regenerable, so it is deliberately not committed. But
-      # vitest's globalSetup builds every package's generated tree from it
-      # before any worker starts, so WITHOUT it the whole suite fails at setup,
-      # not in one test. CI has to materialise it.
+      # Shrink-only conformance ratchet, separate from vitest. Exits 2 if any
+      # fixture widened; reads only committed goldens, so it needs no oracle
+      # jar, no local cache and no stdlib — it belongs with the cheap gates.
       #
-      # `scripts/vendor-stdlib.ts` copies from a local clone at
-      # ~/git/plantuml-stdlib, so that clone is what we reconstruct — pinned to
-      # the exact sha recorded in the committed manifest, never to a moving
-      # branch head. GitHub allows fetching an arbitrary sha directly
-      # (uploadpack.allowAnySHA1InWant), which is what makes the pin exact.
-      # ----------------------------------------------------------------------
+      # jiti, not tsx: tsx is not a dependency of this repo, so `npx tsx` would
+      # silently fetch an unpinned version on every run. jiti is a pinned
+      # devDependency and is already what `npm run build:stdlib` uses.
+      - name: description size deltas
+        run: npx jiti scripts/measure-description-size-deltas.ts
 
-      - name: read the vendored stdlib pin
-        id: pin
-        run: |
-          echo "sha=$(node -p "require('./assets/stdlib.manifest.json').sourceSha")" >> "$GITHUB_OUTPUT"
+  # --------------------------------------------------------------------------
+  # The suite, in TEST_SHARDS parallel shards. Includes the oracle gates (the
+  # svg goldens, the ratchets) — all enforced inside vitest. Each shard needs
+  # the vendored stdlib: vitest's globalSetup builds every stdlib package from
+  # it before any worker starts.
+  # --------------------------------------------------------------------------
+  test:
+    name: test (shard ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    # Hard backstop for a hang, not a performance budget. A quarter of the
+    # 9.4-min single-runner suite plus ~1.5 min of setup; 15 leaves ~3x.
+    timeout-minutes: 15
+    strategy:
+      # One red shard must not cancel the others: the merge job reads every
+      # blob, so a partial run still reports which files failed.
+      fail-fast: false
+      matrix:
+        # Keep in step with env.TEST_SHARDS (a matrix cannot read `env`).
+        shard: [1, 2, 3, 4]
 
-      - name: restore vendored stdlib
-        id: stdlib-cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
-          path: assets/stdlib
-          # Keyed on the pin: a re-pin is a different key and re-vendors.
-          key: stdlib-${{ steps.pin.outputs.sha }}
+          node-version-file: package.json
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: '@knowvah'
 
-      - name: vendor stdlib from the pinned source
-        if: steps.stdlib-cache.outputs.cache-hit != 'true'
+      - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ./.github/actions/vendored-stdlib
+
+      # `--shard=i/n` takes a deterministic 1/n of the collected files; the
+      # blob reporter stores results AND the raw coverage for `--merge-reports`
+      # (the shard's own coverage report is kept to the cheap json-summary; the
+      # merge job renders the real reporters). Thresholds zeroed — see the
+      # header comment.
+      - name: vitest shard
+        run: >-
+          npx vitest run
+          --shard=${{ matrix.shard }}/${{ env.TEST_SHARDS }}
+          --reporter=blob
+          --outputFile.blob=.vitest/blob/blob-${{ matrix.shard }}.json
+          --coverage
+          --coverage.reporter=json-summary
+          --coverage.thresholds.lines=0
+          --coverage.thresholds.functions=0
+          --coverage.thresholds.branches=0
+
+      # The blob is the shard's only product. Uploaded even when tests failed
+      # (`!cancelled()`), so the merge still prints the failures with the rest.
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: vitest-blob-${{ matrix.shard }}
+          path: .vitest/blob/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  # --------------------------------------------------------------------------
+  # One report, one verdict. Merges the shards' blobs, renders the configured
+  # coverage reporters into coverage/, enforces the 90/90/90 thresholds, and
+  # checks that the shards together collected exactly the files on disk.
+  # `--merge-reports` runs no tests and no globalSetup (verified locally
+  # without assets/stdlib present), so it needs neither the stdlib nor the
+  # cache.
+  # --------------------------------------------------------------------------
+  merge:
+    name: merge reports
+    needs: [test]
+    # Runs after red shards too: the merged log is where a failure is read,
+    # and D2 below wants the coverage report published even when thresholds
+    # fail. `!cancelled()` (not `always()`) still skips a hard timeout/cancel.
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: read
+      # `gh api .../actions/runs/<id>` for the workflow's start time (the soft
+      # budget below); a job cannot otherwise see when the workflow began.
+      actions: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: package.json
+          cache: npm
+          registry-url: https://npm.pkg.github.com
+          scope: '@knowvah'
+
+      - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: vitest-blob-*
+          path: .vitest/blob
+          merge-multiple: true
+
+      # Config reporters (text, html, clover, json, cobertura) and the
+      # thresholds come from vitest.config.ts, exactly as `npm test` does; the
+      # json reporter feeds the file-count guard below.
+      - name: merge shards, render coverage, enforce thresholds
+        run: >-
+          npx vitest run
+          --merge-reports=.vitest/blob
+          --reporter=default
+          --reporter=json
+          --outputFile.json=.vitest/merged.json
+          --coverage
+
+      # A vitest run can collect fewer files than are on disk and still exit 0
+      # (.agent-notes/coverage-tmp-race.md; a filter can collect nothing). The
+      # shards must add up to every `tests/**/*.test.ts` outside tests/e2e/,
+      # the config's own include/exclude.
+      - name: collected files equal files on disk
+        if: ${{ !cancelled() }}
         run: |
           set -euo pipefail
-          SRC="$HOME/git/plantuml-stdlib"
-          git init -q "$SRC"
-          git -C "$SRC" remote add origin https://github.com/plantuml/plantuml-stdlib.git
-          git -C "$SRC" fetch -q --depth 1 origin "${{ steps.pin.outputs.sha }}"
-          git -C "$SRC" checkout -q FETCH_HEAD
-          npx jiti scripts/vendor-stdlib.ts
-
-      # Every one of the 34,587 files must hash to what the committed manifest
-      # says. On a cache hit this is the integrity check on the restored tree;
-      # on a miss it proves the pinned source still reproduces byte-for-byte.
-      - name: verify vendored stdlib is verbatim
-        run: npx jiti scripts/vendor-stdlib.ts --verify
-
-      # Re-vendoring rewrites the committed manifests. Identical input must
-      # produce identical manifests, so any diff here means the pin no longer
-      # reproduces — a real finding, not noise. Skipped on a cache hit, where
-      # nothing regenerated them.
-      - name: the pin reproduces the committed manifests
-        if: steps.stdlib-cache.outputs.cache-hit != 'true'
-        run: git diff --exit-code -- assets/stdlib.manifest.json assets/manifests
-
-      # ----------------------------------------------------------------------
-      # Full suite + the oracle gates.
-      # ----------------------------------------------------------------------
-
-      # Includes the 90/90/90 coverage thresholds, the 389 svg goldens and the
-      # 54-fixture description ratchet — all enforced inside vitest.
-      # Observed 8.65 min in run 38077059229 (2026-10-10), up from 2.45-3.88
-      # min as the corpus doubled; the old 12-min cap left ~1.4x headroom.
-      - name: test
-        timeout-minutes: 20
-        run: npm test
+          collected=$(node -p "JSON.parse(require('fs').readFileSync('.vitest/merged.json','utf8')).testResults.length")
+          on_disk=$(find tests -name '*.test.ts' -not -path 'tests/e2e/*' | wc -l | tr -d ' ')
+          echo "collected ${collected} test files across ${TEST_SHARDS} shards; ${on_disk} on disk"
+          if [ "$collected" != "$on_disk" ]; then
+            echo "::error title=Test files skipped::${collected} collected but ${on_disk} on disk -- a shard ran short; read its log before re-running."
+            exit 1
+          fi
 
       # D2: publish the report even if the coverage thresholds above failed
       # the step -- otherwise a repo that starts below 90/90/90 could never
@@ -149,57 +240,44 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      # Shrink-only conformance ratchet, separate from vitest. Exits 2 if any
-      # fixture widened; reads only committed goldens, so it needs no oracle
-      # jar and no local cache.
-      #
-      # jiti, not tsx: tsx is not a dependency of this repo, so `npx tsx` would
-      # silently fetch an unpinned version on every run. jiti is a pinned
-      # devDependency and is already what `npm run build:stdlib` uses.
-      - name: description size deltas
-        run: npx jiti scripts/measure-description-size-deltas.ts
-
       # ----------------------------------------------------------------------
-      # Soft performance budget. A hard timeout only fires once things are
-      # already broken; this reports every run's wall clock and warns while a
-      # slowdown is still a trend rather than a failure. Never fails the build
-      # — a slow green build is still green, and a gate that cries wolf on
-      # runner variance gets ignored.
+      # Soft performance budget, now end-to-end for the whole workflow (this
+      # job is the last on the critical path). A hard timeout only fires once
+      # things are already broken; this reports every run's wall clock and
+      # warns while a slowdown is still a trend rather than a failure. Never
+      # fails the build — a slow green build is still green, and a gate that
+      # cries wolf on runner variance gets ignored.
       #
-      # Budget re-set 2026-09-28 from ONE sample: 8.3 min (36483497258, test
-      # 5.65), after the vitest default moved from jsdom to node. The old
-      # 4.0-5.8 range (30702971624, 30703745724) predates suite growth to
-      # ~23.6k tests; the jsdom default had pushed runs to 12.8 min.
-      #
-      # 12 min = the sample plus the 45% runner spread measured between those
-      # two old runs -- not the earlier ~2x rule, which on 8.3 would be 17 and
-      # would stay silent if the jsdom regression (12.8) came back. Re-derive
-      # from the slow end once a few more runs exist.
-      #
-      # Cold vs warm is NOT split: vendoring the 285 MB tree measured 0.18 min,
-      # an order of magnitude below the variance it would be trying to explain.
+      # Budget 8 min is a PROJECTION from the sharded shape (four ~2.5-min
+      # shards plus ~1.5 min setup each, in parallel with the 2.3-min static
+      # job, then this merge) against the 12.9-min single-job run 38313948530;
+      # the previous budget was 12 from one 8.3-min sample. Re-derive from the
+      # slow end once a few sharded runs exist.
       # ----------------------------------------------------------------------
       - name: flag a slow run
         if: always()
         env:
-          BUDGET_MIN: 12
+          BUDGET_MIN: 8
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          elapsed=$(( $(date +%s) - ${{ steps.timer.outputs.start }} ))
+          started=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" --jq .run_started_at)
+          start_s=$(date -d "$started" +%s)
+          elapsed=$(( $(date +%s) - start_s ))
           mins=$(awk "BEGIN {printf \"%.1f\", $elapsed/60}")
-          echo "CI wall clock: **${mins} min** (budget ${BUDGET_MIN} min, observed 8.3, one sample)" \
+          echo "CI wall clock: **${mins} min** (budget ${BUDGET_MIN} min, projected from the sharded shape; pre-shard single job 12.9)" \
             >> "$GITHUB_STEP_SUMMARY"
           if [ "$elapsed" -gt $(( BUDGET_MIN * 60 )) ]; then
-            echo "::warning title=Slow CI run::${mins} min, over the ${BUDGET_MIN} min soft budget (observed 8.3 min, one sample). Check the step timings before raising the budget — the usual causes are a growing suite or a cache that stopped hitting."
+            echo "::warning title=Slow CI run::${mins} min, over the ${BUDGET_MIN} min soft budget (projected; pre-shard 12.9). Check the shard timings before raising the budget — the usual causes are a growing suite, an unbalanced shard, or a cache that stopped hitting."
           fi
 
   # Publishes line coverage to GitHub Code Quality (PR comment + main baseline).
-  # Own job so code-quality:write never reaches the job that runs npm install
+  # Own job so code-quality:write never reaches the jobs that run npm install
   # scripts. Fork PRs cannot get a write token and are skipped.
   # on-call: if upload-coverage 403s, enable Code Quality in repo Settings ->
   # Security -> Code quality, then re-run the failed job.
   upload-coverage:
-    needs: [gates]
+    needs: [merge]
     if: ${{ !cancelled() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     permissions:
