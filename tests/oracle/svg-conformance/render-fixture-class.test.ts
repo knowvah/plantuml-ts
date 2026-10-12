@@ -32,7 +32,7 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { seedOfUmlSource } from '../../../src/core/assemble-svg.js';
 import { renderSync } from '../../../src/index.js';
 import { combineAssetStores } from '../../../src/core/asset-store.js';
-import { renderFixtureClass, renderClassFixture } from './render-fixture-class.js';
+import { renderFixtureClass, renderClassFixture, prepareElkOnce } from './render-fixture-class.js';
 import { diffVerdict } from '../../../scripts/svg-parity-survey.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
@@ -217,5 +217,26 @@ describe('renderFixtureClass — theme building matches production (cdd4-T7b, cd
     // The later skinparam declaration wins: title text renders blue (#00F),
     // not the earlier <style> block's red (#F00).
     expect(viaFixture).toContain('fill="#00F"');
+  });
+});
+
+// cdd8-T2e (D2d): `renderSync` refuses `!pragma layout elk` without
+// `options.elk` (`src/core/elk/layout-services.ts`). The fixture helper
+// preloads ONE backend per vitest worker and hands it to `renderClassFixture`.
+describe('prepareElkOnce — one elk backend per worker (cdd8-T2e)', () => {
+  const ELK_ERROR = '!pragma layout elk is not supported in renderSync without options.elk';
+
+  it('resolves to the same backend object on every call (elkjs loads once)', async () => {
+    const first = await prepareElkOnce();
+    const second = await prepareElkOnce();
+    expect(second).toBe(first);
+    expect(first).toBeDefined();
+  });
+
+  it('renderClassFixture of an ELK fixture renders through the preloaded backend, not the options.elk error', async () => {
+    await prepareElkOnce();
+    const svg = renderClassFixture(readFixture('cadutu-02-lazu601'), new DeterministicMeasurer());
+    expect(svg).not.toContain(ELK_ERROR);
+    expect(svg.startsWith('<?xml') || svg.startsWith('<svg')).toBe(true);
   });
 });

@@ -34,7 +34,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { renderSync } from '../../../src/index.js';
+import { loadElk, renderSync, type ElkBackend } from '../../../src/index.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { AssetStore } from '../../../src/core/asset-store.js';
 import { buildSpriteAssetsStore } from '../../../scripts/sprite-assets-store.js';
@@ -149,11 +149,11 @@ function errorRow(slug: string, tree: string, e: unknown): RenderAllRow {
   return { slug, tree, verdict: 'errored', structural: 0, numeric: 0, firstDiff: message };
 }
 
-export function renderRow(f: FixtureDir, store: AssetStore, tree: string): RenderAllRow {
+export function renderRow(f: FixtureDir, store: AssetStore, tree: string, elk?: ElkBackend): RenderAllRow {
   try {
     const markup = readFileSync(join(f.dir, 'in.puml'), 'utf-8');
     const oracle = readFileSync(join(f.dir, 'in.svg'), 'utf-8');
-    const svg = renderSync(markup, { measurer: new DeterministicMeasurer(), assetStore: store, includeStore: fixtureIncludeStore() });
+    const svg = renderSync(markup, { measurer: new DeterministicMeasurer(), assetStore: store, includeStore: fixtureIncludeStore(), elk });
     const { structural, numeric } = countDiffs(svg, oracle);
     const v = diffVerdict(svg, oracle);
     const firstDiff = v.firstDiff !== undefined ? { firstDiff: v.firstDiff } : {};
@@ -184,7 +184,7 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
   return { out, tree: treeArg };
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const parsed = parseArgs(process.argv.slice(2));
   if ('error' in parsed) {
     console.error(parsed.error);
@@ -196,9 +196,11 @@ function main(): void {
   const fixtures = collectFixtures(repo, tree);
   process.stderr.write(`rendering ${fixtures.length} ${tree} fixtures\n`);
   const store = combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore());
+  // cdd8-T2e (D2d): one elkjs load per process, passed to every render.
+  const elk = await loadElk();
   const rows: RenderAllRow[] = [];
   fixtures.forEach((f, i) => {
-    rows.push(renderRow(f, store, f.tree));
+    rows.push(renderRow(f, store, f.tree, elk));
     if ((i + 1) % 25 === 0) process.stderr.write(`  ${i + 1}/${fixtures.length}\n`);
   });
   mkdirSync(dirname(out), { recursive: true });
@@ -209,6 +211,9 @@ function main(): void {
 /* v8 ignore start -- CLI entry point; exercised via the acceptance run, not
  * the unit-test suite. */
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
-  main();
+  main().catch((e) => {
+    console.error(e);
+    process.exitCode = 1;
+  });
 }
 /* v8 ignore stop */

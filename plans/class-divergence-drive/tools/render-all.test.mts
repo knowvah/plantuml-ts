@@ -3,6 +3,7 @@
  * with the mission-local vitest config — see `tools/README.md`.
  */
 import { describe, test, expect } from 'vitest';
+import { loadElk } from '../../../src/index.js';
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -202,5 +203,21 @@ describe('renderRow (synthetic fixture, tree tagging)', () => {
     expect(row.structural).toBe(0);
     expect(row.numeric).toBe(0);
     expect(row.firstDiff).toBeDefined();
+  });
+});
+
+/**
+ * cdd8-T2e (D2d): an ELK class fixture renders through a preloaded backend.
+ * Before T3a the layout is still dot-engine, so the row equals b0's
+ * (`measurements/b0.json`: cadutu-02-lazu601 structural 1 / numeric 414).
+ */
+describe('renderRow (ELK fixture, preloaded backend)', () => {
+  test('cadutu-02-lazu601 renders without the options.elk error page and matches the b0 counts', async () => {
+    const repo = resolveRepoRoot(import.meta.url);
+    const f = { slug: 'cadutu-02-lazu601', dir: join(repo, 'test-results', 'dot-cache', 'class', 'cadutu-02-lazu601') };
+    const row = renderRow(f, buildSpriteAssetsStore(), 'class', await loadElk());
+    expect(row.verdict).toBe('diverged');
+    expect(row.structural).toBe(1);
+    expect(row.numeric).toBe(414);
   });
 });

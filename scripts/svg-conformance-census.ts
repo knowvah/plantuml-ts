@@ -94,7 +94,11 @@ import type { AssetStore } from '../src/core/asset-store.js';
 import { combineAssetStores } from '../src/core/asset-store.js';
 import type { IncludeStore } from '../src/core/tim/IncludeStore.js';
 import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
-import { renderFixtureClass, renderClassFixture } from '../tests/oracle/svg-conformance/render-fixture-class.js';
+import {
+  renderFixtureClass,
+  renderClassFixture,
+  prepareElkOnce,
+} from '../tests/oracle/svg-conformance/render-fixture-class.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';
 import { renderFixtureSequence } from '../tests/oracle/svg-conformance/render-fixture-sequence.js';
 import { renderFixtureActivity } from '../tests/oracle/svg-conformance/render-fixture-activity.js';
@@ -456,7 +460,10 @@ function printFamilies(results: readonly CensusResult[]): void {
   }
 }
 
-function main(): void {
+async function main(): Promise<void> {
+  // cdd8-T2e (D2d): one elkjs load per process; `renderClassFixture` then
+  // passes the backend to `renderSync` (ELK class fixtures).
+  await prepareElkOnce();
   const types = process.argv.slice(2).filter((a) => !a.startsWith('--'));
   const requested = types.length > 0 ? types : DEFAULT_TYPES;
   const fixtures = requested.flatMap((t) =>
@@ -492,6 +499,9 @@ function main(): void {
 // real run over the default fixture types.
 /* v8 ignore start -- CLI entry point; exercised via the real census run. */
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
-  main();
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
 }
 /* v8 ignore stop */

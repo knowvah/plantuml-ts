@@ -23,7 +23,7 @@ import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { renderSync } from '../../../src/index.js';
+import { loadElk, renderSync, type ElkBackend } from '../../../src/index.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { AssetStore } from '../../../src/core/asset-store.js';
 import { combineAssetStores } from '../../../src/core/asset-store.js';
@@ -84,8 +84,8 @@ export function formatDiffLine(d: Diff): string {
 
 /** The exact upstream render call (`scripts/svg-parity-survey.ts:268-271`):
  *  `WidthTableMeasurer` + a shared, process-wide sprite asset store. */
-export function renderFixture(markup: string, store: AssetStore): string {
-  return renderSync(markup, { measurer: new DeterministicMeasurer(), assetStore: store, includeStore: fixtureIncludeStore() });
+export function renderFixture(markup: string, store: AssetStore, elk?: ElkBackend): string {
+  return renderSync(markup, { measurer: new DeterministicMeasurer(), assetStore: store, includeStore: fixtureIncludeStore(), elk });
 }
 
 interface FixtureFiles {
@@ -111,11 +111,11 @@ function printDiffs(label: string, pass: boolean, diffs: readonly Diff[]): void 
   for (const d of numeric) console.log(formatDiffLine(d));
 }
 
-function runOne(repo: string, outDir: string, arg: string, store: AssetStore): void {
+function runOne(repo: string, outDir: string, arg: string, store: AssetStore, elk: ElkBackend): void {
   const { tree, slug } = parseTreeSlug(arg);
   const dir = fixtureDir(repo, tree, slug);
   const { markup, oracle } = readFixtureFiles(dir);
-  const svg = renderFixture(markup, store);
+  const svg = renderFixture(markup, store, elk);
   const base = outputBaseName(tree, slug);
   writeFileSync(join(outDir, `${base}.ours.svg`), svg);
   copyFileSync(join(dir, 'in.svg'), join(outDir, `${base}.jar.svg`));
@@ -123,7 +123,7 @@ function runOne(repo: string, outDir: string, arg: string, store: AssetStore): v
   printDiffs(`${tree}/${slug}`, pass, diffs);
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const slugs = process.argv.slice(2);
   if (slugs.length === 0) {
     console.error('usage: render-diff.mts <slug...>');
@@ -134,13 +134,18 @@ function main(): void {
   const outDir = join(repo, 'plans', 'class-divergence-drive', 'measurements', 'out');
   mkdirSync(outDir, { recursive: true });
   const store = combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore());
-  for (const slug of slugs) runOne(repo, outDir, slug, store);
+  // cdd8-T2e (D2d): one elkjs load per process, passed to every render.
+  const elk = await loadElk();
+  for (const slug of slugs) runOne(repo, outDir, slug, store, elk);
 }
 
 /* v8 ignore start -- CLI entry point; exercised via the acceptance run in
  * the commit body, not the unit-test suite (matches this project's other
  * script CLI blocks, e.g. scripts/svg-parity-survey.ts). */
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
-  main();
+  main().catch((e) => {
+    console.error(e);
+    process.exitCode = 1;
+  });
 }
 /* v8 ignore stop */
