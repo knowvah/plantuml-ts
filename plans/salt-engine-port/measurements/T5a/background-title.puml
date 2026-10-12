@@ -1,0 +1,11 @@
+@startsalt
+<style>
+root {
+  BackgroundColor pink
+}
+</style>
+title My title
+{
+[OK] | A
+}
+@endsalt

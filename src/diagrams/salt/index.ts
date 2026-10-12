@@ -14,11 +14,11 @@
  * draw is not a no-op. The `LimitFinder` ink pass a mainframe needs runs
  * first, as `DiagramChromeFactory.create` does before the export draws.
  *
- * With chrome (title/caption/legend/header/footer/mainframe) the fragment
- * declares its margin-less block (`preChromeWidth`/`preChromeHeight`) for
- * `core/annotations/chrome-export.ts#applyExportedChrome` — upstream
- * composes chrome around the raw block and applies the margin after
- * (UgDiagram.java:124-128).
+ * With chrome (title/caption/legend/header/footer/mainframe) the fragment is
+ * the raw block around `BODY_ANCHOR` and carries its `calculateMargin`
+ * result as `exportMargin`: chrome composes around the raw block and
+ * `core/TextBlockExporter.ts#finalizeTitledDiagramFragment` applies the
+ * margin and `scale` after (UgDiagram.java:123-131), as for mindmap.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/salt/PSystemSaltFactory.java
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/TextBlockExporter.java:153-209
@@ -53,7 +53,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import type { Paint } from '../../core/paint.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { StyleSignatureBasic } from '../../core/style/StyleSignatureBasic.js';
-import { group } from '../../core/svg.js';
+import { BODY_ANCHOR } from '../../core/TextBlockExporter.js';
 import type { PSystemSalt } from './PSystemSalt.js';
 import { createSaltDiagram } from './PSystemSaltFactory.js';
 
@@ -236,16 +236,23 @@ function calculateMargin(diagram: PSystemSalt): ClockwiseTopRightBottomLeft {
   return diagram.getDefaultMargins();
 }
 
-/** The diagram as the fragment `src/index.ts` chromes and assembles. */
-export function renderSalt(diagram: PSystemSalt, measurer: StringMeasurer): RenderFragment {
-  const stringBounder = stringBounderFor(measurer);
-  // `DiagramChromeFactory.create`'s first step, `addWarnings` (DiagramChromeFactory.java:128).
-  const textBlock = addWarnings(diagram.getTextBlock(stringBounder), diagram.getWarnings(), muteColorMapper(diagram));
-  const dim = textBlock.calculateDimension(stringBounder);
-  const frameInk = isDisplayPositionedNull(diagram.annotations.mainFrame)
-    ? {}
-    : { frameInk: textBlockInk(textBlock, stringBounder) };
-  const margin = calculateMargin(diagram);
+/** The block `TextBlockExporter` exports: `addWarnings(getTextBlock)`, its
+ *  dimension, and the `calculateMargin` result. */
+interface ExportedBlock {
+  readonly textBlock: TextBlock;
+  readonly dim: XDimension2D;
+  readonly margin: ClockwiseTopRightBottomLeft;
+}
+
+/**
+ * `TextBlockExporter#exportTo` for SVG, no chrome: `calculateFinalDimension`
+ * (the text block plus the margins, java:198-202) as `minDim`, the scale
+ * resolved against it (`computeScaleFactor`, java:205-209), the margin
+ * translate (java:173), then `textBlock.drawU`.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/TextBlockExporter.java:159-209
+ */
+function exportTextBlock(diagram: PSystemSalt, measurer: StringMeasurer, block: ExportedBlock): RenderFragment {
+  const { textBlock, dim, margin } = block;
   const minDim = new XDimension2D(
     dim.getWidth() + margin.getLeft() + margin.getRight(),
     dim.getHeight() + margin.getTop() + margin.getBottom(),
@@ -257,11 +264,66 @@ export function renderSalt(diagram: PSystemSalt, measurer: StringMeasurer): Rend
     diagram.getSkinParam().getDpi(),
   );
   const translate = new UTranslate(margin.getLeft(), margin.getTop());
-  const fragment = drawFragment(diagram, measurer, { textBlock, minDim, scale, translate });
-  // No chrome: the single content `<g>` `finalizeTitledDiagramFragment` adds
-  // to an unchromed mindmap; with chrome, `applyChrome` composes the flat body.
-  if (isEmpty(diagram.annotations)) return { ...fragment, body: group(fragment.body) };
-  return { ...fragment, preChromeWidth: dim.getWidth(), preChromeHeight: dim.getHeight(), ...frameInk };
+  return drawFragment(diagram, measurer, { textBlock, minDim, scale, translate });
+}
+
+/**
+ * With chrome, upstream decorates the RAW block (`UgDiagram#getExporter` →
+ * `addChrome`, UgDiagram.java:123-131) and exports the result with the margin
+ * and scale (TextBlockExporter.java:159-209). The chrome is composed outside
+ * klimt here, so the fragment is the raw block's dimension around
+ * `BODY_ANCHOR`, carrying the margin, `scale` and `dpi` for
+ * `core/TextBlockExporter.ts#finalizeTitledDiagramFragment`, which calls
+ * `drawBodyAt` once with the resolved factor and the anchor's translate —
+ * the mindmap plugin's shape (`src/diagrams/mindmap/index.ts#rawTextBlock`).
+ * The first pass draws no block (salt's only gradient is the background): it
+ * supplies the background and `<defs>`, and the element tree is drawn once,
+ * as upstream draws it once (its `drawU` mutates, see the file header).
+ */
+function rawTextBlock(
+  diagram: PSystemSalt,
+  measurer: StringMeasurer,
+  block: ExportedBlock,
+  frameInk: { frameInk?: InkBox },
+): RenderFragment {
+  const { textBlock, dim, margin } = block;
+  const noTranslate = new UTranslate(0, 0);
+  const background = drawFragment(diagram, measurer, {
+    textBlock: TextBlockUtils.EMPTY_TEXT_BLOCK,
+    minDim: dim,
+    scale: 1,
+    translate: noTranslate,
+  });
+  const drawBodyAt = (scale: number, dx: number, dy: number): string =>
+    drawFragment(diagram, measurer, { textBlock, minDim: dim, scale, translate: new UTranslate(dx, dy) }).body;
+  const anchored: RenderFragment = {
+    ...background,
+    body: BODY_ANCHOR,
+    width: dim.getWidth(),
+    height: dim.getHeight(),
+    dpi: diagram.getSkinParam().getDpi(),
+    exportMargin: margin,
+    drawBodyAt,
+    ...frameInk,
+  };
+  return diagram.scale === undefined ? anchored : { ...anchored, scaleSpec: diagram.scale };
+}
+
+/** The diagram as the fragment `src/index.ts` chromes and assembles. */
+export function renderSalt(diagram: PSystemSalt, measurer: StringMeasurer): RenderFragment {
+  const stringBounder = stringBounderFor(measurer);
+  // `DiagramChromeFactory.create`'s first step, `addWarnings` (DiagramChromeFactory.java:128).
+  const textBlock = addWarnings(diagram.getTextBlock(stringBounder), diagram.getWarnings(), muteColorMapper(diagram));
+  const block: ExportedBlock = {
+    textBlock,
+    dim: textBlock.calculateDimension(stringBounder),
+    margin: calculateMargin(diagram),
+  };
+  if (isEmpty(diagram.annotations)) return exportTextBlock(diagram, measurer, block);
+  const frameInk = isDisplayPositionedNull(diagram.annotations.mainFrame)
+    ? {}
+    : { frameInk: textBlockInk(textBlock, stringBounder) };
+  return rawTextBlock(diagram, measurer, block, frameInk);
 }
 
 export const saltPlugin: SyncPlugin<PSystemSalt, SaltGeometry> = {

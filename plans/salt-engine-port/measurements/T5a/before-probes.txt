@@ -1,0 +1,32 @@
+
+### probe/common-commands  pass=false structural=2 numeric=10
+  S svg/g[1]/g[1]/text[1]/@font-size  exp=28 | act=14
+  S svg/g[1]/g[1]/text[1]/@textLength  exp=88.55 | act=44.275
+  N svg/@height  exp=120 | act=49 (Δ71)
+  N svg/@viewBox[2]  exp=152 | act=65 (Δ87)
+  N svg/@viewBox[3]  exp=120 | act=49 (Δ71)
+  N svg/@width  exp=152 | act=65 (Δ87)
+  N svg/g[1]/g[1]/text[1]/@x  exp=30 | act=10 (Δ20)
+  N svg/g[1]/g[1]/text[1]/@y  exp=51.778 | act=20.889 (Δ30.889)
+  N svg/g[1]/text[1]/@x  exp=57.225 | act=34.613 (Δ22.612000000000002)
+  N svg/g[1]/text[1]/@y  exp=100.667 | act=65.667 (Δ35)
+  N svg/g[1]/text[2]/@x  exp=77.275 | act=54.663 (Δ22.61200000000001)
+  N svg/g[1]/text[2]/@y  exp=100.667 | act=65.667 (Δ35)
+
+### probe/mainframe  pass=false structural=0 numeric=16
+  N svg/@height  exp=89 | act=78 (Δ11)
+  N svg/@viewBox[2]  exp=163 | act=152 (Δ11)
+  N svg/@viewBox[3]  exp=89 | act=78 (Δ11)
+  N svg/@width  exp=163 | act=152 (Δ11)
+  N svg/g[1]/rect[1]/@x  exp=10 | act=5 (Δ5)
+  N svg/g[1]/rect[1]/@y  exp=15 | act=10 (Δ5)
+  N svg/g[1]/path[1]/@d[0]  exp=142.063 | act=137.063 (Δ5)
+  N svg/g[1]/path[1]/@d[1]  exp=15 | act=10 (Δ5)
+  N svg/g[1]/path[1]/@d[2]  exp=142.063 | act=137.063 (Δ5)
+  N svg/g[1]/path[1]/@d[3]  exp=22 | act=17 (Δ5)
+  N svg/g[1]/path[1]/@d[4]  exp=132.063 | act=127.063 (Δ4.999999999999986)
+  N svg/g[1]/path[1]/@d[5]  exp=32 | act=27 (Δ5)
+  N svg/g[1]/path[1]/@d[6]  exp=10 | act=5 (Δ5)
+  N svg/g[1]/path[1]/@d[7]  exp=32 | act=27 (Δ5)
+  N svg/g[1]/text[1]/@x  exp=13 | act=8 (Δ5)
+  N svg/g[1]/text[1]/@y  exp=26.889 | act=21.889 (Δ5)

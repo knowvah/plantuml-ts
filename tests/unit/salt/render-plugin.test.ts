@@ -67,9 +67,6 @@ describe('salt plugin — renderSync equals the jar', () => {
   });
 
   it('title/scale/rotate/minwidth/set separator are commands, not salt text (jar draws My title, A, B)', () => {
-    // The jar's 152x120 canvas (chrome + scale 2) needs the shared chrome
-    // finalizer to know salt's same(5) margin -- outside this plugin; the
-    // drawn texts already match the jar's three.
     const svg = renderSync(probe('common-commands').markup, { measurer });
     expect(texts(svg)).toEqual(['My title', 'A', 'B']);
   });
@@ -109,6 +106,35 @@ describe('salt plugin — chrome', () => {
     expect(ours).toEqual(texts(f.golden));
     expect(ours).toEqual(['This is a mainframe', 'OK', 'A']);
   });
+
+  // UgDiagram.java:123-131: chrome around the margin-less block, then
+  // TextBlockExporter#exportTo translates by same(5) (java:173) and scales
+  // by computeScaleFactor over the chromed, margined dimension (java:205-209).
+  it('mainframe probe: chrome, then the same(5) margin -- 163x89 like the jar', () => {
+    const f = probe('mainframe');
+    expect(rootAttr(renderSync(f.markup, { measurer }), 'viewBox')).toBe('0 0 163 89');
+    expect(diffPaths(f)).toEqual([]);
+  });
+
+  it('common-commands probe: title + scale 2 compose in the jar order -- 152x120 like the jar', () => {
+    const f = probe('common-commands');
+    expect(rootAttr(renderSync(f.markup, { measurer }), 'viewBox')).toBe('0 0 152 120');
+    expect(diffPaths(f)).toEqual([]);
+  });
+
+  it('a style `Margin` outranks same(5) on the chrome path too (TextBlockExporter.java:510-516): 96x89 like the jar', () => {
+    // Jar value: plans/salt-engine-port/measurements/T5a/style-margin-title.svg,
+    // rendered by scripts/oracle-render.sh (1.2026.8beta1).
+    const markup = '@startsalt\n<style>\nroot {\n  Margin 10\n}\n</style>\ntitle My title\n{\n[OK] | A\n}\n@endsalt\n';
+    expect(rootAttr(renderSync(markup, { measurer }), 'viewBox')).toBe('0 0 96 89');
+  });
+
+  it.each([['mejeki-64-buvo994'], ['vuxibo-96-tago783']])(
+    'corpus row %s (title/caption/legend/header/footer) equals the jar',
+    (slug) => {
+      expect(diffPaths(corpus(slug))).toEqual([]);
+    },
+  );
 });
 
 describe('embedded {{salt}} (D7): the nested slot draws salt at the jar size', () => {

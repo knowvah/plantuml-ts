@@ -27,6 +27,7 @@ import type { LayoutServices } from './elk/elk-backend.js';
 import type { SkinCut } from './skin-command.js';
 import { rect, text } from './svg.js';
 import type { Gradient } from './paint.js';
+import type { ClockwiseTopRightBottomLeft } from './klimt/geom/ClockwiseTopRightBottomLeft.js';
 import type { Theme } from './theme.js';
 import type { StringMeasurer } from './measurer.js';
 import type { AssetStore } from './asset-store.js';
@@ -206,7 +207,7 @@ export interface RenderFragment {
    * dpi 96) — every non-MINDMAP fragment, and every mindmap fragment
    * without a `scale` directive, is unaffected.
    *
-   * Set by `src/diagrams/mindmap/index.ts#rawTextBlock`.
+   * Set by the mindmap and salt plugins' `rawTextBlock`.
    */
   scaleSpec?: ScaleSpec;
   dpi?: number;
@@ -239,6 +240,10 @@ export interface RenderFragment {
    * body's numbers are rounded once, after the scale. Returns the flat body.
    */
   drawBodyAt?: (scale: number, dx: number, dy: number) => string;
+  /** sep-T5a: `TextBlockExporter`'s `margin` -- the producer's `Builder#calculateMargin` (style `Margin`, else
+   *  `getDefaultMargins()`, TextBlockExporter.java:510-516), applied after chrome by
+   *  `TextBlockExporter.ts#finalizeTitledDiagramFragment`. Set by the MINDMAP and SALT chrome paths. */
+  exportMargin?: ClockwiseTopRightBottomLeft;
   /**
    * lgm-T1a: the `LimitFinder` ink (`TextBlockUtils.getMinMax(block, sb,
    * false)`) of the block `DiagramChromeFactory.decorateWithFrame` frames,

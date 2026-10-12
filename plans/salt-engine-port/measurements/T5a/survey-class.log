@@ -1,0 +1,34 @@
+
+> @knowvah/plantuml-ts@0.2.0 svg:survey
+> jiti scripts/svg-parity-survey.ts class --out /Users/scottseely/git/knowvah/plantuml-ts/.claude/worktrees/sep-T5a/plans/salt-engine-port/measurements/T5a/parity-class.json
+
+surveying 723 class fixtures (concurrency 6)
+  25/723
+  50/723
+  75/723
+  100/723
+  125/723
+  150/723
+  175/723
+  200/723
+  225/723
+  250/723
+  275/723
+  300/723
+  325/723
+  350/723
+  375/723
+  400/723
+  425/723
+  450/723
+  475/723
+  500/723
+  525/723
+  550/723
+  575/723
+  600/723
+  625/723
+  650/723
+  675/723
+  700/723
+wrote /Users/scottseely/git/knowvah/plantuml-ts/.claude/worktrees/sep-T5a/plans/salt-engine-port/measurements/T5a/parity-class.json — {"conformant":722,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}

@@ -66,6 +66,7 @@ const DIAGRAM_TYPE_HCL = 'HCL';
 const DIAGRAM_TYPE_SEQUENCE = 'SEQUENCE';
 const DIAGRAM_TYPE_ACTIVITY = 'ACTIVITY';
 const DIAGRAM_TYPE_MINDMAP = 'MINDMAP';
+const DIAGRAM_TYPE_SALT = 'SALT';
 
 // ---------------------------------------------------------------------------
 // class finalize (formerly class/renderer-shell.ts#assembleClassShell)
@@ -403,6 +404,7 @@ function finalizeShellFragment(fragment: RenderFragment): RenderFragment {
     case DIAGRAM_TYPE_HCL:
       return finalizeJsonFragment(fragment);
     case DIAGRAM_TYPE_MINDMAP:
+    case DIAGRAM_TYPE_SALT:
       return finalizeTitledDiagramFragment(fragment);
     default:
       return fragment;
