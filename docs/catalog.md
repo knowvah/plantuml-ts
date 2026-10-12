@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1552 modules · 5829 exported names.
+1559 modules · 5836 exported names.
 
 ## `src/`
 
@@ -1776,6 +1776,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `DataSource.ts` | `DataSource` |  |
 | `DataSourceImpl.ts` | `DataSourceImpl` |  |
 | `Position.ts` | `Position` | Position — an immutable (row, col) pair with Java value semantics. |
+| `Positionner2.ts` | `Positionner2` |  |
 | `SaltDictionary.ts` | `SaltDictionary`, `atomOpsFor` |  |
 | `Terminated.ts` | `Terminated` |  |
 | `Terminator.ts` | `Terminator` | Terminator — what ends a salt token: the end of its source line (`NEWLINE`) or a column/structure delimiter after it on the same line (`NEWCOL`). |
@@ -1787,6 +1788,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `AbstractElement.ts` | `AbstractElement` |  |
 | `AbstractElementText.ts` | `AbstractElementText` |  |
 | `Element.ts` | `Element` |  |
+| `ElementBorder.ts` | `ElementBorder` |  |
 | `ElementButton.ts` | `ElementButton` |  |
 | `ElementDroplist.ts` | `ElementDroplist` |  |
 | `ElementEmpty.ts` | `ElementEmpty` |  |
@@ -1795,18 +1797,23 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ElementMenuBar.ts` | `ElementMenuBar` |  |
 | `ElementMenuEntry.ts` | `ElementMenuEntry` |  |
 | `ElementMenuPopup.ts` | `ElementMenuPopup` |  |
+| `ElementPyramid.ts` | `ElementPyramid` |  |
+| `ElementPyramidScrolled.ts` | `ElementPyramidScrolled` |  |
 | `ElementRadioCheckbox.ts` | `ElementRadioCheckbox` |  |
 | `ElementTabBar.ts` | `ElementTabBar` |  |
 | `ElementText.ts` | `ElementText` |  |
 | `ElementTextField.ts` | `ElementTextField` |  |
 | `ElementTree.ts` | `ElementTree` |  |
 | `ElementTreeEntry.ts` | `ElementTreeEntry` |  |
+| `Grid.ts` | `Grid` | Grid — the `{#`/`{+`/`{^`/`{!`/`{-` pyramid table lines: one unit segment per cell edge, collected per `TableStrategy` (the outline at construction, each cell's edges on `addCell`), drawn as horizontals then verticals, then the pyramid titl |
 | `Grid2.ts` | `Grid2` | Grid2 — the `{T` tree-table lines over the given row and column starts, per `TableStrategy`: the outline for `DRAW_OUTSIDE`/ `DRAW_OUTSIDE_WITH_TITLE`, every row line for `DRAW_HORIZONTAL`/ `DRAW_ALL`, every column line for `DRAW_VERTICAL`/ |
+| `LeftFirst.ts` | `LeftFirst` |  |
 | `ListWidth.ts` | `ListWidth` | ListWidth — one width per "other" column of a `{T` tree row; `ElementTree#getWidthOther` folds every row's list with `mergeMax` (`ElementTree.java:100-107`). |
 | `Segment.ts` | `Segment` | Segment — a (row, col) cell edge `Grid` collects in its `horizontals` / `verticals` hash sets (`Grid.java:57-58`). |
 | `Skeleton.ts` | `Skeleton` | Skeleton — the `{T` tree-guide lines: a 2x2 bullet under every entry that has a deeper next entry, and an L-shaped vertical + horizontal guide from each entry's parent down and across to it. |
 | `Skeleton2.ts` | `Skeleton2` | Skeleton2 — the `\|_` creole tree guides. |
 | `TableStrategy.ts` | `TableStrategy`, `fromChar` | TableStrategy — which lines a salt table/tree draws: none, the outline, the outline under a title, every row line, every column line, or all. |
+| `TopFirst.ts` | `TopFirst` |  |
 | `WrappedElement.ts` | `WrappedElement` |  |
 
 ## `src/diagrams/salt/factory/`

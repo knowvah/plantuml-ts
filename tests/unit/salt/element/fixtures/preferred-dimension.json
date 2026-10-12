@@ -1,0 +1,13 @@
+{
+  "border-partial": { "root": "ElementBorder", "width": 40.0, "height": 29.0 },
+  "border-text": { "root": "ElementBorder", "width": 88.69999885559082, "height": 56.0 },
+  "pyramid-all-7x4": { "root": "ElementPyramid", "width": 68.14999961853027, "height": 98.0 },
+  "pyramid-caret-untitled": { "root": "ElementPyramid", "width": 86.12499809265137, "height": 28.0 },
+  "pyramid-merge": { "root": "ElementPyramid", "width": 138.02499675750732, "height": 56.0 },
+  "pyramid-outside-7x4": { "root": "ElementPyramid", "width": 68.14999961853027, "height": 98.0 },
+  "pyramid-strategies": { "root": "ElementPyramid", "width": 40.0, "height": 214.0 },
+  "pyramid-titled": { "root": "ElementPyramid", "width": 86.12499809265137, "height": 52.0 },
+  "scrolled-both": { "root": "ElementPyramidScrolled", "width": 80.67499923706055, "height": 100.0 },
+  "scrolled-horizontal": { "root": "ElementPyramidScrolled", "width": 50.67499923706055, "height": 100.0 },
+  "scrolled-vertical": { "root": "ElementPyramidScrolled", "width": 80.67499923706055, "height": 70.0 }
+}

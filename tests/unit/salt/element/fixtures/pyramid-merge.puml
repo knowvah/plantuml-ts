@@ -1,0 +1,8 @@
+@startsalt
+{#
+A | B | C
+A very long merged cell | * | D
+E
+F | * | *
+}
+@endsalt
