@@ -69,7 +69,7 @@ fidelity number. `final` ∈ `fixed (<commit>)` · `open -> <owner>` (a library-
 | class/bixogo-47-xulu385 | structural-match | 0/49 | legend `<image>` 111×90 | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
 | class/roxosu-00-pini153 | structural-match | 0/49 | legend `<image>` 111×90 | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
 | activity/bozido-07-geze049 | structural-match | 0/68 | 4 slots in one action (wbs 163×145, mindmap, salt 150×66, gantt 325×63); only the salt slot can move here — wbs/gantt have no engine, mindmap draws | T4a |  salt slot fixed (cda4ea75a): 0/68 -> 0/66, slot 150×66 = jar; wbs/gantt slots remain — blocked (no engine) |
-| gantt/duxuce-04-fozu747 | diverged | 9/2 | legend with wbs+mindmap+salt — the WHOLE row is our ERROR_SENTINEL (no gantt engine registered); blocked on a gantt engine, cannot move on salt alone | — (blocked: gantt) | |
+| gantt/duxuce-04-fozu747 | diverged | 9/2 | legend with wbs+mindmap+salt — the WHOLE row is our ERROR_SENTINEL (no gantt engine registered); blocked on a gantt engine, cannot move on salt alone | — (blocked: gantt) |  open -> gantt engine mission (9/2 unchanged at b5, journal row 44; no gantt engine renders the row) |
 
 ## `salt` keyword inside `@startuml` (0 rows — brief said 17; journal row 3)
 

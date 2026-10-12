@@ -35,6 +35,29 @@ post-D7 measurements.
 
 ---
 
+## `salt-engine-port` (sep) — DONE 2026-10-12 (batches 0–5, exit; merged to main as a merge commit, not pushed)
+
+**What changed:**
+- **The `@startsalt` engine is ported 1:1** (62 Java files → `src/diagrams/salt/{element,factory}/` + root, upstream names, `@see` on every symbol): `PSystemSalt`/`PSystemSaltFactory`/`CommandAnything`, every `Element*`/`ElementFactory*`, `Positionner2`, `Grid` (JDK `HashMap` bin-order emulation for the jar's draw order), registered as `saltPlugin` in `src/index.ts`.
+- Salt bucket **0/0/51 → 51/0/0**; svg-salt ratchet **0 → 50** byte pins (lakari-33 is a stock-jar crash page, conformant under the 2026-10-10 error-page rule, held as the jar-crash numeric baseline). Authored root: **30** fixtures (`tests/fixtures/salt/*.puml` + jar `.svg`, `authored-baseline.json`), 25 at 0 diffs.
+- Embeds: class bixogo-47/roxosu-00 and unknown lubicu-73 (`{{salt}}` in legend/label/note) **structural-match → conformant, pinned** (class ratchet 999 → 1002); activity bozido-07's salt slot = jar (row stays blocked on wbs+gantt); gantt duxuce-04 blocked on a gantt engine. **0 conformant losses** in any of 28 engines vs b0.
+- klimt pieces ported into their upstream homes (D4): `Splitter.purgeAllTag` + `FontStyle` regex getters, `UFontFactory.byDefault/serif/sansSerif/monospace`, `FontConfiguration.blackBlueTrue`, `UPixel` + `DriverPixelSvg`, `CommandCreoleSpace` + `AtomSpace` (`{kind:'space'}` creole variant), a `ColorMapper` on `UGraphic` mapped in the SVG drivers (`Fore`/`Back` accept HColors; dark/monochrome/reversecolor through klimt), and the `TitledDiagram` export margin on the fragment (`RenderFragment.exportMargin`; `TITLED_DIAGRAM_MARGIN` gone, salt `same(5)`, mindmap `same(10)`, style `Margin` wins).
+- Routing/refusal: 50 salt rows `SALT -> NONE` known-misroute → `agree`; 50 svg-salt + 3 svg-class clone rows (agree 5687 → 5790, total 6641 → 6694). Dashboard knows the svg-salt and svg-mindmap ratchet families; `parity-mindmap.json` re-pinned (two stale rows).
+
+**Flags for review:**
+- `DriverPixelSvg` relies on `SvgGraphics` carrying its last fill (jar `fill="black"` first shape, `#000` after) — no fill state of its own (`.agent-notes/sep-T2g.md`).
+- `UGraphic#getColorMapper?()` is OPTIONAL (missing = IDENTITY, `LimitFinder.java:227-229`) so ~35 recording graphics compile unchanged; text colour rides an optional `FontConfiguration.hColor` rather than widening `color`.
+- Brief corrections: `@startuml` + `salt` never reaches the salt factory (`DiagramType.java:198-200`); `CommandAnything.java:70` fires only as `@startsalt` + `salt`. Popup draw order is jar-nondeterministic (identity-hashed `HashMap`, `ElementMenuBar.java:54,123`) — `cov-menu-three-popups` is a `jar-flake` row.
+- `src/index.ts` is 521 lines (pre-existing over the 500 cap, +2 for the registration).
+
+**Open (owners — mechanisms in `plans/salt-engine-port/decision-journal.md` rows 38–43):**
+1. **`<space:N>` in a class MEMBER row** contributes nothing where the jar advances N — `MemberRenderAtom` has no space variant (`class-member-creole.ts:316-318`; 28 class files reference the type; no cached row) → class residual drive.
+2. **Chrome + painted root background**: the jar paints the background rect first at the final size (`SvgGraphics.java:188-191`, `:817-819`); salt and mindmap paint it inside `drawBodyAt` at the raw size, after the title (`salt/index.ts`, `mindmap/index.ts`); no corpus row → mindmap/salt follow-on.
+3. **Activity background never colour-mapped** (`activity/renderer.ts:438,441` vs `SvgGraphics.java:176-188`; probes `measurements/T5c/audit/`) → activity residual drive.
+4. **`PSystemErrorUtils#checkBasicError` unported** (`src/core/error/PSystemErrorUtils.ts:12-17`): the `@startuml` + `salt` error page says "Syntax Error?" where the jar says "This looks like a salt diagram…" (conformant by rule, text differs) → error-page follow-on.
+5. **ColorMapper seam residuals** (`.agent-notes/sep-T5c.md`): `<color:black>` over `blackBlueTrue` under `mode dark` paints the dark partner (upstream `changeColor` drops it; gone once the two `FontConfiguration` types unify); sprite tints / the sprite collector map with IDENTITY (`SpriteMonochrome.java:180-188`); class/activity hex post-process keeps alpha under `reversecolor` (`fragment-color-mapper.ts#mapHexChannels` vs `ColorUtils.java:166`).
+6. **wbs / gantt engines** (bozido-07, duxuce-04 blocked) — mission-index D3/D4.
+
 ## `class-divergence-drive-8` (cdd8) — DONE 2026-10-12 (batches 0, 1, 2a–2c, 3, exit)
 
 **What changed:**
@@ -52,7 +75,7 @@ post-D7 measurements.
 - Two description size-backlog pins RAISED as reveals (gevozu-46, sunuju-01: 1.263889 → 2.319445; journal row 16).
 
 **Open (owners):**
-1. **salt-engine-port** — lubicu-73, bixogo-47, roxosu-00 (nested `{{salt}}` draws our 300×60 unknown-diagram box). Launched by T-salt.
+1. ~~**salt-engine-port**~~ — DONE 2026-10-12 (section above): lubicu-73, bixogo-47, roxosu-00 conformant and pinned.
 2. **Description stereotype-scoped style + document margin** (T3b ledger): c4/vakasu-51 (stereotype-keyed skinparam/`<style>` for entities, links via AddRelTag and legend; `root { Margin 10 }` → `theme.diagramMargin` read only by activity; legend font under `skinparam dpi`), unknown/foraba-98 (`skinparam rectangle<<osa_server>>`; `theme-element-resolve.ts:21` has no stereotype tier). Neither is ELK.
 3. **Class ELK long tail** (T3a refuses with an error where the jar draws; no corpus row): notes, notes on links, stereotyped/legend packages, USymbol packages, `together`, `scale`/`newpage` under ELK. Author fixtures + oracles first.
 4. **Description `[<latex>…]` component sizing** — the `[ ]` sizer does not measure `<latex>` (40×44 boxes; gevozu/sunuju). Revealed by T1d.
@@ -654,7 +677,7 @@ journaled rises; 0 losses in any engine at any close.
   dezobu/rozugu, mmp T6g for semutu); cdd6's implementation kept, both tests green.
 - cdd5's bullets resolved here: struck below in the cdd5 section where they were listed.
 
-## `salt-engine-port` — proposed (cdd7 D9, 2026-09-30)
+## `salt-engine-port` — proposed (cdd7 D9, 2026-09-30) — DONE 2026-10-12, see the `sep` section at the top
 
 Hand-off from `class-divergence-drive-7` (`plans/class-divergence-drive-7/decisions.md#D9`):
 the port has no `@startsalt` engine, and the one class-corpus row that needs it is

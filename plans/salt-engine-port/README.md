@@ -91,7 +91,7 @@ Batch close: [close-procedure.md](close-procedure.md).
 | [3](batch-3/overview.md): factories | T3a simple, T3b check/radio, T3c complex | [x] |
 | [4](batch-4/overview.md): wiring + main pin close | T4a | [x] |
 | [5](batch-5/overview.md): residual drive (written at the b4 close) | T5* | [x] |
-| [exit](exit/overview.md): final + merge | T-exit | [ ] |
+| [exit](exit/overview.md): final + merge | T-exit | [x] |
 
 ## Index
 
@@ -104,3 +104,37 @@ Batch close: [close-procedure.md](close-procedure.md).
 - [settings.autonomous.json](settings.autonomous.json): copy to `.claude/settings.autonomous.json`
 
 Recommended executor: `fable` (long-horizon, 1M context).
+
+## Summary (T-exit, 2026-10-12)
+
+**Outcome.** D8 met: salt **0/0/51 → 51/0/0** (50 byte pins in `oracle/goldens/svg-salt/ratchet.json`;
+`lakari-33-mone874` is a stock-jar crash page, conformant under the 2026-10-10 error-page rule and
+held as the jar-crash numeric baseline); the 3 seed `{{salt}}` rows (class bixogo-47, roxosu-00;
+unknown lubicu-73) conformant and pinned; activity bozido-07's salt slot equals the jar (row blocked on
+wbs+gantt), gantt duxuce-04 blocked on a gantt engine; **0 conformant losses** in any of 28 engines vs
+b0 (`measurements/final/README.md`). Authored root added: 30 fixtures with jar oracles, 25 at 0.
+
+**Tasks vs planned.** 0: T0a, T0b. 1: T1a–T1c. 2: T2a–T2e as planned + **T2f** (klimt gaps, stop 10 →
+maintainer-approved, row 14) + **T2g** (UPixel + `dimToUse`, stop 10 → approved, row 24). 3: T3a–T3c.
+4: T4a. 5 (written at the b4 close): **T5a** chrome margin + scale, **T5b** `CommandCreoleSpace`,
+**T5c** `ColorMapper` seam, **T5-cov** authored fixtures — all four approved (rows 28, 35, 36). Three
+tasks halted once on a write-set my spec under-estimated and resumed with the extension journaled
+(T5b row 37, T5c row 41 — two phases around T5-cov's parallel ownership). Two stop-10 halts (rows 13,
+21) became T2f/T2g. The b4 survey chain was cut at 8/28 by a foreign session's load (row 40); b5's ran
+with the gate at 40 (row 44).
+
+**Decisions flagged for review.** D4 reach widened beyond "klimt statics": the `ColorMapper` seam
+changes `Fore`/`Back`/`UDriver` and every SVG driver (additive; `getColorMapper?()` optional,
+IDENTITY when absent); `RenderFragment.exportMargin` replaces `TITLED_DIAGRAM_MARGIN` for every
+`TitledDiagram` producer (mindmap now sets `same(10)` explicitly); `{kind:'space'}` joined the creole
+atom union with seven consumers handling it. Brief corrections: `@startuml` + `salt` never reaches
+the salt factory (`DiagramType.java:198-200`); popup order is jar-nondeterministic (one `jar-flake`
+row); bare `<space>` does not match; `AtomSpace` height is 1.
+
+**Gates at exit.** vitest 1272/1272 files, 28173 tests, 0 failed; typecheck/lint/build exit 0;
+catalog drift 0; routing agree 5790 / misroute 818 / jar-error 86 (6694); refusal rendering 6462.
+
+**Follow-ons** (owners in `planning/next-missions.md`, top section): class-member `<space:N>`
+advance; chrome + painted root background (salt/mindmap); activity background never colour-mapped;
+`PSystemErrorUtils#checkBasicError`; ColorMapper seam residuals (dark-partner override, sprite tint
+IDENTITY, hex post-process alpha); wbs/gantt engines. Merged into main as a merge commit; **not pushed**.
