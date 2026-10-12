@@ -382,6 +382,16 @@ export interface DescriptionDiagramAST {
    */
   kermor?: true;
   /**
+   * `!pragma layout elk` (cdd8 T3b) -- `CommandPragma.java:128-129` (inside
+   * `!TeaVM.isTeaVM()`, case-insensitive NAME/VALUE) calls
+   * `system.setUseElk(true)`, which `CucaDiagram.java:478-479` reads first to
+   * swap in `CucaDiagramFileMakerElk`. The description diagram is a
+   * `CucaDiagram`, so it takes the same maker as class. `descriptionPlugin
+   * .requiresElk` reports it; `description-elk-adapter.ts` routes the layout.
+   * (`!pragma layout smetana` stays unmodelled here, see command-table-directives.ts.)
+   */
+  layoutEngine?: 'elk';
+  /**
    * `scale N` / `scale N/M` / `scale WxH` / `scale N width|height` /
    * `scale max N width|height` / `scale max WxH` (mission G1 I-scale) —
    * `CommandScale*` (6 forms, `command/CommonCommands.java

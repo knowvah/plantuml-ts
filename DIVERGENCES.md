@@ -96,65 +96,38 @@ baseline is now component 253/262, usecase 84/90, class 708/708, object
 **Category:** limitation (upstream's alternate engines are redundant copies of
 the one we implement).
 
-**See also:** `!pragma layout elk` — **not supported**, below. It is not a
-graphviz copy and is not covered by this entry.
+**See also:** `!pragma layout elk`, below — supported through `ElkBackend`
+since 2026-10-11 (cdd8). It is not a graphviz copy and is not covered by this
+entry.
 
-**Ledgered rows (cdd7 D8, 2026-09-30):** four unknown-tree fixtures were
-captured *with* the pragma (they predate the G0 re-capture) and can never
-match the jar numerically; their edge structure was made SmetanaEdge-shaped
-in cdd6 T3c (`c5426277d`). They are signed in `oracle/accepted-divergences.json`
-as `svg-unknown/fakone-16-boro774`, `svg-unknown/japode-92-famo984`,
-`svg-unknown/tikiti-02-bagu049`, `svg-unknown/xagomi-49-caki729`. Two more
-carry the same ruling one level down: `svg-unknown/gubeca-19-lemu434` and
+**Ledgered rows (cdd7 D8, 2026-09-30; updated cdd8 T0b, 2026-10-11):** five
+unknown-tree fixtures had been captured *with* the pragma (before the G0
+re-capture), so the jar never shelled out to graphviz. cdd8 T0b re-captured
+them with the pragma stripped (`scripts/capture-oracle-cache.ts` now applies
+`stripLayoutPragma`): `vakovo-25-licu237`, `fakone-16-boro774`,
+`japode-92-famo984` and `tikiti-02-bagu049` are conformant and pinned, and
+`xagomi-49-caki729` became conformant once the class svek hexagon was ported
+(cdd8 T1e); their acceptances are retired. Two entries still carry the ruling
+one level down: `svg-unknown/gubeca-19-lemu434` and
 `svg-unknown/jixibu-01-xave465` embed a `{{yaml}}` diagram whose 1 px
 `<image>` size delta is the nested JsonDiagram's Smetana geometry (cdd6
-journal row 73). `svg-unknown/kokofa-47-deni140` is signed alongside them
-under the upstream-crash identity class (duplicate JSON name: the jar prints a
-JVM stack trace, this port its `JSON already exists` page — same class as
-rubebe, cdd4 D6). None of these entries changes a bar: the survey and census
-keep printing the rows' real verdicts.
+journal row 73). Neither entry changes a bar: the survey and census keep
+printing the rows' real verdicts.
 
-### `!pragma layout elk` — not supported
+### ~~`!pragma layout elk` — not supported~~ — RETIRED (cdd8, 2026-10-11)
 
-**Upstream:** `!pragma layout elk` lays the diagram out with the Eclipse Layout
-Kernel — a genuinely different algorithm (Sugiyama-style), not a graphviz
-reimplementation.
-
-**This port:** **unsupported.** Unlike `smetana` and `vizjs` (which are graphviz
-under other names — see above), ELK cannot be satisfied by routing to
-`@knowvah/dot-engine`: it would produce a different layout. Diagrams carrying
-this pragma lay out with `@knowvah/dot-engine`, which will **not** match
-upstream. The ~8 corpus fixtures using it are ledgered and excluded from the
-conformance bars. The seven class-corpus fixtures are the `entries` of
-`oracle/accepted-divergences.json` (accepted 2026-09-21, one exact `svg-class/<slug>`
-id each; every one carries the pragma in `in.puml` and has no `svek-N.dot` dump in
-`test-results/dot-cache/class/`, so DOT parity has no oracle either).
-
-**Why (ruling, extending "one layout engine" of 2026-08-09):** this port has
-**one** layout engine, `@knowvah/dot-engine`, and supports no alternative
-routing engine. That ruling was originally written for Smetana — where upstream
-calls Smetana we call dot-engine and accept the geometry delta — and it governs
-ELK for the same reason: a second engine with a genuinely different algorithm
-is precisely what the single-engine rule exists to prevent. This is an
-architectural decision, not a cost/benefit deferral, so it does not turn on the
-fixture count and is **not re-argued per case**.
-
-One practical consequence, worth recording because it would bite anyone who
-tried anyway: `elkjs`'s sole entry point is `layout(): Promise<…>`, while this
-port's public `renderSync` contract and its entire SVG-conformance harness are
-synchronous. ELK diagrams could only work through the async `render()` path and
-would remain untestable by the harness — so even an integration would not move
-the conformance bar. Bundle size would additionally force it to be an optional
-peer dependency rather than a hard one.
-
-**Superseded rationale, recorded so it is not reintroduced:** this entry
-previously listed `elkjs`'s EPL-2.0 license as a reason, describing it as "the
-first non-permissive dependency in a tree that is otherwise MIT." That premise
-does not hold — `@knowvah/dot-engine`, this port's own layout engine, is itself
-EPL-2.0 — and licensing was never the operative reason. The single-engine
-ruling above is, and it stands on its own.
-
-**Category:** limitation (one engine, by choice).
+ELK is supported through the swappable `ElkBackend` (`src/core/elk/`), which
+mirrors upstream's own `net/sourceforge/plantuml/elk/proxy/` layer, and the
+cuca-level maker is a 1:1 port of `CucaDiagramFileMakerElk`, `MyElkDrawing`,
+`MyElkCluster` and `MyElkEdge`. The default backend is `elkjs@0.12.0`, the
+same ELK 0.12.0 the jar bundles, laid out synchronously through its worker
+dispatcher, so the jar's ELK geometry is a target like graphviz's.
+`renderSync` needs `options.elk` (`await loadElk()`, exported) and throws
+without it; `render()` lazy-loads elkjs only for a diagram carrying the
+pragma. ELK is a different algorithm with a different drawing path (straight
+`ULine` sections, not splines), so it is ported rather than deferred to
+dot-engine. License note: elkjs is EPL-2.0 OR GPL-3.0-or-later and stays an
+external runtime dependency, as dot-engine (EPL-2.0) does.
 
 
 ### External `!import` / `!include` deferred (scope) — UPDATED, see below
@@ -201,21 +174,21 @@ atom in the text flow, positioned and sized like the jar's) is conformant;
 the image bytes and exact glyph metrics never will be, because the two
 typesetting engines rasterize differently.
 
-**Correction, 2026-09-02 — the corpus contains no JLaTeXMath output to
-diverge from.** Decoding the base64 of the jar's own `<image>` payloads shows
-every latex/math oracle in this corpus — all 8, across sequence, state and
-component — is `ScientificEquationSafe#getRollback()`
-(`GraphicStrings.createBlackOnWhiteMonospaced(formula)`,
-`ScientificEquationSafe.java:92-124`): the RAW source drawn in monospace 14pt.
-`sequence/mefeke-43-xotu192`'s image is literally
-`<text font-family="monospace" textLength="111.475">[[a,b],[c,d]]((n),(k))</text>`.
-The oracle-generation host had no JLaTeXMath on its classpath. The conclusion
-above stands, but the comparison it names does not exist here: these oracles
-cannot validate typesetting or its metrics at all, and the only meaningful
-target on a latex-bearing fixture is that the `<image>` is present and
-correctly ordered in the flow. Regenerating the corpus on a host WITH
-JLaTeXMath would change these oracles. Full evidence:
-`plans/sequence-creole/findings/latex-oracles-are-rollbacks.md`.
+**Correction, 2026-10-11 (cdd8 T1d) — the oracles are JLaTeXMath now.** The
+2026-09-02 finding that every latex oracle was a monospace rollback
+(`ScientificEquationSafe#getRollback()`) predates `scripts/oracle-render.sh`
+putting Batik on the classpath. Decoding all 537 latex/math `<image>`
+payloads across the 40 fixtures that carry `<latex>`/`<math>`: **519 are
+JLaTeXMath (Batik) SVG and 18 are rollbacks** (cunotu 1, kebadi 1, marese 7,
+pecafo 3, roxita 1, rozesu 3, vocalo 1, xanuke 1). **Sizing rule (cdd8 D6):**
+the image is sized by JLaTeXMath's TeXIcon rule — `TeXIconBuilder.java:64-70`
+(`STYLE_DISPLAY`, size 20, insets 1, widened by `TeXIcon.java:141-157`) and
+`TeXIcon.java:195,210` — over a box built with JLaTeXMath 1.0.7's rules from
+KaTeX's parse tree and Computer Modern metrics (`src/core/latex-metrics/`);
+every `<latex>` formula in the corpus sizes exactly. **Signed D11.3 residues:
+none.** The library-forced candidates (KaTeX has no text kern pairs and
+collapses text-mode spaces, e.g. `\text{mod}` −1 px) occur in no fixture that
+renders today.
 
 **Category:** permanent, maintainer-approved (2026-07-15: "100% right on
 the latex decision").

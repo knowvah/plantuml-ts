@@ -1,5 +1,4 @@
 @startuml
-!pragma layout smetana
 hexagon h [
 more
 and

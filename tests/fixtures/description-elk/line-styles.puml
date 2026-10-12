@@ -1,0 +1,7 @@
+@startuml
+!pragma layout elk
+rectangle A
+rectangle B
+A -[#orange,dashed]-> B
+A -[#blue,dotted,thickness=7]-> B : "Te st"
+@enduml

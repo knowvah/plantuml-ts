@@ -9,13 +9,13 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1465 modules · 5559 exported names.
+1517 modules · 5789 exported names.
 
 ## `src/`
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `index.ts` | `RenderOptions`, `assembleSvg`, `stdlibStore`, `withStdlib`, `BundleData`, `StdlibStore`, `stdlibRegistry`, `StdlibChunkLoadError`, `StdlibRegistry`, `prepareIncludeStore`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `StdlibNotBundledError`, `IncludeWarmupOptions`, `SecurityProfile`, `remoteStdlib`, `StdlibResourceFetchError`, `StdlibRemoteManifest`, `RemoteBundle`, `spriteSplitStdlib`, `SpriteNotBundledError`, `SpriteSplitManifest`, `combineAssetStores`, `AssetPayload`, `AssetStore`, `renderPagesSync`, `renderSync`, `render`, `renderPages`, `renderAll` |  |
+| `index.ts` | `RenderOptions`, `assembleSvg`, `loadElk`, `ElkBackend`, `stdlibStore`, `withStdlib`, `BundleData`, `StdlibStore`, `stdlibRegistry`, `StdlibChunkLoadError`, `StdlibRegistry`, `prepareIncludeStore`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `StdlibNotBundledError`, `IncludeWarmupOptions`, `SecurityProfile`, `remoteStdlib`, `StdlibResourceFetchError`, `StdlibRemoteManifest`, `RemoteBundle`, `spriteSplitStdlib`, `SpriteNotBundledError`, `SpriteSplitManifest`, `combineAssetStores`, `AssetPayload`, `AssetStore`, `renderPagesSync`, `renderSync`, `render`, `renderPages`, `renderAll` |  |
 
 ## `src/core/`
 
@@ -68,6 +68,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `internal-sprite-store.ts` | `INTERNAL_SPRITE_ASSET_PREFIX`, `internalSpriteAssetKey`, `InternalSpriteStore`, `internalSpriteStoreFrom`, `matchJarSpriteLine` | `SpriteImage.fromInternal` (java `klimt/sprite/SpriteImage.java:100-128`) — the jar-internal `/sprites/**` bundle, ported onto ADR-2's synchronous asset channel (`plans/s1l-tail-fix/decisions.md`). |
 | `java-hash-set.ts` | `javaDoubleHashCode`, `javaHashSetOrder` | java-hash-set.ts — the iteration order of a `java.util.HashSet` built by successive `add` calls, for code upstream iterates straight out of a `HashSet` (e.g. |
 | `java-whitespace.ts` | `isJavaWhitespaceAt` | `Character.isWhitespace(char)`, enumerated. |
+| `latex-metrics.ts` | `TeXIconSize`, `texIconDimension`, `measureTeXIcon` | The size of a `<latex>` image, by the rule upstream sizes it with. |
 | `latex.ts` | `measureNodeLabel`, `renderNodeLabel`, `LabelSpan`, `parseLatexLabel`, `measureLatex`, `renderLatexMathML`, `renderLatexAsImage` | LaTeX label parsing, sizing, and rendering utilities. |
 | `link-style-regex.ts` | `STYLE_KEY1`, `STYLE_KEY2`, `LINE_STYLE`, `LINE_STYLE_MULTIPLES` | The link line-style grammar shared by every engine whose arrows take a `[#red,dashed]` style/colour bracket. |
 | `magma.ts` | `computeBranch`, `MagmaGroupInput`, `buildMagmaEdges` | "Magma" standalone chaining — the shared cucadiagram/svek layout feature that arranges link-less ("standalone") leaves into a square grid of INVISIBLE edges so graphviz packs them compactly. |
@@ -81,7 +82,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `openiconic-glyphs-data.ts` | `RawGlyph`, `RAW_GLYPHS` | `RAW_GLYPHS` -- the OpenIconic glyph data table, split out of `openiconic-glyphs.ts` purely to keep that file under this project's 500-line cap (F1-c, S1L tail-fix G11; mirrors the existing `svg.ts`->`svg-markers.ts` / `style-map-theme.ts`- |
 | `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `parsedOpsFor`, `openIconicFactor`, `openIconicDims`, `openIconicStartingAltitude`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
 | `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg`, `noGradient` | Paint — the color/gradient value model for the rendering layer. |
-| `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
+| `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals`, `parseRefusalOf` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
 | `preprocessor-collector.ts` | `StyleAndSkinparamCollector` | preprocessor-collector.ts -- the `<style>` / `skinparam` / `skin` line collector `preprocessor.ts#resultOf` runs over the interpreter's finished result list. |
 | `preprocessor.ts` | `SkinDirective`, `PreprocessorResult`, `DeclarationOrder`, `PreprocessOptions`, `preprocess`, `PreprocessorFailure`, `PreprocessOutcome`, `preprocessOrError`, `preprocessLinesOrError` | Preprocessor -- a thin wrapper over the TIM interpreter (`src/core/tim/`). |
 | `render-options.ts` | `RenderOptions`, `getDefaultMeasurer`, `resolveMeasurer` | `RenderOptions` and measurer resolution — extracted from `src/index.ts` (mission A5 / T4). |
@@ -356,6 +357,76 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `USymbolStack.ts` | `USymbolStack` |  |
 | `USymbolStorage.ts` | `drawStorage`, `getMargin`, `USymbolStorage` |  |
 | `USymbolUsecase.ts` | `USymbolUsecase` |  |
+
+## `src/core/elk/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `CucaDiagramFileMakerElk.ts` | `CENTER_LABEL_TEXT`, `TAIL_LABEL_TEXT`, `HEAD_LABEL_TEXT`, `ElkMakerMaps`, `ElkMakerResult`, `MyElkDrawingFactory`, `getPosition`, `CucaDiagramFileMakerElk`, `makeElkLayout` | The ELK maker: builds the ELK graph of a cuca diagram, lays it out through an {@link ElkBackend}, and returns what upstream hands to `new MyElkDrawing(...)` (cdd8 D3, D13). |
+| `elk-backend.ts` | `ElkBackend`, `LayoutServices`, `ElkBackendError` | The ELK seam (cdd8 D2): one interface that a layout backend implements and the ELK maker (`CucaDiagramFileMakerElk` port) calls. |
+| `elk-object.ts` | `ELK_CORE_OPTIONS_PACKAGE`, `ELK_PROXY_OPTIONS_PACKAGE`, `ELK_OPTION_TYPE`, `ElkOptionType`, `IProperty`, `ElkEnumObject`, `ElkPaddingObject`, `ElkProxyEnumSetObject`, `ElkTrueObject`, `ElkPropertyValue`, `elkEnum`, `elkProperty` | The objects upstream's ELK proxy layer hands to ELK itself, named backend-neutrally. |
+| `ElkDiagramAdapter.ts` | `ElkClusterHeader`, `ElkClusterStyle`, `ElkArrowStyle`, `ElkColors`, `ElkDiagramAdapter` | The engine-supplied diagram the ELK maker reads (cdd8 D13). |
+| `elkjs-backend.ts` | `ELKJS_DISPATCHER_MISSING`, `createElkjsBackend` | `ElkBackend` over elkjs 0.12.0 (cdd8 D2, backend 1), the same ELK release as the jar's (`org.eclipse.elk.core` pom.properties `version=0.12.0`). |
+| `elkjs-graph.ts` | `ElkjsProperty`, `ElkjsLabel`, `ElkjsBendPoint`, `ElkjsPoint`, `ElkjsEdgeSection`, `ElkjsNode`, `ElkjsEdge`, `findBestEdgeContainment` | The elkjs backend's in-memory ELK graph: plain objects implementing the proxy interfaces, holding exactly the state an `org.eclipse.elk.graph` model would (dimensions, location, labels, children, contained edges, properties). |
+| `elkjs-json.ts` | `ElkJsonLabel`, `ElkJsonEdge`, `ElkJsonNode`, `ElkJsonGraph`, `toElkJson`, `applyElkJson` | The elkjs backend's graph <-> ELK JSON conversion. |
+| `elkjs-options.ts` | `encodeOptionValue` | How an ELK property value is written into an elkjs `layoutOptions` entry: the string ELK's `LayoutOptionData#parseValue` turns back into the value (elkjs 0.12.0 `elk-worker.js:67549-67600`; `JsonImporter#setOption`, `:77463-77478`). |
+| `layout-services.ts` | `ELK_RENDER_SYNC_UNSUPPORTED`, `layoutServicesSync`, `layoutServices` | Which `LayoutServices` a render hands to `SyncPlugin.layoutSync` (cdd8 D2b). |
+| `load-elk.ts` | `ElkBackend`, `loadElk` | The elkjs backend, loaded on demand (cdd8 D1). |
+| `MyElkCluster.ts` | `ElkClusterDiagram`, `MyElkCluster` | `MyElkCluster` port (cdd8 T2c): draws one package/cluster at the position ELK gave its node, and answers the `MagneticBorder` a link attached to the cluster reads. |
+| `MyElkDrawing.ts` | `translatedNodeImage`, `MyElkDrawing`, `newMyElkDrawing` | The ELK drawing: "The Drawing class does the real drawing" — every cluster, then every node image at its ELK corner, then every edge (cdd8 D13). |
+| `MyElkEdge.ts` | `MyElkNodeImage`, `MyElkEdgeCluster`, `MyElkEdgeArgs`, `getRoleLabelPosition`, `MyElkEdge` | One ELK edge, drawn: straight `ULine` legs from the section start through each bend point to the section end, the two extremity decorations, then the centre, tail and head labels and the roles beside them (cdd8 D13). |
+
+## `src/core/elk/proxy/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ElkObjectProxy.ts` | `ElkObjectProxy`, `ElkProxyEnum` |  |
+
+## `src/core/elk/proxy/core/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `RecursiveGraphLayoutEngine.ts` | `ElkLayoutRunner`, `RecursiveGraphLayoutEngine` |  |
+
+## `src/core/elk/proxy/core/math/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ElkPadding.ts` | `ElkPadding` |  |
+
+## `src/core/elk/proxy/core/options/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `CoreOptions.ts` | `CoreOptions` |  |
+| `Direction.ts` | `Direction` |  |
+| `EdgeLabelPlacement.ts` | `EdgeLabelPlacement` |  |
+| `HierarchyHandling.ts` | `HierarchyHandling` |  |
+| `NodeLabelPlacement.ts` | `NodeLabelPlacement` |  |
+| `SizeConstraint.ts` | `SizeConstraint` |  |
+
+## `src/core/elk/proxy/core/util/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `NullElkProgressMonitor.ts` | `NullElkProgressMonitor` | Proxy for `org.eclipse.elk.core.util.NullElkProgressMonitor`: a monitor that records nothing. |
+
+## `src/core/elk/proxy/graph/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ElkBendPoint.ts` | `ElkBendPoint` | Proxy for `org.eclipse.elk.graph.ElkBendPoint`. |
+| `ElkEdge.ts` | `ElkEdge` |  |
+| `ElkEdgeSection.ts` | `ElkEdgeSection` |  |
+| `ElkLabel.ts` | `ElkLabel` |  |
+| `ElkNode.ts` | `ElkNode` |  |
+| `ElkWithProperty.ts` | `ElkPropertyArgument`, `ElkWithProperty`, `trueValueOf` |  |
+
+## `src/core/elk/proxy/graph/util/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ElkGraphUtil.ts` | `ElkGraphUtil` |  |
 
 ## `src/core/error/`
 
@@ -649,6 +720,20 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `SvgNanoParser.ts` | `SvgNanoParser` |  |
 | `SvgPath.ts` | `parseSvgPath` |  |
 
+## `src/core/latex-metrics/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `atoms.ts` | `Limits`, `FontGlyph`, `CharAtom`, `RowAtom`, `SpaceAtom`, `ScriptsAtom`, `BigOperatorAtom`, `FractionAtom`, `NthRootAtom`, `Delimiter`, `FencedAtom`, `TypedAtom`, `WrapAtom`, `PhantomAtom`, `BreakMarkAtom`, `Atom`, `leftType`, `rightType`, `limitsOf`, `setOrdinary`, `isBigOperator`, `BuildBox` | The atom model JLaTeXMath typesets, reduced to what sizing needs, and the type queries glue and scripts read from it. |
+| `box.ts` | `Box`, `ALIGN_LEFT`, `ALIGN_RIGHT`, `ALIGN_CENTER`, `Align`, `strutBox`, `charBox`, `addItalicCorrectionToWidth`, `HBox`, `hbox`, `hboxAligned`, `VBox` | The box algebra JLaTeXMath sizes a formula with: `Box`, `CharBox`, `StrutBox`, `HorizontalBox` and `VerticalBox` (JLaTeXMath 1.0.7, the version pinned at `~/git/plantuml/gradle/libs.versions.toml:12`). |
+| `convert.ts` | `Context`, `delimiter`, `Converter`, `FormulaBuilder`, `AtomConverter`, `asRow`, `FAMILY_TYPES`, `STYLES`, `BOLD_FONTS`, `bigOperatorSymbol`, `leafAtom`, `opLimits`, `text` | KaTeX parse tree → JLaTeXMath atoms: what `TeXParser`/`PredefMacros` would have built for the same source (JLaTeXMath 1.0.7, `~/git/plantuml/gradle/libs.versions.toml:12`), with every glyph's metrics taken from KaTeX in the font the source |
+| `fraction.ts` | `fractionBox`, `delimiterBox`, `fencedBox`, `nthRootBox` | Vertical constructions: `FractionAtom`, `NthRoot`, `FencedAtom` and the `DelimiterFactory` they size delimiters with (JLaTeXMath 1.0.7, `~/git/plantuml/gradle/libs.versions.toml:12`). |
+| `katex-glyphs.ts` | `Glyph`, `KNode`, `KATEX_MACROS`, `toKNode`, `nodeField`, `nodeList`, `stringField`, `parseLatex`, `probeGlyph` | Glyph metrics and parse trees from KaTeX, the library this port typesets with instead of JLaTeXMath (DIVERGENCES.md, "LaTeX rendering engine"). |
+| `nodes.ts` | `convertNode`, `formulaRoot` | One KaTeX parse node → the JLaTeXMath atom its macro builds (`PredefMacros`, `PredefinedTeXFormulas`, `TeXParser`; JLaTeXMath 1.0.7, `~/git/plantuml/gradle/libs.versions.toml:12`). |
+| `row.ts` | `PREC`, `scaledCharBox`, `bigOperatorSymbolBox`, `charAtomBox`, `glueBox`, `spaceBox`, `rowBox` | Horizontal typesetting: `RowAtom.createBox`, the glyph boxes of `CharAtom` and `SymbolAtom`, `SpaceAtom`, and the inter-atom glue they get (JLaTeXMath 1.0.7, `~/git/plantuml/gradle/libs.versions.toml:12`). |
+| `scripts.ts` | `scriptsBox`, `bigOperatorBox` | Sub- and superscripts and big-operator limits: `ScriptsAtom.createBox` and `BigOperatorAtom.createBox` (JLaTeXMath 1.0.7, `~/git/plantuml/gradle/libs.versions.toml:12`). |
+| `tex-font.ts` | `STYLE_DISPLAY`, `STYLE_TEXT`, `STYLE_SCRIPT`, `STYLE_SCRIPT_SCRIPT`, `crampStyle`, `denomStyle`, `numStyle`, `subStyle`, `supStyle`, `ROOT_STYLE`, `sizeFactor`, `FontParameter`, `param`, `XHEIGHT_CM`, `XHEIGHT_CMBX`, `xHeight`, `interwordSpace`, `TEX_ICON_SIZE`, `unitFactor`, `muUnit`, `TYPE_ORDINARY`, `TYPE_BIG_OPERATOR`, `TYPE_BINARY_OPERATOR`, `TYPE_RELATION`, `TYPE_OPENING`, `TYPE_CLOSING`, `TYPE_PUNCTUATION`, `TYPE_INNER`, `glueWidth` | JLaTeXMath's font parameters, styles and inter-atom glue: the numbers `DefaultTeXFont`, `TeXEnvironment`, `Glue` and `SpaceAtom` hand to the box builders. |
+
 ## `src/core/math/`
 
 | Module | Exports | Purpose |
@@ -783,8 +868,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ExtremityCrowfoot.ts` | `ExtremityCrowfoot`, `ExtremityFactoryCrowfoot` |  |
 | `ExtremityDiamond.ts` | `ExtremityDiamond`, `ExtremityFactoryDiamond` |  |
 | `ExtremityDoubleLine.ts` | `ExtremityDoubleLine`, `ExtremityFactoryDoubleLine` |  |
+| `ExtremityExtends.ts` | `ExtremityExtends` |  |
 | `ExtremityExtendsLike.ts` | `ExtremityExtendsLike`, `ExtremityExtendsLikeRedefines`, `ExtremityExtendsLikeDefinedBy`, `ExtremityFactoryExtendsLike` |  |
 | `ExtremityFactory.ts` | `ExtremityFactory` |  |
+| `ExtremityFactoryExtends.ts` | `ExtremityFactoryExtends` |  |
 | `ExtremityHalfArrow.ts` | `ExtremityHalfArrow`, `ExtremityFactoryHalfArrow` |  |
 | `ExtremityLineCrowfoot.ts` | `ExtremityLineCrowfoot`, `ExtremityFactoryLineCrowfoot` |  |
 | `ExtremityNotNavigable.ts` | `ExtremityNotNavigable`, `ExtremityFactoryNotNavigable` |  |
@@ -1356,6 +1443,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-edge-note-box.ts` | `labelOperandCenter`, `computeEdgeNoteBox` | cdd-T6 (A2a/M5): the `note on link` operand of a class link's merged label block. |
 | `class-edge-role-label-anchor.ts` | `roleLabelAnchors`, `attachPortLabels` | cdd-T17 (M8): the ADDITIVE role-label mirror geometry, plus `attachPortLabels` itself -- split out of `class-edge-label-anchor.ts` (500-line hook cap; the role mirror pushed that file over) purely to keep both files under the cap. |
 | `class-edge-visibility.ts` | `VisibilityIconGeo`, `EdgeLabelVisibility`, `stripEdgeLabelVisibility`, `VisibilityBlockAnchor`, `visibilityBlockAnchor` | cdd-T6 (A2a/M2): the visibility-modifier block a link LABEL carries when its first line starts with `-`/`#`/`+`/`~`/`*`. |
+| `class-elk-adapter.ts` | `CLASS_ELK_ROOT_GROUP`, `ClassElkModel`, `ClassElkLeafDrawer`, `createClassElkAdapter`, `withClassElkLeafDrawer` | The class engine's {@link ElkDiagramAdapter} (cdd8 T3a, D13): upstream's `CucaDiagram` + `Entity` + `Link` + `printEntityInternal`, as `CucaDiagramFileMakerElk`/`MyElkDrawing`/`MyElkCluster`/`MyElkEdge` read them, over the class engine's ow |
+| `class-elk-layout.ts` | `layoutClassElk` | The class layout under `!pragma layout elk` (cdd8 T3a, D3/D13): `CucaDiagram.java:478-479` picks `CucaDiagramFileMakerElk` for such a diagram, and its `getTextBlock` (`CucaDiagramFileMakerElk.java:477-499`) lays the entities out with ELK an |
+| `class-elk-text.ts` | `classElkLinkLabel`, `classElkEndLabel`, `classElkClusterTitle` | The klimt text blocks the class ELK path hands `MyElkDrawing`/`MyElkEdge`/ `MyElkCluster` (cdd8 T3a): the link label, the quantifier and role labels, and the cluster title. |
 | `class-embedded-block.ts` | `EmbeddedElementBlock`, `scanEmbeddedElementBlock` | `PSystemCommandFactory#addOneSingleLineManageEmbedded2` (`:288-307`) for `CommandCreateElementMultilines`' TYPE0/TYPE1 body (`class-multiline- element.ts`'s `continueMultilineElement`): while an open multi-line element block is accumulating |
 | `class-empty-package.ts` | `EmptyPackageStereoLine`, `EmptyPackageLeafDim`, `measureEmptyPackageLeafDim`, `EmptyPackageLeafExtras`, `renderEmptyPackageIcon` | class-empty-package.ts — `EntityImageEmptyPackage`: a collapsed-empty `package`/`namespace` leaf (G2 N33, `class-magma.ts#isCollapsedGroup`). |
 | `class-ensure-classifier.ts` | `ClassifierRef`, `resolveClassifierRef`, `registerPendingLeaf`, `materializeClassifier`, `ensureClassifier` | `ensureClassifier` — the class parser's single classifier-creation chokepoint — split out of `parser.ts` (which sat exactly at the 500-line module cap) and re-exported from it, so every existing `import { ensureClassifier } from './parser.j |
@@ -1371,9 +1461,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-geo-json-types.ts` | `JsonBodyItem` | `JsonBodyItem` -- split out of `class-geo-types.ts` (500-line hook cap, cdd-T6). |
 | `class-geo-namespace-types.ts` | `NamespaceGeo` | `NamespaceGeo` -- split out of `class-geo-types.ts` (500-line hook cap, cdd-T6). |
 | `class-geo-row-types.ts` | `ClassifierRowGeo` | cdd3-T7: `ClassifierGeo['rows'][number]`'s element type, split out of `class-geo-types.ts` when the new `bodyInkHeight` field pushed that file past the project's 500-line hook cap -- a pure move (every consumer keys off `ClassifierGeo['rows |
-| `class-geo-types.ts` | `ClassifierRowGeo`, `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves`, `ClassLeafGeo`, `EdgeConstraintGeo`, `EdgeNoteBoxGeo`, `EdgeNoteLine`, `QuantifierLineGeo`, `QuantifierLinesGeo`, `RoleLinesGeo`, `SametailGeo`, `VisibilityIconGeo`, `ClassifierGeo`, `EdgeGeo`, `NamespaceGeo`, `EdgeKalBoxes`, `KalBox`, `ClassGeometry`, `ClassPageBoundary`, `JsonBodyItem` | Public geometry types for the class-diagram layout engine. |
+| `class-geo-types.ts` | `ClassifierRowGeo`, `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves`, `ClassLeafGeo`, `EdgeConstraintGeo`, `EdgeNoteBoxGeo`, `EdgeNoteLine`, `QuantifierLineGeo`, `QuantifierLinesGeo`, `RoleLinesGeo`, `SametailGeo`, `VisibilityIconGeo`, `ClassifierGeo`, `EdgeGeo`, `NamespaceGeo`, `EdgeKalBoxes`, `KalBox`, `ClassGeometry`, `ClassPageBoundary`, `ClassElkGeometry`, `JsonBodyItem` | Public geometry types for the class-diagram layout engine. |
 | `class-header-line-stacking.ts` | `headerLineY`, `headerLineTops` | Vertical placement of a classifier NAME's physical lines -- split out of `class-stereotype-layout.ts#buildHeaderRows` (500-line cap) when cdd4-T12 replaced the flat `i * fontSize` step with upstream's per-stripe running sum. |
 | `class-header-visibility-geo.ts` | `HEADER_VISIBILITY_TOP_MARGIN`, `HeaderVisibilityBlock`, `headerVisibilityBlock`, `mergeNameWithVisibility`, `MergedNameGeo`, `attachHeaderVisibilityIcon` | cdd5-T4b (entity-visibility-icon-dropped): the class header's visibility icon block. |
+| `class-hexagon-leaf.ts` | `isHexagonLeaf`, `hexagonPolygonPoints`, `stampHexagonLeaves` | class-hexagon-leaf.ts -- a class-routed `hexagon` leaf's svek polygon (cdd8 T1e, `unknown/xagomi-49-caki729`). |
 | `class-hideshow-ast.ts` | `HideTarget`, `HideShowDirective`, `HideStereotypeDirective`, `RemoveRestoreDirective`, `HideShowPatternDirective`, `HideShowEntityDirective`, `HideShowKindDirective`, `HideShowVisibilityDirective` | Hide/show + remove/restore directive AST types, split out of `ast.ts` (line cap) -- re-exported from it so every `import { ... |
 | `class-hideshow-dispatch.ts` | `executeHideShow` | `hide`/`show` directive dispatch (rule 3 of class-commands.ts's COMMANDS table) — CommandHideShow2 / CommandHideShowByGender / CommandHideShowByVisibility upstream. |
 | `class-hidetext-shield.ts` | `hideTextShieldMarginsByEntity` | cdd-T22b: `SvekNode.java:220-267`'s `shield()`/`appendLabelHtml` -- reserves DOT-node margins around a `hideText` leaf's icon cell (jar: `EntityImageDescription#getShield`, `EntityImageDescription.java:239-262`) so graphviz ranks around the |
@@ -1478,7 +1569,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-visibility-icon.ts` | `VISIBILITY_ICON_SIZE`, `iconSizeOf`, `colorsFor`, `visibilityModifierName`, `renderVisibilityIcon`, `VisibilityIconAmbient`, `renderVisibilityIconAt`, `renderVisibilityUrlBackground`, `visibilityIconOriginY`, `visibilityIconOriginYFromTop`, `rowIconTopOriginY` | Member-row visibility icon shape/color (G2 N6). |
 | `index.ts` | `classPlugin` | Class diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout-ink-extent.ts` | `ClassInkOptions`, `ClassDocumentDims`, `computeClassBorderRectDims`, `computeClassRawInkDims`, `applyClassDocumentMargin`, `computeClassDocumentDims`, `InkShift`, `computeClassInkShift`, `assembleShiftedGeometry` | layout-ink-extent.ts — G2/N5: the `SvekResult`/`TextBlockExporter` document-dimension recipe (svek/SvekResult.java:126-133, core/TextBlockExporter.java:200-202,751-753), ported for CLASS's own pure-string layout (no klimt `UGraphic`, so `re |
-| `layout.ts` | `formatMemberText`, `ROW_TEXT_LEFT_MARGIN`, `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves`, `ClassifierGeo`, `EdgeGeo`, `NamespaceGeo`, `ClassGeometry`, `JsonBodyItem`, `ClassLeafGeo`, `layoutSinglePage`, `layoutMultiPage`, `classPageAst`, `classPageCount`, `sliceClassGeometryPage`, `layoutClass` | Class diagram layout engine. |
+| `layout.ts` | `formatMemberText`, `ROW_TEXT_LEFT_MARGIN`, `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves`, `ClassifierGeo`, `EdgeGeo`, `NamespaceGeo`, `ClassGeometry`, `JsonBodyItem`, `ClassLeafGeo`, `preMeasureClassifiers`, `layoutSinglePage`, `layoutMultiPage`, `classPageAst`, `classPageCount`, `sliceClassGeometryPage`, `layoutClass` | Class diagram layout engine. |
 | `note-freestanding.ts` | `findFreestandingNoteRelationshipIndices`, `findFreestandingNoteConnectors` | note-freestanding.ts — G2/N16 Kind B: a freestanding note (`note "text" as N1`, no host classifier/position) connected to a REAL classifier via a plain relationship line (`N1 .. |
 | `note-layout-groups.ts` | `OPALE_Y_SPACING`, `NoteGroup`, `groupNotes`, `buildNoteGraphParts` | Same-side/same-host note grouping + the seam nodes/edges that go into the svek dot graph. |
 | `note-layout-measure-list.ts` | `buildPlainRows`, `matchNumberedLine`, `buildNumberedListRows` | `buildPlainRows` + C-2's `#`-prefixed numbered-list row builder — split out of `note-layout-measure.ts` purely to keep that file under this project's 500-line cap (T26; mirrors that file's own `note-layout- measure-rows.ts` split precedent, |
@@ -1507,12 +1598,15 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-classifier-map-dividers.ts` | `mapColumnDividerEntries` | renderer-classifier-map-dividers.ts — `mapColumnDividerEntries`, split out of `renderer-classifier-box.ts` when cdd-T29 round 2's `scaleK` threading pushed that file back over the 500-line hook cap (pre- authorised split, same precedent as |
 | `renderer-classifier-row-font-color.ts` | `classifierCascadeFontColor` | `classifierCascadeFontColor` and its own cascade/tier helpers -- split out of `renderer-classifier-rows.ts` purely to keep that file under this project's 500-line cap (T26; mirrors that file's own pre-existing `renderer-classifier-header-sp |
 | `renderer-classifier-rows.ts` | `attributeFontSize`, `wrappedVisibilityIconOriginY`, `renderRow`, `renderRowText`, `renderRowAtoms` | Classifier-box row rendering: attribute font sizing, row + row-text emitters, member atom decoration, and row-atom layout. |
+| `renderer-document.ts` | `ClassDocument`, `ClassDocumentBody`, `beginClassDocument`, `finishClassDocument` | The class document's composition around its body: the scaled theme, the colour mapper, the document background and `<defs>` preamble, and the returned `RenderFragment`'s fields. |
 | `renderer-edge-extras.ts` | `renderEdgeVisibilityIcon`, `renderEdgeNoteBox`, `renderEdgeConstraint`, `renderEdgeCardinalityLabels`, `renderEdgeKalBoxes`, `EdgeDotPathStroke`, `renderEdgeDotPath` | cdd-T7: `renderer-edge.ts`'s overflow — visibility-modifier icon, note-on-link body, and constraint line+text. |
 | `renderer-edge-label.ts` | `arrowLabelTextAttrs`, `magicArrowPolygon`, `renderEdgeMainLabel`, `renderEdgeSingleLabel` | renderer-edge-label.ts — a relationship's plain text label, its magic- arrow glyph, and the shared arrow-label font resolution. |
 | `renderer-edge.ts` | `linkIdForSvg`, `uniqLinkId`, `RenderEdgeContext`, `renderEdge` | Class-diagram edge SVG rendering (path data, link-id escaping, renderEdge). |
+| `renderer-elk.ts` | `renderClassElk` | The class document body under `!pragma layout elk` (cdd8 T3a): the `MyElkDrawing` the maker returned (`CucaDiagramFileMakerElk.java:498`), drawn in place of the svek body inside the same document (`renderer-document.ts`). |
 | `renderer-empty-package-leaf.ts` | `renderEmptyPackageLeaf` | The collapsed-empty package leaf's draw -- moved out of `renderer.ts` (cdd3-T9, 500-line cap) when S-12 added its BACK colour carry. |
 | `renderer-entity-port.ts` | `EntityImagePortParams`, `EntityImagePort`, `isClassEntityPort`, `entityPortDisplay`, `entityPortDesc`, `buildEntityImagePort`, `renderClassEntityPort` | `EntityImagePort` -- the image class upstream instantiates for a class-engine `portin`/`portout` leaf (`LeafType.PORTIN`/`PORTOUT`, `GeneralImageBuilder.java:122-127`, checked BEFORE the `DESCRIPTION` branch), in place of the class box / `E |
 | `renderer-group.ts` | `leafPortion`, `wrapEntity`, `wrapCluster`, `WrapLinkInfo`, `wrapLink`, `renderGroupInheritanceNeighborhood` | renderer-group.ts — G2 N2 (mechanism 3): the per-element `<g class= "entity"\|"cluster"\|"link">` wrapper + `<!--...-->` comment every jar class-diagram fixture stamps around each drawn classifier/namespace/ edge (verified against `bedogi-86- |
+| `renderer-leaf.ts` | `ClassLeafRenderContext`, `ClassLeafSink`, `renderClassLeaf` | One class leaf's draw: `renderClass`'s leaf loop body (`renderer.ts`), moved here unchanged so the ELK drawing (cdd8 T3a, `renderer-elk.ts`) draws each node through the SAME code the svek path does — upstream's ELK maker reuses the very ent |
 | `renderer-list-number-atom.ts` | `renderListNumberAtom` | `renderListNumberAtom` -- the creole numbered-list header glyph (C-2, `klimt/creole/legacy/AtomTextUtils.java:145-159`'s `createListNumber`/ `ListNumberAtom`), split into its own file mirroring `renderer-bullet- atom.ts`'s identical "own fi |
 | `renderer-note-background.ts` | `resolveNoteBackground` | `resolveNoteBackground` -- a note's own fill-color cascade, split out of `renderer-note.ts` purely to keep that file under this project's 500-line cap (T26; mirrors that file's own `renderBulletAtom` split precedent, same reason). |
 | `renderer-note-connector.ts` | `renderNoteConnectorPath`, `noteIsConnectorSource`, `noteGmnName`, `NoteConnectorEndpoints`, `resolveNoteConnectorEndpoints`, `renderNoteConnectorLink` | cdd-T9b — a plain note's dashed connector to its host is upstream's OWN ordinary `Link`, not part of the note's own `EntityImageNote` styling (`command/note/CommandFactoryNoteOnEntity.java:342`: `new LinkType (LinkDecor.NONE, LinkDecor.NONE |
@@ -1535,6 +1629,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `annotation-line-trim.ts` | `trimLineForAnnotationMatch` | `matchAnnotationCommand`'s single-line matchers (`matchTitle` et al., `core/annotations/commands.ts`'s `ORDERED_MATCHERS`) read `lines[i]` verbatim, no internal trim — they require an already-trimmed line, like `state/parser.ts:147-149`'s ` |
 | `ast-stereotype-sprite.ts` | `StereotypeSpriteRef` | `StereotypeSpriteRef` -- moved out of `./ast.ts` (cdd3-T18, pure move, to keep that file under the 500-line cap); re-exported from there. |
 | `ast.ts` | `StereotypeSpriteRef`, `DescriptiveNode`, `DescriptiveLinkStyle`, `DescriptiveLink`, `DescriptionDiagramAST` | AST type definitions for PlantUML descriptive diagrams (component / use-case / deployment). |
+| `command-archimate.ts` | `tryArchimate` | `CommandArchimate.java`'s single-line leaf form, moved out of `parser.ts` (file cap) by cdd8-T1c when it gained the `<<$archimate/icon>>` rewrite. |
 | `command-table-containers.ts` | `CONTAINER_COMMANDS` | Bracket/paren shorthand, container-block, and generic keyword-dispatch commands for the descriptive diagram dispatch table (rules 10-15 of the original command-table.ts COMMANDS array): `[Name]` bracket shorthand, `(Name)` use-case shorthan |
 | `command-table-directives.ts` | `DIRECTIVE_COMMANDS` | Directive-style commands for the descriptive diagram dispatch table (rules 1-4 of the original command-table.ts COMMANDS array): comment lines, `newpage`, direction directives, `skinparam linetype`, `set separator`, `!pragma kermor`, `scale |
 | `command-table-helpers.ts` | `SHORTHAND_TRAILER`, `BRACKET_TRAILER`, `shorthandNode`, `resolveEndpointNamespace` | Shared helpers for the descriptive diagram dispatch table (command-table.ts and its command-group modules). |
@@ -1542,6 +1637,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `command-table-shorthand.ts` | `SHORTHAND_COMMANDS` | Bare shorthand declaration commands for the descriptive diagram dispatch table (rules 5-8b of the original command-table.ts COMMANDS array): business-actor `:Name:/`, actor `:Name:`, business-usecase `(Name)/`, interface `()Name`, and the b |
 | `command-table-types.ts` | `Command` | Shared `Command` shape for the descriptive diagram dispatch table. |
 | `command-table.ts` | `Command`, `COMMANDS` | Command dispatch table for the descriptive diagram parser (component / use-case / deployment). |
+| `description-elk-adapter.ts` | `ROOT_GROUP`, `DescriptionElkContext`, `DescriptionElkAdapter`, `layoutDescriptionElk`, `buildDescriptionElkContext` | `ElkDiagramAdapter` over the description engine (cdd8 T3b, D13). |
+| `description-elk-label.ts` | `nestedRenderer`, `labelSkinSimple`, `ElkDisplayStyle`, `elkDisplayBlock` | The creole `TextBlock` the ELK maker builds for a link's label, quantifier and role (`Display.getWithNewlines(...).create0(font, CENTER, skinParam, wrapWidth, CreoleMode.SIMPLE_LINE, null, null)`: `CucaDiagramFileMakerElk.java:213-215`, `:2 |
 | `element-embedded-block.ts` | `EmbeddedElementBlock`, `scanEmbeddedElementBlock` | `PSystemCommandFactory#addOneSingleLineManageEmbedded2` (`:288-307`) for `CommandCreateElementMultilines`' TYPE1 element body (`parser.ts`'s `continueElementBlock`): while an open element block is accumulating body lines, a line that OPENS |
 | `element-grammar-nosymbol.ts` | `RE_BARE_AS_DECORATED`, `BareAsDecorated`, `parseBareAsDecorated`, `RE_BARE_QUOTED_DECL`, `RE_BARE_DECORATED_DECL`, `RE_CODE_AS_QUOTED_DISPLAY`, `CodeAsQuotedDisplay`, `parseCodeAsQuotedDisplay` | `CommandCreateElementFull`'s declaration alternatives with the leading SYMBOL keyword OMITTED (`getRegexConcat:84`, `(?:(ALL_TYPES\|\(\))[%s]+)?` — the group is optional). |
 | `element-grammar.ts` | `BracketDeclaration`, `parseBracketDeclaration`, `removeMatching`, `removeMatchingLinks`, `effectiveRemovedIds`, `effectiveHiddenIds`, `visibleStereotypeLabels`, `nodeWithVisibleStereotype` | Element-declaration helpers split out of parser.ts to stay under 500 lines (CommandCreateElementFull.java, net.sourceforge.plantuml.descdiagram .command) — the bracket-shorthand declaration form and the id/tag-based `remove`/`hide`/`show` ( |
@@ -1551,11 +1648,11 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `layout-dot-tree.ts` | `PortClusterCtx`, `computePortRanksByCluster`, `buildDotNodes`, `buildDotClusters`, `buildDotEdges`, `buildGeoTree` | Description-diagram layout, phases 2-3: `DotInputGraph` node/cluster/edge construction (svek's `ClusterDotString`/`SvekNode` analogs) and the bottom-up geo-tree assembly that maps solved DOT positions back onto `DescriptionNodeGeo`. |
 | `layout-geo-post.ts` | `ResultEdge`, `EdgeMapping`, `buildEdgeGeos`, `computeTotalDimensions` | Geo post-processing for the description layout engine (phases 5–6): after the graphviz result is mapped to a raw geo tree, these turn it into final pixel geometry — edge-geo construction (spline clipping at container bboxes + label placemen |
 | `layout-helpers-shape-endpoint.ts` | `groupAnchorNodeId`, `resolveEndpoint`, `containerEndpointsInfo`, `symbolBaseShape`, `isInterfaceShielded`, `shapeForNode`, `isPortLabelWide`, `portTablePad`, `applyShieldEdgePorts` | Link endpoint resolution + DOT node shape resolution for the description diagram layout engine. |
-| `layout-helpers-types.ts` | `DescriptionNodeGeo`, `Bbox`, `EdgeContainerEndpoints`, `ResolvedEndpoint`, `DescriptionEdgeGeo`, `DescriptionGeometry`, `CONTAINER_PADDING`, `CONTAINER_TOP_PAD`, `EMPTY_CONTAINER_WIDTH`, `EMPTY_CONTAINER_HEIGHT`, `LAYOUT_MARGIN`, `LAYOUT_MARGIN_LEADING`, `GROUP_ANCHOR_SIZE` | Pure type/const declarations for the description diagram layout engine. |
+| `layout-helpers-types.ts` | `DescriptionElkDrawing`, `DescriptionNodeGeo`, `Bbox`, `EdgeContainerEndpoints`, `ResolvedEndpoint`, `DescriptionEdgeGeo`, `DescriptionGeometry`, `CONTAINER_PADDING`, `CONTAINER_TOP_PAD`, `EMPTY_CONTAINER_WIDTH`, `EMPTY_CONTAINER_HEIGHT`, `LAYOUT_MARGIN`, `LAYOUT_MARGIN_LEADING`, `GROUP_ANCHOR_SIZE` | Pure type/const declarations for the description diagram layout engine. |
 | `layout-helpers.ts` | `DescriptionNodeGeo`, `Bbox`, `EdgeContainerEndpoints`, `ResolvedEndpoint`, `DescriptionEdgeGeo`, `DescriptionGeometry`, `CONTAINER_PADDING`, `CONTAINER_TOP_PAD`, `EMPTY_CONTAINER_WIDTH`, `EMPTY_CONTAINER_HEIGHT`, `LAYOUT_MARGIN`, `LAYOUT_MARGIN_LEADING`, `GROUP_ANCHOR_SIZE`, `groupAnchorNodeId`, `resolveEndpoint`, `containerEndpointsInfo`, `symbolBaseShape`, `isInterfaceShielded`, `shapeForNode`, `isPortLabelWide`, `portTablePad`, `applyShieldEdgePorts`, `measureLeafNode`, `measureLeafShield`, `ACTOR_WIDTH`, `ACTOR_HEIGHT`, `USECASE_HEIGHT`, `PORT_SIZE`, `measureTitleLabel`, `isContainer`, `isClusterNode`, `computeContainerBbox`, `shiftGeo`, `insideBbox`, `buildNodeGeoIndex`, `degenerateSingleLeaf` | Pure, stateless helpers for the description diagram layout engine. |
 | `layout-ink-shift.ts` | `InkShift`, `BodyPlacement`, `BodyFraming`, `placeBody` | layout-ink-shift.ts — G1b/J1 (mechanism C): `SvekResult #calculateDimension`'s `moveDelta` shift (svek/SvekResult.java:125-136), replacing this port's former flat node-box document margin (`layout-geo-post.ts`'s pre-G1b `computeGlobalShift` |
 | `layout-types.ts` | `ContainerDesc`, `ClassifyCtx`, `EdgeDotBuildResult` | The layout engine's shared context/result TYPES, split out of `layout.ts` (this project's established "500-line splits" workaround — mechanical move only, no behavior and no upstream divergence). |
-| `layout.ts` | `isEffectiveCluster`, `DescriptionNodeGeo`, `DescriptionEdgeGeo`, `DescriptionGeometry`, `ClassifyCtx`, `ContainerDesc`, `EdgeDotBuildResult`, `layoutDescription`, `USymbol` | Unified layout engine for PlantUML descriptive diagrams (component / use-case / deployment). |
+| `layout.ts` | `isEffectiveCluster`, `DescriptionNodeGeo`, `DescriptionEdgeGeo`, `DescriptionGeometry`, `ClassifyCtx`, `ContainerDesc`, `EdgeDotBuildResult`, `createClassifyCtx`, `layoutDescription`, `USymbol` | Unified layout engine for PlantUML descriptive diagrams (component / use-case / deployment). |
 | `link-edge-attrs.ts` | `EdgeFontSpecs`, `computeGraphSpacing`, `buildLinkEdgeAttributes` | Link-derived DOT edge attributes + graph spacing for the description engine. |
 | `link-grammar-endpoints.ts` | `EndpointShape`, `classifyEndpointShape`, `EndpointPair` | Endpoint shape classification (`CommandLinkElement.getDummy`) -- split out of `link-grammar.ts` purely to keep that file under this project's 500-line cap. |
 | `link-grammar-regex.ts` | `DECOR_ESCAPE_RE`, `escapeDecorToken`, `buildDecorAlt`, `DECORS1_TOKENS`, `DECORS2_TOKENS`, `DECORS1_ALT`, `DECORS2_ALT`, `TAIL_TO_HEAD_TOKEN`, `HEAD_TO_TAIL_TOKEN`, `STYLE_KEY1`, `STYLE_KEY2`, `LINE_STYLE`, `LINE_STYLE_MULTIPLES`, `LINK_ENT_ALT`, `COLOR_TOKEN`, `COLOR_KEY_ALT`, `COLOR_PART2`, `COLORS_BODY_ALT`, `LINK_LINE_SOURCE`, `LINK_LINE_RE`, `LinkGroups` | Descriptive link-line regex construction (LINK_LINE_RE + its decor/style/ color/token building blocks). |
@@ -1570,11 +1667,11 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `parse-helpers.ts` | `stripFullWrap`, `cleanId`, `resolveTextEscapes`, `resolveNewlineEscapes`, `finalizeDisplay`, `extractNodeStereotype`, `rawStereotypeLabels`, `stripUrl`, `resolveInlineLinks`, `extractColor`, `extractTags`, `extractLinkStereotype`, `StereotypeResult`, `StereotypeSpriteRef`, `ColorResult`, `LinkStereoResult`, `TagsResult`, `CONTAINER_SYMBOLS`, `NameSection`, `makeNode`, `parseNameSection`, `parseInlineBody`, `CONTAINER_INLINE_RE`, `CONTAINER_OPEN_RE`, `KEYWORD_RE`, `ELEMENT_MULTILINE_OPEN_RE`, `ELEMENT_MULTILINE_OPEN_TYPE0_RE`, `ELEMENT_MULTILINE_END0_RE`, `ELEMENT_MULTILINE_END1_RE`, `trySkinparamBlock` | Pure, stateless helpers for the descriptive-diagram parser. |
 | `parse-state.ts` | `NoteOpenMatch`, `ParseState`, `ElementBlockTerminator`, `PendingElementState`, `PendingNoteState`, `makeDefaultAST`, `nextCreationIndex`, `emitNode`, `ensureEndpoint`, `addLink`, `resolveStillUnknown`, `startNewPage`, `executeNoteOpen`, `closePendingNote` | Mutable parse state + entity/note mutation helpers for the descriptive diagram parser (component / use-case / deployment). |
 | `parser.ts` | `CONTAINER_SYMBOLS`, `parseDescription` | Parser for PlantUML descriptive diagrams (component / use-case / deployment). |
-| `renderer-cluster.ts` | `buildCluster` | renderer-cluster.ts — T17: assembles `Cluster` (T12) for one container `DescriptionNodeGeo` (`children.length > 0`). |
+| `renderer-cluster.ts` | `ElkHeaderOptions`, `buildHeader`, `buildStyleDefaults`, `buildCluster` | renderer-cluster.ts — T17: assembles `Cluster` (T12) for one container `DescriptionNodeGeo` (`children.length > 0`). |
 | `renderer-draw-sequence.ts` | `collectByKind`, `drawClusters`, `drawEntities`, `drawEdges` | renderer-draw-sequence.ts — G1b/J1 write-set expansion (journaled, mechanism C): the `SvekResult#drawU` draw-order sequence (cluster, then leaf, then edge), extracted verbatim out of `renderer.ts` so it can be shared with `layout-ink-shift. |
-| `renderer-edge.ts` | `drawEdge` | renderer-edge.ts — T17: adapts one `DescriptionEdgeGeo` (this port's layout output) into `SvekEdgeInput` (T13's decoupled drawing-half contract — see `SvekEdge.ts`'s "Adapter boundary" doc comment, which explicitly names this as a later tas |
-| `renderer-entity.ts` | `drawEntity` | renderer-entity.ts — T17: assembles `EntityImageDescription` (T14) for one leaf `DescriptionNodeGeo` and draws it through klimt, translated to its absolute layout position (`SvekResult.java:87`'s `image.drawU(ug2.apply(new UTranslate(minX, |
-| `renderer-ink-extent.ts` | `runInkWalk`, `driverBounderFor`, `DocumentDimResult`, `computeDocumentDims` | renderer-ink-extent.ts — G0/T3 (LimitFinder mission): the SvekResult document-dimension recipe (svek/SvekResult.java:70-140), lifted out of `renderer.ts` to keep that file under the project's complexity cap. |
+| `renderer-edge.ts` | `arrowLabelFontConfig`, `drawEdge` | renderer-edge.ts — T17: adapts one `DescriptionEdgeGeo` (this port's layout output) into `SvekEdgeInput` (T13's decoupled drawing-half contract — see `SvekEdge.ts`'s "Adapter boundary" doc comment, which explicitly names this as a later tas |
+| `renderer-entity.ts` | `buildEntityParams`, `drawEntity` | renderer-entity.ts — T17: assembles `EntityImageDescription` (T14) for one leaf `DescriptionNodeGeo` and draws it through klimt, translated to its absolute layout position (`SvekResult.java:87`'s `image.drawU(ug2.apply(new UTranslate(minX, |
+| `renderer-ink-extent.ts` | `klimtStringBounderFor`, `runInkWalk`, `driverBounderFor`, `DocumentDimResult`, `computeDocumentDims` | renderer-ink-extent.ts — G0/T3 (LimitFinder mission): the SvekResult document-dimension recipe (svek/SvekResult.java:70-140), lifted out of `renderer.ts` to keep that file under the project's complexity cap. |
 | `renderer-note-opale.ts` | `drawOpaleShape` | renderer-note-opale.ts — T1e (opale note port): draws a `symbol === 'note'` leaf's Opale fold-outline + corner triangle instead of a plain box, when `DescriptionNodeGeo.opale` resolved (`layout-geo-post.ts#applyOpaleNote`, the SAME `Opale.t |
 | `renderer-uid.ts` | `UidPlan`, `buildUidPlan` | renderer-uid.ts — entity/cluster/link uid assignment for the klimt-backed description renderer. |
 | `renderer.ts` | `renderDescription`, `unwrapKlimtSvg` | renderer.ts — T17: klimt-backed public entry point for the description (component/use-case/deployment) diagram engine. |

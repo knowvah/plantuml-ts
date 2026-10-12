@@ -24,6 +24,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { ORACLE_JAR_TIMEOUT_MS } from './lib/oracle-jar-timeout.js';
 import { runInPlainMinute, type GuardClock, type GuardSleep } from './lib/oracle-minute-guard.js';
+import { stripLayoutPragma } from './dot-sync-drilldown.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA_DIR = join(REPO, 'tests', 'visual', 'data');
@@ -101,7 +102,10 @@ function doneSlugs(typeDir: string, manifest: Fixture[]): Set<string> {
  *  it is the documented success signal. */
 function renderFixture(dir: string, markup: string, guard: GuardDeps): Promise<ClassifyResult> {
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, 'in.puml'), markup, 'utf-8');
+  // smetana/vizjs pragmas are stripped so the jar shells out to real graphviz
+  // and dumps svek-N.dot (DIVERGENCES.md "`!pragma layout smetana|vizjs`",
+  // G0 policy; cdd8 D7). `!pragma layout elk` is kept.
+  writeFileSync(join(dir, 'in.puml'), stripLayoutPragma(markup), 'utf-8');
   return runInPlainMinute(
     () => {
       try {

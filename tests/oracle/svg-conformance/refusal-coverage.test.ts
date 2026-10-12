@@ -77,12 +77,12 @@
  * Re-measure by hand:
  *   npx vitest run tests/oracle/svg-conformance/refusal-coverage.test.ts
  */
-import { describe, it, expect } from 'vitest';
+import { beforeAll, describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync, existsSync, openSync, readSync, closeSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { renderSync } from '../../../src/index.js';
+import { loadElk, renderSync, type ElkBackend } from '../../../src/index.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { fullDescription } from '../../../src/core/version.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
@@ -281,11 +281,20 @@ interface LiveRefusal {
  *  `CanvasMeasurer` hits an unimplemented `getContext`, and the resulting
  *  layout failure IS an error page — putting a fabricated refusal inside the
  *  measurement. */
+/** One ELK backend per process (cdd8 D2d): `!pragma layout elk` fixtures
+ *  make `renderSync` refuse without `options.elk` (cdd8 T1b), which would
+ *  read here as a refusal the jar never made. */
+let elk: ElkBackend | undefined;
+beforeAll(async () => {
+  elk = await loadElk();
+});
+
 function measure(f: FixtureRef, store: ReturnType<typeof fixtureIncludeStore>): LiveRefusal {
   const markup = readFileSync(join(fixtureDir(f), 'in.puml'), 'utf8');
   const ours = renderSync(markup, {
     includeStore: store,
     measurer: new DeterministicMeasurer(),
+    elk,
   });
   const weErrored = weErroredIn(ours);
   return {
@@ -871,7 +880,17 @@ describe('refusal coverage — baseline shape', () => {
     // all rendering on both sides. Derivation: 6390 + 234 = 6624.
     // 6624 -> 6625 at aepp/exit: 1 svg-activity clone row (tidoda-12-juxu745),
     // rendering on both sides. Derivation: 6391 + 234 = 6625.
-    expect(manifest.fixtures.length).toBe(6625);
+    // 6625 -> 6629 at cdd8/T0b: 4 svg-class unknown-tree clone rows (vakovo-25,
+    // fakone-16, japode-92, tikiti-02; smetana pragma stripped, re-captured),
+    // rendering on both sides. Derivation: 6395 + 234 = 6629.
+    // 6629 -> 6634 at cdd8/close-b1: 5 svg-class clone rows (unknown-tree
+    // dezobu-62, sapofa-97, semutu-45, xagomi-49; class-tree gadufu-56),
+    // rendering on both sides. Derivation: 6400 + 234 = 6634.
+    // 6634 -> 6641 at cdd8/close-b3: 7 svg-class clone rows (the !pragma layout
+    // elk fixtures cadutu-02, cirojo-62, gokoru-18, lagudi-03, rutefe-49,
+    // tegefa-14, temofi-63; D12-eligible), rendering on both sides.
+    // Derivation: 6407 + 234 = 6641.
+    expect(manifest.fixtures.length).toBe(6641);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -972,7 +991,10 @@ describe('refusal coverage — baseline shape', () => {
     // 6364 -> 6368 at lgm/close-b1e (4 svg-activity clones).
     // 6368 -> 6369 at lgm/close-b1e (1 svg-class clone).
     // 6392 -> 6393 at aepp/exit (1 svg-activity clone, tidoda-12-juxu745).
-    expect(pinnedRendering.length).toBe(6393);
+    // 6393 -> 6397 at cdd8/T0b (4 svg-class unknown-tree clones).
+    // 6397 -> 6402 at cdd8/close-b1 (5 svg-class clones).
+    // 6402 -> 6409 at cdd8/close-b3 (7 svg-class ELK clones).
+    expect(pinnedRendering.length).toBe(6409);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

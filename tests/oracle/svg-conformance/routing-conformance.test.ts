@@ -57,12 +57,12 @@
  * Re-measure by hand:
  *   npx vitest run tests/oracle/svg-conformance/routing-conformance.test.ts
  */
-import { describe, it, expect } from 'vitest';
+import { beforeAll, describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync, existsSync, openSync, readSync, closeSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { renderSync } from '../../../src/index.js';
+import { loadElk, renderSync, type ElkBackend } from '../../../src/index.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 
@@ -254,11 +254,20 @@ type RoutingPair = Pick<LiveRouting, 'jarType' | 'ourType'>;
  *  a routing answer of `NONE` -- inside the measurement. Routing is
  *  measurer-independent, and that is measured, not assumed: the corpus
  *  scores 79 with an identical bucket table under either measurer. */
+/** One ELK backend per process (cdd8 D2d): `!pragma layout elk` fixtures
+ *  make `renderSync` refuse without `options.elk` (cdd8 T1b), which would
+ *  read here as a refusal the jar never made. */
+let elk: ElkBackend | undefined;
+beforeAll(async () => {
+  elk = await loadElk();
+});
+
 function measure(f: FixtureRef, store: ReturnType<typeof fixtureIncludeStore>): LiveRouting {
   const markup = readFileSync(join(fixtureDir(f), 'in.puml'), 'utf8');
   const ours = renderSync(markup, {
     includeStore: store,
     measurer: new DeterministicMeasurer(),
+    elk,
   }).slice(0, HEAD_BYTES);
   const golden = readHead(goldenPath(f));
   return {
@@ -997,10 +1006,19 @@ describe('routing conformance — jar-error classification', () => {
     // Derivation: 5670 + 868 + 86 = 6624.
     // 5670 -> 5671 / 6624 -> 6625 at aepp/exit: 1 svg-activity clone row
     // (tidoda-12-juxu745, zero-diff pin). Derivation: 5671 + 868 + 86 = 6625.
-    expect(pinnedAgree.length).toBe(5671);
+    // 5671 -> 5675 / 6625 -> 6629 at cdd8/T0b: 4 svg-class unknown-tree clone
+    // rows (vakovo-25, fakone-16, japode-92, tikiti-02; zero-diff pins after the
+    // pragma-stripped re-capture). Derivation: 5675 + 868 + 86 = 6629.
+    // 5675 -> 5680 / 6629 -> 6634 at cdd8/close-b1: 5 svg-class clone rows
+    // (dezobu-62, sapofa-97, semutu-45, xagomi-49 unknown-tree; gadufu-56),
+    // zero-diff pins. Derivation: 5680 + 868 + 86 = 6634.
+    // 5680 -> 5687 / 6634 -> 6641 at cdd8/close-b3: 7 svg-class clone rows (the
+    // !pragma layout elk class fixtures, D12-eligible zero-diff pins).
+    // Derivation: 5687 + 868 + 86 = 6641.
+    expect(pinnedAgree.length).toBe(5687);
     expect(pinnedMisroutes.length).toBe(868);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(6625);
+    expect(manifest.fixtures.length).toBe(6641);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

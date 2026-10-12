@@ -31,6 +31,7 @@ import { mapPortRows, mapPortName, shouldMarkPort } from './class-map-port-rows.
 import { MethodsOrFieldsArea } from '../../core/cucadiagram/MethodsOrFieldsArea.js';
 import type { Elected } from '../../core/cucadiagram/Elected.js';
 import { enhancedBodyPortRows } from './class-body-enhanced-ports.js';
+import { isHexagonLeaf } from './class-hexagon-leaf.js';
 
 /**
  * The `tailport`/`headport` a relationship contributes when its `Class::member`
@@ -176,6 +177,10 @@ function resolveNodeShape(
   shield: { isPort: boolean; hasQualifier: boolean } | undefined,
   hasPortBands: boolean,
 ): DotInputNode['shape'] | undefined {
+  // cdd8 T1e: `ShapeType.HEXAGON` (`EntityImageDescription.java:127-128`) is
+  // `shape=hexagon` whatever the shield -- only `RECTANGLE` turns into the
+  // HTML table when shielded (`SvekNode.java:147-151,328-339`).
+  if (isHexagonLeaf(classifier)) return 'hexagon';
   return KIND_SHAPE[classifier.kind] ?? (shield !== undefined || hasPortBands ? 'plaintext' : undefined);
 }
 

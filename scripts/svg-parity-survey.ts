@@ -41,7 +41,7 @@ import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from '
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { renderSync } from '../src/index.js';
+import { loadElk, renderSync, type ElkBackend } from '../src/index.js';
 import { setErrorPageObserver } from '../src/core/error/error-renderer.js';
 import {
   errorPageVerdict,
@@ -69,6 +69,10 @@ const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE_DIR = join(REPO, 'test-results', 'dot-cache');
 // cdd4-T9: sprites + emoji, shared by renderOneMode and renderFrame below.
 const SURVEY_ASSET_STORE = combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore());
+// cdd8-T2e (D2d): `renderSync` refuses `!pragma layout elk` without
+// `options.elk`. Each render worker (`--render-many` / `--render-one`) awaits
+// `loadElk()` ONCE before it renders and every render below passes the result.
+let surveyElk: ElkBackend | undefined;
 const PARITY_OUT = join(REPO, 'tests', 'oracle', 'svg-conformance', 'parity.json');
 const THIS_FILE = fileURLToPath(import.meta.url);
 const DEFAULT_TYPES = ['component', 'usecase'];
@@ -270,6 +274,7 @@ function renderOneMode(dir: string): void {
       measurer: new DeterministicMeasurer(),
       assetStore: SURVEY_ASSET_STORE,
       includeStore: fixtureIncludeStore(),
+      elk: surveyElk,
     });
   } catch (err) {
     setLayoutInputObserver(undefined);
@@ -295,6 +300,7 @@ function renderFrame(dir: string): string {
       measurer: new DeterministicMeasurer(),
       assetStore: SURVEY_ASSET_STORE,
       includeStore: fixtureIncludeStore(),
+      elk: surveyElk,
     });
     const dotEqual = computeDotEqual(svekDots, events, oracleBlind, markup);
     return JSON.stringify({ svg, dotEqual, oracleBlind, errorPage: isErrorPage() });
@@ -311,8 +317,9 @@ function renderFrame(dir: string): string {
  * services one fixture dir per stdin line, one JSON frame per stdout line.
  * See `svg-parity-workers.ts` for the protocol and the isolation trade.
  */
-function renderManyMode(): void {
+async function renderManyMode(): Promise<void> {
   routeConsoleToStderr(console, (s) => process.stderr.write(s));
+  surveyElk = await loadElk();
   let buf = '';
   process.stdin.setEncoding('utf-8');
   process.stdin.on('data', (chunk: string) => {
@@ -462,7 +469,7 @@ async function main(): Promise<void> {
 // CLI dispatch
 // ---------------------------------------------------------------------------
 
-function runRenderOneCli(argv: string[]): void {
+async function runRenderOneCli(argv: string[]): Promise<void> {
   const idx = argv.indexOf('--render-one');
   const dir = argv[idx + 1];
   if (dir === undefined) {
@@ -470,6 +477,7 @@ function runRenderOneCli(argv: string[]): void {
     process.exit(2);
   }
   try {
+    surveyElk = await loadElk();
     renderOneMode(dir);
   } catch (e) {
     process.stderr.write(`__RENDER_ERROR__${errText(e)}\n`);
@@ -482,9 +490,12 @@ function runRenderOneCli(argv: string[]): void {
  * CLI blocks, e.g. tests/oracle/svg-conformance/compare.ts). */
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   if (process.argv.includes('--render-many')) {
-    renderManyMode();
+    renderManyMode().catch((e) => {
+      process.stderr.write(`harness fault: ${errText(e)}\n`);
+      process.exit(2);
+    });
   } else if (process.argv.includes('--render-one')) {
-    runRenderOneCli(process.argv);
+    void runRenderOneCli(process.argv);
   } else {
     main().catch((e) => {
       process.stderr.write(`harness fault: ${errText(e)}\n`);

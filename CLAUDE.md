@@ -86,6 +86,8 @@ geometry delta. Settled; not re-argued per case.
   `@startgit` (`SmetanaForGit`, unbuilt), and `!pragma layout smetana`. None
   emits `svek-N.dot`, so none has a DOT-parity gate; everything else shells
   out to real graphviz, where the jar's geometry IS a target.
+- ELK (`!pragma layout elk`) is upstream's second engine, not a Smetana copy:
+  supported via `ElkBackend` (`src/core/elk/`), elkjs 0.12.0 by default (ruling 2026-10-11).
 
 ## Where things live
 

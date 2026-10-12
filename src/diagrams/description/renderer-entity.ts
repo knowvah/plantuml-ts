@@ -200,7 +200,7 @@ function spriteLabel(
   return resolved === undefined ? {} : { stereotypeSprite: resolved };
 }
 
-function buildEntityParams(
+export function buildEntityParams(
   node: DescriptionNodeGeo,
   theme: Theme,
   sprites: SpriteRegistry | undefined,

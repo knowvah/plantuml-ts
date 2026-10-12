@@ -77,11 +77,12 @@ import type { LeafSizingSubject } from '../../core/svek/image/LeafSizingSubject.
  *   `"no hexagon geometry supplied"` when `hexagonPolygon === undefined` --
  *   exactly what sizing-time `buildSizingEntityParams` leaves it as
  *   (`leaf-sizing-entity.ts:182`'s own doc comment lists it among the
- *   fields "Deliberately NOT threaded"; only the RENDER-time params
- *   (`renderer-usymbol-entity.ts`'s `hexagonPolygon: null`) set it).
- *   Crash-verified, not a mere mismatch: `npx vitest run tests/unit/class/`
- *   throws through this exact call chain the moment any `descriptive`
- *   `hexagon` leaf with no visible members exists in the suite.
+ *   fields "Deliberately NOT threaded"). Crash-verified, not a mere
+ *   mismatch: `npx vitest run tests/unit/class/` throws through this exact
+ *   call chain the moment any `descriptive` `hexagon` leaf with no visible
+ *   members exists in the suite. Its polygon exists only after layout
+ *   (`DotStringFactory.java:414-420`), so cdd8 T1e stamps the hexagon's ink
+ *   post-layout instead (`class-hexagon-leaf.ts#stampHexagonLeaves`).
  *
  * Every OTHER usymbol -- `rectangle`, `queue`, `card`, `entity`, `stack`,
  * `frame`, `label`, `collections`, `artifact`, `person`, `agent`, `cloud`,

@@ -1,4 +1,3 @@
 @startuml
-!pragma layout smetana
 Entity01 }|..|| Entity02
 @enduml

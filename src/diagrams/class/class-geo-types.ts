@@ -10,6 +10,9 @@ import type { GenericTagGeo } from './class-stereotype.js';
 import type { EmptyPackageLeafDim } from './class-namespace-shape.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
 import type { ClassifierRowGeo } from './class-geo-row-types.js';
+import type { ElkDiagramAdapter } from '../../core/elk/ElkDiagramAdapter.js';
+import type { ElkMakerResult } from '../../core/elk/CucaDiagramFileMakerElk.js';
+import type { ClassUidPlanInput } from './renderer-uid.js';
 
 export type { ClassifierRowGeo } from './class-geo-row-types.js';
 
@@ -17,6 +20,7 @@ export { isNoteGeo, isClassifierGeo, classifierLeaves, noteLeaves, type ClassLea
 
 import type { JsonBodyItem } from './class-geo-json-types.js';
 import type { SpriteTint } from '../../core/klimt/sprite/sprite-tint.js';
+import type { Point2D } from '../../core/klimt/UTranslate.js';
 // cdd-T6: re-exported so `class-geo-types.ts` stays the one import site for
 // class geometry types (see `class-geo-edge-extras.ts`'s own doc comment).
 export type {
@@ -238,6 +242,12 @@ export interface ClassifierGeo {
    *  shifted every shape in the document by that much
    *  (`.agent-notes/class-ink-shared-offset-groups.md` item (b)). */
   symbolInk?: LeafSymbolInk;
+
+  /** cdd8 T1e: `SvekNode#getPolygon` for a `ShapeType.HEXAGON` leaf, in the
+   *  node's own frame (`DotStringFactory.java:414-420`), drawn by
+   *  `EntityImageDescription#drawHexagon`. Set by `class-hexagon-leaf.ts
+   *  #stampHexagonLeaves`; absent for every other leaf. */
+  hexagonPolygon?: readonly Point2D[];
 }
 
 // cdd7 T2b: `EdgeGeo` moved to `class-geo-edge-types.ts` (500-line cap) --
@@ -258,6 +268,26 @@ export type { KalBox } from './class-kal.js';
 // `JsonBodyItem` below) -- a pure move, re-exported so no consumer's import
 // path changed.
 export type { ClassGeometry, ClassPageBoundary } from './class-geo-geometry-types.js';
+
+/**
+ * cdd8 T3a: a `!pragma layout elk` class diagram's layout -- what
+ * `CucaDiagramFileMakerElk#getTextBlock` (`CucaDiagramFileMakerElk.java:477-499`)
+ * hands `new MyElkDrawing(...)`, plus what the class drawing of each node needs.
+ *
+ * - `adapter`: the {@link ElkDiagramAdapter} the maker read
+ *   (`class-elk-adapter.ts`); its `drawLeaf` answers the maker's `LimitFinder`
+ *   pass only, the renderer substitutes the SVG draw.
+ * - `result`: the maker's three ordered maps and `minMax`.
+ * - `leafGeos`: each node's leaf geometry with its corner at (0, 0); a node is
+ *   drawn translated to its ELK corner (`MyElkDrawing.java:131-142`).
+ * - `uidPlanInput`: the entity / link numbering input (`renderer-uid.ts`).
+ */
+export interface ClassElkGeometry {
+  readonly adapter: ElkDiagramAdapter;
+  readonly result: ElkMakerResult;
+  readonly leafGeos: ReadonlyMap<string, ClassifierGeo>;
+  readonly uidPlanInput: ClassUidPlanInput;
+}
 
 // cdd-T6: `JsonBodyItem` moved to `class-geo-json-types.ts` when the four
 // new `EdgeGeo` fields pushed this file past the 500-line hook cap

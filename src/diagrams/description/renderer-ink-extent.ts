@@ -164,7 +164,10 @@ class LimitFinderWithGroups implements UGraphic {
  * the real draw pass measure text identically without either module
  * reaching into the other's private state.
  */
-function klimtStringBounderFor(driverBounder: DriverStringBounder, measurer: StringMeasurer): KlimtStringBounder {
+export function klimtStringBounderFor(
+  driverBounder: DriverStringBounder,
+  measurer: StringMeasurer,
+): KlimtStringBounder {
   return {
     calculateDimension(font, text) {
       const width = driverBounder.calculateDimension(font, text).width;

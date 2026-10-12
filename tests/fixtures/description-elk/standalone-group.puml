@@ -1,0 +1,8 @@
+@startuml
+!pragma layout elk
+rectangle "cloud" as c {
+  rectangle "Server VM" as s1
+  rectangle "Gateway VM" as v1
+  rectangle "Gateway VM" as v2
+}
+@enduml

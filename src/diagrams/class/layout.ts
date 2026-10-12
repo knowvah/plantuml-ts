@@ -50,6 +50,7 @@ import { resolveClassScaleFactor } from './class-layout-scale-resolve.js';
 import { scaleClassGeometry } from './class-scale-geo.js';
 import { clusterClipRect } from './class-shield-helpers.js';
 import { leafMagneticRects } from './class-leaf-magnetic-border.js';
+import { stampHexagonLeaves } from './class-hexagon-leaf.js';
 import { scaleClassTheme } from './class-scale-geo.js';
 import {
   buildClassifierGeos,
@@ -115,7 +116,7 @@ function measureLeaf(
  * (dead directives) — jar-verified `mezucu-18-lozi106` (`hide empty
  * members` + a field-only class: jar draws ONE divider, not two).
  */
-function preMeasureClassifiers(
+export function preMeasureClassifiers(
   ast: ClassDiagramAST,
   theme: Theme,
   measurer: StringMeasurer,
@@ -312,6 +313,10 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   const posMap = new Map(result.nodes.map((n) => [n.id, n]));
   const hiddenIds = computeHiddenIds(effAst);
   const classifiers = buildClassifierGeos(effAst, measuredMap, posMap, { hiddenIds, theme, protectedIds });
+  // cdd8 T1e: `DotStringFactory.java:414-420` polygon + its `LimitFinder` ink;
+  // Smetana never calls `SvekNode#setPolygon`, so its hexagon draws no outline.
+  if (effAst.layoutEngine !== 'smetana')
+    stampHexagonLeaves(classifiers, scaleClassTheme(theme, 1), measurer, effAst.sprites);
   // T5 (namespace-cluster-box): read the namespace box from the real
   // graphviz cluster polygon (`result.clusters`), not a member-bbox walk --
   // see `class-geo-builders.ts#buildNamespaceGeos`'s own doc comment.

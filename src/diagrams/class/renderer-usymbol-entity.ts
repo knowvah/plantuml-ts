@@ -23,7 +23,7 @@
  * `EntityImageDescription`-family shape here). Entity hyperlinks ARE
  * threaded (cdd3-T10, S-11: `classifier.url`); `classifier.color` IS
  * threaded (cdd5-T3b, see {@link resolveBackcolor}); `hexagonPolygon` is
- * always `null` (cdd5-T3b, see {@link buildUSymbolEntityParams}).
+ * the geo's stored node polygon (cdd8 T1e, see {@link buildUSymbolEntityParams}).
  *
  * @see ~/git/plantuml/.../svek/image/EntityImageDescription.java
  * @see plans/si14-usymbol-measurement-sharing/decisions.md (ADR-1, ADR-2)
@@ -35,6 +35,7 @@ import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-comm
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { UDrawable } from '../../core/klimt/shape/UDrawable.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { UPolygon } from '../../core/klimt/shape/UPolygon.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { renderDrawableToFragment, type DrawableFragment } from '../../core/klimt/document-shell.js';
 import {
@@ -190,25 +191,13 @@ export function buildUSymbolEntityParams(
     // cdd6 b2 (journal row 40): `SvgNanoParser.java:187-215` -- an unset
     // sprite `stroke-width` inherits the entity's own ambient stroke.
     atomImageResolverFor: makeAtomImageResolverFor(sprites, stroke),
-    // cdd5-T3b (`xagomi-49-caki729`): `EntityImageDescription.java:334-341`'s
-    // `drawHexagon` -- `bibliotekon.getNode(entity).getPolygon()` -- is
-    // upstream's OWN "no computed shape for this node" state (`if (hexagon
-    // != null) { ... }`, silently drawing nothing further), not the
-    // `bibliotekon == null` defensive throw one line above it (dead
-    // upstream: `GeneralImageBuilder.createEntityImageBlock`'s only two
-    // callers, `GraphvizImageBuilder`/`CucaDiagramFileMakerSmetana#getBibliotekon`,
-    // both always pass a real object). This engine has never threaded the
-    // DOT-computed node polygon onto `ClassifierGeo` (would need
-    // `class-dot-graph.ts`/`layout.ts`, outside this task's write-set), so
-    // `null` is the honest, currently-true state for EVERY hexagon leaf this
-    // engine draws -- not a fitted value chosen to dodge the throw. Verified
-    // against `xagomi-49-caki729`'s golden (`!pragma layout smetana`, where
-    // Smetana's own node has no stored polygon either): the jar draws ONLY
-    // the label text, no hexagon outline, exactly what `hexagonPolygon:
-    // null` produces here. A non-Smetana hexagon leaf still lacks its
-    // outline after this fix -- an accepted, reported residual, not a new
-    // regression (pre-fix, EVERY hexagon leaf drew as a wrong class box).
-    hexagonPolygon: null,
+    // cdd8 T1e (`xagomi-49-caki729`): `EntityImageDescription.java:334-341`'s
+    // `drawHexagon` draws `bibliotekon.getNode(entity).getPolygon()`, the
+    // points `DotStringFactory.java:414-420` read back off graphviz for a
+    // `ShapeType.HEXAGON` node -- stamped on the geo by `class-hexagon-leaf.ts
+    // #stampHexagonLeaves`. `null` (upstream's own `hexagon != null` miss) only
+    // for a leaf with no stored polygon, i.e. never a HEXAGON shape.
+    hexagonPolygon: classifier.hexagonPolygon === undefined ? null : new UPolygon(classifier.hexagonPolygon),
   };
 }
 // #lizard forgives -- straight-line params-object assembly plus one ternary,
@@ -285,9 +274,8 @@ export function buildUSymbolEntityParams(
  *  falling to the SAME `renderClassifierBox` fallback it already used, not
  *  a newly-wrong `EntityImageDescription` draw.
  *
- *  `hexagon` IS included (cdd5-T3b, `xagomi-49-caki729`) -- see
- *  {@link buildUSymbolEntityParams}'s `hexagonPolygon: null` for why that
- *  is faithful rather than a crash-avoidance shortcut.
+ *  `hexagon` IS included (cdd5-T3b, `xagomi-49-caki729`); its node polygon
+ *  is threaded by cdd8 T1e (see {@link buildUSymbolEntityParams}).
  */
 export function usesClassUSymbolEntity(classifier: ClassifierGeo): boolean {
   if (classifier.kind === 'usecase' || classifier.kind === 'circle') return true;

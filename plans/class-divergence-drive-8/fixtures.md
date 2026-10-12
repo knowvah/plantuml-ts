@@ -1,0 +1,47 @@
+# Row ledger: cdd8
+
+Seeded during planning (2026-10-11, main `84bd0c3f4`,
+`render-all --tree all`; `S`/`N` = render-diff structural/numeric). T0a
+re-measures every row into `measurements/b0.json` and corrects this table with a
+journal row. T0a b0 (2026-10-11): all 20 verdicts and S/N match `b0.json` exactly;
+no correction needed (journal row 1). The error-page-conformant rows are not listed: class luzive, sadamo
+and zuduxu, and unknown petiku and rubebe.
+
+`final` ∈ `fixed (<commit>)` · `accepted (D11.n)` · `open -> salt-engine-port` ·
+`open -> <next mission>`.
+
+## Rows
+
+| tree/slug | verdict | S/N | family | mechanism (planning) | task | final |
+|---|---|---|---|---|---|---|
+| class/cadutu-02-lazu601 | diverged | 1/414 | elk | `!pragma layout elk` laid out by dot-engine; jar uses ELK 0.12.0 (`CucaDiagram.java:478-479`) | T0c, T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
+| class/cirojo-62-dubo306 | diverged | 19/257 | elk | same | T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
+| class/gokoru-18-daba136 | diverged | 19/257 | elk | same | T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
+| class/lagudi-03-rucu383 | diverged | 1/508 | elk | same | T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
+| class/rutefe-49-xeju709 | diverged | 1/168 | elk | same | T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
+| class/tegefa-14-koxo759 | diverged | 43/431 | elk | same | T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
+| class/temofi-63-vega763 | diverged | 1/414 | elk | same | T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
+| class/bixogo-47-xulu385 | structural-match | 0/49 | salt | legend `{{salt}}` renders our "unknown diagram type" box at 300×60 vs jar 111×90; acceptance "payload bytes" is FALSE (D8) | T0a | open -> salt-engine-port |
+| class/roxosu-00-pini153 | structural-match | 0/49 | salt | same as bixogo | T0a | open -> salt-engine-port |
+| class/nugecu-04-tona107 | structural-match | 0/23 | dot-engine A3 | flat labelled edge mirrored label side (graphviz-issues 23 `[~]`) | T0a | accepted (D11.1) |
+| unknown/lubicu-73-fule059 | structural-match | 0/37 | salt | three `{{salt}}` slots; note seam `UNWIRED_NESTED_RENDERER` (cdd7 journal row 3) | — | open -> salt-engine-port |
+| unknown/dezobu-62-vuzu421 | structural-match | 0/183 | archimate | `CommandArchimate.java:146-152` → `<<$archimate/icon>>` sprite stereotype; description engine draws the label instead | T1c | fixed (T1c f4b59b00e+32dc14038, pinned cdd8-b1) |
+| unknown/sapofa-97-gizu737 | structural-match | 0/11 | latex | `<latex>` image 120×40 (latex.ts heuristic) vs jar JLaTeXMath 18×22 / 18×17 (`TeXIconBuilder.java:47-56`) | T1d | fixed (T1d c719796d4, pinned cdd8-b1) |
+| unknown/vakovo-25-licu237 | structural-match | 0/131 | smetana | captured WITH `!pragma layout smetana` (oracleBlind); G0 re-capture | T0b | fixed (T0b re-capture, pinned cdd8-b0) |
+| unknown/fakone-16-boro774 | structural-match | 0/204 | smetana | same; accepted cdd7 D8, to be retired | T0b | fixed (T0b re-capture, pinned cdd8-b0) |
+| unknown/japode-92-famo984 | structural-match | 0/744 | smetana | same | T0b | fixed (T0b re-capture, pinned cdd8-b0) |
+| unknown/tikiti-02-bagu049 | structural-match | 0/177 | smetana | same | T0b | fixed (T0b re-capture, pinned cdd8-b0) |
+| unknown/xagomi-49-caki729 | diverged (post-T0b) | 1/12 | hexagon | after the pragma-stripped re-capture the jar draws the graphviz hexagon (`DotStringFactory.java:414-420`, `SvekNode.java:337-338`); class emits `shape=rect`, `hexagonPolygon: null` | T0b → T1e | fixed (T1e bf07be2bd, pinned cdd8-b1) |
+| unknown/gubeca-19-lemu434 | structural-match | 0/11 | smetana-yaml | nested `{{yaml}}` is JsonDiagram on the Smetana path (CLAUDE.md ruling) | — | accepted (cdd7 D8) |
+| unknown/jixibu-01-xave465 | structural-match | 0/11 | smetana-yaml | same | — | accepted (cdd7 D8) |
+
+## ELK fixtures outside the class tree (T3b, movers)
+
+c4 ×1, component ×1, unknown ×1 (`grep -l -i 'pragma layout elk'
+test-results/dot-cache/*/*/in.puml`). Recorded by T0a (2026-10-11):
+
+| tree/slug | b0 verdict | task | final |
+|---|---|---|---|
+| c4/vakasu-51-xiza794 | diverged 40/72 → 65/160 | T3b | open -> description-style follow-on (stereotype-keyed styles, `root { Margin }`, legend under dpi; not ELK) |
+| component/dirofi-81-cuga514 | diverged 38/22 → conformant | T3b | fixed (T3b 1b1f2ee7a) |
+| unknown/foraba-98-sagi735 | diverged 7/64 → 6/0 | T3b | open -> description-style follow-on (stereotype-scoped colours; not ELK) |

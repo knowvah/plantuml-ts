@@ -142,13 +142,27 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
   //     general `!pragma` no-op below so a real value survives -- same
   //     precedent as `useIntermediatePackages` above. `!pragma layout elk`/
   //     `vizjs`/anything else still falls through to the general no-op
-  //     (T14's "recognised, no modeled effect" posture) since neither the
-  //     Elk layout engine nor VizJS-in-browser has a port here.
+  //     (T14's "recognised, no modeled effect" posture); `elk` has its own
+  //     rule below (cdd8 T1b).
   //     @see ~/git/plantuml/.../command/CommandPragma.java:104-117
   {
     pattern: /^!pragma\s+layout\s+smetana\s*$/i,
     execute(state) {
-      state.ast.layoutEngine = 'smetana';
+      // Upstream sets two independent flags and tests `isUseElk()` first
+      // (CucaDiagram.java:478-481), so a prior `layout elk` is not undone.
+      if (state.ast.layoutEngine !== 'elk') state.ast.layoutEngine = 'smetana';
+    },
+  },
+
+  // 2c-ter-elk. `!pragma layout elk` (cdd8 T1b) -- `CommandPragma#executeArg`
+  //     calls `system.setUseElk(true)` (CommandPragma.java:128-129, same
+  //     case-insensitive NAME/VALUE match), which `CucaDiagram#
+  //     getCucaDiagramFileMaker` reads first (CucaDiagram.java:478-479) to
+  //     swap in `CucaDiagramFileMakerElk`. Captured onto `layoutEngine`.
+  {
+    pattern: /^!pragma\s+layout\s+elk\s*$/i,
+    execute(state) {
+      state.ast.layoutEngine = 'elk';
     },
   },
 

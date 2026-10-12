@@ -3,6 +3,7 @@
  * with the mission-local vitest config — see `tools/README.md`.
  */
 import { describe, test, expect } from 'vitest';
+import { loadElk } from '../../../src/index.js';
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -79,7 +80,9 @@ describe('loadUnknownClassSlugs / listUnknownClassFixtureDirs (routing filter, T
     expect(slugs.size).toBe(expected);
     expect(dirs.length).toBe(expected);
     // Sanity pin at time of writing (T4-tools-tree.md: "currently 288").
-    expect(expected).toBe(288);
+    // 288 -> 287: the routing baseline already held 287 such rows at main
+    // 84bd0c3f4 (cdd8 b0); found stale by cdd8 T2e (journal row 20).
+    expect(expected).toBe(287);
   });
 
   test('excludes unknown-tree rows whose jar type is not CLASS', () => {
@@ -202,5 +205,21 @@ describe('renderRow (synthetic fixture, tree tagging)', () => {
     expect(row.structural).toBe(0);
     expect(row.numeric).toBe(0);
     expect(row.firstDiff).toBeDefined();
+  });
+});
+
+/**
+ * cdd8-T2e (D2d): an ELK class fixture renders through a preloaded backend.
+ * Before T3a the layout is still dot-engine, so the row equals b0's
+ * (`measurements/b0.json`: cadutu-02-lazu601 structural 1 / numeric 414).
+ */
+describe('renderRow (ELK fixture, preloaded backend)', () => {
+  test('cadutu-02-lazu601 renders without the options.elk error page and matches the b0 counts', async () => {
+    const repo = resolveRepoRoot(import.meta.url);
+    const f = { slug: 'cadutu-02-lazu601', dir: join(repo, 'test-results', 'dot-cache', 'class', 'cadutu-02-lazu601') };
+    const row = renderRow(f, buildSpriteAssetsStore(), 'class', await loadElk());
+    expect(row.verdict).toBe('diverged');
+    expect(row.structural).toBe(1);
+    expect(row.numeric).toBe(414);
   });
 });

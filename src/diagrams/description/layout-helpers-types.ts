@@ -16,6 +16,10 @@ import type { ScaleSpec } from '../../core/scale-command.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { InkBox } from '../../core/annotations/body-ink.js';
 import type { OpaleDirection, OpalePoint } from '../../core/svek/image/Opale.js';
+import type { MyElkDrawing } from '../../core/elk/MyElkDrawing.js';
+
+/** The ELK maker's drawing (`MyElkDrawing.java:86-352`), see `DescriptionGeometry.elk`. */
+export type DescriptionElkDrawing = MyElkDrawing;
 
 // ---------------------------------------------------------------------------
 // Public output node type
@@ -230,6 +234,14 @@ export interface DescriptionGeometry {
   totalHeight: number;
   nodes: DescriptionNodeGeo[];
   edges: DescriptionEdgeGeo[];
+  /**
+   * cdd8 T3b: present iff `!pragma layout elk` took the ELK maker
+   * (`CucaDiagram.java:478-479`). The laid-out `MyElkDrawing` (`MyElkDrawing
+   * .java:86-352`) stands in for `SvekResult`; `nodes`/`edges` above are
+   * empty then. `renderDescription` draws it and sizes the document from
+   * `MyElkDrawing#calculateDimension`.
+   */
+  elk?: DescriptionElkDrawing;
   /**
    * lgm-T1c: the margin-less block `DiagramChromeFactory.create` is handed
    * (`SvekResult#calculateDimension`, `svek/SvekResult.java:130-135`: ink +

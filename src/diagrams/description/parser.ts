@@ -33,7 +33,6 @@ import {
   extractNodeStereotype,
   stripFullWrap,
   makeNode,
-  parseNameSection,
   trySkinparamBlock,
 } from './parse-helpers.js';
 import {
@@ -46,7 +45,7 @@ import {
 } from './parse-state.js';
 import { tryNoteHandling } from './note-dispatch.js';
 import { COMMANDS } from './command-table.js';
-import { leafDisplayName } from './namespace-groups.js';
+import { tryArchimate } from './command-archimate.js';
 
 export { CONTAINER_SYMBOLS } from './parse-helpers.js';
 
@@ -280,44 +279,6 @@ function tryElementBlock(state: ParseState, lines: readonly string[], i: number,
   const type1 = tryElementBlockType1(state, line);
   if (type1 !== null) return type1;
   return tryElementBlockType0(state, lines, i, line);
-}
-
-/**
- * `archimate #color (CODE | DISPLAY "as" CODE | CODE "as" DISPLAY) STEREOTYPE?`
- * — `CommandArchimate.java`'s single-line leaf form (T8,
- * description-leaf-sizing-audit). The mandatory `#color` token PRECEDES
- * CODE/DISPLAY here — the only `KEYWORD_TO_SYMBOL` keyword where color is
- * required and leads, rather than optional and trailing. Every other
- * keyword's grammar leaves `parseNameSection`'s `remainder` starting at the
- * quote (if any), so its `splitLeadingQuote` quote-protection (guillemets
- * INSIDE a quoted display are literal text, never STEREOTYPE) engages
- * correctly; feeding it `#color "..."` unstripped defeats that check
- * entirely (the remainder starts with `#`, not `"`), letting
- * `extractNodeStereotype` reach inside the quotes. Stripping the color
- * HERE, before `parseNameSection` ever sees the rest, keeps that guard
- * intact — verified against `archimate #Business "<<inside>> Hello"`
- * (co-located test).
- *
- * `CommandArchimateMultilines` (`[ … ]` body) and `CommandArchimatePackage`
- * (`{ … }` group) are filed, not implemented — see
- * plans/s1l-leaf-sizing/ledger.md. A line missing the color token (upstream:
- * no command matches, no entity created) falls through to the generic
- * `KEYWORD_TO_SYMBOL` dispatch (`command-table-containers.ts` rule 14)
- * instead, which has no color requirement — more lenient than upstream on
- * that one malformed-input edge, documented in the co-located test.
- */
-const ARCHIMATE_RE = /^archimate\s+(#\S+)\s+(.+)$/i;
-
-function tryArchimate(state: ParseState, line: string): LineOutcome {
-  const m = ARCHIMATE_RE.exec(line);
-  if (m === null) return null;
-  const symbol = KEYWORD_TO_SYMBOL.get('archimate');
-  if (symbol === undefined) return null;
-  const color = m[1]!;
-  const { id, display, stereotype, tags, stereotypeSprite } = parseNameSection(m[2]!);
-  const finalDisplay = display === id ? leafDisplayName(id, state.namespaceSeparator) : display;
-  emitNode(state, makeNode(id, finalDisplay, symbol, stereotype, color, tags, stereotypeSprite));
-  return 1;
 }
 
 /**

@@ -11,6 +11,9 @@
  * no dot-engine stub) the kal-overlap/fixture-level tests already use, over
  * the real corpus fixture `unknown/fakone-16-boro774` (`Entity01 }|..||
  * Entity02` under the pragma) -- not a hand-built `EdgeGeo`/AST literal.
+ * The markup comes from the corpus manifest (`tests/visual/data/unknown.json`):
+ * cdd8 T0b (D7) re-captured the oracle cache with the pragma stripped, so the
+ * cached `in.puml` no longer carries it.
  */
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
@@ -21,7 +24,12 @@ const measurer = new DeterministicMeasurer();
 
 describe('buildEdgeGeos — EdgeGeo.smetana carry (T3c, D8)', () => {
   it('carries smetana: true onto every edge when the diagram has !pragma layout smetana (fakone-16-boro774)', () => {
-    const markup = readFileSync('test-results/dot-cache/unknown/fakone-16-boro774/in.puml', 'utf8');
+    const manifest = JSON.parse(readFileSync('tests/visual/data/unknown.json', 'utf8')) as {
+      slug: string;
+      markup: string;
+    }[];
+    const markup = manifest.find((f) => f.slug === 'fakone-16-boro774')!.markup;
+    expect(markup).toMatch(/^!pragma layout smetana$/m);
     const { geo } = layoutFixtureClass(markup, measurer);
     expect(geo.edges).toHaveLength(1);
     expect(geo.edges[0]!.smetana).toBe(true);
