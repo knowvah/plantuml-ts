@@ -124,7 +124,7 @@ Measurement:
 
 ## Summary (2026-10-12)
 
-- **Tasks:** 17 of 15 planned (T0a–T0c, T1a–T1e, T2a–T2e, T3a–T3c, T-exit, T-salt). T1e was added
+- **Tasks:** 18 (17 planned + T1e: T0a–T0c, T1a–T1e, T2a–T2e, T3a–T3c, T-exit, T-salt). T1e was added
   from T0b's xagomi residual; ExtremityExtends and the description multi-leaf sprite fix landed as
   residual-round fixes.
 - **Counts:** class 713/3/7 → **720/3/0**; unknown CLASS-routed 275/10/2 → **282/3/2** (2 error-page
