@@ -1,0 +1,11 @@
+skinparam-mode-dark: 7 diffs, weighted 7
+   {"path":"svg/g[1]/rect[2]/@fill","actual":"#EEE","expected":"#222","tolerance":0.01}
+   {"path":"svg/g[1]/rect[2]/@stroke","actual":"#000","expected":"#FFF","tolerance":0.01}
+   {"path":"svg/g[1]/text[1]/@fill","actual":"#000","expected":"#FFF","tolerance":0.01}
+   {"path":"svg/g[1]/text[2]/@fill","actual":"#000","expected":"#FFF","tolerance":0.01}
+   {"path":"svg/g[1]/line[1]/@stroke","actual":"#000","expected":"#FFF","tolerance":0.01}
+   {"path":"svg/g[1]/line[2]/@stroke","actual":"#000","expected":"#FFF","tolerance":0.01}
+   {"path":"svg/g[1]/line[3]/@stroke","actual":"#000","expected":"#FFF","tolerance":0.01}
+monochrome-true: 0 diffs, weighted 0
+monochrome-reverse: 0 diffs, weighted 0
+reversecolor-dark: 0 diffs, weighted 0

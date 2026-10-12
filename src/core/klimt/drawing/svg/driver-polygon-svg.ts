@@ -17,6 +17,7 @@
 
 import type { UDriver } from '../../AbstractCommonUGraphic.js';
 import type { UParam } from '../../UParam.js';
+import type { ColorMapper } from '../../color/ColorMapper.js';
 import type { UPolygon } from '../../shape/UPolygon.js';
 import type { SvgGraphics } from './svg-graphics.js';
 import { DriverRectangleSvg } from './driver-rectangle-svg.js';
@@ -26,13 +27,13 @@ import { DriverRectangleSvg } from './driver-rectangle-svg.js';
 export class DriverPolygonSvg implements UDriver<UPolygon> {
   constructor(private readonly svg: SvgGraphics) {}
 
-  draw(shape: UPolygon, param: UParam): void {
+  draw(shape: UPolygon, param: UParam, mapper: ColorMapper): void {
     const x = param.getTranslate().getDx();
     const y = param.getTranslate().getDy();
     const points = shape.getPointArray(x, y);
 
-    DriverRectangleSvg.applyFillColor(this.svg, param);
-    DriverRectangleSvg.applyStrokeColor(this.svg, param);
+    DriverRectangleSvg.applyFillColor(this.svg, mapper, param);
+    DriverRectangleSvg.applyStrokeColor(this.svg, mapper, param);
     this.svg.setStrokeWidth(param.getStroke().getThickness(), param.getStroke().getDasharraySvg() ?? null);
 
     this.svg.svgPolygon(shape.getDeltaShadow(), ...points);

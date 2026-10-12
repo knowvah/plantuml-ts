@@ -116,7 +116,7 @@ export class ElementTree extends AbstractElement {
   drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D | null): void {
     if (zIndex !== 0) return;
 
-    ug = ug.apply(new Fore(this.getBlack().asPaint()));
+    ug = ug.apply(new Fore(this.getBlack()));
 
     const stringBounder = ug.getStringBounder();
     const w1 = this.getWidth1(stringBounder);
@@ -135,7 +135,7 @@ export class ElementTree extends AbstractElement {
       yvar += h;
       rows.push(yvar);
     }
-    ug = ug.apply(new Fore(this.getColor88().asPaint()));
+    ug = ug.apply(new Fore(this.getColor88()));
     skeleton.draw(ug, 0, 0);
     if (this.strategy !== TableStrategy.DRAW_NONE) {
       const grid = new Grid2(rows, cols, this.strategy);

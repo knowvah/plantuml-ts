@@ -15,7 +15,10 @@
  * .ts`'s `NONE_PAINT` doc comment), and `'#00000000'` (explicit
  * zero-alpha) is the equivalent sentinel `SvgGraphicsCore#fixColor`
  * already treats as "none" (`svg-graphics-core.ts`). Both are treated as
- * "transparent" here, matching `fixColor`'s own equivalence class.
+ * "transparent" here, matching `fixColor`'s own equivalence class. An
+ * `HColorSimple` answers its own `isTransparent()` (alpha 0,
+ * `HColorSimple.java:131-134`); a gradient is never transparent (the
+ * inherited `HColor#isTransparent`, `HColor.java:137-139`).
  *
  * `UClip`/`ClipContainer` — not ported (same as `DriverRectangleSvg`);
  * this driver has no clip param at all upstream either (its constructor
@@ -24,13 +27,15 @@
 
 import type { UDriver } from '../../AbstractCommonUGraphic.js';
 import type { UParam } from '../../UParam.js';
-import type { Paint } from '../../../paint.js';
+import type { ColorMapper, HColorOrPaint } from '../../color/ColorMapper.js';
+import { HColorSimple } from '../../color/HColorSimple.js';
 import type { DotPath } from '../../shape/DotPath.js';
 import type { SvgGraphics } from './svg-graphics.js';
 import { DriverRectangleSvg } from './driver-rectangle-svg.js';
 
 // See the module doc comment above for the isTransparent() adaptation.
-function isTransparentPaint(p: Paint): boolean {
+function isTransparentPaint(p: HColorOrPaint): boolean {
+  if (p instanceof HColorSimple) return p.isTransparent();
   return p === 'none' || p === '#00000000';
 }
 
@@ -39,13 +44,13 @@ function isTransparentPaint(p: Paint): boolean {
 export class DriverDotPathSvg implements UDriver<DotPath> {
   constructor(private readonly svg: SvgGraphics) {}
 
-  draw(shape: DotPath, param: UParam): void {
+  draw(shape: DotPath, param: UParam, mapper: ColorMapper): void {
     if (isTransparentPaint(param.getColor())) return;
 
     const x = param.getTranslate().getDx();
     const y = param.getTranslate().getDy();
 
-    DriverRectangleSvg.applyStrokeColor(this.svg, param);
+    DriverRectangleSvg.applyStrokeColor(this.svg, mapper, param);
     this.svg.setFillColor(null);
     this.svg.setStrokeWidth(param.getStroke().getThickness(), param.getStroke().getDasharraySvg() ?? null);
     this.svg.svgPath(x, y, shape.toUPath(), 0);

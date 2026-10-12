@@ -1,5 +1,5 @@
 import type { UChange } from './UChange.js';
-import type { Paint } from '../paint.js';
+import type { HColorOrPaint } from './color/ColorMapper.js';
 
 /**
  * UForeground — a `UChange` that carries a new stroke/foreground paint.
@@ -21,5 +21,5 @@ import type { Paint } from '../paint.js';
  * symmetry, not copied from an upstream name.
  */
 export interface UForeground extends UChange {
-  getColor(): Paint;
+  getColor(): HColorOrPaint;
 }

@@ -83,7 +83,7 @@ export class ElementDroplist extends AbstractElementText implements Element {
   /** @see ElementDroplist.java:91-117 */
   drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D | null): void {
     const dim = this.getPreferredDimension(ug.getStringBounder(), 0, 0);
-    ug = ug.apply(new Fore(this.getBlack().asPaint()));
+    ug = ug.apply(new Fore(this.getBlack()));
 
     if (zIndex === 0) {
       this.drawClosed(ug, dim);
@@ -92,9 +92,7 @@ export class ElementDroplist extends AbstractElementText implements Element {
     if (this.openDrop !== undefined) {
       const dimOpen = this.openDrop.calculateDimension(ug.getStringBounder()).atLeast(dim.getWidth() - 1, 0);
       ug = ug.apply(UTranslate.dy(dim.getHeight() - 1));
-      ug.apply(new Back(this.getColorEE().asPaint())).draw(
-        URectangle.build(dimOpen.getWidth() - 1, dimOpen.getHeight() - 1),
-      );
+      ug.apply(new Back(this.getColorEE())).draw(URectangle.build(dimOpen.getWidth() - 1, dimOpen.getHeight() - 1));
       this.openDrop.drawU(ug);
     }
   }
@@ -102,7 +100,7 @@ export class ElementDroplist extends AbstractElementText implements Element {
   /** The `zIndex == 0` block, split out for the complexity limit.
    *  @see ElementDroplist.java:95-108 */
   private drawClosed(ug: UGraphic, dim: XDimension2D): void {
-    ug.apply(new Back(this.getColorEE().asPaint())).draw(URectangle.build(dim.getWidth() - 1, dim.getHeight() - 1));
+    ug.apply(new Back(this.getColorEE())).draw(URectangle.build(dim.getWidth() - 1, dim.getHeight() - 1));
     this.drawText(ug, 2, 2);
     const xline = dim.getWidth() - this.box;
     ug.apply(UTranslate.dx(xline)).draw(ULine.vline(dim.getHeight() - 1));

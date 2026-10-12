@@ -22,7 +22,7 @@
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/sprite/SpriteMonochrome.java:180-188,215-217
  */
-import type { Paint } from '../../paint.js';
+import { ColorMapper, toSvgPaint, type HColorOrPaint } from '../color/ColorMapper.js';
 import { parseSimpleColor } from '../color/HColorSet.js';
 import { spriteToPngDataUri, type SpriteLike } from './sprite-raster.js';
 
@@ -48,17 +48,23 @@ export interface SpriteTint {
  *
  * Only RGB reaches the gradient (`HColorGradient.java:73-86`), so a
  * translucent back keeps its colour.
+ *
+ * An `HColor` back is read as its light colour (`toSvg(ColorMapper.IDENTITY)`):
+ * `toUImage`'s `colorMapper` and its dark-partnered white/black defaults
+ * (`:180-185`) are not threaded here (no caller passes the drawing
+ * `UGraphic`'s mapper yet).
  */
-export function spriteBackColor(back: Paint | undefined): string | undefined {
+export function spriteBackColor(back: HColorOrPaint | undefined): string | undefined {
   if (back === undefined) return undefined;
-  const solid = typeof back === 'string' ? back : back.color1;
+  const paint = toSvgPaint(back, ColorMapper.IDENTITY);
+  const solid = typeof paint === 'string' ? paint : paint.color1;
   const parsed = parseSimpleColor(solid);
   if (parsed === undefined || parsed.a === 0) return undefined;
   return solid;
 }
 
 /** `toUImage(backcolor, color)` + `image.scale(scale)` as a PNG data URI. */
-export function spriteTintHref(tint: SpriteTint, back: Paint | undefined): string {
+export function spriteTintHref(tint: SpriteTint, back: HColorOrPaint | undefined): string {
   return spriteToPngDataUri(tint.sprite, tint.color, spriteBackColor(back), tint.scale).dataUri;
 }
 
@@ -66,7 +72,7 @@ export function spriteTintHref(tint: SpriteTint, back: Paint | undefined): strin
  *  re-tints ({@link spriteTintHref}); any other image keeps its bytes. */
 export function spriteHrefOver(
   atom: { readonly href: string; readonly tint?: SpriteTint },
-  back: Paint | undefined,
+  back: HColorOrPaint | undefined,
 ): string {
   return atom.tint === undefined ? atom.href : spriteTintHref(atom.tint, back);
 }

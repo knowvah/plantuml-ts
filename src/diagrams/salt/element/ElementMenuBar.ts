@@ -95,7 +95,7 @@ export class ElementMenuBar extends AbstractElement {
   drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D | null): void {
     const preferred = this.getPreferredDimension(ug.getStringBounder(), 0, 0);
 
-    ug = ug.apply(new Fore(this.getBlack().asPaint()));
+    ug = ug.apply(new Fore(this.getBlack()));
 
     if (zIndex === BAR_Z_INDEX) {
       this.drawBar(ug, zIndex, dimToUse);
@@ -112,7 +112,7 @@ export class ElementMenuBar extends AbstractElement {
   private drawBar(ug: UGraphic, zIndex: number, dimToUse: XDimension2D | null): void {
     let x1 = 0;
     // Unguarded like upstream: a null dimToUse is ElementMenuBar.java:108's NullPointerException.
-    ug.apply(new Back(this.getColorDD().asPaint())).draw(URectangle.build(dimToUse!.getWidth(), dimToUse!.getHeight()));
+    ug.apply(new Back(this.getColorDD())).draw(URectangle.build(dimToUse!.getWidth(), dimToUse!.getHeight()));
     for (const entry of this.entries) {
       entry.drawU(ug.apply(UTranslate.dx(x1)), zIndex, dimToUse);
       const w = entry.getPreferredDimension(ug.getStringBounder(), x1, 0).getWidth();

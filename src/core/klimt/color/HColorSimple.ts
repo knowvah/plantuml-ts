@@ -1,5 +1,6 @@
 import type { Paint } from '../../paint.js';
 import type { HColor } from '../../style/Value.js';
+import type { ColorMapper } from './ColorMapper.js';
 import { toSvgHex, type ResolvedColor } from './HColorSet.js';
 
 /** `String.format("%02X")` / `"%02x"` of one 8-bit channel. */
@@ -18,12 +19,13 @@ function xColorToString(c: ResolvedColor): string {
  *
  * Ported slice (what the style engine and the klimt substrate reach):
  * `create`, `withDark`, `darkSchemeTheme`, `isTransparent`, `getAwtColor`,
- * `toString`, `asString`, `equals`, plus the port-only {@link asPaint}.
+ * `toString`, `asString`, `equals`, `toColor`, the inherited `HColor#toSvg`,
+ * plus the port-only {@link asPaint}.
  * Not ported: `transparentFillBehavior` (set only by
  * `withTransparentFillBehavior`/`HColors.transparent(behavior)`, neither
  * reached; every instance here is upstream's default `WITH_FILL_NONE`, so
  * `toString`'s behaviour suffix, java:62-63, never prints), the
- * HSL/monochrome/`opposite`/`unlinear` arithmetic, `isDark`, `toColor`.
+ * HSL/monochrome/`opposite`/`unlinear` arithmetic, `isDark`.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSimple.java:43-242
  */
@@ -75,6 +77,21 @@ export class HColorSimple implements HColor {
     return this.color;
   }
 
+  /** The awt colour when transparent, else the mapper's answer.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSimple.java:172-176 */
+  toColor(mapper: ColorMapper): ResolvedColor {
+    if (this.isTransparent()) return this.getAwtColor();
+    return mapper.fromColorSimple(this);
+  }
+
+  /** `#00000000` when transparent, else `XColor#toSvg` of `toColor(mapper)`
+   *  (the inherited `HColor#toSvg`, final there).
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColor.java:74-79 */
+  toSvg(mapper: ColorMapper): string {
+    if (this.isTransparent()) return '#00000000';
+    return toSvgHex(this.toColor(mapper));
+  }
+
   /** @see HColorSimple.java:225-228 */
   withDark(dark: HColor): HColor {
     return new HColorSimple(this.color, dark);
@@ -90,8 +107,9 @@ export class HColorSimple implements HColor {
    * is a `Paint`, `klimt/UParam.ts`): `HColor#toSvg(ColorMapper.IDENTITY)`
    * — `#00000000` when transparent, else `XColor#toSvg` of the light colour
    * (`ColorMapper.IDENTITY.fromColorSimple` = `getAwtColor()`,
-   * ColorMapper.java:47-52). The dark partner is not consulted: the
-   * port renders the light scheme only.
+   * ColorMapper.java:47-52). The dark partner is not consulted: a caller
+   * that may draw under another mapper hands the `HColorSimple` itself to
+   * `Fore`/`Back` instead, and the driver maps it ({@link toSvg}).
    *
    * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColor.java:74-80
    */

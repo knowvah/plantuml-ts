@@ -87,6 +87,7 @@
  * shape class exists in this port either.
  */
 
+import { ColorMapper } from '../../color/ColorMapper.js';
 import { AbstractCommonUGraphic } from '../../AbstractCommonUGraphic.js';
 import type { UDriver, ShapeConstructor } from '../../AbstractCommonUGraphic.js';
 import type { UShape } from '../../UShape.js';
@@ -158,7 +159,12 @@ export class UGraphicSvg extends AbstractCommonUGraphic {
     stringBounder: DriverStringBounder,
     measurer?: StringMeasurer,
   ): UGraphicSvg {
-    return new UGraphicSvg(new SvgGraphics(seed, option, version), option, stringBounder, measurer);
+    const result = new UGraphicSvg(new SvgGraphics(seed, option, version), option, stringBounder, measurer);
+    // `result.copy(option.getBackcolor(), option.getColorMapper(), ...)`,
+    // UGraphicSvg.java:91; an unset mapper is `SvgOption`'s IDENTITY default
+    // (SvgOption.java:62).
+    result.basicCopy(option.backcolor, option.colorMapper ?? ColorMapper.IDENTITY);
+    return result;
   }
 
   protected copyUGraphic(): UGraphicSvg {

@@ -18,6 +18,7 @@
 
 import type { UDriver } from '../../AbstractCommonUGraphic.js';
 import type { UParam } from '../../UParam.js';
+import { toSvgPaint, type ColorMapper } from '../../color/ColorMapper.js';
 import type { UPixel } from '../../shape/UPixel.js';
 import type { SvgGraphics } from './svg-graphics.js';
 
@@ -29,10 +30,10 @@ export class DriverPixelSvg implements UDriver<UPixel> {
   constructor(private readonly svg: SvgGraphics) {}
 
   /** Upstream: `draw(UPixel, double x, double y, ColorMapper, UParam, SvgGraphics)`. @see DriverPixelSvg.java:46-57 */
-  draw(_pixel: UPixel, param: UParam): void {
+  draw(_pixel: UPixel, param: UParam, mapper: ColorMapper): void {
     const x = param.getTranslate().getDx();
     const y = param.getTranslate().getDy();
-    const color = param.getColor();
+    const color = toSvgPaint(param.getColor(), mapper); // DriverPixelSvg.java:47-53
     if (typeof color === 'string') this.svg.setStrokeColor(color);
     else this.svg.setStrokeColor(color.color1);
     this.svg.setStrokeWidth(PIXEL_SIZE, null);

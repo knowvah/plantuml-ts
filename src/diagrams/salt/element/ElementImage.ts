@@ -48,7 +48,7 @@ export class ElementImage extends AbstractElement {
   drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D | null): void {
     if (zIndex !== 0) return;
 
-    ug = ug.apply(new Fore(this.getBlack().asPaint()));
+    ug = ug.apply(new Fore(this.getBlack()));
 
     const w = row(this.img, 0).length;
     const h = this.img.length;

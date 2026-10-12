@@ -26,8 +26,9 @@ function simple(color: HColor): HColorSimple {
  * pragma every widget draws with. Salt reads no style (decisions.md D3).
  *
  * Colours are returned as `HColorSimple` (upstream: `HColor`), the concrete
- * class every getter builds, so a widget can paint one
- * (`HColorSimple#asPaint`) where upstream applies it (`color.bg()`).
+ * class every getter builds; a widget applies it as `new Fore(color)` /
+ * `new Back(color)` (upstream `ug.apply(color)` / `color.bg()`) and the
+ * klimt driver maps it with the graphic's `ColorMapper`.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/salt/element/AbstractElement.java:45-89
  */

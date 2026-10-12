@@ -8,6 +8,7 @@ import { Back } from './Back.js';
 import { Fore } from './Fore.js';
 import { CopyForegroundColorToBackgroundColor } from './CopyForegroundColorToBackgroundColor.js';
 import type { Paint } from '../paint.js';
+import { ColorMapper, type HColorOrPaint } from './color/ColorMapper.js';
 import type { StringBounder } from './font/StringBounder.js';
 
 /**
@@ -35,7 +36,10 @@ export type ShapeConstructor<S extends UShape> = (abstract new (...args: never[]
  * independently of `AbstractCommonUGraphic`.
  */
 export interface UDriver<S extends UShape = UShape> {
-  draw(shape: S, param: UParam): void;
+  /** `mapper` is the drawing graphic's `getColorMapper()`
+   *  (`AbstractUGraphic.java:145`); every colour a driver emits passes
+   *  through it (`color/ColorMapper.ts#toSvgPaint`). */
+  draw(shape: S, param: UParam, mapper: ColorMapper): void;
 }
 
 /**
@@ -82,11 +86,12 @@ const NONE_PAINT: Paint = 'none';
  * - `UPattern`/`UHidden`: same reasoning — not in the write-set, so
  *   `isHidden()`/`getPattern()` are absent from `UParam` too (see
  *   `UParam.ts`).
- * - `basicCopy(HColor defaultBackground, ColorMapper colorMapper)`:
- *   the overload that seeds a fresh root instance. Dropped along with
- *   `getDefaultBackground()`/`getColorMapper()` (see `UGraphic.ts`
- *   scope note) — nothing in T2 constructs a root instance that needs
- *   them.
+ * - `basicCopy(HColor defaultBackground, ColorMapper colorMapper)`
+ *   (java:77-80): ported (sep-T5c) — the overload that seeds a fresh root
+ *   instance; `UGraphicSvg.build` calls it with the `SvgOption`'s
+ *   background and mapper (`UGraphicSvg.java:91`). `colorMapper` is
+ *   `ColorMapper.IDENTITY` until seeded, the `SvgOption` default
+ *   (`SvgOption.java:62`).
  * - `StringBounder`: dropped constructor dependency; `getStringBounder
  *   ()` is not part of T2's `UGraphic` (see `UGraphic.ts`).
  * - the driver map is NOT part of `basicCopy` state, matching
@@ -98,15 +103,36 @@ const NONE_PAINT: Paint = 'none';
  */
 export abstract class AbstractCommonUGraphic implements UGraphic {
   private stroke: UStroke = UStroke.simple();
-  private color: Paint = NONE_PAINT;
-  private backColor: Paint = NONE_PAINT;
+  private color: HColorOrPaint = NONE_PAINT;
+  private backColor: HColorOrPaint = NONE_PAINT;
   private translate: UTranslate = UTranslate.none();
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/AbstractCommonUGraphic.java:68 */
+  private colorMapper: ColorMapper = ColorMapper.IDENTITY;
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/AbstractCommonUGraphic.java:71 */
+  private defaultBackground: HColorOrPaint | undefined;
 
   private readonly drivers = new Map<ShapeConstructor<UShape>, UDriver<UShape>>();
 
   protected abstract copyUGraphic(): AbstractCommonUGraphic;
 
-  protected basicCopy(other: AbstractCommonUGraphic): void {
+  /** The root seed (java:77-80), or a copy of `other`'s state (java:82-93). */
+  protected basicCopy(other: AbstractCommonUGraphic): void;
+  protected basicCopy(defaultBackground: HColorOrPaint | undefined, colorMapper: ColorMapper): void;
+  protected basicCopy(other: AbstractCommonUGraphic | HColorOrPaint | undefined, colorMapper?: ColorMapper): void {
+    if (other instanceof AbstractCommonUGraphic) this.copyState(other);
+    else this.seedRoot(other, colorMapper ?? ColorMapper.IDENTITY);
+  }
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/AbstractCommonUGraphic.java:77-80 */
+  private seedRoot(defaultBackground: HColorOrPaint | undefined, colorMapper: ColorMapper): void {
+    this.colorMapper = colorMapper;
+    this.defaultBackground = defaultBackground;
+  }
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/AbstractCommonUGraphic.java:82-93 */
+  private copyState(other: AbstractCommonUGraphic): void {
+    this.defaultBackground = other.defaultBackground;
+    this.colorMapper = other.colorMapper;
     this.translate = other.translate;
     this.stroke = other.stroke;
     this.color = other.color;
@@ -139,7 +165,7 @@ export abstract class AbstractCommonUGraphic implements UGraphic {
     if (driver === undefined) {
       throw new Error(`No driver registered for shape ${ctor.name}`);
     }
-    driver.draw(shape, this.getParam());
+    driver.draw(shape, this.getParam(), this.getColorMapper());
   }
 
   getParam(): UParam {
@@ -153,6 +179,16 @@ export abstract class AbstractCommonUGraphic implements UGraphic {
 
   getTranslate(): UTranslate {
     return this.translate;
+  }
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/AbstractCommonUGraphic.java:180-182 */
+  getColorMapper(): ColorMapper {
+    return this.colorMapper;
+  }
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/AbstractCommonUGraphic.java:98-101 */
+  getDefaultBackground(): HColorOrPaint | undefined {
+    return this.defaultBackground;
   }
 
   /**

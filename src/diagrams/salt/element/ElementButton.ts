@@ -18,9 +18,9 @@ const CORNER = 10;
  * ElementButton — `[text]`: the text centred in a rounded `#EEE` box with a
  * 2.5 px black border, reserving 8 px per source character.
  *
- * Colours: `color.bg()` / `ug.apply(color)` are `Back`/`Fore` of
- * `HColorSimple#asPaint` (the port carries `Paint` where upstream carries
- * `HColor`, `UBackground.ts`).
+ * Colours: `color.bg()` / `ug.apply(color)` are `Back`/`Fore` of the
+ * `HColorSimple` itself, mapped (dark partner included) by the klimt driver
+ * (`UBackground.ts`).
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/salt/element/ElementButton.java:47-75
  */
@@ -50,7 +50,7 @@ export class ElementButton extends AbstractElementText implements Element {
 
     const dim = this.getPreferredDimension(ug.getStringBounder(), 0, 0);
     ug = ug.apply(UStroke.withThickness(this.stroke));
-    ug = ug.apply(new Back(this.getColorEE().asPaint())).apply(new Fore(this.getBlack().asPaint()));
+    ug = ug.apply(new Back(this.getColorEE())).apply(new Fore(this.getBlack()));
     ug.apply(new UTranslate(this.stroke, this.stroke)).draw(
       URectangle.build(dim.getWidth() - 2 * this.stroke, dim.getHeight() - 2 * this.stroke).rounded(CORNER),
     );

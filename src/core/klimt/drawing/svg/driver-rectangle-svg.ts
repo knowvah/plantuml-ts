@@ -45,6 +45,7 @@
 
 import type { UDriver } from '../../AbstractCommonUGraphic.js';
 import type { UParam } from '../../UParam.js';
+import { toSvgPaint, type ColorMapper } from '../../color/ColorMapper.js';
 import type { URectangle } from '../../shape/URectangle.js';
 import type { SvgGraphics } from './svg-graphics.js';
 
@@ -54,8 +55,8 @@ export class DriverRectangleSvg implements UDriver<URectangle> {
   constructor(private readonly svg: SvgGraphics) {}
 
   /** Upstream: `DriverRectangleSvg.applyFillColor(SvgGraphics, ColorMapper, UParam)`. */
-  static applyFillColor(svg: SvgGraphics, param: UParam): void {
-    const background = param.getBackcolor();
+  static applyFillColor(svg: SvgGraphics, mapper: ColorMapper, param: UParam): void {
+    const background = toSvgPaint(param.getBackcolor(), mapper);
     if (typeof background === 'string') {
       svg.setFillColor(background);
     } else {
@@ -65,8 +66,8 @@ export class DriverRectangleSvg implements UDriver<URectangle> {
   }
 
   /** Upstream: `DriverRectangleSvg.applyStrokeColor(SvgGraphics, ColorMapper, UParam)`. */
-  static applyStrokeColor(svg: SvgGraphics, param: UParam): void {
-    const color = param.getColor();
+  static applyStrokeColor(svg: SvgGraphics, mapper: ColorMapper, param: UParam): void {
+    const color = toSvgPaint(param.getColor(), mapper);
     if (typeof color === 'string') {
       svg.setStrokeColor(color);
     } else {
@@ -76,7 +77,7 @@ export class DriverRectangleSvg implements UDriver<URectangle> {
   }
 
   /** Upstream: `draw(URectangle, double x, double y, ColorMapper, UParam, SvgGraphics)`. */
-  draw(rect: URectangle, param: UParam): void {
+  draw(rect: URectangle, param: UParam, mapper: ColorMapper): void {
     const x = param.getTranslate().getDx();
     const y = param.getTranslate().getDy();
     const rx = rect.getRx();
@@ -84,8 +85,8 @@ export class DriverRectangleSvg implements UDriver<URectangle> {
     const width = rect.getWidth();
     const height = rect.getHeight();
 
-    DriverRectangleSvg.applyFillColor(this.svg, param);
-    DriverRectangleSvg.applyStrokeColor(this.svg, param);
+    DriverRectangleSvg.applyFillColor(this.svg, mapper, param);
+    DriverRectangleSvg.applyStrokeColor(this.svg, mapper, param);
     this.svg.setStrokeWidth(param.getStroke().getThickness(), param.getStroke().getDasharraySvg() ?? null);
 
     // rx/ry halved at serialization time — see URectangle.ts's own note

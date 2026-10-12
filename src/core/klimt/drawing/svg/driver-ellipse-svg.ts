@@ -15,6 +15,7 @@
 
 import type { UDriver } from '../../AbstractCommonUGraphic.js';
 import type { UParam } from '../../UParam.js';
+import type { ColorMapper } from '../../color/ColorMapper.js';
 import type { UEllipse } from '../../shape/UEllipse.js';
 import type { SvgGraphics } from './svg-graphics.js';
 import { DriverRectangleSvg } from './driver-rectangle-svg.js';
@@ -35,14 +36,14 @@ interface EllipseGeometry {
 export class DriverEllipseSvg implements UDriver<UEllipse> {
   constructor(private readonly svg: SvgGraphics) {}
 
-  draw(shape: UEllipse, param: UParam): void {
+  draw(shape: UEllipse, param: UParam, mapper: ColorMapper): void {
     const x = param.getTranslate().getDx();
     const y = param.getTranslate().getDy();
     const width = shape.getWidth();
     const height = shape.getHeight();
 
-    DriverRectangleSvg.applyStrokeColor(this.svg, param);
-    DriverRectangleSvg.applyFillColor(this.svg, param);
+    DriverRectangleSvg.applyStrokeColor(this.svg, mapper, param);
+    DriverRectangleSvg.applyFillColor(this.svg, mapper, param);
     this.svg.setStrokeWidth(param.getStroke().getThickness(), param.getStroke().getDasharraySvg() ?? null);
 
     const start = shape.getStart();

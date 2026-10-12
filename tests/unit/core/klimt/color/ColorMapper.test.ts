@@ -72,3 +72,19 @@ describe('ColorMapper.DARK_MODE / non-colour paints', () => {
     expect(mapPaint('url(#g1)', ColorMapper.MONOCHROME)).toBe('url(#g1)');
   });
 });
+
+describe('ColorMapper.LIGTHNESS_INVERSE / reverse(order) (ColorMapper.java:74-79,93-100)', () => {
+  it('LIGTHNESS_INVERSE is ColorUtils.getReversed, opaque: #010101 -> #FEFEFE (jar, reversecolor dark)', () => {
+    expect(ColorMapper.LIGTHNESS_INVERSE.fromColorSimple(HColorSimple.create(rgb(1, 1, 1)))).toEqual(
+      rgb(0xfe, 0xfe, 0xfe),
+    );
+    // `new XColor(red2, green2, blue2)` (ColorUtils.java:166): the alpha is dropped.
+    expect(ColorMapper.LIGTHNESS_INVERSE.fromColorSimple(HColorSimple.create(rgb(1, 1, 1, 0x80))).a).toBe(255);
+  });
+
+  it('reverse(order) permutes, then 255-complements each channel, opaque (ColorOrder.java:66-69)', () => {
+    const c = HColorSimple.create(rgb(0x12, 0x34, 0x56, 0x80));
+    expect(ColorMapper.reverse('RGB').fromColorSimple(c)).toEqual(rgb(0xed, 0xcb, 0xa9));
+    expect(ColorMapper.reverse('BGR').fromColorSimple(c)).toEqual(rgb(0xa9, 0xcb, 0xed));
+  });
+});

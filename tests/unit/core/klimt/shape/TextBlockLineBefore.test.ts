@@ -17,7 +17,7 @@ import type { UChange } from '../../../../../src/core/klimt/UChange.js';
 import type { UShape } from '../../../../../src/core/klimt/UShape.js';
 import type { UParam } from '../../../../../src/core/klimt/UParam.js';
 import type { StringBounder } from '../../../../../src/core/klimt/font/StringBounder.js';
-import type { Paint } from '../../../../../src/core/paint.js';
+import type { HColorOrPaint } from '../../../../../src/core/klimt/color/ColorMapper.js';
 import { XDimension2D } from '../../../../../src/core/klimt/geom/XDimension2D.js';
 import { XRectangle2D } from '../../../../../src/core/klimt/geom/XRectangle2D.js';
 import { UTranslate } from '../../../../../src/core/klimt/UTranslate.js';
@@ -32,7 +32,7 @@ const stubStringBounder: StringBounder = { calculateDimension: () => new XDimens
 /** Every `Paint` used in this file's fixtures is a plain string; this
  *  narrows for the event log so it never falls back to `[object Object]`
  *  stringification of a `Gradient`. */
-function paintLabel(paint: Paint): string {
+function paintLabel(paint: HColorOrPaint): string {
   return typeof paint === 'string' ? paint : 'gradient';
 }
 
@@ -40,7 +40,7 @@ class RecordingUGraphic implements UGraphic {
   constructor(
     private readonly events: string[],
     private readonly translate: UTranslate = UTranslate.none(),
-    private readonly color: Paint = '#123456',
+    private readonly color: HColorOrPaint = '#123456',
   ) {}
 
   apply(change: UChange): UGraphic {
