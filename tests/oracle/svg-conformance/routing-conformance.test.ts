@@ -1009,10 +1009,13 @@ describe('routing conformance — jar-error classification', () => {
     // 5671 -> 5675 / 6625 -> 6629 at cdd8/T0b: 4 svg-class unknown-tree clone
     // rows (vakovo-25, fakone-16, japode-92, tikiti-02; zero-diff pins after the
     // pragma-stripped re-capture). Derivation: 5675 + 868 + 86 = 6629.
-    expect(pinnedAgree.length).toBe(5675);
+    // 5675 -> 5680 / 6629 -> 6634 at cdd8/close-b1: 5 svg-class clone rows
+    // (dezobu-62, sapofa-97, semutu-45, xagomi-49 unknown-tree; gadufu-56),
+    // zero-diff pins. Derivation: 5680 + 868 + 86 = 6634.
+    expect(pinnedAgree.length).toBe(5680);
     expect(pinnedMisroutes.length).toBe(868);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(6629);
+    expect(manifest.fixtures.length).toBe(6634);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

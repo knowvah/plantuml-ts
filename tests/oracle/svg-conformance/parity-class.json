@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-10T12:07:19.852Z",
+  "generatedAt": "2026-10-12T02:24:15.244Z",
   "fixtures": [
     {
       "slug": "bajotu-30-soku184",
@@ -266,9 +266,9 @@
       "type": "class",
       "dotEqual": false,
       "verdict": "diverged",
-      "maxDelta": 91.66300000000001,
-      "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/g[4]/path[1]/@d[2]",
+      "maxDelta": 419,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]",
       "oracleBlind": true
     },
     {
@@ -396,8 +396,8 @@
       "type": "class",
       "dotEqual": false,
       "verdict": "diverged",
-      "maxDelta": 255,
-      "firstDiff": "svg/g[1]/g[1]/@class",
+      "maxDelta": 531,
+      "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]",
       "oracleBlind": true
     },
@@ -1282,9 +1282,9 @@
       "type": "class",
       "dotEqual": false,
       "verdict": "diverged",
-      "maxDelta": 116.638,
-      "firstDiff": "svg/g[1]/g[1]/@class",
-      "maxDeltaPath": "svg/g[1]/g[1]/line[1]/@x2",
+      "maxDelta": 573,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]",
       "oracleBlind": true
     },
     {
@@ -1856,9 +1856,9 @@
       "type": "class",
       "dotEqual": false,
       "verdict": "diverged",
-      "maxDelta": 204.44,
-      "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@x",
+      "maxDelta": 395,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]",
       "oracleBlind": true
     },
     {
@@ -3107,9 +3107,9 @@
       "type": "class",
       "dotEqual": false,
       "verdict": "diverged",
-      "maxDelta": 93,
-      "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/@height",
+      "maxDelta": 682,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]",
       "oracleBlind": true
     },
     {
@@ -3460,9 +3460,9 @@
       "type": "class",
       "dotEqual": false,
       "verdict": "diverged",
-      "maxDelta": 714.2429999999999,
-      "firstDiff": "svg/g[1]/g[1]/@class",
-      "maxDeltaPath": "svg/g[1]/g[5]/line[1]/@x2",
+      "maxDelta": 351.1,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[27]/@x",
       "oracleBlind": true
     },
     {
@@ -3500,9 +3500,9 @@
       "type": "class",
       "dotEqual": false,
       "verdict": "diverged",
-      "maxDelta": 214.40700000000004,
-      "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/g[5]/line[1]/@x2",
+      "maxDelta": 474,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]",
       "oracleBlind": true
     },
     {

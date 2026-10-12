@@ -25,13 +25,13 @@ and zuduxu, and unknown petiku and rubebe.
 | class/roxosu-00-pini153 | structural-match | 0/49 | salt | same as bixogo | T0a | open -> salt-engine-port |
 | class/nugecu-04-tona107 | structural-match | 0/23 | dot-engine A3 | flat labelled edge mirrored label side (graphviz-issues 23 `[~]`) | T0a | accepted (D11.1) |
 | unknown/lubicu-73-fule059 | structural-match | 0/37 | salt | three `{{salt}}` slots; note seam `UNWIRED_NESTED_RENDERER` (cdd7 journal row 3) | — | open -> salt-engine-port |
-| unknown/dezobu-62-vuzu421 | structural-match | 0/183 | archimate | `CommandArchimate.java:146-152` → `<<$archimate/icon>>` sprite stereotype; description engine draws the label instead | T1c | |
-| unknown/sapofa-97-gizu737 | structural-match | 0/11 | latex | `<latex>` image 120×40 (latex.ts heuristic) vs jar JLaTeXMath 18×22 / 18×17 (`TeXIconBuilder.java:47-56`) | T1d | |
+| unknown/dezobu-62-vuzu421 | structural-match | 0/183 | archimate | `CommandArchimate.java:146-152` → `<<$archimate/icon>>` sprite stereotype; description engine draws the label instead | T1c | fixed (T1c f4b59b00e+32dc14038, pinned cdd8-b1) |
+| unknown/sapofa-97-gizu737 | structural-match | 0/11 | latex | `<latex>` image 120×40 (latex.ts heuristic) vs jar JLaTeXMath 18×22 / 18×17 (`TeXIconBuilder.java:47-56`) | T1d | fixed (T1d c719796d4, pinned cdd8-b1) |
 | unknown/vakovo-25-licu237 | structural-match | 0/131 | smetana | captured WITH `!pragma layout smetana` (oracleBlind); G0 re-capture | T0b | fixed (T0b re-capture, pinned cdd8-b0) |
 | unknown/fakone-16-boro774 | structural-match | 0/204 | smetana | same; accepted cdd7 D8, to be retired | T0b | fixed (T0b re-capture, pinned cdd8-b0) |
 | unknown/japode-92-famo984 | structural-match | 0/744 | smetana | same | T0b | fixed (T0b re-capture, pinned cdd8-b0) |
 | unknown/tikiti-02-bagu049 | structural-match | 0/177 | smetana | same | T0b | fixed (T0b re-capture, pinned cdd8-b0) |
-| unknown/xagomi-49-caki729 | diverged (post-T0b) | 1/12 | hexagon | after the pragma-stripped re-capture the jar draws the graphviz hexagon (`DotStringFactory.java:414-420`, `SvekNode.java:337-338`); class emits `shape=rect`, `hexagonPolygon: null` | T0b → T1e | |
+| unknown/xagomi-49-caki729 | diverged (post-T0b) | 1/12 | hexagon | after the pragma-stripped re-capture the jar draws the graphviz hexagon (`DotStringFactory.java:414-420`, `SvekNode.java:337-338`); class emits `shape=rect`, `hexagonPolygon: null` | T0b → T1e | fixed (T1e bf07be2bd, pinned cdd8-b1) |
 | unknown/gubeca-19-lemu434 | structural-match | 0/11 | smetana-yaml | nested `{{yaml}}` is JsonDiagram on the Smetana path (CLAUDE.md ruling) | — | accepted (cdd7 D8) |
 | unknown/jixibu-01-xave465 | structural-match | 0/11 | smetana-yaml | same | — | accepted (cdd7 D8) |
 
