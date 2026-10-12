@@ -1,0 +1,514 @@
+{
+  "fixtures": [
+    {
+      "type": "salt",
+      "slug": "bireva-46-dalu382",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "bogusi-24-gedu278",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "buxoza-46-zezu068",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "cajoda-60-geze313",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "cedeku-50-nopo940",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "cifali-45-fexa238",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "danope-71-noje226",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "detike-12-nika771",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "digebu-56-luko289",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "dijali-04-life812",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "donogu-83-dolo473",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "dukixu-89-fase540",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "ferobi-59-kojo540",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "firuta-83-ruvi281",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "fokigi-37-juxi678",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "gubexu-82-name357",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "jukefo-44-teja465",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "kabevi-77-moje909",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "kaziri-68-fofu065",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "kigoki-76-zobi297",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "lakari-33-mone874",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-crash (oracle/goldens/svg-conformance/routing-baseline.json: jarErrored=true; oracle/goldens/stock-error-pages.json: salt/lakari-33-mone874). The cached in.svg is the jar's \"PlantUML ($version$) has crashed\" page for a java.lang.IllegalArgumentException thrown by ElementMenuBar#getElementMenuEntry (salt/element/ElementMenuBar.java:87, via addSubEntry :68 and ElementFactoryMenu.create, salt/factory/ElementFactoryMenu.java:74) -- the oracle produced no salt image for this source, so there is no real geometry to compare fidelity against. The port also renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) for this fixture today (no salt plugin registered -- src/index.ts:111-125), so both sides are degenerate.",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "lobile-12-tafe674",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "lojove-43-veci853",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "maxone-19-guto514",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "mejeki-64-buvo994",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "mucife-33-devu289",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "nakuvu-18-nive718",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "neguge-98-cilu043",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "nutesi-68-soxe380",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "pusisi-42-reco966",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "resexi-89-jeru231",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "ributi-22-dogi775",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "rulico-91-pora469",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "sidoxe-34-nuzu138",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "suvage-74-tera749",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "tageba-44-kove684",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "tejera-28-feli353",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "teloka-76-mamu714",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "terujo-11-dizo291",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "tidube-04-sivu098",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "tikoga-90-nedu880",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "tisaje-59-zula947",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "vizono-80-vipa581",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "vuxibo-96-tago783",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "xaderu-42-jone467",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "xetajo-70-relu240",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "xicose-14-gigi527",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "xijera-10-zago331",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "xutoni-07-pike306",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "zereco-90-dedo257",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    },
+    {
+      "type": "salt",
+      "slug": "zocule-51-bave879",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:361-375) -- no salt plugin is registered (src/index.ts:111-125 lists fifteen registry.register(...) calls; salt is absent), so DiagramRegistry.resolve (dispatcher.ts:431-441) finds zero attempts and resolveAllRefused (:482-487) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar salt render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a salt plugin registers (plans/salt-engine-port/decisions.md D6).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "0af285dcb"
+    }
+  ]
+}
