@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1572 modules · 5848 exported names.
+1578 modules · 5854 exported names.
 
 ## `src/`
 
@@ -1824,17 +1824,23 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `AbstractElementFactoryComplex.ts` | `AbstractElementFactoryComplex` |  |
 | `ElementFactory.ts` | `ElementFactory` |  |
+| `ElementFactoryBorder.ts` | `ElementFactoryBorder` |  |
 | `ElementFactoryButton.ts` | `ElementFactoryButton` |  |
 | `ElementFactoryCheckboxOff.ts` | `ElementFactoryCheckboxOff` |  |
 | `ElementFactoryCheckboxOn.ts` | `ElementFactoryCheckboxOn` |  |
 | `ElementFactoryDroplist.ts` | `ElementFactoryDroplist` |  |
 | `ElementFactoryImage.ts` | `ElementFactoryImage` |  |
 | `ElementFactoryLine.ts` | `ElementFactoryLine` |  |
+| `ElementFactoryMenu.ts` | `ElementFactoryMenu` |  |
+| `ElementFactoryPyramid.ts` | `ElementFactoryPyramid` |  |
 | `ElementFactoryRadioOff.ts` | `ElementFactoryRadioOff` |  |
 | `ElementFactoryRadioOn.ts` | `ElementFactoryRadioOn` |  |
 | `ElementFactoryRetrieveFromDictonnary.ts` | `ElementFactoryRetrieveFromDictonnary` |  |
+| `ElementFactoryScroll.ts` | `ElementFactoryScroll` |  |
+| `ElementFactoryTab.ts` | `ElementFactoryTab` |  |
 | `ElementFactoryText.ts` | `ElementFactoryText` |  |
 | `ElementFactoryTextField.ts` | `ElementFactoryTextField` |  |
+| `ElementFactoryTree.ts` | `ElementFactoryTree` |  |
 | `ScrollStrategy.ts` | `ScrollStrategy`, `fromDesc` | ScrollStrategy — which scroll bars a `{S` scrolled pyramid draws: both, vertical only (`{SI`) or horizontal only (`{S-`); read by `ElementPyramidScrolled.java:64`. |
 
 ## `src/diagrams/sequence/`
