@@ -1,5 +1,6 @@
 import type { Gradient, Paint } from '../../paint.js';
 import { getGrayScaleColor, getGrayScaleColorReverse } from './ColorUtils.js';
+import { HColorGradient } from './HColorGradient.js';
 import { parseSimpleColor, toSvgHex, type ResolvedColor } from './HColorSet.js';
 import { HColorSimple } from './HColorSimple.js';
 
@@ -68,4 +69,37 @@ export function mapPaint(paint: Paint, mapper: ColorMapper): Paint {
     policy: paint.policy,
   };
   return gradient;
+}
+
+/**
+ * PORT-ONLY: what the klimt substrate carries where upstream carries an
+ * `HColor` (`Fore`/`Back`, `UParam#getColor`/`getBackcolor`, `SvgOption`'s
+ * background, `UText`'s font colour). A `Paint` stands for an `HColor` built
+ * from its spelling (no dark partner); an `HColorSimple`/`HColorGradient` is
+ * the upstream object itself, mapped at draw time by the `UGraphic`'s
+ * {@link ColorMapper} (`AbstractUGraphic.java:145`).
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColor.java:55
+ */
+export type HColorOrPaint = Paint | HColorSimple | HColorGradient;
+
+/**
+ * `HColor#toSvg(mapper)` over {@link HColorOrPaint}: an `HColorSimple` maps
+ * with its dark partner (HColor.java:74-79); an `HColorGradient` maps both
+ * stops with `toRGB(mapper)` (DriverRectangleSvg.java:87-90). A `Paint` is
+ * returned as-is under `IDENTITY` — `IDENTITY.fromColorSimple` is the colour
+ * itself (ColorMapper.java:47-52), and leaving the spelling untouched keeps
+ * every `Paint` caller's emission byte-identical — and through
+ * {@link mapPaint} under any other mapper.
+ */
+export function toSvgPaint(color: HColorOrPaint, mapper: ColorMapper): Paint {
+  if (color instanceof HColorSimple) return color.toSvg(mapper);
+  if (color instanceof HColorGradient) return color.asPaint(mapper);
+  return mapper === ColorMapper.IDENTITY ? color : mapPaint(color, mapper);
+}
+
+/** {@link toSvgPaint} for one solid colour string: as-is under `IDENTITY`,
+ *  else `HColor#toSvg(mapper)` of the colour it spells (HColor.java:74-79). */
+export function toSvgSolid(color: string, mapper: ColorMapper): string {
+  return mapper === ColorMapper.IDENTITY ? color : mapSolid(color, mapper);
 }

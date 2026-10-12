@@ -14,15 +14,15 @@ import { URectangle } from '../../../../src/core/klimt/shape/URectangle.js';
 import { UEllipse } from '../../../../src/core/klimt/shape/UEllipse.js';
 import { UPolygon } from '../../../../src/core/klimt/shape/UPolygon.js';
 import { XDimension2D } from '../../../../src/core/klimt/geom/XDimension2D.js';
-import type { Paint } from '../../../../src/core/paint.js';
+import type { HColorOrPaint } from '../../../../src/core/klimt/color/ColorMapper.js';
 
 interface DrawEvent {
   readonly type: 'draw';
   readonly shape: UShape;
   readonly dx: number;
   readonly dy: number;
-  readonly fore: Paint | undefined;
-  readonly back: Paint | undefined;
+  readonly fore: HColorOrPaint | undefined;
+  readonly back: HColorOrPaint | undefined;
 }
 interface GroupEvent {
   readonly type: 'startGroup' | 'closeGroup';
@@ -39,10 +39,10 @@ class RecordingUGraphic implements UGraphic {
   readonly events: Event[];
   private readonly dx: number;
   private readonly dy: number;
-  private readonly fore: Paint | undefined;
-  private readonly back: Paint | undefined;
+  private readonly fore: HColorOrPaint | undefined;
+  private readonly back: HColorOrPaint | undefined;
 
-  constructor(events: Event[] = [], dx = 0, dy = 0, fore?: Paint, back?: Paint) {
+  constructor(events: Event[] = [], dx = 0, dy = 0, fore?: HColorOrPaint, back?: HColorOrPaint) {
     this.events = events;
     this.dx = dx;
     this.dy = dy;

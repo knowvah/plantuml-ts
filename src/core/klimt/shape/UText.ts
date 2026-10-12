@@ -1,5 +1,6 @@
 import type { UShape } from '../UShape.js';
 import type { UStroke } from '../UStroke.js';
+import type { HColorSimple } from '../color/HColorSimple.js';
 import { FontPosition, fontPositionSpace, muteFontSize } from '../font/FontPosition.js';
 
 /**
@@ -149,6 +150,17 @@ export interface FontConfiguration {
   readonly family: string;
   readonly size: number;
   readonly color: string | null;
+  /** The `HColorSimple` {@link color} was resolved from, when the
+   *  configuration came from upstream's single `FontConfiguration` class
+   *  (`font/FontConfigurationBridge.ts`): it keeps the dark partner
+   *  (`FontConfiguration.blackBlueTrue` = BLACK.withDark(WHITE),
+   *  FontConfiguration.java:63-65) that `DriverTextSvg` maps with the
+   *  drawing graphic's `ColorMapper` (DriverTextSvg.java:177-178). Valid only
+   *  while {@link color} is still its `asPaint()`: a creole/skin override
+   *  that spreads a NEW colour over this configuration leaves the field
+   *  behind, and the driver then reads {@link color} (`fontColorOf`).
+   *  Optional, so every existing literal is unchanged. */
+  readonly hColor?: HColorSimple;
   readonly styles: ReadonlySet<FontStyle>;
   /** Upstream's `currentFont.getFontFace()` (`FontConfiguration#getFontFace`,
    *  java:114-115) — the BASE face, independent of {@link styles}. Optional:

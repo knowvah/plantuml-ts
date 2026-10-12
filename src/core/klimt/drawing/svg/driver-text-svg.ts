@@ -52,6 +52,7 @@ import type { UDriver } from '../../AbstractCommonUGraphic.js';
 import type { UParam } from '../../UParam.js';
 import { parseColor } from '../../../paint.js';
 import { resolveColorToSvgHex } from '../../color/HColorSet.js';
+import { toSvgPaint, toSvgSolid, type ColorMapper } from '../../color/ColorMapper.js';
 import { shortenColor } from '../../../svg-format.js';
 import { getFont } from '../../shape/UText.js';
 import { extraLineStrokeWidth, textRenderDecorations, type ExtraLine } from './driver-text-svg-decorations.js';
@@ -66,6 +67,16 @@ export interface StringBounder {
     font: { readonly family: string; readonly size: number },
     text: string,
   ): { readonly width: number; readonly height?: number };
+}
+
+/**
+ * `fontConfiguration.getColor().toSvg(mapper)` (DriverTextSvg.java:177-178):
+ * the bridged `HColorSimple` while {@link FontConfiguration.color} is still
+ * its light paint (`UText.ts#hColor`), else the colour string, mapped.
+ */
+function fontColorOf(font: FontConfiguration, color: string, mapper: ColorMapper): string {
+  if (font.hColor !== undefined && font.hColor.asPaint() === color) return font.hColor.toSvg(mapper);
+  return toSvgSolid(color, mapper);
 }
 
 // Upstream: `text.replace(' ', (char) 160)` — regular space -> NBSP.
@@ -94,7 +105,7 @@ export class DriverTextSvg implements UDriver<UText> {
     private readonly stringBounder: StringBounder,
   ) {}
 
-  draw(shape: UText, param: UParam): void {
+  draw(shape: UText, param: UParam, mapper: ColorMapper): void {
     const font = shape.getFontConfiguration();
     if (font.color === null) return; // Upstream: fontConfiguration.getColor().isTransparent().
 
@@ -115,9 +126,9 @@ export class DriverTextSvg implements UDriver<UText> {
     // Upstream java:161-169: a GRADIENT extended colour is painted as a
     // filled rectangle UNDER the run (`deltaPatch = 2`, java:167-168),
     // before the text itself and instead of the `feFlood` filter.
-    this.drawBackGradient(deco.backGradient, x, y, dim);
+    this.drawBackGradient(deco.backGradient, x, y, dim, mapper);
 
-    this.svg.setFillColor(font.color);
+    this.svg.setFillColor(fontColorOf(font, font.color, mapper));
     this.svg.text(trimmed, x, y, {
       fontFamily: drawFont.family,
       fontSize: drawFont.size,
@@ -126,26 +137,27 @@ export class DriverTextSvg implements UDriver<UText> {
       textDecoration: deco.textDecoration,
       textLength: dim.width,
       attributes: new Map(),
-      textBackColor: deco.backColor === null ? null : resolveColorToSvgHex(deco.backColor),
+      textBackColor: deco.backColor === null ? null : toSvgSolid(resolveColorToSvgHex(deco.backColor), mapper),
       orientation: shape.getOrientation(),
     });
 
     // Upstream java:180: `extraLines.drawAll(x, y, width, font, mapper, svg)`
     // — AFTER the `<text>`, so the coloured rule sits above it in document
     // order exactly as the jar emits it.
-    this.drawExtraLines(deco.extraLines, x, y, dim.width, drawFont.size);
+    this.drawExtraLines(deco.extraLines, { x, y, width: dim.width }, drawFont.size, mapper);
   }
 
-  /** Upstream `ExtraLines#drawAll` (`DriverTextSvg.java:68-75`). */
+  /** Upstream `ExtraLines#drawAll` (`DriverTextSvg.java:68-75`), each
+   *  colour `toSvg(mapper)` (java:72). */
   private drawExtraLines(
     extraLines: readonly ExtraLine[],
-    x: number,
-    y: number,
-    width: number,
+    at: { readonly x: number; readonly y: number; readonly width: number },
     drawnFontSize: number,
+    mapper: ColorMapper,
   ): void {
+    const { x, y, width } = at;
     for (const extra of extraLines) {
-      this.svg.setStrokeColor(shortenColor(resolveColorToSvgHex(extra.color)));
+      this.svg.setStrokeColor(shortenColor(toSvgSolid(resolveColorToSvgHex(extra.color), mapper)));
       this.svg.setStrokeWidth(extraLineStrokeWidth(drawnFontSize), null);
       this.svg.svgLine(x, y + extra.deltaY, x + width, y + extra.deltaY, 0);
     }
@@ -164,9 +176,11 @@ export class DriverTextSvg implements UDriver<UText> {
     x: number,
     y: number,
     dim: { readonly width: number; readonly height?: number },
+    mapper: ColorMapper,
   ): void {
     if (backGradient === null || dim.height === undefined) return;
-    const paint = parseColor(backGradient);
+    // `gr.getColor1().toRGB(mapper)`, `gr.getColor2().toRGB(mapper)` (java:165).
+    const paint = toSvgPaint(parseColor(backGradient), mapper);
     if (typeof paint === 'string') return;
     const id = this.svg.createSvgGradient(paint.color1, paint.color2, paint.policy);
     this.svg.setFillColor(`url(#${id})`);

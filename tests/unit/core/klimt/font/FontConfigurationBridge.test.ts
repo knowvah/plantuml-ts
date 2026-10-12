@@ -28,6 +28,7 @@ describe('bridgeFontConfiguration (FontConfiguration.java:57-80)', () => {
       color: '#0000FF',
       styles: new Set(),
       fontFace: { cssWeight: 400, italic: false },
+      hColor: BLUE,
     });
   });
 
@@ -37,8 +38,10 @@ describe('bridgeFontConfiguration (FontConfiguration.java:57-80)', () => {
     expect([...bridgeFontConfiguration(fcOf(900, true)).styles]).toEqual([FontStyle.ITALIC, FontStyle.BOLD]);
   });
 
-  it('a transparent colour is null (UText.ts stand-in for isTransparent)', () => {
-    expect(bridgeFontConfiguration(fcOf(400, false, HColors.transparent())).color).toBeNull();
+  it('a transparent colour is null (UText.ts stand-in for isTransparent), with no hColor', () => {
+    const fc = bridgeFontConfiguration(fcOf(400, false, HColors.transparent()));
+    expect(fc.color).toBeNull();
+    expect(fc.hColor).toBeUndefined();
   });
 
   it('rejects a colour that is not an HColorSimple, and a font that is not a UFont', () => {

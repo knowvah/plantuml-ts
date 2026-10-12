@@ -1,5 +1,6 @@
 import type { Gradient } from '../../paint.js';
 import type { HColor } from '../../style/Value.js';
+import type { ColorMapper } from './ColorMapper.js';
 import type { ResolvedColor } from './HColorSet.js';
 import type { HColorSimple } from './HColorSimple.js';
 
@@ -7,16 +8,16 @@ import type { HColorSimple } from './HColorSimple.js';
 export type GradientPolicy = Gradient['policy'];
 
 /**
- * `HColor#toRGB(ColorMapper.IDENTITY)`: `XColor.toHexRGBColor(color.getRGB())`
+ * `HColor#toRGB(mapper)`: `XColor.toHexRGBColor(toColor(mapper).getRGB())`
  * = `String.format("#%06X", rgb & 0xFFFFFF)` -- uppercase `#RRGGBB`, alpha
- * DROPPED (unlike `toSvg`). `toColor(IDENTITY)` of an `HColorSimple` is its
- * `XColor` (`HColorSimple.java:172-176`, `ColorMapper.java:47-52`).
+ * DROPPED (unlike `toSvg`). With no mapper it is `toColor(IDENTITY)`, the
+ * `XColor` itself (`HColorSimple.java:172-176`, `ColorMapper.java:47-52`).
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColor.java:69-72
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/awt/XColor.java:127-129
  */
-function toRGB(color: HColorSimple): string {
-  const { r, g, b } = color.getAwtColor();
+function toRGB(color: HColorSimple, mapper: ColorMapper | undefined): string {
+  const { r, g, b } = mapper === undefined ? color.getAwtColor() : color.toColor(mapper);
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0').toUpperCase()}`;
 }
 
@@ -28,8 +29,9 @@ function toRGB(color: HColorSimple): string {
  *
  * The port's only concrete colour reaching here is {@link HColorSimple}
  * (`parseColor` wraps both halves in `HColors.simple`, java:115), so the
- * halves are typed as such. There is no `ColorMapper` port: every
- * `mapper` argument is `ColorMapper.IDENTITY`, as in `HColorSimple#asPaint`.
+ * halves are typed as such. The `mapper` of {@link asPaint} is the
+ * drawing `UGraphic`'s (`DriverRectangleSvg.java:87-90`); `toColor` stays
+ * `ColorMapper.IDENTITY`, as in `HColorSimple#asPaint`.
  * Not ported: `getRGB` (TeaVM/AWT raster only), `opposite` (`HColorSimple
  * #opposite` is unported). Inherited `HColor#withDark` throws, as upstream.
  *
@@ -106,9 +108,10 @@ export class HColorGradient implements HColor {
    * `DriverRectangleSvg` hands `SvgGraphics#createSvgGradient` --
    * `gr.getColor1().toRGB(mapper), gr.getColor2().toRGB(mapper),
    * gr.getPolicy()` (DriverRectangleSvg.java:87-90, 103-106). The port's
-   * rectangle driver makes that call for a `Gradient` paint.
+   * rectangle driver makes that call for a `Gradient` paint. No `mapper` is
+   * `ColorMapper.IDENTITY`.
    */
-  asPaint(): Gradient {
-    return { color1: toRGB(this.color1), color2: toRGB(this.color2), policy: this.policy };
+  asPaint(mapper?: ColorMapper): Gradient {
+    return { color1: toRGB(this.color1, mapper), color2: toRGB(this.color2, mapper), policy: this.policy };
   }
 }

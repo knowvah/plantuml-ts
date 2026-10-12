@@ -1,5 +1,5 @@
 import type { UChange } from './UChange.js';
-import type { Paint } from '../paint.js';
+import type { HColorOrPaint } from './color/ColorMapper.js';
 
 /**
  * UBackground — a `UChange` that carries a new fill/background paint.
@@ -10,10 +10,10 @@ import type { Paint } from '../paint.js';
  * extends UChange { HColor getBackColor(); }`.
  *
  * Adaptation seam (pre-decided, see T2 mission brief): upstream's
- * `getBackColor()` returns `HColor`. The `HColor` system is not ported;
- * this port carries `Paint` (`src/core/paint.ts`) at every seam where
- * upstream carries `HColor`.
+ * `getBackColor()` returns `HColor`. This port carries `Paint`
+ * (`src/core/paint.ts`) or the ported `HColorSimple`/`HColorGradient`
+ * (`HColorOrPaint`, `color/ColorMapper.ts`), mapped at draw time.
  */
 export interface UBackground extends UChange {
-  getBackColor(): Paint;
+  getBackColor(): HColorOrPaint;
 }

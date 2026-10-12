@@ -76,6 +76,7 @@ import { Back } from './klimt/Back.js';
 import type { ResolvedColor } from './klimt/color/HColorSet.js';
 import { parseSimpleColor } from './klimt/color/HColorSet.js';
 import type { Paint } from './paint.js';
+import { ColorMapper, toSvgPaint, type HColorOrPaint } from './klimt/color/ColorMapper.js';
 
 type ResolvedAtomImage =
   | {
@@ -205,8 +206,11 @@ export class SpritePrimitiveCollector implements UGraphic {
       throw new Error(`SpritePrimitiveCollector.apply: unsupported UChange ${change.constructor.name}`);
     }
     const translate = change instanceof UTranslate ? this.translate.compose(change) : this.translate;
-    const fore = change instanceof Fore ? change.getColor() : this.fore;
-    const back = change instanceof Back ? change.getBackColor() : this.back;
+    // A collecting graphic draws nothing, so it resolves an `HColor` change
+    // with `ColorMapper.IDENTITY`, as `LimitFinder#getColorMapper` answers
+    // upstream (LimitFinder.java:227-229); a `Paint` is kept as-is.
+    const fore = change instanceof Fore ? toSvgPaint(change.getColor(), ColorMapper.IDENTITY) : this.fore;
+    const back = change instanceof Back ? toSvgPaint(change.getBackColor(), ColorMapper.IDENTITY) : this.back;
     const stroke = change instanceof UStroke ? change : this.stroke;
     return new SpritePrimitiveCollector(translate, fore, back, stroke, this.primitives);
   }
@@ -376,7 +380,7 @@ function resolveSpriteAtom(
 
 /** A resolved monochrome sprite drawn over `backColor` -- for a caller that
  *  knows the fill at layout time (unwind2-S7); everything else unchanged. */
-function overBack(resolved: ResolvedAtomImage, backColor: Paint | undefined): ResolvedAtomImage {
+function overBack(resolved: ResolvedAtomImage, backColor: HColorOrPaint | undefined): ResolvedAtomImage {
   if (backColor === undefined || resolved?.kind !== 'image' || resolved.tint === undefined) return resolved;
   return { ...resolved, href: spriteTintHref(resolved.tint, backColor) };
 }
@@ -399,7 +403,7 @@ export function makeAtomImageResolverFor(
   ambientStroke?: UStroke,
   // unwind2-S7: the fill the text is drawn on, when the caller emits the
   // href itself rather than through a `UGraphic` (`sprite-tint.ts`).
-  backColor?: Paint,
+  backColor?: HColorOrPaint,
 ): (font: FontConfiguration) => AtomImageResolver {
   const spriteDims = registry !== undefined ? spriteDimsLookupFor(registry) : undefined;
   return (font: FontConfiguration): AtomImageResolver => {

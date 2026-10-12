@@ -4,6 +4,7 @@ import type { UGraphic } from '../UGraphic.js';
 import type { UParam } from '../UParam.js';
 import type { UTranslate } from '../UTranslate.js';
 import type { StringBounder } from '../font/StringBounder.js';
+import { ColorMapper } from '../color/ColorMapper.js';
 
 /**
  * UGraphicDelegator — a `UGraphic` that forwards every read-only member
@@ -21,11 +22,11 @@ import type { StringBounder } from '../font/StringBounder.js';
  * scope, `UGraphic.ts`): this port's `UGraphic` has only 5 members
  * (`apply`, `draw`, `getParam`, `getTranslate`, `getStringBounder`).
  * Delegated here: `getStringBounder`, `getParam`, `draw`, `getTranslate`
- * (T2's own addition, delegated the same way). `matchesProperty`/
- * `getColorMapper`/`startGroup`/`closeGroup`/`flushUg`/
- * `getDefaultBackground`/`writeToStream` are dropped — none is part of
- * this port's `UGraphic` surface, matching every prior scope reduction in
- * this file family.
+ * (T2's own addition, delegated the same way), and `getColorMapper`
+ * (sep-T5c, java:79-81). `matchesProperty`/`startGroup`/`closeGroup`/
+ * `flushUg`/`getDefaultBackground`/`writeToStream` are dropped — none is
+ * part of this port's `UGraphic` surface, matching every prior scope
+ * reduction in this file family.
  *
  * cdd-T28: `startUrl`/`closeUrl` (java:84-91) ARE delegated now. They are
  * still not on this port's `UGraphic` interface — `UGraphicSvg` is the
@@ -61,6 +62,13 @@ export abstract class UGraphicDelegator implements UGraphic {
 
   getTranslate(): UTranslate {
     return this.ug.getTranslate();
+  }
+
+  /** The wrapped graphic's mapper; `IDENTITY` when it has none (see
+   *  `UGraphic.ts#getColorMapper`).
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/UGraphicDelegator.java:79-81 */
+  getColorMapper(): ColorMapper {
+    return this.ug.getColorMapper?.() ?? ColorMapper.IDENTITY;
   }
 
   /** java:84-86 — forwarded only when the wrapped graphic can emit a

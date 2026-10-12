@@ -23,6 +23,7 @@
 
 import type { UDriver } from '../../AbstractCommonUGraphic.js';
 import type { UParam } from '../../UParam.js';
+import { toSvgPaint, type ColorMapper } from '../../color/ColorMapper.js';
 import type { ULine } from '../../shape/ULine.js';
 import type { SvgGraphics } from './svg-graphics.js';
 
@@ -31,13 +32,13 @@ import type { SvgGraphics } from './svg-graphics.js';
 export class DriverLineSvg implements UDriver<ULine> {
   constructor(private readonly svg: SvgGraphics) {}
 
-  draw(shape: ULine, param: UParam): void {
+  draw(shape: ULine, param: UParam, mapper: ColorMapper): void {
     const x = param.getTranslate().getDx();
     const y = param.getTranslate().getDy();
     const x2 = x + shape.getDX();
     const y2 = y + shape.getDY();
 
-    const color = param.getColor();
+    const color = toSvgPaint(param.getColor(), mapper); // DriverLineSvg.java:76-81
     if (typeof color === 'string') {
       this.svg.setStrokeColor(color);
     } else {

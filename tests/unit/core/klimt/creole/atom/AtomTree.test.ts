@@ -16,7 +16,7 @@ import type { UChange } from '../../../../../../src/core/klimt/UChange.js';
 import type { UGraphic } from '../../../../../../src/core/klimt/UGraphic.js';
 import type { UShape } from '../../../../../../src/core/klimt/UShape.js';
 import type { StringBounder } from '../../../../../../src/core/klimt/font/StringBounder.js';
-import type { Paint } from '../../../../../../src/core/paint.js';
+import type { HColorOrPaint } from '../../../../../../src/core/klimt/color/ColorMapper.js';
 
 interface DrawEvent {
   readonly x: number;
@@ -33,7 +33,7 @@ const sb: StringBounder = { calculateDimension: () => new XDimension2D(0, 0) };
 class RecordingUGraphic implements UGraphic {
   constructor(
     private readonly drawEvents: DrawEvent[],
-    private readonly foreEvents: Paint[],
+    private readonly foreEvents: HColorOrPaint[],
     private readonly translate: UTranslate = UTranslate.none(),
   ) {}
 
@@ -121,7 +121,7 @@ describe('AtomTree.drawU (java:79-92)', () => {
   it('draws each cell at margin+xEndForLevel(level), accumulates y by height, then draws the tree connectors', () => {
     const log: CellDraw[] = [];
     const drawEvents: DrawEvent[] = [];
-    const foreEvents: Paint[] = [];
+    const foreEvents: HColorOrPaint[] = [];
     const tree = new AtomTree('#123456');
     tree.addCell(fakeCell(20, 10, 'a', log), 1);
     tree.addCell(fakeCell(15, 8, 'b', log), 1);
@@ -152,7 +152,7 @@ describe('AtomTree.drawU (java:79-92)', () => {
 
   it('a single cell draws no vline offset beyond y=0 (no mother/sister)', () => {
     const drawEvents: DrawEvent[] = [];
-    const foreEvents: Paint[] = [];
+    const foreEvents: HColorOrPaint[] = [];
     const tree = new AtomTree('#000000');
     tree.addCell(fakeCell(10, 20, 'solo', []), 2);
     tree.drawU(new RecordingUGraphic(drawEvents, foreEvents));
