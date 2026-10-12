@@ -1,0 +1,11 @@
+@startsalt
+{
+{T#
++ Name        | Size  | Type
++ src         | 4 KB  | folder
+++ main.ts    | 2 KB  | file
+++ util.ts    | 1 KB  | file
++ README.md   | 3 KB  | file
+}
+}
+@endsalt

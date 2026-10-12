@@ -3,6 +3,7 @@ import type { UShape } from './UShape.js';
 import type { UParam } from './UParam.js';
 import type { UTranslate } from './UTranslate.js';
 import type { StringBounder } from './font/StringBounder.js';
+import type { ColorMapper } from './color/ColorMapper.js';
 
 /**
  * UGraphic — the immutable drawing context renderers draw through.
@@ -53,4 +54,16 @@ export interface UGraphic {
   getParam(): UParam;
   getTranslate(): UTranslate;
   getStringBounder(): StringBounder;
+  /**
+   * The mapper every drawn colour passes through (sep-T5c). OPTIONAL here,
+   * required upstream: the drawing backends (`AbstractCommonUGraphic`, its
+   * `UGraphicSvg`) and the forwarding `UGraphicDelegator` implement it, while
+   * the ~35 recording/collecting test and layout graphics that never reach
+   * a driver keep compiling unchanged. A caller reading it from an arbitrary
+   * `UGraphic` treats an absent member as `ColorMapper.IDENTITY`, what
+   * `LimitFinder` returns upstream (`LimitFinder.java:227-229`).
+   *
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/UGraphic.java:60
+   */
+  getColorMapper?(): ColorMapper;
 }

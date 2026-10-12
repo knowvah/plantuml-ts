@@ -1,0 +1,11 @@
+
+> @knowvah/plantuml-ts@0.2.0 svg:survey
+> jiti scripts/svg-parity-survey.ts mindmap --out /Users/scottseely/git/knowvah/plantuml-ts/.claude/worktrees/sep-T5a/plans/salt-engine-port/measurements/T5a/parity-mindmap.json
+
+surveying 142 mindmap fixtures (concurrency 6)
+  25/142
+  50/142
+  75/142
+  100/142
+  125/142
+wrote /Users/scottseely/git/knowvah/plantuml-ts/.claude/worktrees/sep-T5a/plans/salt-engine-port/measurements/T5a/parity-mindmap.json — {"conformant":142,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}

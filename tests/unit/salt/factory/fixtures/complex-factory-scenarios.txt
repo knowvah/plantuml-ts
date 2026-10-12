@@ -1,0 +1,405 @@
+### ready brace-text
+{
+a
+}
+### ready plus-text
+{+
+a
+}
+### ready caret-text
+{^
+a
+}
+### ready hash-text
+{#
+a
+}
+### ready bang-text
+{!
+a
+}
+### ready minus-text
+{-
+a
+}
+### ready star
+{* File | Edit
+}
+### ready slash
+{/ One | Two }
+### ready S
+{S
+a
+}
+### ready SI
+{SI
+a
+}
+### ready S-minus
+{S-
+a
+}
+### ready lower-s
+{s
+a
+}
+### ready lower-si
+{si
+a
+}
+### ready brace-N
+{
+N={ a }
+}
+### ready brace-S
+{
+S={ a }
+}
+### ready brace-E
+{
+E={ a }
+}
+### ready brace-W
+{
+W={ a }
+}
+### ready brace-C
+{
+C={ a }
+}
+### ready hash-N
+{#
+N={ a }
+}
+### ready plus-S
+{+
+S={ a }
+}
+### ready bang-E
+{!
+E={ a }
+}
+### ready minus-W
+{-
+W={ a }
+}
+### ready caret-N
+{^
+N={ a }
+}
+### ready brace-N-joined
+{
+N=x
+}
+### ready brace-lower-n
+{
+n={ a }
+}
+### ready T
+{T
++ a
+}
+### ready T-hash
+{T#
++ a
+}
+### ready T-plus
+{T+
++ a
+}
+### ready T-caret
+{T^
++ a
+}
+### ready T-minus
+{T-
++ a
+}
+### ready T-bang
+{T!
++ a
+}
+### ready T-dot
+{T.
++ a
+}
+### ready T-x
+{Tx
++ a
+}
+### ready T-long
+{T##
++ a
+}
+### ready lower-t
+{t
++ a
+}
+### ready plus-T
+{+T
++ a
+}
+### ready hash-T-hash
+{#T#
++ a
+}
+### ready brace-alone
+{
+### ready close
+}
+### ready text
+a
+### create pyramid-merge
+{#
+a | b | c
+d | * | e
+}
+### create pyramid-title
+{^"My title"
+x | y
+}
+### create pyramid-title-newline
+{^
+"not a title" | y
+}
+### create pyramid-title-other-strategy
+{+"quoted"
+x
+}
+### create pyramid-nested
+{+
+{
+{-
+a | b
+}
+c
+}
+d
+}
+### create pyramid-first-star
+{
+* | a
+}
+### create pyramid-merge-overflow
+{
+a
+b
+*
+}
+### create pyramid-T-dot
+{T.
++ a
+}
+### create pyramid-unknown-cell
+{
+a | }
+}
+### create scroll-both
+{S
+a
+b
+}
+### create scroll-vertical
+{SI
+a | b
+c | d
+}
+### create scroll-horizontal
+{S-
+a
+}
+### create scroll-in-pyramid
+{
+{S
+x
+}
+y
+}
+### create scroll-star
+{S
+a | *
+}
+### create border-jukefo
+{
+N={# This is my title }
+S={# [OK south] | [Cancel]}
+W={# West }
+E={# East }
+C={#
+A0 | B0
+A1 | B1
+}
+}
+### create border-plain-cells
+{
+N=
+top
+C=
+middle
+}
+### create border-first-char
+{
+N=
+a
+Wxyz
+b
+Cool
+c
+}
+### create border-bad-position
+{
+N=
+a
+X
+b
+}
+### create border-nested-border
+{
+N=
+{
+S=
+inner
+}
+}
+### create menu-firuta
+{
+{# This is my title }
+{* File | Edit | Source
+File | Open | Save
+}
+1
+}
+### create menu-xetajo
+{
+{* File | Edit | Source
+Edit|Copy
+Edit|Paste
+Edit|Cut
+}
+}
+### create menu-lakari
+{
+{*
+A | B
+C | *
+}
+}
+### create menu-single-line-entry
+{
+{* A | B
+A
+Second
+}
+}
+### create tab-horizontal
+{
+{/ General | Fullscreen | Behavior | Saving }
+}
+### create tab-vertical
+{
+{/ Tab 1
+Tab 2
+Tab 3
+}
+}
+### create tab-mixed
+{
+{/ One | Two
+Three
+}
+}
+### create tree-root
+{T#
++Region        | Population    | Age
++ World        | 7.13 billion  | 30
+++ America     | 964 million   | 30
+}
+### create tree-in-pyramid
+{
+{T
++World
+++America
++++Canada
+++Europe
+}
+}
+### create tree-nested-group
+{T#
++ A | x
+++ B | { a | b }
+++ C | y
+}
+### create tree-nested-tree
+{T
++ A | {T+
++ inner | v
+}
++ B
+}
+### create tree-raw-group-first-cell
+{T
+{ a | b }
+}
+### create tree-empty
+{T#
+}
+### create tree-strategy-caret
+{T^
++ a | b
+}
+### create nested-everything
+{
+{+
+{* File | Edit
+File | Open
+}
+{/ One | Two }
+{SI
+{T
++ t
+}
+}
+}
+{
+N=
+{# n }
+C=
+{^"T"
+a | * | b
+}
+}
+}
+### create no-root
+{*
+A
+}
+### create terminator-pyramid
+{
+{ a } | b
+}
+### create terminator-scroll
+{
+{S a } | b
+}
+### create terminator-border
+{
+{ N={ x } } | b
+}
+### create terminator-menu
+{
+{* A } | b
+}
+### create terminator-tab
+{
+{/ A } | b
+}
+### create terminator-tree
+{
+{T
++ a } | b
+}
+### create tree-raw-brace-rows
+{T
+{
+}
+}

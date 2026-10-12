@@ -1,0 +1,8 @@
+@startsalt
+scale 1.5
+{^"My group box<$gears*.3>"
+  Login    | "<$gears*.3>MyName   "
+  Password | "****     "
+  [Cancel] | [  OK<$gears*.3>   ]
+}
+@endsalt

@@ -1,0 +1,9 @@
+@startsalt
+!include cov-include-fragment.iuml
+{
+  Login    | "user     "
+  Password | "****     "
+  $buttonRow("Cancel", "OK")
+  $buttonRow("Help", "Reset")
+}
+@endsalt

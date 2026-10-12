@@ -1,0 +1,2 @@
+
+### salt/danope-71-noje226  pass=true structural=0 numeric=0

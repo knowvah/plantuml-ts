@@ -1,6 +1,6 @@
 import type { UStroke } from './UStroke.js';
 import type { UTranslate } from './UTranslate.js';
-import type { Paint } from '../paint.js';
+import type { HColorOrPaint } from './color/ColorMapper.js';
 
 /**
  * UParam — the drawing state visible to a driver at the moment it draws
@@ -28,11 +28,14 @@ import type { Paint } from '../paint.js';
  * along with it.
  *
  * Adaptation seam (pre-decided): `getColor()`/`getBackcolor()` return
- * `Paint` (`src/core/paint.ts`) instead of upstream's `HColor`.
+ * `Paint` (`src/core/paint.ts`) or the ported `HColor` itself
+ * (`HColorOrPaint`), whichever the `Fore`/`Back` change carried
+ * (AbstractCommonUGraphic.java:121-126); a driver maps it with the
+ * graphic's `ColorMapper` (`color/ColorMapper.ts#toSvgPaint`).
  */
 export interface UParam {
   getStroke(): UStroke;
-  getColor(): Paint;
-  getBackcolor(): Paint;
+  getColor(): HColorOrPaint;
+  getBackcolor(): HColorOrPaint;
   getTranslate(): UTranslate;
 }

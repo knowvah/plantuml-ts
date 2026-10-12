@@ -1,0 +1,2 @@
+
+### salt/ferobi-59-kojo540  pass=true structural=0 numeric=0

@@ -68,6 +68,7 @@ import { creoleRunSpriteImage } from './creole-run-sprite.js';
 import { measureInlineAtom } from '../../creole-atoms-measure.js';
 import { emojiSquareDim } from '../../klimt/creole/atom/AtomEmoji.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
+import { SPACE_ATOM_HEIGHT } from '../../klimt/creole/atom/AtomSpace.js';
 import { FontStyle, getFont } from '../../klimt/shape/UText.js';
 import { ATOM_TEXT_MIN_HEIGHT, layoutLineThroughSea, measurerSeaLineOps } from './creole-sea-line.js';
 import { buildLineAtoms } from '../../klimt/creole/legacy/StripeSimple.js';
@@ -395,6 +396,8 @@ function atomMeasured(atom: CreoleAtom, ctx: MeasureCtx): AtomMeasured {
     const dims = emojiSquareDim(atom.factor);
     return { run: null, width: dims.width, height: dims.height };
   }
+  // `AtomSpace#calculateDimensionSlow`: (width, 1); no run (empty drawU).
+  if (atom.kind === 'space') return { run: null, width: atom.width, height: SPACE_ATOM_HEIGHT };
   return { run: null, width: 0, height: 0 };
 }
 

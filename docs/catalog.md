@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1517 modules · 5789 exported names.
+1584 modules · 5871 exported names.
 
 ## `src/`
 
@@ -484,7 +484,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `ColorMapper.ts` | `ColorMapper`, `mapPaint` |  |
+| `ColorMapper.ts` | `ColorMapper`, `mapPaint`, `HColorOrPaint`, `toSvgPaint`, `toSvgSolid` |  |
 | `ColorOrder.ts` | `ColorOrder`, `getColor`, `getReverse`, `fromString` | ColorOrder -- a channel permutation, used by `ColorMapper.reverse(order)` (`ColorMapper.java:93-100`) for `skinparam reversecolor <order>` (`TitledDiagram.java:308-312`). |
 | `ColorTrieNode.ts` | `RgbTriple`, `getColor`, `NAMES` | ColorTrieNode — the named-color -> RGB table upstream registers into a letter-indexed trie. |
 | `ColorUtils.ts` | `getGrayScale`, `getGrayScaleColor`, `getGrayScaleColorReverse` |  |
@@ -532,6 +532,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `AtomEmoji.ts` | `EMOJI_MAGIC`, `EMOJI_BOX_FACTOR`, `EMOJI_ALTITUDE_FACTOR`, `EMOJI_LINE_HEIGHT_FACTOR`, `emojiLineHeightFactor`, `emojiFactor`, `emojiBoxDim`, `emojiSquareDim`, `emojiStartingAltitude`, `emojiRenderRun` | AtomEmoji — sizing constants for one `<:name:>` creole emoji atom. |
 | `AtomMath.ts` | `AtomMath` | AtomMath — upstream: klimt/creole/atom/AtomMath.java (`extends AbstractAtom implements Atom`, 107 lines). |
 | `AtomOpenIconic.ts` | `AtomOpenIconic`, `asAtomOpenIconic` | `AtomOpenIconic` — an OpenIconic `<&name>` glyph inside a creole line (`StripeSimple#addOpenIcon`, StripeSimple.java:239-243), as the polymorphic `Atom` `Sea`/`SheetBlock1` lay out: `calculateDimensionSlow` (`openIconic.asTextBlock` padded |
+| `AtomSpace.ts` | `SPACE_ATOM_HEIGHT`, `SPACE_ATOM_STARTING_ALTITUDE`, `spaceAtomDim` | AtomSpace — the creole `<space:N>` atom: N pixels of horizontal advance, nothing drawn. |
 | `AtomTable.ts` | `AtomTable` | AtomTable — the drawable/measurable creole table `StripeTable` builds: a grid of `Atom` cells (each itself a `SheetBlock1` wrapping one cell's own nested `Sheet`), laid out column-width/row-height-first (every cell in a column shares that c |
 | `AtomTree.ts` | `AtomTree` | AtomTree — a stack of `Atom` cells, each tagged with an integer nesting `level`, measured/drawn top-to-bottom with a `Skeleton2` bullet/hline/ vline connector drawn beside each cell at its own vertical midpoint. |
 | `AtomWithMargin.ts` | `AtomWithMargin` | AtomWithMargin — wraps another `Atom`, adding a fixed top/bottom margin to its measured height (`marginY1`/`marginY2`) and translating it down by `marginY1` at draw time. |
@@ -553,8 +554,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `CommandCreoleMath.ts` | `createMathCommand` | CommandCreoleMath — `<math>expr</math>`. |
 | `CommandCreoleMonospaced.ts` | `createMonospacedCommand` | CommandCreoleMonospaced — the creole `""text""` monospace run. |
 | `CommandCreoleSizeChange.ts` | `createSizeChangeCommands` | CommandCreoleSizeChange — `<size:N>text</size>` and `<size:N>text to end of line` (no closing tag needed). |
+| `CommandCreoleSpace.ts` | `createSpaceCommand` | CommandCreoleSpace — the creole `<space:N>` / `<space:N/>` tag. |
 | `CommandCreoleStyle.ts` | `createStyleCommands`, `createStyleCommandsWithoutCreoleForm`, `createBackcolorCommands` | CommandCreoleStyle — the BOLD/ITALIC/UNDERLINE/STRIKE/WAVE inline style commands: `**text**`/`//text//`/`__text__`/`--text--`/`~~text~~` (pure Creole double-punctuation) and `<b>text</b>`/`<b>text to end of line` (HTML-tag-style, with or wi |
 | `CommandCreoleUrl.ts` | `HYPERLINK_COLOR`, `createUrlCommand` | CommandCreoleUrl — `[[url]]` / `[[url label]]` / `[[url {tooltip}]]` / `[[url {tooltip} label]]` link atom-splitting: the jar draws the resolved LABEL as its own text atom, in the hyperlink color (blue, `SkinParamUtils.getFontHyperlinkColor |
+| `Splitter.ts` | `Splitter` | Splitter — the creole `htmlTag` alternation and `purgeAllTag`, which strips every tag it matches (salt's `AbstractElementText#getCharNumber`). |
 
 ## `src/core/klimt/creole/legacy/`
 
@@ -606,9 +609,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `driver-image-svg.ts` | `DriverImageSvg` | driver-image-svg.ts — the `UImage` → SVG `<image>` driver (SI5b+E2r T7, D7). |
 | `driver-line-svg.ts` | `DriverLineSvg` | driver-line-svg.ts — the `ULine` → SVG `<line>` driver. |
 | `driver-path-svg.ts` | `DriverPathSvg` | driver-path-svg.ts — the `UPath` → SVG `<path>` driver. |
+| `driver-pixel-svg.ts` | `DriverPixelSvg` | driver-pixel-svg.ts — the `UPixel` → SVG `<rect>` driver. |
 | `driver-polygon-svg.ts` | `DriverPolygonSvg` | driver-polygon-svg.ts — the `UPolygon` → SVG `<polygon>` driver. |
 | `driver-rectangle-svg.ts` | `DriverRectangleSvg` | driver-rectangle-svg.ts — the `URectangle` → SVG `<rect>` driver. |
-| `driver-svg-stubs.ts` | `DriverImagePng`, `DriverPixelSvg`, `DriverImageSvgSvg`, `DriverTextAsPathSvg`, `DriverCenteredCharacterSvg` | driver-svg-stubs.ts — D3′ throwing stubs for the SVG driver family members this task defers. |
+| `driver-svg-stubs.ts` | `DriverImagePng`, `DriverImageSvgSvg`, `DriverTextAsPathSvg`, `DriverCenteredCharacterSvg` | driver-svg-stubs.ts — D3′ throwing stubs for the SVG driver family members this task defers. |
 | `driver-text-svg-decorations.ts` | `ExtraLine`, `TextRenderDecorations`, `fontWeightOf`, `fontStyleOf`, `extraLineStrokeWidth`, `textRenderDecorations` | driver-text-svg-decorations.ts — the pure, emitter-independent half of `DriverTextSvg#draw`: every decision that method makes about a text run's `font-weight`, `font-style`, `text-decoration`, extended-colour decoration LINES and BACKCOLOR |
 | `driver-text-svg.ts` | `StringBounder`, `DriverTextSvg` | driver-text-svg.ts — the `UText` → SVG `<text>` driver. |
 | `svg-graphics-core.ts` | `LengthAdjust`, `TransparentFillBehavior`, `SvgOption`, `basicSvgOption`, `seedOf`, `SvgGraphicsCore` | svg-graphics-core.ts — SvgGraphics's document-lifecycle layer: the options shape, low-level number formatting, fill/stroke state, and gradient-def registration needed by the constructor itself. |
@@ -692,9 +696,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `UImageSvg.ts` | `UImageSvg`, `svgImagePayload` | Port of `UImageSvg` -- an SVG document drawn as an image, as `EmbeddedDiagram#drawU` builds it for a `{{ }}` sub-diagram (`EmbeddedDiagram.java:169-174`) -- plus the payload `SvgGraphics#svgImage (UImageSvg, x, y)` wraps it in before base64 |
 | `ULine.ts` | `ULine` |  |
 | `UPath.ts` | `USegmentType`, `USegment`, `UPath` |  |
+| `UPixel.ts` | `UPixel` |  |
 | `UPolygon.ts` | `UPolygon` |  |
 | `URectangle.ts` | `URectangle` |  |
-| `UText.ts` | `FontStyle`, `FontFace`, `NORMAL_FONT_FACE`, `FontConfiguration`, `getFont`, `getFontFace`, `changeExtendedColor`, `getSpace`, `UText` |  |
+| `UText.ts` | `FontStyle`, `getRegexActivationPattern`, `getRegexDeactivationPattern`, `FontFace`, `NORMAL_FONT_FACE`, `FontConfiguration`, `getFont`, `getFontFace`, `changeExtendedColor`, `getSpace`, `UText` |  |
 
 ## `src/core/klimt/sprite/`
 
@@ -1766,6 +1771,83 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `layout.ts` | `V_LINE_SHORT`, `INDICATOR_HEIGHT`, `V_MARGIN`, `FONT_ASCENT`, `blockRenderedHeight`, `layoutPacket` |  |
 | `parser.ts` | `parsePacket` |  |
 | `renderer.ts` | `renderPacket` |  |
+
+## `src/diagrams/salt/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Cell.ts` | `Cell` | Cell — the grid span (rows `minRow..maxRow`, columns `minCol..maxCol`) an element occupies in a salt pyramid; built by `Positionner2`, widened to the right by `mergeLeft`. |
+| `CommandAnything.ts` | `COMMAND_ANYTHING_PATTERN`, `CommandAnythingTarget`, `executeArg` |  |
+| `DataSource.ts` | `DataSource` |  |
+| `DataSourceImpl.ts` | `DataSourceImpl` |  |
+| `index.ts` | `SaltGeometry`, `renderSalt`, `saltPlugin` | Salt diagram plugin — `PSystemSaltFactory` (parse), then `TextBlockExporter`'s export of `PSystemSalt#getTextBlock` on the klimt substrate: canvas = the text block's dimension plus `same(5)` (`PSystemSalt#getDefaultMargins`), the block draw |
+| `Position.ts` | `Position` | Position — an immutable (row, col) pair with Java value semantics. |
+| `Positionner2.ts` | `Positionner2` |  |
+| `PSystemSalt.ts` | `SaltSkinSource`, `SaltSkinParam`, `PSystemSalt` |  |
+| `PSystemSaltFactory.ts` | `createSaltDiagram` |  |
+| `SaltDictionary.ts` | `SaltDictionary`, `atomOpsFor` |  |
+| `Terminated.ts` | `Terminated` |  |
+| `Terminator.ts` | `Terminator` | Terminator — what ends a salt token: the end of its source line (`NEWLINE`) or a column/structure delimiter after it on the same line (`NEWCOL`). |
+
+## `src/diagrams/salt/element/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `AbstractElement.ts` | `AbstractElement` |  |
+| `AbstractElementText.ts` | `AbstractElementText` |  |
+| `Element.ts` | `Element` |  |
+| `ElementBorder.ts` | `ElementBorder` |  |
+| `ElementButton.ts` | `ElementButton` |  |
+| `ElementDroplist.ts` | `ElementDroplist` |  |
+| `ElementEmpty.ts` | `ElementEmpty` |  |
+| `ElementImage.ts` | `ElementImage` |  |
+| `ElementLine.ts` | `ElementLine` |  |
+| `ElementMenuBar.ts` | `ElementMenuBar` |  |
+| `ElementMenuEntry.ts` | `ElementMenuEntry` |  |
+| `ElementMenuPopup.ts` | `ElementMenuPopup` |  |
+| `ElementPyramid.ts` | `ElementPyramid` |  |
+| `ElementPyramidScrolled.ts` | `ElementPyramidScrolled` |  |
+| `ElementRadioCheckbox.ts` | `ElementRadioCheckbox` |  |
+| `ElementTabBar.ts` | `ElementTabBar` |  |
+| `ElementText.ts` | `ElementText` |  |
+| `ElementTextField.ts` | `ElementTextField` |  |
+| `ElementTree.ts` | `ElementTree` |  |
+| `ElementTreeEntry.ts` | `ElementTreeEntry` |  |
+| `Grid.ts` | `Grid` | Grid — the `{#`/`{+`/`{^`/`{!`/`{-` pyramid table lines: one unit segment per cell edge, collected per `TableStrategy` (the outline at construction, each cell's edges on `addCell`), drawn as horizontals then verticals, then the pyramid titl |
+| `Grid2.ts` | `Grid2` | Grid2 — the `{T` tree-table lines over the given row and column starts, per `TableStrategy`: the outline for `DRAW_OUTSIDE`/ `DRAW_OUTSIDE_WITH_TITLE`, every row line for `DRAW_HORIZONTAL`/ `DRAW_ALL`, every column line for `DRAW_VERTICAL`/ |
+| `LeftFirst.ts` | `LeftFirst` |  |
+| `ListWidth.ts` | `ListWidth` | ListWidth — one width per "other" column of a `{T` tree row; `ElementTree#getWidthOther` folds every row's list with `mergeMax` (`ElementTree.java:100-107`). |
+| `Segment.ts` | `Segment` | Segment — a (row, col) cell edge `Grid` collects in its `horizontals` / `verticals` hash sets (`Grid.java:57-58`). |
+| `Skeleton.ts` | `Skeleton` | Skeleton — the `{T` tree-guide lines: a 2x2 bullet under every entry that has a deeper next entry, and an L-shaped vertical + horizontal guide from each entry's parent down and across to it. |
+| `Skeleton2.ts` | `Skeleton2` | Skeleton2 — the `\|_` creole tree guides. |
+| `TableStrategy.ts` | `TableStrategy`, `fromChar` | TableStrategy — which lines a salt table/tree draws: none, the outline, the outline under a title, every row line, every column line, or all. |
+| `TopFirst.ts` | `TopFirst` |  |
+| `WrappedElement.ts` | `WrappedElement` |  |
+
+## `src/diagrams/salt/factory/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `AbstractElementFactoryComplex.ts` | `AbstractElementFactoryComplex` |  |
+| `ElementFactory.ts` | `ElementFactory` |  |
+| `ElementFactoryBorder.ts` | `ElementFactoryBorder` |  |
+| `ElementFactoryButton.ts` | `ElementFactoryButton` |  |
+| `ElementFactoryCheckboxOff.ts` | `ElementFactoryCheckboxOff` |  |
+| `ElementFactoryCheckboxOn.ts` | `ElementFactoryCheckboxOn` |  |
+| `ElementFactoryDroplist.ts` | `ElementFactoryDroplist` |  |
+| `ElementFactoryImage.ts` | `ElementFactoryImage` |  |
+| `ElementFactoryLine.ts` | `ElementFactoryLine` |  |
+| `ElementFactoryMenu.ts` | `ElementFactoryMenu` |  |
+| `ElementFactoryPyramid.ts` | `ElementFactoryPyramid` |  |
+| `ElementFactoryRadioOff.ts` | `ElementFactoryRadioOff` |  |
+| `ElementFactoryRadioOn.ts` | `ElementFactoryRadioOn` |  |
+| `ElementFactoryRetrieveFromDictonnary.ts` | `ElementFactoryRetrieveFromDictonnary` |  |
+| `ElementFactoryScroll.ts` | `ElementFactoryScroll` |  |
+| `ElementFactoryTab.ts` | `ElementFactoryTab` |  |
+| `ElementFactoryText.ts` | `ElementFactoryText` |  |
+| `ElementFactoryTextField.ts` | `ElementFactoryTextField` |  |
+| `ElementFactoryTree.ts` | `ElementFactoryTree` |  |
+| `ScrollStrategy.ts` | `ScrollStrategy`, `fromDesc` | ScrollStrategy — which scroll bars a `{S` scrolled pyramid draws: both, vertical only (`{SI`) or horizontal only (`{S-`); read by `ElementPyramidScrolled.java:64`. |
 
 ## `src/diagrams/sequence/`
 

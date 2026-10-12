@@ -21,6 +21,7 @@ import { classifyStripeLine } from '../../klimt/creole/legacy/CreoleStripeSimple
 import { buildLineAtoms } from '../../klimt/creole/legacy/StripeSimple.js';
 import { getFont, type FontConfiguration } from '../../klimt/shape/UText.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
+import { SPACE_ATOM_HEIGHT } from '../../klimt/creole/atom/AtomSpace.js';
 import { emojiSquareDim } from '../../klimt/creole/atom/AtomEmoji.js';
 import { ATOM_TEXT_MIN_HEIGHT, layoutLineThroughSea, measurerSeaLineOps } from './creole-sea-line.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../decoration/symbol/usymbol-resolve.js';
@@ -201,6 +202,7 @@ function leafAtomDim(
   // the square, never `emojiBoxDim`'s pre-combined line height: `Sea`
   // derives the hang from the atom's own altitude (`AtomEmoji.ts`).
   if (atom.kind === 'emoji') return emojiSquareDim(atom.factor);
+  if (atom.kind === 'space') return { width: atom.width, height: SPACE_ATOM_HEIGHT };
   // `latex` is measured through a separate LaTeX path, not this atom stream
   // — the same divergence `creoleVisibleText` below already documents.
   return { width: 0, height: 0 };

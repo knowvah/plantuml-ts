@@ -22,7 +22,10 @@ const BOLD_CSS_WEIGHT = 700;
  *    font face (FontConfiguration.java:67-80);
  *  - `fontFace`: the `UFont` face (`currentFont.getFontFace()`);
  *  - `color`: `HColor#toSvg` of the light colour, `null` when transparent
- *    (`UText.ts`'s documented stand-in for `isTransparent()`).
+ *    (`UText.ts`'s documented stand-in for `isTransparent()`);
+ *  - `hColor`: the `HColorSimple` itself (with its dark partner), which
+ *    `DriverTextSvg` maps with the drawing graphic's `ColorMapper`
+ *    (DriverTextSvg.java:177-178); absent when transparent.
  *
  * Throws where the abel object carries a stand-in the style engine never
  * builds (a non-`UFont` font or a non-`HColorSimple` colour) — Java's
@@ -38,13 +41,15 @@ export function bridgeFontConfiguration(fc: StyleFontConfiguration): FontConfigu
     throw new Error('ClassCastException: FontConfiguration color is not an HColorSimple');
 
   const face = font.getFontFace();
-  return {
+  const transparent = color.isTransparent();
+  const bridged: FontConfiguration = {
     family: font.getFontStack().getFullDefinition(),
     size: font.getSize(),
-    color: color.isTransparent() ? null : solidPaint(color),
+    color: transparent ? null : solidPaint(color),
     styles: getStyles(face.cssWeight >= BOLD_CSS_WEIGHT, face.italic),
     fontFace: face,
   };
+  return transparent ? bridged : { ...bridged, hColor: color };
 }
 
 /** `HColorSimple#asPaint` is always a solid `XColor#toSvg` string (HColorSimple.ts). */

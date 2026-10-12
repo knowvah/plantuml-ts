@@ -68,6 +68,7 @@ import { atomTextStartingAltitude } from '../../klimt/creole/legacy/AtomText.js'
 import { XDimension2D } from '../../klimt/geom/XDimension2D.js';
 import type { AtomOps } from '../../klimt/creole/Sea.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
+import { SPACE_ATOM_HEIGHT } from '../../klimt/creole/atom/AtomSpace.js';
 import type { Atom } from '../../klimt/creole/SheetBlock1.js';
 import { emojiBoxDim } from '../../klimt/creole/atom/AtomEmoji.js';
 import { renderLatexAsImage } from '../../latex.js';
@@ -114,6 +115,7 @@ function titleAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps 
     if (atom.kind === 'text') return measureLine(stringBounder, atom.text, measuringFont(atom.font));
     if (atom.kind === 'latex') return renderLatexAsImage(atom.expr, atom.color ?? '#000000');
     if (atom.kind === 'emoji') return emojiBoxDim(atom.factor);
+    if (atom.kind === 'space') return { width: atom.width, height: SPACE_ATOM_HEIGHT };
     const resolved = resolveAtomImage?.(atom.atom);
     return resolved === undefined ? { width: 0, height: 0 } : resolved;
   }

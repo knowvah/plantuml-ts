@@ -1,0 +1,12 @@
+@startsalt
+{
+<<dot
+.XXX.
+X...X
+X.X.X
+X...X
+.XXX.
+>> | first
+<<dot>> | <<dot>> | twice in one row
+}
+@endsalt

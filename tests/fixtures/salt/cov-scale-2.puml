@@ -1,0 +1,7 @@
+@startsalt
+scale 2
+{+
+[OK] | [Cancel]
+() radio | [X] check
+}
+@endsalt

@@ -890,7 +890,15 @@ describe('refusal coverage — baseline shape', () => {
     // elk fixtures cadutu-02, cirojo-62, gokoru-18, lagudi-03, rutefe-49,
     // tegefa-14, temofi-63; D12-eligible), rendering on both sides.
     // Derivation: 6407 + 234 = 6641.
-    expect(manifest.fixtures.length).toBe(6641);
+    // 6641 -> 6691 at sep/close-b4: 47 svg-salt golden clone rows + 3
+    // svg-class embed clone rows (bixogo-47, roxosu-00, unknown-tree
+    // lubicu-73), rendering on both sides; the 50 `dot-cache/salt` rows
+    // re-pinned in place (engine none -> salt, still `ok`)
+    // (plans/salt-engine-port/measurements/repin-salt-routing.mts).
+    // Derivation: 6457 + 234 = 6691.
+    // 6691 -> 6694 at sep/close-b5-wave1: 3 svg-salt clone rows (mejeki-64,
+    // vuxibo-96, neguge-98), rendering on both sides. Derivation: 6460 + 234 = 6694.
+    expect(manifest.fixtures.length).toBe(6694);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -994,7 +1002,11 @@ describe('refusal coverage — baseline shape', () => {
     // 6393 -> 6397 at cdd8/T0b (4 svg-class unknown-tree clones).
     // 6397 -> 6402 at cdd8/close-b1 (5 svg-class clones).
     // 6402 -> 6409 at cdd8/close-b3 (7 svg-class ELK clones).
-    expect(pinnedRendering.length).toBe(6409);
+    // 6409 -> 6459 at sep/close-b4 (47 svg-salt clones + 3 svg-class embed
+    // clones: bixogo-47, roxosu-00, unknown-tree lubicu-73).
+    // 6459 -> 6462 at sep/close-b5-wave1 (3 svg-salt clones: mejeki-64,
+    // vuxibo-96, neguge-98).
+    expect(pinnedRendering.length).toBe(6462);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

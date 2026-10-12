@@ -1,0 +1,5 @@
+@startsalt
+{
+"<img src=x.png>ab                    "
+}
+@endsalt

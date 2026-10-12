@@ -1,0 +1,4 @@
+
+### salt/mejeki-64-buvo994  pass=true structural=0 numeric=0
+
+### salt/vuxibo-96-tago783  pass=true structural=0 numeric=0

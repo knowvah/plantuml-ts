@@ -207,6 +207,9 @@ function rawTextBlock(diagram: MindMapDiagram, measurer: StringMeasurer): Render
     width: dim.getWidth(),
     height: dim.getHeight(),
     dpi: diagram.getSkinParam().getDpi(),
+    // `TextBlockExporter.Builder#calculateMargin`'s fallback, `TitledDiagram
+    // #getDefaultMargins()` = same(10) (TitledDiagram.java:274-277).
+    exportMargin: diagram.getDefaultMargins(),
     drawBodyAt,
     ...(isDisplayPositionedNull(diagram.annotations.mainFrame) ? {} : { frameInk: textBlockInk(diagram, measurer) }),
   };

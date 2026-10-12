@@ -1,0 +1,7 @@
+@startsalt
+{
+"aaaa" | "bbbbb" | "ccccc"
+-- | * | *
+"ddd"
+}
+@endsalt

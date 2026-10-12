@@ -1,0 +1,8 @@
+@startsalt
+!include <tupadr3/font-awesome/gears.puml>
+{^"My group box<$gears*.3>"
+  Login    | "<$gears*.3>MyName   "
+  Password | "****     "
+  [Cancel] | [  OK<$gears*.3>   ]
+}
+@endsalt

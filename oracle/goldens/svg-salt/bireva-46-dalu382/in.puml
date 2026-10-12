@@ -1,0 +1,11 @@
+@startsalt
+  {+
+  Random Walk segmentation
+  ~~
+  {+
+  Define images
+  Open image:  |  ^Original image ^
+  Open seed:   |  ^Seed image     ^
+  }
+  }
+@endsalt

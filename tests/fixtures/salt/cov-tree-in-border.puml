@@ -1,0 +1,12 @@
+@startsalt
+{+
+Project tree
+{T
++ root
+++ docs
+++ src
++++ index.ts
+}
+[Close]
+}
+@endsalt

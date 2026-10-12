@@ -1,0 +1,2 @@
+
+### salt/tikoga-90-nedu880  pass=true structural=0 numeric=0

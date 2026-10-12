@@ -1,0 +1,7 @@
+@startuml
+skinparam monochrome reverse
+skinparam backgroundColor #336699
+start
+:hello;
+stop
+@enduml

@@ -27,11 +27,10 @@
  * base class can't call a subclass-only method (D2′ deviation).
  *
  * `SvgOption` (upstream: `net.atmp.SvgOption`, a fluent builder over
- * `ConfigurationStore`/`ColorMapper`/`HColor`, none ported) is a plain
- * readonly shape with the fields `SvgGraphics.java` reads, plus `linkTarget`
- * (read by `UGraphicSvg.java:161`) — `getFont()` dropped (unread upstream).
- * `backcolor` is `Paint | undefined` (this port's Paint-for-HColor seam,
- * `src/core/paint.ts`), removing the need for `ColorMapper`.
+ * `ConfigurationStore`/`ColorMapper`/`HColor`) is a plain readonly shape
+ * with the fields `SvgGraphics.java` reads, plus `linkTarget` (read by
+ * `UGraphicSvg.java:161`) — `getFont()` dropped (unread upstream).
+ * `backcolor` is an `HColorOrPaint`, mapped by `colorMapper` (sep-T5c).
  *
  * D4′ preamble conformance: upstream's ctor writes
  * `Version.versionString()` into the `<?plantuml ...?>` PI statically;
@@ -53,8 +52,8 @@
 
 import { XmlDocument } from './xml-writer.js';
 import type { XmlNode } from './xml-writer.js';
-import type { Paint } from '../../../paint.js';
 import { isTransparentColor } from '../../../paint.js';
+import { ColorMapper, toSvgPaint, type HColorOrPaint } from '../../color/ColorMapper.js';
 import { resolveColorToSvgHex } from '../../color/HColorSet.js';
 import type { Dimension2D } from '../../shape/UEllipse.js';
 import { DEFAULT_SVG_DECIMALS, formatDecimal, formatOpacity, shortenColor } from '../../../svg-format.js';
@@ -82,7 +81,9 @@ export interface SvgOption {
   readonly hover: string | null;
   readonly svgDimensionStyle: boolean;
   readonly minDim: Dimension2D;
-  readonly backcolor: Paint | undefined;
+  readonly backcolor: HColorOrPaint | undefined;
+  /** `SvgOption.getColorMapper()` (net/atmp/SvgOption.java:62,219-221); unset = IDENTITY. */
+  readonly colorMapper?: ColorMapper;
   readonly scale: number;
   readonly rootAttributes: ReadonlyMap<string, string>;
   readonly title: string | null;
@@ -198,8 +199,8 @@ export class SvgGraphicsCore {
   }
 
   private setupBackcolor(): string | null {
-    const backcolor = this.option.backcolor;
-    if (backcolor === undefined) return null;
+    if (this.option.backcolor === undefined) return null; // mapped: SvgGraphics.java:176-188
+    const backcolor = toSvgPaint(this.option.backcolor, this.option.colorMapper ?? ColorMapper.IDENTITY);
     if (typeof backcolor !== 'string') {
       const id = this.createSvgGradient(backcolor.color1, backcolor.color2, backcolor.policy);
       this.paintBackcolor(`url(#${id})`);

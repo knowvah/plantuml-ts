@@ -1,0 +1,11 @@
+@startsalt
+<style>
+root {
+  Margin 10
+}
+</style>
+title My title
+{
+[OK] | A
+}
+@endsalt

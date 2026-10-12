@@ -68,6 +68,7 @@ import { renderLatexAsImage } from '../../latex.js';
 import type { ISkinSimple } from '../../style/ISkinSimple.js';
 import type { AtomOps } from '../../klimt/creole/Sea.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
+import { SPACE_ATOM_HEIGHT } from '../../klimt/creole/atom/AtomSpace.js';
 import type { Atom } from '../../klimt/creole/SheetBlock1.js';
 import { descEmbeddedRenderer } from './EntityImageDescriptionEmbed.js';
 import { spriteHrefOver } from '../../klimt/sprite/sprite-tint.js';
@@ -216,6 +217,8 @@ export function descAtomOps(
     // hang into the DIMENSION double-counted it for an emoji-only line
     // (+3*factor = +1.75px at font 14 -- `emoji-only-line-height-0`).
     if (atom.kind === 'emoji') return emojiSquareDim(atom.factor);
+    // `AtomSpace#calculateDimensionSlow` (AtomSpace.java:~52): (width, 1).
+    if (atom.kind === 'space') return { width: atom.width, height: SPACE_ATOM_HEIGHT };
     const resolved = resolveAtomImage?.(atom.atom);
     return resolved === undefined ? { width: 0, height: 0 } : resolved;
   }
@@ -258,6 +261,8 @@ export function descAtomOps(
         drawEmojiAtom(ug, atom, resolveEmojiArtwork);
         return;
       }
+      // `AtomSpace#drawU` is empty.
+      if (atom.kind === 'space') return;
       const resolved: ResolvedAtomImageWithRaster | undefined = resolveAtomImage?.(atom.atom);
       if (resolved === undefined) return;
       // svg-sprite-nanoparser T9 fix (was: `if (resolved.kind !== 'image')

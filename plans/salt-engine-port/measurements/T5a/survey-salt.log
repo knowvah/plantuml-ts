@@ -1,0 +1,8 @@
+
+> @knowvah/plantuml-ts@0.2.0 svg:survey
+> jiti scripts/svg-parity-survey.ts salt --out /Users/scottseely/git/knowvah/plantuml-ts/.claude/worktrees/sep-T5a/plans/salt-engine-port/measurements/T5a/parity-salt.json
+
+surveying 51 salt fixtures (concurrency 6)
+  25/51
+  50/51
+wrote /Users/scottseely/git/knowvah/plantuml-ts/.claude/worktrees/sep-T5a/plans/salt-engine-port/measurements/T5a/parity-salt.json — {"conformant":50,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}

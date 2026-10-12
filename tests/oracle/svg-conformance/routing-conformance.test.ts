@@ -1015,10 +1015,20 @@ describe('routing conformance — jar-error classification', () => {
     // 5680 -> 5687 / 6634 -> 6641 at cdd8/close-b3: 7 svg-class clone rows (the
     // !pragma layout elk class fixtures, D12-eligible zero-diff pins).
     // Derivation: 5687 + 868 + 86 = 6641.
-    expect(pinnedAgree.length).toBe(5687);
-    expect(pinnedMisroutes.length).toBe(868);
+    // 5687 -> 5787 / 868 -> 818 / 6641 -> 6691 at sep/close-b4: the salt
+    // plugin registers (sep T4a), so the 50 `dot-cache/salt` known-misroute
+    // rows (SALT -> NONE) re-pin `agree` in place; 47 svg-salt golden clone
+    // rows + 3 svg-class embed clone rows (bixogo-47, roxosu-00, unknown-tree
+    // lubicu-73, the `{{salt}}` seed rows) appended, all zero-diff pins
+    // (plans/salt-engine-port/measurements/repin-salt-routing.mts).
+    // Derivation: 5787 + 818 + 86 = 6691.
+    // 5787 -> 5790 / 6691 -> 6694 at sep/close-b5-wave1: 3 svg-salt clone rows
+    // (mejeki-64, vuxibo-96 after the chrome-margin fix; neguge-98 after the
+    // CommandCreoleSpace port), zero-diff pins. Derivation: 5790 + 818 + 86 = 6694.
+    expect(pinnedAgree.length).toBe(5790);
+    expect(pinnedMisroutes.length).toBe(818);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(6641);
+    expect(manifest.fixtures.length).toBe(6694);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -1079,7 +1089,9 @@ describe('routing conformance — jar-error classification', () => {
     // 874 -> 873 at add4/merge-T3e-2: fukika's stale misroute retired.
     // 873 -> 869 at add4/merge-T3k: the 4 add4-T0b activity parser gaps fixed.
     // 869 -> 867 at isw/close: licole-34 and loteba-26 (sequence) now agree.
-    expect(censused.length).toBe(867);
+    // 867 -> 817 at sep/close-b4: the 50 salt "no engine (D7 todo)" misroutes
+    // re-pinned agree once the salt plugin registered (sep T4a).
+    expect(censused.length).toBe(817);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

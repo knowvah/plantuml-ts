@@ -3,15 +3,16 @@
  * members this task defers.
  *
  * Upstream: `UGraphicSvg.java#register()` wires five more drivers beyond
- * the seven this task ports: `DriverImagePng`, `DriverPixelSvg`,
+ * the seven this task ports: `DriverImagePng`, `DriverPixelSvg` (since
+ * ported — `driver-pixel-svg.ts`, registered for `UPixel`),
  * `DriverImageSvgSvg`, `DriverTextAsPathSvg` (the `textAsPath` branch),
  * and `DriverCenteredCharacterSvg` (the non-TeaVM `UCenteredCharacter`
  * branch — `DriverCenteredCharacterSvgDeterministic`, the TeaVM branch,
  * is N/A; this port is not a TeaVM transpile target). Each throws a
  * message naming D3′, per this task's mission brief scope decision.
  *
- * NONE of these are wired into `u-graphic-svg.ts`'s driver-registry map:
- * their corresponding shape classes (`UPixel`, `UImage`, `UImageSvg`,
+ * NONE of the remaining four are wired into `u-graphic-svg.ts`'s
+ * driver-registry map: their corresponding shape classes (`UImage`, `UImageSvg`,
  * `UCenteredCharacter`) do not exist anywhere in this port (not in any
  * batch-1/2/3 write-set — `src/core/klimt/shape/` has no such files), so
  * there is no `ShapeConstructor` to register them against in the first
@@ -19,7 +20,7 @@
  * silent no-op registration) is the same story — not ported, and its
  * upstream behavior is a no-op anyway, so nothing is lost by omitting it
  * here. These stub classes exist standalone, for structural completeness
- * and to give a citable D3′ throw once any of the four shape classes
+ * and to give a citable D3′ throw once any of the three shape classes
  * eventually lands.
  */
 
@@ -31,13 +32,6 @@ import type { UShape } from '../../UShape.js';
 export class DriverImagePng implements UDriver<UShape> {
   draw(_shape: UShape, _param: UParam): void {
     throw new Error('deferred per D3-prime: PNG image embedding (DriverImagePng) not yet ported');
-  }
-}
-
-/** Upstream: `DriverPixelSvg` (single-pixel `UPixel` rects). */
-export class DriverPixelSvg implements UDriver<UShape> {
-  draw(_shape: UShape, _param: UParam): void {
-    throw new Error('deferred per D3-prime: pixel drawing (DriverPixelSvg) not yet ported');
   }
 }
 

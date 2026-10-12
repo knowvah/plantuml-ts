@@ -1,0 +1,20 @@
+t5c-activity-monochrome-reverse-bg: 2 diffs, 2 colour
+   {"path":"svg/@background","actual":"#336699","expected":"#A3A3A3","tolerance":0.01}
+   {"path":"svg/g[1]/rect[1]/@fill","actual":"#369","expected":"#A3A3A3","tolerance":0.01}
+   ours first rect: <rect x="0" y="0" width="81" height="149" fill="#369" stroke="none"/>
+   jar  first rect: <rect x="0" y="0" width="81" height="149" fill="#A3A3A3" style="stroke:none;"/>
+   ours svg style: width:81px;height:149px;background:#336699; | jar: width:81px;height:149px;background:#A3A3A3;
+t5c-activity-reversecolor-bg: 2 diffs, 2 colour
+   {"path":"svg/@background","actual":"#010101","expected":"#FEFEFE","tolerance":0.01}
+   {"path":"svg/g[1]/rect[1]/@fill","actual":"#010101","expected":"#FEFEFE","tolerance":0.01}
+   ours first rect: <rect x="0" y="0" width="81" height="149" fill="#010101" stroke="none"/>
+   jar  first rect: <rect x="0" y="0" width="81" height="149" fill="#FEFEFE" style="stroke:none;"/>
+   ours svg style: width:81px;height:149px;background:#010101; | jar: width:81px;height:149px;background:#FEFEFE;
+t5c-class-monochrome-reverse-bg: 0 diffs, 0 colour
+   ours first rect: <rect x="0" y="0" width="63" height="178" fill="#A3A3A3" stroke="none"/>
+   jar  first rect: <rect x="0" y="0" width="63" height="178" fill="#A3A3A3" style="stroke:none;"/>
+   ours svg style: width:63px;height:178px;background:#A3A3A3; | jar: width:63px;height:178px;background:#A3A3A3;
+t5c-class-reversecolor-bg: 0 diffs, 0 colour
+   ours first rect: <rect x="0" y="0" width="63" height="178" fill="#FEFEFE" stroke="none"/>
+   jar  first rect: <rect x="0" y="0" width="63" height="178" fill="#FEFEFE" style="stroke:none;"/>
+   ours svg style: width:63px;height:178px;background:#FEFEFE; | jar: width:63px;height:178px;background:#FEFEFE;

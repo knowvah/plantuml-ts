@@ -1,0 +1,2 @@
+
+### salt/resexi-89-jeru231  pass=true structural=0 numeric=0

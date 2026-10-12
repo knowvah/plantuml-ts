@@ -10,9 +10,11 @@
  * `applyStrokeColor` — see that module's doc comment for the shared
  * Paint-resolution seam (D3′).
  *
- * `paintsEqual` stands in for `HColor#equals` restricted to this port's
- * `Paint` model: two plain-string paints compare `===`; a `Gradient`
- * paint is never "equal" to anything here (matching upstream's own
+ * `paintsEqual` stands in for `HColor#equals`: two `HColorSimple`s compare
+ * their light colours, the dark partner ignored (`HColorSimple.java:84-90`);
+ * two plain-string paints compare `===`; a `Paint` and an `HColor` are
+ * never equal (a port-only pairing no caller makes); a gradient
+ * is never "equal" to anything here (matching upstream's own
  * `&& !(color instanceof HColorGradient) && !(color instanceof
  * HColorLinearGradient)` guard — a gradient never takes the fast path).
  *
@@ -29,13 +31,15 @@
 
 import type { UDriver } from '../../AbstractCommonUGraphic.js';
 import type { UParam } from '../../UParam.js';
-import type { Paint } from '../../../paint.js';
+import { toSvgPaint, type ColorMapper, type HColorOrPaint } from '../../color/ColorMapper.js';
+import { HColorSimple } from '../../color/HColorSimple.js';
 import type { UPath } from '../../shape/UPath.js';
 import type { SvgGraphics } from './svg-graphics.js';
 import { DriverRectangleSvg } from './driver-rectangle-svg.js';
 
 // See the module doc comment above for the HColor#equals adaptation.
-function paintsEqual(a: Paint, b: Paint): boolean {
+function paintsEqual(a: HColorOrPaint, b: HColorOrPaint): boolean {
+  if (a instanceof HColorSimple && b instanceof HColorSimple) return a.equals(b);
   return typeof a === 'string' && typeof b === 'string' && a === b;
 }
 
@@ -44,19 +48,19 @@ function paintsEqual(a: Paint, b: Paint): boolean {
 export class DriverPathSvg implements UDriver<UPath> {
   constructor(private readonly svg: SvgGraphics) {}
 
-  draw(shape: UPath, param: UParam): void {
+  draw(shape: UPath, param: UParam, mapper: ColorMapper): void {
     const x = param.getTranslate().getDx();
     const y = param.getTranslate().getDy();
     const color = param.getColor();
     const back = param.getBackcolor();
 
     if (paintsEqual(color, back)) {
-      this.svg.setFillColor(color as string);
+      this.svg.setFillColor(toSvgPaint(color, mapper) as string); // DriverPathSvg.java:66-67
       this.svg.setStrokeColor('');
       this.svg.setStrokeWidth(0, null);
     } else {
-      DriverRectangleSvg.applyFillColor(this.svg, param);
-      DriverRectangleSvg.applyStrokeColor(this.svg, param);
+      DriverRectangleSvg.applyFillColor(this.svg, mapper, param);
+      DriverRectangleSvg.applyStrokeColor(this.svg, mapper, param);
       this.svg.setStrokeWidth(param.getStroke().getThickness(), param.getStroke().getDasharraySvg() ?? null);
     }
 

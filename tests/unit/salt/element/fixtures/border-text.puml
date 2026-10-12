@@ -1,0 +1,12 @@
+@startsalt
+{
+N={# North title }
+S={# South }
+W={# West }
+E={# East }
+C={#
+A0 | B0
+A1 | B1
+}
+}
+@endsalt

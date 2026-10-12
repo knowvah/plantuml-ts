@@ -1,0 +1,6 @@
+@startsalt
+{
+Superclass:  | "java.lang.Object " | [Browse...]
+Do you want to add comments ? (Configure templates and default value <u>here</u>) | * | *
+}
+@endsalt

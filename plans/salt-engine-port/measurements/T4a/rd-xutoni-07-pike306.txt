@@ -1,0 +1,2 @@
+
+### salt/xutoni-07-pike306  pass=true structural=0 numeric=0

@@ -1,0 +1,14 @@
+{
+  "fixtures": [
+    {
+      "type": "salt",
+      "slug": "lakari-33-mone874",
+      "status": "baseline",
+      "weightedScore": 337,
+      "diffCount": 89,
+      "reason": "jar-crash: the stock jar renders its IllegalArgumentException crash page (salt/element/ElementMenuBar.java:87 via ElementFactoryMenu.java:74; oracle/goldens/stock-error-pages.json salt/lakari-33-mone874) and the port renders its own error page from the same throw (ElementMenuBar.ts) -- conformant under the 2026-10-10 error-page rule; the numeric baseline measures our error page against the jar crash page.",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "2ff2f9b9c"
+    }
+  ]
+}

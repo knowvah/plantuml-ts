@@ -1,0 +1,2 @@
+
+### salt/cajoda-60-geze313  pass=true structural=0 numeric=0

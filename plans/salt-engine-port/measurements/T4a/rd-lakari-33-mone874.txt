@@ -1,0 +1,91 @@
+
+### salt/lakari-33-mone874  pass=false structural=62 numeric=27
+  S svg/@background  exp=#FFFFFF | act=#000000
+  S svg/g[1]/text[1]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[1]/@font-style  exp= | act=italic
+  S svg/g[1]/text[1]/@font-weight  exp= | act=700
+  S svg/g[1]/text[1]/@textLength  exp=415.95 | act=319.2
+  S svg/g[1]/text[1]/text()[1]  exp=net.sourceforge.plantuml.PSystemUtils.exportDiagrams(PSystemUtils.java:94) | act=plantuml-ts version 0.1.0 / unknown [Unknown compile time]
+  S svg/g[1]/text[2]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[2]/@font-weight  exp= | act=700
+  S svg/g[1]/text[2]/@textLength  exp=589.275 | act=128.887
+  S svg/g[1]/text[2]/text()[1]  exp=net.sourceforge.plantuml.SourceFileReaderAbstract.getGeneratedImages(SourceFileReaderAbstract.java:206) | act=[From string (line 8) ]
+  S svg/g[1]/text[3]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[3]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[3]/@font-weight  exp= | act=700
+  S svg/g[1]/text[3]/@textLength  exp=342 | act=
+  S svg/g[1]/text[3][childCount]  exp=1 | act=0
+  S svg/g[1]/text[4]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[4]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[4]/@font-weight  exp= | act=700
+  S svg/g[1]/text[4]/@textLength  exp=430.05 | act=63.175
+  S svg/g[1]/text[4]/text()[1]  exp=net.sourceforge.plantuml.Run.lambda$processInputsInParallel$12(Run.java:316) | act=@startsalt
+  S svg/g[1]/text[5]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[5]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[5]/@font-weight  exp= | act=700
+  S svg/g[1]/text[5]/@textLength  exp=397.425 | act=
+  S svg/g[1]/text[5]/text()[1]  exp=net.sourceforge.plantuml.Run.lambda$processInParallel$14(Run.java:332) | act={
+  S svg/g[1]/text[6]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[6]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[6]/@font-weight  exp= | act=700
+  S svg/g[1]/text[6]/@textLength  exp=443.4 | act=10.063
+  S svg/g[1]/text[6]/text()[1]  exp=java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572) | act={*
+  S svg/g[1]/text[7]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[7]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[7]/@font-weight  exp= | act=700
+  S svg/g[1]/text[7]/@textLength  exp=357.225 | act=30.1
+  S svg/g[1]/text[7]/text()[1]  exp=java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) | act=A | B
+  S svg/g[1]/text[8]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[8]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[8]/@font-weight  exp= | act=700
+  S svg/g[1]/text[8]/@textLength  exp=500.025 | act=26.95
+  S svg/g[1]/text[8]/text()[1]  exp=java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) | act=C | *
+  S svg/g[1]/text[9]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[9]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[9]/@font-weight  exp= | act=700
+  S svg/g[1]/text[9]/@textLength  exp=500.025 | act=
+  S svg/g[1]/text[9]/text()[1]  exp=java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) | act=}
+  S svg/g[1]/text[10]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[10]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[10]/@font-weight  exp= | act=700
+  S svg/g[1]/text[10]/@textLength  exp=266.025 | act=
+  S svg/g[1]/text[10]/text()[1]  exp=java.base/java.lang.Thread.run(Thread.java:1583) | act=}
+  S svg/g[1]/text[11]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[11]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[11]/@font-weight  exp= | act=700
+  S svg/g[1]/text[11]/@text-decoration  exp= | act=wavy underline
+  S svg/g[1]/text[11]/@textLength  exp= | act=59.412
+  S svg/g[1]/text[11][childCount]  exp=0 | act=1
+  S svg/g[1]/text[12]/@fill  exp=#000 | act=#F00
+  S svg/g[1]/text[12]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[12]/@font-weight  exp= | act=700
+  S svg/g[1]/text[12]/@textLength  exp=397.65 | act=158.813
+  S svg/g[1]/text[12]/text()[1]  exp=Diagram source: (Use http://zxing.org/w/decode.jspx to decode the qrcode) | act=IllegalArgumentException
+  S svg/g[1][childCount]  exp=48 | act=13
+  N svg/@height  exp=626 | act=190 (Δ436)
+  N svg/@viewBox[2]  exp=761 | act=332 (Δ429)
+  N svg/@viewBox[3]  exp=626 | act=190 (Δ436)
+  N svg/@width  exp=761 | act=332 (Δ429)
+  N svg/g[1]/text[1]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[1]/@y  exp=374.333 | act=17 (Δ357.333)
+  N svg/g[1]/text[2]/@x  exp=11.6 | act=6 (Δ5.6)
+  N svg/g[1]/text[2]/@y  exp=386.333 | act=40 (Δ346.333)
+  N svg/g[1]/text[3]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[3]/@y  exp=398.333 | act=58 (Δ340.333)
+  N svg/g[1]/text[4]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[4]/@y  exp=410.333 | act=72 (Δ338.333)
+  N svg/g[1]/text[5]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[5]/@y  exp=422.333 | act=86 (Δ336.333)
+  N svg/g[1]/text[6]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[6]/@y  exp=434.333 | act=100 (Δ334.333)
+  N svg/g[1]/text[7]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[7]/@y  exp=446.333 | act=114 (Δ332.333)
+  N svg/g[1]/text[8]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[8]/@y  exp=458.333 | act=128 (Δ330.333)
+  N svg/g[1]/text[9]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[9]/@y  exp=470.333 | act=142 (Δ328.333)
+  N svg/g[1]/text[10]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[10]/@y  exp=482.333 | act=156 (Δ326.333)
+  N svg/g[1]/text[11]/@y  exp=494.333 | act=170 (Δ324.333)
+  N svg/g[1]/text[12]/@x  exp=8.3 | act=8.85 (Δ0.5499999999999989)
+  N svg/g[1]/text[12]/@y  exp=506.333 | act=184 (Δ322.333)

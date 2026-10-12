@@ -1,0 +1,16 @@
+@startsalt
+sprite $dot [8x8/16] {
+FFFFFFFF
+F000000F
+F000000F
+F000000F
+F000000F
+F000000F
+F000000F
+FFFFFFFF
+}
+{
+A<$dot>B
+<$missing>C
+}
+@endsalt

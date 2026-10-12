@@ -1,0 +1,34 @@
+@startsalt
+{
+   [X] checkbox
+	[] checkbox
+	() radio
+	(X) radio
+	This is a text
+	[This is my button]
+	<<
+	............
+	.XXXXX......
+	.X...X......
+	.XXXXXXXXXX.
+	.X........X.
+	.X........X.
+	.X........X.
+	.X........X.
+	.XXXXXXXXXX.
+	............
+	>>
+	<<
+	.............
+	.XXXXX......X
+	.X...X.......
+	.XXXXXXXXXX..
+	.X........X..
+	.X........X..
+	.X........X..
+	.X........X..
+	.XXXXXXXXXX..
+	.............
+	>>
+}
+@endsalt
