@@ -8,5 +8,5 @@ gates, journal and a light survey, with no pins expected. Every agent prompt is
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T2c](T2c-myelkcluster.md) | port `MyElkCluster` (172 lines) | typescript-pro (sonnet) | `src/core/elk/MyElkCluster.ts` (+tests) | T2a | [ ] |
-| [T2d](T2d-myelkedge.md) | port `MyElkEdge` (354 lines) | typescript-pro (opus) | `src/core/elk/MyElkEdge.ts` (+tests) | T2a | [ ] |
+| [T2c](T2c-myelkcluster.md) | port `MyElkCluster` (172 lines) | typescript-pro (sonnet) | `src/core/elk/MyElkCluster.ts` (+tests) | T2a | [x] |
+| [T2d](T2d-myelkedge.md) | port `MyElkEdge` (354 lines) | typescript-pro (opus) | `src/core/elk/MyElkEdge.ts` (+tests) | T2a | [x] |
