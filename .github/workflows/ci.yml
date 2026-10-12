@@ -38,8 +38,9 @@ env:
 
 jobs:
   # --------------------------------------------------------------------------
-  # Cheap gates. None of them need the vendored stdlib, so a type error or a
-  # lint failure costs ~1 min instead of a 285 MB download. Runs alongside the
+  # Cheap gates first: typecheck / lint / format / build need no vendored
+  # stdlib, so a type error or a lint failure costs ~1 min; the stdlib is
+  # restored only afterwards, for the size-deltas ratchet. Runs alongside the
   # test shards instead of ahead of them.
   # --------------------------------------------------------------------------
   static:
@@ -82,11 +83,16 @@ jobs:
 
       # Shrink-only conformance ratchet, separate from vitest. Exits 2 if any
       # fixture widened; reads only committed goldens, so it needs no oracle
-      # jar, no local cache and no stdlib — it belongs with the cheap gates.
+      # jar and no local cache — but it DOES render every golden through
+      # `renderSync` with the stdlib assets wired (`scripts/stdlib-assets-store
+      # .ts:98` throws without `assets/stdlib`; PR #76's first run), so the
+      # vendored tree is restored here first. Cache hit: seconds.
       #
       # jiti, not tsx: tsx is not a dependency of this repo, so `npx tsx` would
       # silently fetch an unpinned version on every run. jiti is a pinned
       # devDependency and is already what `npm run build:stdlib` uses.
+      - uses: ./.github/actions/vendored-stdlib
+
       - name: description size deltas
         run: npx jiti scripts/measure-description-size-deltas.ts
 
