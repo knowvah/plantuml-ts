@@ -86,30 +86,12 @@
     },
     {
       "match": {
-        "id": "svg-class/bixogo-47-xulu385"
-      },
-      "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
-      "acceptedAt": "2026-09-23",
-      "acceptedBy": "maintainer",
-      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=4, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=49. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
-        "id": "svg-class/roxosu-00-pini153"
-      },
-      "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
-      "acceptedAt": "2026-09-23",
-      "acceptedBy": "maintainer",
-      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=4, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=49. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
         "id": "svg-class/nugecu-04-tona107"
       },
       "scope": "svg-conformance class ledger (dot-engine known divergence A3 -- cdd4 D6)",
       "acceptedAt": "2026-09-26",
       "acceptedBy": "maintainer",
-      "reason": "One flat labelled `minlen=0` edge (`sh0006->sh0007`) routes around the mirrored side of its label box. docs/graphviz-issues/23 / TRACKER 23: dot-engine accepted this as an instance of its docs/known-divergences.md A3 (spline-routing tie-break). A symmetric label corridor makes the two candidate split corners an exact tie, and C graphviz and the port resolve the tie on floating-point noise, so there is no upstream fix to wait for. Re-verified 2026-09-26 (cdd4 T1) on dot-engine 1.6.1: render-diff structural=0, numeric=23, all on that edge's path and arrowhead polygon (max Δ16.06, label side mirrored); every other element exact. Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=23, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=23. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
+      "reason": "One flat labelled `minlen=0` edge (`sh0006->sh0007`) routes around the mirrored side of its label box. docs/graphviz-issues/23 / TRACKER 23: dot-engine accepted this as an instance of its docs/known-divergences.md A3 (spline-routing tie-break). A symmetric label corridor makes the two candidate split corners an exact tie, and C graphviz and the port resolve the tie on floating-point noise, so there is no upstream fix to wait for. Re-verified 2026-09-26 (cdd4 T1) on dot-engine 1.6.1: render-diff structural=0, numeric=23, all on that edge's path and arrowhead polygon (max Δ16.06, label side mirrored); every other element exact. Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=23, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=23. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line. Re-ruled 2026-10-11: no dot-engine fix pursued (cdd8 D5)."
     },
     {
       "match": {
@@ -776,6 +758,30 @@
       "retiredAt": "2026-10-10",
       "retiredBy": "maintainer",
       "retiredReason": "Error-page rule (user ruling 2026-10-10, docs/svg-conformance.md \"Error pages\"): the stock jar errors (oracle/goldens/stock-error-pages.json) and we render our own error page, so the survey verdict is conformant with errorPage (aepp T2a 9d09e199a)."
+    },
+    {
+      "match": {
+        "id": "svg-class/bixogo-47-xulu385"
+      },
+      "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
+      "acceptedAt": "2026-09-23",
+      "acceptedBy": "maintainer",
+      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=4, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=49. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-11",
+      "retiredBy": "maintainer",
+      "retiredReason": "Retired by cdd8 D8 (plans/class-divergence-drive-8/decisions.md#D8, 2026-10-11): the stated mechanism (\"payload bytes only\") is false. The legend's nested `{{salt}}` renders our 300x60 \"Error: unknown diagram type\" box against the jar's 111x90 salt image (render-diff pass=false structural=0 numeric=49, all on the image box and the legend geometry it drives), so this is an unported engine, not a declared payload divergence. Open -> salt-engine-port (cdd8 D10)."
+    },
+    {
+      "match": {
+        "id": "svg-class/roxosu-00-pini153"
+      },
+      "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
+      "acceptedAt": "2026-09-23",
+      "acceptedBy": "maintainer",
+      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=4, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=49. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-11",
+      "retiredBy": "maintainer",
+      "retiredReason": "Retired by cdd8 D8 (plans/class-divergence-drive-8/decisions.md#D8, 2026-10-11): the stated mechanism (\"payload bytes only\") is false. The legend's nested `{{salt}}` renders our 300x60 \"Error: unknown diagram type\" box against the jar's 111x90 salt image (render-diff pass=false structural=0 numeric=49, all on the image box and the legend geometry it drives), so this is an unported engine, not a declared payload divergence. Open -> salt-engine-port (cdd8 D10)."
     }
   ]
 }

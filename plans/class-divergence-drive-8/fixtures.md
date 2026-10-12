@@ -3,7 +3,8 @@
 Seeded during planning (2026-10-11, main `84bd0c3f4`,
 `render-all --tree all`; `S`/`N` = render-diff structural/numeric). T0a
 re-measures every row into `measurements/b0.json` and corrects this table with a
-journal row. The error-page-conformant rows are not listed: class luzive, sadamo
+journal row. T0a b0 (2026-10-11): all 20 verdicts and S/N match `b0.json` exactly;
+no correction needed (journal row 1). The error-page-conformant rows are not listed: class luzive, sadamo
 and zuduxu, and unknown petiku and rubebe.
 
 `final` ∈ `fixed (<commit>)` · `accepted (D11.n)` · `open -> salt-engine-port` ·
@@ -37,4 +38,10 @@ and zuduxu, and unknown petiku and rubebe.
 ## ELK fixtures outside the class tree (T3b, movers)
 
 c4 ×1, component ×1, unknown ×1 (`grep -l -i 'pragma layout elk'
-test-results/dot-cache/*/*/in.puml`). T0a records their slugs here.
+test-results/dot-cache/*/*/in.puml`). Recorded by T0a (2026-10-11):
+
+| tree/slug | b0 verdict | task | final |
+|---|---|---|---|
+| c4/vakasu-51-xiza794 | (b0-eng/parity-c4.json) | T3b | |
+| component/dirofi-81-cuga514 | (b0-eng/parity-component.json) | T3b | |
+| unknown/foraba-98-sagi735 | (b0.json: not CLASS-routed) | T3b | |
