@@ -1,0 +1,6 @@
+@startsalt
+{#
+A<space:15>B | "x<space:8>y" | [Go<space:10>]
+left<space:4> | <space:30>right | plain
+}
+@endsalt

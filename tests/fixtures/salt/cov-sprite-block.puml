@@ -1,0 +1,14 @@
+@startsalt
+sprite $box {
+FFFFFFFF
+F000000F
+F0FFFF0F
+F0FFFF0F
+F000000F
+FFFFFFFF
+}
+{
+<$box> left | <$box> right
+"<$box> field" | [<$box> button]
+}
+@endsalt

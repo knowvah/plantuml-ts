@@ -1,0 +1,326 @@
+{
+  "fixtures": [
+    {
+      "type": "salt",
+      "slug": "common-commands",
+      "topic": "T4a probe: title + scale 2 + rotate + minwidth + set separator (PSystemSaltFactory common commands)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-include-procedure",
+      "topic": "!include of a sibling fragment (cov-include-fragment.iuml) defining a !procedure that emits a button row, called twice",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-menu-three-popups",
+      "topic": "{* menu bar with three popups (File/Edit/View) and a popup-less entry",
+      "status": "jar-flake",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-flake: ElementMenuBar#drawU iterates popups.entrySet() of a HashMap keyed by identity-hashed ElementMenuEntry (salt/element/ElementMenuBar.java:54,123), so the jar draws the three popups in a run-dependent order. Five consecutive oracle-render.sh runs drew File/View/Edit, View/Edit/File, File/View/Edit, Edit/View/File, Edit/File/View; the port draws insertion order File/Edit/View (ElementMenuBar.ts). Sorted-element multiset of ours equals all five jar renders exactly. Excluded from the ratchet.",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-pseudo-sprite-twice",
+      "topic": "<<dot X/. grid>> image defined inline, then <<dot>> twice in one row (ElementImage -> UPixel, WrappedElement)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-scale-2",
+      "topic": "scale 2 on a {+ border with buttons, radio and checkbox, no other chrome",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-scroll-both",
+      "topic": "{S scroll (ScrollStrategy.BOTH), content taller than wide",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-scroll-horizontal",
+      "topic": "{S- scroll (ScrollStrategy.HORIZONTAL_ONLY), content taller than wide",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-scroll-vertical",
+      "topic": "{SI scroll (ScrollStrategy.VERTICAL_ONLY), content taller than wide",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-separators-every-column",
+      "topic": "-- == ~~ .. separators (ElementLine) in every column of a {# grid, two rotations",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-space-in-cell",
+      "topic": "<space:N> inside text, text-field and button cells, leading and trailing (CommandCreoleSpace)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-sprite-block",
+      "topic": "sprite $box {hex grid} block (manageSprite -> CommandFactorySprite) used as <$box> twice per row in text, field and button cells",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-startuml-salt-keyword",
+      "topic": "`salt` as the first line inside @startuml (PSystemErrorUtils#checkBasicError hint page)",
+      "status": "baseline",
+      "weightedScore": 54,
+      "diffCount": 25,
+      "reason": "error-page: jar renders PSystemErrorUtils#checkBasicError's salt hint (error/PSystemErrorUtils.java:81-87, called from PSystemBuilder.java:252) and the port renders its own Syntax Error page -- conformant under the 2026-10-10 error-page rule; content residual is checkBasicError being unported (src/core/error/PSystemErrorUtils.ts:12-17, core gap, not salt).",
+      "jarError": {
+        "line": 6,
+        "message": "This looks like a salt diagram. Please use @startsalt instead of @startuml. (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-tab-in-border",
+      "topic": "{/ horizontal tab bar inside a {+ border with creole in the first tab",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-tab-vertical",
+      "topic": "{/ tab bar with NEWLINE terminators -> ElementTabBar#setVertical(true)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-title-caption",
+      "topic": "title + caption chrome (D2, shared TitledDiagram path), no scale",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-titled-border-creole",
+      "topic": "{^\"title\" titled border with <b>/<i>/<u> creole in the title",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-tree-in-border",
+      "topic": "{T tree nested inside a {+ border between text and a button",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "cov-tree-table-columns",
+      "topic": "{T# tree table with |-separated multi-column rows",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "dpi-192",
+      "topic": "T4a probe: skinparam dpi dropped by manageSprite",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "hide-stereotype-dropped",
+      "topic": "T4a probe: hide stereotype dropped by manageSprite",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "legend-embedded-salt",
+      "topic": "T4a probe: {{salt}} embedded in a class legend",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "mainframe",
+      "topic": "T4a probe: mainframe chrome around a salt diagram",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "mode-line-is-data",
+      "topic": "T4a probe: `mode dark` is salt data, not a command -> jar crash page",
+      "status": "baseline",
+      "weightedScore": 302,
+      "diffCount": 82,
+      "reason": "jar-crash: `mode dark` is data, no factory ready() -> IllegalArgumentException (salt/PSystemSalt.java:215); jar crash page (random quote: re-renders differ in the quote text and canvas width only) vs our error page -- conformant under the 2026-10-10 error-page rule.",
+      "jarError": {
+        "line": null,
+        "message": ""
+      },
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "monochrome-reverse",
+      "topic": "T4a probe: skinparam monochrome reverse",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "monochrome-true",
+      "topic": "T4a probe: skinparam monochrome true",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "no-factory-ready",
+      "topic": "T4a probe: no factory ready() -> PSystemSalt#createElement IAE crash page",
+      "status": "baseline",
+      "weightedScore": 273,
+      "diffCount": 121,
+      "reason": "jar-crash: `Hello` alone, no factory ready() -> IllegalArgumentException (salt/PSystemSalt.java:215); jar crash page (random quote: re-renders differ in the quote text and canvas width only) vs our error page -- conformant under the 2026-10-10 error-page rule.",
+      "jarError": {
+        "line": null,
+        "message": ""
+      },
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "reversecolor-dark",
+      "topic": "T4a probe: skinparam reversecolor dark",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "salt-first-line",
+      "topic": "T4a probe: @startsalt + first line `salt` -> CommandAnything error page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: both render CommandAnything's \"This is not needed anymore.\" (CommandAnything.java:70) at line 2; residual is our own version string (kept by ruling) and the \"[From <file>\" vs \"[From string\" source label of a string render.",
+      "jarError": {
+        "line": 2,
+        "message": "This is not needed anymore. (Assumed diagram type: salt)"
+      },
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "salt-not-first-line",
+      "topic": "T4a probe: `salt` as a later data line is text",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    },
+    {
+      "type": "salt",
+      "slug": "skinparam-mode-dark",
+      "topic": "T4a probe: skinparam mode dark element colours",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "open -> T5c: AbstractElement#getBlack is BLACK.withDark(WHITE) (salt/element/AbstractElement.java:47-49); the port's UGraphic carries no ColorMapper so the dark partner is lost at asPaint() (7 drawn-colour diffs; klimt seam, T5c).",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "ccb384931"
+    }
+  ]
+}

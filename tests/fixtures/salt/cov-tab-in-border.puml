@@ -1,0 +1,7 @@
+@startsalt
+{+
+{/ <b>Main | Options | About }
+Content of the main tab
+[OK] | [Cancel]
+}
+@endsalt

@@ -1,0 +1,7 @@
+@startsalt
+{^"<b>Account</b> <i>settings</i> <u>here</u>"
+  Name  | "Jane      "
+  Email | "jane@x    "
+  [Save] | [Discard]
+}
+@endsalt

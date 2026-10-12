@@ -104,3 +104,33 @@ shape test).
 
 Removal is **maintainer-only** — see `oracle/goldens/svg-description/
 README.md`'s identical rule; the same rationale applies verbatim.
+
+## Authored root (sep T5-cov, 2026-10-12)
+
+`~/git/pdiff` holds exactly the 51 cached rows, so original fixtures for the
+corpus's thin spots live in a second, committed root: `tests/fixtures/salt/`,
+FLAT, one `<slug>.puml` with the jar's `<slug>.svg` beside it (rendered by
+`scripts/oracle-render.sh tests/fixtures/salt tests/fixtures/salt/<slug>.puml`,
+never a hand-typed `java -jar`). A non-`.puml` file there is an `!include`
+target, not a fixture (`cov-include-fragment.iuml`); relative includes resolve
+from the fixture's directory and stdlib includes through
+`tests/helpers/fixture-include-store.ts`
+(`render-fixture-salt.ts#authoredSaltIncludeStore`).
+
+The root is tracked by its own manifest, `authored-baseline.json`, not a
+second array in `diff-baseline.json`, so the cached invariant (diff-baseline
+rows + ratchet pins = the 51 cached slugs) is untouched and the pin tool never
+sees an authored row. Its invariant (`salt.diff-baseline.ratchet.test.ts`):
+authored rows = the `.puml` files on disk, exactly, each with its `.svg`,
+disjoint from the cached slugs. Row statuses:
+
+- `baseline` — gated by the same never-rises rule; a 0 score is conformant and
+  gated at 0.
+- `jar-flake` — the jar's own output is run-dependent (`cov-menu-three-popups`:
+  identity-hashed popup order, `ElementMenuBar.java:54,123`); excluded from the
+  gate, the observed variants recorded in its `reason`.
+
+`jarError` records an error-page oracle in `stock-error-pages.json`'s
+`{ line, message }` shape (`line: null, message: ""` for a crash page). Fixtures
+are the authors' own markup — no third-party collection is copied (the one
+surveyed for topics is CC BY-NC-SA 4.0, not MIT-compatible).

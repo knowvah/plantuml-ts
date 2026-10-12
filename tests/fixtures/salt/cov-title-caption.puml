@@ -1,0 +1,8 @@
+@startsalt
+title Settings window
+caption Figure 1: the settings dialog
+{
+Name | "value   "
+[Apply]
+}
+@endsalt
