@@ -34,7 +34,7 @@ import { renderClass } from '../../../src/diagrams/class/renderer.js';
 import { isEmpty } from '../../../src/core/annotations/index.js';
 import { applyExportedChrome } from '../../../src/core/annotations/chrome-export.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
-import { assembleSvg, renderSync } from '../../../src/index.js';
+import { assembleSvg, loadElk, renderSync, type ElkBackend } from '../../../src/index.js';
 import { registerNestedDiagramRenderers } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
 import { seedOf } from '../../../src/core/klimt/drawing/svg/svg-seed.js';
 import { seedOfUmlSource } from '../../../src/core/assemble-svg.js';
@@ -187,5 +187,21 @@ export interface ClassFixtureRenderOptions {
  * diverge on ANYTHING but which measurer is injected.
  */
 export function renderClassFixture(markup: string, measurer: StringMeasurer, opts?: ClassFixtureRenderOptions): string {
-  return renderSync(markup, { measurer, ...opts });
+  return renderSync(markup, { measurer, ...(preparedElk === undefined ? {} : { elk: preparedElk }), ...opts });
+}
+
+let elkLoad: Promise<ElkBackend> | undefined;
+let preparedElk: ElkBackend | undefined;
+
+/**
+ * cdd8-T2e (D2d): loads elkjs ONCE per module instance (one per vitest worker)
+ * and remembers the backend, so `renderClassFixture` can pass `{ elk }` to
+ * `renderSync` -- which refuses `!pragma layout elk` without
+ * `options.elk` (`src/core/elk/layout-services.ts`). `renderClassFixture` stays
+ * synchronous; ratchet tests `await prepareElkOnce()` in `beforeAll`. Before
+ * the call, renders behave exactly as they did (no `elk` option).
+ */
+export function prepareElkOnce(): Promise<ElkBackend> {
+  elkLoad ??= loadElk().then((backend) => (preparedElk = backend));
+  return elkLoad;
 }

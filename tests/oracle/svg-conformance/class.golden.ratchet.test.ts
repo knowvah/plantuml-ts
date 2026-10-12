@@ -34,14 +34,14 @@
  * on every axis (ratchet AND parity survey) where description started with
  * ratchet already seeded.
  */
-import { describe, it, expect } from 'vitest';
+import { beforeAll, describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { compareSvg } from './compare.js';
-import { renderClassFixture } from './render-fixture-class.js';
+import { prepareElkOnce, renderClassFixture } from './render-fixture-class.js';
 // cdd5-T2 (D4): the survey's own asset/include stores, shared through T1's
 // `censusClassFixtureOptions` -- imported, not re-combined locally. Before
 // this task the ratchet built its OWN `combineAssetStores(buildSprite...,
@@ -160,6 +160,11 @@ describe('svg-class conformance ratchet — tree resolution (D4)', () => {
 // ---------------------------------------------------------------------------
 
 describe.skipIf(manifest.fixtures.length === 0)('svg-class conformance ratchet (AC1)', () => {
+  // cdd8-T2e (D2d): pinned ELK rows render through a preloaded backend.
+  beforeAll(async () => {
+    await prepareElkOnce();
+  });
+
   for (const f of manifest.fixtures) {
     const tree = f.tree ?? 'class';
     it(`${tree}/${f.slug}: stays zero-diff against the pinned golden`, () => {
