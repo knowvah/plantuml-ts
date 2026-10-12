@@ -9,13 +9,13 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1465 modules · 5559 exported names.
+1490 modules · 5620 exported names.
 
 ## `src/`
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `index.ts` | `RenderOptions`, `assembleSvg`, `stdlibStore`, `withStdlib`, `BundleData`, `StdlibStore`, `stdlibRegistry`, `StdlibChunkLoadError`, `StdlibRegistry`, `prepareIncludeStore`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `StdlibNotBundledError`, `IncludeWarmupOptions`, `SecurityProfile`, `remoteStdlib`, `StdlibResourceFetchError`, `StdlibRemoteManifest`, `RemoteBundle`, `spriteSplitStdlib`, `SpriteNotBundledError`, `SpriteSplitManifest`, `combineAssetStores`, `AssetPayload`, `AssetStore`, `renderPagesSync`, `renderSync`, `render`, `renderPages`, `renderAll` |  |
+| `index.ts` | `RenderOptions`, `assembleSvg`, `loadElk`, `ElkBackend`, `stdlibStore`, `withStdlib`, `BundleData`, `StdlibStore`, `stdlibRegistry`, `StdlibChunkLoadError`, `StdlibRegistry`, `prepareIncludeStore`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `StdlibNotBundledError`, `IncludeWarmupOptions`, `SecurityProfile`, `remoteStdlib`, `StdlibResourceFetchError`, `StdlibRemoteManifest`, `RemoteBundle`, `spriteSplitStdlib`, `SpriteNotBundledError`, `SpriteSplitManifest`, `combineAssetStores`, `AssetPayload`, `AssetStore`, `renderPagesSync`, `renderSync`, `render`, `renderPages`, `renderAll` |  |
 
 ## `src/core/`
 
@@ -81,7 +81,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `openiconic-glyphs-data.ts` | `RawGlyph`, `RAW_GLYPHS` | `RAW_GLYPHS` -- the OpenIconic glyph data table, split out of `openiconic-glyphs.ts` purely to keep that file under this project's 500-line cap (F1-c, S1L tail-fix G11; mirrors the existing `svg.ts`->`svg-markers.ts` / `style-map-theme.ts`- |
 | `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `parsedOpsFor`, `openIconicFactor`, `openIconicDims`, `openIconicStartingAltitude`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
 | `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg`, `noGradient` | Paint — the color/gradient value model for the rendering layer. |
-| `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
+| `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals`, `parseRefusalOf` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
 | `preprocessor-collector.ts` | `StyleAndSkinparamCollector` | preprocessor-collector.ts -- the `<style>` / `skinparam` / `skin` line collector `preprocessor.ts#resultOf` runs over the interpreter's finished result list. |
 | `preprocessor.ts` | `SkinDirective`, `PreprocessorResult`, `DeclarationOrder`, `PreprocessOptions`, `preprocess`, `PreprocessorFailure`, `PreprocessOutcome`, `preprocessOrError`, `preprocessLinesOrError` | Preprocessor -- a thin wrapper over the TIM interpreter (`src/core/tim/`). |
 | `render-options.ts` | `RenderOptions`, `getDefaultMeasurer`, `resolveMeasurer` | `RenderOptions` and measurer resolution — extracted from `src/index.ts` (mission A5 / T4). |
@@ -356,6 +356,71 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `USymbolStack.ts` | `USymbolStack` |  |
 | `USymbolStorage.ts` | `drawStorage`, `getMargin`, `USymbolStorage` |  |
 | `USymbolUsecase.ts` | `USymbolUsecase` |  |
+
+## `src/core/elk/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `elk-backend.ts` | `ElkBackend`, `LayoutServices`, `ElkBackendError` | The ELK seam (cdd8 D2): one interface that a layout backend implements and the ELK maker (`CucaDiagramFileMakerElk` port) calls. |
+| `elk-object.ts` | `ELK_CORE_OPTIONS_PACKAGE`, `ELK_PROXY_OPTIONS_PACKAGE`, `ELK_OPTION_TYPE`, `ElkOptionType`, `IProperty`, `ElkEnumObject`, `ElkPaddingObject`, `ElkProxyEnumSetObject`, `ElkTrueObject`, `ElkPropertyValue`, `elkEnum`, `elkProperty` | The objects upstream's ELK proxy layer hands to ELK itself, named backend-neutrally. |
+| `elkjs-backend.ts` | `ELKJS_DISPATCHER_MISSING`, `createElkjsBackend` | `ElkBackend` over elkjs 0.12.0 (cdd8 D2, backend 1), the same ELK release as the jar's (`org.eclipse.elk.core` pom.properties `version=0.12.0`). |
+| `elkjs-graph.ts` | `ElkjsProperty`, `ElkjsLabel`, `ElkjsBendPoint`, `ElkjsPoint`, `ElkjsEdgeSection`, `ElkjsNode`, `ElkjsEdge`, `findBestEdgeContainment` | The elkjs backend's in-memory ELK graph: plain objects implementing the proxy interfaces, holding exactly the state an `org.eclipse.elk.graph` model would (dimensions, location, labels, children, contained edges, properties). |
+| `elkjs-json.ts` | `ElkJsonLabel`, `ElkJsonEdge`, `ElkJsonNode`, `ElkJsonGraph`, `toElkJson`, `applyElkJson` | The elkjs backend's graph <-> ELK JSON conversion. |
+| `elkjs-options.ts` | `encodeOptionValue` | How an ELK property value is written into an elkjs `layoutOptions` entry: the string ELK's `LayoutOptionData#parseValue` turns back into the value (elkjs 0.12.0 `elk-worker.js:67549-67600`; `JsonImporter#setOption`, `:77463-77478`). |
+| `layout-services.ts` | `ELK_RENDER_SYNC_UNSUPPORTED`, `layoutServicesSync`, `layoutServices` | Which `LayoutServices` a render hands to `SyncPlugin.layoutSync` (cdd8 D2b). |
+| `load-elk.ts` | `ElkBackend`, `loadElk` | The elkjs backend, loaded on demand (cdd8 D1). |
+
+## `src/core/elk/proxy/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ElkObjectProxy.ts` | `ElkObjectProxy`, `ElkProxyEnum` |  |
+
+## `src/core/elk/proxy/core/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `RecursiveGraphLayoutEngine.ts` | `ElkLayoutRunner`, `RecursiveGraphLayoutEngine` |  |
+
+## `src/core/elk/proxy/core/math/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ElkPadding.ts` | `ElkPadding` |  |
+
+## `src/core/elk/proxy/core/options/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `CoreOptions.ts` | `CoreOptions` |  |
+| `Direction.ts` | `Direction` |  |
+| `EdgeLabelPlacement.ts` | `EdgeLabelPlacement` |  |
+| `HierarchyHandling.ts` | `HierarchyHandling` |  |
+| `NodeLabelPlacement.ts` | `NodeLabelPlacement` |  |
+| `SizeConstraint.ts` | `SizeConstraint` |  |
+
+## `src/core/elk/proxy/core/util/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `NullElkProgressMonitor.ts` | `NullElkProgressMonitor` | Proxy for `org.eclipse.elk.core.util.NullElkProgressMonitor`: a monitor that records nothing. |
+
+## `src/core/elk/proxy/graph/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ElkBendPoint.ts` | `ElkBendPoint` | Proxy for `org.eclipse.elk.graph.ElkBendPoint`. |
+| `ElkEdge.ts` | `ElkEdge` |  |
+| `ElkEdgeSection.ts` | `ElkEdgeSection` |  |
+| `ElkLabel.ts` | `ElkLabel` |  |
+| `ElkNode.ts` | `ElkNode` |  |
+| `ElkWithProperty.ts` | `ElkPropertyArgument`, `ElkWithProperty`, `trueValueOf` |  |
+
+## `src/core/elk/proxy/graph/util/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ElkGraphUtil.ts` | `ElkGraphUtil` |  |
 
 ## `src/core/error/`
 

@@ -1,8 +1,7 @@
 import { buildBlockUml, buildBlockUmls, isBlockEmpty, rawBlocksOf } from './core/BlockUmlBuilder.js';
 import type { BlockUml, BlockUmlOk, RawBlock } from './core/BlockUmlBuilder.js';
-import { registry } from './core/dispatcher.js';
+import { registry, type AssembledSvg, type DiagramPlugin, type Resolution } from './core/dispatcher.js';
 import { skinCutOf } from './core/skin-command.js';
-import type { AssembledSvg, DiagramPlugin, Resolution } from './core/dispatcher.js';
 import { buildTheme } from './core/build-theme.js';
 import { applyChrome, isEmpty as isAnnotationsEmpty } from './core/annotations/index.js';
 import { applyExportedChrome } from './core/annotations/chrome-export.js';
@@ -35,8 +34,8 @@ import { surfaceSpriteWarnings, type SpriteRegistry } from './core/sprite-comman
 import { surfaceParseWarnings } from './diagrams/json/ast.js';
 import type { PreprocessorResult } from './core/preprocessor.js';
 import { DiagramRefusal, emptySvg, errorSvg, preprocessorErrorSvg, welcomeSvg } from './core/error/error-diagrams.js';
-import { resolveMeasurer } from './core/render-options.js';
-import type { RenderOptions } from './core/render-options.js';
+import { resolveMeasurer, type RenderOptions } from './core/render-options.js';
+import { layoutServices, layoutServicesSync } from './core/elk/layout-services.js';
 import { assembleSvg, seedOfUmlSource } from './core/assemble-svg.js';
 import { withAllowJavascriptInLink } from './core/security/SecurityUtils.js';
 
@@ -47,6 +46,7 @@ import { withAllowJavascriptInLink } from './core/security/SecurityUtils.js';
 // earlier move to `core/build-theme.ts`.
 export type { RenderOptions } from './core/render-options.js';
 export { assembleSvg } from './core/assemble-svg.js';
+export { loadElk, type ElkBackend } from './core/elk/load-elk.js';
 
 // Re-exported so downstream stdlib packages (SI5b `@knowvah/plantuml-stdlib*`, plans/si5b-stdlib/decisions.md
 // D2) can build an `options.includeStore` carrying vendored bundles. Required here specifically:
@@ -409,7 +409,7 @@ export function renderPagesSync(source: string, options?: RenderOptions): string
     if (!('layoutSync' in ctx.plugin))
       throw new Error('renderSync() is not supported for this diagram type — use render()');
 
-    const geo = ctx.plugin.layoutSync(ast, ctx.theme, ctx.measurer);
+    const geo = ctx.plugin.layoutSync(ast, ctx.theme, ctx.measurer, layoutServicesSync(ctx.plugin, ast, options));
     return assemblePages(ctx, geo, ast, options);
   } catch (err) {
     return [errorSvg(source, err, options)];
@@ -509,7 +509,7 @@ async function renderBlockPages(block: BlockUml, options?: RenderOptions): Promi
     const { ctx, ast } = prepareBlock(block, umlSource, options);
     const geo =
       'layoutSync' in ctx.plugin
-        ? ctx.plugin.layoutSync(ast, ctx.theme, ctx.measurer)
+        ? ctx.plugin.layoutSync(ast, ctx.theme, ctx.measurer, await layoutServices(ctx.plugin, ast, options))
         : await ctx.plugin.layout(ast, ctx.theme, ctx.measurer);
     return assemblePages(ctx, geo, ast, options);
   } catch (err) {
