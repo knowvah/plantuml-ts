@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1517 modules · 5789 exported names.
+1524 modules · 5797 exported names.
 
 ## `src/`
 
@@ -1766,6 +1766,23 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `layout.ts` | `V_LINE_SHORT`, `INDICATOR_HEIGHT`, `V_MARGIN`, `FONT_ASCENT`, `blockRenderedHeight`, `layoutPacket` |  |
 | `parser.ts` | `parsePacket` |  |
 | `renderer.ts` | `renderPacket` |  |
+
+## `src/diagrams/salt/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `SaltDictionary.ts` | `SaltDictionary`, `atomOpsFor` |  |
+
+## `src/diagrams/salt/element/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `AbstractElement.ts` | `AbstractElement` |  |
+| `AbstractElementText.ts` | `AbstractElementText` |  |
+| `Element.ts` | `Element` |  |
+| `ElementEmpty.ts` | `ElementEmpty` |  |
+| `ElementText.ts` | `ElementText` |  |
+| `WrappedElement.ts` | `WrappedElement` |  |
 
 ## `src/diagrams/sequence/`
 
