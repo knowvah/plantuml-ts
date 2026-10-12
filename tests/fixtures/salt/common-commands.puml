@@ -1,0 +1,10 @@
+@startsalt
+title My title
+scale 2
+rotate
+minwidth 50
+set separator ::
+{
+A | B
+}
+@endsalt

@@ -1,0 +1,6 @@
+@startsalt
+hide stereotype
+{
+A | B
+}
+@endsalt

@@ -1,0 +1,2 @@
+
+### salt/kaziri-68-fofu065  pass=true structural=0 numeric=0

@@ -1,0 +1,2 @@
+
+### salt/teloka-76-mamu714  pass=true structural=0 numeric=0

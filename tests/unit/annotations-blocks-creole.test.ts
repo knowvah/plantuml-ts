@@ -335,16 +335,15 @@ describe('chrome creole — {{ }} embedded diagrams (CDD B7FU-R2)', () => {
     expect(decoded).toContain('>f<');
   });
 
-  it('a legend embedding an unsupported diagram type (no salt engine) draws the dispatcher placeholder, as the jar does', () => {
-    // bixogo-47-xulu385/roxosu-00-pini153's shape: `{{salt ... }}` with no salt
-    // engine. The nested render is the dispatcher's 300x60 "unknown diagram
-    // type" SVG, which has no viewBox; upstream's UImageSvg falls back to the
-    // root width/height (UImageSvg.java:139-144) and draws it, so the legend
-    // holds a 300x60 <image> (unwind-U4; was a 42x42 empty slot).
+  it('a legend embedding {{salt}} draws the salt image at the jar size (salt-engine-port T4a)', () => {
+    // bixogo-47-xulu385/roxosu-00-pini153's shape. With the salt plugin
+    // registered the nested render is the salt diagram itself: the jar's
+    // legend holds a 19x25 <image> in a 29x35 box
+    // (tests/fixtures/salt/legend-embedded-salt.svg, scripts/oracle-render.sh).
     const src = '@startuml\nclass foo\nlegend\n{{salt\n{+\n<b>x\n}\n}}\nendlegend\n@enduml';
     const svg = renderSync(src, { measurer: new DeterministicMeasurer() });
     const legend = chromeGroup(svg, 'legend');
-    expect(legend).toContain('<image width="300" height="60"');
-    expect(/<rect[^>]*width="310"[^>]*height="70"/.test(legend)).toBe(true);
+    expect(legend).toContain('<image width="19" height="25"');
+    expect(/<rect[^>]*width="29"[^>]*height="35"/.test(legend)).toBe(true);
   });
 });

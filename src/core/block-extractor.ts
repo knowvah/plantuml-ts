@@ -39,6 +39,7 @@ export type DiagramType =
   | 'packetdiag'
   | 'chart'
   | 'dot'
+  | 'salt'
   | 'unknown';
 
 export interface UmlSource {
@@ -391,6 +392,7 @@ const PORT_TO_UPSTREAM: Readonly<Record<DiagramType, UpstreamDiagramType>> = {
   packetdiag: UpstreamDiagramType.PACKET,
   chart: UpstreamDiagramType.CHART,
   dot: UpstreamDiagramType.DOT,
+  salt: UpstreamDiagramType.SALT,
   unknown: UpstreamDiagramType.UNKNOWN,
 };
 

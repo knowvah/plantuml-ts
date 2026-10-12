@@ -1,0 +1,7 @@
+@startsalt
+skinparam monochrome true
+{
+[OK] | "text"
+^drop^
+}
+@endsalt

@@ -1,0 +1,2 @@
+
+### salt/zereco-90-dedo257  pass=true structural=0 numeric=0

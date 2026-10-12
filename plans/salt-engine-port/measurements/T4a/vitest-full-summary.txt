@@ -1,0 +1,8 @@
+collected files 1269 (on disk 1269)
+{'numTotalTests': 28144, 'numPassedTests': 28076, 'numFailedTests': 58, 'numPendingTests': 4, 'numTodoTests': 6}
+1 tests/oracle/svg-conformance/activity.style-baseline.test.ts
+52 tests/oracle/svg-conformance/salt.diff-baseline.ratchet.test.ts
+1 tests/unit/scripts/parity-dashboard.test.ts
+1 tests/unit/sprite-package-files.test.ts
+2 tests/unit/stdlib-package-files.test.ts
+1 tests/unit/stdlib-packages.test.ts
