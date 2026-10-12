@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1504 modules · 5738 exported names.
+1505 modules · 5740 exported names.
 
 ## `src/`
 
@@ -372,6 +372,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `elkjs-options.ts` | `encodeOptionValue` | How an ELK property value is written into an elkjs `layoutOptions` entry: the string ELK's `LayoutOptionData#parseValue` turns back into the value (elkjs 0.12.0 `elk-worker.js:67549-67600`; `JsonImporter#setOption`, `:77463-77478`). |
 | `layout-services.ts` | `ELK_RENDER_SYNC_UNSUPPORTED`, `layoutServicesSync`, `layoutServices` | Which `LayoutServices` a render hands to `SyncPlugin.layoutSync` (cdd8 D2b). |
 | `load-elk.ts` | `ElkBackend`, `loadElk` | The elkjs backend, loaded on demand (cdd8 D1). |
+| `MyElkCluster.ts` | `ElkClusterDiagram`, `MyElkCluster` | `MyElkCluster` port (cdd8 T2c): draws one package/cluster at the position ELK gave its node, and answers the `MagneticBorder` a link attached to the cluster reads. |
 
 ## `src/core/elk/proxy/`
 
