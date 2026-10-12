@@ -1,0 +1,6 @@
+@startsalt
+skinparam reversecolor dark
+{
+[OK] | "text"
+}
+@endsalt

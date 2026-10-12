@@ -1,0 +1,18 @@
+
+### salt/mejeki-64-buvo994  pass=false structural=0 numeric=16
+  N svg/@height  exp=199 | act=188 (Δ11)
+  N svg/@viewBox[2]  exp=116 | act=105 (Δ11)
+  N svg/@viewBox[3]  exp=199 | act=188 (Δ11)
+  N svg/@width  exp=116 | act=105 (Δ11)
+  N svg/g[1]/g[1]/text[1]/@x  exp=50.775 | act=45.775 (Δ5)
+  N svg/g[1]/g[1]/text[1]/@y  exp=12.778 | act=7.778 (Δ5.000000000000001)
+  N svg/g[1]/g[2]/text[1]/@x  exp=34.906 | act=29.906 (Δ5)
+  N svg/g[1]/g[2]/text[1]/@y  exp=36.889 | act=31.889 (Δ5.0000000000000036)
+  N svg/g[1]/g[3]/rect[1]/@x  exp=17 | act=12 (Δ5)
+  N svg/g[1]/g[3]/rect[1]/@y  exp=128 | act=123 (Δ5)
+  N svg/g[1]/g[3]/text[1]/@x  exp=22 | act=17 (Δ5)
+  N svg/g[1]/g[3]/text[1]/@y  exp=143.889 | act=138.889 (Δ5)
+  N svg/g[1]/g[4]/text[1]/@x  exp=12.288 | act=7.288 (Δ5)
+  N svg/g[1]/g[4]/text[1]/@y  exp=176.889 | act=171.889 (Δ5)
+  N svg/g[1]/g[5]/text[1]/@x  exp=30.7 | act=25.7 (Δ5)
+  N svg/g[1]/g[5]/text[1]/@y  exp=189.778 | act=184.778 (Δ5)

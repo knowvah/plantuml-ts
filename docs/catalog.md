@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1578 modules · 5854 exported names.
+1582 modules · 5864 exported names.
 
 ## `src/`
 
@@ -1775,10 +1775,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `Cell.ts` | `Cell` | Cell — the grid span (rows `minRow..maxRow`, columns `minCol..maxCol`) an element occupies in a salt pyramid; built by `Positionner2`, widened to the right by `mergeLeft`. |
+| `CommandAnything.ts` | `COMMAND_ANYTHING_PATTERN`, `CommandAnythingTarget`, `executeArg` |  |
 | `DataSource.ts` | `DataSource` |  |
 | `DataSourceImpl.ts` | `DataSourceImpl` |  |
+| `index.ts` | `SaltGeometry`, `renderSalt`, `saltPlugin` | Salt diagram plugin — `PSystemSaltFactory` (parse), then `TextBlockExporter`'s export of `PSystemSalt#getTextBlock` on the klimt substrate: canvas = the text block's dimension plus `same(5)` (`PSystemSalt#getDefaultMargins`), the block draw |
 | `Position.ts` | `Position` | Position — an immutable (row, col) pair with Java value semantics. |
 | `Positionner2.ts` | `Positionner2` |  |
+| `PSystemSalt.ts` | `SaltSkinSource`, `SaltSkinParam`, `PSystemSalt` |  |
+| `PSystemSaltFactory.ts` | `createSaltDiagram` |  |
 | `SaltDictionary.ts` | `SaltDictionary`, `atomOpsFor` |  |
 | `Terminated.ts` | `Terminated` |  |
 | `Terminator.ts` | `Terminator` | Terminator — what ends a salt token: the end of its source line (`NEWLINE`) or a column/structure delimiter after it on the same line (`NEWCOL`). |

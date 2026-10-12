@@ -1,0 +1,8 @@
+
+### salt/vuxibo-96-tago783  pass=false structural=0 numeric=6
+  N svg/@height  exp=70 | act=59 (Δ11)
+  N svg/@viewBox[2]  exp=113 | act=102 (Δ11)
+  N svg/@viewBox[3]  exp=70 | act=59 (Δ11)
+  N svg/@width  exp=113 | act=102 (Δ11)
+  N svg/g[1]/g[1]/text[1]/@x  exp=30.225 | act=25.225 (Δ5)
+  N svg/g[1]/g[1]/text[1]/@y  exp=58.889 | act=53.889 (Δ5)

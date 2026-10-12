@@ -1,0 +1,6 @@
+@startsalt
+skinparam mode dark
+{
+[OK] | "text"
+}
+@endsalt

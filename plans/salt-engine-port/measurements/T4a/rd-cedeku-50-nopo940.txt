@@ -1,0 +1,2 @@
+
+### salt/cedeku-50-nopo940  pass=true structural=0 numeric=0

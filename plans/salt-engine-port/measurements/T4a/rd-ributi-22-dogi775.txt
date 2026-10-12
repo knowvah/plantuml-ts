@@ -1,0 +1,2 @@
+
+### salt/ributi-22-dogi775  pass=true structural=0 numeric=0

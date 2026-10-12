@@ -1,0 +1,6 @@
+@startsalt
+skinparam monochrome reverse
+{
+[OK] | "text"
+}
+@endsalt

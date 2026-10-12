@@ -1,0 +1,2 @@
+
+### salt/vizono-80-vipa581  pass=true structural=0 numeric=0

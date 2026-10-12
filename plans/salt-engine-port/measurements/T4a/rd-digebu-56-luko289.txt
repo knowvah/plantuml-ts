@@ -1,0 +1,2 @@
+
+### salt/digebu-56-luko289  pass=true structural=0 numeric=0

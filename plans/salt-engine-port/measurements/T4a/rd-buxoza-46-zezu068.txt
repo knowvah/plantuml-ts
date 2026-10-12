@@ -1,0 +1,2 @@
+
+### salt/buxoza-46-zezu068  pass=true structural=0 numeric=0

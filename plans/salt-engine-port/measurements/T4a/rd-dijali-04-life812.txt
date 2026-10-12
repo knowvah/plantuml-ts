@@ -1,0 +1,2 @@
+
+### salt/dijali-04-life812  pass=true structural=0 numeric=0

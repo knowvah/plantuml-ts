@@ -1,0 +1,10 @@
+@startuml
+class foo
+legend
+{{salt
+{+
+<b>x
+}
+}}
+endlegend
+@enduml

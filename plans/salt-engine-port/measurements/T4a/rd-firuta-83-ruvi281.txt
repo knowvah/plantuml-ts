@@ -1,0 +1,2 @@
+
+### salt/firuta-83-ruvi281  pass=true structural=0 numeric=0

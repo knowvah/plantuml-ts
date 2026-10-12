@@ -1,0 +1,7 @@
+@startsalt
+skinparam handwritten true
+mode dark
+{
+[OK] | A
+}
+@endsalt
