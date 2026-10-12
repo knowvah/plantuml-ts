@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-10T12:10:16.177Z",
+  "generatedAt": "2026-10-12T19:51:32.215Z",
   "fixtures": [
     {
       "slug": "bepinu-34-tiji715",
@@ -199,9 +199,7 @@
       "slug": "fovule-12-noze408",
       "type": "mindmap",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 22,
-      "maxDeltaPath": "svg/@height"
+      "verdict": "conformant"
     },
     {
       "slug": "fupani-26-luco022",
@@ -267,9 +265,7 @@
       "slug": "gukofo-85-vira895",
       "type": "mindmap",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 70,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "gunuco-29-sizu788",

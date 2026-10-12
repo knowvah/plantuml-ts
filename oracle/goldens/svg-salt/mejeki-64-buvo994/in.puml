@@ -1,0 +1,16 @@
+@startsalt
+header some header
+footer <back:red>some footer
+caption caption
+title My title
+caption This is caption
+legend
+<back:red>The legend
+end legend
+{
+test1
+test2
+[button3]
+test4
+} 
+@endsalt

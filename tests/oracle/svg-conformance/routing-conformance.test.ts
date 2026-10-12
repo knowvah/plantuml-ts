@@ -1022,10 +1022,13 @@ describe('routing conformance — jar-error classification', () => {
     // lubicu-73, the `{{salt}}` seed rows) appended, all zero-diff pins
     // (plans/salt-engine-port/measurements/repin-salt-routing.mts).
     // Derivation: 5787 + 818 + 86 = 6691.
-    expect(pinnedAgree.length).toBe(5787);
+    // 5787 -> 5790 / 6691 -> 6694 at sep/close-b5-wave1: 3 svg-salt clone rows
+    // (mejeki-64, vuxibo-96 after the chrome-margin fix; neguge-98 after the
+    // CommandCreoleSpace port), zero-diff pins. Derivation: 5790 + 818 + 86 = 6694.
+    expect(pinnedAgree.length).toBe(5790);
     expect(pinnedMisroutes.length).toBe(818);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(6691);
+    expect(manifest.fixtures.length).toBe(6694);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

@@ -1,12 +1,12 @@
-# T5c: `skinparam mode dark` element colours through a klimt `ColorMapper` seam (stop 10, candidate — no corpus row)
+# T5c: `skinparam mode dark` element colours through a klimt `ColorMapper` seam (maintainer-approved 2026-10-12, journal row 36; no corpus row)
 
 Prepend [../batch-1/task-preamble.md](../batch-1/task-preamble.md).
 
 Residual family from the batch-4 close (journal row 34): the T4a probe
 `tests/fixtures/salt/skinparam-mode-dark.puml` only (7 drawn-colour diffs; the `#1B1B1B`
 background already matches). No cached corpus row exercises dark mode in salt, so D8's exit bar
-does not depend on this task; it is listed because the mechanism is a klimt seam (stop 10) and
-the maintainer decides whether it runs in this mission or is re-filed to `next-missions.md`.
+does not depend on this task; it is listed because the mechanism is a klimt seam (stop 10);
+approved to run in wave 2 (after T5a + T5b merge), in parallel with T5-cov (journal row 36).
 
 ## Mechanism (verified against the Java at the b4 close)
 - Upstream: `AbstractElement#getBlack` is `HColors.BLACK.withDark(HColors.WHITE)`

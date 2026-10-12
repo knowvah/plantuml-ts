@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12T18:53:03.853Z",
+  "generatedAt": "2026-10-12T19:50:52.344Z",
   "fixtures": [
     {
       "slug": "bireva-46-dalu382",
@@ -150,9 +150,7 @@
       "slug": "mejeki-64-buvo994",
       "type": "salt",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 11,
-      "maxDeltaPath": "svg/@height"
+      "verdict": "conformant"
     },
     {
       "slug": "mucife-33-devu289",
@@ -170,10 +168,7 @@
       "slug": "neguge-98-cilu043",
       "type": "salt",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 205.16200000000003,
-      "firstDiff": "svg/g[1]/text[2]/@textLength",
-      "maxDeltaPath": "svg/g[1]/text[9]/@x"
+      "verdict": "conformant"
     },
     {
       "slug": "nutesi-68-soxe380",
@@ -269,9 +264,7 @@
       "slug": "vuxibo-96-tago783",
       "type": "salt",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 11,
-      "maxDeltaPath": "svg/@height"
+      "verdict": "conformant"
     },
     {
       "slug": "xaderu-42-jone467",

@@ -8,34 +8,7 @@
       "diffCount": 89,
       "reason": "jar-crash: the stock jar renders its IllegalArgumentException crash page (salt/element/ElementMenuBar.java:87 via ElementFactoryMenu.java:74; oracle/goldens/stock-error-pages.json salt/lakari-33-mone874) and the port renders its own error page from the same throw (ElementMenuBar.ts) -- conformant under the 2026-10-10 error-page rule; the numeric baseline measures our error page against the jar crash page.",
       "measuredAt": "2026-10-12",
-      "measuredAgainstCommit": "3ab50d039"
-    },
-    {
-      "type": "salt",
-      "slug": "mejeki-64-buvo994",
-      "status": "baseline",
-      "weightedScore": 16,
-      "diffCount": 16,
-      "measuredAt": "2026-10-12",
-      "measuredAgainstCommit": "3ab50d039"
-    },
-    {
-      "type": "salt",
-      "slug": "neguge-98-cilu043",
-      "status": "baseline",
-      "weightedScore": 89,
-      "diffCount": 62,
-      "measuredAt": "2026-10-12",
-      "measuredAgainstCommit": "3ab50d039"
-    },
-    {
-      "type": "salt",
-      "slug": "vuxibo-96-tago783",
-      "status": "baseline",
-      "weightedScore": 6,
-      "diffCount": 6,
-      "measuredAt": "2026-10-12",
-      "measuredAgainstCommit": "3ab50d039"
+      "measuredAgainstCommit": "2ff2f9b9c"
     }
   ]
 }
