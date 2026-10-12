@@ -8,15 +8,6 @@ import { ListWidth } from './ListWidth.js';
 /** Indent per tree level, in px. @see ElementTreeEntry.java:86 */
 const LEVEL_INDENT = 10;
 
-/**
- * The `dimToUse` every tree cell is drawn with: upstream passes `null`
- * (ElementTreeEntry.java:90, 96). `Element.ts` types the parameter
- * non-null, so the `null` is re-typed here rather than replaced by an
- * invented dimension; a cell that reads it (`ElementLine.java:62`) fails as
- * Java's `NullPointerException` does.
- */
-const NULL_DIM_TO_USE = null as unknown as XDimension2D;
-
 /** Java `Iterator<Double>#next`: `NoSuchElementException` once drained. */
 function next(it: Iterator<number>): number {
   const r = it.next();
@@ -87,7 +78,7 @@ export class ElementTreeEntry {
 
   /** @see ElementTreeEntry.java:89-91 */
   drawFirstCell(ug: UGraphic, x: number, y: number): void {
-    this.firstElement.drawU(ug.apply(new UTranslate(x + this.getXDelta(), y)), 0, NULL_DIM_TO_USE);
+    this.firstElement.drawU(ug.apply(new UTranslate(x + this.getXDelta(), y)), 0, null);
   }
 
   /**
@@ -98,7 +89,7 @@ export class ElementTreeEntry {
   drawSecondCell(ug: UGraphic, x: number, y: number, otherWidth: ListWidth, margin: number): void {
     const it = otherWidth.iterator();
     for (const element of this.otherElements) {
-      element.drawU(ug.apply(new UTranslate(x, y)), 0, NULL_DIM_TO_USE);
+      element.drawU(ug.apply(new UTranslate(x, y)), 0, null);
       x += next(it) + margin;
     }
   }

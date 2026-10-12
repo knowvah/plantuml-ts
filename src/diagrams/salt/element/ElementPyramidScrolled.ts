@@ -54,7 +54,7 @@ export class ElementPyramidScrolled extends ElementPyramid {
   }
 
   /** `ug.apply(getBlack())` sets the foreground (`Fore`). @see ElementPyramidScrolled.java:73-84 */
-  override drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D): void {
+  override drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D | null): void {
     super.drawU(ug, zIndex, dimToUse);
     ug = ug.apply(new Fore(this.getBlack().asPaint()));
     const dim = super.getPreferredDimension(ug.getStringBounder(), 0, 0);

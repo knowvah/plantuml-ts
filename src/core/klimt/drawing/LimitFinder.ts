@@ -21,6 +21,7 @@ import { UPolygon } from '../shape/UPolygon.js';
 import { URectangle } from '../shape/URectangle.js';
 import { UText } from '../shape/UText.js';
 import { UImage } from '../shape/UImage.js';
+import { UPixel } from '../shape/UPixel.js';
 
 /** upstream: `LimitFinder#HACK_X_FOR_POLYGON` — polygon x-extent padding quirk, preserved verbatim. */
 const HACK_X_FOR_POLYGON = 10;
@@ -77,8 +78,7 @@ function isTextBlockShape(shape: UShape): shape is TextBlock {
  * `draw(shape)` dispatch — shape kinds with NO counterpart in this port
  * are simply absent from the `if`/`else if` chain (omitted, reported):
  * `UImage`/`UImageSvg`/`UImageTikz` (no `UImage*.ts` exists — image
- * embedding is not ported), `UPixel` (not ported; upstream's branch is
- * `addPoint(x, y)`), `UCenteredCharacter` (not ported; upstream's own
+ * embedding is not ported), `UCenteredCharacter` (not ported; upstream's own
  * branch is "// To be done" — empty), `CenteredText`/`SpecialText` (both
  * belong to unported subsystems — activitydiagram3/ftile and net.atmp
  * respectively; upstream's branches are empty "// Ignored"). The
@@ -87,7 +87,8 @@ function isTextBlockShape(shape: UShape): shape is TextBlock {
  * here: that class implements `UChange`, not `UShape`, in both codebases,
  * so the `instanceof` check can never actually match at runtime — TS's
  * structural `UShape` (an empty marker interface) permits the check to
- * compile exactly as Java's does.
+ * compile exactly as Java's does. `UPixel` IS dispatched, in upstream's
+ * position after it: `addPoint(x, y)` (LimitFinder.java:146-147).
  *
  * `matchesProperty`/`getColorMapper()` — NOT ported (same reasoning as
  * `UGraphicNo.ts`'s identical omissions: no `StringBounder#
@@ -147,6 +148,10 @@ export class LimitFinder extends UGraphicNo {
     } else if (shape instanceof CopyForegroundColorToBackgroundColor) {
       // Ignored — matches upstream's own dead branch (see class doc comment: this class
       // implements UChange, not UShape, in both codebases, so this never matches at runtime).
+    } else if (shape instanceof UPixel) {
+      // LimitFinder.java:146-147 -- reachable: DiagramChromeFactory.java:333's mainframe
+      // delta draws a salt `<<…>>` image (ElementImage.java:70) into a LimitFinder.
+      this.addPoint(x, y);
     } else {
       throw new Error(`LimitFinder.draw: unsupported shape ${shape.constructor.name}`);
     }

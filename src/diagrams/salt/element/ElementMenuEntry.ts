@@ -67,7 +67,7 @@ export class ElementMenuEntry extends AbstractElement {
   }
 
   /** Draws at every z-index (no zIndex test upstream). @see ElementMenuEntry.java:70-77 */
-  drawU(ug: UGraphic, _zIndex: number, _dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, _zIndex: number, _dimToUse: XDimension2D | null): void {
     ug = ug.apply(new Fore(this.getBlack().asPaint()));
     if (this.background !== undefined) {
       const dim = this.getPreferredDimension(ug.getStringBounder(), 0, 0);

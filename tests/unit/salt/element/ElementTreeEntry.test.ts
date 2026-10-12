@@ -10,7 +10,10 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { XDimension2D } from '../../../../src/core/klimt/geom/XDimension2D.js';
+import type { UGraphic } from '../../../../src/core/klimt/UGraphic.js';
 import { UTranslate } from '../../../../src/core/klimt/UTranslate.js';
+import type { Element } from '../../../../src/diagrams/salt/element/Element.js';
 import { ElementText } from '../../../../src/diagrams/salt/element/ElementText.js';
 import { ElementTreeEntry } from '../../../../src/diagrams/salt/element/ElementTreeEntry.js';
 import { ListWidth } from '../../../../src/diagrams/salt/element/ListWidth.js';
@@ -102,5 +105,34 @@ describe('ElementTreeEntry drawing (java:90-100) — rulico Germany row', () => 
     expect(() => drawTo((ug) => entry.drawSecondCell(ug, 0, 0, new ListWidth(), MARGIN))).toThrow(
       /NoSuchElementException/,
     );
+  });
+});
+
+/** Records the `dimToUse` each draw was handed. */
+class DimRecorder implements Element {
+  readonly dims: (XDimension2D | null)[] = [];
+
+  getPreferredDimension(): XDimension2D {
+    return new XDimension2D(1, 1);
+  }
+
+  drawU(_ug: UGraphic, _zIndex: number, dimToUse: XDimension2D | null): void {
+    this.dims.push(dimToUse);
+  }
+}
+
+describe('ElementTreeEntry hands every cell a null dimToUse (java:90, 96)', () => {
+  it('drawFirstCell and drawSecondCell pass null, not a dimension', () => {
+    const first = new DimRecorder();
+    const other = new DimRecorder();
+    const entry = new ElementTreeEntry(0, first);
+    entry.addCell(other);
+    const otherWidth = new ListWidth();
+    otherWidth.add(1);
+    drawTo((ug) => {
+      entry.drawFirstCell(ug, 0, 0);
+      entry.drawSecondCell(ug, 0, 0, otherWidth, MARGIN);
+    });
+    expect([first.dims, other.dims]).toEqual([[null], [null]]);
   });
 });

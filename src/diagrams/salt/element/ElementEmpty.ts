@@ -15,5 +15,5 @@ export class ElementEmpty extends AbstractElement {
   }
 
   /** @see ElementEmpty.java:48-49 */
-  drawU(_ug: UGraphic, _zIndex: number, _dimToUse: XDimension2D): void {}
+  drawU(_ug: UGraphic, _zIndex: number, _dimToUse: XDimension2D | null): void {}
 }

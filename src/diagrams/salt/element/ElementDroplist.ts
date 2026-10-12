@@ -81,7 +81,7 @@ export class ElementDroplist extends AbstractElementText implements Element {
   }
 
   /** @see ElementDroplist.java:91-117 */
-  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D | null): void {
     const dim = this.getPreferredDimension(ug.getStringBounder(), 0, 0);
     ug = ug.apply(new Fore(this.getBlack().asPaint()));
 

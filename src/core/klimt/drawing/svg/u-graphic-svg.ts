@@ -79,8 +79,10 @@
  *
  * Deferred D3′ drivers (see `driver-svg-stubs.ts` for the classes and
  * why none of them can be registered here): `DriverImagePng`,
- * `DriverPixelSvg`, `DriverImageSvgSvg`, `DriverTextAsPathSvg`,
- * `DriverCenteredCharacterSvg`. `ignoreShape(UImageTikz.class)` — not
+ * `DriverImageSvgSvg`, `DriverTextAsPathSvg`,
+ * `DriverCenteredCharacterSvg`. `DriverPixelSvg` is ported
+ * (`driver-pixel-svg.ts`) and registered for `UPixel`, as
+ * `UGraphicSvg.java:122` does. `ignoreShape(UImageTikz.class)` — not
  * ported; upstream's own behavior for it is a no-op, and no `UImageTikz`
  * shape class exists in this port either.
  */
@@ -98,12 +100,14 @@ import { UText } from '../../shape/UText.js';
 import { UImage } from '../../shape/UImage.js';
 import { UComment } from '../../shape/UComment.js';
 import { UEmpty } from '../../shape/UEmpty.js';
+import { UPixel } from '../../shape/UPixel.js';
 import type { UGroup } from '../../shape/UGroup.js';
 import { SvgGraphics } from './svg-graphics.js';
 import type { SvgOption } from './svg-graphics.js';
 import { DriverRectangleSvg } from './driver-rectangle-svg.js';
 import { DriverEllipseSvg } from './driver-ellipse-svg.js';
 import { DriverLineSvg } from './driver-line-svg.js';
+import { DriverPixelSvg } from './driver-pixel-svg.js';
 import { DriverPolygonSvg } from './driver-polygon-svg.js';
 import { DriverPathSvg } from './driver-path-svg.js';
 import { DriverDotPathSvg } from './driver-dot-path-svg.js';
@@ -167,6 +171,7 @@ export class UGraphicSvg extends AbstractCommonUGraphic {
     this.registerDriver(asShapeCtor<URectangle>(URectangle), new DriverRectangleSvg(this.svg));
     this.registerDriver(UEllipse, new DriverEllipseSvg(this.svg));
     this.registerDriver(ULine, new DriverLineSvg(this.svg));
+    this.registerDriver(UPixel, new DriverPixelSvg(this.svg)); // UGraphicSvg.java:122
     this.registerDriver(UPolygon, new DriverPolygonSvg(this.svg));
     this.registerDriver(UPath, new DriverPathSvg(this.svg));
     this.registerDriver(DotPath, new DriverDotPathSvg(this.svg));

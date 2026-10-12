@@ -34,7 +34,7 @@ function simple(color: HColor): HColorSimple {
 export abstract class AbstractElement implements Element {
   abstract getPreferredDimension(stringBounder: StringBounder, x: number, y: number): XDimension2D;
 
-  abstract drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D): void;
+  abstract drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D | null): void;
 
   /** @see AbstractElement.java:47-49 */
   protected getBlack(): HColorSimple {

@@ -115,7 +115,7 @@ export class ElementPyramid extends AbstractElement {
   }
 
   /** `ug.apply(getBlack())` sets the foreground (`Fore`). @see ElementPyramid.java:101-121 */
-  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D | null): void {
     ug = ug.apply(new Fore(this.getBlack().asPaint()));
 
     const { rowsStart, colsStart } = this.init(ug.getStringBounder());
