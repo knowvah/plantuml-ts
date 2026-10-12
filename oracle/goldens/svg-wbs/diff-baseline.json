@@ -1,0 +1,2044 @@
+{
+  "fixtures": [
+    {
+      "type": "wbs",
+      "slug": "WBS-arrow-0",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-0",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-1",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-2",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-3",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-4",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-5",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-6",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-direction-0",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-easter-egg-0",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-easter-egg-1",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-0",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-1",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-10",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-11",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-monoline-def-0-11) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-12",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-13",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-14",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-15",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-16",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-17",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-monoline-def-0-17) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-18",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-monoline-def-0-18) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-19",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-2",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-20",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-21",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-22",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-23",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-24",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-monoline-def-0-24) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-3",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Bad tree structure (Assumed diagram type: wbs)\" at line 3 (oracle/goldens/stock-error-pages.json wbs/WBS-monoline-def-0-3) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-4",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-5",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-6",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-monoline-def-0-6) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-7",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-8",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-monoline-def-0-9",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-0-0",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-0-1",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-0",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-1",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-10",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-11",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-12",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-13",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-14",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-multiline-def-1-14) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-15",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-multiline-def-1-15) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-16",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-17",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-18",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-19",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-2",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-20",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-21",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-multiline-def-1-21) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-3",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-multiline-def-1-3) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-4",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-5",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-6",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-7",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-8",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-multiline-def-1-8) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "WBS-multiline-def-1-9",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "bacole-35-fiki903",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "bigare-83-rupe735",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "bikopa-92-joza078",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "bizele-33-tubi926",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "bizepe-66-putu551",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "bonina-19-baje036",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "bujigo-66-zepu613",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/bujigo-66-zepu613) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "cesoke-21-muro498",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/cesoke-21-muro498) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "cijugo-75-butu330",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "codalo-68-gere629",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "cofele-91-sanu676",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/cofele-91-sanu676) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "cogalo-85-side555",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "cozofa-82-fefe432",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "cunoja-00-nobi445",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "cupuri-11-piru303",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Bad tree structure (Assumed diagram type: wbs)\" at line 30 (oracle/goldens/stock-error-pages.json wbs/cupuri-11-piru303) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "danoji-66-rure273",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "detalo-19-racu448",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "diveva-04-moze399",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "dulato-78-nefo038",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "duzoxe-13-bocu532",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "facibu-72-dako171",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "fasuti-82-dire353",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/fasuti-82-dire353) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "fazafa-49-leka582",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "fecabu-55-foba097",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "fibiti-49-faga748",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "fiboto-83-pida880",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "filara-76-xifu577",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "fimilo-56-jibo267",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "fipina-75-bago028",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "fitemu-52-fica491",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "fodobe-85-beco281",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "goduxe-93-xuje240",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "gogige-30-peba786",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "guximi-08-cako621",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "jekubu-85-fimi106",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "jibiba-77-jixa314",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "jofuna-02-xova357",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "jujugo-23-bede484",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "jumiso-12-teba464",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "jurupa-07-funi255",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "jusapa-97-rege604",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "kadixe-30-pasa212",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "kajefo-25-dazo761",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "kajene-76-pele833",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "kamimo-14-sazi079",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "kekube-11-reni885",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "keloxe-59-zalu422",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "kemola-59-lipa866",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "kifona-80-bufa102",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/kifona-80-bufa102) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "kipadu-03-dine934",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "kofumu-64-gife734",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "kokisi-26-tixi824",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "konipe-99-jafu307",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/konipe-99-jafu307) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "kugane-77-moce175",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "kugunu-20-jisu885",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "kulozi-99-fapu866",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "lacufo-38-basi662",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "lagoda-51-zuna611",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/lagoda-51-zuna611) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "lazigo-83-tevi855",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "lazila-98-copu420",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "lecexi-03-capi482",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "ledama-83-xoko366",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-crash: the stock jar renders its crash page (java.lang.IllegalArgumentException: character to be escaped is missing; oracle/goldens/stock-error-pages.json wbs/ledama-83-xoko366, empty message) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "lesene-63-xeza963",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "link-URL-tooltip-0",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-crash: the stock jar renders its crash page (java.lang.IllegalArgumentException: character to be escaped is missing; oracle/goldens/stock-error-pages.json wbs/link-URL-tooltip-0, empty message) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "link-URL-tooltip-1",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "link-URL-tooltip-2",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "lozolo-55-gole805",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "lucema-49-bolo727",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "mifoxa-71-mago795",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "mogume-53-tuxe939",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "mufute-30-juja962",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "mupade-59-nizi762",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "muzufe-40-vami290",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "nagatu-54-xevo656",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "naveve-56-sezu031",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "navoxe-03-mala012",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "nedose-30-toro694",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "nelisi-61-zuto337",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "nerove-94-mase209",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "nijoci-28-tubo657",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "norutu-85-pana593",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "nulici-21-suxa818",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "nutodi-72-gesi011",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "pagede-80-rapu405",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "palupu-85-neno098",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "pejago-53-vaca955",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "pivuma-60-capa371",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "podeku-19-gofi018",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "popavi-72-rabi940",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "potipu-03-nulo609",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "pubebu-15-gavo856",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "puxezu-74-bile194",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "ranoce-59-jela729",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "rexuri-90-teja825",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "rufaci-77-nala420",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "runula-63-gora344",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "ruseba-92-sene615",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "sabeca-21-dodo233",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "sacile-96-fose945",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "sefovi-44-zega151",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "sefoxo-37-zuvo274",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/sefoxo-37-zuvo274) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "sipuja-30-deto581",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Bad tree structure (Assumed diagram type: wbs)\" at line 3 (oracle/goldens/stock-error-pages.json wbs/sipuja-30-deto581) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "sipuxu-89-ciji559",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "solive-57-nola542",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/solive-57-nola542) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "sotaso-86-migu035",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "suciri-22-jedu341",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "sugepe-47-ruxa931",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "supeno-33-jabe921",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "supori-51-meba536",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "sutesu-19-lufu844",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "tacenu-64-cofi013",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "tefobe-51-jefu626",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "titito-29-gise261",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "tojixi-05-lusu056",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)\" at line 3 (oracle/goldens/stock-error-pages.json wbs/tojixi-05-lusu056) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "tubeli-58-kadi729",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)\" at line 4 (oracle/goldens/stock-error-pages.json wbs/tubeli-58-kadi729) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "tugejo-32-tuna198",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "tuvake-29-namo853",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "tuzeme-92-metu703",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "vavibi-10-maso573",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/vavibi-10-maso573) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "vazalu-10-cebi060",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "vecovi-94-givo515",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "vezati-14-vupe612",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "xagelu-70-fota123",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "xakubu-65-cumo769",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "xalape-44-sipa811",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "xasinu-75-sabe690",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "xecoxa-01-timo183",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "xekazo-08-vozi430",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "xeruno-72-nape751",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "xesafo-81-reca540",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "xifiti-28-jati059",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "xiruxo-19-repo052",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "xiveti-07-suzu992",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "xuzuda-76-bunu077",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "zagudu-70-loto412",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "zapabe-95-nige175",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "zecavo-98-kini554",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error: the stock jar reports \"WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)\" at line 3 (oracle/goldens/stock-error-pages.json wbs/zecavo-98-kini554) -- conformant under the 2026-10-10 error-page rule once the port errors too. Port side: renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "zeneno-39-bize297",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "zipise-65-bevo360",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "zodobi-82-dura410",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "zogadi-16-bore748",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "zogoke-27-tupa218",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "zoxifo-84-pesu554",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    },
+    {
+      "type": "wbs",
+      "slug": "zutivo-71-kaki153",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered",
+      "measuredAt": "2026-10-12",
+      "measuredAgainstCommit": "3376090e9"
+    }
+  ]
+}
