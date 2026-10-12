@@ -316,11 +316,11 @@
       "slug": "skinparam-mode-dark",
       "topic": "T4a probe: skinparam mode dark element colours",
       "status": "baseline",
-      "weightedScore": 7,
-      "diffCount": 7,
+      "weightedScore": 0,
+      "diffCount": 0,
       "reason": "open -> T5c: AbstractElement#getBlack is BLACK.withDark(WHITE) (salt/element/AbstractElement.java:47-49); the port's UGraphic carries no ColorMapper so the dark partner is lost at asPaint() (7 drawn-colour diffs; klimt seam, T5c).",
       "measuredAt": "2026-10-12",
-      "measuredAgainstCommit": "ccb384931"
+      "measuredAgainstCommit": "2336d5ff5"
     }
   ]
 }

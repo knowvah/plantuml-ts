@@ -90,7 +90,7 @@ Batch close: [close-procedure.md](close-procedure.md).
 | [2](batch-2/overview.md): elements + factory base | T2f klimt gaps (first), T2a widgets, T2b menus/tabs, T2c containers, T2d tree, T2e factory base, T2g UPixel + dimToUse (runs with batch 3) | [x] |
 | [3](batch-3/overview.md): factories | T3a simple, T3b check/radio, T3c complex | [x] |
 | [4](batch-4/overview.md): wiring + main pin close | T4a | [x] |
-| [5](batch-5/overview.md): residual drive (written at the b4 close) | T5* | [ ] |
+| [5](batch-5/overview.md): residual drive (written at the b4 close) | T5* | [x] |
 | [exit](exit/overview.md): final + merge | T-exit | [ ] |
 
 ## Index

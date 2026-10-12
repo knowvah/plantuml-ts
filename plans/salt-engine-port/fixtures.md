@@ -33,10 +33,10 @@ fidelity number. `final` ∈ `fixed (<commit>)` · `open -> <owner>` (a library-
 | lobile-12-tafe674 | diverged | 9/2 | `{#` | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
 | lojove-43-veci853 | diverged | 9/2 | `[button]` `()` `[]` `^drop^` `"text"` · skinparam | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
 | maxone-19-guto514 | diverged | 9/2 | `[button]` | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
-| mejeki-64-buvo994 | diverged | 9/2 | `[button]` · title, <back, footer, header, caption, legend | T4a |  open -> T5a (chrome margin; weightedScore 16) |
+| mejeki-64-buvo994 | diverged | 9/2 | `[button]` · title, <back, footer, header, caption, legend | T4a |  fixed (b5131d8dd, T5a) 0/0, pinned b5 wave 1 |
 | mucife-33-devu289 | diverged | 9/2 | `{+` `{/` `[button]` `[]` `"text"` · <b> | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
 | nakuvu-18-nive718 | diverged | 9/2 | `{T` `--` | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
-| neguge-98-cilu043 | diverged | 9/2 | `{+` `{T` `[button]` `^drop^` `"text"` · <b>, <u> | T4a |  open -> T5b (`<space:N>` creole; weightedScore 89) |
+| neguge-98-cilu043 | diverged | 9/2 | `{+` `{T` `[button]` `^drop^` `"text"` · <b>, <u> | T4a |  fixed (696405014, T5b) 0/0, pinned b5 wave 1 |
 | nutesi-68-soxe380 | diverged | 9/2 | `[button]` `"text"` · <u> | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
 | pusisi-42-reco966 | diverged | 9/2 | `{S` | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
 | resexi-89-jeru231 | diverged | 9/2 | `{#` `{/` · title | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
@@ -52,7 +52,7 @@ fidelity number. `final` ∈ `fixed (<commit>)` · `open -> <owner>` (a library-
 | tikoga-90-nedu880 | diverged | 9/2 | `{#` | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
 | tisaje-59-zula947 | diverged | 9/2 | `{^` `[button]` `"text"` · !include | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
 | vizono-80-vipa581 | diverged | 9/2 | `{^` `[button]` `"text"` | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
-| vuxibo-96-tago783 | diverged | 9/2 | `{#` · caption | T4a |  open -> T5a (chrome margin; weightedScore 6) |
+| vuxibo-96-tago783 | diverged | 9/2 | `{#` · caption | T4a |  fixed (b5131d8dd, T5a) 0/0, pinned b5 wave 1 |
 | xaderu-42-jone467 | diverged | 9/2 | `{S` | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
 | xetajo-70-relu240 | diverged | 9/2 | `{#` `{*` · title | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
 | xicose-14-gigi527 | diverged | 9/2 | `[button]` `()` `[]` | T4a |  fixed (cda4ea75a) 0/0, pinned b4 |
@@ -78,3 +78,6 @@ fidelity number. `final` ∈ `fixed (<commit>)` · `open -> <owner>` (a library-
 `CommandAnything.java:70` (`salt` as the first line of a salt block ⇒ `error("This is not needed anymore.")`)
 is exercised by no cached oracle; a probe fixture under `tests/fixtures/salt/` is a push-forward option for T4a.
 
+## Authored rows (30, `tests/fixtures/salt/*.puml`, manifest `oracle/goldens/svg-salt/authored-baseline.json`)
+
+T4a authored 13 jar probes and T5-cov 17 thin-spot fixtures (journal rows 33, 42). 25/30 are 0/0 after T5c (journal row 43); the other 5 carry mechanisms: `cov-menu-three-popups` jar-flake (identity-hashed popup order, `ElementMenuBar.java:54,123`), `cov-startuml-salt-keyword` 54 (error page both sides; message text needs `PSystemErrorUtils#checkBasicError`, `src/core/error/PSystemErrorUtils.ts:12-17`, filed), `salt-first-line` 7 (version string by ruling), `mode-line-is-data` 302 and `no-factory-ready` 273 (jar IAE crash pages vs our error page, conformant by the 2026-10-10 rule).
