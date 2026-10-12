@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1505 modules · 5740 exported names.
+1508 modules · 5747 exported names.
 
 ## `src/`
 
@@ -373,6 +373,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `layout-services.ts` | `ELK_RENDER_SYNC_UNSUPPORTED`, `layoutServicesSync`, `layoutServices` | Which `LayoutServices` a render hands to `SyncPlugin.layoutSync` (cdd8 D2b). |
 | `load-elk.ts` | `ElkBackend`, `loadElk` | The elkjs backend, loaded on demand (cdd8 D1). |
 | `MyElkCluster.ts` | `ElkClusterDiagram`, `MyElkCluster` | `MyElkCluster` port (cdd8 T2c): draws one package/cluster at the position ELK gave its node, and answers the `MagneticBorder` a link attached to the cluster reads. |
+| `MyElkEdge.ts` | `MyElkNodeImage`, `MyElkEdgeCluster`, `MyElkEdgeArgs`, `getRoleLabelPosition`, `MyElkEdge` | One ELK edge, drawn: straight `ULine` legs from the section start through each bend point to the section end, the two extremity decorations, then the centre, tail and head labels and the roles beside them (cdd8 D13). |
 
 ## `src/core/elk/proxy/`
 
@@ -866,8 +867,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ExtremityCrowfoot.ts` | `ExtremityCrowfoot`, `ExtremityFactoryCrowfoot` |  |
 | `ExtremityDiamond.ts` | `ExtremityDiamond`, `ExtremityFactoryDiamond` |  |
 | `ExtremityDoubleLine.ts` | `ExtremityDoubleLine`, `ExtremityFactoryDoubleLine` |  |
+| `ExtremityExtends.ts` | `ExtremityExtends` |  |
 | `ExtremityExtendsLike.ts` | `ExtremityExtendsLike`, `ExtremityExtendsLikeRedefines`, `ExtremityExtendsLikeDefinedBy`, `ExtremityFactoryExtendsLike` |  |
 | `ExtremityFactory.ts` | `ExtremityFactory` |  |
+| `ExtremityFactoryExtends.ts` | `ExtremityFactoryExtends` |  |
 | `ExtremityHalfArrow.ts` | `ExtremityHalfArrow`, `ExtremityFactoryHalfArrow` |  |
 | `ExtremityLineCrowfoot.ts` | `ExtremityLineCrowfoot`, `ExtremityFactoryLineCrowfoot` |  |
 | `ExtremityNotNavigable.ts` | `ExtremityNotNavigable`, `ExtremityFactoryNotNavigable` |  |
