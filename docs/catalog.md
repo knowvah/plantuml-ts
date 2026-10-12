@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1511 modules · 5768 exported names.
+1511 modules · 5770 exported names.
 
 ## `src/`
 
@@ -1632,7 +1632,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `command-table-types.ts` | `Command` | Shared `Command` shape for the descriptive diagram dispatch table. |
 | `command-table.ts` | `Command`, `COMMANDS` | Command dispatch table for the descriptive diagram parser (component / use-case / deployment). |
 | `description-elk-adapter.ts` | `ROOT_GROUP`, `DescriptionElkContext`, `DescriptionElkAdapter`, `layoutDescriptionElk`, `buildDescriptionElkContext` | `ElkDiagramAdapter` over the description engine (cdd8 T3b, D13). |
-| `description-elk-label.ts` | `ElkDisplayStyle`, `elkDisplayBlock` | The creole `TextBlock` the ELK maker builds for a link's label, quantifier and role (`Display.getWithNewlines(...).create0(font, CENTER, skinParam, wrapWidth, CreoleMode.SIMPLE_LINE, null, null)`: `CucaDiagramFileMakerElk.java:213-215`, `:2 |
+| `description-elk-label.ts` | `nestedRenderer`, `labelSkinSimple`, `ElkDisplayStyle`, `elkDisplayBlock` | The creole `TextBlock` the ELK maker builds for a link's label, quantifier and role (`Display.getWithNewlines(...).create0(font, CENTER, skinParam, wrapWidth, CreoleMode.SIMPLE_LINE, null, null)`: `CucaDiagramFileMakerElk.java:213-215`, `:2 |
 | `element-embedded-block.ts` | `EmbeddedElementBlock`, `scanEmbeddedElementBlock` | `PSystemCommandFactory#addOneSingleLineManageEmbedded2` (`:288-307`) for `CommandCreateElementMultilines`' TYPE1 element body (`parser.ts`'s `continueElementBlock`): while an open element block is accumulating body lines, a line that OPENS |
 | `element-grammar-nosymbol.ts` | `RE_BARE_AS_DECORATED`, `BareAsDecorated`, `parseBareAsDecorated`, `RE_BARE_QUOTED_DECL`, `RE_BARE_DECORATED_DECL`, `RE_CODE_AS_QUOTED_DISPLAY`, `CodeAsQuotedDisplay`, `parseCodeAsQuotedDisplay` | `CommandCreateElementFull`'s declaration alternatives with the leading SYMBOL keyword OMITTED (`getRegexConcat:84`, `(?:(ALL_TYPES\|\(\))[%s]+)?` — the group is optional). |
 | `element-grammar.ts` | `BracketDeclaration`, `parseBracketDeclaration`, `removeMatching`, `removeMatchingLinks`, `effectiveRemovedIds`, `effectiveHiddenIds`, `visibleStereotypeLabels`, `nodeWithVisibleStereotype` | Element-declaration helpers split out of parser.ts to stay under 500 lines (CommandCreateElementFull.java, net.sourceforge.plantuml.descdiagram .command) — the bracket-shorthand declaration form and the id/tag-based `remove`/`hide`/`show` ( |

@@ -311,7 +311,7 @@ export class DescriptionElkAdapter implements ElkDiagramAdapter {
 
   drawLeaf(entityId: string, ug: UGraphic, corner: XPoint2D): void {
     const geo = this.nodeGeo(entityId);
-    const uid = this.input.uids.nodeUid.get(entityId) ?? entityId;
+    const uid = this.input.uids.nodeUid.get(entityId)!; // every geo node has a uid (same tree)
     drawEntity(ug, { ...geo, x: corner.x, y: corner.y }, this.input.theme, uid, this.input.ast.sprites);
   }
 
@@ -356,7 +356,7 @@ export class DescriptionElkAdapter implements ElkDiagramAdapter {
   }
 
   getClusterBackColor(groupId: string): Paint {
-    return buildStyleDefaults(this.input.theme, this.nodeGeo(groupId).symbol).backGroundColorDefault ?? 'none';
+    return buildStyleDefaults(this.input.theme, this.nodeGeo(groupId).symbol).backGroundColorDefault!; // always set there
   }
 
   // --- Skin parameters ---------------------------------------------------------
@@ -406,15 +406,14 @@ export class DescriptionElkAdapter implements ElkDiagramAdapter {
     return null;
   }
 
-  getLabel(linkId: string, stringBounder: StringBounder): TextBlock {
+  getLabel(linkId: string, _stringBounder: StringBounder): TextBlock {
     const { link } = this.resolved(linkId);
     if (link.label === undefined) return TextBlockUtils.empty(0, 0);
     const block = this.displayBlock(link.label, CreoleMode.SIMPLE_LINE, this.maxMessageSize());
     // CucaDiagramFileMakerElk.java:158 (addVisibilityModifier's margin) then :228-229.
     const marged = TextBlockUtils.withMargin(block, LABEL_MARGIN, LABEL_MARGIN);
-    return TextBlockUtils.isEmpty(marged, stringBounder)
-      ? marged
-      : TextBlockUtils.withMargin(marged, LABEL_MARGIN, LABEL_MARGIN);
+    // The `isEmpty` test of :228 is never true here: the margin above already makes the block non-empty.
+    return TextBlockUtils.withMargin(marged, LABEL_MARGIN, LABEL_MARGIN);
   }
 
   getQuantifier(linkId: string, n: 1 | 2, stringBounder: StringBounder): TextBlock | null {

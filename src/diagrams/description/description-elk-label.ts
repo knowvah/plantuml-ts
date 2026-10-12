@@ -36,7 +36,7 @@ const TAB_SIZE = 8;
 const DPI = 96;
 
 /** `{{ }}` inside a label: the registered nested renderer, which a unit test may not have registered. */
-function nestedRenderer(): NestedDiagramRenderer {
+export function nestedRenderer(): NestedDiagramRenderer {
   return (
     getNestedDiagramRenderer() ?? {
       render(): TextBlock {
@@ -47,7 +47,7 @@ function nestedRenderer(): NestedDiagramRenderer {
 }
 
 /** The `ISkinSimple` members `CreoleParser`/`StripeSimple` read for a label (`SkinParam.java` defaults). */
-function labelSkinSimple(font: FontConfiguration, sprites: SpriteRegistry | undefined): ISkinSimple {
+export function labelSkinSimple(font: FontConfiguration, sprites: SpriteRegistry | undefined): ISkinSimple {
   const atomOps = chromeAtomOps(sprites, font);
   const pragma = Pragma.createEmpty();
   const skin: ISkinSimple = {

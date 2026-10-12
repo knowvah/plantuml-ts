@@ -248,3 +248,84 @@ describe('the ELK maker over a description diagram, against the jar', () => {
     expect(svg).toContain('options.elk');
   });
 });
+
+describe('DescriptionElkAdapter edge cases', () => {
+  const theme = defaultTheme;
+
+  it('rejects an entity it does not know', () => {
+    const adapter = adapterOf('component A');
+    expect(() => adapter.getUSymbol('nope')).toThrow('unknown entity nope');
+    expect(() => adapter.calculateDimension('nope', adapter.getDefaultStringBounder())).toThrow('no size for nope');
+    expect(adapter.groupLeafs('nope')).toEqual([]);
+  });
+
+  it('orders leaves without a creationIndex last, in a stable order', () => {
+    const ast = parse('component A\ncomponent B');
+    for (const node of ast.nodes) delete (node as { creationIndex?: number }).creationIndex;
+    const adapter = new DescriptionElkAdapter(buildDescriptionElkContext(ast, theme, measurer));
+    expect(adapter.leafs()).toEqual(['A', 'B']);
+  });
+
+  it('skips a removed link and a link whose end names nothing', () => {
+    const ast = parse('component A\ncomponent B\nA --> B');
+    const link = ast.links[0]!;
+    ast.links.push({ ...link, removed: true }, { ...link, from: 'ZZ' }, { ...link, to: 'YY' });
+    const adapter = new DescriptionElkAdapter(buildDescriptionElkContext(ast, theme, measurer));
+    expect(adapter.getLinks()).toEqual(['link0']);
+  });
+
+  it('draws a note leaf with no magnetic border', () => {
+    const adapter = adapterOf('component A\nnote as N1\n  hello\nend note');
+    expect(adapter.leafs()).toContain('N1');
+    expect(adapter.getMagneticBorder('N1').getForceAt({ x: 1, y: 1 }, adapter.getDefaultStringBounder()).getDx()).toBe(
+      0,
+    );
+  });
+
+  it('gives a group with no title and no symbol a zero header height', () => {
+    const ast = parse('package P {\ncomponent A\n}');
+    const group = ast.nodes[0]!;
+    group.display = '';
+    group.symbol = 'note';
+    const adapter = new DescriptionElkAdapter(buildDescriptionElkContext(ast, theme, measurer));
+    expect(adapter.getUSymbol('P')).toBeNull();
+    expect(adapter.getClusterHeader('P', adapter.getDefaultStringBounder()).getTitleAndAttributeHeight()).toBe(0);
+  });
+
+  it('keeps an empty label block and a non-empty one apart, and honours maxMessageSize', () => {
+    const ast = parse('component A\ncomponent B\nA --> B : x\nA --> B');
+    ast.links[1]!.label = '';
+    ast.links[0]!.firstLabel = 'q';
+    ast.links[1]!.firstLabel = '';
+    const wide = { ...theme, maxMessageSize: 40 };
+    for (const t of [theme, wide, { ...theme, maxMessageSize: 0 }]) {
+      const adapter = new DescriptionElkAdapter(buildDescriptionElkContext(ast, t, measurer));
+      const sb = adapter.getDefaultStringBounder();
+      const [labelled, blank] = adapter.getLinks() as [string, string];
+      expect(adapter.getLabel(labelled, sb).calculateDimension(sb).getWidth()).toBeGreaterThan(0);
+      expect(adapter.getLabel(blank, sb).calculateDimension(sb).getWidth()).toBeLessThan(
+        adapter.getLabel(labelled, sb).calculateDimension(sb).getWidth(),
+      );
+      expect(adapter.getQuantifier(labelled, 1, sb)).not.toBeNull();
+      expect(adapter.getQuantifier(blank, 1, sb)).not.toBeNull();
+      expect(adapter.getQuantifier(labelled, 2, sb)).toBeNull(); // secondLabel undefined
+      expect(adapter.getRoleLabel(labelled, 1, sb)).toBeNull();
+    }
+  });
+
+  it('wraps a long label at maxMessageSize', () => {
+    const ast = parse('component A\ncomponent B\nA --> B : alpha beta gamma delta epsilon zeta');
+    const heightWith = (t: typeof theme): number => {
+      const adapter = new DescriptionElkAdapter(buildDescriptionElkContext(ast, t, measurer));
+      const sb = adapter.getDefaultStringBounder();
+      return adapter.getLabel(adapter.getLinks()[0]!, sb).calculateDimension(sb).getHeight();
+    };
+    expect(heightWith({ ...theme, maxMessageSize: 40 })).toBeGreaterThan(heightWith(theme));
+  });
+
+  it('muteToType is a no-op (empty groups are already leaves)', () => {
+    const adapter = adapterOf('component A');
+    expect(adapter.muteToType('A', 'EMPTY_PACKAGE')).toBeUndefined();
+    expect(adapter.getGroupType('A')).toBe('PACKAGE');
+  });
+});
