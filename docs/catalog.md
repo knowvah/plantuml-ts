@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1465 modules · 5559 exported names.
+1466 modules · 5562 exported names.
 
 ## `src/`
 
@@ -1374,6 +1374,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-geo-types.ts` | `ClassifierRowGeo`, `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves`, `ClassLeafGeo`, `EdgeConstraintGeo`, `EdgeNoteBoxGeo`, `EdgeNoteLine`, `QuantifierLineGeo`, `QuantifierLinesGeo`, `RoleLinesGeo`, `SametailGeo`, `VisibilityIconGeo`, `ClassifierGeo`, `EdgeGeo`, `NamespaceGeo`, `EdgeKalBoxes`, `KalBox`, `ClassGeometry`, `ClassPageBoundary`, `JsonBodyItem` | Public geometry types for the class-diagram layout engine. |
 | `class-header-line-stacking.ts` | `headerLineY`, `headerLineTops` | Vertical placement of a classifier NAME's physical lines -- split out of `class-stereotype-layout.ts#buildHeaderRows` (500-line cap) when cdd4-T12 replaced the flat `i * fontSize` step with upstream's per-stripe running sum. |
 | `class-header-visibility-geo.ts` | `HEADER_VISIBILITY_TOP_MARGIN`, `HeaderVisibilityBlock`, `headerVisibilityBlock`, `mergeNameWithVisibility`, `MergedNameGeo`, `attachHeaderVisibilityIcon` | cdd5-T4b (entity-visibility-icon-dropped): the class header's visibility icon block. |
+| `class-hexagon-leaf.ts` | `isHexagonLeaf`, `hexagonPolygonPoints`, `stampHexagonLeaves` | class-hexagon-leaf.ts -- a class-routed `hexagon` leaf's svek polygon (cdd8 T1e, `unknown/xagomi-49-caki729`). |
 | `class-hideshow-ast.ts` | `HideTarget`, `HideShowDirective`, `HideStereotypeDirective`, `RemoveRestoreDirective`, `HideShowPatternDirective`, `HideShowEntityDirective`, `HideShowKindDirective`, `HideShowVisibilityDirective` | Hide/show + remove/restore directive AST types, split out of `ast.ts` (line cap) -- re-exported from it so every `import { ... |
 | `class-hideshow-dispatch.ts` | `executeHideShow` | `hide`/`show` directive dispatch (rule 3 of class-commands.ts's COMMANDS table) — CommandHideShow2 / CommandHideShowByGender / CommandHideShowByVisibility upstream. |
 | `class-hidetext-shield.ts` | `hideTextShieldMarginsByEntity` | cdd-T22b: `SvekNode.java:220-267`'s `shield()`/`appendLabelHtml` -- reserves DOT-node margins around a `hideText` leaf's icon cell (jar: `EntityImageDescription#getShield`, `EntityImageDescription.java:239-262`) so graphviz ranks around the |

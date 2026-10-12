@@ -17,6 +17,7 @@ export { isNoteGeo, isClassifierGeo, classifierLeaves, noteLeaves, type ClassLea
 
 import type { JsonBodyItem } from './class-geo-json-types.js';
 import type { SpriteTint } from '../../core/klimt/sprite/sprite-tint.js';
+import type { Point2D } from '../../core/klimt/UTranslate.js';
 // cdd-T6: re-exported so `class-geo-types.ts` stays the one import site for
 // class geometry types (see `class-geo-edge-extras.ts`'s own doc comment).
 export type {
@@ -238,6 +239,12 @@ export interface ClassifierGeo {
    *  shifted every shape in the document by that much
    *  (`.agent-notes/class-ink-shared-offset-groups.md` item (b)). */
   symbolInk?: LeafSymbolInk;
+
+  /** cdd8 T1e: `SvekNode#getPolygon` for a `ShapeType.HEXAGON` leaf, in the
+   *  node's own frame (`DotStringFactory.java:414-420`), drawn by
+   *  `EntityImageDescription#drawHexagon`. Set by `class-hexagon-leaf.ts
+   *  #stampHexagonLeaves`; absent for every other leaf. */
+  hexagonPolygon?: readonly Point2D[];
 }
 
 // cdd7 T2b: `EdgeGeo` moved to `class-geo-edge-types.ts` (500-line cap) --

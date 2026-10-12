@@ -65,6 +65,9 @@ function scaleClassifierGeo(c: ClassifierGeo, k: number, themeFontSize: number):
     dividerYs: c.dividerYs.map((y) => y * k),
     rows: c.rows.map((r) => scaleRow(r, k, themeFontSize)),
     ...(c.symbolInk !== undefined ? { symbolInk: scaleSymbolInk(c.symbolInk, k) } : {}),
+    ...(c.hexagonPolygon !== undefined
+      ? { hexagonPolygon: c.hexagonPolygon.map((p) => ({ x: p.x * k, y: p.y * k })) }
+      : {}),
     ...(c.badgeSpriteImage !== undefined ? { badgeSpriteImage: scaleBadgeSpriteImage(c.badgeSpriteImage, k) } : {}),
     ...(c.genericTag !== undefined ? { genericTag: scaleGenericTag(c.genericTag, k) } : {}),
     ...(c.folderTab !== undefined ? { folderTab: scaleFolderTab(c.folderTab, k) } : {}),
