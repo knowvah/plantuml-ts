@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1584 modules · 5871 exported names.
+1585 modules · 5873 exported names.
 
 ## `src/`
 
@@ -1983,6 +1983,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `state-transition-clip.ts` | `clusterAnchorRectsOf`, `clipTransitionSpline`, `SolveLine`, `toRectangleArea`, `projectionSpecsOf`, `projectionClusterIdOf`, `inSolveOrder`, `clipLinesInSolveOrder` | state-transition-clip.ts — this port of the edge loop in `DotStringFactory#solve` (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ DotStringFactory.java:458-459`): ```java for (SvekEdge line : getBibliotekon().allLines()) line. |
 | `state-transition-label.ts` | `computeReservedLabelBox`, `transitionLabelAnchor`, `attachTransitionLabel` | Transition label placement — shared by every state-layout pipeline (flat, T3; composite, T4) so antiparallel transitions don't overlap their labels. |
 | `state-transitions.ts` | `ParsedTransition`, `parseTransitionLine`, `isSyncBarId`, `stripSyncBarEquals` | Transition (arrow) grammar for the state parser — `A --> B`, the left-pointing reverse form `A <-- B`, and their decorations (cross-start, circle-end, `[style]` brackets, direction abbreviations, `<<stereotype>>`). |
+
+## `src/diagrams/wbs/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `WBSLink.ts` | `WElementGeometry`, `WBSLink` |  |
 
 ## `src/diagrams/yaml/`
 
