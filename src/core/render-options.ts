@@ -21,6 +21,7 @@ import type { IncludeFetcher, IncludeStore } from './include-resolver.js';
 import type { StdlibRegistry } from './tim/StdlibRegistry.js';
 import type { AssetStore } from './asset-store.js';
 import type { SecurityProfile } from './security/SecurityProfile.js';
+import type { ElkBackend } from './elk/elk-backend.js';
 
 export interface RenderOptions {
   theme?: 'default' | 'dark' | 'sketchy' | 'monochrome' | Partial<Theme>;
@@ -72,6 +73,14 @@ export interface RenderOptions {
   /** Url prefixes allowed under every profile but SANDBOX, and the only ones
    *  under ALLOWLIST. The jar's `plantuml.allowlist.url` (`;`-separated there). */
   urlAllowlist?: readonly string[] | undefined;
+  /**
+   * The ELK layout backend for `!pragma layout elk` diagrams (cdd8 D2b),
+   * upstream's `CucaDiagramFileMakerElk` path. `render()` loads the elkjs
+   * backend itself when this is absent; `renderSync` cannot, so a sync caller
+   * passes `await loadElk()`, or any other `ElkBackend`. Ignored by diagrams
+   * that do not use ELK.
+   */
+  elk?: ElkBackend | undefined;
 }
 
 /** Module-level cache for {@link getDefaultMeasurer} -- see its own doc

@@ -103,3 +103,22 @@ export function mergeRefusals(rs: readonly ParseRefusal[]): ParseRefusal {
   }
   return result!;
 }
+
+/**
+ * Narrows a `parse()` result to the refusal arm. Moved here from
+ * `dispatcher.ts` (cdd8 T1a, file cap), which still re-exports it.
+ *
+ * The registry erases each plugin's AST type parameter to `unknown`, so at the
+ * pipeline's call sites `AST | ParseRefusal` collapses to `unknown` and a
+ * plain discriminant check does not typecheck. This is the same structural
+ * `in` narrowing `src/index.ts#annotationsOf` uses, and for the same reason:
+ * the value is THIS pipeline's own trusted `parse()` output, not external
+ * input, so it is a stage boundary rather than a validation boundary.
+ *
+ * `refused` is the discriminant because no engine AST carries that field (T1);
+ * absence of a field is never the test.
+ */
+export function parseRefusalOf(parsed: unknown): ParseRefusal | undefined {
+  if (typeof parsed !== 'object' || parsed === null) return undefined;
+  return 'refused' in parsed ? (parsed as ParseRefusal) : undefined;
+}

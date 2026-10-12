@@ -22,7 +22,8 @@
 import type { DiagramType, UmlSource } from './block-extractor.js';
 import { upstreamTypeOf } from './block-extractor.js';
 import type { ParseRefusal } from './parse-refusal.js';
-import { mergeRefusals } from './parse-refusal.js';
+import { mergeRefusals, parseRefusalOf } from './parse-refusal.js';
+import type { LayoutServices } from './elk/elk-backend.js';
 import type { SkinCut } from './skin-command.js';
 import { rect, text } from './svg.js';
 import type { Gradient } from './paint.js';
@@ -298,7 +299,16 @@ export interface PaginatedPlugin<AST = unknown, Geo = unknown> {
 export interface SyncPlugin<AST = unknown, Geo = unknown> extends Partial<PaginatedPlugin<AST, Geo>> {
   readonly type: DiagramType;
   parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
-  layoutSync(ast: AST, theme: Theme, measurer: StringMeasurer): Geo;
+  /**
+   * `services` (cdd8 D2b): what the render supplies beyond the AST — an
+   * `ElkBackend` for a diagram whose {@link SyncPlugin.requiresElk} is true.
+   */
+  layoutSync(ast: AST, theme: Theme, measurer: StringMeasurer, services?: LayoutServices): Geo;
+  /**
+   * True when this AST is laid out by ELK, upstream's `isUseElk()` choosing
+   * `CucaDiagramFileMakerElk` (`net/atmp/CucaDiagram.java:478-479`). Absent = never.
+   */
+  requiresElk?(ast: AST): boolean;
   /**
    * `measurer` is the render's own measurer (the one `layout*` received),
    * handed through additively so an engine's draw side measures with the
@@ -341,23 +351,7 @@ export interface AsyncPlugin<AST = unknown, Geo = unknown> extends Partial<Pagin
  */
 export type DiagramPlugin<AST = unknown, Geo = unknown> = SyncPlugin<AST, Geo> | AsyncPlugin<AST, Geo>;
 
-/**
- * Narrows a `parse()` result to the refusal arm.
- *
- * The registry erases each plugin's AST type parameter to `unknown`, so at the
- * pipeline's call sites `AST | ParseRefusal` collapses to `unknown` and a
- * plain discriminant check does not typecheck. This is the same structural
- * `in` narrowing `src/index.ts#annotationsOf` uses, and for the same reason:
- * the value is THIS pipeline's own trusted `parse()` output, not external
- * input, so it is a stage boundary rather than a validation boundary.
- *
- * `refused` is the discriminant because no engine AST carries that field (T1);
- * absence of a field is never the test.
- */
-export function parseRefusalOf(parsed: unknown): ParseRefusal | undefined {
-  if (typeof parsed !== 'object' || parsed === null) return undefined;
-  return 'refused' in parsed ? (parsed as ParseRefusal) : undefined;
-}
+export { parseRefusalOf } from './parse-refusal.js';
 
 // ---------------------------------------------------------------------------
 // Error-sentinel plugin
