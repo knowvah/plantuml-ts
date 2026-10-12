@@ -108,7 +108,7 @@ Measurement:
 | [2a](batch-2a/overview.md): ELK maker + adapter, harness preload | T2a, T2e | [x] |
 | [2b](batch-2b/overview.md): ELK cluster + edge drawing | T2c, T2d | [x] |
 | [2c](batch-2c/overview.md): ELK composite drawing | T2b | [x] |
-| [3](batch-3/overview.md): wiring, ELK rows, ruling docs | T3a, T3b, T3c | [ ] |
+| [3](batch-3/overview.md): wiring, ELK rows, ruling docs | T3a, T3b, T3c | [x] |
 | [exit](exit/overview.md): close + salt hand-off | T-exit, T-salt | [ ] |
 
 ## Index

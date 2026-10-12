@@ -14,13 +14,13 @@ and zuduxu, and unknown petiku and rubebe.
 
 | tree/slug | verdict | S/N | family | mechanism (planning) | task | final |
 |---|---|---|---|---|---|---|
-| class/cadutu-02-lazu601 | diverged | 1/414 | elk | `!pragma layout elk` laid out by dot-engine; jar uses ELK 0.12.0 (`CucaDiagram.java:478-479`) | T0c, T3a | |
-| class/cirojo-62-dubo306 | diverged | 19/257 | elk | same | T3a | |
-| class/gokoru-18-daba136 | diverged | 19/257 | elk | same | T3a | |
-| class/lagudi-03-rucu383 | diverged | 1/508 | elk | same | T3a | |
-| class/rutefe-49-xeju709 | diverged | 1/168 | elk | same | T3a | |
-| class/tegefa-14-koxo759 | diverged | 43/431 | elk | same | T3a | |
-| class/temofi-63-vega763 | diverged | 1/414 | elk | same | T3a | |
+| class/cadutu-02-lazu601 | diverged | 1/414 | elk | `!pragma layout elk` laid out by dot-engine; jar uses ELK 0.12.0 (`CucaDiagram.java:478-479`) | T0c, T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
+| class/cirojo-62-dubo306 | diverged | 19/257 | elk | same | T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
+| class/gokoru-18-daba136 | diverged | 19/257 | elk | same | T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
+| class/lagudi-03-rucu383 | diverged | 1/508 | elk | same | T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
+| class/rutefe-49-xeju709 | diverged | 1/168 | elk | same | T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
+| class/tegefa-14-koxo759 | diverged | 43/431 | elk | same | T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
+| class/temofi-63-vega763 | diverged | 1/414 | elk | same | T3a | fixed (T3a f85c21e4c, pinned cdd8-b3) |
 | class/bixogo-47-xulu385 | structural-match | 0/49 | salt | legend `{{salt}}` renders our "unknown diagram type" box at 300×60 vs jar 111×90; acceptance "payload bytes" is FALSE (D8) | T0a | open -> salt-engine-port |
 | class/roxosu-00-pini153 | structural-match | 0/49 | salt | same as bixogo | T0a | open -> salt-engine-port |
 | class/nugecu-04-tona107 | structural-match | 0/23 | dot-engine A3 | flat labelled edge mirrored label side (graphviz-issues 23 `[~]`) | T0a | accepted (D11.1) |
@@ -42,6 +42,6 @@ test-results/dot-cache/*/*/in.puml`). Recorded by T0a (2026-10-11):
 
 | tree/slug | b0 verdict | task | final |
 |---|---|---|---|
-| c4/vakasu-51-xiza794 | (b0-eng/parity-c4.json) | T3b | |
-| component/dirofi-81-cuga514 | (b0-eng/parity-component.json) | T3b | |
-| unknown/foraba-98-sagi735 | (b0.json: not CLASS-routed) | T3b | |
+| c4/vakasu-51-xiza794 | diverged 40/72 → 65/160 | T3b | open -> description-style follow-on (stereotype-keyed styles, `root { Margin }`, legend under dpi; not ELK) |
+| component/dirofi-81-cuga514 | diverged 38/22 → conformant | T3b | fixed (T3b 1b1f2ee7a) |
+| unknown/foraba-98-sagi735 | diverged 7/64 → 6/0 | T3b | open -> description-style follow-on (stereotype-scoped colours; not ELK) |

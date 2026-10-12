@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12T03:41:32.214Z",
+  "generatedAt": "2026-10-12T05:02:09.950Z",
   "fixtures": [
     {
       "slug": "bajotu-30-soku184",
@@ -265,10 +265,7 @@
       "slug": "cadutu-02-lazu601",
       "type": "class",
       "dotEqual": false,
-      "verdict": "diverged",
-      "maxDelta": 91.66300000000001,
-      "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/g[4]/path[1]/@d[2]",
+      "verdict": "conformant",
       "oracleBlind": true
     },
     {
@@ -395,10 +392,7 @@
       "slug": "cirojo-62-dubo306",
       "type": "class",
       "dotEqual": false,
-      "verdict": "diverged",
-      "maxDelta": 255,
-      "firstDiff": "svg/g[1]/g[1]/@class",
-      "maxDeltaPath": "svg/@viewBox[2]",
+      "verdict": "conformant",
       "oracleBlind": true
     },
     {
@@ -1281,10 +1275,7 @@
       "slug": "gokoru-18-daba136",
       "type": "class",
       "dotEqual": false,
-      "verdict": "diverged",
-      "maxDelta": 116.638,
-      "firstDiff": "svg/g[1]/g[1]/@class",
-      "maxDeltaPath": "svg/g[1]/g[1]/line[1]/@x2",
+      "verdict": "conformant",
       "oracleBlind": true
     },
     {
@@ -1855,10 +1846,7 @@
       "slug": "lagudi-03-rucu383",
       "type": "class",
       "dotEqual": false,
-      "verdict": "diverged",
-      "maxDelta": 204.44,
-      "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@x",
+      "verdict": "conformant",
       "oracleBlind": true
     },
     {
@@ -3106,10 +3094,7 @@
       "slug": "rutefe-49-xeju709",
       "type": "class",
       "dotEqual": false,
-      "verdict": "diverged",
-      "maxDelta": 93,
-      "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/@height",
+      "verdict": "conformant",
       "oracleBlind": true
     },
     {
@@ -3459,10 +3444,7 @@
       "slug": "tegefa-14-koxo759",
       "type": "class",
       "dotEqual": false,
-      "verdict": "diverged",
-      "maxDelta": 714.2429999999999,
-      "firstDiff": "svg/g[1]/g[1]/@class",
-      "maxDeltaPath": "svg/g[1]/g[5]/line[1]/@x2",
+      "verdict": "conformant",
       "oracleBlind": true
     },
     {
@@ -3499,10 +3481,7 @@
       "slug": "temofi-63-vega763",
       "type": "class",
       "dotEqual": false,
-      "verdict": "diverged",
-      "maxDelta": 214.40700000000004,
-      "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/g[5]/line[1]/@x2",
+      "verdict": "conformant",
       "oracleBlind": true
     },
     {

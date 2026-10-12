@@ -886,7 +886,11 @@ describe('refusal coverage — baseline shape', () => {
     // 6629 -> 6634 at cdd8/close-b1: 5 svg-class clone rows (unknown-tree
     // dezobu-62, sapofa-97, semutu-45, xagomi-49; class-tree gadufu-56),
     // rendering on both sides. Derivation: 6400 + 234 = 6634.
-    expect(manifest.fixtures.length).toBe(6634);
+    // 6634 -> 6641 at cdd8/close-b3: 7 svg-class clone rows (the !pragma layout
+    // elk fixtures cadutu-02, cirojo-62, gokoru-18, lagudi-03, rutefe-49,
+    // tegefa-14, temofi-63; D12-eligible), rendering on both sides.
+    // Derivation: 6407 + 234 = 6641.
+    expect(manifest.fixtures.length).toBe(6641);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -989,7 +993,8 @@ describe('refusal coverage — baseline shape', () => {
     // 6392 -> 6393 at aepp/exit (1 svg-activity clone, tidoda-12-juxu745).
     // 6393 -> 6397 at cdd8/T0b (4 svg-class unknown-tree clones).
     // 6397 -> 6402 at cdd8/close-b1 (5 svg-class clones).
-    expect(pinnedRendering.length).toBe(6402);
+    // 6402 -> 6409 at cdd8/close-b3 (7 svg-class ELK clones).
+    expect(pinnedRendering.length).toBe(6409);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

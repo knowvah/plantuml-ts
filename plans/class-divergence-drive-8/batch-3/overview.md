@@ -9,6 +9,6 @@ the 7 ELK class rows and the D12 eligibility rule. Every agent prompt is
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T3a](T3a-class-elk-wiring.md) | class `ElkDiagramAdapter` + route `layoutEngine === 'elk'` through `MyElkDrawing`; 7 ELK rows conformant; D12 eligibility | typescript-pro (opus) | `src/diagrams/class/{index,class-elk-adapter,renderer,class-geo-types}.ts`, `src/core/elk/**` (residual fixes), `tests/oracle/svg-conformance/class.golden.ratchet.test.ts` (eligibility only) (+tests) | T2b, T2e | [ ] |
-| [T3b](T3b-description-elk-wiring.md) | description ELK wiring for the c4/component/unknown ELK fixtures (conditional, D3) | typescript-pro (sonnet) | `src/diagrams/description/{index,description-elk-adapter,renderer}.ts` (+tests) | T2b, T2e | [ ] |
-| [T3c](T3c-ruling-docs.md) | DIVERGENCES ELK entry reopened + latex note corrected; CLAUDE.md one line (D4) | orchestrator | `DIVERGENCES.md`, `CLAUDE.md` | T1d's journal counts | [ ] |
+| [T3a](T3a-class-elk-wiring.md) | class `ElkDiagramAdapter` + route `layoutEngine === 'elk'` through `MyElkDrawing`; 7 ELK rows conformant; D12 eligibility | typescript-pro (opus) | `src/diagrams/class/{index,class-elk-adapter,renderer,class-geo-types}.ts`, `src/core/elk/**` (residual fixes), `tests/oracle/svg-conformance/class.golden.ratchet.test.ts` (eligibility only) (+tests) | T2b, T2e | [x] |
+| [T3b](T3b-description-elk-wiring.md) | description ELK wiring for the c4/component/unknown ELK fixtures (conditional, D3) | typescript-pro (sonnet) | `src/diagrams/description/{index,description-elk-adapter,renderer}.ts` (+tests) | T2b, T2e | [x] |
+| [T3c](T3c-ruling-docs.md) | DIVERGENCES ELK entry reopened + latex note corrected; CLAUDE.md one line (D4) | orchestrator | `DIVERGENCES.md`, `CLAUDE.md` | T1d's journal counts | [x] |

@@ -3,69 +3,6 @@
   "entries": [
     {
       "match": {
-        "id": "svg-class/cadutu-02-lazu601"
-      },
-      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
-      "acceptedAt": "2026-09-21",
-      "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=414, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=1 numeric=414. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
-        "id": "svg-class/cirojo-62-dubo306"
-      },
-      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
-      "acceptedAt": "2026-09-21",
-      "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=19 numeric=257, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=19 numeric=257. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
-        "id": "svg-class/gokoru-18-daba136"
-      },
-      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
-      "acceptedAt": "2026-09-21",
-      "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=19 numeric=257, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=19 numeric=257. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
-        "id": "svg-class/lagudi-03-rucu383"
-      },
-      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
-      "acceptedAt": "2026-09-21",
-      "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=508, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=1 numeric=508. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
-        "id": "svg-class/rutefe-49-xeju709"
-      },
-      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
-      "acceptedAt": "2026-09-21",
-      "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=168, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=1 numeric=168. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
-        "id": "svg-class/tegefa-14-koxo759"
-      },
-      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
-      "acceptedAt": "2026-09-21",
-      "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=43 numeric=431, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=43 numeric=431. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
-        "id": "svg-class/temofi-63-vega763"
-      },
-      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
-      "acceptedAt": "2026-09-21",
-      "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=414, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=1 numeric=414. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
-    },
-    {
-      "match": {
         "id": "svg-class/moxobo-16-tipo829"
       },
       "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
@@ -794,6 +731,90 @@
       "retiredAt": "2026-10-11",
       "retiredBy": "maintainer",
       "retiredReason": "Retired by cdd8 T0b (decisions.md#D7, 2026-10-11): re-captured with `!pragma layout smetana` stripped, so the stated Smetana-residue mechanism no longer applies. The re-captured jar output draws the graphviz hexagon outline (`EntityImageDescription.java:307-341` drawHexagon via `DotStringFactory.java:414-420` setPolygon) and emits `shape=hexagon` (`SvekNode.java:337-338`); our class engine emits `shape=rect` and threads no polygon (`renderer-usymbol-entity.ts` `hexagonPolygon: null`). render-diff 1/12, dotEqual false. Open as a port gap, owned by cdd8 batch 1 (T1e), not an acceptance."
+    },
+    {
+      "match": {
+        "id": "svg-class/cadutu-02-lazu601"
+      },
+      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
+      "acceptedAt": "2026-09-21",
+      "acceptedBy": "maintainer",
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=414, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=1 numeric=414. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-12",
+      "retiredBy": "maintainer",
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+    },
+    {
+      "match": {
+        "id": "svg-class/cirojo-62-dubo306"
+      },
+      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
+      "acceptedAt": "2026-09-21",
+      "acceptedBy": "maintainer",
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=19 numeric=257, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=19 numeric=257. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-12",
+      "retiredBy": "maintainer",
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+    },
+    {
+      "match": {
+        "id": "svg-class/gokoru-18-daba136"
+      },
+      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
+      "acceptedAt": "2026-09-21",
+      "acceptedBy": "maintainer",
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=19 numeric=257, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=19 numeric=257. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-12",
+      "retiredBy": "maintainer",
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+    },
+    {
+      "match": {
+        "id": "svg-class/lagudi-03-rucu383"
+      },
+      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
+      "acceptedAt": "2026-09-21",
+      "acceptedBy": "maintainer",
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=508, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=1 numeric=508. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-12",
+      "retiredBy": "maintainer",
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+    },
+    {
+      "match": {
+        "id": "svg-class/rutefe-49-xeju709"
+      },
+      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
+      "acceptedAt": "2026-09-21",
+      "acceptedBy": "maintainer",
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=168, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=1 numeric=168. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-12",
+      "retiredBy": "maintainer",
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+    },
+    {
+      "match": {
+        "id": "svg-class/tegefa-14-koxo759"
+      },
+      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
+      "acceptedAt": "2026-09-21",
+      "acceptedBy": "maintainer",
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=43 numeric=431, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=43 numeric=431. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-12",
+      "retiredBy": "maintainer",
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+    },
+    {
+      "match": {
+        "id": "svg-class/temofi-63-vega763"
+      },
+      "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
+      "acceptedAt": "2026-09-21",
+      "acceptedBy": "maintainer",
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=414, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=1 numeric=414. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
+      "retiredAt": "2026-10-12",
+      "retiredBy": "maintainer",
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
     }
   ]
 }
