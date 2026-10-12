@@ -1,14 +1,22 @@
-import type { UStroke } from '../klimt/UStroke.js';
+import { HColors } from '../klimt/color/HColors.js';
+import { HColorSet } from '../klimt/color/HColorSet.js';
+import { UStroke } from '../klimt/UStroke.js';
 import type { HColor } from './Colors.js';
 import type { ISkinParam, Style, UFont } from './ISkinParam.js';
 
 /** The tab size the 4-arg `create` passes on. @see FontConfiguration.java:231 */
 const DEFAULT_TAB_SIZE = 8;
+/** `blackBlueTrue`'s tab size. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/font/FontConfiguration.java:64 */
+const BLACK_BLUE_TRUE_TAB_SIZE = 8;
+/** `HColors.BLUE = set.getColorOrWhite("#0000FF")` — a constant the port's
+ *  `HColors` (`klimt/color/HColors.ts`) does not carry, read the same way.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColors.java:92 */
+const BLUE = '#0000FF';
 
 /**
  * FontConfiguration — ADR-2 consumed-slice LOCAL port of
  * `klimt/font/FontConfiguration.java` (a ~470-line class). `Entity`
- * reaches exactly two members:
+ * reaches exactly two members (salt adds a third, `blackBlueTrue`):
  *
  *  - `create(UFont, HColor, HColor, UStroke, int)` — ported for real
  *    (upstream stores the five arguments plus derived fields —
@@ -76,6 +84,22 @@ export class FontConfiguration {
       hyperlinkColor,
       hyperlinkUnderlineStroke as UStroke,
       tabSize ?? DEFAULT_TAB_SIZE,
+    );
+  }
+
+  /**
+   * `create(font, HColors.BLACK.withDark(HColors.WHITE), HColors.BLUE,
+   * UStroke.simple(), 8)`.
+   *
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/font/FontConfiguration.java:63-65
+   */
+  static blackBlueTrue(font: UFont): FontConfiguration {
+    return FontConfiguration.create(
+      font,
+      HColors.BLACK.withDark(HColors.WHITE),
+      HColorSet.instance().getColorOrWhite(BLUE),
+      UStroke.simple(),
+      BLACK_BLUE_TRUE_TAB_SIZE,
     );
   }
 

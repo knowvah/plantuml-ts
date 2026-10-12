@@ -1,4 +1,5 @@
 import { Display } from '../../../core/klimt/creole/Display.js';
+import { Splitter } from '../../../core/klimt/creole/command/Splitter.js';
 import type { StringBounder } from '../../../core/klimt/font/StringBounder.js';
 import type { UFont } from '../../../core/klimt/font/UFont.js';
 import { HorizontalAlignment } from '../../../core/klimt/geom/HorizontalAlignment.js';
@@ -20,23 +21,6 @@ const OPEN_ICONIC_CHARS = '00';
 /** `getSingleSpace`'s fixed answer (the commented-out glyph scan above it is
  *  dead upstream). @see AbstractElementText.java:95-109 */
 const SINGLE_SPACE = 8;
-
-/**
- * `Splitter.purgeAllTag(s)` = `s.replaceAll(htmlTag, "")`
- * (klimt/creole/command/Splitter.java:140-142), `htmlTag` being the
- * alternation built in Splitter.java:84-122 (every `FontStyle`'s regex
- * activation/deactivation pattern, font/color/size/sup/sub/qrcode/img/
- * font-family/link/svg-attribute tags). The port has no `Splitter`: the
- * patterns live scattered across the creole commands and `htmlTag` itself
- * is not assembled anywhere. Stop 10 (decisions.md D4: a missing klimt piece
- * is reported, not re-implemented in salt) — the throw names it.
- */
-function purgeAllTag(_text: string): string {
-  throw new Error(
-    'unported: Splitter.purgeAllTag (klimt/creole/command/Splitter.java:84-122,140-142) is needed by ' +
-      'AbstractElementText#getCharNumber (manageLength) and has no port',
-  );
-}
 
 /**
  * AbstractElementText — a widget built around one creole text block in
@@ -77,7 +61,7 @@ export abstract class AbstractElementText extends AbstractElement {
   /** @see AbstractElementText.java:68-72 */
   private getCharNumber(text: string): number {
     text = text.replaceAll(OPEN_ICONIC_TAG, OPEN_ICONIC_CHARS);
-    text = purgeAllTag(text);
+    text = Splitter.purgeAllTag(text);
     return text.length;
   }
 
