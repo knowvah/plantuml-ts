@@ -17,3 +17,5 @@
   diagrams.
 - **Confidence**: High (measured with and without the copy; render-diff
   table in the T1c hand-back).
+- **Resolution**: fixed in cdd8-T1c by copying the field in `buildGeoNode`
+  (orchestrator-approved write-set extension).

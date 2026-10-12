@@ -23,6 +23,12 @@ function firstNode(line: string): DescriptiveNode {
 
 const PROBE = '@startuml\narchimate #MOTIVATION "Transparency" <<motivation-principle>> as T\n@enduml\n';
 
+const TWO_LEAF =
+  '@startuml\n' +
+  'archimate #MOTIVATION "Transparency" <<motivation-principle>> as T\n' +
+  'archimate #MOTIVATION "Inspection" <<motivation-principle>> as I\n' +
+  '@enduml\n';
+
 function renderProbe(): string {
   return renderSync(PROBE, { measurer: new DeterministicMeasurer(), assetStore: buildSpriteAssetsStore() });
 }
@@ -53,5 +59,18 @@ describe('archimate <<icon>> becomes the $archimate/<icon> sprite stereotype', (
     expect(svg).toContain('<rect x="7" y="7" width="105.575" height="54"');
     expect(svg).not.toContain('motivation-principle');
     expect(svg.match(/<text /g)?.length).toBe(1);
+  });
+
+  it('keeps the sprite on a multi-leaf (DOT) diagram: the jar 105.575 and 83.787 boxes, no overlap', () => {
+    // scripts/oracle-render.sh (1.2026.8beta1) on TWO_LEAF: 245x75 canvas,
+    // <rect x="7" y="7" width="105.575" height="54"/> and
+    // <rect x="147.89" y="7" width="83.787" height="54"/>, two sprite <path>s,
+    // and only the two display <text>s.
+    const svg = renderSync(TWO_LEAF, { measurer: new DeterministicMeasurer(), assetStore: buildSpriteAssetsStore() });
+    expect(svg).toContain('width="245px" height="75px"');
+    expect(svg).toContain('<rect x="7" y="7" width="105.575" height="54"');
+    expect(svg).toContain('<rect x="147.89" y="7" width="83.787" height="54"');
+    expect(svg).not.toContain('motivation-principle');
+    expect(svg.match(/<text /g)?.length).toBe(2);
   });
 });
