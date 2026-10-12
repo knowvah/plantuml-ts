@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-12T05:03:02.029Z",
-  "measuredAgainstCommit": "f6e9ed3a1",
+  "generatedAt": "2026-10-12T05:26:39.039Z",
+  "measuredAgainstCommit": "c83b98e1d",
   "type": "class+tests/oracle/svg-conformance/census-class.json",
   "measurer": "deterministic",
   "fixtures": [

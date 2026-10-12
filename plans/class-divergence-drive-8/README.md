@@ -109,7 +109,7 @@ Measurement:
 | [2b](batch-2b/overview.md): ELK cluster + edge drawing | T2c, T2d | [x] |
 | [2c](batch-2c/overview.md): ELK composite drawing | T2b | [x] |
 | [3](batch-3/overview.md): wiring, ELK rows, ruling docs | T3a, T3b, T3c | [x] |
-| [exit](exit/overview.md): close + salt hand-off | T-exit, T-salt | [ ] |
+| [exit](exit/overview.md): close + salt hand-off | T-exit, T-salt | [x] |
 
 ## Index
 
@@ -121,3 +121,17 @@ Measurement:
   [diagrams/data-flow.md](diagrams/data-flow.md)
 - [settings.autonomous.json](settings.autonomous.json): copied to
   `.claude/settings.autonomous.json`
+
+## Summary (2026-10-12)
+
+- **Tasks:** 17 of 15 planned (T0a–T0c, T1a–T1e, T2a–T2e, T3a–T3c, T-exit, T-salt). T1e was added
+  from T0b's xagomi residual; ExtremityExtends and the description multi-leaf sprite fix landed as
+  residual-round fixes.
+- **Counts:** class 713/3/7 → **720/3/0**; unknown CLASS-routed 275/10/2 → **282/3/2** (2 error-page
+  conformant); ratchet 983 → **999**; all engines 0 conformant losses vs b0.
+- **Gates:** final npm test 1215/1215 collected, typecheck, lint, build green.
+- **Decisions:** 35 journal rows. Flagged for review: `vite.config.ts` elkjs external (row 13), two
+  description size pins raised as reveals (row 16), the `makeElkLayout` factory amendment (row 21),
+  T1b running after T1a instead of in parallel (row 9).
+- **Open:** salt ×3 (salt-engine-port), c4/vakasu-51 and unknown/foraba-98 (description styles), class
+  ELK long tail, nugecu (accepted D11.1), gubeca/jixibu (accepted cdd7 D8). See `planning/next-missions.md`.

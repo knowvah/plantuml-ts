@@ -35,6 +35,33 @@ post-D7 measurements.
 
 ---
 
+## `class-divergence-drive-8` (cdd8) — DONE 2026-10-12 (batches 0, 1, 2a–2c, 3, exit)
+
+**What changed:**
+- **ELK is ported**, not deferred: upstream's `elk/proxy/` layer as a swappable `ElkBackend` (`src/core/elk/`), elkjs **0.12.0** (the jar's ELK) as the default backend, and 1:1 ports of `CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge` (+ the previously unported `ExtremityExtends`). Class and description engines route `!pragma layout elk` through it.
+- Class bucket **713/3/7 → 720/3/0**; unknown CLASS-routed **275/10/2 → 282/3/2** (the 2 diverged are error-page conformant). Class ratchet **983 → 999** pins. **0 conformant losses** in any engine vs b0.
+- Fixed and pinned: the 7 class ELK rows (T3a f85c21e4c); vakovo-25, fakone-16, japode-92, tikiti-02 (T0b re-capture without the smetana pragma); xagomi-49 (T1e bf07be2bd, class svek hexagon); sapofa-97 (T1d c719796d4, latex sized by JLaTeXMath's TeXIcon rule); dezobu-62 (T1c f4b59b00e+32dc14038, archimate sprite stereotype); plus semutu-45 and gadufu-56 (conformant since lgm/aepp, never pinned).
+- Non-class gains: component dirofi-81 (description ELK), turasu-73 (multi-leaf `stereotypeSprite`), mindmap fovule-12/gukofo-85 and state gupeto-19 (latex sizing), unknown lafeze-33/rumepo-86/viraki-97/xemoba-72.
+- Acceptances retired: bixogo-47, roxosu-00 (false mechanism, D8), four smetana rows, the 7 ELK rows. Active entries 75 → 62; none mentions ELK.
+
+**Flags for review:**
+- **D12:** a class row is ratchet-eligible with `dotEqual: true` OR `oracleBlind: true` + `!pragma layout elk` in its cached `in.puml` (`class.golden.ratchet.test.ts#isRatchetEligible`).
+- **Public API (D2b):** `RenderOptions.elk?: ElkBackend`, exported `loadElk()` and `type ElkBackend`; `renderSync` throws for an ELK diagram without `options.elk`; `render()` lazy-loads.
+- **D13 adapter:** `ElkDiagramAdapter` (frozen) is the seam engines implement; `makeElkLayout(adapter, backend, newMyElkDrawing)` takes a drawing factory because `CucaDiagramFileMakerElk.java:495-496` sizes MinMax by drawing.
+- `vite.config.ts` now keeps `elkjs` external (journal row 13), per the standing "depend, don't redistribute" rule.
+- Two description size-backlog pins RAISED as reveals (gevozu-46, sunuju-01: 1.263889 → 2.319445; journal row 16).
+
+**Open (owners):**
+1. **salt-engine-port** — lubicu-73, bixogo-47, roxosu-00 (nested `{{salt}}` draws our 300×60 unknown-diagram box). Launched by T-salt.
+2. **Description stereotype-scoped style + document margin** (T3b ledger): c4/vakasu-51 (stereotype-keyed skinparam/`<style>` for entities, links via AddRelTag and legend; `root { Margin 10 }` → `theme.diagramMargin` read only by activity; legend font under `skinparam dpi`), unknown/foraba-98 (`skinparam rectangle<<osa_server>>`; `theme-element-resolve.ts:21` has no stereotype tier). Neither is ELK.
+3. **Class ELK long tail** (T3a refuses with an error where the jar draws; no corpus row): notes, notes on links, stereotyped/legend packages, USymbol packages, `together`, `scale`/`newpage` under ELK. Author fixtures + oracles first.
+4. **Description `[<latex>…]` component sizing** — the `[ ]` sizer does not measure `<latex>` (40×44 boxes; gevozu/sunuju). Revealed by T1d.
+5. **Mixed text+`<latex>` label estimate** — `TEXT_SPAN_*` in `latex.ts#measureMixedLabel` (renderNodeLabel gets no measurer; needs `src/core/usymbol-shapes.ts`). Re-slotted from T1d.
+6. **Description hexagon outline** — description still passes `hexagonPolygon: null` (`renderer-entity.ts:288`); class got it in T1e.
+7. **Latex port gaps (not library-forced)** — `\ldots`/`\cdots`/`\ddots`, `\bowtie`/`\models`/`\mapsto`, `\stackrel`/`\overset`/`\underset`, primes, extensible `\left|`; array/accent/underline atoms; `scale N` not applied to latex images (corumi). D11.3 candidates (text kern pairs, collapsed text spaces) unsigned: no rendering fixture.
+8. **nugecu-04** stays accepted (D5/D11.1; dot-engine A3).
+9. **Harness hygiene:** `TextBlockUtils.EMPTY_TEXT_BLOCK` is `undefined` in the port vs upstream `empty(0,0)`; `loadElk()` throws inside a Web Worker (elkjs claims `self.onmessage`); `render()` creates a fresh ELK worker per ELK diagram.
+
 ## `activity-error-page-parity` (aepp) — DONE 2026-10-10 (batches 0–3)
 
 **What changed:**
