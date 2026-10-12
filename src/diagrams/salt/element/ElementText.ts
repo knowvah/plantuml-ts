@@ -54,7 +54,7 @@ export class ElementText extends AbstractElement {
   }
 
   /** @see ElementText.java:68-75 */
-  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D | null): void {
     if (zIndex !== 0) {
       return;
     }

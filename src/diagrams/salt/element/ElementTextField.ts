@@ -27,7 +27,7 @@ export class ElementTextField extends AbstractElementText implements Element {
   }
 
   /** @see ElementTextField.java:57-68 */
-  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D | null): void {
     if (zIndex !== 0) {
       return;
     }

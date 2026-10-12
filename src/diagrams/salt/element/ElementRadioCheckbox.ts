@@ -69,7 +69,7 @@ export class ElementRadioCheckbox extends AbstractElement {
   }
 
   /** @see ElementRadioCheckbox.java:80-96 */
-  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D | null): void {
     if (zIndex !== 0) return;
 
     ug = ug.apply(new Fore(this.getBlack().asPaint()));

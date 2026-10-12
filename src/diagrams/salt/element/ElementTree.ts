@@ -113,7 +113,7 @@ export class ElementTree extends AbstractElement {
    * (unless `DRAW_NONE`) the grid in `#888`. `dimToUse` is never read.
    * @see ElementTree.java:118-155
    */
-  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D | null): void {
     if (zIndex !== 0) return;
 
     ug = ug.apply(new Fore(this.getBlack().asPaint()));

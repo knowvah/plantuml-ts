@@ -56,17 +56,18 @@ export class ElementMenuPopup extends AbstractElement {
   }
 
   /** @see ElementMenuPopup.java:76-94 */
-  drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D | null): void {
     if (zIndex !== POPUP_Z_INDEX) return;
 
     ug = ug.apply(new Fore(this.getBlack().asPaint()));
 
-    ug.apply(new Back(this.getColorDD().asPaint())).draw(URectangle.build(dimToUse.getWidth(), dimToUse.getHeight()));
+    // Unguarded like upstream: a null dimToUse is ElementMenuPopup.java:82's NullPointerException.
+    ug.apply(new Back(this.getColorDD().asPaint())).draw(URectangle.build(dimToUse!.getWidth(), dimToUse!.getHeight()));
 
     let y1 = 0;
     for (const entry of this.entries) {
       const h = entry.getPreferredDimension(ug.getStringBounder(), 0, y1).getHeight();
-      if (entry.getText() === SEPARATOR) ug.apply(UTranslate.dy(y1 + h / 2)).draw(ULine.hline(dimToUse.getWidth()));
+      if (entry.getText() === SEPARATOR) ug.apply(UTranslate.dy(y1 + h / 2)).draw(ULine.hline(dimToUse!.getWidth()));
       else entry.drawU(ug.apply(UTranslate.dy(y1)), zIndex, dimToUse);
 
       y1 += h;

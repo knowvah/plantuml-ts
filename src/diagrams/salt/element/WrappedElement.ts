@@ -24,7 +24,7 @@ export class WrappedElement implements Element {
   }
 
   /** @see WrappedElement.java:54-56 */
-  drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D | null): void {
     this.wrapped.drawU(ug, zIndex, dimToUse);
   }
 }

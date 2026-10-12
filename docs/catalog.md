@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1559 modules · 5836 exported names.
+1561 modules · 5837 exported names.
 
 ## `src/`
 
@@ -607,9 +607,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `driver-image-svg.ts` | `DriverImageSvg` | driver-image-svg.ts — the `UImage` → SVG `<image>` driver (SI5b+E2r T7, D7). |
 | `driver-line-svg.ts` | `DriverLineSvg` | driver-line-svg.ts — the `ULine` → SVG `<line>` driver. |
 | `driver-path-svg.ts` | `DriverPathSvg` | driver-path-svg.ts — the `UPath` → SVG `<path>` driver. |
+| `driver-pixel-svg.ts` | `DriverPixelSvg` | driver-pixel-svg.ts — the `UPixel` → SVG `<rect>` driver. |
 | `driver-polygon-svg.ts` | `DriverPolygonSvg` | driver-polygon-svg.ts — the `UPolygon` → SVG `<polygon>` driver. |
 | `driver-rectangle-svg.ts` | `DriverRectangleSvg` | driver-rectangle-svg.ts — the `URectangle` → SVG `<rect>` driver. |
-| `driver-svg-stubs.ts` | `DriverImagePng`, `DriverPixelSvg`, `DriverImageSvgSvg`, `DriverTextAsPathSvg`, `DriverCenteredCharacterSvg` | driver-svg-stubs.ts — D3′ throwing stubs for the SVG driver family members this task defers. |
+| `driver-svg-stubs.ts` | `DriverImagePng`, `DriverImageSvgSvg`, `DriverTextAsPathSvg`, `DriverCenteredCharacterSvg` | driver-svg-stubs.ts — D3′ throwing stubs for the SVG driver family members this task defers. |
 | `driver-text-svg-decorations.ts` | `ExtraLine`, `TextRenderDecorations`, `fontWeightOf`, `fontStyleOf`, `extraLineStrokeWidth`, `textRenderDecorations` | driver-text-svg-decorations.ts — the pure, emitter-independent half of `DriverTextSvg#draw`: every decision that method makes about a text run's `font-weight`, `font-style`, `text-decoration`, extended-colour decoration LINES and BACKCOLOR |
 | `driver-text-svg.ts` | `StringBounder`, `DriverTextSvg` | driver-text-svg.ts — the `UText` → SVG `<text>` driver. |
 | `svg-graphics-core.ts` | `LengthAdjust`, `TransparentFillBehavior`, `SvgOption`, `basicSvgOption`, `seedOf`, `SvgGraphicsCore` | svg-graphics-core.ts — SvgGraphics's document-lifecycle layer: the options shape, low-level number formatting, fill/stroke state, and gradient-def registration needed by the constructor itself. |
@@ -693,6 +694,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `UImageSvg.ts` | `UImageSvg`, `svgImagePayload` | Port of `UImageSvg` -- an SVG document drawn as an image, as `EmbeddedDiagram#drawU` builds it for a `{{ }}` sub-diagram (`EmbeddedDiagram.java:169-174`) -- plus the payload `SvgGraphics#svgImage (UImageSvg, x, y)` wraps it in before base64 |
 | `ULine.ts` | `ULine` |  |
 | `UPath.ts` | `USegmentType`, `USegment`, `UPath` |  |
+| `UPixel.ts` | `UPixel` |  |
 | `UPolygon.ts` | `UPolygon` |  |
 | `URectangle.ts` | `URectangle` |  |
 | `UText.ts` | `FontStyle`, `getRegexActivationPattern`, `getRegexDeactivationPattern`, `FontFace`, `NORMAL_FONT_FACE`, `FontConfiguration`, `getFont`, `getFontFace`, `changeExtendedColor`, `getSpace`, `UText` |  |

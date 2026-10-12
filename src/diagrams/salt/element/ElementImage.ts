@@ -1,7 +1,9 @@
 import { Fore } from '../../../core/klimt/Fore.js';
 import type { StringBounder } from '../../../core/klimt/font/StringBounder.js';
 import { XDimension2D } from '../../../core/klimt/geom/XDimension2D.js';
+import { UPixel } from '../../../core/klimt/shape/UPixel.js';
 import type { UGraphic } from '../../../core/klimt/UGraphic.js';
+import { UTranslate } from '../../../core/klimt/UTranslate.js';
 import { AbstractElement } from './AbstractElement.js';
 
 /** The pixel-on character of a `<<…>>` image. @see ElementImage.java:69 */
@@ -23,12 +25,7 @@ function charAt(s: string, index: number): string {
 
 /**
  * ElementImage — a `<<…>>` bitmap: one pixel per source character, an
- * `X` drawn in black ink; one row per line.
- *
- * `UPixel` (klimt/shape/UPixel.java) has no port — its SVG driver is the
- * throwing `driver-svg-stubs.ts#DriverPixelSvg` — so drawing an `X` throws
- * `unported: UPixel` until klimt ports it (stop 10; reported, not
- * re-implemented in salt).
+ * `X` drawn in black ink as a `UPixel`; one row per line.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/salt/element/ElementImage.java:46-74
  */
@@ -48,7 +45,7 @@ export class ElementImage extends AbstractElement {
   }
 
   /** @see ElementImage.java:58-73 */
-  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D | null): void {
     if (zIndex !== 0) return;
 
     ug = ug.apply(new Fore(this.getBlack().asPaint()));
@@ -58,8 +55,7 @@ export class ElementImage extends AbstractElement {
     for (let i = 0; i < w; i++)
       for (let j = 0; j < h; j++) {
         const c = charAt(row(this.img, j), i);
-        // upstream: ug.apply(new UTranslate(i, j)).draw(new UPixel()) (java:70)
-        if (c === PIXEL) throw new Error(`unported: UPixel (drawing pixel ${i},${j} of a salt image)`);
+        if (c === PIXEL) ug.apply(new UTranslate(i, j)).draw(new UPixel());
       }
   }
 }

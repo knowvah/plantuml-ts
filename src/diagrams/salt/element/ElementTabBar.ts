@@ -71,7 +71,7 @@ export class ElementTabBar extends AbstractElement {
   }
 
   /** @see ElementTabBar.java:91-101 */
-  drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D | null): void {
     if (zIndex !== TAB_BAR_Z_INDEX) return;
     ug = ug.apply(new Fore(this.getBlack().asPaint()));
 
@@ -80,7 +80,7 @@ export class ElementTabBar extends AbstractElement {
   }
 
   /** @see ElementTabBar.java:103-115 */
-  private drawUHorizontal(ug: UGraphic, x: number, y: number, zIndex: number, dimToUse: XDimension2D): void {
+  private drawUHorizontal(ug: UGraphic, x: number, y: number, zIndex: number, dimToUse: XDimension2D | null): void {
     const { margin1, margin2, margin3 } = this;
     let x1 = x;
     for (const elt of this.tabs) {
@@ -109,7 +109,7 @@ export class ElementTabBar extends AbstractElement {
 
   /** `y1` starts at `x`, as upstream writes it (java:131).
    *  @see ElementTabBar.java:128-142 */
-  private drawUVertical(ug: UGraphic, x: number, y: number, zIndex: number, dimToUse: XDimension2D): void {
+  private drawUVertical(ug: UGraphic, x: number, y: number, zIndex: number, dimToUse: XDimension2D | null): void {
     const { margin1, margin2, margin3 } = this;
     const preferred = this.getPreferredDimension(ug.getStringBounder(), x, y);
     ug = ug.apply(new UTranslate(x, y));

@@ -44,16 +44,17 @@ export class ElementLine extends AbstractElement {
   }
 
   /** @see ElementLine.java:57-67 */
-  drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D | null): void {
     if (zIndex !== 0) {
       return;
     }
     ug = ug.apply(new Fore(this.getColorAA().asPaint()));
-    let y2 = dimToUse.getHeight() / 2;
+    // Unguarded like upstream: a null dimToUse is ElementLine.java:62's NullPointerException.
+    let y2 = dimToUse!.getHeight() / 2;
     if (this.separator === DOUBLE) {
       y2 = y2 - 1;
     }
-    ElementLine.drawLine(ug, 0, y2, dimToUse.getWidth(), this.separator);
+    ElementLine.drawLine(ug, 0, y2, dimToUse!.getWidth(), this.separator);
   }
 
   /** @see ElementLine.java:69-80 */

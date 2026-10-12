@@ -13,6 +13,7 @@ export interface Element {
   /** @see Element.java:44 */
   getPreferredDimension(stringBounder: StringBounder, x: number, y: number): XDimension2D;
 
-  /** @see Element.java:46 */
-  drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D): void;
+  /** `dimToUse` is nullable as upstream's reference is: tree cells are drawn
+   *  with `null` (ElementTreeEntry.java:90, 96). @see Element.java:46 */
+  drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D | null): void;
 }

@@ -4,7 +4,6 @@ import { basicSvgOption } from '../../../../src/core/klimt/drawing/svg/svg-graph
 import type { StringBounder } from '../../../../src/core/klimt/drawing/svg/driver-text-svg.js';
 import {
   DriverImagePng,
-  DriverPixelSvg,
   DriverImageSvgSvg,
   DriverTextAsPathSvg,
   DriverCenteredCharacterSvg,
@@ -467,7 +466,6 @@ describe('Deferred D3-prime driver stubs (AC4)', () => {
 
   it.each([
     ['DriverImagePng', new DriverImagePng()],
-    ['DriverPixelSvg', new DriverPixelSvg()],
     ['DriverImageSvgSvg', new DriverImageSvgSvg()],
     ['DriverTextAsPathSvg', new DriverTextAsPathSvg()],
     ['DriverCenteredCharacterSvg', new DriverCenteredCharacterSvg()],

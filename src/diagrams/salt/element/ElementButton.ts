@@ -45,7 +45,7 @@ export class ElementButton extends AbstractElementText implements Element {
   }
 
   /** @see ElementButton.java:63-74 */
-  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, zIndex: number, _dimToUse: XDimension2D | null): void {
     if (zIndex !== 0) return;
 
     const dim = this.getPreferredDimension(ug.getStringBounder(), 0, 0);

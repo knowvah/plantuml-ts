@@ -56,15 +56,16 @@ export class ElementBorder extends AbstractElement {
   }
 
   /** @see ElementBorder.java:73-91 */
-  drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D): void {
+  drawU(ug: UGraphic, zIndex: number, dimToUse: XDimension2D | null): void {
     const stringBounder = ug.getStringBounder();
     const dimNorth = this.north.getPreferredDimension(stringBounder, 0, 0);
     const dimSouth = this.south.getPreferredDimension(stringBounder, 0, 0);
     const dimEast = this.east.getPreferredDimension(stringBounder, 0, 0);
     const dimWest = this.west.getPreferredDimension(stringBounder, 0, 0);
     const pA = new XPoint2D(dimWest.getWidth(), dimNorth.getHeight());
-    const pB = new XPoint2D(dimToUse.getWidth() - dimEast.getWidth(), dimNorth.getHeight());
-    const pC = new XPoint2D(dimWest.getWidth(), dimToUse.getHeight() - dimSouth.getHeight());
+    // Unguarded like upstream: a null dimToUse is ElementBorder.java:80's NullPointerException.
+    const pB = new XPoint2D(dimToUse!.getWidth() - dimEast.getWidth(), dimNorth.getHeight());
+    const pC = new XPoint2D(dimWest.getWidth(), dimToUse!.getHeight() - dimSouth.getHeight());
 
     this.north.drawU(ug, zIndex, dimToUse);
     this.south.drawU(ug.apply(UTranslate.dy(pC.getY())), zIndex, dimToUse);
