@@ -10,6 +10,9 @@ import type { GenericTagGeo } from './class-stereotype.js';
 import type { EmptyPackageLeafDim } from './class-namespace-shape.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
 import type { ClassifierRowGeo } from './class-geo-row-types.js';
+import type { ElkDiagramAdapter } from '../../core/elk/ElkDiagramAdapter.js';
+import type { ElkMakerResult } from '../../core/elk/CucaDiagramFileMakerElk.js';
+import type { ClassUidPlanInput } from './renderer-uid.js';
 
 export type { ClassifierRowGeo } from './class-geo-row-types.js';
 
@@ -265,6 +268,26 @@ export type { KalBox } from './class-kal.js';
 // `JsonBodyItem` below) -- a pure move, re-exported so no consumer's import
 // path changed.
 export type { ClassGeometry, ClassPageBoundary } from './class-geo-geometry-types.js';
+
+/**
+ * cdd8 T3a: a `!pragma layout elk` class diagram's layout -- what
+ * `CucaDiagramFileMakerElk#getTextBlock` (`CucaDiagramFileMakerElk.java:477-499`)
+ * hands `new MyElkDrawing(...)`, plus what the class drawing of each node needs.
+ *
+ * - `adapter`: the {@link ElkDiagramAdapter} the maker read
+ *   (`class-elk-adapter.ts`); its `drawLeaf` answers the maker's `LimitFinder`
+ *   pass only, the renderer substitutes the SVG draw.
+ * - `result`: the maker's three ordered maps and `minMax`.
+ * - `leafGeos`: each node's leaf geometry with its corner at (0, 0); a node is
+ *   drawn translated to its ELK corner (`MyElkDrawing.java:131-142`).
+ * - `uidPlanInput`: the entity / link numbering input (`renderer-uid.ts`).
+ */
+export interface ClassElkGeometry {
+  readonly adapter: ElkDiagramAdapter;
+  readonly result: ElkMakerResult;
+  readonly leafGeos: ReadonlyMap<string, ClassifierGeo>;
+  readonly uidPlanInput: ClassUidPlanInput;
+}
 
 // cdd-T6: `JsonBodyItem` moved to `class-geo-json-types.ts` when the four
 // new `EdgeGeo` fields pushed this file past the 500-line hook cap

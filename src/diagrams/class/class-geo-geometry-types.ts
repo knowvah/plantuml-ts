@@ -8,7 +8,7 @@
  */
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
-import type { EdgeGeo } from './class-geo-types.js';
+import type { ClassElkGeometry, EdgeGeo } from './class-geo-types.js';
 import type { NamespaceGeo } from './class-geo-namespace-types.js';
 import type { ClassLeafGeo } from './class-leaf-geo.js';
 import type { JsonBodyItem } from './class-geo-json-types.js';
@@ -107,6 +107,14 @@ export interface ClassGeometry {
    * geometric field when `scale ...` is present (D4).
    */
   pageBoundaries?: readonly ClassPageBoundary[];
+  /**
+   * cdd8 T3a: present only for a `!pragma layout elk` diagram
+   * (`CucaDiagram.java:478-479`): the ELK maker's result and the adapter it
+   * read, which `renderer-elk.ts` draws through `MyElkDrawing` in place of the
+   * svek body. `leaves`/`edges`/`namespaces` are empty then. See
+   * {@link ClassElkGeometry}.
+   */
+  elk?: ClassElkGeometry;
 }
 
 /** One page's stacked position + own standalone dimension — see

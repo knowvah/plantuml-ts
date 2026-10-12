@@ -5,35 +5,17 @@
  * No DOM, no async.
  */
 
-import {
-  sliceClassGeometryPage,
-  type ClassGeometry,
-  type ClassifierGeo,
-  type NamespaceGeo,
-  type EdgeGeo,
-} from './layout.js';
-import { classifierLeaves, noteLeaves, isNoteGeo } from './class-geo-types.js';
+import { sliceClassGeometryPage, type ClassGeometry, type NamespaceGeo, type EdgeGeo } from './layout.js';
+import { classifierLeaves, noteLeaves } from './class-geo-types.js';
 import { resolveTips } from './note-tips-resolve.js';
-import { renderOneNote, type NoteRenderContext, type NoteConnector } from './renderer-note-dispatch.js';
+import type { NoteRenderContext, NoteConnector } from './renderer-note-dispatch.js';
 import type { Theme } from '../../core/theme.js';
-import { scaleClassTheme, type ScaledTheme } from './class-scale-geo.js';
+import type { ScaledTheme } from './class-scale-geo.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { renderUSymbolIcon } from '../../core/usymbol-shapes.js';
-import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { applyColorMapperToFragment, colorMapperOf } from '../../core/klimt/color/fragment-color-mapper.js';
 import { decorName } from './renderer-arrowhead.js';
 import {} from '../../core/svek/extremity/link-decor.js';
 import { buildClassUidPlan } from './renderer-uid.js';
-import { renderEmptyPackageLeaf } from './renderer-empty-package-leaf.js';
-import {
-  wrapCluster,
-  wrapEntity,
-  wrapLink,
-  leafPortion,
-  renderGroupInheritanceNeighborhood,
-} from './renderer-group.js';
-import { renderAssocPoint, renderAssociationLeaf, renderLollipop } from './renderer-assoc-lollipop.js';
-import { renderClassifierBox } from './renderer-classifier-box.js';
+import { wrapCluster, wrapLink } from './renderer-group.js';
 import {
   renderNamespaceFolder,
   renderNamespaceRect,
@@ -44,34 +26,10 @@ import { DEFAULT_GROUP_FONT_COLOR } from './class-package-style.js';
 import { renderNamespaceUSymbol } from './class-namespace-usymbol-shape.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import {} from './class-layout-helpers.js';
-import { buildClassShadowFilterDef } from './class-shadow.js';
-import { renderClassUSymbolEntity, usesClassUSymbolEntity } from './renderer-usymbol-entity.js';
-import { renderClassEntityPort, isClassEntityPort } from './renderer-entity-port.js';
+import { beginClassDocument, finishClassDocument } from './renderer-document.js';
+import { renderClassElk } from './renderer-elk.js';
+import { renderClassLeaf, type ClassLeafRenderContext, type ClassLeafSink } from './renderer-leaf.js';
 import { mergeFragmentDefs, type DrawableFragment } from '../../core/klimt/document-shell.js';
-
-/** `net.sourceforge.plantuml.core.DiagramType#CLASS` -- verified against
- *  every cached jar class-diagram fixture's `data-diagram-type` root
- *  attribute (e.g. `test-results/dot-cache/class/bajotu-30-soku184/in.svg`).
- *  T8: was `class/renderer-shell.ts`'s own copy of this constant. */
-const DIAGRAM_TYPE_CLASS = 'CLASS';
-
-/** Descriptive elements (database/component/actor/usecase) draw their USymbol
- *  icon instead of the class box; usecase carries no usymbol (its kind is
- *  enough). Returns undefined when this classifier has no icon to draw (the
- *  normal box path below applies) or the icon renderer declines. Split out of
- *  renderClassifier purely to keep that function's own NLOC/CCN under cap. */
-function tryRenderUSymbol(geo: ClassifierGeo, theme: ScaledTheme): string | undefined {
-  const usymbol = geo.kind === 'usecase' ? 'usecase' : geo.usymbol;
-  if (usymbol === undefined) return undefined;
-  const display = geo.rows[0]?.text ?? geo.id;
-  return renderUSymbolIcon(usymbol, { ...geo, display }, theme);
-}
-
-function renderClassifier(geo: ClassifierGeo, theme: ScaledTheme): string {
-  const icon = tryRenderUSymbol(geo, theme);
-  if (icon !== undefined) return icon;
-  return renderClassifierBox(geo, theme);
-}
 
 // ---------------------------------------------------------------------------
 // Namespace box
@@ -182,81 +140,17 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
   // FIRST (not "near fn end"): plain `forgives` gets reset by this
   // function's own nested closures before its `end_of_function()` fires
   // -- see `.agent-notes/N16-lizard-forgive-nested-closures.md`.
-  // cdd-T29 R2 (D4/journal row 175): `index.ts`'s `render(geo, theme)` call
-  // site (outside this task's write-set) passes the UNSCALED theme
-  // unchanged -- this is the one remaining seam that can turn it into a
-  // `ScaledTheme` for every render-time pixel-literal constant this file's
-  // call tree carries (mirrors `sequence/scale-geo.ts`'s identical
-  // `scaleSequenceTheme` derivation). Shadows `theme` for the REST of this
-  // function so every existing read below (colors, `monochrome`,
-  // `shadowing`, every internal call) picks up the scaled value with no
-  // further changes.
-  // unwind2-S11: the layout's `sprite` map rides `Theme#sprites`, as
-  // `layoutClass` laid it out (a cluster title's `<$sprite>`).
-  const skinTheme = geo.sprites === undefined ? rawTheme : { ...rawTheme, sprites: geo.sprites };
-  const theme = scaleClassTheme(skinTheme, geo.scaleK ?? 1);
-  // G2 N61: `skinparam monochrome true|reverse` applies to the document
-  // background too (jar's `ColorMapper` is universal, not scoped to
-  // entity/link colors) -- transformed HERE so every downstream reader of
-  // `canonicalBackground` (the returned `background` field, the
-  // `documentBackgroundRect` derivation below) sees the already-mapped
-  // value, matching `fragment-color-mapper.ts`'s own "single choke point"
-  // design (see that file's header doc comment).
-  // cdd6 T3f: the mapper is `muteColorMapper`'s whole choice --
-  // `monochrome`, else `reversecolor` (`fragment-color-mapper.ts#colorMapperOf`).
-  const colorMapper = colorMapperOf(theme);
-  const resolvedBackground = resolveColorToSvgHex(theme.colors.background);
-  const canonicalBackground = colorMapper !== undefined ? colorMapper(resolvedBackground) : resolvedBackground;
+  // cdd8 T3a: `!pragma layout elk` -- `CucaDiagram.java:478-479` picks the
+  // ELK maker; its drawing replaces the svek body inside the same document.
+  if (geo.elk !== undefined) return renderClassElk(geo, rawTheme);
+  // cdd8 T3a: the document preamble, shared with the ELK body (`renderer-document.ts`).
+  const doc = beginClassDocument(geo, rawTheme);
+  const theme = doc.theme;
   const children: string[] = [];
   let extraDefs = '';
   // SI14 T4: per-node fragments (ADR-2) -- collected so their OWN
   // `extraDefs` de-dup ACROSS fragments via `mergeFragmentDefs` (T1).
   const usymbolEntityFragments: DrawableFragment[] = [];
-
-  // G2 N40: `skinparam pathHoverColor <color>` -- a global CSS hover rule,
-  // the SAME `<style type="text/css"><![CDATA[path:hover{...}]]></style>`
-  // shape `core/klimt/drawing/svg/svg-graphics-core.ts#getPathHover`
-  // already ports as shared (but unwired) machinery -- class's own
-  // string-based `<defs>` assembly (this file's established "class-local
-  // pure-string wrapping" precedent, N2) reproduces it directly rather
-  // than routing through klimt. Jar-verified `dasagu-52-vani172`.
-  if (theme.colors.graph.pathHoverColor !== undefined) {
-    const resolvedHoverHex = resolveColorToSvgHex(theme.colors.graph.pathHoverColor);
-    const hoverHex = colorMapper !== undefined ? colorMapper(resolvedHoverHex) : resolvedHoverHex;
-    extraDefs += `<style type="text/css"><![CDATA[path:hover { stroke: ${hoverHex} !important;}]]></style>`;
-  }
-
-  // mission skin-file-loading (deferred D3 item): ONE shared shadow filter
-  // def per diagram, gated on the SAME `theme.shadowing > 0` diagram-level
-  // check `class-shadow.ts#buildClassShadowFilterDef`'s own doc comment
-  // establishes (mirrors `state/renderer.ts`'s identical Batch-2 gate) --
-  // byte-identical (empty extraDefs) for every pre-mission/shadow-off
-  // fixture.
-  if (theme.shadowing !== undefined && theme.shadowing > 0) {
-    extraDefs += buildClassShadowFilterDef();
-  }
-
-  // G2 N4/N48: full-canvas background rect, ONLY for a non-default
-  // (non-black, non-white, non-transparent) background -- see this
-  // function's own doc comment for the jar-verified exclusion list and
-  // evidence. N48: NOT drawn into `children` here any more -- jar's rect
-  // spans the FINAL (post-chrome, post-document-margin) canvas and is the
-  // outer `<g>`'s FIRST child even when a title/header/footer/legend/
-  // caption sits ABOVE the diagram body (jar-verified `xalaco-64-vuzu312`:
-  // `<rect x="0" y="0" width="81" height="213".../>` precedes `<g
-  // class="title">`) -- this function only knows the PRE-chrome body
-  // dims, so it can no longer draw the rect itself. Threaded instead as
-  // `documentBackgroundRect` on the fragment; `core/assemble-svg.ts`'s
-  // class finalize function (which runs AFTER chrome/margin) draws it at
-  // the correct final size and position. A no-title fixture's `width`/`height`
-  // already equal the final canvas at that point too (chrome is a no-op
-  // there), so this is a strict behavior-preserving move for every
-  // already-passing non-title fixture (jar-verified unchanged:
-  // `bovuze-89-noja934`).
-  const documentBackgroundRect =
-    canonicalBackground !== '#00000000' && canonicalBackground !== '#000000' && canonicalBackground !== '#FFFFFF'
-      ? canonicalBackground
-      : undefined;
   // T3/T4: `geo.leaves` replaces the former `classifiers`/`notes` split
   // (`class-leaf-geo.ts`) AND is now jar's own draw order (D3) -- these
   // views feed the uid plan / tip resolution below; the leaf loop further
@@ -304,71 +198,16 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
   // before any edge. D5: a note/tips leaf draws regardless of its host's
   // `hidden` -- `UHidden` wraps only the HOST node's own image, never a
   // separate note/tips node (see `renderOneNote`'s own doc comment).
-  for (const leaf of geo.leaves) {
-    if (isNoteGeo(leaf)) {
-      const drawn = renderOneNote(leaf, noteCtx, theme);
-      children.push(...drawn.entity);
-      if (drawn.connector !== undefined) noteConnectors.push(drawn.connector);
-      continue;
-    }
-    const classifier = leaf;
-    if (classifier.hidden === true) continue;
-    // G2 N8: an association-class-couple "point" entity draws unwrapped --
-    // no `<g class="entity">`, no id, no comment -- see `renderAssocPoint`'s
-    // own doc comment.
-    if (classifier.kind === 'assoc-circle') {
-      children.push(renderAssocPoint(classifier, theme));
-      continue;
-    }
-    if (classifier.kind === 'association') {
-      children.push(renderAssociationLeaf(classifier, theme, uidPlan.classifierUid.get(classifier.id))); // cdd-T34
-      continue;
-    }
-    // G2 N33: a collapsed-empty package/namespace draws its folder-tab icon
-    // UNWRAPPED -- no `<g class="entity">`, no id, no `<!--class ...-->`
-    // comment (jar-verified `gatula-10-bifu561`: `package foo {}`/
-    // `namespace bar {}` emit bare `<path>`/`<line>`/`<text>` siblings,
-    // identical to `renderAssocPoint`'s own established unwrapped
-    // precedent above) -- see `renderEmptyPackageLeaf`'s doc comment.
-    if (classifier.folderTab !== undefined) {
-      children.push(renderEmptyPackageLeaf(classifier, theme, geo.measurer));
-      continue;
-    }
-    // G2 N20: the lollipop circle DOES get a normal `<g class="entity">`
-    // wrap (unlike assoc-circle above) but the label `<text>` is a plain,
-    // unwrapped sibling -- see `renderLollipop`'s own doc comment.
-    if (classifier.kind === 'lollipop') {
-      const lollipopUid = uidPlan.classifierUid.get(classifier.id) ?? '';
-      const { circle, label } = renderLollipop(classifier, theme);
-      children.push(wrapEntity(leafPortion(classifier.id), lollipopUid, classifier.id, false, circle));
-      if (label !== '') children.push(label);
-      continue;
-    }
-    // SI14 T4 (ADR-1/ADR-2)/cdd-T22 (E8, cacoma-43-poxu615): usecase/actor/
-    // circle/component draw via the SAME faithful `EntityImageDescription
-    // .drawU` path description uses, when a real `StringMeasurer` reached
-    // this geo (absent only for hand-built test fixtures --
-    // `class-geo-types.ts#ClassGeometry.measurer`). The fragment's `body`
-    // carries EntityImageDescription's OWN `<!--entity NAME-->` wrap
-    // (`renderer-usymbol-entity.ts`) -- push UNWRAPPED, never through
-    // `wrapEntity` (wrong `<!--class NAME-->` comment).
-    const port = isClassEntityPort(classifier); // cdd7-T2a: before DESCRIPTION, GeneralImageBuilder.java:122-127
-    if ((port || usesClassUSymbolEntity(classifier)) && geo.measurer !== undefined) {
-      const entityUid = uidPlan.classifierUid.get(classifier.id) ?? '';
-      const fragment = port
-        ? renderClassEntityPort(classifier, theme, geo.measurer, entityUid)
-        : renderClassUSymbolEntity(classifier, theme, geo.measurer, geo.sprites, entityUid);
-      usymbolEntityFragments.push(fragment);
-      children.push(fragment.body);
-      continue;
-    }
-    const uid = uidPlan.classifierUid.get(classifier.id) ?? '';
-    children.push(
-      wrapEntity(leafPortion(classifier.id), uid, classifier.id, true, renderClassifier(classifier, theme)),
-    );
-    // cdd-T16 (M7/E11, flagged write-set extension, SvekResult.java:82-89):
-    children.push(...renderGroupInheritanceNeighborhood(classifier, geo.edges, theme));
-  }
+  const leafCtx: ClassLeafRenderContext = {
+    theme,
+    uidPlan,
+    noteCtx,
+    measurer: geo.measurer,
+    sprites: geo.sprites,
+    edges: geo.edges,
+  };
+  const leafSink: ClassLeafSink = { children, noteConnectors, usymbolEntityFragments };
+  for (const leaf of geo.leaves) renderClassLeaf(leaf, leafCtx, leafSink);
 
   // 3. Edges (last, matching jar: `svek/SvekResult.java:97-101` draws every
   // node before any edge) — `Link#isHidden` ORs its own flag with EITHER endpoint's
@@ -448,45 +287,15 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
   const mergedUsymbolDefs = mergeFragmentDefs(usymbolEntityFragments);
   if (mergedUsymbolDefs !== undefined) extraDefs += mergedUsymbolDefs;
 
-  return {
-    // G2 N61: the single monochrome choke point -- see `fragment-color-mapper.ts`'s
-    // own header doc comment for why a post-processing pass over the WHOLE
-    // assembled fragment (rather than threading `theme.monochrome` through
-    // every individual color-resolution call site) is the correct, low-risk
-    // mirror of jar's real universal `ColorMapper` semantics. No-op when
-    // `theme.monochrome` is `undefined` (every fixture that doesn't set this
-    // skinparam is byte-identical to pre-N61 output).
-    body: applyColorMapperToFragment(children.join(''), colorMapper),
+  return finishClassDocument(doc, geo, {
+    body: children.join(''),
     // cdd6 T3b: `SvgGraphics#ensureVisible` (`SvgGraphics.java:129-133,
     // 1033-1034`) -- each USymbol leaf fragment's own `UGraphicSvg` extent,
     // which carries a `{{ }}` label embed the ink walk never sees.
     width: Math.max(geo.totalWidth, ...usymbolEntityFragments.map((f) => f.width)),
     height: Math.max(geo.totalHeight, ...usymbolEntityFragments.map((f) => f.height)),
-    background: canonicalBackground,
-    ...(extraDefs.length > 0 ? { extraDefs } : {}),
-    // G2 N46: pre-margin/pre-quirk ink dims, present only when
-    // `assembleShiftedGeometry` computed them (`ClassGeometry.rawWidth`'s
-    // own doc comment) -- `core/annotations/chrome.ts#applyChrome` uses
-    // these (not `width`/`height` above) as the chrome-composition
-    // "original" size, and `index.ts#applyAnnotationChrome`'s class branch
-    // re-applies the document margin/quirk to chrome's own output.
-    ...(geo.rawWidth !== undefined && geo.rawHeight !== undefined
-      ? { preChromeWidth: geo.rawWidth, preChromeHeight: geo.rawHeight }
-      : {}),
-    // G2 N48: see this function's own doc comment above -- drawn by
-    // `core/assemble-svg.ts`'s class finalize function at the FINAL
-    // (post-chrome) canvas size, not here.
-    ...(documentBackgroundRect !== undefined ? { documentBackgroundRect } : {}),
-    // G2 N66: `skinparam diagramBorderColor` -- resolved to an SVG-ready
-    // hex HERE (mirrors `canonicalBackground`'s own resolution), drawn by
-    // `core/assemble-svg.ts`'s class finalize function
-    // (`RenderFragment.diagramBorderColor`'s own doc comment for the
-    // chrome-scope guard).
-    ...(theme.colors.graph.diagramBorderColor !== undefined
-      ? { diagramBorderColor: resolveColorToSvgHex(theme.colors.graph.diagramBorderColor) }
-      : {}),
-    diagramType: DIAGRAM_TYPE_CLASS,
-  };
+    extraDefs,
+  });
 }
 
 /**
