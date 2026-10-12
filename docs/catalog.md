@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1540 modules · 5817 exported names.
+1546 modules · 5823 exported names.
 
 ## `src/`
 
@@ -1787,8 +1787,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `AbstractElement.ts` | `AbstractElement` |  |
 | `AbstractElementText.ts` | `AbstractElementText` |  |
 | `Element.ts` | `Element` |  |
+| `ElementButton.ts` | `ElementButton` |  |
+| `ElementDroplist.ts` | `ElementDroplist` |  |
 | `ElementEmpty.ts` | `ElementEmpty` |  |
+| `ElementImage.ts` | `ElementImage` |  |
+| `ElementLine.ts` | `ElementLine` |  |
+| `ElementRadioCheckbox.ts` | `ElementRadioCheckbox` |  |
 | `ElementText.ts` | `ElementText` |  |
+| `ElementTextField.ts` | `ElementTextField` |  |
 | `Grid2.ts` | `Grid2` | Grid2 — the `{T` tree-table lines over the given row and column starts, per `TableStrategy`: the outline for `DRAW_OUTSIDE`/ `DRAW_OUTSIDE_WITH_TITLE`, every row line for `DRAW_HORIZONTAL`/ `DRAW_ALL`, every column line for `DRAW_VERTICAL`/ |
 | `ListWidth.ts` | `ListWidth` | ListWidth — one width per "other" column of a `{T` tree row; `ElementTree#getWidthOther` folds every row's list with `mergeMax` (`ElementTree.java:100-107`). |
 | `Segment.ts` | `Segment` | Segment — a (row, col) cell edge `Grid` collects in its `horizontals` / `verticals` hash sets (`Grid.java:57-58`). |
