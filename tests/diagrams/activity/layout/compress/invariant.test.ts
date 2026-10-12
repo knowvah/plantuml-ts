@@ -50,6 +50,8 @@ import { astOrThrow } from '../../../../helpers/parse-ast.js';
 import { tileNodes } from '../../../../../src/diagrams/activity/layout/tile-layout.js';
 import { GtileTopDown } from '../../../../../src/diagrams/activity/tiles/gtile-top-down.js';
 import type { StringBounder } from '../../../../../src/diagrams/activity/tiles/tile.js';
+import { renderSync } from '../../../../../src/index.js';
+import { registerNestedDiagramRenderers } from '../../../../../src/diagrams/class/class-nested-diagram-renderer.js';
 import {
   assignCoordinatesFull,
   type AssignCoordinatesResult,
@@ -81,6 +83,16 @@ interface DiffBaselineManifest {
 // assertions (`occupiesOn`/`overlaps`) are about RELATIVE shape adjacency,
 // invariant to either run's uniform translation.
 const LAYOUT_MARGIN = 12;
+
+// Register the real recursive nested-diagram renderer before any fixture lays
+// out, exactly as `render-fixture-activity.ts` and production (`src/index.ts`'s
+// `registerNestedDiagramRenderers`) do. Without it, every `{{ }}` action label
+// in the 8 embed fixtures reaches `activity-creole-sheet.ts#nestedRenderer`'s
+// "no nested-diagram renderer is registered" stub, and `EmbeddedDiagram
+// .calculateDimensionSlow` logs the upstream `Logme.error` and lays the slot
+// out at 42x42 -- 30 stderr lines per run and a layout production never
+// produces. Measuring here must mean measuring what production lays out.
+registerNestedDiagramRenderers((source) => renderSync(source, { measurer: new DeterministicMeasurer() }));
 
 const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')) as DiffBaselineManifest;
 // add4-T3j: every RENDERING row -- `baseline` AND `pinned`. A row leaves
