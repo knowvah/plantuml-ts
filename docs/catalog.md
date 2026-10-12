@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1502 modules · 5727 exported names.
+1503 modules · 5732 exported names.
 
 ## `src/`
 
@@ -364,6 +364,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `elk-backend.ts` | `ElkBackend`, `LayoutServices`, `ElkBackendError` | The ELK seam (cdd8 D2): one interface that a layout backend implements and the ELK maker (`CucaDiagramFileMakerElk` port) calls. |
 | `elk-object.ts` | `ELK_CORE_OPTIONS_PACKAGE`, `ELK_PROXY_OPTIONS_PACKAGE`, `ELK_OPTION_TYPE`, `ElkOptionType`, `IProperty`, `ElkEnumObject`, `ElkPaddingObject`, `ElkProxyEnumSetObject`, `ElkTrueObject`, `ElkPropertyValue`, `elkEnum`, `elkProperty` | The objects upstream's ELK proxy layer hands to ELK itself, named backend-neutrally. |
+| `ElkDiagramAdapter.ts` | `ElkClusterHeader`, `ElkClusterStyle`, `ElkArrowStyle`, `ElkColors`, `ElkDiagramAdapter` | The engine-supplied diagram the ELK maker reads (cdd8 D13). |
 | `elkjs-backend.ts` | `ELKJS_DISPATCHER_MISSING`, `createElkjsBackend` | `ElkBackend` over elkjs 0.12.0 (cdd8 D2, backend 1), the same ELK release as the jar's (`org.eclipse.elk.core` pom.properties `version=0.12.0`). |
 | `elkjs-graph.ts` | `ElkjsProperty`, `ElkjsLabel`, `ElkjsBendPoint`, `ElkjsPoint`, `ElkjsEdgeSection`, `ElkjsNode`, `ElkjsEdge`, `findBestEdgeContainment` | The elkjs backend's in-memory ELK graph: plain objects implementing the proxy interfaces, holding exactly the state an `org.eclipse.elk.graph` model would (dimensions, location, labels, children, contained edges, properties). |
 | `elkjs-json.ts` | `ElkJsonLabel`, `ElkJsonEdge`, `ElkJsonNode`, `ElkJsonGraph`, `toElkJson`, `applyElkJson` | The elkjs backend's graph <-> ELK JSON conversion. |
