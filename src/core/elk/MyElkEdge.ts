@@ -43,18 +43,12 @@ import { UTranslate, type Point2D } from '../klimt/UTranslate.js';
 import type { Paint } from '../paint.js';
 import { ExtremityFactoryExtends } from '../svek/extremity/ExtremityFactoryExtends.js';
 import type { SName } from '../style/SName.js';
+// "Nasty trick: we store the type of label (center/head/tail) in the text"
+// (`MyElkEdge.java:248-258`); the maker writes them (`CucaDiagramFileMakerElk.java:424`, `:437`, `:451`).
+import { CENTER_LABEL_TEXT, HEAD_LABEL_TEXT, TAIL_LABEL_TEXT } from './CucaDiagramFileMakerElk.js';
 import type { ElkArrowStyle, ElkDiagramAdapter } from './ElkDiagramAdapter.js';
 import type { ElkEdge } from './proxy/graph/ElkEdge.js';
 import type { ElkEdgeSection } from './proxy/graph/ElkEdgeSection.js';
-
-/**
- * "Nasty trick: we store the type of label (center/head/tail) in the text"
- * (`MyElkEdge.java:248-258`); the maker writes the same three strings
- * (`CucaDiagramFileMakerElk.java:424`, `:437`, `:451`).
- */
-const CENTER_LABEL_TEXT = 'X';
-const TAIL_LABEL_TEXT = '1';
-const HEAD_LABEL_TEXT = '2';
 
 /** `final double gap = 2;`: `MyElkEdge.java:294`. */
 const ROLE_GAP = 2;

@@ -49,9 +49,9 @@ const CLUSTER_PADDING = 15;
 const VERY_STRANGE_OFFSET = 10;
 /** Kinds stored in an `ElkLabel`'s text, read back by `MyElkEdge#drawLabels` (`MyElkEdge.java:249-258`). */
 const CLUSTER_LABEL_TEXT = 'C';
-const CENTER_LABEL_TEXT = 'X';
-const TAIL_LABEL_TEXT = '1';
-const HEAD_LABEL_TEXT = '2';
+export const CENTER_LABEL_TEXT = 'X';
+export const TAIL_LABEL_TEXT = '1';
+export const HEAD_LABEL_TEXT = '2';
 
 /**
  * The three ordered maps `CucaDiagramFileMakerElk.java:140-142` fills, keyed
