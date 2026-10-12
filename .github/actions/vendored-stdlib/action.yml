@@ -1,0 +1,58 @@
+name: vendored stdlib
+description: >-
+  Materialise assets/stdlib (gitignored, 34,587 files / 285 MB) exactly as the
+  committed manifest pins it, verify it byte-for-byte, and prove the pin still
+  reproduces the manifests. Shared by every job that runs vitest: its
+  globalSetup builds every stdlib package from this tree before any worker
+  starts, so without it the whole suite fails at setup, not in one test.
+
+# `scripts/vendor-stdlib.ts` copies from a local clone at ~/git/plantuml-stdlib,
+# so that clone is what we reconstruct — pinned to the exact sha recorded in the
+# committed manifest, never to a moving branch head. GitHub allows fetching an
+# arbitrary sha directly (uploadpack.allowAnySHA1InWant), which is what makes
+# the pin exact.
+
+runs:
+  using: composite
+  steps:
+    - name: read the vendored stdlib pin
+      id: pin
+      shell: bash
+      run: |
+        echo "sha=$(node -p "require('./assets/stdlib.manifest.json').sourceSha")" >> "$GITHUB_OUTPUT"
+
+    - name: restore vendored stdlib
+      id: stdlib-cache
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      with:
+        path: assets/stdlib
+        # Keyed on the pin: a re-pin is a different key and re-vendors.
+        key: stdlib-${{ steps.pin.outputs.sha }}
+
+    - name: vendor stdlib from the pinned source
+      if: steps.stdlib-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        SRC="$HOME/git/plantuml-stdlib"
+        git init -q "$SRC"
+        git -C "$SRC" remote add origin https://github.com/plantuml/plantuml-stdlib.git
+        git -C "$SRC" fetch -q --depth 1 origin "${{ steps.pin.outputs.sha }}"
+        git -C "$SRC" checkout -q FETCH_HEAD
+        npx jiti scripts/vendor-stdlib.ts
+
+    # Every one of the 34,587 files must hash to what the committed manifest
+    # says. On a cache hit this is the integrity check on the restored tree;
+    # on a miss it proves the pinned source still reproduces byte-for-byte.
+    - name: verify vendored stdlib is verbatim
+      shell: bash
+      run: npx jiti scripts/vendor-stdlib.ts --verify
+
+    # Re-vendoring rewrites the committed manifests. Identical input must
+    # produce identical manifests, so any diff here means the pin no longer
+    # reproduces — a real finding, not noise. Skipped on a cache hit, where
+    # nothing regenerated them.
+    - name: the pin reproduces the committed manifests
+      if: steps.stdlib-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: git diff --exit-code -- assets/stdlib.manifest.json assets/manifests
