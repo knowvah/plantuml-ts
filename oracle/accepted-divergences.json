@@ -185,15 +185,6 @@
     },
     {
       "match": {
-        "id": "svg-salt/lakari-33-mone874"
-      },
-      "scope": "svg-conformance salt ledger (jar errors, we draw -- ruling 2026-10-10)",
-      "acceptedAt": "2026-10-10",
-      "acceptedBy": "maintainer",
-      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line; the jar crashes writing the SVG: java.lang.IllegalArgumentException at ElementMenuBar.java:87. Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
-    },
-    {
-      "match": {
         "id": "svg-unknown/dagugu-60-zuli109"
       },
       "scope": "svg-conformance unknown ledger (jar errors, we draw -- ruling 2026-10-10)",
@@ -815,6 +806,18 @@
       "retiredAt": "2026-10-12",
       "retiredBy": "maintainer",
       "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+    },
+    {
+      "match": {
+        "id": "svg-salt/lakari-33-mone874"
+      },
+      "scope": "svg-conformance salt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line; the jar crashes writing the SVG: java.lang.IllegalArgumentException at ElementMenuBar.java:87. Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it.",
+      "retiredAt": "2026-10-12",
+      "retiredBy": "maintainer",
+      "retiredReason": "Retired by salt-engine-port at the batch-4 close (2026-10-12, journal row 34): the salt engine is ported and registered (sep T4a, cda4ea75a, merged 3ab50d039). The port now throws from the same site (ElementMenuBar.ts, mirroring ElementMenuBar.java:87 via ElementFactoryMenu.java:74) and renders its own error page, so the row is conformant under the 2026-10-10 error-page rule (jar errors + we error), survey verdict conformant with errorPage: true. Not ratchet-eligible (our error page is not byte-identical to the jar's crash page: version banner + source name, ruling 'keep our own version string'); held by oracle/goldens/svg-salt/diff-baseline.json as the jar-crash numeric baseline (weightedScore 337 / diffCount 89), like mindmap's femiba-70-duvi238."
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12T05:25:48.196Z",
+  "generatedAt": "2026-10-12T18:53:48.885Z",
   "fixtures": [
     {
       "slug": "bajotu-30-soku184",
@@ -155,9 +155,7 @@
       "slug": "bixogo-47-xulu385",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 189,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "boduli-27-zufa581",
@@ -3026,9 +3024,7 @@
       "slug": "roxosu-00-pini153",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 189,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "rozudo-79-zavu288",

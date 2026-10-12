@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12T05:26:22.471Z",
+  "generatedAt": "2026-10-12T18:54:27.573Z",
   "fixtures": [
     {
       "slug": "activity-legacy1-example-0",
@@ -2838,9 +2838,7 @@
       "slug": "lubicu-73-fule059",
       "type": "unknown",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 450,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "ludecu-61-laja912",

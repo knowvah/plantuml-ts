@@ -127,7 +127,9 @@ describe.skipIf(manifest.fixtures.length === 0)('svg-salt conformance ratchet â€
     expect(clean.pass, `${f.slug}: expected zero-diff baseline`).toBe(true);
 
     // Mutate a numeric attribute in-memory â€” never touches disk.
-    const tampered = golden.replace(/rect x="(\d+)"/, (_m, x: string) => `rect x="${Number(x) + 500}"`);
+    // Salt rects sit at fractional x (`bireva-46-dalu382`: x="85.725"), so the
+    // mindmap regex's `\d+` would not match; accept a decimal here.
+    const tampered = golden.replace(/rect x="([\d.]+)"/, (_m, x: string) => `rect x="${Number(x) + 500}"`);
     expect(tampered).not.toBe(golden);
 
     const { pass, diffs } = compareSvg(ours, tampered, 'deterministic');

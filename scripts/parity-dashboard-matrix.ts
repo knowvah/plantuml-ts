@@ -38,7 +38,6 @@ const NO_ENGINE_D_ID: Readonly<Record<string, string>> = {
   wbs: 'D3',
   gantt: 'D4',
   network: 'D5',
-  salt: 'D7',
   ditaa: 'D8',
   ebnf: 'D10',
   regex: 'D11',

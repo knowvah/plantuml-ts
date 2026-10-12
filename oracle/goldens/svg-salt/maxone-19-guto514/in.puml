@@ -1,0 +1,13 @@
+@startsalt
+{
+	{
+	test1
+	test2
+	[button 3]
+	test4
+	}
+	B
+	C
+	D
+}
+@endsalt

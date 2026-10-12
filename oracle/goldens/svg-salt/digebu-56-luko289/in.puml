@@ -1,0 +1,10 @@
+@startsalt
+skinparam Handwritten  true
+{^
+My Label | ^Dropdown item    ^ 
+[My Button] | *
+[<color:#9a9a9a>My Button] | *
+. | . 
+. | . 
+}
+@endsalt

@@ -5,8 +5,10 @@
  * (salt-engine-port T0b, D6), modelled on
  * `plans/class-divergence-drive/tools/pin-goldens.mts` (its argv handling,
  * its validate-then-copy-then-append order, its byte-equality re-read). Salt
- * has no routing/refusal twin rows to clone and no `--tree`, so those halves
- * of the class tool have no counterpart here. Per slug:
+ * has no `--tree`, and the routing/refusal twin-row clones the class tool
+ * appends live in `repin-salt-routing.mts` instead (run it after every pin:
+ * both gates walk `oracle/goldens/svg-salt/` and demand a row per golden
+ * dir — batch-4 close, journal row 34). Per slug:
  *
  * 1. copies `<repo>/test-results/dot-cache/salt/<slug>/{in.puml,in.svg}` to
  *    `<goldens>/<slug>/{in.puml,golden.svg}` and re-reads both sides to

@@ -1,0 +1,7 @@
+@startsalt
+{#
+.|.| Column 2 | Column 3
+Row header 1 |B| * | value 2
+Row header 2 |C| value 3 | value 4
+}
+@endsalt

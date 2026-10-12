@@ -1,0 +1,44 @@
+wait load 21.59
+wait load 15.68
+wait load 12.07
+wait load 9.83
+wait load 8.45
+== activity 14:10:36 { 7.87 16.97 19.98 }
+wrote plans/salt-engine-port/measurements/b4-eng/parity-activity.json — {"conformant":448,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 10.85
+wait load 8.86
+wait load 8.14
+== board 14:12:38 { 7.57 14.01 18.41 }
+wrote plans/salt-engine-port/measurements/b4-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.43
+== c4 14:13:33 { 7.45 12.95 17.74 }
+wrote plans/salt-engine-port/measurements/b4-eng/parity-c4.json — {"conformant":2,"structural-match":0,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.43
+== chart 14:14:36 { 7.21 11.94 17.04 }
+wrote plans/salt-engine-port/measurements/b4-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.06
+== chronology 14:15:37 { 7.81 11.35 16.47 }
+wrote plans/salt-engine-port/measurements/b4-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== class 14:15:56 { 7.62 11.08 16.26 }
+wrote plans/salt-engine-port/measurements/b4-eng/parity-class.json — {"conformant":722,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 18.39
+wait load 13.56
+wait load 10.29
+wait load 8.58
+== component 14:18:30 { 7.76 10.69 15.31 }
+wrote plans/salt-engine-port/measurements/b4-eng/parity-component.json — {"conformant":69,"structural-match":66,"diverged":131,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.01
+wait load 11.23
+wait load 9.88
+wait load 8.67
+wait load 8.03
+== ditaa 14:21:33 { 7.75 9.72 14.05 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/salt-engine-port/measurements/b4-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+wait load 12.30
+wait load 11.08
+wait load 10.56
+wait load 10.38
+wait load 10.55
+wait load 10.72

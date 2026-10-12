@@ -23,6 +23,8 @@ export const RATCHET_FAMILY: Readonly<Record<string, string>> = {
   hcl: 'svg-hcl',
   dot: 'svg-dot',
   activity: 'svg-activity',
+  mindmap: 'svg-mindmap',
+  salt: 'svg-salt',
 };
 
 /** Subset of `RATCHET_FAMILY` whose family also carries a `diff-baseline.json`. */
@@ -31,6 +33,8 @@ export const DIFF_BASELINE_FAMILY: Readonly<Record<string, string>> = {
   usecase: 'svg-description',
   activity: 'svg-activity',
   sequence: 'svg-sequence',
+  mindmap: 'svg-mindmap',
+  salt: 'svg-salt',
 };
 
 interface RatchetFixture {

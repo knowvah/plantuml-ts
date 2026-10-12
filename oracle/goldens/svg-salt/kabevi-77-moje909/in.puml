@@ -1,0 +1,19 @@
+@startsalt
+{
+{T
++Region        | Population
++ World        | 7.13 billion
+++ America     | 964 million
++++ Canada     | 35 million
++++ USA        | 319 million
+++++ NYC       | 8 million
+++++ Boston    | 617 thousand
++++ Mexico     | 117 million
+++ Europe      | 601 million
++++ Italy      | 61 million
++++ Germany    | 82 million
+++++ Berlin    | 3 million
+++ Africa      | 1 billion
+}
+}
+@endsalt

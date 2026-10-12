@@ -5,4 +5,4 @@ After batch 3 closes. One task, then the standard close with pins **and** the ba
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T4a](T4a-plugin-wiring.md) | PSystemSalt, PSystemSaltFactory, CommandAnything, plugin, registration, chrome, refusal | typescript-pro (opus) | `src/diagrams/salt/{PSystemSalt,PSystemSaltFactory,CommandAnything,index}.ts`, `src/index.ts` (registration line) | T3a, T3b, T3c | [ ] |
+| [T4a](T4a-plugin-wiring.md) | PSystemSalt, PSystemSaltFactory, CommandAnything, plugin, registration, chrome, refusal | typescript-pro (opus) | `src/diagrams/salt/{PSystemSalt,PSystemSaltFactory,CommandAnything,index}.ts`, `src/index.ts` (registration line) | T3a, T3b, T3c | [x] |

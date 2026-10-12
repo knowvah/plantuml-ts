@@ -6,17 +6,15 @@
  *   npx vitest run --config plans/salt-engine-port/measurements/vitest.config.mts
  */
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, existsSync, copyFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, dirname } from 'node:path';
 
-import { pinSalt, parseArgs, DEFAULT_GOLDENS } from './pin-salt.mts';
+import { pinSalt, parseArgs } from './pin-salt.mts';
 
 const DATE = '2026-10-12';
 const SVG = '<svg>salt-golden é</svg>\n';
 const PUML = '@startsalt\n{\n[OK]\n}\n@endsalt\n';
-const REAL_REPO = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 
 let repo: string;
 let goldens: string;
@@ -36,9 +34,10 @@ const ratchet = (): { fixtures: { slug: string; addedAt: string; source: string 
 beforeEach(() => {
   repo = mkdtempSync(join(tmpdir(), 'pin-salt-repo-'));
   goldens = mkdtempSync(join(tmpdir(), 'pin-salt-goldens-'));
-  // A temp COPY of the real (empty at T0b) salt ratchet, so the schema the
-  // tool reads and writes is the committed one.
-  copyFileSync(join(REAL_REPO, DEFAULT_GOLDENS, 'ratchet.json'), join(goldens, 'ratchet.json'));
+  // An EMPTY ratchet in the committed schema (`{ "fixtures": [] }`). Until the
+  // batch-4 close this copied the real file, which was empty at T0b; it now
+  // carries 47 pins, and these cases assert exact slug lists.
+  writeFileSync(join(goldens, 'ratchet.json'), '{\n  "fixtures": []\n}\n');
 });
 afterEach(() => {
   rmSync(repo, { recursive: true, force: true });
