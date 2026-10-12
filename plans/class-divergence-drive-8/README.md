@@ -107,7 +107,7 @@ Measurement:
 | [1](batch-1/overview.md): seam + independent fixes | T1a ElkBackend, T1b pragma, T1c dezobu, T1d latex, T1e xagomi hexagon | [x] |
 | [2a](batch-2a/overview.md): ELK maker + adapter, harness preload | T2a, T2e | [x] |
 | [2b](batch-2b/overview.md): ELK cluster + edge drawing | T2c, T2d | [x] |
-| [2c](batch-2c/overview.md): ELK composite drawing | T2b | [ ] |
+| [2c](batch-2c/overview.md): ELK composite drawing | T2b | [x] |
 | [3](batch-3/overview.md): wiring, ELK rows, ruling docs | T3a, T3b, T3c | [ ] |
 | [exit](exit/overview.md): close + salt hand-off | T-exit, T-salt | [ ] |
 
