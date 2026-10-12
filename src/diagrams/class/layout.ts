@@ -116,7 +116,7 @@ function measureLeaf(
  * (dead directives) — jar-verified `mezucu-18-lozi106` (`hide empty
  * members` + a field-only class: jar draws ONE divider, not two).
  */
-function preMeasureClassifiers(
+export function preMeasureClassifiers(
   ast: ClassDiagramAST,
   theme: Theme,
   measurer: StringMeasurer,

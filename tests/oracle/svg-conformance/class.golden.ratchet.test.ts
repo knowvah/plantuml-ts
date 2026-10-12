@@ -72,6 +72,8 @@ interface RatchetManifest {
 interface ParityEntry {
   slug: string;
   dotEqual: boolean;
+  /** The jar dumped no svek DOT for this row (`scripts/dot-sync-report.ts:288`). */
+  oracleBlind?: boolean;
 }
 
 interface ParityReport {
@@ -243,15 +245,50 @@ if (manifest.fixtures.length === 0) {
 // AC3 — DOT-EQUAL eligibility is enforced in the suite, not just documented.
 // ---------------------------------------------------------------------------
 
+// cdd8 D12: an ELK row has no DOT stage (the jar's ELK path,
+// `CucaDiagram.java:478-479`, dumps no `svek-N.dot`), so it is eligible when
+// the survey marks it `oracleBlind` AND its cached source carries the pragma
+// -- structural, never an exemption list. Read from the fixture's dot-cache
+// directory, the same `in.puml` the survey rendered.
+const DOT_CACHE_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache');
+const ELK_PRAGMA = /^\s*!pragma\s+layout\s+elk\s*$/im;
+
+function hasElkPragma(tree: 'class' | 'unknown', slug: string): boolean {
+  return ELK_PRAGMA.test(readFileSync(join(DOT_CACHE_ROOT, tree, slug, 'in.puml'), 'utf8'));
+}
+
+function isRatchetEligible(entry: ParityEntry, tree: 'class' | 'unknown'): boolean {
+  return entry.dotEqual || (entry.oracleBlind === true && hasElkPragma(tree, entry.slug));
+}
+
+describe('svg-class conformance ratchet — ELK eligibility (D12)', () => {
+  it('a dotEqual row is eligible', () => {
+    expect(isRatchetEligible({ slug: 'bajotu-30-soku184', dotEqual: true }, 'class')).toBe(true);
+  });
+
+  it('an oracleBlind row whose source carries !pragma layout elk is eligible', () => {
+    expect(isRatchetEligible({ slug: 'cadutu-02-lazu601', dotEqual: false, oracleBlind: true }, 'class')).toBe(true);
+  });
+
+  it('an oracleBlind row without the pragma is still ineligible', () => {
+    expect(isRatchetEligible({ slug: 'bajotu-30-soku184', dotEqual: false, oracleBlind: true }, 'class')).toBe(false);
+  });
+
+  it('a row that is neither dotEqual nor oracleBlind is ineligible, pragma or not', () => {
+    expect(isRatchetEligible({ slug: 'cadutu-02-lazu601', dotEqual: false }, 'class')).toBe(false);
+  });
+});
+
 describe.skipIf(manifest.fixtures.length === 0)('svg-class conformance ratchet — eligibility (AC3)', () => {
-  it('every manifest slug has a dotEqual=true parity-class.json entry', () => {
+  it('every manifest slug is DOT-EQUAL, or an ELK row with no DOT stage (D12)', () => {
     for (const f of manifest.fixtures) {
       const tree = f.tree ?? 'class';
       const entry = findParityEntry(f.slug, tree);
       expect(entry, `${tree}/${f.slug}: no parity-${tree}.json entry found`).toBeDefined();
-      expect(entry!.dotEqual, `${tree}/${f.slug}: manifest entry is not DOT-EQUAL — ineligible for the ratchet`).toBe(
-        true,
-      );
+      expect(
+        isRatchetEligible(entry!, tree),
+        `${tree}/${f.slug}: manifest entry is neither DOT-EQUAL nor an oracle-blind ELK row — ineligible for the ratchet`,
+      ).toBe(true);
     }
   });
 });
