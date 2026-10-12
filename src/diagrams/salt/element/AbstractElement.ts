@@ -8,17 +8,9 @@ import type { UFont } from '../../../core/klimt/font/UFont.js';
 import type { XDimension2D } from '../../../core/klimt/geom/XDimension2D.js';
 import type { FontConfiguration } from '../../../core/klimt/shape/UText.js';
 import type { UGraphic } from '../../../core/klimt/UGraphic.js';
-import { UStroke } from '../../../core/klimt/UStroke.js';
 import { Pragma } from '../../../core/skin/Pragma.js';
 import type { HColor } from '../../../core/style/Value.js';
 import type { Element } from './Element.js';
-
-/** `HColors.BLUE = set.getColorOrWhite("#0000FF")` — not in the port's
- *  `HColors` (`klimt/color/HColors.ts`), so read the same way here.
- *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColors.java:92 */
-const BLUE = '#0000FF';
-/** `blackBlueTrue`'s tab size. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/font/FontConfiguration.java:64 */
-const BLACK_BLUE_TRUE_TAB_SIZE = 8;
 
 /** Every palette colour is `HColorSimple#withDark`, which always builds an
  *  `HColorSimple` (`new HColorSimple(this.color, dark)`, HColorSimple.java:
@@ -87,27 +79,17 @@ export abstract class AbstractElement implements Element {
   }
 
   /**
-   * `FontConfiguration.blackBlueTrue(font)` = `create(font,
-   * HColors.BLACK.withDark(HColors.WHITE), HColors.BLUE, UStroke.simple(), 8)`
-   * (FontConfiguration.java:63-65). The port has no klimt
-   * `FontConfiguration.blackBlueTrue`: the five-argument `create` is
-   * `abel/FontConfiguration.ts`, and `bridgeFontConfiguration` turns it into
-   * the creole `FontConfiguration` — whose unset hyperlink colour and
-   * underline stroke ARE blue and `UStroke.simple()` (`UText.ts`,
-   * `hyperlinkColor`/`hyperlinkUnderlineStroke`).
+   * `FontConfiguration.blackBlueTrue(font)` (klimt/font/FontConfiguration.java:
+   * 63-65, `abel/FontConfiguration.ts`), turned into the creole
+   * `FontConfiguration` by `bridgeFontConfiguration` — the port's two
+   * `FontConfiguration` types are one class upstream; the creole one's unset
+   * hyperlink colour and underline stroke ARE blue and `UStroke.simple()`
+   * (`UText.ts`, `hyperlinkColor`/`hyperlinkUnderlineStroke`).
    *
    * @see AbstractElement.java:81-83
    */
   protected blackBlueTrue(font: UFont): FontConfiguration {
-    return bridgeFontConfiguration(
-      AbelFontConfiguration.create(
-        font,
-        HColors.BLACK.withDark(HColors.WHITE),
-        HColorSet.instance().getColorOrWhite(BLUE),
-        UStroke.simple(),
-        BLACK_BLUE_TRUE_TAB_SIZE,
-      ),
-    );
+    return bridgeFontConfiguration(AbelFontConfiguration.blackBlueTrue(font));
   }
 
   /** @see AbstractElement.java:85-87 */

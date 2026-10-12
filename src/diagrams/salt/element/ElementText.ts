@@ -1,4 +1,6 @@
+import { FontConfiguration } from '../../../core/abel/FontConfiguration.js';
 import { Display } from '../../../core/klimt/creole/Display.js';
+import { bridgeFontConfiguration } from '../../../core/klimt/font/FontConfigurationBridge.js';
 import type { StringBounder } from '../../../core/klimt/font/StringBounder.js';
 import type { UFont } from '../../../core/klimt/font/UFont.js';
 import { HorizontalAlignment } from '../../../core/klimt/geom/HorizontalAlignment.js';
@@ -27,15 +29,17 @@ export class ElementText extends AbstractElement {
   private readonly text: string;
 
   /**
-   * `FontConfiguration.blackBlueTrue(font)` is `AbstractElement#blackBlueTrue`
-   * (the same call); `atomOps` is ADR-9's, as in `AbstractElementText`.
+   * `FontConfiguration.blackBlueTrue(font)` (`abel/FontConfiguration.ts`),
+   * bridged to the creole `FontConfiguration` as in
+   * `AbstractElement#blackBlueTrue`; `atomOps` is ADR-9's, as in
+   * `AbstractElementText`.
    * `text.get(0)` on an empty list is Java's `IndexOutOfBoundsException`.
    *
    * @see ElementText.java:57-62
    */
   constructor(text: readonly string[], font: UFont, spriteContainer: ISkinSimple) {
     super();
-    const config = this.blackBlueTrue(font);
+    const config = bridgeFontConfiguration(FontConfiguration.blackBlueTrue(font));
     const ctx = { fontConfiguration: config, spriteContainer, atomOps: atomOpsFor(spriteContainer, config) };
     this.block = Display.create(text).create(ctx, HorizontalAlignment.LEFT);
     const first = text[0];

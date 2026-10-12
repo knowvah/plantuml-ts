@@ -7,9 +7,11 @@ import { FontPosition, fontPositionSpace, muteFontSize } from '../font/FontPosit
  *
  * Upstream: klimt/font/FontStyle.java (a Java `enum`: PLAIN, ITALIC,
  * BOLD, UNDERLINE, STRIKE, WAVE, BACKCOLOR). Ported as an as-const
- * string-union object per project convention (no `const enum`). Only
- * the enum's identity/name is ported here — `starters(isCreolePure)`
- * belongs to the creole markup parser, out of scope for a shape.
+ * string-union object per project convention (no `const enum`). The
+ * enum's identity/name plus `getRegexActivationPattern`/
+ * `getRegexDeactivationPattern` (below, module functions over the constant)
+ * are ported here — `starters(isCreolePure)` belongs to the creole markup
+ * parser, out of scope for a shape.
  */
 export const FontStyle = {
   PLAIN: 'PLAIN',
@@ -21,6 +23,65 @@ export const FontStyle = {
   BACKCOLOR: 'BACKCOLOR',
 } as const;
 export type FontStyle = (typeof FontStyle)[keyof typeof FontStyle];
+
+/**
+ * `FontStyle#getRegexActivationPattern` — the opening-tag regex source
+ * `Splitter.htmlTag` assembles (Splitter.java:88-93). Strings are the Java
+ * literals' runtime values. STRIKE returns the UBREX spelling verbatim
+ * (java:102 is the same literal as `getUbrexActivationPattern`, :131), NOT a
+ * translated alternation: upstream compiles it as a `java.util.regex`
+ * pattern, where `【…┇…】` is literal text and the mid-pattern `$` can never
+ * be followed by `XC`, so the arm matches nothing — the jar keeps `<s>`
+ * through `purgeAllTag` (field-length-strike-s). The Java's trailing
+ * `return null` is unreachable for the seven constants (the exhaustive
+ * switch below).
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/font/FontStyle.java:88-111
+ */
+export function getRegexActivationPattern(style: FontStyle): string {
+  switch (style) {
+    case FontStyle.PLAIN:
+      return '\\<[pP][lL][aA][iI][nN]\\>';
+    case FontStyle.ITALIC:
+      return '\\<[iI]\\>';
+    case FontStyle.BOLD:
+      return '\\<[bB]\\>';
+    case FontStyle.UNDERLINE:
+      return '\\<[uU](?::(#[0-9a-fA-F]{6}|\\w+))?\\>';
+    case FontStyle.WAVE:
+      return '\\<[wW](?::(#[0-9a-fA-F]{6}|\\w+))?\\>';
+    case FontStyle.BACKCOLOR:
+      return '\\<[bB][aA][cC][kK](?::(#?\\w+(?:[-\\\\|/]#?\\w+)?))?\\>';
+    case FontStyle.STRIKE:
+      return '<【strike┇STRIKE┇s┇S┇del┇DEL】〇?〘:〶$XC=【#〇{6}「0〜9a〜fA〜F」┇〇+〴w】〙>';
+  }
+}
+
+/**
+ * `FontStyle#getRegexDeactivationPattern` — the closing-tag regex source
+ * (Java literals' runtime values; the trailing `return null` is unreachable,
+ * as in {@link getRegexActivationPattern}).
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/font/FontStyle.java:166-189
+ */
+export function getRegexDeactivationPattern(style: FontStyle): string {
+  switch (style) {
+    case FontStyle.PLAIN:
+      return '\\</[pP][lL][aA][iI][nN]\\>';
+    case FontStyle.ITALIC:
+      return '\\</[iI]\\>';
+    case FontStyle.BOLD:
+      return '\\</[bB]\\>';
+    case FontStyle.UNDERLINE:
+      return '\\</[uU]\\>';
+    case FontStyle.WAVE:
+      return '\\</[wW]\\>';
+    case FontStyle.BACKCOLOR:
+      return '\\</[bB][aA][cC][kK]\\>';
+    case FontStyle.STRIKE:
+      return '\\</(?:s|S|strike|STRIKE|del|DEL)\\>';
+  }
+}
 
 /**
  * FontConfiguration — the minimal font-rendering surface
