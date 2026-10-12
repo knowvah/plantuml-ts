@@ -77,12 +77,12 @@
  * Re-measure by hand:
  *   npx vitest run tests/oracle/svg-conformance/refusal-coverage.test.ts
  */
-import { describe, it, expect } from 'vitest';
+import { beforeAll, describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync, existsSync, openSync, readSync, closeSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { renderSync } from '../../../src/index.js';
+import { loadElk, renderSync, type ElkBackend } from '../../../src/index.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { fullDescription } from '../../../src/core/version.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
@@ -281,11 +281,20 @@ interface LiveRefusal {
  *  `CanvasMeasurer` hits an unimplemented `getContext`, and the resulting
  *  layout failure IS an error page — putting a fabricated refusal inside the
  *  measurement. */
+/** One ELK backend per process (cdd8 D2d): `!pragma layout elk` fixtures
+ *  make `renderSync` refuse without `options.elk` (cdd8 T1b), which would
+ *  read here as a refusal the jar never made. */
+let elk: ElkBackend | undefined;
+beforeAll(async () => {
+  elk = await loadElk();
+});
+
 function measure(f: FixtureRef, store: ReturnType<typeof fixtureIncludeStore>): LiveRefusal {
   const markup = readFileSync(join(fixtureDir(f), 'in.puml'), 'utf8');
   const ours = renderSync(markup, {
     includeStore: store,
     measurer: new DeterministicMeasurer(),
+    elk,
   });
   const weErrored = weErroredIn(ours);
   return {
