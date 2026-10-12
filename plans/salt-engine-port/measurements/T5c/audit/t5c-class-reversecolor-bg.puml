@@ -1,0 +1,7 @@
+@startuml
+skinparam reversecolor dark
+skinparam backgroundColor #010101
+class A
+class B
+A --> B
+@enduml

@@ -1,0 +1,8 @@
+skinparam-mode-dark with partner-aware paint: 0 diffs, weighted 0
+asPaint call sites reached:
+  4x paintOf (src/core/activity-circle-style.ts:81:62)
+  2x solidPaint (src/core/klimt/font/FontConfigurationBridge.ts:52:23)
+  1x Object.drawU (src/diagrams/salt/PSystemSalt.ts:226:61)
+  2x ElementPyramid.drawU (src/diagrams/salt/element/ElementPyramid.ts:119:50)
+  1x ElementButton.drawU (src/diagrams/salt/element/ElementButton.ts:53:52)
+  1x ElementButton.drawU (src/diagrams/salt/element/ElementButton.ts:53:101)
