@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1465 modules · 5559 exported names.
+1475 modules · 5662 exported names.
 
 ## `src/`
 
@@ -68,6 +68,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `internal-sprite-store.ts` | `INTERNAL_SPRITE_ASSET_PREFIX`, `internalSpriteAssetKey`, `InternalSpriteStore`, `internalSpriteStoreFrom`, `matchJarSpriteLine` | `SpriteImage.fromInternal` (java `klimt/sprite/SpriteImage.java:100-128`) — the jar-internal `/sprites/**` bundle, ported onto ADR-2's synchronous asset channel (`plans/s1l-tail-fix/decisions.md`). |
 | `java-hash-set.ts` | `javaDoubleHashCode`, `javaHashSetOrder` | java-hash-set.ts — the iteration order of a `java.util.HashSet` built by successive `add` calls, for code upstream iterates straight out of a `HashSet` (e.g. |
 | `java-whitespace.ts` | `isJavaWhitespaceAt` | `Character.isWhitespace(char)`, enumerated. |
+| `latex-metrics.ts` | `TeXIconSize`, `texIconDimension`, `measureTeXIcon` | The size of a `<latex>` image, by the rule upstream sizes it with. |
 | `latex.ts` | `measureNodeLabel`, `renderNodeLabel`, `LabelSpan`, `parseLatexLabel`, `measureLatex`, `renderLatexMathML`, `renderLatexAsImage` | LaTeX label parsing, sizing, and rendering utilities. |
 | `link-style-regex.ts` | `STYLE_KEY1`, `STYLE_KEY2`, `LINE_STYLE`, `LINE_STYLE_MULTIPLES` | The link line-style grammar shared by every engine whose arrows take a `[#red,dashed]` style/colour bracket. |
 | `magma.ts` | `computeBranch`, `MagmaGroupInput`, `buildMagmaEdges` | "Magma" standalone chaining — the shared cucadiagram/svek layout feature that arranges link-less ("standalone") leaves into a square grid of INVISIBLE edges so graphviz packs them compactly. |
@@ -648,6 +649,20 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svg-path-bbox.ts` | `PathBox`, `pathBBox` | Bounding box of an SVG path `d`, computed the way `UPath` does. |
 | `SvgNanoParser.ts` | `SvgNanoParser` |  |
 | `SvgPath.ts` | `parseSvgPath` |  |
+
+## `src/core/latex-metrics/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `atoms.ts` | `Limits`, `FontGlyph`, `CharAtom`, `RowAtom`, `SpaceAtom`, `ScriptsAtom`, `BigOperatorAtom`, `FractionAtom`, `NthRootAtom`, `Delimiter`, `FencedAtom`, `TypedAtom`, `WrapAtom`, `PhantomAtom`, `BreakMarkAtom`, `Atom`, `leftType`, `rightType`, `limitsOf`, `setOrdinary`, `isBigOperator`, `BuildBox` | The atom model JLaTeXMath typesets, reduced to what sizing needs, and the type queries glue and scripts read from it. |
+| `box.ts` | `Box`, `ALIGN_LEFT`, `ALIGN_RIGHT`, `ALIGN_CENTER`, `Align`, `strutBox`, `charBox`, `addItalicCorrectionToWidth`, `HBox`, `hbox`, `hboxAligned`, `VBox` | The box algebra JLaTeXMath sizes a formula with: `Box`, `CharBox`, `StrutBox`, `HorizontalBox` and `VerticalBox` (JLaTeXMath 1.0.7, the version pinned at `~/git/plantuml/gradle/libs.versions.toml:12`). |
+| `convert.ts` | `Context`, `delimiter`, `Converter`, `FormulaBuilder`, `AtomConverter`, `asRow`, `FAMILY_TYPES`, `STYLES`, `BOLD_FONTS`, `bigOperatorSymbol`, `leafAtom`, `opLimits`, `text` | KaTeX parse tree → JLaTeXMath atoms: what `TeXParser`/`PredefMacros` would have built for the same source (JLaTeXMath 1.0.7, `~/git/plantuml/gradle/libs.versions.toml:12`), with every glyph's metrics taken from KaTeX in the font the source |
+| `fraction.ts` | `fractionBox`, `delimiterBox`, `fencedBox`, `nthRootBox` | Vertical constructions: `FractionAtom`, `NthRoot`, `FencedAtom` and the `DelimiterFactory` they size delimiters with (JLaTeXMath 1.0.7, `~/git/plantuml/gradle/libs.versions.toml:12`). |
+| `katex-glyphs.ts` | `Glyph`, `KNode`, `KATEX_MACROS`, `toKNode`, `nodeField`, `nodeList`, `stringField`, `parseLatex`, `probeGlyph` | Glyph metrics and parse trees from KaTeX, the library this port typesets with instead of JLaTeXMath (DIVERGENCES.md, "LaTeX rendering engine"). |
+| `nodes.ts` | `convertNode`, `formulaRoot` | One KaTeX parse node → the JLaTeXMath atom its macro builds (`PredefMacros`, `PredefinedTeXFormulas`, `TeXParser`; JLaTeXMath 1.0.7, `~/git/plantuml/gradle/libs.versions.toml:12`). |
+| `row.ts` | `PREC`, `scaledCharBox`, `bigOperatorSymbolBox`, `charAtomBox`, `glueBox`, `spaceBox`, `rowBox` | Horizontal typesetting: `RowAtom.createBox`, the glyph boxes of `CharAtom` and `SymbolAtom`, `SpaceAtom`, and the inter-atom glue they get (JLaTeXMath 1.0.7, `~/git/plantuml/gradle/libs.versions.toml:12`). |
+| `scripts.ts` | `scriptsBox`, `bigOperatorBox` | Sub- and superscripts and big-operator limits: `ScriptsAtom.createBox` and `BigOperatorAtom.createBox` (JLaTeXMath 1.0.7, `~/git/plantuml/gradle/libs.versions.toml:12`). |
+| `tex-font.ts` | `STYLE_DISPLAY`, `STYLE_TEXT`, `STYLE_SCRIPT`, `STYLE_SCRIPT_SCRIPT`, `crampStyle`, `denomStyle`, `numStyle`, `subStyle`, `supStyle`, `ROOT_STYLE`, `sizeFactor`, `FontParameter`, `param`, `XHEIGHT_CM`, `XHEIGHT_CMBX`, `xHeight`, `interwordSpace`, `TEX_ICON_SIZE`, `unitFactor`, `muUnit`, `TYPE_ORDINARY`, `TYPE_BIG_OPERATOR`, `TYPE_BINARY_OPERATOR`, `TYPE_RELATION`, `TYPE_OPENING`, `TYPE_CLOSING`, `TYPE_PUNCTUATION`, `TYPE_INNER`, `glueWidth` | JLaTeXMath's font parameters, styles and inter-atom glue: the numbers `DefaultTeXFont`, `TeXEnvironment`, `Glue` and `SpaceAtom` hand to the box builders. |
 
 ## `src/core/math/`
 

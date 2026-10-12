@@ -116,57 +116,23 @@ describe('parseLatexLabel', () => {
 // ---------------------------------------------------------------------------
 
 describe('measureLatex', () => {
-  it('returns base height 40 for an expression with no structural markers', () => {
-    const { height } = measureLatex('x^2 + y^2');
-    expect(height).toBe(40);
+  // JLaTeXMath 1.0.7 TeXIcon sizes, read from the oracle jar; the full
+  // table and its provenance live in tests/unit/core/latex-metrics.test.ts.
+  it('sizes a lone symbol as JLaTeXMath does', () => {
+    expect(measureLatex('x')).toEqual({ width: 20, height: 17 });
   });
 
-  it('increases height by 20 per structural marker (capped at 80)', () => {
-    // One \frac → height = 40 + 20 = 60
-    const { height: h1 } = measureLatex('\\frac{a}{b}');
-    expect(h1).toBe(60);
-
-    // Three structural markers would be 40 + 60 = 100, capped at 80
-    const { height: h3 } = measureLatex('\\frac{a}{b} \\sum_{i} \\int dx');
-    expect(h3).toBe(80);
+  it('sizes a fraction by its box, not by counting markers', () => {
+    expect(measureLatex('\\frac{a}{b}')).toEqual({ width: 24, height: 45 });
   });
 
-  it('returns width >= 120 for a complex expression', () => {
-    const { width } = measureLatex('\\frac{c_1}{\\lambda^5 (e^{c_2}-1)}');
-    expect(width).toBeGreaterThanOrEqual(120);
+  it('grows with the formula width', () => {
+    expect(measureLatex('x'.repeat(30))).toEqual({ width: 351, height: 17 });
   });
 
-  it('returns height > 40 for an expression with \\frac', () => {
-    const { height } = measureLatex('\\frac{c_1}{\\lambda^5 (e^{c_2}-1)}');
-    expect(height).toBeGreaterThan(40);
-  });
-
-  it('uses minimum width of 120 for very short expressions', () => {
-    const { width } = measureLatex('x');
-    expect(width).toBe(120);
-  });
-
-  it('scales width with atom count for long expressions', () => {
-    // 30 plain characters = 30 atoms × 10px = 300 > 120
-    const longExpr = 'x'.repeat(30);
-    const { width } = measureLatex(longExpr);
-    expect(width).toBe(300);
-  });
-
-  it('counts multiple occurrences of the same structural marker', () => {
-    // Two \frac → 40 + 40 = 80 (cap hit)
-    const { height } = measureLatex('\\frac{a}{b} + \\frac{c}{d}');
-    expect(height).toBe(80);
-  });
-
-  it('counts all structural marker types', () => {
-    // \sqrt alone → 40 + 20 = 60
-    const { height } = measureLatex('\\sqrt{2}');
-    expect(height).toBe(60);
-
-    // \prod alone → 40 + 20 = 60
-    const { height: h2 } = measureLatex('\\prod_{i=1}^{n}');
-    expect(h2).toBe(60);
+  it('sizes radicals and big operators by their glyph boxes', () => {
+    expect(measureLatex('\\sqrt{2}')).toEqual({ width: 36, height: 30 });
+    expect(measureLatex('\\prod_{i=1}^{n}')).toEqual({ width: 34, height: 68 });
   });
 });
 
@@ -240,12 +206,11 @@ describe('measureNodeLabel', () => {
   });
 
   it('uses the latex path (not measurer) for latex labels', () => {
-    // A very long latex expression — measurer would give a huge width,
-    // but measureLatex uses its own formula.
+    // The stub measurer would give 8 px per character; the TeXIcon size
+    // of \frac{a}{b} is 24 × 45.
     const label = '<latex>\\frac{a}{b}</latex>';
     const result = measureNodeLabel(label, stubMeasurer, stubFont);
-    expect(result.width).toBeGreaterThanOrEqual(120);
-    expect(result.height).toBe(60); // 40 + 20 for one \frac
+    expect(result).toEqual({ width: 24, height: 45 });
   });
 });
 

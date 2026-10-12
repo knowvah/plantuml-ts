@@ -3,8 +3,8 @@
  *
  * Labels in PlantUML can embed LaTeX math expressions inside
  * `<latex>…</latex>` tags.  These helpers parse such labels into spans,
- * compute heuristic bounding boxes, and render expressions to SVG
- * `<foreignObject>` containing KaTeX MathML.
+ * size expressions by JLaTeXMath's `TeXIcon` rule (`latex-metrics.ts`), and
+ * render them to SVG `<foreignObject>` containing KaTeX MathML.
  */
 
 import katex from 'katex';
@@ -12,13 +12,15 @@ import { attrs, foreignObject, text } from './svg.js';
 import type { StringMeasurer, FontSpec } from './measurer.js';
 import type { Theme } from './theme.js';
 import { toBase64 } from './klimt/sprite/png-encoder.js';
+import { measureTeXIcon } from './latex-metrics.js';
+import { KATEX_MACROS } from './latex-metrics/katex-glyphs.js';
 
 // ---------------------------------------------------------------------------
 // measureNodeLabel / renderNodeLabel — shared helpers for all diagram types
 // ---------------------------------------------------------------------------
 
 /**
- * Measure the bounding box of a node label, routing to the LaTeX heuristic
+ * Measure the bounding box of a node label, routing to {@link measureLatex}
  * when the label contains a `<latex>` tag, and to the string measurer
  * otherwise.
  */
@@ -32,27 +34,6 @@ export function measureNodeLabel(
   }
   return measurer.measure(label, fontSpec);
 }
-
-/**
- * LaTeX commands JLaTeXMath accepts and KaTeX does not, mapped to KaTeX's own
- * equivalent.
- *
- * Upstream typesets through JLaTeXMath, which implements the standard LaTeX
- * text-mode box commands; KaTeX implements `\text` but not its `\mbox` alias
- * and, with `throwOnError: false`, renders an unknown control sequence as its
- * literal name in error red. `component/vimulo-11-buni641` drew a red
- * `\mbox` beside the formula where the jar draws the word "or"
- * (`P(y|\mathbf{x}) \mbox{ or } f(\mathbf{x})+\epsilon`).
- *
- * `\mbox{…}` and `\text{…}` are the same thing in LaTeX: horizontal text
- * mode. Mapping one to the other reproduces JLaTeXMath's reading rather than
- * approximating it.
- *
- * Scoped to MEASURED reach: `\mbox` is the only command in this corpus's ten
- * latex/math expressions that KaTeX rejects, and with this mapping none is
- * rejected. Add an entry when a fixture needs it, not speculatively.
- */
-const KATEX_MACROS: Readonly<Record<string, string>> = { '\\mbox': '\\text' };
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -84,6 +65,17 @@ function preprocessDollarDelimiters(expr: string): string {
   return parts.join('');
 }
 
+/**
+ * Plain-text span estimate for {@link measureMixedLabel}. `renderNodeLabel`
+ * receives no `StringMeasurer`, so the text beside a `<latex>` span is
+ * estimated rather than measured; this has no upstream counterpart (upstream
+ * lays such a label out as creole, text atoms beside an `AtomMath`). The
+ * `<latex>` spans themselves are sized by {@link measureLatex}.
+ */
+const TEXT_SPAN_PX_PER_CHAR = 8;
+const TEXT_SPAN_MIN_WIDTH_PX = 20;
+const TEXT_SPAN_HEIGHT_PX = 24;
+
 /** Sum bounding boxes across a parsed label span array. */
 function measureMixedLabel(spans: LabelSpan[]): { width: number; height: number } {
   let totalWidth = 0;
@@ -94,12 +86,11 @@ function measureMixedLabel(spans: LabelSpan[]): { width: number; height: number 
       totalWidth += w;
       maxHeight = Math.max(maxHeight, h);
     } else {
-      // Approximate text width: 8px per character, min 20px.
-      totalWidth += Math.max(20, span.content.length * 8);
-      maxHeight = Math.max(maxHeight, 24);
+      totalWidth += Math.max(TEXT_SPAN_MIN_WIDTH_PX, span.content.length * TEXT_SPAN_PX_PER_CHAR);
+      maxHeight = Math.max(maxHeight, TEXT_SPAN_HEIGHT_PX);
     }
   }
-  return { width: Math.max(120, totalWidth), height: Math.max(40, maxHeight) };
+  return { width: totalWidth, height: maxHeight };
 }
 
 /**
@@ -236,90 +227,17 @@ export function parseLatexLabel(raw: string): LabelSpan[] {
 // measureLatex
 // ---------------------------------------------------------------------------
 
-/** Structural markers that add height to a LaTeX expression. */
-const STRUCTURAL_MARKERS = ['\\frac', '\\sum', '\\int', '\\prod', '\\sqrt'] as const;
-
 /**
- * Count "semantic atoms" in a LaTeX expression: each `\command` counts as
- * one atom (it renders as roughly one symbol-width), each non-structural
- * non-whitespace character counts as one atom, and `{`, `}`, `^`, `_`, `\`
- * are skipped (they are structural, not visual).
- *
- * This gives a far better width estimate than raw character count, because
- * multi-character commands like `\epsilon` or `\lambda` produce a single glyph.
- */
-function countAtoms(expr: string): number {
-  let count = 0;
-  let i = 0;
-  while (i < expr.length) {
-    const ch = expr[i]!;
-    if (ch === '\\') {
-      // Consume the command name; each named command → one atom
-      let j = i + 1;
-      while (j < expr.length && /[a-zA-Z]/.test(expr[j]!)) j++;
-      if (j > i + 1) count++; // named command (e.g. \frac, \lambda)
-      // bare backslash-symbol (e.g. \\) → skip silently
-      i = j;
-    } else if (ch === '{' || ch === '}' || ch === '^' || ch === '_') {
-      i++; // structural — skip
-    } else if (ch === ' ' || ch === '\n' || ch === '\t') {
-      i++; // whitespace — skip
-    } else {
-      count++; // regular character or operator
-      i++;
-    }
-  }
-  return count;
-}
-
-// This port's own heuristic constants — there is no upstream (JLaTeXMath)
-// equivalent to cite: upstream rasterizes through JLaTeXMath and measures
-// the resulting bitmap, while this port renders through KaTeX and never
-// produces one to measure (permanent divergence, DIVERGENCES.md "LaTeX
-// rendering engine — KaTeX, not JLaTeXMath"). Values unchanged from the
-// heuristic mission E2r L2 chose; naming them here does not re-tune them.
-/** Width contributed by each semantic atom (`\command` or visible char). */
-const LATEX_WIDTH_PER_ATOM_PX = 10;
-/** Floor on the heuristic width, however few atoms the expression has. */
-const LATEX_MIN_WIDTH_PX = 120;
-/** Height with no structural marker present. */
-const LATEX_BASE_HEIGHT_PX = 40;
-/** Height added per structural marker (`\frac`, `\sum`, `\int`, `\prod`, `\sqrt`). */
-const LATEX_HEIGHT_PER_STRUCTURAL_MARKER_PX = 20;
-/** Ceiling on the heuristic height, however many structural markers appear. */
-const LATEX_MAX_HEIGHT_PX = 80;
-
-/**
- * Heuristic bounding box for a LaTeX expression.
- *
- * Width: count semantic atoms (each `\command` = 1, each visible char = 1)
- *        then multiply by {@link LATEX_WIDTH_PER_ATOM_PX}, floored at
- *        {@link LATEX_MIN_WIDTH_PX}.
- * Height: {@link LATEX_BASE_HEIGHT_PX} +
- *         {@link LATEX_HEIGHT_PER_STRUCTURAL_MARKER_PX} per structural
- *         marker (`\frac`, `\sum`, `\int`, `\prod`, `\sqrt`), capped at
- *         {@link LATEX_MAX_HEIGHT_PX}.
+ * The size of the image upstream draws for a LaTeX expression: JLaTeXMath's
+ * `TeXIcon` dimensions for display style at size 20 with unit insets
+ * (`math/TeXIconBuilder.java:52-73`), which `AtomMath#calculateDimensionSlow`
+ * (`klimt/creole/atom/AtomMath.java:64-71`) reports at scale 1. The box is
+ * typeset by JLaTeXMath's rules over KaTeX's parse tree and glyph metrics
+ * (`latex-metrics.ts`). A `<latex>…</latex>` wrapper is stripped first.
  */
 export function measureLatex(raw: string): { width: number; height: number } {
-  // Strip <latex>…</latex> wrapper if present — the tags themselves must not
-  // contribute to the atom count.
   const expr = raw.replace(/^<latex>([\s\S]*?)<\/latex>$/i, '$1').trim();
-
-  let structuralCount = 0;
-  for (const marker of STRUCTURAL_MARKERS) {
-    let pos = 0;
-    while ((pos = expr.indexOf(marker, pos)) !== -1) {
-      structuralCount++;
-      pos += marker.length;
-    }
-  }
-
-  const height = Math.min(
-    LATEX_BASE_HEIGHT_PX + structuralCount * LATEX_HEIGHT_PER_STRUCTURAL_MARKER_PX,
-    LATEX_MAX_HEIGHT_PX,
-  );
-  const width = Math.max(LATEX_MIN_WIDTH_PX, countAtoms(expr) * LATEX_WIDTH_PER_ATOM_PX);
-
+  const { width, height } = measureTeXIcon(expr);
   return { width, height };
 }
 
