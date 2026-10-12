@@ -233,6 +233,35 @@ describe('captureOracleCache', () => {
     expect(execFileSync).not.toHaveBeenCalled();
   });
 
+  it('writes in.puml with smetana/vizjs layout pragmas stripped and elk kept (cdd8 D7)', async () => {
+    const root = join(tmp, 'cache-strip-pragma');
+    vi.mocked(execFileSync).mockImplementation((_cmd, args) => {
+      const dir = (args as string[])[0]!;
+      writeFileSync(join(dir, 'in.svg'), '<svg/>', 'utf-8');
+      return '';
+    });
+
+    const smetana = '@startuml\n!pragma layout smetana\nclass A\n@enduml\n';
+    const vizjs = '@startuml\n  !PRAGMA layout vizjs\nclass B\n@enduml\n';
+    const elk = '@startuml\n!pragma layout elk\nclass C\n@enduml\n';
+    await captureOracleCache(
+      'unknown',
+      [
+        { slug: 'smetana', markup: smetana },
+        { slug: 'vizjs', markup: vizjs },
+        { slug: 'elk', markup: elk },
+      ],
+      { rebuild: false },
+      root,
+      PLAIN_MINUTE_GUARD,
+    );
+
+    const written = (slug: string): string => readFileSync(join(root, 'unknown', slug, 'in.puml'), 'utf-8');
+    expect(written('smetana')).toBe('@startuml\nclass A\n@enduml\n');
+    expect(written('vizjs')).toBe('@startuml\nclass B\n@enduml\n');
+    expect(written('elk')).toBe(elk);
+  });
+
   it('routes the jar call through the minute guard: waits out a decorated start minute (D9)', async () => {
     const root = join(tmp, 'cache-guard-decorated-start');
     const dir = join(root, 'activity', 'echo');

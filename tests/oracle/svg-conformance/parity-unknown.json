@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-10T12:13:40.648Z",
+  "generatedAt": "2026-10-12T00:54:06.347Z",
   "fixtures": [
     {
       "slug": "activity-legacy1-example-0",
@@ -1146,11 +1146,8 @@
     {
       "slug": "fakone-16-boro774",
       "type": "unknown",
-      "dotEqual": false,
-      "verdict": "structural-match",
-      "maxDelta": 19.001000000000005,
-      "maxDeltaPath": "svg/g[1]/g[2]/path[1]/@d[65]",
-      "oracleBlind": true
+      "dotEqual": true,
+      "verdict": "conformant"
     },
     {
       "slug": "febuci-08-zogi253",
@@ -1873,11 +1870,8 @@
     {
       "slug": "japode-92-famo984",
       "type": "unknown",
-      "dotEqual": false,
-      "verdict": "structural-match",
-      "maxDelta": 51,
-      "maxDeltaPath": "svg/g[1]/g[7]/rect[1]/@x",
-      "oracleBlind": true
+      "dotEqual": true,
+      "verdict": "conformant"
     },
     {
       "slug": "jatujo-12-done231",
@@ -4675,11 +4669,8 @@
     {
       "slug": "tikiti-02-bagu049",
       "type": "unknown",
-      "dotEqual": false,
-      "verdict": "structural-match",
-      "maxDelta": 17.001000000000005,
-      "maxDeltaPath": "svg/g[1]/g[3]/path[1]/@d[33]",
-      "oracleBlind": true
+      "dotEqual": true,
+      "verdict": "conformant"
     },
     {
       "slug": "tilege-34-riki742",
@@ -4999,11 +4990,8 @@
     {
       "slug": "vakovo-25-licu237",
       "type": "unknown",
-      "dotEqual": false,
-      "verdict": "structural-match",
-      "maxDelta": 36,
-      "maxDeltaPath": "svg/@viewBox[2]",
-      "oracleBlind": true
+      "dotEqual": true,
+      "verdict": "conformant"
     },
     {
       "slug": "vapelu-42-maba761",
@@ -5318,10 +5306,10 @@
       "slug": "xagomi-49-caki729",
       "type": "unknown",
       "dotEqual": false,
-      "verdict": "structural-match",
-      "maxDelta": 6,
-      "maxDeltaPath": "svg/@height",
-      "oracleBlind": true
+      "verdict": "diverged",
+      "maxDelta": 19,
+      "firstDiff": "svg/g[1]/g[1][childCount]",
+      "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
       "slug": "xagonu-36-sudi116",

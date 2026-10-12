@@ -1,5 +1,4 @@
 @startuml
-!pragma layout smetana
 'breaks
 a |o-- b
 'works

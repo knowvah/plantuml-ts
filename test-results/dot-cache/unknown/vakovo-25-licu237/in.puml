@@ -2,7 +2,6 @@
 skinparam linetype polyline
 hide circle
 hide stereotype
-!pragma layout smetana
 
 package Package1 {
   package Package2 {
