@@ -1,0 +1,10 @@
+@startuml
+!pragma layout elk
+skinparam defaultTextAlignment center
+sprite $s1 <svg viewBox="0 0 20 20"><rect width="20" height="20" fill="red"/></svg>
+rectangle "Cloud\n<$s1>\nzone" as c {
+  rectangle X
+  rectangle "Wide Y" as Y
+}
+X --> Y : "calls"
+@enduml

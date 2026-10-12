@@ -12,9 +12,20 @@ import { internalSpriteStoreFrom } from '../../core/internal-sprite-store.js';
 import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
 import type { DescriptionDiagramAST } from './ast.js';
 import type { DescriptionGeometry } from './layout.js';
+import type { ElkBackend } from '../../core/elk/elk-backend.js';
+import type { Theme } from '../../core/theme.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import { seedOf } from '../../core/klimt/drawing/svg/svg-graphics-core.js';
 import { parseDescription } from './parser.js';
 import { layoutDescription } from './layout.js';
+import { layoutDescriptionElk } from './description-elk-adapter.js';
+import { ELK_RENDER_SYNC_UNSUPPORTED } from '../../core/elk/layout-services.js';
+import {
+  CUCA_DOCUMENT_MARGIN_BOTTOM,
+  CUCA_DOCUMENT_MARGIN_LEFT,
+  CUCA_DOCUMENT_MARGIN_RIGHT,
+  CUCA_DOCUMENT_MARGIN_TOP,
+} from '../../core/atmp/CucaDiagram.js';
 import { renderDescription, unwrapKlimtSvg } from './renderer.js';
 import { isEmpty } from '../../core/annotations/index.js';
 
@@ -49,6 +60,31 @@ function reconstructSourceForSeed(block: UmlSource): string {
   return ['@startuml', ...block.lines, '@enduml'].join('\n');
 }
 
+/**
+ * The ELK maker's geometry (`SvekResult`'s stand-in): `MyElkDrawing#calculateDimension` is the margin-less block
+ * the chrome composes around (`TextBlockExporter` then adds `CucaDiagram#getDefaultMargins`, as it does for svek).
+ */
+function layoutElkGeometry(
+  ast: DescriptionDiagramAST,
+  theme: Theme,
+  measurer: StringMeasurer,
+  backend: ElkBackend,
+): DescriptionGeometry {
+  const { drawing, block } = layoutDescriptionElk(ast, theme, measurer, backend);
+  return {
+    totalWidth: block.getWidth() + CUCA_DOCUMENT_MARGIN_LEFT + CUCA_DOCUMENT_MARGIN_RIGHT,
+    totalHeight: block.getHeight() + CUCA_DOCUMENT_MARGIN_TOP + CUCA_DOCUMENT_MARGIN_BOTTOM,
+    nodes: [],
+    edges: [],
+    elk: drawing,
+    preChromeWidth: block.getWidth(),
+    preChromeHeight: block.getHeight(),
+    ...(ast.seed !== undefined ? { seed: ast.seed } : {}),
+    ...(ast.sprites !== undefined ? { sprites: ast.sprites } : {}),
+    ...(ast.scale !== undefined ? { scale: ast.scale } : {}),
+  };
+}
+
 export const descriptionPlugin: SyncPlugin<DescriptionDiagramAST, DescriptionGeometry> = {
   type: 'description',
 
@@ -77,9 +113,20 @@ export const descriptionPlugin: SyncPlugin<DescriptionDiagramAST, DescriptionGeo
   // draws `<text textLength>` with the measurer that sized the layout --
   // `SyncPlugin#render(geo, theme)` has no measurer parameter (the class
   // plugin carries it the same way, `class/index.ts#layoutSync`).
-  layoutSync(ast, theme, measurer) {
+  // cdd8 T3b: `!pragma layout elk` (CommandPragma.java:128-129, CucaDiagram.java:478-479, 950-952) swaps in
+  // `CucaDiagramFileMakerElk`. A diagram that requires ELK must not silently fall back to dot-engine.
+  requiresElk(ast) {
+    return ast.layoutEngine === 'elk';
+  },
+
+  layoutSync(ast, theme, measurer, services) {
     const chromed = ast.annotations !== undefined && !isEmpty(ast.annotations);
-    return { ...layoutDescription(ast, theme, measurer), measurer, ...(chromed ? { chromed: true as const } : {}) };
+    const chrome = chromed ? { chromed: true as const } : {};
+    if (ast.layoutEngine === 'elk' && ast.nodes.length > 0) {
+      if (services?.elk === undefined) throw new Error(ELK_RENDER_SYNC_UNSUPPORTED);
+      return { ...layoutElkGeometry(ast, theme, measurer, services.elk), measurer, ...chrome };
+    }
+    return { ...layoutDescription(ast, theme, measurer), measurer, ...chrome };
   },
 
   render(geo, theme): CompleteSvg | RenderFragment {

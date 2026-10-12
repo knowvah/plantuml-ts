@@ -24,7 +24,7 @@ import { FontStyle, type FontConfiguration } from '../../core/klimt/shape/UText.
  * `FontStyle.BOLD`/`FontStyle.ITALIC` the same way
  * `class-member-creole.ts:207-209` already does for the class engine.
  */
-function arrowLabelFontConfig(theme: Theme): FontConfiguration {
+export function arrowLabelFontConfig(theme: Theme): FontConfiguration {
   const font = resolveArrowLabelFont(theme);
   const styles = new Set<FontStyle>();
   if (font.weight === 'bold') styles.add(FontStyle.BOLD);
