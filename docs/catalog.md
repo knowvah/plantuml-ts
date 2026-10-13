@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1601 modules · 5926 exported names.
+1608 modules · 5937 exported names.
 
 ## `src/`
 
@@ -706,6 +706,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `archimate-sprite-names.ts` | `ArchimateSpriteName`, `ARCHIMATE_SPRITE_NAMES` | `ARCHIMATE_SPRITE_NAMES` -- the `sprites/<folder>/` jar entries `listsprite` prints: folders and files in `ResourcesUtils.getJarFile` order (`TreeSet`, `ResourcesUtils.java:89-115`), kept/split as `PSystemListArchimateSprites.java:64-73` do |
 | `AsciiEncoder.ts` | `AsciiEncoder` | PlantUML's own 6-bit encoding used for sprite/URL payloads -- NOT base64. |
 | `ColorPalette4096.ts` | `Rgb4096`, `colorForCode4096` | ColorPalette4096 — the 64-character alphabet + 2-char-code <-> 12-bit-RGB mapping `SpriteColorBuilder4096` reads a `/color` sprite body through. |
 | `ColorResolver.ts` | `GrayLevelRange`, `ColorResolver`, `colorResolverToSvgHex` | ColorResolver — resolves a raw SVG color token (from a decomposed `<$sprite>` `<path>`'s `fill`/`stroke` attribute) to a concrete color, honouring an optional "forced" override color and the sprite's own grey-level range. |
@@ -1628,6 +1629,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-usymbol-entity.ts` | `buildUSymbolEntityParams`, `usesClassUSymbolEntity`, `renderClassUSymbolEntity` | renderer-usymbol-entity.ts — SI14 T4: draws a class-diagram `usecase`/ `actor` leaf through the SAME faithful `EntityImageDescription.drawU` path the description engine's `renderer-entity.ts#drawEntity` already uses, replacing the hand-roll |
 | `renderer.ts` | `renderClass`, `renderClassPage` | Class diagram SVG renderer. |
 
+## `src/diagrams/dedication/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `dedication-images.ts` | `DedicationImage`, `DEDICATION_IMAGES` | `DEDICATION_IMAGES` -- the 10 `DedicationSimple` sentences (`Dedications.java:55-65`, in order) and the PNG the pinned jar embeds for each (D4). |
+
 ## `src/diagrams/description/`
 
 | Module | Exports | Purpose |
@@ -1684,6 +1691,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `title-label-sizing.ts` | `measureTitleLabel` | Title-bar dims for a cluster's own display name — split out of layout-helpers.ts (500-line cap) as its own module, mirroring that file's existing leaf-sizing.js split. |
 | `together.ts` | `TOGETHER_FRAME_PREFIX`, `DescriptionTogether`, `currentTogether`, `openTogetherFrame`, `joinCurrentTogether`, `applyDescriptionTogethers` | `together { }` for the description engine (cdd3-T18): the same upstream code path as class. |
 
+## `src/diagrams/donors/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `donors-list.ts` | `DONORS` | `DONORS` -- the names `PSystemDonors#getDonors` decodes from its `DONORS` constant at runtime (`PSystemDonors.java:73-96`, decode at java:156-170: AsciiEncoder -> Brotli -> UTF-8 -> `replace('*', '.')` -> `StringTokenizer` on `\n`), decoded |
+| `skinparameter-names.ts` | `SKINPARAMETER_NAMES` | `SKINPARAMETER_NAMES` -- `SkinParam.getPossibleValues()` (`SkinParam.java:567-641`), the table `PSystemSkinparameterList.java:99-102` prints: a `TreeSet` of literal keys plus keys derived from the FontParam/ColorParam/LineParam/AlignmentPar |
+
 ## `src/diagrams/dot/`
 
 | Module | Exports | Purpose |
@@ -1693,6 +1707,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `layout.ts` | `layoutDot` |  |
 | `parser.ts` | `parseDot` |  |
 | `renderer.ts` | `renderDot` |  |
+
+## `src/diagrams/eggs/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `charlie-image.ts` | `CharliePng`, `CHARLIE_PNG` | `CHARLIE_PNG` -- the image `charlie` draws (`PSystemCharlie.java`, `PSystemVersion.getCharlieImage`, java:104-106), as the pinned jar embeds it in SVG (D4). |
 
 ## `src/diagrams/files/`
 
@@ -1762,6 +1782,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `SymetricalTee.ts` | `SymetricalTee` | The packing shape `Tetris.add` places: a "tee" of two rectangular arms — (`thickness1`, `elongation1`) then (`thickness2`, `elongation2`) — laid end to end along x, each arm's own thickness centred on the tee's y. |
 | `SymetricalTeePositioned.ts` | `SymetricalTeePositioned` |  |
 | `Tetris.ts` | `Tetris` |  |
+
+## `src/diagrams/openiconic/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `openiconic-all.ts` | `OPENICONIC_ALL` | `OPENICONIC_ALL` -- upstream `openiconic/all.txt`, line by line in file order: the list `PSystemListOpenIconic#getTextBlock` reads (`PSystemListOpenIconic.java:66-73`, resource opened at java:79). |
 
 ## `src/diagrams/packetdiag/`
 
@@ -1984,6 +2010,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `state-transition-clip.ts` | `clusterAnchorRectsOf`, `clipTransitionSpline`, `SolveLine`, `toRectangleArea`, `projectionSpecsOf`, `projectionClusterIdOf`, `inSolveOrder`, `clipLinesInSolveOrder` | state-transition-clip.ts — this port of the edge loop in `DotStringFactory#solve` (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ DotStringFactory.java:458-459`): ```java for (SvekEdge line : getBibliotekon().allLines()) line. |
 | `state-transition-label.ts` | `computeReservedLabelBox`, `transitionLabelAnchor`, `attachTransitionLabel` | Transition label placement — shared by every state-layout pipeline (flat, T3; composite, T4) so antiparallel transitions don't overlap their labels. |
 | `state-transitions.ts` | `ParsedTransition`, `parseTransitionLine`, `isSyncBarId`, `stripSyncBarEquals` | Transition (arrow) grammar for the state parser — `A --> B`, the left-pointing reverse form `A <-- B`, and their decorations (cross-start, circle-end, `[style]` brackets, direction abbreviations, `<<stereotype>>`). |
+
+## `src/diagrams/version/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `stdlib-catalog.ts` | `StdlibCatalogEntry`, `STDLIB_CATALOG` | `STDLIB_CATALOG` -- the folders the bare `stdlib` page lists (`PSystemVersion.java:205-210` -> `Stdlib.addInfoVersion`, `Stdlib.java:320-331`). |
 
 ## `src/diagrams/wbs/`
 
