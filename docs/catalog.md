@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1655 modules · 6026 exported names.
+1657 modules · 6029 exported names.
 
 ## `src/`
 
@@ -1749,6 +1749,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `PSystemRIPFactory.ts` | `PSystemRIPFactory`, `ripPlugin` | `PSystemRIPFactory` — one literal, compared to the raw line with `equalsIgnoreCase`. |
 | `rip-image.ts` | `RIP_PNG` | `RIP_PNG` -- the image `jean canouet` draws under its text (`PSystemRIP.java:63`, `SImageIO.read(imm)`: the inline JPEG `imm`, java:71-435), as the pinned jar re-encodes it in SVG (the D4 approach). |
 | `SentenceDecoder.ts` | `SentenceDecoder` | `SentenceDecoder` — xor an encrypted easter-egg payload with the key a sentence spells (`EggUtils.fromSecretSentence`) and judge whether the result reads as text. |
+
+## `src/diagrams/emoji/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `PSystemListEmoji.ts` | `PSystemListEmoji` | `PSystemListEmoji` — the `emoji <block>` page: a header naming the Unicode block, then every {@link getAll} entry whose key starts with the block, as `<:code:>` artwork, `<#0:code:>` monochrome and the shortcut, in three columns (dx 0 / 500 |
+| `PSystemListEmojiFactory.ts` | `executeLine`, `listEmojiPlugin` | `PSystemListEmojiFactory` — accepts `emoji` (code `26`) or `emoji <block>`. |
 
 ## `src/diagrams/files/`
 
