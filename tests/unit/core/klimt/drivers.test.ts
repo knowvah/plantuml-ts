@@ -298,6 +298,69 @@ describe('DriverTextSvg', () => {
     expect(root.getSvgString()).toContain('text-decoration="underline line-through wavy underline"');
   });
 
+  /**
+   * `fontConfiguration.containsStyle(FontStyle.UNDERLINE) &&
+   * fontConfiguration.getUnderlineStroke().getThickness() > 0`
+   * (DriverTextSvg.java:133-134); `getUnderlineStroke()` is the
+   * `hyperlinkUnderlineStroke` field (FontConfiguration.java:386-388).
+   * Jar oracles: `wbs/keloxe-59-zalu422` (`hyperlinkUnderlineThickness 0`:
+   * link text has no text-decoration), `wbs/facibu-72-dako171` (thickness 2:
+   * `text-decoration="underline"`).
+   */
+  it('UNDERLINE draws nothing when the underline stroke thickness is 0 (java:133-134)', () => {
+    const root = newGraphic();
+    const font = {
+      family: 'sans-serif',
+      size: 12,
+      color: '#FF0000',
+      styles: new Set(['UNDERLINE'] as const),
+      hyperlinkUnderlineStroke: UStroke.withThickness(0),
+    };
+    root.draw(UText.build('Dawkins', font));
+    expect(root.getSvgString()).not.toContain('text-decoration');
+  });
+
+  it('a thickness-0 underline stroke also suppresses the extended-colour line (java:133-139)', () => {
+    const root = newGraphic();
+    const font = {
+      family: 'sans-serif',
+      size: 12,
+      color: '#000000',
+      styles: new Set(['UNDERLINE', 'STRIKE'] as const),
+      extendedColor: '#00FF00',
+      hyperlinkUnderlineStroke: UStroke.withThickness(0),
+    };
+    root.draw(UText.build('deco', font));
+    // Only STRIKE's extended line remains: one <line>, at y - size/4.
+    expect(root.getSvgString().match(/<line /g)).toHaveLength(1);
+    expect(root.getSvgString()).toContain('y1="-3"');
+  });
+
+  it('UNDERLINE keeps the CSS underline for a thickness-2 stroke (java:133-136)', () => {
+    const root = newGraphic();
+    const font = {
+      family: 'sans-serif',
+      size: 12,
+      color: '#FF0000',
+      styles: new Set(['UNDERLINE'] as const),
+      hyperlinkUnderlineStroke: UStroke.withThickness(2),
+    };
+    root.draw(UText.build('Dawkins', font));
+    expect(root.getSvgString()).toContain('text-decoration="underline"');
+  });
+
+  it('UNDERLINE with a null underline stroke throws, as Java NPEs on getThickness() (java:134)', () => {
+    const root = newGraphic();
+    const font = {
+      family: 'sans-serif',
+      size: 12,
+      color: '#000000',
+      styles: new Set(['UNDERLINE'] as const),
+      hyperlinkUnderlineStroke: null,
+    };
+    expect(() => root.draw(UText.build('u', font))).toThrow('NullPointerException');
+  });
+
   it('a leading space shifts x by the measured space width and is stripped from the text', () => {
     const root = newGraphic();
     const font = { family: 'sans-serif', size: 14, color: '#000000', styles: new Set<FontStyle>() };

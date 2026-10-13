@@ -29,7 +29,43 @@ describe('bridgeFontConfiguration (FontConfiguration.java:57-80)', () => {
       styles: new Set(),
       fontFace: { cssWeight: 400, italic: false },
       hColor: BLUE,
+      hyperlinkColor: '#0000FF',
+      hyperlinkUnderlineStroke: STROKE,
     });
+  });
+
+  /**
+   * `Style#getFontConfiguration` builds the font configuration WITH the
+   * style's `HyperLinkColor` and `HyperlinkUnderlineThickness/Style` stroke
+   * (Style.java:265-267, `FontConfiguration.create(font, color,
+   * hyperlinkColor, stroke)`), which `hyperlink()`/`withHyperlink()`
+   * (FontConfiguration.java:253-256,335-340) and `DriverTextSvg`
+   * (java:133-134) read. Jar oracle `wbs/facibu-72-dako171`
+   * (`hyperlinkColor Red`): link text `fill="#F00"`.
+   */
+  it('carries the hyperlink colour and underline stroke (Style.java:265-267)', () => {
+    const red = HColorSet.instance().getColor('red');
+    const thick = UStroke.withThickness(2);
+    const fc = bridgeFontConfiguration(
+      StyleFontConfiguration.create(
+        UFontFactory.build('Arial', { cssWeight: 400, italic: false }, 11),
+        BLUE,
+        red,
+        thick,
+      ),
+    );
+    expect(fc.hyperlinkColor).toBe('#FF0000');
+    expect(fc.hyperlinkUnderlineStroke).toBe(thick);
+  });
+
+  it('rejects a hyperlink colour that is not an HColorSimple', () => {
+    const fc = StyleFontConfiguration.create(
+      UFontFactory.build('Arial', { cssWeight: 400, italic: false }, 11),
+      BLUE,
+      {},
+      STROKE,
+    );
+    expect(() => bridgeFontConfiguration(fc)).toThrow('ClassCastException');
   });
 
   it('getStyles: BOLD from weight >= 700 (UFontFace.java:158-160), ITALIC from the face', () => {

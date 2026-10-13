@@ -1,0 +1,5 @@
+@startwbs
+* a [[http://a.com  two]]
+** b [[“http://q.com” lbl]]
+** c [[http://a.com{tip} the label ]]x
+@endwbs

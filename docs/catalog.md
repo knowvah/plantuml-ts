@@ -557,7 +557,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `CommandCreoleSizeChange.ts` | `createSizeChangeCommands` | CommandCreoleSizeChange — `<size:N>text</size>` and `<size:N>text to end of line` (no closing tag needed). |
 | `CommandCreoleSpace.ts` | `createSpaceCommand` | CommandCreoleSpace — the creole `<space:N>` / `<space:N/>` tag. |
 | `CommandCreoleStyle.ts` | `createStyleCommands`, `createStyleCommandsWithoutCreoleForm`, `createBackcolorCommands` | CommandCreoleStyle — the BOLD/ITALIC/UNDERLINE/STRIKE/WAVE inline style commands: `**text**`/`//text//`/`__text__`/`--text--`/`~~text~~` (pure Creole double-punctuation) and `<b>text</b>`/`<b>text to end of line` (HTML-tag-style, with or wi |
-| `CommandCreoleUrl.ts` | `HYPERLINK_COLOR`, `createUrlCommand` | CommandCreoleUrl — `[[url]]` / `[[url label]]` / `[[url {tooltip}]]` / `[[url {tooltip} label]]` link atom-splitting: the jar draws the resolved LABEL as its own text atom, in the hyperlink color (blue, `SkinParamUtils.getFontHyperlinkColor |
+| `CommandCreoleUrl.ts` | `HYPERLINK_COLOR`, `createUrlCommand` | CommandCreoleUrl — the `[[...]]` creole command: matches `Pattern2.cmpile("^(" + UrlBuilder.getRegexp() + ")")` at the scan position and builds the link through `UrlBuilder#getUrl` in STRICT mode, then draws the resulting `Url`'s LABEL in t |
 | `Splitter.ts` | `Splitter` | Splitter — the creole `htmlTag` alternation and `purgeAllTag`, which strips every tag it matches (salt's `AbstractElementText#getCharNumber`). |
 
 ## `src/core/klimt/creole/legacy/`

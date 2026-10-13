@@ -25,7 +25,14 @@ const BOLD_CSS_WEIGHT = 700;
  *    (`UText.ts`'s documented stand-in for `isTransparent()`);
  *  - `hColor`: the `HColorSimple` itself (with its dark partner), which
  *    `DriverTextSvg` maps with the drawing graphic's `ColorMapper`
- *    (DriverTextSvg.java:177-178); absent when transparent.
+ *    (DriverTextSvg.java:177-178); absent when transparent;
+ *  - `hyperlinkColor`: the style's `HyperLinkColor` (Style.java:265,
+ *    FontConfiguration.java:149), as the solid paint `withHyperlink()`
+ *    (java:253-256) copies onto the colour — read by `CommandCreoleUrl.ts`;
+ *  - `hyperlinkUnderlineStroke`: the style's `HyperlinkUnderlineThickness/
+ *    Style` stroke (Style.java:266, FontConfiguration.java:148), which
+ *    `hyperlink()` (java:335-340) and `DriverTextSvg` (java:133-134,
+ *    `getUnderlineStroke()`) read.
  *
  * Throws where the abel object carries a stand-in the style engine never
  * builds (a non-`UFont` font or a non-`HColorSimple` colour) — Java's
@@ -40,6 +47,10 @@ export function bridgeFontConfiguration(fc: StyleFontConfiguration): FontConfigu
   if (!(color instanceof HColorSimple))
     throw new Error('ClassCastException: FontConfiguration color is not an HColorSimple');
 
+  const hyperlinkColor = fc.getHyperlinkColor();
+  if (!(hyperlinkColor instanceof HColorSimple))
+    throw new Error('ClassCastException: FontConfiguration hyperlinkColor is not an HColorSimple');
+
   const face = font.getFontFace();
   const transparent = color.isTransparent();
   const bridged: FontConfiguration = {
@@ -48,6 +59,8 @@ export function bridgeFontConfiguration(fc: StyleFontConfiguration): FontConfigu
     color: transparent ? null : solidPaint(color),
     styles: getStyles(face.cssWeight >= BOLD_CSS_WEIGHT, face.italic),
     fontFace: face,
+    hyperlinkColor: solidPaint(hyperlinkColor),
+    hyperlinkUnderlineStroke: fc.getHyperlinkUnderlineStroke(),
   };
   return transparent ? bridged : { ...bridged, hColor: color };
 }

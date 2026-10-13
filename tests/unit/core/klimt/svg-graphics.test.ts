@@ -704,6 +704,36 @@ describe('SvgGraphics — openLink/closeLink (cdd-T28, was a D3-prime stub)', ()
     expect(svg.createXml()).toContain('title="aAb\nc"');
   });
 
+  /**
+   * `m.appendReplacement(sb, "" + c)` (SvgGraphics.java:1156) reads the
+   * decoded character as a REPLACEMENT STRING: a lone `\` or `$` is an
+   * escape / group reference with nothing after it, and
+   * `Matcher.appendExpandedReplacement` throws. Jar oracle
+   * `test-results/dot-cache/wbs/ledama-83-xoko366/in.svg`: crash page
+   * "java.lang.IllegalArgumentException: character to be escaped is missing".
+   */
+  it('throws like Matcher.appendReplacement when a decoded char is a lone \\ (java:1156)', () => {
+    const svg = new SvgGraphics(0, basicSvgOption(), 'v');
+    expect(() => svg.openLink('http://x', 'a<U+005C>nb', '_top')).toThrow(
+      'IllegalArgumentException: character to be escaped is missing',
+    );
+  });
+
+  it('throws like Matcher.appendReplacement when a decoded char is a lone $ (java:1156)', () => {
+    const svg = new SvgGraphics(0, basicSvgOption(), 'v');
+    expect(() => svg.openLink('http://x', 'cost <U+0024>5', '_top')).toThrow(
+      'IllegalArgumentException: Illegal group reference: group index is missing',
+    );
+  });
+
+  it('a null title falls back to the url undecoded (java:1148-1149)', () => {
+    const svg = new SvgGraphics(0, basicSvgOption(), 'v');
+    svg.openLink('http://x/<U+005C>', null, '_top');
+    svg.svgRectangle({ x: 1, y: 2, width: 3, height: 4, rx: 0, ry: 0 }, 0);
+    svg.closeLink();
+    expect(svg.createXml()).toContain('xlink:title="http://x/&lt;U+005C>"');
+  });
+
   it('blanks a javascript: url but keeps the <a> (java:1136-1140)', () => {
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
     svg.openLink('javascript:alert(1)', null, '_top');

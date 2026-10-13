@@ -1,121 +1,52 @@
 /**
- * CommandCreoleUrl — `[[url]]` / `[[url label]]` / `[[url {tooltip}]]` /
- * `[[url {tooltip} label]]` link atom-splitting: the jar draws the
- * resolved LABEL as its own text atom, in the hyperlink color (blue,
- * `SkinParamUtils.getFontHyperlinkColor` — `#0000FF` in every jar-verified
- * sample) with an underline, wrapped in an `<a href>` element.
+ * CommandCreoleUrl — the `[[...]]` creole command: matches
+ * `Pattern2.cmpile("^(" + UrlBuilder.getRegexp() + ")")` at the scan
+ * position and builds the link through `UrlBuilder#getUrl` in STRICT mode,
+ * then draws the resulting `Url`'s LABEL in the hyperlink font, wrapped in
+ * an `<a href>` (`StripeSimple#addUrl` -> `AtomTextUtils.createUrl`, which
+ * applies `FontConfiguration#hyperlink()`).
  *
- * Upstream: klimt/creole/command/CommandCreoleUrl.java, built on
- * `UrlBuilder`/`Url` (`net/url/`) — NOT ported symbol-for-symbol (a whole
- * URL-mode/topurl-prefix subsystem, out of this iteration's directive-atom
- * charter); this command instead resolves the visible label directly
- * (strip an optional `{tooltip}`, first whitespace-run is the url, the
- * REST is the label, defaulting to the url itself when nothing follows —
- * `Url(String,String,String)`'s label-defaulting ctor, java) and applies
- * the jar's own OBSERVED text styling (jar-verified 2026-07-15,
- * `usecase/bivira-53-boja685`: `fill="#0000FF"` +
- * `text-decoration="underline"`).
+ * ```java
+ * final UrlBuilder urlBuilder = new UrlBuilder(stripe.getSkinParam().getValue("topurl"), UrlMode.STRICT);
+ * final Url url = urlBuilder.getUrl(m.group(1));
+ * stripe.addUrl(url);
+ * return m.group(1).length();
+ * ```
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/command/CommandCreoleUrl.java:56,73-82
  *
- * G2 N40: the `<a href>` SVG wrapper element itself LANDED (class-diagram
- * call site only, `renderer-classifier-box.ts#renderRowAtoms` -- see that
- * function's own doc comment) via `StripeBuilder#analyzeAndAddInlineWithUrl`
- * (`atom/Atom.ts#CreoleAtomUrl`, threaded onto the produced `'text'` atom(s)
- * rather than a NEW atom kind, so nested creole markup inside the label
- * keeps working exactly as before). `url`/`tooltip` resolution mirrors
- * `resolveLabel`'s own algorithm exactly (same tooltip-strip + first-
- * whitespace-run split, just keeping the PARTS `resolveLabel` throws away)
- * -- jar-verified `dasagu-52-vani172`'s classifier/member-level url grammar
- * is a SEPARATE mechanism (`class-url.ts#parseUrlBracket`'s full 5-way
- * `UrlBuilder` port); this file's own simplified grammar is intentionally
- * NOT unified with it (`core/klimt` must not depend on `diagrams/class`).
- * `entity-level `url of X is [[...]]` hyperlink wrapping remains a
- * SEPARATE, still-missing mechanism (`EntityImageDescription.ts`'s own
- * pre-existing "entity hyperlinks (Url) are not supported" gap) — out of
- * this directive's scope.
+ * The five `UrlBuilder` arms (QUOTED, ONLY_TOOLTIP, ONLY_TOOLTIP_AND_LABEL,
+ * LINK_TOOLTIP_NOLABEL, LINK_WITH_OPTIONAL_TOOLTIP_WITH_OPTIONAL_LABEL) and
+ * `Url`'s tooltip/label defaulting (`Url.java:51-66`) are the port's
+ * `core/url/UrlBuilder.ts` / `core/url/Url.ts`, used here unchanged.
+ *
+ * Port seams (recorded, not fitted):
+ *  - `topurl`: this port's `StripeBuilder` carries no skin param, so the
+ *    builder is constructed with `topurl = null` (no `skinparam topurl`
+ *    prefix on a creole link) — the `withTopUrl` arm is inert here.
+ *  - the label is drawn through `analyzeAndAddInlineWithUrl` (the port's
+ *    recursive creole engine, G2 N40) rather than `AtomTextUtils
+ *    .createAtomTextForUrl`'s sprite/openicon/img/emoji-only split and its
+ *    `Display.getWithNewlines` line split (AtomTextUtils.java:79-91).
+ *
+ * The `<a href>` wrapper element: `StripeBuilder#analyzeAndAddInlineWithUrl`
+ * threads `atom/Atom.ts#CreoleAtomUrl` onto the produced `'text'` atom(s).
  */
 import type { Command, StripeBuilder } from './Command.js';
 import { FontStyle, type FontConfiguration } from '../../shape/UText.js';
+import { getRegexp, transform, UrlBuilder } from '../../../url/UrlBuilder.js';
+import { UrlMode } from '../../../url/UrlMode.js';
+import type { Url } from '../../../url/Url.js';
 
-// `UrlBuilder.getRegexp()`'s shape (bracket-delimited, no nested `]]`
-// inside) — ported as a source string (never a regex literal, the `[`/`]`
-// complexity-hook precedent already established by `creole-atoms.ts`).
-//
-// BOTH brackets are excluded from the capture, not just `]`. Every one of the
-// five alternatives `getRegexp()` composes excludes the pair — the link arm is
-//
-// ```java
-// private static final String S_LINK_WITH_OPTIONAL_TOOLTIP_WITH_OPTIONAL_LABEL =
-//         START_PART + "([^%s%g\\[\\]]+?)" + ...
-// ```
-// @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/url/UrlBuilder.java:76-80
-//
-// The `[` matters whenever a COMPONENT wraps a display in literal brackets of
-// its own — `ComponentRoseGroupingHeader.java:89` does exactly that to a
-// group's comment, so the drawn string is `[[[url]]]`. Admitting `[` made this
-// port match at position 0 and emit one linked run reading `[https://…`, a
-// broken href; upstream cannot start there and matches at position 1, giving
-// the jar's three runs `[` / linked url / `]` (`cedeti-10-bufu072`).
-const URL_TAG_SOURCE = '\\[\\[([^\\[\\]]*(?:\\][^\\[\\]]+)*)\\]\\]';
+/** `Pattern2.cmpile("^(" + UrlBuilder.getRegexp() + ")")` — `%`-token
+ *  transform + CASE_INSENSITIVE (Pattern2.java:109-121; `iu`, as
+ *  `UrlBuilder.ts#cmpile`). `matcher(line, pos)` sets the region at `pos`
+ *  with anchoring bounds (Matcher2.java:56-62), so `^` is the scan position:
+ *  mirrored by matching `line.slice(pos)`.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/command/CommandCreoleUrl.java:56 */
+const PATTERN = new RegExp(`^(${transform(getRegexp())})`, 'iu');
 
+/** Upstream's `blue` hyperlink default (`plantuml.skin:7,565`). */
 export const HYPERLINK_COLOR = '#0000FF';
-
-/**
- * add2 T2d (laxibe-66-teme800): a `{tooltip}` is only a tooltip when
- * nothing but the label/end follows its closing brace -- upstream's
- * `S_LINK_WITH_OPTIONAL_TOOLTIP_WITH_OPTIONAL_LABEL` requires the Link to
- * stop, THEN `(?:[%s]*\{([^{}]*)\})?` (optional tooltip), THEN
- * `(?:[%s]([^%s\{\}\[\]][^\[\]]*))?` (optional label, which always starts
- * with REQUIRED whitespace), THEN `END_PART` --
- * `~/git/plantuml/.../url/UrlBuilder.java:76-80`:
- * ```java
- * private static final String S_LINK_WITH_OPTIONAL_TOOLTIP_WITH_OPTIONAL_LABEL = START_PART + //
- *         "([^%s%g\\[\\]]+?)" + // Link
- *         "(?:[%s]*\\{([^{}]*)\\})?" + // Optional tooltip
- *         "(?:[%s]([^%s\\{\\}\\[\\]][^\\[\\]]*))?" + // Optional label
- *         END_PART;
- * ```
- * So a `}` immediately glued to more non-whitespace text (`{dd}sss`) can
- * never satisfy either the label branch (needs LEADING whitespace) or
- * `END_PART` (needs `]]` right there) -- the lazy Link group is forced to
- * keep growing PAST the brace pair instead, swallowing it as literal link
- * text. Mirrored here as a lookahead: a `{...}` only counts as the tooltip
- * when followed by whitespace or the end of `inner` (`$` -- `inner` is
- * already everything between the `[[`/`]]` delimiters, so "end of inner"
- * IS "immediately before `]]`"). `[^{}]*` matches the Java capture
- * (`[^{}]*`) exactly.
- */
-const TOOLTIP_RE = /\{([^{}]*)\}(?=\s|$)/;
-
-/** Finds the (at most one) upstream-recognized tooltip in `inner` and
- *  returns `inner` with it excised -- shared by {@link resolveLabel} and
- *  {@link resolveUrlAndTooltip} so both read the SAME boundary rule. */
-function extractTooltip(inner: string): { withoutTooltip: string; tooltip: string | undefined } {
-  const m = TOOLTIP_RE.exec(inner);
-  if (m === null) return { withoutTooltip: inner, tooltip: undefined };
-  return { withoutTooltip: inner.slice(0, m.index) + inner.slice(m.index + m[0].length), tooltip: m[1] };
-}
-
-/** Upstream: `Url`'s label-defaulting ctor -- strip an optional
- *  `{tooltip}`, the first whitespace-run is the url, everything after is
- *  the label; falls back to the url itself when nothing remains. */
-function resolveLabel(inner: string): string {
-  const withoutTooltip = extractTooltip(inner).withoutTooltip.replace(/\s+/g, ' ').trim();
-  const spaceIdx = withoutTooltip.indexOf(' ');
-  return spaceIdx === -1 ? withoutTooltip : withoutTooltip.slice(spaceIdx + 1).trim();
-}
-
-/** G2 N40: `resolveLabel`'s own tooltip-strip + first-whitespace-run split,
- *  keeping the url (part BEFORE the split) and tooltip (the `{...}`
- *  capture, defaulting to the url itself when absent -- `Url.java`'s own
- *  tooltip-defaulting ctor rule, same precedent `class-url.ts#buildUrl`
- *  already applies for the classifier-level grammar). */
-function resolveUrlAndTooltip(inner: string): { url: string; tooltip: string } {
-  const { withoutTooltip: stripped, tooltip } = extractTooltip(inner);
-  const withoutTooltip = stripped.replace(/\s+/g, ' ').trim();
-  const spaceIdx = withoutTooltip.indexOf(' ');
-  const url = spaceIdx === -1 ? withoutTooltip : withoutTooltip.slice(0, spaceIdx);
-  return { url, tooltip: tooltip ?? url };
-}
 
 /**
  * D3 (cdd6 T1b): upstream `FontConfiguration#hyperlink()`'s `withHyperlink()`
@@ -130,33 +61,36 @@ function resolveHyperlinkColor(saved: FontConfiguration): string {
   return saved.hyperlinkColor ?? HYPERLINK_COLOR;
 }
 
-function applyHyperlinkStyleAndPush(label: string, url: string, tooltip: string, stripe: StripeBuilder): void {
+/** `StripeSimple#addUrl` (java:224-226) -> `AtomTextUtils.createUrl`
+ *  (java:79-91): `fontConfiguration.hyperlink()` then the label atom(s). */
+function applyHyperlinkStyleAndPush(url: Url, stripe: StripeBuilder): void {
   const saved: FontConfiguration = stripe.getActualFontConfiguration();
   // `FontConfiguration#hyperlink()` (`FontConfiguration.java:335-340`):
   // `add(FontStyle.UNDERLINE)` only when `hyperlinkUnderlineStroke != null`.
   const styles = new Set(saved.styles);
   if (saved.hyperlinkUnderlineStroke !== null) styles.add(FontStyle.UNDERLINE);
   stripe.setActualFontConfiguration({ ...saved, color: resolveHyperlinkColor(saved), styles });
-  stripe.analyzeAndAddInlineWithUrl(label, url, tooltip);
+  stripe.analyzeAndAddInlineWithUrl(url.getLabel(), url.getUrl(), url.getTooltip());
   stripe.setActualFontConfiguration(saved);
 }
 
-/** Upstream: `CommandCreoleUrl.create()`. */
+/** Upstream: `CommandCreoleUrl.create()`.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/command/CommandCreoleUrl.java:58-83 */
 export function createUrlCommand(): Command {
-  const re = new RegExp('^' + URL_TAG_SOURCE);
   return {
     starters: ['[['],
     matchingSize(line, pos) {
-      const m = re.exec(line.slice(pos));
-      return m === null ? 0 : m[0].length;
+      const m = PATTERN.exec(line.slice(pos));
+      return m === null ? 0 : m[1]!.length;
     },
     executeAndAdvance(line, pos, stripe) {
-      const m = re.exec(line.slice(pos));
-      if (m === null) return 0;
-      const inner = m[1]!;
-      const { url, tooltip } = resolveUrlAndTooltip(inner);
-      applyHyperlinkStyleAndPush(resolveLabel(inner), url, tooltip, stripe);
-      return m[0].length;
+      const m = PATTERN.exec(line.slice(pos));
+      if (m === null) throw new Error('IllegalStateException');
+      // `m.group(1)` matched one of the five arms in `getRegexp()` order, so
+      // the same-order STRICT cascade in `getUrl` matches it whole: never null.
+      const url = new UrlBuilder(null, UrlMode.STRICT).getUrl(m[1]!)!;
+      applyHyperlinkStyleAndPush(url, stripe);
+      return m[1]!.length;
     },
   };
 }
