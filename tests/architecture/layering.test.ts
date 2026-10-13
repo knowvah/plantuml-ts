@@ -61,7 +61,7 @@ export const ALLOWLIST: readonly AllowlistEntry[] = [
     to: 'src/diagrams/donors/PSystemDonors.ts',
     why:
       'ufp D3 — upstream lists via PSystemDonors.getCols: ' +
-      'PSystemListOpenIconic.java:47 imports net.sourceforge.plantuml.donors.PSystemDonors, ' +
+      'PSystemListOpenIconic.java:48 imports net.sourceforge.plantuml.donors.PSystemDonors, ' +
       'java:74 calls getCols(lines, 7, 0).',
   },
   {
@@ -69,7 +69,7 @@ export const ALLOWLIST: readonly AllowlistEntry[] = [
     to: 'src/diagrams/donors/PSystemDonors.ts',
     why:
       'ufp D1/D3 — upstream keeps the archimate listing in klimt/sprite and lists via ' +
-      'PSystemDonors.getCols (PSystemListArchimateSprites.java:78, getCols(lines, 4, 0)); ' +
+      'PSystemDonors.getCols (PSystemListArchimateSprites.java:45 import, :75 getCols(lines, 4, 0)); ' +
       'the core home mirrors the Java package.',
   },
   {
