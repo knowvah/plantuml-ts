@@ -21,6 +21,7 @@ import { Colors } from '../../../src/core/abel/Colors.js';
 import { Direction } from '../../../src/core/abel/Direction.js';
 import type { HColor } from '../../../src/core/abel/Colors.js';
 import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
+import { isEmpty } from '../../../src/core/annotations/index.js';
 import { Display } from '../../../src/core/klimt/creole/Display.js';
 import { URectangle } from '../../../src/core/klimt/shape/URectangle.js';
 import type { UChange } from '../../../src/core/klimt/UChange.js';
@@ -437,3 +438,16 @@ function recording(log: { shape: UShape; applied: readonly UChange[] }[], applie
     getStringBounder: () => stringBounder(),
   };
 }
+
+describe('WBSDiagram common-command state (TitledDiagram/UmlDiagram, MindMapDiagram.ts:52-70 precedent)', () => {
+  it('starts with empty annotations and no scale', () => {
+    const d = diagram();
+    expect(isEmpty(d.annotations)).toBe(true);
+    expect(d.scale).toBeUndefined();
+  });
+
+  it('reads its sprites from the skin param', () => {
+    const d = diagram();
+    expect(d.sprites).toBe(d.getSkinParam().getSprites());
+  });
+});
