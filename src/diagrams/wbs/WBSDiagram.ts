@@ -5,6 +5,7 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/wbs/WBSDiagram.java
  */
 import type { HColor } from '../../core/abel/Colors.js';
+import { createAnnotations, type DiagramAnnotations } from '../../core/annotations/index.js';
 import type { Colors } from '../../core/abel/Colors.js';
 import { ColorType } from '../../core/abel/ColorType.js';
 import type { Direction } from '../../core/abel/Direction.js';
@@ -18,6 +19,8 @@ import type { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { Stereotype } from '../../core/stereo/Stereotype.js';
 import { NoStyleAvailableException } from '../../core/style/StyleLoader.js';
 import { StyleSignatureBasic } from '../../core/style/StyleSignatureBasic.js';
@@ -89,6 +92,13 @@ export class WBSDiagram extends TitledDiagram implements TextBlock {
   /** @see WBSDiagram.java:84 */
   private readonly links: WBSLink<WElement>[] = [];
   private readonly skinParam: SkinParam;
+  /** `TitledDiagram`'s title/caption/legend/header/footer/mainframe
+   *  (`CommonCommands.addTitleCommands`), read by the chrome step —
+   *  `MindMapDiagram.ts:52`. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java */
+  readonly annotations: DiagramAnnotations = createAnnotations();
+  /** `CommandScale*`'s target (`UmlDiagram#setScale`) — `MindMapDiagram.ts:54`.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/UmlDiagram.java */
+  scale: ScaleSpec | undefined = undefined;
 
   /** @see WBSDiagram.java:90-92 */
   constructor(source: UmlSource, preprocessing: PreprocessingArtifact, skinParam: SkinParam) {
@@ -98,6 +108,12 @@ export class WBSDiagram extends TitledDiagram implements TextBlock {
 
   getSkinParam(): SkinParam {
     return this.skinParam;
+  }
+
+  /** The skin param's sprites (`SkinParam#addSprite`'s map), read by the
+   *  sprite commands and the chrome step — `MindMapDiagram.ts:70`. */
+  get sprites(): SpriteRegistry {
+    return this.skinParam.getSprites();
   }
 
   /** @see WBSDiagram.java:86-88 */
