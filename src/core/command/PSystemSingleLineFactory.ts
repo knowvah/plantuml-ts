@@ -19,7 +19,7 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/PSystemSingleLineFactory.java
  */
 import type { DiagramType, UmlSource } from '../block-extractor.js';
-import type { AssembledSvg, SyncPlugin } from '../dispatcher.js';
+import type { AssembledSvg, ParseOptions, SyncPlugin } from '../dispatcher.js';
 import type { StringMeasurer } from '../measurer.js';
 import { refuse } from '../parse-refusal.js';
 import type { ParseRefusal } from '../parse-refusal.js';
@@ -72,8 +72,16 @@ export interface RenderContext {
 export interface SingleLineSpec<D> {
   /** Always `'sequence'`: the `@startuml` candidate type (java:58-61). */
   readonly type: SingleLineType;
-  /** `undefined` is upstream's `null`: "Syntax Error?" on the line. */
-  executeLine(source: UmlSource, line: string, preprocessing: PreprocessingArtifact): D | undefined;
+  /** `undefined` is upstream's `null`: "Syntax Error?" on the line.
+   *  `options` is port-only: ADR-2's asset channel (`ParseOptions`), which
+   *  replaces upstream's classpath reads (emoji, `/sprites/**`, dedication
+   *  images) and so has no Java counterpart in the signature. */
+  executeLine(
+    source: UmlSource,
+    line: string,
+    preprocessing: PreprocessingArtifact,
+    options?: ParseOptions,
+  ): D | undefined;
   /** Typically `{ completeSvg: diagram.exportDiagram(0, ctx.measurer) }` (`UgDiagram`). */
   render(diagram: D, ctx: RenderContext): AssembledSvg;
 }
@@ -153,7 +161,7 @@ function emptyError(source: UmlSource, all: readonly string[], at: Located, trac
  * one line, untrimmed (`s.getString()`).
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/PSystemSingleLineFactory.java:69-103
  */
-function createSystem<D>(spec: SingleLineSpec<D>, source: UmlSource): D | ParseRefusal {
+function createSystem<D>(spec: SingleLineSpec<D>, source: UmlSource, options?: ParseOptions): D | ParseRefusal {
   const all = upstreamLinesOf(source);
   const lines = removeInitialNoise(all);
   if (lines.length !== SINGLE_LINE_SOURCE_COUNT) return NOT_SINGLE_LINE;
@@ -162,7 +170,7 @@ function createSystem<D>(spec: SingleLineSpec<D>, source: UmlSource): D | ParseR
   if (!isStartDirective(startLine.text)) throw new Error('UnsupportedOperationException');
   const s = lines[1]!;
   if (isEndDirective(s.text)) return emptyError(source, all, s, 2);
-  const sys = spec.executeLine(source, s.text, new PreprocessingArtifact());
+  const sys = spec.executeLine(source, s.text, new PreprocessingArtifact(), options);
   if (sys === undefined) return refuse('syntax', documentLineOf(source, all, s.k), 1, SYNTAX_ERROR);
   return sys;
 }
@@ -175,7 +183,7 @@ function createSystem<D>(spec: SingleLineSpec<D>, source: UmlSource): D | ParseR
 export function singleLinePlugin<D>(spec: SingleLineSpec<D>): SyncPlugin<D, SingleLineGeometry<D>> {
   return {
     type: SEQUENCE_HACK,
-    parse: (source) => createSystem(spec, source),
+    parse: (source, options) => createSystem(spec, source, options),
     layoutSync: (diagram, _theme, measurer) => ({ diagram, measurer }),
     render: (geo, theme) => spec.render(geo.diagram, { theme, measurer: geo.measurer }),
   };

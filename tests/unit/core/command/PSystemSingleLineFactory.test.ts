@@ -17,7 +17,8 @@ import { describe, expect, it } from 'vitest';
 import { buildBlockUmls } from '../../../../src/core/BlockUmlBuilder.js';
 import type { UmlSource } from '../../../../src/core/block-extractor.js';
 import { DiagramRegistry } from '../../../../src/core/dispatcher.js';
-import type { CompleteSvg, SyncPlugin } from '../../../../src/core/dispatcher.js';
+import type { CompleteSvg, ParseOptions, SyncPlugin } from '../../../../src/core/dispatcher.js';
+import type { AssetStore } from '../../../../src/core/asset-store.js';
 import { mergeRefusals, parseRefusalOf, refuse } from '../../../../src/core/parse-refusal.js';
 import type { ParseRefusal } from '../../../../src/core/parse-refusal.js';
 import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
@@ -174,6 +175,22 @@ describe('singleLinePlugin — plugin shape', () => {
     const geo = plugin.layoutSync(ast as Accepted, defaultTheme, measurer);
     expect(plugin.render(geo, defaultTheme)).toEqual({ completeSvg: 'anything' });
     expect(seen).toEqual([{ theme: defaultTheme, measurer }]);
+  });
+
+  it("forwards parse's ParseOptions (the ADR-2 assetStore channel) to executeLine", () => {
+    const assetStore: AssetStore = { get: () => undefined, has: () => false };
+    const seen: (ParseOptions | undefined)[] = [];
+    const plugin = singleLinePlugin<Accepted>({
+      type: 'sequence',
+      executeLine(_source, line, _preprocessing, options) {
+        seen.push(options);
+        return { who: 'x', line };
+      },
+      render: (diagram) => ({ completeSvg: diagram.line }),
+    });
+    plugin.parse(sourceOf('@startuml\nanything\n@enduml'), { assetStore });
+    plugin.parse(sourceOf('@startuml\nanything\n@enduml'));
+    expect(seen).toEqual([{ assetStore }, undefined]);
   });
 });
 
