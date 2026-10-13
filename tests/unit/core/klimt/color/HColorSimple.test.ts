@@ -50,3 +50,12 @@ describe('HColorSimple', () => {
     expect(RED.withDark(HALF) as HColorSimple).toBeInstanceOf(HColorSimple);
   });
 });
+
+describe('HColorSimple.distanceTo (HColorSimple.java:217-219)', () => {
+  it('delegates to ColorUtils.distance on the wrapped colours', () => {
+    const a = HColorSimple.create({ r: 10, g: 40, b: 90, a: 255 });
+    const b = HColorSimple.create({ r: 20, g: 20, b: 60, a: 255 });
+    expect(a.distanceTo(b)).toBe(18);
+    expect(RED.distanceTo(CLEAR)).toBe(Math.trunc((255 * 299) / 1000));
+  });
+});

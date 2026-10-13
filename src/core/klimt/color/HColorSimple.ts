@@ -1,6 +1,7 @@
 import type { Paint } from '../../paint.js';
 import type { HColor } from '../../style/Value.js';
 import type { ColorMapper } from './ColorMapper.js';
+import { distance } from './ColorUtils.js';
 import { toSvgHex, type ResolvedColor } from './HColorSet.js';
 
 /** `String.format("%02X")` / `"%02x"` of one 8-bit channel. */
@@ -37,6 +38,11 @@ export class HColorSimple implements HColor {
     /** @see HColorSimple.java:46 */
     private readonly dark: HColor | undefined,
   ) {}
+
+  /** @see HColorSimple.java:217-219 */
+  distanceTo(other: HColorSimple): number {
+    return distance(this.color, other.color);
+  }
 
   /** @see HColorSimple.java:141-143 */
   static create(c: ResolvedColor): HColorSimple {
