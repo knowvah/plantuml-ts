@@ -1,0 +1,4 @@
+
+### wbs/keloxe-59-zalu422  pass=false structural=2 numeric=0
+  S svg/g[1]/a[1]/text[1]/@fill  exp=#F00 | act=#00F
+  S svg/g[1]/a[1]/text[1]/@text-decoration  exp= | act=underline

@@ -1,0 +1,11 @@
+
+### wbs/ledama-83-xoko366  pass=false structural=3 numeric=6
+  S svg/g[1]/text[1]/@textLength  exp=397.65 | act=90
+  S svg/g[1]/text[1]/text()[1]  exp=Diagram source: (Use http://zxing.org/w/decode.jspx to decode the qrcode) | act=raw string literals
+  S svg/g[1][childCount]  exp=57 | act=4
+  N svg/@height  exp=770 | act=113 (Δ657)
+  N svg/@viewBox[2]  exp=700 | act=339 (Δ361)
+  N svg/@viewBox[3]  exp=770 | act=113 (Δ657)
+  N svg/@width  exp=700 | act=339 (Δ361)
+  N svg/g[1]/text[1]/@x  exp=8.3 | act=30 (Δ21.7)
+  N svg/g[1]/text[1]/@y  exp=614.333 | act=39.333 (Δ575)

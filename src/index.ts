@@ -26,6 +26,7 @@ import { chartPlugin } from './diagrams/chart/index.js';
 import { dotPlugin } from './diagrams/dot/index.js';
 import { mindmapPlugin } from './diagrams/mindmap/index.js';
 import { saltPlugin } from './diagrams/salt/index.js';
+import { wbsPlugin } from './diagrams/wbs/index.js';
 import type { Theme } from './core/theme.js';
 import type { StyleMap } from './core/skinparam.js';
 import type { StringMeasurer } from './core/measurer.js';
@@ -125,6 +126,7 @@ registry.register(chartPlugin);
 registry.register(dotPlugin);
 registry.register(mindmapPlugin);
 registry.register(saltPlugin);
+registry.register(wbsPlugin);
 
 /** The block's preprocessed interior plus the style sources the interpreter pulled out of THAT block. */
 function umlSourceOfBlock(block: BlockUmlOk): UmlSource {

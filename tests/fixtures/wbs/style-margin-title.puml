@@ -1,0 +1,9 @@
+@startwbs
+<style>
+root {
+  Margin 30
+}
+</style>
+title T
+* r
+@endwbs

@@ -1,0 +1,3 @@
+
+### wbs/facibu-72-dako171  pass=false structural=1 numeric=0
+  S svg/g[1]/a[1]/text[1]/@fill  exp=#F00 | act=#00F
