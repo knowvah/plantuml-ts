@@ -98,8 +98,8 @@ Batch close: [close-procedure.md](close-procedure.md).
 | [2](batch-2/overview.md): tree layout + diagram | T2a, T2b | ∥ (Fork contract) | [x] |
 | [3](batch-3/overview.md): commands + factory | T3a ∥ T3b → T3c | two waves | [x] |
 | [4](batch-4/overview.md): plugin wiring + main pin close | T4a | — | [x] |
-| [5](batch-5/overview.md): residual drive (written at the b4 close) + T5-cov | T5* | per spec | [ ] |
-| [exit](exit/overview.md): final + merge | T-exit | — | [ ] |
+| [5](batch-5/overview.md): residual drive (written at the b4 close) + T5-cov | T5* | per spec | [x] |
+| [exit](exit/overview.md): final + merge | T-exit | — | [x] |
 | [exit](exit/overview.md): next mission brief (after merge) | T-next: `@startuml` utility factories (`listopeniconic`, …) | — | [ ] |
 
 Executor: `fable`. Subagents: `typescript-pro` — opus for T1a, T1b, T2a, T2b, T4a, T5-cov;
@@ -117,3 +117,22 @@ sonnet for T0b, T0c, T1c, T3a–T3c. Every agent prompt = worktree header +
 - [settings.autonomous.json](settings.autonomous.json): copy to `.claude/settings.autonomous.json`
 - Precedents: `plans/salt-engine-port/` (sep, the shape this brief copies),
   `plans/mindmap-engine-port/` (style engine, plugin shape), `.agent-notes/sep-*.md`.
+
+## Mission summary (2026-10-13)
+
+**Tasks:** 15 planned (T0a–c, T1a–c, T2a–b, T3a–c, T4a, T5-cov, T-exit) + 2 written at the b4 close (T5a, T5b) — all done. T-next (utility-factory brief, maintainer request) queued after the merge.
+
+**Result (D10 met):** wbs **0/0/204 → 204/0/0** under `DeterministicMeasurer`; **176 pinned** byte-identical, the 28 stock-error rows conformant by the 2026-10-10 rule (26 refusals + 2 mirrored jar crashes); `activity/bozido-07-geze049` wbs slot 163×145 = jar; **0 conformant losses** in 28 engines; four gates green, collected 1292 = on-disk 1292, 28671 tests. 49 authored fixtures (38 zero-diff, 9 error-parity, 2 family E).
+
+**Decisions (36 journal rows).** Maintainer rulings (stop 10, all approved "port it at its upstream home"): rows 12 (`Style.applyStrokeAndLineColor`), 19b (`ColorParser` + `Colors.parse`), 30 (T5a creole URL/hyperlink/xlink crash, T5b legend style name). **Flagged for review:**
+- row 4 — brief correction: `getWBSDirection` defaults LEFT from a `-` in TYPE (`Direction.java:75-86`); 3-arg contract.
+- rows 19a/20 — brief corrections: one-line multiline blocks never complete (`CommandMultilines2.java:98-104`); `+_` is PSEUDO and bare `+++` is "Missing label" (the brief had them swapped).
+- row 6/14/26 — batches launched before the previous close finished (dependencies were code-only; foreign load starved the survey chain); every close still ran gates + an all-engine survey.
+- rows 22–28 — survey chain run from a scratch copy with the load gate raised 8 → 26 (a dot-engine session held load 17–83).
+- row 29 — `repin-wbs-routing.mts` gained a head-window `known-gap` case (tojixi/zecavo; `bupexo-79` precedent) and re-pins we-error-where-jar-errors rows `ok`.
+- rows 30/33 — 28 wbs accepted divergences RETIRED by the orchestrator (now conformant); nothing signed.
+- row 34 — process slip: the wave-1 close commit carried a test typecheck error, fixed one commit later.
+
+**Gates:** every batch close green; final on the tip in `measurements/final/`.
+
+**Follow-ons:** `planning/next-missions.md` `wbs-engine-port` section (family E chrome order, `ProtectedCommand`, creole-URL and legend residuals, mindmap multiline END probe, colour-regex dedupe, clock-gated error banners) and T-next.

@@ -35,6 +35,26 @@ post-D7 measurements.
 
 ---
 
+## `wbs-engine-port` (wep) — DONE 2026-10-13 (batches 0–5, exit; merged to local main as a merge commit, not pushed)
+
+**What changed:**
+- `@startwbs` engine ported 1:1 from `net/sourceforge/plantuml/wbs/` (15 files) into `src/diagrams/wbs/` with upstream names: `WElement`, `WBSTextBlock`/`ITF`/`ITFLeaf`/`ITFComposed`/`Fork` (WBS's OWN tree layout — the guide's "shares mind-map layout" was wrong, D2), `WBSLink`, `WBSDiagram`, the seven commands, `WBSDiagramFactory`, `wbsPlugin` on the shared `TitledDiagram` path.
+- **wbs survey 0 / 0 / 204 → 204 / 0 / 0** under `DeterministicMeasurer`; **176 rows pinned** byte-identical (`oracle/goldens/svg-wbs/`), the 28 stock-error rows conformant by the 2026-10-10 error-page rule (we render our error page; 2 are jar render CRASHES we now mirror). 49 authored fixtures (`tests/fixtures/wbs/`, `authored-baseline.json`): 38 zero-diff, 9 error-parity, 2 family E.
+- Embed: `activity/bozido-07-geze049` wbs slot 163×145 = jar (diff 66 → 61; the rest is the gantt slot).
+- Routing: 176 wbs known-misroutes → agree; refusal `tojixi-05`/`zecavo-98` → head-window known-gap; 28 wbs accepted divergences retired (now conformant).
+- **Core pieces ported (maintainer-approved stop-10s):** `Style.applyStrokeAndLineColor`; `ColorParser` + `Colors.parse` (the `Colors(String,…)` ctor); creole URLs through the ported `UrlBuilder` (`CommandCreoleUrl.java:56,73-82`); hyperlink colour/underline from style (`Style.java:265-267`, `DriverTextSvg.java:133-134`); `getXlinkTitle` mirrors `Matcher.appendReplacement`'s throw; the legend merges the diagram style name (`EntityImageLegend.java:49-51`). Also `Direction.getWBSDirection` (brief corrected: default from a `-` in TYPE).
+- **0 conformant losses** in any of 28 engines at every close; every non-wbs byte change was the bozido embed.
+
+**Open follow-ons (mechanism, owner):**
+1. **Family E — painted background + chrome rect order** (`SvgGraphics.java:189-191`, `:819-821` vs `TextBlockExporter.ts#finalizeTitledDiagramFragment`): authored `background-pink-title`, `gradient-background-title` only; no corpus row. Same as sep follow-on 2 → one shared chrome follow-on for mindmap/salt/wbs.
+2. **`ProtectedCommand` unported** (`command/ProtectedCommand.java:54-78`, `core/AbstractDiagram.java:173-180`): a throwing command becomes the jar's "You should send a mail…" line-N error; ours escapes to `src/index.ts:418-419` (`cov-error-smart-level`, conformant by rule, text differs). Affects every engine → core follow-on.
+3. **Creole URL residuals** (T5a): `topurl` (`CommandCreoleUrl.java:79`; port `StripeBuilder` has no skin param), url-label creole scope (`AtomTextUtils.java:79-91` vs `StripeSimple.ts:158`), transparent hyperlink colour typed as string (`UText.ts:195`), string-path `svg.ts:378 linkWrap` lacks `getXlinkTitle` decoding; stale "assumed true" comments (`driver-text-svg-decorations.ts:106-109`, `UText.ts:98-107`).
+4. **Legend residuals** (T5b): fill-equals-background (`TextBlockBordered.java:123-124` vs `theme.colors.background`); same-`<style>`-block declaration order (`DarkString.java:50-66`; also title/caption/header/footer).
+5. **Mindmap multiline first-line END probe** (`CommandMindMapOrgmodeMultiline.ts:53-58`) is not Java-faithful (`CommandMultilines2.java:98-104` never tests a first line against END) — mindmap follow-on, unprobed.
+6. **Private colour-regex copies** (activity `dispatch-support.ts:208-212`, `CommandCreateJson.ts:73`, description `link-grammar-regex.ts`) → dedupe onto `src/core/klimt/color/ColorParser.ts`; duplicated mindmap style/skinparam helpers in `WBSDiagramFactory.ts` (module-private in `MindMapDiagramFactory.ts`); renaming the mindmap-named style modules (D12).
+7. **Error oracles move with the clock** (`PSystemError.java:221-229` banner on minutes 1/8/13/15/30/39/48/55): never read a re-captured error oracle's score change as a port change.
+8. **Next mission queued:** `@startuml` utility factories (`listopeniconic`, `colors`, `listfonts`, emoji, `openiconic`, `listsprite`, …) — brief via `/plan-mission` (`plans/wbs-engine-port/exit/T-next-utility-factories.md`).
+
 ## `salt-engine-port` (sep) — DONE 2026-10-12 (batches 0–5, exit; merged to main as a merge commit, not pushed)
 
 **What changed:**
@@ -56,7 +76,7 @@ post-D7 measurements.
 3. **Activity background never colour-mapped** (`activity/renderer.ts:438,441` vs `SvgGraphics.java:176-188`; probes `measurements/T5c/audit/`) → activity residual drive.
 4. **`PSystemErrorUtils#checkBasicError` unported** (`src/core/error/PSystemErrorUtils.ts:12-17`): the `@startuml` + `salt` error page says "Syntax Error?" where the jar says "This looks like a salt diagram…" (conformant by rule, text differs) → error-page follow-on.
 5. **ColorMapper seam residuals** (`.agent-notes/sep-T5c.md`): `<color:black>` over `blackBlueTrue` under `mode dark` paints the dark partner (upstream `changeColor` drops it; gone once the two `FontConfiguration` types unify); sprite tints / the sprite collector map with IDENTITY (`SpriteMonochrome.java:180-188`); class/activity hex post-process keeps alpha under `reversecolor` (`fragment-color-mapper.ts#mapHexChannels` vs `ColorUtils.java:166`).
-6. **wbs / gantt engines** (bozido-07, duxuce-04 blocked) — mission-index D3/D4.
+6. **wbs / gantt engines** (bozido-07, duxuce-04 blocked) — mission-index D3/D4. **wbs half DONE 2026-10-13** (`wbs-engine-port`, bozido's wbs slot = jar); gantt open.
 
 ## `class-divergence-drive-8` (cdd8) — DONE 2026-10-12 (batches 0, 1, 2a–2c, 3, exit)
 

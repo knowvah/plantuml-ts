@@ -155,7 +155,7 @@ SVG-structural bar defined at build time. mission-guide.md has Java sources.
 |----|---------|--------|-----------|-------|
 | D1 | Timing `@starttiming` | todo | SI2 | custom vertical-time layout |
 | D2 | Mind Map `@startmindmap` | todo | S3 | twopi engine |
-| D3 | WBS `@startwbs` | todo | D2 | shares mind-map layout |
+| D3 | WBS `@startwbs` | **done** | D2 | **DONE 2026-10-13 (`wbs-engine-port`) — 0/204 → 204/204 SVG-conformant, 176 pinned (`oracle/goldens/svg-wbs/`).** Correction: WBS does NOT share the mind-map layout — it has its own `Fork`/`ITFComposed`/`ITFLeaf` tree (`wbs/Fork.java:52,86-87`). |
 | D4 | Gantt `@startgantt` | todo | SI2 | constraint solver |
 | D5 | Network nwdiag/rackdiag | todo | — | row-based layout |
 | D6 | Git graph `@startgitgraph` | todo | — | **NOT a lane layout — it is a SMETANA consumer.** `gitlog/SmetanaForGit.java` via `GitDiagram` (`DiagramType.GIT`), a wholly separate Smetana user from the json family. Per the 2026-08-09 maintainer ruling (CLAUDE.md, "Smetana is NOT a porting target"), this type must NOT be held to the jar's geometry: use `@knowvah/dot-engine` and carry the delta as a named entry. Decide what "conformant" means for it BEFORE building, and expect no `svek-N.dot` oracle (no external dot call). |
