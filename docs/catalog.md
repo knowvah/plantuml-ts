@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1616 modules · 5955 exported names.
+1618 modules · 5958 exported names.
 
 ## `src/`
 
@@ -1721,6 +1721,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `charlie-image.ts` | `CharliePng`, `CHARLIE_PNG` | `CHARLIE_PNG` -- the image `charlie` draws (`PSystemCharlie.java`, `PSystemVersion.getCharlieImage`, java:104-106), as the pinned jar embeds it in SVG (D4). |
+| `PSystemColors.ts` | `PSystemColors` | `PSystemColors` — the `colors` page: every named colour as a 175x28 swatch in 21-row columns, or, given a colour, a 19-hexagon palette of the names closest to it (http://www.redblobgames.com/grids/hexagons/). |
+| `PSystemColorsFactory.ts` | `PSystemColorsFactory`, `colorsPlugin` | `PSystemColorsFactory` — `colors`, `color`, optionally followed by a colour name or hex value: the `@startuml` single-line factory for {@link PSystemColors}. |
 
 ## `src/diagrams/files/`
 

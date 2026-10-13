@@ -30,3 +30,26 @@
   the public `UFont` constructor (`new UFont(font.getFontStack(), BOLD, font.getSize())`).
 - **Impact**: not blocking; noted for whoever ports UFont fully.
 - **Confidence**: High
+
+## Observation: ColorUtils.distance divides by 1000; upstream does not (stop — outside write-set)
+- **Context**: second attempt, after the core gaps landed; `kenari-17` (`colors Chocolate`) drew Peru
+  before Tomato, HotPink before Sienna, DimGrey before MediumOrchid.
+- **Finding**: `ColorUtils.java:77-82` returns `getGrayScaleInternal(diffRed, diffGreen, diffBlue)`, the
+  private overload at java:55-58 (`red * 299 + green * 587 + blue * 114`, NO `/ 1000`). The port's
+  `src/core/klimt/color/ColorUtils.ts:35-42` calls `getGrayScale` (`/ 1000`, truncated), so distinct
+  upstream keys collapse into ties: Chocolate→Tomato 21651 vs →Peru 21693 both become 21, and the stable
+  sort then keeps TreeSet order (Peru < Tomato). `tests/unit/core/klimt/color/ColorUtils.test.ts` and
+  `HColorSimple.test.ts:58-59` pin the divided values (255, 29, 18; should be 255000, 29900, 18...).
+- **Impact**: every palette render (`colors <arg>`) orders its 19 names wrongly. With `distance` mocked to
+  the undivided sum, all 11 rows (2 corpus + 9 authored probes) have zero compareSvg diffs.
+- **Confidence**: High (Java quoted; controlled experiment via vi.mock)
+
+## Observation: `colors <anything>` draws the argument itself
+- **Context**: jar probes for the "not a colour" acceptance row.
+- **Finding**: `getColorsCloseTo` appends the raw argument when no name equals it ignoring case
+  (java:237-238); for an unknown name it is White (distance 0 to the White centre), so `colors foo`
+  draws `foo` in the second hexagon. A too-wide all-lowercase argument has no break point:
+  `findShortest` returns null, `Display.getWithNewlines(pragma, null)` is `Display.NULL` and the jar
+  draws the hexagon with no text (probe `colors abcdefghijklmnopqrstuvwxyz`: 19 polygons, 19 texts).
+- **Impact**: fixtures `tests/unit/eggs/fixtures/colors-{foo,longlower,...}` pin these.
+- **Confidence**: High (jar probes)
