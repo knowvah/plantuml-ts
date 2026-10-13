@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1616 modules · 5955 exported names.
+1619 modules · 5964 exported names.
 
 ## `src/`
 
@@ -1703,7 +1703,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `donors-list.ts` | `DONORS` | `DONORS` -- the names `PSystemDonors#getDonors` decodes from its `DONORS` constant at runtime (`PSystemDonors.java:73-96`, decode at java:156-170: AsciiEncoder -> Brotli -> UTF-8 -> `replace('*', '.')` -> `StringTokenizer` on `\n`), decoded |
-| `PSystemDonors.ts` | `getCols` | `PSystemDonors` — the `donors` page. |
+| `PSystemDonors.ts` | `PSystemDonors`, `getCols` | `PSystemDonors` -- the `donors` page: a bold header, the donors list in `COLS` columns (`getCols`) and the PlantUML logo in the bottom-right corner. |
+| `PSystemDonorsFactory.ts` | `acceptsDonorsLine`, `executeLine`, `donorsPlugin` | `PSystemDonorsFactory` -- accepts the single line `donors` (any case, trailing whitespace allowed), as a `singleLinePlugin` (decisions.md D2). |
+| `PSystemSkinparameterList.ts` | `getCols`, `PSystemSkinparameterList` | `PSystemSkinparameterList` -- the `skinparameters` page: every `SkinParam.getPossibleValues()` key in 5 columns. |
+| `PSystemSkinparameterListFactory.ts` | `acceptsSkinparametersLine`, `executeLine`, `skinparameterListPlugin` | `PSystemSkinparameterListFactory` -- accepts the single line `skinparameters` (any case, trailing whitespace allowed), as a `singleLinePlugin` (decisions.md D2). |
 | `skinparameter-names.ts` | `SKINPARAMETER_NAMES` | `SKINPARAMETER_NAMES` -- `SkinParam.getPossibleValues()` (`SkinParam.java:567-641`), the table `PSystemSkinparameterList.java:99-102` prints: a `TreeSet` of literal keys plus keys derived from the FontParam/ColorParam/LineParam/AlignmentPar |
 
 ## `src/diagrams/dot/`
