@@ -46,6 +46,13 @@ export class JavaRandom {
     return Number(BigInt.asIntN(32, this.seed >> BigInt(48 - bits)));
   }
 
+  /** `public long nextLong()`: `((long) next(32) << 32) + next(32)`, wrapped
+   *  to a signed 64-bit value as Java's `long` arithmetic does. */
+  nextLong(): bigint {
+    const high = BigInt(this.next(32));
+    return BigInt.asIntN(64, (high << 32n) + BigInt(this.next(32)));
+  }
+
   /** `public double nextDouble()`. */
   nextDouble(): number {
     return (this.next(26) * 2 ** 27 + this.next(27)) * DOUBLE_UNIT;

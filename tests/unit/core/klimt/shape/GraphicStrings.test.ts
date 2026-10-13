@@ -18,6 +18,10 @@ import { DeterministicMeasurer } from '../../../../../src/core/measurer-determin
 import { Margins, ShapeType } from '../../../../../src/core/svek/image/EntityImageDescriptionSupport.js';
 import { DEFAULT_SVG_DECIMALS, formatDecimal } from '../../../../../src/core/svg-format.js';
 import { exportTo, stringBounderFor } from '../../../../../src/core/UgDiagram.js';
+import { internalEmojiStoreFrom } from '../../../../../src/core/internal-emoji-store.js';
+import { internalSpriteStoreFrom } from '../../../../../src/core/internal-sprite-store.js';
+import { buildEmojiAssetsStore } from '../../../../helpers/emoji-assets-store.js';
+import { buildSpriteAssetsStore } from '../../../../helpers/sprite-assets-store.js';
 
 const measurer = new DeterministicMeasurer();
 const stringBounder = stringBounderFor(measurer);
@@ -122,6 +126,40 @@ describe('GraphicStrings.createBlackOnWhite(strings, image, position) (java:113-
     const block = GraphicStrings.createBlackOnWhite(['Hello'], IMG, undefined);
     expect(dims(block)).toEqual([tw, th]);
     expect(svgOf(block)).not.toContain('<image');
+  });
+});
+
+describe('GraphicStrings.createBlackOnWhite(strings, classpath) — port-only ADR-2 stand-in for the classpath', () => {
+  // Upstream's SpriteContainerEmpty resolves `<$...>` off the classpath
+  // (SpriteContainerEmpty.java:58-61, SpriteImage.fromInternal) and `<:...:>`
+  // artwork off it too (Emoji.java:167); the port has no classpath, so the
+  // stores ride in beside java:105-107's one-argument form.
+  it('resolves an SVG <$archimate/...> sprite through the sprite store; without it nothing is drawn for it', () => {
+    const sprites = internalSpriteStoreFrom(buildSpriteAssetsStore());
+    const line = ['<$archimate/workpackage> workpackage (svg)'];
+    const shapes = (svg: string): number => (svg.match(/<(path|rect|ellipse|polygon|line)\b/g) ?? []).length;
+    expect(shapes(svgOf(GraphicStrings.createBlackOnWhite(line)))).toBe(0);
+    expect(shapes(svgOf(GraphicStrings.createBlackOnWhite(line, { sprites })))).toBeGreaterThan(0);
+  });
+
+  it('declines a PNG internal sprite without throwing (SpriteImage drawing is unported: ufp residual)', () => {
+    const sprites = internalSpriteStoreFrom(buildSpriteAssetsStore());
+    const svg = svgOf(GraphicStrings.createBlackOnWhite(['<$archimate/access> access (png)'], { sprites }));
+    expect(svg).toContain('access (png)');
+    expect(svg).not.toContain('<image');
+  });
+
+  it("draws <:1f600:>'s Twemoji artwork through the emoji store", () => {
+    const emoji = internalEmojiStoreFrom(buildEmojiAssetsStore());
+    const line = ['<:1f600:>'];
+    const count = (svg: string): number => (svg.match(/<(path|ellipse|circle)\b/g) ?? []).length;
+    expect(count(svgOf(GraphicStrings.createBlackOnWhite(line)))).toBe(0);
+    expect(count(svgOf(GraphicStrings.createBlackOnWhite(line, { emoji })))).toBeGreaterThan(0);
+  });
+
+  it('keeps CreoleMode.FULL (java:105-107): __underscore__ is still underlined', () => {
+    const plain = svgOf(GraphicStrings.createBlackOnWhite(['__u__']));
+    expect(svgOf(GraphicStrings.createBlackOnWhite(['__u__'], {}))).toBe(plain);
   });
 });
 

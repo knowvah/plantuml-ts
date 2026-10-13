@@ -19,6 +19,7 @@
  */
 import { chromeAtomOps } from '../../annotations/blocks-creole.js';
 import type { NestedDiagramRenderer } from '../../EmbeddedDiagram.js';
+import type { InternalEmojiStore } from '../../internal-emoji-store.js';
 import type { InternalSpriteStore } from '../../internal-sprite-store.js';
 import { getNestedDiagramRenderer } from '../../nested-diagram-registry.js';
 import { Pragma } from '../../skin/Pragma.js';
@@ -63,8 +64,11 @@ function nestedRenderer(): NestedDiagramRenderer {
 export class SpriteContainerEmpty implements ISkinSimple {
   private readonly sprites: SpriteRegistry;
 
-  constructor(internal?: InternalSpriteStore) {
-    this.sprites = createSpriteRegistry(internal);
+  /** Both stores are port-only (ADR-2): upstream reads `/sprites/**` and the
+   *  Twemoji artwork off the classpath (`SpriteImage.fromInternal`,
+   *  `Emoji.java:167`), which a browser-safe library cannot have. */
+  constructor(internal?: InternalSpriteStore, emoji?: InternalEmojiStore) {
+    this.sprites = createSpriteRegistry(internal, emoji);
   }
 
   /** `SpriteImage.fromInternal(name)`; `undefined` (no store, or no such

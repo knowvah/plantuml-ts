@@ -24,6 +24,8 @@
  */
 import { FontConfiguration as AbelFontConfiguration } from '../../abel/FontConfiguration.js';
 import type { RasterImage } from '../../error/raster-image.js';
+import type { InternalEmojiStore } from '../../internal-emoji-store.js';
+import type { InternalSpriteStore } from '../../internal-sprite-store.js';
 import type { HColor } from '../../style/Value.js';
 import { Margins, ShapeType } from '../../svek/image/EntityImageDescriptionSupport.js';
 import { HColors } from '../color/HColors.js';
@@ -140,10 +142,23 @@ interface PlacedImage {
   readonly position: GraphicPosition;
 }
 
-/** The constructor's `mode` and `isCrash` (java:130, :132). */
+/**
+ * Port-only (ADR-2): the stores standing in for upstream's classpath, which
+ * `SpriteContainerEmpty` reads for `<$...>` sprites (`SpriteImage.fromInternal`,
+ * SpriteContainerEmpty.java:58-61) and `<:...:>` artwork (Emoji.java:167).
+ * A host that wires none draws neither, as without the vendored bundles.
+ */
+export interface GraphicStringsClasspath {
+  readonly sprites?: InternalSpriteStore | undefined;
+  readonly emoji?: InternalEmojiStore | undefined;
+}
+
+/** The constructor's `mode` and `isCrash` (java:130, :132), plus the
+ *  port-only {@link GraphicStringsClasspath} its `SpriteContainerEmpty` reads. */
 interface GraphicMode {
   readonly mode: CreoleMode;
   readonly isCrash: boolean;
+  readonly classpath?: GraphicStringsClasspath | undefined;
 }
 
 /** Every factory but `createForError` and `createGreenOnBlackMonospaced`. */
@@ -184,6 +199,9 @@ export class GraphicStrings extends TextBlockMemoized {
    * (java:157-170, :181-188 test `position` after `image != null`).
    */
   static createBlackOnWhite(strings: readonly string[]): TextBlock;
+  /** Port-only: java:105-107's `createBlackOnWhite(strings)` with the
+   *  classpath stand-in (see {@link GraphicStringsClasspath}). */
+  static createBlackOnWhite(strings: readonly string[], classpath: GraphicStringsClasspath): TextBlock;
   static createBlackOnWhite(
     strings: readonly string[],
     image: RasterImage | undefined,
@@ -191,13 +209,15 @@ export class GraphicStrings extends TextBlockMemoized {
   ): TextBlock;
   static createBlackOnWhite(
     strings: readonly string[],
-    ...imageArgs: [] | [RasterImage | undefined, GraphicPosition | undefined]
+    ...imageArgs: [] | [GraphicStringsClasspath] | [RasterImage | undefined, GraphicPosition | undefined]
   ): TextBlock {
-    if (imageArgs.length === 0)
-      return new GraphicStrings(strings, sansSerif12(textColor()), HColors.WHITE, undefined, FULL);
-    const [image, position] = imageArgs;
-    const placed = image === undefined || position === undefined ? undefined : { image, position };
-    return new GraphicStrings(strings, sansSerif12(textColor()), HColors.WHITE, placed, FULL_BUT_UNDERSCORE);
+    if (imageArgs.length === 2) {
+      const [image, position] = imageArgs;
+      const placed = image === undefined || position === undefined ? undefined : { image, position };
+      return new GraphicStrings(strings, sansSerif12(textColor()), HColors.WHITE, placed, FULL_BUT_UNDERSCORE);
+    }
+    const mode: GraphicMode = { ...FULL, classpath: imageArgs[0] };
+    return new GraphicStrings(strings, sansSerif12(textColor()), HColors.WHITE, undefined, mode);
   }
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/shape/GraphicStrings.java:109-111 */
@@ -224,7 +244,8 @@ export class GraphicStrings extends TextBlockMemoized {
     if (this.graphicMode.mode === CreoleMode.NO_CREOLE)
       throw new Error('GraphicStrings: TextBlockRaw (CreoleMode.NO_CREOLE) is not ported');
     const fontConfiguration = this.fontConfiguration.creole;
-    const spriteContainer = new SpriteContainerEmpty();
+    const classpath = this.graphicMode.classpath;
+    const spriteContainer = new SpriteContainerEmpty(classpath?.sprites, classpath?.emoji);
     const ctx = { fontConfiguration, spriteContainer, atomOps: spriteContainer.atomOps(fontConfiguration) };
     return display.create7(ctx, HorizontalAlignment.LEFT, this.graphicMode.mode);
   }
