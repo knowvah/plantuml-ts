@@ -56,6 +56,8 @@ import { buildSpriteAssetsStore } from './sprite-assets-store.js';
 // cdd4-T9 (journal row 11): the jar always has its Twemoji artwork too --
 // same argument as the sprite store above (lecelo-92-loma110).
 import { buildEmojiAssetsStore } from './emoji-assets-store.js';
+// ufp-T1i: the dedication + egg pictures (ADR-2), so the utility rows survey as the harness measures.
+import { buildUtilityAssetsStore } from './utility-assets-store.js';
 import { combineAssetStores } from '../src/core/asset-store.js';
 // cdd-T32 (journal row 193): the vendored-stdlib store, so a `!include
 // <bundle/...>` fixture renders instead of tripping renderSync's include
@@ -68,7 +70,11 @@ import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE_DIR = join(REPO, 'test-results', 'dot-cache');
 // cdd4-T9: sprites + emoji, shared by renderOneMode and renderFrame below.
-const SURVEY_ASSET_STORE = combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore());
+const SURVEY_ASSET_STORE = combineAssetStores(
+  buildSpriteAssetsStore(),
+  buildEmojiAssetsStore(),
+  buildUtilityAssetsStore(),
+);
 // cdd8-T2e (D2d): `renderSync` refuses `!pragma layout elk` without
 // `options.elk`. Each render worker (`--render-many` / `--render-one`) awaits
 // `loadElk()` ONCE before it renders and every render below passes the result.

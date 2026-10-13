@@ -15,13 +15,16 @@
  */
 import { readFileSync } from 'node:fs';
 
-import type { AssetStore } from '../../../src/core/asset-store.js';
+import { combineAssetStores, type AssetStore } from '../../../src/core/asset-store.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
 import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
 import { fullDescription } from '../../../src/core/version.js';
 import { renderSync } from '../../../src/index.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { buildEmojiAssetsStore } from '../../helpers/emoji-assets-store.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
+import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
+import { buildUtilityAssetsStore } from '../../helpers/utility-assets-store.js';
 import { compareSvg, weightedScore } from './compare.js';
 
 /**
@@ -55,6 +58,14 @@ export const UTILITY_CACHE_TYPE = 'unknown';
 export interface UtilityFixtureRenderOptions {
   assetStore?: AssetStore;
   includeStore?: IncludeStore;
+}
+
+/**
+ * The store the survey renders with (`scripts/svg-parity-survey.ts` `SURVEY_ASSET_STORE`):
+ * sprites + emoji + the utility pictures (T1i), so a utility row measures here as it surveys.
+ */
+export function surveyAssetStore(): AssetStore {
+  return combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore(), buildUtilityAssetsStore());
 }
 
 /**
@@ -92,7 +103,10 @@ export type UtilityMeasure =
  */
 export function measureUtilityMarkup(markup: string, golden: string): UtilityMeasure {
   try {
-    const ours = renderFixtureUtility(markup, new DeterministicMeasurer(), { includeStore: fixtureIncludeStore() });
+    const ours = renderFixtureUtility(markup, new DeterministicMeasurer(), {
+      assetStore: surveyAssetStore(),
+      includeStore: fixtureIncludeStore(),
+    });
     if (ours.includes(ERROR_SENTINEL_MARKER)) return { errored: true, reason: SENTINEL_REASON };
     if (ours.includes(`>${fullDescription()}</text>`)) return { errored: true, reason: ERROR_PAGE_REASON };
     const { diffs } = compareSvg(ours, golden, 'deterministic');

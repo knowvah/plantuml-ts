@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1657 modules · 6029 exported names.
+1657 modules · 6032 exported names.
 
 ## `src/`
 
@@ -1733,7 +1733,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `apple2-image.ts` | `APPLE2_PNG` | `APPLE2_PNG` -- the image `apple //e` draws under its text (`PSystemAppleTwo.java:55`, `PSystemVersion.getApple2Image`, java:124-126: `version/apple2.png`, a header-stripped WebP read by `SFile.getImageFromWebpButHeader`), as the pinned jar |
+| `apple2-image.ts` | `EggImage`, `EggImageUnavailableError`, `eggRasterImage`, `APPLE2_PNG` | `APPLE2_PNG` -- the image `apple //e` draws under its text (`PSystemAppleTwo.java:55`, `PSystemVersion.getApple2Image`, java:124-126: `version/apple2.png`, a header-stripped WebP read by `SFile.getImageFromWebpButHeader`), as the pinned jar |
 | `charlie-image.ts` | `CharliePng`, `CHARLIE_PNG` | `CHARLIE_PNG` -- the image `charlie` draws (`PSystemCharlie.java`, `PSystemVersion.getCharlieImage`, java:104-106), as the pinned jar embeds it in SVG (D4). |
 | `EggUtils.ts` | `EggUtils` | `EggUtils` — hex, xor and the base-26 key the easter-egg sentences are encrypted with. |
 | `equals-ignore-case.ts` | `equalsIgnoreCase` | `java.lang.String#equalsIgnoreCase`, which every egg factory's literal test calls (`PSystemCharlieFactory.java:48`, `PSystemAppleTwoFactory.java:52-53`, `PSystemRIPFactory.java:52`): equal lengths, and per UTF-16 unit the units are equal, o |

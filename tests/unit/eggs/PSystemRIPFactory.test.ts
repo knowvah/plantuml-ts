@@ -11,6 +11,7 @@ import { describe, expect, it } from 'vitest';
 import { parseRefusalOf } from '../../../src/core/parse-refusal.js';
 import { PreprocessingArtifact } from '../../../src/core/tim/PreprocessingArtifact.js';
 import { ripPlugin, PSystemRIPFactory } from '../../../src/diagrams/eggs/PSystemRIPFactory.js';
+import { buildUtilityAssetsStore } from '../../helpers/utility-assets-store.js';
 import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 import { renderWith, sourceOf } from './plugin-harness.js';
 
@@ -23,10 +24,12 @@ function fixture(name: string): { puml: string; svg: string } {
   };
 }
 
+const STORE = { assetStore: buildUtilityAssetsStore() };
+
 describe('PSystemRIPFactory.executeLine (java:50-61)', () => {
   const factory = new PSystemRIPFactory();
   const accepts = (line: string): boolean =>
-    factory.executeLine(sourceOf('@startuml\nx\n@enduml'), line, new PreprocessingArtifact()) !== undefined;
+    factory.executeLine(sourceOf('@startuml\nx\n@enduml'), line, new PreprocessingArtifact(), STORE) !== undefined;
 
   it.each(['jean canouet', 'JEAN CANOUET', 'Jean Canouet'])('accepts %j', (line) => {
     expect(accepts(line)).toBe(true);
@@ -40,12 +43,12 @@ describe('PSystemRIPFactory.executeLine (java:50-61)', () => {
 describe('ripPlugin against the jar', () => {
   it.each(['rip'])('renders %s with zero diffs', (name) => {
     const { puml, svg } = fixture(name);
-    expect(compareSvg(renderWith(ripPlugin, puml), svg, 'deterministic').diffs).toEqual([]);
+    expect(compareSvg(renderWith(ripPlugin, puml, STORE), svg, 'deterministic').diffs).toEqual([]);
   });
 
   it('renders identically three times', () => {
     const { puml } = fixture('rip');
-    const runs = [0, 1, 2].map(() => renderWith(ripPlugin, puml));
+    const runs = [0, 1, 2].map(() => renderWith(ripPlugin, puml, STORE));
     expect(new Set(runs).size).toBe(1);
   });
 
@@ -58,5 +61,22 @@ describe('ripPlugin against the jar', () => {
   it('refuses a 4-line source at the single-line gate', () => {
     const refusal = parseRefusalOf(ripPlugin.parse(sourceOf('@startuml\njean canouet\njean canouet\n@enduml')));
     expect(refusal?.commandScore).toBe(Number.NEGATIVE_INFINITY);
+  });
+});
+
+describe('ripPlugin without a store serving the picture (java IOException arm)', () => {
+  it.each([undefined, { assetStore: { get: () => undefined, has: () => false } }])(
+    'is refused with "Syntax Error?" (options %#)',
+    (options) => {
+      const refusal = parseRefusalOf(ripPlugin.parse(sourceOf('@startuml\njean canouet\n@enduml'), options));
+      expect(refusal?.message).toBe('Syntax Error?');
+    },
+  );
+
+  it('returns no diagram from executeLine', () => {
+    const factory = new PSystemRIPFactory();
+    expect(factory.executeLine(sourceOf('@startuml\nx\n@enduml'), 'jean canouet', new PreprocessingArtifact())).toBe(
+      undefined,
+    );
   });
 });

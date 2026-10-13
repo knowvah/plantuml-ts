@@ -11,6 +11,7 @@ import { describe, expect, it } from 'vitest';
 import { parseRefusalOf } from '../../../src/core/parse-refusal.js';
 import { PreprocessingArtifact } from '../../../src/core/tim/PreprocessingArtifact.js';
 import { appleTwoPlugin, PSystemAppleTwoFactory } from '../../../src/diagrams/eggs/PSystemAppleTwoFactory.js';
+import { buildUtilityAssetsStore } from '../../helpers/utility-assets-store.js';
 import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 import { renderWith, sourceOf } from './plugin-harness.js';
 
@@ -23,10 +24,12 @@ function fixture(name: string): { puml: string; svg: string } {
   };
 }
 
+const STORE = { assetStore: buildUtilityAssetsStore() };
+
 describe('PSystemAppleTwoFactory.executeLine (java:50-62)', () => {
   const factory = new PSystemAppleTwoFactory();
   const accepts = (line: string): boolean =>
-    factory.executeLine(sourceOf('@startuml\nx\n@enduml'), line, new PreprocessingArtifact()) !== undefined;
+    factory.executeLine(sourceOf('@startuml\nx\n@enduml'), line, new PreprocessingArtifact(), STORE) !== undefined;
 
   it.each(['apple //e', 'apple ][', 'apple II', 'Steve Jobs', 'Steve Wozniak', 'APPLE //E', 'steve WOZNIAK'])(
     'accepts %j',
@@ -43,12 +46,12 @@ describe('PSystemAppleTwoFactory.executeLine (java:50-62)', () => {
 describe('appleTwoPlugin against the jar', () => {
   it.each(['apple', 'apple-steve-wozniak'])('renders %s with zero diffs', (name) => {
     const { puml, svg } = fixture(name);
-    expect(compareSvg(renderWith(appleTwoPlugin, puml), svg, 'deterministic').diffs).toEqual([]);
+    expect(compareSvg(renderWith(appleTwoPlugin, puml, STORE), svg, 'deterministic').diffs).toEqual([]);
   });
 
   it('renders identically three times', () => {
     const { puml } = fixture('apple');
-    const runs = [0, 1, 2].map(() => renderWith(appleTwoPlugin, puml));
+    const runs = [0, 1, 2].map(() => renderWith(appleTwoPlugin, puml, STORE));
     expect(new Set(runs).size).toBe(1);
   });
 
@@ -61,5 +64,22 @@ describe('appleTwoPlugin against the jar', () => {
   it('refuses a 4-line source at the single-line gate', () => {
     const refusal = parseRefusalOf(appleTwoPlugin.parse(sourceOf('@startuml\napple II\napple II\n@enduml')));
     expect(refusal?.commandScore).toBe(Number.NEGATIVE_INFINITY);
+  });
+});
+
+describe('appleTwoPlugin without a store serving the picture (java IOException arm)', () => {
+  it.each([undefined, { assetStore: { get: () => undefined, has: () => false } }])(
+    'is refused with "Syntax Error?" (options %#)',
+    (options) => {
+      const refusal = parseRefusalOf(appleTwoPlugin.parse(sourceOf('@startuml\napple //e\n@enduml'), options));
+      expect(refusal?.message).toBe('Syntax Error?');
+    },
+  );
+
+  it('returns no diagram from executeLine', () => {
+    const factory = new PSystemAppleTwoFactory();
+    expect(factory.executeLine(sourceOf('@startuml\nx\n@enduml'), 'apple //e', new PreprocessingArtifact())).toBe(
+      undefined,
+    );
   });
 });
