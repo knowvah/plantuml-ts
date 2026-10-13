@@ -4,10 +4,10 @@ All tasks run in parallel worktrees (disjoint write-sets); 1a and 1b may run tog
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T1a](T1a-openiconic.md) | `PSystemOpenIconic` + `PSystemListOpenIconic` | typescript-pro (opus) | `src/diagrams/openiconic/{PSystemOpenIconic,PSystemOpenIconicFactory,PSystemListOpenIconic,PSystemListOpenIconicFactory}.ts` | batch 0 | [ ] |
-| [T1b](T1b-colors.md) | `PSystemColors` (full grid + hexagon palette) | typescript-pro (opus) | `src/diagrams/eggs/{PSystemColors,PSystemColorsFactory}.ts` | batch 0 | [ ] |
-| [T1c](T1c-emoji.md) | `PSystemListEmoji` | typescript-pro (sonnet) | `src/diagrams/emoji/{PSystemListEmoji,PSystemListEmojiFactory}.ts` | batch 0 | [ ] |
-| [T1d](T1d-archimate-list.md) | `PSystemListArchimateSprites` | typescript-pro (sonnet) | `src/core/klimt/sprite/{PSystemListArchimateSprites,PSystemListArchimateSpritesFactory}.ts` | batch 0 | [ ] |
+| [T1a](T1a-openiconic.md) | `PSystemOpenIconic` + `PSystemListOpenIconic` | typescript-pro (opus) | `src/diagrams/openiconic/{PSystemOpenIconic,PSystemOpenIconicFactory,PSystemListOpenIconic,PSystemListOpenIconicFactory}.ts` | batch 0 | [x] |
+| [T1b](T1b-colors.md) | `PSystemColors` (full grid + hexagon palette) | typescript-pro (opus) | `src/diagrams/eggs/{PSystemColors,PSystemColorsFactory}.ts` | batch 0 | [x] |
+| [T1c](T1c-emoji.md) | `PSystemListEmoji` | typescript-pro (sonnet) | `src/diagrams/emoji/{PSystemListEmoji,PSystemListEmojiFactory}.ts` | batch 0 | [x] |
+| [T1d](T1d-archimate-list.md) | `PSystemListArchimateSprites` | typescript-pro (sonnet) | `src/core/klimt/sprite/{PSystemListArchimateSprites,PSystemListArchimateSpritesFactory}.ts` | batch 0 | [x] |
 
 ## As landed (T0c/T0d/T0e — filled at the batch-0 close)
 

@@ -77,3 +77,16 @@ engine; four gates green with collected = on-disk.
 ## D12 — Execution rules
 wep's: one worktree per task (`measurements/mkwt.sh`), no Serena edit tools in worktrees, oracles
 only via `scripts/oracle-render.sh`, merge commits only, no push, typecheck before every commit.
+
+## D13 — Mirror upstream's MIT edition; sudoku dropped (maintainer ruling 2026-10-13, mid-b1)
+Where upstream builds differ by licence edition (`// ::remove folder|file when __MIT__ …`,
+`// ::comment|uncomment when __MIT__`), the port mirrors the **MIT edition**, not the GPL jar the
+oracle was built from. Consequences: (a) **sudoku is dropped** — `sudoku/` is removed and
+`PSystemSudokuFactory` unregistered in MIT (`GraphicsSudoku.java:59`, `PSystemBuilder.java:161-164`);
+`lazama-75`/`gazale-13` leave the in-scope set (17 → 15) and stay error pages by design; D1's
+`sudoku/` package, D7 and D10's seedless sudoku are void; T1e's engine-only branch is deleted.
+The project README states the omission is deliberate. (b) `License.java` takes its `__MIT__`
+branches (name `MIT`, MIT text; java:63-76, :155-:240). (c) `<qrcode:>` resolves through
+`FlashCodeUtilsNone` (zxing's `FlashCodeUtilsZxing` is `::remove file when __MIT__`), so
+`AtomImg.createQrcode` draws a blank 10x10 RGB image scaled (`AtomImg.java:90-103`) — no QR
+encoder. Oracle rows that render the GPL behaviour differ from the port by this ruling.

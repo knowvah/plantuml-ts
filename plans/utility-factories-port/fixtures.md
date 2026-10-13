@@ -17,8 +17,8 @@ Filled by T0a from `measurements/b0-eng/parity-unknown.json` and `render-diff`. 
 | ludecu-61-laja912 | ListEmoji | `emoji 1f3` | diverged | 90/50 | agree NONE->NONE / known-gap, weErrored, class | T1c |  |
 | xozane-18-becu956 | ListEmoji | `emoji 1f4` | diverged | 87/50 | agree NONE->NONE / known-gap, weErrored, class | T1c |  |
 | xucoma-93-jeko861 | ListArchimateSprites | `listsprite` | diverged | 70/54 | agree NONE->NONE / known-gap, weErrored, class | T1d |  |
-| lazama-75-loli189 | Sudoku | `sudoku 1234` | diverged | 92/48 | agree NONE->NONE / known-gap, weErrored, class | T1e |  |
-| gazale-13-tadu312 | Sudoku | `sudoku 5678` | diverged | 92/48 | agree NONE->NONE / known-gap, weErrored, class | T1e |  |
+| lazama-75-loli189 | Sudoku | `sudoku 1234` | diverged | 92/48 | agree NONE->NONE / known-gap, weErrored, class | T1e | OUT — D13 (MIT edition, sudoku dropped) |
+| gazale-13-tadu312 | Sudoku | `sudoku 5678` | diverged | 92/48 | agree NONE->NONE / known-gap, weErrored, class | T1e | OUT — D13 (MIT edition, sudoku dropped) |
 | govuca-53-mili511 | Version (`stdlib`) | `stdlib` | diverged | 67/32 | agree NONE->NONE / known-gap, weErrored, class | T1f |  |
 | kicizi-84-lexu138 | Charlie | `charlie` | diverged | 1/8 | agree NONE->NONE / known-gap, weErrored, class | T1h |  |
 | kavama-92-noro949 | Dedication | `write your own dedication!` | diverged | 1/8 | agree NONE->NONE / known-gap, weErrored, class | T1h |  |
