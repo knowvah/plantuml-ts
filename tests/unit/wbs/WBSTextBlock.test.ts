@@ -23,8 +23,10 @@ import { XDimension2D } from '../../../src/core/klimt/geom/XDimension2D.js';
 import type { TextBlock } from '../../../src/core/klimt/shape/TextBlock.js';
 import { TextBlockUtils } from '../../../src/core/klimt/shape/TextBlockUtils.js';
 import { SkinParamColors } from '../../../src/core/skin/SkinParamColors.js';
+import { Stereotype } from '../../../src/core/stereo/Stereotype.js';
 import { Pragma } from '../../../src/core/skin/Pragma.js';
 import type { Style } from '../../../src/core/style/Style.js';
+import type { StyleBuilder } from '../../../src/core/style/StyleBuilder.js';
 import { StyleSignatureBasic } from '../../../src/core/style/StyleSignatureBasic.js';
 import { FtileBoxOld } from '../../../src/diagrams/activity/ftile/vertical/FtileBoxOld.js';
 import { IdeaShape } from '../../../src/diagrams/mindmap/IdeaShape.js';
@@ -54,18 +56,22 @@ function widthStyle(value: string): string {
 interface IdeaSpec {
   readonly text?: string;
   readonly shape?: IdeaShape;
+  readonly level?: number;
+  readonly stereotype?: string;
   readonly withBackColor?: (skin: ISkinParamWithSimple) => ISkinParamWithSimple;
 }
 
 function fakeIdea(skin: SkinParam, spec: IdeaSpec = {}): WElementSlice {
   const shape = spec.shape ?? IdeaShape.BOX;
   const names = shape === IdeaShape.NONE ? (['leafNode', 'boxless'] as const) : (['leafNode'] as const);
-  const signature = StyleSignatureBasic.of('root', 'element', 'wbsDiagram', 'node', ...names).addLevel(2);
+  const level = spec.level ?? 2;
+  const stereotype = Stereotype.build(spec.stereotype);
+  const signature = StyleSignatureBasic.of('root', 'element', 'wbsDiagram', 'node', ...names).addLevel(level);
   return {
-    getLevel: () => 2,
+    getLevel: () => level,
     getLabel: () => Display.getWithNewlines(Pragma.createEmpty(), spec.text ?? 'Line 1'),
     getShape: () => shape,
-    getStereotype: () => undefined,
+    getStereotype: () => stereotype,
     getStyle: (): Style => signature.getMergedStyle(skin.getCurrentStyleBuilder())!,
     getStyleBuilder: () => skin.getCurrentStyleBuilder(),
     withBackColor: spec.withBackColor ?? ((s) => s),
@@ -91,6 +97,10 @@ class Probe extends WBSTextBlock {
 
   exposedIdea(): WElementSlice {
     return this.getIdea();
+  }
+
+  line(ug: UGraphic, x1: number, y1: number, x2: number, y2: number): void {
+    this.drawLine(ug, x1, y1, x2, y2);
   }
 }
 
@@ -169,5 +179,115 @@ describe('WBSTextBlock.getIdea (WBSTextBlock.java:82-84)', () => {
   it('is the idea the block was built over', () => {
     const { probe: p, idea } = probe();
     expect(p.exposedIdea()).toBe(idea);
+  });
+});
+
+/**
+ * `drawLine` against the jar's `<line>`s. `BIKOPA` is the `<style>` of
+ * `test-results/dot-cache/wbs/bikopa-92-joza078` (arrow green, `:depth(0)`
+ * red, `arrow :depth(2)` blue 0.5 dashed 4). `HOT` is an authored probe
+ * (`scripts/oracle-render.sh`): `* R <<hot>>` / `** b <<hot>>` / `*** c`
+ * under `wbsDiagram { .hot { arrow { LineColor red } } }`, whose `b`
+ * links are drawn `<line x1="80.013" y1="155" x2="90.013" y2="155"
+ * style="stroke:#F00;stroke-width:1.5;"/>`.
+ */
+describe('WBSTextBlock.drawLine / getStyleUsed (WBSTextBlock.java:86-100)', () => {
+  const LINE = /<line\b[^>]*\/>/g;
+  const BIKOPA = `<style>
+wbsDiagram {
+  Linecolor black
+  arrow {
+    LineColor green
+  }
+  :depth(0) {
+      BackgroundColor White
+      RoundCorner 10
+      LineColor red
+  }
+  arrow {
+    :depth(2) {
+      LineColor blue
+      LineStyle 4
+      LineThickness .5
+    }
+  }
+  node {
+    :depth(2) {
+      LineStyle 2
+      LineThickness 2.5
+    }
+  }
+}
+</style>`;
+  const HOT = `<style>
+wbsDiagram {
+  .hot {
+    arrow {
+      LineColor red
+    }
+  }
+}
+</style>`;
+
+  function lines(spec: IdeaSpec, style: string, x1: number, y1: number, x2: number, y2: number): string[] {
+    const { probe: p } = probe(spec, style);
+    const ug = svgGraphic();
+    p.line(ug, x1, y1, x2, y2);
+    return ug.getSvgString().match(LINE) ?? [];
+  }
+
+  it('drawLine(ug, 30, 5, 10, 5) starts at x=10 under the default arrow style', () => {
+    expect(lines({}, '', 30, 5, 10, 5)).toEqual([
+      '<line x1="10" y1="5" x2="30" y2="5" style="stroke:#181818;stroke-width:1.5;"/>',
+    ]);
+  });
+
+  it('y1 stays with the smaller x and y2 with the larger, whichever end each came from', () => {
+    expect(lines({}, '', 30, 5, 10, 20)).toEqual([
+      '<line x1="10" y1="5" x2="30" y2="20" style="stroke:#181818;stroke-width:1.5;"/>',
+    ]);
+  });
+
+  it.each([
+    [
+      'level 0: :depth(0) red',
+      0,
+      [105.35, 72, 105.35, 92],
+      '<line x1="105.35" y1="72" x2="105.35" y2="92" style="stroke:#F00;stroke-width:1.5;"/>',
+    ],
+    [
+      'level 1, a LEFT link (x1 > x2): arrow green',
+      1,
+      [105.35, 155, 95.35, 155],
+      '<line x1="95.35" y1="155" x2="105.35" y2="155" style="stroke:#008000;stroke-width:1.5;"/>',
+    ],
+    [
+      'level 2: arrow :depth(2) blue, 0.5, dashed 4',
+      2,
+      [144.362, 218, 144.362, 249],
+      '<line x1="144.362" y1="218" x2="144.362" y2="249" style="stroke:#00F;stroke-width:0.5;stroke-dasharray:4,4;"/>',
+    ],
+  ] as const)('bikopa-92-joza078 %s', (_what, level, [x1, y1, x2, y2], expected) => {
+    expect(lines({ level }, BIKOPA, x1, y1, x2, y2)).toEqual([expected]);
+  });
+
+  it('the stereotype reaches the arrow signature (withTOBECHANGED): <<hot>> is red', () => {
+    expect(lines({ level: 1, stereotype: '<<hot>>' }, HOT, 80.013, 155, 90.013, 155)).toEqual([
+      '<line x1="80.013" y1="155" x2="90.013" y2="155" style="stroke:#F00;stroke-width:1.5;"/>',
+    ]);
+  });
+
+  it('without the stereotype the .hot arrow style does not apply', () => {
+    expect(lines({ level: 1 }, HOT, 80.013, 155, 90.013, 155)).toEqual([
+      '<line x1="80.013" y1="155" x2="90.013" y2="155" style="stroke:#181818;stroke-width:1.5;"/>',
+    ]);
+  });
+
+  it('no merged arrow style (null upstream) is the NPE Java hits in drawLine', () => {
+    const skin = skinParam();
+    // StyleSignatureBasic.getMergedStyle(null) is null (StyleSignatureBasic.java:253-259).
+    const idea = { ...fakeIdea(skin), getStyleBuilder: () => undefined as unknown as StyleBuilder };
+    const p = new Probe(skin, idea, skin.atomOps);
+    expect(() => p.line(svgGraphic(), 0, 0, 1, 0)).toThrow(/NullPointerException/);
   });
 });
