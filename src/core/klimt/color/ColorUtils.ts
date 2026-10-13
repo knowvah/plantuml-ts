@@ -29,14 +29,10 @@ export function getGrayScaleColorReverse(color: ResolvedColor): ResolvedColor {
   return { r: grayScale, g: grayScale, b: grayScale, a: 255 };
 }
 
-/** `abs` of each channel difference, then the grey-scale luma of the three
- *  differences (Java `int`, truncated).
+/** `abs` of each channel difference, weighted by the private
+ *  `getGrayScaleInternal` (java:55-58) — the UNdivided sum: only
+ *  `getGrayScaleInternalFromRGB` divides by 1000 (java:48-52).
  *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/ColorUtils.java:77-82 */
 export function distance(c1: ResolvedColor, c2: ResolvedColor): number {
-  return getGrayScale({
-    r: Math.abs(c1.r - c2.r),
-    g: Math.abs(c1.g - c2.g),
-    b: Math.abs(c1.b - c2.b),
-    a: 255,
-  });
+  return Math.abs(c1.r - c2.r) * 299 + Math.abs(c1.g - c2.g) * 587 + Math.abs(c1.b - c2.b) * 114;
 }
