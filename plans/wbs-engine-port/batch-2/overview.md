@@ -4,8 +4,8 @@ Two parallel worktrees. T2b codes against T2a's `Fork` contract (below) with a t
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T2a](T2a-itfcomposed-fork.md) | `ITFComposed` + `Fork`: the tree geometry, auto-width pass, draw order, jar-pinned numbers | typescript-pro (opus) | `src/diagrams/wbs/{ITFComposed,Fork}.ts` + tests | T1a, T1b | [ ] |
-| [T2b](T2b-wbs-diagram.md) | `WBSDiagram` (+ `wbs-skin-param.ts`): `addIdea`, `getSmartLevel`, `add`, `link`, `drawU`, dimension | typescript-pro (opus) | `src/diagrams/wbs/{WBSDiagram,wbs-skin-param}.ts` + tests | T1a, T1c (T2a contract) | [ ] |
+| [T2a](T2a-itfcomposed-fork.md) | `ITFComposed` + `Fork`: the tree geometry, auto-width pass, draw order, jar-pinned numbers | typescript-pro (opus) | `src/diagrams/wbs/{ITFComposed,Fork}.ts` + tests | T1a, T1b | [x] |
+| [T2b](T2b-wbs-diagram.md) | `WBSDiagram` (+ `wbs-skin-param.ts`): `addIdea`, `getSmartLevel`, `add`, `link`, `drawU`, dimension | typescript-pro (opus) | `src/diagrams/wbs/{WBSDiagram,wbs-skin-param}.ts` + tests | T1a, T1c (T2a contract) | [x] |
 
 ## Interface contracts
 - T2a → T2b: `new Fork(skinParam: ISkinParam, root: WElement): WBSTextBlock` (throws when
