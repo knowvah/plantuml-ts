@@ -1,0 +1,5 @@
+@startwbs
+* Root
+** child
+this is not wbs
+@endwbs

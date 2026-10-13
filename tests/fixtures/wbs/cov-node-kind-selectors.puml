@@ -1,0 +1,22 @@
+@startwbs
+<style>
+wbsDiagram {
+  rootNode {
+    BackgroundColor #333333
+    FontColor #FFFFFF
+  }
+  leafNode {
+    BackgroundColor #E0FFE0
+  }
+  boxless {
+    FontColor #A00000
+  }
+}
+</style>
+* Root
+** Inner
+*** Leaf one
+***_ Boxless leaf
+**_ Boxless inner
+*** Leaf two
+@endwbs

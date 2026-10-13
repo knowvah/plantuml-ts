@@ -1,0 +1,23 @@
+@startwbs
+<style>
+wbsDiagram {
+  :depth(0) {
+    BackgroundColor #FFD700
+  }
+  :depth(1) {
+    BackgroundColor #ADD8E6
+    FontColor #00008B
+  }
+  :depth(2) {
+    LineColor #FF0000
+    FontSize 10
+  }
+}
+</style>
+* Root
+** One
+*** One.a
+*** One.b
+** Two
+*** Two.a
+@endwbs

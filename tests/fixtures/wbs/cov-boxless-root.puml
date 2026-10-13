@@ -1,0 +1,7 @@
+@startwbs
+*_ Boxless root
+** Right child
+*** Grandchild
+**< Left child
+** Another right
+@endwbs

@@ -1,0 +1,6 @@
+@startwbs
+skinparam backgroundColor #FFFFE0
+* Root
+** Child
+**< Left
+@endwbs

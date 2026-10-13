@@ -119,3 +119,41 @@ together cover the 204 cached slugs.
 
 Removal is **maintainer-only** — see `oracle/goldens/svg-description/
 README.md`'s identical rule; the same rationale applies verbatim.
+
+## Authored root (wep T5-cov, 2026-10-13)
+
+The 204 cached rows are the work queue, not a ceiling, so original fixtures
+for the corpus's thin spots live in a second, committed root:
+`tests/fixtures/wbs/`, FLAT, one `<slug>.puml` with the jar's `<slug>.svg`
+beside it, rendered one file per call by
+`scripts/oracle-render.sh $PWD/tests/fixtures/wbs $PWD/tests/fixtures/wbs/<slug>.puml`
+(absolute out-dir: a relative one resolves against the input's directory;
+never a hand-typed `java -jar`). The fifteen wep T4a probes (no `cov-`
+prefix) are folded into the same root; the T5-cov fixtures carry `cov-`. A
+non-`.puml` file there would be an `!include` target, not a fixture (relative
+includes resolve from the fixture's directory, stdlib includes through
+`tests/helpers/fixture-include-store.ts`:
+`render-fixture-wbs.ts#authoredWbsIncludeStore`).
+
+The root has its own manifest, `authored-baseline.json`, so the cached
+invariant (diff-baseline rows + ratchet pins = the 204 cached slugs) is
+untouched and `pin-wbs.mts` never sees an authored row. Its invariant
+(`wbs.diff-baseline.ratchet.test.ts`): authored rows = the `.puml` files on
+disk, exactly, each with its `.svg`, disjoint from the cached slugs. Row
+statuses:
+
+- `baseline` — gated by the same never-rises rule; a 0 score is conformant and
+  gated at 0; a nonzero score must carry its mechanism in `reason`.
+- `jar-flake` — the jar's own output is run-dependent; excluded from the gate,
+  the variants (three renders) recorded in its `reason`. None today.
+
+`jarError` records an error-page oracle in `stock-error-pages.json`'s
+`{ line, message }` shape; the error-parity test holds the 2026-10-10 rule
+both ways (a jar error page has no `data-diagram-type`; ours errors on exactly
+those rows and draws the jar's diagram type everywhere else).
+
+Error-page oracles are time-dependent: `PSystemError#getTextBlock`
+(error/PSystemError.java:221-229) adds a Patreon/Liberapay/dedication banner
+when the render's wall-clock minute is 1/8/13/15/30/39/48/55. The committed
+error oracles are banner-free renders; never re-capture one and read the
+score change as a port change.

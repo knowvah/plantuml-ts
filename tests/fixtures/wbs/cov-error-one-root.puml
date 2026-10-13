@@ -1,0 +1,5 @@
+@startwbs
+* First root
+** child
+* Second root
+@endwbs

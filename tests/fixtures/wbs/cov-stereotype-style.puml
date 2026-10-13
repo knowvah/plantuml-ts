@@ -1,0 +1,19 @@
+@startwbs
+<style>
+wbsDiagram {
+  .hot {
+    BackgroundColor #FF6347
+    FontStyle bold
+  }
+  .cold {
+    BackgroundColor #87CEFA
+    LineColor #0000FF
+  }
+}
+</style>
+* Root <<cold>>
+** Warm task
+** Hot task <<hot>>
+*** Child of hot
+** Cold task <<cold>>
+@endwbs

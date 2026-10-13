@@ -1,0 +1,11 @@
+@startwbs
+* "Release plan" as REL
+**< "Gather needs" as NEEDS
+**_< "Boxless left" as BL
+**[#Pink] "Write spec" as SPEC
+***>[#LightBlue] "Draft" as DRAFT
+***_> "Review loop" as LOOP
+** "Ship\nit" as SHIP
+NEEDS -> SHIP
+DRAFT -> SHIP
+@endwbs

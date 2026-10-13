@@ -1,0 +1,12 @@
+@startuml
+start
+:Plan
+{{wbs
+* Plan
+** Build
+*** Compile
+**< Test
+}}
+;
+stop
+@enduml
