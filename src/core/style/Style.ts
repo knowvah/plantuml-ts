@@ -2,8 +2,13 @@ import type { Colors, HColor as ColorsHColor } from '../abel/Colors.js';
 import { ColorType } from '../abel/ColorType.js';
 import { FontConfiguration } from '../abel/FontConfiguration.js';
 import { Fashion } from '../klimt/Fashion.js';
+import { Fore } from '../klimt/Fore.js';
 import { LineBreakStrategy } from '../klimt/LineBreakStrategy.js';
+import type { UGraphic } from '../klimt/UGraphic.js';
 import { UStroke } from '../klimt/UStroke.js';
+import { HColorGradient } from '../klimt/color/HColorGradient.js';
+import { HColorSimple } from '../klimt/color/HColorSimple.js';
+import { HColors } from '../klimt/color/HColors.js';
 import type { UFont } from '../klimt/font/UFont.js';
 import { UFontFactory } from '../klimt/font/UFontFactory.js';
 import { ClockwiseTopRightBottomLeft } from '../klimt/geom/ClockwiseTopRightBottomLeft.js';
@@ -36,6 +41,12 @@ const NORMAL_CSS_WEIGHT = 400;
 const DASH_DELIMITERS = /[-;,]/;
 /** `Double.parseDouble` over a trimmed decimal literal (hex floats not ported). */
 const JAVA_DOUBLE = /^[+-]?(NaN|Infinity|(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?[fFdD]?)$/;
+
+/** `ug.apply(HColor)`: the style layer's `HColor` is an `HColorSimple`/`HColorGradient`; Java's cast otherwise. */
+function foregroundOf(color: HColor): HColorSimple | HColorGradient {
+  if (color instanceof HColorSimple || color instanceof HColorGradient) return color;
+  throw new Error('ClassCastException: line colour is not an HColorSimple');
+}
 
 /** `((ValueImpl) value)`: Java's checked cast. */
 function asValueImpl(value: Value): ValueImpl {
@@ -107,7 +118,7 @@ function parseDash(dash: string): [number, number] | undefined {
  * `mergeNestedChildOver`, `eventuallyOverride(PName, double|String)`,
  * `eventuallyOverride(UStroke)`, `getSymbolContext`, `getStroke(Colors)`
  * (needs `Colors#getSpecificLineStroke`), `createTextBlockBordered`,
- * `applyStrokeAndLineColor`, `toColors`, and the `ID_*` constants.
+ * `toColors`, and the `ID_*` constants.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/Style.java:62-387
  */
@@ -249,6 +260,21 @@ export class Style {
   /** @see Style.java:299-301 */
   getStroke(): UStroke {
     return this.getStrokeOf('LineThickness', 'LineStyle');
+  }
+
+  /**
+   * `LineColor` as the foreground (`HColors.none()` where it is null),
+   * then {@link getStroke}. Applying an `HColor` sets the foreground
+   * (AbstractCommonUGraphic.java:123-124), which is the port's `Fore`.
+   * @see Style.java:372-381
+   */
+  applyStrokeAndLineColor(ug: UGraphic, colorSet: HColorSet): UGraphic {
+    const color: HColor | undefined = this.value('LineColor').asColor(colorSet);
+    if (color === undefined) ug = ug.apply(new Fore(HColors.none()));
+    else ug = ug.apply(new Fore(foregroundOf(color)));
+
+    ug = ug.apply(this.getStroke());
+    return ug;
   }
 
   /** Thickness, plus a dash from the `-;,`-separated style when it parses. @see Style.java:303-320 */

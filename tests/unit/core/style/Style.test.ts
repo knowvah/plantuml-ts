@@ -30,7 +30,13 @@ import { HColorSimple } from '../../../../src/core/klimt/color/HColorSimple.js';
 import { HorizontalAlignment } from '../../../../src/core/klimt/geom/HorizontalAlignment.js';
 import type { UFont } from '../../../../src/core/klimt/font/UFont.js';
 import type { PName } from '../../../../src/core/style/PName.js';
-import type { Value } from '../../../../src/core/style/Value.js';
+import type { HColor as ValueHColor, Value } from '../../../../src/core/style/Value.js';
+import { Fore } from '../../../../src/core/klimt/Fore.js';
+import type { UChange } from '../../../../src/core/klimt/UChange.js';
+import type { UGraphic } from '../../../../src/core/klimt/UGraphic.js';
+import { UStroke } from '../../../../src/core/klimt/UStroke.js';
+import { UTranslate } from '../../../../src/core/klimt/UTranslate.js';
+import { HColors } from '../../../../src/core/klimt/color/HColors.js';
 import { ideaScenarioDump, styleFromDump } from './helpers/style-fixture.js';
 
 const SIG = StyleSignatureBasic.of('root', 'element');
@@ -272,5 +278,65 @@ describe('Style — getter edge cases', () => {
 
   it('getSignature returns the constructor signature', () => {
     expect(style({}).getSignature()).toBe(SIG);
+  });
+});
+
+describe('Style — applyStrokeAndLineColor (Style.java:372-381)', () => {
+  /** A `UGraphic` that records every `apply`, in order, and returns itself. */
+  function recorder(): { ug: UGraphic; applied: UChange[] } {
+    const applied: UChange[] = [];
+    const ug: UGraphic = {
+      apply: (change) => {
+        applied.push(change);
+        return ug;
+      },
+      draw: () => undefined,
+      getParam: () => {
+        throw new Error('unreached');
+      },
+      getTranslate: () => new UTranslate(0, 0),
+      getStringBounder: () => {
+        throw new Error('unreached');
+      },
+    };
+    return { ug, applied };
+  }
+
+  function foreColor(change: UChange | undefined): string {
+    if (!(change instanceof Fore)) throw new Error('not a Fore');
+    return colorString(change.getColor() as object);
+  }
+
+  it('LineColor applies as the foreground, then the style stroke', () => {
+    const s = style({ LineColor: ['#FF0000', 1], LineThickness: ['1.5', 1], LineStyle: ['5-3', 1] });
+    const { ug, applied } = recorder();
+    expect(s.applyStrokeAndLineColor(ug, SET)).toBe(ug);
+    expect(applied).toHaveLength(2);
+    expect(foreColor(applied[0])).toBe(colorString(SET.getColorOrWhite('#FF0000')));
+    expect(applied[1]).toBeInstanceOf(UStroke);
+    const stroke = applied[1] as UStroke;
+    expect([stroke.getDashVisible(), stroke.getDashSpace(), stroke.getThickness()]).toEqual([5, 3, 1.5]);
+  });
+
+  it('no LineColor is ValueNull: HColors.BLACK, not none', () => {
+    const { ug, applied } = recorder();
+    style({}).applyStrokeAndLineColor(ug, SET);
+    expect(foreColor(applied[0])).toBe(colorString(HColors.BLACK));
+    expect((applied[1] as UStroke).getThickness()).toBe(0);
+  });
+
+  it('a null colour (`ValueColor(null, …)` upstream) applies HColors.none()', () => {
+    const map = new Map<PName, Value>([['LineColor', new ValueColor(undefined as unknown as ValueHColor, 1)]]);
+    const { ug, applied } = recorder();
+    new Style(SIG, map).applyStrokeAndLineColor(ug, SET);
+    expect(applied).toHaveLength(2);
+    expect((applied[0] as Fore).getColor()).toBe(HColors.none());
+    expect(applied[1]).toBeInstanceOf(UStroke);
+  });
+
+  it("a colour outside HColorSimple/HColorGradient is Java's ClassCastException", () => {
+    const odd: ValueHColor = { withDark: () => odd };
+    const map = new Map<PName, Value>([['LineColor', new ValueColor(odd, 1)]]);
+    expect(() => new Style(SIG, map).applyStrokeAndLineColor(recorder().ug, SET)).toThrow(/ClassCastException/);
   });
 });
