@@ -35,3 +35,13 @@
   never fails this gate" (`refusal-coverage.test.ts:366-388`).
 - **Impact**: the re-pin at the close is still owed, but no gate forces it.
 - **Confidence**: High.
+
+## Observation: render-diff.mts has no utility asset store
+- **Context**: per-row numbers for the 15 rows after registration.
+- **Finding**: `plans/class-divergence-drive/tools/render-diff.mts:136` combines the sprite and
+  emoji stores only (T1i wired the utility store into the survey, not here), so
+  `kavama-92-noro949` (dedication PNG) reads `pass=false structural=1 numeric=8` there while the
+  survey says conformant; `compareSvg` over `renderFixture` with the utility store added: 0 diffs.
+  `kicizi-84` is unaffected (charlie PNG is inline).
+- **Impact**: close step 6 must not record render-diff's kavama numbers; add the store to the tool.
+- **Confidence**: High (both measured).
