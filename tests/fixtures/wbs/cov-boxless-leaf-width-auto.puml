@@ -1,0 +1,15 @@
+@startwbs
+<style>
+wbsDiagram {
+  node {
+    width auto
+  }
+}
+</style>
+* Root
+** Branch
+***_ boxless leaf with long text
+*** boxed leaf
+**_ boxless branch
+*** under boxless
+@endwbs

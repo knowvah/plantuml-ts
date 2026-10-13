@@ -1,0 +1,10 @@
+@startwbs
+* "Release plan" as REL
+**[#Pink]< "Gather needs" as NEEDS
+**[#Wheat]_ "Boxless right" as BR
+**_ "Plain boxless" as PB
+**> "Write spec" as SPEC
+***[#LightBlue]> "Draft" as DRAFT
+***[#Khaki]_< "Left boxless" as LB
+NEEDS -> DRAFT
+@endwbs

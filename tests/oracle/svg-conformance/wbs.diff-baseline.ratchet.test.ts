@@ -41,9 +41,23 @@
  * `diffCount`/`weightedScore` are `null` (never a number) on every row
  * today: the manifest was seeded with EVERY row already in the error state.
  *
+ * AUTHORED ROOT (wep T5-cov, copied from salt's sep T5-cov). `tests/fixtures/wbs/`
+ * holds original fixtures (`<slug>.puml` + the jar's `<slug>.svg` beside it,
+ * flat; the T4a probes folded in) tracked by a SEPARATE manifest,
+ * `authored-baseline.json`, so the cached invariant ("rows + pins = the 204
+ * cached slugs") is untouched and the pin tool never sees an authored row. Its
+ * invariant: authored rows = the `.puml` files on disk, exactly, each with its
+ * `.svg`, disjoint from the cached slugs. A row is `baseline` (never-rises; 0
+ * is conformant and gated at 0) or `jar-flake` (run-dependent jar output,
+ * excluded, the variants in its `reason`). `jarError` records an error-page
+ * oracle in `stock-error-pages.json`'s `{ line, message }` shape, and the
+ * error-parity test holds the 2026-10-10 rule: we error exactly where the
+ * jar errors.
+ *
  * Re-measure by hand:
  *   npx vitest run tests/oracle/svg-conformance/wbs.diff-baseline.ratchet.test.ts
  *   npx jiti plans/wbs-engine-port/measurements/repin-wbs-baseline.mts
+ *   npx jiti plans/wbs-engine-port/measurements/T5-cov/measure-authored.mts <out.json>
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
@@ -53,7 +67,13 @@ import { fileURLToPath } from 'node:url';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { compareSvg, weightedScore } from './compare.js';
-import { renderFixtureWbs } from './render-fixture-wbs.js';
+import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
+import {
+  authoredWbsIncludeStore,
+  listAuthoredWbsSlugs,
+  readAuthoredWbsFixture,
+  renderFixtureWbs,
+} from './render-fixture-wbs.js';
 
 interface BaselineFixture {
   readonly type: string;
@@ -76,6 +96,7 @@ interface BaselineManifest {
 const HERE = dirname(fileURLToPath(import.meta.url));
 const GOLDENS_DIR = join(HERE, '../../../oracle/goldens/svg-wbs');
 const MANIFEST_PATH = join(GOLDENS_DIR, 'diff-baseline.json');
+const AUTHORED_MANIFEST_PATH = join(GOLDENS_DIR, 'authored-baseline.json');
 const RATCHET_PATH = join(GOLDENS_DIR, 'ratchet.json');
 const CACHE_ROOT = join(HERE, '../../../test-results/dot-cache');
 const WBS_CACHE_DIR = join(CACHE_ROOT, 'wbs');
@@ -91,6 +112,25 @@ const JAR_CRASH_PREFIX = 'jar-crash:';
 const JAR_ERROR_PREFIX = 'jar-error:';
 
 const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')) as BaselineManifest;
+
+/** An authored-root row (`authored-baseline.json`) -- see the header doc comment. */
+interface AuthoredFixture {
+  readonly type: string;
+  readonly slug: string;
+  readonly topic: string;
+  readonly status: 'baseline' | 'jar-flake';
+  readonly weightedScore: number | null;
+  readonly diffCount: number | null;
+  readonly reason?: string;
+  /** `stock-error-pages.json`'s row shape, for an error-page oracle. */
+  readonly jarError?: { readonly line: number | null; readonly message: string };
+  readonly measuredAt: string;
+  readonly measuredAgainstCommit: string;
+}
+
+const authoredManifest = JSON.parse(readFileSync(AUTHORED_MANIFEST_PATH, 'utf8')) as {
+  readonly fixtures: readonly AuthoredFixture[];
+};
 
 type FixtureRef = Pick<BaselineFixture, 'type' | 'slug'>;
 
@@ -120,12 +160,23 @@ type MeasureResult =
  * baseline over unrelated geometry. */
 function measure(f: FixtureRef): MeasureResult {
   const dir = fixtureDir(f);
-  const markup = readFileSync(join(dir, 'in.puml'), 'utf8');
-  const golden = readFileSync(join(dir, 'in.svg'), 'utf8');
+  return measureMarkup(
+    readFileSync(join(dir, 'in.puml'), 'utf8'),
+    readFileSync(join(dir, 'in.svg'), 'utf8'),
+    fixtureIncludeStore(),
+  );
+}
+
+/** Same as {@link measure}, for an authored-root fixture (its jar oracle sits beside it). */
+function measureAuthored(slug: string): MeasureResult {
+  const { markup, golden } = readAuthoredWbsFixture(slug);
+  if (golden === undefined) return { errored: true, reason: `tests/fixtures/wbs/${slug}.svg is missing` };
+  return measureMarkup(markup, golden, authoredWbsIncludeStore());
+}
+
+function measureMarkup(markup: string, golden: string, includeStore: IncludeStore): MeasureResult {
   try {
-    const ours = renderFixtureWbs(markup, new DeterministicMeasurer(), {
-      includeStore: fixtureIncludeStore(),
-    });
+    const ours = renderFixtureWbs(markup, new DeterministicMeasurer(), { includeStore });
     if (ours.includes(ERROR_SENTINEL_MARKER)) {
       return {
         errored: true,
@@ -381,4 +432,84 @@ describe('svg-wbs weighted-score baseline ratchet — promotion is never automat
       'a 0-diff entry in diff-baseline.json is a promotion candidate, not a promotion',
     ).toEqual([]);
   });
+});
+
+// ---------------------------------------------------------------------------
+// AUTHORED ROOT (wep T5-cov) -- `tests/fixtures/wbs/` + `authored-baseline
+// .json`. Shape: one row per `.puml` on disk, each with its jar `.svg`
+// beside it, disjoint from the cached slugs. Gate: the same never-rises rule
+// over every `baseline` row; `jar-flake` rows are excluded and must say why.
+// Error parity: a jar error page (no `data-diagram-type` on its root) is
+// exactly a `jarError` row, and ours errors on exactly those rows.
+// ---------------------------------------------------------------------------
+
+const authoredBaseline = authoredManifest.fixtures.filter((f) => f.status === 'baseline');
+const authoredFlakes = authoredManifest.fixtures.filter((f) => f.status === 'jar-flake');
+
+/** The root `<svg>`'s `data-diagram-type`; absent on both engines' error pages. */
+function diagramTypeOf(svg: string): string | undefined {
+  const root = /^<svg[^>]*>/.exec(svg)?.[0] ?? '';
+  return /\sdata-diagram-type="([^"]*)"/.exec(root)?.[1];
+}
+
+describe('svg-wbs authored fixtures — manifest shape', () => {
+  it('authored rows are exactly one per tests/fixtures/wbs/*.puml on disk, each with its jar .svg', () => {
+    const onDisk = listAuthoredWbsSlugs();
+    expect(authoredManifest.fixtures.map((f) => f.slug).sort()).toEqual(onDisk);
+    expect(onDisk.filter((slug) => readAuthoredWbsFixture(slug).golden === undefined)).toEqual([]);
+  });
+
+  it('authored slugs are disjoint from the cached corpus slugs and the ratchet pins', () => {
+    const ratchet = JSON.parse(readFileSync(RATCHET_PATH, 'utf8')) as { fixtures: { slug: string }[] };
+    const taken = new Set([...readdirSync(WBS_CACHE_DIR), ...ratchet.fixtures.map((f) => f.slug)]);
+    expect(authoredManifest.fixtures.filter((f) => taken.has(f.slug)).map((f) => f.slug)).toEqual([]);
+  });
+
+  it('every row is a numeric baseline or a reasoned jar-flake with no number', () => {
+    expect(authoredBaseline.length + authoredFlakes.length).toBe(authoredManifest.fixtures.length);
+    for (const f of authoredBaseline) expect(f.weightedScore, f.slug).toEqual(expect.any(Number));
+    for (const f of authoredFlakes) {
+      expect(f.weightedScore, f.slug).toBeNull();
+      expect(f.reason, f.slug).toMatch(/^jar-flake: /);
+    }
+  });
+
+  it("every jarError row has stock-error-pages.json's { line, message } shape and its message in the oracle", () => {
+    const rows = authoredManifest.fixtures.filter((f) => f.jarError !== undefined);
+    expect(rows.length).toBeGreaterThan(0);
+    for (const f of rows) {
+      expect(Object.keys(f.jarError!).sort(), f.slug).toEqual(['line', 'message']);
+      expect(f.jarError!.line === null || Number.isInteger(f.jarError!.line), f.slug).toBe(true);
+      const golden = readAuthoredWbsFixture(f.slug).golden ?? '';
+      expect(golden.replaceAll('&lt;', '<'), f.slug).toContain(f.jarError!.message);
+    }
+  });
+
+  it('a nonzero baseline names its mechanism', () => {
+    const unexplained = authoredBaseline.filter((f) => f.weightedScore !== 0 && f.reason === undefined);
+    expect(unexplained.map((f) => f.slug)).toEqual([]);
+  });
+});
+
+describe('svg-wbs authored fixtures — weighted score never rises', () => {
+  for (const f of authoredBaseline) {
+    it(`authored/${f.slug}: weighted score never rises above its baseline (${String(f.weightedScore)})`, () => {
+      const result = measureAuthored(f.slug);
+      if (result.errored) throw new Error(`authored/${f.slug}: rendering/comparison errored: ${result.reason}`);
+      const { ok, message } = checkNoRise(f, f.weightedScore, result.weightedScore);
+      expect(ok, message).toBe(true);
+    });
+  }
+});
+
+describe('svg-wbs authored fixtures — error parity (2026-10-10 error-page rule)', () => {
+  for (const f of authoredManifest.fixtures) {
+    it(`authored/${f.slug}: ${f.jarError === undefined ? 'jar draws and we draw the same diagram type' : 'jar errors and we error'}`, () => {
+      const { markup, golden } = readAuthoredWbsFixture(f.slug);
+      const ours = renderFixtureWbs(markup, new DeterministicMeasurer(), { includeStore: authoredWbsIncludeStore() });
+      const jarType = diagramTypeOf(golden ?? '');
+      expect(jarType === undefined, `${f.slug}: jarError row <=> jar error page`).toBe(f.jarError !== undefined);
+      expect(diagramTypeOf(ours), f.slug).toBe(jarType);
+    });
+  }
 });

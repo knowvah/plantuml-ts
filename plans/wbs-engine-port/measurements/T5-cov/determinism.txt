@@ -1,0 +1,19 @@
+wep T5-cov jar determinism: every tests/fixtures/wbs/*.puml rendered three times
+by scripts/oracle-render.sh (committed capture + two re-renders), cmp per file.
+
+Non-error rows (40): byte-identical in all three renders. No jar-flake row.
+
+Error rows (9): differ only by PSystemError's time-based banner
+(error/PSystemError.java:221-229; minute 1/8/13/55 Patreon, 15 Liberapay,
+30/39/48 dedication): +2 <image>, +126 px height. Image counts
+(committed-first-capture / r2 / r3; 1 = the <5-line welcome image only):
+  cov-dir-then-shape-error               1/1/5  -> kept first capture
+  cov-error-bad-tree                     5/1/1  -> r2 (r2==r3)
+  cov-error-missing-label                4/0/0  -> r2 (r2==r3)
+  cov-error-one-root                     4/0/0  -> r2 (r2==r3)
+  cov-error-smart-level                  5/1/1  -> r2 (r2==r3)
+  cov-error-syntax                       4/0/0  -> r2 (r2==r3)
+  cov-multiline-end-first-line-unclosed  4/0/0  -> r2 (r2==r3)
+  cov-no-such-node                       4/0/0  -> r2 (r2==r3)
+  syntax-error (T4a probe)               5/5/1  -> r3
+Committed oracles are the banner-free renders.

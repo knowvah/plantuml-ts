@@ -1,0 +1,10 @@
+@startwbs
+* Root
+** Branch
+***< Left deep one
+***< Left deep two
+*** Right deep
+****< Left deeper
+**** Right deeper
+--- Minus deep left
+@endwbs

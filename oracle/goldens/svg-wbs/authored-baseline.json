@@ -1,0 +1,541 @@
+{
+  "fixtures": [
+    {
+      "type": "wbs",
+      "slug": "background-pink",
+      "topic": "T4a probe: wbsDiagram { BackgroundColor pink } paints the document background",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "background-pink-title",
+      "topic": "T4a probe: painted wbsDiagram background + title (chrome rect order, family E)",
+      "status": "baseline",
+      "weightedScore": 32,
+      "diffCount": 2,
+      "reason": "family E (no corpus row): the jar paints the document background <rect> first in the content <g> (klimt/drawing/svg/SvgGraphics.java:189-191 paints in the constructor, :819-821 resizes it to the final maxX/maxY); ours draws it inside drawBodyAt's body after the title <g> (src/core/TextBlockExporter.ts#finalizeTitledDiagramFragment): 2 structural diffs g[1]/g[1] rect vs g. Core, filed by sep-T5a; not a wbs fix.",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "chrome",
+      "topic": "T4a probe: title + caption + header + footer around the raw block",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-as-code-new",
+      "topic": "\"label\" as CODE, New order (CommandWBSItemNew mode 1: shape/direction before [#color]) incl. _<, ***>[#c], \\n in a quoted label, links between the codes",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-as-code-old",
+      "topic": "\"label\" as CODE, Old order (CommandWBSItemOld mode 1: [#color] before shape/direction) incl. [#c]_, [#c]_<, link between the codes",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-boxless-leaf-width-auto",
+      "topic": "a _ leaf and a _ branch under width auto",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-boxless-root",
+      "topic": "a boxless (*_) root with children on both sides",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-chrome-legend-mainframe",
+      "topic": "mainframe + title + caption + header + footer + legend right around a two-sided tree",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-depth-selectors",
+      "topic": ":depth(0)/:depth(1)/:depth(2) selectors (BackgroundColor, FontColor, LineColor, FontSize)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-dir-then-shape-error",
+      "topic": "`**<_ \"x\" as C`: CommandWBSItemNew/Old mode 1 RegexOr makes SHAPE_2 a third alternative, so direction-then-shape never matches (Syntax Error?)",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "reason": "error-page: both render the same message at the same line (2026-10-10 rule: conformant); residual is our own version string (kept by ruling) and the \"[From <file>\" vs \"[From string\" source label of a string render.",
+      "jarError": {
+        "line": 3,
+        "message": "Syntax Error? (Assumed diagram type: wbs)"
+      },
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-embed-activity-action",
+      "topic": "{{wbs}} embedded in an activity action (nested seam)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-embed-class-legend",
+      "topic": "{{wbs}} embedded in a class-diagram legend (nested seam)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-error-bad-tree",
+      "topic": "a level skipped (Bad tree structure)",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "reason": "error-page: both render the same message at the same line (2026-10-10 rule: conformant); residual is our own version string (kept by ruling) and the \"[From <file>\" vs \"[From string\" source label of a string render.",
+      "jarError": {
+        "line": 3,
+        "message": "Bad tree structure (Assumed diagram type: wbs)"
+      },
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-error-missing-label",
+      "topic": "a bare ** with a box shape and no label (Missing label for WBS node.)",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: both render the same message at the same line (2026-10-10 rule: conformant); residual is our own version string (kept by ruling) and the \"[From <file>\" vs \"[From string\" source label of a string render.",
+      "jarError": {
+        "line": 4,
+        "message": "Missing label for WBS node. (Assumed diagram type: wbs)"
+      },
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-error-one-root",
+      "topic": "a second level-0 item (WBS diagram only accepts one root first declared.)",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "reason": "error-page: both render the same message at the same line (2026-10-10 rule: conformant); residual is our own version string (kept by ruling) and the \"[From <file>\" vs \"[From string\" source label of a string render.",
+      "jarError": {
+        "line": 4,
+        "message": "WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)"
+      },
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-error-smart-level",
+      "topic": "getSmartLevel cannot place \" -+\" under \"++\" (WBSDiagram.java:207 UnsupportedOperationException, wrapped by ProtectedCommand)",
+      "status": "baseline",
+      "weightedScore": 40,
+      "diffCount": 33,
+      "reason": "error-page: both error (2026-10-10 rule: conformant). Residual: the jar wraps every command in ProtectedCommand (core/AbstractDiagram.java:173-180, command/ProtectedCommand.java:54-78), turning the thrown UnsupportedOperationException into a line-3 CommandExecutionResult.error('You should send a mail ... ' + t.toString()); the port has no ProtectedCommand, so WBSDiagram.ts#getSmartLevel's throw escapes WBSDiagramFactory.ts#executeCommands to renderSync's catch (src/index.ts:418-419, errorSvg), whose page names line 4 and the bare message. Core gap (src/core/command/), plus our own version string (ruling) and the [From string] source label.",
+      "jarError": {
+        "line": 3,
+        "message": "You should send a mail to plantuml@gmail.com with this log (V$version$) java.lang.UnsupportedOperationException: type=< -+>[++] (Assumed diagram type: wbs)"
+      },
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-error-syntax",
+      "topic": "a line no wbs command accepts (Syntax Error?)",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: both render the same message at the same line (2026-10-10 rule: conformant); residual is our own version string (kept by ruling) and the \"[From <file>\" vs \"[From string\" source label of a string render.",
+      "jarError": {
+        "line": 4,
+        "message": "Syntax Error? (Assumed diagram type: wbs)"
+      },
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-forty-nodes",
+      "topic": "40 nodes generated by !while loops (performance sanity, memoised layout)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-left-deeper",
+      "topic": "left-side children at levels 2 and 3 (<, ---), mixed with right siblings",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-left-level1",
+      "topic": "left-side children at level 1 (WElement#createElement LEFT && newLevel == 1 quirk), via < and the -- type",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-link-color",
+      "topic": "links with #Red, .> #00AA00 and #line:blue colours",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-link-crosses-box",
+      "topic": "links from a deep left leaf to a deep right leaf and back, crossing boxes",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-link-default",
+      "topic": "links with the default arrow LineColor (->, -->)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-link-stereo-style",
+      "topic": "a <<crit>> link with arrow { LineColor } + .crit { LineColor } styles",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-max-depth-10",
+      "topic": "a ten-level chain (levels 0..9, corpus max 9) plus a left sibling",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-monochrome-true",
+      "topic": "skinparam monochrome true with a [#Red] node and a coded leaf (ColorMapper seam)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-multiline-end-first-line",
+      "topic": "**:first; is not a complete block (CommandMultilines2.java:98-104): it swallows the next ;-terminated line",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-multiline-end-first-line-unclosed",
+      "topic": "**:only line; with no later ;-terminated line: the block never closes (Syntax Error?)",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: both render the same message at the same line (2026-10-10 rule: conformant); residual is our own version string (kept by ruling) and the \"[From <file>\" vs \"[From string\" source label of a string render.",
+      "jarError": {
+        "line": 3,
+        "message": "Syntax Error? (Assumed diagram type: wbs)"
+      },
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-multiline-quoted-first",
+      "topic": "multiline with a quote-led first data line and a dropped quote line (REMOVE_STARTING_QUOTE), and a double-quoted first line",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-multiline-stereo",
+      "topic": "multiline items closing with ;<<hot>> and ; <<hot>>, a left multiline, a [#color] multiline",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-no-such-node",
+      "topic": "a link to an undeclared code (No such node zz)",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: both render the same message at the same line (2026-10-10 rule: conformant); residual is our own version string (kept by ruling) and the \"[From <file>\" vs \"[From string\" source label of a string render.",
+      "jarError": {
+        "line": 5,
+        "message": "No such node zz (Assumed diagram type: wbs)"
+      },
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-node-kind-selectors",
+      "topic": "rootNode / leafNode / boxless selectors (WElement.java getDefaultStyleDefinitionNode arms)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-pseudo-children",
+      "topic": "PSEUDO (marker-only **_ / **_< / nested ***_) nodes with children, left and right",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-scale-margin-title",
+      "topic": "scale 2 + root { Margin 20 } + title with a left child",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-skinparam-background",
+      "topic": "skinparam backgroundColor #FFFFE0 (document background via skinparam)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-stereotype-style",
+      "topic": "stereotype-scoped styles .hot/.cold on root, inner and leaf nodes",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "cov-width-auto-siblings",
+      "topic": "node { width auto } with siblings of different widths on both sides",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "gradient-background",
+      "topic": "T4a probe: gradient wbsDiagram background (no root background:, SvgGraphics.java:178-183)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "gradient-background-title",
+      "topic": "T4a probe: gradient wbsDiagram background + title (chrome rect order, family E)",
+      "status": "baseline",
+      "weightedScore": 32,
+      "diffCount": 2,
+      "reason": "family E (no corpus row): the jar paints the document background <rect> first in the content <g> (klimt/drawing/svg/SvgGraphics.java:189-191 paints in the constructor, :819-821 resizes it to the final maxX/maxY); ours draws it inside drawBodyAt's body after the title <g> (src/core/TextBlockExporter.ts#finalizeTitledDiagramFragment): 2 structural diffs g[1]/g[1] rect vs g. Core, filed by sep-T5a; not a wbs fix.",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "legend",
+      "topic": "T4a probe: title/caption/header/footer + legend",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "mainframe",
+      "topic": "T4a probe: mainframe frames the LimitFinder ink",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "monochrome-reverse",
+      "topic": "T4a probe: skinparam monochrome reverse (muted colour mapper)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "reversecolor-dark",
+      "topic": "T4a probe: skinparam reversecolor dark (muted colour mapper)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "scale",
+      "topic": "T4a probe: scale 2 against the margined dimension",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "single-root",
+      "topic": "T4a probe: a lone root, fork + delta(20) + same(10)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "style-margin",
+      "topic": "T4a probe: root { Margin 30 } replaces same(10)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "style-margin-title",
+      "topic": "T4a probe: root { Margin 30 } + title (chrome path)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "syntax-error",
+      "topic": "T4a probe: a line no command accepts (Syntax Error?)",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "reason": "error-page: both render the same message at the same line (2026-10-10 rule: conformant); residual is our own version string (kept by ruling) and the \"[From <file>\" vs \"[From string\" source label of a string render.",
+      "jarError": {
+        "line": 3,
+        "message": "Syntax Error? (Assumed diagram type: wbs)"
+      },
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    },
+    {
+      "type": "wbs",
+      "slug": "title-scale",
+      "topic": "T4a probe: title + scale 2",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd29"
+    }
+  ]
+}

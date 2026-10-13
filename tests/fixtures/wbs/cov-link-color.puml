@@ -1,0 +1,10 @@
+@startwbs
+* Root
+**(a) Alpha
+***(a1) Alpha one
+**(b) Beta
+***(b1) Beta one
+a1 -> b1 #Red
+b .> a #00AA00
+a1 -> b #line:blue
+@endwbs

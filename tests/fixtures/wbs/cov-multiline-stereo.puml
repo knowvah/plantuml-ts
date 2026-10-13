@@ -1,0 +1,16 @@
+@startwbs
+<style>
+wbsDiagram {
+  .hot {
+    BackgroundColor #FFA07A
+  }
+}
+</style>
+* Root
+**:First line
+second line;<<hot>>
+**<:Left multi
+line two;
+***[#Khaki]:single body
+end here; <<hot>>
+@endwbs

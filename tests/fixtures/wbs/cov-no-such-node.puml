@@ -1,0 +1,6 @@
+@startwbs
+* Root
+**(a) Alpha
+**(b) Beta
+a -> zz
+@endwbs

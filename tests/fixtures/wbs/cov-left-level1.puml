@@ -1,0 +1,9 @@
+@startwbs
+* Root
+** Right one
+**< Left one
+** Right two
+**< Left two
+-- Minus left
+** Right three
+@endwbs

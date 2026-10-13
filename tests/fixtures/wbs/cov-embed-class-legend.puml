@@ -1,0 +1,12 @@
+@startuml
+class Alpha
+class Beta
+Alpha --> Beta
+legend
+{{wbs
+* Plan
+** Build
+**< Test
+}}
+end legend
+@enduml

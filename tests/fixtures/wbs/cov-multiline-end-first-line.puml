@@ -1,0 +1,6 @@
+@startwbs
+* Root
+**:first;
+** swallowed;
+** after
+@endwbs

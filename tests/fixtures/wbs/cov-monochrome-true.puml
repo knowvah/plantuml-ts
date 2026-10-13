@@ -1,0 +1,8 @@
+@startwbs
+skinparam monochrome true
+* Root
+**[#Red] Red task
+** Plain
+***(x) Leaf
+**< Left
+@endwbs

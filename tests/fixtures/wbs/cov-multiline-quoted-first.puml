@@ -1,0 +1,9 @@
+@startwbs
+* Root
+**:'quoted first
+middle line
+'dropped quote line
+last line;
+**:"double quoted"
+second;
+@endwbs
