@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1623 modules · 5970 exported names.
+1625 modules · 5974 exported names.
 
 ## `src/`
 
@@ -718,6 +718,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ColorResolver.ts` | `GrayLevelRange`, `ColorResolver`, `colorResolverToSvgHex` | ColorResolver — resolves a raw SVG color token (from a decomposed `<$sprite>` `<path>`'s `fill`/`stroke` attribute) to a concrete color, honouring an optional "forced" override color and the sprite's own grey-level range. |
 | `png-encoder.ts` | `RGBA_BYTES_PER_PIXEL`, `crc32`, `encodePng`, `toBase64`, `toBase64DataUri` | Deterministic PNG writer, browser-safe, synchronous: the byte stream the jar's `javax.imageio` PNG writer produces for a sprite raster. |
 | `png-ihdr.ts` | `PngIhdr`, `parsePngIhdrFromDataUri` | PNG IHDR chunk reader for `data:image/png;base64,...` data URIs. |
+| `PSystemListArchimateSprites.ts` | `listArchimateSpritesLines`, `PSystemListArchimateSprites` | `PSystemListArchimateSprites` -- the `listsprite` page: every vendored `sprites/<folder>/` file drawn as `<$folder/name> name (fmt)`, split into 4 columns by `getCols`. |
+| `PSystemListArchimateSpritesFactory.ts` | `acceptsListArchimateSprites`, `listArchimateSpritesPlugin` | `PSystemListArchimateSpritesFactory` -- accepts a one-line source starting (case-insensitively) with `listsprite`. |
 | `sprite-bilinear.ts` | `scaledRasterSize`, `scaleBilinear` | The jar's sprite/img raster scale: `PortableImageAwt#scale` (`klimt/awt/PortableImageAwt.java:113-127`) builds a `round(w * scale) x round(h * scale)` `TYPE_INT_ARGB` destination and runs `java.awt.image.AffineTransformOp` with `TYPE_BILINE |
 | `sprite-raster.ts` | `SpriteLike`, `spriteMonochromeAsLike`, `RgbaBitmap`, `spriteToRgba`, `SpritePngResult`, `spriteToPngDataUri`, `spriteColor4096ToRgba`, `spriteColor4096ToPngDataUri` | Monochrome-sprite tint + PNG rasterization (T5 of SI5b/decisions.md D7). |
 | `sprite-tint.ts` | `SpriteTint`, `spriteBackColor`, `spriteTintHref`, `spriteHrefOver` | sprite-tint.ts — a monochrome sprite's tint, deferred until the back colour it is drawn over is known (unwind2-S7). |
