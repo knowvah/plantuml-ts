@@ -1,0 +1,21 @@
+@startwbs
+<style>
+.mexicoStyle * {
+     BackgroundColor lightblue
+     FontColor Blue
+     RoundCorner 10
+}
+</style>
+* World
+** America
+*** Canada
+*** Mexico <<mexicoStyle>>
+**** Chihuahua
+*** USA
+**** Texas
+*** New York
+** Europe
+*** England
+*** Germany
+*** Spain
+@endwbs

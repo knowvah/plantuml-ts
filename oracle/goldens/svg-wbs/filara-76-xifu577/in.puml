@@ -1,0 +1,16 @@
+@startwbs
+* groclist
+**[#limegreen] Research
+***> Connect to database
+***> Execute SQL script
+***> Insert item to list
+****> Barcode
+*****> Scan
+*****> Manual input
+***> C++ Test library
+***> Search item
+** Design
+***> Database
+****> Create database
+** Implementation
+@endwbs

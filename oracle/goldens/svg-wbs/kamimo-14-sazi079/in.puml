@@ -1,0 +1,29 @@
+@startwbs
+<style>
+wbsDiagram {
+  FontColor blue
+  FontStyle bold  
+  FontSize 13
+
+  element {
+    BackGroundColor palegreen
+    LineThickness 1.0
+  }
+
+  .red {
+    FontColor red
+    FontStyle bold  
+    FontSize 13
+    MaximumWidth 50
+  }
+}
+</style>
++ the partner workpackage
+++ blue
++++ blue workpackage
++++_ blue boxless workpackage 
+++ red <<red>>
++++ red workpackage <<red>>
++++_ red boxless workpackage <<red>>
+
+@endwbs

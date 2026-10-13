@@ -1,0 +1,17 @@
+@startwbs
+<style>
+wbsDiagram {
+    node {
+        BackgroundColor Red
+    }
+
+    .lol {
+        BackgroundColor Green
+    }
+}
+</style>
+
+* root
+** not root <<lol>>
+
+@endwbs

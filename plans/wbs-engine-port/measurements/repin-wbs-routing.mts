@@ -58,10 +58,50 @@ function routingRow(m: MeasuredFixture, old: Row, stamp: Pick<Row, 'measuredAt' 
   return { tree: 'dot-cache', type: 'wbs', slug: m.slug, jarType: m.jarType, ourType: m.ourType, status: 'agree', ...stamp };
 }
 
+/** Stock-jar error record (`scripts/stock-jar-verify.sh`): keys `wbs/<slug>`. */
+const STOCK_ERRORS = (
+  JSON.parse(readFileSync(join(REPO, 'oracle/goldens/stock-error-pages.json'), 'utf8')) as {
+    errors: Record<string, { line: number | null; message: string }>;
+  }
+).errors;
+
+/** b4 close (journal row 29): the jar's error page for a <5-line source is
+ *  prefixed by the Welcome tutorial (PSystemError.java:217-218), pushing its
+ *  'PlantUML version' banner past the gates' 4096-byte HEAD_BYTES window, so
+ *  the head read records `jarRendered: true` for a genuine jar error. Same
+ *  ledger reason as `unknown/bupexo-79-sijo243`. */
+function headWindowReason(slug: string): string {
+  const e = STOCK_ERRORS[`wbs/${slug}`]!;
+  return (
+    `PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() ` +
+    `(PSystemError.java:217-218), pushing the jar's 'PlantUML version ...' signature (PSystemError.java:148) ` +
+    `past the 4096-byte HEAD_BYTES head-read window (refusal-coverage.test.ts, pin-corpus-tree-measure.ts), ` +
+    `so isJarErrorPage misreads a genuine jar error page as jarRendered. The stock jar errors here ` +
+    `(oracle/goldens/stock-error-pages.json wbs/${slug}: "${e.message}" line ${e.line}) and this port ` +
+    `refuses with the same string (WBSDiagram.addIdeaDisplay, WBSDiagram.java:160-162) -- conformant under ` +
+    `the 2026-10-10 error-page rule. Measurement-tool limitation, not an unported feature ` +
+    `(wbs-engine-port b4 close, journal row 29).`
+  );
+}
+
 function refusalRow(m: MeasuredFixture, old: Row, stamp: Pick<Row, 'measuredAt' | 'measuredAgainstCommit'>): Row {
   if (old.status === 'jar-error') return old;
-  if (m.weErrored) throw new Error(`refusal: ${m.slug} errors on our side; a known-gap needs a ledger reason`);
-  return { tree: 'dot-cache', type: 'wbs', slug: m.slug, jarRendered: m.jarRendered, weErrored: false, engine: m.engine, status: 'ok', ...stamp };
+  if (m.weErrored && m.jarRendered && STOCK_ERRORS[`wbs/${m.slug}`] !== undefined)
+    return {
+      tree: 'dot-cache',
+      type: 'wbs',
+      slug: m.slug,
+      jarRendered: true,
+      weErrored: true,
+      engine: m.engine,
+      status: 'known-gap',
+      ...stamp,
+      reason: headWindowReason(m.slug),
+    };
+  // We error where the jar errors too: agreement, not a defect (refusal-coverage.test.ts#isDefect,
+  // #checkNoNewRefusal); re-pinned `ok` with the measured flags (b4 close, journal row 29).
+  if (m.weErrored && m.jarRendered) throw new Error(`refusal: ${m.slug} errors on our side; a known-gap needs a ledger reason`);
+  return { tree: 'dot-cache', type: 'wbs', slug: m.slug, jarRendered: m.jarRendered, weErrored: m.weErrored, engine: m.engine, status: 'ok', ...stamp };
 }
 
 function rebuild(

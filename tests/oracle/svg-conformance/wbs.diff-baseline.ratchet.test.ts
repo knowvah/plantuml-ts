@@ -267,9 +267,9 @@ describe('svg-wbs weighted-score baseline ratchet', () => {
     });
   }
 
-  it(`has no baselined fixtures yet (all ${WBS_CACHED_SLUG_COUNT} are status "error") — see header doc comment`, () => {
-    expect(baselineFixtures).toHaveLength(0);
-    expect(errorFixtures).toHaveLength(WBS_CACHED_SLUG_COUNT);
+  it('every manifest row is a numeric baseline (no "error" rows remain since the wbs plugin landed, wep T4a)', () => {
+    expect(baselineFixtures).toHaveLength(manifest.fixtures.length);
+    expect(errorFixtures).toHaveLength(0);
   });
 });
 
@@ -320,14 +320,16 @@ describe('svg-wbs weighted-score baseline ratchet — branch discrimination', ()
     expect(checkNoRise(sample, 9, 7).ok).toBe(true);
   });
 
-  it('the ERROR_SENTINEL marker check fires against a REAL fixture, not only fabricated strings', () => {
+  // Until the batch-4 close this case fired against a REAL fixture (every
+  // wbs row rendered the sentinel). The plugin now registers (wep T4a), so
+  // the sentinel path is exercised on the marker text itself; a real render
+  // must NOT trip it (mirrors salt.diff-baseline.ratchet.test.ts).
+  it('the ERROR_SENTINEL marker check no longer fires against a real fixture once the plugin renders', () => {
     const real = manifest.fixtures[0];
     expect(real, 'expected at least one manifest fixture').toBeDefined();
     const result = measure(real!);
-    expect(result).toEqual({
-      errored: true,
-      reason: 'renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no wbs plugin registered',
-    });
+    expect(result.errored).toBe(false);
+    expect(ERROR_SENTINEL_MARKER).toBe('Error: unknown diagram type');
   });
 });
 

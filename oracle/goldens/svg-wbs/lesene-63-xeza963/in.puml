@@ -1,0 +1,7 @@
+@startwbs
+* Test
+** A topic
+*** "common" as c1
+** "Another topic" as t2
+t2 ..> c1 #blue
+@endwbs

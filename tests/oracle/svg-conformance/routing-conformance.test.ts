@@ -1025,10 +1025,16 @@ describe('routing conformance — jar-error classification', () => {
     // 5787 -> 5790 / 6691 -> 6694 at sep/close-b5-wave1: 3 svg-salt clone rows
     // (mejeki-64, vuxibo-96 after the chrome-margin fix; neguge-98 after the
     // CommandCreoleSpace port), zero-diff pins. Derivation: 5790 + 818 + 86 = 6694.
-    expect(pinnedAgree.length).toBe(5790);
-    expect(pinnedMisroutes.length).toBe(818);
+    // 5790 -> 6134 / 818 -> 642 / 6694 -> 6862 at wep/close-b4: the wbs
+    // plugin registers (wep T4a), so the 176 `dot-cache/wbs` known-misroute
+    // rows (WBS -> NONE) re-pin `agree` in place; 168 svg-wbs golden clone
+    // rows appended, all zero-diff pins
+    // (plans/wbs-engine-port/measurements/repin-wbs-routing.mts).
+    // Derivation: 6134 + 642 + 86 = 6862.
+    expect(pinnedAgree.length).toBe(6134);
+    expect(pinnedMisroutes.length).toBe(642);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(6694);
+    expect(manifest.fixtures.length).toBe(6862);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -1091,7 +1097,9 @@ describe('routing conformance — jar-error classification', () => {
     // 869 -> 867 at isw/close: licole-34 and loteba-26 (sequence) now agree.
     // 867 -> 817 at sep/close-b4: the 50 salt "no engine (D7 todo)" misroutes
     // re-pinned agree once the salt plugin registered (sep T4a).
-    expect(censused.length).toBe(817);
+    // 817 -> 641 at wep/close-b4: the 176 wbs "no engine (D3 todo)" misroutes
+    // re-pinned agree once the wbs plugin registered (wep T4a).
+    expect(censused.length).toBe(641);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

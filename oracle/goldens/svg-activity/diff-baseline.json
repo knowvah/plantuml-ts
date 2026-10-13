@@ -239,10 +239,10 @@
       "type": "activity",
       "slug": "bozido-07-geze049",
       "status": "baseline",
-      "weightedScore": 66,
-      "diffCount": 66,
-      "measuredAt": "2026-10-12",
-      "measuredAgainstCommit": "3ab50d03"
+      "weightedScore": 61,
+      "diffCount": 61,
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "71b55c44"
     },
     {
       "type": "activity",

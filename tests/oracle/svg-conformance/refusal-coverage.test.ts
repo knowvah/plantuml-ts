@@ -898,7 +898,12 @@ describe('refusal coverage — baseline shape', () => {
     // Derivation: 6457 + 234 = 6691.
     // 6691 -> 6694 at sep/close-b5-wave1: 3 svg-salt clone rows (mejeki-64,
     // vuxibo-96, neguge-98), rendering on both sides. Derivation: 6460 + 234 = 6694.
-    expect(manifest.fixtures.length).toBe(6694);
+    // 6694 -> 6862 at wep/close-b4: 168 svg-wbs golden clone rows, rendering
+    // on both sides; the 204 `dot-cache/wbs` rows re-pinned in place (engine
+    // none -> wbs; tojixi-05 and zecavo-98 -> known-gap, head-window jar
+    // errors) (plans/wbs-engine-port/measurements/repin-wbs-routing.mts).
+    // Derivation: 6694 + 168 = 6862.
+    expect(manifest.fixtures.length).toBe(6862);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -926,7 +931,12 @@ describe('refusal coverage — baseline shape', () => {
     // 242 -> 241 at add4/merge-T3e-2: fukika-81-gite897 renders (stale pin retired).
     // 241 -> 237 at add4/merge-T3k: the 4 add4-T0b activity parser gaps render.
     // 234 -> 232 / 6390 -> 6392 at isw/close: sequence licole-34-vejo527 (`+ XXX`) and loteba-26-konu854 (`& return`) render after the batch-2 sequence ports; re-pinned from a fresh measurement by scripts/repin-sequence-baselines.ts.
-    expect(pinnedErroring.length).toBe(232);
+    // 232 -> 238 at wep/close-b4: six wbs rows the jar errors on now error here
+    // too (the wbs plugin registers, wep T4a): WBS-monoline-def-0-3 ("Bad tree
+    // structure"), WBS-multiline-def-1-{14,15,21} ("Syntax Error?"), and the
+    // head-window known-gaps tojixi-05-lusu056 / zecavo-98-kini554. Re-pinned
+    // `weErrored: true` from a fresh measurement (repin-wbs-routing.mts).
+    expect(pinnedErroring.length).toBe(238);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -1006,7 +1016,10 @@ describe('refusal coverage — baseline shape', () => {
     // clones: bixogo-47, roxosu-00, unknown-tree lubicu-73).
     // 6459 -> 6462 at sep/close-b5-wave1 (3 svg-salt clones: mejeki-64,
     // vuxibo-96, neguge-98).
-    expect(pinnedRendering.length).toBe(6462);
+    // 6462 -> 6624 at wep/close-b4 (+168 svg-wbs clones, -6 wbs dot-cache rows
+    // that now error on both sides; see the erroring count above).
+    // Derivation: 6462 + 168 - 6 = 6624.
+    expect(pinnedRendering.length).toBe(6624);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -1070,7 +1083,11 @@ describe('refusal coverage — baseline shape', () => {
     // known-gaps are fixed (CommandPage, CommandLink3, CommandFootboxIgnored,
     // CommandHideShowByGender ported) and re-pinned ok.
     // 200 -> 198 at isw/close: licole-34 and loteba-26 known-gap -> ok.
-    expect(gaps.length).toBe(198);
+    // 198 -> 200 at wep/close-b4: wbs/tojixi-05-lusu056 and zecavo-98-kini554
+    // are jar ErrorUml pages past the head window (Welcome preamble,
+    // PSystemError.java:217-218; stock record "WBS diagram only accepts one
+    // root first declared."), which the port now refuses with the same string.
+    expect(gaps.length).toBe(200);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //
