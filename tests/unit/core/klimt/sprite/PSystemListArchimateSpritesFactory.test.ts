@@ -17,8 +17,8 @@ import {
 import type { PSystemListArchimateSprites } from '../../../../../src/core/klimt/sprite/PSystemListArchimateSprites.js';
 import { listArchimateSpritesLines } from '../../../../../src/core/klimt/sprite/PSystemListArchimateSprites.js';
 import { ARCHIMATE_SPRITE_NAMES } from '../../../../../src/core/klimt/sprite/archimate-sprite-names.js';
-import { buildSpriteAssetsStore } from '../../../../helpers/sprite-assets-store.js';
 import { compareSvg } from '../../../../oracle/svg-conformance/compare.js';
+import { surveyAssetStore } from '../../../../oracle/svg-conformance/render-fixture-utility.js';
 
 const SLUG = 'xucoma-93-jeko861';
 const CACHE_DIRS = [
@@ -35,7 +35,7 @@ function sourceOf(text: string): UmlSource {
 }
 
 function renderPage(text: string, withStore = true): string {
-  const options = withStore ? { assetStore: buildSpriteAssetsStore() } : undefined;
+  const options = withStore ? { assetStore: surveyAssetStore() } : undefined;
   const parsed = listArchimateSpritesPlugin.parse(sourceOf(text), options);
   if (parseRefusalOf(parsed) !== undefined) throw new Error('refused');
   const measurer = new DeterministicMeasurer();
@@ -96,18 +96,20 @@ describe('plugin', () => {
     expect(renderPage('@startuml\nlistsprite\n@enduml', false)).toContain('<svg');
   });
 
-  it.skipIf(CACHE === undefined)('matches the jar render of xucoma-93-jeko861 (844x667)', () => {
+  it.skipIf(CACHE === undefined)('matches the jar render of xucoma-93-jeko861 (844x667) with zero diffs', () => {
     const actual = renderPage('@startuml\nlistsprite\n@enduml');
-    const { diffs } = compareSvg(actual, readFileSync(join(CACHE!, 'in.svg'), 'utf8'), 'deterministic');
-    // Residual: the 24 PNG internal sprites are not drawn (SpriteImage.java:60-100 unported;
-    // internal-sprite-store.ts#pngDimensions returns dims only), so every row from the first
-    // PNG row (`access`) onward is mis-sized. Rows before it (text[1..7]) match the jar.
-    const root = diffs.filter((d) => d.path.startsWith('svg/@')).map((d) => [d.path, d.actual, d.expected]);
-    expect(root).toEqual([
-      ['svg/@height', '656', '667'],
-      ['svg/@viewBox[3]', '656', '667'],
-    ]);
-    expect(diffs.some((d) => /^svg\/g\[1\]\/text\[[1-7]\]\//.test(d.path))).toBe(false);
+    const golden = readFileSync(join(CACHE!, 'in.svg'), 'utf8');
+    expect(compareSvg(actual, golden, 'deterministic').diffs).toEqual([]);
     expect(actual).toContain('width="844px"');
+  });
+
+  it.skipIf(CACHE === undefined)('embeds the 23 internal PNG sprites byte for byte as the jar does', () => {
+    // compareSvg exempts image href bytes; SpriteImage's muted, bilinear-scaled PNG
+    // (SpriteImage.java:90-91, PixelImage.java:97-113) is checked here directly.
+    const hrefs = (svg: string): string[] =>
+      [...svg.matchAll(/xlink:href="(data:image\/png;base64,[^"]*)"/g)].map((m) => m[1]!);
+    const ours = hrefs(renderPage('@startuml\nlistsprite\n@enduml'));
+    expect(ours).toHaveLength(23);
+    expect(ours).toEqual(hrefs(readFileSync(join(CACHE!, 'in.svg'), 'utf8')));
   });
 });
