@@ -1,0 +1,174 @@
+{
+  "fixtures": [
+    {
+      "type": "unknown",
+      "slug": "fotete-48-viga126",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "bamudi-49-caxo996",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "jigemu-90-titu666",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "kenari-17-dajo806",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "vedine-65-rafo449",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "tukimi-92-noxu802",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "rubeku-92-vefi942",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "zusibo-75-vate603",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "tomodo-34-bimi231",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "ludecu-61-laja912",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "xozane-18-becu956",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "xucoma-93-jeko861",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "lazama-75-loli189",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "gazale-13-tadu312",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "govuca-53-mili511",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "kicizi-84-lexu138",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    },
+    {
+      "type": "unknown",
+      "slug": "kavama-92-noro949",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "3e99b64fc"
+    }
+  ]
+}
