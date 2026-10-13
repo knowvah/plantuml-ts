@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1653 modules · 6023 exported names.
+1655 modules · 6026 exported names.
 
 ## `src/`
 
@@ -1741,6 +1741,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `PSystemAppleTwoFactory.ts` | `PSystemAppleTwoFactory`, `appleTwoPlugin` | `PSystemAppleTwoFactory` — five literals, compared to the raw line with `equalsIgnoreCase`. |
 | `PSystemCharlie.ts` | `PSystemCharlie` | `PSystemCharlie` — the "Je suis Charlie" picture, alone on the page. |
 | `PSystemCharlieFactory.ts` | `PSystemCharlieFactory`, `charliePlugin` | `PSystemCharlieFactory` — two literals, compared to the raw line with `equalsIgnoreCase`. |
+| `PSystemColors.ts` | `PSystemColors` | `PSystemColors` — the `colors` page: every named colour as a 175x28 swatch in 21-row columns, or, given a colour, a 19-hexagon palette of the names closest to it (http://www.redblobgames.com/grids/hexagons/). |
+| `PSystemColorsFactory.ts` | `PSystemColorsFactory`, `colorsPlugin` | `PSystemColorsFactory` — `colors`, `color`, optionally followed by a colour name or hex value: the `@startuml` single-line factory for {@link PSystemColors}. |
 | `PSystemEgg.ts` | `PSystemEgg` | `PSystemEgg` — a decoded easter-egg sentence, one line per `\|`-separated token, drawn by `PlainStringsDiagram`. |
 | `PSystemEggFactory.ts` | `PSystemEggFactory`, `eggPlugin` | `PSystemEggFactory` — a line that decrypts one of two stored payloads to printable text is an easter egg (`SentenceDecoder`). |
 | `PSystemRIP.ts` | `PSystemRIP` | `PSystemRIP` — a dedication to the author's grandfather over his picture. |
