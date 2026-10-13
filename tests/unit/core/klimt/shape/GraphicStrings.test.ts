@@ -157,6 +157,22 @@ describe('GraphicStrings.createBlackOnWhite(strings, classpath) — port-only AD
     expect(count(svgOf(GraphicStrings.createBlackOnWhite(line, { emoji })))).toBeGreaterThan(0);
   });
 
+  it('tints <#0:code:> artwork with the font colour as BOTH colours (Emoji.java:175-181)', () => {
+    const emoji = internalEmojiStoreFrom(buildEmojiAssetsStore());
+    const fills = (svg: string): string[] => [
+      ...new Set([...svg.matchAll(/fill="(#[0-9A-Fa-f]+)"/g)].map((m) => m[1]!)),
+    ];
+    const colour = svgOf(GraphicStrings.createBlackOnWhite(['<:1f600:>'], { emoji }));
+    const mono = svgOf(GraphicStrings.createBlackOnWhite(['<#0:1f600:>'], { emoji }));
+    expect(fills(colour)).toContain('#FFCC4D');
+    expect(fills(mono)).not.toContain('#FFCC4D');
+  });
+
+  it('skips an artwork path that only moves (UPath#isInvisible; SvgPath.java:244-248)', () => {
+    const emoji = { get: (): string => '<path fill="#67757F" d="M11 14zm0 0z"/>' };
+    expect(svgOf(GraphicStrings.createBlackOnWhite(['<:1f5c2:>'], { emoji }))).not.toContain('<path');
+  });
+
   it('keeps CreoleMode.FULL (java:105-107): __underscore__ is still underlined', () => {
     const plain = svgOf(GraphicStrings.createBlackOnWhite(['__u__']));
     expect(svgOf(GraphicStrings.createBlackOnWhite(['__u__'], {}))).toBe(plain);
