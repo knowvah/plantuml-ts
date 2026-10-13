@@ -1,0 +1,7 @@
+
+### unknown/bamudi-49-caxo996  pass=false structural=1 numeric=4
+  S svg/g[1][childCount]  exp=1 | act=27
+  N svg/@height  exp=19 | act=284 (Δ265)
+  N svg/@viewBox[2]  exp=19 | act=532 (Δ513)
+  N svg/@viewBox[3]  exp=19 | act=284 (Δ265)
+  N svg/@width  exp=19 | act=532 (Δ513)

@@ -1,0 +1,11 @@
+
+### unknown/kavama-92-noro949  pass=false structural=1 numeric=8
+  S svg/g[1][childCount]  exp=1 | act=27
+  N svg/@height  exp=422 | act=284 (Δ138)
+  N svg/@viewBox[2]  exp=640 | act=532 (Δ108)
+  N svg/@viewBox[3]  exp=422 | act=284 (Δ138)
+  N svg/@width  exp=640 | act=532 (Δ108)
+  N svg/g[1]/image[1]/@height  exp=422 | act=71 (Δ351)
+  N svg/g[1]/image[1]/@width  exp=640 | act=80 (Δ560)
+  N svg/g[1]/image[1]/@x  exp=0 | act=445.75 (Δ445.75)
+  N svg/g[1]/image[1]/@y  exp=0 | act=6 (Δ6)

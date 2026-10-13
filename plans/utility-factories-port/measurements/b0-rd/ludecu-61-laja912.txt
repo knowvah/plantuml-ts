@@ -1,0 +1,142 @@
+
+### unknown/ludecu-61-laja912  pass=false structural=90 numeric=50
+  S svg/g[1]/text[1]/@font-family  exp=monospace | act=
+  S svg/g[1]/text[1]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[1]/@font-weight  exp= | act=700
+  S svg/g[1]/text[1]/@textLength  exp=49.969 | act=122.625
+  S svg/g[1]/text[1]/text()[1]  exp=<:label:> | act=Welcome to PlantUML!
+  S svg/g[1]/text[2]/@font-family  exp=monospace | act=
+  S svg/g[1]/text[2]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[2]/@textLength  exp=51.269 | act=
+  S svg/g[1]/text[2][childCount]  exp=1 | act=0
+  S svg/g[1]/text[3]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[3]/@textLength  exp= | act=245.25
+  S svg/g[1]/text[3][childCount]  exp=0 | act=1
+  S svg/g[1]/text[4]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[5]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[5]/@textLength  exp=83.119 | act=92.55
+  S svg/g[1]/text[5]/text()[1]  exp=<:badminton:> | act=Bob->Alice: Hello
+  S svg/g[1]/text[6]/@font-family  exp=monospace | act=
+  S svg/g[1]/text[6]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[6]/@textLength  exp=51.269 | act=
+  S svg/g[1]/text[6][childCount]  exp=1 | act=0
+  S svg/g[1]/text[7]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[7]/@textLength  exp= | act=13.275
+  S svg/g[1]/text[7][childCount]  exp=0 | act=1
+  S svg/g[1]/text[8]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[9]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[9]/@textLength  exp=114.969 | act=77.4
+  S svg/g[1]/text[9]/text()[1]  exp=<:bow_and_arrow:> | act=class Example
+  S svg/g[1]/text[10]/@font-family  exp=monospace | act=
+  S svg/g[1]/text[10]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[10]/@textLength  exp=51.269 | act=
+  S svg/g[1]/text[10][childCount]  exp=1 | act=0
+  S svg/g[1]/text[11]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[11]/@textLength  exp= | act=301.275
+  S svg/g[1]/text[11][childCount]  exp=0 | act=1
+  S svg/g[1]/text[12]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[12]/@text-decoration  exp= | act=underline
+  S svg/g[1]/text[12]/@textLength  exp= | act=107.175
+  S svg/g[1]/text[12][childCount]  exp=0 | act=1
+  S svg/g[1]/text[13]/@font-family  exp=monospace | act=
+  S svg/g[1]/text[13]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[13]/@textLength  exp=73.694 | act=
+  S svg/g[1]/text[13][childCount]  exp=1 | act=0
+  S svg/g[1]/text[14]/@font-family  exp=monospace | act=
+  S svg/g[1]/text[14]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[14]/@textLength  exp=51.269 | act=92.025
+  S svg/g[1]/text[14]/text()[1]  exp=<:1f3fb:> | act=(Details by typing
+  S svg/g[1]/text[15]/@font-family  exp= | act=monospace
+  S svg/g[1]/text[15]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[15]/@textLength  exp= | act=37.425
+  S svg/g[1]/text[15][childCount]  exp=0 | act=1
+  S svg/g[1]/text[16]/@font-family  exp=monospace | act=
+  S svg/g[1]/text[16]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[16]/@textLength  exp=50.537 | act=48.675
+  S svg/g[1]/text[16]/text()[1]  exp=<:1f3fc:> | act=keyword)
+  S svg/g[1]/text[17]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[18]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[18]/@font-family  exp=monospace | act=
+  S svg/g[1]/text[18]/@font-size  exp=13 | act=12
+  S svg/g[1]/text[18]/@font-style  exp= | act=italic
+  S svg/g[1]/text[18]/@font-weight  exp= | act=700
+  S svg/g[1]/text[18]/@textLength  exp=51.269 | act=319.2
+  S svg/g[1]/text[18]/text()[1]  exp=<:1f3fd:> | act=plantuml-ts version 0.1.0 / unknown [Unknown compile time]
+  S svg/g[1]/text[19]/@font-size  exp=13 | act=14
+  S svg/g[1]/text[19]/@font-weight  exp= | act=700
+  S svg/g[1]/text[19]/@textLength  exp= | act=128.887
+  S svg/g[1]/text[19][childCount]  exp=0 | act=1
+  S svg/g[1]/text[20]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[20]/@font-family  exp=monospace | act=
+  S svg/g[1]/text[20]/@font-size  exp=13 | act=14
+  S svg/g[1]/text[20]/@font-weight  exp= | act=700
+  S svg/g[1]/text[20]/@textLength  exp=51.269 | act=
+  S svg/g[1]/text[20][childCount]  exp=1 | act=0
+  S svg/g[1]/text[21]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[21]/@font-size  exp=13 | act=14
+  S svg/g[1]/text[21]/@font-weight  exp= | act=700
+  S svg/g[1]/text[21]/@textLength  exp= | act=63.963
+  S svg/g[1]/text[21][childCount]  exp=0 | act=1
+  S svg/g[1]/text[22]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[22]/@font-family  exp=monospace | act=
+  S svg/g[1]/text[22]/@font-size  exp=13 | act=14
+  S svg/g[1]/text[22]/@font-weight  exp= | act=700
+  S svg/g[1]/text[22]/@text-decoration  exp= | act=wavy underline
+  S svg/g[1]/text[22]/@textLength  exp=47.612 | act=56.787
+  S svg/g[1]/text[22]/text()[1]  exp=<:1f3ff:> | act=emoji 1f3
+  S svg/g[1]/text[23]/@fill  exp=#000 | act=#F00
+  S svg/g[1]/text[23]/@font-size  exp=13 | act=14
+  S svg/g[1]/text[23]/@font-weight  exp= | act=700
+  S svg/g[1]/text[23]/@textLength  exp= | act=281.313
+  S svg/g[1]/text[23][childCount]  exp=0 | act=1
+  S svg/g[1][childCount]  exp=4680 | act=27
+  N svg/@height  exp=2591 | act=284 (Δ2307)
+  N svg/@viewBox[2]  exp=1501 | act=532 (Δ969)
+  N svg/@viewBox[3]  exp=2591 | act=284 (Δ2307)
+  N svg/@width  exp=1501 | act=532 (Δ969)
+  N svg/g[1]/text[1]/@x  exp=1105.99 | act=5 (Δ1100.99)
+  N svg/g[1]/text[1]/@y  exp=2333.36 | act=14.333 (Δ2319.027)
+  N svg/g[1]/text[2]/@x  exp=1005 | act=5 (Δ1000)
+  N svg/g[1]/text[2]/@y  exp=2364.49 | act=26.333 (Δ2338.1569999999997)
+  N svg/g[1]/text[3]/@x  exp=1079.34 | act=5 (Δ1074.34)
+  N svg/g[1]/text[3]/@y  exp=2364.49 | act=38.333 (Δ2326.1569999999997)
+  N svg/g[1]/text[4]/@x  exp=1102.42 | act=5 (Δ1097.42)
+  N svg/g[1]/text[4]/@y  exp=2364.49 | act=50.333 (Δ2314.1569999999997)
+  N svg/g[1]/text[5]/@x  exp=1105.99 | act=5 (Δ1100.99)
+  N svg/g[1]/text[5]/@y  exp=2364.49 | act=62.333 (Δ2302.1569999999997)
+  N svg/g[1]/text[6]/@x  exp=1005 | act=5 (Δ1000)
+  N svg/g[1]/text[6]/@y  exp=2395.61 | act=74.333 (Δ2321.277)
+  N svg/g[1]/text[7]/@x  exp=1079.34 | act=5 (Δ1074.34)
+  N svg/g[1]/text[7]/@y  exp=2395.61 | act=86.333 (Δ2309.277)
+  N svg/g[1]/text[8]/@x  exp=1102.42 | act=5 (Δ1097.42)
+  N svg/g[1]/text[8]/@y  exp=2395.61 | act=98.333 (Δ2297.277)
+  N svg/g[1]/text[9]/@x  exp=1105.99 | act=5 (Δ1100.99)
+  N svg/g[1]/text[9]/@y  exp=2395.61 | act=110.333 (Δ2285.277)
+  N svg/g[1]/text[10]/@x  exp=1005 | act=5 (Δ1000)
+  N svg/g[1]/text[10]/@y  exp=2426.74 | act=122.333 (Δ2304.4069999999997)
+  N svg/g[1]/text[11]/@x  exp=1079.34 | act=5 (Δ1074.34)
+  N svg/g[1]/text[11]/@y  exp=2426.74 | act=134.333 (Δ2292.4069999999997)
+  N svg/g[1]/text[12]/@x  exp=1102.42 | act=309.575 (Δ792.845)
+  N svg/g[1]/text[12]/@y  exp=2426.74 | act=134.333 (Δ2292.4069999999997)
+  N svg/g[1]/text[13]/@x  exp=1105.99 | act=5 (Δ1100.99)
+  N svg/g[1]/text[13]/@y  exp=2426.74 | act=146.333 (Δ2280.4069999999997)
+  N svg/g[1]/text[14]/@x  exp=1005 | act=5 (Δ1000)
+  N svg/g[1]/text[14]/@y  exp=2457.86 | act=158.333 (Δ2299.527)
+  N svg/g[1]/text[15]/@x  exp=1079.34 | act=100.325 (Δ979.0149999999999)
+  N svg/g[1]/text[15]/@y  exp=2457.86 | act=158.333 (Δ2299.527)
+  N svg/g[1]/text[16]/@x  exp=1005 | act=141.05 (Δ863.95)
+  N svg/g[1]/text[16]/@y  exp=2488.99 | act=158.333 (Δ2330.6569999999997)
+  N svg/g[1]/text[17]/@x  exp=1078.61 | act=5 (Δ1073.61)
+  N svg/g[1]/text[17]/@y  exp=2488.99 | act=170.333 (Δ2318.6569999999997)
+  N svg/g[1]/text[18]/@x  exp=1005 | act=5 (Δ1000)
+  N svg/g[1]/text[18]/@y  exp=2520.11 | act=195 (Δ2325.11)
+  N svg/g[1]/text[19]/@x  exp=1079.34 | act=6 (Δ1073.34)
+  N svg/g[1]/text[19]/@y  exp=2520.11 | act=218 (Δ2302.11)
+  N svg/g[1]/text[20]/@x  exp=1005 | act=5 (Δ1000)
+  N svg/g[1]/text[20]/@y  exp=2551.24 | act=236 (Δ2315.24)
+  N svg/g[1]/text[21]/@x  exp=1079.34 | act=5 (Δ1074.34)
+  N svg/g[1]/text[21]/@y  exp=2551.24 | act=250 (Δ2301.24)
+  N svg/g[1]/text[22]/@x  exp=1005 | act=5 (Δ1000)
+  N svg/g[1]/text[22]/@y  exp=2582.36 | act=264 (Δ2318.36)
+  N svg/g[1]/text[23]/@x  exp=1075.69 | act=8.85 (Δ1066.8400000000001)
+  N svg/g[1]/text[23]/@y  exp=2582.36 | act=278 (Δ2304.36)

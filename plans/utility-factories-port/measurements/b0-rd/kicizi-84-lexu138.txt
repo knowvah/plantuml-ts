@@ -1,0 +1,11 @@
+
+### unknown/kicizi-84-lexu138  pass=false structural=1 numeric=8
+  S svg/g[1][childCount]  exp=1 | act=27
+  N svg/@height  exp=66 | act=284 (Δ218)
+  N svg/@viewBox[2]  exp=250 | act=532 (Δ282)
+  N svg/@viewBox[3]  exp=66 | act=284 (Δ218)
+  N svg/@width  exp=250 | act=532 (Δ282)
+  N svg/g[1]/image[1]/@height  exp=66 | act=71 (Δ5)
+  N svg/g[1]/image[1]/@width  exp=250 | act=80 (Δ170)
+  N svg/g[1]/image[1]/@x  exp=0 | act=445.75 (Δ445.75)
+  N svg/g[1]/image[1]/@y  exp=0 | act=6 (Δ6)

@@ -1,0 +1,4 @@
+32744	dist
+-rw-r--r--@ 1 scottseely  staff  2095358 Oct 13 15:56 dist/plantuml-ts.cjs
+-rw-r--r--@ 1 scottseely  staff  2622285 Oct 13 15:56 dist/plantuml-ts.js
+-rw-r--r--@ 1 scottseely  staff  2622285 Oct 13 15:56 dist/plantuml-ts.js
