@@ -87,7 +87,7 @@ only via `scripts/oracle-render.sh`. Batch close: [close-procedure.md](close-pro
 
 | Batch | Tasks | Parallel | Done |
 |---|---|---|---|
-| [0](batch-0/overview.md): branch, b0, harness, core bases, colour core, data | T0a → T0b ∥ T0c ∥ T0d ∥ T0e | after T0a | [ ] |
+| [0](batch-0/overview.md): branch, b0, harness, core bases, colour core, data | T0a → T0b ∥ T0c ∥ T0d ∥ T0e | after T0a | [x] |
 | [1a](batch-1a/overview.md): openiconic, colors, emoji list, archimate list | T1a–T1d | all ∥ | [ ] |
 | [1b](batch-1b/overview.md): sudoku, version/license, donors+skinparameters, eggs+dedication | T1e–T1h | all ∥ (∥ 1a) | [ ] |
 | [2](batch-2/overview.md): registration in upstream order + main pin close | T2a | — | [ ] |

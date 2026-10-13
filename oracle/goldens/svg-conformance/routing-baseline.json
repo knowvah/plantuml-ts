@@ -46230,7 +46230,7 @@
       "status": "known-misroute",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
@@ -47157,7 +47157,7 @@
       "status": "known-misroute",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
@@ -47291,7 +47291,7 @@
       "status": "known-misroute",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
@@ -48627,7 +48627,7 @@
       "status": "known-misroute",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
@@ -49503,7 +49503,7 @@
       "status": "known-misroute",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
@@ -50152,7 +50152,7 @@
       "status": "known-misroute",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
@@ -52778,7 +52778,7 @@
       "status": "known-misroute",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
