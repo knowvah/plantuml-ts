@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1616 modules · 5953 exported names.
+1623 modules · 5976 exported names.
 
 ## `src/`
 
@@ -2023,6 +2023,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `License.ts` | `LicenseBuild`, `ORACLE_BUILD`, `formatDateInstance`, `License` | `License` — the text the `license` page prints (`PSystemLicense`) and the licence name `about`/`version` quote. |
+| `LicenseInfo.ts` | `LicenseInfoFields`, `LicenseInfo`, `retrieveQuick`, `retrieveNamedOrDistributorQuickIsValid`, `retrieveNamedSlow`, `retrieveDistributorImage`, `retrieveDistributor` | `LicenseInfo` — the PlantUML licence the running build carries, as `License` and `PSystemLicense` read it. |
+| `LicenseType.ts` | `LicenseType`, `fromInt` | `LicenseType` — the kind of licence a {@link LicenseInfo} records. |
+| `PSystemLicense.ts` | `getTextBlock`, `PSystemLicense` | `PSystemLicense` — the `license` page: `License#getText1` + `#getText2` as one black-on-white `GraphicStrings`, or, when the licence carries a distributor logo, the two halves around that logo. |
+| `PSystemLicenseFactory.ts` | `PSystemLicenseFactory`, `licensePlugin` | `PSystemLicenseFactory` — `license` (and its misspellings) as a single-line `@startuml` page, through the ported `PSystemSingleLineFactory` gate (`singleLinePlugin`, decisions.md D2/D3). |
+| `PSystemVersion.ts` | `getPlantumlImage`, `getAuthorsStrings`, `addInfoVersion`, `PSystemVersion` | `PSystemVersion` — the `about`/`authors` and bare `stdlib` pages: lines of creole drawn black on white with the PlantUML logo in the bottom-right corner (`PlainStringsDiagram`). |
+| `PSystemVersionFactory.ts` | `PSystemVersionFactory`, `versionPlugin` | `PSystemVersionFactory` — `about`/`authors`/`author` and bare `stdlib` as single-line `@startuml` pages, through the ported `PSystemSingleLineFactory` gate (`singleLinePlugin`, decisions.md D2/D3). |
 | `stdlib-catalog.ts` | `StdlibCatalogEntry`, `STDLIB_CATALOG` | `STDLIB_CATALOG` -- the folders the bare `stdlib` page lists (`PSystemVersion.java:205-210` -> `Stdlib.addInfoVersion`, `Stdlib.java:320-331`). |
 
 ## `src/diagrams/wbs/`
