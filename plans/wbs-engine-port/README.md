@@ -93,7 +93,7 @@ Batch close: [close-procedure.md](close-procedure.md).
 
 | Batch | Tasks | Parallel | Done |
 |---|---|---|---|
-| [0](batch-0/overview.md): branch, b0, harness, `getWBSDirection` | T0a → T0b ∥ T0c | T0b ∥ T0c | [ ] |
+| [0](batch-0/overview.md): branch, b0, harness, `getWBSDirection` | T0a → T0b ∥ T0c | T0b ∥ T0c | [x] |
 | [1](batch-1/overview.md): model + leaf text blocks | T1a, T1b, T1c | all ∥ | [ ] |
 | [2](batch-2/overview.md): tree layout + diagram | T2a, T2b | ∥ (Fork contract) | [ ] |
 | [3](batch-3/overview.md): commands + factory | T3a ∥ T3b → T3c | two waves | [ ] |
