@@ -4,7 +4,13 @@
  * division), then `subList(i, min(size, i + maxLine))` stepping by `maxLine`.
  */
 import { describe, expect, it } from 'vitest';
-import { getCols } from '../../../src/diagrams/donors/PSystemDonors.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { PreprocessingArtifact } from '../../../src/core/tim/PreprocessingArtifact.js';
+import { stringBounderFor } from '../../../src/core/UgDiagram.js';
+import { getCols, PSystemDonors } from '../../../src/diagrams/donors/PSystemDonors.js';
+import { donorsPlugin } from '../../../src/diagrams/donors/PSystemDonorsFactory.js';
+import { compareSvg } from '../../oracle/svg-conformance/compare.js';
+import { fixture, renderWith } from '../../helpers/utility-single-line.js';
 
 /** `line0`, `line1`, ... — distinct values so a mis-sliced column shows. */
 function linesOf(n: number): string[] {
@@ -45,5 +51,45 @@ describe('PSystemDonors.getCols (PSystemDonors.java:146-154)', () => {
 
   it('1 col: maxLine = (3 + 0 + 0) / 1 = 3, the whole list in one column', () => {
     expect(getCols(linesOf(3), 1, 0)).toEqual([['line0', 'line1', 'line2']]);
+  });
+});
+
+describe('PSystemDonors render (PSystemDonors.java:106-144)', () => {
+  const diagram = new PSystemDonors({ lines: [], type: 'sequence' }, new PreprocessingArtifact());
+
+  it('describes itself as (Donors)', () => {
+    expect(diagram.getDescription()).toBe('(Donors)');
+  });
+
+  it('header is the bold sponsors line', () => {
+    const svg = renderWith(donorsPlugin, fixture('donors.puml'));
+    expect(svg).toContain('Special thanks to our sponsors and donors !');
+  });
+
+  it('matches the jar oracle (donors probe) with zero diffs', () => {
+    const { pass, diffs } = compareSvg(
+      renderWith(donorsPlugin, fixture('donors.puml')),
+      fixture('donors.svg'),
+      'deterministic',
+    );
+    expect(diffs).toEqual([]);
+    expect(pass).toBe(true);
+  });
+
+  it('is deterministic across three renders', () => {
+    const first = renderWith(donorsPlugin, fixture('donors.puml'));
+    expect(renderWith(donorsPlugin, fixture('donors.puml'))).toBe(first);
+    expect(renderWith(donorsPlugin, fixture('donors.puml'))).toBe(first);
+  });
+
+  it('create builds a PSystemDonors from source and artifact', () => {
+    expect(PSystemDonors.create({ lines: [], type: 'sequence' }, new PreprocessingArtifact())).toBeInstanceOf(
+      PSystemDonors,
+    );
+  });
+
+  it('getHeader is a one-line block with the same height as the rendered header', () => {
+    const measurer = stringBounderFor(new DeterministicMeasurer());
+    expect(diagram.getHeader().calculateDimension(measurer).getHeight()).toBeGreaterThan(0);
   });
 });
