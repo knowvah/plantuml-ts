@@ -1,7 +1,7 @@
 /**
- * `PSystemVersion` — the `about`/`authors` and bare `stdlib` pages: lines of
- * creole drawn black on white with the PlantUML logo in the bottom-right
- * corner (`PlainStringsDiagram`).
+ * `PSystemVersion` — the `about`/`authors`, `version` and bare `stdlib` pages:
+ * lines of creole drawn black on white with the PlantUML logo in the
+ * bottom-right corner (`PlainStringsDiagram`).
  *
  * This port prints its own name and version string (`plantuml-ts version
  * <v>`, matching the error banner's `fullDescription()`) where the jar prints
@@ -9,15 +9,13 @@
  * own version string", DIVERGENCES.md "Error pages print this port's
  * version").
  *
+ * The `version` page (`createShowVersion`, java:172-202) prints this port's
+ * own environment where the jar prints its host's (decisions.md D14,
+ * DIVERGENCES.md "`version` page prints the port's own environment"): its
+ * layout engine through `GraphvizUtils.addDotStatus`'s library arm, and none
+ * of the JVM/OS/environment lines a browser library does not have.
+ *
  * Not ported:
- * - `createShowVersion` (java:172-202, the `version` page): after its first
- *   four lines it prints host state the port does not have — the `dot`
- *   executable's status (`GraphvizUtils.addDotStatus`), JVM system properties
- *   (`OptionPrint.interestingProperties`) and the `PLANTUML_LIMIT_SIZE`
- *   environment variable (`OptionPrint.interestingValues`). The oracle's
- *   `-DPLANTUML_DETERMINISTIC_TEXT` swaps the string bounder only
- *   (`FileFormat.java:185-192`), so those lines are the oracle host's. Stop 14
- *   (host-only behaviour), reported for a ruling.
  * - `createTestDot`, `createKeyDistributor` and the private image constructor
  *   (java:83-89, :256-279): `testdot` and the key tools are out (decisions.md D8).
  * - The other image getters (`getTime01`, `getTime15`, `getCharlieImage`,
@@ -27,13 +25,17 @@
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/PSystemVersion.java
  */
+import { renderSvg } from '@knowvah/dot-engine';
 import type { UmlSource } from '../../core/block-extractor.js';
+// The canvas-free text measurer `renderSvg` measures `test` with, installed
+// for its side effect as every other engine consumer does.
+import '../../core/dot-engine-measurer.js';
 import { PLANTUML_LOGO } from '../../core/error/plantuml-logo.js';
 import type { RasterImage } from '../../core/error/raster-image.js';
 import { GraphicPosition } from '../../core/klimt/geom/GraphicPosition.js';
 import { PlainStringsDiagram } from '../../core/PlainStringsDiagram.js';
 import type { PreprocessingArtifact } from '../../core/tim/PreprocessingArtifact.js';
-import { COMPILE_TIME_STRING, versionString } from '../../core/version.js';
+import { COMMIT, COMPILE_TIME_STRING, versionString } from '../../core/version.js';
 import { License } from './License.js';
 import { STDLIB_CATALOG } from './stdlib-catalog.js';
 
@@ -47,6 +49,30 @@ const BLANK = ' ';
 /** `s.replaceAll("\\</?\\w+\\>", "")`: Java's `\w` is `[a-zA-Z_0-9]`, as JS's.
  *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/PSystemVersion.java:249 */
 const TAG = /<\/?\w+>/g;
+
+/**
+ * The layout engine this port draws with, named as the module `renderSvg` is
+ * imported from. It stands where upstream names its JavaScript layout library
+ * (`"VizJs library is used!"`); `@knowvah/dot-engine` exports no version
+ * string, so the page names the engine without one (decisions.md D14).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/dot/GraphvizUtils.java:94
+ */
+const LAYOUT_ENGINE = '@knowvah/dot-engine';
+
+/** `create(null, "digraph foo { test; }", "svg")`, laid out by `dot`.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/dot/GraphvizUtils.java:161-162 */
+const TEST_DOT = 'digraph foo { test; }';
+const TEST_ENGINE = 'dot';
+
+/** `addDotStatus(strings, true)` (java:193): the rich-text prefixes.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/dot/GraphvizUtils.java:86-89 */
+const RED = '<b><color:red>';
+const BOLD = '<b>';
+
+/** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/dot/GraphvizUtils.java:171 */
+const EMPTY_FILE = 'Error: dot generates empty file. Check you dot installation.';
+/** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/dot/GraphvizUtils.java:175 */
+const UNREADABLE_SVG = 'Error: dot generates unreadable SVG file. Check you dot installation.';
 
 /** The authors lines between the licence line and the closing link.
  *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/PSystemVersion.java:227-239 */
@@ -107,6 +133,42 @@ export function addInfoVersion(strings: string[], details: boolean): void {
   }
 }
 
+/**
+ * `getTestCreateSimpleFile`: lays the test graph out with the port's engine.
+ * The `ProcessState` timeout arm (java:164-165) has no counterpart:
+ * `renderSvg` runs in-process and synchronously, with no process to time out.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/dot/GraphvizUtils.java:160-178
+ */
+function getTestCreateSimpleFile(): string | undefined {
+  const data = renderSvg(TEST_DOT, TEST_ENGINE);
+  if (data.length === 0) return EMPTY_FILE;
+  if (!data.includes('<svg')) return UNREADABLE_SVG;
+  return undefined;
+}
+
+/**
+ * `addDotStatus(strings, true)`, its `useVizJs` arm (java:93-108): the port
+ * lays out with a linked JavaScript library, never a `dot` executable, so the
+ * executable arms (java:110-155 — `GRAPHVIZ_DOT`, `Dot executable is`,
+ * `ExeState`, `<b>GraphViz</b> ""<dot -V>""` and the version checks) have no
+ * counterpart. `Logme.error(e)` (java:104) is not mirrored: `src/` logs
+ * nothing, and the page prints the error. The error code it returns is read
+ * only by the CLI's `-testdot` (`OptionPrint.printCheckGraphviz`), not ported.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/dot/GraphvizUtils.java:83-108
+ */
+function addDotStatus(strings: string[]): void {
+  // java:94 `VizJs library is used!` → the engine this port links (D14).
+  strings.push(`${LAYOUT_ENGINE} library is used!`);
+  try {
+    const err = getTestCreateSimpleFile();
+    strings.push(err === undefined ? `${BOLD}Installation seems OK. File generation OK` : RED + err);
+  } catch (e) {
+    // `e.toString()`: JS `Error#toString` is `name: message`, as Java's
+    // `getClass().getName() + ": " + message` minus the package.
+    strings.push(RED + String(e));
+  }
+}
+
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/PSystemVersion.java:67 */
 export class PSystemVersion extends PlainStringsDiagram {
   /**
@@ -122,6 +184,43 @@ export class PSystemVersion extends PlainStringsDiagram {
       this.image = getPlantumlImage();
       this.imagePosition = GraphicPosition.BACKGROUND_CORNER_BOTTOM_RIGHT;
     }
+  }
+
+  /**
+   * The `version` page with this port's own values (decisions.md D14).
+   * `ReportLog` is a list of strings (`crash/ReportLog.java:50-71`).
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/PSystemVersion.java:172-202
+   */
+  static createShowVersion(source: UmlSource, preprocessing: PreprocessingArtifact): PSystemVersion {
+    const strings: string[] = [];
+    // java:174 `<b>PlantUML</b>` → this port's name (journal row 24a, D14).
+    strings.push(`<b>plantuml-ts</b> ""${versionString()}""`);
+    // java:175-176 `CompilationInfo.COMMIT`, `Version.compileTimeString()`:
+    // this port's own build constants (`core/version.ts`).
+    strings.push(`<b>Git Commit</b> ""${COMMIT}""`);
+    strings.push(`<b>Build Time</b> ""${COMPILE_TIME_STRING}""`);
+    // java:178 `!TeaVM.isTeaVM()`: the port mirrors the JVM jar.
+    strings.push(`<b>License</b> ""${License.getCurrent().toString()}""`);
+    // java:180 `checkOldVersionWarning` adds nothing: the port never stamps a
+    // compile time, and unstamped `Version.compileTime()` is now
+    // (Version.java:79-82), so the age is 0 days < 140 (ReportLog.java:87-95).
+    // java:181-189 omitted: `Loaded from <jar>` and the Word-mode lines print
+    // only under the INSECURE profile; the page cannot see
+    // `RenderOptions.securityProfile` (include prefetch only), the jar's
+    // default LEGACY prints neither, and the port has no jar path or Word mode.
+    strings.push(BLANK);
+    addDotStatus(strings);
+    strings.push(BLANK);
+    // java:194-195 `OptionPrint.interestingProperties()` omitted: Java
+    // Runtime, JVM, Default Encoding, Language and Country are JVM system
+    // properties (OptionPrint.java:61-81); a browser library has no JVM, and
+    // reading the host's locale would make the page host-dependent.
+    // java:197-198 `OptionPrint.interestingValues()` omitted: its ` ` and
+    // `PLANTUML_LIMIT_SIZE: <n>` (OptionPrint.java:83-88) report an environment
+    // variable and an image-size limit this port neither reads nor applies.
+    // Upstream's own browser build drops both blocks (`TeaVM.isTeaVM()`,
+    // OptionPrint.java:62-63, :85).
+    return new PSystemVersion(source, true, strings, preprocessing);
   }
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/PSystemVersion.java:205-211 */
