@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1632 modules · 5997 exported names.
+1653 modules · 6023 exported names.
 
 ## `src/`
 
@@ -1643,6 +1643,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `dedication-images.ts` | `DedicationImage`, `DEDICATION_IMAGES` | `DEDICATION_IMAGES` -- the 10 `DedicationSimple` sentences (`Dedications.java:55-65`, in order) and the PNG the pinned jar embeds for each (D4). |
+| `Dedication.ts` | `Dedication` | `Dedication` — one sentence that may unlock an image. |
+| `DedicationEncrypted.ts` | `DedicationEncrypted` | `DedicationEncrypted` — one of the three secret dedications. |
+| `Dedications.ts` | `Dedications` | `Dedications` — the 10 public sentences then the 3 secret ones, tried in order on any line longer than 25 chars. |
+| `DedicationSimple.ts` | `DedicationSimple` | `DedicationSimple` — a public sentence and its image. |
+| `equals-ignore-case.ts` | `equalsIgnoreCase` | `java.lang.String#equalsIgnoreCase`, as `DedicationSimple#same` calls it (`DedicationSimple.java:74`): equal lengths, and per UTF-16 unit the units are equal, or their upper cases are, or the lower cases of their upper cases are (`String#re |
+| `PSystemDedication.ts` | `PSystemDedication` | `PSystemDedication` — a dedication image, alone on the page. |
+| `PSystemDedicationFactory.ts` | `PSystemDedicationFactory`, `dedicationPlugin` | `PSystemDedicationFactory` — a line `Dedications.get` recognises is a dedication page. |
+| `TinyHashableString.ts` | `TinyHashableString` | `TinyHashableString` — the line `Dedications.get` hands every dedication. |
 
 ## `src/diagrams/description/`
 
@@ -1725,7 +1733,20 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `apple2-image.ts` | `APPLE2_PNG` | `APPLE2_PNG` -- the image `apple //e` draws under its text (`PSystemAppleTwo.java:55`, `PSystemVersion.getApple2Image`, java:124-126: `version/apple2.png`, a header-stripped WebP read by `SFile.getImageFromWebpButHeader`), as the pinned jar |
 | `charlie-image.ts` | `CharliePng`, `CHARLIE_PNG` | `CHARLIE_PNG` -- the image `charlie` draws (`PSystemCharlie.java`, `PSystemVersion.getCharlieImage`, java:104-106), as the pinned jar embeds it in SVG (D4). |
+| `EggUtils.ts` | `EggUtils` | `EggUtils` — hex, xor and the base-26 key the easter-egg sentences are encrypted with. |
+| `equals-ignore-case.ts` | `equalsIgnoreCase` | `java.lang.String#equalsIgnoreCase`, which every egg factory's literal test calls (`PSystemCharlieFactory.java:48`, `PSystemAppleTwoFactory.java:52-53`, `PSystemRIPFactory.java:52`): equal lengths, and per UTF-16 unit the units are equal, o |
+| `PSystemAppleTwo.ts` | `PSystemAppleTwo` | `PSystemAppleTwo` — "Apple //e for ever !" over the Apple //e picture. |
+| `PSystemAppleTwoFactory.ts` | `PSystemAppleTwoFactory`, `appleTwoPlugin` | `PSystemAppleTwoFactory` — five literals, compared to the raw line with `equalsIgnoreCase`. |
+| `PSystemCharlie.ts` | `PSystemCharlie` | `PSystemCharlie` — the "Je suis Charlie" picture, alone on the page. |
+| `PSystemCharlieFactory.ts` | `PSystemCharlieFactory`, `charliePlugin` | `PSystemCharlieFactory` — two literals, compared to the raw line with `equalsIgnoreCase`. |
+| `PSystemEgg.ts` | `PSystemEgg` | `PSystemEgg` — a decoded easter-egg sentence, one line per `\|`-separated token, drawn by `PlainStringsDiagram`. |
+| `PSystemEggFactory.ts` | `PSystemEggFactory`, `eggPlugin` | `PSystemEggFactory` — a line that decrypts one of two stored payloads to printable text is an easter egg (`SentenceDecoder`). |
+| `PSystemRIP.ts` | `PSystemRIP` | `PSystemRIP` — a dedication to the author's grandfather over his picture. |
+| `PSystemRIPFactory.ts` | `PSystemRIPFactory`, `ripPlugin` | `PSystemRIPFactory` — one literal, compared to the raw line with `equalsIgnoreCase`. |
+| `rip-image.ts` | `RIP_PNG` | `RIP_PNG` -- the image `jean canouet` draws under its text (`PSystemRIP.java:63`, `SImageIO.read(imm)`: the inline JPEG `imm`, java:71-435), as the pinned jar re-encodes it in SVG (the D4 approach). |
+| `SentenceDecoder.ts` | `SentenceDecoder` | `SentenceDecoder` — xor an encrypted easter-egg payload with the key a sentence spells (`EggUtils.fromSecretSentence`) and judge whether the result reads as text. |
 
 ## `src/diagrams/files/`
 
