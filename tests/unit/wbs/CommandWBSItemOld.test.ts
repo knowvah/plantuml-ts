@@ -5,7 +5,7 @@
  * `RegexResult.getLazzy("BACKCOLOR"|"CODE"|"SHAPE", 0)` +
  * `Direction.getWBSDirection` would pass.
  */
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Direction } from '../../../src/core/abel/Direction.js';
 import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
 import { preprocess } from '../../../src/core/preprocessor.js';
@@ -19,6 +19,10 @@ import { SkinParam } from '../../../src/diagrams/wbs/wbs-skin-param.js';
 import { WBSDiagram } from '../../../src/diagrams/wbs/WBSDiagram.js';
 
 const WARNING = 'Please define Direction/Shape before Color/Id.';
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 const RED = HColorSet.instance().getColor('#red');
 
 function diagram(): WBSDiagram {
