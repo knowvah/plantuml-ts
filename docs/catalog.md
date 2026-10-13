@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1600 modules · 5914 exported names.
+1601 modules · 5921 exported names.
 
 ## `src/`
 
@@ -1995,6 +1995,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `CommandWBSItemOld.ts` | `WBS_ITEM_OLD_RE_0`, `WBS_ITEM_OLD_RE_1`, `applyWbsItemOld` |  |
 | `CommandWBSLink.ts` | `WBS_LINK_RE`, `WbsLinkTarget`, `applyWbsLink` |  |
 | `Fork.ts` | `Fork` |  |
+| `index.ts` | `WbsGeometry`, `calculateBackColor`, `muteColorMapper`, `isHandwritten`, `calculateMargin`, `renderWbs`, `wbsPlugin` | WBS diagram plugin — `WBSDiagramFactory` (parse), then `TextBlockExporter`'s export of `WBSDiagram#getTextBlock` (the diagram itself, WBSDiagram.java:94-97) on the klimt substrate: canvas = the diagram's `calculateDimension` (fork + 20, WBS |
 | `ITF.ts` | `ITF`, `getMainBoxWidthDefault` |  |
 | `ITFComposed.ts` | `ITFComposed` |  |
 | `ITFLeaf.ts` | `ITFLeaf` |  |

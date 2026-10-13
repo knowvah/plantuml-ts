@@ -1,0 +1,10 @@
+@startwbs
+<style>
+wbsDiagram {
+  BackgroundColor red/blue
+}
+</style>
+title T
+* r
+** a
+@endwbs

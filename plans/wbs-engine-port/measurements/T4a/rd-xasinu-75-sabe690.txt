@@ -1,0 +1,4 @@
+
+### wbs/xasinu-75-sabe690  pass=false structural=2 numeric=0
+  S svg/g[1]/a[1]/@href  exp= | act=TP
+  S svg/g[1]/a[1]/@xlink:href  exp= | act=TP
