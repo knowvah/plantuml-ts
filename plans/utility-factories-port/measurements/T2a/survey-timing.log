@@ -1,0 +1,11 @@
+
+> @knowvah/plantuml-ts@0.2.0 svg:survey
+> jiti scripts/svg-parity-survey.ts timing --out /Users/scottseely/git/knowvah/plantuml-ts/.claude/worktrees/ufp-T2a/plans/utility-factories-port/measurements/T2a/parity-timing.json
+
+surveying 126 timing fixtures (concurrency 6)
+  25/126
+  50/126
+  75/126
+  100/126
+  125/126
+wrote /Users/scottseely/git/knowvah/plantuml-ts/.claude/worktrees/ufp-T2a/plans/utility-factories-port/measurements/T2a/parity-timing.json — {"conformant":6,"structural-match":0,"diverged":120,"errored":0,"timeout":0,"oracle-error":0}
