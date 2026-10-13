@@ -903,7 +903,9 @@ describe('refusal coverage — baseline shape', () => {
     // none -> wbs; tojixi-05 and zecavo-98 -> known-gap, head-window jar
     // errors) (plans/wbs-engine-port/measurements/repin-wbs-routing.mts).
     // Derivation: 6694 + 168 = 6862.
-    expect(manifest.fixtures.length).toBe(6862);
+    // 6862 -> 6870 at wep/close-b5-wave1: 8 svg-wbs clone rows (T5a/T5b fixes),
+    // rendering on both sides. Derivation: 6862 + 8 = 6870.
+    expect(manifest.fixtures.length).toBe(6870);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -1019,7 +1021,8 @@ describe('refusal coverage — baseline shape', () => {
     // 6462 -> 6624 at wep/close-b4 (+168 svg-wbs clones, -6 wbs dot-cache rows
     // that now error on both sides; see the erroring count above).
     // Derivation: 6462 + 168 - 6 = 6624.
-    expect(pinnedRendering.length).toBe(6624);
+    // 6624 -> 6632 at wep/close-b5-wave1 (+8 svg-wbs clones).
+    expect(pinnedRendering.length).toBe(6632);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

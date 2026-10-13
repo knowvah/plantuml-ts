@@ -1,0 +1,22 @@
+@startwbs
+
+<style>
+wbsDiagram {
+  hyperlinkUnderlineThickness 0
+  hyperlinkColor Red
+  
+  .pinkname {
+      BackgroundColor pink
+  }
+}
+</style>
+
+* Software Project
+**[#SkyBlue] Design
+***: Build team
+ - John (The database) [[https://dawkins.com Dawkins]]
+ - Sally (The javascript) Marten
+ - Fred (The Animal) Johnson; <<pinkname>>
+*** Start detailed estimation
+
+@endwbs

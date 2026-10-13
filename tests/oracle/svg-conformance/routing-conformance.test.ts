@@ -1031,10 +1031,14 @@ describe('routing conformance — jar-error classification', () => {
     // rows appended, all zero-diff pins
     // (plans/wbs-engine-port/measurements/repin-wbs-routing.mts).
     // Derivation: 6134 + 642 + 86 = 6862.
-    expect(pinnedAgree.length).toBe(6134);
+    // 6134 -> 6142 / 6862 -> 6870 at wep/close-b5-wave1: 8 svg-wbs clone rows
+    // (facibu-72, keloxe-59, link-URL-tooltip-1/-2, xasinu-75, zeneno-39 after
+    // T5a; fipina-75, xakubu-65 after T5b), zero-diff pins.
+    // Derivation: 6142 + 642 + 86 = 6870.
+    expect(pinnedAgree.length).toBe(6142);
     expect(pinnedMisroutes.length).toBe(642);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(6862);
+    expect(manifest.fixtures.length).toBe(6870);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

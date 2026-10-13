@@ -299,24 +299,6 @@
       "acceptedAt": "2026-10-10",
       "acceptedBy": "maintainer",
       "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line or label; stdrpt prints only \"Some diagram description contains errors\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
-    },
-    {
-      "match": {
-        "id": "svg-wbs/ledama-83-xoko366"
-      },
-      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
-      "acceptedAt": "2026-10-10",
-      "acceptedBy": "maintainer",
-      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line; the jar crashes writing the SVG: java.lang.IllegalArgumentException: character to be escaped is missing at SvgGraphics.java:1156. Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
-    },
-    {
-      "match": {
-        "id": "svg-wbs/link-URL-tooltip-0"
-      },
-      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
-      "acceptedAt": "2026-10-10",
-      "acceptedBy": "maintainer",
-      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line; the jar crashes writing the SVG: java.lang.IllegalArgumentException: character to be escaped is missing at SvgGraphics.java:1156. Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
     }
   ],
   "retired": [
@@ -896,6 +878,30 @@
       "retiredAt": "2026-10-13",
       "retiredBy": "wbs-engine-port (orchestrator, batch-4 close)",
       "retiredReason": "Retired by wbs-engine-port at the batch-4 close (2026-10-13, journal row 30): the wbs engine is ported and registered (wep T4a 8f4e2b254, merged 71b55c446). The port now refuses this source with its own error page (WBSDiagramFactory parse refusal / WBSDiagram command error, the jar's string), so jar errors + we error = conformant under the 2026-10-10 error-page rule; the survey reports it conformant."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/ledama-83-xoko366"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line; the jar crashes writing the SVG: java.lang.IllegalArgumentException: character to be escaped is missing at SvgGraphics.java:1156. Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it.",
+      "retiredAt": "2026-10-13",
+      "retiredBy": "wbs-engine-port (orchestrator, batch-5 wave-1 close)",
+      "retiredReason": "Retired by wbs-engine-port at the batch-5 wave-1 close (2026-10-13, journal row 33): wep T5a (da15d5507, merged bfd1a5c4e) routes creole [[...]] through the ported UrlBuilder (CommandCreoleUrl.java:56,73-82), so the QUOTED tooltip carries the decoded <U+005C>, and svg-graphics.ts mirrors SvgGraphics.java:1153-1157 Matcher.appendReplacement(sb, \"\"+c), which throws on a lone backslash -- the port now renders its own error page where the jar renders its crash page: conformant under the 2026-10-10 error-page rule."
+    },
+    {
+      "match": {
+        "id": "svg-wbs/link-URL-tooltip-0"
+      },
+      "scope": "svg-conformance wbs ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), no line; the jar crashes writing the SVG: java.lang.IllegalArgumentException: character to be escaped is missing at SvgGraphics.java:1156. Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it.",
+      "retiredAt": "2026-10-13",
+      "retiredBy": "wbs-engine-port (orchestrator, batch-5 wave-1 close)",
+      "retiredReason": "Retired by wbs-engine-port at the batch-5 wave-1 close (2026-10-13, journal row 33): wep T5a (da15d5507, merged bfd1a5c4e) routes creole [[...]] through the ported UrlBuilder (CommandCreoleUrl.java:56,73-82), so the QUOTED tooltip carries the decoded <U+005C>, and svg-graphics.ts mirrors SvgGraphics.java:1153-1157 Matcher.appendReplacement(sb, \"\"+c), which throws on a lone backslash -- the port now renders its own error page where the jar renders its crash page: conformant under the 2026-10-10 error-page rule."
     }
   ]
 }

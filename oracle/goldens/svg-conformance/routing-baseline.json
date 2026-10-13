@@ -1,5 +1,5 @@
 {
-  "$comment": "Routing-conformance baseline (sequence-engine-overclaims-nested-diagrams / T1; re-pinned by routing-heuristic-repair / T8). jarType is the answer upstream itself gave, read from the committed golden root attribute (TextBlockExporter.java:292-294). ourType is what renderSync produces for the same source through tests/helpers/fixture-include-store.ts. Corpus directory names are NOT the oracle (D6). Regenerated only from a fresh measurement, never by hand-editing an entry to make the gate pass; a fall is re-pinned to \"agree\", never the reverse. Gated by tests/oracle/svg-conformance/routing-conformance.test.ts. Measured 2026-08-24 at 2d5e47dc, after batches 2-5 of routing-heuristic-repair re-routed 73 fixtures: 3158 fixtures, 3148 agree, 2 known-misroute, 8 jar-error (unchanged). Residual known-misroute (both confirmed structural stop conditions, see plans/routing-heuristic-repair/decision-journal.md):   CLASS -> DESCRIPTION: 1 (component/kokebo-27-vafi688 -- CommandPackageWithUSymbol/CommandRemoveRestore registered on both ClassDiagramFactory and DescriptionDiagramFactory, no line-text discriminator, needs parse-attempt dispatch)   SEQUENCE -> NONE: 1 (sequence/nuvoja-46-dezu541 -- !includedef preprocessor stop, IncludeExecutor.ts:127, outside this mission's write-set). Prior state (2026-08-23 at 0315454c): 3079 agree, 79 known-misroute -- SEQUENCE -> DESCRIPTION: 34   SEQUENCE -> CLASS: 12   SEQUENCE -> JSON: 12   SEQUENCE -> NONE: 10   NONE -> CLASS: 4   CLASS -> DESCRIPTION: 2   CLASS -> YAML: 2   SEQUENCE -> YAML: 2   CLASS -> SEQUENCE: 1. Re-pinned 2026-09-02 at 0cf15e23 by activity-oracle-harness / T6, activity entries ONLY (verified by diff: 350 activity entries moved, ZERO non-activity entries): 3531 fixtures, 3401 agree, 99 known-misroute, 31 jar-error. T0b had pinned all 350 non-jar-error activity fixtures `known-misroute` on ONE shared mechanism -- renderActivity stamped no root data-diagram-type (src/diagrams/activity/renderer.ts:221-226 vs TextBlockExporter.java:293). T5 routed activity through the klimt document shell and 268 of the 350 fell to agree. The other 82 did NOT fall and were NOT re-pinned: our activity parser refuses those sources outright, so renderSync returns a PSystemError page that carries no root attribute either. They stay known-misroute with a rewritten reason naming the reproduced refusal -- the same 82 diff-baseline.json records as status:\"error\" (activity-oracle-harness D8). Re-pinning all 350 to agree, as a straight reading of T5's effect would suggest, would have turned this gate RED on those 82 and violated this file's own rule above. Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed, verified by git diff --numstat): 3572 fixtures, 3402 agree, 139 known-misroute, 31 jar-error. The five never-captured families were captured with scripts/capture-oracle-cache.ts. board (4), chart (29), files (1) and packet (6) are pinned known-misroute on ONE shared mechanism: each engine's renderer returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never stamps the root attribute TextBlockExporter.java:292-294 writes -- NONE here, BOARD/CHART/FILES/PACKET in the golden. chronology (1) agrees at NONE == NONE: the pinned jar (1.2026.8beta1) has no factory for DiagramType.CHRONOLOGY, so PSystemBuilder.java:284 returns PSystemUnsupported and its golden is the 'Diagram not supported by this release' page (PSystemUnsupported.java:62), which carries no data-diagram-type and is NOT a PSystemError page. Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh, maintainer request), ADDITIVE ONLY: 912 rows appended for c4, ditaa, ebnf, gantt, mindmap, network, regex, salt, timing, wbs, wire — the buckets that had no oracle. The ten no-engine types are pinned known-misroute on ONE mechanism: no plugin registers their DiagramType, so DiagramRegistry#resolve has zero candidates and returns the error sentinel (src/core/dispatcher.ts:317-342) where upstream runs the factory PSystemBuilder.java registers; each reason names that factory line and the Phase D row that ports it. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned STATE -> NONE (4 sequence, 1 timing) after the state parser stopped swallowing lines whose transition grammar did not match; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate). Re-pinned 2026-09-20 at 31f579dd by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (825 \"unknown\" rows appended). Re-pinned 2026-09-21 at 340eae4d by class-divergence-drive / close-b1, ADDITIVE ONLY (119 \"svg-class\" golden rows appended, each the clone of its byte-identical dot-cache twin, as every prior svg-class golden row was). Re-pinned 2026-09-21 at e6f840a1 by class-divergence-drive / close-b2, ADDITIVE ONLY (24 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at cae310f1 by class-divergence-drive / close-b3, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 2397dcde by class-divergence-drive / close-b4, ADDITIVE ONLY (8 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 3dc87cb3 by class-divergence-drive / close-b6, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (19 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (9 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 35cb2771 by class-divergence-drive / close-b8, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at f8d9f6cb by class-divergence-drive / close-b9, ADDITIVE ONLY (18 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (0 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (11 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins; class-inheritance-interface-assoc already carried its golden rows as an authored fixture). Re-pinned 2026-09-24 at 7c9f8b4a by class-divergence-drive-2 / close-b1 (T10), ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 2f2cbb1f by class-divergence-drive-2 / close-b2, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 9763ca80 by class-divergence-drive-2 / close-b3, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 99fa55ff by class-divergence-drive-2 / close-b4, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 2af32e19 by class-divergence-drive-2 / close-b5, ADDITIVE ONLY (6 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-25 at c6681aa6 by class-divergence-drive-3 / close-b1, ADDITIVE ONLY (17 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at cfe1f9f3 by class-divergence-drive-3 / close-b2, ADDITIVE ONLY (17 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at ef3a93ef by class-divergence-drive-3 / close-b3, ADDITIVE ONLY (14 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at 5103eb61 by class-divergence-drive-3 / close-b4, ADDITIVE ONLY (12 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at 916f97ae by class-divergence-drive-3 / close-b5, ADDITIVE ONLY (19 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-27 at 682a54ce by class-divergence-drive-3 / close-b2, ADDITIVE ONLY (20 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at cff18966 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at cff18966 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (120 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at fdcdaf39 by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (54 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 3986fbf1 by class-divergence-drive-5 / close-b4, ADDITIVE ONLY (30 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 8aed6847 by class-divergence-drive-5 / close-b5, ADDITIVE ONLY (18 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 6a4402ae by class-divergence-drive-5 / close-b0, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-29 at 69149258 by class-divergence-drive-5 / close-b2, ADDITIVE ONLY (20 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-29 at c12fa177 by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (21 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 9b080efb9 by mindmap-engine-port / close-b5 (D7), IN PLACE: 139 rows known-misroute -> agree (137 mindmap rows now route MINDMAP since the plugin registered in T5a, plus c4 favasu-27-fesa452 and xizifu-87-siti076, stale pins that already routed DESCRIPTION before this mission); 2 mindmap rows stay known-misroute (crash page, unported HColorGradient). Re-pinned 2026-09-30 at fa9db8748 by mindmap-engine-port / close-b5, ADDITIVE ONLY (127 \"svg-mindmap\" golden rows appended, clones of their byte-identical dot-cache twins, as every svg-class golden row was). Re-pinned 2026-09-30 at c5dc64471 by mindmap-engine-port / close-b6 (D7), IN PLACE: 139 mindmap rows agree (nukose-24-funi267 and vacofo-66-puno159 known-misroute -> agree: HColorGradient ported in T6a); 0 known-misroute remain. Re-pinned 2026-09-30 at c5dc64471 by mindmap-engine-port / close-b6, ADDITIVE ONLY (10 \"svg-mindmap\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at e42ba122 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 1ead924b by class-divergence-drive-5 / close-b2, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 2748fd1d9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (35 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-01 at 8a8c1692c by activity-divergence-drive / close-b1b, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-01 at b4b553c7e by activity-divergence-drive / close-b2, ADDITIVE ONLY (16 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-02 at 65b07a57c by activity-divergence-drive / close-b3, ADDITIVE ONLY (12 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). add2-b1p: jevofu-58-fazo194, mepeze-15-nuge493, xoreko-43-noto860, zokuni-21-sapu966 render since T1p-c ported `end merge` (CommandForkEnd3.java:57-81, ParallelBuilderMerge.java) -> agree / weErrored false. Re-pinned 2026-10-02 at bdf8b1e2f by activity-divergence-drive / close-b1p, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at d018a56f9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (12 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). add2-b2: the 34 remaining activity parser-gap rows render since T2e/T2g (CommandForkEnd3/SplitEnd3/Swimlane/If2/ElseIf2/Endif3/Backward3/Note3/NoteLong3/CircleSpot3/Label/Goto, journal rows 31-34) -> agree / weErrored false. Re-pinned 2026-10-03 at 66db74002 by activity-divergence-drive / close-b2, ADDITIVE ONLY (13 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at 4f5d48d2e by activity-divergence-drive / close-b3w1, ADDITIVE ONLY (109 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at 9104b8ee0 by activity-divergence-drive / close-b3, ADDITIVE ONLY (18 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-06 at dcd2283c9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (13 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-06 at 0850c251d by activity-divergence-drive / close-b2, ADDITIVE ONLY (36 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 5ab1679ad by activity-divergence-drive / close-b3w1, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 918cd7e97 by activity-divergence-drive / close-b3, ADDITIVE ONLY (17 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 87727a9c by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (79 \"activity\" rows appended). Re-pinned 2026-10-07 at 87727a9c7 by activity-divergence-drive / close-b0, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at dd289f647 by activity-divergence-drive / merge-T1a, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 79c2bfb2c by activity-divergence-drive / merge-T1c, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 50a347b27 by activity-divergence-drive / merge-T1b, ADDITIVE ONLY (6 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 55b701493 by activity-divergence-drive / merge-T1g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 3b36df731 by activity-divergence-drive / merge-T2c, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at a30245dea by activity-divergence-drive / merge-T2a, ADDITIVE ONLY (7 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 541c5f2c2 by activity-divergence-drive / merge-T2d, ADDITIVE ONLY (22 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 76efedca8 by activity-divergence-drive / merge-T2e, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at ad64c122b by activity-divergence-drive / merge-T2d-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at c4915f83c by activity-divergence-drive / merge-T2f, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 6c788ec6c by activity-divergence-drive / merge-T2b, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at c6f501d95 by activity-divergence-drive / merge-T2f-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 3ec2d4cd0 by activity-divergence-drive / merge-T2g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 0a21936b1 by activity-divergence-drive / merge-T3a, ADDITIVE ONLY (6 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 790fee5a1 by activity-divergence-drive / merge-T3d, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at dc72942fc by activity-divergence-drive / merge-T3a-2, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 1d2fb519d by activity-divergence-drive / merge-T3c, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 22f819df6 by activity-divergence-drive / merge-T3c-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at fd2c3fa86 by activity-divergence-drive / merge-T3d-3, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 4ea823f10 by activity-divergence-drive / merge-T3gates-2, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 53d01279d by activity-divergence-drive / merge-T3b, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 0996e8891 by activity-divergence-drive / merge-T3e-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 12b567d91 by activity-divergence-drive / merge-T3f, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 2b080518d by activity-divergence-drive / merge-T3g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at e1afb6d61 by activity-divergence-drive / merge-T3h, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 2686a2577 by activity-divergence-drive / merge-T3k, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 2098d674d by activity-divergence-drive / fix-jucidi, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 4181c68de by activity-divergence-drive / close-b1e, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 4181c68d by class-divergence-drive-5 / close-b1e, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). isw (2026-10-09, 9f012d794): 24 jar-error rows re-pinned from a fresh measurement — seam #4 gives U+0020 width, so their goldens are no longer SlotFinder crash pages. Re-pinned 2026-10-09 at 3d8988d80 by activity-divergence-drive / isw/close, ADDITIVE ONLY (18 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-10 at ebb7b943a by activity-divergence-drive / aepp-b12, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at c0e75aa4 by class-divergence-drive-5 / t0b, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at 9a2ac1c5 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at 9a2ac1c5 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at f6e9ed3a by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by class-divergence-drive-5 / salt-engine-port batch-4 close, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by class-divergence-drive-5 / salt-engine-port batch-4 close, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by salt-engine-port / batch-4 close: 50 \"salt\" dot-cache rows re-measured in place (the salt plugin now registers), 47 \"svg-salt\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 2ff2f9b9 by salt-engine-port / batch-5 wave-1 close: 50 \"salt\" dot-cache rows re-measured in place (the salt plugin now registers), 50 \"svg-salt\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at 71b55c44 by wbs-engine-port / batch-4 close: 178 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 168 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at 71b55c44 by wbs-engine-port / batch-4 close: 178 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 168 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins).",
+  "$comment": "Routing-conformance baseline (sequence-engine-overclaims-nested-diagrams / T1; re-pinned by routing-heuristic-repair / T8). jarType is the answer upstream itself gave, read from the committed golden root attribute (TextBlockExporter.java:292-294). ourType is what renderSync produces for the same source through tests/helpers/fixture-include-store.ts. Corpus directory names are NOT the oracle (D6). Regenerated only from a fresh measurement, never by hand-editing an entry to make the gate pass; a fall is re-pinned to \"agree\", never the reverse. Gated by tests/oracle/svg-conformance/routing-conformance.test.ts. Measured 2026-08-24 at 2d5e47dc, after batches 2-5 of routing-heuristic-repair re-routed 73 fixtures: 3158 fixtures, 3148 agree, 2 known-misroute, 8 jar-error (unchanged). Residual known-misroute (both confirmed structural stop conditions, see plans/routing-heuristic-repair/decision-journal.md):   CLASS -> DESCRIPTION: 1 (component/kokebo-27-vafi688 -- CommandPackageWithUSymbol/CommandRemoveRestore registered on both ClassDiagramFactory and DescriptionDiagramFactory, no line-text discriminator, needs parse-attempt dispatch)   SEQUENCE -> NONE: 1 (sequence/nuvoja-46-dezu541 -- !includedef preprocessor stop, IncludeExecutor.ts:127, outside this mission's write-set). Prior state (2026-08-23 at 0315454c): 3079 agree, 79 known-misroute -- SEQUENCE -> DESCRIPTION: 34   SEQUENCE -> CLASS: 12   SEQUENCE -> JSON: 12   SEQUENCE -> NONE: 10   NONE -> CLASS: 4   CLASS -> DESCRIPTION: 2   CLASS -> YAML: 2   SEQUENCE -> YAML: 2   CLASS -> SEQUENCE: 1. Re-pinned 2026-09-02 at 0cf15e23 by activity-oracle-harness / T6, activity entries ONLY (verified by diff: 350 activity entries moved, ZERO non-activity entries): 3531 fixtures, 3401 agree, 99 known-misroute, 31 jar-error. T0b had pinned all 350 non-jar-error activity fixtures `known-misroute` on ONE shared mechanism -- renderActivity stamped no root data-diagram-type (src/diagrams/activity/renderer.ts:221-226 vs TextBlockExporter.java:293). T5 routed activity through the klimt document shell and 268 of the 350 fell to agree. The other 82 did NOT fall and were NOT re-pinned: our activity parser refuses those sources outright, so renderSync returns a PSystemError page that carries no root attribute either. They stay known-misroute with a rewritten reason naming the reproduced refusal -- the same 82 diff-baseline.json records as status:\"error\" (activity-oracle-harness D8). Re-pinning all 350 to agree, as a straight reading of T5's effect would suggest, would have turned this gate RED on those 82 and violated this file's own rule above. Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed, verified by git diff --numstat): 3572 fixtures, 3402 agree, 139 known-misroute, 31 jar-error. The five never-captured families were captured with scripts/capture-oracle-cache.ts. board (4), chart (29), files (1) and packet (6) are pinned known-misroute on ONE shared mechanism: each engine's renderer returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never stamps the root attribute TextBlockExporter.java:292-294 writes -- NONE here, BOARD/CHART/FILES/PACKET in the golden. chronology (1) agrees at NONE == NONE: the pinned jar (1.2026.8beta1) has no factory for DiagramType.CHRONOLOGY, so PSystemBuilder.java:284 returns PSystemUnsupported and its golden is the 'Diagram not supported by this release' page (PSystemUnsupported.java:62), which carries no data-diagram-type and is NOT a PSystemError page. Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh, maintainer request), ADDITIVE ONLY: 912 rows appended for c4, ditaa, ebnf, gantt, mindmap, network, regex, salt, timing, wbs, wire — the buckets that had no oracle. The ten no-engine types are pinned known-misroute on ONE mechanism: no plugin registers their DiagramType, so DiagramRegistry#resolve has zero candidates and returns the error sentinel (src/core/dispatcher.ts:317-342) where upstream runs the factory PSystemBuilder.java registers; each reason names that factory line and the Phase D row that ports it. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned STATE -> NONE (4 sequence, 1 timing) after the state parser stopped swallowing lines whose transition grammar did not match; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate). Re-pinned 2026-09-20 at 31f579dd by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (825 \"unknown\" rows appended). Re-pinned 2026-09-21 at 340eae4d by class-divergence-drive / close-b1, ADDITIVE ONLY (119 \"svg-class\" golden rows appended, each the clone of its byte-identical dot-cache twin, as every prior svg-class golden row was). Re-pinned 2026-09-21 at e6f840a1 by class-divergence-drive / close-b2, ADDITIVE ONLY (24 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at cae310f1 by class-divergence-drive / close-b3, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 2397dcde by class-divergence-drive / close-b4, ADDITIVE ONLY (8 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 3dc87cb3 by class-divergence-drive / close-b6, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (19 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (9 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 35cb2771 by class-divergence-drive / close-b8, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at f8d9f6cb by class-divergence-drive / close-b9, ADDITIVE ONLY (18 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (0 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (11 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins; class-inheritance-interface-assoc already carried its golden rows as an authored fixture). Re-pinned 2026-09-24 at 7c9f8b4a by class-divergence-drive-2 / close-b1 (T10), ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 2f2cbb1f by class-divergence-drive-2 / close-b2, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 9763ca80 by class-divergence-drive-2 / close-b3, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 99fa55ff by class-divergence-drive-2 / close-b4, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 2af32e19 by class-divergence-drive-2 / close-b5, ADDITIVE ONLY (6 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-25 at c6681aa6 by class-divergence-drive-3 / close-b1, ADDITIVE ONLY (17 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at cfe1f9f3 by class-divergence-drive-3 / close-b2, ADDITIVE ONLY (17 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at ef3a93ef by class-divergence-drive-3 / close-b3, ADDITIVE ONLY (14 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at 5103eb61 by class-divergence-drive-3 / close-b4, ADDITIVE ONLY (12 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at 916f97ae by class-divergence-drive-3 / close-b5, ADDITIVE ONLY (19 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-27 at 682a54ce by class-divergence-drive-3 / close-b2, ADDITIVE ONLY (20 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at cff18966 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at cff18966 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (120 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at fdcdaf39 by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (54 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 3986fbf1 by class-divergence-drive-5 / close-b4, ADDITIVE ONLY (30 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 8aed6847 by class-divergence-drive-5 / close-b5, ADDITIVE ONLY (18 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 6a4402ae by class-divergence-drive-5 / close-b0, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-29 at 69149258 by class-divergence-drive-5 / close-b2, ADDITIVE ONLY (20 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-29 at c12fa177 by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (21 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 9b080efb9 by mindmap-engine-port / close-b5 (D7), IN PLACE: 139 rows known-misroute -> agree (137 mindmap rows now route MINDMAP since the plugin registered in T5a, plus c4 favasu-27-fesa452 and xizifu-87-siti076, stale pins that already routed DESCRIPTION before this mission); 2 mindmap rows stay known-misroute (crash page, unported HColorGradient). Re-pinned 2026-09-30 at fa9db8748 by mindmap-engine-port / close-b5, ADDITIVE ONLY (127 \"svg-mindmap\" golden rows appended, clones of their byte-identical dot-cache twins, as every svg-class golden row was). Re-pinned 2026-09-30 at c5dc64471 by mindmap-engine-port / close-b6 (D7), IN PLACE: 139 mindmap rows agree (nukose-24-funi267 and vacofo-66-puno159 known-misroute -> agree: HColorGradient ported in T6a); 0 known-misroute remain. Re-pinned 2026-09-30 at c5dc64471 by mindmap-engine-port / close-b6, ADDITIVE ONLY (10 \"svg-mindmap\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at e42ba122 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 1ead924b by class-divergence-drive-5 / close-b2, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 2748fd1d9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (35 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-01 at 8a8c1692c by activity-divergence-drive / close-b1b, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-01 at b4b553c7e by activity-divergence-drive / close-b2, ADDITIVE ONLY (16 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-02 at 65b07a57c by activity-divergence-drive / close-b3, ADDITIVE ONLY (12 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). add2-b1p: jevofu-58-fazo194, mepeze-15-nuge493, xoreko-43-noto860, zokuni-21-sapu966 render since T1p-c ported `end merge` (CommandForkEnd3.java:57-81, ParallelBuilderMerge.java) -> agree / weErrored false. Re-pinned 2026-10-02 at bdf8b1e2f by activity-divergence-drive / close-b1p, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at d018a56f9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (12 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). add2-b2: the 34 remaining activity parser-gap rows render since T2e/T2g (CommandForkEnd3/SplitEnd3/Swimlane/If2/ElseIf2/Endif3/Backward3/Note3/NoteLong3/CircleSpot3/Label/Goto, journal rows 31-34) -> agree / weErrored false. Re-pinned 2026-10-03 at 66db74002 by activity-divergence-drive / close-b2, ADDITIVE ONLY (13 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at 4f5d48d2e by activity-divergence-drive / close-b3w1, ADDITIVE ONLY (109 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at 9104b8ee0 by activity-divergence-drive / close-b3, ADDITIVE ONLY (18 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-06 at dcd2283c9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (13 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-06 at 0850c251d by activity-divergence-drive / close-b2, ADDITIVE ONLY (36 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 5ab1679ad by activity-divergence-drive / close-b3w1, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 918cd7e97 by activity-divergence-drive / close-b3, ADDITIVE ONLY (17 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 87727a9c by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (79 \"activity\" rows appended). Re-pinned 2026-10-07 at 87727a9c7 by activity-divergence-drive / close-b0, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at dd289f647 by activity-divergence-drive / merge-T1a, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 79c2bfb2c by activity-divergence-drive / merge-T1c, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 50a347b27 by activity-divergence-drive / merge-T1b, ADDITIVE ONLY (6 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 55b701493 by activity-divergence-drive / merge-T1g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 3b36df731 by activity-divergence-drive / merge-T2c, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at a30245dea by activity-divergence-drive / merge-T2a, ADDITIVE ONLY (7 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 541c5f2c2 by activity-divergence-drive / merge-T2d, ADDITIVE ONLY (22 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 76efedca8 by activity-divergence-drive / merge-T2e, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at ad64c122b by activity-divergence-drive / merge-T2d-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at c4915f83c by activity-divergence-drive / merge-T2f, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 6c788ec6c by activity-divergence-drive / merge-T2b, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at c6f501d95 by activity-divergence-drive / merge-T2f-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 3ec2d4cd0 by activity-divergence-drive / merge-T2g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 0a21936b1 by activity-divergence-drive / merge-T3a, ADDITIVE ONLY (6 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 790fee5a1 by activity-divergence-drive / merge-T3d, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at dc72942fc by activity-divergence-drive / merge-T3a-2, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 1d2fb519d by activity-divergence-drive / merge-T3c, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 22f819df6 by activity-divergence-drive / merge-T3c-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at fd2c3fa86 by activity-divergence-drive / merge-T3d-3, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 4ea823f10 by activity-divergence-drive / merge-T3gates-2, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 53d01279d by activity-divergence-drive / merge-T3b, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 0996e8891 by activity-divergence-drive / merge-T3e-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 12b567d91 by activity-divergence-drive / merge-T3f, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 2b080518d by activity-divergence-drive / merge-T3g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at e1afb6d61 by activity-divergence-drive / merge-T3h, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 2686a2577 by activity-divergence-drive / merge-T3k, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 2098d674d by activity-divergence-drive / fix-jucidi, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 4181c68de by activity-divergence-drive / close-b1e, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 4181c68d by class-divergence-drive-5 / close-b1e, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). isw (2026-10-09, 9f012d794): 24 jar-error rows re-pinned from a fresh measurement — seam #4 gives U+0020 width, so their goldens are no longer SlotFinder crash pages. Re-pinned 2026-10-09 at 3d8988d80 by activity-divergence-drive / isw/close, ADDITIVE ONLY (18 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-10 at ebb7b943a by activity-divergence-drive / aepp-b12, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at c0e75aa4 by class-divergence-drive-5 / t0b, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at 9a2ac1c5 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at 9a2ac1c5 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at f6e9ed3a by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by class-divergence-drive-5 / salt-engine-port batch-4 close, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by class-divergence-drive-5 / salt-engine-port batch-4 close, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by salt-engine-port / batch-4 close: 50 \"salt\" dot-cache rows re-measured in place (the salt plugin now registers), 47 \"svg-salt\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 2ff2f9b9 by salt-engine-port / batch-5 wave-1 close: 50 \"salt\" dot-cache rows re-measured in place (the salt plugin now registers), 50 \"svg-salt\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at 71b55c44 by wbs-engine-port / batch-4 close: 178 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 168 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at 71b55c44 by wbs-engine-port / batch-4 close: 178 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 168 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at c3e65bd2 by wbs-engine-port / batch-5 wave-1 close: 178 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 168 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at c3e65bd2 by wbs-engine-port / batch-5 wave-1 close: 178 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 176 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins).",
   "fixtures": [
     {
       "tree": "dot-cache",
@@ -43173,7 +43173,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43183,7 +43183,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43193,7 +43193,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43203,7 +43203,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43213,7 +43213,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43223,7 +43223,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43255,7 +43255,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43265,7 +43265,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43286,7 +43286,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43296,7 +43296,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43306,7 +43306,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43327,7 +43327,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43337,7 +43337,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43347,7 +43347,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43357,7 +43357,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43367,7 +43367,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43377,7 +43377,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43398,7 +43398,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43408,7 +43408,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43418,7 +43418,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43428,7 +43428,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43438,7 +43438,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43448,7 +43448,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43458,7 +43458,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43468,7 +43468,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43478,7 +43478,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43488,7 +43488,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43498,7 +43498,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43508,7 +43508,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43518,7 +43518,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43528,7 +43528,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43538,7 +43538,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43548,7 +43548,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43558,7 +43558,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43568,7 +43568,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43578,7 +43578,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43588,7 +43588,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43598,7 +43598,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43608,7 +43608,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43618,7 +43618,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43628,7 +43628,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43638,7 +43638,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43648,7 +43648,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43669,7 +43669,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43679,7 +43679,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43689,7 +43689,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43710,7 +43710,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43720,7 +43720,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43730,7 +43730,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43740,7 +43740,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43761,7 +43761,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43771,7 +43771,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43781,7 +43781,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43802,7 +43802,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43823,7 +43823,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43833,7 +43833,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43843,7 +43843,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43853,7 +43853,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43863,7 +43863,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43873,7 +43873,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43883,7 +43883,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43893,7 +43893,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43903,7 +43903,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43913,7 +43913,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43923,7 +43923,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43933,7 +43933,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43943,7 +43943,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43953,7 +43953,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43963,7 +43963,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43973,7 +43973,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43983,7 +43983,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -43993,7 +43993,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44003,7 +44003,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44013,7 +44013,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44023,7 +44023,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44033,7 +44033,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44043,7 +44043,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44053,7 +44053,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44063,7 +44063,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44073,7 +44073,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44083,7 +44083,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44093,7 +44093,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44103,7 +44103,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44113,7 +44113,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44123,7 +44123,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44133,7 +44133,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44143,7 +44143,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44153,7 +44153,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44163,7 +44163,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44173,7 +44173,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44205,7 +44205,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44226,7 +44226,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44236,7 +44236,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44246,7 +44246,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44256,7 +44256,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44266,7 +44266,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44276,7 +44276,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44286,7 +44286,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44296,7 +44296,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44306,7 +44306,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44316,7 +44316,7 @@
       "ourType": "NONE",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44337,7 +44337,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44347,7 +44347,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44357,7 +44357,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44378,7 +44378,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44388,7 +44388,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44398,7 +44398,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44408,7 +44408,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44418,7 +44418,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44428,7 +44428,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44438,7 +44438,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44448,7 +44448,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44458,7 +44458,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44468,7 +44468,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44478,7 +44478,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44488,7 +44488,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44498,7 +44498,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44508,7 +44508,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44518,7 +44518,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44528,7 +44528,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44538,7 +44538,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44559,7 +44559,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44569,7 +44569,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44579,7 +44579,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44589,7 +44589,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44599,7 +44599,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44631,7 +44631,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44641,7 +44641,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44651,7 +44651,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44661,7 +44661,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44671,7 +44671,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44681,7 +44681,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44713,7 +44713,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44723,7 +44723,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44744,7 +44744,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44754,7 +44754,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44764,7 +44764,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44774,7 +44774,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44784,7 +44784,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44794,7 +44794,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44804,7 +44804,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44814,7 +44814,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44824,7 +44824,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44834,7 +44834,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44844,7 +44844,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44876,7 +44876,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44886,7 +44886,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44896,7 +44896,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44906,7 +44906,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44916,7 +44916,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44926,7 +44926,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44958,7 +44958,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44968,7 +44968,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44978,7 +44978,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -44988,7 +44988,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45009,7 +45009,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45019,7 +45019,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45029,7 +45029,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45039,7 +45039,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45049,7 +45049,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45059,7 +45059,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45069,7 +45069,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45079,7 +45079,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45089,7 +45089,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45099,7 +45099,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45109,7 +45109,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45119,7 +45119,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45129,7 +45129,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45139,7 +45139,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45149,7 +45149,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45159,7 +45159,7 @@
       "ourType": "NONE",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45169,7 +45169,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45179,7 +45179,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45189,7 +45189,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45199,7 +45199,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45209,7 +45209,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45219,7 +45219,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -45229,7 +45229,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -67680,7 +67680,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67690,7 +67690,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67700,7 +67700,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67710,7 +67710,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67720,7 +67720,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67730,7 +67730,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67740,7 +67740,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67750,7 +67750,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67760,7 +67760,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67770,7 +67770,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67780,7 +67780,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67790,7 +67790,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67800,7 +67800,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67810,7 +67810,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67820,7 +67820,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67830,7 +67830,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67840,7 +67840,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67850,7 +67850,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67860,7 +67860,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67870,7 +67870,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67880,7 +67880,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67890,7 +67890,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67900,7 +67900,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67910,7 +67910,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67920,7 +67920,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67930,7 +67930,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67940,7 +67940,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67950,7 +67950,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67960,7 +67960,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67970,7 +67970,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67980,7 +67980,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -67990,7 +67990,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68000,7 +68000,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68010,7 +68010,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68020,7 +68020,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68030,7 +68030,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68040,7 +68040,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68050,7 +68050,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68060,7 +68060,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68070,7 +68070,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68080,7 +68080,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68090,7 +68090,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68100,7 +68100,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68110,7 +68110,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68120,7 +68120,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68130,7 +68130,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68140,7 +68140,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68150,7 +68150,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68160,7 +68160,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68170,7 +68170,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68180,7 +68180,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68190,7 +68190,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68200,7 +68200,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68210,7 +68210,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68220,7 +68220,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68230,7 +68230,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68240,7 +68240,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68250,7 +68250,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68260,7 +68260,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68270,7 +68270,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68280,7 +68280,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68290,7 +68290,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68300,7 +68300,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68310,7 +68310,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68320,7 +68320,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68330,7 +68330,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68340,7 +68340,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68350,7 +68350,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68360,7 +68360,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68370,7 +68370,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68380,7 +68380,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68390,7 +68390,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68400,7 +68400,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68410,7 +68410,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68420,7 +68420,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68430,7 +68430,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68440,7 +68440,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68450,7 +68450,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68460,7 +68460,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68470,7 +68470,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68480,7 +68480,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68490,7 +68490,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68500,7 +68500,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68510,7 +68510,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68520,7 +68520,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68530,7 +68530,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68540,7 +68540,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68550,7 +68550,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68560,7 +68560,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68570,7 +68570,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68580,7 +68580,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68590,7 +68590,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68600,7 +68600,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68610,7 +68610,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68620,7 +68620,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68630,7 +68630,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68640,7 +68640,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68650,7 +68650,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68660,7 +68660,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68670,7 +68670,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68680,7 +68680,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68690,7 +68690,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68700,7 +68700,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68710,7 +68710,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68720,7 +68720,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68730,7 +68730,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68740,7 +68740,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68750,7 +68750,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68760,7 +68760,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68770,7 +68770,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68780,7 +68780,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68790,7 +68790,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68800,7 +68800,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68810,7 +68810,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68820,7 +68820,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68830,7 +68830,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68840,7 +68840,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68850,7 +68850,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68860,7 +68860,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68870,7 +68870,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68880,7 +68880,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68890,7 +68890,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68900,7 +68900,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68910,7 +68910,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68920,7 +68920,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68930,7 +68930,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68940,7 +68940,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68950,7 +68950,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68960,7 +68960,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68970,7 +68970,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68980,7 +68980,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -68990,7 +68990,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69000,7 +69000,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69010,7 +69010,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69020,7 +69020,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69030,7 +69030,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69040,7 +69040,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69050,7 +69050,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69060,7 +69060,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69070,7 +69070,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69080,7 +69080,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69090,7 +69090,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69100,7 +69100,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69110,7 +69110,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69120,7 +69120,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69130,7 +69130,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69140,7 +69140,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69150,7 +69150,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69160,7 +69160,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69170,7 +69170,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69180,7 +69180,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69190,7 +69190,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69200,7 +69200,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69210,7 +69210,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69220,7 +69220,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69230,7 +69230,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69240,7 +69240,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69250,7 +69250,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69260,7 +69260,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69270,7 +69270,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69280,7 +69280,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69290,7 +69290,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69300,7 +69300,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69310,7 +69310,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69320,7 +69320,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69330,7 +69330,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69340,7 +69340,7 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "goldens",
@@ -69350,7 +69350,87 @@
       "ourType": "WBS",
       "status": "agree",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c44"
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "facibu-72-dako171",
+      "jarType": "WBS",
+      "ourType": "WBS",
+      "status": "agree",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "fipina-75-bago028",
+      "jarType": "WBS",
+      "ourType": "WBS",
+      "status": "agree",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "keloxe-59-zalu422",
+      "jarType": "WBS",
+      "ourType": "WBS",
+      "status": "agree",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "link-URL-tooltip-1",
+      "jarType": "WBS",
+      "ourType": "WBS",
+      "status": "agree",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "link-URL-tooltip-2",
+      "jarType": "WBS",
+      "ourType": "WBS",
+      "status": "agree",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xakubu-65-cumo769",
+      "jarType": "WBS",
+      "ourType": "WBS",
+      "status": "agree",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xasinu-75-sabe690",
+      "jarType": "WBS",
+      "ourType": "WBS",
+      "status": "agree",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "zeneno-39-bize297",
+      "jarType": "WBS",
+      "ourType": "WBS",
+      "status": "agree",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     }
   ]
 }

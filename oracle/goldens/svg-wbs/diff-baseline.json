@@ -8,7 +8,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-monoline-def-0-11) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -18,7 +18,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-monoline-def-0-17) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -28,7 +28,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-monoline-def-0-18) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -38,7 +38,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-monoline-def-0-24) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -48,7 +48,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Bad tree structure (Assumed diagram type: wbs)\" at line 3 (oracle/goldens/stock-error-pages.json wbs/WBS-monoline-def-0-3) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -58,7 +58,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-monoline-def-0-6) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -68,7 +68,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-multiline-def-1-14) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -78,7 +78,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-multiline-def-1-15) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -88,7 +88,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-multiline-def-1-21) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -98,7 +98,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-multiline-def-1-3) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -108,7 +108,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/WBS-multiline-def-1-8) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -118,7 +118,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/bujigo-66-zepu613) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -128,7 +128,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/cesoke-21-muro498) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -138,7 +138,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/cofele-91-sanu676) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -148,16 +148,7 @@
       "diffCount": 100,
       "reason": "jar-error: the stock jar reports \"Bad tree structure (Assumed diagram type: wbs)\" at line 30 (oracle/goldens/stock-error-pages.json wbs/cupuri-11-piru303) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
-    },
-    {
-      "type": "wbs",
-      "slug": "facibu-72-dako171",
-      "status": "baseline",
-      "weightedScore": 1,
-      "diffCount": 1,
-      "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -167,25 +158,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/fasuti-82-dire353) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
-    },
-    {
-      "type": "wbs",
-      "slug": "fipina-75-bago028",
-      "status": "baseline",
-      "weightedScore": 68,
-      "diffCount": 68,
-      "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
-    },
-    {
-      "type": "wbs",
-      "slug": "keloxe-59-zalu422",
-      "status": "baseline",
-      "weightedScore": 2,
-      "diffCount": 2,
-      "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -195,7 +168,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/kifona-80-bufa102) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -205,7 +178,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/konipe-99-jafu307) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -215,45 +188,27 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/lagoda-51-zuna611) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
       "slug": "ledama-83-xoko366",
       "status": "baseline",
-      "weightedScore": 419,
-      "diffCount": 9,
+      "weightedScore": 375,
+      "diffCount": 133,
       "reason": "jar-crash: the stock jar renders its crash page (java.lang.IllegalArgumentException: character to be escaped is missing; oracle/goldens/stock-error-pages.json wbs/ledama-83-xoko366, empty message) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
       "slug": "link-URL-tooltip-0",
       "status": "baseline",
-      "weightedScore": 419,
-      "diffCount": 9,
+      "weightedScore": 375,
+      "diffCount": 133,
       "reason": "jar-crash: the stock jar renders its crash page (java.lang.IllegalArgumentException: character to be escaped is missing; oracle/goldens/stock-error-pages.json wbs/link-URL-tooltip-0, empty message) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
-    },
-    {
-      "type": "wbs",
-      "slug": "link-URL-tooltip-1",
-      "status": "baseline",
-      "weightedScore": 11,
-      "diffCount": 11,
-      "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
-    },
-    {
-      "type": "wbs",
-      "slug": "link-URL-tooltip-2",
-      "status": "baseline",
-      "weightedScore": 2,
-      "diffCount": 2,
-      "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -263,7 +218,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/sefoxo-37-zuvo274) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -273,7 +228,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Bad tree structure (Assumed diagram type: wbs)\" at line 3 (oracle/goldens/stock-error-pages.json wbs/sipuja-30-deto581) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -283,7 +238,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/solive-57-nola542) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -293,7 +248,7 @@
       "diffCount": 5,
       "reason": "jar-error: the stock jar reports \"WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)\" at line 3 (oracle/goldens/stock-error-pages.json wbs/tojixi-05-lusu056) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -303,7 +258,7 @@
       "diffCount": 5,
       "reason": "jar-error: the stock jar reports \"WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)\" at line 4 (oracle/goldens/stock-error-pages.json wbs/tubeli-58-kadi729) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -313,25 +268,7 @@
       "diffCount": 7,
       "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: wbs)\" at line 6 (oracle/goldens/stock-error-pages.json wbs/vavibi-10-maso573) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
-    },
-    {
-      "type": "wbs",
-      "slug": "xakubu-65-cumo769",
-      "status": "baseline",
-      "weightedScore": 35,
-      "diffCount": 35,
-      "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
-    },
-    {
-      "type": "wbs",
-      "slug": "xasinu-75-sabe690",
-      "status": "baseline",
-      "weightedScore": 2,
-      "diffCount": 2,
-      "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     },
     {
       "type": "wbs",
@@ -341,16 +278,7 @@
       "diffCount": 5,
       "reason": "jar-error: the stock jar reports \"WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)\" at line 3 (oracle/goldens/stock-error-pages.json wbs/zecavo-98-kini554) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
       "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
-    },
-    {
-      "type": "wbs",
-      "slug": "zeneno-39-bize297",
-      "status": "baseline",
-      "weightedScore": 11,
-      "diffCount": 11,
-      "measuredAt": "2026-10-13",
-      "measuredAgainstCommit": "71b55c446"
+      "measuredAgainstCommit": "c3e65bd29"
     }
   ]
 }

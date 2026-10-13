@@ -88,7 +88,7 @@ Filled by T0a from `measurements/b0.json` / `b0-eng/parity-wbs.json`.
 | diveva-04-moze399 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[+],multiline | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | dulato-78-nefo038 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],style | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | duzoxe-13-bocu532 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],stereo,style | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
-| facibu-72-dako171 | diverged (sentinel) → b4 diverged | 9/2 → 1/0 | depth[*-],[#color],multiline,stereo,style,url | — | T5a (A) | open -> T5a |
+| facibu-72-dako171 | diverged (sentinel) → b4 diverged → b5w1 conformant | 9/2 → 1/0 | depth[*-],[#color],multiline,stereo,style,url | — | T5a (A) | fixed (T5a da15d5507, merged bfd1a5c4e); pinned b5w1 |
 | fasuti-82-dire353 | diverged (sentinel) → b4 conformant | 9/2 → n/a (our error page) | depth[*],<>,_,multiline | Syntax Error? (l.6) | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); error page (jar error + we error) |
 | fazafa-49-leka582 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],style | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | fecabu-55-foba097 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],stereo,style | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
@@ -96,7 +96,7 @@ Filled by T0a from `measurements/b0.json` / `b0-eng/parity-wbs.json`.
 | fiboto-83-pida880 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],code,link | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | filara-76-xifu577 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],<>,[#color] | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | fimilo-56-jibo267 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*] | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
-| fipina-75-bago028 | diverged (sentinel) → b4 diverged | 9/2 → 3/65 | depth[+],skinparam,title,legend | — | T5b (B) | open -> T5b |
+| fipina-75-bago028 | diverged (sentinel) → b4 diverged → b5w1 conformant | 9/2 → 3/65 | depth[+],skinparam,title,legend | — | T5b (B) | fixed (T5b f2dea8589, merged c3e65bd29); pinned b5w1 |
 | fitemu-52-fica491 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],[#color] | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | fodobe-85-beco281 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],[#color] | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | goduxe-93-xuje240 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],[#color] | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
@@ -114,7 +114,7 @@ Filled by T0a from `measurements/b0.json` / `b0-eng/parity-wbs.json`.
 | kajene-76-pele833 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[+-] | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | kamimo-14-sazi079 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[+],_,stereo,style | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | kekube-11-reni885 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[+],style | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
-| keloxe-59-zalu422 | diverged (sentinel) → b4 diverged | 9/2 → 2/0 | depth[*-],[#color],multiline,stereo,style,url | — | T5a (A) | open -> T5a |
+| keloxe-59-zalu422 | diverged (sentinel) → b4 diverged → b5w1 conformant | 9/2 → 2/0 | depth[*-],[#color],multiline,stereo,style,url | — | T5a (A) | fixed (T5a da15d5507, merged bfd1a5c4e); pinned b5w1 |
 | kemola-59-lipa866 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],code,link | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | kifona-80-bufa102 | diverged (sentinel) → b4 conformant | 9/2 → n/a (our error page) | depth[*],[#color],code,link | Syntax Error? (l.6) | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); error page (jar error + we error) |
 | kipadu-03-dine934 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],[#color],code,link | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
@@ -129,11 +129,11 @@ Filled by T0a from `measurements/b0.json` / `b0-eng/parity-wbs.json`.
 | lazigo-83-tevi855 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],[#color],multiline | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | lazila-98-copu420 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],<> | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | lecexi-03-capi482 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],<>,[#color] | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
-| ledama-83-xoko366 | diverged (sentinel) → b4 diverged | 9/2 → 3/6 | depth[+],url,creole | crash: IllegalArgumentException | T5a (D) | open -> T5a |
+| ledama-83-xoko366 | diverged (sentinel) → b4 diverged → b5w1 conformant | 9/2 → 3/6 | depth[+],url,creole | crash: IllegalArgumentException | T5a (D) | fixed (T5a da15d5507, merged bfd1a5c4e); our error page (jar crash + we error) |
 | lesene-63-xeza963 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],code | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
-| link-URL-tooltip-0 | diverged (sentinel) → b4 diverged | 9/2 → 3/6 | depth[+],url,creole | crash: IllegalArgumentException | T5a (D) | open -> T5a |
-| link-URL-tooltip-1 | diverged (sentinel) → b4 diverged | 9/2 → 6/5 | depth[+],url,creole | — | T5a (C) | open -> T5a |
-| link-URL-tooltip-2 | diverged (sentinel) → b4 diverged | 9/2 → 2/0 | depth[+],url,creole | — | T5a (C) | open -> T5a |
+| link-URL-tooltip-0 | diverged (sentinel) → b4 diverged → b5w1 conformant | 9/2 → 3/6 | depth[+],url,creole | crash: IllegalArgumentException | T5a (D) | fixed (T5a da15d5507, merged bfd1a5c4e); our error page (jar crash + we error) |
+| link-URL-tooltip-1 | diverged (sentinel) → b4 diverged → b5w1 conformant | 9/2 → 6/5 | depth[+],url,creole | — | T5a (C) | fixed (T5a da15d5507, merged bfd1a5c4e); pinned b5w1 |
+| link-URL-tooltip-2 | diverged (sentinel) → b4 diverged → b5w1 conformant | 9/2 → 2/0 | depth[+],url,creole | — | T5a (C) | fixed (T5a da15d5507, merged bfd1a5c4e); pinned b5w1 |
 | lozolo-55-gole805 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],stereo,style | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | lucema-49-bolo727 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],<>,[#color] | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | mifoxa-71-mago795 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],code,stereo,style | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
@@ -191,9 +191,9 @@ Filled by T0a from `measurements/b0.json` / `b0-eng/parity-wbs.json`.
 | vecovi-94-givo515 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],_,[#color],multiline | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | vezati-14-vupe612 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],<>,[#color],code,multiline,link | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | xagelu-70-fota123 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],[#color] | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
-| xakubu-65-cumo769 | diverged (sentinel) → b4 diverged | 9/2 → 5/30 | depth[*],title,caption,legend,header,footer,creole | — | T5b (B) | open -> T5b |
+| xakubu-65-cumo769 | diverged (sentinel) → b4 diverged → b5w1 conformant | 9/2 → 5/30 | depth[*],title,caption,legend,header,footer,creole | — | T5b (B) | fixed (T5b f2dea8589, merged c3e65bd29); pinned b5w1 |
 | xalape-44-sipa811 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],code,multiline,link | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
-| xasinu-75-sabe690 | diverged (sentinel) → b4 diverged | 9/2 → 2/0 | depth[+],url,creole | — | T5a (C) | open -> T5a |
+| xasinu-75-sabe690 | diverged (sentinel) → b4 diverged → b5w1 conformant | 9/2 → 2/0 | depth[+],url,creole | — | T5a (C) | fixed (T5a da15d5507, merged bfd1a5c4e); pinned b5w1 |
 | xecoxa-01-timo183 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],stereo,style,creole | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | xekazo-08-vozi430 | diverged (sentinel) → b4 conformant | 8/2 → 0/0 | depth[*],pragma/theme/scale | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | xeruno-72-nape751 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],_ | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
@@ -205,7 +205,7 @@ Filled by T0a from `measurements/b0.json` / `b0-eng/parity-wbs.json`.
 | zagudu-70-loto412 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],[#color],code,link | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | zapabe-95-nige175 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*] | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | zecavo-98-kini554 | diverged (sentinel) → b4 conformant | 9/2 → n/a (our error page) | depth[*] | WBS diagram only accepts one root first declared. (l.3) | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); error page (jar error + we error) |
-| zeneno-39-bize297 | diverged (sentinel) → b4 diverged | 9/2 → 6/5 | depth[+],url,creole | — | T5a (C) | open -> T5a |
+| zeneno-39-bize297 | diverged (sentinel) → b4 diverged → b5w1 conformant | 9/2 → 6/5 | depth[+],url,creole | — | T5a (C) | fixed (T5a da15d5507, merged bfd1a5c4e); pinned b5w1 |
 | zipise-65-bevo360 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],stereo,style | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | zodobi-82-dura410 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],style | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
 | zogadi-16-bore748 | diverged (sentinel) → b4 conformant | 9/2 → 0/0 | depth[*],<>,code,link | — | T4a | fixed (T4a 8f4e2b254, merged 71b55c446); pinned b4 |
