@@ -75,9 +75,9 @@ const JAR_ABOUT =
 const VERSION_DIFFS = [
   ['svg/@viewBox[2]', '393', '403'],
   ['svg/@width', '393', '403'],
-  ['svg/g[1]/text[1]/@textLength', '124.65', '150.075'],
-  ['svg/g[1]/text[1]/text()[1]', `PlantUML version ${VERSION}`, 'PlantUML version $version$'],
-  ['svg/g[1]/text[2]/@x', '132.95', '158.375'],
+  ['svg/g[1]/text[1]/@textLength', '130.575', '150.075'],
+  ['svg/g[1]/text[1]/text()[1]', `plantuml-ts version ${VERSION}`, 'PlantUML version $version$'],
+  ['svg/g[1]/text[2]/@x', '138.875', '158.375'],
   ['svg/g[1]/image[1]/@x', '307.325', '317.075'],
 ];
 
@@ -131,7 +131,7 @@ describe('PSystemVersion.createStdLib — govuca-53-mili511', () => {
 describe('getAuthorsStrings (java:219-245)', () => {
   it('opens with this port version, the compile-time placeholder and the GPL edition', () => {
     expect(getAuthorsStrings(true).slice(0, 4)).toEqual([
-      `<b>PlantUML version ${VERSION}</b> (Unknown compile time)`,
+      `<b>plantuml-ts version ${VERSION}</b> (Unknown compile time)`,
       '(GPL source distribution)',
       ' ',
       '<u>Original idea</u>: Arnaud Roques',
@@ -146,7 +146,7 @@ describe('getAuthorsStrings (java:219-245)', () => {
 
   it('strips <tag> and </tag> without the tags (java:248-249)', () => {
     const lines = getAuthorsStrings(false);
-    expect(lines[0]).toBe(`PlantUML version ${VERSION} (Unknown compile time)`);
+    expect(lines[0]).toBe(`plantuml-ts version ${VERSION} (Unknown compile time)`);
     expect(lines[4]).toBe('Word Macro: Alain Bertucat & Matthieu Sabatier');
     expect(lines[7]).toBe('Official Eclipse Plugin: Hallvard Trætteberg');
   });

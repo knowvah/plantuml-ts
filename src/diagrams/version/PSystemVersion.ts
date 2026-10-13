@@ -3,8 +3,9 @@
  * creole drawn black on white with the PlantUML logo in the bottom-right
  * corner (`PlainStringsDiagram`).
  *
- * This port prints its own version string where the jar prints
- * `Version.versionString()` (`core/version.ts`; user ruling 2026-10-08, "keep
+ * This port prints its own name and version string (`plantuml-ts version
+ * <v>`, matching the error banner's `fullDescription()`) where the jar prints
+ * `PlantUML version ` + `Version.versionString()` (`core/version.ts`; user ruling 2026-10-08, "keep
  * own version string", DIVERGENCES.md "Error pages print this port's
  * version").
  *
@@ -82,7 +83,9 @@ function add(result: string[], s: string, withTag: boolean): void {
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/PSystemVersion.java:219-245 */
 export function getAuthorsStrings(withTag: boolean): string[] {
   const strings: string[] = [];
-  add(strings, `<b>PlantUML version ${versionString()}</b> (${COMPILE_TIME_STRING})`, withTag);
+  // `PlantUML version` → `plantuml-ts version` (ufp journal row 24a): the
+  // 2026-10-08 ruling's reason — never tell a user they ran PlantUML.
+  add(strings, `<b>plantuml-ts version ${versionString()}</b> (${COMPILE_TIME_STRING})`, withTag);
   add(strings, `(${License.getCurrent().toString()} source distribution)`, withTag);
   add(strings, BLANK, withTag);
   for (const line of AUTHORS) add(strings, line, withTag);
