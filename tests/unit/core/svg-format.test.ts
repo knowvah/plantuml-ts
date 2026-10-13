@@ -273,3 +273,18 @@ describe('svg-format', () => {
     });
   });
 });
+
+describe('formatDecimal keeps leading fraction zeros when HALF_UP carries (ufp)', () => {
+  // `intPart + keep` = "0004" for 0.0049 @3; BigInt("0004") + 1 = "5" lost the
+  // padding, and slice(-3) then printed 0.5 instead of Java's %.3f 0.005 (trailing zeros trimmed).
+  it.each([
+    [0.0049, 3, '0.005'],
+    [-0.0049, 3, '-0.005'],
+    [0.009999999999999953, 3, '0.01'],
+    [0.00049, 3, '0'],
+    [0.0995, 3, '0.1'],
+    [0.9995, 3, '1'],
+  ])('formatDecimal(%s, %i) = %s', (x, n, expected) => {
+    expect(formatDecimal(x, n)).toBe(expected);
+  });
+});
