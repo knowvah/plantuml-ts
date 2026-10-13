@@ -34,8 +34,11 @@ describe('lgm-T1c: description chrome equals the jar', () => {
     expect(diffsOf(name)).toEqual([]);
   });
 
-  it('deployment-frame: only a cloud glyph path coordinate differs', () => {
-    expect(pathsOf('deployment-frame')).toEqual(['svg/g[1]/g[3]/path[1]/@d[64]']);
+  // Its one residual (cloud glyph path token 64: ours 20.5, jar 20.005) was
+  // svg-format's javaFixedN dropping the carried fraction's zero padding,
+  // fixed in 82e861efc (ufp journal row 31).
+  it('deployment-frame: equals the jar', () => {
+    expect(pathsOf('deployment-frame')).toEqual([]);
   });
 
   it('usecase-frame-note: only the note entity order differs', () => {
