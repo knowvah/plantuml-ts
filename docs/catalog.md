@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1616 modules · 5955 exported names.
+1618 modules · 5958 exported names.
 
 ## `src/`
 
@@ -1721,6 +1721,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `charlie-image.ts` | `CharliePng`, `CHARLIE_PNG` | `CHARLIE_PNG` -- the image `charlie` draws (`PSystemCharlie.java`, `PSystemVersion.getCharlieImage`, java:104-106), as the pinned jar embeds it in SVG (D4). |
+
+## `src/diagrams/emoji/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `PSystemListEmoji.ts` | `PSystemListEmoji` | `PSystemListEmoji` — the `emoji <block>` page: a header naming the Unicode block, then every {@link getAll} entry whose key starts with the block, as `<:code:>` artwork, `<#0:code:>` monochrome and the shortcut, in three columns (dx 0 / 500 |
+| `PSystemListEmojiFactory.ts` | `executeLine`, `listEmojiPlugin` | `PSystemListEmojiFactory` — accepts `emoji` (code `26`) or `emoji <block>`. |
 
 ## `src/diagrams/files/`
 
