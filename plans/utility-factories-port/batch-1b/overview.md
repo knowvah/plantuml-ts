@@ -8,5 +8,6 @@ All tasks run in parallel worktrees (disjoint write-sets); 1a and 1b may run tog
 | [T1f](T1f-version.md) | `version/` (license, version, about/authors, stdlib) | typescript-pro (opus) | `src/diagrams/version/**` (except T0e's `stdlib-catalog.ts`) | batch 0 | [ ] |
 | [T1g](T1g-donors.md) | `PSystemDonors` + `PSystemSkinparameterList` | typescript-pro (sonnet) | `src/diagrams/donors/{PSystemDonors,PSystemDonorsFactory,PSystemSkinparameterList,PSystemSkinparameterListFactory}.ts`, `tests/fixtures/utility/{donors,skinparameters}.*` | batch 0 | [ ] |
 | [T1h](T1h-eggs.md) | eggs + dedication | typescript-pro (opus) | `src/diagrams/eggs/**` (except T1b's `PSystemColors*`), `src/diagrams/dedication/**`, `tests/fixtures/utility/{apple,rip}*` | batch 0 | [ ] |
+| [T1i](T1i-utility-assets.md) | utility image assets: store builder, egg images out of the bundle, harness = survey stores (added b1, journal row 25) | typescript-pro (sonnet) | see spec | T1h | [ ] |
 
 See `../batch-1a/overview.md` "As landed" for the batch-0 contracts.
