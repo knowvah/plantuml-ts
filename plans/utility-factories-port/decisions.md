@@ -90,3 +90,17 @@ branches (name `MIT`, MIT text; java:63-76, :155-:240). (c) `<qrcode:>` resolves
 `FlashCodeUtilsNone` (zxing's `FlashCodeUtilsZxing` is `::remove file when __MIT__`), so
 `AtomImg.createQrcode` draws a blank 10x10 RGB image scaled (`AtomImg.java:90-103`) — no QR
 encoder. Oracle rows that render the GPL behaviour differ from the port by this ruling.
+
+## D14 — `version` renders the port's own values (maintainer ruling 2026-10-13, b1 close)
+`PSystemVersion#createShowVersion` (java:172-202) prints host state after its first four lines
+(`GraphvizUtils.addDotStatus`, `OptionPrint.interestingProperties`/`interestingValues`). The port
+renders the page with its own truthful equivalents (its layout engine instead of a Graphviz
+binary; no JVM/OS lines it does not have) — a platform-forced divergence, recorded in
+`DIVERGENCES.md` when it lands. Never print the oracle host's values. The about/authors label
+`plantuml-ts version <v>` (journal row 24a) is confirmed.
+
+## D15 — Core ports approved for batch 3 (maintainer ruling 2026-10-13, b1 close)
+Pre-approved core pieces (no stop-10 report needed): `SpriteImage` drawing of internal PNG
+sprites (SpriteImage.java:60-100; the internal store keeps PNG bytes), the `<qrcode:>` creole
+command + `AtomImg.createQrcode` under the MIT edition (D13: `FlashCodeUtilsNone`, blank 10x10),
+and `HColorAutomagic` with `HColorSet`'s `automatic` branch (HColorSet.java:85-86).
