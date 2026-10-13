@@ -96,7 +96,7 @@ Batch close: [close-procedure.md](close-procedure.md).
 | [0](batch-0/overview.md): branch, b0, harness, `getWBSDirection` | T0a → T0b ∥ T0c | T0b ∥ T0c | [x] |
 | [1](batch-1/overview.md): model + leaf text blocks | T1a, T1b, T1c | all ∥ | [x] |
 | [2](batch-2/overview.md): tree layout + diagram | T2a, T2b | ∥ (Fork contract) | [x] |
-| [3](batch-3/overview.md): commands + factory | T3a ∥ T3b → T3c | two waves | [ ] |
+| [3](batch-3/overview.md): commands + factory | T3a ∥ T3b → T3c | two waves | [x] |
 | [4](batch-4/overview.md): plugin wiring + main pin close | T4a | — | [ ] |
 | [5](batch-5/overview.md): residual drive (written at the b4 close) + T5-cov | T5* | per spec | [ ] |
 | [exit](exit/overview.md): final + merge | T-exit | — | [ ] |

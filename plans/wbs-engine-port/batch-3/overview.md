@@ -4,9 +4,9 @@ Wave 1: T3a ∥ T3b (parallel worktrees). Wave 2: T3c after both merge.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T3a](T3a-item-commands.md) | `CommandWBSItemNew` + `CommandWBSItemOld`, modes 1 and 0 | typescript-pro (sonnet) | `src/diagrams/wbs/{CommandWBSItemNew,CommandWBSItemOld}.ts` + tests | T0c, T2b | [ ] |
-| [T3b](T3b-multiline-and-link-commands.md) | `CommandWBSItemMultilineNew/Old` + `CommandWBSLink` | typescript-pro (sonnet) | `src/diagrams/wbs/{CommandWBSItemMultilineNew,CommandWBSItemMultilineOld,CommandWBSLink}.ts` + tests | T0c, T2b | [ ] |
-| [T3c](T3c-factory.md) | `WBSDiagramFactory`: dispatch in the Java's order, common commands, style/skinparam declarations, refusal | typescript-pro (sonnet) | `src/diagrams/wbs/WBSDiagramFactory.ts` + test | T3a, T3b | [ ] |
+| [T3a](T3a-item-commands.md) | `CommandWBSItemNew` + `CommandWBSItemOld`, modes 1 and 0 | typescript-pro (sonnet) | `src/diagrams/wbs/{CommandWBSItemNew,CommandWBSItemOld}.ts` + tests | T0c, T2b | [x] |
+| [T3b](T3b-multiline-and-link-commands.md) | `CommandWBSItemMultilineNew/Old` + `CommandWBSLink` | typescript-pro (sonnet) | `src/diagrams/wbs/{CommandWBSItemMultilineNew,CommandWBSItemMultilineOld,CommandWBSLink}.ts` + tests | T0c, T2b | [x] |
+| [T3c](T3c-factory.md) | `WBSDiagramFactory`: dispatch in the Java's order, common commands, style/skinparam declarations, refusal | typescript-pro (sonnet) | `src/diagrams/wbs/WBSDiagramFactory.ts` + test | T3a, T3b | [x] |
 
 ## Interface contracts (T3a/T3b → T3c)
 Each command module exports its regex(es) and an apply function in the mindmap shape:
