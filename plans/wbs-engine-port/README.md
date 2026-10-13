@@ -100,7 +100,7 @@ Batch close: [close-procedure.md](close-procedure.md).
 | [4](batch-4/overview.md): plugin wiring + main pin close | T4a | — | [x] |
 | [5](batch-5/overview.md): residual drive (written at the b4 close) + T5-cov | T5* | per spec | [x] |
 | [exit](exit/overview.md): final + merge | T-exit | — | [x] |
-| [exit](exit/overview.md): next mission brief (after merge) | T-next: `@startuml` utility factories (`listopeniconic`, …) | — | [ ] |
+| [exit](exit/overview.md): next mission brief (after merge) | T-next: `@startuml` utility factories (`listopeniconic`, …) | — | [x] |
 
 Executor: `fable`. Subagents: `typescript-pro` — opus for T1a, T1b, T2a, T2b, T4a, T5-cov;
 sonnet for T0b, T0c, T1c, T3a–T3c. Every agent prompt = worktree header +
