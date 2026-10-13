@@ -3,12 +3,14 @@
  * licence name `about`/`version` quote.
  *
  * Upstream's build pre-processes this file per edition (`// ::comment when
- * __MIT__ ...` / `// ::uncomment when __MIT__`). The port mirrors the edition
- * the oracle jar is: the GPL one (`toString` "GPL", `end3`'s GPL paragraph,
- * java:155-168), which is what every jar probe prints. The other editions'
- * paragraphs (`addMit`, `addEpl`, `addBsd`, `addApache`, `addLgpl`,
- * `addGplv2`, java:240-371) are commented out in that edition and so not
- * ported.
+ * __MIT__ ...` / `// ::uncomment when __MIT__`). The port mirrors the MIT
+ * edition (D13): `toString` is "MIT" (java:66-68), and `end3` drops the GPL
+ * paragraph (java:155-168, `::comment when __MIT__`) for `addMit`
+ * (java:170-172, :240-264). The oracle jar is the GPL edition, so its
+ * `license`/`about` probes print the GPL name and paragraph where this port
+ * prints MIT's. The other editions' paragraphs (`addEpl`, `addBsd`,
+ * `addApache`, `addLgpl`, `addGplv2`, java:266-371) stay commented out in the
+ * MIT edition and are not ported.
  *
  * Long runs of `text.add(...)` are module-level line tables, each cited to its
  * java lines (the complexity hook's 30-NLOC cap); the order of additions is
@@ -20,8 +22,8 @@ import type { LicenseInfo } from './LicenseInfo.js';
 import { retrieveQuick } from './LicenseInfo.js';
 import { LicenseType } from './LicenseType.js';
 
-/** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/License.java:64 */
-const GPL = 'GPL';
+/** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/License.java:67 */
+const MIT = 'MIT';
 
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/License.java:115 */
 const RULE = '+=======================================================================';
@@ -48,21 +50,30 @@ const SUPPORT_US = [
 const QRCODES =
   '\t<qrcode:https://plantuml.com/patreon>\t\t<qrcode:https://plantuml.com/lp>\t\t<qrcode:https://plantuml.com/paypal>';
 
-/** The GPL edition's paragraph.
- *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/License.java:156-167 */
-const GPL_TEXT = [
+/** `addMit`'s paragraph, the MIT edition's `end3` opening (java:170-172).
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/License.java:241-263 */
+const MIT_TEXT = [
   'PlantUML is free software; you can redistribute it and/or modify it',
-  'under the terms of the GNU General Public License as published by',
-  'the Free Software Foundation, either version 3 of the License, or',
-  '(at your option) any later version.',
+  'under the terms of the MIT License.',
   BLANK,
-  'PlantUML distributed in the hope that it will be useful, but',
-  'WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY',
-  'or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public',
-  'License for more details.',
+  'See http://opensource.org/licenses/MIT',
   BLANK,
-  'You should have received a copy of the GNU General Public License',
-  'along with this library.  If not, see <https://www.gnu.org/licenses/>.',
+  'Permission is hereby granted, free of charge, to any person obtaining',
+  'a copy of this software and associated documentation files (the "Software"),',
+  'to deal in the Software without restriction, including without limitation',
+  'the rights to use, copy, modify, merge, publish, distribute, sublicense,',
+  'and/or sell copies of the Software, and to permit persons to whom the',
+  'Software is furnished to do so, subject to the following conditions:',
+  BLANK,
+  'The above copyright notice and this permission notice shall be included',
+  'in all copies or substantial portions of the Software.',
+  BLANK,
+  'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS',
+  'OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,',
+  'FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE',
+  'AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,',
+  'WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR',
+  'IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.',
 ] as const;
 
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/License.java:191-195 */
@@ -164,10 +175,11 @@ export class License {
   /** Upstream's implicit no-arg constructor; `build` is port-only (see {@link LicenseBuild}). */
   constructor(private readonly build: LicenseBuild = ORACLE_BUILD) {}
 
-  /** The GPL edition's arm (java:63-65); the others are `// ::uncomment`ed out.
+  /** The MIT edition's arm (java:66-68); the GPL arm (java:63-65) is
+   *  `// ::comment`ed out in it, the others stay `// ::uncomment`-only.
    *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/License.java:61-84 */
   toString(): string {
-    return GPL;
+    return MIT;
   }
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/License.java:86-88 */
@@ -221,9 +233,11 @@ export class License {
     }
   }
 
-  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/License.java:154-236 */
+  /** `addMit(licenseInfo, text)` (java:170-172) in place of the GPL lines.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/License.java:154-236 */
   private end3(licenseInfo: LicenseInfo, text: string[]): void {
-    text.push(...GPL_TEXT, BLANK);
+    this.addMit(licenseInfo, text);
+    text.push(BLANK);
     if (!licenseInfo.isValid()) text.push(...SPONSORED);
     text.push(
       'Images (whatever their format : PNG, SVG, EPS...) generated by running PlantUML',
@@ -241,6 +255,11 @@ export class License {
     text.push(BLANK);
     text.push(...(this.build.isThereArchive ? ARCHIVE : IGY));
     text.push(...CREDITS);
+  }
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/License.java:240-264 */
+  private addMit(_licenseInfo: LicenseInfo, text: string[]): void {
+    text.push(...MIT_TEXT);
   }
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/License.java:373-390 */

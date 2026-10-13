@@ -41,6 +41,9 @@ export interface StripeBuilder {
    *  read it) — or the `¿name?` red error text run for an unknown name. */
   /** Upstream: `stripe.addSpace(size)` (CommandCreoleSpace.java) -- pushes an `AtomSpace` (`atom/AtomSpace.ts`). */
   addSpace(width: number): void;
+  /** Upstream: `stripe.addQrcode(src, scale)` (CommandCreoleQrcode.java:80,
+   *  StripeSimple.java:216-218) -- pushes `AtomImg.createQrcode(src, scale)`. */
+  addQrcode(src: string, scale: number): void;
   addEmoji(name: string, scale: number, forcedColor: string | null): void;
   /** G2 N40: recursion entry for a `[[url]]` command's captured LABEL text
    *  -- the SAME recursive engine as {@link analyzeAndAddInline}, but every
