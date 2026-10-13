@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1616 modules · 5953 exported names.
+1620 modules · 5959 exported names.
 
 ## `src/`
 
@@ -1796,6 +1796,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `openiconic-all.ts` | `OPENICONIC_ALL` | `OPENICONIC_ALL` -- upstream `openiconic/all.txt`, line by line in file order: the list `PSystemListOpenIconic#getTextBlock` reads (`PSystemListOpenIconic.java:66-73`, resource opened at java:79). |
+| `PSystemListOpenIconic.ts` | `PSystemListOpenIconic` | `PSystemListOpenIconic` — the `listopeniconic` page: a header, then one `<&name> name` creole line per icon of `all.txt`, in 7 columns. |
+| `PSystemListOpenIconicFactory.ts` | `executeLineListOpenIconic`, `listOpenIconicPlugin` | `PSystemListOpenIconicFactory` — the single-line factory for `listopeniconic`. |
+| `PSystemOpenIconic.ts` | `PSystemOpenIconic` | `PSystemOpenIconic` — the `openiconic <name>` page: one OpenIconic glyph, black, at `factor`, with a 5px margin all round. |
+| `PSystemOpenIconicFactory.ts` | `executeLineOpenIconic`, `openIconicPlugin` | `PSystemOpenIconicFactory` — the single-line factory for `openiconic <name>`. |
 
 ## `src/diagrams/packetdiag/`
 
