@@ -158,8 +158,8 @@ describe('HColorSet class (HColorSet.java:43-120)', () => {
     expect(set.getColor('blue').asString()).toBe('#0000FF');
   });
 
-  it('the unported HColorAutomagic / HColorScheme results throw rather than resolve', () => {
-    expect(() => set.getColorOrWhite('automatic')).toThrow('HColorAutomagic');
+  it('`automatic` resolves to an HColorAutomagic (HColor.asString "?HColorAutomagic"); HColorScheme is unported', () => {
+    expect(set.getColorOrWhite('automatic').asString()).toBe('?HColorAutomagic');
     expect(() => set.getColorOrWhite('#?red:blue')).toThrow('HColorScheme');
     expect(() => set.getColorOrWhite('#?red:blue:green')).toThrow('HColorScheme');
   });

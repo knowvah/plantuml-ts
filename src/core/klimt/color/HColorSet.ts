@@ -26,6 +26,7 @@ import { getColor, NAMES } from './ColorTrieNode.js';
 import type { RgbTriple } from './ColorTrieNode.js';
 import type { GradientPolicy, HColorGradient } from './HColorGradient.js';
 import { HColors } from './HColors.js';
+import { HColorAutomagic } from './HColorAutomagic.js';
 import type { HColorSimple } from './HColorSimple.js';
 import { NoSuchColorException } from './NoSuchColorException.js';
 
@@ -319,6 +320,9 @@ function parseGradient(s: string): HColorGradient | undefined {
   return undefined;
 }
 
+/** What `HColorSet#parseColor` returns (`HColor` subclasses). */
+export type ParsedColor = HColorSimple | HColorGradient | HColorAutomagic;
+
 /**
  * HColorSet — the colour-name/hex resolver as upstream's singleton class,
  * layered over this module's {@link parseSimpleColor} (the private
@@ -355,17 +359,17 @@ export class HColorSet {
   }
 
   /** `parseColor(s)`, else `HColors.WHITE`. @see HColorSet.java:58-63 */
-  getColorOrWhite(s: string): HColorSimple | HColorGradient {
+  getColorOrWhite(s: string): ParsedColor {
     return this.parseColor(s) ?? HColors.WHITE;
   }
 
   /** `undefined` where upstream returns `null`. @see HColorSet.java:65-67 */
-  getColorOrNull(s: string): HColorSimple | HColorGradient | undefined {
+  getColorOrNull(s: string): ParsedColor | undefined {
     return this.parseColor(s);
   }
 
   /** @see HColorSet.java:69-76 */
-  getColor(s: string): HColorSimple | HColorGradient {
+  getColor(s: string): ParsedColor {
     const result = this.parseColor(s);
     if (result === undefined) throw new NoSuchColorException();
     return result;
@@ -377,11 +381,11 @@ export class HColorSet {
    *
    * @see HColorSet.java:78-120
    */
-  private parseColor(sIn: string): HColorSimple | HColorGradient | undefined {
+  private parseColor(sIn: string): ParsedColor | undefined {
     const s = sIn.startsWith('#') ? sIn.substring(1) : sIn;
     const lower = s.toLowerCase();
     if (lower === 'transparent' || lower === 'background') return HColors.none();
-    if (lower === 'automatic') throw unported('HColorAutomagic', s);
+    if (lower === 'automatic') return new HColorAutomagic();
 
     const result = parseSimpleColor(s);
     if (result !== undefined) return HColors.simple(result);

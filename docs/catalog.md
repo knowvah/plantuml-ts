@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1657 modules · 6032 exported names.
+1658 modules · 6034 exported names.
 
 ## `src/`
 
@@ -494,9 +494,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ColorTrieNode.ts` | `RgbTriple`, `getColor`, `NAMES` | ColorTrieNode — the named-color -> RGB table upstream registers into a letter-indexed trie. |
 | `ColorUtils.ts` | `getGrayScale`, `getGrayScaleColor`, `getGrayScaleColorReverse`, `distance` |  |
 | `fragment-color-mapper.ts` | `MonochromeMode`, `HexColorMapper`, `applyMonochromeHex`, `getReversed`, `colorMapperOf`, `applyColorMapperToFragment`, `applyMonochromeToFragment` | fragment-color-mapper.ts -- `skinparam monochrome true\|reverse` (G2 N61). |
+| `HColorAutomagic.ts` | `HColorAutomagic` |  |
 | `HColorGradient.ts` | `GradientPolicy`, `HColorGradient` |  |
 | `HColors.ts` | `HColors` |  |
-| `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `parseColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor`, `HColorSet` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
+| `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `parseColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor`, `ParsedColor`, `HColorSet` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
 | `HColorSimple.ts` | `HColorSimple` |  |
 | `HUSLColorConverter.ts` | `xyzToRgb`, `rgbToXyz`, `xyzToLuv`, `luvToXyz`, `luvToLch`, `lchToLuv`, `hsluvToLch`, `lchToHsluv`, `hpluvToLch`, `lchToHpluv`, `rgbToHex`, `hexToRgb`, `lchToRgb`, `rgbToLch`, `hsluvToRgb`, `rgbToHsluv`, `hpluvToRgb`, `rgbToHpluv`, `hsluvToHex`, `hpluvToHex`, `hexToHsluv`, `hexToHpluv` | HUSLColorConverter -- the HSLuv / HPLuv colour-space conversions (Alexei Boronine's reference implementation, as vendored upstream). |
 | `NoSuchColorException.ts` | `NoSuchColorException` | NoSuchColorException — thrown by `HColorSet#getColor` for a token that resolves to no colour. |
