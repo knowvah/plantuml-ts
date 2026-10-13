@@ -59,7 +59,13 @@ import type { Theme } from '../theme.js';
 import type { StyleMap } from '../skinparam.js';
 import { resolveColorToSvgHex } from '../klimt/color/HColorSet.js';
 import { ANNOTATION_ELEMENTS } from './annotation-style-types.js';
-import type { AnnotationBoxStyle, AnnotationElement } from './annotation-style-types.js';
+import type { AnnotationBoxStyle, AnnotationElement, ResolvedAnnotationStyles } from './annotation-style-types.js';
+import type { DiagramType } from '../TitledDiagram.js';
+import type { SName } from '../style/SName.js';
+import { PNAMES } from '../style/PName.js';
+import { StyleSignatureBasic } from '../style/StyleSignatureBasic.js';
+import { loadSkin } from '../style/StyleLoader.js';
+import { DEFAULT_SKIN } from '../style/mindmap-style-builder.js';
 import { BASE_DEFAULTS, cloneBoxStyle } from './annotation-defaults.js';
 import { applySkinparamOverrides } from './annotation-skinparam.js';
 import { applyStyleOverrides } from './annotation-style-overrides.js';
@@ -74,7 +80,13 @@ import {
 // from './style.js' so existing call sites need no changes.
 // ---------------------------------------------------------------------------
 
-export type { BoxSides, AnnotationBoxStyle, AnnotationElement } from './annotation-style-types.js';
+export type {
+  BoxSides,
+  AnnotationBoxStyle,
+  AnnotationElement,
+  LegendStyleFor,
+  ResolvedAnnotationStyles,
+} from './annotation-style-types.js';
 export { expandGrayShorthand } from './annotation-color.js';
 export { parseClockwise } from './annotation-clockwise.js';
 
@@ -92,51 +104,172 @@ export { parseClockwise } from './annotation-clockwise.js';
  * every chrome element sits directly on the document canvas). Every other
  * use of `theme` the T2 interface contract anticipated is still unwired
  * (see module doc).
+ *
+ * wep-T5b: `legendFor(diagramType)` is the legend `EntityImageLegend.create`
+ * draws for that diagram -- signature `root, root, document,
+ * <getStyleName()>, legend` (EntityImageLegend.java:49-51), so the skin's
+ * and the document's `<styleName> { … }` declarations reach it
+ * (`wbsDiagram`'s five, plantuml.skin:350-356). `legend` stays the
+ * diagram-agnostic style.
  */
 export function resolveAnnotationStyles(
   theme: Theme,
   declarations: ReadonlyMap<string, string> | StyleSkinparamSource,
   styleMap: StyleMap,
-): Record<AnnotationElement, AnnotationBoxStyle> {
-  const documentBackgroundHex = resolveColorToSvgHex(theme.colors.background);
-  const themeStyleMap = toStyleMap(theme.styleOverrides);
-  const segments = segmentsOf(declarations, styleMap);
+): ResolvedAnnotationStyles {
+  const ctx: ResolveContext = {
+    documentBackgroundHex: resolveColorToSvgHex(theme.colors.background),
+    themeStyleMap: toStyleMap(theme.styleOverrides),
+    segments: segmentsOf(declarations, styleMap),
+  };
   const result = {} as Record<AnnotationElement, AnnotationBoxStyle>;
-  for (const element of ANNOTATION_ELEMENTS) {
-    const style = cloneBoxStyle(BASE_DEFAULTS[element]);
-    // G2 N51: see `AnnotationBoxStyle#documentBackground`'s own doc comment.
-    style.documentBackground = documentBackgroundHex;
-    // G2 N46 (near-zero harvest): `skinparam DefaultFontName X` maps to
-    // `PName.FontName` at `SName.root` (`FromSkinparamToStyle.java:156`,
-    // `addConvert("defaultFontName", PName.FontName, SName.root)`) --
-    // root is the common ancestor of every chrome element's OWN style
-    // cascade (`StyleSignatureBasic.of(SName.root, SName.document,
-    // SName.title)` etc, this module's own doc comment), so a global
-    // `DefaultFontName` overrides every element's `ROOT_FONT_FAMILY`
-    // default UNLESS that element sets its own more-specific FontName
-    // (per-element skinparam/`<style>`, applied AFTER this and so still
-    // wins) -- jar-verified `boduli-27-zufa581` (`skinparam DefaultFontName
-    // Helvetica` + `Title ...`, title `<text font-family="Helvetica">`).
-    // Applied BEFORE the per-element overrides below so a more specific
-    // override still wins (root < document < element cascade specificity).
-    // The theme's OWN `<style>` declarations (`root { … }` and
-    // `document { … }`), run through the SAME selector resolution a user
-    // `<style>` block gets -- and BEFORE it, so a user override still wins.
-    //
-    // Routed through the styleMap rather than seeded from the compiled scalar
-    // fields, and that distinction is load-bearing: `theme.fontFamily` and
-    // `theme.colors.text` always hold a value, so seeding from them clobbered
-    // the skin's own per-element defaults (`header`/`footer` FontColor `#8`)
-    // even when no theme was applied at all. Only a theme that actually
-    // DECLARED a root block should override them, which is exactly what an
-    // absent `styleOverrides` entry expresses.
-    if (themeStyleMap !== undefined) {
-      applyStyleOverrides(element, style, themeStyleMap, documentBackgroundHex);
-    }
-    for (const segment of segments) applySegment(element, style, segment, documentBackgroundHex);
-    result[element] = style;
+  for (const element of ANNOTATION_ELEMENTS) result[element] = resolveElement(element, ctx, undefined);
+  // wep-T5b: one legend per style name, resolved on first use (upstream
+  // memoizes `getMergedStyle` per signature, StyleBuilder.java:126-129).
+  const legends = new Map<SName, AnnotationBoxStyle>();
+  const legendFor = (diagramType: string | undefined): AnnotationBoxStyle => {
+    if (diagramType === undefined) return result.legend;
+    const styleName = getStyleName(diagramType);
+    const cached = legends.get(styleName);
+    if (cached !== undefined) return cached;
+    const legend = resolveElement('legend', ctx, styleName);
+    legends.set(styleName, legend);
+    return legend;
+  };
+  return { ...result, legendFor };
+}
+
+/** What every element's resolution reads, computed once per call. */
+interface ResolveContext {
+  readonly documentBackgroundHex: string;
+  readonly themeStyleMap: StyleMap | undefined;
+  readonly segments: readonly StyleSkinparamSegment[];
+}
+
+/**
+ * One element's style: skin defaults, then (legend with a style name only,
+ * wep-T5b) the skin's own `<styleName>` contribution, then the theme's and
+ * the document's declarations.
+ */
+function resolveElement(
+  element: AnnotationElement,
+  ctx: ResolveContext,
+  styleName: SName | undefined,
+): AnnotationBoxStyle {
+  const style = cloneBoxStyle(BASE_DEFAULTS[element]);
+  // G2 N51: see `AnnotationBoxStyle#documentBackground`'s own doc comment.
+  style.documentBackground = ctx.documentBackgroundHex;
+  if (styleName !== undefined) {
+    const skinLayer: StyleMap = new Map([[styleName.toLowerCase(), new Map(skinLegendDeclarations(styleName))]]);
+    applyStyleOverrides(element, style, skinLayer, ctx.documentBackgroundHex, styleName);
   }
-  return result;
+  // G2 N46 (near-zero harvest): `skinparam DefaultFontName X` maps to
+  // `PName.FontName` at `SName.root` (`FromSkinparamToStyle.java:156`,
+  // `addConvert("defaultFontName", PName.FontName, SName.root)`) --
+  // root is the common ancestor of every chrome element's OWN style
+  // cascade (`StyleSignatureBasic.of(SName.root, SName.document,
+  // SName.title)` etc, this module's own doc comment), so a global
+  // `DefaultFontName` overrides every element's `ROOT_FONT_FAMILY`
+  // default UNLESS that element sets its own more-specific FontName
+  // (per-element skinparam/`<style>`, applied AFTER this and so still
+  // wins) -- jar-verified `boduli-27-zufa581` (`skinparam DefaultFontName
+  // Helvetica` + `Title ...`, title `<text font-family="Helvetica">`).
+  // Applied BEFORE the per-element overrides below so a more specific
+  // override still wins (root < document < element cascade specificity).
+  // The theme's OWN `<style>` declarations (`root { … }` and `document { … }`),
+  // run through the SAME selector resolution a user `<style>` block gets --
+  // and BEFORE it, so a user override still wins.
+  //
+  // Routed through the styleMap rather than seeded from the compiled scalar
+  // fields, and that distinction is load-bearing: `theme.fontFamily` and
+  // `theme.colors.text` always hold a value, so seeding from them clobbered
+  // the skin's own per-element defaults (`header`/`footer` FontColor `#8`)
+  // even when no theme was applied at all. Only a theme that actually
+  // DECLARED a root block should override them, which is exactly what an
+  // absent `styleOverrides` entry expresses.
+  if (ctx.themeStyleMap !== undefined) {
+    applyStyleOverrides(element, style, ctx.themeStyleMap, ctx.documentBackgroundHex, styleName);
+  }
+  for (const segment of ctx.segments) applySegment(element, style, segment, ctx.documentBackgroundHex, styleName);
+  return style;
+}
+
+// ---------------------------------------------------------------------------
+// wep-T5b: the diagram's style name in the legend's signature
+// ---------------------------------------------------------------------------
+
+/**
+ * `DiagramType#getStyleName`, keyed by the upstream enum constant's name (the
+ * value every producer sets on `RenderFragment.diagramType`). Every type not
+ * listed falls through to `SName.activityDiagram` (java:295). Ported here, its
+ * one consumer's module, until `core/DiagramType` itself is ported
+ * (`TitledDiagram.ts#DiagramType` is the values-only slice).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/DiagramType.java:234-296
+ */
+const STYLE_NAME_BY_DIAGRAM_TYPE: ReadonlyMap<string, SName> = new Map<DiagramType, SName>([
+  ['SEQUENCE', 'sequenceDiagram'],
+  ['STATE', 'stateDiagram'],
+  ['CLASS', 'classDiagram'],
+  ['OBJECT', 'objectDiagram'],
+  ['ACTIVITY', 'activityDiagram'],
+  ['DESCRIPTION', 'componentDiagram'],
+  ['MINDMAP', 'mindmapDiagram'],
+  ['WBS', 'wbsDiagram'],
+  ['GANTT', 'ganttDiagram'],
+  ['SALT', 'saltDiagram'],
+  ['YAML', 'yamlDiagram'],
+  ['HCL', 'yamlDiagram'],
+  ['JSON', 'jsonDiagram'],
+  ['TIMING', 'timingDiagram'],
+  ['NWDIAG', 'nwdiagDiagram'],
+  ['EBNF', 'ebnf'],
+  ['REGEX', 'regex'],
+  ['CHRONOLOGY', 'ganttDiagram'],
+  ['CHART', 'chartDiagram'],
+  ['PACKET', 'packetdiagDiagram'],
+]);
+
+/** `return SName.activityDiagram;` @see DiagramType.java:295 */
+const DEFAULT_STYLE_NAME: SName = 'activityDiagram';
+
+/** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/DiagramType.java:234-296 */
+export function getStyleName(diagramType: string): SName {
+  return STYLE_NAME_BY_DIAGRAM_TYPE.get(diagramType) ?? DEFAULT_STYLE_NAME;
+}
+
+/**
+ * Per style name, the declarations the default skin adds to the legend once
+ * the style name joins its signature: every property of
+ * `StyleSignatureBasic.of(root, root, document, <styleName>, legend)
+ * .getMergedStyle(skin)` (EntityImageLegend.java:49-51) whose winning value is
+ * not the one `of(root, root, document, legend)` already merges -- the
+ * declarations `BASE_DEFAULTS` (plantuml.skin `root {}` + `document { legend
+ * {} }`) does not transcribe. Each skin value carries its own declaration
+ * counter (`ValueImpl.regular(value, counter)`, StyleParser.java:137), so a
+ * different priority is a different declaration. For plantuml.skin these are
+ * wbsDiagram's five (plantuml.skin:350-356), timingDiagram's four
+ * (plantuml.skin:479-483) and yamlDiagram/jsonDiagram's two (plantuml.skin:
+ * 457-459). Module-level cache: pure in its key (the embedded skin text is a
+ * constant), so concurrent callers can only ever store equal values.
+ */
+const skinLegendCache = new Map<SName, ReadonlyMap<string, string>>();
+
+function skinLegendDeclarations(styleName: SName): ReadonlyMap<string, string> {
+  const cached = skinLegendCache.get(styleName);
+  if (cached !== undefined) return cached;
+  const skin = loadSkin(DEFAULT_SKIN);
+  const scoped = StyleSignatureBasic.of('root', 'root', 'document', styleName, 'legend').getMergedStyle(skin);
+  const base = StyleSignatureBasic.of('root', 'root', 'document', 'legend').getMergedStyle(skin);
+  const declarations = new Map<string, string>();
+  for (const name of PNAMES) {
+    if (scoped === undefined || !scoped.hasValue(name)) continue;
+    const value = scoped.value(name);
+    if (base?.hasValue(name) === true && base.value(name).getPriority() === value.getPriority()) continue;
+    const text = value.asString();
+    if (text !== null) declarations.set(name.toLowerCase(), text);
+  }
+  skinLegendCache.set(styleName, declarations);
+  return declarations;
 }
 
 /**
@@ -164,9 +297,10 @@ function applySegment(
   style: AnnotationBoxStyle,
   segment: StyleSkinparamSegment,
   documentBackgroundHex: string,
+  styleName: SName | undefined,
 ): void {
   if (segment.kind === 'style') {
-    applyStyleOverrides(element, style, segment.styleMap, documentBackgroundHex);
+    applyStyleOverrides(element, style, segment.styleMap, documentBackgroundHex, styleName);
     return;
   }
   const defaultFontName = segment.entries.get('defaultfontname');

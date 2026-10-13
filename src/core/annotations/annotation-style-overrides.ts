@@ -156,21 +156,26 @@ function applyDeclarations(
 
 /**
  * D7: `legend`'s upstream style signature is diagram-type-scoped
- * (`root,document,<type>,legend`); title/caption/header/footer/mainframe are
- * bare (`root,document,<element>` — confirmed for mainframe via
- * `DiagramChromeFactory.java:263`). `resolveAnnotationStyles` has no
- * `diagramType` parameter (locked T2 interface: theme/skinparam/styleMap
- * only), so every `<type>.legend` selector `parseStyleBlock` can produce
- * (its 2-level nesting cap fits `sequenceDiagram { legend { ... } }` exactly)
- * is applied regardless of the diagram actually being rendered. Flagged for
- * T4/orchestrator: threading a `diagramType` parameter through is the correct
- * fix once available.
+ * (`root,root,document,<styleName>,legend`, EntityImageLegend.java:49-51);
+ * title/caption/header/footer/mainframe are bare (`root,document,<element>`
+ * — confirmed for mainframe via `DiagramChromeFactory.java:263`).
+ *
+ * wep-T5b: with the diagram's `styleName` (`DiagramType#getStyleName`,
+ * `style.ts#getStyleName`) the legend takes every further selector whose
+ * names all belong to that signature (`StyleSignatureBasic#matchAll`, pure
+ * set containment, java:194-220) -- the bare `<styleName>` block and
+ * `<styleName>.legend` among them, another diagram type's `.legend` not --
+ * in the map's order, after the fixed `root`/`document`/`legend`/
+ * `document.legend` steps above. Without one (a producer that sets no
+ * `RenderFragment.diagramType`, or the agnostic `.legend` field), every
+ * `<type>.legend` selector is applied regardless of the diagram, as before.
  */
 export function applyStyleOverrides(
   element: AnnotationElement,
   style: AnnotationBoxStyle,
   styleMap: StyleMap,
   documentBackgroundHex: string,
+  diagramStyleName?: string,
 ): void {
   // G2 N48: `root` is the LOWEST-priority member of the `root,document,
   // <element>` style signature (this function's own D7 doc comment) --
@@ -216,11 +221,26 @@ export function applyStyleOverrides(
   if (documentScoped !== undefined) applyDeclarations(style, documentScoped, documentBackgroundHex);
 
   if (element !== 'legend') return;
+  const matches = legendSelectorMatcher(diagramStyleName);
   for (const [selector, declarations] of styleMap) {
-    // \x22document.legend\x22 is already applied above (documentScoped); skip
-    // it here so it is not re-applied a second, redundant time.
-    if (selector !== 'legend' && selector !== 'document.legend' && selector.endsWith('.legend')) {
-      applyDeclarations(style, declarations, documentBackgroundHex);
-    }
+    if (matches(selector)) applyDeclarations(style, declarations, documentBackgroundHex);
   }
+}
+
+/** The four selectors {@link applyStyleOverrides} applies before its loop,
+ *  skipped there so none is applied a second time. */
+const LEGEND_FIXED_SELECTORS: ReadonlySet<string> = new Set(['root', 'document', 'legend', 'document.legend']);
+
+/**
+ * Which remaining selectors reach the legend: with a style name, those whose
+ * every name is one of `root`, `document`, `<styleName>`, `legend`
+ * (`StyleSignatureBasic.of(root, root, document, styleName, legend)`,
+ * EntityImageLegend.java:49-51, under `matchAll`); without, any `*.legend`.
+ */
+function legendSelectorMatcher(diagramStyleName: string | undefined): (selector: string) => boolean {
+  if (diagramStyleName === undefined) {
+    return (selector) => !LEGEND_FIXED_SELECTORS.has(selector) && selector.endsWith('.legend');
+  }
+  const names = new Set(['root', 'document', diagramStyleName.toLowerCase(), 'legend']);
+  return (selector) => !LEGEND_FIXED_SELECTORS.has(selector) && selector.split('.').every((name) => names.has(name));
 }
