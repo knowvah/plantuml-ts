@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1595 modules · 5896 exported names.
+1599 modules · 5913 exported names.
 
 ## `src/`
 
@@ -486,6 +486,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `ColorMapper.ts` | `ColorMapper`, `mapPaint`, `HColorOrPaint`, `toSvgPaint`, `toSvgSolid` |  |
 | `ColorOrder.ts` | `ColorOrder`, `getColor`, `getReverse`, `fromString` | ColorOrder -- a channel permutation, used by `ColorMapper.reverse(order)` (`ColorMapper.java:93-100`) for `skinparam reversecolor <order>` (`TitledDiagram.java:308-312`). |
+| `ColorParser.ts` | `COLOR_REGEXP`, `PART2`, `COLORS_REGEXP`, `ColorParser` |  |
 | `ColorTrieNode.ts` | `RgbTriple`, `getColor`, `NAMES` | ColorTrieNode — the named-color -> RGB table upstream registers into a letter-indexed trie. |
 | `ColorUtils.ts` | `getGrayScale`, `getGrayScaleColor`, `getGrayScaleColorReverse` |  |
 | `fragment-color-mapper.ts` | `MonochromeMode`, `HexColorMapper`, `applyMonochromeHex`, `getReversed`, `colorMapperOf`, `applyColorMapperToFragment`, `applyMonochromeToFragment` | fragment-color-mapper.ts -- `skinparam monochrome true\|reverse` (G2 N61). |
@@ -1988,8 +1989,11 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `CommandWBSItemMultilineNew.ts` | `WBS_MULTILINE_END_RE`, `WBS_CODE_CHARS`, `WBS_MULTILINE_NEW_START_RE`, `WbsMultilineBlock`, `WbsItemTarget`, `collectWbsMultilineBlock`, `applyWbsItemMultilineNew`, `applyMultilineItem` |  |
+| `CommandWBSItemMultilineOld.ts` | `WBS_MULTILINE_OLD_START_RE`, `applyWbsItemMultilineOld` |  |
 | `CommandWBSItemNew.ts` | `WBS_ITEM_NEW_RE_0`, `WBS_ITEM_NEW_RE_1`, `applyWbsItemNew` |  |
 | `CommandWBSItemOld.ts` | `WBS_ITEM_OLD_RE_0`, `WBS_ITEM_OLD_RE_1`, `applyWbsItemOld` |  |
+| `CommandWBSLink.ts` | `WBS_LINK_RE`, `WbsLinkTarget`, `applyWbsLink` |  |
 | `Fork.ts` | `Fork` |  |
 | `ITF.ts` | `ITF`, `getMainBoxWidthDefault` |  |
 | `ITFComposed.ts` | `ITFComposed` |  |
