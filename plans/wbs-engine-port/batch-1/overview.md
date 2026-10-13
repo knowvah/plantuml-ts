@@ -5,9 +5,9 @@ All three run in parallel worktrees; T1b and T1c code against T1a's `WElement` c
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T1a](T1a-welement.md) | `WElement`: tree model, style signature + `STEP_BY_PARENT` merge, geometry | typescript-pro (opus) | `src/diagrams/wbs/WElement.ts`, `tests/unit/wbs/WElement.test.ts` | T0 | [ ] |
-| [T1b](T1b-wbs-text-block-itf-leaf.md) | `WBSTextBlock`, `ITF`, `ITFLeaf`: main box via `FtileBoxOld.createWbs`, line drawing, leaf anchors | typescript-pro (opus) | `src/diagrams/wbs/{WBSTextBlock,ITF,ITFLeaf}.ts` + tests | T0 (T1a contract) | [ ] |
-| [T1c](T1c-wbs-link.md) | `WBSLink`: clipped centre line + arrow | typescript-pro (sonnet) | `src/diagrams/wbs/WBSLink.ts` + test | T0 (T1a contract) | [ ] |
+| [T1a](T1a-welement.md) | `WElement`: tree model, style signature + `STEP_BY_PARENT` merge, geometry | typescript-pro (opus) | `src/diagrams/wbs/WElement.ts`, `tests/unit/wbs/WElement.test.ts` | T0 | [x] |
+| [T1b](T1b-wbs-text-block-itf-leaf.md) | `WBSTextBlock`, `ITF`, `ITFLeaf`: main box via `FtileBoxOld.createWbs`, line drawing, leaf anchors | typescript-pro (opus) | `src/diagrams/wbs/{WBSTextBlock,ITF,ITFLeaf}.ts` + tests | T0 (T1a contract) | [x] |
+| [T1c](T1c-wbs-link.md) | `WBSLink`: clipped centre line + arrow | typescript-pro (sonnet) | `src/diagrams/wbs/WBSLink.ts` + test | T0 (T1a contract) | [x] |
 
 ## Interface contract: `WElement` (T1a → T1b, T1c, T2a, T2b)
 ```ts

@@ -1,0 +1,113 @@
+wait load 14.57
+wait load 10.46
+== activity 09:29:22 { 7.75 11.58 9.02 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-activity.json — {"conformant":448,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.88
+== board 09:30:22 { 6.36 10.63 8.85 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 09:30:47 { 6.19 10.25 8.76 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-c4.json — {"conformant":2,"structural-match":0,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.63
+== chart 09:31:50 { 6.74 9.78 8.70 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.11
+== chronology 09:32:54 { 7.39 9.54 8.69 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+wait load 15.70
+wait load 13.51
+wait load 10.18
+wait load 10.03
+wait load 9.39
+wait load 9.64
+== class 09:36:26 { 7.59 9.68 9.04 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-class.json — {"conformant":722,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.48
+== component 09:37:31 { 5.99 8.93 8.81 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-component.json — {"conformant":69,"structural-match":66,"diverged":131,"errored":0,"timeout":0,"oracle-error":0}
+== ditaa 09:38:02 { 7.07 8.88 8.79 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+wait load 9.01
+wait load 8.39
+== dot 09:39:17 { 6.71 8.59 8.70 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== ebnf 09:39:43 { 7.16 8.53 8.68 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+wait load 11.28
+wait load 8.22
+== files 09:41:10 { 6.19 8.15 8.53 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-files.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 09:41:29 { 6.24 8.08 8.50 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-gantt.json — {"conformant":1,"structural-match":0,"diverged":264,"errored":0,"timeout":0,"oracle-error":0}
+== hcl 09:41:56 { 6.83 8.02 8.46 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== json 09:42:20 { 6.08 7.75 8.35 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-json.json — {"conformant":13,"structural-match":24,"diverged":13,"errored":0,"timeout":0,"oracle-error":0}
+== mindmap 09:42:48 { 6.98 7.83 8.36 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-mindmap.json — {"conformant":142,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.21
+== network 09:43:45 { 7.16 7.81 8.32 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-network.json — {"conformant":0,"structural-match":0,"diverged":3,"errored":0,"timeout":0,"oracle-error":0}
+== object 09:44:09 { 6.51 7.61 8.24 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-object.json — {"conformant":63,"structural-match":8,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== packet 09:44:36 { 7.16 7.64 8.22 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+== regex 09:45:03 { 7.20 7.59 8.19 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.28
+== salt 09:46:00 { 7.47 7.61 8.15 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-salt.json — {"conformant":51,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.39
+wait load 9.71
+wait load 8.25
+== sequence 09:48:05 { 7.78 7.92 8.22 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-sequence.json — {"conformant":0,"structural-match":0,"diverged":1143,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.36
+== state 09:49:16 { 7.90 8.05 8.25 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-state.json — {"conformant":78,"structural-match":11,"diverged":184,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.48
+wait load 8.46
+== timing 09:50:50 { 7.39 8.00 8.22 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-timing.json — {"conformant":6,"structural-match":0,"diverged":120,"errored":0,"timeout":0,"oracle-error":0}
+wait load 11.80
+wait load 10.39
+wait load 9.13
+wait load 8.24
+wait load 8.14
+== unknown 09:53:54 { 7.55 8.28 8.33 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-unknown.json — {"conformant":408,"structural-match":47,"diverged":370,"errored":0,"timeout":0,"oracle-error":0}
+wait load 10.61
+wait load 9.05
+wait load 8.54
+== usecase 09:56:03 { 7.73 8.37 8.38 }
+[xmldom fatalError]	comment is not well-formed at position 3151 
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-usecase.json — {"conformant":29,"structural-match":18,"diverged":46,"errored":0,"timeout":0,"oracle-error":1}
+wait load 10.88
+wait load 10.36
+wait load 9.58
+wait load 8.28
+== wbs 09:58:40 { 7.83 8.63 8.52 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-wbs.json — {"conformant":0,"structural-match":0,"diverged":204,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.81
+wait load 9.68
+wait load 10.34
+wait load 10.31
+wait load 9.22
+wait load 8.23
+== wire 10:02:13 { 7.63 8.76 8.65 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+wait load 11.40
+wait load 10.14
+wait load 9.36
+wait load 8.42
+wait load 8.18
+wait load 8.85
+wait load 10.74
+wait load 9.33
+wait load 8.51
+wait load 8.30
+wait load 8.17
+== yaml 10:08:15 { 7.59 8.65 8.71 }
+wrote plans/wbs-engine-port/measurements/b1-eng/parity-yaml.json — {"conformant":7,"structural-match":28,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+DONE 10:08:52
