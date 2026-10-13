@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1584 modules · 5871 exported names.
+1584 modules · 5872 exported names.
 
 ## `src/`
 
@@ -183,7 +183,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Colors.ts` | `HColor`, `Colors` |  |
 | `ColorType.ts` | `ColorType`, `getType` | ColorType — which slot of an element's color set a color applies to (`klimt/color/ColorType.java`). |
 | `CucaNote.ts` | `CucaNote` |  |
-| `Direction.ts` | `Direction`, `getInv`, `getShortCode`, `fromChar`, `lazzyValueOf` | Direction — the four-way direction selector (`utils/Direction.java`). |
+| `Direction.ts` | `Direction`, `getInv`, `getShortCode`, `fromChar`, `lazzyValueOf`, `getWBSDirection` | Direction — the four-way direction selector (`utils/Direction.java`). |
 | `DisplayPositioned.ts` | `DisplayPositioned` |  |
 | `Entity.ts` | `Entity` |  |
 | `EntityBase.ts` | `EntityBase` |  |
