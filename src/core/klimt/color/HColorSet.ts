@@ -22,7 +22,7 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/awt/XColor.java
  */
 
-import { getColor } from './ColorTrieNode.js';
+import { getColor, NAMES } from './ColorTrieNode.js';
 import type { RgbTriple } from './ColorTrieNode.js';
 import type { GradientPolicy, HColorGradient } from './HColorGradient.js';
 import { HColors } from './HColors.js';
@@ -326,7 +326,7 @@ function parseGradient(s: string): HColorGradient | undefined {
  * {@link HColorSimple}, or {@link HColorGradient} for a `c1<policy>c2`
  * token (java:109-117). The `automatic` and `?light:dark` forms
  * (`HColorAutomagic`, `HColorScheme`) are not ported and throw: no mindmap
- * fixture reaches either (b6-T6a). `names()` is not ported. Stateless.
+ * fixture reaches either (b6-T6a). Stateless.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSet.java:43-120
  */
@@ -341,6 +341,18 @@ export class HColorSet {
 
   /** @see HColorSet.java:55-56 */
   private constructor() {}
+
+  /**
+   * Upstream returns an unmodifiable view of `ColorTrieNode.NAMES`, a
+   * `TreeSet<String>` (ColorTrieNode.java:50): sorted by `String.compareTo`
+   * (UTF-16 code units, case-sensitive) and deduplicated. The port's
+   * `NAMES` keeps registration order, so sort here.
+   *
+   * @see HColorSet.java:51-53
+   */
+  names(): string[] {
+    return [...new Set(NAMES)].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  }
 
   /** `parseColor(s)`, else `HColors.WHITE`. @see HColorSet.java:58-63 */
   getColorOrWhite(s: string): HColorSimple | HColorGradient {
