@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1591 modules · 5884 exported names.
+1593 modules · 5890 exported names.
 
 ## `src/`
 
@@ -1992,6 +1992,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ITF.ts` | `ITF`, `getMainBoxWidthDefault` |  |
 | `ITFComposed.ts` | `ITFComposed` |  |
 | `ITFLeaf.ts` | `ITFLeaf` |  |
+| `wbs-skin-param.ts` | `SkinParamSource`, `SkinParam` | The wbs engine's `SkinParam` — the slice of upstream's `skin/SkinParam.java` a `WBSDiagram` reaches through `TitledDiagram#getSkinParam()`: the `ISkinSimple` members the creole sheets read, `getIHtmlColorSet`, and the real style engine's CU |
+| `WBSDiagram.ts` | `patternStereotype`, `WBSIdeaLabel`, `WBSIdeaContent`, `WBSDiagram` | WBSDiagram — one `@startwbs` block: the WBS tree (its single root and the last node added), the org-mode "smart level" scanner, the coded nodes the `->` links name, and the links themselves. |
 | `WBSLink.ts` | `WElementGeometry`, `WBSLink` |  |
 | `WBSTextBlock.ts` | `WElementSlice`, `WBSTextBlock` |  |
 | `WElement.ts` | `STEP_BY_PARENT`, `WElementDecoration`, `WElement` | WElement — one node of a WBS tree: label, level, LEFT/RIGHT children, style resolution and recorded geometry. |
