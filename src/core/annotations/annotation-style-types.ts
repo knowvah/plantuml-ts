@@ -97,3 +97,19 @@ export const ANNOTATION_ELEMENTS: readonly AnnotationElement[] = [
   'legend',
   'mainframe',
 ];
+
+/**
+ * wep-T5b: the legend's style for one diagram. `EntityImageLegend.create`
+ * resolves it where the legend is drawn, from the diagram's style builder
+ * and `skinParam.getDiagramType().getStyleName()` (EntityImageLegend.java:
+ * 47-55); `RenderFragment.diagramType` carries the upstream `DiagramType`
+ * name to the draw site (`chrome.ts#addLegend`). `undefined` (a producer that
+ * declares no type) is the diagram-agnostic legend.
+ */
+export type LegendStyleFor = (diagramType: string | undefined) => AnnotationBoxStyle;
+
+/** `resolveAnnotationStyles`'s result: every element's diagram-agnostic
+ *  style, plus the legend resolved for a diagram type ({@link LegendStyleFor}). */
+export type ResolvedAnnotationStyles = Record<AnnotationElement, AnnotationBoxStyle> & {
+  readonly legendFor: LegendStyleFor;
+};

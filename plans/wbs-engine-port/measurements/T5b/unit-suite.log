@@ -1,0 +1,110 @@
+
+ RUN  v5.0.3 /Users/scottseely/git/knowvah/plantuml-ts/.claude/worktrees/wep-T5b
+
+[build-stdlib-packages] stdlib: skip -- generated/ content hash already matches the current build inputs
+[build-stdlib-packages] stdlib-aws: skip -- generated/ content hash already matches the current build inputs
+[build-stdlib-packages] stdlib-tupadr3: skip -- generated/ content hash already matches the current build inputs
+[build-stdlib-packages] stdlib-all: skip -- generated/ content hash already matches the current build inputs
+[build-stdlib-packages] stdlib/assets/bootstrap1.13.1: skip -- sprites already match the current source content
+ ❯ tests/unit/sprite-package-files.test.ts (8 tests | 1 failed) 261ms
+   ❯ acceptance 2: every sprite name in the real manifest is inside the resolved package contents (1)
+     × sprites/<name>.puml and sprites.json are all packed, under the size ceiling, with LICENSE files 241ms
+
+> @knowvah/plantuml-stdlib-aws@0.1.0 prepack
+> npm run copy-assets
+
+
+> @knowvah/plantuml-stdlib-aws@0.1.0 copy-assets
+> node scripts/copy-assets.mjs
+
+
+> @knowvah/plantuml-stdlib-tupadr3@0.1.0 prepack
+> npm run copy-assets
+
+
+> @knowvah/plantuml-stdlib-tupadr3@0.1.0 copy-assets
+> node scripts/copy-assets.mjs
+
+ ❯ tests/unit/stdlib-package-files.test.ts (7 tests | 2 failed) 944ms
+   ❯ acceptance 2: every emitted manifest path is inside the resolved package contents (2)
+     × stdlib-aws/awslib14 417ms
+     × stdlib-tupadr3/tupadr3 467ms
+ ❯ tests/unit/stdlib-packages.test.ts (14 tests | 1 failed) 853ms
+   ❯ npm pack --dry-run: tarball ceilings + LICENSE presence (2)
+     × packages/stdlib-all ships a LICENSE and no vendored data of its own 233ms
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/unit/sprite-package-files.test.ts > acceptance 2: every sprite name in the real manifest is inside the resolved package contents > sprites/<name>.puml and sprites.json are all packed, under the size ceiling, with LICENSE files
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/unit/sprite-package-files.test.ts:156:69
+    154|       const packedPaths = new Set(packed.files.map((f) => f.path));
+    155|
+    156|       expect(packedPaths.has(`assets/${BUNDLE_NAME}/sprites.json`)).to…
+       |                                                                     ^
+    157|       for (const name of manifest.sprites) {
+    158|         const expectedPackedPath = `assets/${BUNDLE_NAME}/sprites/${na…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/unit/stdlib-package-files.test.ts > acceptance 2: every emitted manifest path is inside the resolved package contents > stdlib-aws/awslib14
+ FAIL  tests/unit/stdlib-package-files.test.ts > acceptance 2: every emitted manifest path is inside the resolved package contents > stdlib-tupadr3/tupadr3
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/unit/stdlib-package-files.test.ts:206:53
+    204|         const relPath = manifest?.files[key] as string;
+    205|         const expectedPackedPath = `assets/${assetFolder}/${relPath}`;
+    206|         expect(packedPaths.has(expectedPackedPath)).toBe(true);
+       |                                                     ^
+    207|       }
+    208|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/unit/stdlib-packages.test.ts > npm pack --dry-run: tarball ceilings + LICENSE presence > packages/stdlib-all ships a LICENSE and no vendored data of its own
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/unit/stdlib-packages.test.ts:443:73
+    441|
+    442|       expect(result.files.some((f) => f.path === 'LICENSE')).toBe(true…
+    443|       expect(result.files.some((f) => f.path.startsWith('generated/'))…
+       |                                                                         ^
+    444|       expect(result.files.some((f) => f.path.includes('assets'))).toBe…
+    445|     },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  3 failed | 1099 passed | 1 skipped (1103)
+      Tests  4 failed | 18452 passed | 8 expected fail | 2 skipped | 6 todo (18472)
+   Start at  14:50:28
+   Duration  80.41s (import 75%, tests 17%, transform 7%, worker 1%)
+
+     Import  2738 modules were evaluated 29127 times · 183.23s total, 75% of tracked time
+             ~34.68s faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+             learn more: https://vitest.dev/guide/improving-performance#test-isolation
+

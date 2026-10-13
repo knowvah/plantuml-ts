@@ -1,0 +1,15 @@
+@startwbs
+<style>
+wbsDiagram {
+  FontSize 20
+}
+legend {
+  FontSize 9
+}
+</style>
+legend
+leg
+end legend
+* r
+** a
+@endwbs

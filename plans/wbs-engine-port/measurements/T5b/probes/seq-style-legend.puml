@@ -1,0 +1,11 @@
+@startuml
+<style>
+sequenceDiagram {
+  FontSize 20
+}
+</style>
+legend
+leg
+end legend
+a -> b
+@enduml

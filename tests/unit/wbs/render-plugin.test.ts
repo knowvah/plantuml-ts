@@ -120,6 +120,96 @@ describe('wbs plugin — chrome', () => {
   });
 });
 
+type Attrs = Readonly<Record<string, string>>;
+
+function attrsOf(tag: string): Attrs {
+  return Object.fromEntries([...tag.matchAll(/\s([\w-]+)="([^"]*)"/g)].map((m) => [m[1] ?? '', m[2] ?? '']));
+}
+
+/** The `<g class="legend">` group's first `<rect>` and `<text>` attributes. */
+function legendOf(svg: string): { rect: Attrs; text: Attrs } {
+  const group = /<g class="legend"[^>]*>(.*?)<\/g>/.exec(svg)?.[1] ?? '';
+  return {
+    rect: attrsOf(/<rect [^>]*\/>/.exec(group)?.[0] ?? ''),
+    text: attrsOf(/<text [^>]*>/.exec(group)?.[0] ?? ''),
+  };
+}
+
+// wep-T5b: `EntityImageLegend.create` merges `root, root, document,
+// <getDiagramType().getStyleName()>, legend` (EntityImageLegend.java:49-51),
+// so `wbsDiagram { Padding 10; Margin 15; RoundCorner 0; LineThickness 1.5;
+// FontSize 12 }` (plantuml.skin:350-356) reaches the WBS legend.
+describe('wbs plugin — the legend merges wbsDiagram (EntityImageLegend.java:49-51)', () => {
+  it('wbs/xakubu-65-cumo769: no rx, stroke 1.5, font 12, 132x282 like the jar', () => {
+    const f = corpus('wbs/xakubu-65-cumo769');
+    const svg = renderSync(f.markup, { measurer });
+    const { rect, text } = legendOf(svg);
+    expect(rect).toEqual({
+      x: '25',
+      y: '195',
+      width: '80.075',
+      height: '32',
+      fill: '#DDD',
+      stroke: '#000',
+      'stroke-width': '1.5',
+    });
+    expect(text).toMatchObject({ x: '35', y: '214.333', fill: '#000', 'font-size': '12', textLength: '60.075' });
+    expect(rootAttr(svg, 'viewBox')).toBe('0 0 132 282');
+    expect(diffPaths(f)).toEqual([]);
+  });
+
+  it('wbs/fipina-75-bago028 (dpi 300): the legend rect and canvas like the jar', () => {
+    const f = corpus('wbs/fipina-75-bago028');
+    // jar width 236.582: our 236.581 is inside compareSvg's numeric tolerance.
+    expect(legendOf(renderSync(f.markup, { measurer })).rect).toEqual({
+      x: '301.543',
+      y: '181.25',
+      width: '236.581',
+      height: '312.5',
+      fill: '#DDD',
+      stroke: '#000',
+      'stroke-width': '4.688',
+    });
+    expect(diffPaths(f)).toEqual([]);
+  });
+
+  it('probe legend: title/caption/header/footer + legend like the jar', () => {
+    expect(diffPaths(probe('legend'))).toEqual([]);
+  });
+
+  it('a user `wbsDiagram { FontSize 20 }` reaches the legend (jar probe: 46.75x40, font-size 20)', () => {
+    const svg = renderSync(
+      '@startwbs\n<style>\nwbsDiagram {\n  FontSize 20\n}\n</style>\nlegend\nleg\nend legend\n* r\n** a\n@endwbs\n',
+      { measurer },
+    );
+    const { rect, text } = legendOf(svg);
+    expect(rect).toEqual({
+      x: '25',
+      y: '165',
+      width: '46.75',
+      height: '40',
+      fill: '#DDD',
+      stroke: '#000',
+      'stroke-width': '1.5',
+    });
+    expect(text).toMatchObject({ x: '35', y: '190.556', fill: '#000', 'font-size': '20', textLength: '26.75' });
+  });
+
+  it('a `sequenceDiagram { legend {} }` does not reach a WBS legend (jar probe: fill #000)', () => {
+    const svg = renderSync(
+      '@startwbs\n<style>\nsequenceDiagram {\n  legend {\n    FontColor red\n  }\n}\n</style>\nlegend\nleg\nend legend\n* r\n** a\n@endwbs\n',
+      { measurer },
+    );
+    expect(legendOf(svg).text).toMatchObject({
+      x: '35',
+      y: '168.333',
+      fill: '#000',
+      'font-size': '12',
+      textLength: '16.05',
+    });
+  });
+});
+
 describe('wbs plugin — error pages (D8)', () => {
   it('a line no command accepts renders our error page, as the jar renders its own', () => {
     const svg = renderSync(probe('syntax-error').markup, { measurer });

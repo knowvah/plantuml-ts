@@ -1,0 +1,14 @@
+@startwbs
+<style>
+wbsDiagram {
+  legend {
+    FontColor red
+  }
+}
+</style>
+legend
+leg
+end legend
+* r
+** a
+@endwbs
