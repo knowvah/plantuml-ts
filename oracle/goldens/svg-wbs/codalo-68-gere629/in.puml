@@ -1,0 +1,17 @@
+@startwbs
+<style>
+wbsDiagram {
+    BackGroundColor white
+  }
+  
+  .americaStyle * {
+	  FontColor red
+	    BackGroundColor blue
+  }
+
+}
+</style>
+
+* America <<americaStyle>>
+** Canada <<americaStyle>>
+@endwbs

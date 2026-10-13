@@ -1,0 +1,13 @@
+
+### wbs/link-URL-tooltip-1  pass=false structural=6 numeric=5
+  S svg/g[1]/a[1]/@href  exp=Example:\n\nconst char* msg1 = <U+0022>\<U+200B>nHello,world!<U+0022>; | act="Example:\n\nconst
+  S svg/g[1]/a[1]/@title  exp=Example:  const char* msg1 = "\​nHello,world!"; | act="Example:  const
+  S svg/g[1]/a[1]/@xlink:href  exp=Example:\n\nconst char* msg1 = <U+0022>\<U+200B>nHello,world!<U+0022>; | act="Example:\n\nconst
+  S svg/g[1]/a[1]/@xlink:title  exp=Example:  const char* msg1 = "\​nHello,world!"; | act="Example:  const
+  S svg/g[1]/a[1]/text[1]/@textLength  exp=15.375 | act=181.8
+  S svg/g[1]/a[1]/text[1]/text()[1]  exp=TP | act=char* msg1 = "\​nHello,world!";" TP
+  N svg/@viewBox[2]  exp=172 | act=339 (Δ167)
+  N svg/@width  exp=172 | act=339 (Δ167)
+  N svg/g[1]/rect[1]/@width  exp=131.975 | act=298.4 (Δ166.42499999999998)
+  N svg/g[1]/line[1]/@x1  exp=85.987 | act=169.2 (Δ83.213)
+  N svg/g[1]/line[1]/@x2  exp=85.987 | act=169.2 (Δ83.213)

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1584 modules · 5871 exported names.
+1601 modules · 5926 exported names.
 
 ## `src/`
 
@@ -183,7 +183,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Colors.ts` | `HColor`, `Colors` |  |
 | `ColorType.ts` | `ColorType`, `getType` | ColorType — which slot of an element's color set a color applies to (`klimt/color/ColorType.java`). |
 | `CucaNote.ts` | `CucaNote` |  |
-| `Direction.ts` | `Direction`, `getInv`, `getShortCode`, `fromChar`, `lazzyValueOf` | Direction — the four-way direction selector (`utils/Direction.java`). |
+| `Direction.ts` | `Direction`, `getInv`, `getShortCode`, `fromChar`, `lazzyValueOf`, `getWBSDirection` | Direction — the four-way direction selector (`utils/Direction.java`). |
 | `DisplayPositioned.ts` | `DisplayPositioned` |  |
 | `Entity.ts` | `Entity` |  |
 | `EntityBase.ts` | `EntityBase` |  |
@@ -227,7 +227,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `annotation-defaults.ts` | `BASE_DEFAULTS`, `cloneBoxStyle` | Base defaults — plantuml.skin document{} / mainframe{} blocks, verbatim. |
 | `annotation-skinparam.ts` | `applySkinparamOverrides` | skinparam overrides — FromSkinparamToStyle.java:87-176. |
 | `annotation-style-overrides.ts` | `applyStyleOverrides` | `<style>` overrides — parseStyleBlock's already-parsed StyleMap. |
-| `annotation-style-types.ts` | `BoxSides`, `AnnotationBoxStyle`, `AnnotationElement`, `ANNOTATION_ELEMENTS` | Shared types for annotation chrome style resolution — see `style.ts`'s module doc comment for the full layering/design rationale these types support. |
+| `annotation-style-types.ts` | `BoxSides`, `AnnotationBoxStyle`, `AnnotationElement`, `ANNOTATION_ELEMENTS`, `LegendStyleFor`, `ResolvedAnnotationStyles` | Shared types for annotation chrome style resolution — see `style.ts`'s module doc comment for the full layering/design rationale these types support. |
 | `blocks-creole-atoms.ts` | `isCreoleAtomData`, `atomDim`, `drawAtom`, `fontOfAtom` | blocks-creole-atoms.ts — cdd6 T1b: the per-atom measure/draw helpers `chromeAtomOps` (`blocks-creole.ts`) composes, split out so `blocks-creole.ts` stays under this project's 500-line cap after D3's `ChromeTextPaint.hyperlinkColor` addition |
 | `blocks-creole.ts` | `ChromeTextPaint`, `ChromeTextBlock`, `chromeFontConfiguration`, `chromeAtomOps`, `buildChromeCreoleBlock`, `buildChromeTextBlock` | blocks-creole.ts — cdd-T28: the creole half of `Style #createTextBlockBordered` (`style/Style.java:353-369`), split out of `blocks.ts` (which stays the BORDER/margin half, `TextBlockBordered` + `TextBlockMarged`) to keep both files under th |
 | `blocks.ts` | `AnnotationBlock`, `buildAnnotationBlock` | blocks.ts — mission G0b / T4: the drawable half of `Style .createTextBlockBordered` (`style/Style.java:315-332`) + `TextBlockBordered` (`klimt/shape/TextBlockBordered.java`) + `TextBlockMarged` (`klimt/shape/TextBlockMarged.java`, applied v |
@@ -239,7 +239,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `coord-shift.ts` | `shiftFragmentBody`, `formatShiftedCoordinates` | coord-shift.ts — mission G1d: the eager-arithmetic equivalent of upstream's `UGraphic.apply(new UTranslate(dx, dy))` coordinate-context threading (`klimt/UGraphic.java`/`UTranslate.java`, already ported at `src/core/klimt/UTranslate.ts` and |
 | `index.ts` | `DisplayPositioned`, `DiagramAnnotations`, `createAnnotations`, `horizontalAlignmentFromString`, `horizontalAlignmentFromStringOrDefault`, `isDisplayPositionedNull`, `isEmpty`, `noneDisplayPositioned`, `setCaption`, `setLegend`, `setMainFrame`, `setTitle`, `singleDisplayPositioned`, `updateFooter`, `updateHeader`, `verticalAlignmentFromString`, `withDisplay`, `withHorizontalAlignment`, `withLocation`, `matchAnnotationCommand`, `AnnotationBlock`, `buildAnnotationBlock`, `AnnotationStyles`, `applyChrome`, `getTextX`, `mergeTB` | Public surface of the annotation model + command matcher (mission G0b). |
 | `model.ts` | `DisplayPositioned`, `noneDisplayPositioned`, `singleDisplayPositioned`, `isDisplayPositionedNull`, `withDisplay`, `withHorizontalAlignment`, `withLocation`, `horizontalAlignmentFromString`, `horizontalAlignmentFromStringOrDefault`, `verticalAlignmentFromString`, `DiagramAnnotations`, `createAnnotations`, `isEmpty`, `setTitle`, `setCaption`, `setLegend`, `setMainFrame`, `updateHeader`, `updateFooter` | DisplayPositioned + DiagramAnnotations — the shared chrome model ported from upstream `TitledDiagram`'s title/caption/legend/header/footer/ mainFrame fields. |
-| `style.ts` | `BoxSides`, `AnnotationBoxStyle`, `AnnotationElement`, `expandGrayShorthand`, `parseClockwise`, `resolveAnnotationStyles` | Annotation chrome style resolution. |
+| `style.ts` | `BoxSides`, `AnnotationBoxStyle`, `AnnotationElement`, `LegendStyleFor`, `ResolvedAnnotationStyles`, `expandGrayShorthand`, `parseClockwise`, `resolveAnnotationStyles`, `getStyleName` | Annotation chrome style resolution. |
 | `WarningBannerBlock.ts` | `WarningBannerBlock`, `addWarnings` | `DiagramChromeFactory#addWarnings` and its `WarningBannerBlock` — the yellow banner `DiagramChromeFactory.create` draws ABOVE the raw text block (its first step, before the mainframe/legend/title/caption/header/footer `chrome.ts` composes), |
 
 ## `src/core/atmp/`
@@ -486,6 +486,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `ColorMapper.ts` | `ColorMapper`, `mapPaint`, `HColorOrPaint`, `toSvgPaint`, `toSvgSolid` |  |
 | `ColorOrder.ts` | `ColorOrder`, `getColor`, `getReverse`, `fromString` | ColorOrder -- a channel permutation, used by `ColorMapper.reverse(order)` (`ColorMapper.java:93-100`) for `skinparam reversecolor <order>` (`TitledDiagram.java:308-312`). |
+| `ColorParser.ts` | `COLOR_REGEXP`, `PART2`, `COLORS_REGEXP`, `ColorParser` |  |
 | `ColorTrieNode.ts` | `RgbTriple`, `getColor`, `NAMES` | ColorTrieNode — the named-color -> RGB table upstream registers into a letter-indexed trie. |
 | `ColorUtils.ts` | `getGrayScale`, `getGrayScaleColor`, `getGrayScaleColorReverse` |  |
 | `fragment-color-mapper.ts` | `MonochromeMode`, `HexColorMapper`, `applyMonochromeHex`, `getReversed`, `colorMapperOf`, `applyColorMapperToFragment`, `applyMonochromeToFragment` | fragment-color-mapper.ts -- `skinparam monochrome true\|reverse` (G2 N61). |
@@ -556,7 +557,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `CommandCreoleSizeChange.ts` | `createSizeChangeCommands` | CommandCreoleSizeChange — `<size:N>text</size>` and `<size:N>text to end of line` (no closing tag needed). |
 | `CommandCreoleSpace.ts` | `createSpaceCommand` | CommandCreoleSpace — the creole `<space:N>` / `<space:N/>` tag. |
 | `CommandCreoleStyle.ts` | `createStyleCommands`, `createStyleCommandsWithoutCreoleForm`, `createBackcolorCommands` | CommandCreoleStyle — the BOLD/ITALIC/UNDERLINE/STRIKE/WAVE inline style commands: `**text**`/`//text//`/`__text__`/`--text--`/`~~text~~` (pure Creole double-punctuation) and `<b>text</b>`/`<b>text to end of line` (HTML-tag-style, with or wi |
-| `CommandCreoleUrl.ts` | `HYPERLINK_COLOR`, `createUrlCommand` | CommandCreoleUrl — `[[url]]` / `[[url label]]` / `[[url {tooltip}]]` / `[[url {tooltip} label]]` link atom-splitting: the jar draws the resolved LABEL as its own text atom, in the hyperlink color (blue, `SkinParamUtils.getFontHyperlinkColor |
+| `CommandCreoleUrl.ts` | `HYPERLINK_COLOR`, `createUrlCommand` | CommandCreoleUrl — the `[[...]]` creole command: matches `Pattern2.cmpile("^(" + UrlBuilder.getRegexp() + ")")` at the scan position and builds the link through `UrlBuilder#getUrl` in STRICT mode, then draws the resulting `Url`'s LABEL in t |
 | `Splitter.ts` | `Splitter` | Splitter — the creole `htmlTag` alternation and `purgeAllTag`, which strips every tag it matches (salt's `AbstractElementText#getCharNumber`). |
 
 ## `src/core/klimt/creole/legacy/`
@@ -1983,6 +1984,27 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `state-transition-clip.ts` | `clusterAnchorRectsOf`, `clipTransitionSpline`, `SolveLine`, `toRectangleArea`, `projectionSpecsOf`, `projectionClusterIdOf`, `inSolveOrder`, `clipLinesInSolveOrder` | state-transition-clip.ts — this port of the edge loop in `DotStringFactory#solve` (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ DotStringFactory.java:458-459`): ```java for (SvekEdge line : getBibliotekon().allLines()) line. |
 | `state-transition-label.ts` | `computeReservedLabelBox`, `transitionLabelAnchor`, `attachTransitionLabel` | Transition label placement — shared by every state-layout pipeline (flat, T3; composite, T4) so antiparallel transitions don't overlap their labels. |
 | `state-transitions.ts` | `ParsedTransition`, `parseTransitionLine`, `isSyncBarId`, `stripSyncBarEquals` | Transition (arrow) grammar for the state parser — `A --> B`, the left-pointing reverse form `A <-- B`, and their decorations (cross-start, circle-end, `[style]` brackets, direction abbreviations, `<<stereotype>>`). |
+
+## `src/diagrams/wbs/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `CommandWBSItemMultilineNew.ts` | `WBS_MULTILINE_END_RE`, `WBS_CODE_CHARS`, `WBS_MULTILINE_NEW_START_RE`, `WbsMultilineBlock`, `WbsItemTarget`, `collectWbsMultilineBlock`, `applyWbsItemMultilineNew`, `applyMultilineItem` |  |
+| `CommandWBSItemMultilineOld.ts` | `WBS_MULTILINE_OLD_START_RE`, `applyWbsItemMultilineOld` |  |
+| `CommandWBSItemNew.ts` | `WBS_ITEM_NEW_RE_0`, `WBS_ITEM_NEW_RE_1`, `applyWbsItemNew` |  |
+| `CommandWBSItemOld.ts` | `WBS_ITEM_OLD_RE_0`, `WBS_ITEM_OLD_RE_1`, `applyWbsItemOld` |  |
+| `CommandWBSLink.ts` | `WBS_LINK_RE`, `WbsLinkTarget`, `applyWbsLink` |  |
+| `Fork.ts` | `Fork` |  |
+| `index.ts` | `WbsGeometry`, `calculateBackColor`, `muteColorMapper`, `isHandwritten`, `calculateMargin`, `renderWbs`, `wbsPlugin` | WBS diagram plugin — `WBSDiagramFactory` (parse), then `TextBlockExporter`'s export of `WBSDiagram#getTextBlock` (the diagram itself, WBSDiagram.java:94-97) on the klimt substrate: canvas = the diagram's `calculateDimension` (fork + 20, WBS |
+| `ITF.ts` | `ITF`, `getMainBoxWidthDefault` |  |
+| `ITFComposed.ts` | `ITFComposed` |  |
+| `ITFLeaf.ts` | `ITFLeaf` |  |
+| `wbs-skin-param.ts` | `SkinParamSource`, `SkinParam` | The wbs engine's `SkinParam` — the slice of upstream's `skin/SkinParam.java` a `WBSDiagram` reaches through `TitledDiagram#getSkinParam()`: the `ISkinSimple` members the creole sheets read, `getIHtmlColorSet`, and the real style engine's CU |
+| `WBSDiagram.ts` | `patternStereotype`, `WBSIdeaLabel`, `WBSIdeaContent`, `WBSDiagram` | WBSDiagram — one `@startwbs` block: the WBS tree (its single root and the last node added), the org-mode "smart level" scanner, the coded nodes the `->` links name, and the links themselves. |
+| `WBSDiagramFactory.ts` | `parseWbs` |  |
+| `WBSLink.ts` | `WElementGeometry`, `WBSLink` |  |
+| `WBSTextBlock.ts` | `WElementSlice`, `WBSTextBlock` |  |
+| `WElement.ts` | `STEP_BY_PARENT`, `WElementDecoration`, `WElement` | WElement — one node of a WBS tree: label, level, LEFT/RIGHT children, style resolution and recorded geometry. |
 
 ## `src/diagrams/yaml/`
 

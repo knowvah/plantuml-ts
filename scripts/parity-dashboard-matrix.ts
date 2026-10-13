@@ -35,7 +35,6 @@ const ENGINE_OVERRIDE: Readonly<Record<string, string>> = {
 const NO_ENGINE_D_ID: Readonly<Record<string, string>> = {
   timing: 'D1',
   mindmap: 'D2',
-  wbs: 'D3',
   gantt: 'D4',
   network: 'D5',
   ditaa: 'D8',

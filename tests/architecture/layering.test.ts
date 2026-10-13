@@ -119,6 +119,25 @@ export const ALLOWLIST: readonly AllowlistEntry[] = [
       "the activity engine's FtileBoxOld, kept at its upstream path " +
       '(mission mindmap-engine-port D4; wbs ITFLeaf.java:38 shares it).',
   },
+  {
+    from: 'src/diagrams/wbs/',
+    to: 'src/diagrams/activity/ftile/',
+    why:
+      'upstream ITFLeaf.java:38, WBSTextBlock.java:38 and ITFComposed.java:42 ' +
+      'import net.sourceforge.plantuml.activitydiagram3.ftile.vertical.FtileBoxOld ' +
+      '(createWbs) -- the wbs node box IS the activity FtileBoxOld, shared with ' +
+      'mindmap above (mission wbs-engine-port D3).',
+  },
+  {
+    from: 'src/diagrams/wbs/',
+    to: 'src/diagrams/mindmap/',
+    why:
+      'upstream wbs imports net.sourceforge.plantuml.mindmap.IdeaShape in ' +
+      'WElement.java:50, WBSTextBlock.java:51, ITFLeaf.java:53, ' +
+      'ITFComposed.java:54, WBSDiagram.java:65 and the four CommandWBSItem* ' +
+      'commands -- IdeaShape lives in the mindmap package upstream and the ' +
+      'port keeps it at its upstream path (mission wbs-engine-port D3/D4).',
+  },
 ];
 
 /** Measured 2026-08-17 at 321bfb8b (T0): 13 edges, each naming the task

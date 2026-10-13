@@ -67,6 +67,7 @@ const DIAGRAM_TYPE_SEQUENCE = 'SEQUENCE';
 const DIAGRAM_TYPE_ACTIVITY = 'ACTIVITY';
 const DIAGRAM_TYPE_MINDMAP = 'MINDMAP';
 const DIAGRAM_TYPE_SALT = 'SALT';
+const DIAGRAM_TYPE_WBS = 'WBS';
 
 // ---------------------------------------------------------------------------
 // class finalize (formerly class/renderer-shell.ts#assembleClassShell)
@@ -405,6 +406,7 @@ function finalizeShellFragment(fragment: RenderFragment): RenderFragment {
       return finalizeJsonFragment(fragment);
     case DIAGRAM_TYPE_MINDMAP:
     case DIAGRAM_TYPE_SALT:
+    case DIAGRAM_TYPE_WBS:
       return finalizeTitledDiagramFragment(fragment);
     default:
       return fragment;

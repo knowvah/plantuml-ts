@@ -1,0 +1,6 @@
+@startwbs
+title T
+scale 2
+* r
+** a
+@endwbs

@@ -1,0 +1,19 @@
+@startwbs
+<style>
+wbsDiagram {
+  arrow {
+    LineColor #0000CC
+  }
+}
+.crit {
+  LineColor #CC0000
+}
+</style>
+* Root
+**(a) Alpha
+***(a1) Alpha one
+**(b) Beta
+***(b1) Beta one
+a1 -> b1 <<crit>>
+b -> a
+@endwbs

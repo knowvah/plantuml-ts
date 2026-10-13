@@ -1,0 +1,8 @@
+@startwbs
++ Project
+++ Part A
++++ Part AA
+++++ Part AAA
++++++ Part AAAA
+++++++ Part AAAAA
+@endwbs

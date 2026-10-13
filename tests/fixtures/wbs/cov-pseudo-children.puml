@@ -1,0 +1,12 @@
+@startwbs
+* Root
+** Labelled
+*** Under labelled
+**_<
+*** Left under pseudo one
+*** Left under pseudo two
+**_
+***_
+**** Under nested pseudo
+** After pseudo
+@endwbs

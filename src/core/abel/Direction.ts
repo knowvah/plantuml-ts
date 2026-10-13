@@ -12,10 +12,8 @@
  *
  * Ported members: the 4 values, `getInv`, `getShortCode`, `fromChar`,
  * `lazzyValueOf` (added by mindmap-engine-port T1d — CommandMindMapDirection's
- * only Direction consumer).
- * Omitted (batch-1 blocked-member precedent, revisit when consumers land):
- * `getWBSDirection` (needs `regex/RegexResult` + `utils/Constant`, both
- * unported preprocessor/regex machinery).
+ * only Direction consumer), `getWBSDirection` (wbs-engine-port T0c, ported
+ * over the capture groups rather than `RegexResult`).
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/utils/Direction.java:44
  */
@@ -80,4 +78,23 @@ export function lazzyValueOf(s: string): Direction {
   if (upper === Direction.RIGHT || upper === Direction.LEFT || upper === Direction.DOWN || upper === Direction.UP)
     return upper;
   throw new Error(`No enum constant utils.Direction.${upper}`);
+}
+
+/**
+ * `Direction.getWBSDirection(RegexResult)` over its inputs: `type` is the
+ * `Constant.WBS_TYPE` ("TYPE") capture (`[ \t]*[*+-]+`), `dir1`/`dir2` the
+ * `WBS_DIRECTION_1`/`_2` captures (`([<>])?`). Default is LEFT when `type`
+ * contains `-`, else RIGHT; `getLazzy(WBS_DIRECTION, 0)` yields the first
+ * non-null group (entries iterated in `data` order, `RegexResult.java:98-111`),
+ * and `<` forces LEFT, `>` forces RIGHT. In the commands the two groups sit in
+ * the two arms of one RegexOr, so at most one is ever set.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/utils/Direction.java:75-86
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/utils/Constant.java:40-41
+ */
+export function getWBSDirection(type: string, dir1: string | undefined, dir2: string | undefined): Direction {
+  let direction: Direction = type.includes('-') ? Direction.LEFT : Direction.RIGHT;
+  const dir = dir1 ?? dir2;
+  if (dir === '<') direction = Direction.LEFT;
+  else if (dir === '>') direction = Direction.RIGHT;
+  return direction;
 }

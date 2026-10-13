@@ -1,0 +1,8 @@
+@startwbs
+title My title
+caption cap
+header head
+footer foot
+* r
+** a
+@endwbs

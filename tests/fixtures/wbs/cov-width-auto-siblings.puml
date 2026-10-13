@@ -1,0 +1,18 @@
+@startwbs
+<style>
+wbsDiagram {
+  node {
+    width auto
+  }
+}
+</style>
+* Programme
+** A
+*** short
+*** a much longer sibling label
+** Second branch with longer text
+*** x
+*** medium label
+**< Left one
+**< L
+@endwbs

@@ -1,0 +1,12 @@
+@startwbs
+scale 2
+<style>
+root {
+  Margin 20
+}
+</style>
+title Scaled
+* Release
+** Build
+**< Prepare
+@endwbs

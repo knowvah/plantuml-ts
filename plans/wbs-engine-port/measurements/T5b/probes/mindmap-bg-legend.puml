@@ -1,0 +1,12 @@
+@startmindmap
+<style>
+mindmapDiagram {
+  BackgroundColor pink
+}
+</style>
+legend
+leg
+end legend
+* r
+** a
+@endmindmap

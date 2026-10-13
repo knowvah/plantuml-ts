@@ -84,8 +84,11 @@ describe('AbstractElement#blackBlueTrue (FontConfiguration.java:63-65)', () => {
     expect(fc.size).toBe(12);
     expect(fc.color).toBe('#000000');
     expect([...fc.styles]).toEqual([]);
-    expect(fc.hyperlinkColor).toBeUndefined();
-    expect(fc.hyperlinkUnderlineStroke).toBeUndefined();
+    // FontConfiguration.java:63-64: `create(font, BLACK.withDark(WHITE), HColors.BLUE,
+    // UStroke.simple(), 8)` -- the hyperlink colour and underline reach the UText
+    // config since wep-T5a's FontConfigurationBridge fix (Style.java:265-267).
+    expect(fc.hyperlinkColor).toBe('#0000FF');
+    expect(fc.hyperlinkUnderlineStroke?.getThickness()).toBe(1);
   });
 
   it('carries the face: bold and italic become styles (FontConfiguration.java:67-80)', () => {

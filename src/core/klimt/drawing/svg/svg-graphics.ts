@@ -89,6 +89,24 @@ export function getMetadataHex(_comment: string): string {
  * tooltip and turns a literal `\n` into a real newline, falling back to
  * the url when no tooltip was given.
  */
+/**
+ * `Matcher#appendReplacement`'s treatment of a ONE-character replacement
+ * string (`java.util.regex.Matcher#appendExpandedReplacement`): a `\` escapes
+ * the next character and a `$` starts a group reference, so either one alone
+ * has nothing to consume and throws `IllegalArgumentException`; every other
+ * character is appended literally. `SvgGraphics.java:1156` passes the decoded
+ * `<U+XXXX>` character straight in (`"" + c`), so a tooltip carrying
+ * `<U+005C>` or `<U+0024>` crashes the jar (`wbs/ledama-83-xoko366` oracle:
+ * "java.lang.IllegalArgumentException: character to be escaped is missing").
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/SvgGraphics.java:1153-1157
+ */
+function appendReplacementOf(c: string): string {
+  if (c === '\\') throw new Error('IllegalArgumentException: character to be escaped is missing');
+  if (c === '$') throw new Error('IllegalArgumentException: Illegal group reference: group index is missing');
+  return c;
+}
+
 class LinkData {
   private readonly url: string;
   constructor(
@@ -100,10 +118,14 @@ class LinkData {
     this.url = ignoreThisLink(url) ? '' : url;
   }
 
+  /** java:1147-1161. Each decoded `(char)` goes through
+   *  `m.appendReplacement(sb, "" + c)` — see {@link appendReplacementOf}. */
   private getXlinkTitle(): string {
     if (this.title === null) return this.url;
     return this.title
-      .replace(/<U\+([0-9A-Fa-f]+)>/g, (_m, hex: string) => String.fromCharCode(Number.parseInt(hex, 16)))
+      .replace(/<U\+([0-9A-Fa-f]+)>/g, (_m, hex: string) =>
+        appendReplacementOf(String.fromCharCode(Number.parseInt(hex, 16))),
+      )
       .replace(/\\n/g, '\n');
   }
 

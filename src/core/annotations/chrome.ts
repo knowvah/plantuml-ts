@@ -64,7 +64,7 @@
 import type { RenderFragment } from '../dispatcher.js';
 import type { DiagramAnnotations, DisplayPositioned } from './model.js';
 import { isDisplayPositionedNull, isEmpty } from './model.js';
-import type { AnnotationBoxStyle, AnnotationElement } from './style.js';
+import type { AnnotationBoxStyle, AnnotationElement, LegendStyleFor } from './style.js';
 import type { StringMeasurer } from '../measurer.js';
 import { HorizontalAlignment } from '../klimt/geom/HorizontalAlignment.js';
 import { VerticalAlignment } from '../klimt/geom/VerticalAlignment.js';
@@ -80,7 +80,18 @@ import { withDeferredFormat } from '../svg-format.js';
 /** T2's `resolveAnnotationStyles` return shape, re-exported under the name
  *  T4's interface contract (`plans/g0b-annotations/batch-2/T4-chrome-core.md`)
  *  calls it. */
-export type AnnotationStyles = Record<AnnotationElement, AnnotationBoxStyle>;
+export type AnnotationStyles = Record<AnnotationElement, AnnotationBoxStyle> & {
+  /** wep-T5b: the legend for the fragment's `diagramType`
+   *  (`ResolvedAnnotationStyles#legendFor`); a hand-built style set without
+   *  it draws `legend` for every diagram. */
+  readonly legendFor?: LegendStyleFor;
+};
+
+/** What the chrome slots read besides the styles: the text context, and the
+ *  fragment's `diagramType` the legend's style signature needs. */
+interface ChromeSlotContext extends ChromeTextContext {
+  readonly diagramType?: string | undefined;
+}
 
 interface Dim {
   readonly width: number;
@@ -276,12 +287,16 @@ function applyChromeSlots(
   block: AnnotationBlock,
   annotations: DiagramAnnotations,
   styles: AnnotationStyles,
-  ctx: ChromeTextContext,
+  ctx: ChromeSlotContext,
 ): { readonly block: AnnotationBlock; readonly decorated: boolean } {
   let decorated = false;
 
   if (!isDisplayPositionedNull(annotations.legend)) {
-    block = addLegend(block, annotations.legend, styles.legend, ctx);
+    // wep-T5b: `EntityImageLegend.create(legend.getDisplay(), skinParam)`
+    // (DiagramChromeFactory.java:354) resolves the style here, with the
+    // diagram's type (EntityImageLegend.java:49-51).
+    const legendStyle = styles.legendFor?.(ctx.diagramType) ?? styles.legend;
+    block = addLegend(block, annotations.legend, legendStyle, ctx);
     decorated = true;
   }
   if (!isDisplayPositionedNull(annotations.title)) {
@@ -371,7 +386,7 @@ function composeChrome(
   // so `mainframeDecorated` below is the ONLY thing that changes relative
   // to pre-T34 behavior for a mainframe-free diagram (none — `isEmpty()`
   // already required at least one non-null annotation to reach this line).
-  const ctx: ChromeTextContext = { measurer, sprites };
+  const ctx: ChromeSlotContext = { measurer, sprites, diagramType: fragment.diagramType };
   const mainframeDecorated = !isDisplayPositionedNull(annotations.mainFrame);
   const framed = mainframeDecorated ? addMainframe(initial, annotations.mainFrame, styles.mainframe, ctx) : initial;
   const { block, decorated } = applyChromeSlots(framed, annotations, styles, ctx);

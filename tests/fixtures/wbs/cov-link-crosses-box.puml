@@ -1,0 +1,12 @@
+@startwbs
+* Root
+**<(l) Left branch
+***<(ll) Left leaf
+**(m) Middle
+*** Middle leaf one
+*** Middle leaf two
+**(r) Right branch
+***(rr) Right leaf
+ll -> rr
+rr -> l
+@endwbs

@@ -188,6 +188,45 @@ describe('applyChrome — title', () => {
 // Legend stacking (acceptance criteria #3)
 // ---------------------------------------------------------------------------
 
+// wep-T5b: `DiagramChromeFactory.addLegend` calls `EntityImageLegend.create(…,
+// skinParam)` (DiagramChromeFactory.java:354), whose style signature carries
+// the diagram's style name (EntityImageLegend.java:49-51): the legend style
+// comes from `legendFor(fragment.diagramType)` when the style set has one.
+describe('applyChrome — the legend style for the fragment`s diagramType', () => {
+  const seen: (string | undefined)[] = [];
+  const styles: AnnotationStyles = {
+    ...plainStyles(),
+    legendFor: (diagramType) => {
+      seen.push(diagramType);
+      return plainStyle({ fontSize: diagramType === 'WBS' ? 30 : 20 });
+    },
+  };
+  const legendOnly = (): DiagramAnnotations => {
+    const a = createAnnotations();
+    setLegend(a, singleDisplayPositioned(['L'], HorizontalAlignment.LEFT, VerticalAlignment.BOTTOM, 0));
+    return a;
+  };
+
+  it('a WBS fragment draws legendFor("WBS")', () => {
+    const fragment: RenderFragment = { ...makeFragment(100, 50), diagramType: 'WBS' };
+    const result = applyChrome(fragment, legendOnly(), styles, MEASURER);
+    expect(result.body).toMatch(/<g class="legend"><text [^>]*font-size="30"/);
+    expect(seen.at(-1)).toBe('WBS');
+  });
+
+  it('a fragment with no diagramType asks legendFor(undefined)', () => {
+    const result = applyChrome(makeFragment(100, 50), legendOnly(), styles, MEASURER);
+    expect(result.body).toMatch(/<g class="legend"><text [^>]*font-size="20"/);
+    expect(seen.at(-1)).toBeUndefined();
+  });
+
+  it('a style set without legendFor draws its `legend` entry', () => {
+    const fragment: RenderFragment = { ...makeFragment(100, 50), diagramType: 'WBS' };
+    const result = applyChrome(fragment, legendOnly(), plainStyles({ legend: { fontSize: 12 } }), MEASURER);
+    expect(result.body).toMatch(/<g class="legend"><text [^>]*font-size="12"/);
+  });
+});
+
 describe('applyChrome — legend + title stacking', () => {
   it('legend bottom-left + title: draw order is title, body, legend (legend x=0 when not the widest)', () => {
     const a = createAnnotations();

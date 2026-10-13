@@ -1,0 +1,13 @@
+
+### wbs/WBS-monoline-def-0-10  pass=false structural=9 numeric=2
+  S svg/@background  exp=#FFFFFF | act=
+  S svg/@contentStyleType  exp=text/css | act=
+  S svg/@preserveAspectRatio  exp=none | act=
+  S svg/@version  exp=1.1 | act=
+  S svg/@viewBox  exp=0 0 247 212 | act=
+  S svg/@xmlns:xlink  exp=http://www.w3.org/1999/xlink | act=
+  S svg/@zoomAndPan  exp=magnify | act=
+  S svg/rect[1]  exp=defs | act=rect
+  S svg/text[1]  exp=g | act=text
+  N svg/@height  exp=212 | act=60 (Δ152)
+  N svg/@width  exp=247 | act=300 (Δ53)

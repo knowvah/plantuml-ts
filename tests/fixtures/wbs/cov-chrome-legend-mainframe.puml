@@ -1,0 +1,16 @@
+@startwbs
+mainframe Plan frame
+title Release title
+caption Figure one
+header page head
+footer page foot
+legend right
+Boxes are tasks
+end legend
+* Release
+** Build
+*** Compile
+*** Package
+**< Prepare
+** Ship
+@endwbs

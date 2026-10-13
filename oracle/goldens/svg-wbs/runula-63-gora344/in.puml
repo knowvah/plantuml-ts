@@ -1,0 +1,23 @@
+@startwbs
+<style>
+.b * {
+  LineColor blue
+  Arrow {
+    LineColor blue
+  }
+}
+.r * {
+  LineColor red
+  Arrow {
+    LineColor red
+  }
+}
+</style>
+
+* Root
+** Blue <<b>>
+*** B1
+*** B2
+** Red <<r>>
+*** R1
+@endwbs

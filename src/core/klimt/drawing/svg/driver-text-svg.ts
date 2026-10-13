@@ -29,10 +29,9 @@
  *   with class's own string renderers) plus the two emission helpers
  *   below. That includes upstream's two-tier face-weight fallback
  *   (java:97-103) and the `face.isItalic()` override (java:105-107).
- * - `getUnderlineStroke().getThickness() > 0` (java:133-134): still has no
- *   equivalent — this port carries no `UStroke` on a font configuration —
- *   and is assumed true whenever UNDERLINE is present, exactly as the
- *   plain-CSS branch already assumed before.
+ * - `getUnderlineStroke().getThickness() > 0` (java:133-134): ported as
+ *   {@link underlineGate} — `getUnderlineStroke()` is the configuration's
+ *   `hyperlinkUnderlineStroke` (FontConfiguration.java:386-388).
  * - the `HColorGradient` BACKCOLOR arm (java:161-169) needs the run's
  *   measured HEIGHT; see `drawBackGradient` below for the seam condition.
  * - `fontConfiguration.getAttributes()` (extra literal SVG attributes):
@@ -54,7 +53,8 @@ import { parseColor } from '../../../paint.js';
 import { resolveColorToSvgHex } from '../../color/HColorSet.js';
 import { toSvgPaint, toSvgSolid, type ColorMapper } from '../../color/ColorMapper.js';
 import { shortenColor } from '../../../svg-format.js';
-import { getFont } from '../../shape/UText.js';
+import { FontStyle, getFont } from '../../shape/UText.js';
+import { UStroke } from '../../UStroke.js';
 import { extraLineStrokeWidth, textRenderDecorations, type ExtraLine } from './driver-text-svg-decorations.js';
 import type { UText, FontConfiguration } from '../../shape/UText.js';
 import type { SvgGraphics } from './svg-graphics.js';
@@ -97,6 +97,28 @@ function trin(text: string): string {
   return text.slice(start, end + 1);
 }
 
+/**
+ * `fontConfiguration.containsStyle(FontStyle.UNDERLINE) &&
+ * fontConfiguration.getUnderlineStroke().getThickness() > 0`
+ * (DriverTextSvg.java:133-134) gates BOTH underline arms (CSS `underline`
+ * and the extended-colour `ExtraLines` rule). `getUnderlineStroke()` returns
+ * the `hyperlinkUnderlineStroke` field (FontConfiguration.java:386-388):
+ * `undefined` here is its unset default `UStroke.simple()` (UText.ts), and
+ * `null` (`skinparam hyperlinkUnderline false`, SkinParam.java:1057-1061)
+ * makes Java NPE on `getThickness()`. A failing gate drops UNDERLINE from
+ * the configuration the decoration accumulator reads; nothing else in
+ * `textRenderDecorations` reads UNDERLINE.
+ */
+function underlineGate(font: FontConfiguration): FontConfiguration {
+  if (!font.styles.has(FontStyle.UNDERLINE)) return font;
+  const stroke = font.hyperlinkUnderlineStroke === undefined ? UStroke.simple() : font.hyperlinkUnderlineStroke;
+  if (stroke === null) throw new Error('NullPointerException: getUnderlineStroke() is null (DriverTextSvg.java:134)');
+  if (stroke.getThickness() > 0) return font;
+  const styles = new Set(font.styles);
+  styles.delete(FontStyle.UNDERLINE);
+  return { ...font, styles };
+}
+
 /** Upstream: `DriverTextSvg`. Ported: the members listed in the module
  * doc comment above. */
 export class DriverTextSvg implements UDriver<UText> {
@@ -121,7 +143,7 @@ export class DriverTextSvg implements UDriver<UText> {
     // `font` for a NORMAL run.
     const drawFont = getFont(font);
     const dim = this.stringBounder.calculateDimension(drawFont, trimmed);
-    const deco = textRenderDecorations(font, drawFont.size);
+    const deco = textRenderDecorations(underlineGate(font), drawFont.size);
 
     // Upstream java:161-169: a GRADIENT extended colour is painted as a
     // filled rectangle UNDER the run (`deltaPatch = 2`, java:167-168),

@@ -1,7 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { defaultTheme } from '../../src/core/theme.js';
 import { parseStyleBlock, type StyleMap } from '../../src/core/skinparam.js';
-import { resolveAnnotationStyles, expandGrayShorthand, parseClockwise } from '../../src/core/annotations/style.js';
+import {
+  resolveAnnotationStyles,
+  expandGrayShorthand,
+  getStyleName,
+  parseClockwise,
+} from '../../src/core/annotations/style.js';
 import { HorizontalAlignment } from '../../src/core/klimt/geom/HorizontalAlignment.js';
 
 const EMPTY_SKINPARAM = new Map<string, string>();
@@ -383,5 +388,99 @@ describe('resolveAnnotationStyles — <style> overrides skinparam', () => {
   it('when only skinparam is set (no <style> override), skinparam value is used', () => {
     const styles = resolve(new Map([['LegendBackgroundColor', '#FFAA00']]));
     expect(styles.legend.backgroundColor).toBe('#FFAA00');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// wep-T5b: the legend's style signature carries the diagram's style name --
+// `EntityImageLegend.create` merges `root, root, document,
+// <skinParam.getDiagramType().getStyleName()>, legend`
+// (activitydiagram3/ftile/EntityImageLegend.java:49-51), so the skin's
+// top-level `wbsDiagram { Padding 10; Margin 15; RoundCorner 0;
+// LineThickness 1.5; FontSize 12 }` (plantuml.skin:350-356, declared after
+// `document { legend {} }`, plantuml.skin:46-53, so it outranks it) reaches a
+// WBS legend. Jar values: `wbs/xakubu-65-cumo769` (rect 80.075x32, no rx,
+// stroke-width 1.5, text font-size 12 at x+10) and the T5b probes under
+// `plans/wbs-engine-port/measurements/T5b/probes/`.
+// ---------------------------------------------------------------------------
+describe('resolveAnnotationStyles — legendFor: the diagram style name (EntityImageLegend.java:49-51)', () => {
+  it('WBS: the skin wbsDiagram block reaches the legend; document.legend colours stay', () => {
+    const legend = resolve().legendFor('WBS');
+    expect(legend.fontSize).toBe(12);
+    expect(legend.roundCorner).toBe(0);
+    expect(legend.lineThickness).toBe(1.5);
+    expect(legend.padding).toEqual({ top: 10, right: 10, bottom: 10, left: 10 });
+    expect(legend.margin).toEqual({ top: 15, right: 15, bottom: 15, left: 15 });
+    expect(legend.backgroundColor).toBe('#DDDDDD');
+    expect(legend.lineColor).toBe('black');
+  });
+
+  it('a style name whose skin block declares nothing at top level keeps document.legend (mindmapDiagram)', () => {
+    const styles = resolve();
+    expect(styles.legendFor('MINDMAP')).toEqual(styles.legend);
+  });
+
+  it('no diagram type: the diagram-agnostic legend', () => {
+    const styles = resolve();
+    expect(styles.legendFor(undefined)).toEqual(styles.legend);
+  });
+
+  it('<style> wbsDiagram { FontSize 20 } reaches the WBS legend only (probe wbs-style-fontsize: font-size 20)', () => {
+    const styles = resolve(EMPTY_SKINPARAM, parseStyleBlock('wbsDiagram { FontSize 20 }'));
+    expect(styles.legendFor('WBS').fontSize).toBe(20);
+    expect(styles.legendFor('MINDMAP').fontSize).toBe(14);
+  });
+
+  it('<style> sequenceDiagram { FontSize 20 } reaches a SEQUENCE legend (probe seq-style-legend: font-size 20, rx 7.5)', () => {
+    const legend = resolve(EMPTY_SKINPARAM, parseStyleBlock('sequenceDiagram { FontSize 20 }')).legendFor('SEQUENCE');
+    expect(legend.fontSize).toBe(20);
+    expect(legend.roundCorner).toBe(15);
+  });
+
+  it('another diagram type`s legend selector does not reach it (probe wbs-foreign-legend: fill #000)', () => {
+    const styles = resolve(EMPTY_SKINPARAM, parseStyleBlock('sequenceDiagram { legend { FontColor red } }'));
+    expect(styles.legendFor('WBS').fontColor).toBe('black');
+    expect(styles.legendFor('SEQUENCE').fontColor).toBe('red');
+  });
+
+  it('its own diagram type`s legend selector does (probe wbs-own-legend: fill #F00)', () => {
+    const styles = resolve(EMPTY_SKINPARAM, parseStyleBlock('wbsDiagram { legend { FontColor red } }'));
+    expect(styles.legendFor('WBS').fontColor).toBe('red');
+  });
+
+  it('a skinparam is declared after the skin, so `LegendFontSize 16` outranks wbsDiagram`s FontSize 12', () => {
+    expect(resolve(new Map([['LegendFontSize', '16']])).legendFor('WBS').fontSize).toBe(16);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// DiagramType#getStyleName (core/DiagramType.java:234-296)
+// ---------------------------------------------------------------------------
+describe('getStyleName (DiagramType.java:234-296)', () => {
+  it.each([
+    ['SEQUENCE', 'sequenceDiagram'],
+    ['STATE', 'stateDiagram'],
+    ['CLASS', 'classDiagram'],
+    ['OBJECT', 'objectDiagram'],
+    ['ACTIVITY', 'activityDiagram'],
+    ['DESCRIPTION', 'componentDiagram'],
+    ['MINDMAP', 'mindmapDiagram'],
+    ['WBS', 'wbsDiagram'],
+    ['GANTT', 'ganttDiagram'],
+    ['SALT', 'saltDiagram'],
+    ['YAML', 'yamlDiagram'],
+    ['HCL', 'yamlDiagram'],
+    ['JSON', 'jsonDiagram'],
+    ['TIMING', 'timingDiagram'],
+    ['NWDIAG', 'nwdiagDiagram'],
+    ['EBNF', 'ebnf'],
+    ['REGEX', 'regex'],
+    ['CHRONOLOGY', 'ganttDiagram'],
+    ['CHART', 'chartDiagram'],
+    ['PACKET', 'packetdiagDiagram'],
+    ['FILES', 'activityDiagram'],
+    ['BOARD', 'activityDiagram'],
+  ] as const)('%s -> %s', (type, name) => {
+    expect(getStyleName(type)).toBe(name);
   });
 });

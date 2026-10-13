@@ -1,0 +1,29 @@
+@startwbs
+<style>
+wbsDiagram {
+  :depth(1) {
+    // Will target America, Europe
+    BackGroundColor white
+  }
+  
+  .americaStyle * {
+	  FontColor red
+	  :depth(2) {
+	    BackGroundColor blue
+	  }
+  }
+
+}
+</style>
+
+* World
+** America <<americaStyle>>
+*** Canada
+*** Mexico
+*** USA
+**** Texas
+** Europe <<europeStyle>>
+*** England
+*** Germany
+*** Spain
+@endwbs

@@ -1,4 +1,6 @@
+import { getType } from './ColorType.js';
 import type { ColorType } from './ColorType.js';
+import type { HColorSet } from '../klimt/color/HColorSet.js';
 import { LinkStyle } from '../decoration/LinkStyle.js';
 import type { UStroke } from '../klimt/UStroke.js';
 
@@ -27,10 +29,6 @@ export type HColor = object;
  * unported machinery (journaled; revisit when the blockers land):
  *  - the private `add(ColorType, Colors)` overload — its only callers
  *    are the omitted `applyStereotype*` members below
- *  - `Colors(String, HColorSet, ColorType)` parsing constructor — needs
- *    the OOP `HColorSet#getColor` + `NoSuchColorException` (this port's
- *    `HColorSet.ts` is free functions; see `style/ISkinSimple.ts`'s own
- *    audit of the same divergence)
  *  - `getSpecificLineStroke` — needs `LinkStyle#getStroke3` (unported)
  *  - `mute(ISkinParam)`, `applyStroke(UGraphic,...)`,
  *    `applyStereotype(...)`, `applyStereotypeForNote(...)`,
@@ -43,7 +41,7 @@ export type HColor = object;
 export class Colors {
   /** `EnumMap<ColorType, HColor>` → insertion-ordered `Map`.
    * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/Colors.java:56 */
-  private readonly map = new Map<ColorType, HColor>();
+  private readonly map = new Map<ColorType, HColor | undefined>();
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/Colors.java:57 */
   private lineStyle: LinkStyle | undefined = undefined;
@@ -62,6 +60,35 @@ export class Colors {
   toString(): string {
     const entries = [...this.map.entries()].map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(', ');
     return `{${entries}} ${String(this.lineStyle)}`;
+  }
+
+  /**
+   * `Colors(String data, HColorSet set, ColorType mainType)` as a static
+   * factory (the TS class keeps its private empty constructor). Throws
+   * `NoSuchColorException` from `set.getColor` exactly where upstream does;
+   * `StringTokenizer(data, ";")` yields no empty tokens.
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/Colors.java:95-124
+   */
+  static parse(data: string, set: Pick<HColorSet, 'getColor' | 'getColorOrNull'>, mainType: ColorType): Colors {
+    const result = new Colors();
+    data = data.toLowerCase().replaceAll('#', '');
+
+    for (const s of data.split(';')) {
+      if (s === '') continue;
+      const x = s.indexOf(':');
+      if (x === -1) {
+        if (!s.includes('.')) result.map.set(mainType, set.getColor(s));
+      } else {
+        const name = s.substring(0, x);
+        const value = s.substring(x + 1);
+        if (name.toLowerCase() === 'shadowing') result.shadowing = value.toLowerCase() === 'true';
+        else result.map.set(getType(name), set.getColorOrNull(value));
+      }
+    }
+    if (data.includes('line.dashed')) result.lineStyle = LinkStyle.DASHED();
+    else if (data.includes('line.dotted')) result.lineStyle = LinkStyle.DOTTED();
+    else if (data.includes('line.bold')) result.lineStyle = LinkStyle.BOLD();
+    return result;
   }
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/Colors.java:65-67 */

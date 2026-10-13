@@ -1,0 +1,5 @@
+@startwbs
+*[#blue] this is the partner workpackage
+**[#red] this is my workpackage
+** this is another workpackage
+@endwbs

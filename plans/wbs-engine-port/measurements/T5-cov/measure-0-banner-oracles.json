@@ -1,0 +1,946 @@
+[
+  {
+    "slug": "background-pink",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "background-pink-title",
+    "pass": false,
+    "weightedScore": 32,
+    "diffCount": 2,
+    "structural": 2,
+    "numeric": 0,
+    "first": [
+      {
+        "path": "svg/g[1]/g[1]",
+        "actual": "g",
+        "expected": "rect",
+        "tolerance": 0.01,
+        "weight": 16
+      },
+      {
+        "path": "svg/g[1]/rect[1]",
+        "actual": "rect",
+        "expected": "g",
+        "tolerance": 0.01,
+        "weight": 16
+      }
+    ]
+  },
+  {
+    "slug": "chrome",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-as-code-new",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-as-code-old",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-boxless-leaf-width-auto",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-boxless-root",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-chrome-legend-mainframe",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-depth-selectors",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-dir-then-shape-error",
+    "pass": false,
+    "weightedScore": 5,
+    "diffCount": 5,
+    "structural": 4,
+    "numeric": 1,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.1.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "281.65",
+        "delta": 150.76299999999998,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "279.65",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 3) ]",
+        "expected": "[From cov-dir-then-shape-error.puml (line 3) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-embed-activity-action",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-embed-class-legend",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-error-bad-tree",
+    "pass": false,
+    "weightedScore": 75,
+    "diffCount": 36,
+    "structural": 5,
+    "numeric": 31,
+    "first": [
+      {
+        "path": "svg/@height",
+        "actual": "298",
+        "expected": "424",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "298",
+        "expected": "424",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[1]/@y",
+        "actual": "0",
+        "expected": "63",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@y",
+        "actual": "14.333",
+        "expected": "77.333",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[2]/@y",
+        "actual": "26.333",
+        "expected": "89.333",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[3]/@y",
+        "actual": "38.333",
+        "expected": "101.333",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[4]/@y",
+        "actual": "50.333",
+        "expected": "113.333",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[5]/@y",
+        "actual": "62.333",
+        "expected": "125.333",
+        "delta": 63,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-error-missing-label",
+    "pass": false,
+    "weightedScore": 67,
+    "diffCount": 20,
+    "structural": 6,
+    "numeric": 14,
+    "first": [
+      {
+        "path": "svg/@background",
+        "actual": "#000000",
+        "expected": "#FFFFFF",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@height",
+        "actual": "134",
+        "expected": "260",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "379",
+        "expected": "513",
+        "delta": 134,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "134",
+        "expected": "260",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "379",
+        "expected": "513",
+        "delta": 134,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@y",
+        "actual": "17",
+        "expected": "80",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/text()[1]",
+        "actual": "plantuml-ts version 0.1.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-error-one-root",
+    "pass": false,
+    "weightedScore": 65,
+    "diffCount": 18,
+    "structural": 6,
+    "numeric": 12,
+    "first": [
+      {
+        "path": "svg/@background",
+        "actual": "#000000",
+        "expected": "#FFFFFF",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@height",
+        "actual": "134",
+        "expected": "260",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "134",
+        "expected": "260",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@y",
+        "actual": "17",
+        "expected": "80",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/text()[1]",
+        "actual": "plantuml-ts version 0.1.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[1]/@width",
+        "actual": "130.887",
+        "expected": "243.5",
+        "delta": 112.613,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[1]/@y",
+        "actual": "25",
+        "expected": "88",
+        "delta": 63,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-error-smart-level",
+    "pass": false,
+    "weightedScore": 94,
+    "diffCount": 47,
+    "structural": 10,
+    "numeric": 37,
+    "first": [
+      {
+        "path": "svg/@height",
+        "actual": "312",
+        "expected": "424",
+        "delta": 112,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "532",
+        "expected": "1026",
+        "delta": 494,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "312",
+        "expected": "424",
+        "delta": 112,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "532",
+        "expected": "1026",
+        "delta": 494,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[1]/@width",
+        "actual": "531.75",
+        "expected": "1025.26",
+        "delta": 493.51,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[1]/@y",
+        "actual": "0",
+        "expected": "63",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@y",
+        "actual": "14.333",
+        "expected": "77.333",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[2]/@y",
+        "actual": "26.333",
+        "expected": "89.333",
+        "delta": 63,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-error-syntax",
+    "pass": false,
+    "weightedScore": 67,
+    "diffCount": 20,
+    "structural": 6,
+    "numeric": 14,
+    "first": [
+      {
+        "path": "svg/@background",
+        "actual": "#000000",
+        "expected": "#FFFFFF",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@height",
+        "actual": "134",
+        "expected": "260",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "332",
+        "expected": "513",
+        "delta": 181,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "134",
+        "expected": "260",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "332",
+        "expected": "513",
+        "delta": 181,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@y",
+        "actual": "17",
+        "expected": "80",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/text()[1]",
+        "actual": "plantuml-ts version 0.1.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-forty-nodes",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-left-deeper",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-left-level1",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-link-color",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-link-crosses-box",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-link-default",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-link-stereo-style",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-max-depth-10",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-monochrome-true",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-multiline-end-first-line",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-multiline-end-first-line-unclosed",
+    "pass": false,
+    "weightedScore": 66,
+    "diffCount": 19,
+    "structural": 6,
+    "numeric": 13,
+    "first": [
+      {
+        "path": "svg/@background",
+        "actual": "#000000",
+        "expected": "#FFFFFF",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@height",
+        "actual": "120",
+        "expected": "246",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "332",
+        "expected": "513",
+        "delta": 181,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "120",
+        "expected": "246",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "332",
+        "expected": "513",
+        "delta": 181,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@y",
+        "actual": "17",
+        "expected": "80",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/text()[1]",
+        "actual": "plantuml-ts version 0.1.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-multiline-quoted-first",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-multiline-stereo",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-no-such-node",
+    "pass": false,
+    "weightedScore": 68,
+    "diffCount": 21,
+    "structural": 6,
+    "numeric": 15,
+    "first": [
+      {
+        "path": "svg/@background",
+        "actual": "#000000",
+        "expected": "#FFFFFF",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@height",
+        "actual": "148",
+        "expected": "274",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "332",
+        "expected": "513",
+        "delta": 181,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "148",
+        "expected": "274",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "332",
+        "expected": "513",
+        "delta": 181,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@y",
+        "actual": "17",
+        "expected": "80",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/text()[1]",
+        "actual": "plantuml-ts version 0.1.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-node-kind-selectors",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-pseudo-children",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-scale-margin-title",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-skinparam-background",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-stereotype-style",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "cov-width-auto-siblings",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "gradient-background",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "gradient-background-title",
+    "pass": false,
+    "weightedScore": 32,
+    "diffCount": 2,
+    "structural": 2,
+    "numeric": 0,
+    "first": [
+      {
+        "path": "svg/g[1]/g[1]",
+        "actual": "g",
+        "expected": "rect",
+        "tolerance": 0.01,
+        "weight": 16
+      },
+      {
+        "path": "svg/g[1]/rect[1]",
+        "actual": "rect",
+        "expected": "g",
+        "tolerance": 0.01,
+        "weight": 16
+      }
+    ]
+  },
+  {
+    "slug": "legend",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "mainframe",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "monochrome-reverse",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "reversecolor-dark",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "scale",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "single-root",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "style-margin",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "style-margin-title",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  },
+  {
+    "slug": "syntax-error",
+    "pass": false,
+    "weightedScore": 75,
+    "diffCount": 36,
+    "structural": 5,
+    "numeric": 31,
+    "first": [
+      {
+        "path": "svg/@height",
+        "actual": "298",
+        "expected": "424",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "298",
+        "expected": "424",
+        "delta": 126,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[1]/@y",
+        "actual": "0",
+        "expected": "63",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@y",
+        "actual": "14.333",
+        "expected": "77.333",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[2]/@y",
+        "actual": "26.333",
+        "expected": "89.333",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[3]/@y",
+        "actual": "38.333",
+        "expected": "101.333",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[4]/@y",
+        "actual": "50.333",
+        "expected": "113.333",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[5]/@y",
+        "actual": "62.333",
+        "expected": "125.333",
+        "delta": 63,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "title-scale",
+    "pass": true,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "numeric": 0,
+    "first": []
+  }
+]

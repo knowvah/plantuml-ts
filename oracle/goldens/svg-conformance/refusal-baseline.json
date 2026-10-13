@@ -1,5 +1,5 @@
 {
-  "$comment": "Refusal-coverage baseline (dispatch-by-parse-attempt / T0). jarRendered is FALSE iff the fixture's committed golden is one of PlantUML's own graphical error pages (PSystemError.java:148-155 / ReportLog.java:103-108); such a fixture is excluded from SLI 2, because the jar failing is no evidence about us. weErrored is TRUE iff renderSync produces a PSystemError page for the same source through tests/helpers/fixture-include-store.ts, detected by the whole-text-element version banner PSystemError#header() writes. engine is which engine owns the answer -- the (Assumed diagram type: X) the error page prints, or our root data-diagram-type lower-cased -- and is INFORMATIONAL; this gate never asserts on it. status \"known-gap\" excuses a refusal from the defect count and is reserved for batches 4-6, each pin carrying the unported Command that explains it. Nothing is pinned known-gap here: at this commit no engine can refuse anything at all. The one defect (we error, jar rendered) is sequence/nuvoja-46-dezu541 -- !includedef, stopped in the preprocessor (IncludeExecutor.ts:127), named out of scope by this mission's stop condition 10. Re-measure: npx vitest run tests/oracle/svg-conformance/refusal-coverage.test.ts Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed): 3572 fixtures, 31 jar-error, 105 erroring here, 3467 rendering. All 41 new fixtures (board, chart, chronology, files, packet) render on both sides: jarRendered true, weErrored false, engine none (none of these engines stamps a root data-diagram-type -- see the routing baseline). Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh), ADDITIVE ONLY: 912 rows appended for the eleven previously uncaptured buckets. The no-engine types error here on sources the jar rendered and are pinned known-gap: the \"specific unported Command\" is the whole factory, named with its PSystemBuilder.java line, because no command of that engine exists yet in this port. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned ok -> known-gap (4 sequence, 1 timing) -- the state parser had been drawing empty diagrams for sources whose real engine refuses; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-gap rows retired to ok from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity erroring rows now render (weErrored false) from a fresh measurement ([FIXED] lines of the gate). Re-pinned 2026-09-20 at 31f579dd by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (825 \"unknown\" rows appended). Re-pinned 2026-09-21 at 340eae4d by class-divergence-drive / close-b1, ADDITIVE ONLY (119 \"svg-class\" golden rows appended, each the clone of its byte-identical dot-cache twin, as every prior svg-class golden row was). Re-pinned 2026-09-21 at e6f840a1 by class-divergence-drive / close-b2, ADDITIVE ONLY (24 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at cae310f1 by class-divergence-drive / close-b3, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 2397dcde by class-divergence-drive / close-b4, ADDITIVE ONLY (8 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 3dc87cb3 by class-divergence-drive / close-b6, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (19 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (9 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 35cb2771 by class-divergence-drive / close-b8, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at f8d9f6cb by class-divergence-drive / close-b9, ADDITIVE ONLY (18 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (0 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (11 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins; class-inheritance-interface-assoc already carried its golden rows as an authored fixture). Re-pinned 2026-09-24 at 7c9f8b4a by class-divergence-drive-2 / close-b1 (T10), ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 2f2cbb1f by class-divergence-drive-2 / close-b2, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 9763ca80 by class-divergence-drive-2 / close-b3, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 99fa55ff by class-divergence-drive-2 / close-b4, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 2af32e19 by class-divergence-drive-2 / close-b5, ADDITIVE ONLY (6 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-25 at c6681aa6 by class-divergence-drive-3 / close-b1, ADDITIVE ONLY (17 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at cfe1f9f3 by class-divergence-drive-3 / close-b2, ADDITIVE ONLY (17 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at ef3a93ef by class-divergence-drive-3 / close-b3, ADDITIVE ONLY (14 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at 5103eb61 by class-divergence-drive-3 / close-b4, ADDITIVE ONLY (12 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at 916f97ae by class-divergence-drive-3 / close-b5, ADDITIVE ONLY (19 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-27 at 682a54ce by class-divergence-drive-3 / close-b2, ADDITIVE ONLY (20 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at cff18966 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at cff18966 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (120 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at fdcdaf39 by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (54 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 3986fbf1 by class-divergence-drive-5 / close-b4, ADDITIVE ONLY (30 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 8aed6847 by class-divergence-drive-5 / close-b5, ADDITIVE ONLY (18 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 6a4402ae by class-divergence-drive-5 / close-b0, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-29 at 69149258 by class-divergence-drive-5 / close-b2, ADDITIVE ONLY (20 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-29 at c12fa177 by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (21 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 9b080efb9 by mindmap-engine-port / close-b5 (D7), IN PLACE: 137 mindmap rows ok (engine mindmap); 2 rows ok -> known-gap (nukose-24-funi267, vacofo-66-puno159: unported HColorGradient, owner batch 6). Re-pinned 2026-09-30 at fa9db8748 by mindmap-engine-port / close-b5, ADDITIVE ONLY (127 \"svg-mindmap\" golden rows appended, clones of their byte-identical dot-cache twins, as every svg-class golden row was). Re-pinned 2026-09-30 at c5dc64471 by mindmap-engine-port / close-b6 (D7), IN PLACE: 139 mindmap rows ok (nukose-24-funi267 and vacofo-66-puno159 known-gap -> ok: HColorGradient ported in T6a); 0 known-gap remain. Re-pinned 2026-09-30 at c5dc64471 by mindmap-engine-port / close-b6, ADDITIVE ONLY (10 \"svg-mindmap\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at e42ba122 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 1ead924b by class-divergence-drive-5 / close-b2, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 2748fd1d9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (35 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-01 at 8a8c1692c by activity-divergence-drive / close-b1b, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-01 at b4b553c7e by activity-divergence-drive / close-b2, ADDITIVE ONLY (16 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-02 at 65b07a57c by activity-divergence-drive / close-b3, ADDITIVE ONLY (12 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). add2-b1p: jevofu-58-fazo194, mepeze-15-nuge493, xoreko-43-noto860, zokuni-21-sapu966 render since T1p-c ported `end merge` (CommandForkEnd3.java:57-81, ParallelBuilderMerge.java) -> agree / weErrored false. Re-pinned 2026-10-02 at bdf8b1e2f by activity-divergence-drive / close-b1p, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at d018a56f9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (12 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). add2-b2: the 34 remaining activity parser-gap rows render since T2e/T2g (CommandForkEnd3/SplitEnd3/Swimlane/If2/ElseIf2/Endif3/Backward3/Note3/NoteLong3/CircleSpot3/Label/Goto, journal rows 31-34) -> agree / weErrored false. Re-pinned 2026-10-03 at 66db74002 by activity-divergence-drive / close-b2, ADDITIVE ONLY (13 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at 4f5d48d2e by activity-divergence-drive / close-b3w1, ADDITIVE ONLY (109 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at 9104b8ee0 by activity-divergence-drive / close-b3, ADDITIVE ONLY (18 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-06 at dcd2283c9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (13 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-06 at 0850c251d by activity-divergence-drive / close-b2, ADDITIVE ONLY (36 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 5ab1679ad by activity-divergence-drive / close-b3w1, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 918cd7e97 by activity-divergence-drive / close-b3, ADDITIVE ONLY (17 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 87727a9c by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (79 \"activity\" rows appended). Re-pinned 2026-10-07 at 87727a9c7 by activity-divergence-drive / close-b0, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at dd289f647 by activity-divergence-drive / merge-T1a, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 79c2bfb2c by activity-divergence-drive / merge-T1c, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 50a347b27 by activity-divergence-drive / merge-T1b, ADDITIVE ONLY (6 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 55b701493 by activity-divergence-drive / merge-T1g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 3b36df731 by activity-divergence-drive / merge-T2c, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at a30245dea by activity-divergence-drive / merge-T2a, ADDITIVE ONLY (7 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 541c5f2c2 by activity-divergence-drive / merge-T2d, ADDITIVE ONLY (22 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 76efedca8 by activity-divergence-drive / merge-T2e, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at ad64c122b by activity-divergence-drive / merge-T2d-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at c4915f83c by activity-divergence-drive / merge-T2f, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 6c788ec6c by activity-divergence-drive / merge-T2b, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at c6f501d95 by activity-divergence-drive / merge-T2f-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 3ec2d4cd0 by activity-divergence-drive / merge-T2g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 0a21936b1 by activity-divergence-drive / merge-T3a, ADDITIVE ONLY (6 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 790fee5a1 by activity-divergence-drive / merge-T3d, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at dc72942fc by activity-divergence-drive / merge-T3a-2, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 1d2fb519d by activity-divergence-drive / merge-T3c, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 22f819df6 by activity-divergence-drive / merge-T3c-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at fd2c3fa86 by activity-divergence-drive / merge-T3d-3, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 4ea823f10 by activity-divergence-drive / merge-T3gates-2, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 53d01279d by activity-divergence-drive / merge-T3b, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 0996e8891 by activity-divergence-drive / merge-T3e-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 12b567d91 by activity-divergence-drive / merge-T3f, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 2b080518d by activity-divergence-drive / merge-T3g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at e1afb6d61 by activity-divergence-drive / merge-T3h, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 2686a2577 by activity-divergence-drive / merge-T3k, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 2098d674d by activity-divergence-drive / fix-jucidi, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 4181c68de by activity-divergence-drive / close-b1e, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 4181c68d by class-divergence-drive-5 / close-b1e, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). isw (2026-10-09, 9f012d794): 24 jar-error rows re-pinned from a fresh measurement — seam #4 gives U+0020 width, so their goldens are no longer SlotFinder crash pages. Re-pinned 2026-10-09 at 3d8988d80 by activity-divergence-drive / isw/close, ADDITIVE ONLY (18 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-10 at ebb7b943a by activity-divergence-drive / aepp-b12, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at c0e75aa4 by class-divergence-drive-5 / t0b, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at 9a2ac1c5 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at 9a2ac1c5 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at f6e9ed3a by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by class-divergence-drive-5 / salt-engine-port batch-4 close, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by class-divergence-drive-5 / salt-engine-port batch-4 close, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by salt-engine-port / batch-4 close: 50 \"salt\" dot-cache rows re-measured in place (the salt plugin now registers), 47 \"svg-salt\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 2ff2f9b9 by salt-engine-port / batch-5 wave-1 close: 50 \"salt\" dot-cache rows re-measured in place (the salt plugin now registers), 50 \"svg-salt\" golden rows appended (clones of their byte-identical dot-cache twins).",
+  "$comment": "Refusal-coverage baseline (dispatch-by-parse-attempt / T0). jarRendered is FALSE iff the fixture's committed golden is one of PlantUML's own graphical error pages (PSystemError.java:148-155 / ReportLog.java:103-108); such a fixture is excluded from SLI 2, because the jar failing is no evidence about us. weErrored is TRUE iff renderSync produces a PSystemError page for the same source through tests/helpers/fixture-include-store.ts, detected by the whole-text-element version banner PSystemError#header() writes. engine is which engine owns the answer -- the (Assumed diagram type: X) the error page prints, or our root data-diagram-type lower-cased -- and is INFORMATIONAL; this gate never asserts on it. status \"known-gap\" excuses a refusal from the defect count and is reserved for batches 4-6, each pin carrying the unported Command that explains it. Nothing is pinned known-gap here: at this commit no engine can refuse anything at all. The one defect (we error, jar rendered) is sequence/nuvoja-46-dezu541 -- !includedef, stopped in the preprocessor (IncludeExecutor.ts:127), named out of scope by this mission's stop condition 10. Re-measure: npx vitest run tests/oracle/svg-conformance/refusal-coverage.test.ts Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed): 3572 fixtures, 31 jar-error, 105 erroring here, 3467 rendering. All 41 new fixtures (board, chart, chronology, files, packet) render on both sides: jarRendered true, weErrored false, engine none (none of these engines stamps a root data-diagram-type -- see the routing baseline). Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh), ADDITIVE ONLY: 912 rows appended for the eleven previously uncaptured buckets. The no-engine types error here on sources the jar rendered and are pinned known-gap: the \"specific unported Command\" is the whole factory, named with its PSystemBuilder.java line, because no command of that engine exists yet in this port. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned ok -> known-gap (4 sequence, 1 timing) -- the state parser had been drawing empty diagrams for sources whose real engine refuses; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-gap rows retired to ok from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity erroring rows now render (weErrored false) from a fresh measurement ([FIXED] lines of the gate). Re-pinned 2026-09-20 at 31f579dd by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (825 \"unknown\" rows appended). Re-pinned 2026-09-21 at 340eae4d by class-divergence-drive / close-b1, ADDITIVE ONLY (119 \"svg-class\" golden rows appended, each the clone of its byte-identical dot-cache twin, as every prior svg-class golden row was). Re-pinned 2026-09-21 at e6f840a1 by class-divergence-drive / close-b2, ADDITIVE ONLY (24 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at cae310f1 by class-divergence-drive / close-b3, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 2397dcde by class-divergence-drive / close-b4, ADDITIVE ONLY (8 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 3dc87cb3 by class-divergence-drive / close-b6, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (19 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (9 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 35cb2771 by class-divergence-drive / close-b8, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at f8d9f6cb by class-divergence-drive / close-b9, ADDITIVE ONLY (18 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (0 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (11 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins; class-inheritance-interface-assoc already carried its golden rows as an authored fixture). Re-pinned 2026-09-24 at 7c9f8b4a by class-divergence-drive-2 / close-b1 (T10), ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 2f2cbb1f by class-divergence-drive-2 / close-b2, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 9763ca80 by class-divergence-drive-2 / close-b3, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 99fa55ff by class-divergence-drive-2 / close-b4, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 2af32e19 by class-divergence-drive-2 / close-b5, ADDITIVE ONLY (6 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-25 at c6681aa6 by class-divergence-drive-3 / close-b1, ADDITIVE ONLY (17 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at cfe1f9f3 by class-divergence-drive-3 / close-b2, ADDITIVE ONLY (17 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at ef3a93ef by class-divergence-drive-3 / close-b3, ADDITIVE ONLY (14 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at 5103eb61 by class-divergence-drive-3 / close-b4, ADDITIVE ONLY (12 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at 916f97ae by class-divergence-drive-3 / close-b5, ADDITIVE ONLY (19 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-27 at 682a54ce by class-divergence-drive-3 / close-b2, ADDITIVE ONLY (20 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at cff18966 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at cff18966 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (120 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at fdcdaf39 by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (54 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 3986fbf1 by class-divergence-drive-5 / close-b4, ADDITIVE ONLY (30 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 8aed6847 by class-divergence-drive-5 / close-b5, ADDITIVE ONLY (18 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 6a4402ae by class-divergence-drive-5 / close-b0, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-29 at 69149258 by class-divergence-drive-5 / close-b2, ADDITIVE ONLY (20 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-29 at c12fa177 by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (21 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 9b080efb9 by mindmap-engine-port / close-b5 (D7), IN PLACE: 137 mindmap rows ok (engine mindmap); 2 rows ok -> known-gap (nukose-24-funi267, vacofo-66-puno159: unported HColorGradient, owner batch 6). Re-pinned 2026-09-30 at fa9db8748 by mindmap-engine-port / close-b5, ADDITIVE ONLY (127 \"svg-mindmap\" golden rows appended, clones of their byte-identical dot-cache twins, as every svg-class golden row was). Re-pinned 2026-09-30 at c5dc64471 by mindmap-engine-port / close-b6 (D7), IN PLACE: 139 mindmap rows ok (nukose-24-funi267 and vacofo-66-puno159 known-gap -> ok: HColorGradient ported in T6a); 0 known-gap remain. Re-pinned 2026-09-30 at c5dc64471 by mindmap-engine-port / close-b6, ADDITIVE ONLY (10 \"svg-mindmap\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at e42ba122 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 1ead924b by class-divergence-drive-5 / close-b2, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 2748fd1d9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (35 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-01 at 8a8c1692c by activity-divergence-drive / close-b1b, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-01 at b4b553c7e by activity-divergence-drive / close-b2, ADDITIVE ONLY (16 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-02 at 65b07a57c by activity-divergence-drive / close-b3, ADDITIVE ONLY (12 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). add2-b1p: jevofu-58-fazo194, mepeze-15-nuge493, xoreko-43-noto860, zokuni-21-sapu966 render since T1p-c ported `end merge` (CommandForkEnd3.java:57-81, ParallelBuilderMerge.java) -> agree / weErrored false. Re-pinned 2026-10-02 at bdf8b1e2f by activity-divergence-drive / close-b1p, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at d018a56f9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (12 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). add2-b2: the 34 remaining activity parser-gap rows render since T2e/T2g (CommandForkEnd3/SplitEnd3/Swimlane/If2/ElseIf2/Endif3/Backward3/Note3/NoteLong3/CircleSpot3/Label/Goto, journal rows 31-34) -> agree / weErrored false. Re-pinned 2026-10-03 at 66db74002 by activity-divergence-drive / close-b2, ADDITIVE ONLY (13 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at 4f5d48d2e by activity-divergence-drive / close-b3w1, ADDITIVE ONLY (109 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at 9104b8ee0 by activity-divergence-drive / close-b3, ADDITIVE ONLY (18 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-06 at dcd2283c9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (13 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-06 at 0850c251d by activity-divergence-drive / close-b2, ADDITIVE ONLY (36 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 5ab1679ad by activity-divergence-drive / close-b3w1, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 918cd7e97 by activity-divergence-drive / close-b3, ADDITIVE ONLY (17 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 87727a9c by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (79 \"activity\" rows appended). Re-pinned 2026-10-07 at 87727a9c7 by activity-divergence-drive / close-b0, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at dd289f647 by activity-divergence-drive / merge-T1a, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 79c2bfb2c by activity-divergence-drive / merge-T1c, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 50a347b27 by activity-divergence-drive / merge-T1b, ADDITIVE ONLY (6 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 55b701493 by activity-divergence-drive / merge-T1g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 3b36df731 by activity-divergence-drive / merge-T2c, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at a30245dea by activity-divergence-drive / merge-T2a, ADDITIVE ONLY (7 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 541c5f2c2 by activity-divergence-drive / merge-T2d, ADDITIVE ONLY (22 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 76efedca8 by activity-divergence-drive / merge-T2e, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at ad64c122b by activity-divergence-drive / merge-T2d-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at c4915f83c by activity-divergence-drive / merge-T2f, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 6c788ec6c by activity-divergence-drive / merge-T2b, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at c6f501d95 by activity-divergence-drive / merge-T2f-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 3ec2d4cd0 by activity-divergence-drive / merge-T2g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 0a21936b1 by activity-divergence-drive / merge-T3a, ADDITIVE ONLY (6 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 790fee5a1 by activity-divergence-drive / merge-T3d, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at dc72942fc by activity-divergence-drive / merge-T3a-2, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 1d2fb519d by activity-divergence-drive / merge-T3c, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 22f819df6 by activity-divergence-drive / merge-T3c-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at fd2c3fa86 by activity-divergence-drive / merge-T3d-3, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 4ea823f10 by activity-divergence-drive / merge-T3gates-2, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 53d01279d by activity-divergence-drive / merge-T3b, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 0996e8891 by activity-divergence-drive / merge-T3e-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 12b567d91 by activity-divergence-drive / merge-T3f, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 2b080518d by activity-divergence-drive / merge-T3g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at e1afb6d61 by activity-divergence-drive / merge-T3h, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 2686a2577 by activity-divergence-drive / merge-T3k, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 2098d674d by activity-divergence-drive / fix-jucidi, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 4181c68de by activity-divergence-drive / close-b1e, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 4181c68d by class-divergence-drive-5 / close-b1e, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). isw (2026-10-09, 9f012d794): 24 jar-error rows re-pinned from a fresh measurement — seam #4 gives U+0020 width, so their goldens are no longer SlotFinder crash pages. Re-pinned 2026-10-09 at 3d8988d80 by activity-divergence-drive / isw/close, ADDITIVE ONLY (18 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-10 at ebb7b943a by activity-divergence-drive / aepp-b12, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at c0e75aa4 by class-divergence-drive-5 / t0b, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at 9a2ac1c5 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at 9a2ac1c5 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at f6e9ed3a by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by class-divergence-drive-5 / salt-engine-port batch-4 close, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by class-divergence-drive-5 / salt-engine-port batch-4 close, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by salt-engine-port / batch-4 close: 50 \"salt\" dot-cache rows re-measured in place (the salt plugin now registers), 47 \"svg-salt\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 2ff2f9b9 by salt-engine-port / batch-5 wave-1 close: 50 \"salt\" dot-cache rows re-measured in place (the salt plugin now registers), 50 \"svg-salt\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at 71b55c44 by wbs-engine-port / batch-4 close: 182 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 168 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at c3e65bd2 by wbs-engine-port / batch-5 wave-1 close: 182 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 168 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at c3e65bd2 by wbs-engine-port / batch-5 wave-1 close: 182 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 176 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins).",
   "fixtures": [
     {
       "tree": "dot-cache",
@@ -47013,10 +47013,10 @@
       "slug": "bacole-35-fiki903",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47024,10 +47024,10 @@
       "slug": "bigare-83-rupe735",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47035,10 +47035,10 @@
       "slug": "bikopa-92-joza078",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47046,10 +47046,10 @@
       "slug": "bizele-33-tubi926",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47057,10 +47057,10 @@
       "slug": "bizepe-66-putu551",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47068,10 +47068,10 @@
       "slug": "bonina-19-baje036",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47101,10 +47101,10 @@
       "slug": "cijugo-75-butu330",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47112,10 +47112,10 @@
       "slug": "codalo-68-gere629",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47134,10 +47134,10 @@
       "slug": "cogalo-85-side555",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47145,10 +47145,10 @@
       "slug": "cozofa-82-fefe432",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47156,10 +47156,10 @@
       "slug": "cunoja-00-nobi445",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47178,10 +47178,10 @@
       "slug": "danoji-66-rure273",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47189,10 +47189,10 @@
       "slug": "detalo-19-racu448",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47200,10 +47200,10 @@
       "slug": "diveva-04-moze399",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47211,10 +47211,10 @@
       "slug": "dulato-78-nefo038",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47222,10 +47222,10 @@
       "slug": "duzoxe-13-bocu532",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47233,10 +47233,10 @@
       "slug": "facibu-72-dako171",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47255,10 +47255,10 @@
       "slug": "fazafa-49-leka582",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47266,10 +47266,10 @@
       "slug": "fecabu-55-foba097",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47277,10 +47277,10 @@
       "slug": "fibiti-49-faga748",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47288,10 +47288,10 @@
       "slug": "fiboto-83-pida880",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47299,10 +47299,10 @@
       "slug": "filara-76-xifu577",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47310,10 +47310,10 @@
       "slug": "fimilo-56-jibo267",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47321,10 +47321,10 @@
       "slug": "fipina-75-bago028",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47332,10 +47332,10 @@
       "slug": "fitemu-52-fica491",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47343,10 +47343,10 @@
       "slug": "fodobe-85-beco281",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47354,10 +47354,10 @@
       "slug": "goduxe-93-xuje240",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47365,10 +47365,10 @@
       "slug": "gogige-30-peba786",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47376,10 +47376,10 @@
       "slug": "guximi-08-cako621",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47387,10 +47387,10 @@
       "slug": "jekubu-85-fimi106",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47398,10 +47398,10 @@
       "slug": "jibiba-77-jixa314",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47409,10 +47409,10 @@
       "slug": "jofuna-02-xova357",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47420,10 +47420,10 @@
       "slug": "jujugo-23-bede484",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47431,10 +47431,10 @@
       "slug": "jumiso-12-teba464",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47442,10 +47442,10 @@
       "slug": "jurupa-07-funi255",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47453,10 +47453,10 @@
       "slug": "jusapa-97-rege604",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47464,10 +47464,10 @@
       "slug": "kadixe-30-pasa212",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47475,10 +47475,10 @@
       "slug": "kajefo-25-dazo761",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47486,10 +47486,10 @@
       "slug": "kajene-76-pele833",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47497,10 +47497,10 @@
       "slug": "kamimo-14-sazi079",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47508,10 +47508,10 @@
       "slug": "kekube-11-reni885",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47519,10 +47519,10 @@
       "slug": "keloxe-59-zalu422",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47530,10 +47530,10 @@
       "slug": "kemola-59-lipa866",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47552,10 +47552,10 @@
       "slug": "kipadu-03-dine934",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47563,10 +47563,10 @@
       "slug": "kofumu-64-gife734",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47574,10 +47574,10 @@
       "slug": "kokisi-26-tixi824",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47596,10 +47596,10 @@
       "slug": "kugane-77-moce175",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47607,10 +47607,10 @@
       "slug": "kugunu-20-jisu885",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47618,10 +47618,10 @@
       "slug": "kulozi-99-fapu866",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47629,10 +47629,10 @@
       "slug": "lacufo-38-basi662",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47651,10 +47651,10 @@
       "slug": "lazigo-83-tevi855",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47662,10 +47662,10 @@
       "slug": "lazila-98-copu420",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47673,10 +47673,10 @@
       "slug": "lecexi-03-capi482",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47695,10 +47695,10 @@
       "slug": "lesene-63-xeza963",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47717,10 +47717,10 @@
       "slug": "link-URL-tooltip-1",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47728,10 +47728,10 @@
       "slug": "link-URL-tooltip-2",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47739,10 +47739,10 @@
       "slug": "lozolo-55-gole805",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47750,10 +47750,10 @@
       "slug": "lucema-49-bolo727",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47761,10 +47761,10 @@
       "slug": "mifoxa-71-mago795",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47772,10 +47772,10 @@
       "slug": "mogume-53-tuxe939",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47783,10 +47783,10 @@
       "slug": "mufute-30-juja962",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47794,10 +47794,10 @@
       "slug": "mupade-59-nizi762",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47805,10 +47805,10 @@
       "slug": "muzufe-40-vami290",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47816,10 +47816,10 @@
       "slug": "nagatu-54-xevo656",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47827,10 +47827,10 @@
       "slug": "naveve-56-sezu031",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47838,10 +47838,10 @@
       "slug": "navoxe-03-mala012",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47849,10 +47849,10 @@
       "slug": "nedose-30-toro694",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47860,10 +47860,10 @@
       "slug": "nelisi-61-zuto337",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47871,10 +47871,10 @@
       "slug": "nerove-94-mase209",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47882,10 +47882,10 @@
       "slug": "nijoci-28-tubo657",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47893,10 +47893,10 @@
       "slug": "norutu-85-pana593",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47904,10 +47904,10 @@
       "slug": "nulici-21-suxa818",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47915,10 +47915,10 @@
       "slug": "nutodi-72-gesi011",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47926,10 +47926,10 @@
       "slug": "pagede-80-rapu405",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47937,10 +47937,10 @@
       "slug": "palupu-85-neno098",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47948,10 +47948,10 @@
       "slug": "pejago-53-vaca955",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47959,10 +47959,10 @@
       "slug": "pivuma-60-capa371",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47970,10 +47970,10 @@
       "slug": "podeku-19-gofi018",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47981,10 +47981,10 @@
       "slug": "popavi-72-rabi940",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -47992,10 +47992,10 @@
       "slug": "potipu-03-nulo609",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48003,10 +48003,10 @@
       "slug": "pubebu-15-gavo856",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48014,10 +48014,10 @@
       "slug": "puxezu-74-bile194",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48025,10 +48025,10 @@
       "slug": "ranoce-59-jela729",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48036,10 +48036,10 @@
       "slug": "rexuri-90-teja825",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48047,10 +48047,10 @@
       "slug": "rufaci-77-nala420",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48058,10 +48058,10 @@
       "slug": "runula-63-gora344",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48069,10 +48069,10 @@
       "slug": "ruseba-92-sene615",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48080,10 +48080,10 @@
       "slug": "sabeca-21-dodo233",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48091,10 +48091,10 @@
       "slug": "sacile-96-fose945",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48102,10 +48102,10 @@
       "slug": "sefovi-44-zega151",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48135,10 +48135,10 @@
       "slug": "sipuxu-89-ciji559",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48157,10 +48157,10 @@
       "slug": "sotaso-86-migu035",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48168,10 +48168,10 @@
       "slug": "suciri-22-jedu341",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48179,10 +48179,10 @@
       "slug": "sugepe-47-ruxa931",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48190,10 +48190,10 @@
       "slug": "supeno-33-jabe921",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48201,10 +48201,10 @@
       "slug": "supori-51-meba536",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48212,10 +48212,10 @@
       "slug": "sutesu-19-lufu844",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48223,10 +48223,10 @@
       "slug": "tacenu-64-cofi013",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48234,10 +48234,10 @@
       "slug": "tefobe-51-jefu626",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48245,21 +48245,22 @@
       "slug": "titito-29-gise261",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
       "type": "wbs",
       "slug": "tojixi-05-lusu056",
       "jarRendered": true,
-      "weErrored": false,
-      "engine": "none",
-      "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "weErrored": true,
+      "engine": "wbs",
+      "status": "known-gap",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218), pushing the jar's 'PlantUML version ...' signature (PSystemError.java:148) past the 4096-byte HEAD_BYTES head-read window (refusal-coverage.test.ts, pin-corpus-tree-measure.ts), so isJarErrorPage misreads a genuine jar error page as jarRendered. The stock jar errors here (oracle/goldens/stock-error-pages.json wbs/tojixi-05-lusu056: \"WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)\" line 3) and this port refuses with the same string (WBSDiagram.addIdeaDisplay, WBSDiagram.java:160-162) -- conformant under the 2026-10-10 error-page rule. Measurement-tool limitation, not an unported feature (wbs-engine-port b4 close, journal row 29)."
     },
     {
       "tree": "dot-cache",
@@ -48278,10 +48279,10 @@
       "slug": "tugejo-32-tuna198",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48289,10 +48290,10 @@
       "slug": "tuvake-29-namo853",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48300,10 +48301,10 @@
       "slug": "tuzeme-92-metu703",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48322,10 +48323,10 @@
       "slug": "vazalu-10-cebi060",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48333,10 +48334,10 @@
       "slug": "vecovi-94-givo515",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48344,10 +48345,10 @@
       "slug": "vezati-14-vupe612",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48355,10 +48356,10 @@
       "slug": "WBS-arrow-0",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48366,10 +48367,10 @@
       "slug": "WBS-arrow-depending-leaf-direction-0",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48377,10 +48378,10 @@
       "slug": "WBS-arrow-depending-leaf-direction-1",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48388,10 +48389,10 @@
       "slug": "WBS-arrow-depending-leaf-direction-2",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48399,10 +48400,10 @@
       "slug": "WBS-arrow-depending-leaf-direction-3",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48410,10 +48411,10 @@
       "slug": "WBS-arrow-depending-leaf-direction-4",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48421,10 +48422,10 @@
       "slug": "WBS-arrow-depending-leaf-direction-5",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48432,10 +48433,10 @@
       "slug": "WBS-arrow-depending-leaf-direction-6",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48443,10 +48444,10 @@
       "slug": "WBS-direction-0",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48454,10 +48455,10 @@
       "slug": "WBS-easter-egg-0",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48465,10 +48466,10 @@
       "slug": "WBS-easter-egg-1",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48476,10 +48477,10 @@
       "slug": "WBS-monoline-def-0-0",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48487,10 +48488,10 @@
       "slug": "WBS-monoline-def-0-1",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48498,10 +48499,10 @@
       "slug": "WBS-monoline-def-0-10",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48520,10 +48521,10 @@
       "slug": "WBS-monoline-def-0-12",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48531,10 +48532,10 @@
       "slug": "WBS-monoline-def-0-13",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48542,10 +48543,10 @@
       "slug": "WBS-monoline-def-0-14",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48553,10 +48554,10 @@
       "slug": "WBS-monoline-def-0-15",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48564,10 +48565,10 @@
       "slug": "WBS-monoline-def-0-16",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48597,10 +48598,10 @@
       "slug": "WBS-monoline-def-0-19",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48608,10 +48609,10 @@
       "slug": "WBS-monoline-def-0-2",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48619,10 +48620,10 @@
       "slug": "WBS-monoline-def-0-20",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48630,10 +48631,10 @@
       "slug": "WBS-monoline-def-0-21",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48641,10 +48642,10 @@
       "slug": "WBS-monoline-def-0-22",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48652,10 +48653,10 @@
       "slug": "WBS-monoline-def-0-23",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48673,11 +48674,11 @@
       "type": "wbs",
       "slug": "WBS-monoline-def-0-3",
       "jarRendered": false,
-      "weErrored": false,
-      "engine": "none",
+      "weErrored": true,
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-27",
-      "measuredAgainstCommit": "689f66a9"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48685,10 +48686,10 @@
       "slug": "WBS-monoline-def-0-4",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48696,10 +48697,10 @@
       "slug": "WBS-monoline-def-0-5",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48718,10 +48719,10 @@
       "slug": "WBS-monoline-def-0-7",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48729,10 +48730,10 @@
       "slug": "WBS-monoline-def-0-8",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48740,10 +48741,10 @@
       "slug": "WBS-monoline-def-0-9",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48751,10 +48752,10 @@
       "slug": "WBS-multiline-def-0-0",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48762,10 +48763,10 @@
       "slug": "WBS-multiline-def-0-1",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48773,10 +48774,10 @@
       "slug": "WBS-multiline-def-1-0",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48784,10 +48785,10 @@
       "slug": "WBS-multiline-def-1-1",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48795,10 +48796,10 @@
       "slug": "WBS-multiline-def-1-10",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48806,10 +48807,10 @@
       "slug": "WBS-multiline-def-1-11",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48817,10 +48818,10 @@
       "slug": "WBS-multiline-def-1-12",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48828,32 +48829,32 @@
       "slug": "WBS-multiline-def-1-13",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
       "type": "wbs",
       "slug": "WBS-multiline-def-1-14",
       "jarRendered": false,
-      "weErrored": false,
-      "engine": "none",
+      "weErrored": true,
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-27",
-      "measuredAgainstCommit": "689f66a9"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
       "type": "wbs",
       "slug": "WBS-multiline-def-1-15",
       "jarRendered": false,
-      "weErrored": false,
-      "engine": "none",
+      "weErrored": true,
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-27",
-      "measuredAgainstCommit": "689f66a9"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48861,10 +48862,10 @@
       "slug": "WBS-multiline-def-1-16",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48872,10 +48873,10 @@
       "slug": "WBS-multiline-def-1-17",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48883,10 +48884,10 @@
       "slug": "WBS-multiline-def-1-18",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48894,10 +48895,10 @@
       "slug": "WBS-multiline-def-1-19",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48905,10 +48906,10 @@
       "slug": "WBS-multiline-def-1-2",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48916,21 +48917,21 @@
       "slug": "WBS-multiline-def-1-20",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
       "type": "wbs",
       "slug": "WBS-multiline-def-1-21",
       "jarRendered": false,
-      "weErrored": false,
-      "engine": "none",
+      "weErrored": true,
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-27",
-      "measuredAgainstCommit": "689f66a9"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48949,10 +48950,10 @@
       "slug": "WBS-multiline-def-1-4",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48960,10 +48961,10 @@
       "slug": "WBS-multiline-def-1-5",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48971,10 +48972,10 @@
       "slug": "WBS-multiline-def-1-6",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -48982,10 +48983,10 @@
       "slug": "WBS-multiline-def-1-7",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49004,10 +49005,10 @@
       "slug": "WBS-multiline-def-1-9",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49015,10 +49016,10 @@
       "slug": "xagelu-70-fota123",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49026,10 +49027,10 @@
       "slug": "xakubu-65-cumo769",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49037,10 +49038,10 @@
       "slug": "xalape-44-sipa811",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49048,10 +49049,10 @@
       "slug": "xasinu-75-sabe690",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49059,10 +49060,10 @@
       "slug": "xecoxa-01-timo183",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49070,10 +49071,10 @@
       "slug": "xekazo-08-vozi430",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49081,10 +49082,10 @@
       "slug": "xeruno-72-nape751",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49092,10 +49093,10 @@
       "slug": "xesafo-81-reca540",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49103,10 +49104,10 @@
       "slug": "xifiti-28-jati059",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49114,10 +49115,10 @@
       "slug": "xiruxo-19-repo052",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49125,10 +49126,10 @@
       "slug": "xiveti-07-suzu992",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49136,10 +49137,10 @@
       "slug": "xuzuda-76-bunu077",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49147,10 +49148,10 @@
       "slug": "zagudu-70-loto412",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49158,21 +49159,22 @@
       "slug": "zapabe-95-nige175",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
       "type": "wbs",
       "slug": "zecavo-98-kini554",
       "jarRendered": true,
-      "weErrored": false,
-      "engine": "none",
-      "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "weErrored": true,
+      "engine": "wbs",
+      "status": "known-gap",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2",
+      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218), pushing the jar's 'PlantUML version ...' signature (PSystemError.java:148) past the 4096-byte HEAD_BYTES head-read window (refusal-coverage.test.ts, pin-corpus-tree-measure.ts), so isJarErrorPage misreads a genuine jar error page as jarRendered. The stock jar errors here (oracle/goldens/stock-error-pages.json wbs/zecavo-98-kini554: \"WBS diagram only accepts one root first declared. (Assumed diagram type: wbs)\" line 3) and this port refuses with the same string (WBSDiagram.addIdeaDisplay, WBSDiagram.java:160-162) -- conformant under the 2026-10-10 error-page rule. Measurement-tool limitation, not an unported feature (wbs-engine-port b4 close, journal row 29)."
     },
     {
       "tree": "dot-cache",
@@ -49180,10 +49182,10 @@
       "slug": "zeneno-39-bize297",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49191,10 +49193,10 @@
       "slug": "zipise-65-bevo360",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49202,10 +49204,10 @@
       "slug": "zodobi-82-dura410",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49213,10 +49215,10 @@
       "slug": "zogadi-16-bore748",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49224,10 +49226,10 @@
       "slug": "zogoke-27-tupa218",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49235,10 +49237,10 @@
       "slug": "zoxifo-84-pesu554",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -49246,10 +49248,10 @@
       "slug": "zutivo-71-kaki153",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "none",
+      "engine": "wbs",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     },
     {
       "tree": "dot-cache",
@@ -73832,6 +73834,1942 @@
       "status": "ok",
       "measuredAt": "2026-10-12",
       "measuredAgainstCommit": "2ff2f9b9"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-arrow-0",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-0",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-1",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-2",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-3",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-4",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-5",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-arrow-depending-leaf-direction-6",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-direction-0",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-easter-egg-0",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-easter-egg-1",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-0",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-1",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-10",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-12",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-13",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-14",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-15",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-16",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-19",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-2",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-20",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-21",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-22",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-23",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-4",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-5",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-7",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-8",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-monoline-def-0-9",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-0-0",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-0-1",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-0",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-1",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-10",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-11",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-12",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-13",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-16",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-17",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-18",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-19",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-2",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-20",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-4",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-5",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-6",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-7",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "WBS-multiline-def-1-9",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "bacole-35-fiki903",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "bigare-83-rupe735",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "bikopa-92-joza078",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "bizele-33-tubi926",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "bizepe-66-putu551",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "bonina-19-baje036",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "cijugo-75-butu330",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "codalo-68-gere629",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "cogalo-85-side555",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "cozofa-82-fefe432",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "cunoja-00-nobi445",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "danoji-66-rure273",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "detalo-19-racu448",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "diveva-04-moze399",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "dulato-78-nefo038",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "duzoxe-13-bocu532",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "fazafa-49-leka582",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "fecabu-55-foba097",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "fibiti-49-faga748",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "fiboto-83-pida880",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "filara-76-xifu577",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "fimilo-56-jibo267",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "fitemu-52-fica491",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "fodobe-85-beco281",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "goduxe-93-xuje240",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "gogige-30-peba786",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "guximi-08-cako621",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "jekubu-85-fimi106",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "jibiba-77-jixa314",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "jofuna-02-xova357",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "jujugo-23-bede484",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "jumiso-12-teba464",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "jurupa-07-funi255",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "jusapa-97-rege604",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "kadixe-30-pasa212",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "kajefo-25-dazo761",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "kajene-76-pele833",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "kamimo-14-sazi079",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "kekube-11-reni885",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "kemola-59-lipa866",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "kipadu-03-dine934",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "kofumu-64-gife734",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "kokisi-26-tixi824",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "kugane-77-moce175",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "kugunu-20-jisu885",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "kulozi-99-fapu866",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "lacufo-38-basi662",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "lazigo-83-tevi855",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "lazila-98-copu420",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "lecexi-03-capi482",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "lesene-63-xeza963",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "lozolo-55-gole805",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "lucema-49-bolo727",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "mifoxa-71-mago795",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "mogume-53-tuxe939",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "mufute-30-juja962",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "mupade-59-nizi762",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "muzufe-40-vami290",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "nagatu-54-xevo656",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "naveve-56-sezu031",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "navoxe-03-mala012",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "nedose-30-toro694",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "nelisi-61-zuto337",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "nerove-94-mase209",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "nijoci-28-tubo657",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "norutu-85-pana593",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "nulici-21-suxa818",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "nutodi-72-gesi011",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "pagede-80-rapu405",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "palupu-85-neno098",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "pejago-53-vaca955",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "pivuma-60-capa371",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "podeku-19-gofi018",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "popavi-72-rabi940",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "potipu-03-nulo609",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "pubebu-15-gavo856",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "puxezu-74-bile194",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "ranoce-59-jela729",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "rexuri-90-teja825",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "rufaci-77-nala420",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "runula-63-gora344",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "ruseba-92-sene615",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "sabeca-21-dodo233",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "sacile-96-fose945",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "sefovi-44-zega151",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "sipuxu-89-ciji559",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "sotaso-86-migu035",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "suciri-22-jedu341",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "sugepe-47-ruxa931",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "supeno-33-jabe921",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "supori-51-meba536",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "sutesu-19-lufu844",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "tacenu-64-cofi013",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "tefobe-51-jefu626",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "titito-29-gise261",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "tugejo-32-tuna198",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "tuvake-29-namo853",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "tuzeme-92-metu703",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "vazalu-10-cebi060",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "vecovi-94-givo515",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "vezati-14-vupe612",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xagelu-70-fota123",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xalape-44-sipa811",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xecoxa-01-timo183",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xekazo-08-vozi430",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xeruno-72-nape751",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xesafo-81-reca540",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xifiti-28-jati059",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xiruxo-19-repo052",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xiveti-07-suzu992",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xuzuda-76-bunu077",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "zagudu-70-loto412",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "zapabe-95-nige175",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "zipise-65-bevo360",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "zodobi-82-dura410",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "zogadi-16-bore748",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "zogoke-27-tupa218",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "zoxifo-84-pesu554",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "zutivo-71-kaki153",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "facibu-72-dako171",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "fipina-75-bago028",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "keloxe-59-zalu422",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "link-URL-tooltip-1",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "link-URL-tooltip-2",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xakubu-65-cumo769",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "xasinu-75-sabe690",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-wbs",
+      "slug": "zeneno-39-bize297",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "wbs",
+      "status": "ok",
+      "measuredAt": "2026-10-13",
+      "measuredAgainstCommit": "c3e65bd2"
     }
   ]
 }
