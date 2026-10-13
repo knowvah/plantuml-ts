@@ -70,7 +70,8 @@ const GOLDENS_DIR = join(REPO, 'oracle', 'goldens');
  *  confused again at a call site. */
 const GOLDENS_CONFORMANCE_DIR = join(GOLDENS_DIR, 'svg-conformance');
 const DOT_PARITY_PATH = join(SVG_CONFORMANCE_DIR, 'dot-parity.json');
-const INDEX_TS_PATH = join(REPO, 'src', 'index.ts');
+/** Where the `registry.register(<type>Plugin)` calls live (moved out of `src/index.ts` by ufp T2a). */
+const REGISTRATIONS_TS_PATH = join(REPO, 'src', 'registered-plugins.ts');
 const REPORT_OUT = join(REPO, 'docs', 'parity-report.md');
 
 // ---------------------------------------------------------------------------
@@ -100,7 +101,7 @@ export function loadInputs(): RawInputs {
   return {
     buckets,
     corpusCounts: corpusCountsOf(DATA_DIR, buckets),
-    registeredEngines: registeredEngineTypes(readFileSync(INDEX_TS_PATH, 'utf-8')),
+    registeredEngines: registeredEngineTypes(readFileSync(REGISTRATIONS_TS_PATH, 'utf-8')),
     oracleCounts: oracleCountsOf(CACHE_DIR),
     jarUnsupportedCounts: jarUnsupportedCountsOf(CACHE_DIR),
     dotParity: loadDotParity(DOT_PARITY_PATH),

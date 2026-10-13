@@ -9,24 +9,8 @@ import type { DiagramAnnotations } from './core/annotations/index.js';
 import { resolveAnnotationStyles } from './core/annotations/style.js';
 import { unwrapKlimtSvg } from './diagrams/description/renderer.js';
 import { applyActivityChrome, applyActivityScale } from './diagrams/activity/layout/document-margin.js';
-import { sequencePlugin } from './diagrams/sequence/index.js';
-import { classPlugin } from './diagrams/class/index.js';
 import { registerNestedDiagramRenderers } from './diagrams/class/class-nested-diagram-renderer.js';
-import { statePlugin } from './diagrams/state/index.js';
-import { descriptionPlugin } from './diagrams/description/index.js';
-import { activityPlugin } from './diagrams/activity/index.js';
-import { jsonPlugin } from './diagrams/json/index.js';
-import { yamlPlugin } from './diagrams/yaml/index.js';
-import { hclPlugin } from './diagrams/hcl/index.js';
-import { boardPlugin } from './diagrams/board/index.js';
-import { chronologyPlugin } from './diagrams/chronology/index.js';
-import { filesPlugin } from './diagrams/files/index.js';
-import { packetdiagPlugin } from './diagrams/packetdiag/index.js';
-import { chartPlugin } from './diagrams/chart/index.js';
-import { dotPlugin } from './diagrams/dot/index.js';
-import { mindmapPlugin } from './diagrams/mindmap/index.js';
-import { saltPlugin } from './diagrams/salt/index.js';
-import { wbsPlugin } from './diagrams/wbs/index.js';
+import { registerPlugins } from './registered-plugins.js';
 import type { Theme } from './core/theme.js';
 import type { StyleMap } from './core/skinparam.js';
 import type { StringMeasurer } from './core/measurer.js';
@@ -81,52 +65,9 @@ export { spriteSplitStdlib, SpriteNotBundledError, type SpriteSplitManifest } fr
 // ADR-2 (plans/s1l-tail-fix/decisions.md): the sync-fillable asset seam F4-a/F4-b both consume via options.assetStore.
 export { combineAssetStores, type AssetPayload, type AssetStore } from './core/asset-store.js';
 
-// Registration order IS upstream's factory order (`PSystemBuilder.java:134-141`),
-// re-mirrored here now that dispatch attempts the parse. Under the old
-// `accepts()` heuristics this order was frozen the other way round --
-// mirroring upstream moved the routing gate 79 -> 469, 25 fixed and 415 newly
-// misrouted (`.agent-notes/T2-registration-order-halt.md`) -- because the
-// order was compensating for `sequencePlugin.accepts()` claiming 1343 of 3158
-// fixtures, 244 of them not sequence diagrams. With refusal live that
-// compensation is unnecessary and the upstream order is simply correct, which
-// is why D3' makes the order change and the dispatch switch one unit.
-//
-// Upstream's legacy-UML run is: SequenceDiagramFactory, ClassDiagramFactory,
-// ActivityDiagramFactory, DescriptionDiagramFactory, StateDiagramFactory,
-// ActivityDiagramFactory3, BpmDiagramFactory.
-//
-// THIS PORT'S ACTIVITY ENGINE SITS AT ActivityDiagramFactory3's SLOT, after
-// state -- not at the legacy factory's slot, which is where T12's own brief
-// put it. The engine mirrors `ActivityDiagramFactory3`: `trySwimlane`,
-// `tryAction`, `tryIf`, `tryRepeat`, `tryFork`, `trySplit` map 1:1 onto
-// `CommandSwimlane`, `CommandActivity3`, `CommandIf4`, `CommandRepeat3`,
-// `CommandFork3`, `CommandSplit3` (`ActivityDiagramFactory3.java:105-165`),
-// while the legacy factory's arrow-based `UBrexCommandIf` /
-// `CommandLinkActivity` / `CommandLinkLongActivity`
-// (`ActivityDiagramFactory.java:76-97`) have no counterpart anywhere here.
-// Putting it at slot 5 would let it claim `@startuml` sources upstream gives
-// to description or state.
-//
-// The engines below the legacy-UML run are not in `@startuml`'s candidate set
-// at all (`DiagramType.java:198-201`), so their relative order can never
-// decide a tie; they keep their existing order.
-registry.register(sequencePlugin);
-registry.register(classPlugin);
-registry.register(descriptionPlugin);
-registry.register(statePlugin);
-registry.register(activityPlugin);
-registry.register(yamlPlugin);
-registry.register(jsonPlugin);
-registry.register(hclPlugin);
-registry.register(boardPlugin);
-registry.register(chronologyPlugin);
-registry.register(filesPlugin);
-registry.register(packetdiagPlugin);
-registry.register(chartPlugin);
-registry.register(dotPlugin);
-registry.register(mindmapPlugin);
-registry.register(saltPlugin);
-registry.register(wbsPlugin);
+// Upstream's factory order (`PSystemBuilder.java:133-200`); the registrations,
+// their order rationale and each one's Java line live in `registered-plugins.ts`.
+registerPlugins(registry);
 
 /** The block's preprocessed interior plus the style sources the interpreter pulled out of THAT block. */
 function umlSourceOfBlock(block: BlockUmlOk): UmlSource {

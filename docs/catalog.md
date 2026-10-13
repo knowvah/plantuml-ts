@@ -9,13 +9,14 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1657 modules · 6032 exported names.
+1658 modules · 6034 exported names.
 
 ## `src/`
 
 | Module | Exports | Purpose |
 |---|---|---|
 | `index.ts` | `RenderOptions`, `assembleSvg`, `loadElk`, `ElkBackend`, `stdlibStore`, `withStdlib`, `BundleData`, `StdlibStore`, `stdlibRegistry`, `StdlibChunkLoadError`, `StdlibRegistry`, `prepareIncludeStore`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `StdlibNotBundledError`, `IncludeWarmupOptions`, `SecurityProfile`, `remoteStdlib`, `StdlibResourceFetchError`, `StdlibRemoteManifest`, `RemoteBundle`, `spriteSplitStdlib`, `SpriteNotBundledError`, `SpriteSplitManifest`, `combineAssetStores`, `AssetPayload`, `AssetStore`, `renderPagesSync`, `renderSync`, `render`, `renderPages`, `renderAll` |  |
+| `registered-plugins.ts` | `PluginRegistrar`, `registerPlugins` | The composition root's registrations, in upstream's factory order: the `factories.add(...)` run of `PSystemBuilder`'s constructor. |
 
 ## `src/core/`
 
