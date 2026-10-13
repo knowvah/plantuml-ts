@@ -44,7 +44,7 @@ does, not mindmap's direct read. `WBS` is routed beside `MINDMAP`/`SALT` in
 
 ## D6 — Direction and link geometry in their upstream homes
 `getWBSDirection` (`utils/Direction.java:44`: `<` in either `WBS_DIRECTION` group ⇒ LEFT, else
-RIGHT) is added to `src/core/abel/Direction.ts` in batch 0 (T0c), pre-declared, so no command
+RIGHT — **corrected 2026-10-12, journal row 4:** actually `Direction.java:75-86`, default LEFT iff TYPE contains `-`, then `<` ⇒ LEFT / `>` ⇒ RIGHT override; signature `getWBSDirection(type, dir1, dir2)`) is added to `src/core/abel/Direction.ts` in batch 0 (T0c), pre-declared, so no command
 task hits stop 10 for it. `WBSLink` uses the port's `XRectangle2D.intersect`, `XLine2D`,
 `ExtremityArrow`; `WElement.setGeometry` reads `AbstractCommonUGraphic.getTranslate()` during
 `drawU` (ITFComposed.java:103-106, ITFLeaf.java:46-49); `WBSDiagram.drawMe` draws links after

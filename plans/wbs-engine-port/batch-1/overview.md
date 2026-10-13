@@ -23,4 +23,6 @@ export class WElement {
   getPosition(): UTranslate | undefined; getDimension(): XDimension2D | undefined;
 }
 ```
+**As landed (T1a, journal row 8):** `createElement(decoration: WElementDecoration, newLevel, direction)` with `WElementDecoration = { backColor, label, stereotype, shape, styleBuilder }`; `withBackColor(skinParam: ISkinParamWithSimple): ISkinParamWithSimple`.
+
 Close with the standard procedure (`close-procedure.md`).

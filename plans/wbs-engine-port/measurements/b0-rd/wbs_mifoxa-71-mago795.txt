@@ -1,0 +1,13 @@
+
+### wbs/mifoxa-71-mago795  pass=false structural=9 numeric=2
+  S svg/@background  exp=#FFFFFF | act=
+  S svg/@contentStyleType  exp=text/css | act=
+  S svg/@preserveAspectRatio  exp=none | act=
+  S svg/@version  exp=1.1 | act=
+  S svg/@viewBox  exp=0 0 255 192 | act=
+  S svg/@xmlns:xlink  exp=http://www.w3.org/1999/xlink | act=
+  S svg/@zoomAndPan  exp=magnify | act=
+  S svg/rect[1]  exp=defs | act=rect
+  S svg/text[1]  exp=g | act=text
+  N svg/@height  exp=192 | act=60 (Δ132)
+  N svg/@width  exp=255 | act=300 (Δ45)

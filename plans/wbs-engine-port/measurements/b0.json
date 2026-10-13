@@ -1,0 +1,117 @@
+{
+ "base": "50df8d98e",
+ "date": "2026-10-12",
+ "gates": {
+  "collected": 1272,
+  "onDisk": 1272,
+  "tests": 28173,
+  "failed": 0
+ },
+ "engines": {
+  "activity": {
+   "conformant": 448,
+   "structural-match": 1
+  },
+  "board": {
+   "diverged": 4
+  },
+  "c4": {
+   "diverged": 9,
+   "conformant": 2
+  },
+  "chart": {
+   "diverged": 29
+  },
+  "chronology": {
+   "diverged": 1
+  },
+  "class": {
+   "conformant": 722,
+   "structural-match": 1
+  },
+  "component": {
+   "structural-match": 66,
+   "diverged": 131,
+   "conformant": 69
+  },
+  "ditaa": {
+   "oracle-error": 2
+  },
+  "dot": {
+   "conformant": 5
+  },
+  "ebnf": {
+   "diverged": 44
+  },
+  "files": {
+   "diverged": 1
+  },
+  "gantt": {
+   "diverged": 264,
+   "conformant": 1
+  },
+  "hcl": {
+   "conformant": 1,
+   "structural-match": 2
+  },
+  "json": {
+   "structural-match": 24,
+   "conformant": 13,
+   "diverged": 13
+  },
+  "mindmap": {
+   "conformant": 142
+  },
+  "network": {
+   "diverged": 3
+  },
+  "object": {
+   "conformant": 63,
+   "diverged": 9,
+   "structural-match": 8
+  },
+  "packet": {
+   "diverged": 6
+  },
+  "regex": {
+   "diverged": 46
+  },
+  "salt": {
+   "conformant": 51
+  },
+  "sequence": {
+   "diverged": 1143
+  },
+  "state": {
+   "diverged": 184,
+   "conformant": 78,
+   "structural-match": 11
+  },
+  "timing": {
+   "diverged": 120,
+   "conformant": 6
+  },
+  "unknown": {
+   "conformant": 408,
+   "diverged": 370,
+   "structural-match": 47
+  },
+  "usecase": {
+   "diverged": 46,
+   "conformant": 29,
+   "structural-match": 18,
+   "oracle-error": 1
+  },
+  "wbs": {
+   "diverged": 204
+  },
+  "wire": {
+   "diverged": 18
+  },
+  "yaml": {
+   "diverged": 4,
+   "conformant": 7,
+   "structural-match": 28
+  }
+ }
+}

@@ -16,7 +16,7 @@ Transcribe the two single-line item commands (`wbs/CommandWBSItemNew.java`,
    "SHAPE", 0)` — read `regex/RegexResult.java#getLazzy` (first non-null of the `_1`/`_2`
    suffixed groups) and mirror it with a small helper.
 2. `executeArg` (New:52-67, Old:51-68): colour through `getIHtmlColorSet().getColor`
-   (`NoSuchColorException` → `badColor()`), direction via `getWBSDirection(dir1, dir2)`
+   (`NoSuchColorException` → `badColor()`), direction via `getWBSDirection(type, dir1, dir2)` (corrected contract, journal row 4: default from a `-` in TYPE, `<`/`>` override)
    (T0c), shape `IdeaShape.fromDesc(shape)`; no label and shape NONE → PSEUDO; no label
    otherwise → "Missing label for WBS node."; Old additionally `diagram.addWarning(new
    Warning("Please define Direction/Shape before Color/Id."))` (Old:66); then
