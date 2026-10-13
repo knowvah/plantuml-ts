@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1616 modules · 5953 exported names.
+1616 modules · 5955 exported names.
 
 ## `src/`
 
@@ -514,7 +514,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `DisplayNewlines.ts` | `JawsWarning`, `jawsWarningToWarning`, `getWithNewlines3`, `ParsedNewlines`, `parseWithNewlines`, `hasSeveralGuideLinesOfAll`, `hasSeveralGuideLinesOfString`, `splitDisplayLines` | DisplayNewlines — the pure, `this`-free half of `klimt/creole/Display.java`: the `\n`/tab/left-align/right-align escape-sequence scanner (`getWithNewlines`/`getWithNewlines3`), the deprecation-warning helper it calls (`addWarning`, `warning |
 | `DisplayReaders.ts` | `getStereotypeIfAny`, `isWhite`, `toStringOf`, `contentWidth`, `cacheKeyOf`, `iteratorOf`, `equalsLike`, `createFooOf` | `Display`'s read-only derived-value methods (`getStereotypeIfAny`, `isWhite`, `toString`, `contentWidth`, `cacheKey`, the `Iterable` protocol), plus `equalsLike` and the `createFoo` factory -- split out of `Display.ts` purely to keep that f |
 | `DisplayText.ts` | `replaceBackslashT`, `replace`, `manageGuillemet`, `withPage`, `removeEndingStereotype`, `getEndingStereotype`, `underlined`, `underlinedName`, `addAll`, `addFirst`, `appendFirstLine`, `add`, `addGeneric`, `splitMultiline`, `toTooltipText`, `hasSeveralGuideLines` | DisplayText — `Display`'s "same metadata, new content" list-manipulation family (`add*`/`with*`/`replace*`/`underlined*`/`splitMultiline`/...) plus its two subsystem-blocked seams (`withoutStereotypeIfNeeded`, `hasUrl`). |
-| `Emoji.ts` | `EmojiEntry`, `retrieveEmoji`, `emojiCharacter` | Emoji — the `<:name:>` creole emoji name registry. |
+| `Emoji.ts` | `EmojiEntry`, `getAll`, `retrieveEmoji`, `emojiCharacter` | Emoji — the `<:name:>` creole emoji name registry. |
 | `Fission.ts` | `NeutronType`, `getSplitted` | Fission — word-wrap. |
 | `Parser.ts` | `MONOSPACED`, `isLatexStart`, `isLatexEnd`, `isCodeStart`, `isCodeEnd`, `isTreeStart`, `getScale`, `getColor` | Parser — small static line-classification helpers `CreoleParser` (T9a) needs to dispatch a raw display line to the code/latex/tree/table branches, plus two pure `<style>`-attribute readers unrelated to that dispatch but part of the same ups |
 | `Position.ts` | `Position` |  |
@@ -681,7 +681,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `big-frame.ts` | `Dim`, `Sides`, `BigFrameStyle`, `BigFrameLayout`, `buildBigFrame` | big-frame.ts — cdd-T34 (E14 `mainframe`): `klimt/shape/BigFrame.java`, the box `core/DiagramChromeFactory.java#decorateWithFrame` wraps the WHOLE diagram body in for `mainframe TEXT` — a rounded rect with a folder-tab title cutout in its to |
 | `DotPath.ts` | `Bezier`, `PointAndAngle`, `DotPath` |  |
-| `GraphicStrings.ts` | `GraphicStrings` | `GraphicStrings` — a list of lines drawn as one creole block (sans-serif 12 black on white by default) inside a 5px margin, optionally with an image in a corner or under the text. |
+| `GraphicStrings.ts` | `GraphicStringsClasspath`, `GraphicStrings` | `GraphicStrings` — a list of lines drawn as one creole block (sans-serif 12 black on white by default) inside a 5px margin, optionally with an image in a corner or under the text. |
 | `TextBlock.ts` | `TextBlock`, `textBlockMagneticBorder` |  |
 | `TextBlockHorizontal.ts` | `TextBlockHorizontal` |  |
 | `TextBlockInEllipse.ts` | `TextBlockInEllipse` |  |

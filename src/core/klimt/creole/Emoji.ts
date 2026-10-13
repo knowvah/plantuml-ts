@@ -242,6 +242,13 @@ const ALL: ReadonlyMap<string, EmojiEntry> = (() => {
   return map;
 })();
 
+/** The registry as a key-sorted copy: `new TreeMap<>(ALL)` orders by
+ *  `String#compareTo` (UTF-16 code units), which is JS's default sort.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/emoji/Emoji.java:85-86 */
+export function getAll(): ReadonlyMap<string, EmojiEntry> {
+  return new Map([...ALL.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
+}
+
 /** Upstream: `Emoji.retrieve(name)` — lowercased lookup by unicode hex or
  *  shortcut; `undefined` for an unknown name (caller falls back to the
  *  `¿name?` error text run, `StripeSimple#addEmoji` java:246-250). */
