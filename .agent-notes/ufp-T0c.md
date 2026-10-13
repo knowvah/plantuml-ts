@@ -1,9 +1,21 @@
 # ufp-T0c — core bases + single-line plugin helper
 
-## Observation: GraphicStrings has no klimt TextBlock port
-- **Context**: porting `PlainStringsDiagram#getTextBlock` (= `GraphicStrings.createBlackOnWhite(strings, image, imagePosition)`, PlainStringsDiagram.java:59-62).
-- **Finding**: `src/core/error/graphic-strings.ts#blackOnWhite` is an `ErrorBlock` (string-sink) model used by the error/Welcome pages, not a klimt `TextBlock`. `src/core/klimt/shape/` has no `GraphicStrings`. The klimt pieces it needs exist (`Display.create7` with `CreoleMode.FULL`/`FULL_BUT_UNDERSCORE`, `UImage`, `UTranslate`).
-- **Impact**: `PlainStringsDiagram` (version, RIP, AppleTwo, Egg) and `PSystemDonors`' column/header blocks cannot be drawn through klimt until `klimt/shape/GraphicStrings.ts` lands. Reported as stop 10; PlainStringsDiagram not written.
+## Observation: GraphicStrings now exists twice
+- **Context**: porting `PlainStringsDiagram#getTextBlock` (= `GraphicStrings.createBlackOnWhite(strings, image, imagePosition)`, PlainStringsDiagram.java:59-62); stop 10 raised, then the orchestrator extended the write-set (push-forward).
+- **Finding**: `src/core/klimt/shape/GraphicStrings.ts` is the klimt port (with `klimt/sprite/SpriteContainerEmpty.ts` and `klimt/geom/GraphicPosition.ts`, which it needs). `src/core/error/graphic-strings.ts#blackOnWhite` is the older `ErrorBlock` (string-sink) model the error/Welcome pages still use; it was left untouched (no refactor while porting).
+- **Impact**: the Welcome page is now drawable both ways. Through `PlainStringsDiagram` it is byte-identical to the jar (`<?plantuml-src?>` aside). The error-page path still renders it with the error measurer: 533px vs the jar's 532px. That makes it a candidate for a later consolidation.
+- **Confidence**: High
+
+## Observation: the license page needs a `<qrcode:...>` creole atom
+- **Context**: pinning `GraphicStrings` against the jar `license` probe.
+- **Finding**: `License.java:145-146` adds `\t<qrcode:https://plantuml.com/patreon>\t\t<qrcode:...lp>\t\t<qrcode:...paypal>`, drawn as three 99x99 `<image>`s. The port has no qrcode atom. Without that line the other 61 texts match the jar's x/y/textLength exactly, with every y after the qrcode line 99px higher than the jar's. The jar canvas height is 834 = (int)(61*12 + 10 + 91 + 1): the qrcode line MEASURES 91 but the following text is drawn 99 lower. The cause of that 8px difference was not investigated.
+- **Impact**: T1f (license) needs the qrcode atom ported.
+- **Confidence**: High (measured)
+
+## Observation: SpriteContainerEmpty has no internal-sprite channel from GraphicStrings
+- **Context**: porting `GraphicStrings#getTextBlock` (`new SpriteContainerEmpty()`, java:150).
+- **Finding**: `SpriteContainerEmpty#getSprite` is `SpriteImage.fromInternal`; the port takes an optional `InternalSpriteStore`, but `GraphicStrings` constructs it with none (upstream has no parameter there).
+- **Impact**: `<$archimate/...>` inside GraphicStrings lines (the archimate listing, T1d) resolves to nothing until a store is threaded through.
 - **Confidence**: High
 
 ## Observation: a diagramType-less RenderFragment does not get the jar's root

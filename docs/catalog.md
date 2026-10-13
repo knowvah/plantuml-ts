@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1605 modules · 5937 exported names.
+1609 modules · 5941 exported names.
 
 ## `src/`
 
@@ -83,6 +83,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `parsedOpsFor`, `openIconicFactor`, `openIconicDims`, `openIconicStartingAltitude`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
 | `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg`, `noGradient` | Paint — the color/gradient value model for the rendering layer. |
 | `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals`, `parseRefusalOf` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
+| `PlainStringsDiagram.ts` | `PlainStringsDiagram` | `PlainStringsDiagram` — a {@link UgDiagram} whose page is its `strings` drawn black on white, optionally with an `image` at `imagePosition` (`version`, the eggs). |
 | `preprocessor-collector.ts` | `StyleAndSkinparamCollector` | preprocessor-collector.ts -- the `<style>` / `skinparam` / `skin` line collector `preprocessor.ts#resultOf` runs over the interpreter's finished result list. |
 | `preprocessor.ts` | `SkinDirective`, `PreprocessorResult`, `DeclarationOrder`, `PreprocessOptions`, `preprocess`, `PreprocessorFailure`, `PreprocessOutcome`, `preprocessOrError`, `preprocessLinesOrError` | Preprocessor -- a thin wrapper over the TIM interpreter (`src/core/tim/`). |
 | `render-options.ts` | `RenderOptions`, `getDefaultMeasurer`, `resolveMeasurer` | `RenderOptions` and measurer resolution — extracted from `src/index.ts` (mission A5 / T4). |
@@ -648,6 +649,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ClockwiseTopRightBottomLeft.ts` | `ClockwiseTopRightBottomLeft` |  |
 | `CoordinateChange.ts` | `CoordinateChange` |  |
 | `EnsureVisible.ts` | `EnsureVisible` | EnsureVisible — the callback surface a clickable region (`Url`) exposes so drivers can report every point they actually painted for it; the accumulated bounding box becomes the image-map/SVG link geometry. |
+| `GraphicPosition.ts` | `GraphicPosition` | `GraphicPosition` — where `GraphicStrings` places its image. |
 | `HorizontalAlignment.ts` | `HorizontalAlignment`, `horizontalAlignmentFromString` | HorizontalAlignment — the 3-way text/label alignment `USymbol#asSmall`/ `asBig` (decoration/symbol/USymbol.java) take for the stereotype and, for `asBig`, the label too (see `USymbolRectangle.java`'s `asBig`, which branches on `labelAlignme |
 | `MagneticBorder.ts` | `MagneticBorder` |  |
 | `MagneticBorderNone.ts` | `MagneticBorderNone` |  |
@@ -679,6 +681,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `big-frame.ts` | `Dim`, `Sides`, `BigFrameStyle`, `BigFrameLayout`, `buildBigFrame` | big-frame.ts — cdd-T34 (E14 `mainframe`): `klimt/shape/BigFrame.java`, the box `core/DiagramChromeFactory.java#decorateWithFrame` wraps the WHOLE diagram body in for `mainframe TEXT` — a rounded rect with a folder-tab title cutout in its to |
 | `DotPath.ts` | `Bezier`, `PointAndAngle`, `DotPath` |  |
+| `GraphicStrings.ts` | `GraphicStrings` | `GraphicStrings` — a list of lines drawn as one creole block (sans-serif 12 black on white by default) inside a 5px margin, optionally with an image in a corner or under the text. |
 | `TextBlock.ts` | `TextBlock`, `textBlockMagneticBorder` |  |
 | `TextBlockHorizontal.ts` | `TextBlockHorizontal` |  |
 | `TextBlockInEllipse.ts` | `TextBlockInEllipse` |  |
@@ -720,6 +723,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Sprite.ts` | `Sprite` | The shared marker every sprite kind implements: pixel dimensions. |
 | `SpriteColor4096.ts` | `SpriteColor4096` |  |
 | `SpriteColorBuilder4096.ts` | `buildSpriteColor4096` | SpriteColorBuilder4096 — decodes a `sprite $name [WxH/color] { ... |
+| `SpriteContainerEmpty.ts` | `SpriteContainerEmpty` | `SpriteContainerEmpty` — the skin `GraphicStrings` hands its creole text (GraphicStrings.java:135): no skinparams, `<<`/`>>` left as typed, and sprites only from the jar-resident bundle (`SpriteImage.fromInternal`). |
 | `SpriteGrayLevel.ts` | `SpriteGrayLevel` |  |
 | `SpriteMonochrome.ts` | `SpriteMonochrome` |  |
 | `SpriteSvg.ts` | `svgDimension`, `svgInkBox`, `SpriteSvg`, `isSpriteSvg` | `SpriteSvg` — a sprite defined by an inline `<svg>…</svg>` element rather than the encoded grey-level grid `SpriteMonochrome` carries. |
