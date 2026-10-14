@@ -131,6 +131,7 @@ function buildAnchorNode(
   hasGroupEdge: boolean,
   fontSpec: FontSpec,
   measurer: StringMeasurer,
+  titleDims: ClusterTitleDims | 'unsized' | undefined,
 ): DotInputNode {
   const anchor: DotInputNode = {
     id: groupAnchorNodeId(clusterId),
@@ -139,9 +140,15 @@ function buildAnchorNode(
   };
   if (isPortCluster) {
     anchor.shape = 'rect';
-    const title = measureTitleLabel(display, symbol, fontSpec, measurer);
-    anchor.titleLabelWidth = title.width;
-    anchor.titleLabelHeight = title.height;
+    // T4: the TABLE the jar prints on the `empty()` rect (ClusterDotString
+    // .java:177-181) is `getTitleAndAttributeWidth/Height() - 5` -- the D5
+    // dims. `'unsized'` (no wrapper inputs, e.g. the ELK adapter's leaf-only
+    // sizing call) keeps the pre-T4 measurement.
+    const title = titleDims === 'unsized' ? measureTitleLabel(display, symbol, fontSpec, measurer) : titleDims;
+    if (title !== undefined) {
+      anchor.titleLabelWidth = title.width;
+      anchor.titleLabelHeight = title.height;
+    }
     if (hasGroupEdge) anchor.groupAnchorAlsoPoint = true;
   } else {
     anchor.shape = 'point';
@@ -162,6 +169,7 @@ export function buildDotNodes(
   links: readonly DescriptiveLink[],
   fixCircle: boolean,
   stereotypeRules: ReadonlyArray<{ pattern?: string; show: boolean }>,
+  titleDimsByCluster?: ReadonlyMap<string, ClusterTitleDims | undefined>,
 ): DotInputNode[] {
   const result: DotInputNode[] = [];
   for (const [id, node] of ctx.astNodeById) {
@@ -228,6 +236,7 @@ export function buildDotNodes(
         groupAnchorClusterIds.has(clusterId),
         fontSpec,
         measurer,
+        titleDimsByCluster === undefined ? 'unsized' : titleDimsByCluster.get(clusterId),
       ),
     );
   }
@@ -248,6 +257,34 @@ export interface ClusterWrapperInputs {
   groupAnchorClusterIds: ReadonlySet<string>;
 }
 
+/** `ClusterHeader`'s TABLE dims for one group (D5); `undefined` iff no label. */
+export type ClusterTitleDims = { width: number; height: number };
+
+/** D5 dims for a container, sized from its FILTERED stereotype list. */
+function titleDimsFor(c: ContainerDesc, wrap: ClusterWrapperInputs): ClusterTitleDims | undefined {
+  const stereotype = visibleStereotypeLabels(c.stereotype, wrap.stereotypeRules);
+  const { stereotype: _raw, ...bare } = c;
+  const visible: ContainerDesc = stereotype === undefined ? bare : { ...bare, stereotype };
+  return descriptionClusterTitleTable(visible, wrap.theme, wrap.measurer);
+}
+
+/** The D5 dims of every container, keyed by `clusterId` -- the single source
+ *  for the cluster label TABLE and the port family's anchor TABLE. */
+export function clusterTitleDimsById(
+  ctx: ClassifyCtx,
+  wrap: ClusterWrapperInputs,
+): Map<string, ClusterTitleDims | undefined> {
+  return new Map(ctx.containers.map((c) => [c.clusterId, titleDimsFor(c, wrap)] as const));
+}
+
+function applyLabelDims(cluster: DotInputCluster, dims: ClusterTitleDims | undefined): void {
+  if (dims === undefined) return;
+  cluster.labelWidth = dims.width;
+  cluster.labelHeight = dims.height;
+  cluster.titleTableWidth = dims.width;
+  cluster.titleTableHeight = dims.height;
+}
+
 /**
  * The plain (non-port, non-kermor) family of `ClusterDotString.printInternal`:
  *  - `protection0`/`protection1` are unconditional outside swimlanes
@@ -258,22 +295,13 @@ export interface ClusterWrapperInputs {
  *    so it is `unwrappedNodeId`: a `nodeIds` member that stays unwrapped.
  *  - `cluster.isLabel()` prints the title TABLE (`:122-125`); D5 sizes it.
  */
-function applyPlainWrappers(cluster: DotInputCluster, c: ContainerDesc, wrap: ClusterWrapperInputs): void {
-  const linked = wrap.groupAnchorClusterIds.has(c.clusterId);
+function applyPlainWrappers(cluster: DotInputCluster, linked: boolean, dims: ClusterTitleDims | undefined): void {
   cluster.innerMarginLevels = linked ? 2 : 1;
   // The anchor is already the last `nodeIds` member (buildDotClusters); the
   // layout builder keeps the `unwrappedNodeId` member a direct child of the
   // base cluster instead of nesting it under `i`/`p1` (graph-layout-build.ts:495).
-  if (linked) cluster.unwrappedNodeId = groupAnchorNodeId(c.clusterId);
-  const stereotype = visibleStereotypeLabels(c.stereotype, wrap.stereotypeRules);
-  const { stereotype: _raw, ...bare } = c;
-  const visible: ContainerDesc = stereotype === undefined ? bare : { ...bare, stereotype };
-  const dims = descriptionClusterTitleTable(visible, wrap.theme, wrap.measurer);
-  if (dims === undefined) return;
-  cluster.labelWidth = dims.width;
-  cluster.labelHeight = dims.height;
-  cluster.titleTableWidth = dims.width;
-  cluster.titleTableHeight = dims.height;
+  if (linked) cluster.unwrappedNodeId = groupAnchorNodeId(cluster.id);
+  applyLabelDims(cluster, dims);
 }
 
 export function buildDotClusters(
@@ -283,6 +311,7 @@ export function buildDotClusters(
   kermor: boolean,
   wrap: ClusterWrapperInputs,
 ): DotInputCluster[] {
+  const dimsById = clusterTitleDimsById(ctx, wrap);
   return ctx.containers.map((c) => {
     // The anchor is a direct member of its own cluster (not nested in any
     // child sub-cluster) — ClusterDotString.java:149 emits it at the
@@ -296,17 +325,30 @@ export function buildDotClusters(
       const parentDesc = ctx.containerById.get(c.parentAstId);
       if (parentDesc !== undefined) cluster.parentId = parentDesc.clusterId;
     }
+    const linked = wrap.groupAnchorClusterIds.has(c.clusterId);
+    const dims = dimsById.get(c.clusterId);
     const portRanks = portRanksByCluster.get(c.clusterId);
     if (portRanks !== undefined) {
       cluster.portRanks = portRanks;
       // ClusterDotStringKermor's printRanks never chains to an anchor (see
       // runLayout's anchorClusterIds comment) — no anchor node exists to
       // point at under kermor, so portAnchorId stays unset.
-      if (!kermor) cluster.portAnchorId = groupAnchorNodeId(c.clusterId);
+      if (!kermor) {
+        cluster.portAnchorId = groupAnchorNodeId(c.clusterId);
+        // hasPort(): protection is forced off (ClusterDotString.java:109-112)
+        // so no innerMarginLevels; the label TABLE rides the `empty()` anchor
+        // (:175-181, see buildAnchorNode), not `ee` (:132-133). The `a`/`i`
+        // pair that still fires on a group link (:98, :151) is NOT populated:
+        // `borderPointAncestorWrap` is honoured only with `portRanksLabelOnEe`
+        // (graph-layout-build-borderpoint.ts:108,140; svek-dot-wrappers.ts:65),
+        // and `buildHasPortClusterHandles` ignores it -- core change, stop 7.
+      }
     } else if (!kermor) {
-      // Port (T4) and kermor (T4) families keep their pre-T3 shape.
-      applyPlainWrappers(cluster, c, wrap);
+      applyPlainWrappers(cluster, linked, dims);
     }
+    // ClusterDotStringKermor.printInternal never calls protection0/1 and
+    // prints no a/i: only the gamma subgraph's title TABLE (:135-137).
+    if (kermor) applyLabelDims(cluster, dims);
     return cluster;
   });
 }

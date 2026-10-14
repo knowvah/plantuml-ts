@@ -99,23 +99,45 @@ describe.skipIf(!hasCorpus)('description plain-family wrappers vs cached jar DOT
     for (const c of anon) expect(c.titleTableWidth).toBeUndefined();
   });
 
-  it('port clusters are left to T4: no wrappers, no title table', () => {
-    const [ours] = captureOurs('component', 'gurive-62-ricu497');
+  it('port family: no protection levels, no cluster title table; the TABLE rides the rect anchor', () => {
+    const [ours] = captureOurs('component', 'repoge-41-demu604');
     const ports = (ours!.clusters ?? []).filter((c) => c.portRanks !== undefined);
-    expect(ports.length).toBeGreaterThan(0);
-    for (const c of ports) {
-      expect(c.innerMarginLevels).toBeUndefined();
-      expect(c.titleTableWidth).toBeUndefined();
-    }
+    expect(ports.length).toBe(1);
+    expect(ports[0]!.innerMarginLevels).toBeUndefined();
+    expect(ports[0]!.titleTableWidth).toBeUndefined();
+    const anchor = ours!.nodes.find((n) => n.id === ports[0]!.portAnchorId);
+    // jar: `zaent0001 [shape=rect,width=.01,height=.01,label=<TABLE ... WIDTH="128" HEIGHT="23">`
+    expect(readJarDot('component', 'repoge-41-demu604')).toMatch(
+      /zaent0001 \[shape=rect,width=\.01,height=\.01,label=<<TABLE[^>]*WIDTH="128" HEIGHT="23"/,
+    );
+    expect([anchor?.titleLabelWidth, anchor?.titleLabelHeight]).toEqual([128, 23]);
+    expect(toSvekDot(ours!)).toMatch(
+      /zaent0001 \[shape=rect,width=\.01,height=\.01,label=<<TABLE[^>]*WIDTH="128" HEIGHT="23"/,
+    );
   });
 
-  it('kermor clusters are left to T4: no wrappers, no title table', () => {
+  it.each(['fopako-15-labi027', 'perapa-23-mobu798'])('port fixture %s is layout-equal', (slug) => {
+    const [ours] = captureOurs('component', slug);
+    expect(layoutParity(readJarDot('component', slug), ours!)).toEqual({ equal: true });
+  });
+
+  it('port group that is a link endpoint still lacks the a/i pair (core: stop 7)', () => {
+    // jar repoge: `cluster6a {... cluster6ee {... cluster6i {`; the layout builder ignores
+    // borderPointAncestorWrap without portRanksLabelOnEe, so cluster subgraphs: jar 4 vs ours 2.
+    const [ours] = captureOurs('component', 'repoge-41-demu604');
+    const r = layoutParity(readJarDot('component', 'repoge-41-demu604'), ours!);
+    expect(r.firstDiff).toEqual({ component: 'clusterTree', detail: 'cluster subgraphs: jar 4 vs ours 2' });
+  });
+
+  it('kermor family: gamma title TABLE dims, no protection or a/i levels', () => {
     const [ours] = captureOurs('component', 'fojamu-08-veku866');
     expect(ours!.kermor).toBe(true);
-    expect((ours!.clusters ?? []).length).toBeGreaterThan(0);
-    for (const c of ours!.clusters ?? []) {
-      expect(c.innerMarginLevels).toBeUndefined();
-      expect(c.titleTableWidth).toBeUndefined();
-    }
+    const clusters = ours!.clusters ?? [];
+    expect(clusters.length).toBe(1);
+    // jar fojamu gamma: `label=<<TABLE ... WIDTH="128" HEIGHT="23">`
+    expect(readJarDot('component', 'fojamu-08-veku866')).toMatch(/cluster6gamma[\s\S]*WIDTH="128" HEIGHT="23"/);
+    expect([clusters[0]!.labelWidth, clusters[0]!.labelHeight]).toEqual([128, 23]);
+    expect(clusters[0]!.innerMarginLevels).toBeUndefined();
+    expect(clusters[0]!.borderPointAncestorWrap).toBeUndefined();
   });
 });

@@ -49,6 +49,7 @@ import {
   computePortRanksByCluster,
   buildDotNodes,
   buildDotClusters,
+  clusterTitleDimsById,
   buildDotEdges,
   buildGeoTree,
   type PortClusterCtx,
@@ -171,12 +172,13 @@ function runLayout(
   const anchorClusterIds = kermor
     ? new Set(edgeDotBuild.groupAnchorClusterIds)
     : new Set([...edgeDotBuild.groupAnchorClusterIds, ...portClusterIds]);
-  const dotClusters = buildDotClusters(ctx, anchorClusterIds, portRanksByCluster, kermor, {
+  const wrapperInputs = {
     theme,
     measurer,
     stereotypeRules: ast.stereotypeVisibilityRules ?? [],
     groupAnchorClusterIds: edgeDotBuild.groupAnchorClusterIds,
-  }).map((c) => ({
+  };
+  const dotClusters = buildDotClusters(ctx, anchorClusterIds, portRanksByCluster, kermor, wrapperInputs).map((c) => ({
     ...c,
     nodeIds: c.nodeIds.filter((id) => !removed.has(id)),
   }));
@@ -192,6 +194,7 @@ function runLayout(
       ast.links,
       fixCircle,
       ast.stereotypeVisibilityRules ?? [],
+      clusterTitleDimsById(ctx, wrapperInputs),
     ).filter((n) => !removed.has(n.id)),
     edges: edgeDotBuild.dotEdges,
     nodeSep,

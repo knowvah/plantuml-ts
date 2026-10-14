@@ -68,8 +68,8 @@ describe.skipIf(!hasCorpus)('computeLayoutEqual over cached jar DOT', () => {
     expect(computeLayoutEqual(f.dots, f.events, false, f.markup)).toEqual({ layoutEqual: true });
   });
 
-  it('bamami is unequal with a clusterTree first diff', () => {
-    const f = fixture('unknown', 'bamami-10-lava790');
+  it('repoge (port group link: a/i pair not yet built) is unequal with a clusterTree first diff', () => {
+    const f = fixture('component', 'repoge-41-demu604');
     const r = computeLayoutEqual(f.dots, f.events, false, f.markup);
     expect(r.layoutEqual).toBe(false);
     expect(r.layoutFirstDiff?.component).toBe('clusterTree');
