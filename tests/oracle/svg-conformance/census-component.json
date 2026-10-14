@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-14T22:38:57.134Z",
-  "measuredAgainstCommit": "7b59644e3",
+  "generatedAt": "2026-10-14T23:50:08.700Z",
+  "measuredAgainstCommit": "8f252e59b",
   "type": "component+tests/oracle/svg-conformance/census-component.json",
   "measurer": "deterministic",
   "fixtures": [
@@ -998,8 +998,8 @@
     {
       "slug": "povuju-56-zafi701",
       "status": "ok",
-      "diffCount": 55,
-      "bucket": "31+"
+      "diffCount": 13,
+      "bucket": "11-30"
     },
     {
       "slug": "purevo-74-pamo264",
@@ -1250,7 +1250,7 @@
     {
       "slug": "texacu-57-daci050",
       "status": "ok",
-      "diffCount": 174,
+      "diffCount": 38,
       "bucket": "31+"
     },
     {

@@ -60,9 +60,9 @@
       "slug": "texacu-57-daci050",
       "group": 1,
       "status": "baseline",
-      "diffCount": 174,
+      "diffCount": 38,
       "measuredAt": "2026-10-14",
-      "measuredAgainstCommit": "7b59644e3"
+      "measuredAgainstCommit": "8f252e59b"
     },
     {
       "type": "usecase",

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-14T22:39:00.431Z",
-  "measuredAgainstCommit": "7b59644e3",
+  "generatedAt": "2026-10-14T23:50:12.033Z",
+  "measuredAgainstCommit": "8f252e59b",
   "type": "usecase+tests/oracle/svg-conformance/census-usecase.json",
   "measurer": "deterministic",
   "fixtures": [
@@ -79,8 +79,8 @@
     {
       "slug": "depabo-06-kato214",
       "status": "ok",
-      "diffCount": 84,
-      "bucket": "31+"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "dijico-15-cabu824",

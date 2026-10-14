@@ -527,6 +527,12 @@
       "type": "usecase",
       "addedAt": "2026-10-14",
       "source": "dot-cache"
+    },
+    {
+      "slug": "depabo-06-kato214",
+      "type": "usecase",
+      "addedAt": "2026-10-14",
+      "source": "dot-cache"
     }
   ]
 }

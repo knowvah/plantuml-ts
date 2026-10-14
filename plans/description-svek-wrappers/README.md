@@ -76,7 +76,7 @@ on every changed file (worktrees skip the husky hook).
 | [2](batch-2/overview.md) survey column + ratchet; wrappers (plain) | T2 ∥ T3 | ∥ | [x] |
 | [3](batch-3/overview.md) wrappers (port + kermor); dashboard regen | T4 ∥ T5 (+T4b/c, T4d) | ∥ | [x] |
 | [4](batch-4/overview.md) measure b4 + re-pin; residual triage | T6 → T7 | — | [x] |
-| [5](batch-5/overview.md) deroxu | T8 → T9 (cond.) → T10 | — | [ ] |
+| [5](batch-5/overview.md) deroxu | T8 → T9 (cond.) → T10 | — | [x] |
 | [6](batch-6/overview.md) exit | T11 | — | [ ] |
 
 ## Index
