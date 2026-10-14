@@ -8,7 +8,11 @@
 import type { GvGraphBuilder } from '@knowvah/dot-engine';
 import type { DotInputCluster, DotInputGraph, DotInputNode } from './graph-layout.types.js';
 import { buildBorderPointClusterHandles, inheritedEeLabel } from './graph-layout-build-borderpoint.js';
-import { buildKermorClusterHandles, placeKermorMembers } from './graph-layout-build-kermor.js';
+import {
+  addNodesWithKermorRootEmpty,
+  buildKermorClusterHandles,
+  placeKermorMembers,
+} from './graph-layout-build-kermor.js';
 import {
   addTitledAnchorNode,
   buildHasPortClusterHandles,
@@ -198,15 +202,13 @@ function addOneNode(b: GvGraphBuilder, n: DotInputNode): void {
 }
 
 export function addNodes(b: GvGraphBuilder, input: DotInputGraph): void {
-  for (const n of firstEncounterOrder(input)) addOneNode(b, n);
+  addNodesWithKermorRootEmpty(b, input, firstEncounterOrder(input), addOneNode);
   // Rank constraints (rank=source|sink|same|min|max): graphviz groups nodes by
   // a subgraph carrying `rank=`. Declaring an existing node id inside the
   // subgraph references it (DOT semantics — no duplicate node is created).
-  // cdd3-T28 (E3-10): a port ranked by its cluster's `portRanks` is NOT
-  // regrouped at the root -- upstream prints that rankset only inside the
-  // cluster (`ClusterDotString.java:136-137,254-260`), as the text emitter
-  // does (`svek-dot-emit.ts#rankLines`); a second, root rankset makes
-  // graphviz evict the port from its cluster (`sokevu-87-toce485`).
+  // cdd3-T28: a port ranked by its cluster's `portRanks` is NOT regrouped at
+  // the root (`ClusterDotString.java:136-137,254-260`); a second, root rankset
+  // makes graphviz evict the port from its cluster (`sokevu-87-toce485`).
   const portIds = new Set((input.clusters ?? []).flatMap((c) => (c.portRanks ?? []).flatMap((r) => r.nodeIds)));
   const rankGroups = new Map<string, string[]>();
   for (const n of input.nodes) {
@@ -346,7 +348,7 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
       return handles;
     }
     const outerName = nameFor(c);
-    // T4c: kermor -- alpha?/beta/gamma; `gamma` is the drawn cluster.
+    // T4c: kermor alpha?/beta/gamma; `gamma` is the drawn cluster.
     if (input.kermor === true) {
       const k = buildKermorClusterHandles(c, outerName, parentInnermost, () => portRankSubId++);
       idByName.delete(outerName);
@@ -386,7 +388,6 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     // G7 T7: jar's OUTER "a"/"p0" pair (`ClusterDotString.java:91-116`) wraps
     // `main` from outside, gated by the same `innerMarginLevels` as the inner
     // "i"/"p1" pair (307/307 cached DOTs pair p0 with p1, 93/93 a with i).
-    // "a" nests outside "p0" (`:98-115`).
     let host = parentInnermost;
     if (levels === 2) host = host.addSubgraph(`${outerName}a`, {});
     if (levels !== undefined) host = host.addSubgraph(`${outerName}p0`, {});

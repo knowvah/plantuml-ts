@@ -14,6 +14,7 @@
 
 import type { DescriptiveNode, DescriptiveLink } from './ast.js';
 import type { Theme } from '../../core/theme.js';
+import { measureLinkNoteDim } from './link-note-box.js';
 import { descriptionClusterTitleTable } from './description-cluster-header.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { DotInputNode, DotInputEdge, DotInputCluster } from '../../core/graph-layout.js';
@@ -304,6 +305,26 @@ function applyPlainWrappers(cluster: DotInputCluster, linked: boolean, dims: Clu
   applyLabelDims(cluster, dims);
 }
 
+/**
+ * `ClusterDotStringKermor.java:88-99,104-112`: the TOP/BOTTOM note table is
+ * `SvekEdge.appendTable(sb, (int) dim.getWidth(), (int) dim.getHeight(), ...)`
+ * with `dim = getCucaNote(position).calculateDimension` -- an
+ * `EntityImageNoteLink` (`Cluster.java:393-399`), whose size is the Rose note
+ * component's preferred size: the SAME block the `note on link` sizer measures
+ * (`link-note-box.ts#measureLinkNoteDim`).
+ */
+function applyKermorNotes(cluster: DotInputCluster, c: ContainerDesc, wrap: ClusterWrapperInputs): void {
+  if (c.kermorNotes === undefined) return;
+  const dims = (text: string | undefined): ClusterTitleDims | undefined => {
+    if (text === undefined) return undefined;
+    const d = measureLinkNoteDim(text, wrap.theme, wrap.measurer);
+    return { width: Math.trunc(d.width), height: Math.trunc(d.height) };
+  };
+  const top = dims(c.kermorNotes.top);
+  const bottom = dims(c.kermorNotes.bottom);
+  cluster.kermorNotes = { ...(top === undefined ? {} : { top }), ...(bottom === undefined ? {} : { bottom }) };
+}
+
 export function buildDotClusters(
   ctx: ClassifyCtx,
   anchorClusterIds: ReadonlySet<string>,
@@ -346,7 +367,10 @@ export function buildDotClusters(
     }
     // ClusterDotStringKermor.printInternal never calls protection0/1 and
     // prints no a/i: only the gamma subgraph's title TABLE (:135-137).
-    if (kermor) applyLabelDims(cluster, dims);
+    if (kermor) {
+      applyLabelDims(cluster, dims);
+      applyKermorNotes(cluster, c, wrap);
+    }
     return cluster;
   });
 }

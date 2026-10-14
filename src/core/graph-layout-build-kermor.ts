@@ -15,7 +15,7 @@
  */
 
 import type { GvGraphBuilder } from '@knowvah/dot-engine';
-import type { DotInputCluster } from './graph-layout.types.js';
+import type { DotInputCluster, DotInputGraph, DotInputNode } from './graph-layout.types.js';
 
 /** `SvekEdge.appendTable`'s `(int)` casts (`SvekEdge.java:504-507`). */
 function noteTable(width: number, height: number): string {
@@ -50,7 +50,7 @@ export function buildKermorClusterHandles(
     host = host.addSubgraph(`${outerName}alpha`, {});
     labelWithNote(host, c.kermorNotes?.top);
   }
-  const beta = host.addSubgraph(`${outerName}beta`, {});
+  const beta = host.addSubgraph(`${outerName}beta`, { labelloc: 'b' }); // :103-104
   labelWithNote(beta, c.kermorNotes?.bottom);
   for (const pr of c.portRanks ?? []) {
     if (pr.rank !== 'source') continue;
@@ -60,7 +60,7 @@ export function buildKermorClusterHandles(
       beta.addNode(id);
     }
   }
-  const gamma = beta.addSubgraph(`${outerName}gamma`, {});
+  const gamma = beta.addSubgraph(`${outerName}gamma`, { labelloc: 't' }); // :128-129
   if (c.titleTableWidth !== undefined && c.titleTableHeight !== undefined) {
     gamma.setHtmlAttr('label', noteTable(c.titleTableWidth, c.titleTableHeight));
   }
@@ -70,7 +70,10 @@ export function buildKermorClusterHandles(
 /** The rank=sink groups (`:153`) go last inside gamma; normal members first. */
 export function placeKermorMembers(c: DotInputCluster, gamma: GvGraphBuilder, nextRankSubId: () => number): void {
   const ports = new Set((c.portRanks ?? []).flatMap((r) => r.nodeIds));
-  for (const id of c.nodeIds) if (!ports.has(id)) gamma.addNode(id);
+  const normals = c.nodeIds.filter((id) => !ports.has(id));
+  // `Cluster.printCluster3_forKermor` (`Cluster.java:598-601`): `<id>empty` point when no normal member.
+  if (normals.length === 0) gamma.addNode(`${c.id}empty`, { shape: 'point' });
+  for (const id of normals) gamma.addNode(id);
   for (const pr of c.portRanks ?? []) {
     if (pr.rank !== 'sink') continue;
     const rankSub = gamma.addSubgraph(`__portrank_${nextRankSubId()}`, { rank: pr.rank });
@@ -80,3 +83,37 @@ export function placeKermorMembers(c: DotInputCluster, gamma: GvGraphBuilder, ne
     }
   }
 }
+
+/** `Cluster.printCluster3_forKermor` on the ROOT (`DotStringFactory.java:178-184`):
+ *  both edge batches print FIRST, then the root prints
+ *  `<rootId>empty [shape=point,label=""]` when it has no direct normal node
+ *  (`Cluster.java:595-598`), then the clusters. So the placeholder is created
+ *  after every edge endpoint and before any other cluster member -- graphviz
+ *  breaks rank ties by creation order. Mirrors the text emitter's `rootEmpty`
+ *  (`svek-dot-emit.ts`), same condition: no node outside a cluster.
+ *  `order` is `firstEncounterOrder(input)`; `add` declares one node. */
+export function addNodesWithKermorRootEmpty(
+  b: GvGraphBuilder,
+  input: DotInputGraph,
+  order: readonly DotInputNode[],
+  add: (b: GvGraphBuilder, n: DotInputNode) => void,
+): void {
+  if (input.kermor !== true) {
+    for (const n of order) add(b, n);
+    return;
+  }
+  const clustered = new Set((input.clusters ?? []).flatMap((c) => c.nodeIds));
+  let pending = input.nodes.every((n) => clustered.has(n.id));
+  const endpoints = new Set(input.edges.flatMap((e) => [e.from, e.to]));
+  for (const n of order) {
+    if (pending && !endpoints.has(n.id)) {
+      b.addNode(KERMOR_ROOT_EMPTY_ID, { shape: 'point' });
+      pending = false;
+    }
+    add(b, n);
+  }
+  if (pending) b.addNode(KERMOR_ROOT_EMPTY_ID, { shape: 'point' });
+}
+
+/** Same literal as the text emitter's placeholder (the comparator ignores ids). */
+export const KERMOR_ROOT_EMPTY_ID = 'rootEmpty';

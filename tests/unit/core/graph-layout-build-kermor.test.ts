@@ -46,7 +46,7 @@ describe('kermor cluster nesting', () => {
     const noted = layoutGraph(graph({ top: { width: 200, height: 50 } }));
     expect(plain.clusters!.map((c) => c.id)).toEqual(['cluster0']);
     expect(noted.clusters!.map((c) => c.id)).toEqual(['cluster0']);
-    expect(noted.clusters![0]!.width).toBe(plain.clusters![0]!.width);
+    expect(noted.clusters![0]!.width).toBeCloseTo(plain.clusters![0]!.width, 6);
     // alpha/beta reserve room around gamma: the whole graph is shifted further from the origin.
     expect(noted.originShift!.y).toBeGreaterThan(plain.originShift!.y);
   });

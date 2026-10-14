@@ -162,15 +162,42 @@ describe.skipIf(!hasCorpus)('description plain-family wrappers vs cached jar DOT
     expect(clusters[0]!.borderPointAncestorWrap).toBeUndefined();
   });
 
-  it("kermor emits beta > gamma; the jar's alpha (group note) is not populated yet", () => {
-    const [ours] = captureOurs('component', 'fojamu-08-veku866');
-    const dot = toSvekDot(ours!);
-    expect(dot).toMatch(/subgraph cluster\d+beta \{labelloc="b";[\s\S]*subgraph cluster\d+gamma \{labelloc="t";/);
-    expect(dot).not.toMatch(/alpha/);
-    // jar: alpha carries the TOP note (282x46); a kermor group note is dropped at parse time
-    // (parse-state.ts attachNoteToEntity), so `kermorNotes` stays unset.
-    expect(readJarDot('component', 'fojamu-08-veku866')).toMatch(/cluster6alpha/);
-    const r = layoutParity(readJarDot('component', 'fojamu-08-veku866'), ours!);
-    expect(r.firstDiff).toEqual({ component: 'clusterTree', detail: 'cluster subgraphs: jar 3 vs ours 2' });
+  it('kermor group notes: dims pinned from the jar DOT (EntityImageNoteLink, (int) dims)', () => {
+    const dims = (tree: string, slug: string): (string | undefined)[] =>
+      captureOurs(tree, slug)[0]!.clusters!.map((c) => {
+        const n = c.kermorNotes;
+        return n === undefined ? undefined : `${(n.top ?? n.bottom)!.width}x${(n.top ?? n.bottom)!.height}`;
+      });
+    expect(dims('component', 'fojamu-08-veku866')).toEqual(['282x46']);
+    expect(dims('component', 'siseda-71-napu395')).toEqual(['282x46', '269x72', '266x85', undefined]);
+    const jar = readJarDot('component', 'siseda-71-napu395');
+    for (const wh of ['WIDTH="282" HEIGHT="46"', 'WIDTH="269" HEIGHT="72"', 'WIDTH="266" HEIGHT="85"']) {
+      expect(jar).toContain(wh);
+    }
+  });
+
+  it('fojamu keeps the TOP note on alpha and zubujo the BOTTOM note on beta', () => {
+    const [fo] = captureOurs('component', 'fojamu-08-veku866');
+    expect(fo!.clusters![0]!.kermorNotes).toEqual({ top: { width: 282, height: 46 } });
+    const [zu] = captureOurs('component', 'zubujo-87-xaxa087');
+    expect(zu!.clusters![0]!.kermorNotes).toEqual({ bottom: { width: 282, height: 46 } });
+  });
+
+  it.each([
+    ['component', 'fojamu-08-veku866'],
+    ['component', 'zubujo-87-xaxa087'],
+    ['component', 'siseda-71-napu395'],
+  ])('kermor fixture %s/%s is layout-equal (alpha/beta/gamma, root empty point)', (tree, slug) => {
+    const [ours] = captureOurs(tree, slug);
+    expect(layoutParity(readJarDot(tree, slug), ours!)).toEqual({ equal: true });
+  });
+
+  it('keeps only the first TOP/BOTTOM note, ignores LEFT, and a leaf note still becomes a note node', () => {
+    const [g] = captureMarkup(
+      '@startuml\n!pragma kermor on\npackage P {\n[A]\n}\nnote top of P: first\nnote top of P: second\nnote left of P: ignored\n[B]\nnote right of B: leaf\n@enduml',
+    );
+    const p = g!.clusters![0]!;
+    expect(Object.keys(p.kermorNotes ?? {})).toEqual(['top']);
+    expect(g!.nodes.some((n) => n.id.startsWith('__note_'))).toBe(true);
   });
 });
