@@ -14,6 +14,11 @@
 
 import type { DescriptiveNode, DescriptiveLink } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
+import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
+import { FontStyle } from '../../core/klimt/shape/UText.js';
+import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { buildTextBlock } from '../../core/svek/image/EntityImageDescriptionSupport.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { DotInputNodeShape, DotInputGraph } from '../../core/graph-layout.js';
 import type { EdgeContainerEndpoints, ResolvedEndpoint } from './layout-helpers-types.js';
@@ -173,7 +178,25 @@ export function shapeForNode(
  *  41.55 where the jar writes `WIDTH="41"`.
  *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/SvekNode.java:181-186 */
 function portLabelWidth2(node: DescriptiveNode, fontSpec: FontSpec, measurer: StringMeasurer): number {
-  return Math.trunc(measurer.measure(node.display, fontSpec).width);
+  // dsw-T9: `EntityImagePort` sizes the label with `leaf.getDisplay().create(...)`
+  // (AbstractEntityImageBorder.java:79-82) -- a multi-line TextBlock whose width is
+  // the WIDEST line. `measurer.measure` is single-line (it sums the lines), so route
+  // through `buildTextBlock`, the block the draw path (`drawPortFallback`) uses.
+  const font: FontConfiguration = {
+    family: fontSpec.family,
+    size: fontSpec.size,
+    color: null,
+    styles: new Set(portFontStyles(fontSpec)),
+  };
+  const block = buildTextBlock(node.display, font, HorizontalAlignment.CENTER);
+  return Math.trunc(block.calculateDimension(new MeasurerStringBounder(measurer)).getWidth());
+}
+
+function portFontStyles(fontSpec: FontSpec): FontStyle[] {
+  const styles: FontStyle[] = [];
+  if (fontSpec.weight === 'bold') styles.push(FontStyle.BOLD);
+  if (fontSpec.style === 'italic') styles.push(FontStyle.ITALIC);
+  return styles;
 }
 
 /** SvekNode.appendLabelHtmlSpecialForPort: `width2 > 40` switches a port
