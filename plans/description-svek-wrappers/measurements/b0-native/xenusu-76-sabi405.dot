@@ -1,0 +1,42 @@
+digraph unix {
+	graph [bb="0,0,311.38,162",
+		nodesep=0.486111,
+		ranksep=0.833333,
+		remincross=true,
+		searchsize=500
+	];
+	node [label="\N"];
+	sh0006	[color="#000006",
+		height=0.61111,
+		label="",
+		pos="131.16,140",
+		shape=rect,
+		width=0.66372];
+	sh0007	[color="#000007",
+		height=0.61111,
+		label="",
+		pos="131.16,22",
+		shape=rect,
+		width=0.66372];
+	sh0006 -> sh0007	[arrowhead=none,
+		arrowtail=none,
+		color="#000008",
+		label=<<TABLE BGCOLOR="#000009" FIXEDSIZE="TRUE" WIDTH="83" HEIGHT="14"><TR><TD></TD></TR></TABLE>>,
+		lp="46.658,81",
+		minlen=1,
+		pos="106.95,137.04 77.211,133.18 27.911,121.76 5.1582,88 -21.325,48.71 63.264,31.755 106.86,25.762"];
+	sh0006 -> sh0007	[arrowhead=none,
+		arrowtail=none,
+		color="#00000C",
+		label=<<TABLE BGCOLOR="#00000D" FIXEDSIZE="TRUE" WIDTH="106" HEIGHT="14"><TR><TD></TD></TR></TABLE>>,
+		lp="181.16,81",
+		minlen=1,
+		pos="129.36,117.64 128.5,104.96 127.73,88.566 128.16,74 128.44,64.248 129.04,53.46 129.62,44.328"];
+	sh0006 -> sh0007	[arrowhead=none,
+		arrowtail=none,
+		color="#000010",
+		label=<<TABLE BGCOLOR="#000011" FIXEDSIZE="TRUE" WIDTH="69" HEIGHT="14"><TR><TD></TD></TR></TABLE>>,
+		lp="276.88,81",
+		minlen=1,
+		pos="155.24,135.13 180.82,129.6 220.04,116.71 238.16,88 259.79,53.72 193.12,34.889 155.32,27.191"];
+}

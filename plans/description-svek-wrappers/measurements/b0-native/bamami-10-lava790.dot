@@ -1,0 +1,70 @@
+digraph unix {
+	graph [bb="0,0,177,113.07",
+		nodesep=0.486111,
+		ranksep=0.833333,
+		remincross=true,
+		searchsize=500
+	];
+	node [label="\N"];
+	subgraph cluster6p0 {
+		graph [bb="8,8.0697,169,105.07",
+			label=""
+		];
+		subgraph cluster6 {
+			graph [bb="16,16.07,161,97.07",
+				color="#000006",
+				label=<<TABLE BGCOLOR="#000007" FIXEDSIZE="TRUE" WIDTH="17" HEIGHT="23"><TR><TD></TD></TR></TABLE>>,
+				labeljust=c,
+				lheight=0.32,
+				lp="88.5,81.57",
+				lwidth=0.24,
+				style=solid
+			];
+			subgraph cluster6p1 {
+				graph [bb="24,24.07,153,58.07",
+					label=""
+				];
+				sh0010	[color="#00000A",
+					height=0.25,
+					label="",
+					pos="41,41.07",
+					shape=rect,
+					width=0.25];
+				sh0011	[color="#00000B",
+					height=0.25,
+					label="",
+					pos="136,41.07",
+					shape=rect,
+					width=0.25];
+				sh0010 -> sh0011	[arrowhead=none,
+					arrowtail=none,
+					color="#00000C",
+					label=<<TABLE BGCOLOR="#00000D" FIXEDSIZE="TRUE" WIDTH="42" HEIGHT="15"><TR><TD></TD></TR></TABLE>>,
+					lp="88.5,51.57",
+					minlen=0,
+					pos="50.456,41.07 68.666,41.07 108.4,41.07 126.58,41.07"];
+				sh0010 -> sh0011	[arrowhead=none,
+					arrowtail=none,
+					color="#000010",
+					label=<<TABLE BGCOLOR="#000011" FIXEDSIZE="TRUE" WIDTH="6" HEIGHT="15"><TR><TD></TD></TR></TABLE>>,
+					lp="88.5,9.5697",
+					minlen=0,
+					pos="46.87,31.624 56.365,17.652 76.05,-6.0465 96,2.0697 110.73,8.0636 123.01,22.383 129.92,31.902"];
+				sh0010 -> sh0011	[arrowhead=none,
+					arrowtail=none,
+					color="#000014",
+					label=<<TABLE BGCOLOR="#000015" FIXEDSIZE="TRUE" WIDTH="11" HEIGHT="15"><TR><TD></TD></TR></TABLE>>,
+					lp="88.5,72.57",
+					minlen=0,
+					pos="50.089,49.251 54.899,53.03 61.121,57.108 67.5,59.07 85.342,64.556 91.658,64.556 109.5,59.07 115.88,57.108 122.1,53.03 126.91,49.251"];
+				sh0010 -> sh0011	[arrowhead=none,
+					arrowtail=none,
+					color="#000018",
+					label=<<TABLE BGCOLOR="#000019" FIXEDSIZE="TRUE" WIDTH="15" HEIGHT="15"><TR><TD></TD></TR></TABLE>>,
+					lp="88.5,30.57",
+					minlen=0,
+					pos="50.467,35.425 58.333,31.081 69.981,25.435 81,23.07 97.503,19.528 116.03,28.386 126.82,34.895"];
+			}
+		}
+	}
+}

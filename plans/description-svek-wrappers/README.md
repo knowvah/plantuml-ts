@@ -71,7 +71,7 @@ on every changed file (worktrees skip the husky hook).
 
 | Batch | Tasks | Parallel | Done |
 |---|---|---|---|
-| [0](batch-0/overview.md) branch + b0 | T0 | — | [ ] |
+| [0](batch-0/overview.md) branch + b0 | T0 | — | [x] |
 | [1](batch-1/overview.md) gate, tightened dotEqual, header sizing | T1a ∥ T1b ∥ T1c | all ∥ | [ ] |
 | [2](batch-2/overview.md) survey column + ratchet; wrappers (plain) | T2 ∥ T3 | ∥ | [ ] |
 | [3](batch-3/overview.md) wrappers (port + kermor); dashboard regen | T4 ∥ T5 | ∥ | [ ] |
