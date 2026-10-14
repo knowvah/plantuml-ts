@@ -35,6 +35,58 @@ post-D7 measurements.
 
 ---
 
+## `utility-factories-port` (ufp) — DONE 2026-10-13 (batches 0–3, exit; merged to local main as a merge commit, not pushed)
+
+**What changed:**
+- The `@startuml` single-line utility diagrams are ported 1:1 as plugins, registered at their `PSystemBuilder.java:133-200` slots through a ported `PSystemSingleLineFactory` gate. They are `listopeniconic`, `openiconic`, `colors` (including `automatic`, via `HColorAutomagic`), `listemoji`/`emoji`, `listsprite` (ListArchimateSprites), `version`/`about`/`authors`/`license`, bare `stdlib`, `donors`, `skinparameters`, `charlie`, the public dedications and the eggs (Egg/AppleTwo/RIP). The base classes `UgDiagram`, `UgSimpleDiagram` and `PlainStringsDiagram` are ported too.
+- **Rulings:** D13 mirrors upstream's **MIT edition** (sudoku dropped; the README section says the easter egg is intentionally absent). D14: the `version` page prints the port's own values. The about label stays `plantuml-ts version <v>`. D15 approved three core ports: `SpriteImage` (PNG sprites), `<qrcode:>` creole under MIT (a blank image via `FlashCodeUtilsNone`), and `HColorAutomagic`.
+- **Utility rows: 0/15 → 15/15 in-scope conformant and pinned** (`oracle/goldens/svg-utility/ratchet.json`, 15 pins). The 2 sudoku rows are OUT under D13.
+- **Unknown survey:** 408/47/370 → 423/47/355.
+- **Routing:** agree 6142 → 6157, total 6870 → 6885.
+- **Refusal:** erroring 238 → 225, rendering 6632 → 6660, known-gap 200 → 187.
+- **0 conformant losses** in any of 28 engines against b0 (b0 → b3 had 15 movers, all in-scope, all up).
+- **Authored coverage:** `tests/fixtures/utility/`, 49 rows with jar oracles (`authored-baseline.json`, never-rises + 3-render determinism). 19 rows are 0-diff. 22 jar-errors-and-we-error rows sit at 5–7 diffs (error-page residuals 1–3 below). Six are ruled differences: license ×3 145/87 (D13), about/authors 8/8 (D13 + own label), version 134/72 (D14). One is a parity gap (`listsprite` refusal, follow-on 4).
+- Bundle: `dist/plantuml-ts.js` +101,705 B over b0 (budget +250 KB).
+
+**Fixed rows with commits:**
+- openiconic ×2: T1a `0873e5ad1`.
+- colors ×2: T1b `5d010546b`.
+- emoji ×7: T1c `e0b98d222`.
+- stdlib: T1f `9c70c2680`.
+- charlie: T1h `b7e3415b8`.
+- dedication `kavama-92`: T1h + T1i `fbe3b697c`.
+- All of the above registered by T2a `907f5a5b6`.
+- archimate `xucoma-93`: T3a `954b49fe0`, merged `8d904615a`.
+
+**Open follow-ons (mechanism, owner):**
+1. **Error-page source label** (`PSystemError.java:239` prints `[From <file>.puml`; `src/core/tim/ReadLineReader.ts:37` prints `[From string`). This costs 3 diffs on every jar-errors-and-we-error page. The other 2 are our own version string, which the ruling keeps.
+2. **Sequence refusal index off by one** (`src/diagrams/sequence/parser.ts:266`). It reports line/consumed as an index into `source.lines`, which excludes `@startuml`, so the class engine wins the `PSystemErrorUtils.java:140-147` tie that sequence wins in the jar. The page then names class where the jar names sequence (+2 diffs). Skinparam-stripped sources need the full-source position.
+3. **Tab stops in the error listing**: `TileText.java:82-84,94-104` moves a tab to the next 8-space stop, but `src/core/error/error-page-exact.ts:178-198` handles only leading spaces.
+4. **`ListSpriteDiagramFactory` unported** (`PSystemBuilder.java:170`, `klimt/sprite/ListSpriteDiagram*.java`, 250 lines). It serves `@startuml` AND `@startsprites` (`DiagramType.java:194-200`). The jar draws where we error on `listsprite` that falls past the single-line gate. It is core plus the out-of-scope `@startsprites`, so it needs its own mission.
+5. **Asset packaging**: ship `assets/{eggs,dedication}` to library consumers. Today the refusal gate (no asset store) errors on `kavama-92`, and so does a library user by default.
+6. **Rendering gaps**:
+   - No RGB PNG encoder path (`PixelImage.java:72-73`; `png-encoder.ts` writes RGBA). This affects only the href bytes of qrcode at scale 1.
+   - `Parser.getScale` returns NaN where Java throws NumberFormatException (`Parser.ts:69`).
+   - `UImage.getHeight` −1 is compensated at call sites.
+   - LimitFinder uses raster−1 where Java uses raster−2.
+   - `HColorScheme` and `HColorGradient#opposite` are unported.
+   - Other sprite draw seams skip `SpriteImage`: stereotype `<<$png>>` and the class/sequence headers.
+7. **Records**:
+   - About 100 "never added" reasons for NWDIAG/TIMING/BPM/GIT/FLOW rows are misleading.
+   - Creole/math/latex/def rows were recorded `ok` while measuring the sentinel, so the `vesuzo-97` pin is stale.
+   - The utility diff-baseline's sudoku reason could cite D13.
+8. **Dedupe**: `error/graphic-strings.ts` vs the ported GraphicStrings, `equalsIgnoreCase`, `removeInitialNoise`.
+9. **Tooling**: `chain.sh` gates only on the 1-minute load average; the first b2 pass timed c4 out under a 30-load 15-minute average.
+10. **Oracle stability**: the GPL jar's license page is nondeterministic in multi-file runs (`FlashCodeUtilsZxing.java:60` `tryLock` → `:76` null → blank QR). Re-capture license oracles one file per jar run.
+11. **Out of scope by ruling:** `listfonts` (host fonts), `help` (own mission), `@startcreole/math/latex/def/sprites/crash`, `path` (INSECURE only), encrypted dedications, the key tools, `testdot`.
+12. **For a maintainer ruling:** `PSystemBuilder.java:165-166` wraps `PSystemDitaaFactory` in `::comment when __MIT__ __EPL__ __BSD__ __ASL__`, so the MIT edition has no ditaa. D13 was ruled for sudoku. Whether "mirror the MIT edition" extends to the ported ditaa engine is undecided; nothing was changed.
+
+**Flagged for review:**
+- T0c contract deviations (journal row 9).
+- The T1f about-label ruling (row 24, since confirmed by the user).
+- The b2-close ratchet harness fix outside the close's write-set (row 42).
+- The `repin-utility-routing.mts` carve-outs (`MIT_EDITION_SLUGS`, `ASSET_SEAM_SLUGS`, row 41).
+
 ## `wbs-engine-port` (wep) — DONE 2026-10-13 (batches 0–5, exit; merged to local main as a merge commit, not pushed)
 
 **What changed:**

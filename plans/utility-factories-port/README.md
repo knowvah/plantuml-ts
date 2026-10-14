@@ -91,8 +91,8 @@ only via `scripts/oracle-render.sh`. Batch close: [close-procedure.md](close-pro
 | [1a](batch-1a/overview.md): openiconic, colors, emoji list, archimate list | T1a–T1d | all ∥ | [x] |
 | [1b](batch-1b/overview.md): sudoku, version/license, donors+skinparameters, eggs+dedication | T1e–T1h | all ∥ (∥ 1a) | [x] (T1e dropped, D13) |
 | [2](batch-2/overview.md): registration in upstream order + main pin close | T2a | — | [x] |
-| [3](batch-3/overview.md): residual drive (written at the b2 close) + T3-cov | T3* | per spec | [ ] |
-| [exit](exit/overview.md): final + merge | T-exit | — | [ ] |
+| [3](batch-3/overview.md): residual drive (written at the b2 close) + T3-cov | T3* | per spec | [x] |
+| [exit](exit/overview.md): final + merge | T-exit | — | [x] |
 
 Executor: `fable`. Subagents: `typescript-pro` — opus for T0c, T0e, T1a, T1b, T1e, T1f, T1h,
 T2a, T3-cov; sonnet for T0b, T0d, T1c, T1d, T1g. Every agent prompt = worktree header +
@@ -108,3 +108,31 @@ T2a, T3-cov; sonnet for T0b, T0d, T1c, T1d, T1g. Every agent prompt = worktree h
 - [settings.autonomous.json](settings.autonomous.json): copy to `.claude/settings.autonomous.json`
 - Precedents: `plans/wbs-engine-port/` (wep, the shape this brief copies), `plans/salt-engine-port/`,
   `.agent-notes/wep-*.md`, `plans/unknown-bucket-routing-repair/diagnosis/T6.md` (the gap record).
+
+## Summary (T-exit, 2026-10-13)
+
+**Tasks vs planned:** every planned task ran except T1e (sudoku), dropped by D13. T1i (the dedication asset seam) and T3a–T3d were added from residual families found at the b1/b2 closes. T3-cov authored 49 rows.
+
+**Outcome:** utility **15/15 in-scope conformant and pinned**; the 2 sudoku rows are OUT (D13).
+- Unknown survey: 408/47/370 → 423/47/355.
+- Routing: agree 6142 → 6157 / 6885.
+- Refusal: rendering 6632 → 6660, known-gap 200 → 187.
+- 0 conformant losses in 28 engines.
+
+**Decisions flagged:**
+- D13: mirror the MIT edition.
+- D14: the version page shows the port's own values.
+- D15: three core ports (SpriteImage, qrcode MIT, HColorAutomagic).
+- Journal row 9: T0c contract deviations.
+- Journal row 41: re-pin tool carve-outs.
+- Journal row 42: b2-close ratchet harness fix outside the close write-set.
+
+**Gates (final):** 1362 = 1362 files collected, 29513 passed / 0 failed; typecheck/lint/build 0; js +101,705 B vs b0 (budget +250 KB).
+
+**Follow-ons:** `planning/next-missions.md`, ufp section (12 items). Among them:
+- error-page source label;
+- sequence refusal index;
+- error-listing tab stops;
+- `ListSpriteDiagramFactory`;
+- asset packaging;
+- a maintainer question on whether D13 extends to ditaa (`PSystemBuilder.java:165-166`).
