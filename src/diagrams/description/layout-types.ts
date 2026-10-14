@@ -25,6 +25,8 @@ export interface ContainerDesc {
   stereotype?: readonly string[];
   directLeafAstIds: string[];
   parentAstId?: string;
+  /** `!pragma kermor on` TOP/BOTTOM group notes (`DescriptiveNode.kermorNotes`). */
+  kermorNotes?: { top?: string; bottom?: string };
 }
 
 export interface ClassifyCtx {

@@ -118,11 +118,17 @@ export function buildHasPortClusterHandles(
   parentInnermost: GvGraphBuilder,
   nextRankSubId: () => number,
 ): ClusterHandles {
-  const main = parentInnermost.addSubgraph(outerName, {});
+  // T4b: `a` wraps the base cluster (`ClusterDotString.java:98-99`) and `i`
+  // opens inside `ee` (`:151-152`), both on `thereALinkFromOrToGroup1`;
+  // `p0`/`p1` are forced off for a port family (`:109-112`).
+  const linked = c.borderPointAncestorWrap === true;
+  const host = linked ? parentInnermost.addSubgraph(`${outerName}a`, {}) : parentInnermost;
+  const main = host.addSubgraph(outerName, {});
   // `isHasPortCluster` guarantees `portRanks`/`portAnchorId` here.
   for (const pr of c.portRanks!) printRanks(main, pr, `__portrank_${nextRankSubId()}`, c.portAnchorId!);
   const ee = main.addSubgraph(`${outerName}ee`, {});
-  return { main, innermost: ee };
+  if (!linked) return { main, innermost: ee };
+  return { main, innermost: ee.addSubgraph(`${outerName}i`, {}), ee };
 }
 
 /** Where `addClusters` declares a `hasPort()` cluster's direct members: every
@@ -131,6 +137,9 @@ export function buildHasPortClusterHandles(
  *  anchor and any NORMAL member -- in `ee` (`printCluster1`, `:174`). */
 export function placeHasPortMembers(c: DotInputCluster, handles: ClusterHandles, portIds: ReadonlySet<string>): void {
   const ranked = new Set(c.portRanks!.flatMap((r) => r.nodeIds));
+  // The special point is declared in `ee` before `i` opens, then the `empty()`
+  // rect re-declares it inside `i`: dot assigns the node to the innermost.
+  if (handles.ee !== undefined && c.portAnchorId !== undefined) handles.ee.addNode(c.portAnchorId);
   for (const id of c.nodeIds) {
     if (ranked.has(id)) continue;
     (portIds.has(id) ? handles.main : handles.innermost).addNode(id);

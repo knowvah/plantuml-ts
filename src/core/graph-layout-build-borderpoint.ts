@@ -38,6 +38,10 @@ import type { DotInputCluster } from './graph-layout.types.js';
 export interface ClusterHandles {
   main: GvGraphBuilder;
   innermost: GvGraphBuilder;
+  /** T4b: the `${outerName}ee` subgraph, set only for a hasPort cluster whose
+   *  `i` wrapper makes `innermost` a descendant of it -- the special point is
+   *  declared here, before `i` opens (`ClusterDotString.java:146-152`). */
+  ee?: GvGraphBuilder;
 }
 
 /** The empty FIXEDSIZE reservation jar hands graphviz for a cluster title —

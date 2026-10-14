@@ -36,6 +36,13 @@ export interface DescriptiveNode {
    *  which is AFTER applySingleStrategy — so they never count as magma
    *  standalones. Braceless declarations are plain leaves. */
   declaredAsGroup?: true;
+  /** `!pragma kermor on` only: the first TOP and BOTTOM note on this GROUP
+   *  (`Entity.addNote(display, position, colors)`, `CommandFactoryNoteOnEntity
+   *  .java:322`; `Cluster.getCucaNote` reads `getNotes(position).get(0)`, so a
+   *  second note at the same position is ignored). Position is already
+   *  `withRankdir`-resolved; LEFT/RIGHT notes are stored upstream but read by
+   *  nothing in the kermor DOT path, so they are not kept here. */
+  kermorNotes?: { top?: string; bottom?: string };
   /** Auto-vivified `GroupType.PACKAGE` wrapper synthesized ONLY at layout
    *  time from a dotted (`set separator`-qualified) declaration id that has
    *  no explicit `{ }` block of its own — mirrors upstream

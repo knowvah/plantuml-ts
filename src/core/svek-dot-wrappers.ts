@@ -62,7 +62,11 @@ export interface WrapperLevels {
  * true for a title-table-eligible composite — see the field's own doc comment).
  */
 export function wrapperLevels(cluster: DotInputCluster): WrapperLevels {
-  if (cluster.portRanksLabelOnEe === true) {
+  // T4b: a hasPort cluster (genuine PORTIN/PORTOUT, `ClusterDotString.java:117-184`)
+  // is also a border-point cluster -- protection forced off (`:109-112`), `a`/`i`
+  // gated by `thereALinkFromOrToGroup1` -- but only once it opts in via
+  // `borderPointAncestorWrap`; without it the `innerMarginLevels` path below applies.
+  if (cluster.portRanksLabelOnEe === true || cluster.borderPointAncestorWrap === true) {
     const wrap = cluster.borderPointAncestorWrap === true;
     return { a: wrap, p0: false, i: wrap, p1: false };
   }

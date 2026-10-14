@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1667 modules · 6054 exported names.
+1668 modules · 6061 exported names.
 
 ## `src/`
 
@@ -53,6 +53,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `graph-layout-build-borderpoint.ts` | `ClusterHandles`, `inheritedEeLabel`, `buildBorderPointClusterHandles` | G7 T14b border-point (`<<entrypoint>>`/`<<exitpoint>>`-child, `portRanksLabelOnEe`) cluster nesting — split out of ./graph-layout-build.ts#addClusters (500-line file-cap compliance; pure extraction, no behavior change). |
 | `graph-layout-build-constraint.ts` | `withSameContainerConstraints` | The two graph-level paths to `constraint=false`. |
 | `graph-layout-build-edges.ts` | `CARDINALITY_FONT_SIZE`, `EdgeIndex`, `edgeKey`, `addEdges` | `addEdges` — split out of ./graph-layout-build.ts (500-line file-cap compliance, forced by G7 T14b's border-point wiring additions; pure move, no behavior change). |
+| `graph-layout-build-kermor.ts` | `kermorHasAlpha`, `buildKermorClusterHandles`, `placeKermorMembers`, `addNodesWithKermorRootEmpty`, `KERMOR_ROOT_EMPTY_ID` | `!pragma kermor on` cluster nesting for the layout builder -- the `ClusterDotStringKermor.printInternal` shape (`svek/ClusterDotStringKermor.java:67-165`): [alpha {label=<note TOP table or "">] only if the group has a TOP or BOTTOM note (:8 |
 | `graph-layout-build-portcluster.ts` | `isHasPortCluster`, `addTitledAnchorNode`, `buildHasPortClusterHandles`, `placeHasPortMembers` | cdd4-T6 (E3-10b): the layout-builder half of `ClusterDotString`'s `hasPort()` branch. |
 | `graph-layout-build.ts` | `PX_PER_INCH`, `addEdges`, `edgeKey`, `CARDINALITY_FONT_SIZE`, `EdgeIndex`, `applyGraphAttrs`, `firstEncounterOrder`, `addNodes`, `ClusterIndex`, `addClusters` | @knowvah/dot-engine builder construction for `layoutGraph()` — split from `graph-layout.ts` (500-line file cap). |
 | `graph-layout-cluster.types.ts` | `DotInputCluster` | `DotInputCluster` — the cluster half of the layout input contract. |
@@ -1690,7 +1691,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `frontier-cluster-bbox.ts` | `PortClusterInfo`, `ClusterSpacing`, `computePortClusterBbox`, `registerPortCluster`, `DescriptionSolveRects` | frontier-cluster-bbox.ts — a port cluster's drawn box, `Cluster #manageEntryExitPoint` (`svek/Cluster.java:410-430`) over `core/svek/FrontierCalculator.ts`: final Collection<RectangleArea> insides = new ArrayList<>(); final List<XPoint2D> p |
 | `index.ts` | `descriptionPlugin` | Description diagram plugin — the consolidated engine for component, use-case, and deployment diagrams (upstream `DescriptionDiagramFactory`). |
 | `layout-classify.ts` | `countRawContainers`, `isEffectiveCluster`, `classifyAst` | Phase 1: AST classification (`classifyAst`/`classifyAsCluster`/ `isEffectiveCluster`/`countRawContainers`) -- split out of `layout.ts` purely to keep that file under this project's 500-line cap. |
-| `layout-dot-tree.ts` | `PortClusterCtx`, `computePortRanksByCluster`, `buildDotNodes`, `ClusterWrapperInputs`, `buildDotClusters`, `buildDotEdges`, `buildGeoTree` | Description-diagram layout, phases 2-3: `DotInputGraph` node/cluster/edge construction (svek's `ClusterDotString`/`SvekNode` analogs) and the bottom-up geo-tree assembly that maps solved DOT positions back onto `DescriptionNodeGeo`. |
+| `layout-dot-tree.ts` | `PortClusterCtx`, `computePortRanksByCluster`, `buildDotNodes`, `ClusterWrapperInputs`, `ClusterTitleDims`, `clusterTitleDimsById`, `buildDotClusters`, `buildDotEdges`, `buildGeoTree` | Description-diagram layout, phases 2-3: `DotInputGraph` node/cluster/edge construction (svek's `ClusterDotString`/`SvekNode` analogs) and the bottom-up geo-tree assembly that maps solved DOT positions back onto `DescriptionNodeGeo`. |
 | `layout-geo-post.ts` | `ResultEdge`, `EdgeMapping`, `buildEdgeGeos`, `computeTotalDimensions` | Geo post-processing for the description layout engine (phases 5–6): after the graphviz result is mapped to a raw geo tree, these turn it into final pixel geometry — edge-geo construction (spline clipping at container bboxes + label placemen |
 | `layout-helpers-shape-endpoint.ts` | `groupAnchorNodeId`, `resolveEndpoint`, `containerEndpointsInfo`, `symbolBaseShape`, `isInterfaceShielded`, `shapeForNode`, `isPortLabelWide`, `portTablePad`, `applyShieldEdgePorts` | Link endpoint resolution + DOT node shape resolution for the description diagram layout engine. |
 | `layout-helpers-types.ts` | `DescriptionElkDrawing`, `DescriptionNodeGeo`, `Bbox`, `EdgeContainerEndpoints`, `ResolvedEndpoint`, `DescriptionEdgeGeo`, `DescriptionGeometry`, `CONTAINER_PADDING`, `CONTAINER_TOP_PAD`, `EMPTY_CONTAINER_WIDTH`, `EMPTY_CONTAINER_HEIGHT`, `LAYOUT_MARGIN`, `LAYOUT_MARGIN_LEADING`, `GROUP_ANCHOR_SIZE` | Pure type/const declarations for the description diagram layout engine. |
