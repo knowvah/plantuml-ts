@@ -142,11 +142,11 @@ describe('GraphicStrings.createBlackOnWhite(strings, classpath) — port-only AD
     expect(shapes(svgOf(GraphicStrings.createBlackOnWhite(line, { sprites })))).toBeGreaterThan(0);
   });
 
-  it('declines a PNG internal sprite without throwing (SpriteImage drawing is unported: ufp residual)', () => {
+  it('draws a PNG internal sprite as one round(16 * 12/13) = 15px <image> (SpriteImage.java:86-91)', () => {
     const sprites = internalSpriteStoreFrom(buildSpriteAssetsStore());
     const svg = svgOf(GraphicStrings.createBlackOnWhite(['<$archimate/access> access (png)'], { sprites }));
     expect(svg).toContain('access (png)');
-    expect(svg).not.toContain('<image');
+    expect(svg.match(/<image width="15" height="15" /g)).toHaveLength(1);
   });
 
   it("draws <:1f600:>'s Twemoji artwork through the emoji store", () => {

@@ -13,6 +13,7 @@ import { describe, it, expect } from 'vitest';
 import { combineAssetStores } from '../../src/core/asset-store.js';
 import { internalSpriteAssetKey, internalSpriteStoreFrom } from '../../src/core/internal-sprite-store.js';
 import { isSpriteSvg } from '../../src/core/klimt/sprite/SpriteSvg.js';
+import { SpriteImage } from '../../src/core/klimt/sprite/SpriteImage.js';
 import { createSpriteRegistry, getSprite, matchSpriteCommand } from '../../src/core/sprite-commands.js';
 import { SPRITES_DIR, SPRITES_MANIFEST, UPSTREAM_SHA, verifyTree } from '../../scripts/vendor-sprites.js';
 import { buildSpriteAssetsStore } from '../helpers/sprite-assets-store.js';
@@ -128,8 +129,10 @@ describe('sprite resolution against the real bundle', () => {
     expect(sprite.inkHeight).toBeLessThanOrEqual(20);
   });
 
-  it('resolves a PNG-only name to its IHDR dimensions', () => {
-    expect(store.get('archimate/junction-and')).toEqual({ width: 16, height: 16 });
+  it('resolves a PNG-only name to a SpriteImage measuring UImage#getWidth() = 16 - 1', () => {
+    const sprite = store.get('archimate/junction-and');
+    expect(sprite).toBeInstanceOf(SpriteImage);
+    expect([sprite?.width, sprite?.height]).toEqual([15, 15]);
   });
 
   it('resolves <<$archimate/interface>> through getSprite with no !include', () => {

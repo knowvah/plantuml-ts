@@ -32,6 +32,9 @@
  *   (svg-sprite-nanoparser T9, ADR-2) rather than re-emitted as an opaque
  *   `<image href="data:image/svg+xml;base64,...">`. See
  *   `resolveSvgSpriteAtom`'s own doc comment.
+ * - `sprite` atoms with an internal PNG entry (`getSpriteImage`, ufp-T3a):
+ *   `SpriteImage#asTextBlock(...).drawU` collected the same way, one
+ *   `UImage` at the resampled raster's size. See `resolveImageSpriteAtom`.
  *
  * Width/height are ALWAYS taken from `measureInlineAtom`, never from
  * `spriteToPngDataUri`'s own returned `width`/`height` (the two are
@@ -60,6 +63,9 @@ import type { AtomImageResolver, InlineAtomToken, SpriteDimsLookup } from './cre
 import { measureInlineAtom, spriteAtomScale } from './creole-atoms-measure.js';
 import type { SpriteRegistry } from './sprite-commands.js';
 import { getSpriteMonochrome, getSpriteSvg, getSpriteColor4096, spriteDimsLookupFor } from './sprite-commands.js';
+import { getSpriteImage } from './sprite-registry.js';
+import type { SpriteImage } from './klimt/sprite/SpriteImage.js';
+import { HColorSimple } from './klimt/color/HColorSimple.js';
 import { spriteMonochromeAsLike, spriteColor4096ToPngDataUri } from './klimt/sprite/sprite-raster.js';
 import { spriteTintHref, type SpriteTint } from './klimt/sprite/sprite-tint.js';
 import { SvgNanoParser } from './klimt/sprite/SvgNanoParser.js';
@@ -74,7 +80,7 @@ import { UStroke } from './klimt/UStroke.js';
 import { Fore } from './klimt/Fore.js';
 import { Back } from './klimt/Back.js';
 import type { ResolvedColor } from './klimt/color/HColorSet.js';
-import { parseSimpleColor } from './klimt/color/HColorSet.js';
+import { parseColor, parseSimpleColor } from './klimt/color/HColorSet.js';
 import type { Paint } from './paint.js';
 import { ColorMapper, toSvgPaint, type HColorOrPaint } from './klimt/color/ColorMapper.js';
 
@@ -333,6 +339,51 @@ function resolveColorSpriteAtom(
   };
 }
 
+/** `HColors.WHITE`: `HColorSet#getColorOrWhite`'s fallback (HColorSet.java:58-63). */
+const WHITE: ResolvedColor = { r: 255, g: 255, b: 255, a: 255 };
+
+/** `fontConfiguration.getColor()` (StripeSimple.java:234) as an `HColorSimple`:
+ *  the configuration's own `HColorSimple` while {@link FontConfiguration.color}
+ *  is still its paint (the `fontColorOf` rule, `driver-text-svg.ts`), else
+ *  the colour string re-parsed; `undefined` = no colour. */
+function fontHColor(font: FontConfiguration): HColorSimple | undefined {
+  if (font.hColor !== undefined && font.hColor.asPaint() === font.color) return font.hColor;
+  const parsed = font.color === null ? undefined : parseColor(font.color);
+  return parsed === undefined ? undefined : HColorSimple.create(parsed);
+}
+
+/** `CommandCreoleSprite`'s forced colour: `getColorOrWhite(colorName)`
+ *  (CommandCreoleSprite.java:89-91). */
+function forcedHColor(forcedColor: string | undefined): HColorSimple | undefined {
+  if (forcedColor === undefined) return undefined;
+  return HColorSimple.create(parseColor(forcedColor) ?? WHITE);
+}
+
+/**
+ * ufp-T3a: an internal PNG sprite (`SpriteImage`). `AtomSprite#drawU`
+ * (AtomSprite.java:73-80) draws `sprite.asTextBlock(fontColor, forcedColor,
+ * scale, backColor)`; that draw is collected here, as
+ * {@link resolveSvgSpriteAtom} collects `SvgNanoParser#drawU`, because the
+ * drawn `UImage` carries the RESAMPLED raster's size (`round(16 * scale)`,
+ * SvgGraphics.java:973-974) while the atom measures `UImage#getWidth() *
+ * scale` = `(16 - 1) * scale` (SpriteImage.java:94-97) — two sizes the
+ * `'image'` arm's single `width` cannot hold. The collector answers no
+ * `ColorMapper`, read as `IDENTITY` (the monochrome tint path's own limit).
+ */
+function resolveImageSpriteAtom(
+  atom: Extract<InlineAtomToken, { kind: 'sprite' }>,
+  sprite: SpriteImage,
+  spriteDims: SpriteDimsLookup,
+  font: FontConfiguration,
+): ResolvedDrawableAtom {
+  const dims = measureInlineAtom(atom, spriteDims, font.size);
+  const collector = SpritePrimitiveCollector.create();
+  sprite
+    .asTextBlock(fontHColor(font), forcedHColor(atom.forcedColor), spriteAtomScale(atom, font.size), undefined)
+    .drawU(collector);
+  return { kind: 'drawable', primitives: [...collector.collected()], width: dims.width, height: dims.height };
+}
+
 function resolveSpriteAtom(
   atom: Extract<InlineAtomToken, { kind: 'sprite' }>,
   registry: SpriteRegistry,
@@ -342,6 +393,8 @@ function resolveSpriteAtom(
 ): ResolvedAtomImage {
   const svgSprite = getSpriteSvg(registry, atom.name);
   if (svgSprite !== undefined) return resolveSvgSpriteAtom(atom, svgSprite.svg, spriteDims, font, ambientStroke);
+  const imageSprite = getSpriteImage(registry, atom.name);
+  if (imageSprite !== undefined) return resolveImageSpriteAtom(atom, imageSprite, spriteDims, font);
   const sprite = getSpriteMonochrome(registry, atom.name);
   if (sprite === undefined) return resolveColorSpriteAtom(atom, registry, spriteDims, font);
   // `font.size` is threaded so the sprite picks up `CommandCreoleSprite`'s
