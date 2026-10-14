@@ -46,7 +46,7 @@ const DEFAULT_DPI = 96;
 /** Colour never affects a width; the black default keeps the config total. */
 const MEASURE_ONLY_COLOR = '#000000';
 
-function nestedRenderer(): NestedDiagramRenderer {
+export function nestedRenderer(): NestedDiagramRenderer {
   return (
     getNestedDiagramRenderer() ?? {
       render(): TextBlock {
@@ -56,7 +56,7 @@ function nestedRenderer(): NestedDiagramRenderer {
   );
 }
 
-function stateSkinSimple(fc: FontConfiguration, theme: Theme): ISkinSimple {
+export function stateSkinSimple(fc: FontConfiguration, theme: Theme): ISkinSimple {
   const sprites = theme.sprites;
   const atomOps = chromeAtomOps(sprites, fc);
   const pragma = Pragma.createEmpty();
@@ -85,7 +85,7 @@ function stateSkinSimple(fc: FontConfiguration, theme: Theme): ISkinSimple {
   return skin;
 }
 
-function stringBounderFor(measurer: StringMeasurer, font: FontSpec): StringBounder {
+export function stringBounderFor(measurer: StringMeasurer, font: FontSpec): StringBounder {
   return {
     calculateDimension(fc, text) {
       const dim = measurer.measure(text, { ...font, size: fc.size });
