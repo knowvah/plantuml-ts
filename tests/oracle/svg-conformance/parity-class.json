@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12T18:53:48.885Z",
+  "generatedAt": "2026-10-14T15:03:54.687Z",
   "fixtures": [
     {
       "slug": "bajotu-30-soku184",
@@ -2500,9 +2500,7 @@
       "slug": "nugecu-04-tona107",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 16.060000000000002,
-      "maxDeltaPath": "svg/g[1]/g[4]/path[1]/@d[5]"
+      "verdict": "conformant"
     },
     {
       "slug": "nujiga-81-peno983",

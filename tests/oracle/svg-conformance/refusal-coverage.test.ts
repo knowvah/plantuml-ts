@@ -912,7 +912,9 @@ describe('refusal coverage — baseline shape', () => {
     // 6884 -> 6885 at ufp/close-b3: 1 svg-utility golden clone row
     // (xucoma-93-jeko861, ufp T3a), rendering on both sides.
     // Derivation: 6884 + 1 = 6885.
-    expect(manifest.fixtures.length).toBe(6885);
+    // 6885 -> 6886 at the dot-engine 2.4.0 bump: 1 svg-class golden clone row
+    // (nugecu-04-tona107), rendering on both sides. Derivation: 6885 + 1 = 6886.
+    expect(manifest.fixtures.length).toBe(6886);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -1039,7 +1041,9 @@ describe('refusal coverage — baseline shape', () => {
     // Derivation: 6632 + 14 + 13 = 6659.
     // 6659 -> 6660 at ufp/close-b3 (+1 rendering svg-utility clone,
     // xucoma-93-jeko861). Derivation: 6659 + 1 = 6660.
-    expect(pinnedRendering.length).toBe(6660);
+    // 6660 -> 6661 at the dot-engine 2.4.0 bump (+1 rendering svg-class clone,
+    // nugecu-04-tona107). Derivation: 6660 + 1 = 6661.
+    expect(pinnedRendering.length).toBe(6661);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

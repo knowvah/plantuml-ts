@@ -35,6 +35,39 @@ post-D7 measurements.
 
 ---
 
+## dot-engine 2.4.0 bump — DONE 2026-10-14 (`chore/dot-engine-2.4.0`, merged to local main, not pushed)
+
+**What changed:** `@knowvah/dot-engine` 2.3.0 → 2.4.0. That brings in PR #85's tracker
+fixes (published in 2.3.1) and PR #86 (the graphviz 16.1.0 sync). Across all 4903 cached
+fixtures, 10 render differently and only one changes verdict:
+`class/nugecu-04-tona107` went structural-match → conformant (0/23 → 0/0). It is pinned in the
+class ratchet (now 1003), and its A3 accepted divergence is retired. The class census was also
+refreshed: bixogo, roxosu and lubicu, pinned at sep-b4, still carried stale counts. Tracker 23
+and 27 are ticked; every other 28–35 entry carries a dated measurement
+(`docs/graphviz-issues/TRACKER.md`). Measurements are in `.agent-notes/dot-engine-2.4.0-bump.md`.
+
+**Follow-ons:**
+1. **Svek wrapper clusters missing on the description path.** On bamami, bobixe, pugodi,
+   rufopi, zosuje (tracker 32/35), repoge (30) and xagonu (29), the jar wraps a package in
+   `cluster<N>p0 > cluster<N>` (label TABLE) `> cluster<N>p1`. Our input cluster carries no
+   `innerMarginLevels` and no title-table size, so `wrapperLevels`
+   (`src/core/svek-dot-wrappers.ts:64`) opens no wrappers, and the cluster gets a plain-text
+   label. 2.4.0 lays out the jar's own DOT like native, so these rows need this gap closed
+   before the tracker fixes can show. Start from bamami (4 parallel flat edges, 1 package).
+2. **deroxu-29 port-table node sizes.** It has the same 38 clusters, but the canvas is 4958
+   wide against the jar's 3757, and only 7 of 246 edge `pos` values match native. Our port-table
+   nodes are sized differently from the jar's `plaintext` TABLE nodes (tracker 28).
+3. **`dotEqual` cannot see cluster nesting or label sizes.** `compareStructural`
+   (`tests/oracle/svek-dot.ts`) compares cluster membership sizes, so all of the rows above
+   report `dotEqual: true` while laying out differently. A gate that compares our builder's
+   `-Tdot` layout against native on the jar DOT would catch this. On rubebe, zuduxu, pavuzo
+   and xenusu that comparison matches exactly (bb and every pos).
+4. **Post-layout residuals** whose layout already equals native: xenusu (7/8), pavuzo (4/85,
+   tracker 16), rubebe (160/63) and zuduxu (127/52, tracker 31). These are plantuml-ts drawing
+   work.
+
+---
+
 ## `utility-factories-port` (ufp) — DONE 2026-10-13 (batches 0–3, exit; merged to local main as a merge commit, not pushed)
 
 **What changed:**
