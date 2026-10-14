@@ -1,14 +1,11 @@
 /**
- * `PSystemVersionFactory` — `about`/`authors`/`author` and bare `stdlib` as
- * single-line `@startuml` pages, through the ported `PSystemSingleLineFactory`
+ * `PSystemVersionFactory` — `about`/`authors`/`author`, `version` and bare
+ * `stdlib` as single-line `@startuml` pages, through the ported `PSystemSingleLineFactory`
  * gate (`singleLinePlugin`, decisions.md D2/D3). Registration in
  * `src/index.ts` is T2a's (`PSystemBuilder.java:144-152` position).
  *
  * Not accepted, so the line falls through to `null` ("Syntax Error?"):
- * - `version` (java:55-56): `createShowVersion` prints host state (the `dot`
- *   executable, JVM properties, an environment variable) — stop 14, reported
- *   for a ruling (see `PSystemVersion.ts`).
- * - `testdot` and the key tools (java:62-83): out by decisions.md D8.
+ * `testdot` and the key tools (java:62-83), out by decisions.md D8.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/PSystemVersionFactory.java
  */
@@ -27,6 +24,10 @@ const JAVA_SPACES = '[ \\t\\n\\x0B\\f\\r]*$';
  *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/PSystemVersionFactory.java:52 */
 const AUTHORS = new RegExp(`^(authors?|about)${JAVA_SPACES}`, 'i');
 
+/** `(?i)^version\\s*$`: the page prints this port's own values (decisions.md D14).
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/PSystemVersionFactory.java:55 */
+const VERSION = new RegExp(`^version${JAVA_SPACES}`, 'i');
+
 /** `(?i)^stdlib\\s*$`, inside `if (!TeaVM.isTeaVM())` (java:58): the port
  *  mirrors the JVM jar.
  *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/PSystemVersionFactory.java:59 */
@@ -42,6 +43,7 @@ export class PSystemVersionFactory {
    */
   executeLine(source: UmlSource, line: string, preprocessing: PreprocessingArtifact): PSystemVersion | undefined {
     if (AUTHORS.test(line)) return PSystemVersion.createShowAuthors(source, preprocessing);
+    if (VERSION.test(line)) return PSystemVersion.createShowVersion(source, preprocessing);
     if (STDLIB.test(line)) return PSystemVersion.createStdLib(source, preprocessing);
     return undefined;
   }
@@ -49,7 +51,7 @@ export class PSystemVersionFactory {
 
 const factory = new PSystemVersionFactory();
 
-/** The `about`/`authors`/`stdlib` page plugin; `UgDiagram#exportDiagram` is the whole render. */
+/** The `about`/`authors`/`version`/`stdlib` page plugin; `UgDiagram#exportDiagram` is the whole render. */
 export const versionPlugin: SyncPlugin<
   PSystemVersion,
   SingleLineGeometry<PSystemVersion>

@@ -1,8 +1,8 @@
 /**
  * `PSystemVersionFactory` (version/PSystemVersionFactory.java): `about` /
- * `author` / `authors` (java:52) and bare `stdlib` (java:59) through the
- * single-line gate. `version` (java:55, stop 14 — host state), `testdot` and
- * the key tools (java:62-83, D8) are not accepted.
+ * `author` / `authors` (java:52), `version` (java:55, the port's own values —
+ * decisions.md D14) and bare `stdlib` (java:59) through the single-line gate.
+ * `testdot` and the key tools (java:62-83, D8) are not accepted.
  */
 import { describe, expect, it } from 'vitest';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
@@ -49,9 +49,15 @@ describe('PSystemVersionFactory#executeLine (java:49-90)', () => {
     for (const line of ['stdlib', 'STDLIB', 'stdlib  ']) expect(linesOf(line)?.[0], line).toBe('<b>adaml');
   });
 
-  it('refuses version (stop 14), testdot and the key tools (D8), and anything else', () => {
+  it('version builds the version page, any case, trailing whitespace allowed (java:55-56)', () => {
+    for (const line of ['version', 'VERSION', 'Version \t'])
+      expect(linesOf(line)?.[2], JSON.stringify(line)).toBe('<b>Build Time</b> ""Unknown compile time""');
+  });
+
+  it('refuses testdot and the key tools (D8), and anything else', () => {
     for (const line of [
-      'version',
+      'versions',
+      ' version',
       'testdot',
       'keygen',
       'keydistributor',
@@ -79,12 +85,19 @@ describe('versionPlugin', () => {
     expect(renderOf('stdlib')).toContain('width="589px" height="1655px"');
   });
 
-  it('renders each page the same three times', () => {
-    for (const line of ['about', 'stdlib']) expect(new Set([0, 1, 2].map(() => renderOf(line))).size).toBe(1);
+  it('renders the version page with the logo bottom-right', () => {
+    const svg = renderOf('version');
+    expect(svg).toContain('font-weight="700">Installation seems OK. File generation OK</text>');
+    expect(svg).toMatch(/<image width="80" height="71" x="[\d.]+" y="\d+"/);
   });
 
-  it("refuses version with the gate's Syntax Error?", () => {
-    expect(versionPlugin.parse(sourceOf('@startuml\nversion\n@enduml'))).toEqual(
+  it('renders each page the same three times', () => {
+    for (const line of ['about', 'stdlib', 'version'])
+      expect(new Set([0, 1, 2].map(() => renderOf(line))).size).toBe(1);
+  });
+
+  it("refuses testdot with the gate's Syntax Error?", () => {
+    expect(versionPlugin.parse(sourceOf('@startuml\ntestdot\n@enduml'))).toEqual(
       refuse('syntax', 1, 1, 'Syntax Error?'),
     );
   });

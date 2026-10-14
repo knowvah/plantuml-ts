@@ -2081,8 +2081,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `LicenseType.ts` | `LicenseType`, `fromInt` | `LicenseType` — the kind of licence a {@link LicenseInfo} records. |
 | `PSystemLicense.ts` | `getTextBlock`, `PSystemLicense` | `PSystemLicense` — the `license` page: `License#getText1` + `#getText2` as one black-on-white `GraphicStrings`, or, when the licence carries a distributor logo, the two halves around that logo. |
 | `PSystemLicenseFactory.ts` | `PSystemLicenseFactory`, `licensePlugin` | `PSystemLicenseFactory` — `license` (and its misspellings) as a single-line `@startuml` page, through the ported `PSystemSingleLineFactory` gate (`singleLinePlugin`, decisions.md D2/D3). |
-| `PSystemVersion.ts` | `getPlantumlImage`, `getAuthorsStrings`, `addInfoVersion`, `PSystemVersion` | `PSystemVersion` — the `about`/`authors` and bare `stdlib` pages: lines of creole drawn black on white with the PlantUML logo in the bottom-right corner (`PlainStringsDiagram`). |
-| `PSystemVersionFactory.ts` | `PSystemVersionFactory`, `versionPlugin` | `PSystemVersionFactory` — `about`/`authors`/`author` and bare `stdlib` as single-line `@startuml` pages, through the ported `PSystemSingleLineFactory` gate (`singleLinePlugin`, decisions.md D2/D3). |
+| `PSystemVersion.ts` | `getPlantumlImage`, `getAuthorsStrings`, `addInfoVersion`, `PSystemVersion` | `PSystemVersion` — the `about`/`authors`, `version` and bare `stdlib` pages: lines of creole drawn black on white with the PlantUML logo in the bottom-right corner (`PlainStringsDiagram`). |
+| `PSystemVersionFactory.ts` | `PSystemVersionFactory`, `versionPlugin` | `PSystemVersionFactory` — `about`/`authors`/`author`, `version` and bare `stdlib` as single-line `@startuml` pages, through the ported `PSystemSingleLineFactory` gate (`singleLinePlugin`, decisions.md D2/D3). |
 | `stdlib-catalog.ts` | `StdlibCatalogEntry`, `STDLIB_CATALOG` | `STDLIB_CATALOG` -- the folders the bare `stdlib` page lists (`PSystemVersion.java:205-210` -> `Stdlib.addInfoVersion`, `Stdlib.java:320-331`). |
 
 ## `src/diagrams/wbs/`
