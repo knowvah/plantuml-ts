@@ -9,6 +9,7 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterDotString.java
  */
 import type { Theme } from '../../core/theme.js';
+import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
 import { TextBlockUtils } from '../../core/klimt/shape/TextBlockUtils.js';
@@ -38,6 +39,7 @@ function headerNode(container: ContainerDesc): DescriptionNodeGeo {
     height: 0,
     children: [],
     ...(container.stereotype === undefined ? {} : { stereotype: container.stereotype }),
+    ...(container.stereotypeSprite === undefined ? {} : { stereotypeSprite: container.stereotypeSprite }),
   };
 }
 
@@ -65,8 +67,9 @@ export function descriptionClusterTitleTable(
   container: ContainerDesc,
   theme: Theme,
   measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
 ): { width: number; height: number } | undefined {
-  const header = buildHeader(headerNode(container), theme);
+  const header = buildHeader(headerNode(container), theme, { sprites });
   const stereoAndTitle = TextBlockUtils.mergeTB(header.stereo, header.title, header.titleHorizontalAlignment);
   const dimLabel = stereoAndTitle.calculateDimension(new MeasurerStringBounder(measurer));
   const symbol = resolveSymbol(container.symbol, theme);

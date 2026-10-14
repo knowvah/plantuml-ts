@@ -168,7 +168,7 @@ function svekBody(geo: DescriptionGeometry, theme: Theme, measurer: StringMeasur
   // suppression). Same `draw` closure either way, matching upstream's own
   // single shared `SvekResult#drawU` call site for both purposes.
   const draw = (target: UGraphic, respectHidden: boolean): void => {
-    drawClusters(target, containers, theme, plan, respectHidden);
+    drawClusters(target, containers, theme, plan, respectHidden, geo.sprites);
     // T1e write-set expansion (journaled): `geo.edges` threaded through so
     // a note leaf can find its own Opale connector — see
     // `renderer-draw-sequence.ts#drawEntities`'s own doc comment.

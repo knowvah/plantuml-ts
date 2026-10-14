@@ -32,6 +32,7 @@ export {
   finalizeDisplay,
   extractNodeStereotype,
   rawStereotypeLabels,
+  carryRawStereotypeLabels,
   stripUrl,
   resolveInlineLinks,
   extractColor,

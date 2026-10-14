@@ -175,6 +175,7 @@ function runLayout(
   const wrapperInputs = {
     theme,
     measurer,
+    sprites: ast.sprites,
     stereotypeRules: ast.stereotypeVisibilityRules ?? [],
     groupAnchorClusterIds: edgeDotBuild.groupAnchorClusterIds,
   };

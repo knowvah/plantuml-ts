@@ -18,6 +18,7 @@ import {
   extractColor,
   extractNodeStereotype,
   rawStereotypeLabels,
+  carryRawStereotypeLabels,
   resolveNewlineEscapes,
 } from './parse-helpers.js';
 import type { StereotypeSpriteRef } from './parse-helpers.js';
@@ -361,7 +362,7 @@ export function visibleStereotypeLabels(
   // `gender.equals(label)` compares the DOUBLE_COMPARATOR label (the raw
   // `<<...>>` run, padding included), not the display form.
   const raw = rawStereotypeLabels(labels);
-  return labels.filter((label, i) => {
+  const shownAt = labels.map((label, i) => {
     const rawLabel = raw?.[i] ?? `<<${label}>>`;
     let shown = true;
     for (const rule of rules) {
@@ -369,6 +370,9 @@ export function visibleStereotypeLabels(
     }
     return shown;
   });
+  const visible = labels.filter((_label, i) => shownAt[i]);
+  carryRawStereotypeLabels(labels, visible, (i) => shownAt[i] === true);
+  return visible;
 }
 
 /**

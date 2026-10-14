@@ -137,39 +137,47 @@ export interface SurveySummary {
   diverged: number;
   /** Rows that are conformant because both jar and we render an error page (D7). */
   errorPage?: number;
+  /** Rows whose `layoutEqual` is `true` (mission description-svek-wrappers, D3).
+   *  Absent when the survey predates the column (no row carries the field). */
+  layoutEqual?: number;
+  /** Rows whose `layoutEqual` is `true` or `false` (not `'n/a'`). Absent with `layoutEqual`. */
+  layoutComparable?: number;
   generatedAt: string;
 }
 
 /** Pure: verdict tally for one type's fixture rows. */
-export function tallySurvey(
-  rows: readonly FixtureRow[],
-): Pick<SurveySummary, 'conformant' | 'structural' | 'diverged'> & { errorPage: number } {
+export function tallySurvey(rows: readonly FixtureRow[]): Pick<
+  SurveySummary,
+  'conformant' | 'structural' | 'diverged' | 'layoutEqual' | 'layoutComparable'
+> & {
+  errorPage: number;
+} {
   const count = (v: Verdict): number => rows.filter((r) => r.verdict === v).length;
-  return {
+  const tally = {
     conformant: count('conformant'),
     structural: count('structural-match'),
     diverged: count('diverged'),
     errorPage: rows.filter((r) => r.errorPage === true).length,
+  };
+  if (!rows.some((r) => r.layoutEqual !== undefined)) return tally;
+  return {
+    ...tally,
+    layoutEqual: rows.filter((r) => r.layoutEqual === true).length,
+    layoutComparable: rows.filter((r) => r.layoutEqual === true || r.layoutEqual === false).length,
   };
 }
 
 const PARITY_FILE_RE = /^parity-([a-z0-9]+)\.json$/;
 
 /** One entry per type covered by ANY survey file: `parity-<type>.json` files
- *  plus `parity.json`'s two embedded types (component/usecase, D4). A type
- *  present in both is unreachable in practice (D4: parity.json is exactly the
- *  types with no dedicated `parity-<type>.json`), so no merge conflict arises. */
+ *  plus `parity.json`'s embedded types (D4). The legacy `parity.json`
+ *  (2026-09-21) still carries component/usecase rows, and a dedicated
+ *  `parity-component.json` / `parity-usecase.json` now exists beside it; the
+ *  per-type file is the live measurement, so it WINS for the same type
+ *  (description-svek-wrappers journal row 11: the legacy rows had overridden
+ *  the per-type pin, showing component 0/13/253 beside a pinned 67/66/133). */
 export function loadSurveyByType(svgConformanceDir: string): Record<string, SurveySummary> {
   const out: Record<string, SurveySummary> = {};
-  for (const f of readdirSync(svgConformanceDir)) {
-    const m = PARITY_FILE_RE.exec(f);
-    if (m === null) continue;
-    const surveyPath = join(svgConformanceDir, f);
-    const parsed: unknown = JSON.parse(readFileSync(surveyPath, 'utf-8'));
-    assertJsonObjectShape(parsed, surveyPath, ['generatedAt', 'fixtures']);
-    const report = parsed as ParityReport;
-    out[m[1]!] = { ...tallySurvey(report.fixtures), generatedAt: report.generatedAt };
-  }
   const legacyPath = join(svgConformanceDir, 'parity.json');
   if (existsSync(legacyPath)) {
     const legacyParsed: unknown = JSON.parse(readFileSync(legacyPath, 'utf-8'));
@@ -179,6 +187,15 @@ export function loadSurveyByType(svgConformanceDir: string): Record<string, Surv
       const rows = report.fixtures.filter((r) => r.type === type);
       out[type] = { ...tallySurvey(rows), generatedAt: report.generatedAt };
     }
+  }
+  for (const f of readdirSync(svgConformanceDir)) {
+    const m = PARITY_FILE_RE.exec(f);
+    if (m === null) continue;
+    const surveyPath = join(svgConformanceDir, f);
+    const parsed: unknown = JSON.parse(readFileSync(surveyPath, 'utf-8'));
+    assertJsonObjectShape(parsed, surveyPath, ['generatedAt', 'fixtures']);
+    const report = parsed as ParityReport;
+    out[m[1]!] = { ...tallySurvey(report.fixtures), generatedAt: report.generatedAt };
   }
   return out;
 }
