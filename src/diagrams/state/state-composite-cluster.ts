@@ -17,7 +17,8 @@ import type { State } from './ast.js';
 import type { FontSpec } from '../../core/measurer.js';
 import type { DotInputNode, DotInputCluster, DotLayoutResult } from '../../core/graph-layout.js';
 import { splitStateDisplayLines } from './state-sizing.js';
-import { measureLines, measureClusterTitle, titleAndAttributeWidth } from './state-composite-header.js';
+import { stateDescriptionBlockWidth } from './state-composite-description-block.js';
+import { measureClusterTitle, titleAndAttributeWidth } from './state-composite-header.js';
 import { computeTitleTableHeight } from '../../core/cluster-title-table.js';
 import { zaentId } from './state-composite-classify.js';
 import { isGroupTouched, recordBorderPointCluster } from './state-composite-detect.js';
@@ -63,7 +64,7 @@ import {
  * TOP-border formula
  * (`border[TOP_IX] = label.dimen.y + 2*GAP`, GAP=4, @knowvah/dot-engine's own
  * `graph-label.ts:113`, a faithful port of `lib/common/input.c:885-892`)
- * by exactly 6pt per `titleTableEligible` cluster, compounding by nesting
+ * by exactly 6pt per composite cluster, compounding by nesting
  * depth. `9` is the jar-verified value; the `3 + 16 = 19` coincidence above
  * only ever matched `CLUSTER_HEADER_HEIGHT` (a SEPARATE, unchanged,
  * renderer-side constant, its own paragraph below) — it was never a
@@ -100,7 +101,7 @@ import {
  */
 // G6 T7: `CLUSTER_TITLE_TABLE_HEIGHT` (flat 9px, jar-verified ONLY for the
 // single-line/no-attribute case) is SUPERSEDED by the jar-real
-// `computeTitleTableHeight` formula above — `titleTableEligible` below no
+// `computeTitleTableHeight` formula above — the title table no
 // longer requires `lineCount === 1`, so a fixed per-cluster constant can no
 // longer represent every eligible cluster's reservation. The formula
 // reduces to exactly 9 for the single-line/no-attribute case (see its own
@@ -323,11 +324,13 @@ export function resolveClusterComposite(
   const stereoLines = 0;
   const stereoWidth = 0;
   const headerFont: FontSpec = { family: ctx.theme.fontFamily, size: ctx.theme.fontSize };
-  const attrWidth = measureLines(attrTextLines, headerFont, ctx).width;
+  // `ClusterHeader.java:78`: the jar's creole sheet width (Bullet header
+  // included), not the raw glyph width -- gopudo-91-bego999 jar 40 vs raw 38.
+  const attrWidth = stateDescriptionBlockWidth(attrTextLines, headerFont, ctx.measurer, ctx.theme);
   // The single jar-real `label` value (`titleAndAttributeWidth`'s own doc
   // comment) -- fed to BOTH `labelWidth`/`labelHeight` (unconditional,
-  // below) and `titleTableWidth`/`titleTableHeight` (gated by
-  // `titleTableEligible`, below): jar computes ONE `ClusterHeader` per
+  // below) and `titleTableWidth`/`titleTableHeight`
+  // (now unconditional, below): jar computes ONE `ClusterHeader` per
   // cluster regardless of border-point routing, so both port fields must
   // carry the IDENTICAL formula output.
   const headerWidth = titleAndAttributeWidth(title.width, stereoWidth, attrWidth);
@@ -392,7 +395,7 @@ export function resolveClusterComposite(
   // G5 C7 (ledger.md §C7, `DotInputCluster.innerMarginLevels`'s doc has the
   // full derivation): `needsZaentPoint` reduces to jar's own
   // `thereALinkFromOrToGroup` ("touched") boolean for every
-  // `titleTableEligible` composite -- guarded `!hasBorderPointChildren`
+  // composite -- guarded `!hasBorderPointChildren`
   // below since protection0/1 are forced off for that family regardless
   // (`ClusterDotString.java:107-112`; `borderPointAncestorWrap` below is
   // its own, narrower, replacement). `anchorId` is computed here so

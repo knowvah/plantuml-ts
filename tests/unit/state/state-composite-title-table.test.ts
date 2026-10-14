@@ -1,6 +1,6 @@
 /**
  * dsw-T1d: a state composite's `ClusterHeader` title TABLE (and its
- * `p0`/`p1` wrappers) at ANY font size. Values are the jar's own
+ * `p0`/`p1` wrappers) at ANY font size, and a bullet attribute's width. Values are the jar's own
  * `svek-1.dot` (test-results/dot-cache/state/niveno-60-tiro789): `ClusterDotString.java:107-125,299-314`,
  * `ClusterHeader.java:76-91`.
  */
@@ -25,6 +25,24 @@ waiting : waiting label
 
 /** jar `svek-1.dot` cluster6 TABLE WIDTH x HEIGHT. */
 const NIVENO_TABLE = { width: 104, height: 38 } as const;
+const GOPUDO = `@startuml
+state A {
+  A : * a list
+  state B
+  B --> A
+}
+
+state C {
+  C : * a list
+  state D
+  D --> A
+}
+
+@enduml`;
+
+/** jar gopudo svek-1.dot cluster6/cluster11: (int)(Bullet 12 + 28.7875) = 40. */
+const GOPUDO_TABLE = { width: 40, height: 28 } as const;
+
 /** `innerMarginLevels` 1 = p0 + p1 wrappers (no zaent anchor). */
 const WRAPPED_LEVELS = 1;
 
@@ -44,5 +62,14 @@ describe('state composite title table', () => {
     expect(Math.floor(c.titleTableWidth!)).toBe(NIVENO_TABLE.width);
     expect(c.titleTableHeight).toBe(NIVENO_TABLE.height);
     expect(c.innerMarginLevels).toBe(WRAPPED_LEVELS);
+  });
+
+  it('gopudo: a creole bullet attribute adds the 12-wide Bullet header', () => {
+    const cs = clustersOf(GOPUDO);
+    expect(cs).toHaveLength(2);
+    for (const c of cs) {
+      expect(Math.floor(c.titleTableWidth!)).toBe(GOPUDO_TABLE.width);
+      expect(c.titleTableHeight).toBe(GOPUDO_TABLE.height);
+    }
   });
 });
