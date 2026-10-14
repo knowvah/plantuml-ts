@@ -71,20 +71,18 @@ describe.skipIf(!hasCorpus)('layoutParity over cached jar DOT', () => {
     });
   });
 
-  it('bamami differs first in clusterTree (jar wrapper chain, ours one plain cluster)', () => {
+  it('bamami is layout-equal once description emits the jar wrapper chain (dsw T3)', () => {
     const [ours] = captureOurs('unknown', 'bamami-10-lava790');
-    const r = layoutParity(readJarDot('unknown', 'bamami-10-lava790'), ours!);
-    expect(r.equal).toBe(false);
-    expect(r.firstDiff?.component).toBe('clusterTree');
+    expect(layoutParity(readJarDot('unknown', 'bamami-10-lava790'), ours!)).toEqual({ equal: true });
   });
 
-  it('xagonu names the jar 43 vs ours 13 cluster subgraphs', () => {
+  it('xagonu cluster nesting matches (12 vs 12); one root cluster bb differs by 6px in x', () => {
     const [ours] = captureOurs('unknown', 'xagonu-36-sudi116');
     const r = layoutParity(readJarDot('unknown', 'xagonu-36-sudi116'), ours!);
-    expect(r.firstDiff).toEqual({
-      component: 'clusterTree',
-      detail: 'cluster subgraphs: jar 43 vs ours 13',
-    });
+    expect(r.firstDiff?.component).toBe('clusterTree');
+    expect(r.firstDiff?.detail).toMatch(
+      /^jar 12 vs ours 12; sorted\[0\] .* bb 449\.700024,.* vs ours .* bb 443\.700024,/,
+    );
   });
 
   it('is deterministic: identical inputs give deep-equal results', () => {
