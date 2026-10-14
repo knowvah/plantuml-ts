@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-14T17:21:59.498Z",
-  "measuredAgainstCommit": "2d765dbd5",
+  "generatedAt": "2026-10-14T22:23:45.423Z",
+  "measuredAgainstCommit": "0a94c7975",
   "rows": [
     {
       "type": "activity",
@@ -53,8 +53,8 @@
     {
       "type": "component",
       "comparable": 263,
-      "equal": 248,
-      "pct": "94%",
+      "equal": 260,
+      "pct": "99%",
       "oracleBlind": 1,
       "note": "—"
     },

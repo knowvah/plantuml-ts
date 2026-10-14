@@ -462,7 +462,7 @@ const clusterSignature = (c: StructuralCluster): string => {
  *  `sortedClusterSizes` alone compared membership counts, so a graph with one
  *  plain-labelled cluster equalled the jar's `p0 > cluster > p1` pair with a
  *  title TABLE. */
-const sortedClusterSignatures = (g: StructuralGraph): string[] => g.clusters.map(clusterSignature).sort();
+export const sortedClusterSignatures = (g: StructuralGraph): string[] => g.clusters.map(clusterSignature).sort();
 
 /** Sorted multiset of every edge ENDPOINT's port id, `-` for "no port". Node
  *  ids are synthetic and deliberately not compared, so the ports are gathered

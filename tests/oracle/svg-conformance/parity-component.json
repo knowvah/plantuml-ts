@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-14T17:34:26.293Z",
+  "generatedAt": "2026-10-14T21:49:05.439Z",
   "fixtures": [
     {
       "slug": "babafi-51-dixi026",
@@ -452,13 +452,9 @@
       "slug": "dugovi-24-kupu658",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: jar 1 vs ours 1; sorted[0] jar depth 0 wrappers -/-/-/- bb 8,8,115,110.000016 vs ours depth 0 wrappers -/-/-/- bb 8,8,191,110.000016"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
-      "maxDelta": 136,
+      "maxDelta": 121,
       "firstDiff": "svg/g[1]/g[4][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -592,11 +588,7 @@
       "slug": "fojamu-08-veku866",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: cluster subgraphs: jar 3 vs ours 1"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
       "maxDelta": 71,
       "firstDiff": "svg/g[1]/g[2][childCount]",
@@ -606,11 +598,7 @@
       "slug": "fopako-15-labi027",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "nodeSizes",
-        "detail": "page 1: jar 5 vs ours 5; sorted[4] jar 95,31 vs ours 95,17"
-      },
+      "layoutEqual": true,
       "verdict": "structural-match",
       "maxDelta": 40.391000000000005,
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
@@ -784,11 +772,7 @@
       "slug": "gurive-62-ricu497",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: cluster subgraphs: jar 15 vs ours 9"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
       "maxDelta": 40.39199999999998,
       "firstDiff": "svg/g[1]/g[2]/@id",
@@ -862,9 +846,8 @@
       "type": "component",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "diverged",
+      "verdict": "structural-match",
       "maxDelta": 19,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/@height"
     },
     {
@@ -1052,11 +1035,7 @@
       "slug": "lesori-32-zeve057",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: jar 2 vs ours 2; sorted[0] jar depth 0 wrappers -/p0/-/p1 bb 16,16,230,213 vs ours depth 0 wrappers -/p0/-/p1 bb 16,16,230,201"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
       "maxDelta": 71,
       "firstDiff": "svg/g[1]/g[1]/polygon[1]/@fill",
@@ -1468,11 +1447,7 @@
       "slug": "perapa-23-mobu798",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: jar 4 vs ours 4; sorted[0] jar depth 0 wrappers -/-/-/- bb 31,203,202,239.00000000000006 vs ours depth 0 wrappers -/-/-/- bb 31,189,202,225.00000000000006"
-      },
+      "layoutEqual": true,
       "verdict": "structural-match",
       "maxDelta": 40.391000000000005,
       "maxDeltaPath": "svg/g[1]/g[4]/text[1]/@x"
@@ -1528,15 +1503,11 @@
       "slug": "ravodu-50-siso430",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: jar 2 vs ours 2; sorted[0] jar depth 0 wrappers -/p0/-/p1 bb 16,16,230,213 vs ours depth 0 wrappers -/p0/-/p1 bb 16,16,230,201"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
-      "maxDelta": 71,
+      "maxDelta": 97.68200000000002,
       "firstDiff": "svg/g[1]/g[1]/polygon[1]/@fill",
-      "maxDeltaPath": "svg/@height"
+      "maxDeltaPath": "svg/g[1]/g[1]/path[1]/@d[36]"
     },
     {
       "slug": "raxata-43-buni314",
@@ -1568,13 +1539,9 @@
       "slug": "repite-70-vabe533",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: cluster subgraphs: jar 15 vs ours 9"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
-      "maxDelta": 107.891,
+      "maxDelta": 99.891,
       "firstDiff": "svg/g[1]/g[2]/@id",
       "maxDeltaPath": "svg/g[1]/g[4]/text[1]/@x"
     },
@@ -1582,11 +1549,7 @@
       "slug": "repoge-41-demu604",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: cluster subgraphs: jar 4 vs ours 2"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
       "maxDelta": 243,
       "firstDiff": "svg/g[1]/g[1]/@class",
@@ -1652,11 +1615,7 @@
       "slug": "ruciga-77-ruja233",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: jar 1 vs ours 1; sorted[0] jar depth 0 wrappers -/p0/-/p1 bb 16,16,370,99.99999199999999 vs ours depth 0 wrappers -/p0/-/p1 bb 16,16,370,92.99999199999999"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
       "maxDelta": 95,
       "firstDiff": "svg/defs[1][childCount]",
@@ -1762,13 +1721,9 @@
       "slug": "siseda-71-napu395",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: cluster subgraphs: jar 11 vs ours 4"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
-      "maxDelta": 551.5,
+      "maxDelta": 491,
       "firstDiff": "svg/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/g[1]/text[4]/@y"
     },
@@ -1995,11 +1950,7 @@
       "slug": "tuliba-37-liza126",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: jar 1 vs ours 1; sorted[0] jar depth 0 wrappers a/p0/i/p1 bb 522.149992,69.71305639895775,234,139 vs ours depth 0 wrappers a/p0/i/p1 bb 522.149992,68.78196194592914,234,119"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
       "maxDelta": 81.21299999999997,
       "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
@@ -2244,11 +2195,7 @@
       "slug": "xusuxe-62-guba767",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: jar 1 vs ours 1; sorted[0] jar depth 0 wrappers -/p0/-/p1 bb 142.75624,16,590,187.69231200000002 vs ours depth 0 wrappers -/p0/-/p1 bb 142.75624,16,590,139.69231200000002"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
       "maxDelta": 61.61099999999999,
       "firstDiff": "svg/g[1]/g[1]/polygon[1]/@stroke",
@@ -2409,11 +2356,7 @@
       "slug": "zubujo-87-xaxa087",
       "type": "component",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: cluster subgraphs: jar 3 vs ours 1"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
       "maxDelta": 76,
       "firstDiff": "svg/g[1]/g[2][childCount]",

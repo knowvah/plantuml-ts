@@ -29,6 +29,10 @@ import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { MapIncludeStore } from '../src/core/tim/IncludeStore.js';
 import { withStdlib } from '../src/core/tim/StdlibStore.js';
 import { buildStdlibAssetsStore } from './stdlib-assets-store.js';
+import { buildSpriteAssetsStore } from './sprite-assets-store.js';
+import { buildEmojiAssetsStore } from './emoji-assets-store.js';
+import { buildUtilityAssetsStore } from './utility-assets-store.js';
+import { combineAssetStores } from '../src/core/asset-store.js';
 import { ORACLE_JAR_TIMEOUT_MS } from './lib/oracle-jar-timeout.js';
 import type { DotInputGraph } from '../src/core/graph-layout.js';
 import {
@@ -135,6 +139,17 @@ export function plantumlDots(jar: string, type: string, f: Fixture, rebuild: boo
  *  class/object/state denominators this mission must not touch. */
 const STDLIB_WIRED_TYPES = new Set(['component', 'usecase']);
 
+/** The survey's asset stores (`svg-parity-survey.ts` SURVEY_ASSET_STORE): the
+ *  jar always has its internal `<$archimate/...>`/emoji sprites, so without them
+ *  a sprite stereotype measures as text and the title TABLE under-sizes
+ *  (dsw journal: lesori, ravodu, ruciga, tuliba read unequal here but equal in
+ *  the survey). Built once, lazily, for STDLIB_WIRED_TYPES only. */
+let surveyAssetStore: ReturnType<typeof combineAssetStores> | undefined;
+function surveyAssetStoreFor(): ReturnType<typeof combineAssetStores> {
+  surveyAssetStore ??= combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore(), buildUtilityAssetsStore());
+  return surveyAssetStore;
+}
+
 /** `!include <bundle/thing>` fixtures (D9 sprite-dims mechanisms, T9) need a
  *  stdlib store or they hit `StdlibNotBundledError` before layout ever
  *  runs -- an assets-backed store (`scripts/stdlib-assets-store.ts`) is
@@ -146,7 +161,10 @@ function ourInputs(type: string, markup: string): DotInputGraph[] {
     renderSync(markup, {
       measurer: new DeterministicMeasurer(),
       ...(STDLIB_WIRED_TYPES.has(type)
-        ? { includeStore: withStdlib(new MapIncludeStore(), buildStdlibAssetsStore()) }
+        ? {
+            includeStore: withStdlib(new MapIncludeStore(), buildStdlibAssetsStore()),
+            assetStore: surveyAssetStoreFor(),
+          }
         : {}),
     });
   } catch {

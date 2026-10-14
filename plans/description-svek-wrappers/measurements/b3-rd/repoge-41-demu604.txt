@@ -1,0 +1,56 @@
+
+### component/repoge-41-demu604  pass=false structural=36 numeric=18
+  S svg/g[1]/g[1]/@class  exp=entity | act=cluster
+  S svg/g[1]/g[1]/@id  exp=ent0002 | act=ent0001
+  S svg/g[1]/g[1]/text[1]/@font-size  exp=13 | act=14
+  S svg/g[1]/g[1]/text[1]/@font-style  exp= | act=italic
+  S svg/g[1]/g[1]/text[1]/@textLength  exp=81.656 | act=48.3
+  S svg/g[1]/g[1]/text[1]/text()[1]  exp=would be here | act=«block»
+  S svg/g[1]/g[1]/text[2]/@font-size  exp=13 | act=14
+  S svg/g[1]/g[1]/text[2]/@font-weight  exp= | act=700
+  S svg/g[1]/g[1]/text[2]/@textLength  exp=44.119 | act=128.275
+  S svg/g[1]/g[1]/text[2]/text()[1]  exp=usually. | act=Temperature Sensor
+  S svg/g[1]/g[1][childCount]  exp=5 | act=6
+  S svg/g[1]/g[2]/@id  exp=ent0003 | act=ent0002
+  S svg/g[1]/g[2]/rect[1]/@fill  exp=#F1F1F1 | act=#FEFFDD
+  S svg/g[1]/g[2]/rect[1]/@stroke-width  exp=1.5 | act=1
+  S svg/g[1]/g[2][childCount]  exp=2 | act=1
+  S svg/g[1]/g[3]/@id  exp=ent0004 | act=ent0003
+  S svg/g[1]/g[3]/text[1]/text()[1]  exp=in2withalongname | act=in1withalongname
+  S svg/g[1]/g[4]/@id  exp=ent0005 | act=ent0004
+  S svg/g[1]/g[4]/text[1]/@textLength  exp=121.45 | act=112.963
+  S svg/g[1]/g[4]/text[1]/text()[1]  exp=out1withalongname | act=in2withalongname
+  S svg/g[1]/g[5]/@id  exp=ent0006 | act=ent0005
+  S svg/g[1]/g[5]/text[1]/text()[1]  exp=out2withalongname | act=out1withalongname
+  S svg/g[1]/g[6]/@id  exp=ent0008 | act=ent0006
+  S svg/g[1]/g[6]/text[1]/@font-size  exp=13 | act=14
+  S svg/g[1]/g[6]/text[1]/@textLength  exp=75.725 | act=121.45
+  S svg/g[1]/g[6]/text[1]/text()[1]  exp=2note bottom | act=out2withalongname
+  S svg/g[1]/g[6][childCount]  exp=3 | act=2
+  S svg/g[1]/g[7]/@class  exp=link | act=entity
+  S svg/g[1]/g[7]/@id  exp=lnk9 | act=ent0007
+  S svg/g[1]/g[7]/path[1]/@d  exp=M331.61,157.941 C364.12,178.361 421.91,214.661 450.7,232.741 | act=M506.365,233.111 L506.365,243.111 L516.365,243.111 L506.365,233.111
+  S svg/g[1]/g[7]/path[1]/@fill  exp=none | act=#FEFFDD
+  S svg/g[1]/g[7]/path[1]/@id  exp=tempSensor-GMN7 | act=
+  S svg/g[1]/g[7]/path[1]/@stroke-dasharray  exp=7,7 | act=
+  S svg/g[1]/g[7]/path[1]/@stroke-width  exp=1 | act=0.5
+  S svg/g[1]/g[7][childCount]  exp=1 | act=2
+  S svg/g[1][childCount]  exp=8 | act=11
+  N svg/g[1]/g[1]/text[1]/@x  exp=37.12 | act=129.1 (Δ91.97999999999999)
+  N svg/g[1]/g[1]/text[1]/@y  exp=145.722 | act=63.5 (Δ82.22200000000001)
+  N svg/g[1]/g[1]/text[2]/@x  exp=37.12 | act=89.113 (Δ51.993)
+  N svg/g[1]/g[1]/text[2]/@y  exp=158.722 | act=77.5 (Δ81.22200000000001)
+  N svg/g[1]/g[2]/rect[1]/@height  exp=12 | act=49 (Δ37)
+  N svg/g[1]/g[2]/rect[1]/@width  exp=12 | act=169.769 (Δ157.769)
+  N svg/g[1]/g[2]/rect[1]/@x  exp=117 | act=31.12 (Δ85.88)
+  N svg/g[1]/g[2]/rect[1]/@y  exp=33.611 | act=117.611 (Δ84)
+  N svg/g[1]/g[3]/text[1]/@x  exp=223.519 | act=66.519 (Δ157)
+  N svg/g[1]/g[3]/rect[1]/@x  exp=274 | act=117 (Δ157)
+  N svg/g[1]/g[4]/text[1]/@x  exp=58.775 | act=223.519 (Δ164.744)
+  N svg/g[1]/g[4]/text[1]/@y  exp=261.5 | act=18.5 (Δ243)
+  N svg/g[1]/g[4]/rect[1]/@x  exp=113.5 | act=274 (Δ160.5)
+  N svg/g[1]/g[4]/rect[1]/@y  exp=238.611 | act=33.611 (Δ205)
+  N svg/g[1]/g[5]/text[1]/@x  exp=220.775 | act=58.775 (Δ162)
+  N svg/g[1]/g[5]/rect[1]/@x  exp=275.5 | act=113.5 (Δ162)
+  N svg/g[1]/g[6]/text[1]/@x  exp=425.64 | act=220.775 (Δ204.86499999999998)
+  N svg/g[1]/g[6]/text[1]/@y  exp=248.222 | act=261.5 (Δ13.277999999999992)

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-14T17:40:57.131Z",
+  "generatedAt": "2026-10-14T22:00:15.919Z",
   "fixtures": [
     {
       "slug": "bajelo-54-dixe684",
@@ -1416,15 +1416,11 @@
       "slug": "niveno-60-tiro789",
       "type": "state",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: cluster subgraphs: jar 3 vs ours 1"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
-      "maxDelta": 201.88899999999998,
-      "firstDiff": "svg/g[1]/g[1]/@class",
-      "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
+      "maxDelta": 64.872,
+      "firstDiff": "svg/g[1]/g[1]/rect[1]/@rx",
+      "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
     },
     {
       "slug": "nixoja-06-guxe431",

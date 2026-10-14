@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-14T17:41:55.066Z",
+  "generatedAt": "2026-10-14T22:02:48.349Z",
   "fixtures": [
     {
       "slug": "activity-legacy1-example-0",
@@ -123,15 +123,10 @@
       "slug": "barobi-40-zusa254",
       "type": "unknown",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: jar 2 vs ours 2; sorted[0] jar depth 0 wrappers -/p0/-/p1 bb 16,156.6923200000001,527,801.769272 vs ours depth 0 wrappers -/p0/-/p1 bb 16,156.6923200000001,527,699.769272"
-      },
-      "verdict": "diverged",
-      "maxDelta": 110,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
-      "maxDeltaPath": "svg/@height"
+      "layoutEqual": true,
+      "verdict": "structural-match",
+      "maxDelta": 61,
+      "maxDeltaPath": "svg/g[1]/g[1]/polygon[1]/@points[1]"
     },
     {
       "slug": "basoto-36-resu245",
@@ -1937,7 +1932,7 @@
     {
       "slug": "golamo-46-lume529",
       "type": "unknown",
-      "dotEqual": true,
+      "dotEqual": false,
       "layoutEqual": false,
       "layoutFirstDiff": {
         "component": "clusterTree",
@@ -2461,14 +2456,9 @@
       "slug": "jujuga-39-miva043",
       "type": "unknown",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: cluster subgraphs: jar 12 vs ours 10"
-      },
-      "verdict": "diverged",
-      "maxDelta": 68.184,
-      "firstDiff": "svg/g[1]/g[8]/path[1]/@d",
+      "layoutEqual": true,
+      "verdict": "structural-match",
+      "maxDelta": 52.184,
       "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
     },
     {
@@ -2500,7 +2490,7 @@
     {
       "slug": "juvose-99-mopu040",
       "type": "unknown",
-      "dotEqual": true,
+      "dotEqual": false,
       "layoutEqual": false,
       "layoutFirstDiff": {
         "component": "clusterTree",
@@ -4517,7 +4507,7 @@
     {
       "slug": "rebena-98-kiba723",
       "type": "unknown",
-      "dotEqual": true,
+      "dotEqual": false,
       "layoutEqual": false,
       "layoutFirstDiff": {
         "component": "clusterTree",
@@ -6035,7 +6025,7 @@
     {
       "slug": "vuvave-27-saki879",
       "type": "unknown",
-      "dotEqual": true,
+      "dotEqual": false,
       "layoutEqual": false,
       "layoutFirstDiff": {
         "component": "clusterTree",
@@ -6284,11 +6274,7 @@
       "slug": "xigele-78-sija109",
       "type": "unknown",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "clusterTree",
-        "detail": "page 1: jar 1 vs ours 1; sorted[0] jar depth 0 wrappers -/p0/-/p1 bb 16,16,275,516.846128 vs ours depth 0 wrappers -/p0/-/p1 bb 16,16,275,448.846128"
-      },
+      "layoutEqual": true,
       "verdict": "diverged",
       "maxDelta": 116.837,
       "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
@@ -6314,7 +6300,7 @@
     {
       "slug": "xipane-40-dune740",
       "type": "unknown",
-      "dotEqual": true,
+      "dotEqual": false,
       "layoutEqual": false,
       "layoutFirstDiff": {
         "component": "clusterTree",
