@@ -79,7 +79,7 @@ post-D7 measurements.
 9. **Tooling**: `chain.sh` gates only on the 1-minute load average; the first b2 pass timed c4 out under a 30-load 15-minute average.
 10. **Oracle stability**: the GPL jar's license page is nondeterministic in multi-file runs (`FlashCodeUtilsZxing.java:60` `tryLock` → `:76` null → blank QR). Re-capture license oracles one file per jar run.
 11. **Out of scope by ruling:** `listfonts` (host fonts), `help` (own mission), `@startcreole/math/latex/def/sprites/crash`, `path` (INSECURE only), encrypted dedications, the key tools, `testdot`.
-12. **For a maintainer ruling:** `PSystemBuilder.java:165-166` wraps `PSystemDitaaFactory` in `::comment when __MIT__ __EPL__ __BSD__ __ASL__`, so the MIT edition has no ditaa. D13 was ruled for sudoku. Whether "mirror the MIT edition" extends to the ported ditaa engine is undecided; nothing was changed.
+12. ~~**For a maintainer ruling:** ditaa under the MIT edition~~ — RULED 2026-10-14: keep ditaa; D13 covers sudoku only (`PSystemBuilder.java:165-166` disables `PSystemDitaaFactory` for MIT; the port keeps it). Recorded in D13 and the README.
 
 **Flagged for review:**
 - T0c contract deviations (journal row 9).
