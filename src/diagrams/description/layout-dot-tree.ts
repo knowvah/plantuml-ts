@@ -13,6 +13,8 @@
  */
 
 import type { DescriptiveNode, DescriptiveLink } from './ast.js';
+import type { Theme } from '../../core/theme.js';
+import { descriptionClusterTitleTable } from './description-cluster-header.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { DotInputNode, DotInputEdge, DotInputCluster } from '../../core/graph-layout.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
@@ -44,6 +46,7 @@ import { buildLinkEdgeAttributes, type EdgeFontSpecs } from './link-edge-attrs.j
 import { visibleStereotypeLabels, nodeWithVisibleStereotype } from './element-grammar.js';
 import { dotKeyFor } from './namespace-groups.js';
 import type { ClassifyCtx, EdgeDotBuildResult } from './layout.js';
+import type { ContainerDesc } from './layout-types.js';
 import { isEffectiveCluster } from './layout.js';
 
 export interface PortClusterCtx {
@@ -234,11 +237,51 @@ export function buildDotNodes(
   // G5/C1 500-line split (pure move), not introduced here.
 }
 
+/** What the plain-family wrapper/title population needs beyond the container
+ *  tree (T3, decisions.md D5/D6). */
+export interface ClusterWrapperInputs {
+  theme: Theme;
+  measurer: StringMeasurer;
+  /** `hide|show stereotype` rules; the header sizes the FILTERED list. */
+  stereotypeRules: ReadonlyArray<{ pattern?: string; show: boolean }>;
+  /** Containers a link targets directly -- jar `isThereALinkFromOrToGroup`. */
+  groupAnchorClusterIds: ReadonlySet<string>;
+}
+
+/**
+ * The plain (non-port, non-kermor) family of `ClusterDotString.printInternal`:
+ *  - `protection0`/`protection1` are unconditional outside swimlanes
+ *    (`ClusterDotString.java:299-314`; description has no swimlanes), so
+ *    `innerMarginLevels` is always set -- `1` for `p0`/`p1`, `2` when
+ *    `thereALinkFromOrToGroup1` adds `a`/`i` (`:91-99`, `:151-152`).
+ *  - the special point (`:146-147`) is declared before `i`/`p1` (`:151-155`),
+ *    so it is `unwrappedNodeId`: a `nodeIds` member that stays unwrapped.
+ *  - `cluster.isLabel()` prints the title TABLE (`:122-125`); D5 sizes it.
+ */
+function applyPlainWrappers(cluster: DotInputCluster, c: ContainerDesc, wrap: ClusterWrapperInputs): void {
+  const linked = wrap.groupAnchorClusterIds.has(c.clusterId);
+  cluster.innerMarginLevels = linked ? 2 : 1;
+  // The anchor is already the last `nodeIds` member (buildDotClusters); the
+  // layout builder keeps the `unwrappedNodeId` member a direct child of the
+  // base cluster instead of nesting it under `i`/`p1` (graph-layout-build.ts:495).
+  if (linked) cluster.unwrappedNodeId = groupAnchorNodeId(c.clusterId);
+  const stereotype = visibleStereotypeLabels(c.stereotype, wrap.stereotypeRules);
+  const { stereotype: _raw, ...bare } = c;
+  const visible: ContainerDesc = stereotype === undefined ? bare : { ...bare, stereotype };
+  const dims = descriptionClusterTitleTable(visible, wrap.theme, wrap.measurer);
+  if (dims === undefined) return;
+  cluster.labelWidth = dims.width;
+  cluster.labelHeight = dims.height;
+  cluster.titleTableWidth = dims.width;
+  cluster.titleTableHeight = dims.height;
+}
+
 export function buildDotClusters(
   ctx: ClassifyCtx,
   anchorClusterIds: ReadonlySet<string>,
   portRanksByCluster: ReadonlyMap<string, { rank: 'source' | 'sink'; nodeIds: string[] }[]>,
   kermor: boolean,
+  wrap: ClusterWrapperInputs,
 ): DotInputCluster[] {
   return ctx.containers.map((c) => {
     // The anchor is a direct member of its own cluster (not nested in any
@@ -260,6 +303,9 @@ export function buildDotClusters(
       // runLayout's anchorClusterIds comment) — no anchor node exists to
       // point at under kermor, so portAnchorId stays unset.
       if (!kermor) cluster.portAnchorId = groupAnchorNodeId(c.clusterId);
+    } else if (!kermor) {
+      // Port (T4) and kermor (T4) families keep their pre-T3 shape.
+      applyPlainWrappers(cluster, c, wrap);
     }
     return cluster;
   });
