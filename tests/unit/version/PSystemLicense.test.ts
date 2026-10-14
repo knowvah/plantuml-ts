@@ -5,12 +5,18 @@
  *
  * Jar pin (`scripts/oracle-render.sh`, 1.2026.8beta1, `@startuml\nlicense\n@enduml`):
  * a 518 x 842 page of 61 `<text>` rows and three 99x99 qrcode `<image>`s for
- * line 16 (`License.java:145-146`). Residual: the `<qrcode:...>` creole atom
- * (`CommandCreoleQrcode` -> `StripeSimple#addQrcode` -> `AtomImg.createQrcode`
- * -> `FlashCodeUtilsZxing`) is unported core creole, so this port draws line
- * 16 as five text runs and the page is 680 x 755; every other row keeps the
- * jar's x and textLength, 87px higher after line 16 (the jar's 99px qrcode
- * row less this port's one 12px text row).
+ * line 16 (`License.java:145-146`). The jar is the GPL edition; the port is the
+ * MIT one (D13), which moves the page in exactly two ways:
+ * - the qrcode line: `FlashCodeUtilsNone` exports nothing, so each
+ *   `<qrcode:...>` is `AtomImg.createQrcode`'s blank 10x10 image at the default
+ *   scale 3 — 30x30, not the GPL edition's 33-module QR code at 99x99 — and the
+ *   row is 30 high, not 99 (69px less);
+ * - `addMit`'s 22 lines replace the GPL paragraph's 13 (`License.java:155-172`,
+ *   108px more), and `toString` prints `MIT` in two lines. Its widest line
+ *   (570.9) widens the page to 581.
+ * Controlled experiment (ufp-T3b): with the GPL `License` restored and the
+ * blank image sized 33x33 the port's page has zero `compareSvg` diffs against
+ * the jar; every diff below is one of these two.
  */
 import { describe, expect, it } from 'vitest';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
@@ -23,6 +29,7 @@ import { HColors } from '../../../src/core/klimt/color/HColors.js';
 import { ClockwiseTopRightBottomLeft } from '../../../src/core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 import { getTextBlock, PSystemLicense } from '../../../src/diagrams/version/PSystemLicense.js';
 import { LicenseInfo } from '../../../src/diagrams/version/LicenseInfo.js';
+import { createQrcode } from '../../../src/core/klimt/creole/atom/AtomImg.js';
 
 const measurer = new DeterministicMeasurer();
 const SOURCE: UmlSource = { lines: ['license'], type: 'sequence' };
@@ -95,17 +102,43 @@ const JAR_LICENSE_ROWS = [
   '5 833.333 -',
 ];
 
-/** This port's line 16: the qrcode line drawn as creole text (the residual). */
-const PORT_QRCODE_ROWS = [
-  '31.4 194.333 76.275',
-  '107.675 194.333 122.325',
-  '266.075 194.333 76.275',
-  '342.35 194.333 91.05',
-  '474.35 194.333 199.95',
+/** The MIT qrcode row: three 30x30 images, two tabs (52.8px) apart, at the jar's first tab stop and row top. */
+const PORT_QRCODE_ROWS = ['image 31.4 185 30x30', 'image 114.2 185 30x30', 'image 197 185 30x30'];
+
+/** `addMit` (License.java:241-263) + the blank of :189, as this port draws them. */
+const PORT_MIT_ROWS = [
+  '5 224.333 342.975',
+  '5 236.333 189',
+  '5 248.333 -',
+  '5 260.333 208.5',
+  '5 272.333 -',
+  '5 284.333 367.05',
+  '5 296.333 400.2',
+  '5 308.333 361.95',
+  '5 320.333 366.3',
+  '5 332.333 368.25',
+  '5 344.333 346.5',
+  '5 356.333 -',
+  '5 368.333 378.75',
+  '5 380.333 270.525',
+  '5 392.333 -',
+  '5 404.333 496.95',
+  '5 416.333 518.85',
+  '5 428.333 534.6',
+  '5 440.333 570.9',
+  '5 452.333 539.325',
+  '5 464.333 553.65',
+  '5 476.333 -',
 ];
 
-/** The jar's qrcode row (99) less this port's text row (12). */
-const QRCODE_SHIFT = 87;
+/** The jar rows after the GPL paragraph (13 rows from index 18). */
+const JAR_AFTER_EDITION_TEXT = 31;
+
+/** The MIT page's rows after `addMit`: 22 rows for the GPL's 13 (+108), a 30px qrcode row for 99 (-69). */
+const EDITION_SHIFT = 39;
+
+/** `this MIT license.` / `...without any reference to the MIT license.` (License.java:201, :203), row index after `addMit`. */
+const MIT_NAME_ROWS: Readonly<Record<number, string>> = { 8: '86.625', 10: '434.325' };
 
 function rows(svg: string): string[] {
   return [...svg.matchAll(/<(text|image)([^>]*)>/g)].map((m) => {
@@ -120,9 +153,10 @@ function rootAttr(svg: string, name: string): string | undefined {
   return new RegExp(` ${name}="([^"]*)"`).exec(/^<svg[^>]*>/.exec(svg)?.[0] ?? '')?.[1];
 }
 
-function shifted(row: string): string {
+function shifted(row: string, index: number): string {
   const [x, y, textLength] = row.split(' ');
-  return `${x ?? ''} ${String(Number((Number(y) - QRCODE_SHIFT).toFixed(3)))} ${textLength ?? ''}`;
+  const length = MIT_NAME_ROWS[index] ?? textLength ?? '';
+  return `${x ?? ''} ${String(Number((Number(y) + EDITION_SHIFT).toFixed(3)))} ${length}`;
 }
 
 describe('PSystemLicense — the jar license page', () => {
@@ -133,14 +167,27 @@ describe('PSystemLicense — the jar license page', () => {
     expect(ours.slice(0, 15)).toEqual(JAR_LICENSE_ROWS.slice(0, 15));
   });
 
-  it('draws the 46 lines after the qrcode line at the jar x / textLength, 87px higher', () => {
-    expect(ours.slice(20)).toEqual(JAR_LICENSE_ROWS.slice(18).map(shifted));
+  it('draws the MIT qrcode row: three 30x30 blank images where the GPL jar draws 99x99 QR codes (D13)', () => {
+    expect(ours.slice(15, 18)).toEqual(PORT_QRCODE_ROWS);
+    expect(JAR_LICENSE_ROWS.slice(15, 18)).toEqual([
+      'image 31.4 185 99x99',
+      'image 183.2 185 99x99',
+      'image 335 185 99x99',
+    ]);
   });
 
-  it('residual: draws the qrcode line as text (no <qrcode:> atom), so the page is 680 x 755, not 518 x 842', () => {
-    expect(ours.slice(15, 20)).toEqual(PORT_QRCODE_ROWS);
-    expect(svg).not.toContain('<image');
-    expect([rootAttr(svg, 'width'), rootAttr(svg, 'height')]).toEqual(['680px', '755px']);
+  it('draws addMit where the jar draws the GPL paragraph (D13)', () => {
+    expect(ours.slice(18, 40)).toEqual(PORT_MIT_ROWS);
+  });
+
+  it('draws the 31 lines after the edition text at the jar x / textLength, 39px lower, MIT in two of them', () => {
+    expect(ours.slice(40)).toEqual(JAR_LICENSE_ROWS.slice(JAR_AFTER_EDITION_TEXT).map(shifted));
+  });
+
+  it('is 581 x 881 (the jar GPL page is 518 x 842) and embeds the blank qrcode PNG', () => {
+    expect([rootAttr(svg, 'width'), rootAttr(svg, 'height')]).toEqual(['581px', '881px']);
+    expect(svg.match(/<image /g)).toHaveLength(3);
+    expect(svg).toContain(`xlink:href="${createQrcode('https://plantuml.com/patreon', 3).dataUri}"`);
   });
 
   it('renders the same document three times', () => {

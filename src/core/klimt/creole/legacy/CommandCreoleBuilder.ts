@@ -58,6 +58,7 @@ import { createMathCommand } from '../command/CommandCreoleMath.js';
 import { createMonospacedCommand } from '../command/CommandCreoleMonospaced.js';
 import { createSpaceCommand } from '../command/CommandCreoleSpace.js';
 import { createUrlCommand } from '../command/CommandCreoleUrl.js';
+import { createQrcodeCommand } from '../command/CommandCreoleQrcode.js';
 
 /** Upstream: `CommandCreoleBuilder#addCommand` — fans one Command's
  *  `starters()` out into the shared map, appending (never replacing) so
@@ -143,6 +144,11 @@ function buildCommandMap(mode: 'FULL' | 'OTHER'): Map<string, Command[]> {
   // mode gate here), so member rows and headers parse it too.
   addCommand(map, createExposantChangeCommand(FontPosition.EXPOSANT));
   addCommand(map, createExposantChangeCommand(FontPosition.INDICE));
+  // ufp-T3b: upstream ctor position (java:107) — after `CommandCreoleImg`
+  // (java:106; this port recognizes `<img>` in `StripeSimple#modifyStripe`'s
+  // atom scan, not here), before OpenIcon/Emoji. `<q` is no other command's
+  // starter. Both maps (no mode gate).
+  addCommand(map, createQrcodeCommand());
   // A2s R2i: upstream ctor position (java :109) — after the color commands
   // (relative order preserved: color/colorAndSize claim their starters
   // first), before math/latex. Registered in BOTH maps (no mode gate), so

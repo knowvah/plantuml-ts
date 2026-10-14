@@ -71,13 +71,16 @@ const JAR_ABOUT =
   '<text x="5" y="230.333" fill="#000" font-size="12">\u00a0</text>' +
   '<image width="80" height="71" x="317.075" y="162" xlink:href="HREF"/></g></svg>';
 
-/** What the version string moves: [path, ours, jar]. */
+/** What the version string moves, and the edition name (D13: the port is the
+ *  MIT edition, `License.java:66-68`; the oracle jar the GPL one): [path, ours, jar]. */
 const VERSION_DIFFS = [
   ['svg/@viewBox[2]', '393', '403'],
   ['svg/@width', '393', '403'],
   ['svg/g[1]/text[1]/@textLength', '130.575', '150.075'],
   ['svg/g[1]/text[1]/text()[1]', `plantuml-ts version ${VERSION}`, 'PlantUML version $version$'],
   ['svg/g[1]/text[2]/@x', '138.875', '158.375'],
+  ['svg/g[1]/text[3]/@textLength', '129.225', '132.6'],
+  ['svg/g[1]/text[3]/text()[1]', '(MIT source distribution)', '(GPL source distribution)'],
   ['svg/g[1]/image[1]/@x', '307.325', '317.075'],
 ];
 
@@ -88,7 +91,7 @@ function about(): PSystemVersion {
 describe('PSystemVersion.createShowAuthors — the jar about page', () => {
   const svg = about().exportDiagram(0, measurer);
 
-  it('differs from the jar only where the version string moves the page', () => {
+  it('differs from the jar only where the version string and the edition name move the page', () => {
     const { diffs } = compareSvg(svg, JAR_ABOUT, 'deterministic');
     expect(diffs.map((d) => [d.path, d.actual, d.expected])).toEqual(VERSION_DIFFS);
   });
@@ -129,10 +132,10 @@ describe('PSystemVersion.createStdLib — govuca-53-mili511', () => {
 });
 
 describe('getAuthorsStrings (java:219-245)', () => {
-  it('opens with this port version, the compile-time placeholder and the GPL edition', () => {
+  it('opens with this port version, the compile-time placeholder and the MIT edition (D13)', () => {
     expect(getAuthorsStrings(true).slice(0, 4)).toEqual([
       `<b>plantuml-ts version ${VERSION}</b> (Unknown compile time)`,
-      '(GPL source distribution)',
+      '(MIT source distribution)',
       ' ',
       '<u>Original idea</u>: Arnaud Roques',
     ]);

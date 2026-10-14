@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1660 modules · 6044 exported names.
+1666 modules · 6052 exported names.
 
 ## `src/`
 
@@ -457,6 +457,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `raster-image.ts` | `RasterImage` | A bundled raster the error pages draw: its pixel size (`PortableImage #getWidth`/`#getHeight`) and the data URI the jar's SVG embeds for it. |
 | `UmlSource.ts` | `umlSourceOf` | The diagram's own lines — `@start…` through `@end…` — sliced out of the raw input. |
 
+## `src/core/flashcode/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `FlashCodeFactory.ts` | `getFlashCodeUtils` | `FlashCodeFactory` — the `FlashCodeUtils` this build has. |
+| `FlashCodeUtils.ts` | `FlashCodeUtils` | `FlashCodeUtils` — renders a text as a 2-D barcode (QR code) image. |
+| `FlashCodeUtilsNone.ts` | `FlashCodeUtilsNone` | `FlashCodeUtilsNone` — the `FlashCodeUtils` that exports no image. |
+
 ## `src/core/gantt/`
 
 | Module | Exports | Purpose |
@@ -537,6 +545,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `AbstractAtom.ts` | `AbstractAtom` | AbstractAtom — upstream: klimt/creole/atom/AbstractAtom.java (`abstract class AbstractAtom extends TextBlockMemoized implements Atom`). |
 | `Atom.ts` | `CreoleAtomUrl`, `CreoleAtom` | Atom — one drawable/measurable piece of a creole `Stripe` (one physical display line). |
 | `AtomEmoji.ts` | `EMOJI_MAGIC`, `EMOJI_BOX_FACTOR`, `EMOJI_ALTITUDE_FACTOR`, `EMOJI_LINE_HEIGHT_FACTOR`, `emojiLineHeightFactor`, `emojiFactor`, `emojiBoxDim`, `emojiSquareDim`, `emojiStartingAltitude`, `emojiRenderRun` | AtomEmoji — sizing constants for one `<:name:>` creole emoji atom. |
+| `AtomImg.ts` | `createQrcode` | `AtomImg.createQrcode` — the image atom a creole `<qrcode:...>` adds (`StripeSimple#addQrcode`, java:216-218). |
+| `AtomImgPortableImage.ts` | `TYPE_INT_RGB`, `buildPortableImage`, `scalePortableImage` | The `PortableImage` pieces `AtomImg.createQrcode` reaches (AtomImg.java:95, :98): `PortableImageFactory.build(w, h, TYPE_INT_RGB)` and the `UImage(PixelImage(im, TYPE_NEAREST_NEIGHBOR)).scale(scale).getImage(1)` chain, which ends in `Portab |
 | `AtomMath.ts` | `AtomMath` | AtomMath — upstream: klimt/creole/atom/AtomMath.java (`extends AbstractAtom implements Atom`, 107 lines). |
 | `AtomOpenIconic.ts` | `AtomOpenIconic`, `asAtomOpenIconic` | `AtomOpenIconic` — an OpenIconic `<&name>` glyph inside a creole line (`StripeSimple#addOpenIcon`, StripeSimple.java:239-243), as the polymorphic `Atom` `Sea`/`SheetBlock1` lay out: `calculateDimensionSlow` (`openIconic.asTextBlock` padded |
 | `AtomSpace.ts` | `SPACE_ATOM_HEIGHT`, `SPACE_ATOM_STARTING_ALTITUDE`, `spaceAtomDim` | AtomSpace — the creole `<space:N>` atom: N pixels of horizontal advance, nothing drawn. |
@@ -560,6 +570,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `CommandCreoleLatex.ts` | `createLatexCommand` | CommandCreoleLatex — `<latex>expr</latex>`. |
 | `CommandCreoleMath.ts` | `createMathCommand` | CommandCreoleMath — `<math>expr</math>`. |
 | `CommandCreoleMonospaced.ts` | `createMonospacedCommand` | CommandCreoleMonospaced — the creole `""text""` monospace run. |
+| `CommandCreoleQrcode.ts` | `createQrcodeCommand` | CommandCreoleQrcode — the creole `<qrcode:text>` / `<qrcode text{scale=N}>` tag: one image atom (`AtomImg.createQrcode`, via `stripe.addQrcode`). |
 | `CommandCreoleSizeChange.ts` | `createSizeChangeCommands` | CommandCreoleSizeChange — `<size:N>text</size>` and `<size:N>text to end of line` (no closing tag needed). |
 | `CommandCreoleSpace.ts` | `createSpaceCommand` | CommandCreoleSpace — the creole `<space:N>` / `<space:N/>` tag. |
 | `CommandCreoleStyle.ts` | `createStyleCommands`, `createStyleCommandsWithoutCreoleForm`, `createBackcolorCommands` | CommandCreoleStyle — the BOLD/ITALIC/UNDERLINE/STRIKE/WAVE inline style commands: `**text**`/`//text//`/`__text__`/`--text--`/`~~text~~` (pure Creole double-punctuation) and `<b>text</b>`/`<b>text to end of line` (HTML-tag-style, with or wi |

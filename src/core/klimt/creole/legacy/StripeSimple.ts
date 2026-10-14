@@ -64,6 +64,7 @@ import { retrieveEmoji } from '../Emoji.js';
 import { emojiFactor } from '../atom/AtomEmoji.js';
 import { resolveColorToSvgHex } from '../../color/HColorSet.js';
 import { CharHidder } from '../../../utils/CharHidder.js';
+import { createQrcode } from '../atom/AtomImg.js';
 
 /** Font for an `<img>` cannot-decode/error fallback text run —
  *  `AtomImg.create` (`AtomImg.java:106-107`) hardcodes
@@ -165,6 +166,12 @@ class StripeAtomBuilder implements StripeBuilder {
   /** Upstream: `StripeSimple#addSpace` -> `AtomSpace.create(width)`. */
   addSpace(width: number): void {
     this.built.push({ kind: 'space', width });
+  }
+
+  /** Upstream: `StripeSimple#addQrcode` (java:216-218) ->
+   *  `AtomImg.createQrcode(src, scale)`, an image atom like `<img>`'s. */
+  addQrcode(src: string, scale: number): void {
+    this.built.push({ kind: 'inline', atom: createQrcode(src, scale), ambientFont: this.font });
   }
 
   pushLatexAtom(expr: string): void {
