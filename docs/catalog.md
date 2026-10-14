@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1666 modules · 6052 exported names.
+1667 modules · 6053 exported names.
 
 ## `src/`
 
@@ -1681,6 +1681,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `command-table-shorthand.ts` | `SHORTHAND_COMMANDS` | Bare shorthand declaration commands for the descriptive diagram dispatch table (rules 5-8b of the original command-table.ts COMMANDS array): business-actor `:Name:/`, actor `:Name:`, business-usecase `(Name)/`, interface `()Name`, and the b |
 | `command-table-types.ts` | `Command` | Shared `Command` shape for the descriptive diagram dispatch table. |
 | `command-table.ts` | `Command`, `COMMANDS` | Command dispatch table for the descriptive diagram parser (component / use-case / deployment). |
+| `description-cluster-header.ts` | `descriptionClusterTitleTable` | `ClusterHeader`'s DOT-side sizing for a description group: the `titleAndAttributeWidth/Height` the jar prints as the cluster's label `<TABLE>` (`ClusterDotString.java:122-125`). |
 | `description-elk-adapter.ts` | `ROOT_GROUP`, `DescriptionElkContext`, `DescriptionElkAdapter`, `layoutDescriptionElk`, `buildDescriptionElkContext` | `ElkDiagramAdapter` over the description engine (cdd8 T3b, D13). |
 | `description-elk-label.ts` | `nestedRenderer`, `labelSkinSimple`, `ElkDisplayStyle`, `elkDisplayBlock` | The creole `TextBlock` the ELK maker builds for a link's label, quantifier and role (`Display.getWithNewlines(...).create0(font, CENTER, skinParam, wrapWidth, CreoleMode.SIMPLE_LINE, null, null)`: `CucaDiagramFileMakerElk.java:213-215`, `:2 |
 | `element-embedded-block.ts` | `EmbeddedElementBlock`, `scanEmbeddedElementBlock` | `PSystemCommandFactory#addOneSingleLineManageEmbedded2` (`:288-307`) for `CommandCreateElementMultilines`' TYPE1 element body (`parser.ts`'s `continueElementBlock`): while an open element block is accumulating body lines, a line that OPENS |
