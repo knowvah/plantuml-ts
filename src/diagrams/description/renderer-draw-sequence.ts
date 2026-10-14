@@ -16,6 +16,7 @@
  */
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { Theme } from '../../core/theme.js';
+import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { DescriptionGeometry, DescriptionNodeGeo, DescriptionEdgeGeo } from './layout-helpers.js';
 import type { UidPlan } from './renderer-uid.js';
 import { buildCluster } from './renderer-cluster.js';
@@ -113,6 +114,7 @@ export function drawClusters(
   theme: Theme,
   plan: UidPlan,
   respectHidden: boolean,
+  sprites?: SpriteRegistry,
 ): void {
   for (const node of containers) {
     // G1 I-hideshow: `Cluster#drawU`'s own early return (svek/Cluster.java
@@ -131,7 +133,7 @@ export function drawClusters(
     // canvas height of 169 reserves comp2's full box + edge even though
     // neither is drawn).
     if (respectHidden && node.hidden === true) continue;
-    buildCluster(node, theme, plan.nodeUid.get(node.id)!).drawU(ug);
+    buildCluster(node, theme, plan.nodeUid.get(node.id)!, sprites).drawU(ug);
   }
 }
 

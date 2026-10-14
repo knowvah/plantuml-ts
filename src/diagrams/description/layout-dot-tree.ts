@@ -14,6 +14,7 @@
 
 import type { DescriptiveNode, DescriptiveLink } from './ast.js';
 import type { Theme } from '../../core/theme.js';
+import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { measureLinkNoteDim } from './link-note-box.js';
 import { descriptionClusterTitleTable } from './description-cluster-header.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
@@ -252,6 +253,8 @@ export function buildDotNodes(
 export interface ClusterWrapperInputs {
   theme: Theme;
   measurer: StringMeasurer;
+  /** The diagram's sprites: a sprite stereotype / title sprite sizes the header (`ClusterHeader.java:187-188`). */
+  sprites?: SpriteRegistry | undefined;
   /** `hide|show stereotype` rules; the header sizes the FILTERED list. */
   stereotypeRules: ReadonlyArray<{ pattern?: string; show: boolean }>;
   /** Containers a link targets directly -- jar `isThereALinkFromOrToGroup`. */
@@ -266,7 +269,7 @@ function titleDimsFor(c: ContainerDesc, wrap: ClusterWrapperInputs): ClusterTitl
   const stereotype = visibleStereotypeLabels(c.stereotype, wrap.stereotypeRules);
   const { stereotype: _raw, ...bare } = c;
   const visible: ContainerDesc = stereotype === undefined ? bare : { ...bare, stereotype };
-  return descriptionClusterTitleTable(visible, wrap.theme, wrap.measurer);
+  return descriptionClusterTitleTable(visible, wrap.theme, wrap.measurer, wrap.sprites);
 }
 
 /** The D5 dims of every container, keyed by `clusterId` -- the single source
@@ -548,6 +551,9 @@ function buildGeoNode(
   };
   const visibleStereotype = visibleStereotypeLabels(astNode.stereotype, stereotypeRules);
   if (visibleStereotype !== undefined && visibleStereotype.length > 0) geo.stereotype = visibleStereotype;
+  // The sizer measured this sprite (`ContainerDesc.stereotypeSprite`), so the cluster header must draw it
+  // (`ClusterHeader.java:187-188`).
+  if (astNode.stereotypeSprite !== undefined) geo.stereotypeSprite = astNode.stereotypeSprite;
   if (astNode.color !== undefined) geo.color = astNode.color;
   if (astNode.creationIndex !== undefined) geo.creationIndex = astNode.creationIndex;
   if (astNode.declaredAsGroup === true) geo.declaredAsGroup = true;

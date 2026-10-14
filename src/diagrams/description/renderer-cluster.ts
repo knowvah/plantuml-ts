@@ -22,8 +22,11 @@ import {
 } from '../../core/svek/Cluster.js';
 import { PackageStyle } from '../../core/svek/PackageStyle.js';
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
-import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
+import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
+import { buildStereo, resolveStereotypeSprite } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
+import { rawStereotypeLabels } from './parse-helpers.js';
 import type { DescriptionNodeGeo } from './layout-helpers.js';
 import { resolveSymbol, textFont } from '../../core/decoration/symbol/usymbol-resolve.js';
 
@@ -90,36 +93,50 @@ function isFolderStyled(symbol: USymbol): boolean {
   return symbol === 'package' || symbol === 'folder';
 }
 
-/** What the ELK path adds to {@link buildHeader}: the diagram's sprites and the title block's own alignment. */
-export interface ElkHeaderOptions {
+/** What {@link buildHeader} reads beyond the node: the diagram's sprites (both paths: `<$sprite>` in the
+ *  title and a sprite stereotype) and, on the ELK path only, the title block's own alignment. */
+export interface HeaderOptions {
   readonly sprites: SpriteRegistry | undefined;
-  readonly alignment: HorizontalAlignment;
+  readonly alignment?: HorizontalAlignment;
 }
 
-export function buildHeader(node: DescriptionNodeGeo, theme: Theme, elk?: ElkHeaderOptions): ClusterHeaderInfo {
+/** `ClusterHeader.java:197-207`: one centered guillemet line per visible tag, or an empty block. */
+function labelBlock(node: DescriptionNodeGeo, theme: Theme): TextBlock {
+  if (node.stereotype === undefined || node.stereotype.length === 0) return TextBlockUtils.empty(0, 0);
+  // `Display.create(visibleStereotypes)` takes the RAW `<<...>>` runs (`CucaDiagram.java:596-602`, DOUBLE_COMPARATOR)
+  // and the creole parser's `Guillemet#manageGuillemet` (`CreoleParser.java:175`) turns each into `«x»` -- except a
+  // run holding a creole tag (`<< <U+00B5>Service >>`), which its `[^<>]` class rejects and stays literal.
+  const raw = rawStereotypeLabels(node.stereotype);
+  const lines = node.stereotype.map((label, i) => (raw?.[i] === undefined ? `<<${label}>>` : raw[i]));
+  return buildTextBlock(
+    lines.join('\n'),
+    textFont(theme, node.symbol, 0, STEREOTYPE_STYLES, 'stereotype'),
+    HorizontalAlignment.CENTER,
+  );
+}
+
+export function buildHeader(node: DescriptionNodeGeo, theme: Theme, options?: HeaderOptions): ClusterHeaderInfo {
   const titleFont = textFont(theme, node.symbol, 0, TITLE_STYLES);
-  // `elk` is the ELK path's (cdd8 T3b): `ClusterHeader.java:117-119` builds the title with the full
-  // `Display#create` under `style.getHorizontalAlignment()`, so a `<$sprite>` in a group's label draws and
-  // `skinparam defaultTextAlignment` (root) aligns its lines. The svek path passes none and is unchanged.
-  const alignment = elk?.alignment ?? HorizontalAlignment.LEFT;
+  // `ClusterHeader.java:117-119` builds the title with the full `Display#create`, so a `<$sprite>` in a
+  // group's label measures and draws; the ELK path (cdd8 T3b) also passes `style.getHorizontalAlignment()`.
+  const alignment = options?.alignment ?? HorizontalAlignment.LEFT;
   const title = buildTextBlock(
     node.display,
     titleFont,
     alignment,
-    elk === undefined ? undefined : makeAtomImageResolverFor(elk.sprites)(titleFont),
+    options === undefined ? undefined : makeAtomImageResolverFor(options.sprites)(titleFont),
   );
   // G1 I5b: one guillemet line per stereotype tag, same convention as
   // `EntityImageDescriptionSupport.ts#buildStereo` -- ClusterHeader.java
   // :197-207 (`Display.create(visibleStereotypes)`) stacks ALL tags, not
   // just the first.
-  const stereo =
-    node.stereotype !== undefined && node.stereotype.length > 0
-      ? buildTextBlock(
-          node.stereotype.map((label) => `«${label}»`).join('\n'),
-          textFont(theme, node.symbol, 0, STEREOTYPE_STYLES, 'stereotype'),
-          HorizontalAlignment.CENTER,
-        )
-      : TextBlockUtils.empty(0, 0);
+  // `ClusterHeader.java:187-188`: `stereotype.getSprite(skinParam)` is tested FIRST; a hit replaces the
+  // label block (same `buildStereo` the leaf path calls, `EntityImageDescription.java:192-201`).
+  const sprite = resolveStereotypeSprite(
+    node.stereotypeSprite,
+    options?.sprites === undefined ? undefined : spriteDimsLookupFor(options.sprites),
+  );
+  const stereo = sprite === undefined ? labelBlock(node, theme) : buildStereo([], titleFont, undefined, sprite);
   return { title, stereo, titleHorizontalAlignment: HorizontalAlignment.LEFT };
 }
 
@@ -160,7 +177,7 @@ export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleD
 
 /** Builds the `Cluster` for one container node, ready to `drawU(ug)`
  *  (absolute position resolved internally — see module doc comment). */
-export function buildCluster(node: DescriptionNodeGeo, theme: Theme, uid: string): Cluster {
+export function buildCluster(node: DescriptionNodeGeo, theme: Theme, uid: string, sprites?: SpriteRegistry): Cluster {
   const group: ClusterGroupInfo = {
     hidden: false,
     name: node.id,
@@ -180,7 +197,7 @@ export function buildCluster(node: DescriptionNodeGeo, theme: Theme, uid: string
   };
   return new Cluster(
     group,
-    buildHeader(node, theme),
+    buildHeader(node, theme, { sprites }),
     { position: new UTranslate(node.x, node.y), width: node.width, height: node.height },
     buildStyleDefaults(theme, node.symbol),
     symbolInfo,
