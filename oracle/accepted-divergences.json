@@ -23,15 +23,6 @@
     },
     {
       "match": {
-        "id": "svg-class/nugecu-04-tona107"
-      },
-      "scope": "svg-conformance class ledger (dot-engine known divergence A3 -- cdd4 D6)",
-      "acceptedAt": "2026-09-26",
-      "acceptedBy": "maintainer",
-      "reason": "One flat labelled `minlen=0` edge (`sh0006->sh0007`) routes around the mirrored side of its label box. docs/graphviz-issues/23 / TRACKER 23: dot-engine accepted this as an instance of its docs/known-divergences.md A3 (spline-routing tie-break). A symmetric label corridor makes the two candidate split corners an exact tie, and C graphviz and the port resolve the tie on floating-point noise, so there is no upstream fix to wait for. Re-verified 2026-09-26 (cdd4 T1) on dot-engine 1.6.1: render-diff structural=0, numeric=23, all on that edge's path and arrowhead polygon (max Δ16.06, label side mirrored); every other element exact. Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=23, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=23. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line. Re-ruled 2026-10-11: no dot-engine fix pursued (cdd8 D5)."
-    },
-    {
-      "match": {
         "id": "svg-unknown/gubeca-19-lemu434"
       },
       "scope": "svg-conformance unknown ledger (nested {{yaml}} image size -- Smetana path, cdd7 D8)",
@@ -902,6 +893,18 @@
       "retiredAt": "2026-10-13",
       "retiredBy": "wbs-engine-port (orchestrator, batch-5 wave-1 close)",
       "retiredReason": "Retired by wbs-engine-port at the batch-5 wave-1 close (2026-10-13, journal row 33): wep T5a (da15d5507, merged bfd1a5c4e) routes creole [[...]] through the ported UrlBuilder (CommandCreoleUrl.java:56,73-82), so the QUOTED tooltip carries the decoded <U+005C>, and svg-graphics.ts mirrors SvgGraphics.java:1153-1157 Matcher.appendReplacement(sb, \"\"+c), which throws on a lone backslash -- the port now renders its own error page where the jar renders its crash page: conformant under the 2026-10-10 error-page rule."
+    },
+    {
+      "match": {
+        "id": "svg-class/nugecu-04-tona107"
+      },
+      "scope": "svg-conformance class ledger (dot-engine known divergence A3 -- cdd4 D6)",
+      "acceptedAt": "2026-09-26",
+      "acceptedBy": "maintainer",
+      "reason": "One flat labelled `minlen=0` edge (`sh0006->sh0007`) routes around the mirrored side of its label box. docs/graphviz-issues/23 / TRACKER 23: dot-engine accepted this as an instance of its docs/known-divergences.md A3 (spline-routing tie-break). A symmetric label corridor makes the two candidate split corners an exact tie, and C graphviz and the port resolve the tie on floating-point noise, so there is no upstream fix to wait for. Re-verified 2026-09-26 (cdd4 T1) on dot-engine 1.6.1: render-diff structural=0, numeric=23, all on that edge's path and arrowhead polygon (max Δ16.06, label side mirrored); every other element exact. Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=23, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=23. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line. Re-ruled 2026-10-11: no dot-engine fix pursued (cdd8 D5).",
+      "retiredAt": "2026-10-14",
+      "retiredBy": "dot-engine 2.4.0 bump (chore/dot-engine-2.4.0)",
+      "retiredReason": "Retired: the divergence no longer exists. dot-engine fixed TRACKER 23 in PR #85 (cdf597bc, reallyroutespline's max-deviation split now matches C bit for bit: libm hypot, strict `>`, clang fp-contract fusion), published in 2.3.1 and carried into 2.4.0; dot-engine retired its A3 known divergence. Measured 2026-10-14 on the pinned 2.4.0 tarball: render-diff structural=0 numeric=0 (was 0/23 on 2.3.0), survey verdict structural-match -> conformant, census diffCount 23 -> 0. Pinned into oracle/goldens/svg-class/ratchet.json (source dot-engine-2.4.0). The A3 premise that C resolves the tie on floating-point noise was wrong: the two corners differ by 1 ULP and C decides deterministically."
     }
   ]
 }

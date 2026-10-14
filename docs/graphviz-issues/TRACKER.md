@@ -5,6 +5,23 @@ the box only when the fix has landed in the pinned dot-engine `.tgz`
 AND the affected plantuml-ts fixtures re-measure clean (the class /
 object ratchets and census re-run instantly against an updated `.tgz`).
 
+<!-- NOTE 2026-10-14: dot-engine's oracle is now native graphviz 16.1.0
+     (headless text metrics), and on the issue repros its output is identical
+     to homebrew 16.1.0 run headless. A filing against pango-enabled
+     homebrew 16.1.0 therefore compares like with like, apart from
+     pango-measured text: per dot-engine test/golden/inputs/PROVENANCE.md
+     only pt-issue-29-pair and pt-issue-31-inline measure text. -->
+
+<!-- NOTE 2026-10-14: plantuml-ts pins @knowvah/dot-engine 2.4.0 (PR #85 fixes
+     via 2.3.1 plus PR #86, the graphviz 16.1.0 sync). Across all 4903 cached
+     fixtures, 10 render differently from 2.3.0 and 0 change verdict
+     except class/nugecu-04-tona107, which became conformant. On every
+     re-measured issue fixture, 2.4.0 renders the jar's own svek-1.dot
+     byte-identical to native dot -Tsvg. Where a fixture still differs, the
+     entry's 2026-10-14 line says whether our DOT input differs or the
+     residual is post-layout. Measurements are in
+     .agent-notes/dot-engine-2.4.0-bump.md. -->
+
 `[~]` marks an issue closed without an upstream fix to wait for —
 either diagnosed as correct-by-oracle, or reclassified as our work.
 
@@ -126,7 +143,9 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         moves either way yet, and the box stays open per this file's own rule
         rather than being ticked on the strength of the fix existing.
         (A trailing line here said "this repo is still on ^1.4.0" — stale the
-        moment T7 landed the bump recorded above, and removed 2026-08-15.) -->
+        moment T7 landed the bump recorded above, and removed 2026-08-15.)
+        2026-10-12 (dot-engine plantuml-tracker-2): consumer-side; no
+        dot-engine work. -->
 - [~] 15-cluster-anchor-point-ranked-with-target.md  <!-- RECLASSIFIED 2026-08-19:
         NOT a dot-engine defect. The filing compared two different quantities --
         the jar's DRAWN spline start (88.187, i.e. where PlantUML clips the path
@@ -293,7 +312,11 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         ROUTING half of `skinparam linetype ortho` was never wired even
         though this entry wired the LABEL half. pavuzo-79-zodu430 closes
         when 03 does. See 17's second-pass block and
-        .agent-notes/gvi17-splines-never-emitted.md. -->
+        .agent-notes/gvi17-splines-never-emitted.md.
+        2026-10-12 (dot-engine plantuml-tracker-2): consumer-side; no
+        dot-engine work. 03 is consumed -- re-measure pavuzo-79-zodu430 and
+        tick if clean.
+        RE-MEASURED 2026-10-14 (dot-engine pinned at 2.4.0): state/pavuzo-79-zodu430 is still 4/85, so the box stays open. Our builder graph lays out identically to native `dot -Tdot` on the jar DOT (bb and all 6 edge pos), so the residual is plantuml-ts post-layout work. -->
 - [~] 18-compound-clip-last-segment-shape-delta.md  <!-- RECLASSIFIED 2026-09-26: NOT
         dot-engine. On the cached svek-1.dot of bejusa-95-gafo325 and
         pecabi-95-demu756, dot-engine (main and branch), native graphviz 15.1 and
@@ -316,7 +339,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         -- both negative controls ruling out a wiring bug -- see the issue
         file for the full elimination chain. Not chased (stop 8); a
         per-curve dot-engine routing delta, not a general defect in T13's
-        clip. -->
+        clip.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-18.test.ts (bajotu, bejusa, pecabi, sanixi) -->
 - [x] 19-flat-edge-ignores-html-table-port.md  <!-- CONSUMED 2026-09-26 via dot-engine 1.6.1 (cdd4 T0d): camuna, nafiki, coxose, mucoti, rifuzu, sefazi class-conformant; ririlu raw layout byte-matches real dot, its remaining SVG residual is the plantuml-ts B-6 Kal stall. FIXED 2026-09-26 on
         dot-engine branch fix/plantuml-tracker-issues (022a21b7), NOT YET PUBLISHED. Mechanism: make_flat_adj_edges
         takes the rotated aux-graph path when either end has a DEFINED port; the
@@ -340,7 +364,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         variable. Costs `mucoti-34-seve858` +1 diff against the pre-T15
         baseline; `sefazi-02-defe499` and `camuna-58-veca254` carry the
         same delta but still fall 35/142. Not chased (stop 8); no
-        compensation applied, since any would be fitting. -->
+        compensation applied, since any would be fitting.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-19.test.ts (baneru, camuna, coxose, mucoti, nafiki, rifuzu, ririlu, sefazi) -->
 - [~] 20-taillabel-headlabel-no-canvas-reservation.md  <!-- RECLASSIFIED
         2026-09-25 (cdd3-T5): NOT dot-engine. Engine == real dot 16.1.0 on
         the cached DOT and on our API-built graph (bb 107.58, node x 55);
@@ -362,7 +387,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         the divergence is entirely in how it handles the two label
         attributes. `focaci-80-suzu938` stays `structural-match` (0
         structural / ~92 numeric, all one cascading ~2.4px delta). Not
-        chased (stop 8); no compensation applied. -->
+        chased (stop 8); no compensation applied.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-20.test.ts (focaci) -->
 - [~] 21-same-rank-node-order-mirrored.md  <!-- RECLASSIFIED 2026-09-25
         (cdd3-T5): NOT dot-engine. Engine == real dot on the cached DOT for
         both. boseba: our graph drops `together` cluster2t0 (deleting it
@@ -385,7 +411,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         structural diff is exactly the rerouted path, every numeric diff
         explained by the uniform shift). Not chased into dot-engine's own
         mincross/ordering source (stop 8, one diagnosis pass); no
-        plantuml-ts change warranted -- the DOT input is already correct. -->
+        plantuml-ts change warranted -- the DOT input is already correct.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-21.test.ts (inline, boseba, majuva) -->
 - [x] 17-ortho-xlabel-canvas-reservation-short.md  <!-- RESOLVED 2026-09-03 by
         mission linetype-ortho-routing. This entry's own reclassification was
         right that the engine is innocent and right that the 1.583 is the
@@ -466,8 +493,23 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         exactly, isolating the trigger to plaintext/HTML + LR together.
         Re-verified against the pinned dot-engine 1.6.0. Not chased into
         dot-engine's own `sameport.c` source beyond the port-construction
-        call site. -->
-- [~] 23-flat-labelled-edge-mirrored-label-side.md  <!-- ACCEPTED DIVERGENCE
+        call site.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-22.test.ts (sametail-min[, -rect, -tb], pijiju, quote) -->
+- [x] 23-flat-labelled-edge-mirrored-label-side.md  <!-- FIXED 2026-10-12, on main cdf597bc (PR #85, rebase-merged),
+        published in @knowvah/dot-engine 2.3.1 (2026-10-12T13:41Z).
+        PREVIOUS NOTE FOLLOWS: FIXED 2026-10-12 on
+        dot-engine branch fix/plantuml-tracker-issues-2 (44aba8a3), NOT YET PUBLISHED.
+        Mechanism: not floating-point noise -- the two candidate split corners
+        differ by 1 ULP and C decides deterministically. reallyroutespline
+        (route.c) uses libm hypot (448), strict `>` (139) and a clang
+        fp-contract-fused Bezier eval (137-138); the port used Math.hypot, an
+        unfused eval and a tolerant tie-break. Outcome: hypot + contraction,
+        not hypot alone -- with libm hypot but no fusion, widths 5/12/20 still
+        mirror. dot-engine A3 is retired (all members conformant).
+        Verified against native graphviz 15.x (our oracle); the filing compared
+        against homebrew 16.1.0.
+        Re-measure on the next .tgz bump: class/nugecu-04-tona107.
+        PREVIOUS NOTE FOLLOWS: ACCEPTED DIVERGENCE
         2026-09-26: another instance of dot-engine docs/known-divergences.md
         A3 (spline-routing tie-break). A symmetric label corridor makes the
         two candidate split corners an exact tie, and C and the port resolve
@@ -479,7 +521,9 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         others (5, 12, 30) -- a tie-break divergence in dot-engine's
         box-corridor shortest-path search (`make_flat_labeled_edge` /
         `routesplines`), not a constant offset. Re-verified against the
-        pinned 1.6.0 with a 5-point width sweep. -->
+        pinned 1.6.0 with a 5-point width sweep.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-23.test.ts (w5/w9/w12/w20/w30, nugecu)
+        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): class/nugecu-04-tona107 render-diff 0/23 -> 0/0, survey structural-match -> conformant; pinned in oracle/goldens/svg-class/ratchet.json; its accepted divergence is retired. Box ticked. -->
 - [x] 24-flat-labelled-minlen0-edge-spline-diverges.md  <!-- CONSUMED 2026-09-26 via dot-engine 1.6.1 (cdd4 T0d): givoli, nadepi, tekena class-conformant. FIXED 2026-09-26 on
         dot-engine branch fix/plantuml-tracker-issues (8c9579ea), NOT YET PUBLISHED. Mechanism: dot_splines_ routes
         flat edges in-loop at their edgecmp position; the port deferred every
@@ -497,7 +541,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         point-for-point where issue 23's mirror pairs always matched y
         exactly (probe: scratch/T6-c12-mirror-check.mts). Filed as a
         separate issue in the same feature area (flat labelled edge
-        routing) rather than folded into 23. -->
+        routing) rather than folded into 23.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-24.test.ts (givoli, nadepi, tekena). RESIDUAL: the coordinates quoted in the issue file (lp="1063,902.5", pos="1169.7,850.43 ...") do not match the current cached fixture givoli; its svek-1.dot was regenerated 2026-10-09, after the issue was filed. Homebrew 16.1.0 and the dot-engine oracle both give lp="1093,902.5", pos="1208.3,850.47 ..." on the current fixture, so the quoted numbers are stale and should be re-measured against it. -->
 - [x] 25-edge-label-published-when-unplaced.md  <!-- CONSUMED 2026-09-26 via dot-engine 1.6.1 (cdd4 T0d): delasa class-conformant with no plantuml-ts change; the consumer half is verified by cdd4 T11. FIXED 2026-09-26 on
         dot-engine branch fix/plantuml-tracker-issues (5932a793), NOT YET PUBLISHED. getLayout() now applies the
         same `set` gate to the centre label as to tail/head/xlabel; delasa's 3
@@ -512,7 +557,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         on the same "was it placed" condition. Re-verified: real `-Tsvg`
         draws 0 `<text>` in the 3 labels' colours; dot-engine's
         `getLayout()` returns a non-null `label` for all 3
-        (scratch/T6-e3-12-label-gate.mts). -->
+        (scratch/T6-e3-12-label-gate.mts).
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-25.test.ts (delasa) -->
 - [x] 26-self-loop-in-cluster-with-flat-labelled-edge.md  <!-- CONSUMED 2026-09-26 via dot-engine 1.6.1 (cdd4 T0d): cobumi class-conformant. FIXED 2026-09-26 on
         dot-engine branch fix/plantuml-tracker-issues (52982142), NOT YET PUBLISHED. Mechanism: C's abomination
         adds the flat-label rank at index -1 and leaves ND_rank alone; the port
@@ -527,7 +573,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         reproduce it -- re-verified on the bisected 13-line repro
         (scratch/E3-selfloop-bisect.dot) carried over from E3. Residual on
         top of E3-18's `Bibliotekon#addLine` fix (plantuml-ts-side, this
-        mission), not superseded by it. -->
+        mission), not superseded by it.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-26.test.ts (selfloop-min/-cluster/-bisect, cobumi, quote) -->
 - [~] E3-D2 lead (builder `setAttr('remincross','true')` before
         `searchsize` cancels searchsize) NOT FILED 2026-09-25 (cdd3-T6):
         does not reproduce on the pinned dot-engine 1.6.0. Re-ran the
@@ -539,13 +586,126 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         mismatches (sanity check, matching E3.md's own number exactly). The
         order-sensitivity E3.md recorded as a MEDIUM-confidence lead does
         not hold today -- measurement recorded here, no issue filed. -->
-- [ ] 27-parser-accepts-node-brace-block.md  <!-- FILED 2026-10-08 (unwind-U2): `node { shape=box }` parses in dot-engine 1.6.1, graphviz rejects; also peggy vs yacc error text on invalid DOT. -->
-- [ ] 28-flat-nonadjacent-edge-ignores-splines-polyline-line.md  <!-- FILED 2026-10-08 (lgm-T0c): flat edge across a non-neighbour ignores splines=polyline/line (routesplines used); deroxu-29-gude369. -->
-- [ ] 29-ortho-self-loop-edge-lost.md  <!-- FILED 2026-10-08 (lgm-T0c): `splines=ortho; a->a` loses the loop ("lost a a edge"), real draws it; xagonu-36-sudi116. -->
-- [ ] 30-flat-adjacent-edge-pair-with-port-endpoint-offset.md  <!-- FILED 2026-10-08 (lgm-T0c): adjacent flat edge pair with one port: port-less edge endpoints off ~0.2px; sokevu-87-toce485, repoge-41-demu604. -->
-- [~] 31-routing-failure-lost-edge-exit-status.md  <!-- FILED 2026-10-08 (lgm-T0c): zuduxu-90-kosi876 / rubebe-45-sura795 "rejected" by dot only via exit 1 (Pshortestpath failed, edges lost identically); same SVG, not the issue-27 class. -->
-- [ ] 32-adjacent-flat-parallel-labelled-edges-mirrored-detour.md  <!-- FILED 2026-10-08 (lgm-T0c): makeSimpleFlatLabels detour edge is the x-mirror of real; zosuje-43-zebi775, bamami-10-lava790, bobixe-18-riza923, pugodi-27-kone040, rufopi-30-roro642. Same family as 23. -->
-- [ ] 33-parallel-labelled-edges-second-edge-bend-position.md  <!-- FILED 2026-10-08 (lgm-T0c): parallel labelled non-flat edges, second edge's Bezier join at other label-box end; xenusu-76-sabi405. -->
-- [ ] 34-html-table-border-emitted-before-cells.md  <!-- FILED 2026-10-08 (lgm-T0c): 16.1.0 draws table border before cells, dot-engine after (matches 15.0 source); order-only; seen in rubebe-45-sura795. -->
-- [ ] 35-narrow-edge-label-parallel-edges-layout-offset.md  <!-- FILED 2026-10-08 (lgm-T0c): narrow-label parallel edges put nodes at fractional x in real, integer in dot-engine (0.226px); no fixture isolates it. -->
+- [x] 27-parser-accepts-node-brace-block.md  <!-- FIXED 2026-10-12, on main b18c06e1 (PR #85, rebase-merged),
+        published in @knowvah/dot-engine 2.3.1 (2026-10-12T13:41Z).
+        PREVIOUS NOTE FOLLOWS: FIXED 2026-10-12 on
+        dot-engine branch fix/plantuml-tracker-issues-2 (fdd6d03d), NOT YET PUBLISHED.
+        Mechanism: grammar.y attrstmt requires a bracket attrlist; the
+        port's AttrList had an empty alternative, so `node { ... }` parsed as an
+        attr statement plus an anonymous subgraph. Now rejected with a
+        ParseError. Error-text parity (graphviz `syntax error in line N near
+        'tok'`) not implemented -- ParseError contract kept (dot-engine AD-4).
+        Verified against native graphviz 15.x (our oracle); the filing compared
+        against homebrew 16.1.0.
+        Re-measure on the next .tgz bump: none named in the filing (parser-only).
+        PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (unwind-U2): `node { shape=box }` parses in dot-engine 1.6.1, graphviz rejects; also peggy vs yacc error text on invalid DOT.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-27.test.ts (ParseError case)
+        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): parser-only, and plantuml-ts never emits an attribute statement without a bracket list; no fixture to re-measure. Box ticked. -->
+- [ ] 28-flat-nonadjacent-edge-ignores-splines-polyline-line.md  <!-- FIXED 2026-10-12, on main d3d7297f (PR #85, rebase-merged),
+        published in @knowvah/dot-engine 2.3.1 (2026-10-12T13:41Z).
+        PREVIOUS NOTE FOLLOWS: FIXED 2026-10-12 on
+        dot-engine branch fix/plantuml-tracker-issues-2 (87de3eea), NOT YET PUBLISHED.
+        Mechanism: make_flat_edge / make_flat_adj_edges dispatch on the
+        graph edge type (line -> makeSimpleFlat, non-spline -> routepolylines);
+        the port hard-coded EDGETYPE_SPLINE for flat edges.
+        Verified against native graphviz 15.x (our oracle); the filing compared
+        against homebrew 16.1.0.
+        Re-measure on the next .tgz bump: unknown/deroxu-29-gude369.
+        PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): flat edge across a non-neighbour ignores splines=polyline/line (routesplines used); deroxu-29-gude369.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-28.test.ts (polyline, line, deroxu, quotes)
+        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): unknown/deroxu-29-gude369 is still 879/2500 (unchanged count; bytes moved). Our builder graph does NOT lay out like native on the jar DOT, because our DOT input differs from the jar's although `dotEqual` reports true: same 38 clusters, but our port-table node sizes differ, giving bb width 4958 vs 3757 and 7/246 matching edge pos. 2.4.0 renders the jar's own svek-1.dot byte-identical to native, so the remaining work is ours (a DOT-input gap), not an upstream wait. -->
+- [ ] 29-ortho-self-loop-edge-lost.md  <!-- FIXED 2026-10-12, on main ea0a8849 (PR #85, rebase-merged),
+        published in @knowvah/dot-engine 2.3.1 (2026-10-12T13:41Z).
+        PREVIOUS NOTE FOLLOWS: FIXED 2026-10-12 on
+        dot-engine branch fix/plantuml-tracker-issues-2 (33a928d8), NOT YET PUBLISHED.
+        Mechanism: the ortho adapter skipped every tail == head edge;
+        C's orthoEdges gather (ortho.c:1207-1228) keeps loops and routes them
+        via addLoop.
+        Verified against native graphviz 15.x (our oracle); the filing compared
+        against homebrew 16.1.0.
+        Re-measure on the next .tgz bump: unknown/xagonu-36-sudi116.
+        PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): `splines=ortho; a->a` loses the loop ("lost a a edge"), real draws it; xagonu-36-sudi116.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-29.test.ts (inline, pair, quote; pair measures text)
+        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): unknown/xagonu-36-sudi116 is still 192/594, bytes unchanged. Our builder graph does NOT lay out like native on the jar DOT, because our DOT input differs from the jar's (`dotEqual` is false here): we emit 13 clusters against the jar's 43, missing the package wrapper clusters. 2.4.0 renders the jar's own svek-1.dot byte-identical to native, so the remaining work is ours (a DOT-input gap), not an upstream wait. -->
+- [ ] 30-flat-adjacent-edge-pair-with-port-endpoint-offset.md  <!-- FIXED 2026-10-12, on main 87347711 (PR #85, rebase-merged),
+        published in @knowvah/dot-engine 2.3.1 (2026-10-12T13:41Z).
+        PREVIOUS NOTE FOLLOWS: FIXED 2026-10-12 on
+        dot-engine branch fix/plantuml-tracker-issues-2 (bdd614d5), NOT YET PUBLISHED.
+        Mechanism: C groups every adjacent flat edge sharing a main edge
+        into one make_flat_adj_edges call and routes the port-less edge through
+        the aux graph; the port split the group by port presence, so that edge
+        took makeSimpleFlat and clipped at a different point (54.28 vs 54.46).
+        Verified against native graphviz 15.x (our oracle); the filing compared
+        against homebrew 16.1.0.
+        Re-measure on the next .tgz bump: class/sokevu-87-toce485, component/repoge-41-demu604.
+        PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): adjacent flat edge pair with one port: port-less edge endpoints off ~0.2px; sokevu-87-toce485, repoge-41-demu604.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-30.test.ts (inline, repoge, sokevu, port-first, quote)
+        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): class/sokevu-87-toce485 conformant (it was before the bump too); component/repoge-41-demu604 still 36/20, bytes unchanged. Our builder graph does NOT lay out like native on the jar DOT, because our DOT input differs from the jar's although `dotEqual` reports true: we emit 2 clusters against the jar's 4 (missing the cluster<N>p0/p1 wrappers). 2.4.0 renders the jar's own svek-1.dot byte-identical to native, so the remaining work is ours (a DOT-input gap), not an upstream wait. -->
+- [~] 31-routing-failure-lost-edge-exit-status.md  <!-- OUTCOME 2026-10-14: the
+        dot-engine port printed `Pshortestpath failed` 3x vs native 1x (inline,
+        zuduxu) and 36x vs 34x (rubebe), with identical lost-edge sets. FIXED on
+        dot-engine main 5b6b9bfc (PR #86, rebase-merged; branch sha 54bd3b9b,
+        `fix(dot): consume edges lost by group and chain routing`), NOT YET
+        PUBLISHED. Mechanism: three
+        failure paths did not mark the edge lost, so a backstop re-routed it and
+        re-printed the warning. Warning counts now match native.
+        PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): zuduxu-90-kosi876 / rubebe-45-sura795 "rejected" by dot only via exit 1 (Pshortestpath failed, edges lost identically); same SVG, not the issue-27 class.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-31.test.ts (inline, zuduxu, rubebe: SVG + lost-edge set + warning count; inline measures text)
+        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): published in 2.4.0 (PR #86; the branch sha 54bd3b9b was rebased to 5b6b9bfc). unknown/rubebe-45-sura795 160/63 and class/zuduxu-90-kosi876 127/52, bytes unchanged. Our own builder graph lays out identically to native `dot -Tdot` on the jar DOT (bb and every edge pos), so the residual is plantuml-ts post-layout work, not an upstream wait. -->
+- [ ] 32-adjacent-flat-parallel-labelled-edges-mirrored-detour.md  <!-- FIXED 2026-10-12, on main cdf597bc (PR #85, rebase-merged),
+        published in @knowvah/dot-engine 2.3.1 (2026-10-12T13:41Z).
+        PREVIOUS NOTE FOLLOWS: FIXED 2026-10-12 on
+        dot-engine branch fix/plantuml-tracker-issues-2 (44aba8a3), NOT YET PUBLISHED.
+        Mechanism: same as 23 -- the max-deviation split in
+        reallyroutespline now matches C bit for bit (libm hypot, strict `>`,
+        clang fp-contract fusion). Separate, NOT a port bug: the upper label
+        sits outside the viewBox in native 15.x and graphvizonline too (C never
+        updateBBs makeSimpleFlatLabels labels, dotsplines.c:410-417);
+        graphvizonline only shows it because svg-pan-zoom drops the viewBox and
+        the panel is taller than the drawing. Consumer fix: grow the viewBox to
+        the drawn extent.
+        Verified against native graphviz 15.x (our oracle); the filing compared
+        against homebrew 16.1.0.
+        Re-measure on the next .tgz bump: component/zosuje-43-zebi775, unknown/bamami-10-lava790,
+        bobixe-18-riza923, pugodi-27-kone040, rufopi-30-roro642.
+        PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): makeSimpleFlatLabels detour edge is the x-mirror of real; zosuje-43-zebi775, bamami-10-lava790, bobixe-18-riza923, pugodi-27-kone040, rufopi-30-roro642. Same family as 23.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-32.test.ts (inline, zosuje, bamami, bobixe, pugodi, rufopi, quotes)
+        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): none of zosuje (20/180), bamami, bobixe, pugodi (0/100 each) or rufopi (5/103) moved a byte. Our builder graph does NOT lay out like native on the jar DOT, because our DOT input differs from the jar's although `dotEqual` reports true: the jar wraps the package in cluster6p0 > cluster6 (17x23 label TABLE) > cluster6p1; we emit one cluster with a plain-text label (1 vs 3 clusters, bb 145x90.57 vs 177x113.07). 2.4.0 renders the jar's own svek-1.dot byte-identical to native, so the remaining work is ours (a DOT-input gap), not an upstream wait. -->
+- [ ] 33-parallel-labelled-edges-second-edge-bend-position.md  <!-- FIXED 2026-10-12, on main cdf597bc (PR #85, rebase-merged),
+        published in @knowvah/dot-engine 2.3.1 (2026-10-12T13:41Z).
+        PREVIOUS NOTE FOLLOWS: FIXED 2026-10-12 on
+        dot-engine branch fix/plantuml-tracker-issues-2 (44aba8a3), NOT YET PUBLISHED.
+        Mechanism: same as 23 -- the second edge's Bezier join followed
+        the port's max-deviation split; now C's split point bit for bit.
+        Verified against native graphviz 15.x (our oracle); the filing compared
+        against homebrew 16.1.0.
+        Re-measure on the next .tgz bump: component/xenusu-76-sabi405.
+        PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): parallel labelled non-flat edges, second edge's Bezier join at other label-box end; xenusu-76-sabi405.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-33.test.ts (inline, xenusu, quote)
+        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): component/xenusu-76-sabi405 render-diff 7/29 -> 7/8 (the bend moved to the jar's side). Our own builder graph lays out identically to native `dot -Tdot` on the jar DOT (bb and every edge pos), so the residual is plantuml-ts post-layout work, not an upstream wait. -->
+- [ ] 34-html-table-border-emitted-before-cells.md  <!-- FIXED 2026-10-14, on dot-engine main 67f3ad3a
+        (PR #86, rebase-merged; branch sha 704a97ed), NOT YET PUBLISHED.
+        Mechanism: port of graphviz 16.1 commit f0d07786b, which draws the table
+        rules and border before the cells (emit_html_tbl); dot-engine drew them
+        after (15.x order). The oracle is now 16.1.0.
+        PREVIOUS NOTE FOLLOWS: VERSION SKEW
+        2026-10-12: native 15.x draws cells then border, as the port does;
+        16.1.0 reordered emit_html_tbl. Tracked by the dot-engine graphviz
+        16.1.0 sync follow-on. No dot-engine fix on the 15.x oracle.
+        PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): 16.1.0 draws table border before cells, dot-engine after (matches 15.0 source); order-only; seen in rubebe-45-sura795.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-34.test.ts (inline, rubebe, quote)
+        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): published in 2.4.0 (PR #86; the branch sha 704a97ed was rebased to 67f3ad3a). The emission order only affects dot-engine's own SVG renderer, which svek discards; unknown/rubebe-45-sura795 is still 160/63, bytes unchanged. Our own builder graph lays out identically to native `dot -Tdot` on the jar DOT (bb and every edge pos), so the residual is plantuml-ts post-layout work, not an upstream wait. -->
+- [ ] 35-narrow-edge-label-parallel-edges-layout-offset.md  <!-- FIXED 2026-10-12, on main cdf597bc (PR #85, rebase-merged),
+        published in @knowvah/dot-engine 2.3.1 (2026-10-12T13:41Z).
+        PREVIOUS NOTE FOLLOWS: FIXED 2026-10-12 on
+        dot-engine branch fix/plantuml-tracker-issues-2 (44aba8a3), NOT YET PUBLISHED.
+        Mechanism: same family as 23 -- the faithful max-deviation split
+        reproduces native on the filed repro (dot-engine golden pt-issue-35).
+        Verified against native graphviz 15.x (our oracle); the filing compared
+        against homebrew 16.1.0.
+        Re-measure on the next .tgz bump: unknown/bamami-10-lava790 (the filing names no isolating
+        fixture).
+        PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): narrow-label parallel edges put nodes at fractional x in real, integer in dot-engine (0.226px); no fixture isolates it.
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-35.test.ts (inline, bamami, quote)
+        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): unknown/bamami-10-lava790 is still 0/100, bytes unchanged. Our builder graph does NOT lay out like native on the jar DOT, because our DOT input differs from the jar's although `dotEqual` reports true: the same missing package wrapper clusters as 32. 2.4.0 renders the jar's own svek-1.dot byte-identical to native, so the remaining work is ours (a DOT-input gap), not an upstream wait. -->
   <!-- 23 ALSO SEEN 2026-10-08 (lgm-T0c): nugecu-04-tona107 minimises to this mechanism; related 32, 33. -->

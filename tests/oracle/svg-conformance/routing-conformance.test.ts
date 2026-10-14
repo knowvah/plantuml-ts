@@ -1043,10 +1043,13 @@ describe('routing conformance — jar-error classification', () => {
     // 6156 -> 6157 / 6884 -> 6885 at ufp/close-b3: 1 svg-utility clone row
     // (xucoma-93-jeko861, SpriteImage ported by ufp T3a), zero-diff pin.
     // Derivation: 6157 + 642 + 86 = 6885.
-    expect(pinnedAgree.length).toBe(6157);
+    // 6157 -> 6158 / 6885 -> 6886 at the dot-engine 2.4.0 bump: 1 svg-class
+    // clone row (nugecu-04-tona107, conformant once dot-engine fixed
+    // TRACKER 23), zero-diff pin. Derivation: 6158 + 642 + 86 = 6886.
+    expect(pinnedAgree.length).toBe(6158);
     expect(pinnedMisroutes.length).toBe(642);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(6885);
+    expect(manifest.fixtures.length).toBe(6886);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
