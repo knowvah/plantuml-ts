@@ -284,6 +284,21 @@ export function finalizeDisplay(display: string): string {
  */
 const RAW_LABELS = new WeakMap<readonly string[], readonly string[]>();
 
+/** Carries the raw `<<...>>` labels of `from` onto `to`, a subset of `from`'s entries picked by `keep`
+ *  (`visibleStereotypeLabels` filters the list; the filtered array must still know its source labels). */
+export function carryRawStereotypeLabels(
+  from: readonly string[],
+  to: readonly string[],
+  keep: (index: number) => boolean,
+): void {
+  const raw = RAW_LABELS.get(from);
+  if (raw !== undefined)
+    RAW_LABELS.set(
+      to,
+      raw.filter((_label, i) => keep(i)),
+    );
+}
+
 /** The `<<...>>` source labels behind a stereotype array from
  *  {@link extractNodeStereotype}; `undefined` for any other array. */
 export function rawStereotypeLabels(labels: readonly string[]): readonly string[] | undefined {

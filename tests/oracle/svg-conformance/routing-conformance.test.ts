@@ -1046,10 +1046,17 @@ describe('routing conformance — jar-error classification', () => {
     // 6157 -> 6158 / 6885 -> 6886 at the dot-engine 2.4.0 bump: 1 svg-class
     // clone row (nugecu-04-tona107, conformant once dot-engine fixed
     // TRACKER 23), zero-diff pin. Derivation: 6158 + 642 + 86 = 6886.
-    expect(pinnedAgree.length).toBe(6158);
+    // 6158 -> 6195 / 6886 -> 6923 at description-svek-wrappers T6 (b4): 37
+    // svg-description clone rows (DESCRIPTION -> DESCRIPTION `agree`),
+    // zero-diff pins (measurements/pin-description.mts). Derivation:
+    // 6195 + 642 + 86 = 6923.
+    // 6195 -> 6196 / 6923 -> 6924 at description-svek-wrappers T10 (b5): 1
+    // svg-description clone row (depabo-06-kato214, conformant after T9's
+    // inverted links). Derivation: 6196 + 642 + 86 = 6924.
+    expect(pinnedAgree.length).toBe(6196);
     expect(pinnedMisroutes.length).toBe(642);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(6886);
+    expect(manifest.fixtures.length).toBe(6924);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

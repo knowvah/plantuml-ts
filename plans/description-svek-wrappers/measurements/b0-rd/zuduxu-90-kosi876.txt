@@ -1,0 +1,185 @@
+triangulation failed
+in routesplines, Pshortestpath failed
+lost A B edge
+lost A B edge
+
+### class/zuduxu-90-kosi876  pass=false structural=127 numeric=52
+  S svg/@background  exp=#FFFFFF | act=#000000
+  S svg/g[1]/text[1]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[1]/@font-style  exp= | act=italic
+  S svg/g[1]/text[1]/@font-weight  exp= | act=700
+  S svg/g[1]/text[1]/@textLength  exp=652.5 | act=319.2
+  S svg/g[1]/text[1]/text()[1]  exp=java.lang.NullPointerException: Cannot invoke "net.sourceforge.plantuml.klimt.geom.XPoint2D.getX()" because "pt4" is null | act=plantuml-ts version 0.2.0 / unknown [Unknown compile time]
+  S svg/g[1]/text[2]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[2]/@font-weight  exp= | act=700
+  S svg/g[1]/text[2]/@textLength  exp=427.35 | act=136.675
+  S svg/g[1]/text[2]/text()[1]  exp=net.sourceforge.plantuml.dot.Neighborhood.intersection(Neighborhood.java:151) | act=[From string (line 21) ]
+  S svg/g[1]/text[3]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[3]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[3]/@font-weight  exp= | act=700
+  S svg/g[1]/text[3]/@textLength  exp=427.35 | act=
+  S svg/g[1]/text[3][childCount]  exp=1 | act=0
+  S svg/g[1]/text[4]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[4]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[4]/@font-weight  exp= | act=700
+  S svg/g[1]/text[4]/@textLength  exp=394.05 | act=63.963
+  S svg/g[1]/text[4]/text()[1]  exp=net.sourceforge.plantuml.dot.Neighborhood.drawU(Neighborhood.java:80) | act=@startuml
+  S svg/g[1]/text[5]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[5]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[5]/@font-weight  exp= | act=700
+  S svg/g[1]/text[5]/@textLength  exp=539.7 | act=
+  S svg/g[1]/text[5][childCount]  exp=1 | act=0
+  S svg/g[1]/text[6]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[6]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[6]/@font-weight  exp= | act=700
+  S svg/g[1]/text[6]/@textLength  exp=372.675 | act=185.063
+  S svg/g[1]/text[6]/text()[1]  exp=net.sourceforge.plantuml.svek.SvekResult.drawU(SvekResult.java:89) | act=skinparam groupInheritance 2
+  S svg/g[1]/text[7]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[7]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[7]/@font-weight  exp= | act=700
+  S svg/g[1]/text[7]/@textLength  exp=470.025 | act=
+  S svg/g[1]/text[7][childCount]  exp=1 | act=0
+  S svg/g[1]/text[8]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[8]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[8]/@font-weight  exp= | act=700
+  S svg/g[1]/text[8]/@textLength  exp=448.8 | act=53.638
+  S svg/g[1]/text[8]/text()[1]  exp=net.sourceforge.plantuml.svek.SvekResult.calculateDimension(SvekResult.java:132) | act=class A {
+  S svg/g[1]/text[9]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[9]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[9]/@font-weight  exp= | act=700
+  S svg/g[1]/text[9]/@textLength  exp=528.9 | act=
+  S svg/g[1]/text[9]/text()[1]  exp=net.sourceforge.plantuml.klimt.shape.TextBlockUtils$2.calculateDimension(TextBlockUtils.java:170) | act=a
+  S svg/g[1]/text[10]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[10]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[10]/@font-weight  exp= | act=700
+  S svg/g[1]/text[10]/@textLength  exp=548.1 | act=
+  S svg/g[1]/text[10]/text()[1]  exp=net.sourceforge.plantuml.core.TextBlockExporter.calculateFinalDimension(TextBlockExporter.java:200) | act=}
+  S svg/g[1]/text[11]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[11]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[11]/@font-weight  exp= | act=700
+  S svg/g[1]/text[11]/@textLength  exp=465.15 | act=
+  S svg/g[1]/text[11][childCount]  exp=1 | act=0
+  S svg/g[1]/text[12]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[12]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[12]/@font-weight  exp= | act=700
+  S svg/g[1]/text[12]/@textLength  exp=388.65 | act=102.463
+  S svg/g[1]/text[12]/text()[1]  exp=net.sourceforge.plantuml.UgDiagram.exportDiagram(UgDiagram.java:96) | act=note right of A::a
+  S svg/g[1]/text[13]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[13]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[13]/@font-weight  exp= | act=700
+  S svg/g[1]/text[13]/@textLength  exp=460.65 | act=65.275
+  S svg/g[1]/text[13]/text()[1]  exp=net.sourceforge.plantuml.PSystemUtils.exportDiagramsDefault(PSystemUtils.java:205) | act=some note
+  S svg/g[1]/text[14]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[14]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[14]/@font-weight  exp= | act=700
+  S svg/g[1]/text[14]/@textLength  exp=415.95 | act=54.425
+  S svg/g[1]/text[14]/text()[1]  exp=net.sourceforge.plantuml.PSystemUtils.exportDiagrams(PSystemUtils.java:94) | act=end note
+  S svg/g[1]/text[15]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[15]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[15]/@font-weight  exp= | act=700
+  S svg/g[1]/text[15]/@textLength  exp=589.275 | act=
+  S svg/g[1]/text[15][childCount]  exp=1 | act=0
+  S svg/g[1]/text[16]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[16]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[16]/@font-weight  exp= | act=700
+  S svg/g[1]/text[16]/@textLength  exp=342 | act=
+  S svg/g[1]/text[16][childCount]  exp=1 | act=0
+  S svg/g[1]/text[17]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[17]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[17]/@font-weight  exp= | act=700
+  S svg/g[1]/text[17]/@textLength  exp=430.05 | act=119.7
+  S svg/g[1]/text[17]/text()[1]  exp=net.sourceforge.plantuml.Run.lambda$processInputsInParallel$12(Run.java:316) | act=class B extends A {
+  S svg/g[1]/text[18]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[18]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[18]/@font-weight  exp= | act=700
+  S svg/g[1]/text[18]/@textLength  exp=397.425 | act=
+  S svg/g[1]/text[18]/text()[1]  exp=net.sourceforge.plantuml.Run.lambda$processInParallel$14(Run.java:332) | act=}
+  S svg/g[1]/text[19]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[19]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[19]/@font-weight  exp= | act=700
+  S svg/g[1]/text[19]/@textLength  exp=443.4 | act=
+  S svg/g[1]/text[19][childCount]  exp=1 | act=0
+  S svg/g[1]/text[20]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[20]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[20]/@font-weight  exp= | act=700
+  S svg/g[1]/text[20]/@textLength  exp=357.225 | act=
+  S svg/g[1]/text[20][childCount]  exp=1 | act=0
+  S svg/g[1]/text[21]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[21]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[21]/@font-weight  exp= | act=700
+  S svg/g[1]/text[21]/@textLength  exp=500.025 | act=119.7
+  S svg/g[1]/text[21]/text()[1]  exp=java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) | act=class B extends A {
+  S svg/g[1]/text[22]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[22]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[22]/@font-weight  exp= | act=700
+  S svg/g[1]/text[22]/@textLength  exp=500.025 | act=
+  S svg/g[1]/text[22]/text()[1]  exp=java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) | act=}
+  S svg/g[1]/text[23]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[23]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[23]/@font-weight  exp= | act=700
+  S svg/g[1]/text[23]/@textLength  exp=266.025 | act=
+  S svg/g[1]/text[23][childCount]  exp=1 | act=0
+  S svg/g[1]/text[24]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[24]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[24]/@font-weight  exp= | act=700
+  S svg/g[1]/text[24]/@text-decoration  exp= | act=wavy underline
+  S svg/g[1]/text[24]/@textLength  exp= | act=60.2
+  S svg/g[1]/text[24][childCount]  exp=0 | act=1
+  S svg/g[1]/text[25]/@fill  exp=#000 | act=#F00
+  S svg/g[1]/text[25]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[25]/@font-weight  exp= | act=700
+  S svg/g[1]/text[25]/@textLength  exp=397.65 | act=445.025
+  S svg/g[1]/text[25]/text()[1]  exp=Diagram source: (Use http://zxing.org/w/decode.jspx to decode the qrcode) | act=Cannot draw grouped inheritance: no route was found for the link B -> A
+  S svg/g[1][childCount]  exp=50 | act=26
+  N svg/@height  exp=710 | act=372 (Δ338)
+  N svg/@viewBox[2]  exp=906 | act=459 (Δ447)
+  N svg/@viewBox[3]  exp=710 | act=372 (Δ338)
+  N svg/@width  exp=906 | act=459 (Δ447)
+  N svg/g[1]/text[1]/@y  exp=242.333 | act=17 (Δ225.333)
+  N svg/g[1]/text[2]/@x  exp=11.6 | act=6 (Δ5.6)
+  N svg/g[1]/text[2]/@y  exp=254.333 | act=40 (Δ214.333)
+  N svg/g[1]/text[3]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[3]/@y  exp=266.333 | act=58 (Δ208.33300000000003)
+  N svg/g[1]/text[4]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[4]/@y  exp=278.333 | act=72 (Δ206.33300000000003)
+  N svg/g[1]/text[5]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[5]/@y  exp=290.333 | act=86 (Δ204.33300000000003)
+  N svg/g[1]/text[6]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[6]/@y  exp=302.333 | act=100 (Δ202.33300000000003)
+  N svg/g[1]/text[7]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[7]/@y  exp=314.333 | act=114 (Δ200.33300000000003)
+  N svg/g[1]/text[8]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[8]/@y  exp=326.333 | act=128 (Δ198.33300000000003)
+  N svg/g[1]/text[9]/@x  exp=11.6 | act=20.4 (Δ8.799999999999999)
+  N svg/g[1]/text[9]/@y  exp=338.333 | act=142 (Δ196.33300000000003)
+  N svg/g[1]/text[10]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[10]/@y  exp=350.333 | act=156 (Δ194.33300000000003)
+  N svg/g[1]/text[11]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[11]/@y  exp=362.333 | act=170 (Δ192.33300000000003)
+  N svg/g[1]/text[12]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[12]/@y  exp=374.333 | act=184 (Δ190.33300000000003)
+  N svg/g[1]/text[13]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[13]/@y  exp=386.333 | act=198 (Δ188.33300000000003)
+  N svg/g[1]/text[14]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[14]/@y  exp=398.333 | act=212 (Δ186.33300000000003)
+  N svg/g[1]/text[15]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[15]/@y  exp=410.333 | act=226 (Δ184.33300000000003)
+  N svg/g[1]/text[16]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[16]/@y  exp=422.333 | act=240 (Δ182.33300000000003)
+  N svg/g[1]/text[17]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[17]/@y  exp=434.333 | act=254 (Δ180.33300000000003)
+  N svg/g[1]/text[18]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[18]/@y  exp=446.333 | act=268 (Δ178.33300000000003)
+  N svg/g[1]/text[19]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[19]/@y  exp=458.333 | act=282 (Δ176.33300000000003)
+  N svg/g[1]/text[20]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[20]/@y  exp=470.333 | act=296 (Δ174.33300000000003)
+  N svg/g[1]/text[21]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[21]/@y  exp=482.333 | act=310 (Δ172.33300000000003)
+  N svg/g[1]/text[22]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[22]/@y  exp=494.333 | act=324 (Δ170.33300000000003)
+  N svg/g[1]/text[23]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[23]/@y  exp=506.333 | act=338 (Δ168.33300000000003)
+  N svg/g[1]/text[24]/@y  exp=518.333 | act=352 (Δ166.33299999999997)
+  N svg/g[1]/text[25]/@x  exp=8.3 | act=8.85 (Δ0.5499999999999989)
+  N svg/g[1]/text[25]/@y  exp=530.333 | act=366 (Δ164.33299999999997)

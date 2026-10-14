@@ -134,6 +134,22 @@ export function surveyColumn(s: SurveySummary | undefined): ColumnResult {
   return { cell: `${s.conformant} / ${s.structural} / ${s.diverged}${err}`, freshness: s.generatedAt };
 }
 
+/** `layoutEqual n/m` (description-svek-wrappers D3/T5): fixtures whose layout
+ *  graph is geometry-equal to the jar's svek DOT, over the fixtures where the
+ *  comparison was possible. Same file, same date as the survey column, so it
+ *  carries no freshness of its own. Non-svek types reuse the dot column's
+ *  reason; `layoutEqual` and `dotEqual` share the same DOT-stage precondition.
+ *  `no comparable fixture` is a vocabulary word added here: the survey carries
+ *  the column but every row was `'n/a'` (oracle-blind or page-count mismatch). */
+export function layoutEqualColumn(s: SurveySummary | undefined, dot: TypeRow | undefined): ColumnResult {
+  if (dot !== undefined && dot.note === 'n/a (no DOT stage)') return NOT_STARTED(DOT_NOTE_MAP[dot.note]!);
+  if (s === undefined) return NOT_STARTED('n/a (no survey yet)');
+  if (s.layoutEqual === undefined || s.layoutComparable === undefined)
+    return NOT_STARTED('n/a (no layoutEqual survey yet)');
+  if (s.layoutComparable === 0) return NOT_STARTED('n/a (no comparable fixture)');
+  return { cell: `${s.layoutEqual}/${s.layoutComparable}`, freshness: undefined };
+}
+
 export function censusColumn(s: CensusSummary | undefined): ColumnResult {
   if (s === undefined) return NOT_STARTED('n/a (no census yet)');
   return { cell: String(s.zeroDiff), freshness: s.generatedAt };

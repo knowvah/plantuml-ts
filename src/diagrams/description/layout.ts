@@ -49,6 +49,7 @@ import {
   computePortRanksByCluster,
   buildDotNodes,
   buildDotClusters,
+  clusterTitleDimsById,
   buildDotEdges,
   buildGeoTree,
   type PortClusterCtx,
@@ -138,6 +139,7 @@ function runLayout(
   linetype: 'ortho' | 'polyline' | undefined,
   removed: ReadonlySet<string>,
   fixCircle: boolean,
+  theme: Theme,
 ): {
   result: DotLayoutResult;
   edgeDotBuild: EdgeDotBuildResult;
@@ -170,7 +172,14 @@ function runLayout(
   const anchorClusterIds = kermor
     ? new Set(edgeDotBuild.groupAnchorClusterIds)
     : new Set([...edgeDotBuild.groupAnchorClusterIds, ...portClusterIds]);
-  const dotClusters = buildDotClusters(ctx, anchorClusterIds, portRanksByCluster, kermor).map((c) => ({
+  const wrapperInputs = {
+    theme,
+    measurer,
+    sprites: ast.sprites,
+    stereotypeRules: ast.stereotypeVisibilityRules ?? [],
+    groupAnchorClusterIds: edgeDotBuild.groupAnchorClusterIds,
+  };
+  const dotClusters = buildDotClusters(ctx, anchorClusterIds, portRanksByCluster, kermor, wrapperInputs).map((c) => ({
     ...c,
     nodeIds: c.nodeIds.filter((id) => !removed.has(id)),
   }));
@@ -186,6 +195,7 @@ function runLayout(
       ast.links,
       fixCircle,
       ast.stereotypeVisibilityRules ?? [],
+      clusterTitleDimsById(ctx, wrapperInputs),
     ).filter((n) => !removed.has(n.id)),
     edges: edgeDotBuild.dotEdges,
     nodeSep,
@@ -453,6 +463,7 @@ export function layoutDescription(
     theme.linetype ?? ast.linetype,
     removed,
     theme.fixCircleLabelOverlapping === true,
+    theme,
   );
   const { nodes, edges, placement } = buildGeoAndEdges(
     ast,

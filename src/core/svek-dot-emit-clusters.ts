@@ -16,6 +16,7 @@
 
 import type { DotInputCluster, DotInputNode } from './graph-layout.types.js';
 import type { ClusterColors, ClusterTree, NodeRec } from './svek-dot-sequence.js';
+import { kermorHasAlpha } from './graph-layout-build-kermor.js';
 import { hex, labelTable, portTable, rowPortTable, shieldTable } from './svek-dot-emit-labels.js';
 import { closeCount, innerWrapperLines, outerWrapperLines, wrapperLevels } from './svek-dot-wrappers.js';
 
@@ -37,7 +38,7 @@ function shapeAttr(node: DotInputNode): string {
   return `shape=${shape}`;
 }
 
-export function nodeLine(node: DotInputNode, rec: NodeRec): string {
+export function nodeLine(node: DotInputNode, rec: NodeRec, omitPointDecl = false): string {
   const shape = node.shape ?? 'rect';
   if (shape === 'point') {
     return `${rec.sh} [shape=point,width=.01,label=""];`;
@@ -52,7 +53,8 @@ export function nodeLine(node: DotInputNode, rec: NodeRec): string {
     // (thereALinkFromOrToGroup2), independently of hasPort(); graphviz lets
     // a node id be redeclared, and the comparator dedupes by first-seen
     // shape, so both lines matter (see graph-layout.types.ts).
-    const pointDecl = node.groupAnchorAlsoPoint === true ? `${rec.sh} [shape=point,width=.01,label=""];` : '';
+    const pointDecl =
+      node.groupAnchorAlsoPoint === true && !omitPointDecl ? `${rec.sh} [shape=point,width=.01,label=""];` : '';
     return `${pointDecl}${rec.sh} [shape=rect,width=.01,height=.01,label=${labelTable(
       node.titleLabelWidth,
       node.titleLabelHeight,
@@ -179,10 +181,15 @@ function portClusterEeBlock(
   colors: Map<string, ClusterColors>,
 ): string[] {
   const w = wrapperLevels(cluster);
-  const out = [
-    `subgraph ${cluster.id}ee {${eeLabelAttr(cluster, colors.get(cluster.id)!)}`,
-    ...innerWrapperLines(cluster.id, w),
-  ];
+  const out = [`subgraph ${cluster.id}ee {${eeLabelAttr(cluster, colors.get(cluster.id)!)}`];
+  // `ClusterDotString.java:146-147,151-152`: when the group is a link endpoint
+  // the special point is declared BEFORE `i` opens (so it sits in `ee`); the
+  // `empty()` rect re-declares it last inside `i` (`:175-181`).
+  const anchor = nodeById.get(cluster.portAnchorId ?? '');
+  const pointInEe = w.i && cluster.portRanksLabelOnEe !== true && anchor?.groupAnchorAlsoPoint === true;
+  const anchorRec = anchor === undefined ? undefined : recs.get(anchor.id);
+  if (pointInEe && anchorRec !== undefined) out.push(`${anchorRec.sh} [shape=point,width=.01,label=""];`);
+  out.push(...innerWrapperLines(cluster.id, w));
   // Ranked members are declared by `printRanks` in the OUTER cluster, so `ee`
   // carries only what is left: the anchor/placeholder and any real member.
   const outer = rankedIds(cluster);
@@ -190,7 +197,7 @@ function portClusterEeBlock(
     const node = nodeById.get(id);
     const rec = recs.get(id);
     if (outer.has(id) || node?.isPort === true || node === undefined || rec === undefined) continue;
-    out.push(nodeLine(node, rec));
+    out.push(nodeLine(node, rec, pointInEe && id === anchor?.id));
   }
   for (const child of childrenOf.get(cluster.id) ?? []) {
     // portClusterBlock is only ever reached on the non-kermor path
@@ -270,14 +277,13 @@ function kermorRankGroupLines(
 
 /** `!pragma kermor on`'s cluster body — `ClusterDotStringKermor.printInternal`
  *  + `Cluster.printCluster3_forKermor` (svek/ClusterDotStringKermor.java,
- *  Cluster.java:595-609). Deliberately narrower than the full Java: the
- *  `alpha`/`beta` note-label wrapper subgraphs are omitted (a group-attached
- *  note becomes `Entity#addNote` data under kermor, never a DOT node/edge —
- *  see description/parse-state.ts's `attachNoteToEntity` — so there is no
- *  label content to wrap, and the comparator's `parseClusters` never matches
- *  ANY kermor subgraph name against `/^cluster\d+$/` regardless of alpha/
- *  beta nesting depth, so the omission is invisible to DOT-parity). What IS
- *  ported: the rank-source group (before gamma opens), the `${id}empty`
+ *  Cluster.java:595-609). Prints `alpha` (only when a TOP/BOTTOM note exists,
+ *  `kermorNotes`; its label is the TOP note table), `beta` (always; label is
+ *  the BOTTOM note table, rank-source group inside), then `gamma` (title
+ *  TABLE, members, children, rank-sink group). T4c retired the earlier
+ *  alpha/beta omission: the comparator's cluster census counts every
+ *  `cluster*` subgraph, so the jar's three-deep nesting is part of parity.
+ *  Also ported: the rank-source group (before gamma opens), the `${id}empty`
  *  point placeholder when direct non-port members are empty, and the
  *  rank-sink group (inside gamma, no anchor/chain — contrast
  *  `portClusterBlock`'s `hasPort()` chain, which kermor's own `printRanks`
@@ -295,13 +301,21 @@ function kermorClusterBlock(
   const sinkRanks = (cluster.portRanks ?? []).filter((r) => r.rank === 'sink');
   const normalIds = cluster.nodeIds.filter((id) => !portIds.has(id));
 
-  const out: string[] = [...kermorRankGroupLines(sourceRanks, recs, nodeById)];
+  const hasAlpha = kermorHasAlpha(cluster);
+  const note = cluster.kermorNotes;
+  const noteLabel = (n: { width: number; height: number } | undefined): string =>
+    n === undefined ? 'label="";' : `label=${labelTable(n.width, n.height, cc.title)};`;
+  const out: string[] = [];
+  // `:81-115`: alpha only with a TOP/BOTTOM note; beta always; ranks-source sit in beta.
+  if (hasAlpha) out.push(`subgraph ${cluster.id}alpha {color="#FFFF00";${noteLabel(note?.top)}`);
+  out.push(`subgraph ${cluster.id}beta {labelloc="b";color="#FFFF00";${noteLabel(note?.bottom)}`);
+  out.push(...kermorRankGroupLines(sourceRanks, recs, nodeById));
 
   const label =
     cluster.labelWidth !== undefined && cluster.labelHeight !== undefined
       ? `labeljust="c";label=${labelTable(cluster.labelWidth, cluster.labelHeight, cc.title)};`
       : 'label="";';
-  out.push(`subgraph ${cluster.id}gamma {style=solid;color="${hex(cc.color)}";${label}`);
+  out.push(`subgraph ${cluster.id}gamma {labelloc="t";style=solid;color="${hex(cc.color)}";${label}`);
 
   if (normalIds.length === 0) {
     out.push(`${cluster.id}empty [shape=point,label=""];`);
@@ -316,7 +330,8 @@ function kermorClusterBlock(
     out.push(...kermorClusterBlock(child, childrenOf, recs, nodeById, colors));
   }
   out.push(...kermorRankGroupLines(sinkRanks, recs, nodeById));
-  out.push('}');
+  out.push('}', '}');
+  if (hasAlpha) out.push('}');
   // #lizard forgives — faithful port of `ClusterDotStringKermor.printInternal`
   // + `Cluster.printCluster3_forKermor`; each branch is one upstream case
   // (rank-source group, title-table label, the `${id}empty` placeholder, child

@@ -8,7 +8,8 @@
  * confirm the bar didn't get *looser* while being tightened.
  */
 import { describe, it, expect } from 'vitest';
-import { parseSvekDot, compareStructural } from './svek-dot.js';
+import { parseSvekDot, compareStructural, dotInputToStructural } from './svek-dot.js';
+import type { DotInputGraph } from '../../src/core/graph-layout.js';
 
 /** Minimal two-node, one-edge svek DOT, with overridable graph attrs. */
 function dot(opts: {
@@ -238,5 +239,159 @@ describe('compareStructural — splinesOk (linetype-ortho-routing D5)', () => {
     const oracle = parseSvekDot(dot({ minlen: 0 }));
     const candidate = parseSvekDot(dot({ minlen: 0 }));
     expect(compareStructural(oracle, candidate).splinesOk).toBe(true);
+  });
+});
+
+/**
+ * D4 of description-svek-wrappers: `clusterOk` compared membership counts only,
+ * so a graph with one plain-labelled cluster equalled the jar's `p0 > cluster >
+ * p1` pair carrying a title TABLE. These pin the nesting check on jar DOT
+ * copied from the corpus cache.
+ */
+const NO_WRAPPER_CHAIN = { a: false, p0: false, i: false, p1: false };
+
+/** `unknown/bamami-10-lava790/svek-1.dot` (jar), cluster block verbatim. */
+const BAMAMI_JAR_DOT = [
+  'digraph unix {',
+  'sh0010->sh0011[arrowtail=none,arrowhead=none,minlen=0,color="#00000C",label=<<TABLE BGCOLOR="#00000D" FIXEDSIZE="TRUE" WIDTH="42" HEIGHT="15"><TR><TD></TD></TR></TABLE>>];',
+  'subgraph cluster6p0 {label="";subgraph cluster6 {style=solid;color="#000006";labeljust="c";label=<<TABLE BGCOLOR="#000007" FIXEDSIZE="TRUE" WIDTH="17" HEIGHT="23"><TR><TD></TD></TR></TABLE>>;',
+  'subgraph cluster6p1 {label="";',
+  'sh0010 [shape=rect,label="",width=0.250000,height=0.250000,color="#00000A"];',
+  'sh0011 [shape=rect,label="",width=0.250000,height=0.250000,color="#00000B"];',
+  '',
+  '}}}',
+  '',
+  '}',
+].join('\n');
+
+/** `state/viroxo-69-fito663/svek-1.dot` (jar): a border-point cluster whose
+ *  group is touched — `a`/`i` only, the title TABLE on `ee`, and a leading
+ *  `{rank=sink;…}` group whose `}` must not close the cluster. */
+const VIROXO_JAR_DOT = [
+  'digraph unix {',
+  'subgraph cluster6a {label="";subgraph cluster6 {style=solid;color="#000006";labeljust="c";{rank=sink;sh0010;}',
+  'sh0010 [shape=rect,label="",width=0.166667,height=0.166667,color="#00000A"];',
+  '',
+  'subgraph cluster6ee {label=<<TABLE BGCOLOR="#000007" FIXEDSIZE="TRUE" WIDTH="42" HEIGHT="9"><TR><TD></TD></TR></TABLE>>;zaent0001 [shape=point,width=.01,label=""];subgraph cluster6i {label="";',
+  'sh0011 [shape=circle,label="",width=0.277778,height=0.277778,color="#00000B"];',
+  '',
+  '}}}}',
+  '}',
+].join('\n');
+
+const pairOfNodes = [
+  { id: 'a', width: 18, height: 18 },
+  { id: 'b', width: 18, height: 18 },
+];
+
+describe('compareStructural — cluster nesting and title TABLE (D4)', () => {
+  it('parses bamami: cluster6 is p0/p1-wrapped with a 17x23 title table', () => {
+    const [cluster, ...rest] = parseSvekDot(BAMAMI_JAR_DOT).clusters;
+    expect(rest).toEqual([]);
+    expect(cluster).toEqual({
+      memberCount: 2,
+      wrapperChain: { a: false, p0: true, i: false, p1: true },
+      titleTable: { w: 17, h: 23 },
+    });
+  });
+
+  it('does not take an edge label TABLE for a cluster title', () => {
+    const dotText = [
+      'digraph unix {',
+      'subgraph cluster1 {style=solid;color="#000001";label="";',
+      'sh0001 [shape=rect,label="",width=0.250000,height=0.250000,color="#000002"];',
+      'sh0001->sh0002[minlen=1,label=<<TABLE BGCOLOR="#000003" FIXEDSIZE="TRUE" WIDTH="42" HEIGHT="15"><TR><TD></TD></TR></TABLE>>];',
+      '}',
+      '}',
+    ].join('\n');
+    expect(parseSvekDot(dotText).clusters[0]).toEqual({ memberCount: 1, wrapperChain: NO_WRAPPER_CHAIN });
+  });
+
+  it('parses a border-point cluster: a/i wrap, no p0/p1, title taken from ee', () => {
+    const [cluster] = parseSvekDot(VIROXO_JAR_DOT).clusters;
+    // memberCount 0 is the historical rank-group quirk, kept on purpose (see
+    // parseClusters): the nesting fields must not depend on it.
+    expect(cluster).toEqual({
+      memberCount: 0,
+      wrapperChain: { a: true, p0: false, i: true, p1: false },
+      titleTable: { w: 42, h: 9 },
+    });
+  });
+
+  it('takes the title from a port anchor node when the cluster has no label of its own', () => {
+    const dotText = [
+      'digraph unix {',
+      'subgraph cluster3 {style=solid;color="#000003";labeljust="c";',
+      'subgraph cluster3ee {label="";',
+      'sh0001 [shape=rect,width=.01,height=.01,label=<<TABLE BGCOLOR="#000004" FIXEDSIZE="TRUE" WIDTH="69" HEIGHT="14"><TR><TD></TD></TR></TABLE>>];',
+      '}}',
+      '}',
+    ].join('\n');
+    expect(parseSvekDot(dotText).clusters[0]?.titleTable).toEqual({ w: 69, h: 14 });
+  });
+
+  it('fails clusterNestingOk for our pre-T3 shape: one cluster, plain label, no wrappers', () => {
+    // What description emitted before its cluster header was ported: the jar
+    // block above has p0/p1 and a title TABLE; ours has neither.
+    const ours: DotInputGraph = {
+      nodes: pairOfNodes,
+      edges: [],
+      clusters: [{ id: 'cluster6', label: 'C', nodeIds: ['a', 'b'] }],
+    };
+    const diff = compareStructural(parseSvekDot(BAMAMI_JAR_DOT), dotInputToStructural(ours));
+    expect(diff.clusterOk).toBe(true);
+    expect(diff.clusterNestingOk).toBe(false);
+    expect(diff.structurallyEqual).toBe(false);
+  });
+
+  it('passes clusterNestingOk once the candidate carries the same chain and title size', () => {
+    const ours: DotInputGraph = {
+      nodes: pairOfNodes,
+      edges: [],
+      clusters: [
+        { id: 'cluster6', label: 'C', labelWidth: 17, labelHeight: 23, innerMarginLevels: 1, nodeIds: ['a', 'b'] },
+      ],
+    };
+    const diff = compareStructural(parseSvekDot(BAMAMI_JAR_DOT), dotInputToStructural(ours));
+    expect(diff.clusterNestingOk).toBe(true);
+  });
+
+  it('fails clusterNestingOk when only the title TABLE size differs', () => {
+    const ours: DotInputGraph = {
+      nodes: pairOfNodes,
+      edges: [],
+      clusters: [
+        { id: 'cluster6', label: 'C', labelWidth: 17, labelHeight: 14, innerMarginLevels: 1, nodeIds: ['a', 'b'] },
+      ],
+    };
+    const diff = compareStructural(parseSvekDot(BAMAMI_JAR_DOT), dotInputToStructural(ours));
+    expect(diff.clusterNestingOk).toBe(false);
+  });
+
+  it('gives a border-point cluster the same a/i chain on both sides', () => {
+    const ours: DotInputGraph = {
+      nodes: [
+        { id: 'p', width: 12, height: 12, isPort: true },
+        { id: 'm', width: 50, height: 50 },
+      ],
+      edges: [],
+      clusters: [
+        {
+          id: 'cluster6',
+          label: 'C',
+          labelWidth: 42,
+          labelHeight: 9,
+          nodeIds: ['p', 'm'],
+          portRanks: [{ rank: 'sink', nodeIds: ['p'] }],
+          portRanksLabelOnEe: true,
+          borderPointAncestorWrap: true,
+        },
+      ],
+    };
+    const oracleCluster = parseSvekDot(VIROXO_JAR_DOT).clusters[0]!;
+    const candidateCluster = dotInputToStructural(ours).clusters[0]!;
+    expect(candidateCluster.wrapperChain).toEqual({ a: true, p0: false, i: true, p1: false });
+    expect(candidateCluster.wrapperChain).toEqual(oracleCluster.wrapperChain);
+    expect(candidateCluster.titleTable).toEqual(oracleCluster.titleTable);
   });
 });

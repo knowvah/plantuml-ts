@@ -35,6 +35,56 @@ post-D7 measurements.
 
 ---
 
+## description-svek-wrappers (dsw) — DONE 2026-10-14 (merged to local main, not pushed)
+
+**What changed:** the description engine now hands the layout the jar's svek protection wrappers
+(`p0`/`p1`, `a`/`i` on linked groups including port groups, kermor `alpha`/`beta`/`gamma` with the
+group notes) and the DOT-side `ClusterHeader` title TABLE, including sprite stereotypes, title
+sprites and raw `<< >>` creole. Other changes:
+- New `layoutParity` gate (in-process dot-engine layout of our builder graph vs the jar's
+  svek DOT), plus a 469-pin shrink-only ratchet and a survey/dashboard `layoutEqual` column.
+- `dotEqual` now sees wrapper chains and title tables.
+- State wrappers at any font size; state composite description widths via the creole sheet.
+- deroxu's two input defects fixed (multi-line port width; inverted LEFT/UP links).
+
+**Counts b0 → final** (conformant/structural/diverged): component 69/66/131 → 69/70/127, usecase
+29/18/46 → 30/17/46, unknown 423/47/355 → 423/48/354. 0 conformant losses in all 28 engines at
+every close.
+- layoutEqual (comparable rows): component 244/251, usecase 71/73, unknown-DESCRIPTION 150/175,
+  c4 1/5.
+- svg-description ratchet 51 → 89. dot-parity component 259/263 → 260/263 (under the tighter
+  check).
+
+**Open residuals (owners):**
+- Post-layout drawing on layout-equal rows → the component-conformance mission (to be planned).
+  T7's Table C (`.agent-notes/dsw-T7.md`) is the cheapest queue: single fill/stroke colour diffs
+  and childCount.
+- c4: 14 clusterTree rows whose wrappers match but cluster bb differs → unowned; next c4 work.
+- xagonu cluster bb: our DOT lacks the jar's self-loop xlabel TABLEs (suspected) → component
+  mission.
+- deroxu render: `skinparam dpi 60` scale and the missing title (not traced) → component mission.
+- unknown/gerebe, jafexe: container classification (`foo1.foo2` one jar cluster vs two ours) →
+  component mission.
+- unknown dotEqual flips under the tightened check (golamo, juvose, rebena, vuvave, xipane):
+  title-table sizing from per-stereotype font size, `packagestyle node` (`theme.ts:169`
+  rect-only) and title creole → component mission.
+- State: the same multi-line port-width defect (`state-leaf-node.ts:61-64`) → unowned, state.
+- Core emitter text order: the outer zaent anchor is printed before a nested child cluster in a
+  port cluster (ClusterDotString.java:174-190). Layout-neutral → unowned, low.
+- Unknown DESCRIPTION conformant rows (56) and c4 (2) have no byte-exact ratchet home; the
+  description ratchet's eligibility reads the stale legacy `parity.json` → tooling.
+- 10 conformant description rows skipped from pinning (`measurements/b4-pin-dryrun.txt`) → the
+  component mission.
+
+## Post-layout residuals of the dot-engine 2.4.0 controls
+
+Layout already equals native on all four (dsw layoutParity: equal), so what remains is drawing work:
+xenusu (7/8), pavuzo (4/85, tracker 16), rubebe (160/63) and zuduxu (127/52, tracker 31).
+**rubebe and zuduxu are `jarErrored` in the routing baseline:** apply the 2026-10-10 error-page
+rule (`docs/svg-conformance.md`, "Error pages"; memory error-page-conformance-rule) before any
+drawing work. If the stock jar errors and we render our own error page, the row is conformant;
+if we draw where the latest release jar errors, it is an accepted divergence.
+
 ## dot-engine 2.4.0 bump — DONE 2026-10-14 (`chore/dot-engine-2.4.0`, merged to local main, not pushed)
 
 **What changed:** `@knowvah/dot-engine` 2.3.0 → 2.4.0. That brings in PR #85's tracker
@@ -47,24 +97,16 @@ and 27 are ticked; every other 28–35 entry carries a dated measurement
 (`docs/graphviz-issues/TRACKER.md`). Measurements are in `.agent-notes/dot-engine-2.4.0-bump.md`.
 
 **Follow-ons:**
-1. **Svek wrapper clusters missing on the description path.** On bamami, bobixe, pugodi,
-   rufopi, zosuje (tracker 32/35), repoge (30) and xagonu (29), the jar wraps a package in
-   `cluster<N>p0 > cluster<N>` (label TABLE) `> cluster<N>p1`. Our input cluster carries no
-   `innerMarginLevels` and no title-table size, so `wrapperLevels`
-   (`src/core/svek-dot-wrappers.ts:64`) opens no wrappers, and the cluster gets a plain-text
-   label. 2.4.0 lays out the jar's own DOT like native, so these rows need this gap closed
-   before the tracker fixes can show. Start from bamami (4 parallel flat edges, 1 package).
-2. **deroxu-29 port-table node sizes.** It has the same 38 clusters, but the canvas is 4958
-   wide against the jar's 3757, and only 7 of 246 edge `pos` values match native. Our port-table
-   nodes are sized differently from the jar's `plaintext` TABLE nodes (tracker 28).
-3. **`dotEqual` cannot see cluster nesting or label sizes.** `compareStructural`
-   (`tests/oracle/svek-dot.ts`) compares cluster membership sizes, so all of the rows above
-   report `dotEqual: true` while laying out differently. A gate that compares our builder's
-   `-Tdot` layout against native on the jar DOT would catch this. On rubebe, zuduxu, pavuzo
-   and xenusu that comparison matches exactly (bb and every pos).
-4. **Post-layout residuals** whose layout already equals native: xenusu (7/8), pavuzo (4/85,
-   tracker 16), rubebe (160/63) and zuduxu (127/52, tracker 31). These are plantuml-ts drawing
-   work.
+1. ~~Svek wrapper clusters missing on the description path~~ — CLOSED 2026-10-14 by
+   description-svek-wrappers (plain p0/p1 9e6ad6286; port, kermor and core a/i 0a94c7975).
+   bamami, bobixe, pugodi, rufopi, zosuje and repoge are now layout-equal; xagonu's nesting matches
+   (the residual is its cluster bb).
+2. ~~deroxu-29 port-table node sizes~~ — CLOSED 2026-10-14 by dsw T8/T9 (9afa18c55, 9dd626bd5):
+   two description input defects, not node sizes alone. deroxu is now layout-equal.
+3. ~~`dotEqual` cannot see cluster nesting or label sizes~~ — CLOSED 2026-10-14 by dsw T1a (the
+   layoutParity gate and the 469-pin ratchet) and T1b (`clusterNestingOk`).
+4. Post-layout residuals: moved to their own entry below ("Post-layout residuals of the dot-engine
+   2.4.0 controls").
 
 ---
 

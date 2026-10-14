@@ -133,7 +133,7 @@ function walkRawInk(
   const driverBounder = driverBounderFor(measurer);
   return runInkWalk(
     (ug) => {
-      drawClusters(ug, containers, theme, plan, false);
+      drawClusters(ug, containers, theme, plan, false, sprites);
       // T1e write-set expansion (journaled): see
       // `renderer-draw-sequence.ts#drawEntities`'s own doc comment.
       drawEntities(ug, leaves, theme, plan, sprites, false, rawEdges);

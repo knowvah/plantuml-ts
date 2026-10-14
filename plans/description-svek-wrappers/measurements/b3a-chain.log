@@ -1,0 +1,98 @@
+wait load 13.69
+wait load 12.39
+wait load 9.61
+wait load 8.10
+== activity 16:06:48 { 7.78 10.64 9.67 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-activity.json — {"conformant":448,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.07
+== board 16:07:51 { 7.30 10.01 9.51 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 16:08:19 { 7.47 9.82 9.45 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-c4.json — {"conformant":2,"structural-match":0,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.74
+== chart 16:09:24 { 6.70 9.27 9.28 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+== chronology 16:09:56 { 7.56 9.16 9.23 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== class 16:10:21 { 6.95 8.89 9.13 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-class.json — {"conformant":723,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.45
+== component 16:11:23 { 7.87 8.86 9.11 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-component.json — {"conformant":69,"structural-match":69,"diverged":128,"errored":0,"timeout":0,"oracle-error":0}
+wait load 37.29
+wait load 25.96
+wait load 18.87
+wait load 15.32
+wait load 12.64
+wait load 12.47
+wait load 11.56
+wait load 11.75
+wait load 15.67
+wait load 14.05
+wait load 11.64
+wait load 9.18
+== ditaa 16:18:06 { 7.39 11.54 11.00 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 16:18:17 { 7.18 11.35 10.94 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== ebnf 16:18:45 { 7.40 11.07 10.84 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+wait load 11.96
+wait load 10.32
+== files 16:20:13 { 7.69 10.83 10.82 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-files.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 16:20:34 { 6.74 10.40 10.67 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-gantt.json — {"conformant":1,"structural-match":0,"diverged":264,"errored":0,"timeout":0,"oracle-error":0}
+== hcl 16:21:05 { 7.17 10.15 10.57 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.07
+== json 16:22:00 { 7.12 9.73 10.39 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-json.json — {"conformant":13,"structural-match":24,"diverged":13,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.12
+== mindmap 16:23:00 { 6.79 9.23 10.16 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-mindmap.json — {"conformant":142,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.31
+== network 16:24:00 { 7.58 9.00 10.00 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-network.json — {"conformant":0,"structural-match":0,"diverged":3,"errored":0,"timeout":0,"oracle-error":0}
+== object 16:24:26 { 7.61 8.89 9.93 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-object.json — {"conformant":63,"structural-match":8,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.39
+== packet 16:25:27 { 7.10 8.56 9.74 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.58
+== regex 16:26:29 { 7.26 8.44 9.62 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.55
+wait load 8.35
+== salt 16:28:01 { 7.25 8.32 9.46 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-salt.json — {"conformant":51,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 11.85
+wait load 10.41
+wait load 8.53
+wait load 8.56
+== sequence 16:30:34 { 7.94 8.57 9.41 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-sequence.json — {"conformant":0,"structural-match":0,"diverged":1143,"errored":0,"timeout":0,"oracle-error":0}
+wait load 11.49
+wait load 12.60
+wait load 9.99
+== state 16:32:44 { 7.49 8.86 9.45 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-state.json — {"conformant":78,"structural-match":11,"diverged":184,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.94
+== timing 16:33:44 { 7.26 8.65 9.33 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-timing.json — {"conformant":6,"structural-match":0,"diverged":120,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 16:34:12 { 7.93 8.67 9.32 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-unknown.json — {"conformant":423,"structural-match":47,"diverged":355,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.56
+== usecase 16:35:17 { 7.03 8.37 9.16 }
+[xmldom fatalError]	comment is not well-formed at position 3151 
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-usecase.json — {"conformant":29,"structural-match":18,"diverged":46,"errored":0,"timeout":0,"oracle-error":1}
+== wbs 16:35:49 { 7.67 8.37 9.13 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-wbs.json — {"conformant":204,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.45
+== wire 16:36:48 { 6.85 8.06 8.96 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 16:37:17 { 7.28 8.03 8.92 }
+wrote plans/description-svek-wrappers/measurements/b3a-eng/parity-yaml.json — {"conformant":7,"structural-match":28,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+DONE 16:37:53

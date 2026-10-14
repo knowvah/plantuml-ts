@@ -914,7 +914,11 @@ describe('refusal coverage — baseline shape', () => {
     // Derivation: 6884 + 1 = 6885.
     // 6885 -> 6886 at the dot-engine 2.4.0 bump: 1 svg-class golden clone row
     // (nugecu-04-tona107), rendering on both sides. Derivation: 6885 + 1 = 6886.
-    expect(manifest.fixtures.length).toBe(6886);
+    // 6886 -> 6923 at description-svek-wrappers T6 (b4): 37 svg-description
+    // golden clone rows, rendering on both sides. Derivation: 6886 + 37 = 6923.
+    // 6923 -> 6924 at description-svek-wrappers T10 (b5): 1 svg-description
+    // golden clone row (depabo-06-kato214). Derivation: 6923 + 1 = 6924.
+    expect(manifest.fixtures.length).toBe(6924);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -1043,7 +1047,10 @@ describe('refusal coverage — baseline shape', () => {
     // xucoma-93-jeko861). Derivation: 6659 + 1 = 6660.
     // 6660 -> 6661 at the dot-engine 2.4.0 bump (+1 rendering svg-class clone,
     // nugecu-04-tona107). Derivation: 6660 + 1 = 6661.
-    expect(pinnedRendering.length).toBe(6661);
+    // 6661 -> 6698 at description-svek-wrappers T6 (b4): +37 rendering
+    // svg-description golden clone rows. Derivation: 6661 + 37 = 6698.
+    // 6698 -> 6699 at description-svek-wrappers T10 (b5): +1 (depabo-06-kato214).
+    expect(pinnedRendering.length).toBe(6699);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

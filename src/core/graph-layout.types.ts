@@ -178,7 +178,7 @@ export interface DotInputEdge {
    * `getInv()` (a `-up-`/`-left-` direction word). Not a DOT attribute: it
    * decides where `from`'s shape line is declared, `Cluster#printCluster1`
    * (`./svek-dot-top.ts`). Only `true` is carried; absent ⇒ not inverted.
-   * Set by the class engine only.
+   * Set by the class and description engines.
    */
   inverted?: true;
   attributes?: {

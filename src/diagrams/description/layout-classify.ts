@@ -35,6 +35,8 @@ function classifyAsCluster(
   };
   if (parentAstId !== undefined) desc.parentAstId = parentAstId;
   if (node.stereotype !== undefined) desc.stereotype = node.stereotype;
+  if (node.stereotypeSprite !== undefined) desc.stereotypeSprite = node.stereotypeSprite;
+  if (node.kermorNotes !== undefined) desc.kermorNotes = node.kermorNotes;
   ctx.containers.push(desc);
   ctx.containerById.set(key, desc);
   classifyAst(node.children, ctx, removed, childAncestors, key);

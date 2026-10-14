@@ -5,8 +5,9 @@
  * / `parity-dashboard-goldens.ts` / `parity-dashboard-matrix.ts`, and the D9
  * drift gate against the committed `docs/parity-report.md`.
  */
-import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { describe, it, expect, afterEach } from 'vitest';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -18,9 +19,19 @@ import {
   loadInputs,
   type RawInputs,
 } from '../../../scripts/parity-dashboard.js';
-import { tallySurvey, zeroDiffCount, registeredEngineTypes } from '../../../scripts/parity-dashboard-inputs.js';
+import {
+  tallySurvey,
+  zeroDiffCount,
+  registeredEngineTypes,
+  loadSurveyByType,
+} from '../../../scripts/parity-dashboard-inputs.js';
 import { ratchetPinsOf, diffBaselineStatsOf, groupBaselineByType } from '../../../scripts/parity-dashboard-goldens.js';
-import { engineCell, noEngineColumn, surveyColumn } from '../../../scripts/parity-dashboard-matrix.js';
+import {
+  engineCell,
+  noEngineColumn,
+  surveyColumn,
+  layoutEqualColumn,
+} from '../../../scripts/parity-dashboard-matrix.js';
 import type { TypeRow } from '../../../scripts/dot-parity-rows.js';
 import type { FixtureRow } from '../../../scripts/svg-parity-survey.js';
 
@@ -99,6 +110,7 @@ describe('buildMatrix', () => {
       oracle: '723',
       dot: '710/711 (100%)',
       survey: '412 / 50 / 261',
+      layout: 'n/a (no layoutEqual survey yet)',
       census: 'n/a (no census yet)',
       ratchet: '314',
       diffBaseline: 'n/a (no diff-baseline yet)',
@@ -271,7 +283,7 @@ describe('renderReport', () => {
   it('AC2: every n/a in the Matrix table matches the D8 vocabulary, no bare n/a', () => {
     const tableBlock = out.slice(out.indexOf('## Matrix'), out.indexOf('## Freshness'));
     const vocab =
-      /^n\/a \((no engine \(D\d+ todo\)|no DOT stage \(non-svek\)|no oracle captured|no ratchet yet|no survey yet|no census yet|no diff-baseline yet|no data-diagram-type classification|plantuml-ts only|engine, unclassifiable corpus|accounting bucket)\)$/;
+      /^n\/a \((no engine \(D\d+ todo\)|no DOT stage \(non-svek\)|no oracle captured|no ratchet yet|no survey yet|no layoutEqual survey yet|no comparable fixture|no census yet|no diff-baseline yet|no data-diagram-type classification|plantuml-ts only|engine, unclassifiable corpus|accounting bucket)\)$/;
     for (const line of tableBlock.split('\n').filter((l) => l.startsWith('| '))) {
       for (const cell of line.split('|').map((c) => c.trim())) {
         if (cell.startsWith('n/a')) expect(cell).toMatch(vocab);
@@ -337,6 +349,76 @@ describe('tallySurvey', () => {
     expect(surveyColumn({ conformant: 3, structural: 0, diverged: 1, errorPage: 0, generatedAt: 'g' }).cell).toBe(
       '3 / 0 / 1',
     );
+  });
+});
+
+describe('layoutEqual column (description-svek-wrappers T5)', () => {
+  const measured = { conformant: 1, structural: 0, diverged: 3, layoutEqual: 3, layoutComparable: 4, generatedAt: 'g' };
+  const svek = dotRow('component', { comparable: 4, equal: 4, pct: '100%' });
+
+  it('tallySurvey counts true as equal and true|false as comparable, skipping n/a rows', () => {
+    const rows = [
+      { verdict: 'conformant', layoutEqual: true },
+      { verdict: 'diverged', layoutEqual: true },
+      { verdict: 'diverged', layoutEqual: false },
+      { verdict: 'diverged', layoutEqual: 'n/a' },
+    ] as unknown as FixtureRow[];
+    const t = tallySurvey(rows);
+    expect([t.layoutEqual, t.layoutComparable]).toEqual([2, 3]);
+  });
+
+  it('tallySurvey omits both counts for a survey that predates the column', () => {
+    const t = tallySurvey([{ verdict: 'conformant' }] as unknown as FixtureRow[]);
+    expect('layoutEqual' in t || 'layoutComparable' in t).toBe(false);
+  });
+
+  it('shows equal/comparable for a measured svek row', () => {
+    expect(layoutEqualColumn(measured, svek).cell).toBe('3/4');
+  });
+
+  it('names the reason for a non-svek row, a missing survey, a pre-T2 survey and an all-n/a survey', () => {
+    const nonSvek = dotRow('sequence', { note: 'n/a (no DOT stage)' });
+    expect(layoutEqualColumn(measured, nonSvek).cell).toBe('n/a (no DOT stage (non-svek))');
+    expect(layoutEqualColumn(undefined, svek).cell).toBe('n/a (no survey yet)');
+    const preT2 = { conformant: 1, structural: 0, diverged: 3, generatedAt: 'g' };
+    expect(layoutEqualColumn(preT2, svek).cell).toBe('n/a (no layoutEqual survey yet)');
+    expect(layoutEqualColumn({ ...measured, layoutEqual: 0, layoutComparable: 0 }, svek).cell).toBe(
+      'n/a (no comparable fixture)',
+    );
+  });
+
+  it('buildMatrix puts the cell beside the survey cell', () => {
+    const inputs = baseInputs();
+    inputs.surveyByType['class'] = { ...measured, generatedAt: '2026-09-03T18:45:20.062Z' };
+    expect(buildMatrix(inputs).find((r) => r.type === 'class')!.layout).toBe('3/4');
+  });
+});
+
+describe('loadSurveyByType precedence', () => {
+  const dirs: string[] = [];
+  afterEach(() => {
+    for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true });
+  });
+  const fx = (type: string, verdict: string): object => ({ slug: `${type}-${verdict}`, type, verdict });
+
+  it('lets a per-type parity-<type>.json win over the legacy parity.json rows for that type', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pd-survey-'));
+    dirs.push(dir);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      join(dir, 'parity.json'),
+      JSON.stringify({
+        generatedAt: 'legacy',
+        fixtures: [fx('component', 'diverged'), fx('component', 'diverged'), fx('usecase', 'diverged')],
+      }),
+    );
+    writeFileSync(
+      join(dir, 'parity-component.json'),
+      JSON.stringify({ generatedAt: 'fresh', fixtures: [fx('component', 'conformant'), fx('component', 'diverged')] }),
+    );
+    const out = loadSurveyByType(dir);
+    expect(out['component']).toEqual({ conformant: 1, structural: 0, diverged: 1, errorPage: 0, generatedAt: 'fresh' });
+    expect(out['usecase']).toEqual({ conformant: 0, structural: 0, diverged: 1, errorPage: 0, generatedAt: 'legacy' });
   });
 });
 

@@ -1,0 +1,34 @@
+activity: 448/1/0+0 dot=449 layout=1 -> 448/1/0+0 dot=449 layout=1 movers=0
+board: 0/0/4+0 dot=4 layout=0 -> 0/0/4+0 dot=4 layout=0 movers=0
+c4: 2/0/9+0 dot=5 layout=1 -> 2/0/9+0 dot=5 layout=1 movers=0
+chart: 0/0/29+0 dot=29 layout=0 -> 0/0/29+0 dot=29 layout=0 movers=0
+chronology: 0/0/1+0 dot=1 layout=0 -> 0/0/1+0 dot=1 layout=0 movers=0
+class: 723/0/0+0 dot=715 layout=547 -> 723/0/0+0 dot=715 layout=547 movers=0
+component: 69/70/127+0 dot=262 layout=243 -> 69/70/127+0 dot=262 layout=244 movers=1
+  texacu-57-daci050: layoutEqual false->true
+ditaa: 0/0/0+2 dot=0 layout=0 -> 0/0/0+2 dot=0 layout=0 movers=0
+dot: 5/0/0+0 dot=5 layout=0 -> 5/0/0+0 dot=5 layout=0 movers=0
+ebnf: 0/0/44+0 dot=44 layout=0 -> 0/0/44+0 dot=44 layout=0 movers=0
+files: 0/0/1+0 dot=1 layout=0 -> 0/0/1+0 dot=1 layout=0 movers=0
+gantt: 1/0/264+0 dot=265 layout=0 -> 1/0/264+0 dot=265 layout=0 movers=0
+hcl: 1/2/0+0 dot=0 layout=0 -> 1/2/0+0 dot=0 layout=0 movers=0
+json: 13/24/13+0 dot=1 layout=0 -> 13/24/13+0 dot=1 layout=0 movers=0
+mindmap: 142/0/0+0 dot=142 layout=0 -> 142/0/0+0 dot=142 layout=0 movers=0
+network: 0/0/3+0 dot=1 layout=1 -> 0/0/3+0 dot=1 layout=1 movers=0
+object: 63/8/9+0 dot=78 layout=59 -> 63/8/9+0 dot=78 layout=59 movers=0
+packet: 0/0/6+0 dot=6 layout=0 -> 0/0/6+0 dot=6 layout=0 movers=0
+regex: 0/0/46+0 dot=46 layout=0 -> 0/0/46+0 dot=46 layout=0 movers=0
+salt: 51/0/0+0 dot=51 layout=0 -> 51/0/0+0 dot=51 layout=0 movers=0
+sequence: 0/0/1143+0 dot=1140 layout=0 -> 0/0/1143+0 dot=1140 layout=0 movers=0
+state: 78/11/184+0 dot=272 layout=252 -> 78/11/184+0 dot=272 layout=252 movers=0
+timing: 6/0/120+0 dot=126 layout=0 -> 6/0/120+0 dot=126 layout=0 movers=0
+unknown: 423/48/354+0 dot=798 layout=348 -> 423/48/354+0 dot=798 layout=351 movers=3
+  deroxu-29-gude369: layoutEqual false->true
+  kuduba-74-taki821: layoutEqual false->true
+  tireno-34-buta139: layoutEqual false->true
+usecase: 29/18/46+1 dot=93 layout=70 -> 30/17/46+1 dot=93 layout=71 movers=1
+  depabo-06-kato214: verdict structural-match->conformant, layoutEqual false->true
+wbs: 204/0/0+0 dot=204 layout=0 -> 204/0/0+0 dot=204 layout=0 movers=0
+wire: 0/0/18+0 dot=18 layout=0 -> 0/0/18+0 dot=18 layout=0 movers=0
+yaml: 7/28/4+0 dot=0 layout=0 -> 7/28/4+0 dot=0 layout=0 movers=0
+CONFORMANT LOSSES: 0

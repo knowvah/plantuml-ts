@@ -1,0 +1,17 @@
+
+### component/xenusu-76-sabi405  pass=false structural=7 numeric=8
+  S svg/g[1]/g[3]/path[1]/@stroke-width  exp=2 | act=1
+  S svg/g[1]/g[3]/polygon[1]/@stroke-width  exp=2 | act=1
+  S svg/g[1]/g[4]/path[1]/@stroke  exp=#00F | act=#008000
+  S svg/g[1]/g[4]/path[1]/@stroke-width  exp=2 | act=1
+  S svg/g[1]/g[4]/polygon[1]/@fill  exp=#00F | act=#008000
+  S svg/g[1]/g[4]/polygon[1]/@stroke  exp=#00F | act=#008000
+  S svg/g[1]/g[4]/polygon[1]/@stroke-width  exp=2 | act=1
+  N svg/@viewBox[2]  exp=354 | act=386 (Δ32)
+  N svg/@width  exp=354 | act=386 (Δ32)
+  N svg/g[1]/g[3]/text[1]/@x  exp=33.49 | act=73.99 (Δ40.49999999999999)
+  N svg/g[1]/g[3]/text[1]/@y  exp=91.333 | act=88 (Δ3.3329999999999984)
+  N svg/g[1]/g[4]/text[1]/@x  exp=156.49 | act=208.49 (Δ52)
+  N svg/g[1]/g[4]/text[1]/@y  exp=91.333 | act=88 (Δ3.3329999999999984)
+  N svg/g[1]/g[5]/text[1]/@x  exp=270.71 | act=304.21 (Δ33.5)
+  N svg/g[1]/g[5]/text[1]/@y  exp=91.333 | act=88 (Δ3.3329999999999984)

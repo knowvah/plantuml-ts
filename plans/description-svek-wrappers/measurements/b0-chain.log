@@ -1,0 +1,87 @@
+wait load 11.91
+wait load 8.33
+== activity 11:06:38 { 6.03 7.44 8.63 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-activity.json — {"conformant":448,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== board 11:07:09 { 6.57 7.39 8.56 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 11:07:38 { 6.67 7.31 8.49 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-c4.json — {"conformant":2,"structural-match":0,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== chart 11:08:12 { 7.23 7.35 8.46 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+== chronology 11:08:43 { 7.72 7.42 8.44 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== class 11:09:06 { 6.00 7.03 8.27 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-class.json — {"conformant":723,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== component 11:09:40 { 7.07 7.16 8.27 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-component.json — {"conformant":69,"structural-match":66,"diverged":131,"errored":0,"timeout":0,"oracle-error":0}
+== ditaa 11:10:08 { 6.33 6.97 8.17 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 11:10:19 { 6.02 6.87 8.11 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.23
+wait load 8.02
+== ebnf 11:11:47 { 6.82 7.10 8.09 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.45
+== files 11:12:48 { 7.36 7.21 8.06 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-files.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+wait load 10.83
+wait load 11.48
+wait load 8.90
+== gantt 11:14:44 { 6.70 7.70 8.19 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-gantt.json — {"conformant":1,"structural-match":0,"diverged":264,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.11
+== hcl 11:15:48 { 7.30 7.74 8.18 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.79
+wait load 8.66
+== json 11:17:19 { 7.67 7.91 8.20 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-json.json — {"conformant":13,"structural-match":24,"diverged":13,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.40
+wait load 15.26
+wait load 13.48
+wait load 13.25
+wait load 11.59
+wait load 8.39
+wait load 8.13
+== mindmap 11:21:22 { 7.43 8.96 8.73 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-mindmap.json — {"conformant":142,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.92
+== network 11:22:24 { 7.86 8.87 8.71 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-network.json — {"conformant":0,"structural-match":0,"diverged":3,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.68
+== object 11:23:23 { 6.70 8.56 8.62 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-object.json — {"conformant":63,"structural-match":8,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+wait load 11.20
+== packet 11:24:23 { 7.69 8.80 8.72 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+== regex 11:24:52 { 7.77 8.68 8.68 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+== salt 11:25:20 { 7.53 8.52 8.62 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-salt.json — {"conformant":51,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== sequence 11:25:50 { 6.95 8.27 8.52 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-sequence.json — {"conformant":0,"structural-match":0,"diverged":1143,"errored":0,"timeout":0,"oracle-error":0}
+== state 11:26:24 { 6.73 8.07 8.44 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-state.json — {"conformant":78,"structural-match":11,"diverged":184,"errored":0,"timeout":0,"oracle-error":0}
+== timing 11:26:51 { 6.75 7.94 8.38 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-timing.json — {"conformant":6,"structural-match":0,"diverged":120,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 11:27:19 { 6.55 7.78 8.31 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-unknown.json — {"conformant":423,"structural-match":47,"diverged":355,"errored":0,"timeout":0,"oracle-error":0}
+== usecase 11:27:52 { 6.68 7.63 8.23 }
+[xmldom fatalError]	comment is not well-formed at position 3151 
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-usecase.json — {"conformant":29,"structural-match":18,"diverged":46,"errored":0,"timeout":0,"oracle-error":1}
+== wbs 11:28:22 { 6.73 7.51 8.16 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-wbs.json — {"conformant":204,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 11.23
+wait load 10.08
+wait load 12.61
+wait load 18.98
+wait load 16.88
+wait load 10.96
+== wire 11:31:54 { 7.29 9.72 9.11 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 11:32:21 { 6.75 9.34 8.99 }
+wrote plans/description-svek-wrappers/measurements/b0-eng/parity-yaml.json — {"conformant":7,"structural-match":28,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+DONE 11:32:48

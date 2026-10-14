@@ -88,8 +88,8 @@ export function measureClusterTitle(
  * `portClusterBlock`'s `label=` emission, `svek-dot-emit.ts`) carry this
  * formula UNCONDITIONALLY, matching jar's own unconditional `ClusterHeader`
  * construction (every group with a title gets one, regardless of
- * border-point routing). `titleTableWidth`/`titleTableHeight` (gated by
- * `titleTableEligible`) are the IDENTICAL values, restricted to the port's
+ * border-point routing). `titleTableWidth`/`titleTableHeight` (now
+ * unconditional, dsw-T1d) are the IDENTICAL values, restricted to the port's
  * own FIXEDSIZE-table real-layout mechanism — a port implementation detail
  * with no jar counterpart (jar computes `ClusterHeader` the same way for
  * every cluster; `titleTable*`'s gating exists only because the real-layout

@@ -96,10 +96,28 @@ export interface StructuralEdge {
    *  `description/link-edge-attrs.ts`. */
   invis: boolean;
 }
+/** Which of `ClusterDotString`'s protection wrappers enclose a logical cluster
+ *  (`ClusterDotString.java:94-158`); same shape as `WrapperLevels`
+ *  (`src/core/svek-dot-wrappers.ts`), kept structural here so the oracle
+ *  helper carries no behaviour of its own. */
+export interface WrapperChain {
+  a: boolean;
+  p0: boolean;
+  i: boolean;
+  p1: boolean;
+}
 export interface StructuralCluster {
   memberCount: number;
-  labelW: number | undefined;
-  labelH: number | undefined;
+  /** Wrapper subgraphs `clusterNa|p0|i|p1` around the base `clusterN`, folded
+   *  into it (they are not clusters of their own). D4 of
+   *  description-svek-wrappers: the membership count alone read "DOT equal"
+   *  for graphs that nest differently. */
+  wrapperChain: WrapperChain;
+  /** WIDTH x HEIGHT of the cluster's title `<TABLE>`: on the base cluster, on
+   *  its `clusterNee` placeholder (border-point branch,
+   *  `ClusterDotString.java:138-141`), or on the `empty()` port anchor node
+   *  (`:178-181`). Undefined when the cluster carries no title table. */
+  titleTable?: { w: number; h: number };
 }
 export interface StructuralGraph {
   nodes: StructuralNode[];
@@ -205,36 +223,115 @@ function parseNodes(dot: string): StructuralNode[] {
 interface ClusterFrame {
   name: string;
   members: Set<string>;
-  labelW: number | undefined;
-  labelH: number | undefined;
+}
+
+/** `clusterN` + the suffix of one of Svek's own sub-subgraphs. */
+const CLUSTER_PART_RE = /^(cluster\d+)(a|p0|i|p1|ee)$/;
+const BASE_CLUSTER_RE = /^cluster\d+$/;
+const TITLE_TABLE_RE = /label=<<TABLE[^>]*?WIDTH="(\d+)"\s+HEIGHT="(\d+)"/;
+
+/** One `subgraph NAME {` open (attributes up to the next brace, newline or
+ *  nested `subgraph`, so `cluster6p0 {label="";subgraph cluster6 {` yields two
+ *  tokens), a close brace, or a node line. A port anchor's title table is
+ *  `[shape=rect,width=.01,height=.01,label=<<TABLE` (`SvekNode`/`empty()`),
+ *  captured by its own alternative before the generic node one. A bare `{`
+ *  (a `{rank=source;…;}` group) is its own token so {@link scanNesting} can
+ *  balance it. */
+const CLUSTER_TOKEN_RE =
+  /subgraph\s+(\w+)\s*\{((?:(?!subgraph\s)[^{}\n])*)|(\})|(\w+)\s*\[shape=rect,width=\.01,height=\.01,(label=<<TABLE[^>]*?WIDTH="\d+"\s+HEIGHT="\d+")|(\w+)\s*\[shape=|(\{)/g;
+
+interface ClusterRecord {
+  chain: WrapperChain;
+  titleTable: { w: number; h: number } | undefined;
+}
+
+const baseOf = (name: string): string | undefined => {
+  if (BASE_CLUSTER_RE.test(name)) return name;
+  return CLUSTER_PART_RE.exec(name)?.[1];
+};
+
+function recordFor(records: Map<string, ClusterRecord>, base: string): ClusterRecord {
+  let rec = records.get(base);
+  if (rec === undefined) {
+    rec = { chain: { a: false, p0: false, i: false, p1: false }, titleTable: undefined };
+    records.set(base, rec);
+  }
+  return rec;
+}
+
+function noteTitle(rec: ClusterRecord, attrs: string): void {
+  const t = TITLE_TABLE_RE.exec(attrs);
+  if (t !== null && rec.titleTable === undefined) rec.titleTable = { w: Number(t[1]), h: Number(t[2]) };
+}
+
+/** Wrapper chain and title TABLE per base cluster, from a brace-balanced scan:
+ *  a bare `{` (a `{rank=source;…;}` group) opens an anonymous frame, so its `}`
+ *  closes that group and not the cluster around it. Svek's `clusterNa|p0|i|p1`
+ *  wrappers and `clusterNee` are attributed to the base cluster they wrap; a
+ *  title is the first title TABLE on the base, its `ee`, or its port anchor. */
+function scanNesting(dot: string): Map<string, ClusterRecord> {
+  const records = new Map<string, ClusterRecord>();
+  const open: string[] = [];
+  const tokenRe = new RegExp(CLUSTER_TOKEN_RE.source, 'g');
+  for (let m = tokenRe.exec(dot); m !== null; m = tokenRe.exec(dot)) {
+    if (m[1] !== undefined) {
+      open.push(m[1]);
+      const base = baseOf(m[1]);
+      if (base === undefined) continue;
+      const rec = recordFor(records, base);
+      const part = CLUSTER_PART_RE.exec(m[1])?.[2];
+      if (part === 'a' || part === 'p0' || part === 'i' || part === 'p1') rec.chain[part] = true;
+      noteTitle(rec, m[2] ?? '');
+    } else if (m[3] !== undefined) {
+      open.pop();
+    } else if (m[4] !== undefined) {
+      const base = open
+        .map(baseOf)
+        .reverse()
+        .find((b) => b !== undefined);
+      if (base !== undefined) noteTitle(recordFor(records, base), m[5] ?? '');
+    } else if (m[7] !== undefined) {
+      open.push('');
+    }
+  }
+  return records;
 }
 
 /** Brace-stack scan: logical clusters are subgraphs named exactly `clusterN`
  *  (Svek's protection wrappers clusterNp0/p1/a/i are skipped); a cluster's
- *  members are all leaf node ids in its subtree; its label is its title TABLE. */
+ *  members are all leaf node ids in its subtree.
+ *
+ *  Membership deliberately keeps the historical UNBALANCED scan, in which the
+ *  `}` of a `{rank=…;…;}` group pops the enclosing cluster frame, so a cluster
+ *  that opens with a rank group reads memberCount 0 on both sides (pinned by
+ *  `state-composites-dot.test.ts`, bitaxo-18-tamo974). Fixing it would move
+ *  `clusterOk` verdicts, which is out of D4's scope; the nesting fields come
+ *  from {@link scanNesting} instead. */
 function parseClusters(dot: string): StructuralCluster[] {
-  const tokenRe = /subgraph\s+(\w+)\s*\{|(\})|label=<<TABLE[^>]*?WIDTH="(\d+)"\s+HEIGHT="(\d+)"|(\w+)\s*\[shape=/g;
+  const nesting = scanNesting(dot);
+  const tokenRe = new RegExp(CLUSTER_TOKEN_RE.source, 'g');
   const stack: ClusterFrame[] = [];
   const out: StructuralCluster[] = [];
   for (let m = tokenRe.exec(dot); m !== null; m = tokenRe.exec(dot)) {
     const top = stack[stack.length - 1];
     if (m[1] !== undefined) {
-      stack.push({ name: m[1], members: new Set(), labelW: undefined, labelH: undefined });
-    } else if (m[2] !== undefined) {
+      stack.push({ name: m[1], members: new Set() });
+    } else if (m[3] !== undefined) {
       const f = stack.pop();
       if (f === undefined) continue;
       const parent = stack[stack.length - 1];
       if (parent !== undefined) for (const id of f.members) parent.members.add(id);
-      if (/^cluster\d+$/.test(f.name)) {
-        out.push({ memberCount: f.members.size, labelW: f.labelW, labelH: f.labelH });
-      }
-    } else if (m[3] !== undefined) {
-      if (top !== undefined && top.labelW === undefined) {
-        top.labelW = Number(m[3]);
-        top.labelH = Number(m[4]);
-      }
-    } else if (m[5] !== undefined && top !== undefined) {
-      top.members.add(m[5]);
+      if (!BASE_CLUSTER_RE.test(f.name)) continue;
+      const rec = recordFor(nesting, f.name);
+      out.push({
+        memberCount: f.members.size,
+        wrapperChain: rec.chain,
+        ...(rec.titleTable === undefined ? {} : { titleTable: rec.titleTable }),
+      });
+    } else if (m[4] !== undefined) {
+      top?.members.add(m[4]);
+    } else if (m[6] !== undefined) {
+      top?.members.add(m[6]);
     }
   }
   return out;
@@ -351,6 +448,22 @@ const sortedSametails = (g: StructuralGraph): string[] =>
 
 const sortedClusterSizes = (g: StructuralGraph): number[] => g.clusters.map((c) => c.memberCount).sort((a, b) => a - b);
 
+/** Id-agnostic signature of one cluster's nesting: membership count, which of
+ *  `a|p0|i|p1` wrap it, and its title TABLE size (`-` when it has none). The
+ *  member count stays in so two clusters' parts cannot be cross-paired. */
+const clusterSignature = (c: StructuralCluster): string => {
+  const { a, p0, i, p1 } = c.wrapperChain;
+  const chain = [a ? 'a' : '', p0 ? 'p0' : '', i ? 'i' : '', p1 ? 'p1' : ''].join('.');
+  const title = c.titleTable === undefined ? '-' : `${c.titleTable.w}x${c.titleTable.h}`;
+  return `${c.memberCount}|${chain}|${title}`;
+};
+
+/** Sorted multiset of {@link clusterSignature}s. D4 (description-svek-wrappers):
+ *  `sortedClusterSizes` alone compared membership counts, so a graph with one
+ *  plain-labelled cluster equalled the jar's `p0 > cluster > p1` pair with a
+ *  title TABLE. */
+export const sortedClusterSignatures = (g: StructuralGraph): string[] => g.clusters.map(clusterSignature).sort();
+
 /** Sorted multiset of every edge ENDPOINT's port id, `-` for "no port". Node
  *  ids are synthetic and deliberately not compared, so the ports are gathered
  *  id-agnostically, exactly like {@link degreeSequence}. */
@@ -415,6 +528,10 @@ export interface StructuralDiff {
    *  see this module's doc comment for the measured blindness this closes. */
   portOk: boolean;
   clusterOk: boolean;
+  /** Per-cluster wrapper chain (`a|p0|i|p1`) and title-TABLE size match, as a
+   *  sorted multiset — see {@link StructuralCluster.wrapperChain}. `clusterOk`
+   *  is membership counts only. */
+  clusterNestingOk: boolean;
   /** Edge ORIENTATION matches, as a sorted `in:out` degree multiset — see
    *  {@link degreeSequenceDirected} for why this is not covered by
    *  `degreeOk`, which is undirected. B31. */
@@ -491,6 +608,7 @@ export function compareStructural(oracle: StructuralGraph, candidate: Structural
   const labelSizeOk = eqStr(sortedLabelBoxes(oracle), sortedLabelBoxes(candidate));
   const portOk = eqStr(sortedPorts(oracle), sortedPorts(candidate));
   const clusterOk = eqNum(sortedClusterSizes(oracle), sortedClusterSizes(candidate));
+  const clusterNestingOk = eqStr(sortedClusterSignatures(oracle), sortedClusterSignatures(candidate));
   const rdOk = rankdirOk(oracle.rankdir, candidate.rankdir);
   const nsOk = numAttrOk(oracle.nodesep, candidate.nodesep);
   const rsOk = numAttrOk(oracle.ranksep, candidate.ranksep);
@@ -510,6 +628,7 @@ export function compareStructural(oracle: StructuralGraph, candidate: Structural
     labelSizeOk,
     portOk,
     clusterOk,
+    clusterNestingOk,
     rankdirOk: rdOk,
     nodesepOk: nsOk,
     ranksepOk: rsOk,
@@ -527,6 +646,7 @@ export function compareStructural(oracle: StructuralGraph, candidate: Structural
       labelSizeOk &&
       portOk &&
       clusterOk &&
+      clusterNestingOk &&
       rdOk &&
       nsOk &&
       rsOk &&

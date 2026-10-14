@@ -11,6 +11,7 @@ import { toSvekDot } from '../src/core/svek-dot-emit.js';
 import {
   parseSvekDot,
   compareStructural,
+  sortedClusterSignatures,
   degreeSequence,
   type StructuralGraph,
   type StructuralDiff,
@@ -27,6 +28,7 @@ export const CHECKS = [
   'labelSizeOk',
   'portOk',
   'clusterOk',
+  'clusterNestingOk',
   'rankdirOk',
   'nodesepOk',
   'ranksepOk',
@@ -151,6 +153,10 @@ const CHECK_DETAILS: Record<Check, CheckDetail> = {
   labelSizeOk: { label: 'label boxes kind:WxH (D7)', values: (o, c) => [labelBoxesOf(o), labelBoxesOf(c)] },
   portOk: { label: 'edge endpoint ports', values: (o, c) => [portsOf(o), portsOf(c)] },
   clusterOk: { label: 'cluster-size list', values: (o, c) => [clusterSizesOf(o), clusterSizesOf(c)] },
+  clusterNestingOk: {
+    label: 'cluster members|wrappers|title (D4)',
+    values: (o, c) => [sortedClusterSignatures(o), sortedClusterSignatures(c)],
+  },
   rankdirOk: { label: 'rankdir', values: (o, c) => [o.rankdir, c.rankdir] },
   nodesepOk: { label: 'nodesep (in)', values: (o, c) => [o.nodesep, c.nodesep] },
   ranksepOk: { label: 'ranksep (in)', values: (o, c) => [o.ranksep, c.ranksep] },

@@ -9,6 +9,11 @@ import type { GvGraphBuilder } from '@knowvah/dot-engine';
 import type { DotInputCluster, DotInputGraph, DotInputNode } from './graph-layout.types.js';
 import { buildBorderPointClusterHandles, inheritedEeLabel } from './graph-layout-build-borderpoint.js';
 import {
+  addNodesWithKermorRootEmpty,
+  buildKermorClusterHandles,
+  placeKermorMembers,
+} from './graph-layout-build-kermor.js';
+import {
   addTitledAnchorNode,
   buildHasPortClusterHandles,
   isHasPortCluster,
@@ -197,15 +202,13 @@ function addOneNode(b: GvGraphBuilder, n: DotInputNode): void {
 }
 
 export function addNodes(b: GvGraphBuilder, input: DotInputGraph): void {
-  for (const n of firstEncounterOrder(input)) addOneNode(b, n);
+  addNodesWithKermorRootEmpty(b, input, firstEncounterOrder(input), addOneNode);
   // Rank constraints (rank=source|sink|same|min|max): graphviz groups nodes by
   // a subgraph carrying `rank=`. Declaring an existing node id inside the
   // subgraph references it (DOT semantics — no duplicate node is created).
-  // cdd3-T28 (E3-10): a port ranked by its cluster's `portRanks` is NOT
-  // regrouped at the root -- upstream prints that rankset only inside the
-  // cluster (`ClusterDotString.java:136-137,254-260`), as the text emitter
-  // does (`svek-dot-emit.ts#rankLines`); a second, root rankset makes
-  // graphviz evict the port from its cluster (`sokevu-87-toce485`).
+  // cdd3-T28: a port ranked by its cluster's `portRanks` is NOT regrouped at
+  // the root (`ClusterDotString.java:136-137,254-260`); a second, root rankset
+  // makes graphviz evict the port from its cluster (`sokevu-87-toce485`).
   const portIds = new Set((input.clusters ?? []).flatMap((c) => (c.portRanks ?? []).flatMap((r) => r.nodeIds)));
   const rankGroups = new Map<string, string[]>();
   for (const n of input.nodes) {
@@ -345,6 +348,14 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
       return handles;
     }
     const outerName = nameFor(c);
+    // T4c: kermor alpha?/beta/gamma; `gamma` is the drawn cluster.
+    if (input.kermor === true) {
+      const k = buildKermorClusterHandles(c, outerName, parentInnermost, () => portRankSubId++);
+      idByName.delete(outerName);
+      idByName.set(`${outerName}gamma`, c.id);
+      handlesById.set(c.id, k);
+      return k;
+    }
     // G7 T14b: full ee/i-wrapped border-point (entry/exit-point) branch --
     // MUTUALLY EXCLUSIVE with the plain-cluster branch below, for the SAME
     // cluster (jar's own `ClusterDotString`: `entityPositionsExceptNormal
@@ -374,23 +385,9 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
       return handles;
     }
     const levels = c.innerMarginLevels;
-    // G7 T7: jar's OUTER ancestor-protection pair ("a"/"p0",
-    // `ClusterDotString.java:91-116`) wraps `main` from the OUTSIDE, gated
-    // by the SAME `innerMarginLevels` value the pre-existing inner "i"/"p1"
-    // pair below already uses — jar-verified corpus-wide (307/307 cached
-    // DOTs carry "p0" wherever "p1" appears; 93/93 carry "a" wherever "i"
-    // appears; zero counterexamples). This holds because `protection0()`
-    // and `protection1()` are BOTH unconditionally true for every
-    // `titleTableEligible` composite in this port's corpus: `useSwimlanes`
-    // is a distinct, unported jar feature (this port's own "swimlane"
-    // concept is Activity-diagram-only, unrelated to
-    // `ISkinParam.useSwimlanes(DiagramType)`) and `USymbols.NODE` never
-    // applies to a state composite — and `thereALinkFromOrToGroup1` is the
-    // SAME boolean `needsZaentPoint` already encodes as
-    // `innerMarginLevels === 2` (`state-composite-cluster.ts`'s own doc
-    // comment). "a" nests OUTSIDE "p0" (jar emits
-    // `subgraphClusterNoLabel(sb,"a")` before `subgraphClusterNoLabel(sb,
-    // "p0")`, `ClusterDotString.java:98-115`).
+    // G7 T7: jar's OUTER "a"/"p0" pair (`ClusterDotString.java:91-116`) wraps
+    // `main` from outside, gated by the same `innerMarginLevels` as the inner
+    // "i"/"p1" pair (307/307 cached DOTs pair p0 with p1, 93/93 a with i).
     let host = parentInnermost;
     if (levels === 2) host = host.addSubgraph(`${outerName}a`, {});
     if (levels !== undefined) host = host.addSubgraph(`${outerName}p0`, {});
@@ -469,6 +466,10 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
   const portIds = new Set(input.nodes.filter((n) => n.isPort === true).map((n) => n.id));
   for (const c of clusters) {
     const { main, innermost } = handlesFor(c);
+    if (input.kermor === true) {
+      placeKermorMembers(c, innermost, () => portRankSubId++);
+      continue;
+    }
     if (isHasPortCluster(c)) {
       placeHasPortMembers(c, { main, innermost }, portIds);
       continue;
