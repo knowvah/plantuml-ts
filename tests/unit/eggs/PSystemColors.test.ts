@@ -20,8 +20,8 @@
  *   (java:226-236), so not `containsCaseInsensitive` and appended.
  * - `color Red`, `colorsRed`, `colors\t`: the factory's other accepted shapes.
  * - `colors automatic` draws the FULL grid (1401x589): `HColorAutomagic` is not
- *   an `HColorSimple` (HColorSet.java:85-86). `HColorAutomagic` is unported
- *   (`HColorSet.ts` throws), the named residual of this task.
+ *   an `HColorSimple` (HColorSet.java:85-86); jar probe
+ *   `core/klimt/color/fixtures/colors-automatic.jar.svg` (ufp T3c).
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -155,9 +155,16 @@ describe('PSystemColors — authored jar probes (fixtures/)', () => {
   });
 });
 
-describe('PSystemColors — colors automatic (named residual: HColorAutomagic unported)', () => {
-  it('the jar draws the full grid; the port throws from HColorSet#parseColor', () => {
-    const diagram = diagramOf('automatic');
-    expect(() => diagram.exportDiagram(0, new DeterministicMeasurer())).toThrow(/unported: HColorAutomagic/);
+describe('PSystemColors — colors automatic (HColorAutomagic, HColorSet.java:85-86)', () => {
+  const svg = render('@startuml\ncolors automatic\n@enduml');
+  const jar = readFileSync(join(REPO, 'tests/unit/core/klimt/color/fixtures/colors-automatic.jar.svg'), 'utf8');
+
+  it('draws the full grid, not a palette: zero diffs against the jar probe', () => {
+    expect(compareSvg(svg, jar, 'deterministic').diffs).toEqual([]);
+  });
+
+  it('is the 1401x589 page of 154 named cells', () => {
+    expect(svg).toContain('width="1401px" height="589px"');
+    expect(count(svg, 'rect')).toBe(154);
   });
 });
