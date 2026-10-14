@@ -377,16 +377,18 @@ export function resolveClusterComposite(
   // branch (`portRanksLabelOnEe`); (c) the FrontierCalculator correction
   // pass (`borderPointMemberIds` below).
   //
-  // `ctx.theme.fontSize === 14` is DELIBERATELY NOT relaxed -- unverified at
-  // non-default font sizes, left gated per diagnosis discipline. Ineligible
-  // composites keep the pre-C3 plain shape, byte-identical to before.
-  //
+  // The former `ctx.theme.fontSize === 14` gate is REMOVED (dsw-T1d):
+  // jar's `ClusterDotString.java:107-125,299-314` has no font-size term --
+  // `protection0/1`, the title TABLE and the `p0`/`p1` wrappers depend only
+  // on `thereALinkFromOrToGroup` and the `ClusterHeader` dims
+  // (`ClusterHeader.java:60-120`), which `computeTitleTableHeight`
+  // parameterises on `fontSize` already (`niveno-60-tiro789`, font size
+  // != 14, jar emits `cluster<N>p0 > cluster<N> (104x38 TABLE) > p1`).
   // G8 T2: `ctx.insideAutonomPass !== true` REMOVED -- jar's own eligibility
   // test has no concept of "which port pass" a cluster resolves in; the
   // `buildPlainAutonomSpec` `Math.max` floor this guarded against is now
   // provably redundant once the `labelInk` ink-walk fold lands (D6). See
   // `plans/g8-label-placement/` decision journal for the full writeup.
-  const titleTableEligible = ctx.theme.fontSize === 14;
   // G5 C7 (ledger.md §C7, `DotInputCluster.innerMarginLevels`'s doc has the
   // full derivation): `needsZaentPoint` reduces to jar's own
   // `thereALinkFromOrToGroup` ("touched") boolean for every
@@ -395,7 +397,7 @@ export function resolveClusterComposite(
   // (`ClusterDotString.java:107-112`; `borderPointAncestorWrap` below is
   // its own, narrower, replacement). `anchorId` is computed here so
   // `unwrappedNodeId` can share this object literal; `zaentId` is pure.
-  const needsZaentPoint = titleTableEligible && ctx.classify.needsZaentPoint.has(s.id);
+  const needsZaentPoint = ctx.classify.needsZaentPoint.has(s.id);
   const anchorId = zaentId(s.id);
   // G7 T14b: `thereALinkFromOrToGroup1` (`ClusterDotString.java:91-96`) --
   // gates BOTH the outer "a" wrap and the inner "${id}i" wrap for a
@@ -415,13 +417,9 @@ export function resolveClusterComposite(
     label: s.display,
     labelWidth: headerWidth,
     labelHeight: headerHeight,
-    ...(titleTableEligible
-      ? {
-          titleTableWidth: headerWidth,
-          titleTableHeight: headerHeight,
-        }
-      : {}),
-    ...(titleTableEligible && !hasBorderPointChildren ? { innerMarginLevels: needsZaentPoint ? 2 : 1 } : {}),
+    titleTableWidth: headerWidth,
+    titleTableHeight: headerHeight,
+    ...(!hasBorderPointChildren ? { innerMarginLevels: needsZaentPoint ? 2 : 1 } : {}),
     ...(needsZaentPoint && !hasBorderPointChildren ? { unwrappedNodeId: anchorId } : {}),
     ...(borderPointAncestorWrap ? { borderPointAncestorWrap: true as const } : {}),
     ...(parentClusterId !== undefined ? { parentId: parentClusterId } : {}),
@@ -465,15 +463,9 @@ export function resolveClusterComposite(
     display: s.display,
     children: sortSpecsByCreationIndex([...pseudoSpecs, ...childSpecs, ...regionSpecs]),
     clusterId,
-    ...(titleTableEligible
-      ? {
-          titleWidth: title.width,
-          clusterHeaderHeight: CLUSTER_HEADER_HEIGHT,
-          titleBaselineMargin: hasBorderPointChildren
-            ? BORDER_POINT_TITLE_BASELINE_MARGIN
-            : CLUSTER_TITLE_BASELINE_MARGIN,
-        }
-      : {}),
+    titleWidth: title.width,
+    clusterHeaderHeight: CLUSTER_HEADER_HEIGHT,
+    titleBaselineMargin: hasBorderPointChildren ? BORDER_POINT_TITLE_BASELINE_MARGIN : CLUSTER_TITLE_BASELINE_MARGIN,
     // lgm-T1d: `solveAcc` lets `materializeCluster` replay this pass's
     // `Cluster#manageEntryExitPoint` calls (`state-composite-drawn-rects.ts`).
     ...(hasBorderPointChildren ? { borderPointMemberIds, solveAcc: acc } : {}),
