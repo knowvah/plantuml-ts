@@ -90,6 +90,10 @@ branches (name `MIT`, MIT text; java:63-76, :155-:240). (c) `<qrcode:>` resolves
 `FlashCodeUtilsNone` (zxing's `FlashCodeUtilsZxing` is `::remove file when __MIT__`), so
 `AtomImg.createQrcode` draws a blank 10x10 RGB image scaled (`AtomImg.java:90-103`) — no QR
 encoder. Oracle rows that render the GPL behaviour differ from the port by this ruling.
+**Scope (maintainer ruling 2026-10-14): D13 covers sudoku only.** Upstream also comments out
+`PSystemDitaaFactory` for MIT (`PSystemBuilder.java:165-166`, `::comment when __MIT__ __EPL__
+__BSD__ __ASL__`); the port **keeps** its ported ditaa engine. Other edition markers are ruled
+case by case, not by extension of D13.
 
 ## D14 — `version` renders the port's own values (maintainer ruling 2026-10-13, b1 close)
 `PSystemVersion#createShowVersion` (java:172-202) prints host state after its first four lines
