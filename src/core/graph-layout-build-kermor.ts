@@ -1,0 +1,82 @@
+/**
+ * `!pragma kermor on` cluster nesting for the layout builder -- the
+ * `ClusterDotStringKermor.printInternal` shape (`svek/ClusterDotStringKermor.java:67-165`):
+ *
+ *   [alpha {label=<note TOP table or "">]            only if the group has a TOP or BOTTOM note (:81-100, :145-147)
+ *     beta {labelloc=b; label=<note BOTTOM table or "">    always (:102-115)
+ *       {rank=source; input ports}                          (:117)
+ *       gamma {labelloc=t; style=solid; label=<title table>  always (:126-143)
+ *         normal members | `empty` point; child clusters    (`Cluster.printCluster3_forKermor`, Cluster.java:595-609)
+ *         {rank=sink; output ports}                         (:153)
+ *
+ * There is no bare `cluster<N>`, no `p0`/`p1`, no `a`/`i` and no `ee`: kermor
+ * never calls `protection0/1` (`:258-265` are unused). `gamma` is the drawn
+ * cluster, so it is the subgraph the `ClusterIndex` maps back to the caller's id.
+ */
+
+import type { GvGraphBuilder } from '@knowvah/dot-engine';
+import type { DotInputCluster } from './graph-layout.types.js';
+
+/** `SvekEdge.appendTable`'s `(int)` casts (`SvekEdge.java:504-507`). */
+function noteTable(width: number, height: number): string {
+  return `<TABLE FIXEDSIZE="TRUE" WIDTH="${Math.floor(width)}" HEIGHT="${Math.floor(height)}"><TR><TD></TD></TR></TABLE>`;
+}
+
+/** Sets `label` to the note's table (`:90-99`, `:104-112`), else the bare `""`. */
+function labelWithNote(sub: GvGraphBuilder, note: { width: number; height: number } | undefined): void {
+  if (note !== undefined) sub.setHtmlAttr('label', noteTable(note.width, note.height));
+}
+
+/** `useAlphaAndBeta()` (`:167-174`): any TOP or BOTTOM note on the group. */
+export function kermorHasAlpha(c: DotInputCluster): boolean {
+  return c.kermorNotes?.top !== undefined || c.kermorNotes?.bottom !== undefined;
+}
+
+/** The `main`/`innermost` pair `addClusters` threads; both are `gamma` here. */
+interface ClusterHandlesLike {
+  main: GvGraphBuilder;
+  innermost: GvGraphBuilder;
+}
+
+/** Builds alpha?/beta/gamma for `c`; returns `{ main, innermost }` both = `gamma`. */
+export function buildKermorClusterHandles(
+  c: DotInputCluster,
+  outerName: string,
+  parentInnermost: GvGraphBuilder,
+  nextRankSubId: () => number,
+): ClusterHandlesLike {
+  let host = parentInnermost;
+  if (kermorHasAlpha(c)) {
+    host = host.addSubgraph(`${outerName}alpha`, {});
+    labelWithNote(host, c.kermorNotes?.top);
+  }
+  const beta = host.addSubgraph(`${outerName}beta`, {});
+  labelWithNote(beta, c.kermorNotes?.bottom);
+  for (const pr of c.portRanks ?? []) {
+    if (pr.rank !== 'source') continue;
+    const rankSub = beta.addSubgraph(`__portrank_${nextRankSubId()}`, { rank: pr.rank });
+    for (const id of pr.nodeIds) {
+      rankSub.addNode(id);
+      beta.addNode(id);
+    }
+  }
+  const gamma = beta.addSubgraph(`${outerName}gamma`, {});
+  if (c.titleTableWidth !== undefined && c.titleTableHeight !== undefined) {
+    gamma.setHtmlAttr('label', noteTable(c.titleTableWidth, c.titleTableHeight));
+  }
+  return { main: gamma, innermost: gamma };
+}
+
+/** The rank=sink groups (`:153`) go last inside gamma; normal members first. */
+export function placeKermorMembers(c: DotInputCluster, gamma: GvGraphBuilder, nextRankSubId: () => number): void {
+  const ports = new Set((c.portRanks ?? []).flatMap((r) => r.nodeIds));
+  for (const id of c.nodeIds) if (!ports.has(id)) gamma.addNode(id);
+  for (const pr of c.portRanks ?? []) {
+    if (pr.rank !== 'sink') continue;
+    const rankSub = gamma.addSubgraph(`__portrank_${nextRankSubId()}`, { rank: pr.rank });
+    for (const id of pr.nodeIds) {
+      rankSub.addNode(id);
+      gamma.addNode(id);
+    }
+  }
+}

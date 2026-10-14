@@ -8,6 +8,7 @@
 import type { GvGraphBuilder } from '@knowvah/dot-engine';
 import type { DotInputCluster, DotInputGraph, DotInputNode } from './graph-layout.types.js';
 import { buildBorderPointClusterHandles, inheritedEeLabel } from './graph-layout-build-borderpoint.js';
+import { buildKermorClusterHandles, placeKermorMembers } from './graph-layout-build-kermor.js';
 import {
   addTitledAnchorNode,
   buildHasPortClusterHandles,
@@ -345,6 +346,14 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
       return handles;
     }
     const outerName = nameFor(c);
+    // T4c: kermor -- alpha?/beta/gamma; `gamma` is the drawn cluster.
+    if (input.kermor === true) {
+      const k = buildKermorClusterHandles(c, outerName, parentInnermost, () => portRankSubId++);
+      idByName.delete(outerName);
+      idByName.set(`${outerName}gamma`, c.id);
+      handlesById.set(c.id, k);
+      return k;
+    }
     // G7 T14b: full ee/i-wrapped border-point (entry/exit-point) branch --
     // MUTUALLY EXCLUSIVE with the plain-cluster branch below, for the SAME
     // cluster (jar's own `ClusterDotString`: `entityPositionsExceptNormal
@@ -374,23 +383,10 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
       return handles;
     }
     const levels = c.innerMarginLevels;
-    // G7 T7: jar's OUTER ancestor-protection pair ("a"/"p0",
-    // `ClusterDotString.java:91-116`) wraps `main` from the OUTSIDE, gated
-    // by the SAME `innerMarginLevels` value the pre-existing inner "i"/"p1"
-    // pair below already uses — jar-verified corpus-wide (307/307 cached
-    // DOTs carry "p0" wherever "p1" appears; 93/93 carry "a" wherever "i"
-    // appears; zero counterexamples). This holds because `protection0()`
-    // and `protection1()` are BOTH unconditionally true for every
-    // `titleTableEligible` composite in this port's corpus: `useSwimlanes`
-    // is a distinct, unported jar feature (this port's own "swimlane"
-    // concept is Activity-diagram-only, unrelated to
-    // `ISkinParam.useSwimlanes(DiagramType)`) and `USymbols.NODE` never
-    // applies to a state composite — and `thereALinkFromOrToGroup1` is the
-    // SAME boolean `needsZaentPoint` already encodes as
-    // `innerMarginLevels === 2` (`state-composite-cluster.ts`'s own doc
-    // comment). "a" nests OUTSIDE "p0" (jar emits
-    // `subgraphClusterNoLabel(sb,"a")` before `subgraphClusterNoLabel(sb,
-    // "p0")`, `ClusterDotString.java:98-115`).
+    // G7 T7: jar's OUTER "a"/"p0" pair (`ClusterDotString.java:91-116`) wraps
+    // `main` from outside, gated by the same `innerMarginLevels` as the inner
+    // "i"/"p1" pair (307/307 cached DOTs pair p0 with p1, 93/93 a with i).
+    // "a" nests outside "p0" (`:98-115`).
     let host = parentInnermost;
     if (levels === 2) host = host.addSubgraph(`${outerName}a`, {});
     if (levels !== undefined) host = host.addSubgraph(`${outerName}p0`, {});
@@ -469,6 +465,10 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
   const portIds = new Set(input.nodes.filter((n) => n.isPort === true).map((n) => n.id));
   for (const c of clusters) {
     const { main, innermost } = handlesFor(c);
+    if (input.kermor === true) {
+      placeKermorMembers(c, innermost, () => portRankSubId++);
+      continue;
+    }
     if (isHasPortCluster(c)) {
       placeHasPortMembers(c, { main, innermost }, portIds);
       continue;

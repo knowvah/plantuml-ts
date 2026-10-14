@@ -161,4 +161,16 @@ describe.skipIf(!hasCorpus)('description plain-family wrappers vs cached jar DOT
     expect(clusters[0]!.innerMarginLevels).toBeUndefined();
     expect(clusters[0]!.borderPointAncestorWrap).toBeUndefined();
   });
+
+  it("kermor emits beta > gamma; the jar's alpha (group note) is not populated yet", () => {
+    const [ours] = captureOurs('component', 'fojamu-08-veku866');
+    const dot = toSvekDot(ours!);
+    expect(dot).toMatch(/subgraph cluster\d+beta \{labelloc="b";[\s\S]*subgraph cluster\d+gamma \{labelloc="t";/);
+    expect(dot).not.toMatch(/alpha/);
+    // jar: alpha carries the TOP note (282x46); a kermor group note is dropped at parse time
+    // (parse-state.ts attachNoteToEntity), so `kermorNotes` stays unset.
+    expect(readJarDot('component', 'fojamu-08-veku866')).toMatch(/cluster6alpha/);
+    const r = layoutParity(readJarDot('component', 'fojamu-08-veku866'), ours!);
+    expect(r.firstDiff).toEqual({ component: 'clusterTree', detail: 'cluster subgraphs: jar 3 vs ours 2' });
+  });
 });
