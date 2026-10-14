@@ -317,6 +317,14 @@ export interface DescriptiveLink {
    */
   creationIndex?: number;
   /**
+   * dsw-T9: the link was built by `Link#getInv()` (`-left-`/`-up-` direction,
+   * `CommandLinkElement.java:325-326`; `abel/Link.java:145-147` sets
+   * `result.inverted = !this.inverted`). `from`/`to` are already post-inversion.
+   * Only `true` is carried. Feeds `DotInputEdge.inverted`, which decides where
+   * `from`'s shape line is declared (`Cluster.java:195-212,515-523`).
+   */
+  inverted?: true;
+  /**
    * `note [pos] on|of link` -- upstream `Link#getNote()`'s `CucaNote`
    * display, kept OUT of `label` (`abel/Link.java:328-334`;
    * `CommandFactoryNoteOnLink#executeInternal` calls `link.addNote(CucaNote

@@ -423,6 +423,8 @@ export function buildDotEdges(
       id: dotId,
       from: fromRes.dotNodeId,
       to: toRes.dotNodeId,
+      // Link#isInverted -> SvekEdge#isInverted (SvekEdge.java:1148-1150).
+      ...(link.inverted === true ? { inverted: true as const } : {}),
       attributes: buildLinkEdgeAttributes(link, fonts, measurer, linetype, ctx.sprites),
     });
     dotEdgeToLinkIdx.set(dotId, i);
