@@ -77,7 +77,7 @@ on every changed file (worktrees skip the husky hook).
 | [3](batch-3/overview.md) wrappers (port + kermor); dashboard regen | T4 ∥ T5 (+T4b/c, T4d) | ∥ | [x] |
 | [4](batch-4/overview.md) measure b4 + re-pin; residual triage | T6 → T7 | — | [x] |
 | [5](batch-5/overview.md) deroxu | T8 → T9 (cond.) → T10 | — | [x] |
-| [6](batch-6/overview.md) exit | T11 | — | [ ] |
+| [6](batch-6/overview.md) exit | T11 | — | [x] |
 
 ## Index
 
@@ -91,3 +91,22 @@ on every changed file (worktrees skip the husky hook).
 
 **Observability:** survey verdicts, `dotEqual`, `layoutEqual`, ratchet pins, census and diff-baseline
 are the SLIs; each close journals them against the b0 sha. **Rollback:** Reversible (revert the merge).
+
+## Mission summary (2026-10-14)
+
+- **Tasks:** 11 planned (T0–T11). All done, plus 4 added by ruling or push-forward: T1d (state),
+  T4b/T4c (core, stop-7 ruling), T4d (group header sprites/creole).
+- **Halts:** 2.
+  - Stop 5: the tightened dotEqual flipped 2 state + 103 description pins. Ruled option 1, state
+    fix in scope.
+  - Stop 7: core builder for linked-port a/i and kermor. Ruled both in scope.
+- **Results, b0 → final:**
+  - 0 conformant losses in all 28 engines at every close.
+  - component 69/66/131 → 69/70/127; usecase 29/18/46 → 30/17/46; unknown 423/47/355 →
+    423/48/354.
+  - layoutEqual: component 244/251, usecase 71/73, unknown-DESCRIPTION 150/175.
+  - svg-description ratchet 51 → 89; layout-parity ratchet 469; dot-parity component 260/263.
+- **Brief corrections flagged for review:** journal rows 3 (pavuzo tree), 8 (empty display),
+  11 (legacy parity.json), 19 (D6 anchor stays in nodeIds).
+- **Gates:** all four green at every close (final 1374/1374).
+- **Follow-ups:** `planning/next-missions.md` (dsw DONE section; follow-on 4 entry).
