@@ -52,6 +52,7 @@ import {
 import { setLayoutInputObserver, type LayoutInputEvent } from '../src/core/graph-layout.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { computeDotEqual, hasActiveSmetanaPragma } from './lib/survey-dot-equal.js';
+import { computeLayoutEqual, type LayoutEqualFields } from './lib/survey-layout-equal.js';
 import { buildSpriteAssetsStore } from './sprite-assets-store.js';
 // cdd4-T9 (journal row 11): the jar always has its Twemoji artwork too --
 // same argument as the sprite store above (lecelo-92-loma110).
@@ -129,7 +130,7 @@ const SVEK_DOT_RE = new RegExp('^svek-([0-9]+)\\.dot$');
 
 export type Verdict = 'conformant' | 'structural-match' | 'diverged' | 'oracle-error' | 'errored' | 'timeout';
 
-export interface FixtureRow {
+export interface FixtureRow extends Partial<LayoutEqualFields> {
   slug: string;
   type: string;
   verdict: Verdict;
@@ -289,7 +290,8 @@ function renderOneMode(dir: string): void {
   }
   setLayoutInputObserver(undefined);
   const dotEqual = computeDotEqual(svekDots, events, oracleBlind, markup);
-  process.stdout.write(JSON.stringify({ svg, dotEqual, oracleBlind }));
+  const layout = computeLayoutEqual(svekDots, events, oracleBlind, markup);
+  process.stdout.write(JSON.stringify({ svg, dotEqual, oracleBlind, ...layout }));
 }
 
 /** Renders ONE fixture and returns the protocol frame, without exiting — the
@@ -309,7 +311,8 @@ function renderFrame(dir: string): string {
       elk: surveyElk,
     });
     const dotEqual = computeDotEqual(svekDots, events, oracleBlind, markup);
-    return JSON.stringify({ svg, dotEqual, oracleBlind, errorPage: isErrorPage() });
+    const layout = computeLayoutEqual(svekDots, events, oracleBlind, markup);
+    return JSON.stringify({ svg, dotEqual, oracleBlind, errorPage: isErrorPage(), ...layout });
   } catch (err) {
     return JSON.stringify({ error: errText(err).split('\n')[0] });
   } finally {
@@ -371,7 +374,9 @@ function rowFor(type: string, f: FixtureDir, oracleSvg: string, o: WorkerOutcome
   }
   const verdict = errorPageVerdict(type, f.slug, rec, o.rendered.errorPage) ?? diffVerdict(o.rendered.svg, oracleSvg);
   const blindField = o.rendered.oracleBlind ? { oracleBlind: true } : {};
-  return { slug: f.slug, type, dotEqual: o.rendered.dotEqual, ...verdict, ...blindField };
+  const { layoutEqual, layoutFirstDiff } = o.rendered;
+  const layoutFields = { layoutEqual, ...(layoutFirstDiff === undefined ? {} : { layoutFirstDiff }) };
+  return { slug: f.slug, type, dotEqual: o.rendered.dotEqual, ...layoutFields, ...verdict, ...blindField };
 }
 
 /** Surveys one type through the persistent pool, preserving input order. */

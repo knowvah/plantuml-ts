@@ -27,11 +27,15 @@
  */
 
 import type { ChildProcess } from 'node:child_process';
+import type { LayoutParityResult } from '../tests/oracle/layout-parity.js';
 
 /** One fixture's render, as the worker reports it. */
 export interface RenderedFixture {
   svg: string;
   dotEqual: boolean;
+  /** `layoutEqual` column (scripts/lib/survey-layout-equal.ts). */
+  layoutEqual: boolean | 'n/a';
+  layoutFirstDiff?: NonNullable<LayoutParityResult['firstDiff']>;
   oracleBlind: boolean;
   /** Our renderer emitted its error page (`setErrorPageObserver`). */
   errorPage: boolean;
@@ -110,6 +114,8 @@ function parseFrame(line: string, stderr: string): WorkerOutcome {
       rendered: {
         svg: parsed.svg,
         dotEqual: parsed.dotEqual === true,
+        layoutEqual: parsed.layoutEqual === true || parsed.layoutEqual === false ? parsed.layoutEqual : 'n/a',
+        ...(parsed.layoutFirstDiff === undefined ? {} : { layoutFirstDiff: parsed.layoutFirstDiff }),
         oracleBlind: parsed.oracleBlind === true,
         errorPage: parsed.errorPage === true,
       },
