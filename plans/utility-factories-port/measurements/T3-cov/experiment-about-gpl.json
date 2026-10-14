@@ -1,0 +1,20 @@
+[
+  {
+    "slug": "cov-about",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-authors",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  }
+]

@@ -1,0 +1,24 @@
+[
+  {
+    "slug": "cov-about",
+    "errored": false,
+    "weightedScore": 2,
+    "diffCount": 2,
+    "structural": 2,
+    "weErrored": false,
+    "first": [
+      {
+        "path": "svg/g[1]/text[3]/@textLength",
+        "actual": "129.225",
+        "expected": "132.6",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[3]/text()[1]",
+        "actual": "(MIT source distribution)",
+        "expected": "(GPL source distribution)",
+        "tolerance": 0.01
+      }
+    ]
+  }
+]

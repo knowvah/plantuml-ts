@@ -1,0 +1,617 @@
+{
+  "fixtures": [
+    {
+      "type": "utility",
+      "slug": "apple",
+      "topic": "T1h probe: `apple //e` (PSystemAppleTwoFactory.java)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "apple-steve-wozniak",
+      "topic": "T1h probe: `STEVE wozniak` (equalsIgnoreCase arm)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-about",
+      "topic": "`about` (PSystemVersion#createShowAuthors)",
+      "status": "baseline",
+      "weightedScore": 8,
+      "diffCount": 8,
+      "reason": "D13 + the kept label (journal row 24a; memory keep-own-version-string): \"plantuml-ts version 0.2.0\" vs \"PlantUML version $version$\" (src/diagrams/version/PSystemVersion.ts:114) and \"(MIT source distribution)\" vs \"(GPL source distribution)\" (:115, License.java:63-68). Controlled experiment: both set to the jar's -> 0 (experiment-about-gpl.json); label alone -> 2 (experiment-about-label-only.json): 6 diffs are the label and the width it drives, 2 the edition.",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-apple-kelvin-sign",
+      "topic": "T1h probe: `Steve Wozniak` with U+212A KELVIN SIGN (equalsIgnoreCase)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-apple-trailing-space",
+      "topic": "T1h probe: `apple //e ` (raw line)",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-authors",
+      "topic": "`authors` (the authors? arm)",
+      "status": "baseline",
+      "weightedScore": 8,
+      "diffCount": 8,
+      "reason": "D13 + the kept label (journal row 24a; memory keep-own-version-string): \"plantuml-ts version 0.2.0\" vs \"PlantUML version $version$\" (src/diagrams/version/PSystemVersion.ts:114) and \"(MIT source distribution)\" vs \"(GPL source distribution)\" (:115, License.java:63-68). Controlled experiment: both set to the jar's -> 0 (experiment-about-gpl.json); label alone -> 2 (experiment-about-label-only.json): 6 diffs are the label and the width it drives, 2 the edition.",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-charlie-dotless-i",
+      "topic": "T1h probe: `charlıe` (dotless i; Java char-wise equalsIgnoreCase)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-charlie-leading-tab",
+      "topic": "T1h probe: `\\tcharlie` (raw line)",
+      "status": "baseline",
+      "weightedScore": 6,
+      "diffCount": 6,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +1 diff: the listing's text x 5 vs 35.8 -- TileText#drawU advances a \\t to the next tab stop (8 spaces' width, TileText.java:82-84, :94-104); src/core/error/error-page-exact.ts:178-198 draws each listing line as one run with leading-space placement only.",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-charlie-trailing-spaces",
+      "topic": "T1h probe: `charlie  ` (equalsIgnoreCase on the raw line)",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-dedication-ben-and-jen",
+      "topic": "`Ben and Jen 2020` -- refused by the same `> 25` gate (16 chars)",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). The jar errors because the line is 16 chars (Dedications.java:92; Dedications.ts:22).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-dedication-boundaries",
+      "topic": "DedicationSimple `Boundaries allow discipline to create true strength`",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-dedication-linux-china",
+      "topic": "`linux_china` -- a DedicationSimple sentence the length gate refuses (Dedications.java:92 `> 25`)",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). The jar errors because the line is 11 chars (src/diagrams/dedication/Dedications.ts:22 mirrors the gate).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-dedication-nothing-punctuated",
+      "topic": "DedicationSimple `NOTHING of value -- is ever easy!` (same() strips [^\\p{L}0-9]+, equalsIgnoreCase)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-egg-synthetic",
+      "topic": "T1h probe: PSystemEggFactory positive path via a synthetic non-secret line",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-emoji-no-block",
+      "topic": "`emoji` with no block (PSystemListEmojiFactory default code \"26\")",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-emoji-unknown-block",
+      "topic": "`emoji zz` (unknown block)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-jesuischarlie",
+      "topic": "`jesuischarlie` (PSystemCharlieFactory second arm)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-licence",
+      "topic": "`licence` (the c/s spelling arm)",
+      "status": "baseline",
+      "weightedScore": 145,
+      "diffCount": 87,
+      "reason": "D13: the MIT edition (License.java:63-68 name, :170-172/:240-264 addMit; MIT <qrcode:> = FlashCodeUtilsNone, blank 10x10 at x3, AtomImg.java:90-103) vs the GPL oracle (GPL paragraph :155-168, zxing 33-module QR at x3 = 99x99). Controlled experiment (experiment-license-gpl.json): GPL name + paragraph restored in src/diagrams/version/License.ts and the blank forced to 33x33 (src/core/klimt/creole/atom/AtomImg.ts:35) -> 0 diffs on all three spellings. Oracle: one file per jar run -- FlashCodeUtilsZxing.java:60 lock.tryLock() fails under concurrent renders and :76 returns null, so a multi-file run draws 773/834/842 px at random; single-file runs 842 in 9/9.",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-license",
+      "topic": "`license` (PSystemLicenseFactory `(?i)^li[sc][ea]n[sc]e\\s*$`)",
+      "status": "baseline",
+      "weightedScore": 145,
+      "diffCount": 87,
+      "reason": "D13: the MIT edition (License.java:63-68 name, :170-172/:240-264 addMit; MIT <qrcode:> = FlashCodeUtilsNone, blank 10x10 at x3, AtomImg.java:90-103) vs the GPL oracle (GPL paragraph :155-168, zxing 33-module QR at x3 = 99x99). Controlled experiment (experiment-license-gpl.json): GPL name + paragraph restored in src/diagrams/version/License.ts and the blank forced to 33x33 (src/core/klimt/creole/atom/AtomImg.ts:35) -> 0 diffs on all three spellings. Oracle: one file per jar run -- FlashCodeUtilsZxing.java:60 lock.tryLock() fails under concurrent renders and :76 returns null, so a multi-file run draws 773/834/842 px at random; single-file runs 842 in 9/9.",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-license-upper",
+      "topic": "`LICENSE` ((?i) case arm)",
+      "status": "baseline",
+      "weightedScore": 145,
+      "diffCount": 87,
+      "reason": "D13: the MIT edition (License.java:63-68 name, :170-172/:240-264 addMit; MIT <qrcode:> = FlashCodeUtilsNone, blank 10x10 at x3, AtomImg.java:90-103) vs the GPL oracle (GPL paragraph :155-168, zxing 33-module QR at x3 = 99x99). Controlled experiment (experiment-license-gpl.json): GPL name + paragraph restored in src/diagrams/version/License.ts and the blank forced to 33x33 (src/core/klimt/creole/atom/AtomImg.ts:35) -> 0 diffs on all three spellings. Oracle: one file per jar run -- FlashCodeUtilsZxing.java:60 lock.tryLock() fails under concurrent renders and :76 returns null, so a multi-file run draws 773/834/842 px at random; single-file runs 842 in 9/9.",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-noise-before-literal",
+      "topic": "removeInitialNoise: blank + `skinparam ` + `skinparamlocked ` + `!pragma ` lines before the literal (UmlSource.java:79-106, isNoise :95-106)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-noise-not-noise",
+      "topic": "`Skinparam ...` (capital S is not noise, UmlSource.java:99-100 startsWith(\"skinparam \")) -> 4 lines, single-line factories refuse",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"class\" vs \"sequence\", the same sequence-index mechanism as the refuse rows, but origIndex + 1 alone leaves 5 (experiment-error-step3b): the skin line is cut from source.lines (probe: body [\"openiconic lightbulb\"]) so sequence reports line 0 where class reports 2.",
+      "jarError": {
+        "line": 3,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-openiconic-account-login",
+      "topic": "`openiconic account-login` (no transform)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-openiconic-action-undo",
+      "topic": "`openiconic action-undo` (transform=\"translate(0 1)\", two args)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-openiconic-euro",
+      "topic": "`openiconic euro` (transform=\"translate(-1)\": OpenIconic.java:67 `(\\d+)` misses the sign -> UTranslate.none())",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-about",
+      "topic": "refusal parity: `about` twice (4-line source) -- PSystemVersionFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-apple",
+      "topic": "refusal parity: `apple //e` twice (4-line source) -- PSystemAppleTwoFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-charlie",
+      "topic": "refusal parity: `charlie` twice (4-line source) -- PSystemCharlieFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-colors",
+      "topic": "refusal parity: `colors` twice (4-line source) -- PSystemColorsFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-dedication",
+      "topic": "refusal parity: `linux_china` twice (4-line source) -- PSystemDedicationFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-donors",
+      "topic": "refusal parity: `donors` twice (4-line source) -- PSystemDonorsFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-egg",
+      "topic": "refusal parity: `<synthetic egg line>` twice (4-line source) -- PSystemEggFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-emoji",
+      "topic": "refusal parity: `emoji` twice (4-line source) -- PSystemListEmojiFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-license",
+      "topic": "refusal parity: `license` twice (4-line source) -- PSystemLicenseFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-listopeniconic",
+      "topic": "refusal parity: `listopeniconic` twice (4-line source) -- PSystemListOpenIconicFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-listsprite",
+      "topic": "refusal parity: `listsprite` twice -- PSystemListArchimateSpritesFactory returns null and the jar falls through to ListSpriteDiagramFactory",
+      "status": "baseline",
+      "weightedScore": 192,
+      "diffCount": 5,
+      "reason": "jar draws, we error (a defect; the 2026-10-10 rule does not cover it): ListSpriteDiagramFactory (PSystemBuilder.java:170) accepts `listsprites?` and ignores it (CommandListSprite.java:58 regex, :69-70 executeArg ok()), drawing an empty 21x21 page; the port has no ListSpriteDiagramFactory (no match in src/), so every candidate refuses. A new plugin + src/index.ts registration, outside T3-cov's write-set. 5 diffs / weighted 192 (g childCount 27 vs 0 = 188).",
+      "parityGap": "ListSpriteDiagramFactory (PSystemBuilder.java:170) is unported",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-openiconic",
+      "topic": "refusal parity: `openiconic lightbulb` twice (4-line source) -- PSystemOpenIconicFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-rip",
+      "topic": "refusal parity: `jean canouet` twice (4-line source) -- PSystemRIPFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-skinparameters",
+      "topic": "refusal parity: `skinparameters` twice (4-line source) -- PSystemSkinparameterListFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-stdlib",
+      "topic": "refusal parity: `stdlib` twice (4-line source) -- PSystemVersionFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-refuse-version",
+      "topic": "refusal parity: `version` twice (4-line source) -- PSystemVersionFactory returns null (PSystemSingleLineFactory.java:75-76) and the jar falls through to its Syntax Error? page",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse). +2 diffs \"(Assumed diagram type: class)\" vs the jar's \"sequence\": src/diagrams/sequence/parser.ts:266 refuses with line = consumed = the index into source.lines (no @startuml), where the class/description/state engines count from @startuml (the DiagramRefusal contract, src/core/error/error-diagrams.ts:64), so our sequence refusal scores 10 below class; the jar's trace holds @startuml and the failing line (PSystemCommandFactory.java:113, :171-174), SequenceDiagramFactory ties class and wins first (PSystemErrorUtils.java:140-147). Every single-line utility factory refuses a 4-line source the jar's way (PSystemSingleLineFactory.java:75-76 return null; NOT_SINGLE_LINE score -Infinity, src/core/command/PSystemSingleLineFactory.ts:62, :167). Controlled experiment (experiment-error-step3b-seq-line-and-consumed.json): parser.ts:266 at origIndex + 1 for both -> 3 (label only) on all 15 refuse rows. Pre-existing, outside the utility packages (ufp-T2a note).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-rip-trailing-space",
+      "topic": "T1h probe: `jean canouet ` (raw line)",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-stdlib-upper-trailing",
+      "topic": "`STDLIB  ` ((?i) + trailing \\s* of `^stdlib\\s*$`)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-steve-jobs",
+      "topic": "`Steve Jobs` (PSystemAppleTwoFactory arm)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-strasse",
+      "topic": "T1h probe: `straße` (no factory accepts it)",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "reason": "error-page: jar errors and we error, same message, same line (2026-10-10 rule: conformant). Residual 5 = our own version string, kept by ruling (src/core/error/PSystemError.ts:151 fullDescription() vs PSystemError.java:151 Version.fullDescription(); 2 diffs) + the source label \"[From string\" vs the jar's \"[From <file>.puml\" (PSystemError.java:239 lineLocation.getDescription(): oracle-render.sh hands the jar a file, renderSync reads a string, src/core/tim/ReadLineReader.ts:37; 3 diffs). Controlled experiment (measurements/T3-cov/experiment-error-step1-version.json, -step2-label.json): the jar's version string -> 3, plus the file name as the label -> 0 (cov-strasse).",
+      "jarError": {
+        "line": 2,
+        "message": "Syntax Error? (Assumed diagram type: sequence)"
+      },
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "cov-version",
+      "topic": "`version` (PSystemVersion#createShowVersion)",
+      "status": "baseline",
+      "weightedScore": 134,
+      "diffCount": 72,
+      "reason": "D14 (+D13 License row): the port prints its own page (src/diagrams/version/PSystemVersion.ts, PSystemVersion.java:172-202) -- plantuml-ts / 0.2.0 / unknown for PlantUML / $version$ / $git.commit.id$, MIT for GPL, \"@knowvah/dot-engine library is used!\" (GraphvizUtils.java:94 arm) for the oracle host's \"dot - graphviz version 16.1.0 (20260904.0139)\", and no JVM/env block (OptionPrint.java:62-63/:85 omit it under TeaVM too): 8 text rows vs the jar's 15. No cheap experiment: the jar rows are the oracle host's state, which D14 forbids printing.",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "donors",
+      "topic": "T1g probe: `donors` (PSystemDonorsFactory)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "rip",
+      "topic": "T1h probe: `jean canouet` (PSystemRIPFactory)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    },
+    {
+      "type": "utility",
+      "slug": "skinparameters",
+      "topic": "T1g probe: `skinparameters` (PSystemSkinparameterListFactory)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "2eb0a50fc"
+    }
+  ]
+}

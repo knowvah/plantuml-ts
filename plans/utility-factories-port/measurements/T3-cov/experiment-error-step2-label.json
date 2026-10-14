@@ -1,0 +1,122 @@
+[
+  {
+    "slug": "cov-strasse",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": true,
+    "first": []
+  },
+  {
+    "slug": "cov-refuse-colors",
+    "errored": false,
+    "weightedScore": 5,
+    "diffCount": 5,
+    "structural": 4,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "202.375",
+        "expected": "238.163",
+        "delta": 35.78800000000001,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "200.375",
+        "expected": "236.163",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From cov-strasse.puml (line 2) ]",
+        "expected": "[From cov-refuse-colors.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-noise-not-noise",
+    "errored": false,
+    "weightedScore": 5,
+    "diffCount": 5,
+    "structural": 4,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "202.375",
+        "expected": "253.038",
+        "delta": 50.66300000000001,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "200.375",
+        "expected": "251.038",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From cov-strasse.puml (line 3) ]",
+        "expected": "[From cov-noise-not-noise.puml (line 3) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[24]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[24]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-dedication-linux-china",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "202.375",
+        "expected": "292.85",
+        "delta": 90.47500000000002,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "200.375",
+        "expected": "290.85",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From cov-strasse.puml (line 2) ]",
+        "expected": "[From cov-dedication-linux-china.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  }
+]
