@@ -5,7 +5,7 @@
 # OWN copy -- cdd7 journal row 8).
 set -euo pipefail
 R="$(git rev-parse --show-toplevel)"; t="$1"; W="$R/.claude/worktrees/dsw-$t"
-git -C "$R" worktree add -q -b "dsw/$t" "$W" feat/description-svek-wrappers
+git -C "$R" worktree add -q -b "dsw/$t" "$W" "${2:-feat/description-svek-wrappers}"
 cd "$W"
 for p in .husky/_ node_modules oracle/dist assets/stdlib tests/corpus plans/class-divergence-drive/tools/node_modules packages/emoji/assets packages/sprites-archimate/assets packages/stdlib-all/generated packages/stdlib-aws/assets packages/stdlib-aws/generated packages/stdlib-tupadr3/assets packages/stdlib-tupadr3/generated packages/stdlib/assets packages/stdlib/generated; do
   [ -e "$R/$p" ] && { rm -rf "$W/$p"; mkdir -p "$(dirname "$W/$p")"; ln -s "$R/$p" "$W/$p"; }
