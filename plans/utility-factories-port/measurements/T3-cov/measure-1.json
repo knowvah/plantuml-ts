@@ -1,0 +1,1857 @@
+[
+  {
+    "slug": "apple",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "apple-steve-wozniak",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-about",
+    "errored": false,
+    "weightedScore": 8,
+    "diffCount": 8,
+    "structural": 4,
+    "weErrored": false,
+    "first": [
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "393",
+        "expected": "403",
+        "delta": 10,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "393",
+        "expected": "403",
+        "delta": 10,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@textLength",
+        "actual": "130.575",
+        "expected": "150.075",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0",
+        "expected": "PlantUML version $version$",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[2]/@x",
+        "actual": "138.875",
+        "expected": "158.375",
+        "delta": 19.5,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[3]/@textLength",
+        "actual": "129.225",
+        "expected": "132.6",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[3]/text()[1]",
+        "actual": "(MIT source distribution)",
+        "expected": "(GPL source distribution)",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[1]/@x",
+        "actual": "307.325",
+        "expected": "317.075",
+        "delta": 9.75,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-apple-kelvin-sign",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-apple-trailing-space",
+    "errored": false,
+    "weightedScore": 5,
+    "diffCount": 5,
+    "structural": 4,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "279.55",
+        "delta": 148.663,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "277.55",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-apple-trailing-space.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-authors",
+    "errored": false,
+    "weightedScore": 8,
+    "diffCount": 8,
+    "structural": 4,
+    "weErrored": false,
+    "first": [
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "393",
+        "expected": "403",
+        "delta": 10,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "393",
+        "expected": "403",
+        "delta": 10,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@textLength",
+        "actual": "130.575",
+        "expected": "150.075",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0",
+        "expected": "PlantUML version $version$",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[2]/@x",
+        "actual": "138.875",
+        "expected": "158.375",
+        "delta": 19.5,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[3]/@textLength",
+        "actual": "129.225",
+        "expected": "132.6",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[3]/text()[1]",
+        "actual": "(MIT source distribution)",
+        "expected": "(GPL source distribution)",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[1]/@x",
+        "actual": "307.325",
+        "expected": "317.075",
+        "delta": 9.75,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-charlie-dotless-i",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-charlie-leading-tab",
+    "errored": false,
+    "weightedScore": 6,
+    "diffCount": 6,
+    "structural": 4,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "272.55",
+        "delta": 141.663,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "270.55",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-charlie-leading-tab.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[22]/@x",
+        "actual": "5",
+        "expected": "35.8",
+        "delta": 30.799999999999997,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-charlie-trailing-spaces",
+    "errored": false,
+    "weightedScore": 5,
+    "diffCount": 5,
+    "structural": 4,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "293.55",
+        "delta": 162.663,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "291.55",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-charlie-trailing-spaces.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-dedication-ben-and-jen",
+    "errored": false,
+    "weightedScore": 5,
+    "diffCount": 5,
+    "structural": 4,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "300.55",
+        "delta": 169.663,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "298.55",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-dedication-ben-and-jen.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-dedication-boundaries",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-dedication-linux-china",
+    "errored": false,
+    "weightedScore": 5,
+    "diffCount": 5,
+    "structural": 4,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "292.85",
+        "delta": 161.96300000000002,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "290.85",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-dedication-linux-china.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-dedication-nothing-punctuated",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-egg-synthetic",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-emoji-no-block",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-emoji-unknown-block",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-jesuischarlie",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-licence",
+    "errored": false,
+    "weightedScore": 145,
+    "diffCount": 87,
+    "structural": 29,
+    "weErrored": false,
+    "first": [
+      {
+        "path": "svg/@height",
+        "actual": "881",
+        "expected": "842",
+        "delta": 39,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "581",
+        "expected": "518",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "881",
+        "expected": "842",
+        "delta": 39,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "581",
+        "expected": "518",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[1]/@height",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[1]/@width",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[2]/@height",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[2]/@width",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[2]/@x",
+        "actual": "114.2",
+        "expected": "183.2",
+        "delta": 68.99999999999999,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[3]/@height",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[3]/@width",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[3]/@x",
+        "actual": "197",
+        "expected": "335",
+        "delta": 138,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-license",
+    "errored": false,
+    "weightedScore": 145,
+    "diffCount": 87,
+    "structural": 29,
+    "weErrored": false,
+    "first": [
+      {
+        "path": "svg/@height",
+        "actual": "881",
+        "expected": "842",
+        "delta": 39,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "581",
+        "expected": "518",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "881",
+        "expected": "842",
+        "delta": 39,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "581",
+        "expected": "518",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[1]/@height",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[1]/@width",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[2]/@height",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[2]/@width",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[2]/@x",
+        "actual": "114.2",
+        "expected": "183.2",
+        "delta": 68.99999999999999,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[3]/@height",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[3]/@width",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[3]/@x",
+        "actual": "197",
+        "expected": "335",
+        "delta": 138,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-license-upper",
+    "errored": false,
+    "weightedScore": 145,
+    "diffCount": 87,
+    "structural": 29,
+    "weErrored": false,
+    "first": [
+      {
+        "path": "svg/@height",
+        "actual": "881",
+        "expected": "842",
+        "delta": 39,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "581",
+        "expected": "518",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "881",
+        "expected": "842",
+        "delta": 39,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "581",
+        "expected": "518",
+        "delta": 63,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[1]/@height",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[1]/@width",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[2]/@height",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[2]/@width",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[2]/@x",
+        "actual": "114.2",
+        "expected": "183.2",
+        "delta": 68.99999999999999,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[3]/@height",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[3]/@width",
+        "actual": "30",
+        "expected": "99",
+        "delta": 69,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/image[3]/@x",
+        "actual": "197",
+        "expected": "335",
+        "delta": 138,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-noise-before-literal",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-noise-not-noise",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "201.512",
+        "expected": "253.038",
+        "delta": 51.52600000000001,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "251.038",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 3) ]",
+        "expected": "[From cov-noise-not-noise.puml (line 3) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[24]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[24]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-openiconic-account-login",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-openiconic-action-undo",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-openiconic-euro",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-refuse-about",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "235.8",
+        "delta": 104.91300000000001,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "233.8",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-about.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-apple",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "235.1",
+        "delta": 104.213,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "233.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-apple.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-charlie",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "242.1",
+        "delta": 111.213,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "240.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-charlie.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-colors",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "238.163",
+        "delta": 107.27600000000001,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "236.163",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-colors.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-dedication",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "264.675",
+        "delta": 133.788,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "262.675",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-dedication.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-donors",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "243.587",
+        "delta": 112.69999999999999,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "241.587",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-donors.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-egg",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "224.163",
+        "delta": 93.27600000000001,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "222.163",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-egg.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-emoji",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "234.313",
+        "delta": 103.42599999999999,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "232.313",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-emoji.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-license",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "244.462",
+        "delta": 113.57499999999999,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "242.462",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-license.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-listopeniconic",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "284.975",
+        "delta": 154.08800000000002,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "282.975",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-listopeniconic.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-listsprite",
+    "errored": false,
+    "weightedScore": 192,
+    "diffCount": 5,
+    "structural": 1,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/@height",
+        "actual": "284",
+        "expected": "21",
+        "delta": 263,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "532",
+        "expected": "21",
+        "delta": 511,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "284",
+        "expected": "21",
+        "delta": 263,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "532",
+        "expected": "21",
+        "delta": 511,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1][childCount]",
+        "actual": "27",
+        "expected": "0",
+        "tolerance": 0.01,
+        "weight": 188
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-openiconic",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "267.825",
+        "delta": 136.938,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "265.825",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-openiconic.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-rip",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "216.375",
+        "delta": 85.488,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "214.375",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-rip.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-skinparameters",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "296.438",
+        "delta": 165.551,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "294.438",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-skinparameters.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-stdlib",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "233.525",
+        "delta": 102.638,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "231.525",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-stdlib.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-version",
+    "errored": false,
+    "weightedScore": 7,
+    "diffCount": 7,
+    "structural": 6,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "245.95",
+        "delta": 115.06299999999999,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "243.95",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-version.puml (line 2) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[23]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-rip-trailing-space",
+    "errored": false,
+    "weightedScore": 5,
+    "diffCount": 5,
+    "structural": 4,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "260.825",
+        "delta": 129.938,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "258.825",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-rip-trailing-space.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-stdlib-upper-trailing",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-steve-jobs",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-strasse",
+    "errored": false,
+    "weightedScore": 5,
+    "diffCount": 5,
+    "structural": 4,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/text[18]/@textLength",
+        "actual": "319.2",
+        "expected": "371.25",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[18]/text()[1]",
+        "actual": "plantuml-ts version 0.2.0 / unknown [Unknown compile time]",
+        "expected": "PlantUML version $version$ / $git.commit.id$ [Unknown compile time]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "202.375",
+        "delta": 71.488,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "200.375",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-strasse.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-version",
+    "errored": false,
+    "weightedScore": 134,
+    "diffCount": 72,
+    "structural": 41,
+    "weErrored": false,
+    "first": [
+      {
+        "path": "svg/@height",
+        "actual": "107",
+        "expected": "191",
+        "delta": 84,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "344",
+        "expected": "420",
+        "delta": 76,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "107",
+        "expected": "191",
+        "delta": 84,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "344",
+        "expected": "420",
+        "delta": 76,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@textLength",
+        "actual": "58.65",
+        "expected": "41.4",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/@y",
+        "actual": "14.333",
+        "expected": "50.333",
+        "delta": 36,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[1]/text()[1]",
+        "actual": "plantuml-ts",
+        "expected": "License",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[2]/@x",
+        "actual": "63.65",
+        "expected": "46.4",
+        "delta": 17.25,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[2]/@y",
+        "actual": "14.333",
+        "expected": "50.333",
+        "delta": 36,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[3]/@textLength",
+        "actual": "26.625",
+        "expected": "24",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[3]/@x",
+        "actual": "66.95",
+        "expected": "49.7",
+        "delta": 17.25,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[3]/@y",
+        "actual": "14.333",
+        "expected": "50.333",
+        "delta": 36,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "donors",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "rip",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "skinparameters",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  }
+]

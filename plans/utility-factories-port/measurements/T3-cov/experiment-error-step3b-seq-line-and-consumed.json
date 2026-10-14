@@ -1,0 +1,552 @@
+[
+  {
+    "slug": "cov-noise-not-noise",
+    "errored": false,
+    "weightedScore": 5,
+    "diffCount": 5,
+    "structural": 4,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "201.512",
+        "expected": "253.038",
+        "delta": 51.52600000000001,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "251.038",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 3) ]",
+        "expected": "[From cov-noise-not-noise.puml (line 3) ]",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[24]/@textLength",
+        "actual": "281.313",
+        "expected": "310.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[24]/text()[1]",
+        "actual": "Syntax Error? (Assumed diagram type: class)",
+        "expected": "Syntax Error? (Assumed diagram type: sequence)",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-about",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "235.8",
+        "delta": 104.91300000000001,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "233.8",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-about.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-apple",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "235.1",
+        "delta": 104.213,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "233.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-apple.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-charlie",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "242.1",
+        "delta": 111.213,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "240.1",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-charlie.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-colors",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "238.163",
+        "delta": 107.27600000000001,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "236.163",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-colors.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-dedication",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "264.675",
+        "delta": 133.788,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "262.675",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-dedication.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-donors",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "243.587",
+        "delta": 112.69999999999999,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "241.587",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-donors.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-egg",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "224.163",
+        "delta": 93.27600000000001,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "222.163",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-egg.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-emoji",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "234.313",
+        "delta": 103.42599999999999,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "232.313",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-emoji.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-license",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "244.462",
+        "delta": 113.57499999999999,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "242.462",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-license.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-listopeniconic",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "284.975",
+        "delta": 154.08800000000002,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "282.975",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-listopeniconic.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-listsprite",
+    "errored": false,
+    "weightedScore": 192,
+    "diffCount": 5,
+    "structural": 1,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/@height",
+        "actual": "284",
+        "expected": "21",
+        "delta": 263,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[2]",
+        "actual": "532",
+        "expected": "21",
+        "delta": 511,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@viewBox[3]",
+        "actual": "284",
+        "expected": "21",
+        "delta": 263,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/@width",
+        "actual": "532",
+        "expected": "21",
+        "delta": 511,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1][childCount]",
+        "actual": "27",
+        "expected": "0",
+        "tolerance": 0.01,
+        "weight": 188
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-openiconic",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "267.825",
+        "delta": 136.938,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "265.825",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-openiconic.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-rip",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "216.375",
+        "delta": 85.488,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "214.375",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-rip.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-skinparameters",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "296.438",
+        "delta": 165.551,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "294.438",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-skinparameters.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-stdlib",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "233.525",
+        "delta": 102.638,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "231.525",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-stdlib.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-refuse-version",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "245.95",
+        "delta": 115.06299999999999,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "243.95",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-refuse-version.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  },
+  {
+    "slug": "cov-strasse",
+    "errored": false,
+    "weightedScore": 3,
+    "diffCount": 3,
+    "structural": 2,
+    "weErrored": true,
+    "first": [
+      {
+        "path": "svg/g[1]/rect[3]/@width",
+        "actual": "130.887",
+        "expected": "202.375",
+        "delta": 71.488,
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/@textLength",
+        "actual": "128.887",
+        "expected": "200.375",
+        "tolerance": 0.01
+      },
+      {
+        "path": "svg/g[1]/text[19]/text()[1]",
+        "actual": "[From string (line 2) ]",
+        "expected": "[From cov-strasse.puml (line 2) ]",
+        "tolerance": 0.01
+      }
+    ]
+  }
+]

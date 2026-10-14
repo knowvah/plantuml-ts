@@ -12,8 +12,16 @@
  * (`PSystemBuilder.java:134-200` single-line easter eggs, listings and the
  * version family) have no cache tree of their own -- the unknown bucket holds
  * them. Every tool and gate in this family reads and writes only these rows.
+ *
+ * A SECOND, authored root (T3-cov, D10; copied from `render-fixture-wbs.ts`'s
+ * wep T5-cov additions): {@link AUTHORED_UTILITY_ROOT}, a FLAT committed tree
+ * of `<slug>.puml` + `<slug>.svg` pairs (the svg rendered by
+ * `scripts/oracle-render.sh`), tracked by `authored-baseline.json`, never by
+ * `diff-baseline.json`/`ratchet.json`.
  */
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { combineAssetStores, type AssetStore } from '../../../src/core/asset-store.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
@@ -120,4 +128,81 @@ export function measureUtilityMarkup(markup: string, golden: string): UtilityMea
 export function measureUtilitySlug(cacheRoot: string, slug: string): UtilityMeasure {
   const dir = `${cacheRoot}/${UTILITY_CACHE_TYPE}/${slug}`;
   return measureUtilityMarkup(readFileSync(`${dir}/in.puml`, 'utf8'), readFileSync(`${dir}/in.svg`, 'utf8'));
+}
+
+/** The committed, flat authored-fixture root (`<slug>.puml` + `<slug>.svg`). */
+export const AUTHORED_UTILITY_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/utility');
+
+const PUML_SUFFIX = '.puml';
+const SVG_SUFFIX = '.svg';
+
+/** Every authored fixture slug: the `*.puml` basenames under {@link AUTHORED_UTILITY_ROOT}, sorted. */
+export function listAuthoredUtilitySlugs(root: string = AUTHORED_UTILITY_ROOT): string[] {
+  return readdirSync(root)
+    .filter((f) => f.endsWith(PUML_SUFFIX))
+    .map((f) => f.slice(0, -PUML_SUFFIX.length))
+    .sort();
+}
+
+/** One authored fixture's source and jar oracle (`undefined` when the svg is absent). */
+export interface AuthoredUtilityFixture {
+  readonly markup: string;
+  readonly golden: string | undefined;
+}
+
+export function readAuthoredUtilityFixture(slug: string, root: string = AUTHORED_UTILITY_ROOT): AuthoredUtilityFixture {
+  const svgPath = join(root, slug + SVG_SUFFIX);
+  return {
+    markup: readFileSync(join(root, slug + PUML_SUFFIX), 'utf8'),
+    golden: existsSync(svgPath) ? readFileSync(svgPath, 'utf8') : undefined,
+  };
+}
+
+/** Renders an authored fixture exactly as {@link measureUtilityMarkup} does (survey asset store, delta 3). */
+export function renderAuthoredUtility(markup: string): string {
+  return renderFixtureUtility(markup, new DeterministicMeasurer(), {
+    assetStore: surveyAssetStore(),
+    includeStore: fixtureIncludeStore(),
+  });
+}
+
+/** True when `ours` is this port's error banner page or the dispatcher sentinel. */
+export function isOurErrorPage(ours: string): boolean {
+  return ours.includes(ERROR_SENTINEL_MARKER) || ours.includes(`>${fullDescription()}</text>`);
+}
+
+export type AuthoredUtilityMeasure =
+  | {
+      readonly errored: false;
+      readonly weightedScore: number;
+      readonly diffCount: number;
+      readonly structural: number;
+      readonly weErrored: boolean;
+    }
+  | { readonly errored: true; readonly reason: string };
+
+/**
+ * Measures one authored row against the jar oracle beside it. Unlike
+ * {@link measureUtilityMarkup}, an error page on our side is still COMPARED
+ * (wep T5-cov's shape): the 2026-10-10 rule makes "jar errors + we error"
+ * conformant, so an authored error row is gated on its residual, and
+ * `weErrored` feeds the error-parity test.
+ */
+export function measureAuthoredUtility(slug: string, root: string = AUTHORED_UTILITY_ROOT): AuthoredUtilityMeasure {
+  const { markup, golden } = readAuthoredUtilityFixture(slug, root);
+  if (golden === undefined) return { errored: true, reason: `${slug}.svg is missing` };
+  try {
+    const ours = renderAuthoredUtility(markup);
+    const { diffs } = compareSvg(ours, golden, 'deterministic');
+    const structural = diffs.filter((d) => d.delta === undefined).length;
+    return {
+      errored: false,
+      weightedScore: weightedScore(diffs),
+      diffCount: diffs.length,
+      structural,
+      weErrored: isOurErrorPage(ours),
+    };
+  } catch (err) {
+    return { errored: true, reason: err instanceof Error ? err.message : String(err) };
+  }
 }

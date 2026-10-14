@@ -27,6 +27,35 @@ documented placeholder assertion in that state.
 fresh b0 measurement: all 17 rows `status: "error"` with the reason, no numeric
 baseline (pinning a score against a placeholder would measure nothing).
 
+## Authored root (T3-cov, D10)
+
+`tests/fixtures/utility/` is a flat tree of ORIGINAL fixtures (`<slug>.puml` +
+the jar's `<slug>.svg` beside it; new files carry the `cov-` prefix, the five
+T1g/T1h probes keep their names) tracked by `authored-baseline.json` -- never by
+`diff-baseline.json`, `ratchet.json` or the pin tools. Gates
+(`utility.diff-baseline.ratchet.test.ts`, "authored" blocks): rows = the `.puml`
+files on disk, disjoint from the cached `unknown` slugs; weightedScore never
+rises (rendered with `surveyAssetStore()`); a nonzero row names its mechanism;
+`jarError` rows are exactly the jar error pages; we error exactly where the jar
+errors (2026-10-10 rule) except a `parityGap` row, which must keep reproducing
+its named gap; three renders per row are byte-identical.
+
+Render an authored oracle with `scripts/oracle-render.sh <abs dir> <abs puml>`
+(absolute paths write flat). Render `license`-family rows ONE FILE PER RUN: the
+GPL jar's `FlashCodeUtilsZxing#exportFlashcode` returns null when
+`lock.tryLock()` fails (FlashCodeUtilsZxing.java:60, :76), so a multi-file run
+draws the page 773/834/842 px high at random; single-file runs are stable.
+Error-page oracles also depend on the capture minute (PSystemError.java:221-229,
+see `.agent-notes/cdd5-T0e-error-page-time-decoration.md`): check a re-capture
+for banner `<image>`s before trusting a score change.
+
+Regenerate the manifest from a fresh measurement (topics and mechanisms are in
+the tool; it refuses a nonzero row without a reason):
+
+```
+npx jiti plans/utility-factories-port/measurements/T3-cov/build-authored-baseline.mts <commit> [--write]
+```
+
 ## No DOT-parity gate
 
 None of these factories shells out to Graphviz; the only eligibility condition
@@ -38,6 +67,7 @@ for a pin is byte-for-byte conformance under `DeterministicMeasurer`.
 oracle/goldens/svg-utility/
   ratchet.json                 <- the manifest (source of truth for CI)
   diff-baseline.json           <- weighted-score baseline (see above)
+  authored-baseline.json       <- authored-root baseline (tests/fixtures/utility/)
   README.md                    <- this file
   <slug>/
     in.puml                    <- fixture source (committed, offline)

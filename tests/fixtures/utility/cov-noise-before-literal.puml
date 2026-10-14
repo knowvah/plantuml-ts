@@ -1,0 +1,7 @@
+@startuml
+
+skinparam backgroundColor red
+skinparamlocked shadowing false
+!pragma layout smetana
+openiconic lightbulb
+@enduml

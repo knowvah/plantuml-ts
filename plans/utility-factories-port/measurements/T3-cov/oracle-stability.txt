@@ -1,0 +1,16 @@
+ufp T3-cov oracle stability (scripts/oracle-render.sh, 1.2026.8beta1, 2026-10-14)
+
+1. Batch runs: all 49 tests/fixtures/utility/*.puml rendered three times in one
+   jar invocation each (initial capture + re-runs a, b), cmp against the committed svg.
+   Identical in all three: every row EXCEPT cov-license / cov-license-upper / cov-licence,
+   whose svg/@height took 773, 834 or 842 at random across runs (content identical).
+   Mechanism: FlashCodeUtilsZxing.java:60 `if (lock.tryLock())` -- a concurrent render
+   holding the lock makes :76 `return null`, AtomImg.createQrcode falls back to the
+   10x10 blank (AtomImg.java:94-95), and PSystemLicense rebuilds its TextBlock for
+   calculateDimension and drawU separately, so the canvas is sized from a fallback
+   QR row while the drawn row holds the real 99x99 codes.
+2. Single-file runs: each license spelling rendered alone, three times each (9 runs):
+   842 px every time. The committed license oracles are single-file renders
+   (byte-identical to the first single run).
+3. Error-page rows: no banner <image> (PSystemError.java:221-229 minute decorations);
+   scores 5-7 against ours, consistent across runs a/b.
