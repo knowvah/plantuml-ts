@@ -68,12 +68,17 @@ describe.skipIf(!hasCorpus)('computeLayoutEqual over cached jar DOT', () => {
     expect(computeLayoutEqual(f.dots, f.events, false, f.markup)).toEqual({ layoutEqual: true });
   });
 
-  it('bamami is unequal with a clusterTree first diff', () => {
+  it('bamami is layout-equal once description emits the p0/p1 wrappers (dsw T3)', () => {
     const f = fixture('unknown', 'bamami-10-lava790');
+    expect(computeLayoutEqual(f.dots, f.events, false, f.markup)).toEqual({ layoutEqual: true });
+  });
+
+  it('xagonu is unequal with a clusterTree first diff (cluster bb; dsw journal row 20)', () => {
+    const f = fixture('unknown', 'xagonu-36-sudi116');
     const r = computeLayoutEqual(f.dots, f.events, false, f.markup);
     expect(r.layoutEqual).toBe(false);
     expect(r.layoutFirstDiff?.component).toBe('clusterTree');
-    expect(r.layoutFirstDiff?.detail.length).toBeGreaterThan(0);
+    expect(r.layoutFirstDiff?.detail).toContain('jar 12 vs ours 12');
   });
 
   it('a doctored graph (extra node) reports unequal', () => {
