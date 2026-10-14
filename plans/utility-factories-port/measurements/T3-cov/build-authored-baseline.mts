@@ -79,7 +79,8 @@ const SPECS: Record<string, RowSpec> = {
       '$git.commit.id$, MIT for GPL, "@knowvah/dot-engine library is used!" (GraphvizUtils.java:94 arm) ' +
       'for the oracle host\'s "dot - graphviz version 16.1.0 (20260904.0139)", and no JVM/env block ' +
       '(OptionPrint.java:62-63/:85 omit it under TeaVM too): 8 text rows vs the jar\'s 15. No cheap ' +
-      'experiment: the jar rows are the oracle host\'s state, which D14 forbids printing.',
+      'experiment: the jar rows are the oracle host\'s state, which D14 forbids printing. Plus the ' +
+      'port-author credit line appended last (user ruling 2026-10-14, DIVERGENCES.md).',
   },
   'cov-about': {
     topic: '`about` (PSystemVersion#createShowAuthors)',
@@ -88,7 +89,10 @@ const SPECS: Record<string, RowSpec> = {
       'vs "PlantUML version $version$" (src/diagrams/version/PSystemVersion.ts:114) and "(MIT source ' +
       'distribution)" vs "(GPL source distribution)" (:115, License.java:63-68). Controlled experiment: both ' +
       'set to the jar\'s -> 0 (experiment-about-gpl.json); label alone -> 2 (experiment-about-label-only' +
-      '.json): 6 diffs are the label and the width it drives, 2 the edition.',
+      '.json): 6 diffs are the label and the width it drives, 2 the edition. Plus the port-author ' +
+      'credit line appended after the jar\'s closing blank (user ruling 2026-10-14, DIVERGENCES.md ' +
+      '"`about`, `authors` and `version` credit the TypeScript port"): without it the score is 8; with ' +
+      'it compareSvg re-aligns the page on the changed element count, so one added line costs the rest.',
   },
   'cov-authors': { topic: '`authors` (the authors? arm)' },
   'cov-stdlib-upper-trailing': { topic: '`STDLIB  ` ((?i) + trailing \\s* of `^stdlib\\s*$`)' },

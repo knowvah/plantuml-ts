@@ -106,20 +106,39 @@ const VERSION_DIFFS = [
   ['svg/g[1]/image[1]/@x', '307.325', '317.075'],
 ];
 
+/** The port-author credit appended after everything the jar prints (user ruling 2026-10-14,
+ *  DIVERGENCES.md "`about`, `authors` and `version` credit the TypeScript port"). */
+const PORT_CREDIT_ABOUT = '<u>TypeScript port</u>: Scott Seely (sseely)';
+const PORT_CREDIT_VERSION = '<b>TypeScript port</b> ""Scott Seely (sseely)""';
+
 function about(): PSystemVersion {
   return PSystemVersion.createShowAuthors(SOURCE, new PreprocessingArtifact());
+}
+
+/** The page built from every line but the appended credit: the jar's own lines. */
+function aboutJarLines(): PSystemVersion {
+  return new PSystemVersion(SOURCE, true, about().getLines().slice(0, -1), new PreprocessingArtifact());
 }
 
 describe('PSystemVersion.createShowAuthors — the jar about page', () => {
   const svg = about().exportDiagram(0, measurer);
 
   it('differs from the jar only where the version string and the edition name move the page', () => {
-    const { diffs } = compareSvg(svg, JAR_ABOUT, 'deterministic');
+    const { diffs } = compareSvg(aboutJarLines().exportDiagram(0, measurer), JAR_ABOUT, 'deterministic');
     expect(diffs.map((d) => [d.path, d.actual, d.expected])).toEqual(VERSION_DIFFS);
   });
 
-  it('embeds the PlantUML logo at its 80x71 size', () => {
-    expect(svg).toContain(`<image width="80" height="71" x="307.325" y="162" xlink:href="${PLANTUML_LOGO.href}"/>`);
+  it('appends the port credit as one more line below the jar page, moving only height and logo', () => {
+    expect(about().getLines().at(-1)).toBe(PORT_CREDIT_ABOUT);
+    expect(svg).toContain(
+      '<text x="5" y="242.333" fill="#000" font-size="12" textLength="81.3" text-decoration="underline">TypeScript port</text>' +
+        '<text x="86.3" y="242.333" fill="#000" font-size="12" textLength="112.575">: Scott Seely (sseely)</text>',
+    );
+    expect(svg).toContain('height="251px"');
+  });
+
+  it('embeds the PlantUML logo at its 80x71 size, one line lower than the jar (162 + 12)', () => {
+    expect(svg).toContain(`<image width="80" height="71" x="307.325" y="174" xlink:href="${PLANTUML_LOGO.href}"/>`);
   });
 
   it('renders the same document three times', () => {
@@ -163,10 +182,11 @@ describe('getAuthorsStrings (java:219-245)', () => {
     ]);
   });
 
-  it('is 19 lines closing on the site link between blanks', () => {
+  it("is the jar's 19 lines, closing on the site link between blanks, then the port credit", () => {
     const lines = getAuthorsStrings(true);
-    expect(lines).toHaveLength(19);
-    expect(lines.slice(-3)).toEqual([' ', 'https://plantuml.com', ' ']);
+    expect(lines).toHaveLength(20);
+    expect(lines.slice(-4)).toEqual([' ', 'https://plantuml.com', ' ', PORT_CREDIT_ABOUT]);
+    expect(getAuthorsStrings(false).at(-1)).toBe('TypeScript port: Scott Seely (sseely)');
   });
 
   it('strips <tag> and </tag> without the tags (java:248-249)', () => {
@@ -284,6 +304,7 @@ describe('PSystemVersion.createShowVersion — lines (java:172-202, D14)', () =>
       '@knowvah/dot-engine library is used!',
       '<b>Installation seems OK. File generation OK',
       ' ',
+      PORT_CREDIT_VERSION,
     ]);
   });
 
@@ -325,8 +346,19 @@ describe('PSystemVersion.createShowVersion — geometry against the jar probe', 
   const svg = versionPage().exportDiagram(0, measurer);
   const texts = textsOf(svg);
 
-  it('draws eight lines: four label/value lines of three runs, then four single runs', () => {
-    expect(texts).toHaveLength(16);
+  it('draws nine lines: four label/value lines of three runs, four single runs, then the credit', () => {
+    expect(texts).toHaveLength(19);
+    // The jar's label / space / monospace-value line shape, one 12 px step below the closing blank.
+    const [label, space, value] = texts.slice(16).map(runOf);
+    expect([label?.text, space?.text.trim(), value?.text]).toEqual([
+      'TypeScript port',
+      '',
+      'Scott\u00a0Seely\u00a0(sseely)',
+    ]);
+    expect(label?.attrs['font-weight']).toBe('700');
+    expect(Number(value?.attrs['x']) - Number(space?.attrs['x'])).toBeCloseTo(JAR_SPACE_ADVANCE, 3);
+    expect(value?.attrs['font-family']).toBe('monospace');
+    expect(Number(label?.attrs['y']) - Number(runOf(texts[15] ?? '').attrs['y'])).toBe(JAR_LINE_STEP);
   });
 
   it('kept label lines (Git Commit, Build Time, License): label and space runs equal the jar, value run placed as the jar', () => {
@@ -354,7 +386,7 @@ describe('PSystemVersion.createShowVersion — geometry against the jar probe', 
 
   it("blank, file-generation and closing blank lines equal the jar's (lines 5, 7, 8)", () => {
     expect(texts[12]).toBe(JAR_VERSION_TEXTS[12]);
-    expect(texts.slice(14)).toEqual(JAR_VERSION_TEXTS.slice(16, 18));
+    expect(texts.slice(14, 16)).toEqual(JAR_VERSION_TEXTS.slice(16, 18));
   });
 
   it("line 6 (the engine) sits where the jar's GraphViz line does, plain as the VizJs arm (GraphvizUtils.java:94)", () => {
@@ -367,8 +399,8 @@ describe('PSystemVersion.createShowVersion — geometry against the jar probe', 
     });
   });
 
-  it("is seven lines shorter than the jar's 15 (JVM/environment lines omitted), logo at height - 77", () => {
-    const height = JAR_VERSION_HEIGHT - (JAR_LINES - 8) * JAR_LINE_STEP;
+  it("is six lines shorter than the jar's 15 (seven JVM/environment lines omitted, one credit added), logo at height - 77", () => {
+    const height = JAR_VERSION_HEIGHT - (JAR_LINES - 9) * JAR_LINE_STEP;
     expect(svg).toContain(`height="${height}px"`);
     expect(svg).toMatch(
       new RegExp(`<image width="80" height="71" x="[\\d.]+" y="${height - (JAR_VERSION_HEIGHT - JAR_LOGO_Y)}"`),

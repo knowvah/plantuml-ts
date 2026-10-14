@@ -92,6 +92,14 @@ const AUTHORS = [
   '<u>Web Assembly</u>: Sakir Temel',
 ] as const;
 
+/** This port's author, credited in the jar's `<u>role</u>` / `<b>label</b>`
+ *  forms on one line appended after everything the jar prints, so every jar
+ *  line keeps the jar's position (`about`/`authors`, `version`). Kept by user ruling (2026-10-14; DIVERGENCES.md "`about`,
+ *  `authors` and `version` credit the TypeScript port"). The GitHub login
+ *  follows the jar's own handle-as-name entry (`Stdlib Icons: tupadr3`). */
+const PORT_AUTHOR_ROLE = 'TypeScript port';
+const PORT_AUTHOR = 'Scott Seely (sseely)';
+
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/version/PSystemVersion.java:241-243 */
 const AUTHORS_END = [BLANK, 'https://plantuml.com', BLANK] as const;
 
@@ -116,6 +124,7 @@ export function getAuthorsStrings(withTag: boolean): string[] {
   add(strings, BLANK, withTag);
   for (const line of AUTHORS) add(strings, line, withTag);
   for (const line of AUTHORS_END) add(strings, line, withTag);
+  add(strings, `<u>${PORT_AUTHOR_ROLE}</u>: ${PORT_AUTHOR}`, withTag);
   return strings;
 }
 
@@ -220,6 +229,7 @@ export class PSystemVersion extends PlainStringsDiagram {
     // variable and an image-size limit this port neither reads nor applies.
     // Upstream's own browser build drops both blocks (`TeaVM.isTeaVM()`,
     // OptionPrint.java:62-63, :85).
+    strings.push(`<b>${PORT_AUTHOR_ROLE}</b> ""${PORT_AUTHOR}""`);
     return new PSystemVersion(source, true, strings, preprocessing);
   }
 
