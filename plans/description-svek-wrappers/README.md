@@ -73,7 +73,7 @@ on every changed file (worktrees skip the husky hook).
 |---|---|---|---|
 | [0](batch-0/overview.md) branch + b0 | T0 | — | [x] |
 | [1](batch-1/overview.md) gate, tightened dotEqual, header sizing | T1a ∥ T1b ∥ T1c | all ∥ | [ ] |
-| [2](batch-2/overview.md) survey column + ratchet; wrappers (plain) | T2 ∥ T3 | ∥ | [ ] |
+| [2](batch-2/overview.md) survey column + ratchet; wrappers (plain) | T2 ∥ T3 | ∥ | [x] |
 | [3](batch-3/overview.md) wrappers (port + kermor); dashboard regen | T4 ∥ T5 | ∥ | [ ] |
 | [4](batch-4/overview.md) measure b4 + re-pin; residual triage | T6 → T7 | — | [ ] |
 | [5](batch-5/overview.md) deroxu | T8 → T9 (cond.) → T10 | — | [ ] |

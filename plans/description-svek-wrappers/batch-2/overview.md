@@ -6,8 +6,8 @@ merged; a row T3 makes unequal is stop 4 unless the journal states its mechanism
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T2 | Survey `layoutEqual` column + layout-parity ratchet, seeded | typescript-pro (sonnet) | `scripts/svg-parity-survey.ts`, `scripts/lib/survey-layout-equal.ts`, `tests/unit/scripts/survey-layout-equal.test.ts`, `tests/oracle/svg-conformance/layout-parity.ratchet.test.ts`, `oracle/goldens/svg-conformance/layout-parity-baseline.json` | T1a | [ ] |
-| T3 | Description wrappers, plain family (D5, D6) | typescript-pro (sonnet), **named `dsw-wrappers`** (resumed for T4) | `src/diagrams/description/layout-dot-tree.ts`, `src/diagrams/description/layout.ts`, `tests/unit/description/description-svek-wrappers.test.ts` | T1a, T1c | [ ] |
+| T2 | Survey `layoutEqual` column + layout-parity ratchet, seeded | typescript-pro (sonnet) | `scripts/svg-parity-survey.ts`, `scripts/lib/survey-layout-equal.ts`, `tests/unit/scripts/survey-layout-equal.test.ts`, `tests/oracle/svg-conformance/layout-parity.ratchet.test.ts`, `oracle/goldens/svg-conformance/layout-parity-baseline.json` | T1a | [x] |
+| T3 | Description wrappers, plain family (D5, D6) | typescript-pro (sonnet), **named `dsw-wrappers`** (resumed for T4) | `src/diagrams/description/layout-dot-tree.ts`, `src/diagrams/description/layout.ts`, `tests/unit/description/description-svek-wrappers.test.ts` | T1a, T1c | [x] |
 
 Close: [../close-procedure.md](../close-procedure.md). This is the first close where the description
 surveys move. Expect component/usecase/unknown verdict movers and dotEqual flips (now that T1b is
