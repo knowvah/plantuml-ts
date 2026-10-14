@@ -47,7 +47,10 @@ export const LINK_COMMANDS: readonly Command[] = [
       // on inversion, burning a SECOND shared-counter value beyond the
       // discarded pre-inversion Link's own -- see DescriptiveLink
       // .creationIndex's doc comment.
-      if (parsed.inverted) nextCreationIndex(state);
+      if (parsed.inverted) {
+        nextCreationIndex(state);
+        parsed.link.inverted = true;
+      }
       parsed.link.creationIndex = nextCreationIndex(state);
       addLink(state, parsed.link);
     },
