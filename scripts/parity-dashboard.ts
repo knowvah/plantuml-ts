@@ -51,6 +51,7 @@ import {
   type ColumnResult,
   dotColumn,
   surveyColumn,
+  layoutEqualColumn,
   censusColumn,
   ratchetColumn,
   diffBaselineColumn,
@@ -125,6 +126,7 @@ export interface MatrixRow {
   oracle: string;
   dot: string;
   survey: string;
+  layout: string;
   census: string;
   ratchet: string;
   diffBaseline: string;
@@ -147,6 +149,7 @@ interface RowColumns {
   oracle: ReturnType<typeof oracleColumn>;
   dot: ReturnType<typeof dotColumn>;
   survey: ReturnType<typeof surveyColumn>;
+  layout: ReturnType<typeof layoutEqualColumn>;
   census: ReturnType<typeof censusColumn>;
   ratchet: ReturnType<typeof ratchetColumn>;
   diffBaseline: ReturnType<typeof diffBaselineColumn>;
@@ -158,13 +161,13 @@ interface RowColumns {
  *  source, so there is nothing to compare and no source date to report. */
 function plantumlTsOnlyColumns(): RowColumns {
   const c = PLANTUML_TS_ONLY;
-  return { oracle: c, dot: c, survey: c, census: c, ratchet: c, diffBaseline: c, routing: c, refusal: c };
+  return { oracle: c, dot: c, survey: c, layout: c, census: c, ratchet: c, diffBaseline: c, routing: c, refusal: c };
 }
 
 /** A no-engine bucket keeps its real oracle count; every comparison cell
  *  repeats the engine reason (`parity-dashboard-matrix.ts#noEngineColumn`). */
 function noEngineColumns(c: ColumnResult, oracle: ColumnResult): RowColumns {
-  return { oracle, dot: c, survey: c, census: c, ratchet: c, diffBaseline: c, routing: c, refusal: c };
+  return { oracle, dot: c, survey: c, layout: c, census: c, ratchet: c, diffBaseline: c, routing: c, refusal: c };
 }
 
 function columnsFor(type: string, inputs: RawInputs, dotByType: ReadonlyMap<string, TypeRow>): RowColumns {
@@ -175,6 +178,7 @@ function columnsFor(type: string, inputs: RawInputs, dotByType: ReadonlyMap<stri
     oracle: oracleColumn(type, inputs.oracleCounts),
     dot: dotColumn(dotByType.get(type), inputs.dotParity.generatedAt),
     survey: surveyColumn(inputs.surveyByType[type]),
+    layout: layoutEqualColumn(inputs.surveyByType[type], dotByType.get(type)),
     census: censusColumn(inputs.censusByType[type]),
     ratchet: ratchetColumn(inputs.ratchetByType[type]),
     diffBaseline: diffBaselineColumn(inputs.diffBaselineByType[type]),
@@ -191,6 +195,7 @@ function matrixRowOf(type: string, inputs: RawInputs, c: RowColumns): MatrixRow 
     oracle: c.oracle.cell,
     dot: c.dot.cell,
     survey: c.survey.cell,
+    layout: c.layout.cell,
     census: c.census.cell,
     ratchet: c.ratchet.cell,
     diffBaseline: c.diffBaseline.cell,
@@ -266,7 +271,10 @@ const PREAMBLE = [
     "bucket, or the still-unbuilt Phase D mission that will; **corpus** is the bucket's fixture " +
     'count; **oracle** is how many of those fixtures have a cached PlantUML jar SVG under ' +
     '`test-results/dot-cache/<type>/`; **DOT equal** reads `tests/oracle/svg-conformance/dot-' +
-    'parity.json`; **ratchet pins**, **diff-baseline**, **routing** and **refusal** read the ' +
+    'parity.json` (structure: cluster nesting, wrapper chain, title table, edges); **layoutEqual** ' +
+    'is `equal/comparable` read from the same survey file as **survey** (the geometry of our ' +
+    "layout graph against the jar's svek DOT, `tests/oracle/layout-parity.ts`; fixtures with no " +
+    'comparison are not counted); **ratchet pins**, **diff-baseline**, **routing** and **refusal** read the ' +
     'committed goldens under `oracle/goldens/`. Every empty cell names why it is empty, per the ' +
     'vocabulary in decisions.md D8 — a bare `n/a` never appears. `n/a (plantuml-ts only)` marks ' +
     'a type whose every cached jar SVG is PlantUML\'s own "Diagram not supported by this ' +
@@ -289,13 +297,13 @@ const PREAMBLE = [
 ].join('\n');
 
 const MATRIX_HEADER =
-  '| type | engine | corpus | oracle | DOT equal | survey conformant / structural / diverged | ' +
+  '| type | engine | corpus | oracle | DOT equal | survey conformant / structural / diverged | layoutEqual | ' +
   'census 0-diff | ratchet pins | diff-baseline (n · ΣweightedScore) | routing agree | refusal ok |';
-const MATRIX_SEP = '| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |';
+const MATRIX_SEP = '| --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- |';
 
 function matrixRowLine(r: MatrixRow): string {
   return (
-    `| ${r.type} | ${r.engine} | ${r.corpus} | ${r.oracle} | ${r.dot} | ${r.survey} | ` +
+    `| ${r.type} | ${r.engine} | ${r.corpus} | ${r.oracle} | ${r.dot} | ${r.survey} | ${r.layout} | ` +
     `${r.census} | ${r.ratchet} | ${r.diffBaseline} | ${r.routing} | ${r.refusal} |`
   );
 }
