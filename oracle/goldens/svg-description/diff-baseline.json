@@ -6,72 +6,72 @@
       "slug": "bozana-38-xufi750",
       "group": 1,
       "status": "baseline",
-      "diffCount": 28,
-      "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "804232d4"
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "component",
       "slug": "bozoju-49-kufo528",
       "group": 1,
       "status": "baseline",
-      "diffCount": 55,
-      "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "diffCount": 53,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "component",
       "slug": "gucefa-91-pume734",
       "group": 1,
       "status": "baseline",
-      "diffCount": 80,
-      "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "diffCount": 52,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "component",
       "slug": "kanute-77-lacu414",
       "group": 1,
       "status": "baseline",
-      "diffCount": 79,
-      "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "804232d4"
+      "diffCount": 72,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "component",
       "slug": "lotofa-28-rudo664",
       "group": 1,
       "status": "baseline",
-      "diffCount": 77,
-      "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "diffCount": 76,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "component",
       "slug": "sevage-80-seva382",
       "group": 1,
       "status": "baseline",
-      "diffCount": 79,
-      "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "diffCount": 78,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "component",
       "slug": "texacu-57-daci050",
       "group": 1,
       "status": "baseline",
-      "diffCount": 312,
-      "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "diffCount": 174,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "usecase",
       "slug": "cobuju-30-paxo591",
       "group": 1,
       "status": "baseline",
-      "diffCount": 32,
-      "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "diffCount": 0,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "usecase",
@@ -98,9 +98,9 @@
       "slug": "jecici-56-bimu826",
       "group": 1,
       "status": "baseline",
-      "diffCount": 188,
-      "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "804232d4",
+      "diffCount": 120,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3",
       "note": "LOWERED 151 -> 138 by the edge-label-box mission, batches 1-2. The label boxes this fixture emits are now byte-exact against its oracle (72x22 and 67x12, previously 346x13 and 156x13): creole tags are stripped before measuring, multi-line labels take the max line width rather than the concatenation, `skinparam arrowFontSize 10` is honoured, and the reserved box is handed to the layout engine instead of plain text. The earlier RAISED-to-151 note is superseded; its cause -- ~5x oversized label boxes -- is what these batches fixed. Still ABOVE the mission's <=133 exit bar, which is recorded as unmet rather than redefined; the residue is not the label box."
     },
     {
@@ -108,18 +108,18 @@
       "slug": "codabo-50-mupa164",
       "group": 2,
       "status": "baseline",
-      "diffCount": 17,
-      "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "804232d4"
+      "diffCount": 15,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "component",
       "slug": "xufexu-38-fola855",
       "group": 2,
       "status": "baseline",
-      "diffCount": 27,
-      "measuredAt": "2026-09-30",
-      "measuredAgainstCommit": "6d8ff65c",
+      "diffCount": 25,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3",
       "note": "cdd7-T1e: the `note left` on `foo` is now opale (GraphvizImageBuilder.java:245-260, EntityImageNote.java:207-243) -- was 12 (pre-existing id/color/childCount diffs). Opale draws via UPath (no LimitFinder min-corner inset, LimitFinder.ts#drawUPath / LimitFinder.java:164-166) instead of the old plain URectangle (-1 inset, LimitFinder.ts's drawRectangle), which changes this fixture's global ink-extent-derived shift/width (layout-ink-shift.ts#computeInkShift, renderer-ink-extent.ts#computeDocumentDims) by a uniform 1px, surfacing a pre-existing @knowvah/dot-engine-vs-real-graphviz arithmetic delta for this graph that the old rect's inset happened to mask. Verified: every new numeric diff is the SAME Δ1 on every coordinate (viewBox/width plus every ellipse/text/path value) -- not a shape-specific defect. The note itself is now structurally MORE faithful (opale outline, no stray dashed edge) — see the commit body."
     },
     {
@@ -137,9 +137,9 @@
       "slug": "nixura-77-bina738",
       "group": 2,
       "status": "baseline",
-      "diffCount": 9,
-      "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "804232d4"
+      "diffCount": 6,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "component",
@@ -155,27 +155,27 @@
       "slug": "butebe-90-dozo380",
       "group": 3,
       "status": "baseline",
-      "diffCount": 7,
-      "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "17a534cc"
+      "diffCount": 1,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "component",
       "slug": "dexigu-24-deru622",
       "group": 3,
       "status": "baseline",
-      "diffCount": 35,
-      "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "diffCount": 33,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "component",
       "slug": "kenece-24-juku624",
       "group": 3,
       "status": "baseline",
-      "diffCount": 35,
-      "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "diffCount": 33,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "component",
@@ -191,18 +191,18 @@
       "slug": "zifaji-87-raki559",
       "group": 3,
       "status": "baseline",
-      "diffCount": 31,
-      "measuredAt": "2026-07-29",
-      "measuredAgainstCommit": "28d1688"
+      "diffCount": 29,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     },
     {
       "type": "usecase",
       "slug": "pivudu-29-pele178",
       "group": 3,
       "status": "baseline",
-      "diffCount": 24,
-      "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "804232d4"
+      "diffCount": 13,
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "7b59644e3"
     }
   ]
 }
