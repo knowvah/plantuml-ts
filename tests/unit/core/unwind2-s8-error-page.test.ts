@@ -14,9 +14,13 @@
  * diffs the user's ruling keeps (DIVERGENCES.md "Error pages print this
  * port's version, and the source name is `string`": banner text and length,
  * `[From …]` text and length, the band behind it). Beyond that:
- *  - `+2` on `error-short`/`error-long`/`error-arecibo*`: the "Syntax Error?"
- *    page names `class` where the jar names `sequence` -- refusal routing,
- *    not this task's;
+ *  - `+2` on `error-long`/`error-arecibo`: the "Syntax Error?" page names
+ *    `class` where the jar names `sequence` -- refusal routing, not this
+ *    task's. The short (3-line) pages lost this +2 at ufp T2a: the first
+ *    registered `@startuml` candidate is now `colorsPlugin` (typed SEQUENCE,
+ *    PSystemBuilder.java:134 / PSystemSingleLineFactory.java:61), which ties
+ *    class's refusal score and wins the first-best merge
+ *    (PSystemErrorUtils.java:139-146), as upstream does;
  *  - `+2` more on `error-long` and `+3` on `error-arecibo`: the page's width
  *    (and the Arecibo image's x) follow the shorter version banner.
  */
@@ -31,11 +35,11 @@ import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 const DIR = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/unwind2-S8');
 
 const PINS: Readonly<Record<string, number>> = {
-  'error-arecibo-short': 7,
+  'error-arecibo-short': 5,
   'error-arecibo': 10,
   'error-long': 9,
   'error-preprocessor-short': 5,
-  'error-short': 7,
+  'error-short': 5,
   'welcome-empty-uml': 0,
 };
 

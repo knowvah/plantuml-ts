@@ -1,5 +1,5 @@
 {
-  "$comment": "Refusal-coverage baseline (dispatch-by-parse-attempt / T0). jarRendered is FALSE iff the fixture's committed golden is one of PlantUML's own graphical error pages (PSystemError.java:148-155 / ReportLog.java:103-108); such a fixture is excluded from SLI 2, because the jar failing is no evidence about us. weErrored is TRUE iff renderSync produces a PSystemError page for the same source through tests/helpers/fixture-include-store.ts, detected by the whole-text-element version banner PSystemError#header() writes. engine is which engine owns the answer -- the (Assumed diagram type: X) the error page prints, or our root data-diagram-type lower-cased -- and is INFORMATIONAL; this gate never asserts on it. status \"known-gap\" excuses a refusal from the defect count and is reserved for batches 4-6, each pin carrying the unported Command that explains it. Nothing is pinned known-gap here: at this commit no engine can refuse anything at all. The one defect (we error, jar rendered) is sequence/nuvoja-46-dezu541 -- !includedef, stopped in the preprocessor (IncludeExecutor.ts:127), named out of scope by this mission's stop condition 10. Re-measure: npx vitest run tests/oracle/svg-conformance/refusal-coverage.test.ts Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed): 3572 fixtures, 31 jar-error, 105 erroring here, 3467 rendering. All 41 new fixtures (board, chart, chronology, files, packet) render on both sides: jarRendered true, weErrored false, engine none (none of these engines stamps a root data-diagram-type -- see the routing baseline). Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh), ADDITIVE ONLY: 912 rows appended for the eleven previously uncaptured buckets. The no-engine types error here on sources the jar rendered and are pinned known-gap: the \"specific unported Command\" is the whole factory, named with its PSystemBuilder.java line, because no command of that engine exists yet in this port. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned ok -> known-gap (4 sequence, 1 timing) -- the state parser had been drawing empty diagrams for sources whose real engine refuses; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-gap rows retired to ok from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity erroring rows now render (weErrored false) from a fresh measurement ([FIXED] lines of the gate). Re-pinned 2026-09-20 at 31f579dd by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (825 \"unknown\" rows appended). Re-pinned 2026-09-21 at 340eae4d by class-divergence-drive / close-b1, ADDITIVE ONLY (119 \"svg-class\" golden rows appended, each the clone of its byte-identical dot-cache twin, as every prior svg-class golden row was). Re-pinned 2026-09-21 at e6f840a1 by class-divergence-drive / close-b2, ADDITIVE ONLY (24 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at cae310f1 by class-divergence-drive / close-b3, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 2397dcde by class-divergence-drive / close-b4, ADDITIVE ONLY (8 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 3dc87cb3 by class-divergence-drive / close-b6, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (19 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (9 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 35cb2771 by class-divergence-drive / close-b8, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at f8d9f6cb by class-divergence-drive / close-b9, ADDITIVE ONLY (18 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (0 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (11 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins; class-inheritance-interface-assoc already carried its golden rows as an authored fixture). Re-pinned 2026-09-24 at 7c9f8b4a by class-divergence-drive-2 / close-b1 (T10), ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 2f2cbb1f by class-divergence-drive-2 / close-b2, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 9763ca80 by class-divergence-drive-2 / close-b3, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 99fa55ff by class-divergence-drive-2 / close-b4, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 2af32e19 by class-divergence-drive-2 / close-b5, ADDITIVE ONLY (6 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-25 at c6681aa6 by class-divergence-drive-3 / close-b1, ADDITIVE ONLY (17 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at cfe1f9f3 by class-divergence-drive-3 / close-b2, ADDITIVE ONLY (17 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at ef3a93ef by class-divergence-drive-3 / close-b3, ADDITIVE ONLY (14 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at 5103eb61 by class-divergence-drive-3 / close-b4, ADDITIVE ONLY (12 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at 916f97ae by class-divergence-drive-3 / close-b5, ADDITIVE ONLY (19 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-27 at 682a54ce by class-divergence-drive-3 / close-b2, ADDITIVE ONLY (20 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at cff18966 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at cff18966 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (120 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at fdcdaf39 by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (54 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 3986fbf1 by class-divergence-drive-5 / close-b4, ADDITIVE ONLY (30 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 8aed6847 by class-divergence-drive-5 / close-b5, ADDITIVE ONLY (18 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 6a4402ae by class-divergence-drive-5 / close-b0, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-29 at 69149258 by class-divergence-drive-5 / close-b2, ADDITIVE ONLY (20 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-29 at c12fa177 by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (21 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 9b080efb9 by mindmap-engine-port / close-b5 (D7), IN PLACE: 137 mindmap rows ok (engine mindmap); 2 rows ok -> known-gap (nukose-24-funi267, vacofo-66-puno159: unported HColorGradient, owner batch 6). Re-pinned 2026-09-30 at fa9db8748 by mindmap-engine-port / close-b5, ADDITIVE ONLY (127 \"svg-mindmap\" golden rows appended, clones of their byte-identical dot-cache twins, as every svg-class golden row was). Re-pinned 2026-09-30 at c5dc64471 by mindmap-engine-port / close-b6 (D7), IN PLACE: 139 mindmap rows ok (nukose-24-funi267 and vacofo-66-puno159 known-gap -> ok: HColorGradient ported in T6a); 0 known-gap remain. Re-pinned 2026-09-30 at c5dc64471 by mindmap-engine-port / close-b6, ADDITIVE ONLY (10 \"svg-mindmap\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at e42ba122 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 1ead924b by class-divergence-drive-5 / close-b2, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 2748fd1d9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (35 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-01 at 8a8c1692c by activity-divergence-drive / close-b1b, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-01 at b4b553c7e by activity-divergence-drive / close-b2, ADDITIVE ONLY (16 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-02 at 65b07a57c by activity-divergence-drive / close-b3, ADDITIVE ONLY (12 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). add2-b1p: jevofu-58-fazo194, mepeze-15-nuge493, xoreko-43-noto860, zokuni-21-sapu966 render since T1p-c ported `end merge` (CommandForkEnd3.java:57-81, ParallelBuilderMerge.java) -> agree / weErrored false. Re-pinned 2026-10-02 at bdf8b1e2f by activity-divergence-drive / close-b1p, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at d018a56f9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (12 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). add2-b2: the 34 remaining activity parser-gap rows render since T2e/T2g (CommandForkEnd3/SplitEnd3/Swimlane/If2/ElseIf2/Endif3/Backward3/Note3/NoteLong3/CircleSpot3/Label/Goto, journal rows 31-34) -> agree / weErrored false. Re-pinned 2026-10-03 at 66db74002 by activity-divergence-drive / close-b2, ADDITIVE ONLY (13 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at 4f5d48d2e by activity-divergence-drive / close-b3w1, ADDITIVE ONLY (109 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at 9104b8ee0 by activity-divergence-drive / close-b3, ADDITIVE ONLY (18 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-06 at dcd2283c9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (13 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-06 at 0850c251d by activity-divergence-drive / close-b2, ADDITIVE ONLY (36 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 5ab1679ad by activity-divergence-drive / close-b3w1, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 918cd7e97 by activity-divergence-drive / close-b3, ADDITIVE ONLY (17 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 87727a9c by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (79 \"activity\" rows appended). Re-pinned 2026-10-07 at 87727a9c7 by activity-divergence-drive / close-b0, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at dd289f647 by activity-divergence-drive / merge-T1a, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 79c2bfb2c by activity-divergence-drive / merge-T1c, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 50a347b27 by activity-divergence-drive / merge-T1b, ADDITIVE ONLY (6 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 55b701493 by activity-divergence-drive / merge-T1g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 3b36df731 by activity-divergence-drive / merge-T2c, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at a30245dea by activity-divergence-drive / merge-T2a, ADDITIVE ONLY (7 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 541c5f2c2 by activity-divergence-drive / merge-T2d, ADDITIVE ONLY (22 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 76efedca8 by activity-divergence-drive / merge-T2e, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at ad64c122b by activity-divergence-drive / merge-T2d-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at c4915f83c by activity-divergence-drive / merge-T2f, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 6c788ec6c by activity-divergence-drive / merge-T2b, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at c6f501d95 by activity-divergence-drive / merge-T2f-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 3ec2d4cd0 by activity-divergence-drive / merge-T2g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 0a21936b1 by activity-divergence-drive / merge-T3a, ADDITIVE ONLY (6 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 790fee5a1 by activity-divergence-drive / merge-T3d, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at dc72942fc by activity-divergence-drive / merge-T3a-2, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 1d2fb519d by activity-divergence-drive / merge-T3c, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 22f819df6 by activity-divergence-drive / merge-T3c-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at fd2c3fa86 by activity-divergence-drive / merge-T3d-3, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 4ea823f10 by activity-divergence-drive / merge-T3gates-2, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 53d01279d by activity-divergence-drive / merge-T3b, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 0996e8891 by activity-divergence-drive / merge-T3e-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 12b567d91 by activity-divergence-drive / merge-T3f, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 2b080518d by activity-divergence-drive / merge-T3g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at e1afb6d61 by activity-divergence-drive / merge-T3h, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 2686a2577 by activity-divergence-drive / merge-T3k, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 2098d674d by activity-divergence-drive / fix-jucidi, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 4181c68de by activity-divergence-drive / close-b1e, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 4181c68d by class-divergence-drive-5 / close-b1e, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). isw (2026-10-09, 9f012d794): 24 jar-error rows re-pinned from a fresh measurement — seam #4 gives U+0020 width, so their goldens are no longer SlotFinder crash pages. Re-pinned 2026-10-09 at 3d8988d80 by activity-divergence-drive / isw/close, ADDITIVE ONLY (18 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-10 at ebb7b943a by activity-divergence-drive / aepp-b12, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at c0e75aa4 by class-divergence-drive-5 / t0b, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at 9a2ac1c5 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at 9a2ac1c5 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at f6e9ed3a by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by class-divergence-drive-5 / salt-engine-port batch-4 close, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by class-divergence-drive-5 / salt-engine-port batch-4 close, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by salt-engine-port / batch-4 close: 50 \"salt\" dot-cache rows re-measured in place (the salt plugin now registers), 47 \"svg-salt\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 2ff2f9b9 by salt-engine-port / batch-5 wave-1 close: 50 \"salt\" dot-cache rows re-measured in place (the salt plugin now registers), 50 \"svg-salt\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at 71b55c44 by wbs-engine-port / batch-4 close: 182 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 168 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at c3e65bd2 by wbs-engine-port / batch-5 wave-1 close: 182 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 168 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at c3e65bd2 by wbs-engine-port / batch-5 wave-1 close: 182 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 176 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins).",
+  "$comment": "Refusal-coverage baseline (dispatch-by-parse-attempt / T0). jarRendered is FALSE iff the fixture's committed golden is one of PlantUML's own graphical error pages (PSystemError.java:148-155 / ReportLog.java:103-108); such a fixture is excluded from SLI 2, because the jar failing is no evidence about us. weErrored is TRUE iff renderSync produces a PSystemError page for the same source through tests/helpers/fixture-include-store.ts, detected by the whole-text-element version banner PSystemError#header() writes. engine is which engine owns the answer -- the (Assumed diagram type: X) the error page prints, or our root data-diagram-type lower-cased -- and is INFORMATIONAL; this gate never asserts on it. status \"known-gap\" excuses a refusal from the defect count and is reserved for batches 4-6, each pin carrying the unported Command that explains it. Nothing is pinned known-gap here: at this commit no engine can refuse anything at all. The one defect (we error, jar rendered) is sequence/nuvoja-46-dezu541 -- !includedef, stopped in the preprocessor (IncludeExecutor.ts:127), named out of scope by this mission's stop condition 10. Re-measure: npx vitest run tests/oracle/svg-conformance/refusal-coverage.test.ts Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed): 3572 fixtures, 31 jar-error, 105 erroring here, 3467 rendering. All 41 new fixtures (board, chart, chronology, files, packet) render on both sides: jarRendered true, weErrored false, engine none (none of these engines stamps a root data-diagram-type -- see the routing baseline). Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh), ADDITIVE ONLY: 912 rows appended for the eleven previously uncaptured buckets. The no-engine types error here on sources the jar rendered and are pinned known-gap: the \"specific unported Command\" is the whole factory, named with its PSystemBuilder.java line, because no command of that engine exists yet in this port. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned ok -> known-gap (4 sequence, 1 timing) -- the state parser had been drawing empty diagrams for sources whose real engine refuses; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-gap rows retired to ok from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity erroring rows now render (weErrored false) from a fresh measurement ([FIXED] lines of the gate). Re-pinned 2026-09-20 at 31f579dd by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (825 \"unknown\" rows appended). Re-pinned 2026-09-21 at 340eae4d by class-divergence-drive / close-b1, ADDITIVE ONLY (119 \"svg-class\" golden rows appended, each the clone of its byte-identical dot-cache twin, as every prior svg-class golden row was). Re-pinned 2026-09-21 at e6f840a1 by class-divergence-drive / close-b2, ADDITIVE ONLY (24 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at cae310f1 by class-divergence-drive / close-b3, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 2397dcde by class-divergence-drive / close-b4, ADDITIVE ONLY (8 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 3dc87cb3 by class-divergence-drive / close-b6, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (19 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (9 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 35cb2771 by class-divergence-drive / close-b8, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at f8d9f6cb by class-divergence-drive / close-b9, ADDITIVE ONLY (18 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (0 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (11 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins; class-inheritance-interface-assoc already carried its golden rows as an authored fixture). Re-pinned 2026-09-24 at 7c9f8b4a by class-divergence-drive-2 / close-b1 (T10), ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 2f2cbb1f by class-divergence-drive-2 / close-b2, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 9763ca80 by class-divergence-drive-2 / close-b3, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 99fa55ff by class-divergence-drive-2 / close-b4, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-24 at 2af32e19 by class-divergence-drive-2 / close-b5, ADDITIVE ONLY (6 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-25 at c6681aa6 by class-divergence-drive-3 / close-b1, ADDITIVE ONLY (17 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at cfe1f9f3 by class-divergence-drive-3 / close-b2, ADDITIVE ONLY (17 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at ef3a93ef by class-divergence-drive-3 / close-b3, ADDITIVE ONLY (14 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at 5103eb61 by class-divergence-drive-3 / close-b4, ADDITIVE ONLY (12 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-26 at 916f97ae by class-divergence-drive-3 / close-b5, ADDITIVE ONLY (19 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-27 at 682a54ce by class-divergence-drive-3 / close-b2, ADDITIVE ONLY (20 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at cff18966 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at cff18966 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (120 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at fdcdaf39 by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (54 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 3986fbf1 by class-divergence-drive-5 / close-b4, ADDITIVE ONLY (30 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 8aed6847 by class-divergence-drive-5 / close-b5, ADDITIVE ONLY (18 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-28 at 6a4402ae by class-divergence-drive-5 / close-b0, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-29 at 69149258 by class-divergence-drive-5 / close-b2, ADDITIVE ONLY (20 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-29 at c12fa177 by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (21 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 9b080efb9 by mindmap-engine-port / close-b5 (D7), IN PLACE: 137 mindmap rows ok (engine mindmap); 2 rows ok -> known-gap (nukose-24-funi267, vacofo-66-puno159: unported HColorGradient, owner batch 6). Re-pinned 2026-09-30 at fa9db8748 by mindmap-engine-port / close-b5, ADDITIVE ONLY (127 \"svg-mindmap\" golden rows appended, clones of their byte-identical dot-cache twins, as every svg-class golden row was). Re-pinned 2026-09-30 at c5dc64471 by mindmap-engine-port / close-b6 (D7), IN PLACE: 139 mindmap rows ok (nukose-24-funi267 and vacofo-66-puno159 known-gap -> ok: HColorGradient ported in T6a); 0 known-gap remain. Re-pinned 2026-09-30 at c5dc64471 by mindmap-engine-port / close-b6, ADDITIVE ONLY (10 \"svg-mindmap\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at e42ba122 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 1ead924b by class-divergence-drive-5 / close-b2, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-30 at 2748fd1d9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (35 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-01 at 8a8c1692c by activity-divergence-drive / close-b1b, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-01 at b4b553c7e by activity-divergence-drive / close-b2, ADDITIVE ONLY (16 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-02 at 65b07a57c by activity-divergence-drive / close-b3, ADDITIVE ONLY (12 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). add2-b1p: jevofu-58-fazo194, mepeze-15-nuge493, xoreko-43-noto860, zokuni-21-sapu966 render since T1p-c ported `end merge` (CommandForkEnd3.java:57-81, ParallelBuilderMerge.java) -> agree / weErrored false. Re-pinned 2026-10-02 at bdf8b1e2f by activity-divergence-drive / close-b1p, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at d018a56f9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (12 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). add2-b2: the 34 remaining activity parser-gap rows render since T2e/T2g (CommandForkEnd3/SplitEnd3/Swimlane/If2/ElseIf2/Endif3/Backward3/Note3/NoteLong3/CircleSpot3/Label/Goto, journal rows 31-34) -> agree / weErrored false. Re-pinned 2026-10-03 at 66db74002 by activity-divergence-drive / close-b2, ADDITIVE ONLY (13 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at 4f5d48d2e by activity-divergence-drive / close-b3w1, ADDITIVE ONLY (109 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-03 at 9104b8ee0 by activity-divergence-drive / close-b3, ADDITIVE ONLY (18 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-06 at dcd2283c9 by activity-divergence-drive / close-b1, ADDITIVE ONLY (13 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-06 at 0850c251d by activity-divergence-drive / close-b2, ADDITIVE ONLY (36 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 5ab1679ad by activity-divergence-drive / close-b3w1, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 918cd7e97 by activity-divergence-drive / close-b3, ADDITIVE ONLY (17 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 87727a9c by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (79 \"activity\" rows appended). Re-pinned 2026-10-07 at 87727a9c7 by activity-divergence-drive / close-b0, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at dd289f647 by activity-divergence-drive / merge-T1a, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 79c2bfb2c by activity-divergence-drive / merge-T1c, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 50a347b27 by activity-divergence-drive / merge-T1b, ADDITIVE ONLY (6 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 55b701493 by activity-divergence-drive / merge-T1g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 3b36df731 by activity-divergence-drive / merge-T2c, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at a30245dea by activity-divergence-drive / merge-T2a, ADDITIVE ONLY (7 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 541c5f2c2 by activity-divergence-drive / merge-T2d, ADDITIVE ONLY (22 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 76efedca8 by activity-divergence-drive / merge-T2e, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at ad64c122b by activity-divergence-drive / merge-T2d-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at c4915f83c by activity-divergence-drive / merge-T2f, ADDITIVE ONLY (5 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 6c788ec6c by activity-divergence-drive / merge-T2b, ADDITIVE ONLY (11 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at c6f501d95 by activity-divergence-drive / merge-T2f-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 3ec2d4cd0 by activity-divergence-drive / merge-T2g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 0a21936b1 by activity-divergence-drive / merge-T3a, ADDITIVE ONLY (6 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 790fee5a1 by activity-divergence-drive / merge-T3d, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at dc72942fc by activity-divergence-drive / merge-T3a-2, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 1d2fb519d by activity-divergence-drive / merge-T3c, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 22f819df6 by activity-divergence-drive / merge-T3c-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at fd2c3fa86 by activity-divergence-drive / merge-T3d-3, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 4ea823f10 by activity-divergence-drive / merge-T3gates-2, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 53d01279d by activity-divergence-drive / merge-T3b, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 0996e8891 by activity-divergence-drive / merge-T3e-2, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 12b567d91 by activity-divergence-drive / merge-T3f, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-07 at 2b080518d by activity-divergence-drive / merge-T3g, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at e1afb6d61 by activity-divergence-drive / merge-T3h, ADDITIVE ONLY (2 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 2686a2577 by activity-divergence-drive / merge-T3k, ADDITIVE ONLY (3 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 2098d674d by activity-divergence-drive / fix-jucidi, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 4181c68de by activity-divergence-drive / close-b1e, ADDITIVE ONLY (4 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-08 at 4181c68d by class-divergence-drive-5 / close-b1e, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). isw (2026-10-09, 9f012d794): 24 jar-error rows re-pinned from a fresh measurement — seam #4 gives U+0020 width, so their goldens are no longer SlotFinder crash pages. Re-pinned 2026-10-09 at 3d8988d80 by activity-divergence-drive / isw/close, ADDITIVE ONLY (18 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-10 at ebb7b943a by activity-divergence-drive / aepp-b12, ADDITIVE ONLY (1 \"svg-activity\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at c0e75aa4 by class-divergence-drive-5 / t0b, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at 9a2ac1c5 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (4 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-11 at 9a2ac1c5 by class-divergence-drive-5 / close-b1, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at f6e9ed3a by class-divergence-drive-5 / close-b3, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by class-divergence-drive-5 / salt-engine-port batch-4 close, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by class-divergence-drive-5 / salt-engine-port batch-4 close, ADDITIVE ONLY (1 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 3ab50d03 by salt-engine-port / batch-4 close: 50 \"salt\" dot-cache rows re-measured in place (the salt plugin now registers), 47 \"svg-salt\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-12 at 2ff2f9b9 by salt-engine-port / batch-5 wave-1 close: 50 \"salt\" dot-cache rows re-measured in place (the salt plugin now registers), 50 \"svg-salt\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at 71b55c44 by wbs-engine-port / batch-4 close: 182 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 168 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at c3e65bd2 by wbs-engine-port / batch-5 wave-1 close: 182 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 168 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-13 at c3e65bd2 by wbs-engine-port / batch-5 wave-1 close: 182 \"wbs\" dot-cache rows re-measured in place (the wbs plugin now registers), 176 \"svg-wbs\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-14 at 16b6580b by utility-factories-port / b2-close: 17 utility \"unknown\" dot-cache rows re-measured in place, 14 \"svg-utility\" golden rows appended (clones of their byte-identical dot-cache twins). Re-pinned 2026-10-14 at e908d335 by utility-factories-port / b3-close: 17 utility \"unknown\" dot-cache rows re-measured in place, 15 \"svg-utility\" golden rows appended (clones of their byte-identical dot-cache twins).",
   "fixtures": [
     {
       "tree": "dot-cache",
@@ -49577,12 +49577,11 @@
       "type": "unknown",
       "slug": "bamudi-49-caxo996",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemOpenIconicFactory (PSystemBuilder.java:150) renders one named glyph from the bundled Open Iconic path data (openiconic/PSystemOpenIconic.java, openiconic/OpenIconic.java) when the line is 'openiconic <name>'; this factory and its glyph-path data set are unported."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -50325,7 +50324,7 @@
       "status": "known-gap",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
@@ -51331,7 +51330,7 @@
       "status": "known-gap",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
@@ -51477,7 +51476,7 @@
       "status": "known-gap",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
@@ -51517,12 +51516,11 @@
       "type": "unknown",
       "slug": "fotete-48-viga126",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemListOpenIconicFactory (PSystemBuilder.java:151) renders the full Open Iconic icon catalog (openiconic/PSystemListOpenIconic.java) for the bare 'listopeniconic' line; unported alongside PSystemOpenIconicFactory's single-glyph mode."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -51674,11 +51672,11 @@
       "slug": "gazale-13-tadu312",
       "jarRendered": true,
       "weErrored": true,
-      "engine": "class",
+      "engine": "sequence",
       "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemSudokuFactory (PSystemBuilder.java:163) parses the digit grid and solves it via DLXEngine/SudokuDLX's dancing-links algorithm (sudoku/SudokuDLX.java) and renders the grid with GraphicsSudoku (sudoku/GraphicsSudoku.java); this whole solver-plus-renderer subsystem is unported."
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335",
+      "reason": "Out of scope by maintainer ruling (utility-factories-port D13, 2026-10-13): this port mirrors upstream's MIT edition, which strips the sudoku/ package ('// ::remove folder when __MIT__' in sudoku/GraphicsSudoku.java) and comments out the PSystemSudokuFactory registration (PSystemBuilder.java:163), so a `sudoku` line is a syntax error there as here. The GPL oracle jar draws the puzzle; README.md \"Mirrors upstream's MIT edition\"."
     },
     {
       "tree": "dot-cache",
@@ -51982,12 +51980,11 @@
       "type": "unknown",
       "slug": "govuca-53-mili511",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "The top-level 'stdlib <name>' directive is dead code upstream -- StdlibDiagramFactory's constructor unconditionally throws UnsupportedOperationException (klimt/sprite/StdlibDiagramFactory.java:50) and its PSystemBuilder registration is commented out (PSystemBuilder.java:171) -- but a bare 'stdlib' line (no argument) still reaches a library-catalog listing page (confirmed by the rendered per-library 'Delivered by <source>' credit line matching preproc/Stdlib.java:327's format string); the exact triggering class was not pinned down further (a preprocessor-level listing, not one of PSystemBuilder's factories), but the feature is unported either way."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -52337,12 +52334,11 @@
       "type": "unknown",
       "slug": "jigemu-90-titu666",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemColorsFactory (PSystemBuilder.java:134) matches ^colors?\\s*(#?\\w+)?\\s*$ (PSystemColorsFactory.java:48) and, with no argument, renders the full named-color palette via PSystemColors; this factory, its CSS-color-name table and its renderer are entirely unported."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -52827,11 +52823,11 @@
       "slug": "kavama-92-noro949",
       "jarRendered": true,
       "weErrored": true,
-      "engine": "class",
+      "engine": "sequence",
       "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemDedicationFactory (PSystemBuilder.java:186) matches one line against Dedications.get(line) (dedication/Dedications.java:78-88), which requires length()>25 and an exact match against a small curated phrase list -- the first entry of which is literally this fixture's line, 'Write your own dedication!' (dedication/Dedications.java:66). Unported: a bundled-PNG-image easter egg, same family as PSystemCharlieFactory."
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335",
+      "reason": "The dedication image reaches the port only through options.assetStore (ADR-2): DedicationSimple.getImage returns undefined when the store cannot serve its bytes (src/diagrams/dedication/DedicationSimple.ts:43-44, upstream's failed decode, DedicationSimple.java:65-68), so Dedications.get matches nothing and no factory claims the line. This gate renders with no asset store, as a library consumer does by default; with the utility asset store (surveyAssetStore) the page renders conformant and is pinned in svg-utility. Closes when the eggs/dedication assets ship to library consumers (utility-factories-port follow-on)."
     },
     {
       "tree": "dot-cache",
@@ -52926,12 +52922,11 @@
       "type": "unknown",
       "slug": "kenari-17-dajo806",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemColorsFactory (PSystemBuilder.java:134) matches ^colors?\\s*(#?\\w+)?\\s*$ (PSystemColorsFactory.java:48); with a named-color argument it renders that color's related-color family via PSystemColors; this factory, its CSS-color-name table and its renderer are entirely unported."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -52943,7 +52938,7 @@
       "status": "known-gap",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
@@ -53005,12 +53000,11 @@
       "type": "unknown",
       "slug": "kicizi-84-lexu138",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemCharlieFactory (PSystemBuilder.java:181) is a single-line easter egg (eggs/PSystemCharlieFactory.java) rendering a bundled PNG when the line is exactly 'charlie'; unported."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -53145,7 +53139,7 @@
       "status": "known-gap",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "T9 fixed the state-seam over-claim: state-commands.ts rule 16's transition pre-filter (pattern /[<>]/, passes:['two']) now carries a confirm(match) hook that runs parseTransitionLine(match.input) PASS-INDEPENDENTLY, and dispatchCommand (src/diagrams/state/parser.ts:135-144) only treats a pattern match as 'this line is handled' when confirm also returns true -- mirroring upstream's real per-command candidate matching, which tests every command's full anchored regex before isEligibleFor is ever consulted (command/PSystemCommandFactory.java:169-175). state now refuses this line ('Syntax Error?'), joining class/sequence/description; re-measured through measureFixture: ourType flips STATE->NONE (agrees with jarType NONE) and weErrored flips false->true. The refusal itself remains a known-gap, not fixed: the jar does NOT error on this source -- PSystemListFontsFactory (font/PSystemListFonts.java, PSystemBuilder.java:148) is the upstream factory that renders 'Fonts available:' for a bare 'listfonts <text>' line by enumerating the HOST JVM's installed fonts, a system font enumeration API this port's browser-safe library (CLAUDE.md) can never have, so it is permanently unported -- same family and same disposition as this fragment's jivufi-79-simi298/jodesa-24-lovo810/vofomo-62-gure525 rows. Landing verified: NOT a third engine (routing agrees NONE==NONE, D3), a pure narrowing (state only stops accepting something it never should have, D9). HELD, not merged: this same narrowing unmasks 5 pre-existing, unrelated defects in OTHER engines that state's looseness was accidentally hiding (every one of these documents reaches state only as dispatch's last resort, and contains a bare '>' from its own '->' arrows, which used to satisfy rule 16's loose gate) -- dot-cache/sequence/bomino-39-tipo216 (line 3 '<style src=strictuml.skin>': CommandStyleImport, style/CommandStyleImport.java:67-80, registered via CommonCommands.addCommonCommands2, command/CommonCommands.java:91-93 -> SequenceDiagramFactory.java:100), dot-cache/sequence/dolice-60-copi767 (line 7 'note left [[http://www.google.es]]': FactorySequenceNoteOnArrowCommand's URL group, command/note/sequence/FactorySequenceNoteOnArrowCommand.java:77-88, UrlBuilder.OPTIONAL at :86, missing from src/diagrams/sequence/command-note-factory.ts:179-216's noteOnArrowCommand pattern), dot-cache/sequence/fojomu-60-cuda302 (line 9 '{start} <-> {end} : some time') and dot-cache/sequence/zoturo-25-jima978 (line 10, same shape): CommandLinkAnchor, sequencediagram/command/CommandLinkAnchor.java:49-88, SequenceDiagramFactory.java:155, already self-documented as an unported gap in src/diagrams/sequence/command-misc.ts:14-16, and dot-cache/timing/zeboxu-77-xola056 (the whole 'timing' diagram TYPE is unported -- no src/diagrams/timing/ exists at all -- upstream registers it as TimingDiagramFactory, timingdiagram/TimingDiagramFactory.java, PSystemBuilder.java:187). Per decisions.md D11, landing is judged only after a companion seam task ports these; until then this commit stays off main."
+      "reason": "PSystemListFontsFactory (PSystemBuilder.java:148) matches 'listfont' / 'listfonts' or a line starting 'listfont ' / 'listfonts ' (font/PSystemListFontsFactory.java:49-50) and returns PSystemListFonts (font/PSystemListFonts.java:47-58), a PlainStringsDiagram whose strings are '<b><size:16>Fonts available:' followed by one '<family> : <font:<family>><text>' line per GraphicsEnvironment#getAvailableFontFamilyNames() entry; this fixture is `listfonts` plus a text argument. This port registers no listfonts plugin, so every engine refuses the line (\"Syntax Error?\") while the jar draws the listing. The listing depends on the host font set; whether it is ported with an injected family list or accepted as a library-forced divergence is a maintainer ruling not yet made."
     },
     {
       "tree": "dot-cache",
@@ -53363,11 +53357,11 @@
       "slug": "lazama-75-loli189",
       "jarRendered": true,
       "weErrored": true,
-      "engine": "class",
+      "engine": "sequence",
       "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemSudokuFactory (PSystemBuilder.java:163) parses the digit grid and solves it via DLXEngine/SudokuDLX's dancing-links algorithm (sudoku/SudokuDLX.java) and renders the grid with GraphicsSudoku (sudoku/GraphicsSudoku.java); this whole solver-plus-renderer subsystem is unported."
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335",
+      "reason": "Out of scope by maintainer ruling (utility-factories-port D13, 2026-10-13): this port mirrors upstream's MIT edition, which strips the sudoku/ package ('// ::remove folder when __MIT__' in sudoku/GraphicsSudoku.java) and comments out the PSystemSudokuFactory registration (PSystemBuilder.java:163), so a `sudoku` line is a syntax error there as here. The GPL oracle jar draws the puzzle; README.md \"Mirrors upstream's MIT edition\"."
     },
     {
       "tree": "dot-cache",
@@ -53694,12 +53688,11 @@
       "type": "unknown",
       "slug": "ludecu-61-laja912",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -53898,7 +53891,7 @@
       "status": "known-gap",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
@@ -54604,7 +54597,7 @@
       "status": "known-gap",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
@@ -55645,12 +55638,11 @@
       "type": "unknown",
       "slug": "rubeku-92-vefi942",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -56693,12 +56685,11 @@
       "type": "unknown",
       "slug": "tomodo-34-bimi231",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -56805,12 +56796,11 @@
       "type": "unknown",
       "slug": "tukimi-92-noxu802",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -57017,12 +57007,11 @@
       "type": "unknown",
       "slug": "vedine-65-rafo449",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -57465,7 +57454,7 @@
       "status": "known-gap",
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
-      "reason": "no plugin registers DiagramType.HELP: HelpFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:188); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
+      "reason": "no plugin registers DiagramType.HELP: upstream adds HelpFactory to PSystemBuilder's factory list (PSystemBuilder.java:188; help/HelpFactory.java:51-66, DiagramType.HELP with five CommandHelp* commands) and this port has no help engine (src/index.ts registers none); this source opens with @startuml, so the candidate set is the legacy-UML run (DiagramType.java:198-201 -- SEQUENCE, STATE, CLASS, OBJECT, ACTIVITY, DESCRIPTION, COMPOSITE, TIMING, HELP, SPRITES) and every one of those ten refuses this source; class's refusal draws the PSystemError banner page (src/core/dispatcher.ts:317-342) instead of the HELP diagram the jar drew. The document errors here while the golden says HELP."
     },
     {
       "tree": "dot-cache",
@@ -57737,12 +57726,11 @@
       "type": "unknown",
       "slug": "xozane-18-becu956",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -57793,12 +57781,11 @@
       "type": "unknown",
       "slug": "xucoma-93-jeko861",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemListArchimateSpritesFactory (PSystemBuilder.java:152) renders the bundled ArchiMate sprite catalog for the bare 'listsprite' line (klimt/sprite/PSystemListArchimateSprites.java, matched text 'List Current Sprites'); this factory and its bundled sprite set are unported."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -58567,12 +58554,11 @@
       "type": "unknown",
       "slug": "zusibo-75-vate603",
       "jarRendered": true,
-      "weErrored": true,
-      "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemListEmojiFactory (PSystemBuilder.java:149) lists every codepoint in the named Unicode emoji block from a bundled emoji table (emoji/PSystemListEmoji.java); this factory and its emoji-block data table are unported."
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     },
     {
       "tree": "dot-cache",
@@ -75770,6 +75756,172 @@
       "status": "ok",
       "measuredAt": "2026-10-13",
       "measuredAgainstCommit": "c3e65bd2"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "fotete-48-viga126",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "bamudi-49-caxo996",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "jigemu-90-titu666",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "kenari-17-dajo806",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "vedine-65-rafo449",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "tukimi-92-noxu802",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "rubeku-92-vefi942",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "zusibo-75-vate603",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "tomodo-34-bimi231",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "ludecu-61-laja912",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "xozane-18-becu956",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "govuca-53-mili511",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "kicizi-84-lexu138",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "kavama-92-noro949",
+      "jarRendered": true,
+      "weErrored": true,
+      "engine": "sequence",
+      "status": "known-gap",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335",
+      "reason": "The dedication image reaches the port only through options.assetStore (ADR-2): DedicationSimple.getImage returns undefined when the store cannot serve its bytes (src/diagrams/dedication/DedicationSimple.ts:43-44, upstream's failed decode, DedicationSimple.java:65-68), so Dedications.get matches nothing and no factory claims the line. This gate renders with no asset store, as a library consumer does by default; with the utility asset store (surveyAssetStore) the page renders conformant and is pinned in svg-utility. Closes when the eggs/dedication assets ship to library consumers (utility-factories-port follow-on)."
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-utility",
+      "slug": "xucoma-93-jeko861",
+      "jarRendered": true,
+      "weErrored": false,
+      "engine": "none",
+      "status": "ok",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335"
     }
   ]
 }

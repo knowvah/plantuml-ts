@@ -267,7 +267,9 @@ export class SvgNanoParser implements GrayLevelRange {
     const tmp = withId.slice(x1 + 3, x2);
 
     const path = parseSvgPath(tmp, UTranslate.none(), applied.getAffineTransform());
-    applied.draw(path);
+    // `SvgPath#drawMe(ug, at)`: a path of bare moves draws nothing.
+    // @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/openiconic/SvgPath.java:244-248
+    if (!path.isInvisible()) applied.draw(path);
   }
 
   /** @see SvgNanoParser.java#computeMinMaxGray */

@@ -74,6 +74,18 @@ The algorithms implemented here follow the methods described in:
 Modifications relative to the original PlantUML source are recorded
 in the Git history of this repository.
 
+### Mirrors upstream's MIT edition
+
+Where upstream PlantUML builds differ by license edition, this port mirrors
+the **MIT edition**. In particular, the `sudoku` easter egg
+(`@startuml` / `sudoku [seed]` / `@enduml`) is **intentionally not
+included**: upstream strips its `sudoku/` package from every non-GPL edition
+(`// ::remove folder when __MIT__ …` in `GraphicsSudoku.java`; the factory
+registration is commented out for MIT in `PSystemBuilder.java`), so a
+`sudoku` line is a syntax error here, as it is in the MIT edition.
+The default (GPL) PlantUML jar draws a puzzle there; that difference is
+deliberate, not a missing feature.
+
 ## License
 
 MIT — see [LICENSE](LICENSE). Third-party components and their licenses are

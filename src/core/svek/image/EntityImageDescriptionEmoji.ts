@@ -13,6 +13,7 @@ import type { UGraphic } from '../../klimt/UGraphic.js';
 import { UTranslate } from '../../klimt/UTranslate.js';
 import { UText } from '../../klimt/shape/UText.js';
 import { SvgNanoParser } from '../../klimt/sprite/SvgNanoParser.js';
+import { parseColor } from '../../klimt/color/HColorSet.js';
 import { emojiRenderRun } from '../../klimt/creole/atom/AtomEmoji.js';
 import { measureLine } from './EntityImageDescriptionSupport.js';
 
@@ -20,6 +21,9 @@ import { measureLine } from './EntityImageDescriptionSupport.js';
 export interface EmojiAtomLike {
   readonly unicode: string;
   readonly factor: number;
+  /** `<#color:code:>`'s resolved tint (`StripeSimple#addEmoji`), `null`/absent
+   *  for plain `<:code:>`: upstream's `colorForMonochrome`. */
+  readonly color?: string | null;
 }
 
 /** Raw artwork source by codepoint — `core/internal-emoji-store.ts`. */
@@ -46,7 +50,9 @@ export function drawEmojiAtom(
 ): void {
   const artwork = resolveArtwork?.(atom.unicode);
   if (artwork !== undefined) {
-    new SvgNanoParser(artwork).drawU(ug, atom.factor, undefined, undefined);
+    // `parser.drawU(ug, scale, colorForMonochrome, colorForMonochrome)`.
+    const tint = atom.color == null ? undefined : parseColor(atom.color);
+    new SvgNanoParser(artwork).drawU(ug, atom.factor, tint, tint);
     return;
   }
   const run = emojiRenderRun(atom as Parameters<typeof emojiRenderRun>[0]);

@@ -13,6 +13,7 @@ import {
   fontConfigurationForHeading,
 } from '../../../../../../src/core/klimt/creole/legacy/StripeSimple.js';
 import { encodePng, toBase64DataUri } from '../../../../../../src/core/klimt/sprite/png-encoder.js';
+import { createQrcode } from '../../../../../../src/core/klimt/creole/atom/AtomImg.js';
 
 const PLAIN: FontConfiguration = { family: 'sans-serif', size: 14, color: '#000000', styles: new Set() };
 
@@ -239,5 +240,25 @@ describe('buildLineAtoms — <img> cannot-decode fallback is a hardcoded monospa
     // a bare `ccc`: that trimming is `DriverTextSvg`'s emit-time `trin`, not an
     // atom-level property, so it belongs to the driver test rather than here.
     expect(texts).toEqual(['ccc \n ', 'ddd \n eee']);
+  });
+});
+
+describe('StripeSimple#addQrcode (java:216-218) — <qrcode:> becomes an AtomImg', () => {
+  test('the tag is one img atom between the text runs, at the font active there', () => {
+    const atoms = buildStripeAtoms('a<qrcode:abcdef>b', PLAIN);
+    expect(atoms).toEqual([
+      { kind: 'text', text: 'a', font: PLAIN },
+      { kind: 'inline', atom: createQrcode('abcdef', 3), ambientFont: PLAIN },
+      { kind: 'text', text: 'b', font: PLAIN },
+    ]);
+  });
+
+  test('the license line: tabs stay text, the three tags become 30x30 images', () => {
+    const line =
+      '\t<qrcode:https://plantuml.com/patreon>\t\t<qrcode:https://plantuml.com/lp>\t\t<qrcode:https://plantuml.com/paypal>';
+    const shape = buildStripeAtoms(line, PLAIN).map((a) =>
+      a.kind === 'text' ? a.text : a.kind === 'inline' && a.atom.kind === 'img' ? `${String(a.atom.width)}px` : a.kind,
+    );
+    expect(shape).toEqual(['\t', '30px', '\t\t', '30px', '\t\t', '30px']);
   });
 });

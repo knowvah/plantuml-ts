@@ -57,6 +57,22 @@ export const ALLOWLIST: readonly AllowlistEntry[] = [
       "engine's index.ts to do so.",
   },
   {
+    from: 'src/diagrams/openiconic/PSystemListOpenIconic.ts',
+    to: 'src/diagrams/donors/PSystemDonors.ts',
+    why:
+      'ufp D3 — upstream lists via PSystemDonors.getCols: ' +
+      'PSystemListOpenIconic.java:48 imports net.sourceforge.plantuml.donors.PSystemDonors, ' +
+      'java:74 calls getCols(lines, 7, 0).',
+  },
+  {
+    from: 'src/core/klimt/sprite/PSystemListArchimateSprites.ts',
+    to: 'src/diagrams/donors/PSystemDonors.ts',
+    why:
+      'ufp D1/D3 — upstream keeps the archimate listing in klimt/sprite and lists via ' +
+      'PSystemDonors.getCols (PSystemListArchimateSprites.java:45 import, :75 getCols(lines, 4, 0)); ' +
+      'the core home mirrors the Java package.',
+  },
+  {
     from: 'src/diagrams/hcl/',
     to: 'src/diagrams/json/',
     why:

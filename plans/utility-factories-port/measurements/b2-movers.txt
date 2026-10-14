@@ -1,0 +1,15 @@
+unknown bamudi-49-caxo996 diverged->conformant UP dotEqual true->true
+unknown fotete-48-viga126 diverged->conformant UP dotEqual true->true
+unknown govuca-53-mili511 diverged->conformant UP dotEqual true->true
+unknown jigemu-90-titu666 diverged->conformant UP dotEqual true->true
+unknown kavama-92-noro949 diverged->conformant UP dotEqual true->true
+unknown kenari-17-dajo806 diverged->conformant UP dotEqual true->true
+unknown kicizi-84-lexu138 diverged->conformant UP dotEqual true->true
+unknown ludecu-61-laja912 diverged->conformant UP dotEqual true->true
+unknown rubeku-92-vefi942 diverged->conformant UP dotEqual true->true
+unknown tomodo-34-bimi231 diverged->conformant UP dotEqual true->true
+unknown tukimi-92-noxu802 diverged->conformant UP dotEqual true->true
+unknown vedine-65-rafo449 diverged->conformant UP dotEqual true->true
+unknown xozane-18-becu956 diverged->conformant UP dotEqual true->true
+unknown zusibo-75-vate603 diverged->conformant UP dotEqual true->true
+movers 14

@@ -71,6 +71,8 @@ import { Fore } from '../klimt/Fore.js';
 import type { XDimension2D } from '../klimt/geom/XDimension2D.js';
 import { emojiStartingAltitude } from '../klimt/creole/atom/AtomEmoji.js';
 import { makeAtomImageResolverFor } from '../creole-atoms-image-resolver.js';
+import { drawEmojiAtom } from '../svek/image/EntityImageDescriptionEmoji.js';
+import type { EmojiArtworkResolver } from '../svek/image/EntityImageDescriptionEmoji.js';
 import type { SpriteRegistry } from '../sprite-commands.js';
 import { FontStyle, type FontConfiguration } from '../klimt/shape/UText.js';
 import { atomTextStartingAltitude } from '../klimt/creole/legacy/AtomText.js';
@@ -153,6 +155,11 @@ export function chromeFontConfiguration(style: AnnotationBoxStyle, hyperlinkColo
  * `AtomOpenIconic` — answers all three. */
 export function chromeAtomOps(sprites: SpriteRegistry | undefined, baseFont: FontConfiguration): AtomOps {
   const resolverFor = makeAtomImageResolverFor(sprites);
+  // The registry's Twemoji store (`Emoji.java:167`'s classpath read, ADR-2):
+  // without it `drawAtom` falls back to the platform glyph, as before.
+  const emojiStore = sprites?.emoji;
+  const emojiArtwork: EmojiArtworkResolver | undefined =
+    emojiStore === undefined ? undefined : (unicode) => emojiStore.get(unicode);
   const polymorphic = (a: CreoleAtom): CreoleAtom | Atom => asAtomOpenIconic(a, baseFont) ?? a;
   return {
     calculateDimension(creoleAtom: CreoleAtom, stringBounder: StringBounder): XDimension2D {
@@ -172,6 +179,7 @@ export function chromeAtomOps(sprites: SpriteRegistry | undefined, baseFont: Fon
         atom.drawU(ug);
         return;
       }
+      if (atom.kind === 'emoji' && emojiArtwork !== undefined) return drawEmojiAtom(ug, atom, emojiArtwork);
       drawAtom(atom, ug, resolverFor(fontOfAtom(atom, baseFont)));
     },
   };

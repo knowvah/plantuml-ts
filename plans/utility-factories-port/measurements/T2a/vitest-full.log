@@ -1,0 +1,27 @@
+[build-stdlib-packages] stdlib: skip -- generated/ content hash already matches the current build inputs
+[build-stdlib-packages] stdlib-aws: skip -- generated/ content hash already matches the current build inputs
+[build-stdlib-packages] stdlib-tupadr3: skip -- generated/ content hash already matches the current build inputs
+[build-stdlib-packages] stdlib-all: skip -- generated/ content hash already matches the current build inputs
+[build-stdlib-packages] stdlib/assets/bootstrap1.13.1: skip -- sprites already match the current source content
+
+> @knowvah/plantuml-stdlib-aws@0.1.0 prepack
+> npm run copy-assets
+
+
+> @knowvah/plantuml-stdlib-aws@0.1.0 copy-assets
+> node scripts/copy-assets.mjs
+
+
+> @knowvah/plantuml-stdlib-tupadr3@0.1.0 prepack
+> npm run copy-assets
+
+
+> @knowvah/plantuml-stdlib-tupadr3@0.1.0 copy-assets
+> node scripts/copy-assets.mjs
+
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+JSON report written to /Users/scottseely/git/knowvah/plantuml-ts/.claude/worktrees/ufp-T2a/plans/utility-factories-port/measurements/T2a/vitest-full.json

@@ -50,3 +50,30 @@ describe('HColorSimple', () => {
     expect(RED.withDark(HALF) as HColorSimple).toBeInstanceOf(HColorSimple);
   });
 });
+
+describe('HColorSimple.distanceTo (HColorSimple.java:217-219)', () => {
+  it('delegates to ColorUtils.distance on the wrapped colours', () => {
+    const a = HColorSimple.create({ r: 10, g: 40, b: 90, a: 255 });
+    const b = HColorSimple.create({ r: 20, g: 20, b: 60, a: 255 });
+    expect(a.distanceTo(b)).toBe(18150);
+    expect(RED.distanceTo(CLEAR)).toBe(255 * 299);
+  });
+});
+
+describe('HColorSimple.opposite (HColorSimple.java:211-215)', () => {
+  const rgb = (r: number, g: number, b: number): HColorSimple => HColorSimple.create({ r, g, b, a: 255 });
+  const awt = (c: HColorSimple): unknown => c.opposite().getAwtColor();
+  const WHITE = { r: 255, g: 255, b: 255, a: 255 };
+  const BLACK = { r: 0, g: 0, b: 0, a: 255 };
+
+  it('is white on black and black on white', () => {
+    expect(awt(rgb(0, 0, 0))).toEqual(WHITE);
+    expect(awt(rgb(255, 255, 255))).toEqual(BLACK);
+  });
+
+  it('thresholds 255 - grey > 127 strictly: grey 127 -> white, grey 128 -> black', () => {
+    // Chocolate (210,105,30): grey = (62790 + 61635 + 3420) / 1000 = 127.
+    expect(awt(rgb(210, 105, 30))).toEqual(WHITE);
+    expect(awt(rgb(128, 128, 128))).toEqual(BLACK);
+  });
+});

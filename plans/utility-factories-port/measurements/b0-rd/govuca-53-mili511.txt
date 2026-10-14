@@ -1,0 +1,101 @@
+
+### unknown/govuca-53-mili511  pass=false structural=67 numeric=32
+  S svg/g[1]/text[1]/@font-weight  exp= | act=700
+  S svg/g[1]/text[1]/@textLength  exp=343.95 | act=122.625
+  S svg/g[1]/text[1]/text()[1]  exp=Delivered by https://github.com/Templarian/MaterialDesign-SVG/ | act=Welcome to PlantUML!
+  S svg/g[1]/text[3]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[3]/@textLength  exp=75.975 | act=245.25
+  S svg/g[1]/text[3]/text()[1]  exp=material7.4.47 | act=You can start with a simple UML Diagram like:
+  S svg/g[1]/text[4]/@textLength  exp=77.325 | act=
+  S svg/g[1]/text[4][childCount]  exp=1 | act=0
+  S svg/g[1]/text[5]/@font-family  exp= | act=monospace
+  S svg/g[1]/text[5]/@textLength  exp=343.95 | act=92.55
+  S svg/g[1]/text[5]/text()[1]  exp=Delivered by https://github.com/Templarian/MaterialDesign-SVG/ | act=Bob->Alice: Hello
+  S svg/g[1]/text[7]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[7]/@textLength  exp=28.65 | act=13.275
+  S svg/g[1]/text[7]/text()[1]  exp=office | act=Or
+  S svg/g[1]/text[8]/@textLength  exp=70.65 | act=
+  S svg/g[1]/text[8][childCount]  exp=1 | act=0
+  S svg/g[1]/text[9]/@font-family  exp= | act=monospace
+  S svg/g[1]/text[9]/@textLength  exp=291.825 | act=77.4
+  S svg/g[1]/text[9]/text()[1]  exp=Delivered by https://github.com/Roemer/plantuml-office | act=class Example
+  S svg/g[1]/text[11]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[11]/@textLength  exp=19.35 | act=301.275
+  S svg/g[1]/text[11]/text()[1]  exp=osa | act=You will find more information about PlantUML syntax on
+  S svg/g[1]/text[12]/@text-decoration  exp= | act=underline
+  S svg/g[1]/text[12]/@textLength  exp=70.65 | act=107.175
+  S svg/g[1]/text[12]/text()[1]  exp=Version 0.0.1 | act=https://plantuml.com
+  S svg/g[1]/text[13]/@textLength  exp=461.925 | act=
+  S svg/g[1]/text[13][childCount]  exp=1 | act=0
+  S svg/g[1]/text[14]/@textLength  exp= | act=92.025
+  S svg/g[1]/text[14][childCount]  exp=0 | act=1
+  S svg/g[1]/text[15]/@font-family  exp= | act=monospace
+  S svg/g[1]/text[15]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[15]/@textLength  exp=26.025 | act=37.425
+  S svg/g[1]/text[15]/text()[1]  exp=osa2 | act=license
+  S svg/g[1]/text[16]/@textLength  exp=70.65 | act=48.675
+  S svg/g[1]/text[16]/text()[1]  exp=Version 0.0.1 | act=keyword)
+  S svg/g[1]/text[17]/@textLength  exp=468.6 | act=
+  S svg/g[1]/text[17][childCount]  exp=1 | act=0
+  S svg/g[1]/text[18]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[18]/@font-style  exp= | act=italic
+  S svg/g[1]/text[18]/@font-weight  exp= | act=700
+  S svg/g[1]/text[18]/@textLength  exp= | act=319.2
+  S svg/g[1]/text[18][childCount]  exp=0 | act=1
+  S svg/g[1]/text[19]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[19]/@textLength  exp=40.65 | act=128.887
+  S svg/g[1]/text[19]/text()[1]  exp=tupadr3 | act=[From string (line 2) ]
+  S svg/g[1]/text[20]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[20]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[20]/@font-weight  exp= | act=700
+  S svg/g[1]/text[20]/@textLength  exp=70.65 | act=
+  S svg/g[1]/text[20][childCount]  exp=1 | act=0
+  S svg/g[1]/text[21]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[21]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[21]/@font-weight  exp= | act=700
+  S svg/g[1]/text[21]/@textLength  exp=346.425 | act=63.963
+  S svg/g[1]/text[21]/text()[1]  exp=Delivered by https://github.com/tupadr3/plantuml-icon-font-sprites | act=@startuml
+  S svg/g[1]/text[22]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[22]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[22]/@font-weight  exp= | act=700
+  S svg/g[1]/text[22]/@text-decoration  exp= | act=wavy underline
+  S svg/g[1]/text[22]/@textLength  exp= | act=32.725
+  S svg/g[1]/text[22][childCount]  exp=0 | act=1
+  S svg/g[1]/text[23]/@fill  exp=#000 | act=#F00
+  S svg/g[1]/text[23]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[23]/@font-weight  exp= | act=700
+  S svg/g[1]/text[23]/@textLength  exp= | act=281.313
+  S svg/g[1]/text[23][childCount]  exp=0 | act=1
+  S svg/g[1][childCount]  exp=138 | act=27
+  N svg/@height  exp=1655 | act=284 (Δ1371)
+  N svg/@viewBox[2]  exp=589 | act=532 (Δ57)
+  N svg/@viewBox[3]  exp=1655 | act=284 (Δ1371)
+  N svg/@width  exp=589 | act=532 (Δ57)
+  N svg/g[1]/text[1]/@y  exp=1382.33 | act=14.333 (Δ1367.9969999999998)
+  N svg/g[1]/text[2]/@y  exp=1394.33 | act=26.333 (Δ1367.9969999999998)
+  N svg/g[1]/text[3]/@y  exp=1406.33 | act=38.333 (Δ1367.9969999999998)
+  N svg/g[1]/text[4]/@y  exp=1418.33 | act=50.333 (Δ1367.9969999999998)
+  N svg/g[1]/text[5]/@y  exp=1430.33 | act=62.333 (Δ1367.9969999999998)
+  N svg/g[1]/text[6]/@y  exp=1442.33 | act=74.333 (Δ1367.9969999999998)
+  N svg/g[1]/text[7]/@y  exp=1454.33 | act=86.333 (Δ1367.9969999999998)
+  N svg/g[1]/text[8]/@y  exp=1466.33 | act=98.333 (Δ1367.9969999999998)
+  N svg/g[1]/text[9]/@y  exp=1478.33 | act=110.333 (Δ1367.9969999999998)
+  N svg/g[1]/text[10]/@y  exp=1490.33 | act=122.333 (Δ1367.9969999999998)
+  N svg/g[1]/text[11]/@y  exp=1502.33 | act=134.333 (Δ1367.9969999999998)
+  N svg/g[1]/text[12]/@x  exp=5 | act=309.575 (Δ304.575)
+  N svg/g[1]/text[12]/@y  exp=1514.33 | act=134.333 (Δ1379.9969999999998)
+  N svg/g[1]/text[13]/@y  exp=1526.33 | act=146.333 (Δ1379.9969999999998)
+  N svg/g[1]/text[14]/@y  exp=1538.33 | act=158.333 (Δ1379.9969999999998)
+  N svg/g[1]/text[15]/@x  exp=5 | act=100.325 (Δ95.325)
+  N svg/g[1]/text[15]/@y  exp=1550.33 | act=158.333 (Δ1391.9969999999998)
+  N svg/g[1]/text[16]/@x  exp=5 | act=141.05 (Δ136.05)
+  N svg/g[1]/text[16]/@y  exp=1562.33 | act=158.333 (Δ1403.9969999999998)
+  N svg/g[1]/text[17]/@y  exp=1574.33 | act=170.333 (Δ1403.9969999999998)
+  N svg/g[1]/text[18]/@y  exp=1586.33 | act=195 (Δ1391.33)
+  N svg/g[1]/text[19]/@x  exp=5 | act=6 (Δ1)
+  N svg/g[1]/text[19]/@y  exp=1598.33 | act=218 (Δ1380.33)
+  N svg/g[1]/text[20]/@y  exp=1610.33 | act=236 (Δ1374.33)
+  N svg/g[1]/text[21]/@y  exp=1622.33 | act=250 (Δ1372.33)
+  N svg/g[1]/text[22]/@y  exp=1634.33 | act=264 (Δ1370.33)
+  N svg/g[1]/text[23]/@x  exp=5 | act=8.85 (Δ3.8499999999999996)
+  N svg/g[1]/text[23]/@y  exp=1646.33 | act=278 (Δ1368.33)

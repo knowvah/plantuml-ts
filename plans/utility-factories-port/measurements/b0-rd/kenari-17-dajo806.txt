@@ -1,0 +1,129 @@
+
+### unknown/kenari-17-dajo806  pass=false structural=85 numeric=42
+  S svg/g[1]/text[1]/@fill  exp=#FFF | act=#000
+  S svg/g[1]/text[1]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[1]/@textLength  exp=63.088 | act=122.625
+  S svg/g[1]/text[1]/text()[1]  exp=Chocolate | act=Welcome to PlantUML!
+  S svg/g[1]/text[2]/@fill  exp=#FFF | act=#000
+  S svg/g[1]/text[2]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[2]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[2]/@textLength  exp=63.875 | act=
+  S svg/g[1]/text[2][childCount]  exp=1 | act=0
+  S svg/g[1]/text[3]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[3]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[3]/@textLength  exp=88.9 | act=245.25
+  S svg/g[1]/text[3]/text()[1]  exp=PaleVioletRed | act=You can start with a simple UML Diagram like:
+  S svg/g[1]/text[4]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[4]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[4]/@textLength  exp=47.425 | act=
+  S svg/g[1]/text[4][childCount]  exp=1 | act=0
+  S svg/g[1]/text[5]/@font-family  exp= | act=monospace
+  S svg/g[1]/text[5]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[5]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[5]/@textLength  exp=29.575 | act=92.55
+  S svg/g[1]/text[5]/text()[1]  exp=Peru | act=Bob->Alice: Hello
+  S svg/g[1]/text[6]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[6]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[6]/@textLength  exp=100.45 | act=
+  S svg/g[1]/text[6][childCount]  exp=1 | act=0
+  S svg/g[1]/text[7]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[7]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[7]/@textLength  exp=41.213 | act=13.275
+  S svg/g[1]/text[7]/text()[1]  exp=Orchid | act=Or
+  S svg/g[1]/text[8]/@fill  exp=#FFF | act=#000
+  S svg/g[1]/text[8]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[8]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[8]/@textLength  exp=43.662 | act=
+  S svg/g[1]/text[8][childCount]  exp=1 | act=0
+  S svg/g[1]/text[9]/@font-family  exp= | act=monospace
+  S svg/g[1]/text[9]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[9]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[9]/@textLength  exp=49.088 | act=77.4
+  S svg/g[1]/text[9]/text()[1]  exp=HotPink | act=class Example
+  S svg/g[1]/text[10]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[10]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[10]/@textLength  exp=33.513 | act=
+  S svg/g[1]/text[10][childCount]  exp=1 | act=0
+  S svg/g[1]/text[11]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[11]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[11]/@textLength  exp=63.875 | act=301.275
+  S svg/g[1]/text[11]/text()[1]  exp=LightCoral | act=You will find more information about PlantUML syntax on
+  S svg/g[1]/text[12]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[12]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[12]/@text-decoration  exp= | act=underline
+  S svg/g[1]/text[12]/@textLength  exp=47.513 | act=107.175
+  S svg/g[1]/text[12]/text()[1]  exp=Salmon | act=https://plantuml.com
+  S svg/g[1]/text[13]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[13]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[13]/@textLength  exp=73.15 | act=
+  S svg/g[1]/text[13][childCount]  exp=1 | act=0
+  S svg/g[1]/text[14]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[14]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[14]/@textLength  exp=70.875 | act=92.025
+  S svg/g[1]/text[14]/text()[1]  exp=GoldenRod | act=(Details by typing
+  S svg/g[1]/text[15]/@fill  exp=#FFF | act=#000
+  S svg/g[1]/text[15]/@font-family  exp= | act=monospace
+  S svg/g[1]/text[15]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[15]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[15]/@textLength  exp=72.363 | act=37.425
+  S svg/g[1]/text[15]/text()[1]  exp=OrangeRed | act=license
+  S svg/g[1]/text[16]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[16]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[16]/@textLength  exp=91 | act=48.675
+  S svg/g[1]/text[16]/text()[1]  exp=MediumOrchid | act=keyword)
+  S svg/g[1]/text[17]/@fill  exp=#FFF | act=#000
+  S svg/g[1]/text[17]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[17]/@font-weight  exp=700 | act=
+  S svg/g[1]/text[17]/@textLength  exp=55.213 | act=
+  S svg/g[1]/text[17][childCount]  exp=1 | act=0
+  S svg/g[1]/text[18]/@fill  exp=#FFF | act=#33FF02
+  S svg/g[1]/text[18]/@font-size  exp=14 | act=12
+  S svg/g[1]/text[18]/@font-style  exp= | act=italic
+  S svg/g[1]/text[18]/@textLength  exp=100.363 | act=319.2
+  S svg/g[1]/text[18]/text()[1]  exp=DarkOliveGreen | act=plantuml-ts version 0.1.0 / unknown [Unknown compile time]
+  S svg/g[1]/text[19]/@fill  exp=#FFF | act=#F00
+  S svg/g[1]/text[19]/@textLength  exp=31.938 | act=281.313
+  S svg/g[1]/text[19]/text()[1]  exp=Olive | act=Syntax Error? (Assumed diagram type: class)
+  S svg/g[1][childCount]  exp=38 | act=27
+  N svg/@height  exp=482 | act=284 (Δ198)
+  N svg/@viewBox[2]  exp=581 | act=532 (Δ49)
+  N svg/@viewBox[3]  exp=482 | act=284 (Δ198)
+  N svg/@width  exp=581 | act=532 (Δ49)
+  N svg/g[1]/text[1]/@x  exp=228.264 | act=5 (Δ223.264)
+  N svg/g[1]/text[1]/@y  exp=243.889 | act=14.333 (Δ229.556)
+  N svg/g[1]/text[2]/@x  exp=331.793 | act=5 (Δ326.793)
+  N svg/g[1]/text[2]/@y  exp=243.889 | act=26.333 (Δ217.556)
+  N svg/g[1]/text[3]/@x  exp=267.319 | act=5 (Δ262.319)
+  N svg/g[1]/text[3]/@y  exp=333.889 | act=38.333 (Δ295.55600000000004)
+  N svg/g[1]/text[4]/@x  exp=184.134 | act=5 (Δ179.134)
+  N svg/g[1]/text[4]/@y  exp=333.889 | act=50.333 (Δ283.55600000000004)
+  N svg/g[1]/text[5]/@x  exp=141.097 | act=5 (Δ136.097)
+  N svg/g[1]/text[5]/@y  exp=243.889 | act=62.333 (Δ181.556)
+  N svg/g[1]/text[6]/@x  exp=157.621 | act=5 (Δ152.621)
+  N svg/g[1]/text[6]/@y  exp=153.889 | act=74.333 (Δ79.55600000000001)
+  N svg/g[1]/text[7]/@x  exp=291.163 | act=5 (Δ286.163)
+  N svg/g[1]/text[7]/@y  exp=153.889 | act=86.333 (Δ67.55600000000001)
+  N svg/g[1]/text[8]/@x  exp=445.822 | act=5 (Δ440.822)
+  N svg/g[1]/text[8]/@y  exp=243.889 | act=98.333 (Δ145.556)
+  N svg/g[1]/text[9]/@x  exp=391.148 | act=5 (Δ386.148)
+  N svg/g[1]/text[9]/@y  exp=333.889 | act=110.333 (Δ223.556)
+  N svg/g[1]/text[10]/@x  exp=346.974 | act=5 (Δ341.974)
+  N svg/g[1]/text[10]/@y  exp=423.889 | act=122.333 (Δ301.55600000000004)
+  N svg/g[1]/text[11]/@x  exp=227.87 | act=5 (Δ222.87)
+  N svg/g[1]/text[11]/@y  exp=423.889 | act=134.333 (Δ289.55600000000004)
+  N svg/g[1]/text[12]/@x  exp=132.128 | act=309.575 (Δ177.447)
+  N svg/g[1]/text[12]/@y  exp=423.889 | act=134.333 (Δ289.55600000000004)
+  N svg/g[1]/text[13]/@x  exp=67.348 | act=5 (Δ62.348)
+  N svg/g[1]/text[13]/@y  exp=333.889 | act=146.333 (Δ187.556)
+  N svg/g[1]/text[14]/@x  exp=16.524 | act=5 (Δ11.524000000000001)
+  N svg/g[1]/text[14]/@y  exp=243.889 | act=158.333 (Δ85.55600000000001)
+  N svg/g[1]/text[15]/@x  exp=67.742 | act=100.325 (Δ32.583)
+  N svg/g[1]/text[15]/@y  exp=153.889 | act=158.333 (Δ4.443999999999988)
+  N svg/g[1]/text[16]/@x  exp=110.385 | act=141.05 (Δ30.665000000000006)
+  N svg/g[1]/text[16]/@y  exp=63.889 | act=158.333 (Δ94.44399999999999)
+  N svg/g[1]/text[17]/@x  exp=232.201 | act=5 (Δ227.201)
+  N svg/g[1]/text[17]/@y  exp=63.889 | act=170.333 (Δ106.44399999999999)
+  N svg/g[1]/text[18]/@x  exp=313.549 | act=5 (Δ308.549)
+  N svg/g[1]/text[18]/@y  exp=63.889 | act=195 (Δ131.111)
+  N svg/g[1]/text[19]/@x  exp=399.723 | act=8.85 (Δ390.873)
+  N svg/g[1]/text[19]/@y  exp=153.889 | act=278 (Δ124.11099999999999)

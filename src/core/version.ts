@@ -16,7 +16,7 @@
  */
 
 /** plantuml-ts's own version — kept in step with `package.json#version`. */
-export const VERSION = '0.1.0';
+export const VERSION = '0.2.0';
 
 /** Build-stamped at release; the placeholder is what a dev build reports. */
 export const COMMIT = 'unknown';

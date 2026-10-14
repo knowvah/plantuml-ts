@@ -1,6 +1,7 @@
 import type { Paint } from '../../paint.js';
 import type { HColor } from '../../style/Value.js';
 import type { ColorMapper } from './ColorMapper.js';
+import { distance, getGrayScaleColor } from './ColorUtils.js';
 import { toSvgHex, type ResolvedColor } from './HColorSet.js';
 
 /** `String.format("%02X")` / `"%02x"` of one 8-bit channel. */
@@ -25,7 +26,7 @@ function xColorToString(c: ResolvedColor): string {
  * `withTransparentFillBehavior`/`HColors.transparent(behavior)`, neither
  * reached; every instance here is upstream's default `WITH_FILL_NONE`, so
  * `toString`'s behaviour suffix, java:62-63, never prints), the
- * HSL/monochrome/`opposite`/`unlinear` arithmetic, `isDark`.
+ * HSL/monochrome/`unlinear` arithmetic, `isDark`.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSimple.java:43-242
  */
@@ -37,6 +38,19 @@ export class HColorSimple implements HColor {
     /** @see HColorSimple.java:46 */
     private readonly dark: HColor | undefined,
   ) {}
+
+  /** @see HColorSimple.java:217-219 */
+  distanceTo(other: HColorSimple): number {
+    return distance(this.color, other.color);
+  }
+
+  /** White on a dark colour, black on a light one: `255 - grey > 127`.
+   *  @see HColorSimple.java:211-215 */
+  opposite(): HColorSimple {
+    const mono = getGrayScaleColor(this.color);
+    const grayScale = 255 - mono.g > 127 ? 255 : 0;
+    return HColorSimple.create({ r: grayScale, g: grayScale, b: grayScale, a: 255 });
+  }
 
   /** @see HColorSimple.java:141-143 */
   static create(c: ResolvedColor): HColorSimple {

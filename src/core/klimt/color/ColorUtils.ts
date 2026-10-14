@@ -3,7 +3,7 @@ import type { ResolvedColor } from './HColorSet.js';
 /**
  * ColorUtils — the grey-scale slice `ColorMapper.MONOCHROME` /
  * `MONOCHROME_REVERSE` reach (the YIQ luma, 24ways.org/2010/calculating-color-contrast).
- * Not ported: `getReversed`, `distance`, `getGrayScaleFromRGB`, the HSL
+ * Not ported: `getReversed`, `getGrayScaleFromRGB`, the HSL
  * helpers — no ported mapper reaches them.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/ColorUtils.java:45-75
@@ -27,4 +27,12 @@ export function getGrayScaleColor(color: ResolvedColor): ResolvedColor {
 export function getGrayScaleColorReverse(color: ResolvedColor): ResolvedColor {
   const grayScale = 255 - getGrayScale(color);
   return { r: grayScale, g: grayScale, b: grayScale, a: 255 };
+}
+
+/** `abs` of each channel difference, weighted by the private
+ *  `getGrayScaleInternal` (java:55-58) — the UNdivided sum: only
+ *  `getGrayScaleInternalFromRGB` divides by 1000 (java:48-52).
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/ColorUtils.java:77-82 */
+export function distance(c1: ResolvedColor, c2: ResolvedColor): number {
+  return Math.abs(c1.r - c2.r) * 299 + Math.abs(c1.g - c2.g) * 587 + Math.abs(c1.b - c2.b) * 114;
 }

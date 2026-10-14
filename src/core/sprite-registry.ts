@@ -18,9 +18,10 @@ import type { SpriteDimsLookup } from './creole-atoms.js';
 import type { InternalSpriteStore } from './internal-sprite-store.js';
 import type { InternalEmojiStore } from './internal-emoji-store.js';
 import type { Sprite } from './klimt/sprite/Sprite.js';
-import type { SpriteMonochrome } from './klimt/sprite/SpriteMonochrome.js';
+import { SpriteMonochrome } from './klimt/sprite/SpriteMonochrome.js';
 import { isSpriteSvg, type SpriteSvg } from './klimt/sprite/SpriteSvg.js';
 import { SpriteColor4096 } from './klimt/sprite/SpriteColor4096.js';
+import { SpriteImage } from './klimt/sprite/SpriteImage.js';
 
 export interface SpriteRegistry {
   readonly byName: Map<string, Sprite>;
@@ -183,8 +184,10 @@ export function getSpriteMonochrome(registry: SpriteRegistry, name: string): Spr
   // tint path must skip it rather than cast blindly (S1L-f part 2b; the
   // colour exclusion is cdd-T26 residual round's own addition, once
   // `SpriteColor4096` became a real registrable `Sprite` kind).
-  if (isSpriteSvg(sprite) || isSpriteColor4096(sprite)) return undefined;
-  return sprite as SpriteMonochrome | undefined;
+  // The internal store's PNG entries are `SpriteImage`s (`internal-sprite-store.ts`
+  // `probe`), pixels rather than a grid: {@link getSpriteImage} reaches them,
+  // and only a real `SpriteMonochrome` reaches the tint path (ufp).
+  return sprite instanceof SpriteMonochrome ? sprite : undefined;
 }
 
 /** cdd-T26 residual round: the `getSpriteMonochrome`/`getSpriteSvg`
@@ -200,6 +203,14 @@ export function isSpriteColor4096(sprite: Sprite | undefined): sprite is SpriteC
 export function getSpriteColor4096(registry: SpriteRegistry, name: string): SpriteColor4096 | undefined {
   const sprite = getSprite(registry, name);
   return isSpriteColor4096(sprite) ? sprite : undefined;
+}
+
+/** ufp-T3a: the raster (`/sprites/**.png`) registry entry for `name` —
+ *  `SpriteImage.fromInternal`'s PNG branch (SpriteImage.java:113-115) — or
+ *  `undefined` when the name is unknown or another sprite kind. */
+export function getSpriteImage(registry: SpriteRegistry, name: string): SpriteImage | undefined {
+  const sprite = getSprite(registry, name);
+  return sprite instanceof SpriteImage ? sprite : undefined;
 }
 
 /** The SVG-backed registry entry for `name`, or `undefined` when the name is

@@ -28,6 +28,10 @@
 import type { AssetStore } from './asset-store.js';
 import type { Sprite } from './klimt/sprite/Sprite.js';
 import { SpriteSvg } from './klimt/sprite/SpriteSvg.js';
+import { SpriteImage } from './klimt/sprite/SpriteImage.js';
+import type { ArgbImage } from './klimt/sprite/sprite-raster.js';
+import { ByteBitInputStream } from './code/deflate/ByteBitInputStream.js';
+import { Decompressor } from './code/deflate/Decompressor.js';
 
 /**
  * Namespace prefix for every internal-sprite key inside a shared
@@ -67,27 +71,195 @@ export interface InternalSpriteStore {
 /** Probe order, `SpriteImage.java:107-113`: SVG wins outright over PNG. */
 const PROBE_EXTENSIONS: readonly string[] = ['.svg', '.png'];
 
-/** PNG signature + `IHDR` big-endian width/height, ISO/IEC 15948 §11.2.2 —
- *  the raw-bytes twin of `klimt/sprite/png-ihdr.ts#parsePngIhdrFromDataUri`
- *  (that one decodes a `data:` URI prefix; a vendored asset arrives as bytes
- *  already). Plain arithmetic, not bitwise shifts, for the same
- *  complexity-hook reason that file documents. */
+// ---------------------------------------------------------------------------
+// `SImageIO.read(is)` (SpriteImage.java:113-115): PNG bytes -> `getRGB` ints
+// ---------------------------------------------------------------------------
+
+/** PNG signature, ISO/IEC 15948 §5.2. */
 const PNG_SIGNATURE: readonly number[] = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+/** Chunk length + type + CRC around each chunk's data (§5.3). */
+const CHUNK_OVERHEAD = 12;
+const CHUNK_HEADER = 8;
+/** `IHDR` colour types the decoder reads (§11.2.2): indexed and 8-bit RGBA. */
+const COLOR_TYPE_INDEXED = 3;
+const COLOR_TYPE_RGBA = 6;
+const RGBA_CHANNELS = 4;
+const BITS_PER_BYTE = 8;
+/** zlib `CM = 8` (deflate) and `FDICT` (RFC 1950 §2.2). */
+const ZLIB_METHOD_DEFLATE = 8;
+const ZLIB_FDICT = 0x20;
+const ZLIB_HEADER = 2;
+const OPAQUE_ALPHA = 0xff;
 
 function uint32At(bytes: Uint8Array, offset: number): number {
   return bytes[offset]! * 16777216 + bytes[offset + 1]! * 65536 + bytes[offset + 2]! * 256 + bytes[offset + 3]!;
 }
 
-/** `SImageIO.read(is)` -> `image.getWidth()/getHeight()`, reduced to the
- *  header read those two accessors need. `undefined` when the payload is not
- *  a PNG with a leading IHDR chunk. */
-function pngDimensions(bytes: Uint8Array): { width: number; height: number } | undefined {
-  if (bytes.length < 24) return undefined;
-  if (PNG_SIGNATURE.some((b, i) => bytes[i] !== b)) return undefined;
-  const width = uint32At(bytes, 16);
-  const height = uint32At(bytes, 20);
-  if (width === 0 || height === 0) return undefined;
-  return { width, height };
+interface PngHeader {
+  readonly width: number;
+  readonly height: number;
+  readonly bitDepth: number;
+  readonly colorType: number;
+  readonly interlace: number;
+}
+
+interface PngChunks {
+  readonly header: PngHeader;
+  readonly palette: Uint8Array | undefined;
+  readonly transparency: Uint8Array | undefined;
+  readonly data: Uint8Array;
+}
+
+/** The chunks the decoder reads; every other ancillary chunk (`gAMA`,
+ *  `pHYs`, `tEXt`, `tIME` in the vendored bundle) is skipped — Java's
+ *  `PNGImageReader` applies no gamma to `getRGB` either. */
+function readChunks(bytes: Uint8Array): PngChunks {
+  if (bytes.length < CHUNK_HEADER || PNG_SIGNATURE.some((b, i) => bytes[i] !== b)) throw new Error('not a PNG');
+  const named = new Map<string, Uint8Array>();
+  const data: Uint8Array[] = [];
+  for (let offset = CHUNK_HEADER; offset + CHUNK_OVERHEAD <= bytes.length;) {
+    const length = uint32At(bytes, offset);
+    const type = String.fromCharCode(...bytes.subarray(offset + 4, offset + CHUNK_HEADER));
+    const body = bytes.subarray(offset + CHUNK_HEADER, offset + CHUNK_HEADER + length);
+    if (body.length !== length) break;
+    if (type === 'IDAT') data.push(body);
+    else if (!named.has(type)) named.set(type, body);
+    offset += CHUNK_OVERHEAD + length;
+  }
+  const ihdr = named.get('IHDR');
+  if (ihdr === undefined || ihdr.length < 13 || data.length === 0) throw new Error('PNG without IHDR or IDAT');
+  const header = {
+    width: uint32At(ihdr, 0),
+    height: uint32At(ihdr, 4),
+    bitDepth: ihdr[8]!,
+    colorType: ihdr[9]!,
+    interlace: ihdr[12]!,
+  };
+  return { header, palette: named.get('PLTE'), transparency: named.get('tRNS'), data: concat(data) };
+}
+
+function concat(parts: readonly Uint8Array[]): Uint8Array {
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+
+/** Bits per pixel of a supported header, or a throw for the rest: the
+ *  vendored bundle is 1-bit indexed (`assignment.png`,
+ *  `association-unidirect.png`) and 8-bit RGBA (the other 21). Greyscale is
+ *  not decoded: `getRGB` of Java's grey `ColorModel` is a colour-space
+ *  conversion, not the stored value. */
+function bitsPerPixel(header: PngHeader): number {
+  if (header.width === 0 || header.height === 0) throw new Error('empty PNG');
+  if (header.interlace !== 0) throw new Error('interlaced PNG');
+  if (header.colorType === COLOR_TYPE_RGBA && header.bitDepth === BITS_PER_BYTE) return RGBA_CHANNELS * BITS_PER_BYTE;
+  if (header.colorType === COLOR_TYPE_INDEXED && header.bitDepth <= BITS_PER_BYTE) return header.bitDepth;
+  throw new Error(`unsupported PNG colour type ${header.colorType}/${header.bitDepth}`);
+}
+
+/** zlib stream (RFC 1950) -> inflated bytes, through the deflate port. */
+function inflateZlib(stream: Uint8Array): Uint8Array {
+  const cmf = stream[0] ?? 0;
+  const flg = stream[1] ?? 0;
+  if ((cmf & 0x0f) !== ZLIB_METHOD_DEFLATE || (flg & ZLIB_FDICT) !== 0) throw new Error('unsupported zlib header');
+  const padded = new Uint8Array(stream.length - ZLIB_HEADER + 256);
+  padded.set(stream.subarray(ZLIB_HEADER));
+  return Decompressor.decompress(new ByteBitInputStream(padded));
+}
+
+/** The Paeth predictor (§9.4). */
+function paeth(a: number, b: number, c: number): number {
+  const p = a + b - c;
+  const pa = Math.abs(p - a);
+  const pb = Math.abs(p - b);
+  const pc = Math.abs(p - c);
+  if (pa <= pb && pa <= pc) return a;
+  return pb <= pc ? b : c;
+}
+
+function predictor(type: number, a: number, b: number, c: number): number {
+  switch (type) {
+    case 0:
+      return 0;
+    case 1:
+      return a;
+    case 2:
+      return b;
+    case 3:
+      return Math.floor((a + b) / 2);
+    case 4:
+      return paeth(a, b, c);
+    default:
+      throw new Error(`unknown PNG filter ${type}`);
+  }
+}
+
+/** Reverses the per-scanline filters (§9.2) in place; returns the rows. */
+function unfilter(raw: Uint8Array, header: PngHeader, bpp: number): Uint8Array[] {
+  const stride = Math.ceil((header.width * bpp) / BITS_PER_BYTE);
+  if (raw.length < header.height * (stride + 1)) throw new Error('short PNG data');
+  const left = Math.max(1, bpp / BITS_PER_BYTE);
+  const rows: Uint8Array[] = [];
+  let previous: Uint8Array = new Uint8Array(stride);
+  for (let y = 0; y < header.height; y++) {
+    const start = y * (stride + 1);
+    const type = raw[start]!;
+    const row = raw.subarray(start + 1, start + 1 + stride);
+    for (let i = 0; i < stride; i++) {
+      const a = i >= left ? row[i - left]! : 0;
+      const c = i >= left ? previous[i - left]! : 0;
+      row[i] = (row[i]! + predictor(type, a, previous[i]!, c)) & OPAQUE_ALPHA;
+    }
+    rows.push(row);
+    previous = row;
+  }
+  return rows;
+}
+
+/** `IndexColorModel#getRGB`: `PLTE` rgb, `tRNS` alpha (opaque past its end). */
+function indexedArgb(chunks: PngChunks, index: number): number {
+  const palette = chunks.palette;
+  if (palette === undefined || (index + 1) * 3 > palette.length) throw new Error('PNG palette index out of range');
+  const alpha = chunks.transparency?.[index] ?? OPAQUE_ALPHA;
+  return (alpha << 24) | (palette[index * 3]! << 16) | (palette[index * 3 + 1]! << 8) | palette[index * 3 + 2]!;
+}
+
+/** One pixel of an unfiltered row as `getRGB` answers it. */
+function pixelArgb(chunks: PngChunks, row: Uint8Array, x: number): number {
+  const { bitDepth, colorType } = chunks.header;
+  if (colorType === COLOR_TYPE_RGBA) {
+    const o = x * RGBA_CHANNELS;
+    return (row[o + 3]! << 24) | (row[o]! << 16) | (row[o + 1]! << 8) | row[o + 2]!;
+  }
+  const bit = x * bitDepth;
+  const shift = BITS_PER_BYTE - bitDepth - (bit % BITS_PER_BYTE);
+  return indexedArgb(chunks, (row[Math.floor(bit / BITS_PER_BYTE)]! >> shift) & ((1 << bitDepth) - 1));
+}
+
+/**
+ * `SImageIO.read(is)` reduced to what `SpriteImage` reads off the result:
+ * pixel size and `getRGB(x, y)` (non-premultiplied ARGB `int`s). Covers the
+ * vendored bundle's two encodings (see {@link bitsPerPixel}); `undefined` for
+ * anything else or anything malformed — `fromInternal` logs and returns
+ * `null` on any `Throwable` (java:118-121).
+ */
+export function readPng(bytes: Uint8Array): ArgbImage | undefined {
+  try {
+    const chunks = readChunks(bytes);
+    const { width, height } = chunks.header;
+    const rows = unfilter(inflateZlib(chunks.data), chunks.header, bitsPerPixel(chunks.header));
+    const argb = new Int32Array(width * height);
+    rows.forEach((row, y) => {
+      for (let x = 0; x < width; x++) argb[y * width + x] = pixelArgb(chunks, row, x);
+    });
+    return { width, height, argb };
+  } catch {
+    return undefined;
+  }
 }
 
 const decoder = new TextDecoder();
@@ -101,7 +273,8 @@ function probe(assets: AssetStore, path: string, extension: string): Sprite | un
   const payload = assets.get(internalSpriteAssetKey(path + extension));
   if (payload === undefined) return undefined;
   if (extension === '.svg') return SpriteSvg.from(decoder.decode(payload.bytes));
-  return pngDimensions(payload.bytes);
+  const image = readPng(payload.bytes);
+  return image === undefined ? undefined : new SpriteImage(image);
 }
 
 /** True when `path` already carries a sprite extension — `fromInternal`

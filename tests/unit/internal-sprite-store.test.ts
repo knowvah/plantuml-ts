@@ -5,6 +5,7 @@
  * @see src/core/internal-sprite-store.ts
  */
 
+import { deflateSync } from 'node:zlib';
 import { describe, it, expect } from 'vitest';
 
 import type { AssetStore, AssetPayload } from '../../src/core/asset-store.js';
@@ -13,8 +14,13 @@ import {
   internalSpriteAssetKey,
   internalSpriteStoreFrom,
   matchJarSpriteLine,
+  readPng,
 } from '../../src/core/internal-sprite-store.js';
+import { ARCHIMATE_SPRITE_NAMES } from '../../src/core/klimt/sprite/archimate-sprite-names.js';
+import { buildSpriteAssetsStore } from '../helpers/sprite-assets-store.js';
 import { isSpriteSvg } from '../../src/core/klimt/sprite/SpriteSvg.js';
+import { SpriteImage } from '../../src/core/klimt/sprite/SpriteImage.js';
+import { crc32, encodePng } from '../../src/core/klimt/sprite/png-encoder.js';
 
 const encoder = new TextEncoder();
 
@@ -25,10 +31,8 @@ const ARCHIMATE_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" width="19.995mm" height="19.928mm" ' +
   'viewBox="0 0 19.995 19.928"><path d="M 2,2 L 18,2 L 18,18 L 2,18 Z"/></svg>';
 
-const PNG_1X1 = new Uint8Array([
-  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52, 0, 0, 0, 1, 0, 0, 0, 1, 8, 6, 0,
-  0, 0,
-]);
+/** A real 1x1 RGBA PNG (one opaque black pixel). */
+const PNG_1X1 = encodePng(new Uint8Array([0, 0, 0, 255]), 1, 1);
 
 function storeOf(entries: Readonly<Record<string, AssetPayload>>): AssetStore {
   return {
@@ -125,7 +129,9 @@ describe('internalSpriteStoreFrom', () => {
       }),
     );
     const sprite = store.get('archimate/access');
-    expect(sprite).toEqual({ width: 1, height: 1 });
+    // `new SpriteImage(SImageIO.read(is))` (java:113-115): UImage#getWidth() = 1 - 1.
+    expect(sprite).toBeInstanceOf(SpriteImage);
+    expect([sprite?.width, sprite?.height]).toEqual([0, 0]);
   });
 
   it('prefers the .svg over the .png when both exist (java:107-113 probe order)', () => {
@@ -212,5 +218,261 @@ describe('matchJarSpriteLine', () => {
 
   it('rejects a whitespace-only bundle path — it could never resolve', () => {
     expect(matchJarSpriteLine('sprite $x jar:   ')).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// `SImageIO.read(is)` (SpriteImage.java:113-115) -> `PortableImage#getRGB`
+// ---------------------------------------------------------------------------
+
+/** Java `int` ARGB. */
+function argb(a: number, r: number, g: number, b: number): number {
+  return (a << 24) | (r << 16) | (g << 8) | b | 0;
+}
+
+function chunk(type: string, data: Uint8Array): Uint8Array {
+  const out = new Uint8Array(12 + data.length);
+  const view = new DataView(out.buffer);
+  view.setUint32(0, data.length);
+  const typed = new Uint8Array([...type].map((c) => c.charCodeAt(0)));
+  out.set(typed, 4);
+  out.set(data, 8);
+  view.setUint32(8 + data.length, crc32(new Uint8Array([...typed, ...data])));
+  return out;
+}
+
+interface PngSpec {
+  readonly width: number;
+  readonly height: number;
+  readonly bitDepth: number;
+  readonly colorType: number;
+  readonly interlace?: number;
+  /** Filter byte + filtered scanline, per row, already concatenated. */
+  readonly scanlines: Uint8Array;
+  readonly extra?: readonly Uint8Array[];
+  readonly zlib?: Uint8Array;
+}
+
+/** A PNG assembled chunk by chunk (ISO/IEC 15948 §5), compressed with node:zlib. */
+function pngOf(spec: PngSpec): Uint8Array {
+  const ihdr = new Uint8Array(13);
+  const view = new DataView(ihdr.buffer);
+  view.setUint32(0, spec.width);
+  view.setUint32(4, spec.height);
+  ihdr.set([spec.bitDepth, spec.colorType, 0, 0, spec.interlace ?? 0], 8);
+  const parts = [
+    new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk('IHDR', ihdr),
+    ...(spec.extra ?? []),
+    chunk('IDAT', spec.zlib ?? new Uint8Array(deflateSync(spec.scanlines))),
+    chunk('IEND', new Uint8Array(0)),
+  ];
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+
+function paeth(a: number, b: number, c: number): number {
+  const p = a + b - c;
+  const pa = Math.abs(p - a);
+  const pb = Math.abs(p - b);
+  const pc = Math.abs(p - c);
+  if (pa <= pb && pa <= pc) return a;
+  return pb <= pc ? b : c;
+}
+
+/** Encodes `rows` (raw bytes per row) with one filter type per row (§9.2). */
+function filtered(rows: readonly number[][], filters: readonly number[], bpp: number): Uint8Array {
+  const out: number[] = [];
+  rows.forEach((row, y) => {
+    const prev = y === 0 ? row.map(() => 0) : rows[y - 1]!;
+    const type = filters[y]!;
+    out.push(type);
+    row.forEach((x, i) => {
+      const a = i >= bpp ? row[i - bpp]! : 0;
+      const b = prev[i]!;
+      const c = i >= bpp ? prev[i - bpp]! : 0;
+      const predictor = [0, a, b, Math.floor((a + b) / 2), paeth(a, b, c)][type]!;
+      out.push((x - predictor) & 0xff);
+    });
+  });
+  return new Uint8Array(out);
+}
+
+function vendored(name: string): Uint8Array {
+  const payload = buildSpriteAssetsStore().get(internalSpriteAssetKey(`archimate/${name}.png`));
+  if (payload === undefined) throw new Error(`no vendored ${name}.png`);
+  return payload.bytes;
+}
+
+describe('readPng (SImageIO.read stand-in)', () => {
+  it('decodes the vendored 8-bit RGBA access.png: 15 opaque black, 241 clear pixels', () => {
+    const image = readPng(vendored('access'));
+    expect([image?.width, image?.height]).toEqual([16, 16]);
+    const values = Array.from(image!.argb);
+    expect(values.filter((v) => v === argb(255, 0, 0, 0))).toHaveLength(15);
+    expect(values.filter((v) => v === 0)).toHaveLength(241);
+  });
+
+  it('decodes the vendored 1-bit palette assignment.png through PLTE + tRNS', () => {
+    const image = readPng(vendored('assignment'))!;
+    const values = Array.from(image.argb);
+    expect(values.filter((v) => v === argb(255, 0, 0, 0))).toHaveLength(56);
+    expect(values.filter((v) => v === argb(0, 255, 255, 255))).toHaveLength(200);
+    expect(image.argb[1 * 16 + 10]).toBe(argb(255, 0, 0, 0));
+    expect(image.argb[0]).toBe(argb(0, 255, 255, 255));
+  });
+
+  it('resolves every vendored archimate PNG to a 15x15-measuring SpriteImage', () => {
+    const store = internalSpriteStoreFrom(buildSpriteAssetsStore());
+    const pngs = ARCHIMATE_SPRITE_NAMES.filter((n) => n.format === 'png');
+    expect(pngs).toHaveLength(23);
+    for (const { folder, name } of pngs) {
+      const sprite = store.get(`${folder}/${name}`);
+      expect(sprite, name).toBeInstanceOf(SpriteImage);
+      expect([sprite?.width, sprite?.height], name).toEqual([15, 15]);
+    }
+  });
+
+  it('round-trips the port encoder (RGBA, filter 0)', () => {
+    const rgba = new Uint8Array([1, 2, 3, 4, 250, 251, 252, 253, 9, 8, 7, 0, 0, 0, 0, 255, 10, 20, 30, 40, 5, 6, 7, 8]);
+    const image = readPng(encodePng(rgba, 3, 2))!;
+    expect(Array.from(image.argb)).toEqual([
+      argb(4, 1, 2, 3),
+      argb(253, 250, 251, 252),
+      argb(0, 9, 8, 7),
+      argb(255, 0, 0, 0),
+      argb(40, 10, 20, 30),
+      argb(8, 5, 6, 7),
+    ]);
+  });
+
+  it('reverses all five scanline filters (sub, up, average, paeth)', () => {
+    const rows = [
+      [10, 20, 30, 255, 40, 50, 60, 128],
+      [200, 100, 50, 25, 1, 2, 3, 4],
+      [7, 77, 177, 255, 255, 0, 128, 64],
+      [90, 80, 70, 60, 50, 40, 30, 20],
+      [11, 22, 33, 44, 55, 66, 77, 88],
+    ];
+    const bytes = pngOf({
+      width: 2,
+      height: 5,
+      bitDepth: 8,
+      colorType: 6,
+      scanlines: filtered(rows, [0, 1, 2, 3, 4], 4),
+    });
+    const image = readPng(bytes)!;
+    expect(Array.from(image.argb)).toEqual(
+      rows.flatMap((r) => [argb(r[3]!, r[0]!, r[1]!, r[2]!), argb(r[7]!, r[4]!, r[5]!, r[6]!)]),
+    );
+  });
+
+  it('unpacks 2- and 4-bit palette indices, MSB first; entries past tRNS are opaque', () => {
+    const plte = chunk('PLTE', new Uint8Array([255, 0, 0, 0, 255, 0, 0, 0, 255, 9, 9, 9]));
+    const trns = chunk('tRNS', new Uint8Array([0x40]));
+    const two = readPng(
+      pngOf({
+        width: 4,
+        height: 1,
+        bitDepth: 2,
+        colorType: 3,
+        scanlines: new Uint8Array([0, 0b00011011]),
+        extra: [plte, trns],
+      }),
+    )!;
+    expect(Array.from(two.argb)).toEqual([
+      argb(0x40, 255, 0, 0),
+      argb(255, 0, 255, 0),
+      argb(255, 0, 0, 255),
+      argb(255, 9, 9, 9),
+    ]);
+    const four = readPng(
+      pngOf({
+        width: 3,
+        height: 1,
+        bitDepth: 4,
+        colorType: 3,
+        scanlines: new Uint8Array([0, 0x21, 0x30]),
+        extra: [plte],
+      }),
+    )!;
+    expect(Array.from(four.argb)).toEqual([argb(255, 0, 0, 255), argb(255, 0, 255, 0), argb(255, 9, 9, 9)]);
+    const eight = readPng(
+      pngOf({ width: 1, height: 1, bitDepth: 8, colorType: 3, scanlines: new Uint8Array([0, 2]), extra: [plte] }),
+    )!;
+    expect(Array.from(eight.argb)).toEqual([argb(255, 0, 0, 255)]);
+  });
+
+  it.each([
+    [
+      'a palette index past PLTE',
+      { width: 1, height: 1, bitDepth: 8, colorType: 3, scanlines: new Uint8Array([0, 5]) },
+    ],
+    [
+      'a greyscale image (colour type 0)',
+      { width: 1, height: 1, bitDepth: 8, colorType: 0, scanlines: new Uint8Array([0, 5]) },
+    ],
+    ['a 16-bit RGBA image', { width: 1, height: 1, bitDepth: 16, colorType: 6, scanlines: new Uint8Array(9) }],
+    [
+      'an Adam7-interlaced image',
+      { width: 1, height: 1, bitDepth: 8, colorType: 6, interlace: 1, scanlines: new Uint8Array(5) },
+    ],
+    ['a short IDAT stream', { width: 2, height: 2, bitDepth: 8, colorType: 6, scanlines: new Uint8Array(5) }],
+    [
+      'an unknown filter type',
+      { width: 1, height: 1, bitDepth: 8, colorType: 6, scanlines: new Uint8Array([5, 0, 0, 0, 0]) },
+    ],
+    [
+      'a preset-dictionary zlib header',
+      {
+        width: 1,
+        height: 1,
+        bitDepth: 8,
+        colorType: 6,
+        scanlines: new Uint8Array(5),
+        zlib: new Uint8Array([0x78, 0xbb, 0, 0]),
+      },
+    ],
+    [
+      'a non-deflate zlib method',
+      {
+        width: 1,
+        height: 1,
+        bitDepth: 8,
+        colorType: 6,
+        scanlines: new Uint8Array(5),
+        zlib: new Uint8Array([0x77, 0x01, 0, 0]),
+      },
+    ],
+    [
+      'a corrupt deflate stream',
+      {
+        width: 1,
+        height: 1,
+        bitDepth: 8,
+        colorType: 6,
+        scanlines: new Uint8Array(5),
+        zlib: new Uint8Array([0x78, 0x9c, 0xff, 0xff, 0xff]),
+      },
+    ],
+  ] satisfies [string, PngSpec][])('declines %s (fromInternal logs and returns null, java:118-121)', (_label, spec) => {
+    expect(readPng(pngOf(spec))).toBeUndefined();
+  });
+
+  it('declines a PNG with no IDAT chunk', () => {
+    const noData = pngOf({ width: 1, height: 1, bitDepth: 8, colorType: 6, scanlines: new Uint8Array(5) });
+    // Drop the IDAT: signature (8) + IHDR (25), then IEND.
+    const idatLength = new DataView(noData.buffer).getUint32(33);
+    const stripped = new Uint8Array([...noData.subarray(0, 33), ...noData.subarray(33 + 12 + idatLength)]);
+    expect(readPng(stripped)).toBeUndefined();
+  });
+
+  it('declines a truncated chunk list', () => {
+    expect(readPng(vendored('access').subarray(0, 40))).toBeUndefined();
   });
 });

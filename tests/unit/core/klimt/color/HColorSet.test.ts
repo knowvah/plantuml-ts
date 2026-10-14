@@ -158,8 +158,8 @@ describe('HColorSet class (HColorSet.java:43-120)', () => {
     expect(set.getColor('blue').asString()).toBe('#0000FF');
   });
 
-  it('the unported HColorAutomagic / HColorScheme results throw rather than resolve', () => {
-    expect(() => set.getColorOrWhite('automatic')).toThrow('HColorAutomagic');
+  it('`automatic` resolves to an HColorAutomagic (HColor.asString "?HColorAutomagic"); HColorScheme is unported', () => {
+    expect(set.getColorOrWhite('automatic').asString()).toBe('?HColorAutomagic');
     expect(() => set.getColorOrWhite('#?red:blue')).toThrow('HColorScheme');
     expect(() => set.getColorOrWhite('#?red:blue:green')).toThrow('HColorScheme');
   });
@@ -174,5 +174,16 @@ describe('HColorSet class (HColorSet.java:43-120)', () => {
 
   it('`?` with an unparsable 3rd part falls through to the gradient scan and then null', () => {
     expect(set.getColorOrNull('?red:blue:nosuch')).toBeUndefined();
+  });
+});
+
+describe('HColorSet.names (HColorSet.java:51-53, TreeSet ColorTrieNode.java:50)', () => {
+  it('lists 154 names sorted by code unit, first APPLICATION, last YellowGreen', () => {
+    const names = HColorSet.instance().names();
+    expect(names).toHaveLength(154);
+    expect(names[0]).toBe('APPLICATION');
+    expect(names[names.length - 1]).toBe('YellowGreen');
+    expect(names).toEqual([...names].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)));
+    expect(new Set(names).size).toBe(154);
   });
 });

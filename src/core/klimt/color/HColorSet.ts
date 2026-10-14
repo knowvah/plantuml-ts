@@ -22,10 +22,11 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/awt/XColor.java
  */
 
-import { getColor } from './ColorTrieNode.js';
+import { getColor, NAMES } from './ColorTrieNode.js';
 import type { RgbTriple } from './ColorTrieNode.js';
 import type { GradientPolicy, HColorGradient } from './HColorGradient.js';
 import { HColors } from './HColors.js';
+import { HColorAutomagic } from './HColorAutomagic.js';
 import type { HColorSimple } from './HColorSimple.js';
 import { NoSuchColorException } from './NoSuchColorException.js';
 
@@ -319,6 +320,9 @@ function parseGradient(s: string): HColorGradient | undefined {
   return undefined;
 }
 
+/** What `HColorSet#parseColor` returns (`HColor` subclasses). */
+export type ParsedColor = HColorSimple | HColorGradient | HColorAutomagic;
+
 /**
  * HColorSet — the colour-name/hex resolver as upstream's singleton class,
  * layered over this module's {@link parseSimpleColor} (the private
@@ -326,7 +330,7 @@ function parseGradient(s: string): HColorGradient | undefined {
  * {@link HColorSimple}, or {@link HColorGradient} for a `c1<policy>c2`
  * token (java:109-117). The `automatic` and `?light:dark` forms
  * (`HColorAutomagic`, `HColorScheme`) are not ported and throw: no mindmap
- * fixture reaches either (b6-T6a). `names()` is not ported. Stateless.
+ * fixture reaches either (b6-T6a). Stateless.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSet.java:43-120
  */
@@ -342,18 +346,30 @@ export class HColorSet {
   /** @see HColorSet.java:55-56 */
   private constructor() {}
 
+  /**
+   * Upstream returns an unmodifiable view of `ColorTrieNode.NAMES`, a
+   * `TreeSet<String>` (ColorTrieNode.java:50): sorted by `String.compareTo`
+   * (UTF-16 code units, case-sensitive) and deduplicated. The port's
+   * `NAMES` keeps registration order, so sort here.
+   *
+   * @see HColorSet.java:51-53
+   */
+  names(): string[] {
+    return [...new Set(NAMES)].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  }
+
   /** `parseColor(s)`, else `HColors.WHITE`. @see HColorSet.java:58-63 */
-  getColorOrWhite(s: string): HColorSimple | HColorGradient {
+  getColorOrWhite(s: string): ParsedColor {
     return this.parseColor(s) ?? HColors.WHITE;
   }
 
   /** `undefined` where upstream returns `null`. @see HColorSet.java:65-67 */
-  getColorOrNull(s: string): HColorSimple | HColorGradient | undefined {
+  getColorOrNull(s: string): ParsedColor | undefined {
     return this.parseColor(s);
   }
 
   /** @see HColorSet.java:69-76 */
-  getColor(s: string): HColorSimple | HColorGradient {
+  getColor(s: string): ParsedColor {
     const result = this.parseColor(s);
     if (result === undefined) throw new NoSuchColorException();
     return result;
@@ -365,11 +381,11 @@ export class HColorSet {
    *
    * @see HColorSet.java:78-120
    */
-  private parseColor(sIn: string): HColorSimple | HColorGradient | undefined {
+  private parseColor(sIn: string): ParsedColor | undefined {
     const s = sIn.startsWith('#') ? sIn.substring(1) : sIn;
     const lower = s.toLowerCase();
     if (lower === 'transparent' || lower === 'background') return HColors.none();
-    if (lower === 'automatic') throw unported('HColorAutomagic', s);
+    if (lower === 'automatic') return new HColorAutomagic();
 
     const result = parseSimpleColor(s);
     if (result !== undefined) return HColors.simple(result);

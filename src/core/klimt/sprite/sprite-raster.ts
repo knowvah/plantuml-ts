@@ -267,3 +267,136 @@ export function spriteColor4096ToPngDataUri(sprite: SpriteColor4096, scale: numb
     height: height * scale,
   };
 }
+
+// ---------------------------------------------------------------------------
+// `net.atmp.PixelImage` over a `PortableImage` (ufp-T3a, `SpriteImage`)
+// ---------------------------------------------------------------------------
+
+/**
+ * A decoded `PortableImage` as `getRGB` answers it: one Java `int` ARGB per
+ * pixel (alpha in the top byte, signed), row-major, `argb[y * width + x]`.
+ * `PixelImage#deepCopy` (`net/atmp/PixelImage.java:174-182`) copies into a
+ * `TYPE_INT_ARGB` image, so every `setRGB` below stores its int verbatim.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/awt/PortableImage.java
+ */
+export interface ArgbImage {
+  readonly width: number;
+  readonly height: number;
+  readonly argb: Int32Array;
+}
+
+/** `mask_a__ = 0xFF000000` as the Java `int` it is (PixelImage.java:154). */
+const MASK_A = 0xff000000 | 0;
+/** `mask_rgb = 0x00FFFFFF` (PixelImage.java:155). */
+const MASK_RGB = 0x00ffffff;
+/** `getDarkerRgb`'s "none yet" sentinel (PixelImage.java:134). */
+const NO_DARKER_RGB = -1;
+/** YIQ weights and divisor of `ColorUtils#getGrayScaleInternal` (ColorUtils.java:48-58). */
+const GRAY_R = 299;
+const GRAY_G = 587;
+const GRAY_B = 114;
+const GRAY_DIVISOR = 1000;
+const BYTE = 0xff;
+
+/** `ColorUtils.getGrayScaleFromRGB(rgb)` (ColorUtils.java:60-65). */
+function grayScaleFromRgb(rgb: number): number {
+  const red = (rgb >> 16) & BYTE;
+  const green = (rgb >> 8) & BYTE;
+  const blue = rgb & BYTE;
+  return Math.trunc((red * GRAY_R + green * GRAY_G + blue * GRAY_B) / GRAY_DIVISOR);
+}
+
+/** `getRGB(x, y)` of a row-major {@link ArgbImage}. */
+function rgbAt(image: ArgbImage, x: number, y: number): number {
+  return image.argb[y * image.width + x]!;
+}
+
+/** `PixelImage#deepCopy` (PixelImage.java:174-182). */
+function deepCopy(image: ArgbImage): ArgbImage {
+  return { width: image.width, height: image.height, argb: Int32Array.from(image.argb) };
+}
+
+/**
+ * `PixelImage#getDarkerRgb` (PixelImage.java:133-152): the rgb of the darkest
+ * FULLY opaque pixel, visiting x outer, y inner — on a grey tie the first one
+ * visited wins (strict `<`). `-1` when no pixel is opaque.
+ */
+export function getDarkerRgb(image: ArgbImage): number {
+  let darkerRgb = NO_DARKER_RGB;
+  for (let i = 0; i < image.width; i++)
+    for (let j = 0; j < image.height; j++) {
+      const color = rgbAt(image, i, j);
+      if ((color & MASK_A) !== MASK_A) continue;
+      const rgb = color & MASK_RGB;
+      if (darkerRgb === NO_DARKER_RGB || grayScaleFromRgb(rgb) < grayScaleFromRgb(darkerRgb)) darkerRgb = rgb;
+    }
+  return darkerRgb;
+}
+
+/**
+ * `PixelImage#muteColor` (PixelImage.java:97-113): every non-transparent pixel
+ * whose rgb is {@link getDarkerRgb}'s becomes `newColor.getRGB() + a` — Java
+ * `int` addition, so an opaque `newColor` over an opaque pixel overflows to
+ * alpha `0xFE` (`(0xFF + A) & 0xFF` in general). `newColorRgb` is
+ * `XColor#getRGB()` (XColor.java:64-66).
+ */
+export function muteColor(image: ArgbImage, newColorRgb: number): ArgbImage {
+  const darkerRgb = getDarkerRgb(image);
+  const copy = deepCopy(image);
+  for (let i = 0; i < image.width; i++)
+    for (let j = 0; j < image.height; j++) {
+      const color = rgbAt(image, i, j);
+      const a = color & MASK_A;
+      if (a !== 0 && (color & MASK_RGB) === darkerRgb) copy.argb[j * image.width + i] = (newColorRgb + a) | 0;
+    }
+  return copy;
+}
+
+/**
+ * `PixelImage#monochrome` (PixelImage.java:81-94), operator precedence
+ * included: `grayScale + grayScale << 8 + grayScale << 16` parses as
+ * `((g + g) << (8 + g)) << 16` in Java, and JS `<<` masks its count to five
+ * bits exactly as Java's `int` shift does.
+ */
+export function monochrome(image: ArgbImage): ArgbImage {
+  const copy = deepCopy(image);
+  for (let i = 0; i < image.width; i++)
+    for (let j = 0; j < image.height; j++) {
+      const color = rgbAt(image, i, j);
+      const grayScale = grayScaleFromRgb(color & MASK_RGB);
+      const gray = ((grayScale + grayScale) << (8 + grayScale)) << 16;
+      copy.argb[j * image.width + i] = (gray + (color & MASK_A)) | 0;
+    }
+  return copy;
+}
+
+/** The non-premultiplied RGBA bytes `scaleBilinear`/`encodePng` read. */
+function argbToRgba(image: ArgbImage): RgbaBitmap {
+  const rgba = new Uint8Array(image.argb.length * RGBA_BYTES_PER_PIXEL);
+  image.argb.forEach((color, index) => {
+    const offset = index * RGBA_BYTES_PER_PIXEL;
+    rgba[offset] = (color >> 16) & BYTE;
+    rgba[offset + 1] = (color >> 8) & BYTE;
+    rgba[offset + 2] = color & BYTE;
+    rgba[offset + 3] = (color >>> 24) & BYTE;
+  });
+  return { rgba, width: image.width, height: image.height };
+}
+
+/**
+ * `PixelImage#getImage` at a cumulative `scale` (PixelImage.java:69-78,
+ * `PortableImageAwt#scale` TYPE_BILINEAR, reproduced by {@link scaleBilinear})
+ * encoded as `SvgGraphics#svgImage` embeds it (SvgGraphics.java:970-983): the
+ * resampled raster's own pixel size and its PNG data URI.
+ */
+export function argbImageToPngDataUri(
+  image: ArgbImage,
+  scale: number,
+): { readonly dataUri: string; readonly width: number; readonly height: number } {
+  const raster = scaleBilinear(argbToRgba(image), scale);
+  return {
+    dataUri: toBase64DataUri(encodePng(raster.rgba, raster.width, raster.height)),
+    width: raster.width,
+    height: raster.height,
+  };
+}

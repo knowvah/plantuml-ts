@@ -1,0 +1,24 @@
+{
+  "fixtures": [
+    {
+      "type": "unknown",
+      "slug": "lazama-75-loli189",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335e"
+    },
+    {
+      "type": "unknown",
+      "slug": "gazale-13-tadu312",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
+      "measuredAt": "2026-10-14",
+      "measuredAgainstCommit": "e908d335e"
+    }
+  ]
+}

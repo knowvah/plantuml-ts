@@ -9,13 +9,14 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1601 modules · 5926 exported names.
+1666 modules · 6052 exported names.
 
 ## `src/`
 
 | Module | Exports | Purpose |
 |---|---|---|
 | `index.ts` | `RenderOptions`, `assembleSvg`, `loadElk`, `ElkBackend`, `stdlibStore`, `withStdlib`, `BundleData`, `StdlibStore`, `stdlibRegistry`, `StdlibChunkLoadError`, `StdlibRegistry`, `prepareIncludeStore`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `StdlibNotBundledError`, `IncludeWarmupOptions`, `SecurityProfile`, `remoteStdlib`, `StdlibResourceFetchError`, `StdlibRemoteManifest`, `RemoteBundle`, `spriteSplitStdlib`, `SpriteNotBundledError`, `SpriteSplitManifest`, `combineAssetStores`, `AssetPayload`, `AssetStore`, `renderPagesSync`, `renderSync`, `render`, `renderPages`, `renderAll` |  |
+| `registered-plugins.ts` | `PluginRegistrar`, `registerPlugins` | The composition root's registrations, in upstream's factory order: the `factories.add(...)` run of `PSystemBuilder`'s constructor. |
 
 ## `src/core/`
 
@@ -65,7 +66,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `include-resolver-timeout.ts` | `withIncludeTimeout` | Bounding one include fetch by time -- the port of upstream's `Future#get(SecurityUtils.getSecurityProfile().getTimeout(), MILLISECONDS)` around every URL read (`security/SURL.java:357-358`, :402, :438). |
 | `include-resolver.ts` | `MapIncludeStore`, `IncludeNotFoundError`, `StdlibNotBundledError`, `EMPTY_INCLUDE_STORE`, `IncludeStore`, `IncludeFetcher`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `fetchInclude`, `prefetchIncludes`, `IncludeWarmupOptions`, `prepareIncludeStore` | The ASYNC half of the include seam. |
 | `internal-emoji-store.ts` | `INTERNAL_EMOJI_ASSET_PREFIX`, `internalEmojiAssetKey`, `InternalEmojiStore`, `EmojiArtworkResolver`, `emojiArtworkResolverFor`, `internalEmojiStoreFrom` | The Twemoji artwork half of `<:name:>` emoji rendering. |
-| `internal-sprite-store.ts` | `INTERNAL_SPRITE_ASSET_PREFIX`, `internalSpriteAssetKey`, `InternalSpriteStore`, `internalSpriteStoreFrom`, `matchJarSpriteLine` | `SpriteImage.fromInternal` (java `klimt/sprite/SpriteImage.java:100-128`) — the jar-internal `/sprites/**` bundle, ported onto ADR-2's synchronous asset channel (`plans/s1l-tail-fix/decisions.md`). |
+| `internal-sprite-store.ts` | `INTERNAL_SPRITE_ASSET_PREFIX`, `internalSpriteAssetKey`, `InternalSpriteStore`, `readPng`, `internalSpriteStoreFrom`, `matchJarSpriteLine` | `SpriteImage.fromInternal` (java `klimt/sprite/SpriteImage.java:100-128`) — the jar-internal `/sprites/**` bundle, ported onto ADR-2's synchronous asset channel (`plans/s1l-tail-fix/decisions.md`). |
 | `java-hash-set.ts` | `javaDoubleHashCode`, `javaHashSetOrder` | java-hash-set.ts — the iteration order of a `java.util.HashSet` built by successive `add` calls, for code upstream iterates straight out of a `HashSet` (e.g. |
 | `java-whitespace.ts` | `isJavaWhitespaceAt` | `Character.isWhitespace(char)`, enumerated. |
 | `latex-metrics.ts` | `TeXIconSize`, `texIconDimension`, `measureTeXIcon` | The size of a `<latex>` image, by the rule upstream sizes it with. |
@@ -83,6 +84,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `parsedOpsFor`, `openIconicFactor`, `openIconicDims`, `openIconicStartingAltitude`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
 | `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg`, `noGradient` | Paint — the color/gradient value model for the rendering layer. |
 | `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals`, `parseRefusalOf` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
+| `PlainStringsDiagram.ts` | `PlainStringsDiagram` | `PlainStringsDiagram` — a {@link UgDiagram} whose page is its `strings` drawn black on white, optionally with an `image` at `imagePosition` (`version`, the eggs). |
 | `preprocessor-collector.ts` | `StyleAndSkinparamCollector` | preprocessor-collector.ts -- the `<style>` / `skinparam` / `skin` line collector `preprocessor.ts#resultOf` runs over the interpreter's finished result list. |
 | `preprocessor.ts` | `SkinDirective`, `PreprocessorResult`, `DeclarationOrder`, `PreprocessOptions`, `preprocess`, `PreprocessorFailure`, `PreprocessOutcome`, `preprocessOrError`, `preprocessLinesOrError` | Preprocessor -- a thin wrapper over the TIM interpreter (`src/core/tim/`). |
 | `render-options.ts` | `RenderOptions`, `getDefaultMeasurer`, `resolveMeasurer` | `RenderOptions` and measurer resolution — extracted from `src/index.ts` (mission A5 / T4). |
@@ -113,7 +115,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `spline-clip.ts` | `ClipRect`, `subdivide`, `clipSplineStart`, `clipSplineEnd` | spline-clip.ts — faithful port of upstream's compound-edge boundary clipping (`DotPath#simulateCompound`, klimt/shape/DotPath.java), applied when an edge endpoint is a container/group. |
 | `sprite-commands.ts` | `addSprite`, `createSpriteRegistry`, `getSprite`, `getSpriteMonochrome`, `getSpriteSvg`, `getSpriteColor4096`, `spriteDimsLookupFor`, `surfaceSpriteWarnings`, `SpriteRegistry`, `isSpriteMultilineOpenLine`, `isSpriteMultilineCloseLine`, `isSvgSpriteOpenLine`, `isSvgSpriteCloseLine`, `matchSpriteCommand` | `matchSpriteCommand` — the shared sprite-DEFINITION matcher parsers call at their own command-dispatch position, mirroring `matchAnnotationCommand` (`core/annotations/commands.ts`) exactly: extraction inside each parser, never a textual pre |
 | `sprite-prefetch.ts` | `scanSpriteNames` | Scan a diagram source for the `<$name>` sprite references it contains. |
-| `sprite-registry.ts` | `SpriteRegistry`, `createSpriteRegistry`, `addSprite`, `surfaceSpriteWarnings`, `getSprite`, `spriteDimsLookupFor`, `getSpriteMonochrome`, `isSpriteColor4096`, `getSpriteColor4096`, `getSpriteSvg` | `SpriteRegistry` — the per-diagram sprite map and its lookup seams, split out of `sprite-commands.ts` (which owns the sprite-DEFINITION grammar) purely to keep that file under this repo's 500-line module cap; the same split precedent as `op |
+| `sprite-registry.ts` | `SpriteRegistry`, `createSpriteRegistry`, `addSprite`, `surfaceSpriteWarnings`, `getSprite`, `spriteDimsLookupFor`, `getSpriteMonochrome`, `isSpriteColor4096`, `getSpriteColor4096`, `getSpriteImage`, `getSpriteSvg` | `SpriteRegistry` — the per-diagram sprite map and its lookup seams, split out of `sprite-commands.ts` (which owns the sprite-DEFINITION grammar) purely to keep that file under this repo's 500-line module cap; the same split precedent as `op |
 | `sprite-split-stdlib.ts` | `SpriteSplitManifest`, `SpriteNotBundledError`, `spriteSplitNamesOf`, `spriteSplitStdlib`, `assembleSpriteSplitContent` | si11b T4 -- per-sprite stdlib bundle registration, and the prefetch-side assembly it enables. |
 | `stdlib-content.ts` | `stdlibContentFor` | Resolving a `<bundle/thing>` include target to its CONTENT, for the prefetch walk's third channel (`include-resolver.ts#prefetchInner`). |
 | `stereotype-decoration.ts` | `GuillemetPair`, `DEFAULT_GUILLEMET`, `wrapGuillemet`, `hasMultipleLabel`, `splitStereotypeLabels`, `splitStereotypeStyleTags`, `CircledCharDecoration`, `parseCircledCharDecoration`, `CircledSpriteDecoration`, `parseCircledSpriteDecoration`, `DEFAULT_CIRCLED_CHARACTER_FONT_SIZE`, `resolveBadgeRadius` | stereotype-decoration.ts — the port of `StereotypeDecoration#buildComplex` (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/stereo/ StereotypeDecoration.java:143-182`): how a `<<...>>` run splits into the label(s) a diagram DISPLAYS |
@@ -170,6 +172,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `themes-builtin.ts` | `BUILTIN_THEMES` | Built-in PlantUML theme residue: only the fields an executed `!theme` does not yet reach -- see scripts/compile-themes.py. |
 | `themes-source.ts` | `THEME_SOURCES` | GENERATED by `scripts/build-theme-sources.ts` -- do not edit by hand. |
 | `TitledDiagram.ts` | `DiagramType`, `UmlSource`, `Previous`, `TitledDiagram` |  |
+| `UgDiagram.ts` | `TextBlockExporter`, `stringBounderFor`, `exportTo`, `UgDiagram` | `UgDiagram` — the base of every diagram that exports one klimt `TextBlock`, and its export path for the diagrams that are NOT a `TitledDiagram` (`getExporter`'s `else` arm, UgDiagram.java:140-145): the utility pages (`license`, `version`, ` |
+| `UgSimpleDiagram.ts` | `UgSimpleDiagram` | `UgSimpleDiagram` — a {@link UgDiagram} that is its own `TextBlock`: the subclass implements `calculateDimension`/`drawU`, and `getTextBlock` hands back `this` (`final` upstream). |
 | `uml-source-lines.ts` | `mutateExpandsBreakline`, `loadInternal`, `patchBase64Line`, `umlSourceSeedLines` | The line list upstream's `UmlSource#seed()` walks -- `BlockUml#data` as `PSystemBuilder#createPSystem` turns it into a `UmlSource`. |
 | `usymbol-shapes.ts` | `IconGeo`, `renderDatabaseIcon`, `renderComponentIcon`, `renderActorIcon`, `renderUseCaseIcon`, `renderUSymbolIcon` | Shared per-USymbol leaf-shape renderers — the SVG for a descriptive element's icon (component notch, database cylinder, actor stick-figure, usecase ellipse). |
 | `version.ts` | `VERSION`, `COMMIT`, `COMPILE_TIME_STRING`, `versionString`, `fullDescription` | The version banner the error diagram prints above the source listing. |
@@ -270,6 +274,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `CommandExecutionResult.ts` | `AbstractDiagram`, `CommandExecutionResult` | CommandExecutionResult — the ok/error outcome every command returns. |
 | `JsonNode.ts` | `JsonNode` | Parsed value of a `json Name { ... |
 | `ParserPass.ts` | `ParserPass` | ParserPass — which of the (up to) three parsing passes is running. |
+| `PSystemSingleLineFactory.ts` | `SingleLineType`, `RenderContext`, `SingleLineSpec`, `SingleLineGeometry`, `singleLinePlugin` | `PSystemSingleLineFactory` as a plugin helper: every `@startuml` utility page (`license`, `colors`, `sudoku`, the eggs, ...) is a factory that accepts a source of exactly one line between `@startuml` and `@enduml`, after the noise directly |
 
 ## `src/core/common/`
 
@@ -452,6 +457,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `raster-image.ts` | `RasterImage` | A bundled raster the error pages draw: its pixel size (`PortableImage #getWidth`/`#getHeight`) and the data URI the jar's SVG embeds for it. |
 | `UmlSource.ts` | `umlSourceOf` | The diagram's own lines — `@start…` through `@end…` — sliced out of the raw input. |
 
+## `src/core/flashcode/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `FlashCodeFactory.ts` | `getFlashCodeUtils` | `FlashCodeFactory` — the `FlashCodeUtils` this build has. |
+| `FlashCodeUtils.ts` | `FlashCodeUtils` | `FlashCodeUtils` — renders a text as a 2-D barcode (QR code) image. |
+| `FlashCodeUtilsNone.ts` | `FlashCodeUtilsNone` | `FlashCodeUtilsNone` — the `FlashCodeUtils` that exports no image. |
+
 ## `src/core/gantt/`
 
 | Module | Exports | Purpose |
@@ -488,11 +501,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ColorOrder.ts` | `ColorOrder`, `getColor`, `getReverse`, `fromString` | ColorOrder -- a channel permutation, used by `ColorMapper.reverse(order)` (`ColorMapper.java:93-100`) for `skinparam reversecolor <order>` (`TitledDiagram.java:308-312`). |
 | `ColorParser.ts` | `COLOR_REGEXP`, `PART2`, `COLORS_REGEXP`, `ColorParser` |  |
 | `ColorTrieNode.ts` | `RgbTriple`, `getColor`, `NAMES` | ColorTrieNode — the named-color -> RGB table upstream registers into a letter-indexed trie. |
-| `ColorUtils.ts` | `getGrayScale`, `getGrayScaleColor`, `getGrayScaleColorReverse` |  |
+| `ColorUtils.ts` | `getGrayScale`, `getGrayScaleColor`, `getGrayScaleColorReverse`, `distance` |  |
 | `fragment-color-mapper.ts` | `MonochromeMode`, `HexColorMapper`, `applyMonochromeHex`, `getReversed`, `colorMapperOf`, `applyColorMapperToFragment`, `applyMonochromeToFragment` | fragment-color-mapper.ts -- `skinparam monochrome true\|reverse` (G2 N61). |
+| `HColorAutomagic.ts` | `HColorAutomagic` |  |
 | `HColorGradient.ts` | `GradientPolicy`, `HColorGradient` |  |
 | `HColors.ts` | `HColors` |  |
-| `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `parseColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor`, `HColorSet` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
+| `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `parseColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor`, `ParsedColor`, `HColorSet` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
 | `HColorSimple.ts` | `HColorSimple` |  |
 | `HUSLColorConverter.ts` | `xyzToRgb`, `rgbToXyz`, `xyzToLuv`, `luvToXyz`, `luvToLch`, `lchToLuv`, `hsluvToLch`, `lchToHsluv`, `hpluvToLch`, `lchToHpluv`, `rgbToHex`, `hexToRgb`, `lchToRgb`, `rgbToLch`, `hsluvToRgb`, `rgbToHsluv`, `hpluvToRgb`, `rgbToHpluv`, `hsluvToHex`, `hpluvToHex`, `hexToHsluv`, `hexToHpluv` | HUSLColorConverter -- the HSLuv / HPLuv colour-space conversions (Alexei Boronine's reference implementation, as vendored upstream). |
 | `NoSuchColorException.ts` | `NoSuchColorException` | NoSuchColorException — thrown by `HColorSet#getColor` for a token that resolves to no colour. |
@@ -510,7 +524,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `DisplayNewlines.ts` | `JawsWarning`, `jawsWarningToWarning`, `getWithNewlines3`, `ParsedNewlines`, `parseWithNewlines`, `hasSeveralGuideLinesOfAll`, `hasSeveralGuideLinesOfString`, `splitDisplayLines` | DisplayNewlines — the pure, `this`-free half of `klimt/creole/Display.java`: the `\n`/tab/left-align/right-align escape-sequence scanner (`getWithNewlines`/`getWithNewlines3`), the deprecation-warning helper it calls (`addWarning`, `warning |
 | `DisplayReaders.ts` | `getStereotypeIfAny`, `isWhite`, `toStringOf`, `contentWidth`, `cacheKeyOf`, `iteratorOf`, `equalsLike`, `createFooOf` | `Display`'s read-only derived-value methods (`getStereotypeIfAny`, `isWhite`, `toString`, `contentWidth`, `cacheKey`, the `Iterable` protocol), plus `equalsLike` and the `createFoo` factory -- split out of `Display.ts` purely to keep that f |
 | `DisplayText.ts` | `replaceBackslashT`, `replace`, `manageGuillemet`, `withPage`, `removeEndingStereotype`, `getEndingStereotype`, `underlined`, `underlinedName`, `addAll`, `addFirst`, `appendFirstLine`, `add`, `addGeneric`, `splitMultiline`, `toTooltipText`, `hasSeveralGuideLines` | DisplayText — `Display`'s "same metadata, new content" list-manipulation family (`add*`/`with*`/`replace*`/`underlined*`/`splitMultiline`/...) plus its two subsystem-blocked seams (`withoutStereotypeIfNeeded`, `hasUrl`). |
-| `Emoji.ts` | `EmojiEntry`, `retrieveEmoji`, `emojiCharacter` | Emoji — the `<:name:>` creole emoji name registry. |
+| `Emoji.ts` | `EmojiEntry`, `getAll`, `retrieveEmoji`, `emojiCharacter` | Emoji — the `<:name:>` creole emoji name registry. |
 | `Fission.ts` | `NeutronType`, `getSplitted` | Fission — word-wrap. |
 | `Parser.ts` | `MONOSPACED`, `isLatexStart`, `isLatexEnd`, `isCodeStart`, `isCodeEnd`, `isTreeStart`, `getScale`, `getColor` | Parser — small static line-classification helpers `CreoleParser` (T9a) needs to dispatch a raw display line to the code/latex/tree/table branches, plus two pure `<style>`-attribute readers unrelated to that dispatch but part of the same ups |
 | `Position.ts` | `Position` |  |
@@ -531,6 +545,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `AbstractAtom.ts` | `AbstractAtom` | AbstractAtom — upstream: klimt/creole/atom/AbstractAtom.java (`abstract class AbstractAtom extends TextBlockMemoized implements Atom`). |
 | `Atom.ts` | `CreoleAtomUrl`, `CreoleAtom` | Atom — one drawable/measurable piece of a creole `Stripe` (one physical display line). |
 | `AtomEmoji.ts` | `EMOJI_MAGIC`, `EMOJI_BOX_FACTOR`, `EMOJI_ALTITUDE_FACTOR`, `EMOJI_LINE_HEIGHT_FACTOR`, `emojiLineHeightFactor`, `emojiFactor`, `emojiBoxDim`, `emojiSquareDim`, `emojiStartingAltitude`, `emojiRenderRun` | AtomEmoji — sizing constants for one `<:name:>` creole emoji atom. |
+| `AtomImg.ts` | `createQrcode` | `AtomImg.createQrcode` — the image atom a creole `<qrcode:...>` adds (`StripeSimple#addQrcode`, java:216-218). |
+| `AtomImgPortableImage.ts` | `TYPE_INT_RGB`, `buildPortableImage`, `scalePortableImage` | The `PortableImage` pieces `AtomImg.createQrcode` reaches (AtomImg.java:95, :98): `PortableImageFactory.build(w, h, TYPE_INT_RGB)` and the `UImage(PixelImage(im, TYPE_NEAREST_NEIGHBOR)).scale(scale).getImage(1)` chain, which ends in `Portab |
 | `AtomMath.ts` | `AtomMath` | AtomMath — upstream: klimt/creole/atom/AtomMath.java (`extends AbstractAtom implements Atom`, 107 lines). |
 | `AtomOpenIconic.ts` | `AtomOpenIconic`, `asAtomOpenIconic` | `AtomOpenIconic` — an OpenIconic `<&name>` glyph inside a creole line (`StripeSimple#addOpenIcon`, StripeSimple.java:239-243), as the polymorphic `Atom` `Sea`/`SheetBlock1` lay out: `calculateDimensionSlow` (`openIconic.asTextBlock` padded |
 | `AtomSpace.ts` | `SPACE_ATOM_HEIGHT`, `SPACE_ATOM_STARTING_ALTITUDE`, `spaceAtomDim` | AtomSpace — the creole `<space:N>` atom: N pixels of horizontal advance, nothing drawn. |
@@ -554,6 +570,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `CommandCreoleLatex.ts` | `createLatexCommand` | CommandCreoleLatex — `<latex>expr</latex>`. |
 | `CommandCreoleMath.ts` | `createMathCommand` | CommandCreoleMath — `<math>expr</math>`. |
 | `CommandCreoleMonospaced.ts` | `createMonospacedCommand` | CommandCreoleMonospaced — the creole `""text""` monospace run. |
+| `CommandCreoleQrcode.ts` | `createQrcodeCommand` | CommandCreoleQrcode — the creole `<qrcode:text>` / `<qrcode text{scale=N}>` tag: one image atom (`AtomImg.createQrcode`, via `stripe.addQrcode`). |
 | `CommandCreoleSizeChange.ts` | `createSizeChangeCommands` | CommandCreoleSizeChange — `<size:N>text</size>` and `<size:N>text to end of line` (no closing tag needed). |
 | `CommandCreoleSpace.ts` | `createSpaceCommand` | CommandCreoleSpace — the creole `<space:N>` / `<space:N/>` tag. |
 | `CommandCreoleStyle.ts` | `createStyleCommands`, `createStyleCommandsWithoutCreoleForm`, `createBackcolorCommands` | CommandCreoleStyle — the BOLD/ITALIC/UNDERLINE/STRIKE/WAVE inline style commands: `**text**`/`//text//`/`__text__`/`--text--`/`~~text~~` (pure Creole double-punctuation) and `<b>text</b>`/`<b>text to end of line` (HTML-tag-style, with or wi |
@@ -645,6 +662,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ClockwiseTopRightBottomLeft.ts` | `ClockwiseTopRightBottomLeft` |  |
 | `CoordinateChange.ts` | `CoordinateChange` |  |
 | `EnsureVisible.ts` | `EnsureVisible` | EnsureVisible — the callback surface a clickable region (`Url`) exposes so drivers can report every point they actually painted for it; the accumulated bounding box becomes the image-map/SVG link geometry. |
+| `GraphicPosition.ts` | `GraphicPosition` | `GraphicPosition` — where `GraphicStrings` places its image. |
 | `HorizontalAlignment.ts` | `HorizontalAlignment`, `horizontalAlignmentFromString` | HorizontalAlignment — the 3-way text/label alignment `USymbol#asSmall`/ `asBig` (decoration/symbol/USymbol.java) take for the stereotype and, for `asBig`, the label too (see `USymbolRectangle.java`'s `asBig`, which branches on `labelAlignme |
 | `MagneticBorder.ts` | `MagneticBorder` |  |
 | `MagneticBorderNone.ts` | `MagneticBorderNone` |  |
@@ -676,6 +694,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `big-frame.ts` | `Dim`, `Sides`, `BigFrameStyle`, `BigFrameLayout`, `buildBigFrame` | big-frame.ts — cdd-T34 (E14 `mainframe`): `klimt/shape/BigFrame.java`, the box `core/DiagramChromeFactory.java#decorateWithFrame` wraps the WHOLE diagram body in for `mainframe TEXT` — a rounded rect with a folder-tab title cutout in its to |
 | `DotPath.ts` | `Bezier`, `PointAndAngle`, `DotPath` |  |
+| `GraphicStrings.ts` | `GraphicStringsClasspath`, `GraphicStrings` | `GraphicStrings` — a list of lines drawn as one creole block (sans-serif 12 black on white by default) inside a 5px margin, optionally with an image in a corner or under the text. |
 | `TextBlock.ts` | `TextBlock`, `textBlockMagneticBorder` |  |
 | `TextBlockHorizontal.ts` | `TextBlockHorizontal` |  |
 | `TextBlockInEllipse.ts` | `TextBlockInEllipse` |  |
@@ -706,18 +725,23 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `archimate-sprite-names.ts` | `ArchimateSpriteName`, `ARCHIMATE_SPRITE_NAMES` | `ARCHIMATE_SPRITE_NAMES` -- the `sprites/<folder>/` jar entries `listsprite` prints: folders and files in `ResourcesUtils.getJarFile` order (`TreeSet`, `ResourcesUtils.java:89-115`), kept/split as `PSystemListArchimateSprites.java:64-73` do |
 | `AsciiEncoder.ts` | `AsciiEncoder` | PlantUML's own 6-bit encoding used for sprite/URL payloads -- NOT base64. |
 | `ColorPalette4096.ts` | `Rgb4096`, `colorForCode4096` | ColorPalette4096 — the 64-character alphabet + 2-char-code <-> 12-bit-RGB mapping `SpriteColorBuilder4096` reads a `/color` sprite body through. |
 | `ColorResolver.ts` | `GrayLevelRange`, `ColorResolver`, `colorResolverToSvgHex` | ColorResolver — resolves a raw SVG color token (from a decomposed `<$sprite>` `<path>`'s `fill`/`stroke` attribute) to a concrete color, honouring an optional "forced" override color and the sprite's own grey-level range. |
 | `png-encoder.ts` | `RGBA_BYTES_PER_PIXEL`, `crc32`, `encodePng`, `toBase64`, `toBase64DataUri` | Deterministic PNG writer, browser-safe, synchronous: the byte stream the jar's `javax.imageio` PNG writer produces for a sprite raster. |
 | `png-ihdr.ts` | `PngIhdr`, `parsePngIhdrFromDataUri` | PNG IHDR chunk reader for `data:image/png;base64,...` data URIs. |
+| `PSystemListArchimateSprites.ts` | `listArchimateSpritesLines`, `PSystemListArchimateSprites` | `PSystemListArchimateSprites` -- the `listsprite` page: every vendored `sprites/<folder>/` file drawn as `<$folder/name> name (fmt)`, split into 4 columns by `getCols`. |
+| `PSystemListArchimateSpritesFactory.ts` | `acceptsListArchimateSprites`, `listArchimateSpritesPlugin` | `PSystemListArchimateSpritesFactory` -- accepts a one-line source starting (case-insensitively) with `listsprite`. |
 | `sprite-bilinear.ts` | `scaledRasterSize`, `scaleBilinear` | The jar's sprite/img raster scale: `PortableImageAwt#scale` (`klimt/awt/PortableImageAwt.java:113-127`) builds a `round(w * scale) x round(h * scale)` `TYPE_INT_ARGB` destination and runs `java.awt.image.AffineTransformOp` with `TYPE_BILINE |
-| `sprite-raster.ts` | `SpriteLike`, `spriteMonochromeAsLike`, `RgbaBitmap`, `spriteToRgba`, `SpritePngResult`, `spriteToPngDataUri`, `spriteColor4096ToRgba`, `spriteColor4096ToPngDataUri` | Monochrome-sprite tint + PNG rasterization (T5 of SI5b/decisions.md D7). |
+| `sprite-raster.ts` | `SpriteLike`, `spriteMonochromeAsLike`, `RgbaBitmap`, `spriteToRgba`, `SpritePngResult`, `spriteToPngDataUri`, `spriteColor4096ToRgba`, `spriteColor4096ToPngDataUri`, `ArgbImage`, `getDarkerRgb`, `muteColor`, `monochrome`, `argbImageToPngDataUri` | Monochrome-sprite tint + PNG rasterization (T5 of SI5b/decisions.md D7). |
 | `sprite-tint.ts` | `SpriteTint`, `spriteBackColor`, `spriteTintHref`, `spriteHrefOver` | sprite-tint.ts — a monochrome sprite's tint, deferred until the back colour it is drawn over is known (unwind2-S7). |
 | `Sprite.ts` | `Sprite` | The shared marker every sprite kind implements: pixel dimensions. |
 | `SpriteColor4096.ts` | `SpriteColor4096` |  |
 | `SpriteColorBuilder4096.ts` | `buildSpriteColor4096` | SpriteColorBuilder4096 — decodes a `sprite $name [WxH/color] { ... |
+| `SpriteContainerEmpty.ts` | `SpriteContainerEmpty` | `SpriteContainerEmpty` — the skin `GraphicStrings` hands its creole text (GraphicStrings.java:135): no skinparams, `<<`/`>>` left as typed, and sprites only from the jar-resident bundle (`SpriteImage.fromInternal`). |
 | `SpriteGrayLevel.ts` | `SpriteGrayLevel` |  |
+| `SpriteImage.ts` | `SpriteImage` | `SpriteImage` — a sprite backed by a raster `PortableImage`: what `SpriteImage.fromInternal` returns for a jar-internal `/sprites/**.png` (SpriteImage.java:113-115; the probe itself is `internal-sprite-store.ts`). |
 | `SpriteMonochrome.ts` | `SpriteMonochrome` |  |
 | `SpriteSvg.ts` | `svgDimension`, `svgInkBox`, `SpriteSvg`, `isSpriteSvg` | `SpriteSvg` — a sprite defined by an inline `<svg>…</svg>` element rather than the encoded grey-level grid `SpriteMonochrome` carries. |
 | `svg-nanoparser-shapes.ts` | `DATA_STROKE`, `getFillString`, `applyFillAndStroke`, `drawCircle`, `drawEllipse`, `drawText` | svg-nanoparser-shapes.ts -- the `<circle>`/`<ellipse>`/`<text>` element emitters plus the shared `applyFillAndStroke`/`getFillString` attribute resolution `SvgNanoParser.drawU` dispatches to, split into its own module per this task's comple |
@@ -1628,6 +1652,20 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-usymbol-entity.ts` | `buildUSymbolEntityParams`, `usesClassUSymbolEntity`, `renderClassUSymbolEntity` | renderer-usymbol-entity.ts — SI14 T4: draws a class-diagram `usecase`/ `actor` leaf through the SAME faithful `EntityImageDescription.drawU` path the description engine's `renderer-entity.ts#drawEntity` already uses, replacing the hand-roll |
 | `renderer.ts` | `renderClass`, `renderClassPage` | Class diagram SVG renderer. |
 
+## `src/diagrams/dedication/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `dedication-images.ts` | `DedicationImage`, `DEDICATION_IMAGES` | `DEDICATION_IMAGES` -- the 10 `DedicationSimple` sentences (`Dedications.java:55-65`, in order) and the PNG the pinned jar embeds for each (D4). |
+| `Dedication.ts` | `Dedication` | `Dedication` — one sentence that may unlock an image. |
+| `DedicationEncrypted.ts` | `DedicationEncrypted` | `DedicationEncrypted` — one of the three secret dedications. |
+| `Dedications.ts` | `Dedications` | `Dedications` — the 10 public sentences then the 3 secret ones, tried in order on any line longer than 25 chars. |
+| `DedicationSimple.ts` | `DedicationSimple` | `DedicationSimple` — a public sentence and its image. |
+| `equals-ignore-case.ts` | `equalsIgnoreCase` | `java.lang.String#equalsIgnoreCase`, as `DedicationSimple#same` calls it (`DedicationSimple.java:74`): equal lengths, and per UTF-16 unit the units are equal, or their upper cases are, or the lower cases of their upper cases are (`String#re |
+| `PSystemDedication.ts` | `PSystemDedication` | `PSystemDedication` — a dedication image, alone on the page. |
+| `PSystemDedicationFactory.ts` | `PSystemDedicationFactory`, `dedicationPlugin` | `PSystemDedicationFactory` — a line `Dedications.get` recognises is a dedication page. |
+| `TinyHashableString.ts` | `TinyHashableString` | `TinyHashableString` — the line `Dedications.get` hands every dedication. |
+
 ## `src/diagrams/description/`
 
 | Module | Exports | Purpose |
@@ -1684,6 +1722,17 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `title-label-sizing.ts` | `measureTitleLabel` | Title-bar dims for a cluster's own display name — split out of layout-helpers.ts (500-line cap) as its own module, mirroring that file's existing leaf-sizing.js split. |
 | `together.ts` | `TOGETHER_FRAME_PREFIX`, `DescriptionTogether`, `currentTogether`, `openTogetherFrame`, `joinCurrentTogether`, `applyDescriptionTogethers` | `together { }` for the description engine (cdd3-T18): the same upstream code path as class. |
 
+## `src/diagrams/donors/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `donors-list.ts` | `DONORS` | `DONORS` -- the names `PSystemDonors#getDonors` decodes from its `DONORS` constant at runtime (`PSystemDonors.java:73-96`, decode at java:156-170: AsciiEncoder -> Brotli -> UTF-8 -> `replace('*', '.')` -> `StringTokenizer` on `\n`), decoded |
+| `PSystemDonors.ts` | `PSystemDonors`, `getCols` | `PSystemDonors` -- the `donors` page: a bold header, the donors list in `COLS` columns (`getCols`) and the PlantUML logo in the bottom-right corner. |
+| `PSystemDonorsFactory.ts` | `acceptsDonorsLine`, `executeLine`, `donorsPlugin` | `PSystemDonorsFactory` -- accepts the single line `donors` (any case, trailing whitespace allowed), as a `singleLinePlugin` (decisions.md D2). |
+| `PSystemSkinparameterList.ts` | `getCols`, `PSystemSkinparameterList` | `PSystemSkinparameterList` -- the `skinparameters` page: every `SkinParam.getPossibleValues()` key in 5 columns. |
+| `PSystemSkinparameterListFactory.ts` | `acceptsSkinparametersLine`, `executeLine`, `skinparameterListPlugin` | `PSystemSkinparameterListFactory` -- accepts the single line `skinparameters` (any case, trailing whitespace allowed), as a `singleLinePlugin` (decisions.md D2). |
+| `skinparameter-names.ts` | `SKINPARAMETER_NAMES` | `SKINPARAMETER_NAMES` -- `SkinParam.getPossibleValues()` (`SkinParam.java:567-641`), the table `PSystemSkinparameterList.java:99-102` prints: a `TreeSet` of literal keys plus keys derived from the FontParam/ColorParam/LineParam/AlignmentPar |
+
 ## `src/diagrams/dot/`
 
 | Module | Exports | Purpose |
@@ -1693,6 +1742,34 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `layout.ts` | `layoutDot` |  |
 | `parser.ts` | `parseDot` |  |
 | `renderer.ts` | `renderDot` |  |
+
+## `src/diagrams/eggs/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `apple2-image.ts` | `EggImage`, `EggImageUnavailableError`, `eggRasterImage`, `APPLE2_PNG` | `APPLE2_PNG` -- the image `apple //e` draws under its text (`PSystemAppleTwo.java:55`, `PSystemVersion.getApple2Image`, java:124-126: `version/apple2.png`, a header-stripped WebP read by `SFile.getImageFromWebpButHeader`), as the pinned jar |
+| `charlie-image.ts` | `CharliePng`, `CHARLIE_PNG` | `CHARLIE_PNG` -- the image `charlie` draws (`PSystemCharlie.java`, `PSystemVersion.getCharlieImage`, java:104-106), as the pinned jar embeds it in SVG (D4). |
+| `EggUtils.ts` | `EggUtils` | `EggUtils` — hex, xor and the base-26 key the easter-egg sentences are encrypted with. |
+| `equals-ignore-case.ts` | `equalsIgnoreCase` | `java.lang.String#equalsIgnoreCase`, which every egg factory's literal test calls (`PSystemCharlieFactory.java:48`, `PSystemAppleTwoFactory.java:52-53`, `PSystemRIPFactory.java:52`): equal lengths, and per UTF-16 unit the units are equal, o |
+| `PSystemAppleTwo.ts` | `PSystemAppleTwo` | `PSystemAppleTwo` — "Apple //e for ever !" over the Apple //e picture. |
+| `PSystemAppleTwoFactory.ts` | `PSystemAppleTwoFactory`, `appleTwoPlugin` | `PSystemAppleTwoFactory` — five literals, compared to the raw line with `equalsIgnoreCase`. |
+| `PSystemCharlie.ts` | `PSystemCharlie` | `PSystemCharlie` — the "Je suis Charlie" picture, alone on the page. |
+| `PSystemCharlieFactory.ts` | `PSystemCharlieFactory`, `charliePlugin` | `PSystemCharlieFactory` — two literals, compared to the raw line with `equalsIgnoreCase`. |
+| `PSystemColors.ts` | `PSystemColors` | `PSystemColors` — the `colors` page: every named colour as a 175x28 swatch in 21-row columns, or, given a colour, a 19-hexagon palette of the names closest to it (http://www.redblobgames.com/grids/hexagons/). |
+| `PSystemColorsFactory.ts` | `PSystemColorsFactory`, `colorsPlugin` | `PSystemColorsFactory` — `colors`, `color`, optionally followed by a colour name or hex value: the `@startuml` single-line factory for {@link PSystemColors}. |
+| `PSystemEgg.ts` | `PSystemEgg` | `PSystemEgg` — a decoded easter-egg sentence, one line per `\|`-separated token, drawn by `PlainStringsDiagram`. |
+| `PSystemEggFactory.ts` | `PSystemEggFactory`, `eggPlugin` | `PSystemEggFactory` — a line that decrypts one of two stored payloads to printable text is an easter egg (`SentenceDecoder`). |
+| `PSystemRIP.ts` | `PSystemRIP` | `PSystemRIP` — a dedication to the author's grandfather over his picture. |
+| `PSystemRIPFactory.ts` | `PSystemRIPFactory`, `ripPlugin` | `PSystemRIPFactory` — one literal, compared to the raw line with `equalsIgnoreCase`. |
+| `rip-image.ts` | `RIP_PNG` | `RIP_PNG` -- the image `jean canouet` draws under its text (`PSystemRIP.java:63`, `SImageIO.read(imm)`: the inline JPEG `imm`, java:71-435), as the pinned jar re-encodes it in SVG (the D4 approach). |
+| `SentenceDecoder.ts` | `SentenceDecoder` | `SentenceDecoder` — xor an encrypted easter-egg payload with the key a sentence spells (`EggUtils.fromSecretSentence`) and judge whether the result reads as text. |
+
+## `src/diagrams/emoji/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `PSystemListEmoji.ts` | `PSystemListEmoji` | `PSystemListEmoji` — the `emoji <block>` page: a header naming the Unicode block, then every {@link getAll} entry whose key starts with the block, as `<:code:>` artwork, `<#0:code:>` monochrome and the shortcut, in three columns (dx 0 / 500 |
+| `PSystemListEmojiFactory.ts` | `executeLine`, `listEmojiPlugin` | `PSystemListEmojiFactory` — accepts `emoji` (code `26`) or `emoji <block>`. |
 
 ## `src/diagrams/files/`
 
@@ -1762,6 +1839,16 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `SymetricalTee.ts` | `SymetricalTee` | The packing shape `Tetris.add` places: a "tee" of two rectangular arms — (`thickness1`, `elongation1`) then (`thickness2`, `elongation2`) — laid end to end along x, each arm's own thickness centred on the tee's y. |
 | `SymetricalTeePositioned.ts` | `SymetricalTeePositioned` |  |
 | `Tetris.ts` | `Tetris` |  |
+
+## `src/diagrams/openiconic/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `openiconic-all.ts` | `OPENICONIC_ALL` | `OPENICONIC_ALL` -- upstream `openiconic/all.txt`, line by line in file order: the list `PSystemListOpenIconic#getTextBlock` reads (`PSystemListOpenIconic.java:66-73`, resource opened at java:79). |
+| `PSystemListOpenIconic.ts` | `PSystemListOpenIconic` | `PSystemListOpenIconic` — the `listopeniconic` page: a header, then one `<&name> name` creole line per icon of `all.txt`, in 7 columns. |
+| `PSystemListOpenIconicFactory.ts` | `executeLineListOpenIconic`, `listOpenIconicPlugin` | `PSystemListOpenIconicFactory` — the single-line factory for `listopeniconic`. |
+| `PSystemOpenIconic.ts` | `PSystemOpenIconic` | `PSystemOpenIconic` — the `openiconic <name>` page: one OpenIconic glyph, black, at `factor`, with a 5px margin all round. |
+| `PSystemOpenIconicFactory.ts` | `executeLineOpenIconic`, `openIconicPlugin` | `PSystemOpenIconicFactory` — the single-line factory for `openiconic <name>`. |
 
 ## `src/diagrams/packetdiag/`
 
@@ -1984,6 +2071,19 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `state-transition-clip.ts` | `clusterAnchorRectsOf`, `clipTransitionSpline`, `SolveLine`, `toRectangleArea`, `projectionSpecsOf`, `projectionClusterIdOf`, `inSolveOrder`, `clipLinesInSolveOrder` | state-transition-clip.ts — this port of the edge loop in `DotStringFactory#solve` (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ DotStringFactory.java:458-459`): ```java for (SvekEdge line : getBibliotekon().allLines()) line. |
 | `state-transition-label.ts` | `computeReservedLabelBox`, `transitionLabelAnchor`, `attachTransitionLabel` | Transition label placement — shared by every state-layout pipeline (flat, T3; composite, T4) so antiparallel transitions don't overlap their labels. |
 | `state-transitions.ts` | `ParsedTransition`, `parseTransitionLine`, `isSyncBarId`, `stripSyncBarEquals` | Transition (arrow) grammar for the state parser — `A --> B`, the left-pointing reverse form `A <-- B`, and their decorations (cross-start, circle-end, `[style]` brackets, direction abbreviations, `<<stereotype>>`). |
+
+## `src/diagrams/version/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `License.ts` | `LicenseBuild`, `ORACLE_BUILD`, `formatDateInstance`, `License` | `License` — the text the `license` page prints (`PSystemLicense`) and the licence name `about`/`version` quote. |
+| `LicenseInfo.ts` | `LicenseInfoFields`, `LicenseInfo`, `retrieveQuick`, `retrieveNamedOrDistributorQuickIsValid`, `retrieveNamedSlow`, `retrieveDistributorImage`, `retrieveDistributor` | `LicenseInfo` — the PlantUML licence the running build carries, as `License` and `PSystemLicense` read it. |
+| `LicenseType.ts` | `LicenseType`, `fromInt` | `LicenseType` — the kind of licence a {@link LicenseInfo} records. |
+| `PSystemLicense.ts` | `getTextBlock`, `PSystemLicense` | `PSystemLicense` — the `license` page: `License#getText1` + `#getText2` as one black-on-white `GraphicStrings`, or, when the licence carries a distributor logo, the two halves around that logo. |
+| `PSystemLicenseFactory.ts` | `PSystemLicenseFactory`, `licensePlugin` | `PSystemLicenseFactory` — `license` (and its misspellings) as a single-line `@startuml` page, through the ported `PSystemSingleLineFactory` gate (`singleLinePlugin`, decisions.md D2/D3). |
+| `PSystemVersion.ts` | `getPlantumlImage`, `getAuthorsStrings`, `addInfoVersion`, `PSystemVersion` | `PSystemVersion` — the `about`/`authors`, `version` and bare `stdlib` pages: lines of creole drawn black on white with the PlantUML logo in the bottom-right corner (`PlainStringsDiagram`). |
+| `PSystemVersionFactory.ts` | `PSystemVersionFactory`, `versionPlugin` | `PSystemVersionFactory` — `about`/`authors`/`author`, `version` and bare `stdlib` as single-line `@startuml` pages, through the ported `PSystemSingleLineFactory` gate (`singleLinePlugin`, decisions.md D2/D3). |
+| `stdlib-catalog.ts` | `StdlibCatalogEntry`, `STDLIB_CATALOG` | `STDLIB_CATALOG` -- the folders the bare `stdlib` page lists (`PSystemVersion.java:205-210` -> `Stdlib.addInfoVersion`, `Stdlib.java:320-331`). |
 
 ## `src/diagrams/wbs/`
 

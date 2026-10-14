@@ -1,0 +1,7 @@
+
+### unknown/bupexo-79-sijo243  pass=false structural=4 numeric=1
+  S svg/g[1]/text[18]/@textLength  exp=371.25 | act=319.2
+  S svg/g[1]/text[18]/text()[1]  exp=PlantUML version $version$ / $git.commit.id$ [Unknown compile time] | act=plantuml-ts version 0.1.0 / unknown [Unknown compile time]
+  S svg/g[1]/text[19]/@textLength  exp=139.825 | act=128.887
+  S svg/g[1]/text[19]/text()[1]  exp=[From in.puml (line 2) ] | act=[From string (line 2) ]
+  N svg/g[1]/rect[3]/@width  exp=141.825 | act=130.887 (Δ10.937999999999988)

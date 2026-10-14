@@ -1035,10 +1035,18 @@ describe('routing conformance — jar-error classification', () => {
     // (facibu-72, keloxe-59, link-URL-tooltip-1/-2, xasinu-75, zeneno-39 after
     // T5a; fipina-75, xakubu-65 after T5b), zero-diff pins.
     // Derivation: 6142 + 642 + 86 = 6870.
-    expect(pinnedAgree.length).toBe(6142);
+    // 6142 -> 6156 / 6870 -> 6884 at ufp/close-b2: 14 svg-utility clone rows
+    // (the utility plugins register, ufp T2a; every pinned row already routed
+    // NONE -> NONE `agree`), zero-diff pins
+    // (plans/utility-factories-port/measurements/repin-utility-routing.mts).
+    // Derivation: 6156 + 642 + 86 = 6884.
+    // 6156 -> 6157 / 6884 -> 6885 at ufp/close-b3: 1 svg-utility clone row
+    // (xucoma-93-jeko861, SpriteImage ported by ufp T3a), zero-diff pin.
+    // Derivation: 6157 + 642 + 86 = 6885.
+    expect(pinnedAgree.length).toBe(6157);
     expect(pinnedMisroutes.length).toBe(642);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(6870);
+    expect(manifest.fixtures.length).toBe(6885);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

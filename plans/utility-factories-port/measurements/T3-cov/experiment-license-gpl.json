@@ -1,0 +1,29 @@
+[
+  {
+    "slug": "cov-license",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-licence",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  },
+  {
+    "slug": "cov-license-upper",
+    "errored": false,
+    "weightedScore": 0,
+    "diffCount": 0,
+    "structural": 0,
+    "weErrored": false,
+    "first": []
+  }
+]

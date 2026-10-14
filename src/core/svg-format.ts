@@ -62,7 +62,9 @@ function javaFixedN(x: number, decimals: number): string {
   const keep = padded.slice(0, decimals);
   const roundUp = padded.charCodeAt(decimals) - 48 >= 5;
   let digits = intPart + keep; // decimal point implicitly `decimals` digits from the right
-  if (roundUp) digits = (BigInt(digits) + 1n).toString();
+  // Keep the padding: "0004" + 1 must stay "0005", not "5", or the
+  // fraction slice below shifts left (0.0049 @3 printed 0.5).
+  if (roundUp) digits = (BigInt(digits) + 1n).toString().padStart(digits.length, '0');
   if (decimals === 0) {
     return (neg ? '-' : '') + digits;
   }
