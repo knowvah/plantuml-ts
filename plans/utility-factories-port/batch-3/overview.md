@@ -7,10 +7,10 @@ T3-cov runs in the last wave, after every residual fix has merged.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T3a](T3a-sprite-image.md) | F1: SpriteImage — internal PNG sprites drawn (xucoma-93) | typescript-pro (opus) | see spec | — (D15) | [ ] |
-| [T3b](T3b-qrcode-license-mit.md) | F2: `<qrcode:>` under MIT + License MIT branches (license page) | typescript-pro (opus) | see spec | — (D13, D15) | [ ] |
-| [T3c](T3c-automagic.md) | F3: HColorAutomagic + `automatic` branch (`colors automatic`) | typescript-pro (sonnet) | see spec | — (D15) | [ ] |
-| [T3d](T3d-version-page.md) | F4: `version` page with the port's own values + DIVERGENCES entry | typescript-pro (opus) | see spec | — (D14) | [ ] |
+| [T3a](T3a-sprite-image.md) | F1: SpriteImage — internal PNG sprites drawn (xucoma-93) | typescript-pro (opus) | see spec | — (D15) | [x] |
+| [T3b](T3b-qrcode-license-mit.md) | F2: `<qrcode:>` under MIT + License MIT branches (license page) | typescript-pro (opus) | see spec | — (D13, D15) | [x] |
+| [T3c](T3c-automagic.md) | F3: HColorAutomagic + `automatic` branch (`colors automatic`) | typescript-pro (sonnet) | see spec | — (D15) | [x] |
+| [T3d](T3d-version-page.md) | F4: `version` page with the port's own values + DIVERGENCES entry | typescript-pro (opus) | see spec | — (D14) | [x] |
 | [T3-cov](T3-cov-authored-fixtures.md) | authored fixtures + jar oracles for every factory without a corpus row; harness walks `tests/fixtures/utility/` | typescript-pro (opus) | `tests/fixtures/utility/**`, `oracle/goldens/svg-utility/authored-baseline.json`, the utility harness files, utility package dirs (mechanism fixes, except files a parallel task owns) | T2a + the residual tasks | [ ] |
 
 Target: D11.

@@ -2,22 +2,13 @@
   "fixtures": [
     {
       "type": "unknown",
-      "slug": "xucoma-93-jeko861",
-      "status": "baseline",
-      "weightedScore": 7138,
-      "diffCount": 7001,
-      "measuredAt": "2026-10-14",
-      "measuredAgainstCommit": "16b6580b5"
-    },
-    {
-      "type": "unknown",
       "slug": "lazama-75-loli189",
       "status": "error",
       "weightedScore": null,
       "diffCount": null,
       "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
       "measuredAt": "2026-10-14",
-      "measuredAgainstCommit": "16b6580b5"
+      "measuredAgainstCommit": "e908d335e"
     },
     {
       "type": "unknown",
@@ -27,7 +18,7 @@
       "diffCount": null,
       "reason": "renders this port's PSystemError banner page (dispatcher refusal) -- no plugin registers this utility factory",
       "measuredAt": "2026-10-14",
-      "measuredAgainstCommit": "16b6580b5"
+      "measuredAgainstCommit": "e908d335e"
     }
   ]
 }

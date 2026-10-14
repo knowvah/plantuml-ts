@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-14T02:06:47.995Z",
+  "generatedAt": "2026-10-14T03:28:10.023Z",
   "fixtures": [
     {
       "slug": "activity-legacy1-example-0",
@@ -5537,10 +5537,7 @@
       "slug": "xucoma-93-jeko861",
       "type": "unknown",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 14.770000000000095,
-      "firstDiff": "svg/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/path[23]/@d[21]"
+      "verdict": "conformant"
     },
     {
       "slug": "xucura-15-fuxu925",

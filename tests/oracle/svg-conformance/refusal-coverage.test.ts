@@ -909,7 +909,10 @@ describe('refusal coverage — baseline shape', () => {
     // `dot-cache/unknown` utility rows re-pinned in place
     // (plans/utility-factories-port/measurements/repin-utility-routing.mts).
     // Derivation: 6870 + 14 = 6884.
-    expect(manifest.fixtures.length).toBe(6884);
+    // 6884 -> 6885 at ufp/close-b3: 1 svg-utility golden clone row
+    // (xucoma-93-jeko861, ufp T3a), rendering on both sides.
+    // Derivation: 6884 + 1 = 6885.
+    expect(manifest.fixtures.length).toBe(6885);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -1034,7 +1037,9 @@ describe('refusal coverage — baseline shape', () => {
     // 6632 -> 6659 at ufp/close-b2 (+14 utility dot-cache rows now rendering,
     // +13 rendering svg-utility clones; kavama-92's clone errors, see above).
     // Derivation: 6632 + 14 + 13 = 6659.
-    expect(pinnedRendering.length).toBe(6659);
+    // 6659 -> 6660 at ufp/close-b3 (+1 rendering svg-utility clone,
+    // xucoma-93-jeko861). Derivation: 6659 + 1 = 6660.
+    expect(pinnedRendering.length).toBe(6660);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

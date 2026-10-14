@@ -1,0 +1,154 @@
+wait load 17.87
+wait load 13.36
+wait load 10.29
+wait load 8.90
+== activity 21:36:21 { 7.77 14.96 18.77 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-activity.json — {"conformant":448,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.80
+== board 21:37:25 { 7.83 13.64 18.00 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+wait load 29.83
+wait load 25.41
+wait load 17.52
+wait load 12.63
+wait load 9.96
+wait load 9.41
+== c4 21:41:15 { 7.53 13.56 17.29 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-c4.json — {"conformant":2,"structural-match":0,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.95
+wait load 8.09
+== chart 21:42:49 { 7.17 12.00 16.30 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+== chronology 21:43:20 { 7.98 11.71 16.05 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== class 21:43:41 { 7.54 11.37 15.83 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-class.json — {"conformant":722,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.16
+== component 21:44:45 { 7.46 10.70 15.25 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-component.json — {"conformant":69,"structural-match":66,"diverged":131,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.40
+== ditaa 21:45:46 { 7.58 10.18 14.75 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/utility-factories-port/measurements/b3-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 21:45:57 { 7.43 10.06 14.65 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.52
+== ebnf 21:46:56 { 6.88 9.52 14.14 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.15
+wait load 13.34
+wait load 14.69
+wait load 18.02
+wait load 53.82
+wait load 99.73
+wait load 67.24
+wait load 53.75
+wait load 40.45
+wait load 31.49
+wait load 24.85
+wait load 20.15
+wait load 35.95
+wait load 70.86
+wait load 81.45
+wait load 55.86
+wait load 61.18
+wait load 72.72
+wait load 63.86
+wait load 81.92
+wait load 85.66
+wait load 81.05
+wait load 76.01
+wait load 72.08
+wait load 58.39
+wait load 38.97
+wait load 26.92
+wait load 18.95
+wait load 14.38
+wait load 11.55
+wait load 9.87
+== files 22:02:58 { 7.95 33.03 33.44 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-files.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.00
+== gantt 22:03:50 { 7.39 29.03 31.93 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-gantt.json — {"conformant":1,"structural-match":0,"diverged":264,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.96
+wait load 8.14
+== hcl 22:05:23 { 7.42 23.27 29.40 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== json 22:05:48 { 7.86 22.10 28.80 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-json.json — {"conformant":13,"structural-match":24,"diverged":13,"errored":0,"timeout":0,"oracle-error":0}
+wait load 12.00
+wait load 9.89
+wait load 8.79
+== mindmap 22:07:50 { 7.90 17.81 26.24 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-mindmap.json — {"conformant":142,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.97
+== network 22:08:52 { 7.27 15.79 24.86 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-network.json — {"conformant":0,"structural-match":0,"diverged":3,"errored":0,"timeout":0,"oracle-error":0}
+== object 22:09:18 { 7.63 15.20 24.39 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-object.json — {"conformant":63,"structural-match":8,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.25
+== packet 22:10:20 { 7.40 13.80 23.24 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.44
+== regex 22:11:20 { 7.09 12.60 22.15 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+wait load 12.61
+wait load 28.25
+wait load 30.78
+wait load 27.56
+wait load 23.30
+wait load 20.15
+wait load 16.79
+wait load 14.42
+wait load 12.18
+wait load 10.46
+wait load 9.23
+wait load 9.27
+wait load 9.41
+wait load 8.99
+wait load 10.02
+wait load 9.76
+wait load 9.32
+wait load 9.01
+wait load 8.16
+== salt 22:21:22 { 7.99 11.14 17.47 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-salt.json — {"conformant":51,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 11.00
+wait load 10.61
+wait load 9.80
+wait load 8.61
+== sequence 22:23:57 { 7.69 10.25 16.08 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-sequence.json — {"conformant":0,"structural-match":0,"diverged":1143,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.27
+wait load 10.22
+wait load 8.21
+== state 22:26:04 { 7.29 9.45 14.95 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-state.json — {"conformant":78,"structural-match":11,"diverged":184,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.24
+== timing 22:27:05 { 7.09 9.06 14.43 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-timing.json — {"conformant":6,"structural-match":0,"diverged":120,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 22:27:35 { 7.88 9.04 14.23 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-unknown.json — {"conformant":423,"structural-match":47,"diverged":355,"errored":0,"timeout":0,"oracle-error":0}
+wait load 19.78
+wait load 15.29
+wait load 11.48
+wait load 9.16
+== usecase 22:30:10 { 7.79 9.74 13.76 }
+[xmldom fatalError]	comment is not well-formed at position 3151 
+wrote plans/utility-factories-port/measurements/b3-eng/parity-usecase.json — {"conformant":29,"structural-match":18,"diverged":46,"errored":0,"timeout":0,"oracle-error":1}
+wait load 8.30
+wait load 11.43
+wait load 19.41
+wait load 14.63
+wait load 10.86
+wait load 8.70
+== wbs 22:33:44 { 7.43 10.08 13.12 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-wbs.json — {"conformant":204,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 8.79
+== wire 22:34:43 { 7.01 9.62 12.76 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 22:35:13 { 7.44 9.45 12.59 }
+wrote plans/utility-factories-port/measurements/b3-eng/parity-yaml.json — {"conformant":7,"structural-match":28,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+DONE 22:35:42
