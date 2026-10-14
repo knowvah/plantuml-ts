@@ -121,12 +121,33 @@ describe.skipIf(!hasCorpus)('description plain-family wrappers vs cached jar DOT
     expect(layoutParity(readJarDot('component', slug), ours!)).toEqual({ equal: true });
   });
 
-  it('port group that is a link endpoint still lacks the a/i pair (core: stop 7)', () => {
-    // jar repoge: `cluster6a {... cluster6ee {... cluster6i {`; the layout builder ignores
-    // borderPointAncestorWrap without portRanksLabelOnEe, so cluster subgraphs: jar 4 vs ours 2.
+  it.each([
+    ['component', 'repoge-41-demu604'],
+    ['component', 'gurive-62-ricu497'],
+    ['component', 'repite-70-vabe533'],
+    ['unknown', 'jujuga-39-miva043'],
+  ])('linked port group %s/%s is layout-equal (a/i pair, T4b)', (tree, slug) => {
+    const [ours] = captureOurs(tree, slug);
+    expect(layoutParity(readJarDot(tree, slug), ours!)).toEqual({ equal: true });
+  });
+
+  it('repoge emits the jar a > base > ee > point, i > members, rect nesting', () => {
     const [ours] = captureOurs('component', 'repoge-41-demu604');
-    const r = layoutParity(readJarDot('component', 'repoge-41-demu604'), ours!);
-    expect(r.firstDiff).toEqual({ component: 'clusterTree', detail: 'cluster subgraphs: jar 4 vs ours 2' });
+    expect((ours!.clusters ?? [])[0]!.borderPointAncestorWrap).toBe(true);
+    const dot = toSvekDot(ours!);
+    const order = [
+      /subgraph cluster\d+a \{label="";/,
+      /subgraph cluster\d+ \{style=solid;/,
+      /subgraph cluster\d+ee \{label="";\s*zaent0001 \[shape=point,width=\.01,label=""\];/,
+      /subgraph cluster\d+i \{label="";/,
+      /zaent0001 \[shape=rect,width=\.01,height=\.01,label=<<TABLE[^>]*WIDTH="128" HEIGHT="23"/,
+    ];
+    let at = 0;
+    for (const re of order) {
+      const m = re.exec(dot.slice(at));
+      expect(m, String(re)).not.toBeNull();
+      at += m!.index + m![0].length;
+    }
   });
 
   it('kermor family: gamma title TABLE dims, no protection or a/i levels', () => {

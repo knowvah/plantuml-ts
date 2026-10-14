@@ -7,8 +7,8 @@
  *
  * The geometry is hand-built: a description fixture whose port cluster is a
  * link endpoint cannot be compared with the jar yet, because our DOT lacks the
- * `a`/`i` wrapper subgraphs `ClusterDotString.java:91-96` emits for it (see
- * the `it.fails` below), so the layout differs before any clip runs. Every
+ * `a`/`i` wrapper subgraphs `ClusterDotString.java:91-96` emits for it (until
+ * T4b; the last test below now passes), so the layout differed before any clip ran. Every
  * number is the arithmetic of `FrontierCalculator.java:154-167`.
  */
 import { readFileSync } from 'node:fs';
@@ -169,12 +169,9 @@ describe('buildEdgeGeos — port-cluster clip (lgm T1b)', () => {
 describe('description port cluster against the jar', () => {
   const FIXTURE = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/lgm-T1b/desc-port-cluster-lines');
 
-  // KNOWN GAP, separate mechanism: `ClusterDotString.java:91-96` wraps a port
-  // cluster that is a link endpoint in `a`/`i` subgraphs (`subgraph cluster6a`,
-  // `cluster6i` in the jar's dump), which the description DOT emitter does not
-  // write, so graphviz places the nodes differently before any clip runs. When
-  // that lands this test starts passing and `it.fails` flags it for removal.
-  it.fails('renders every link end equal to the jar’s', () => {
+  // T4b: the `a`/`i` wrappers `ClusterDotString.java:91-96` emits for a linked port
+  // cluster are now built, so this fixture lays out like the jar (formerly `it.fails`).
+  it('renders every link end equal to the jar’s', () => {
     const ours = renderSync(readFileSync(`${FIXTURE}.puml`, 'utf8'), { measurer: new DeterministicMeasurer() });
     expect(mismatchedLinks(ours, readFileSync(`${FIXTURE}.svg`, 'utf8'))).toEqual([]);
   });

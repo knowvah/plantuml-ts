@@ -164,8 +164,10 @@ export interface DotInputCluster {
    *  build.ts#addClusters`'s outer `${outerName}a` wrap (NEVER a `p0`
    *  sibling — protection0 is always off here) and its inner `${outerName}i`
    *  wrap (nested inside `${outerName}ee`, wrapping that subgraph's own
-   *  non-port content). Meaningful ONLY when `portRanksLabelOnEe` is also
-   *  `true`; ignored otherwise. */
+   *  non-port content). Meaningful with `portRanksLabelOnEe`, and (T4b) on a
+   *  `hasPort()` cluster (`portRanks` + `portAnchorId`, no `portRanksLabelOnEe`),
+   *  where it nests `a` around the base cluster and `i` inside `ee`, the
+   *  special point staying in `ee` (`ClusterDotString.java:98,146-152`). */
   borderPointAncestorWrap?: true;
   /** cdd3-T18: the `together { }` block this cluster's GROUP was created in
    *  (`CucaDiagram#gotoGroup`, `atmp/CucaDiagram.java:349-353`, which sets

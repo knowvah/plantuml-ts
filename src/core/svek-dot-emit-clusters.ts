@@ -37,7 +37,7 @@ function shapeAttr(node: DotInputNode): string {
   return `shape=${shape}`;
 }
 
-export function nodeLine(node: DotInputNode, rec: NodeRec): string {
+export function nodeLine(node: DotInputNode, rec: NodeRec, omitPointDecl = false): string {
   const shape = node.shape ?? 'rect';
   if (shape === 'point') {
     return `${rec.sh} [shape=point,width=.01,label=""];`;
@@ -52,7 +52,8 @@ export function nodeLine(node: DotInputNode, rec: NodeRec): string {
     // (thereALinkFromOrToGroup2), independently of hasPort(); graphviz lets
     // a node id be redeclared, and the comparator dedupes by first-seen
     // shape, so both lines matter (see graph-layout.types.ts).
-    const pointDecl = node.groupAnchorAlsoPoint === true ? `${rec.sh} [shape=point,width=.01,label=""];` : '';
+    const pointDecl =
+      node.groupAnchorAlsoPoint === true && !omitPointDecl ? `${rec.sh} [shape=point,width=.01,label=""];` : '';
     return `${pointDecl}${rec.sh} [shape=rect,width=.01,height=.01,label=${labelTable(
       node.titleLabelWidth,
       node.titleLabelHeight,
@@ -179,10 +180,15 @@ function portClusterEeBlock(
   colors: Map<string, ClusterColors>,
 ): string[] {
   const w = wrapperLevels(cluster);
-  const out = [
-    `subgraph ${cluster.id}ee {${eeLabelAttr(cluster, colors.get(cluster.id)!)}`,
-    ...innerWrapperLines(cluster.id, w),
-  ];
+  const out = [`subgraph ${cluster.id}ee {${eeLabelAttr(cluster, colors.get(cluster.id)!)}`];
+  // `ClusterDotString.java:146-147,151-152`: when the group is a link endpoint
+  // the special point is declared BEFORE `i` opens (so it sits in `ee`); the
+  // `empty()` rect re-declares it last inside `i` (`:175-181`).
+  const anchor = nodeById.get(cluster.portAnchorId ?? '');
+  const pointInEe = w.i && cluster.portRanksLabelOnEe !== true && anchor?.groupAnchorAlsoPoint === true;
+  const anchorRec = anchor === undefined ? undefined : recs.get(anchor.id);
+  if (pointInEe && anchorRec !== undefined) out.push(`${anchorRec.sh} [shape=point,width=.01,label=""];`);
+  out.push(...innerWrapperLines(cluster.id, w));
   // Ranked members are declared by `printRanks` in the OUTER cluster, so `ee`
   // carries only what is left: the anchor/placeholder and any real member.
   const outer = rankedIds(cluster);
@@ -190,7 +196,7 @@ function portClusterEeBlock(
     const node = nodeById.get(id);
     const rec = recs.get(id);
     if (outer.has(id) || node?.isPort === true || node === undefined || rec === undefined) continue;
-    out.push(nodeLine(node, rec));
+    out.push(nodeLine(node, rec, pointInEe && id === anchor?.id));
   }
   for (const child of childrenOf.get(cluster.id) ?? []) {
     // portClusterBlock is only ever reached on the non-kermor path

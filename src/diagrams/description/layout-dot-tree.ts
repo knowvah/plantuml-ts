@@ -338,10 +338,8 @@ export function buildDotClusters(
         // hasPort(): protection is forced off (ClusterDotString.java:109-112)
         // so no innerMarginLevels; the label TABLE rides the `empty()` anchor
         // (:175-181, see buildAnchorNode), not `ee` (:132-133). The `a`/`i`
-        // pair that still fires on a group link (:98, :151) is NOT populated:
-        // `borderPointAncestorWrap` is honoured only with `portRanksLabelOnEe`
-        // (graph-layout-build-borderpoint.ts:108,140; svek-dot-wrappers.ts:65),
-        // and `buildHasPortClusterHandles` ignores it -- core change, stop 7.
+        // pair still fires on a group link (:98, :151): `borderPointAncestorWrap`.
+        if (linked) cluster.borderPointAncestorWrap = true;
       }
     } else if (!kermor) {
       applyPlainWrappers(cluster, linked, dims);
