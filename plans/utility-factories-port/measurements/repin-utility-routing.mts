@@ -13,7 +13,11 @@
  *    pinned. A fixture that now routes `agree` / renders `ok` is re-pinned so
  *    and its `reason` is dropped (the fresh row carries none -- the factory
  *    that the old reason called unported is now ported); one that still
- *    misroutes or errors on our side is REFUSED (no ledger of excuses here).
+ *    misroutes or errors on our side is REFUSED (no ledger of excuses here),
+ *    except the two sudoku rows D13 rules out ({@link MIT_EDITION_SLUGS}),
+ *    which stay `known-gap` with the ruling as their reason, and the
+ *    {@link ASSET_SEAM_SLUGS} row, which errors here only for want of an
+ *    asset store (its goldens twin is cloned `known-gap` too).
  * 2. Clones, for every slug in `oracle/goldens/svg-utility/ratchet.json`, its
  *    fresh dot-cache twin as `tree: goldens, type: svg-utility` in both files,
  *    replacing any earlier `svg-utility` goldens rows.
@@ -68,8 +72,39 @@ export function routingRow(m: MeasuredFixture, old: Row, stamp: Stamp): Row {
   return { tree: 'dot-cache', type: UTILITY_CACHE_TYPE, slug: m.slug, jarType: m.jarType, ourType: m.ourType, status: 'agree', ...stamp };
 }
 
+/** The two sudoku rows D13 rules out: upstream strips `sudoku/` from the MIT edition. */
+export const MIT_EDITION_SLUGS: readonly string[] = ['lazama-75-loli189', 'gazale-13-tadu312'];
+export const MIT_EDITION_REASON =
+  'Out of scope by maintainer ruling (utility-factories-port D13, 2026-10-13): this port mirrors upstream\'s MIT ' +
+  "edition, which strips the sudoku/ package ('// ::remove folder when __MIT__' in sudoku/GraphicsSudoku.java) and " +
+  'comments out the PSystemSudokuFactory registration (PSystemBuilder.java:163), so a `sudoku` line is a syntax ' +
+  'error there as here. The GPL oracle jar draws the puzzle; README.md "Mirrors upstream\'s MIT edition".';
+
+/** Rows the refusal gate sees error only because it renders with no `options.assetStore`. */
+export const ASSET_SEAM_SLUGS: readonly string[] = ['kavama-92-noro949'];
+export const ASSET_SEAM_REASON =
+  'The dedication image reaches the port only through options.assetStore (ADR-2): DedicationSimple.getImage returns ' +
+  'undefined when the store cannot serve its bytes (src/diagrams/dedication/DedicationSimple.ts:43-44, upstream\'s ' +
+  'failed decode, DedicationSimple.java:65-68), so Dedications.get matches nothing and no factory claims the line. ' +
+  'This gate renders with no asset store, as a library consumer does by default; with the utility asset store ' +
+  '(surveyAssetStore) the page renders conformant and is pinned in svg-utility. Closes when the eggs/dedication ' +
+  'assets ship to library consumers (utility-factories-port follow-on).';
+
+const ruledKnownGap = (m: MeasuredFixture, stamp: Stamp, reason: string): Row => {
+  const { slug, jarRendered, weErrored, engine } = m;
+  return { tree: 'dot-cache', type: UTILITY_CACHE_TYPE, slug, jarRendered, weErrored, engine, status: 'known-gap', ...stamp, reason };
+};
+
 export function refusalRow(m: MeasuredFixture, old: Row, stamp: Stamp): Row {
   if (old.status === 'jar-error') return old;
+  if (ASSET_SEAM_SLUGS.includes(m.slug)) {
+    if (!m.weErrored) throw new Error(`refusal: ${m.slug} renders without an asset store; retire its asset-seam known-gap`);
+    return ruledKnownGap(m, stamp, ASSET_SEAM_REASON);
+  }
+  if (MIT_EDITION_SLUGS.includes(m.slug)) {
+    if (!m.weErrored) throw new Error(`refusal: ${m.slug} renders on our side, but D13 rules sudoku out (MIT edition)`);
+    return ruledKnownGap(m, stamp, MIT_EDITION_REASON);
+  }
   if (m.weErrored && m.jarRendered) {
     throw new Error(`refusal: ${m.slug} errors on our side where the jar renders; no ledger excuse here`);
   }
@@ -102,7 +137,8 @@ export function rebuild(
     const twin = cacheRows.get(slug);
     if (twin === undefined) throw new Error(`${slug}: pinned in ratchet.json but has no dot-cache/unknown utility row`);
     const okStatus = derive === routingRow ? 'agree' : 'ok';
-    if (twin.status !== okStatus) throw new Error(`${slug}: twin status ${twin.status}, cannot clone as a golden row`);
+    const assetSeamTwin = derive === refusalRow && twin.status === 'known-gap' && ASSET_SEAM_SLUGS.includes(slug);
+    if (twin.status !== okStatus && !assetSeamTwin) throw new Error(`${slug}: twin status ${twin.status}, cannot clone as a golden row`);
     fixtures.push({ ...twin, tree: 'goldens', type: GOLDENS_TYPE, slug, ...stamp });
   }
   return { fixtures, replaced, cloned: pinned.length };

@@ -905,7 +905,11 @@ describe('refusal coverage — baseline shape', () => {
     // Derivation: 6694 + 168 = 6862.
     // 6862 -> 6870 at wep/close-b5-wave1: 8 svg-wbs clone rows (T5a/T5b fixes),
     // rendering on both sides. Derivation: 6862 + 8 = 6870.
-    expect(manifest.fixtures.length).toBe(6870);
+    // 6870 -> 6884 at ufp/close-b2: 14 svg-utility golden clone rows; the 17
+    // `dot-cache/unknown` utility rows re-pinned in place
+    // (plans/utility-factories-port/measurements/repin-utility-routing.mts).
+    // Derivation: 6870 + 14 = 6884.
+    expect(manifest.fixtures.length).toBe(6884);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -938,7 +942,12 @@ describe('refusal coverage — baseline shape', () => {
     // structure"), WBS-multiline-def-1-{14,15,21} ("Syntax Error?"), and the
     // head-window known-gaps tojixi-05-lusu056 / zecavo-98-kini554. Re-pinned
     // `weErrored: true` from a fresh measurement (repin-wbs-routing.mts).
-    expect(pinnedErroring.length).toBe(238);
+    // 238 -> 225 at ufp/close-b2: the utility plugins register (ufp T2a), so
+    // 14 of the 17 `dot-cache/unknown` utility rows render; lazama-75 and
+    // gazale-13 (sudoku, out by D13, MIT edition) and kavama-92 (dedication,
+    // no asset store in this gate) still error, and kavama's svg-utility
+    // golden twin errors with it. Derivation: 238 - 14 + 1 = 225.
+    expect(pinnedErroring.length).toBe(225);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -1022,7 +1031,10 @@ describe('refusal coverage — baseline shape', () => {
     // that now error on both sides; see the erroring count above).
     // Derivation: 6462 + 168 - 6 = 6624.
     // 6624 -> 6632 at wep/close-b5-wave1 (+8 svg-wbs clones).
-    expect(pinnedRendering.length).toBe(6632);
+    // 6632 -> 6659 at ufp/close-b2 (+14 utility dot-cache rows now rendering,
+    // +13 rendering svg-utility clones; kavama-92's clone errors, see above).
+    // Derivation: 6632 + 14 + 13 = 6659.
+    expect(pinnedRendering.length).toBe(6659);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -1090,7 +1102,10 @@ describe('refusal coverage — baseline shape', () => {
     // are jar ErrorUml pages past the head window (Welcome preamble,
     // PSystemError.java:217-218; stock record "WBS diagram only accepts one
     // root first declared."), which the port now refuses with the same string.
-    expect(gaps.length).toBe(200);
+    // 200 -> 187 at ufp/close-b2: 14 utility known-gaps -> ok; kavama-92 stays
+    // known-gap (asset-store seam) and its svg-utility twin is cloned known-gap.
+    // Derivation: 200 - 14 + 1 = 187.
+    expect(gaps.length).toBe(187);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //

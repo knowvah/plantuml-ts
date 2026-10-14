@@ -12,10 +12,14 @@ import { join, dirname } from 'node:path';
 
 import { pinUtility, parseArgs } from './pin-utility.mts';
 import {
+  ASSET_SEAM_REASON,
+  ASSET_SEAM_SLUGS,
   HELP_RIGHT_CLAUSE,
   HELP_WRONG_CLAUSE,
   KUBUJU_REASON,
   KUBUJU_SLUG,
+  MIT_EDITION_REASON,
+  MIT_EDITION_SLUGS,
   fixRecords,
   rebuild,
   refusalRow,
@@ -199,6 +203,44 @@ describe('repin-utility-routing — pure record logic', () => {
     });
     expect(() => refusalRow(measured({ weErrored: true }), cacheRow('fotete-48-viga126'), STAMP)).toThrow(
       'refusal: fotete-48-viga126 errors on our side where the jar renders; no ledger excuse here',
+    );
+  });
+
+  test('refusalRow keeps a D13 MIT-edition row known-gap with the ruling as its reason', () => {
+    expect(MIT_EDITION_SLUGS).toEqual(['lazama-75-loli189', 'gazale-13-tadu312']);
+    const old = cacheRow('gazale-13-tadu312', { jarRendered: true, weErrored: true, engine: 'class', reason: 'unported' });
+    const m = measured({ slug: 'gazale-13-tadu312', weErrored: true, engine: 'class' });
+    expect(refusalRow(m, old, STAMP)).toEqual({
+      tree: 'dot-cache',
+      type: 'unknown',
+      slug: 'gazale-13-tadu312',
+      jarRendered: true,
+      weErrored: true,
+      engine: 'class',
+      status: 'known-gap',
+      ...STAMP,
+      reason: MIT_EDITION_REASON,
+    });
+    expect(() => refusalRow(measured({ slug: 'gazale-13-tadu312' }), old, STAMP)).toThrow(
+      'refusal: gazale-13-tadu312 renders on our side, but D13 rules sudoku out (MIT edition)',
+    );
+  });
+
+  test('refusalRow keeps the asset-seam row known-gap; rebuild clones its known-gap twin as a golden', () => {
+    expect(ASSET_SEAM_SLUGS).toEqual(['kavama-92-noro949']);
+    const old = cacheRow('kavama-92-noro949', { reason: 'unported' });
+    const m = measured({ slug: 'kavama-92-noro949', weErrored: true, engine: 'sequence' });
+    const row = refusalRow(m, old, STAMP);
+    expect(row).toMatchObject({ status: 'known-gap', weErrored: true, engine: 'sequence', reason: ASSET_SEAM_REASON });
+    expect(() => refusalRow(measured({ slug: 'kavama-92-noro949' }), old, STAMP)).toThrow(
+      'refusal: kavama-92-noro949 renders without an asset store; retire its asset-seam known-gap',
+    );
+    const out = rebuild({ $comment: 'c', fixtures: [old] }, [m], ['kavama-92-noro949'], refusalRow, STAMP);
+    expect(out.fixtures.at(-1)).toMatchObject({ tree: 'goldens', type: 'svg-utility', status: 'known-gap', reason: ASSET_SEAM_REASON });
+    const sudoku = cacheRow('gazale-13-tadu312');
+    const ms = measured({ slug: 'gazale-13-tadu312', weErrored: true });
+    expect(() => rebuild({ $comment: 'c', fixtures: [sudoku] }, [ms], ['gazale-13-tadu312'], refusalRow, STAMP)).toThrow(
+      'gazale-13-tadu312: twin status known-gap, cannot clone as a golden row',
     );
   });
 

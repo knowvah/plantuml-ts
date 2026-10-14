@@ -11,10 +11,9 @@
  * `UTILITY_SLUGS` list of 17 `test-results/dot-cache/unknown/` rows, not a
  * whole cache dir.
  *
- * STARTS EMPTY (T0b): `ratchet.json` is `{ "fixtures": [] }`. No utility
- * plugin is registered (`src/index.ts`), so every row renders our error page
- * today, which can never be zero-diff against a real jar render. AC1/AC2
- * degrade to a documented placeholder assertion while the manifest is empty.
+ * Started empty (T0b): before the utility plugins registered (ufp T2a)
+ * every row rendered our error page. AC1/AC2 degrade to a documented
+ * placeholder assertion while the manifest is empty; ufp/close-b2 pinned 14.
  *
  * PINNING IS ORCHESTRATOR-ONLY, AT BATCH CLOSES -- this task pins nothing.
  * The pin tool is `plans/utility-factories-port/measurements/pin-utility.mts`;
@@ -28,7 +27,7 @@ import { fileURLToPath } from 'node:url';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { compareSvg } from './compare.js';
-import { renderFixtureUtility } from './render-fixture-utility.js';
+import { renderFixtureUtility, surveyAssetStore } from './render-fixture-utility.js';
 
 interface RatchetFixture {
   slug: string;
@@ -60,8 +59,16 @@ function firstDiffPath(diffs: readonly { path: string }[]): string {
   return diffs.length > 0 ? diffs[0]!.path : '(none)';
 }
 
+/** Renders with the survey's OWN stores (`measureUtilityMarkup`,
+ *  render-fixture-utility.ts), as the class ratchet does (cdd5-T2): a pin is
+ *  the survey's zero-diff verdict, and the emoji and dedication pages draw
+ *  their bytes from `surveyAssetStore()`. Without it 8 of the 14 b2-close
+ *  pins compared a store-less render against their golden (ufp/close-b2). */
 function renderPinned(f: RatchetFixture): string {
-  return renderFixtureUtility(readSource(f), new DeterministicMeasurer(), { includeStore: fixtureIncludeStore() });
+  return renderFixtureUtility(readSource(f), new DeterministicMeasurer(), {
+    assetStore: surveyAssetStore(),
+    includeStore: fixtureIncludeStore(),
+  });
 }
 
 // ---------------------------------------------------------------------------

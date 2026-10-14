@@ -26,6 +26,8 @@ export const RATCHET_FAMILY: Readonly<Record<string, string>> = {
   mindmap: 'svg-mindmap',
   salt: 'svg-salt',
   wbs: 'svg-wbs',
+  // The utility factories' rows live in the `unknown` bucket (ufp D9).
+  unknown: 'svg-utility',
 };
 
 /** Subset of `RATCHET_FAMILY` whose family also carries a `diff-baseline.json`. */
@@ -37,6 +39,7 @@ export const DIFF_BASELINE_FAMILY: Readonly<Record<string, string>> = {
   mindmap: 'svg-mindmap',
   salt: 'svg-salt',
   wbs: 'svg-wbs',
+  unknown: 'svg-utility',
 };
 
 interface RatchetFixture {
