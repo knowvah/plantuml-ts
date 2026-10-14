@@ -1,12 +1,12 @@
 import { HColorGradient, type GradientPolicy } from './HColorGradient.js';
-import { HColorSet, type ResolvedColor } from './HColorSet.js';
+import { HColorSet, type ParsedColor, type ResolvedColor } from './HColorSet.js';
 import { HColorSimple } from './HColorSimple.js';
 
 /** `new XColor(0, 0, 0, 0)` (HColors.java:121). */
 const TRANSPARENT_XCOLOR: ResolvedColor = { r: 0, g: 0, b: 0, a: 0 };
 
 /** Java's checked `(HColorSimple)` cast on a `getColorOrWhite` result (HColors.java:84-85). */
-function asSimple(c: HColorSimple | HColorGradient): HColorSimple {
+function asSimple(c: ParsedColor): HColorSimple {
   if (!(c instanceof HColorSimple)) throw new Error('ClassCastException: not an HColorSimple');
   return c;
 }

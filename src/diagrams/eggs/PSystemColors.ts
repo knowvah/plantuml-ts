@@ -28,9 +28,8 @@ import { FontConfiguration } from '../../core/abel/FontConfiguration.js';
 import type { UmlSource } from '../../core/block-extractor.js';
 import { Back } from '../../core/klimt/Back.js';
 import { HColors } from '../../core/klimt/color/HColors.js';
-import { HColorSet } from '../../core/klimt/color/HColorSet.js';
+import { HColorSet, type ParsedColor } from '../../core/klimt/color/HColorSet.js';
 import { HColorSimple } from '../../core/klimt/color/HColorSimple.js';
-import type { HColorGradient } from '../../core/klimt/color/HColorGradient.js';
 import { Display } from '../../core/klimt/creole/Display.js';
 import { Fore } from '../../core/klimt/Fore.js';
 import { bridgeFontConfiguration } from '../../core/klimt/font/FontConfigurationBridge.js';
@@ -93,7 +92,7 @@ const GREY = 'Grey';
 const DESCRIPTION = '(Colors)';
 
 /** Java's checked `(HColorSimple)` cast. */
-function asSimple(color: HColorSimple | HColorGradient): HColorSimple {
+function asSimple(color: ParsedColor): HColorSimple {
   if (!(color instanceof HColorSimple)) throw new Error('ClassCastException: not an HColorSimple');
   return color;
 }

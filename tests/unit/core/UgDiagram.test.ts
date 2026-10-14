@@ -16,6 +16,7 @@ import { describe, expect, it } from 'vitest';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { ColorMapper } from '../../../src/core/klimt/color/ColorMapper.js';
 import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
+import type { HColorSimple } from '../../../src/core/klimt/color/HColorSimple.js';
 import { HColors } from '../../../src/core/klimt/color/HColors.js';
 import type { HColorOrPaint } from '../../../src/core/klimt/color/ColorMapper.js';
 import type { StringBounder } from '../../../src/core/klimt/font/StringBounder.js';
@@ -217,7 +218,7 @@ describe('UgDiagram#exportDiagram — getExporter steps (UgDiagram.java:123-150)
   });
 
   it('maps colours through muteColorMapper (UgDiagram.java:134-135)', () => {
-    const red = HColorSet.instance().getColorOrWhite('#FF0000');
+    const red = HColorSet.instance().getColorOrWhite('#FF0000') as HColorSimple; // a plain hex is an HColorSimple
     expect(rootAttr(new FixedDiagram(new FixedBlock(20, 20, red)).exportDiagram(0, measurer), 'style')).toBe(
       'width:21px;height:21px;background:#FF0000;',
     );
