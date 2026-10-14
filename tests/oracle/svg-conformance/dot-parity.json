@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-21T01:49:10.211Z",
-  "measuredAgainstCommit": "31f579dd",
+  "generatedAt": "2026-10-14T17:21:59.498Z",
+  "measuredAgainstCommit": "2d765dbd5",
   "rows": [
     {
       "type": "activity",
@@ -44,8 +44,8 @@
     },
     {
       "type": "class",
-      "comparable": 711,
-      "equal": 710,
+      "comparable": 712,
+      "equal": 712,
       "pct": "100%",
       "oracleBlind": 7,
       "note": "—"
@@ -53,8 +53,8 @@
     {
       "type": "component",
       "comparable": 263,
-      "equal": 259,
-      "pct": "98%",
+      "equal": 248,
+      "pct": "94%",
       "oracleBlind": 1,
       "note": "—"
     },

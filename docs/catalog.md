@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1668 modules · 6061 exported names.
+1669 modules · 6065 exported names.
 
 ## `src/`
 
@@ -2037,6 +2037,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `state-composite-classify.ts` | `CompositeKind`, `FiringUnit`, `ClassifyResult`, `classifyDiagram`, `zaentId`, `resolveEndpoint` | Whole-diagram composite classification (mission A4/T4) — computed ONCE up front so any pass, at any depth, can resolve a transition endpoint without re-walking the tree. |
 | `state-composite-cluster.ts` | `tightContentDimension`, `resolveClusterComposite` | Non-autonom `Cluster` composite pass building — split out of ./state-composite-pass.ts (mission A4 Phase L iter 16, 500-line file-cap compliance; pure move, only the CONC-region-leaf mechanism is new — see its own doc below). |
 | `state-composite-concurrent.ts` | `ConcurrentRegionPassResult`, `buildConcurrentAutonomSpec`, `buildConcurrentRegionPass` | Concurrent-region (`--` separator) composite pass building — split out of ./state-composite-pass.ts (mission A4 Phase L, 500-line file-cap compliance; pure move, zero behavior change). |
+| `state-composite-description-block.ts` | `nestedRenderer`, `stateSkinSimple`, `stringBounderFor`, `stateDescriptionBlockWidth` | state-composite-description-block -- the composite header's attribute block measured the way the jar builds it: `ClusterHeader.java:78` `g.getStateDescription(skinParam).calculateDimension(..)`, where `Entity.java:610-632` ends in `display. |
 | `state-composite-detect.ts` | `subtreeIds`, `hasLocalContent`, `hasBorderPointDescendant`, `hasDirectBorderPointChild`, `hasNonBorderEeContent`, `collectAllTransitions`, `isAutarkic`, `isGroupTouched`, `recordBorderPointCluster` | Autonom ("autarkic") predicate — mission A4/T4, mechanisms.md §3. |
 | `state-composite-drawn-rects.ts` | `DrawnClusterRect`, `drawnClusterRects` | The rectangle the jar DRAWS for a border-point composite — and the one its ink pass sees — which is neither graphviz's polygon nor a single `manageEntryExitPoint` of it (lgm-T1d). |
 | `state-composite-edge-label.ts` | `buildEdgeAttrs` | Transition edge label/xlabel attribute building — split out of ./state-composite-pass.ts (mission A4 Phase L, 500-line file-cap compliance; pure move, zero behavior change) for its own coherent concern: turning a `Transition`'s guard/action |
