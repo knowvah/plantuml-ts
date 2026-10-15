@@ -35,6 +35,53 @@ post-D7 measurements.
 
 ---
 
+## component-divergence-drive (codd) — DONE 2026-10-15 (merged to local main as a merge commit, not pushed)
+
+**What changed:** post-layout drawing of the description engine. Containers draw at the engine's
+cluster rect (not a padded child union); `skinparam packagestyle`; `set separator` phantom groups and
+their uid order; container packing/scoping (`useIntermediatePackages`, scoped reopen); kermor group
+notes and the kermor port frontier; notes drawn as the jar's opale entity group; entity/edge colour
+precedence (stereotype tier, element buckets, ports, container inline colours, RoundCorner); canvas
+(degenerate predicate, background rect order, style document margin, scale/dpi under chrome); text
+(edge labels at the table corner, entity/cluster title alignment from the style cascade, stereotype
+font size + AtomText 10-px clamp, MinimumWidth, creole cluster titles, `%n()`, embedded-quote
+displays); self-loops and port labels reach the DOT; `skinparam arrowThickness`. The census and the
+description ratchet now render through `renderSync` like the survey.
+
+**Counts b0 → final** (conformant/structural/diverged): component 69/70/127 → **180/12/74**, usecase
+30/17/46 → 58/2/33, unknown 423/48/354 → 483/16/326, network 0 → 1. 0 conformant losses in all 28
+engines at b1 and b5 (b2–b4 closes folded into b5, journal row 41).
+- Census component Σ (renderSync instrument) 21319 → **2201** (10.3%), zero-diff 68 → 179.
+- D1: all five clauses met (journal row 47).
+- Pins: svg-description 89 → 352, layout-parity 469 → 489, diff-baseline tightened on 17 rows,
+  census pins updated where rows fell.
+
+**Open residuals (owners; mechanisms in `plans/component-divergence-drive/decision-journal.md`):**
+- `[[url]]` → `<a>`: entity url never reaches `buildEntityParams` (givape, gacida, jazabe, balopu,
+  saroje; `EntityImageDescription.java:139,305,328`) and link-label url/sprite/`<img>` atoms (nevuzi,
+  malumi, bivira, ruciga) → next description mission.
+- Edge `path @id` uses the qualified name; the jar uses `Quark.getName` (fidati, kofovu, tojitu: 88
+  diffs each). Needs the separator in the edge geo → next description mission.
+- Link middle decor `-0)-`/`-(0)-` not drawn; core `SvekEdge` has no middle decor (lakuti, bokumi,
+  nofunu, saveje; `CommandLinkElement.java:104,149-157`, `SvekEdge.java:353-356`) → core mission.
+- Description magic-arrow glyph (berelu, funeme; glyph only in `class-magic-arrow.ts`) → core.
+- Note-on-link (`EntityImageNoteLink`) unported: dikexa, povuju, tujica, josoxo, usecase fogiku/jafuke.
+- Quantifier text not drawn (purevo "1", misube "*", fetefi) though it now reaches the DOT.
+- Degenerate-leaf sizing omits element font options (`layout.ts:406` vs `layout-dot-tree.ts:190-206`;
+  kuciku, mavicu; patch proven in T4's report) — single-file, cheap.
+- `<latex>` box guard in `leaf-sizing.ts:182` (kezodo, vimulo; gevozu/sunuju 164 → 68) — core, D5.
+- cumofi: `skinparam handwritten` jitter and the deprecation-warning block.
+- Stereotype-signed styles on description leaves/clusters and `StereotypeFontColor` (golamo, berufi);
+  `Shadowing<<stereo>>` (deroxu); `!theme carbon-gray` title-style border (reroca).
+- perapa/banatu port-cluster x (5.8/8.75 px) — unexplained after three probes.
+- xagonu: `\r` label prefix kept, edge draw order. bagoze: rainbow second path.
+- Post-colon `<<st>> text` link label is one line in the jar (`link-grammar.ts`).
+- usecase/fepuvo-06-rugi981 still emits a malformed XML comment (pre-existing `error` pin).
+- ELK adapter: packagestyle FOLDER and placeholder geo boxes; null-symbol packagestyles log
+  `console.error` per render. Class engine keeps a root-only alignment copy.
+- TRACKER 36 (dot-engine): flat adjacent unlabelled edge 0.1-0.3 px (zodela 0/1) → dot-engine.
+- TRACKER #11 label-box inputs: berelu, vugaso, pumoko.
+
 ## description-svek-wrappers (dsw) — DONE 2026-10-14 (merged to local main, not pushed)
 
 **What changed:** the description engine now hands the layout the jar's svek protection wrappers
@@ -56,25 +103,26 @@ every close.
   check).
 
 **Open residuals (owners):**
-- Post-layout drawing on layout-equal rows → the component-conformance mission (to be planned).
+- ~~Post-layout drawing on layout-equal rows~~ — largely CLOSED 2026-10-15 by codd (component 69 → 180
+  conformant); remaining rows are listed in the codd section above.
   T7's Table C (`.agent-notes/dsw-T7.md`) is the cheapest queue: single fill/stroke colour diffs
   and childCount.
 - c4: 14 clusterTree rows whose wrappers match but cluster bb differs → unowned; next c4 work.
-- xagonu cluster bb: our DOT lacks the jar's self-loop xlabel TABLEs (suspected) → component
-  mission.
-- deroxu render: `skinparam dpi 60` scale and the missing title (not traced) → component mission.
-- unknown/gerebe, jafexe: container classification (`foo1.foo2` one jar cluster vs two ours) →
-  component mission.
-- unknown dotEqual flips under the tightened check (golamo, juvose, rebena, vuvave, xipane):
-  title-table sizing from per-stereotype font size, `packagestyle node` (`theme.ts:169`
-  rect-only) and title creole → component mission.
+- ~~xagonu cluster bb~~ — CLOSED 2026-10-15 by codd T9 (867ba1fd7): description dropped every
+  self-loop; xagonu now layout-equal and pinned.
+- ~~deroxu render: dpi 60 scale under chrome~~ — CLOSED 2026-10-15 by codd T4 (08c9a9e08); 719/1237
+  remain (Shadowing<<stereo>>, colours, @id) → codd residuals.
+- ~~unknown/gerebe, jafexe container classification~~ — CLOSED 2026-10-15 by codd T8 (ec8f6e127):
+  packing + scoped reopen; both conformant.
+- ~~unknown dotEqual flips (golamo, juvose, rebena, vuvave, xipane)~~ — CLOSED 2026-10-15 by codd
+  T2 (eb87da5ce), T7a (f0251a64d, fcff0651d), T7b (68b1b7ce8, d1b4243f7): all five layout-equal.
 - State: the same multi-line port-width defect (`state-leaf-node.ts:61-64`) → unowned, state.
 - Core emitter text order: the outer zaent anchor is printed before a nested child cluster in a
   port cluster (ClusterDotString.java:174-190). Layout-neutral → unowned, low.
-- Unknown DESCRIPTION conformant rows (56) and c4 (2) have no byte-exact ratchet home; the
-  description ratchet's eligibility reads the stale legacy `parity.json` → tooling.
-- 10 conformant description rows skipped from pinning (`measurements/b4-pin-dryrun.txt`) → the
-  component mission.
+- ~~Ratchet home for unknown DESCRIPTION / c4; stale legacy eligibility~~ — CLOSED 2026-10-15 by
+  codd T1a (0b43dcfca); 115 unknown rows pinned at b5. c4's 2 conformant rows route NONE/CLASS.
+- ~~10 skipped rows~~ — CLOSED 2026-10-15 by codd: 9 pinned; dirofi stays out (dotEqual false,
+  jar error page).
 
 ## Post-layout residuals of the dot-engine 2.4.0 controls
 

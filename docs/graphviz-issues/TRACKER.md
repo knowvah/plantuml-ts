@@ -107,7 +107,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         which never sends a width. Given a FIXEDSIZE table it tracks the jar
         within ~0.6 horizontally and matches real graphviz exactly vertically.
         No upstream fix to wait for -- work is ours, scoped in
-        .agent-notes/class-edge-label-rank-gap.md. -->
+        .agent-notes/class-edge-label-rank-gap.md. 
+        CONSUMED 2026-10-15 (codd): engine and builder clean on 39 of 42 description minlen=0 labelled-edge rows (T0b). codd T7a draws description edge labels at the table corner + margin (SvekEdge.java:951-954): jecici 39/81 -> 27/78. Still ours: label-box INPUT on berelu (37/74; magic-arrow glyph unported), vugaso (1/19, lollipop box) and pumoko (110/827, `Rel_*` empty labels). -->
 - [~] 12-port-label-placement-near-head-node.md  <!-- RECLASSIFIED 2026-08-13:
         NOT a dot-engine defect. Port-label placement is byte-identical to the
         native oracle on the filed repro in three forms and on the fixture's
@@ -115,7 +116,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         object/tobuka-93-jale775 are all port-label text x/y, every y delta half
         the label-box height with opposite signs for an edge's two ends — one
         formula fed correct centres cannot do that, so the mechanism is ours,
-        in portLabelAnchor (class-edge-geo.ts:202-223). -->
+        in portLabelAnchor (class-edge-geo.ts:202-223). 
+        CONSUMED 2026-10-15 (codd): T9 carries quantifier text to taillabel/headlabel (link-edge-attrs.ts applyQualifierLabels; SvekEdge.java:447-468); builder == native incl. tail_lp/head_lp on fetefi, nofunu, purevo; T8 fixed misube's node order (GraphvizImageBuilder.java:226-227). Render-diff b5: purevo 1/0, misube 1/0, fetefi 3/2, nofunu 23/4 -- the quantifier TEXT is not drawn yet (ours, renderer-edge/SvekEdge). -->
 - [x] 13-edge-tail-head-label-positions-not-in-getlayout.md
 - [ ] 14-cluster-label-position-not-in-getlayout.md  <!-- FIXED upstream
         2026-08-14: ClusterGeometry carries label {x, y, width, height}, where
@@ -145,7 +147,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         (A trailing line here said "this repo is still on ^1.4.0" — stale the
         moment T7 landed the bump recorded above, and removed 2026-08-15.)
         2026-10-12 (dot-engine plantuml-tracker-2): consumer-side; no
-        dot-engine work. -->
+        dot-engine work. 
+        CONSUMED 2026-10-15 (codd): engine == native; cluster.label still never consumed. T2 draws containers at the engine cluster rect; T7b centres rect/rectangle/card titles from the composite title style (ClusterHeader.java:121-128, USymbolRectangle.java:126-131) while package/folder titles stay at USymbolFolder.java:228 UTranslate(4, 2). Box stays open: no upstream fix to consume; ours on the remaining title rows. -->
 - [~] 15-cluster-anchor-point-ranked-with-target.md  <!-- RECLASSIFIED 2026-08-19:
         NOT a dot-engine defect. The filing compared two different quantities --
         the jar's DRAWN spline start (88.187, i.e. where PlantUML clips the path
@@ -165,7 +168,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         warns and leaves the spline alone (verified: output unchanged). No
         upstream fix to wait for -- work is ours, applying the simulateCompound
         clip we already ship (DIVERGENCES.md:688) to state composite-anchor
-        transitions before LimitFinder folds the spline into the ink extent. -->
+        transitions before LimitFinder folds the spline into the ink extent. 
+        CONSUMED 2026-10-15 (codd): IDENTICAL on 50/50 zaent fixtures (T0b). codd T2 draws the cluster box at the engine rect, which moved the ours-draw zaent rows (e.g. repoge 36/18 -> 37/16, link label + magic-arrow residuals). -->
 - [ ] 16-edge-xlabel-position-not-in-getlayout.md  <!-- FIXED upstream
         2026-08-19: EdgeGeometry carries `xlabel {x, y}`, snapshotted from
         edge.info.xlabel through the same flipY as every other coordinate and
@@ -340,7 +344,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         file for the full elimination chain. Not chased (stop 8); a
         per-curve dot-engine routing delta, not a general defect in T13's
         clip.
-        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-18.test.ts (bajotu, bejusa, pecabi, sanixi) -->
+        RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-18.test.ts (bajotu, bejusa, pecabi, sanixi) 
+        CONSUMED 2026-10-15 (codd): description clip boxes now come from the engine cluster rect (T2 M1); no engine wait. -->
 - [x] 19-flat-edge-ignores-html-table-port.md  <!-- CONSUMED 2026-09-26 via dot-engine 1.6.1 (cdd4 T0d): camuna, nafiki, coxose, mucoti, rifuzu, sefazi class-conformant; ririlu raw layout byte-matches real dot, its remaining SVG residual is the plantuml-ts B-6 Kal stall. FIXED 2026-09-26 on
         dot-engine branch fix/plantuml-tracker-issues (022a21b7), NOT YET PUBLISHED. Mechanism: make_flat_adj_edges
         takes the rotated aux-graph path when either end has a DEFINED port; the
@@ -375,7 +380,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         ("~* initiators", 61.1px) instead of the drawn quantifierLines.
         ORIGINAL NOTE FOLLOWS: FILED 2026-09-23
         (cdd-B7FU-R3, item 4). An edge carrying BOTH `taillabel` and
-        `headlabel` HTML tables (`A "role1" --> "role2" B`) gets NO extra
+        `headlabel` HTML tables (`A "role1" 
+        CONSUMED 2026-10-15 (codd): purevo's input defect (#12 mechanism) fixed by T9; builder == native incl. tail_lp/head_lp; render-diff 1/0 (quantifier text not drawn, ours). --> "role2" B`) gets NO extra
         canvas/centring reservation from dot-engine, where real graphviz
         reserves ~2.425px asymmetrically (left side only) for the identical
         byte-equal DOT input. Isolated with a controlled A/B on
@@ -614,7 +620,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): flat edge across a non-neighbour ignores splines=polyline/line (routesplines used); deroxu-29-gude369.
         RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-28.test.ts (polyline, line, deroxu, quotes)
         CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): unknown/deroxu-29-gude369 is still 879/2500 (unchanged count; bytes moved). Our builder graph does NOT lay out like native on the jar DOT, because our DOT input differs from the jar's although `dotEqual` reports true: same 38 clusters, but our port-table node sizes differ, giving bb width 4958 vs 3757 and 7/246 matching edge pos. 2.4.0 renders the jar's own svek-1.dot byte-identical to native, so the remaining work is ours (a DOT-input gap), not an upstream wait.
-        CONSUMED 2026-10-14 (dsw, merge to main pending): unknown/deroxu-29-gude369 layoutParity unequal (bb 4958 vs 3757) -> EQUAL (bb 3757, 246/246 edge pos = native). Two plantuml-ts input defects, both fixed in description: multi-line port label sized single-line (SvekNode.java:181-190) and LEFT/UP links never marked inverted (CommandLinkElement.java:325-326, Cluster.java:195-212). render-diff 879/2500 -> 743/2505: the remaining residual is ours and post-layout (skinparam dpi 60 scale and the title, not traced). Box stays open: the fixture does not yet re-measure clean. -->
+        CONSUMED 2026-10-14 (dsw, merge to main pending): unknown/deroxu-29-gude369 layoutParity unequal (bb 4958 vs 3757) -> EQUAL (bb 3757, 246/246 edge pos = native). Two plantuml-ts input defects, both fixed in description: multi-line port label sized single-line (SvekNode.java:181-190) and LEFT/UP links never marked inverted (CommandLinkElement.java:325-326, Cluster.java:195-212). render-diff 879/2500 -> 743/2505: the remaining residual is ours and post-layout (skinparam dpi 60 scale and the title, not traced). Box stays open: the fixture does not yet re-measure clean. 
+        CONSUMED 2026-10-15 (codd): deroxu layout-equal; T4 ported scale/dpi under chrome and the dash scaling: render-diff 743/2505 -> 719/1237. Residual ours (Shadowing<<stereo>>, colours, @id). -->
 - [ ] 29-ortho-self-loop-edge-lost.md  <!-- FIXED 2026-10-12, on main ea0a8849 (PR #85, rebase-merged),
         published in @knowvah/dot-engine 2.3.1 (2026-10-12T13:41Z).
         PREVIOUS NOTE FOLLOWS: FIXED 2026-10-12 on
@@ -628,7 +635,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): `splines=ortho; a->a` loses the loop ("lost a a edge"), real draws it; xagonu-36-sudi116.
         RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-29.test.ts (inline, pair, quote; pair measures text)
         CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): unknown/xagonu-36-sudi116 is still 192/594, bytes unchanged. Our builder graph does NOT lay out like native on the jar DOT, because our DOT input differs from the jar's (`dotEqual` is false here): we emit 13 clusters against the jar's 43, missing the package wrapper clusters. 2.4.0 renders the jar's own svek-1.dot byte-identical to native, so the remaining work is ours (a DOT-input gap), not an upstream wait.
-        CONSUMED 2026-10-14 (dsw, merge to main pending): unknown/xagonu-36-sudi116 cluster tree jar 43 vs ours 13 -> equal nesting (jar 12 vs ours 12 base clusters with matching wrappers); layoutParity still differs on cluster bb (449.70 vs 443.70) because our DOT lacks the jar's two self-loop xlabel TABLEs (sh0050->sh0050 139x38, zaent0019->zaent0019 142x25; suspected, ours). render-diff 192/594 -> 191/586. Box stays open. -->
+        CONSUMED 2026-10-14 (dsw, merge to main pending): unknown/xagonu-36-sudi116 cluster tree jar 43 vs ours 13 -> equal nesting (jar 12 vs ours 12 base clusters with matching wrappers); layoutParity still differs on cluster bb (449.70 vs 443.70) because our DOT lacks the jar's two self-loop xlabel TABLEs (sh0050->sh0050 139x38, zaent0019->zaent0019 142x25; suspected, ours). render-diff 192/594 -> 191/586. Box stays open. 
+        CONSUMED 2026-10-15 (codd): xagonu was an INPUT defect -- description buildDotEdges skipped every self-loop (layout-dot-tree.ts:422); T9 emits them and the builder lays out identical to native (bb 1044x1316); dotEqual/layoutEqual true, pinned in layout-parity. Render-diff 191/586 -> 45/887 (label `\r` prefix, edge draw order: ours). Box open: fixtures not clean. -->
 - [ ] 30-flat-adjacent-edge-pair-with-port-endpoint-offset.md  <!-- FIXED 2026-10-12, on main 87347711 (PR #85, rebase-merged),
         published in @knowvah/dot-engine 2.3.1 (2026-10-12T13:41Z).
         PREVIOUS NOTE FOLLOWS: FIXED 2026-10-12 on
@@ -643,7 +651,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): adjacent flat edge pair with one port: port-less edge endpoints off ~0.2px; sokevu-87-toce485, repoge-41-demu604.
         RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-30.test.ts (inline, repoge, sokevu, port-first, quote)
         CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): class/sokevu-87-toce485 conformant (it was before the bump too); component/repoge-41-demu604 still 36/20, bytes unchanged. Our builder graph does NOT lay out like native on the jar DOT, because our DOT input differs from the jar's although `dotEqual` reports true: we emit 2 clusters against the jar's 4 (missing the cluster<N>p0/p1 wrappers). 2.4.0 renders the jar's own svek-1.dot byte-identical to native, so the remaining work is ours (a DOT-input gap), not an upstream wait.
-        CONSUMED 2026-10-14 (dsw, merge to main pending): class/sokevu-87-toce485 conformant (0/0) and layout-equal. component/repoge-41-demu604 layoutParity jar 4 vs ours 2 clusters -> EQUAL (core a/i wrappers around a linked port cluster, ClusterDotString.java:98-99,151-152,175-181); render-diff 36/20 -> 36/18, residual is ours and post-layout. Box stays open until repoge re-measures clean. -->
+        CONSUMED 2026-10-14 (dsw, merge to main pending): class/sokevu-87-toce485 conformant (0/0) and layout-equal. component/repoge-41-demu604 layoutParity jar 4 vs ours 2 clusters -> EQUAL (core a/i wrappers around a linked port cluster, ClusterDotString.java:98-99,151-152,175-181); render-diff 36/20 -> 36/18, residual is ours and post-layout. Box stays open until repoge re-measures clean. 
+        CONSUMED 2026-10-15 (codd): repoge still builder == native, layoutParity EQUAL; render-diff 36/18 -> 37/16 after the codd drawing fixes; residual ours (draw order/labels). -->
 - [~] 31-routing-failure-lost-edge-exit-status.md  <!-- OUTCOME 2026-10-14: the
         dot-engine port printed `Pshortestpath failed` 3x vs native 1x (inline,
         zuduxu) and 36x vs 34x (rubebe), with identical lost-edge sets. FIXED on
@@ -674,7 +683,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): makeSimpleFlatLabels detour edge is the x-mirror of real; zosuje-43-zebi775, bamami-10-lava790, bobixe-18-riza923, pugodi-27-kone040, rufopi-30-roro642. Same family as 23.
         RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-32.test.ts (inline, zosuje, bamami, bobixe, pugodi, rufopi, quotes)
         CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): none of zosuje (20/180), bamami, bobixe, pugodi (0/100 each) or rufopi (5/103) moved a byte. Our builder graph does NOT lay out like native on the jar DOT, because our DOT input differs from the jar's although `dotEqual` reports true: the jar wraps the package in cluster6p0 > cluster6 (17x23 label TABLE) > cluster6p1; we emit one cluster with a plain-text label (1 vs 3 clusters, bb 145x90.57 vs 177x113.07). 2.4.0 renders the jar's own svek-1.dot byte-identical to native, so the remaining work is ours (a DOT-input gap), not an upstream wait.
-        CONSUMED 2026-10-14 (dsw, merge to main pending): bamami, bobixe, pugodi, rufopi and zosuje all layoutParity unequal (jar 3 vs ours 1 clusters: missing p0/p1 protection wrappers + title TABLE) -> EQUAL, i.e. the engine fix now reaches them. render-diff bamami/bobixe/pugodi 0/100 -> 0/88, rufopi 5/103 -> 5/91, zosuje 20/180 unchanged: the residuals are ours and post-layout (e.g. bamami svg height 232 vs 219). Box stays open until they re-measure clean. -->
+        CONSUMED 2026-10-14 (dsw, merge to main pending): bamami, bobixe, pugodi, rufopi and zosuje all layoutParity unequal (jar 3 vs ours 1 clusters: missing p0/p1 protection wrappers + title TABLE) -> EQUAL, i.e. the engine fix now reaches them. render-diff bamami/bobixe/pugodi 0/100 -> 0/88, rufopi 5/103 -> 5/91, zosuje 20/180 unchanged: the residuals are ours and post-layout (e.g. bamami svg height 232 vs 219). Box stays open until they re-measure clean. 
+        CONSUMED 2026-10-15 (codd): T2 draws the package at the engine cluster rect and T4 reads the exporter margin: bamami, bobixe, pugodi 0/88 -> 0/0 (conformant), rufopi 5/91 -> 2/0, zosuje 20/180 -> 17/0. Box stays open until rufopi and zosuje re-measure clean (their residuals are ours: cluster fill/second title line, zosuje style colours). -->
 - [ ] 33-parallel-labelled-edges-second-edge-bend-position.md  <!-- FIXED 2026-10-12, on main cdf597bc (PR #85, rebase-merged),
         published in @knowvah/dot-engine 2.3.1 (2026-10-12T13:41Z).
         PREVIOUS NOTE FOLLOWS: FIXED 2026-10-12 on
@@ -699,7 +709,7 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): 16.1.0 draws table border before cells, dot-engine after (matches 15.0 source); order-only; seen in rubebe-45-sura795.
         RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-34.test.ts (inline, rubebe, quote)
         CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): published in 2.4.0 (PR #86; the branch sha 704a97ed was rebased to 67f3ad3a). The emission order only affects dot-engine's own SVG renderer, which svek discards; unknown/rubebe-45-sura795 is still 160/63, bytes unchanged. Our own builder graph lays out identically to native `dot -Tdot` on the jar DOT (bb and every edge pos), so the residual is plantuml-ts post-layout work, not an upstream wait. -->
-- [ ] 35-narrow-edge-label-parallel-edges-layout-offset.md  <!-- FIXED 2026-10-12, on main cdf597bc (PR #85, rebase-merged),
+- [x] 35-narrow-edge-label-parallel-edges-layout-offset.md  <!-- FIXED 2026-10-12, on main cdf597bc (PR #85, rebase-merged),
         published in @knowvah/dot-engine 2.3.1 (2026-10-12T13:41Z).
         PREVIOUS NOTE FOLLOWS: FIXED 2026-10-12 on
         dot-engine branch fix/plantuml-tracker-issues-2 (44aba8a3), NOT YET PUBLISHED.
@@ -711,7 +721,9 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         fixture).
         PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): narrow-label parallel edges put nodes at fractional x in real, integer in dot-engine (0.226px); no fixture isolates it.
         RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-35.test.ts (inline, bamami, quote)
-        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): unknown/bamami-10-lava790 is still 0/100, bytes unchanged. Our builder graph does NOT lay out like native on the jar DOT, because our DOT input differs from the jar's although `dotEqual` reports true: the same missing package wrapper clusters as 32. 2.4.0 renders the jar's own svek-1.dot byte-identical to native, so the remaining work is ours (a DOT-input gap), not an upstream wait. -->
-- [ ] 36-flat-adjacent-unlabelled-edge-endpoint-offset.md  <!-- FILED 2026-10-15 (codd-T0b): single flat adjacent minlen=0 edge, no port/label, endpoints 0.1-0.3 px off native 16.1.0; unknown/zodela-36-sica712, usecase/cimare-47-deke334 (conformant, invisible edges). -->
+        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): unknown/bamami-10-lava790 is still 0/100, bytes unchanged. Our builder graph does NOT lay out like native on the jar DOT, because our DOT input differs from the jar's although `dotEqual` reports true: the same missing package wrapper clusters as 32. 2.4.0 renders the jar's own svek-1.dot byte-identical to native, so the remaining work is ours (a DOT-input gap), not an upstream wait. 
+        CONSUMED 2026-10-15 (codd): unknown/bamami-10-lava790 re-measures CLEAN on dot-engine 2.4.0 (render-diff 0/0, survey conformant, dotEqual and layoutEqual true) after T2's cluster-rect drawing. Box ticked under the file's rule. -->
+- [ ] 36-flat-adjacent-unlabelled-edge-endpoint-offset.md  <!-- FILED 2026-10-15 (codd-T0b): single flat adjacent minlen=0 edge, no port/label, endpoints 0.1-0.3 px off native 16.1.0; unknown/zodela-36-sica712, usecase/cimare-47-deke334 (conformant, invisible edges). 
+        CONSUMED 2026-10-15 (codd): still the engine's; zodela-36-sica712 now 0/1 (the one numeric diff is this sub-px rect x). -->
   <!-- 23 ALSO SEEN 2026-10-08 (lgm-T0c): nugecu-04-tona107 minimises to this mechanism; related 32, 33.
         CONSUMED 2026-10-14 (dsw, merge to main pending): unknown/bamami-10-lava790 layoutParity unequal -> EQUAL (p0/p1 wrappers + 17x23 title TABLE); render-diff 0/100 -> 0/88, post-layout residual ours. Box stays open. -->
