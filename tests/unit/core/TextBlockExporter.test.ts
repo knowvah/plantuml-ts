@@ -14,7 +14,7 @@ import { assembleSvg } from '../../../src/core/assemble-svg.js';
 import type { RenderFragment } from '../../../src/core/dispatcher.js';
 import { ClockwiseTopRightBottomLeft } from '../../../src/core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 import { ROOT_GROUP_OPEN } from '../../../src/core/svg.js';
-import { BODY_ANCHOR, finalizeTitledDiagramFragment } from '../../../src/core/TextBlockExporter.js';
+import { BODY_ANCHOR, finalizeTitledDiagramFragment, scaleFragmentBody } from '../../../src/core/TextBlockExporter.js';
 
 /** `PSystemSalt#getDefaultMargins()` (PSystemSalt.java:238-240). */
 const SALT_DEFAULT_MARGIN = ClockwiseTopRightBottomLeft.same(5);
@@ -93,5 +93,14 @@ describe('assembleSvg — SALT is a TitledDiagram on the shared export path', ()
     const svg = assembleSvg(chromed({ body: `<g>${INNER}</g>`, exportMargin: SALT_DEFAULT_MARGIN }));
     expect(svg).toContain('viewBox="0 0 111 61"');
     expect(svg).toContain('<text x="6" y="7">A</text>');
+  });
+});
+
+describe('scaleFragmentBody — dash pattern inside style', () => {
+  it('scales stroke-width and the stroke-dasharray pair together (SvgGraphics#setStrokeWidth, :557-562)', () => {
+    const body = '<path d="M10,20 L30,40" style="stroke:#181818;stroke-width:1;stroke-dasharray:7,7;" fill="none"/>';
+    expect(scaleFragmentBody(body, 0.625)).toBe(
+      '<path d="M6.25,12.5 L18.75,25" style="stroke:#181818;stroke-width:0.625;stroke-dasharray:4.375,4.375;" fill="none"/>',
+    );
   });
 });

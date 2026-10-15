@@ -164,14 +164,16 @@ function scalePathD(value: string, factor: number): string {
 }
 
 /** `style="stroke:#181818;stroke-width:1.5;stroke-miterlimit:10;"` — only
- *  `stroke-width` (a length, `SvgGraphics.java#setStrokeWidth:557` scales
- *  it via the same `format()`) scales; the color and the dimensionless
- *  `stroke-miterlimit` ratio do not. */
+ *  `stroke-width` and `stroke-dasharray` (lengths, `SvgGraphics.java
+ *  #setStrokeWidth:557-562` scales both via the same `format()`) scale; the
+ *  color and the dimensionless `stroke-miterlimit` ratio do not. */
 function scaleStyleAttr(value: string, factor: number): string {
-  return value.replace(
-    /stroke-width:(-?\d+(?:\.\d+)?)/,
-    (_match, width: string) => `stroke-width:${scaleToken(width, factor)}`,
-  );
+  return value
+    .replace(/stroke-width:(-?\d+(?:\.\d+)?)/, (_match, width: string) => `stroke-width:${scaleToken(width, factor)}`)
+    .replace(
+      /stroke-dasharray:([\d.,\s]+)/,
+      (_match, dashes: string) => `stroke-dasharray:${scalePoints(dashes, factor)}`,
+    );
 }
 
 /** Attribute names mindmap's own producer vocabulary ever carries a

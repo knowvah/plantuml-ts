@@ -41,7 +41,8 @@
 import { formatShiftedCoordinates } from './annotations/coord-shift.js';
 import type { AssembledSvg, RenderFragment } from './dispatcher.js';
 import { svgRoot, group, rect } from './svg.js';
-import { finalizeActivityFragment } from './assemble-svg-activity.js';
+import { finalizeActivityFragment, scaleActivityBody } from './assemble-svg-activity.js';
+import { resolveScaleFactor } from './scale-command.js';
 import { applySeededDefIds } from './svg-defs-seeded.js';
 import { seedOf } from './klimt/drawing/svg/svg-seed.js';
 import { assembleDocumentShell } from './klimt/document-shell.js';
@@ -380,20 +381,39 @@ function finalizeSequenceBody(fragment: RenderFragment): string {
 // ---------------------------------------------------------------------------
 
 /**
- * codd-T4: description's chrome-composed fragment. The only work is the
- * full-canvas background `<rect>` as the content `<g>`'s FIRST child, drawn
- * at the FINAL size (`UgDiagram.java:123-135`: `addChrome`, then
- * `TextBlockUtils.addBackcolor`); every other description fragment falls
- * through unchanged, as before.
+ * codd-T4: description's chrome-composed fragment. Two jobs, both because
+ * chrome is composed OUTSIDE klimt here while the jar draws it through the
+ * same `UGraphic` as the body:
+ *  - the full-canvas background `<rect>` as the content `<g>`'s FIRST child,
+ *    drawn at the FINAL size (`UgDiagram.java:123-135`: `addChrome`, then
+ *    `TextBlockUtils.addBackcolor`);
+ *  - `scale` / `skinparam dpi`, applied to the whole composed block
+ *    (`TextBlockExporter.java:159-177`, title included).
+ * A fragment with neither falls through unchanged, as before.
  */
 function finalizeDescriptionFragment(fragment: RenderFragment): RenderFragment {
-  if (fragment.documentBackgroundRect === undefined) return fragment;
-  const background = rect(0, 0, Math.trunc(fragment.width), Math.trunc(fragment.height), {
-    fill: fragment.documentBackgroundRect,
-    stroke: 'none',
-    strokeWidth: 1,
-  });
-  return { ...fragment, body: spliceAsFirstChild(fragment.body, background) };
+  const body =
+    fragment.documentBackgroundRect === undefined
+      ? fragment.body
+      : spliceAsFirstChild(
+          fragment.body,
+          rect(0, 0, Math.trunc(fragment.width), Math.trunc(fragment.height), {
+            fill: fragment.documentBackgroundRect,
+            stroke: 'none',
+            strokeWidth: 1,
+          }),
+        );
+  // `TextBlockExporter#computeScaleFactor` (`:204-208`) reads the chrome-and-margin dimension before `ensureVisible`.
+  const dimension = fragment.exportedDimension ?? fragment;
+  const factor = resolveScaleFactor(fragment.scaleSpec, dimension.width, dimension.height, fragment.dpi);
+  if (factor === 1) return { ...fragment, body };
+  return {
+    ...fragment,
+    body: scaleActivityBody(body, factor),
+    scaledCanvas: true,
+    width: fragment.width * factor,
+    height: fragment.height * factor,
+  };
 }
 
 /**

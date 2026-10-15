@@ -123,6 +123,10 @@ export function applyDocumentMargin(fragment: RenderFragment, margin: DocumentMa
   return {
     ...fragment,
     body: shiftFragmentBody(fragment.body, margin.left, margin.top),
+    exportedDimension: {
+      width: fragment.width + margin.left + margin.right,
+      height: fragment.height + margin.top + margin.bottom,
+    },
     width: Math.floor(fragment.width + margin.left + margin.right + ENSURE_VISIBLE_DELTA),
     height: Math.floor(fragment.height + margin.top + margin.bottom + ENSURE_VISIBLE_DELTA),
   };

@@ -165,6 +165,16 @@ function degenerateDims(geo: DescriptionGeometry, margin: DocumentMargin): Docum
 /** `EntityImageDegenerated#delta` (`svek/EntityImageDegenerated.java:55`). */
 const DEGENERATE_DELTA = 7;
 
+/**
+ * The margin-less block `DiagramChromeFactory.create` receives for a degenerate geometry:
+ * `EntityImageDegenerated#calculateDimension` (`svek/EntityImageDegenerated.java:73-75`), i.e. the leaf plus
+ * `delta * 2` -- no document margin (`UgDiagram.java:123-135` adds that after chrome).
+ */
+export function degenerateBlockDims(geo: DescriptionGeometry): { width: number; height: number } {
+  const leaf = geo.nodes[0]!;
+  return { width: leaf.width + DEGENERATE_DELTA * 2, height: leaf.height + DEGENERATE_DELTA * 2 };
+}
+
 /** What a body contributes to the document: its draw pass and its dimension. */
 interface DocumentBody {
   readonly draw: (target: UGraphic, respectHidden: boolean) => void;
@@ -269,7 +279,9 @@ export function renderDescription(
   // cdd-T30: `theme.dpi` -- `skinParam.getDpi()`
   // (`core/TextBlockExporter.java:206`), default 96 when `skinparam dpi` was
   // never declared (`Theme.dpi`'s own doc comment).
-  const scale = resolveScaleFactor(geo.scale, width, height, theme.dpi);
+  // codd-T4: a chromed geometry is scaled AFTER chrome (`assemble-svg.ts#finalizeDescriptionFragment`), as the jar
+  // scales the chrome-composed block (`TextBlockExporter.java:159-177`).
+  const scale = geo.chromed === true ? 1 : resolveScaleFactor(geo.scale, width, height, theme.dpi);
 
   const option = basicSvgOption({
     minDim: { width, height },

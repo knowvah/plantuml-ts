@@ -137,7 +137,7 @@ function scaleNumbers(value: string, factor: number): string {
  *  objectBoundingBox fractions). Each number is formatted here, once, after
  *  the multiply (`SvgGraphics.java:468-475`) -- the body was drawn deferred
  *  (`RenderFragment.numbersDeferred`), so this runs at factor 1 too. */
-function scaleActivityBody(body: string, factor: number): string {
+export function scaleActivityBody(body: string, factor: number): string {
   return mapOutsideInlineDefs(formatScaledFragmentBody(body, factor), (segment) =>
     segment.replace(ACTIVITY_EXTRA_SCALABLE_ATTR_RE, (_m, name: string, value: string) =>
       attrs([[name, scaleNumbers(value, factor)]]).trimStart(),
