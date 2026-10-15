@@ -191,3 +191,29 @@ describe('resolveNewlineEscapes -- the %n() sentinel (codd-T7a, T6-G)', () => {
     expect(resolveNewlineEscapes(`a${NL}b [[u c${NL}d]]`)).toBe(`a\nb [[u c${NL}d]]`);
   });
 });
+
+describe('parseNameSection -- lazy [%g].+?[%g] backtracks past an embedded quote (codd-T7a, T6-H)', () => {
+  // CommandCreateElementFull.java:130: DISPLAY_CORE / CODE_WITH_QUOTE are `[%g].+?[%g]`.
+  it('takes the display up to the quote that lets `as CODE` match (xipane-40-dune740)', () => {
+    const section = parseNameSection('"A ""B"" C" as he #white');
+    expect(section.id).toBe('he');
+    expect(section.display).toBe('A ""B"" C');
+    expect(section.color).toBe('#white');
+  });
+
+  it('does the same for `CODE as "display"` (DISPLAY2/3/4)', () => {
+    const section = parseNameSection('he as "A ""B"" C"');
+    expect(section.id).toBe('he');
+    expect(section.display).toBe('A ""B"" C');
+  });
+
+  it('takes a lone quoted CODE_WITH_QUOTE whole', () => {
+    expect(parseNameSection('"A ""B"" C"').id).toBe('A ""B"" C');
+  });
+
+  it('keeps the first close when it already continues the line', () => {
+    const section = parseNameSection('"Name" as short');
+    expect(section.id).toBe('short');
+    expect(section.display).toBe('Name');
+  });
+});
