@@ -6,8 +6,8 @@
  * node as a graphviz cluster (container symbol with children) or a
  * DotInputNode (leaf, or empty container). Build one DotInputGraph and call
  * layoutGraph() once; map results back to DescriptionGeometry — leaf
- * positions from result.nodes, container bboxes as a bottom-up padded union
- * of children, edge points from result.edges (real graphviz splines),
+ * positions from result.nodes, container bboxes from the engine's cluster rects
+ * (`result.clusters`), edge points from result.edges (real graphviz splines),
  * cross-container endpoints clipped at the container bbox. No DOM/SVG/async.
  *
  * Phase 1 AST classification (`classifyAst`/`isEffectiveCluster`/
@@ -27,7 +27,6 @@ import {
   type DescriptionNodeGeo,
   shiftGeo,
   buildNodeGeoIndex,
-  measureTitleLabel,
   type DescriptionEdgeGeo,
   type DescriptionGeometry,
   degenerateSingleLeaf,
@@ -37,7 +36,7 @@ import { type EdgeMapping, buildEdgeGeos, computeTotalDimensions } from './layou
 import { placeBody, type BodyPlacement } from './layout-ink-shift.js';
 import { isDisplayPositionedNull } from '../../core/annotations/index.js';
 import type { PortClusterInfo, ClusterSpacing } from './frontier-cluster-bbox.js';
-import type { RectangleArea } from '../../core/svek/FrontierCalculator.js';
+import { buildPortClusterInfoByAstId, clusterBoxesByAstId } from './layout-cluster-boxes.js';
 import { computeGraphSpacing, type EdgeFontSpecs } from './link-edge-attrs.js';
 import { spriteDimsLookupFor } from '../../core/sprite-commands.js';
 import { emojiArtworkResolverFor } from '../../core/internal-emoji-store.js';
@@ -80,52 +79,6 @@ import { applyDescriptionTogethers } from './together.js';
 // emission drop removed entities (verified: cifaki-66 keeps the magma edge
 // between the two surviving leaves of a 3-standalone chain; gezemu-34
 // demotes an emptied frame to a leaf).
-/** Builds the `PortClusterInfo` (frontier-cluster-bbox.ts) for every
- *  container with port children -- the clusters `Cluster#drawU` runs
- *  `manageEntryExitPoint` for (`entityPositionsExceptNormal().size() > 0`,
- *  `Cluster.java:344-345`). `initial` is the cluster's own graphviz rect from
- *  THIS layout (`DotStringFactory.java:432-441` -> `Cluster#setPosition`,
- *  `Cluster.java:511-512`), `clusterRects` every cluster's, for child
- *  `insides`; `titleWidth`/`titleHeight` are `measureTitleLabel`'s jar-exact
- *  `getTitleAndAttributeWidth/Height` (`Cluster.java:427-428`). Kermor never
- *  builds a port anchor (`portAnchorId` stays unset, see `buildDotClusters`)
- *  -- `manageEntryExitPoint`'s upstream call site is unconditional on
- *  kermor, but no kermor fixture exercises a port cluster, so this stays
- *  scoped to the non-kermor path. */
-function buildPortClusterInfoByAstId(
-  ctx: ClassifyCtx,
-  portRanksByCluster: ReadonlyMap<string, { rank: 'source' | 'sink'; nodeIds: string[] }[]>,
-  fonts: { fontSpec: FontSpec; measurer: StringMeasurer },
-  kermor: boolean,
-  result: DotLayoutResult,
-): Map<string, PortClusterInfo> {
-  const out = new Map<string, PortClusterInfo>();
-  if (kermor) return out;
-  const clusterRects = clusterRectsByAstId(ctx, result);
-  for (const c of ctx.containers) {
-    const initial = clusterRects.get(c.astId);
-    // No rect -> no `PortClusterInfo`: `buildGeoNode` keeps the padded-union
-    // box for that container, as it did before cdd4-T6b.
-    if (!portRanksByCluster.has(c.clusterId) || initial === undefined) continue;
-    const title = measureTitleLabel(c.display, c.symbol, fonts.fontSpec, fonts.measurer);
-    out.set(c.astId, { initial, clusterRects, titleWidth: title.width, titleHeight: title.height });
-  }
-  return out;
-}
-
-/** `DotLayoutResult.clusters` (keyed by `DotInputCluster.id`, the
- *  container's `clusterId`) re-keyed by the geo id (`astId`) as
- *  `RectangleArea`s. */
-function clusterRectsByAstId(ctx: ClassifyCtx, result: DotLayoutResult): Map<string, RectangleArea> {
-  const byClusterId = new Map((result.clusters ?? []).map((c) => [c.id, c]));
-  const out = new Map<string, RectangleArea>();
-  for (const c of ctx.containers) {
-    const r = byClusterId.get(c.clusterId);
-    if (r !== undefined) out.set(c.astId, { minX: r.x, minY: r.y, maxX: r.x + r.width, maxY: r.y + r.height });
-  }
-  return out;
-}
-
 function runLayout(
   ast: DescriptionDiagramAST,
   ctx: ClassifyCtx,
@@ -476,6 +429,7 @@ export function layoutDescription(
     {
       infoByAstId: portClusterInfoByAstId,
       spacing,
+      clusterBoxByAstId: clusterBoxesByAstId(ctx, result),
     },
   );
   const { totalWidth, totalHeight } = computeTotalDimensions(nodes, edges);
