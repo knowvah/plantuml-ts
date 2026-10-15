@@ -47,9 +47,8 @@ describe('container classification under a separator (codd-T8)', () => {
   it('jafexe: second.physical1 is a new group, so the tree has three clusters (first, first.physical1, second)', () => {
     const { graph, jarDot } = capture('jafexe');
     expect(graph.clusters).toHaveLength(3);
-    // The jar also has the self link sh0015->sh0015; layout-dot-tree.ts drops every self link (T9's file),
-    // which is why the first cluster's bb still differs. The tree itself (count and nesting) is the jar's.
-    expect(layoutParity(jarDot, graph).firstDiff?.detail).toMatch(/^jar 3 vs ours 3; /);
+    // With codd-T9's self links emitted (the jar's sh0015->sh0015), the whole layout equals the jar's.
+    expect(layoutParity(jarDot, graph).firstDiff).toBeUndefined();
     expect(graph.clusters?.map((c) => c.parentId !== undefined)).toEqual([false, true, false]);
   });
 });
