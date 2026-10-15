@@ -20,20 +20,17 @@ import type { ClassifyCtx } from './layout-types.js';
  *  THIS layout (`DotStringFactory.java:432-441` -> `Cluster#setPosition`,
  *  `Cluster.java:511-512`), `clusterRects` every cluster's, for child
  *  `insides`; `titleWidth`/`titleHeight` are `measureTitleLabel`'s jar-exact
- *  `getTitleAndAttributeWidth/Height` (`Cluster.java:427-428`). Kermor never
- *  builds a port anchor (`portAnchorId` stays unset, see `buildDotClusters`)
- *  -- `manageEntryExitPoint`'s upstream call site is unconditional on
- *  kermor, but no kermor fixture exercises a port cluster, so this stays
- *  scoped to the non-kermor path. */
+ *  `getTitleAndAttributeWidth/Height` (`Cluster.java:427-428`). Kermor builds
+ *  the same info: `Cluster#drawU` runs `manageEntryExitPoint` whenever the group
+ *  has a port, kermor or not (`Cluster.java:344-345`); kermor only skips the port
+ *  ANCHOR node (`portAnchorId` stays unset, see `buildDotClusters`). */
 export function buildPortClusterInfoByAstId(
   ctx: ClassifyCtx,
   portRanksByCluster: ReadonlyMap<string, { rank: 'source' | 'sink'; nodeIds: string[] }[]>,
   fonts: { fontSpec: FontSpec; measurer: StringMeasurer },
-  kermor: boolean,
   result: DotLayoutResult,
 ): Map<string, PortClusterInfo> {
   const out = new Map<string, PortClusterInfo>();
-  if (kermor) return out;
   const clusterRects = clusterRectsByAstId(ctx, result);
   for (const c of ctx.containers) {
     const initial = clusterRects.get(c.astId);
