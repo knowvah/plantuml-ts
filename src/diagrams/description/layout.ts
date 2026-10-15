@@ -25,6 +25,7 @@ import { layoutGraph } from '../../core/graph-layout.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import {
   type DescriptionNodeGeo,
+  type KermorNotesGeo,
   shiftGeo,
   buildNodeGeoIndex,
   type DescriptionEdgeGeo,
@@ -37,7 +38,12 @@ import { placeBody, type BodyPlacement } from './layout-ink-shift.js';
 import { applyPackageStyle } from './layout-package-style.js';
 import { isDisplayPositionedNull } from '../../core/annotations/index.js';
 import type { PortClusterInfo, ClusterSpacing } from './frontier-cluster-bbox.js';
-import { buildPortClusterInfoByAstId, clusterBoxesByAstId } from './layout-cluster-boxes.js';
+import {
+  buildPortClusterInfoByAstId,
+  clusterBoxesByAstId,
+  kermorNotesByAstId,
+  withKermorNotes,
+} from './layout-cluster-boxes.js';
 import { computeGraphSpacing, type EdgeFontSpecs } from './link-edge-attrs.js';
 import { spriteDimsLookupFor } from '../../core/sprite-commands.js';
 import { emojiArtworkResolverFor } from '../../core/internal-emoji-store.js';
@@ -224,6 +230,7 @@ function buildGeoAndEdges(
   theme: Theme,
   measurer: StringMeasurer,
   portClusterCtx: PortClusterCtx,
+  kermorNotes: ReadonlyMap<string, KermorNotesGeo>,
 ): { nodes: DescriptionNodeGeo[]; edges: DescriptionEdgeGeo[]; placement: BodyPlacement } {
   // G1 I-hideshow: `hidden` is draw-time-only (never a DOT/geo-tree
   // membership filter, contrast `removed` above) -- computed here, once,
@@ -236,14 +243,9 @@ function buildGeoAndEdges(
   // (`CucaDiagram.java:325-336`, called from `getTextBlock` :464) makes the `set separator` groups real
   // `GroupType.PACKAGE` groups, which `Cluster#drawU` draws. `buildNamespaceGroups` is pure, so this is the same tree.
   const groupedNodes = buildNamespaceGroups(ast.nodes, ast.namespaceSeparator);
-  const rawNodes = buildGeoTree(
-    groupedNodes,
-    leafPosMap,
-    collidingIds,
-    removed,
-    hidden,
-    stereotypeRules,
-    portClusterCtx,
+  const rawNodes = withKermorNotes(
+    buildGeoTree(groupedNodes, leafPosMap, collidingIds, removed, hidden, stereotypeRules, portClusterCtx),
+    kermorNotes,
   );
   const geoIndex = buildNodeGeoIndex(rawNodes);
   // G1b/J1 (mechanism C): build edges ONCE at (dx=0,dy=0) -- the RAW,
@@ -441,6 +443,7 @@ export function layoutDescription(
       spacing,
       clusterBoxByAstId: clusterBoxesByAstId(ctx, result),
     },
+    kermorNotesByAstId(ctx, result),
   );
   const { totalWidth, totalHeight } = computeTotalDimensions(nodes, edges);
   return {

@@ -28,6 +28,8 @@ import {
   type DescriptionNodeGeo,
   type Bbox,
   type DescriptionGeometry,
+  type KermorNoteGeo,
+  type KermorNotesGeo,
   LAYOUT_MARGIN,
   LAYOUT_MARGIN_LEADING,
 } from './layout-helpers-types.js';
@@ -38,6 +40,8 @@ export type {
   ResolvedEndpoint,
   DescriptionEdgeGeo,
   DescriptionGeometry,
+  KermorNoteGeo,
+  KermorNotesGeo,
 } from './layout-helpers-types.js';
 export {
   EMPTY_CONTAINER_WIDTH,
@@ -106,10 +110,20 @@ export function isClusterNode(node: DescriptiveNode): boolean {
 // Coordinate shift
 // ---------------------------------------------------------------------------
 
+/** `Cluster.moveSvek` (`Cluster.java:126-131`) moves `xyNoteTop`/`xyNoteBottom` with the cluster. */
+function shiftKermorNotes(notes: KermorNotesGeo, dx: number, dy: number): KermorNotesGeo {
+  const move = (n: KermorNoteGeo): KermorNoteGeo => ({ ...n, x: n.x + dx, y: n.y + dy });
+  return {
+    ...(notes.top === undefined ? {} : { top: move(notes.top) }),
+    ...(notes.bottom === undefined ? {} : { bottom: move(notes.bottom) }),
+  };
+}
+
 /** Recursively shift a DescriptionNodeGeo and all its descendants by (dx, dy). */
 export function shiftGeo(geo: DescriptionNodeGeo, dx: number, dy: number): DescriptionNodeGeo {
   return {
     ...geo,
+    ...(geo.kermorNotes === undefined ? {} : { kermorNotes: shiftKermorNotes(geo.kermorNotes, dx, dy) }),
     x: geo.x + dx,
     y: geo.y + dy,
     children: geo.children.map((c) => shiftGeo(c, dx, dy)),

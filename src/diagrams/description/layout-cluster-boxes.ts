@@ -10,7 +10,8 @@ import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { RectangleArea } from '../../core/svek/FrontierCalculator.js';
 import type { PortClusterInfo } from './frontier-cluster-bbox.js';
-import { measureTitleLabel, type Bbox } from './layout-helpers.js';
+import { measureTitleLabel, type Bbox, type DescriptionNodeGeo, type KermorNotesGeo } from './layout-helpers.js';
+import { kermorNoteClusterId, type KermorNoteSlot } from '../../core/graph-layout-build-kermor.js';
 import type { ClassifyCtx } from './layout-types.js';
 
 /** Builds the `PortClusterInfo` (frontier-cluster-bbox.ts) for every
@@ -72,4 +73,48 @@ export function clusterBoxesByAstId(ctx: ClassifyCtx, result: DotLayoutResult): 
     if (r !== undefined) out.set(c.astId, { x: r.x, y: r.y, width: r.width, height: r.height });
   }
   return out;
+}
+
+/** One slot's note: the min corner of its placed label table (`DotStringFactory.java:454,460`,
+ *  `SvekUtils.getMinXY` over the table polygon; `label` is the table's centre). */
+function kermorNoteAt(
+  byClusterId: ReadonlyMap<string, NonNullable<DotLayoutResult['clusters']>[number]>,
+  clusterId: string,
+  slot: KermorNoteSlot,
+  text: string | undefined,
+): { text: string; x: number; y: number } | undefined {
+  const label = byClusterId.get(kermorNoteClusterId(clusterId, slot))?.label;
+  if (text === undefined || label === undefined) return undefined;
+  return { text, x: label.x - label.width / 2, y: label.y - label.height / 2 };
+}
+
+/**
+ * The kermor TOP/BOTTOM group notes, keyed by geo id (`astId`). `DotStringFactory.java:438-440` `continue`s past a
+ * cluster whose title table is empty BEFORE it reads the note positions (`:442-461`), so a group the engine gave no
+ * title label gets no note; the position comes from the alpha (TOP) / beta (BOTTOM) label table.
+ */
+export function kermorNotesByAstId(ctx: ClassifyCtx, result: DotLayoutResult): Map<string, KermorNotesGeo> {
+  const byClusterId = new Map((result.clusters ?? []).map((c) => [c.id, c]));
+  const out = new Map<string, KermorNotesGeo>();
+  for (const c of ctx.containers) {
+    if (c.kermorNotes === undefined || byClusterId.get(c.clusterId)?.label === undefined) continue;
+    const top = kermorNoteAt(byClusterId, c.clusterId, 'top', c.kermorNotes.top);
+    const bottom = kermorNoteAt(byClusterId, c.clusterId, 'bottom', c.kermorNotes.bottom);
+    if (top !== undefined || bottom !== undefined) {
+      out.set(c.astId, { ...(top === undefined ? {} : { top }), ...(bottom === undefined ? {} : { bottom }) });
+    }
+  }
+  return out;
+}
+
+/** The geo tree with each cluster's note positions attached (pure; unchanged nodes are returned as-is). */
+export function withKermorNotes(
+  nodes: readonly DescriptionNodeGeo[],
+  notes: ReadonlyMap<string, KermorNotesGeo>,
+): DescriptionNodeGeo[] {
+  if (notes.size === 0) return [...nodes];
+  return nodes.map((n) => {
+    const own = notes.get(n.id);
+    return { ...n, ...(own === undefined ? {} : { kermorNotes: own }), children: withKermorNotes(n.children, notes) };
+  });
 }

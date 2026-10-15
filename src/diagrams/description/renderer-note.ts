@@ -25,6 +25,7 @@ import { UStroke } from '../../core/klimt/UStroke.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
 import { Back } from '../../core/klimt/Back.js';
 import { Fore } from '../../core/klimt/Fore.js';
 import { UGraphicStencil } from '../../core/klimt/drawing/UGraphicStencil.js';
@@ -75,6 +76,18 @@ function noteFont(theme: Theme): FontConfiguration {
   return { ...textFont(theme, 'note'), size: resolveElementFontSize(theme, 'note', 'title') ?? NOTE_FONT_SIZE };
 }
 
+/** The creole body block both note kinds draw (`BodyFactory.create3` over the `note` font). */
+export function buildNoteBlock(display: string, theme: Theme, sprites: SpriteRegistry | undefined): TextBlock {
+  return buildNoteBody(display, noteFont(theme), {
+    wrapWidth: theme.wrapWidth,
+    guillemet: {
+      start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,
+      end: theme.colors.graph.guillemetEnd ?? GUILLEMET_DEFAULT.end,
+    },
+    atomImageResolverFor: makeAtomImageResolverFor(sprites),
+  });
+}
+
 /** `.tag` sub-selector fill for the note's `<<stereotype>>` labels
  *  (`core/style-map-tag-cascade.ts#computeNoteStyleTagCascade`). */
 function tagBackground(theme: Theme, labels: readonly string[]): Paint | undefined {
@@ -116,14 +129,7 @@ export function drawNote(
 ): void {
   const info: EntityDecorationInfo = { name: node.id, qualifiedName: node.id, uid, location: null };
   const paints = resolveNotePaints(node, theme);
-  const block = buildNoteBody(node.display, noteFont(theme), {
-    wrapWidth: theme.wrapWidth,
-    guillemet: {
-      start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,
-      end: theme.colors.graph.guillemetEnd ?? GUILLEMET_DEFAULT.end,
-    },
-    atomImageResolverFor: makeAtomImageResolverFor(sprites),
-  });
+  const block = buildNoteBlock(node.display, theme, sprites);
   decorateEntityDrawing(
     requireGroups(ug),
     info,

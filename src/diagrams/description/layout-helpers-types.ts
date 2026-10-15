@@ -102,6 +102,22 @@ export interface DescriptionNodeGeo {
    *  drawn edge, its pre-existing default).
    *  @see ~/git/plantuml/.../svek/image/EntityImageNote.java:207-243 */
   opale?: { direction: OpaleDirection; pp1: OpalePoint; pp2: OpalePoint };
+  /** `!pragma kermor on` only, on a cluster: the TOP/BOTTOM group notes `Cluster#drawU` draws before the
+   *  cluster symbol (`Cluster.java:302-307`). Set by `layout-cluster-boxes.ts#withKermorNotes`. */
+  kermorNotes?: KermorNotesGeo;
+}
+
+/** One kermor group note: its text and `xyNoteTop`/`xyNoteBottom` (`Cluster.java:121-122`) -- the min corner
+ *  of the placed alpha/beta label table (`DotStringFactory.java:454,460`), in the geo frame. */
+export interface KermorNoteGeo {
+  readonly text: string;
+  readonly x: number;
+  readonly y: number;
+}
+
+export interface KermorNotesGeo {
+  readonly top?: KermorNoteGeo;
+  readonly bottom?: KermorNoteGeo;
 }
 
 // ---------------------------------------------------------------------------

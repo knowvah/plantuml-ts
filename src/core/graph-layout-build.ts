@@ -12,6 +12,7 @@ import {
   addNodesWithKermorRootEmpty,
   buildKermorClusterHandles,
   placeKermorMembers,
+  registerKermorClusterIds,
 } from './graph-layout-build-kermor.js';
 import {
   addTitledAnchorNode,
@@ -351,8 +352,7 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     // T4c: kermor alpha?/beta/gamma; `gamma` is the drawn cluster.
     if (input.kermor === true) {
       const k = buildKermorClusterHandles(c, outerName, parentInnermost, () => portRankSubId++);
-      idByName.delete(outerName);
-      idByName.set(`${outerName}gamma`, c.id);
+      registerKermorClusterIds(idByName, c, outerName);
       handlesById.set(c.id, k);
       return k;
     }
