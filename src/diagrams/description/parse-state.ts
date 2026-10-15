@@ -12,7 +12,8 @@ import { dropsAsSingleDuplicate } from '../../core/cucadiagram/linkDedup.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
 import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
 import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
-import { scopedKey } from './namespace-groups.js';
+import { countQuarksByName, scopedKey, splitNamespacePath } from './namespace-groups.js';
+import { packSomePackage } from './namespace-pack.js';
 import type { DescriptionDiagramAST, DescriptiveLink, DescriptiveNode } from './ast.js';
 import { extractNodeStereotype, makeNode, resolveNewlineEscapes } from './parse-helpers.js';
 import { joinCurrentTogether } from './together.js';
@@ -96,6 +97,9 @@ export interface ParseState {
    *  NOT "." for description diagrams. Mirrored onto `state.ast` by the
    *  `set separator` command itself so `layoutDescription` can read it. */
   namespaceSeparator: string | null;
+  /** `!pragma useIntermediatePackages` (default true, `PragmaKey.USE_INTERMEDIATE_PACKAGES`). False asks
+   *  `finalizePage` to run `AbstractEntityDiagram#packSomePackage`. */
+  intermediatePackages: boolean;
   /** I3b write-set expansion (journaled): `net.atmp.CucaDiagram#cpt1` --
    *  ONE shared `AtomicInteger`-equivalent counter feeding EVERY node's
    *  `ent%04d` uid AND every link's `lnkN` uid, incremented in true
@@ -222,6 +226,40 @@ export function emitNode(state: ParseState, node: DescriptiveNode): void {
   node.creationIndex = nextCreationIndex(state);
 }
 
+/** The node list of the innermost open container (`getCurrentGroup()`), or the root list. */
+function currentScope(state: ParseState): readonly DescriptiveNode[] {
+  return state.containerStack[state.containerStack.length - 1]?.children ?? state.ast.nodes;
+}
+
+/**
+ * `CucaDiagram#quarkInContextSafe` for a link endpoint (`reuseExistingChild=true`, CucaDiagram.java
+ * :251-275). Without a separator the name is global (`firstWithName`, :252-256). With one, an undotted
+ * name reuses an existing entity only when EXACTLY ONE quark carries it and that quark is not the
+ * current group (:267-273); otherwise it is a child of the current group (:274).
+ */
+function endpointAlreadyKnown(state: ParseState, id: string): boolean {
+  const sep = state.namespaceSeparator;
+  if (sep === null || splitNamespacePath(id, sep) !== null) return state.nodesById.has(id);
+  if (currentScope(state).some((n) => n.id === id)) return true;
+  const current = state.containerStack[state.containerStack.length - 1];
+  const byName = state.nodesById.get(id);
+  return byName !== undefined && byName !== current && countQuarksByName(state.ast.nodes, id, sep) === 1;
+}
+
+/**
+ * The group a container-open line (`package X {`) enters again, if any. `quarkInContext(false, id)`
+ * (CommandPackageWithUSymbol.java:151-152): no separator -> a global lookup by name; with a separator an
+ * undotted id is a child of the CURRENT group (CucaDiagram.java:274), so only a sibling matches.
+ */
+export function findReopenedGroup(state: ParseState, id: string): DescriptiveNode | undefined {
+  const sep = state.namespaceSeparator;
+  const existing =
+    sep === null || splitNamespacePath(id, sep) !== null
+      ? state.nodesById.get(id)
+      : currentScope(state).find((n) => n.id === id);
+  return existing?.declaredAsGroup === true ? existing : undefined;
+}
+
 /**
  * CommandLinkElement.getDummy(): create a leaf for a link endpoint that has
  * no prior declaration. `emitNode` already places it in the innermost open
@@ -229,7 +267,7 @@ export function emitNode(state: ParseState, node: DescriptiveNode): void {
  * whatever `{`-block is open at the point the link line is processed.
  */
 export function ensureEndpoint(state: ParseState, ep: EndpointShape): void {
-  if (state.nodesById.has(ep.id) || state.qualifiedNodesById.has(ep.id)) return;
+  if (state.qualifiedNodesById.has(ep.id) || endpointAlreadyKnown(state, ep.id)) return;
   // The DISPLAY resolves `\n`/`\r`/`\l` escapes (`Display.getWithNewlines`,
   // which `getDummy` routes the display through) while the ID stays raw —
   // the same split `finalizeDisplay`'s own doc records, since `quark
@@ -296,6 +334,15 @@ export function resolveStillUnknown(nodes: DescriptiveNode[]): void {
 }
 
 /**
+ * End-of-page work, in `DescriptionDiagram`'s order: `makeDiagramReady` (still-unknown leaves mute),
+ * then `checkFinalError` (:91-98), whose `packSomePackage` precedes `applySingleStrategy`.
+ */
+export function finalizePage(state: ParseState): void {
+  resolveStillUnknown(state.ast.nodes);
+  if (!state.intermediatePackages) packSomePackage(state.ast.nodes, state.ast.links, state.namespaceSeparator);
+}
+
+/**
  * `newpage` (CommandNewpage): finalize the current page and start an
  * entirely fresh one. Upstream creates a brand-new empty diagram and wraps
  * the pair in `NewpagedDiagram`, which routes every subsequent command to
@@ -311,7 +358,7 @@ export function resolveStillUnknown(nodes: DescriptiveNode[]): void {
  * @see class/parser.ts#startNewPage (identical mechanism, T7)
  */
 export function startNewPage(state: ParseState): void {
-  resolveStillUnknown(state.ast.nodes);
+  finalizePage(state);
   state.pages.push(state.ast);
   // A `newpage` starts an independent diagram, but the classpath bundle is
   // process-wide upstream — carry it across the page boundary.
@@ -326,6 +373,7 @@ export function startNewPage(state: ParseState): void {
   state.noteCounter = 0;
   state.pendingNote = undefined;
   state.namespaceSeparator = null;
+  state.intermediatePackages = true;
   // NewpagedDiagram wraps a BRAND-NEW empty CucaDiagram per page -- a fresh
   // `cpt1` counter starting at 0 (see ParseState.uidCounter's doc comment).
   state.uidCounter = 0;

@@ -22,7 +22,7 @@ import {
 } from './parse-helpers.js';
 import { parseBracketDeclaration } from './element-grammar.js';
 import { RE_BARE_DECORATED_DECL, RE_BARE_QUOTED_DECL } from './element-grammar-nosymbol.js';
-import { emitNode, nextCreationIndex } from './parse-state.js';
+import { emitNode, findReopenedGroup, nextCreationIndex } from './parse-state.js';
 import { leafDisplayName } from './namespace-groups.js';
 
 /**
@@ -132,8 +132,8 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       const kw = match[1]!.toLowerCase();
       const symbol = KEYWORD_TO_SYMBOL.get(kw) ?? 'node';
       const { id, display, stereotype, color, tags, stereotypeSprite } = parseNameSection(match[2]!.trim());
-      const existing = state.nodesById.get(id);
-      if (existing !== undefined && existing.declaredAsGroup === true) {
+      const existing = findReopenedGroup(state, id);
+      if (existing !== undefined) {
         state.containerStack.push(existing);
         return;
       }
