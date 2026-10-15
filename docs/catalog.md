@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1670 modules · 6067 exported names.
+1671 modules · 6070 exported names.
 
 ## `src/`
 
@@ -167,7 +167,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `theme-merge.ts` | `deepMergeTheme` | `deepMergeTheme` and its helpers — split out of `theme.ts` (mechanical extraction to keep that file under the project's 500-line cap, same rationale as `theme-graph-colors.ts`/`theme-element-resolve.ts`; a pure move, no behavior change). |
 | `theme-root-fields.ts` | `ThemeRootFields` |  |
 | `theme-sequence-fields.ts` | `ThemeSequenceFields` | `Theme.sequence` field shape — split out of theme.ts (cdd-T30) to keep that file under the project's 500-line file-size cap. |
-| `theme.ts` | `ElementColors`, `ThemeGraphColors`, `ThemeColorFields`, `ThemeSequenceFields`, `ThemeRootFields`, `Theme`, `defaultTheme`, `darkTheme`, `sketchyTheme`, `monochromeTheme`, `ThemeOverride`, `deepMergeTheme`, `resolveTheme`, `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth` | Theme system for plantuml-ts. |
+| `theme.ts` | `ElementColors`, `ThemeGraphColors`, `ThemeColorFields`, `ThemeSequenceFields`, `ThemeRootFields`, `PackageStyleSetting`, `Theme`, `defaultTheme`, `darkTheme`, `sketchyTheme`, `monochromeTheme`, `ThemeOverride`, `deepMergeTheme`, `resolveTheme`, `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth` | Theme system for plantuml-ts. |
 | `themes-builtin-a-m.ts` | `BUILTIN_THEMES_A_M` | Built-in PlantUML theme residue (amiga .. |
 | `themes-builtin-p-v.ts` | `BUILTIN_THEMES_P_V` | Built-in PlantUML theme residue (plain .. |
 | `themes-builtin.ts` | `BUILTIN_THEMES` | Built-in PlantUML theme residue: only the fields an executed `!theme` does not yet reach -- see scripts/compile-themes.py. |
@@ -332,7 +332,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `SymbolContext.ts` | `SymbolContext` |  |
-| `usymbol-resolve.ts` | `resolveActorStyle`, `JAR_DEFAULT_TEXT_COLOR`, `upstreamKeyword`, `mapComponentStyle`, `resolveSymbol`, `textFontColor`, `textFont`, `entityTitleStyles` | usymbol-resolve.ts — shared symbol/style/font resolution for `USymbol` draw paths (SI27 T2: moved from `diagrams/description/renderer-symbol.ts` — upstream keeps this ONE place, `Entity#getUSymbol`, for every factory; the class engine's `re |
+| `usymbol-resolve.ts` | `resolveActorStyle`, `JAR_DEFAULT_TEXT_COLOR`, `upstreamKeyword`, `mapComponentStyle`, `resolvePackageStyle`, `resolveSymbol`, `textFontColor`, `textFont`, `entityTitleStyles` | usymbol-resolve.ts — shared symbol/style/font resolution for `USymbol` draw paths (SI27 T2: moved from `diagrams/description/renderer-symbol.ts` — upstream keeps this ONE place, `Entity#getUSymbol`, for every factory; the class engine's `re |
 | `USymbol.ts` | `SName`, `USymbol`, `Margin` |  |
 | `USymbolAction.ts` | `USymbolAction` |  |
 | `USymbolActor.ts` | `USymbolActor` |  |
@@ -1698,6 +1698,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `layout-helpers-types.ts` | `DescriptionElkDrawing`, `DescriptionNodeGeo`, `Bbox`, `EdgeContainerEndpoints`, `ResolvedEndpoint`, `DescriptionEdgeGeo`, `DescriptionGeometry`, `EMPTY_CONTAINER_WIDTH`, `EMPTY_CONTAINER_HEIGHT`, `LAYOUT_MARGIN`, `LAYOUT_MARGIN_LEADING`, `GROUP_ANCHOR_SIZE` | Pure type/const declarations for the description diagram layout engine. |
 | `layout-helpers.ts` | `DescriptionNodeGeo`, `Bbox`, `EdgeContainerEndpoints`, `ResolvedEndpoint`, `DescriptionEdgeGeo`, `DescriptionGeometry`, `EMPTY_CONTAINER_WIDTH`, `EMPTY_CONTAINER_HEIGHT`, `LAYOUT_MARGIN`, `LAYOUT_MARGIN_LEADING`, `GROUP_ANCHOR_SIZE`, `groupAnchorNodeId`, `resolveEndpoint`, `containerEndpointsInfo`, `symbolBaseShape`, `isInterfaceShielded`, `shapeForNode`, `isPortLabelWide`, `portTablePad`, `applyShieldEdgePorts`, `measureLeafNode`, `measureLeafShield`, `ACTOR_WIDTH`, `ACTOR_HEIGHT`, `USECASE_HEIGHT`, `PORT_SIZE`, `measureTitleLabel`, `isContainer`, `isClusterNode`, `shiftGeo`, `insideBbox`, `buildNodeGeoIndex`, `degenerateSingleLeaf` | Pure, stateless helpers for the description diagram layout engine. |
 | `layout-ink-shift.ts` | `InkShift`, `BodyPlacement`, `BodyFraming`, `placeBody` | layout-ink-shift.ts — G1b/J1 (mechanism C): `SvekResult #calculateDimension`'s `moveDelta` shift (svek/SvekResult.java:125-136), replacing this port's former flat node-box document margin (`layout-geo-post.ts`'s pre-G1b `computeGlobalShift` |
+| `layout-package-style.ts` | `applyPackageStyle` | `skinparam packagestyle` -> the `package` keyword's group symbol. |
 | `layout-types.ts` | `ContainerDesc`, `ClassifyCtx`, `EdgeDotBuildResult` | The layout engine's shared context/result TYPES, split out of `layout.ts` (this project's established "500-line splits" workaround — mechanical move only, no behavior and no upstream divergence). |
 | `layout.ts` | `isEffectiveCluster`, `DescriptionNodeGeo`, `DescriptionEdgeGeo`, `DescriptionGeometry`, `ClassifyCtx`, `ContainerDesc`, `EdgeDotBuildResult`, `createClassifyCtx`, `layoutDescription`, `USymbol` | Unified layout engine for PlantUML descriptive diagrams (component / use-case / deployment). |
 | `link-edge-attrs.ts` | `EdgeFontSpecs`, `computeGraphSpacing`, `buildLinkEdgeAttributes` | Link-derived DOT edge attributes + graph spacing for the description engine. |

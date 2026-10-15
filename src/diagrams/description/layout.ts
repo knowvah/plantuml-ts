@@ -34,6 +34,7 @@ import {
 } from './layout-helpers.js';
 import { type EdgeMapping, buildEdgeGeos, computeTotalDimensions } from './layout-geo-post.js';
 import { placeBody, type BodyPlacement } from './layout-ink-shift.js';
+import { applyPackageStyle } from './layout-package-style.js';
 import { isDisplayPositionedNull } from '../../core/annotations/index.js';
 import type { PortClusterInfo, ClusterSpacing } from './frontier-cluster-bbox.js';
 import { buildPortClusterInfoByAstId, clusterBoxesByAstId } from './layout-cluster-boxes.js';
@@ -319,10 +320,13 @@ export function createClassifyCtx(ast: DescriptionDiagramAST, theme: Theme): Cla
 /** Lay out a descriptive diagram; pixel geometry for all nodes and edges
  *  (see the file-header algorithm summary above). */
 export function layoutDescription(
-  ast: DescriptionDiagramAST,
+  authoredAst: DescriptionDiagramAST,
   theme: Theme,
   measurer: StringMeasurer,
 ): DescriptionGeometry {
+  // `skinparam packagestyle`: the `package` keyword's group symbol (`CommandPackageWithUSymbol.java:194`).
+  const styledNodes = applyPackageStyle(authoredAst.nodes, theme);
+  const ast = styledNodes === authoredAst.nodes ? authoredAst : { ...authoredAst, nodes: styledNodes };
   if (ast.nodes.length === 0) {
     return {
       totalWidth: 0,

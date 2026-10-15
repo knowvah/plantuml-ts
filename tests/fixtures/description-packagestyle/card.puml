@@ -1,0 +1,7 @@
+@startuml
+skinparam packagestyle card
+package "Pk" {
+  [A]
+}
+[B] --> [A]
+@enduml

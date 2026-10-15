@@ -1,0 +1,7 @@
+@startuml
+skinparam packagestyle storage
+package "Pk" {
+  [A]
+}
+[B] --> [A]
+@enduml

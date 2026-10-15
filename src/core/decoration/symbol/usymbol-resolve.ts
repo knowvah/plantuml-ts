@@ -13,12 +13,12 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/abel/Entity.java#getUSymbol (:408)
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/ISkinParam.java#actorStyle (:196)
  */
-import type { Theme } from '../../theme.js';
+import type { Theme, PackageStyleSetting } from '../../theme.js';
 import { resolveElementFontSize } from '../../theme.js';
 import { isTransparentColor } from '../../paint.js';
 import { FontStyle, type FontConfiguration } from '../../klimt/shape/UText.js';
 import { ActorStyle } from '../../skin/ActorStyle.js';
-import { ComponentStyle } from './USymbols.js';
+import { ComponentStyle, PackageStyle, packageStyleToUSymbol } from './USymbols.js';
 import { resolveDescriptionUSymbol } from '../../svek/image/EntityImageDescription.js';
 import type { USymbol as UpstreamUSymbol } from './USymbol.js';
 import type { USymbol } from '../../descriptive-keywords.js';
@@ -84,6 +84,27 @@ export function mapComponentStyle(style: Theme['componentStyle']): ComponentStyl
   return ComponentStyle.UML2;
 }
 
+const PACKAGE_STYLE_BY_SETTING: Readonly<Record<PackageStyleSetting, PackageStyle>> = {
+  folder: PackageStyle.FOLDER,
+  rect: PackageStyle.RECTANGLE,
+  node: PackageStyle.NODE,
+  frame: PackageStyle.FRAME,
+  cloud: PackageStyle.CLOUD,
+  database: PackageStyle.DATABASE,
+  agent: PackageStyle.AGENT,
+  storage: PackageStyle.STORAGE,
+  component1: PackageStyle.COMPONENT1,
+  component2: PackageStyle.COMPONENT2,
+  artifact: PackageStyle.ARTIFACT,
+  card: PackageStyle.CARD,
+};
+
+/** `Theme.packageStyle` (lowercase setting) -> `USymbols.ts`'s `PackageStyle` as-const -- `SkinParam#packageStyle`
+ *  (`SkinParam.java:820-826`): FOLDER when the skinparam is absent or unknown. */
+export function resolvePackageStyle(theme: Theme): PackageStyle {
+  return PACKAGE_STYLE_BY_SETTING[theme.packageStyle ?? 'folder'];
+}
+
 /** Resolves the `USymbol` for a description-diagram node/container symbol,
  *  reusing `EntityImageDescription`'s own `resolveDescriptionUSymbol` seam
  *  (T14) — the same function upstream's `Entity#getUSymbol` fallback chain
@@ -95,6 +116,10 @@ export function mapComponentStyle(style: Theme['componentStyle']): ComponentStyl
  *  unported draw class; same fallback path). */
 export function resolveSymbol(symbol: USymbol, theme: Theme): UpstreamUSymbol | null {
   if (symbol === 'port' || symbol === 'note') return null;
+  // `USymbols.fromString("package", ..., packageStyle)` (`USymbols.java:103-104`, from
+  // `CommandPackageWithUSymbol.java:194`): the keyword's symbol IS the skin's package style, and is null for the
+  // styles `PackageStyle#toUSymbol` has no symbol for.
+  if (symbol === 'package') return packageStyleToUSymbol(resolvePackageStyle(theme));
   return resolveDescriptionUSymbol(
     upstreamKeyword(symbol),
     resolveActorStyle(theme.actorStyle),

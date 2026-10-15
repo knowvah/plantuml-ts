@@ -1,0 +1,7 @@
+@startuml
+skinparam packagestyle agent
+package "Pk" {
+  [A]
+}
+[B] --> [A]
+@enduml

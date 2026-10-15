@@ -20,7 +20,6 @@ import {
   type ClusterStyleDefaults,
   type ClusterSymbolInfo,
 } from '../../core/svek/Cluster.js';
-import { PackageStyle } from '../../core/svek/PackageStyle.js';
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
@@ -28,7 +27,7 @@ import { buildStereo, resolveStereotypeSprite } from '../../core/svek/image/Enti
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import { rawStereotypeLabels } from './parse-helpers.js';
 import type { DescriptionNodeGeo } from './layout-helpers.js';
-import { resolveSymbol, textFont } from '../../core/decoration/symbol/usymbol-resolve.js';
+import { resolvePackageStyle, resolveSymbol, textFont } from '../../core/decoration/symbol/usymbol-resolve.js';
 
 /** Jar-observed default cluster border width for `package`/`folder`
  *  (folder-tab-decorated) containers only (`test-results/dot-cache/
@@ -192,7 +191,9 @@ export function buildCluster(node: DescriptionNodeGeo, theme: Theme, uid: string
   const symbolInfo: ClusterSymbolInfo = {
     symbol: resolveSymbol(node.symbol, theme),
     packageStyle: null,
-    defaultPackageStyle: PackageStyle.FOLDER,
+    // `skinParam.packageStyle()` (`Cluster.java:357-359`): a group with no symbol of its own (null `toUSymbol()`)
+    // falls through `ClusterDecoration#guess` to it, and draws nothing when that is null as well.
+    defaultPackageStyle: resolvePackageStyle(theme),
     stereoAlignment: HorizontalAlignment.CENTER,
   };
   return new Cluster(
