@@ -128,3 +128,33 @@ on-disk.
 count, layoutEqual, the ratchets (description 89, layout-parity 469, class/object/state) and the
 named ledger. Each close journals them against the b0 sha and regenerates the dashboard.
 **Rollback:** Reversible (revert the merge).
+
+## Mission summary (2026-10-15)
+
+**Tasks:** 13 planned (T0–T12) — all completed. T7 ran as two disjoint agents (T7a edge labels and
+parse helpers, T7b entity/cluster text) with T10 collapsed into T7b, per the batch-4 ownership rule.
+Batch closes b2–b4 were folded into the T11 close (journal row 41).
+
+**Result (b0 → b5):** component 69/70/127 → **180/12/74**; usecase 30/17/46 → 58/2/33; unknown
+423/48/354 → 483/16/326; network 0 → 1. 0 conformant losses in all 28 engines; no dotEqual or
+layoutEqual flip to false. Census component Σ 21319 → **2201** (renderSync instrument; 10.3%),
+zero-diff 68 → 179. Pins: svg-description 89 → 352, layout-parity 469 → 489. **D1 met on all five
+clauses** (journal row 47).
+
+**Quality gates:** green at b0, b1, b5 (before and after the re-pin) and final: collected 1410 =
+on-disk, 0 failed; typecheck, lint, build 0; coverage 96.97/92.4/97.72/98.
+
+**Decisions:** 48 journal rows. Flagged for review: rows 3 and 15 (two read-only `cd`s below the repo
+root, no side effects), 7 (census instrument change and same-instrument D1 accounting), 12 (bare
+`skinparam borderColor` now ignored, as in the Java), 17 (M5 given to T3, not T2, to keep one writer
+per file), 22 (packagestyle resolved at layout entry; `console.error` for null-symbol styles; ELK
+adapter), 27 (T5 edited core before reporting; D5 guards re-run green by the orchestrator), 31
+(magic-arrow labels moved away from the jar with a stated mechanism, not reverted), 41 (b2–b4 closes
+folded into b5).
+
+**New engine finding:** TRACKER 36 (flat adjacent unlabelled edge, 0.1–0.3 px), filed.
+
+**Follow-ups:** `planning/next-missions.md`, "component-divergence-drive (codd)" section — `[[url]]`
+`<a>` wrappers, qualified edge `@id`, link middle decor, magic-arrow glyph, note-on-link, quantifier
+text, degenerate sizing font options, `<latex>` box guard, handwritten/warning (cumofi), stereotype-signed
+styles, perapa/banatu port-cluster x.
