@@ -14,6 +14,7 @@ import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.j
 import { TextBlockUtils } from '../../core/klimt/shape/TextBlockUtils.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
 import { buildTextBlock } from '../../core/svek/image/EntityImageDescriptionSupport.js';
+import { buildClusterTitle } from '../../core/svek/image/EntityImageDescriptionClusterTitle.js';
 import {
   Cluster,
   type ClusterGroupInfo,
@@ -127,12 +128,9 @@ export function buildHeader(node: DescriptionNodeGeo, theme: Theme, options?: He
   // `ClusterHeader.java:117-119` builds the title with the full `Display#create`, so a `<$sprite>` in a
   // group's label measures and draws; the ELK path (cdd8 T3b) also passes `style.getHorizontalAlignment()`.
   const alignment = options?.alignment ?? resolveClusterTitleAlignment(theme, node.symbol);
-  const title = buildTextBlock(
-    node.display,
-    titleFont,
-    alignment,
-    options === undefined ? undefined : makeAtomImageResolverFor(options.sprites)(titleFont),
-  );
+  const title = buildClusterTitle(node.display, titleFont, alignment, {
+    resolveAtomImage: options === undefined ? undefined : makeAtomImageResolverFor(options.sprites)(titleFont),
+  });
   // G1 I5b: one guillemet line per stereotype tag, same convention as
   // `EntityImageDescriptionSupport.ts#buildStereo` -- ClusterHeader.java
   // :197-207 (`Display.create(visibleStereotypes)`) stacks ALL tags, not

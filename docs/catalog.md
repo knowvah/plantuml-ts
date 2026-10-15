@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1675 modules · 6106 exported names.
+1676 modules · 6109 exported names.
 
 ## `src/`
 
@@ -924,7 +924,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `creole-sea-line.ts` | `ATOM_TEXT_MIN_HEIGHT`, `SeaLineOps`, `SeaLineLayout`, `creoleAtomStartingAltitude`, `layoutLineThroughSea`, `measurerSeaLineOps` | creole-sea-line — the vertical half of one physical (post-word-wrap) creole line: `Sea` placement, the line's own height, and the per-run baseline offset a `<sup>`/`<sub>` run needs (SI30 `decisions.md#D2`). |
 | `creole-text-lines.ts` | `FontStyleFlags`, `CreoleRunImage`, `CreoleTextRun`, `CreoleTextLine`, `creoleTextLines` | creole-text-lines — the ONE core creole-text seam shared by the state sizer (T6) and the state renderer (T7), per `plans/state-declared-size-fix/ decisions.md#D1`. |
 | `EntityImageDescription.ts` | `ShapeType`, `Margins`, `resolveDescriptionUSymbol`, `HexagonPolygon`, `EntityUrl`, `EntityImageDescriptionEntity`, `EntityImageDescriptionSymbol`, `EntityImageDescriptionLabels`, `EntityImageDescriptionStereotypeSprite`, `EntityImageDescriptionPaint`, `EntityImageDescriptionLinkInfo`, `EntityImageDescriptionParams`, `EntityImageDescription` | EntityImageDescription — draws a descriptive/deployment leaf entity (`component`, `usecase`, `database`, `interface`, `rectangle`, ...): the `<!--entity NAME--><g class="entity" ...>` wrapper, the resolved `USymbol`'s `asSmall` chrome, an o |
-| `EntityImageDescriptionDelegates.ts` | `hasSomeHorizontalLinkVisible`, `isThereADoubleLink`, `hasSomeHorizontalLinkDoubleDecorated`, `computeShieldMargins`, `hideTextOffsets`, `requireGroups`, `descAtomOps`, `buildDesc`, `resolveStereotypeSprite`, `buildStereo` | EntityImageDescriptionDelegates — every private-instance-method body `EntityImageDescription` delegates to (`buildDesc`, `buildStereo`, the three link-scanning helpers, `computeShieldMargins`, `hideTextOffsets`, `requireGroups`). |
+| `EntityImageDescriptionClusterTitle.ts` | `ClusterTitleOptions`, `buildClusterTitle` | A group's title block: `ClusterHeader#getTitleBlock` builds it with `label.create(fontConfiguration, alignment, g.getSkinParam())` (`ClusterHeader.java:128`) -- `Display#create` -> `DisplayCreole` -> the creole `Sheet` (`SheetBlock1`/`Sheet |
+| `EntityImageDescriptionDelegates.ts` | `hasSomeHorizontalLinkVisible`, `isThereADoubleLink`, `hasSomeHorizontalLinkDoubleDecorated`, `computeShieldMargins`, `hideTextOffsets`, `requireGroups`, `descAtomOps`, `buildLocalSkinSimple`, `buildDesc`, `resolveStereotypeSprite`, `buildStereo` | EntityImageDescriptionDelegates — every private-instance-method body `EntityImageDescription` delegates to (`buildDesc`, `buildStereo`, the three link-scanning helpers, `computeShieldMargins`, `hideTextOffsets`, `requireGroups`). |
 | `EntityImageDescriptionEmbed.ts` | `descEmbeddedRenderer` | EntityImageDescriptionEmbed — the `{{ ... |
 | `EntityImageDescriptionEmoji.ts` | `EmojiAtomLike`, `EmojiArtworkResolver`, `drawEmojiAtom` | The `<:name:>` emoji draw branch of `descAtomOps`, split out of `EntityImageDescriptionDelegates.ts` at the 500-line cap. |
 | `EntityImageDescriptionLinkScan.ts` | `hasSomeHorizontalLinkVisible`, `isThereADoubleLink`, `hasSomeHorizontalLinkDoubleDecorated` | The three link-scanning helpers `EntityImageDescription` delegates to (`hasSomeHorizontalLinkVisible`/`isThereADoubleLink`/ `hasSomeHorizontalLinkDoubleDecorated`) -- split out of `EntityImageDescriptionDelegates.ts` purely to stay under th |
