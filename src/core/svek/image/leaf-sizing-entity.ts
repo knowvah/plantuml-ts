@@ -142,11 +142,14 @@ function sizingFontConfig(fontSpec: FontSpec, size: number): FontConfiguration {
 
 /**
  * `EntityImageDescription.java:175,188,191`'s `defaultAlign = styleTitle.getHorizontalAlignment()` -- the
- * title-scoped signature `{root, element, <diagram>, symbol.getSNames(), title}`. Cascade, highest first:
- * the element's own `<style> <sname> { HorizontalAlignment X }` bucket (`own`); `plantuml.skin:452-454`'s
- * bare `usecase { HorizontalAlignment center }` (matches a usecase title signature only); the root bucket
- * (`root`, written by `skinparam defaultTextAlignment X`, `FromSkinparamToStyle.java:155`); then
- * `plantuml.skin:12`'s `root { HorizontalAlignment left }`.
+ * title-scoped signature `{root, element, <diagram>, symbol.getSNames(), title}`. Every declaration that matches
+ * that signature competes by PARSE ORDER, not specificity (`DarkString#mergeWith` keeps the larger
+ * `AutomaticCounter` priority; the skin loads first), so a user declaration of any tier beats the skin's
+ * defaults: the element's own `<style> <sname> { HorizontalAlignment X }` bucket (`own`) and the root bucket
+ * (`root`, written by `skinparam defaultTextAlignment X`, `FromSkinparamToStyle.java:155`). Only when the user
+ * declared neither does the skin apply: `plantuml.skin:452-454`'s bare `usecase { HorizontalAlignment center }`
+ * for a usecase title signature, else `plantuml.skin:12`'s `root { HorizontalAlignment left }`. Probed against the
+ * jar: `skinparam defaultTextAlignment right` right-aligns a usecase too.
  *
  * The ONE implementation for the sizing construction (which does not yet receive the overrides -- no
  * `BoxSizingOpts` producer threads them; only the default cascade is sized) and the draw-time
@@ -163,9 +166,8 @@ export function titleAlignmentFor(
   symbol: LeafSizingSubject['symbol'],
   overrides?: { readonly own?: HorizontalAlignment | undefined; readonly root?: HorizontalAlignment | undefined },
 ): HorizontalAlignment {
-  if (overrides?.own !== undefined) return overrides.own;
-  if (symbol === 'usecase' || symbol === 'usecase-business') return HorizontalAlignment.CENTER;
-  return overrides?.root ?? HorizontalAlignment.LEFT;
+  const isUsecase = symbol === 'usecase' || symbol === 'usecase-business';
+  return overrides?.own ?? overrides?.root ?? (isUsecase ? HorizontalAlignment.CENTER : HorizontalAlignment.LEFT);
 }
 
 /** `EntityImageDescriptionPaint` assembly, split out to keep

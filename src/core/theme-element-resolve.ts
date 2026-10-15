@@ -239,11 +239,14 @@ export function foldRootBackgroundIntoSequence(theme: Theme): Theme {
 
 /**
  * `ClusterHeader.java:121`: a group title's `style.getHorizontalAlignment()` over the signature
- * `{root, element, <diagram>, uSymbol.getSNames(), composite, title}` (`:151-163`). `plantuml.skin:93-99`
- * (`element { composite,package { title { HorizontalAlignment center } } }`) is more specific than the root
- * tier, so `skinparam defaultTextAlignment` (root bucket) does not reach it; only the container's own
- * `<style> <sname> { HorizontalAlignment X }` bucket does.
+ * `{root, element, <diagram>, uSymbol.getSNames(), composite, title}` (`:151-163`). Declarations compete by parse
+ * order (`DarkString#mergeWith`, the skin loads first), so a user declaration beats `plantuml.skin:93-99`'s
+ * `element { composite,package { title { HorizontalAlignment center } } }`: the container's own
+ * `<style> <sname> { HorizontalAlignment X }` bucket, then the root bucket (`skinparam defaultTextAlignment X`,
+ * `FromSkinparamToStyle.java:155`). Probed against the jar: `defaultTextAlignment right` right-aligns a
+ * `rectangle` title. With neither, the skin's CENTER.
  */
 export function resolveClusterTitleAlignment(theme: Theme, sname: string): HorizontalAlignment {
-  return theme.colors.elements?.[sname]?.horizontalAlignment ?? HorizontalAlignment.CENTER;
+  const elements = theme.colors.elements;
+  return elements?.[sname]?.horizontalAlignment ?? elements?.root?.horizontalAlignment ?? HorizontalAlignment.CENTER;
 }

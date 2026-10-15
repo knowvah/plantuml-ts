@@ -36,9 +36,10 @@ describe('titleAlignmentFor (T6-B)', () => {
     expect(titleAlignmentFor('usecase-business')).toBe(C);
   });
 
-  it('the root bucket (skinparam defaultTextAlignment) overrides root LEFT but not the usecase rule', () => {
+  it('the root bucket (skinparam defaultTextAlignment) beats every skin default, usecase included (jar probe)', () => {
     expect(titleAlignmentFor('component', { root: R })).toBe(R);
-    expect(titleAlignmentFor('usecase', { root: R })).toBe(C);
+    expect(titleAlignmentFor('usecase', { root: R })).toBe(R);
+    expect(titleAlignmentFor('usecase', { root: L })).toBe(L);
   });
 
   it("the element's own bucket beats both", () => {

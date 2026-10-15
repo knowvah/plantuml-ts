@@ -32,12 +32,12 @@ describe('buildHeader titleHorizontalAlignment (T6-C)', () => {
     expect(buildHeader(node('rectangle'), theme).titleHorizontalAlignment).toBe(HorizontalAlignment.LEFT);
   });
 
-  it('a skinparam defaultTextAlignment (root bucket) does not move a composite title', () => {
+  it('a skinparam defaultTextAlignment (root bucket) beats the skin CENTER (jar probe)', () => {
     const theme: Theme = {
       ...defaultTheme,
       colors: { ...defaultTheme.colors, elements: { root: { horizontalAlignment: HorizontalAlignment.RIGHT } } },
     };
-    expect(buildHeader(node('rectangle'), theme).titleHorizontalAlignment).toBe(HorizontalAlignment.CENTER);
+    expect(buildHeader(node('rectangle'), theme).titleHorizontalAlignment).toBe(HorizontalAlignment.RIGHT);
   });
 });
 
