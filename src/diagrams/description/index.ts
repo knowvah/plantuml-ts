@@ -145,6 +145,8 @@ export const descriptionPlugin: SyncPlugin<DescriptionDiagramAST, DescriptionGeo
         ? { preChromeWidth: geo.preChromeWidth, preChromeHeight: geo.preChromeHeight }
         : {}),
       ...(geo.frameInk !== undefined ? { frameInk: geo.frameInk } : {}),
+      // codd-T4: a style `Margin` (`TextBlockExporter.java:510-516`) is the margin the exporter applies AFTER chrome.
+      ...(theme.diagramMargin !== undefined ? { documentMargin: theme.diagramMargin } : {}),
     };
   },
 };

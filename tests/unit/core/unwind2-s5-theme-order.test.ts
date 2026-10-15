@@ -14,8 +14,8 @@
  *
  * Pins are `[colour diffs, all diffs]`. Non-zero entries are OTHER, theme-
  * independent gaps (each reproduces with no `!theme`; see
- * `.agent-notes/unwind2-S5.md`): `root { Margin }` unread by class/usecase/
- * mindmap; sequence lifelines ignore `root { LineColor }` and
+ * `.agent-notes/unwind2-S5.md`): `root { Margin }` unread by class/
+ * mindmap (usecase reads it since codd-T4: the description exporter margin); sequence lifelines ignore `root { LineColor }` and
  * `SequenceLifeLineBorderColor`; sequence ignores `root { LineThickness /
  * RoundCorner }` and participant/arrow font skinparams (reddress, mars); the
  * usecase actor label ignores `root { FontColor }`; class-reddress is the
@@ -61,12 +61,12 @@ const PINS: Readonly<Record<string, readonly [number, number]>> = {
   'sequence-style-before': [2, 87],
   'sequence-style-root': [2, 17],
   'sequence-theme-only': [2, 87],
-  'usecase-skinparam-after': [2, 53],
-  'usecase-skinparam-before': [2, 53],
-  'usecase-style-after': [2, 53],
-  'usecase-style-before': [2, 53],
+  'usecase-skinparam-after': [2, 17],
+  'usecase-skinparam-before': [2, 17],
+  'usecase-style-after': [2, 17],
+  'usecase-style-before': [2, 17],
   'usecase-style-root': [2, 2],
-  'usecase-theme-only': [2, 53],
+  'usecase-theme-only': [2, 17],
 };
 
 const CASES = readdirSync(DIR)

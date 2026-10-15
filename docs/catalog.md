@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1673 modules · 6078 exported names.
+1673 modules · 6080 exported names.
 
 ## `src/`
 
@@ -44,7 +44,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `descriptive-keywords.ts` | `USymbol`, `ALL_TYPES`, `KEYWORD_TO_SYMBOL`, `stripSpriteRegions` | Shared descriptive-keyword table — single source of truth for the descriptive diagram engine (component / use-case / deployment). |
 | `diagram-type-set.ts` | `DiagramType`, `findStartTypes` | Faithful port of `net.sourceforge.plantuml.core.DiagramType`'s start-tag candidate set — `findStartTypes` only. |
 | `dispatcher.ts` | `ParseOptions`, `RenderFragment`, `CompleteSvg`, `AssembledSvg`, `PaginatedPlugin`, `SyncPlugin`, `AsyncPlugin`, `DiagramPlugin`, `parseRefusalOf`, `Resolution`, `DiagramRegistry`, `registry` | Dispatcher: holds a registry of DiagramPlugin instances and resolves which one owns a given UmlSource **by attempting the parse**, exactly as upstream does (`PSystemBuilder#createPSystem`, `:257-283`). |
-| `document-margin.ts` | `DocumentMargin`, `SEQUENCE_DOCUMENT_MARGIN`, `documentMarginOf`, `removeDocumentMargin`, `applyDocumentMargin` | document-margin.ts -- lgm-T1a: `TextBlockExporter`'s outer document margin, applied to a fragment AFTER `DiagramChromeFactory.create` composed its chrome (title/legend/caption/header/footer/mainframe), as upstream does. |
+| `document-margin.ts` | `DocumentMargin`, `SEQUENCE_DOCUMENT_MARGIN`, `CUCA_DOCUMENT_MARGIN`, `documentMarginOf`, `calculateMargin`, `removeDocumentMargin`, `applyDocumentMargin` | document-margin.ts -- lgm-T1a: `TextBlockExporter`'s outer document margin, applied to a fragment AFTER `DiagramChromeFactory.create` composed its chrome (title/legend/caption/header/footer/mainframe), as upstream does. |
 | `dot-engine-measurer.ts` | _(none)_ | The single install point for `@knowvah/dot-engine`'s text measurer. |
 | `dot-splines.ts` | `dotSplinesAttrs` | Translates the `linetype` semantic enum on `DotInputGraph` into the DOT attribute pairs upstream emits for it. |
 | `edge-label-box-note-merge.ts` | `NoteOnLinkPosition`, `MergedLabelBoxInput`, `computeMergedLabelBox` | The `note on link` merge half of `edge-label-box.ts` — the note operand, the four `Position` merges and the shield. |

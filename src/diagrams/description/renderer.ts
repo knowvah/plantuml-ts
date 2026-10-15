@@ -95,6 +95,8 @@ import { buildUidPlan } from './renderer-uid.js';
 import { collectByKind, drawClusters, drawEntities, drawEdges } from './renderer-draw-sequence.js';
 import { computeDocumentDims, driverBounderFor } from './renderer-ink-extent.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
+import { CUCA_DOCUMENT_MARGIN, calculateMargin, type DocumentMargin } from '../../core/document-margin.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { extractViewBoxDims, extractFlatContent, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 
@@ -143,6 +145,26 @@ function isDegenerateGeo(geo: DescriptionGeometry): boolean {
   return geo.degenerate === true;
 }
 
+/**
+ * `EntityImageDegenerated#calculateDimension` (`svek/EntityImageDegenerated
+ * .java:73-75`, `orig.calculateDimension(sb).delta(delta * 2, delta * 2)`)
+ * plus the exporter margin (`TextBlockExporter#calculateFinalDimension`,
+ * `:198-203`). The layout's `geo.totalWidth` bakes in the cuca default margin
+ * (`degenerateSingleLeaf`), so a style `Margin` is applied from the leaf's own
+ * size instead.
+ */
+function degenerateDims(geo: DescriptionGeometry, margin: DocumentMargin): DocumentBody['dims'] {
+  if (margin === CUCA_DOCUMENT_MARGIN) return { width: geo.totalWidth, height: geo.totalHeight };
+  const leaf = geo.nodes[0]!;
+  return {
+    width: leaf.width + DEGENERATE_DELTA * 2 + margin.left + margin.right,
+    height: leaf.height + DEGENERATE_DELTA * 2 + margin.top + margin.bottom,
+  };
+}
+
+/** `EntityImageDegenerated#delta` (`svek/EntityImageDegenerated.java:55`). */
+const DEGENERATE_DELTA = 7;
+
 /** What a body contributes to the document: its draw pass and its dimension. */
 interface DocumentBody {
   readonly draw: (target: UGraphic, respectHidden: boolean) => void;
@@ -153,7 +175,12 @@ interface DocumentBody {
  * The svek body: `SvekResult#drawU` (clusters, leaves, edges) and the document dimension recipe (see
  * `renderDescription`'s doc comment). Moved out of `renderDescription` verbatim (cdd8 T3b).
  */
-function svekBody(geo: DescriptionGeometry, theme: Theme, measurer: StringMeasurer): DocumentBody {
+function svekBody(
+  geo: DescriptionGeometry,
+  theme: Theme,
+  measurer: StringMeasurer,
+  margin: DocumentMargin,
+): DocumentBody {
   const plan = buildUidPlan(geo);
   const { containers, leaves } = collectByKind(geo.nodes);
   // G1 I-hideshow: `respectHidden` distinguishes the LimitFinder ink-extent
@@ -173,8 +200,8 @@ function svekBody(geo: DescriptionGeometry, theme: Theme, measurer: StringMeasur
 
   const driverBounder = driverBounderFor(measurer);
   const dims = isDegenerateGeo(geo)
-    ? { width: geo.totalWidth, height: geo.totalHeight }
-    : computeDocumentDims((target) => draw(target, false), driverBounder, measurer);
+    ? degenerateDims(geo, margin)
+    : computeDocumentDims((target) => draw(target, false), driverBounder, measurer, margin);
 
   return { draw, dims };
 }
@@ -183,8 +210,19 @@ function svekBody(geo: DescriptionGeometry, theme: Theme, measurer: StringMeasur
  * The ELK body: `MyElkDrawing#drawU` (clusters, nodes, edges; `MyElkDrawing.java:110-114`) with the document
  * dimension the geometry already carries (`MyElkDrawing#calculateDimension` plus the `CucaDiagram` margins).
  */
-function elkBody(elk: NonNullable<DescriptionGeometry['elk']>, geo: DescriptionGeometry): DocumentBody {
-  return { draw: (target) => elk.drawU(target), dims: { width: geo.totalWidth, height: geo.totalHeight } };
+function elkBody(
+  elk: NonNullable<DescriptionGeometry['elk']>,
+  geo: DescriptionGeometry,
+  margin: DocumentMargin,
+): DocumentBody {
+  const dims =
+    margin === CUCA_DOCUMENT_MARGIN
+      ? { width: geo.totalWidth, height: geo.totalHeight }
+      : {
+          width: geo.totalWidth - CUCA_DOCUMENT_MARGIN.left - CUCA_DOCUMENT_MARGIN.right + margin.left + margin.right,
+          height: geo.totalHeight - CUCA_DOCUMENT_MARGIN.top - CUCA_DOCUMENT_MARGIN.bottom + margin.top + margin.bottom,
+        };
+  return { draw: (target) => elk.drawU(target), dims };
 }
 
 /**
@@ -213,7 +251,9 @@ export function renderDescription(
   theme: Theme,
   measurer: StringMeasurer = jarMeasurer,
 ): string {
-  const { draw, dims } = geo.elk === undefined ? svekBody(geo, theme, measurer) : elkBody(geo.elk, geo);
+  const margin = calculateMargin(theme, CUCA_DOCUMENT_MARGIN);
+  const body = geo.elk === undefined ? svekBody(geo, theme, measurer, margin) : elkBody(geo.elk, geo, margin);
+  const { dims } = body;
   const { width, height } = dims;
   const driverBounder = driverBounderFor(measurer);
 
@@ -239,7 +279,8 @@ export function renderDescription(
   });
   const ug = UGraphicSvg.build(geo.seed ?? 0n, option, VERSION_PLACEHOLDER, driverBounder, measurer);
 
-  draw(ug, true);
+  // `TextBlockExporter#exportTo`: `ug.apply(new UTranslate(margin.getLeft(), margin.getTop()))`.
+  body.draw(ug.apply(new UTranslate(margin.left, margin.top)), true);
 
   return ug.getSvgString();
 }
