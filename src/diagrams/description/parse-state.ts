@@ -14,13 +14,14 @@ import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
 import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
 import { scopedKey } from './namespace-groups.js';
 import type { DescriptionDiagramAST, DescriptiveLink, DescriptiveNode } from './ast.js';
-import { makeNode, resolveNewlineEscapes } from './parse-helpers.js';
+import { extractNodeStereotype, makeNode, resolveNewlineEscapes } from './parse-helpers.js';
 import { joinCurrentTogether } from './together.js';
 import type { EndpointShape } from './link-grammar.js';
 import { removeEmptyColumns } from './note-columns.js';
 import {
   noteAttachment,
   resolvePosition,
+  type NoteDecor,
   type NoteOpenMatch,
   type NotePosition,
   type NoteTerminator,
@@ -158,6 +159,7 @@ export type PendingNoteState =
       lines: string[];
       position: NotePosition;
       targetId: string | undefined;
+      decor: NoteDecor;
     };
 
 /** `internal` (F4-f piece 1): `SpriteImage.fromInternal`'s classpath bundle,
@@ -182,10 +184,29 @@ export function nextCreationIndex(state: ParseState): number {
   return state.uidCounter;
 }
 
+/**
+ * `CommandCreateElementFull.java:316,324-347`: `Entity entity = quark.getData();
+ * if (entity == null) entity = diagram.reallyCreateLeaf(...)` -- a leaf declared
+ * again (same quark, same type) is NOT a new entity: no new uid, no new
+ * `lastEntity`; only `setDisplay`, a given `<<stereotype>>`, and
+ * `setColors(colors)` (always, so an absent colour clears) apply to it.
+ */
+function reuseLeaf(arr: readonly DescriptiveNode[], node: DescriptiveNode): boolean {
+  if (node.declaredAsGroup === true) return false;
+  const existing = arr.find((n) => n.id === node.id && n.declaredAsGroup !== true && n.symbol === node.symbol);
+  if (existing === undefined) return false;
+  existing.display = node.display;
+  if (node.stereotype !== undefined) existing.stereotype = node.stereotype;
+  if (node.color !== undefined) existing.color = node.color;
+  else delete existing.color;
+  return true;
+}
+
 export function emitNode(state: ParseState, node: DescriptiveNode): void {
-  joinCurrentTogether(state, node);
   const parent = state.containerStack[state.containerStack.length - 1];
   const arr = parent !== undefined ? parent.children : state.ast.nodes;
+  if (reuseLeaf(arr, node)) return;
+  joinCurrentTogether(state, node);
   arr.push(node);
   state.nodesById.set(node.id, node);
   state.parentArrayById.set(node.id, arr);
@@ -319,17 +340,31 @@ export function startNewPage(state: ParseState): void {
 /** Notes are ordinary leaves upstream (EntityImageNote/svek) — `emitNode`
  *  already updates `lastEntityId` since a note node never sets
  *  `declaredAsGroup`. */
-function emitNoteLeaf(state: ParseState, id: string, text: string): void {
+function emitNoteLeaf(state: ParseState, id: string, text: string, decor?: NoteDecor): void {
   // A note's text is a Display like any other, so `\n`/`\r`/`\l` escapes
   // split it into lines (`Display.getWithNewlines`, which every note command
   // routes its text through). Without this a `note left: a\nb\nc` measured
   // as ONE very wide line — berufi-69-dara369's note came out 447.24×23
   // against the jar's 194.39×49 (S1L-e).
-  emitNode(state, makeNode(id, resolveNewlineEscapes(text), 'note'));
+  // CommandFactoryNoteOnEntity.java:331-336: `note.setStereotype(stereotype)`,
+  // `note.setColors(colors)`.
+  const labels = decor?.stereotype === undefined ? [] : (extractNodeStereotype(decor.stereotype)?.stereotypes ?? []);
+  emitNode(
+    state,
+    makeNode(id, resolveNewlineEscapes(text), 'note', labels.length > 0 ? labels : undefined, decor?.color),
+  );
 }
 
 /** Upstream's own wording, verbatim — `CommandFactoryNoteOnEntity.java:301`. */
 const NOTHING_TO_NOTE_TO = 'Nothing to note to';
+
+/** `CommandFactoryNoteOnEntity.java:327`: `diagram.getUniqueSequence("GMN")`
+ *  draws one value from the shared `cpt1` counter (the quark name
+ *  `GMN<n>`) BEFORE `reallyCreateLeaf` (:329) assigns the leaf's own uid. */
+function emitGeneratedNoteLeaf(state: ParseState, id: string, text: string, decor: NoteDecor): void {
+  nextCreationIndex(state);
+  emitNoteLeaf(state, id, text, decor);
+}
 
 /**
  * CommandFactoryNoteOnEntity.executeInternal (:295-323): resolves cl1 (the
@@ -350,6 +385,7 @@ function attachNoteToEntity(
   position: NotePosition,
   targetId: string | undefined,
   text: string,
+  decor: NoteDecor,
 ): void {
   const resolvedTarget = targetId ?? state.lastEntityId;
   if (resolvedTarget === undefined || !state.nodesById.has(resolvedTarget)) return;
@@ -370,7 +406,7 @@ function attachNoteToEntity(
   }
   const pos = resolvePosition(position, state.ast.rankdir);
   const noteId = `__note_${state.noteCounter++}`;
-  emitNoteLeaf(state, noteId, text);
+  emitGeneratedNoteLeaf(state, noteId, text, decor);
   const link = noteAttachment(pos, resolvedTarget, noteId);
   // CommandFactoryNoteOnEntity.java:342-360: a real `new Link(...)` (goDashed
   // LinkType), consuming its own `lnkN` uid from the shared counter -- see
@@ -440,7 +476,7 @@ function executeNoteOnEntityOpen(
     return;
   }
   if (m.kind === 'on-entity-single') {
-    attachNoteToEntity(state, m.position, m.targetId, m.text);
+    attachNoteToEntity(state, m.position, m.targetId, m.text, m.decor);
     return;
   }
   state.pendingNote = {
@@ -449,6 +485,7 @@ function executeNoteOnEntityOpen(
     lines: [],
     position: m.position,
     targetId: m.targetId,
+    decor: m.decor,
   };
 }
 
@@ -492,5 +529,5 @@ export function closePendingNote(state: ParseState): void {
     emitNoteLeaf(state, pending.id, text);
     return;
   }
-  attachNoteToEntity(state, pending.position, pending.targetId, text);
+  attachNoteToEntity(state, pending.position, pending.targetId, text, pending.decor);
 }
