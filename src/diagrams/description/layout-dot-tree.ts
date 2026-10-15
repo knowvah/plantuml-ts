@@ -419,7 +419,10 @@ export function buildDotEdges(
       ctx.qualifiedPathToDotKey,
     );
     if (fromRes === undefined || toRes === undefined) continue;
-    if (fromRes.dotNodeId === toRes.dotNodeId) continue;
+    // No `fromRes.dotNodeId === toRes.dotNodeId` skip: SvekEdge emits every
+    // link, a leaf self-loop (`SvekEdge.isAutolink`, SvekEdge.java:1291-1293)
+    // and a group auto-link (`Link.isAutoLinkOfAGroup`, abel/Link.java:341-352)
+    // alike, as `X->X` with its label as an xlabel TABLE.
 
     const dotId = `dot-edge-${i}`;
     dotEdges.push({

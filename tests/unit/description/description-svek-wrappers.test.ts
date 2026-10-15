@@ -60,10 +60,11 @@ describe.skipIf(!hasCorpus)('description plain-family wrappers vs cached jar DOT
     expect(dot).not.toMatch(/cluster\d+a \{/);
   });
 
-  it('xagonu: cluster nesting now matches (12 vs 12); the residual is one root cluster bb', () => {
+  it('xagonu: cluster nesting and layout match the jar (codd T9: the two self-loops reach the DOT)', () => {
     const ours = captureOurs('unknown', 'xagonu-36-sudi116');
     const r = layoutParity(readJarDot('unknown', 'xagonu-36-sudi116'), ours[0]!);
-    expect(r.firstDiff?.detail).toMatch(/^jar 12 vs ours 12; /);
+    expect(r.equal).toBe(true);
+    expect(r.firstDiff).toBeUndefined();
   });
 
   it('a group that is a link endpoint gets innerMarginLevels 2 and an unwrapped anchor (balipa)', () => {
