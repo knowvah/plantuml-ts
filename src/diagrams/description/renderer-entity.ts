@@ -19,6 +19,7 @@ import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { Theme } from '../../core/theme.js';
 import { resolveElementPaint, resolveElementShadowing, resolveElementLineThickness } from '../../core/theme.js';
+import { resolveElementMinimumWidth } from '../../core/theme-element-resolve.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
@@ -199,6 +200,7 @@ export function buildEntityParams(
         own: theme.colors.elements?.[node.symbol]?.horizontalAlignment,
         root: theme.colors.elements?.root?.horizontalAlignment,
       }),
+      minimumWidth: resolveElementMinimumWidth(theme, node.symbol) ?? 0,
       stereotypeAlignment: HorizontalAlignment.CENTER,
       ...(theme.wrapWidth !== undefined ? { wrapWidth: theme.wrapWidth } : {}),
       guillemet: {
