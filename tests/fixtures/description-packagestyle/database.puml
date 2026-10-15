@@ -1,0 +1,7 @@
+@startuml
+skinparam packagestyle database
+package "Pk" {
+  [A]
+}
+[B] --> [A]
+@enduml

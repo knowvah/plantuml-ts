@@ -11,7 +11,7 @@
  */
 
 import type { Paint, Gradient } from './paint.js';
-import type { ElementColors } from './theme.js';
+import type { ElementColors, PackageStyleSetting } from './theme.js';
 import type { ActorStyle } from './skin/ActorStyle.js';
 
 export interface SkinparamAccumulator {
@@ -92,7 +92,7 @@ export interface SkinparamAccumulator {
   monochrome: 'true' | 'reverse' | undefined;
   /** Raw `skinparam reversecolor` (`TitledDiagram.java:301`). */
   reverseColor: string | undefined;
-  packageStyle: 'rect' | undefined;
+  packageStyle: PackageStyleSetting | undefined;
   fixCircleLabelOverlapping: boolean | undefined;
   shadowing: number | undefined;
   background: string | undefined;

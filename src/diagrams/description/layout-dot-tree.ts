@@ -28,7 +28,6 @@ import {
   GROUP_ANCHOR_SIZE,
   measureLeafNode,
   measureLeafShield,
-  computeContainerBbox,
   type EdgeContainerEndpoints,
   resolveEndpoint,
   containerEndpointsInfo,
@@ -54,6 +53,10 @@ import { isEffectiveCluster } from './layout.js';
 export interface PortClusterCtx {
   readonly infoByAstId: ReadonlyMap<string, PortClusterInfo>;
   readonly spacing: ClusterSpacing;
+  /** Every laid-out container's engine cluster rect (`layout-cluster-boxes.ts#clusterBoxesByAstId`), keyed by
+   *  geo id -- the drawn box of a non-port container (`ClusterDecoration.java:78,89-90`). Absent only for the
+   *  ELK path's structural tree (`description-elk-adapter.ts#structuralGeoTree`), whose boxes the maker places. */
+  readonly clusterBoxByAstId?: ReadonlyMap<string, Bbox>;
 }
 
 // ── Phase 2: DotInputGraph construction ──
@@ -444,7 +447,7 @@ export function buildDotEdges(
   // 500-line split (pure move), not introduced here.
 }
 
-// ── Phase 3: geo tree construction (bottom-up, containers padded around children) ──
+// ── Phase 3: geo tree construction (bottom-up; a container takes the engine's cluster rect) ──
 
 /**
  * `EntityImagePort.upPosition()` (svek/image/EntityImagePort.java:76-80):
@@ -463,6 +466,19 @@ function applyPortLabelPositions(children: readonly DescriptionNodeGeo[], bbox: 
   for (const child of children) {
     if (child.symbol === 'port') child.portLabelAbove = child.y < centerY;
   }
+}
+
+/** The placeholder box of a structural tree whose geometry is placed elsewhere (ELK). */
+const STRUCTURAL_BOX: Bbox = { x: 0, y: 0, width: 0, height: 0 };
+
+/** A non-port container is drawn at the graphviz rect `DotStringFactory.java:432-441` gave its cluster
+ *  (`ClusterDecoration.java:78,89-90`); every effective cluster was handed to the engine, so a missing rect is a
+ *  broken invariant, not a state to paper over. */
+function engineClusterBox(key: string, boxes: ReadonlyMap<string, Bbox> | undefined): Bbox {
+  if (boxes === undefined) return STRUCTURAL_BOX;
+  const box = boxes.get(key);
+  if (box === undefined) throw new Error(`description layout: the engine published no cluster rect for '${key}'`);
+  return box;
 }
 
 function buildGeoNode(
@@ -536,12 +552,12 @@ function buildGeoNode(
       buildGeoNode(c, leafPosMap, childAncestors, collidingIds, removed, hidden, stereotypeRules, portClusterCtx),
     );
   // G1b/J2 (mechanism B): a cluster with port children gets its box from
-  // `FrontierCalculator`/`manageEntryExitPoint`, not the plain padded-union
-  // formula -- see frontier-cluster-bbox.ts's doc comment.
+  // `FrontierCalculator`/`manageEntryExitPoint`, not the plain engine cluster
+  // rect -- see frontier-cluster-bbox.ts's doc comment.
   const portInfo = portClusterCtx.infoByAstId.get(key);
   const bbox =
     portInfo === undefined
-      ? computeContainerBbox(children)
+      ? engineClusterBox(key, portClusterCtx.clusterBoxByAstId)
       : computePortClusterBbox(children, portInfo, portClusterCtx.spacing);
   applyPortLabelPositions(children, bbox);
   const geo: DescriptionNodeGeo = {

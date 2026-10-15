@@ -21,6 +21,29 @@ import {
 } from './skinparam-key-handlers-shared.js';
 import { ActorStyle } from './skin/ActorStyle.js';
 import { ADD_MAGIC_HANDLERS } from './skinparam-key-handlers-add-magic.js';
+import type { PackageStyleSetting } from './theme.js';
+
+/** `PackageStyle.fromString` (`svek/PackageStyle.java:50-58`): the enum names, case-insensitive, plus `rect`
+ *  for RECTANGLE; anything else is null (and `SkinParam#packageStyle` then answers FOLDER). */
+const PACKAGE_STYLE_SETTINGS: ReadonlyMap<string, PackageStyleSetting> = new Map<string, PackageStyleSetting>([
+  ['folder', 'folder'],
+  ['rectangle', 'rect'],
+  ['rect', 'rect'],
+  ['node', 'node'],
+  ['frame', 'frame'],
+  ['cloud', 'cloud'],
+  ['database', 'database'],
+  ['agent', 'agent'],
+  ['storage', 'storage'],
+  ['component1', 'component1'],
+  ['component2', 'component2'],
+  ['artifact', 'artifact'],
+  ['card', 'card'],
+]);
+
+function parsePackageStyleSetting(value: string): PackageStyleSetting | undefined {
+  return PACKAGE_STYLE_SETTINGS.get(value.trim().toLowerCase());
+}
 
 export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> = [
   [
@@ -383,8 +406,8 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   [
     ['packagestyle'],
     (acc, value) => {
-      const v = value.trim().toLowerCase();
-      if (v === 'rect' || v === 'rectangle') acc.packageStyle = 'rect';
+      const style = parsePackageStyleSetting(value);
+      if (style !== undefined) acc.packageStyle = style;
     },
   ],
   [

@@ -306,11 +306,6 @@ export interface DescriptionGeometry {
 // Sizing constants (exported so layout.ts and siblings can use them)
 // ---------------------------------------------------------------------------
 
-/** Padding on left / right / bottom inside a container box. */
-export const CONTAINER_PADDING = 16;
-/** Extra space at the top of a container box for its label. */
-export const CONTAINER_TOP_PAD = 28;
-
 /** Width of an empty container (container symbol with no children). */
 export const EMPTY_CONTAINER_WIDTH = 160;
 /** Height of an empty container. */
