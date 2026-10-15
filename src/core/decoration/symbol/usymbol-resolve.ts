@@ -178,18 +178,8 @@ export function textFontColor(theme: Theme, symbol: string): string | null {
  * then to `theme.fontSize + sizeDelta`). Callers building stereotype text
  * pass `role: 'stereotype'` alongside `FontStyle.ITALIC`.
  *
- * > **Open, escalated (S1L-tail G4 tier 2).** `resolveElementFontSize` now
- * > carries a fourth `stereotypes` argument for the per-stereotype-NAME tier
- * > (`skinparam <sname>StereotypeFontSize<<bar>> N` / `<style> <sname> {
- * > stereotype { .bar { FontSize N } } }`), and the SIZER supplies it. This
- * > function cannot: it has no access to the entity's own labels, and it is
- * > already at the project's 5-parameter ceiling, so delivering them means
- * > bundling `role`+`stereotypes` into one options argument and updating all
- * > FIVE call sites — `renderer-entity.ts:189-190`,
- * > `renderer-cluster.ts:92,101`, `class/renderer-usymbol-entity.ts:82-83` —
- * > four of which sit outside F3-fix's declared write-set. Until then the INK
- * > half of `loroto-06-fano471`/`toxine-81-xofo986` stays open (`«bar»` draws
- * > at 20 where the jar draws 10); only the SIZE half closed.
+ * > The per-stereotype-NAME size tier is delivered by {@link stereotypeTextFont} (codd T6-D), which takes the
+> entity's labels; `textFont`'s `'stereotype'` role resolves the un-labelled tiers only.
  */
 export function textFont(
   theme: Theme,
@@ -198,7 +188,43 @@ export function textFont(
   styles: ReadonlySet<FontStyle> = EMPTY_STYLES,
   role: 'title' | 'stereotype' = 'title',
 ): FontConfiguration {
-  const sizeOverride = resolveElementFontSize(theme, symbol, role);
+  return fontConfigurationFor(
+    theme,
+    symbol,
+    styles,
+    resolveElementFontSize(theme, symbol, role) ?? theme.fontSize + sizeDelta,
+  );
+}
+
+/**
+ * The stereotype font of one entity/group, WITH its labels: the per-stereotype-NAME FontSize tier
+ * (`skinparam <sname>StereotypeFontSize<<bar>> N` / `<style> <sname> { stereotype { .bar { FontSize N } } }`,
+ * `resolveElementFontSize`'s `stereotypes` argument) that {@link textFont} cannot reach, since it has no access to
+ * the labels. `EntityImageDescription.java:155-157` / `ClusterHeader.java:208-213` build the stereotype style
+ * `forStereotypeItself(stereotype)`, so the draw side must size it the way the sizer already does
+ * (`leaf-sizing-entity.ts`); otherwise the DOT box and the drawn `«x»` disagree (`loroto-06-fano471`,
+ * `toxine-81-xofo986`, `unknown/golamo-46-lume529`).
+ */
+export function stereotypeTextFont(
+  theme: Theme,
+  symbol: string,
+  labels: readonly string[],
+  styles: ReadonlySet<FontStyle>,
+): FontConfiguration {
+  return fontConfigurationFor(
+    theme,
+    symbol,
+    styles,
+    resolveElementFontSize(theme, symbol, 'stereotype', labels) ?? theme.fontSize,
+  );
+}
+
+function fontConfigurationFor(
+  theme: Theme,
+  symbol: string,
+  styles: ReadonlySet<FontStyle>,
+  size: number,
+): FontConfiguration {
   // cdd6 T3g (D3): `FontConfiguration.create(skinParam, style, colors)`
   // reads `style.value(PName.HyperLinkColor)` (`FontConfiguration.java
   // :213-219`) -- the element's own `<style> <sname> { HyperLinkColor }`
@@ -206,7 +232,7 @@ export function textFont(
   const hyperlinkColor = theme.colors.elements?.[symbol]?.hyperlinkColor;
   return {
     family: theme.fontFamily,
-    size: sizeOverride ?? theme.fontSize + sizeDelta,
+    size,
     color: textFontColor(theme, symbol),
     styles,
     ...(hyperlinkColor === undefined ? {} : { hyperlinkColor }),

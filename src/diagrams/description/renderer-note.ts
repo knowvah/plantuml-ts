@@ -17,6 +17,7 @@
  * @see ~/git/plantuml/.../svek/image/EntityImageNote.java:154-233 (drawU)
  * @see ~/git/plantuml/.../svek/image/EntityImageNote.java:272-286 (drawNormal)
  */
+import { bareEntityName } from './namespace-groups.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { Theme } from '../../core/theme.js';
 import { resolveElementFontSize, resolveElementLineThickness } from '../../core/theme.js';
@@ -127,7 +128,7 @@ export function drawNote(
   uid: string,
   sprites: SpriteRegistry | undefined,
 ): void {
-  const info: EntityDecorationInfo = { name: node.id, qualifiedName: node.id, uid, location: null };
+  const info: EntityDecorationInfo = { name: bareEntityName(node.id), qualifiedName: node.id, uid, location: null };
   const paints = resolveNotePaints(node, theme);
   const block = buildNoteBlock(node.display, theme, sprites);
   decorateEntityDrawing(

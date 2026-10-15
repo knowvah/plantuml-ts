@@ -5,14 +5,17 @@
  * .position` (a `UTranslate`) internally — the caller passes the
  * un-translated `ug` (see `Cluster.ts`'s `ClusterDecoration#drawU`).
  */
+import { bareEntityName } from './namespace-groups.js';
 import type { Theme } from '../../core/theme.js';
 import { resolveElementShadowing } from '../../core/theme.js';
+import { resolveClusterTitleAlignment, resolveElementRoundCorner } from '../../core/theme-element-resolve.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { TextBlockUtils } from '../../core/klimt/shape/TextBlockUtils.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
 import { buildTextBlock } from '../../core/svek/image/EntityImageDescriptionSupport.js';
+import { buildClusterTitle } from '../../core/svek/image/EntityImageDescriptionClusterTitle.js';
 import {
   Cluster,
   type ClusterGroupInfo,
@@ -27,8 +30,14 @@ import { buildStereo, resolveStereotypeSprite } from '../../core/svek/image/Enti
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import { rawStereotypeLabels } from './parse-helpers.js';
 import type { DescriptionNodeGeo } from './layout-helpers.js';
-import { resolvePackageStyle, resolveSymbol, textFont } from '../../core/decoration/symbol/usymbol-resolve.js';
+import {
+  resolvePackageStyle,
+  resolveSymbol,
+  stereotypeTextFont,
+  textFont,
+} from '../../core/decoration/symbol/usymbol-resolve.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import { parseColorOverride, lineStyleStroke } from './renderer-color-override.js';
 import { drawKermorGroupNote } from './renderer-cluster-note.js';
 
 /** Jar-observed default cluster border width for `package`/`folder`
@@ -111,22 +120,22 @@ function labelBlock(node: DescriptionNodeGeo, theme: Theme): TextBlock {
   const lines = node.stereotype.map((label, i) => (raw?.[i] === undefined ? `<<${label}>>` : raw[i]));
   return buildTextBlock(
     lines.join('\n'),
-    textFont(theme, node.symbol, 0, STEREOTYPE_STYLES, 'stereotype'),
+    stereotypeTextFont(theme, node.symbol, node.stereotype, STEREOTYPE_STYLES),
     HorizontalAlignment.CENTER,
   );
 }
 
 export function buildHeader(node: DescriptionNodeGeo, theme: Theme, options?: HeaderOptions): ClusterHeaderInfo {
-  const titleFont = textFont(theme, node.symbol, 0, TITLE_STYLES);
+  // `ClusterHeader.java:111`: the title font is built with `g.getColors()`, so an inline `text:` colour wins.
+  const text = node.color === undefined ? undefined : parseColorOverride(node.color).text;
+  const baseFont = textFont(theme, node.symbol, 0, TITLE_STYLES);
+  const titleFont = text === undefined ? baseFont : { ...baseFont, color: text };
   // `ClusterHeader.java:117-119` builds the title with the full `Display#create`, so a `<$sprite>` in a
   // group's label measures and draws; the ELK path (cdd8 T3b) also passes `style.getHorizontalAlignment()`.
-  const alignment = options?.alignment ?? HorizontalAlignment.LEFT;
-  const title = buildTextBlock(
-    node.display,
-    titleFont,
-    alignment,
-    options === undefined ? undefined : makeAtomImageResolverFor(options.sprites)(titleFont),
-  );
+  const alignment = options?.alignment ?? resolveClusterTitleAlignment(theme, node.symbol);
+  const title = buildClusterTitle(node.display, titleFont, alignment, {
+    resolveAtomImage: options === undefined ? undefined : makeAtomImageResolverFor(options.sprites)(titleFont),
+  });
   // G1 I5b: one guillemet line per stereotype tag, same convention as
   // `EntityImageDescriptionSupport.ts#buildStereo` -- ClusterHeader.java
   // :197-207 (`Display.create(visibleStereotypes)`) stacks ALL tags, not
@@ -138,7 +147,7 @@ export function buildHeader(node: DescriptionNodeGeo, theme: Theme, options?: He
     options?.sprites === undefined ? undefined : spriteDimsLookupFor(options.sprites),
   );
   const stereo = sprite === undefined ? labelBlock(node, theme) : buildStereo([], titleFont, undefined, sprite);
-  return { title, stereo, titleHorizontalAlignment: HorizontalAlignment.LEFT };
+  return { title, stereo, titleHorizontalAlignment: resolveClusterTitleAlignment(theme, node.symbol) };
 }
 
 export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleDefaults {
@@ -162,7 +171,7 @@ export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleD
     // draws a FLAT `UPolygon` only when roundCorner===0; the jar's real
     // unstyled folder default is rounded (a `UPath` with `arcTo` corners),
     // same as every non-folder container.
-    roundCorner: NON_FOLDER_ROUND_CORNER,
+    roundCorner: resolveElementRoundCorner(theme, symbol) ?? NON_FOLDER_ROUND_CORNER,
     strictUmlStyle: false,
     diagonalCorner: 0,
     lineColorDefault: folder ? FOLDER_BORDER_DEFAULT : NON_FOLDER_BORDER_DEFAULT,
@@ -201,16 +210,18 @@ class NotedCluster extends Cluster {
 /** Builds the `Cluster` for one container node, ready to `drawU(ug)`
  *  (absolute position resolved internally — see module doc comment). */
 export function buildCluster(node: DescriptionNodeGeo, theme: Theme, uid: string, sprites?: SpriteRegistry): Cluster {
+  // `Cluster.java:312-319,683-692`: the group's inline `#back;line:x` colours (`Colors`) outrank its style.
+  const override = node.color === undefined ? {} : parseColorOverride(node.color);
   const group: ClusterGroupInfo = {
     hidden: false,
-    name: node.id,
+    name: bareEntityName(node.id),
     uid,
     qualifiedName: node.id,
     location: null,
     isRoot: false,
-    lineColorOverride: null,
-    backColorOverride: null,
-    specificLineStroke: null,
+    lineColorOverride: override.line ?? null,
+    backColorOverride: override.back ?? null,
+    specificLineStroke: lineStyleStroke(override.lineStyle) ?? null,
   };
   const symbolInfo: ClusterSymbolInfo = {
     symbol: resolveSymbol(node.symbol, theme),

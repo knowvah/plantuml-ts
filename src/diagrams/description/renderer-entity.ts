@@ -15,10 +15,12 @@
  * exact chrome. Documented approximation, not a T17 acceptance blocker
  * (neither symbol appears in the T17 zero-diff conformance fixture).
  */
+import { bareEntityName } from './namespace-groups.js';
 import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { Theme } from '../../core/theme.js';
 import { resolveElementPaint, resolveElementShadowing, resolveElementLineThickness } from '../../core/theme.js';
+import { resolveElementMinimumWidth, resolveElementRoundCorner } from '../../core/theme-element-resolve.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
@@ -32,6 +34,7 @@ import {
   type EntityImageDescriptionParams,
   type EntityImageDescriptionStereotypeSprite,
 } from '../../core/svek/image/EntityImageDescription.js';
+import { titleAlignmentFor } from '../../core/svek/image/leaf-sizing-entity.js';
 import { buildTextBlock } from '../../core/svek/image/EntityImageDescriptionSupport.js';
 import {
   decorateEntityDrawing,
@@ -42,6 +45,7 @@ import {
   upstreamKeyword,
   mapComponentStyle,
   textFont,
+  stereotypeTextFont,
   entityTitleStyles,
   resolveActorStyle,
 } from '../../core/decoration/symbol/usymbol-resolve.js';
@@ -49,7 +53,7 @@ import { type SpriteRegistry, spriteDimsLookupFor } from '../../core/sprite-comm
 import { resolveStereotypeSprite } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
 import { drawNote } from './renderer-note.js';
-import { parseColorOverride, type ColorOverride } from './renderer-color-override.js';
+import { parseColorOverride, lineStyleStroke, type ColorOverride } from './renderer-color-override.js';
 
 /** Jar-verified default entity corner radius / stroke width for the
  *  rectangle-family `USymbol`s (`test-results/dot-cache/component/
@@ -104,14 +108,11 @@ function overrideStroke(
   lineStyle: ColorOverride['lineStyle'],
   defaultThickness: number = ENTITY_STROKE_WIDTH,
 ): UStroke {
-  if (lineStyle === 'dashed') return new UStroke(7, 7, 1);
-  if (lineStyle === 'dotted') return new UStroke(1, 3, 1);
-  if (lineStyle === 'bold') return UStroke.withThickness(2);
   // No inline line-style override: the element's own resolved LineThickness
   // (`skin rose`'s `componentDiagram { node { LineThickness 1.5 } }`) stands
   // in for the built-in `ENTITY_STROKE_WIDTH` default -- the dashed/dotted/
   // bold branches keep their fixed upstream thicknesses (LinkStyle.getStroke3).
-  return UStroke.withThickness(defaultThickness);
+  return lineStyleStroke(lineStyle) ?? UStroke.withThickness(defaultThickness);
 }
 
 /** Renderer-side twin of `leaf-sizing-entity.ts#spriteLabel` — the registry is
@@ -138,7 +139,7 @@ export function buildEntityParams(
   // code name in `fontBody`.
   const fontTitle = textFont(theme, node.symbol, 0, entityTitleStyles(node.symbol));
   const fontBody = textFont(theme, node.symbol);
-  const fontStereo = textFont(theme, node.symbol, 0, STEREOTYPE_STYLES, 'stereotype');
+  const fontStereo = stereotypeTextFont(theme, node.symbol, stereotypeLabels, STEREOTYPE_STYLES);
   // D3 (cdd6 T1b/T2f): this entity's own resolved LineThickness -- the SAME
   // value `paint.stroke` below draws the body's border with -- doubles as
   // the sprite decomposition's ambient stroke seed (`SvgNanoParser.java
@@ -151,7 +152,7 @@ export function buildEntityParams(
   // atoms can never disagree on this entity's ambient thickness.
   const lineThickness = resolveElementLineThickness(theme, node.symbol) ?? ENTITY_STROKE_WIDTH;
   return {
-    entity: { name: node.id, uid: '', qualifiedName: node.id, location: null, url: null },
+    entity: { name: bareEntityName(node.id), uid: '', qualifiedName: node.id, location: null, url: null },
     symbol: {
       keyword: upstreamKeyword(node.symbol),
       actorStyle: resolveActorStyle(theme.actorStyle),
@@ -176,7 +177,7 @@ export function buildEntityParams(
         override.back ??
         businessBackcolor(theme, node.symbol) ??
         resolveElementPaint(theme, node.symbol, 'background', stereotypeLabels),
-      roundCorner: ENTITY_ROUND_CORNER,
+      roundCorner: resolveElementRoundCorner(theme, node.symbol) ?? ENTITY_ROUND_CORNER,
       diagonalCorner: 0,
       // mission skin-file-loading (deferred D3 item): was hardcoded 0 --
       // `EntityImageDescription.ts:251`'s `.withShadow(params.paint
@@ -194,7 +195,11 @@ export function buildEntityParams(
       fontTitle: override.text !== undefined ? { ...fontTitle, color: override.text } : fontTitle,
       fontBody: override.text !== undefined ? { ...fontBody, color: override.text } : fontBody,
       fontStereo: override.text !== undefined ? { ...fontStereo, color: override.text } : fontStereo,
-      titleAlignment: HorizontalAlignment.CENTER,
+      titleAlignment: titleAlignmentFor(node.symbol, {
+        own: theme.colors.elements?.[node.symbol]?.horizontalAlignment,
+        root: theme.colors.elements?.root?.horizontalAlignment,
+      }),
+      minimumWidth: resolveElementMinimumWidth(theme, node.symbol) ?? 0,
       stereotypeAlignment: HorizontalAlignment.CENTER,
       ...(theme.wrapWidth !== undefined ? { wrapWidth: theme.wrapWidth } : {}),
       guillemet: {
@@ -245,7 +250,7 @@ const PORT_STROKE_WIDTH = 1.5;
  *  first, then the `resolveElementPaint` cascade (`sname: 'port'`, jar-verified
  *  `#F1F1F1`/`#181818` by default), NOT `theme.colors.border` for both. */
 function drawPortFallback(ug: UGraphic, node: DescriptionNodeGeo, theme: Theme, uid: string): void {
-  const info: EntityDecorationInfo = { name: node.id, qualifiedName: node.id, uid, location: null };
+  const info: EntityDecorationInfo = { name: bareEntityName(node.id), qualifiedName: node.id, uid, location: null };
   const font = textFont(theme, 'port');
   // EntityImagePort.java:121-130: inline colours, then the port style + `<<labels>>`.
   const override = node.color !== undefined ? parseColorOverride(node.color) : {};

@@ -337,7 +337,11 @@ export function descAtomOps(
  *  given upstream's traced default. `skin` self-references inside `sheet()`
  *  so a `StripeTable`/`StripeTree`/`CreoleHorizontalLine` constructed deeper
  *  in the `CreoleParser` dispatch sees the SAME capability object back. */
-function buildLocalSkinSimple(guillemet: GuillemetPair | undefined, atomOps: AtomOps, pragma: Pragma): ISkinSimple {
+export function buildLocalSkinSimple(
+  guillemet: GuillemetPair | undefined,
+  atomOps: AtomOps,
+  pragma: Pragma,
+): ISkinSimple {
   const renderer = descEmbeddedRenderer();
   const skin: ISkinSimple = {
     getSprite: () => null, // no SpriteRegistry reachable from ISkinSimple here (DisplayCreole.ts's own T9c note)
