@@ -163,6 +163,16 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
     },
   },
 
+  // 2e1b. `!pragma useIntermediatePackages true|false` -- `PragmaKey.USE_INTERMEDIATE_PACKAGES`, read by
+  //       `DescriptionDiagram#checkFinalError` (:93-94); see namespace-pack.ts. Must precede the
+  //       general `!pragma NAME` fallback below.
+  {
+    pattern: /^!pragma\s+useIntermediatePackages\s+(true|false)\s*$/i,
+    execute(state, match) {
+      state.intermediatePackages = !/^false$/i.test(match[1]!);
+    },
+  },
+
   // 2e2. `!pragma NAME [VALUE]` — CommandPragma, registered on EVERY factory
   //      via CommonCommands.addCommonCommands1 (DescriptionDiagramFactory
   //      .java:87). T13 (dispatch-by-parse-attempt): `!pragma svek_trace on`
