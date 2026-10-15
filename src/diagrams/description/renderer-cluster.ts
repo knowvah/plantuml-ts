@@ -28,6 +28,8 @@ import type { USymbol } from '../../core/descriptive-keywords.js';
 import { rawStereotypeLabels } from './parse-helpers.js';
 import type { DescriptionNodeGeo } from './layout-helpers.js';
 import { resolvePackageStyle, resolveSymbol, textFont } from '../../core/decoration/symbol/usymbol-resolve.js';
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import { drawKermorGroupNote } from './renderer-cluster-note.js';
 
 /** Jar-observed default cluster border width for `package`/`folder`
  *  (folder-tab-decorated) containers only (`test-results/dot-cache/
@@ -174,6 +176,28 @@ export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleD
   };
 }
 
+/**
+ * `Cluster#drawU`'s `!pragma kermor on` branch (`Cluster.java:302-307`): the TOP then the BOTTOM group note draw
+ * before the cluster's own comment and symbol. `group.isHidden()` returns first (`:298-300`); the caller
+ * (`renderer-draw-sequence.ts#drawClusters`) already skips hidden containers.
+ */
+class NotedCluster extends Cluster {
+  constructor(
+    args: ConstructorParameters<typeof Cluster>,
+    private readonly notes: NonNullable<DescriptionNodeGeo['kermorNotes']>,
+    private readonly theme: Theme,
+    private readonly sprites: SpriteRegistry | undefined,
+  ) {
+    super(...args);
+  }
+
+  override drawU(ug: UGraphic): void {
+    if (this.notes.top !== undefined) drawKermorGroupNote(ug, this.notes.top, this.theme, this.sprites);
+    if (this.notes.bottom !== undefined) drawKermorGroupNote(ug, this.notes.bottom, this.theme, this.sprites);
+    super.drawU(ug);
+  }
+}
+
 /** Builds the `Cluster` for one container node, ready to `drawU(ug)`
  *  (absolute position resolved internally — see module doc comment). */
 export function buildCluster(node: DescriptionNodeGeo, theme: Theme, uid: string, sprites?: SpriteRegistry): Cluster {
@@ -196,11 +220,14 @@ export function buildCluster(node: DescriptionNodeGeo, theme: Theme, uid: string
     defaultPackageStyle: resolvePackageStyle(theme),
     stereoAlignment: HorizontalAlignment.CENTER,
   };
-  return new Cluster(
+  const args: ConstructorParameters<typeof Cluster> = [
     group,
     buildHeader(node, theme, { sprites }),
     { position: new UTranslate(node.x, node.y), width: node.width, height: node.height },
     buildStyleDefaults(theme, node.symbol),
     symbolInfo,
-  );
+  ];
+  return node.kermorNotes === undefined
+    ? new Cluster(...args)
+    : new NotedCluster(args, node.kermorNotes, theme, sprites);
 }
