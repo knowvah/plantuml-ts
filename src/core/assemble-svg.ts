@@ -59,6 +59,7 @@ import {
  *  root `data-diagram-type`). Each engine declares its own copy to SET `RenderFragment.diagramType`
  *  (`class/renderer.ts`, `json/index.ts`, `mindmap/index.ts`, ...); these are for DISPATCH only. */
 const DIAGRAM_TYPE_CLASS = 'CLASS';
+const DIAGRAM_TYPE_DESCRIPTION = 'DESCRIPTION';
 const DIAGRAM_TYPE_STATE = 'STATE';
 const DIAGRAM_TYPE_JSON = 'JSON';
 const DIAGRAM_TYPE_YAML = 'YAML';
@@ -379,6 +380,23 @@ function finalizeSequenceBody(fragment: RenderFragment): string {
 // ---------------------------------------------------------------------------
 
 /**
+ * codd-T4: description's chrome-composed fragment. The only work is the
+ * full-canvas background `<rect>` as the content `<g>`'s FIRST child, drawn
+ * at the FINAL size (`UgDiagram.java:123-135`: `addChrome`, then
+ * `TextBlockUtils.addBackcolor`); every other description fragment falls
+ * through unchanged, as before.
+ */
+function finalizeDescriptionFragment(fragment: RenderFragment): RenderFragment {
+  if (fragment.documentBackgroundRect === undefined) return fragment;
+  const background = rect(0, 0, Math.trunc(fragment.width), Math.trunc(fragment.height), {
+    fill: fragment.documentBackgroundRect,
+    stroke: 'none',
+    strokeWidth: 1,
+  });
+  return { ...fragment, body: spliceAsFirstChild(fragment.body, background) };
+}
+
+/**
  * Per-`diagramType` body finalization -- the work each of the four former
  * `diagrams/<engine>/renderer-shell.ts` files did to `fragment.body` (and,
  * for json, `fragment.background`) before handing off to
@@ -394,6 +412,8 @@ function finalizeShellFragment(fragment: RenderFragment): RenderFragment {
   switch (fragment.diagramType) {
     case DIAGRAM_TYPE_CLASS:
       return { ...fragment, body: finalizeClassBody(fragment) };
+    case DIAGRAM_TYPE_DESCRIPTION:
+      return finalizeDescriptionFragment(fragment);
     case DIAGRAM_TYPE_STATE:
       return { ...fragment, body: finalizeStateBody(fragment) };
     case DIAGRAM_TYPE_SEQUENCE:

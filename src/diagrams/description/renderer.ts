@@ -293,11 +293,34 @@ export function renderDescription(
  */
 export function unwrapKlimtSvg(svg: string, background: string): RenderFragment {
   const { width, height } = extractViewBoxDims(svg);
-  const { body, extraDefs } = extractFlatContent(svg);
+  const { body: klimtBody, extraDefs } = extractFlatContent(svg);
+  const { body, documentBackgroundRect } = splitLeadingBackgroundRect(klimtBody);
   // The root `style="...background:"` carries the resolved hex the jar writes
   // (`gray` -> `#808080`), as class's own resolve-before-shell convention (N4).
   background = resolveColorToSvgHex(background);
-  return extraDefs.length > 0
-    ? { body, width, height, background, extraDefs, diagramType: DIAGRAM_TYPE_DESCRIPTION }
-    : { body, width, height, background, diagramType: DIAGRAM_TYPE_DESCRIPTION };
+  const fragment: RenderFragment = { body, width, height, background, diagramType: DIAGRAM_TYPE_DESCRIPTION };
+  if (extraDefs.length > 0) fragment.extraDefs = extraDefs;
+  if (documentBackgroundRect !== undefined) fragment.documentBackgroundRect = documentBackgroundRect;
+  return fragment;
+}
+
+/** The background `<rect>` `SvgGraphicsCore#paintBackcolor` writes as the
+ *  klimt body's first child (non-default backgrounds only): the canvas origin,
+ *  the fill, and `stroke:none`. */
+const LEADING_BACKGROUND_RECT_RE =
+  /^<rect x="0" y="0" width="\d+" height="\d+" fill="(#[0-9A-Fa-f]{3,8})" style="stroke:none;"\/>/;
+
+/**
+ * codd-T4: the jar's background rect belongs to the FINAL canvas, not to the
+ * klimt body. `UgDiagram#getExporter` (`UgDiagram.java:123-135`) runs
+ * `addChrome` (title, caption, ...) and only then `TextBlockUtils
+ * .addBackcolor`, so the rect spans the chrome-composed canvas and precedes
+ * the title group (`component/sugaca-11-boma467`). The body's own rect, sized
+ * to the margin-less block, is split off here and handed to the assembler as
+ * `documentBackgroundRect` (the class engine's N48 mechanism).
+ */
+function splitLeadingBackgroundRect(body: string): { body: string; documentBackgroundRect?: string } {
+  const match = LEADING_BACKGROUND_RECT_RE.exec(body);
+  if (match === null) return { body };
+  return { body: body.slice(match[0].length), documentBackgroundRect: match[1]! };
 }
