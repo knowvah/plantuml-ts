@@ -240,6 +240,7 @@ export function degenerateSingleLeaf(
     totalHeight: dims.height + LAYOUT_MARGIN_LEADING + LAYOUT_MARGIN,
     nodes: [geo],
     edges: [],
+    degenerate: true,
     ...spritesField,
   };
 }

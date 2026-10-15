@@ -248,6 +248,14 @@ export interface DescriptionEdgeGeo {
 export interface DescriptionGeometry {
   totalWidth: number;
   totalHeight: number;
+  /**
+   * codd-T4: `true` iff the layout took the `EntityImageDegenerated` path
+   * (`GraphvizImageBuilder.java:211-222`, `DotData#isDegeneratedWithFewEntities`,
+   * `dot/DotData.java:69-71`), whose predicate counts the entities, groups and
+   * links a `remove` hides. The renderer cannot recover it from the surviving
+   * geometry (a lone surviving leaf beside removed ones is NOT degenerate).
+   */
+  degenerate?: true;
   nodes: DescriptionNodeGeo[];
   edges: DescriptionEdgeGeo[];
   /**

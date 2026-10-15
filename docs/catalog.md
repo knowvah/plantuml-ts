@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1674 modules · 6089 exported names.
+1674 modules · 6093 exported names.
 
 ## `src/`
 
@@ -24,7 +24,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `activity-circle-style.ts` | `ActivityCircleColors`, `ActivityCircleStyle`, `ActivityCircleStyleSource`, `resolveActivityCircleStyle`, `withActivityCircleStyle` | The activity start/stop circles' merged-style colours (mission add4, T3f, `labala-74-juki864`). |
 | `arrow-label-font.ts` | `ARROW_LABEL_DEFAULT_COLOR`, `ArrowLabelFont`, `resolveArrowLabelFont`, `resolveCardinalityFontColor`, `resolveCardinalityFont` | D3: the arrow-label font resolver -- `GraphvizImageBuilder.java:234-235` (`getDefaultStyleDefinitionArrow(stereotype).getMergedStyle(...) .getFontConfiguration(...)`), upstream's `labelFont` argument to `SvekEdge`'s constructor. |
-| `assemble-svg-activity.ts` | `finalizeActivityFragment` | Activity's per-diagram body finalization — split out of `assemble-svg.ts` (T2d-a pass 2, 500-line hook) to make room for the DOCGRAD gradient background branch. |
+| `assemble-svg-activity.ts` | `scaleActivityBody`, `finalizeActivityFragment` | Activity's per-diagram body finalization — split out of `assemble-svg.ts` (T2d-a pass 2, 500-line hook) to make room for the DOCGRAD gradient background branch. |
 | `assemble-svg.ts` | `assembleSvg`, `seedOfUmlSource` | The single central document-assembly choke point — extracted from `src/index.ts` (mission A5 / T4), which sits at the repo's 500-line hook cap. |
 | `asset-store.ts` | `AssetPayload`, `AssetStore`, `combineAssetStores` | ADR-2's asset store seam (`plans/s1l-tail-fix/decisions.md`) — the synchronous, pre-fillable channel for vendored binary/text asset payloads (the jar-internal `/sprites/**` bundle, F4-a; Twemoji artwork, F4-b). |
 | `assume-transparent.ts` | `RE_ASSUME_TRANSPARENT`, `isAssumeTransparent` | `CommandAssumeTransparent`: `!assume transparent dark\|light`, a historical directive every command factory registers through `CommonCommands#addCommonCommands2` (`command/CommonCommands.java:65`). |
@@ -44,7 +44,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `descriptive-keywords.ts` | `USymbol`, `ALL_TYPES`, `KEYWORD_TO_SYMBOL`, `stripSpriteRegions` | Shared descriptive-keyword table — single source of truth for the descriptive diagram engine (component / use-case / deployment). |
 | `diagram-type-set.ts` | `DiagramType`, `findStartTypes` | Faithful port of `net.sourceforge.plantuml.core.DiagramType`'s start-tag candidate set — `findStartTypes` only. |
 | `dispatcher.ts` | `ParseOptions`, `RenderFragment`, `CompleteSvg`, `AssembledSvg`, `PaginatedPlugin`, `SyncPlugin`, `AsyncPlugin`, `DiagramPlugin`, `parseRefusalOf`, `Resolution`, `DiagramRegistry`, `registry` | Dispatcher: holds a registry of DiagramPlugin instances and resolves which one owns a given UmlSource **by attempting the parse**, exactly as upstream does (`PSystemBuilder#createPSystem`, `:257-283`). |
-| `document-margin.ts` | `DocumentMargin`, `SEQUENCE_DOCUMENT_MARGIN`, `documentMarginOf`, `removeDocumentMargin`, `applyDocumentMargin` | document-margin.ts -- lgm-T1a: `TextBlockExporter`'s outer document margin, applied to a fragment AFTER `DiagramChromeFactory.create` composed its chrome (title/legend/caption/header/footer/mainframe), as upstream does. |
+| `document-margin.ts` | `DocumentMargin`, `SEQUENCE_DOCUMENT_MARGIN`, `CUCA_DOCUMENT_MARGIN`, `documentMarginOf`, `calculateMargin`, `removeDocumentMargin`, `applyDocumentMargin` | document-margin.ts -- lgm-T1a: `TextBlockExporter`'s outer document margin, applied to a fragment AFTER `DiagramChromeFactory.create` composed its chrome (title/legend/caption/header/footer/mainframe), as upstream does. |
 | `dot-engine-measurer.ts` | _(none)_ | The single install point for `@knowvah/dot-engine`'s text measurer. |
 | `dot-splines.ts` | `dotSplinesAttrs` | Translates the `linetype` semantic enum on `DotInputGraph` into the DOT attribute pairs upstream emits for it. |
 | `edge-label-box-note-merge.ts` | `NoteOnLinkPosition`, `MergedLabelBoxInput`, `computeMergedLabelBox` | The `note on link` merge half of `edge-label-box.ts` — the note operand, the four `Position` merges and the shield. |
@@ -1725,7 +1725,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-note-opale.ts` | `NOTE_STROKE_WIDTH`, `NotePaints`, `opalePolygonNormal`, `drawNoteShape` | renderer-note-opale.ts — T1e (opale note port): draws a `symbol === 'note'` leaf's Opale fold-outline + corner triangle instead of a plain box, when `DescriptionNodeGeo.opale` resolved (`layout-geo-post.ts#applyOpaleNote`, the SAME `Opale.t |
 | `renderer-note.ts` | `buildNoteBlock`, `resolveNotePaints`, `drawNote` | renderer-note.ts -- `EntityImageNote#drawU` for a description `note` leaf, split out of `renderer-entity.ts` (at the 500-line cap). |
 | `renderer-uid.ts` | `UidPlan`, `buildUidPlan` | renderer-uid.ts — entity/cluster/link uid assignment for the klimt-backed description renderer. |
-| `renderer.ts` | `renderDescription`, `unwrapKlimtSvg` | renderer.ts — T17: klimt-backed public entry point for the description (component/use-case/deployment) diagram engine. |
+| `renderer.ts` | `degenerateBlockDims`, `renderDescription`, `unwrapKlimtSvg` | renderer.ts — T17: klimt-backed public entry point for the description (component/use-case/deployment) diagram engine. |
 | `title-label-sizing.ts` | `measureTitleLabel` | Title-bar dims for a cluster's own display name — split out of layout-helpers.ts (500-line cap) as its own module, mirroring that file's existing leaf-sizing.js split. |
 | `together.ts` | `TOGETHER_FRAME_PREFIX`, `DescriptionTogether`, `currentTogether`, `openTogetherFrame`, `joinCurrentTogether`, `applyDescriptionTogethers` | `together { }` for the description engine (cdd3-T18): the same upstream code path as class. |
 
