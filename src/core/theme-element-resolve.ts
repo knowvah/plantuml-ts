@@ -10,6 +10,49 @@ import type { Paint } from './paint.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
 
 /**
+ * The pseudo-bucket holding a `<style> .tag { ... }` selector that names no
+ * SName: its signature carries only the stereotype, so it matches every
+ * element carrying that tag (`Context.java#push` `.`-branch ->
+ * `StyleSignatureBasic.empty().addStereotype`; `StyleSignatureBasic
+ * #matchAllImpl`). Written by `style-map-element.ts#collectTagStyle`.
+ */
+export const ANY_ELEMENT_BUCKET = '*';
+
+/** The stereotype-keyed twin of each {@link ElementColors} colour role. */
+const STEREOTYPE_PAINT_FIELD = {
+  background: 'backgroundColorByStereo',
+  border: 'borderByStereo',
+} as const;
+
+/**
+ * The stereotype tier of one element's colour: a `<<label>>`-qualified
+ * `skinparam <sname>BackgroundColor<<label>>` / `<style> <sname> { .label {
+ * BackgroundColor } }` (or the SName-less `<style> .label { ... }`) beats the
+ * un-qualified bucket, because upstream re-signs such a style at +1000
+ * priority (`FromSkinparamToStyle.java#addStyle`, `StyleLoader.java:178-186`
+ * `addPriorityForStereotype`; `Context.java#toStyles` for the `<style>`
+ * spelling). Keys are CLEANED tags; the LAST label with a value wins,
+ * mirroring `StyleSignatureBasic#withTOBECHANGED` fanning the signature out
+ * one label at a time and the merge keeping the last-registered value. The
+ * SName's own bucket is consulted after the SName-less one.
+ */
+function stereotypePaint(
+  theme: Theme,
+  sname: string,
+  role: keyof typeof STEREOTYPE_PAINT_FIELD,
+  stereotypes: readonly string[],
+): Paint | undefined {
+  const field = STEREOTYPE_PAINT_FIELD[role];
+  let hit: Paint | undefined;
+  for (const bucketName of [ANY_ELEMENT_BUCKET, sname]) {
+    const byTag = theme.colors.elements?.[bucketName]?.[field];
+    if (byTag === undefined) continue;
+    for (const label of stereotypes) hit = byTag[cleanStereoKey(label)] ?? hit;
+  }
+  return hit;
+}
+
+/**
  * Resolve the {@link Paint} for one element's color role, cascading
  * element-specific (SName) bucket → root default (decision D4). Never throws on
  * an unrecognized `sname` — it falls through to the root default.
@@ -17,8 +60,23 @@ import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
  * `background` resolves to the root node fill (`nodeBackground`, `#F1F1F1` by
  * default), NOT the class-specific `classBackground`, so a `database` (or any
  * non-`class` element) is not tinted with the class color.
+ *
+ * `stereotypes` (codd-T1c): the element's OWN `<<label>>`s, raw as parsed.
+ * Supplied only by callers whose upstream image merges a stereotype-re-signed
+ * style (`EntityImageDescription.java:152-160`, `EntityImagePort.java:61-64`
+ * via `withTOBECHANGED`); when omitted the cascade is exactly what it was.
+ * Only `background` and `border` have a stereotype tier.
  */
-export function resolveElementPaint(theme: Theme, sname: string, role: 'background' | 'border' | 'font'): Paint {
+export function resolveElementPaint(
+  theme: Theme,
+  sname: string,
+  role: 'background' | 'border' | 'font',
+  stereotypes?: readonly string[],
+): Paint {
+  if (role !== 'font' && stereotypes !== undefined) {
+    const tagged = stereotypePaint(theme, sname, role, stereotypes);
+    if (tagged !== undefined) return tagged;
+  }
   const specific = theme.colors.elements?.[sname]?.[role];
   if (specific !== undefined) return specific;
   switch (role) {

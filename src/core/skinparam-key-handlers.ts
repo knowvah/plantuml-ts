@@ -161,6 +161,16 @@ export function resolveColorPaint(value: string): Paint {
 }
 
 /**
+ * Dedicated-handler keys that ALSO write their element bucket (see
+ * {@link applyNormalKey}). The other overlaps -- `noteBackgroundColor`,
+ * `package{Background,Border}Color`, `activity{Background,Border}Color`,
+ * `swimlaneBorderColor` -- stay legacy-only: the class and activity engines
+ * read their own dedicated fields, and `tests/unit/core/style-map-buckets-cdd6
+ * .test.ts` pins that `packageBackgroundColor` creates no package bucket.
+ */
+const BUCKET_TOO_KEYS: ReadonlySet<string> = new Set(['interfacebackgroundcolor', 'actorbordercolor']);
+
+/**
  * Applies a single normalized, non stereotype-qualified skinparam key/value
  * pair to `acc`. Table lookup first; on a miss, delegates to the generic
  * per-element bucket fallback (see {@link applyElementBucketFallback}).
@@ -169,6 +179,12 @@ export function applyNormalKey(acc: SkinparamAccumulator, key: string, value: st
   const handler = KEY_HANDLER_MAP.get(key);
   if (handler !== undefined) {
     handler(acc, value, resolveColor(value), resolveColorPaint(value));
+    // codd-T1c: upstream converts EVERY `<sname>BackgroundColor`/`BorderColor`
+    // into a Style on the element's SName (`FromSkinparamToStyle.java#addMagic`
+    // :251-261), which the description entity images read
+    // (`EntityImageDescription.java:152-166`). These two dedicated keys feed a
+    // legacy field no description reader consults, so they also fill the bucket.
+    if (BUCKET_TOO_KEYS.has(key)) tryElementColorBucket(acc, key, value);
     return;
   }
   applyElementBucketFallback(acc, key, value);
