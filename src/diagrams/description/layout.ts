@@ -231,7 +231,19 @@ function buildGeoAndEdges(
   const hidden = effectiveHiddenIds(ast.nodes, ast.hideShowRules ?? []);
   const stereotypeRules = ast.stereotypeVisibilityRules ?? [];
   const leafPosMap = new Map(result.nodes.map((n) => [n.id, n]));
-  const rawNodes = buildGeoTree(ast.nodes, leafPosMap, collidingIds, removed, hidden, stereotypeRules, portClusterCtx);
+  // The tree the layout classified (`layoutDescription`'s `groupedNodes`): `CucaDiagram#eventuallyBuildPhantomGroups`
+  // (`CucaDiagram.java:325-336`, called from `getTextBlock` :464) makes the `set separator` groups real
+  // `GroupType.PACKAGE` groups, which `Cluster#drawU` draws. `buildNamespaceGroups` is pure, so this is the same tree.
+  const groupedNodes = buildNamespaceGroups(ast.nodes, ast.namespaceSeparator);
+  const rawNodes = buildGeoTree(
+    groupedNodes,
+    leafPosMap,
+    collidingIds,
+    removed,
+    hidden,
+    stereotypeRules,
+    portClusterCtx,
+  );
   const geoIndex = buildNodeGeoIndex(rawNodes);
   // G1b/J1 (mechanism C): build edges ONCE at (dx=0,dy=0) -- the RAW,
   // fully-resolved (spline-clipped, labeled) draw shape `placeBody`'s
