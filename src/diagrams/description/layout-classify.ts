@@ -65,6 +65,19 @@ export function isEffectiveCluster(node: DescriptiveNode, removed: ReadonlySet<s
   return isClusterNode(node) && node.children.some((c) => !removed.has(c.id));
 }
 
+/**
+ * `GraphvizImageBuilder#printGroups` / `#printGroup` (:226-227, :408-436) emit the DOT nodes of the ROOT as
+ * every group (an empty group is an entity there, :416-418) before the unpackaged leaves, and inside a
+ * group as its own leaves before its sub-groups.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/GraphvizImageBuilder.java:226-227
+ */
+function inDotEmissionOrder(nodes: readonly DescriptiveNode[], atRoot: boolean): DescriptiveNode[] {
+  const isGroup = (n: DescriptiveNode): boolean => n.declaredAsGroup === true || isClusterNode(n);
+  const groups = nodes.filter(isGroup);
+  const leaves = nodes.filter((n) => !isGroup(n));
+  return atRoot ? [...groups, ...leaves] : [...leaves, ...groups];
+}
+
 export function classifyAst(
   nodes: readonly DescriptiveNode[],
   ctx: ClassifyCtx,
@@ -72,7 +85,7 @@ export function classifyAst(
   ancestorIds: readonly string[] = [],
   parentAstId?: string,
 ): void {
-  for (const node of nodes) {
+  for (const node of inDotEmissionOrder(nodes, parentAstId === undefined)) {
     const key = dotKeyFor(ancestorIds, node.id, ctx.collidingIds);
     ctx.astNodeById.set(key, node);
     ctx.qualifiedPathToDotKey.set(scopedKey([...ancestorIds, node.id]), key);
