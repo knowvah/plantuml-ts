@@ -6,6 +6,7 @@
  */
 import type { Paint } from '../../core/paint.js';
 import { parseColor } from '../../core/paint.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
 
 /** Per-entity inline color/style override (`#orange;line:blue`,
  *  `#line.dashed`) — mirrors upstream `Colors` (klimt/color/Colors.java)
@@ -68,4 +69,15 @@ export function parseColorOverride(raw: string): ColorOverride {
   else if (data.includes('line.dotted')) result.lineStyle = 'dotted';
   else if (data.includes('line.bold')) result.lineStyle = 'bold';
   return result;
+}
+
+/** `LinkStyle.getStroke3()` (decoration/LinkStyle.java:97-107) — the three fixed dash patterns upstream uses for
+ *  `line.dashed`/`.dotted`/`.bold`, all with `nonZeroThickness()` = 1 (no thickness override syntax reaches element
+ *  declarations). `undefined` when there is no inline line style: `Colors#getSpecificLineStroke()` is then null and the
+ *  style's own stroke stands. */
+export function lineStyleStroke(lineStyle: ColorOverride['lineStyle']): UStroke | undefined {
+  if (lineStyle === 'dashed') return new UStroke(7, 7, 1);
+  if (lineStyle === 'dotted') return new UStroke(1, 3, 1);
+  if (lineStyle === 'bold') return UStroke.withThickness(2);
+  return undefined;
 }

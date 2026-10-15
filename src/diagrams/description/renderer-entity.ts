@@ -52,7 +52,7 @@ import { type SpriteRegistry, spriteDimsLookupFor } from '../../core/sprite-comm
 import { resolveStereotypeSprite } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
 import { drawNote } from './renderer-note.js';
-import { parseColorOverride, type ColorOverride } from './renderer-color-override.js';
+import { parseColorOverride, lineStyleStroke, type ColorOverride } from './renderer-color-override.js';
 
 /** Jar-verified default entity corner radius / stroke width for the
  *  rectangle-family `USymbol`s (`test-results/dot-cache/component/
@@ -107,14 +107,11 @@ function overrideStroke(
   lineStyle: ColorOverride['lineStyle'],
   defaultThickness: number = ENTITY_STROKE_WIDTH,
 ): UStroke {
-  if (lineStyle === 'dashed') return new UStroke(7, 7, 1);
-  if (lineStyle === 'dotted') return new UStroke(1, 3, 1);
-  if (lineStyle === 'bold') return UStroke.withThickness(2);
   // No inline line-style override: the element's own resolved LineThickness
   // (`skin rose`'s `componentDiagram { node { LineThickness 1.5 } }`) stands
   // in for the built-in `ENTITY_STROKE_WIDTH` default -- the dashed/dotted/
   // bold branches keep their fixed upstream thicknesses (LinkStyle.getStroke3).
-  return UStroke.withThickness(defaultThickness);
+  return lineStyleStroke(lineStyle) ?? UStroke.withThickness(defaultThickness);
 }
 
 /** Renderer-side twin of `leaf-sizing-entity.ts#spriteLabel` — the registry is

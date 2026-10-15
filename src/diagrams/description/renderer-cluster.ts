@@ -36,6 +36,7 @@ import {
   textFont,
 } from '../../core/decoration/symbol/usymbol-resolve.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import { parseColorOverride, lineStyleStroke } from './renderer-color-override.js';
 import { drawKermorGroupNote } from './renderer-cluster-note.js';
 
 /** Jar-observed default cluster border width for `package`/`folder`
@@ -124,7 +125,10 @@ function labelBlock(node: DescriptionNodeGeo, theme: Theme): TextBlock {
 }
 
 export function buildHeader(node: DescriptionNodeGeo, theme: Theme, options?: HeaderOptions): ClusterHeaderInfo {
-  const titleFont = textFont(theme, node.symbol, 0, TITLE_STYLES);
+  // `ClusterHeader.java:111`: the title font is built with `g.getColors()`, so an inline `text:` colour wins.
+  const text = node.color === undefined ? undefined : parseColorOverride(node.color).text;
+  const baseFont = textFont(theme, node.symbol, 0, TITLE_STYLES);
+  const titleFont = text === undefined ? baseFont : { ...baseFont, color: text };
   // `ClusterHeader.java:117-119` builds the title with the full `Display#create`, so a `<$sprite>` in a
   // group's label measures and draws; the ELK path (cdd8 T3b) also passes `style.getHorizontalAlignment()`.
   const alignment = options?.alignment ?? resolveClusterTitleAlignment(theme, node.symbol);
@@ -205,6 +209,8 @@ class NotedCluster extends Cluster {
 /** Builds the `Cluster` for one container node, ready to `drawU(ug)`
  *  (absolute position resolved internally — see module doc comment). */
 export function buildCluster(node: DescriptionNodeGeo, theme: Theme, uid: string, sprites?: SpriteRegistry): Cluster {
+  // `Cluster.java:312-319,683-692`: the group's inline `#back;line:x` colours (`Colors`) outrank its style.
+  const override = node.color === undefined ? {} : parseColorOverride(node.color);
   const group: ClusterGroupInfo = {
     hidden: false,
     name: node.id,
@@ -212,9 +218,9 @@ export function buildCluster(node: DescriptionNodeGeo, theme: Theme, uid: string
     qualifiedName: node.id,
     location: null,
     isRoot: false,
-    lineColorOverride: null,
-    backColorOverride: null,
-    specificLineStroke: null,
+    lineColorOverride: override.line ?? null,
+    backColorOverride: override.back ?? null,
+    specificLineStroke: lineStyleStroke(override.lineStyle) ?? null,
   };
   const symbolInfo: ClusterSymbolInfo = {
     symbol: resolveSymbol(node.symbol, theme),

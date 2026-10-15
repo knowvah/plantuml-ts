@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1676 modules · 6110 exported names.
+1676 modules · 6111 exported names.
 
 ## `src/`
 
@@ -1719,7 +1719,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `parser.ts` | `CONTAINER_SYMBOLS`, `parseDescription` | Parser for PlantUML descriptive diagrams (component / use-case / deployment). |
 | `renderer-cluster-note.ts` | `drawKermorGroupNote` | renderer-cluster-note.ts -- the `!pragma kermor on` group note `Cluster#drawU` draws before the cluster's own symbol: `getCucaNote(Position.TOP\|BOTTOM).drawU(ug.apply(UTranslate.point(xyNote...)))` (`Cluster.java:302-307`). |
 | `renderer-cluster.ts` | `HeaderOptions`, `buildHeader`, `buildStyleDefaults`, `buildCluster` | renderer-cluster.ts — T17: assembles `Cluster` (T12) for one container `DescriptionNodeGeo` (`children.length > 0`). |
-| `renderer-color-override.ts` | `ColorOverride`, `parseColorOverride` | renderer-color-override.ts -- per-entity inline `#color;line:..` parsing, split out of `renderer-entity.ts` (already at the 500-line cap) so the note renderer (`renderer-note.ts`) can share it without an import cycle. |
+| `renderer-color-override.ts` | `ColorOverride`, `parseColorOverride`, `lineStyleStroke` | renderer-color-override.ts -- per-entity inline `#color;line:..` parsing, split out of `renderer-entity.ts` (already at the 500-line cap) so the note renderer (`renderer-note.ts`) can share it without an import cycle. |
 | `renderer-draw-sequence.ts` | `collectByKind`, `drawClusters`, `drawEntities`, `drawEdges` | renderer-draw-sequence.ts — G1b/J1 write-set expansion (journaled, mechanism C): the `SvekResult#drawU` draw-order sequence (cluster, then leaf, then edge), extracted verbatim out of `renderer.ts` so it can be shared with `layout-ink-shift. |
 | `renderer-edge.ts` | `arrowLabelFontConfig`, `drawEdge` | renderer-edge.ts — T17: adapts one `DescriptionEdgeGeo` (this port's layout output) into `SvekEdgeInput` (T13's decoupled drawing-half contract — see `SvekEdge.ts`'s "Adapter boundary" doc comment, which explicitly names this as a later tas |
 | `renderer-entity.ts` | `buildEntityParams`, `drawEntity` | renderer-entity.ts — T17: assembles `EntityImageDescription` (T14) for one leaf `DescriptionNodeGeo` and draws it through klimt, translated to its absolute layout position (`SvekResult.java:87`'s `image.drawU(ug2.apply(new UTranslate(minX, |
