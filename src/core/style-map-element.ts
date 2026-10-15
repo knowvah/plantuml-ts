@@ -13,6 +13,7 @@ import { resolveColor, ELEMENT_BUCKET_SNAMES } from './skinparam.js';
 import { parseColor } from './paint.js';
 import { lineStyleDash } from './style-line-style.js';
 import { cleanStereotypeToken } from './style-map-tag-cascade.js';
+import { ANY_ELEMENT_BUCKET } from './theme-element-resolve.js';
 import { parseHorizontalAlignment } from './skinparam-key-handlers-table-b.js';
 import { parseFontStyleFlags } from './skinparam-key-handlers-shared.js';
 
@@ -77,8 +78,10 @@ const TAG_SELECTOR_INFIX = '..';
  *  `getDefaultStyleDefinition` puts `SName.group` in every non-state cluster
  *  signature). Admitted to the `<style>` bucket routing only, so a bare
  *  `group { LineStyle 2 }` lands in `elements.group` (jar: every cluster
- *  draws `stroke-dasharray:2,2`). cdd6 T1a. */
-const CLUSTER_BUCKET_SNAMES: ReadonlySet<string> = new Set(['group']);
+ *  draws `stroke-dasharray:2,2`). cdd6 T1a.
+ *  `port` (codd-T1c, `EntityImagePort.java:61-64`) is the second: no
+ *  `addMagic(SName.port)` exists, so only the `<style>` selector reaches it. */
+const CLUSTER_BUCKET_SNAMES: ReadonlySet<string> = new Set(['group', 'port']);
 
 /**
  * Diagram-type style-selector names (`SName` values PlantUML's style engine
@@ -176,6 +179,23 @@ function isBucketSName(sname: string): boolean {
 }
 
 /**
+ * The `(sname bucket, cleaned tag)` a tag sub-selector addresses: `<sname>..
+ * <tag>` (nested, `<style> <sname> { .tag { ... } }`) or the SName-less
+ * `.<tag>` (`Context.java#push`'s `.`-branch). `undefined` when `selector` is
+ * not a tag selector; `sname === undefined` when it is one under a selector
+ * that feeds no bucket (the caller then claims and ignores it).
+ */
+function parseTagSubSelector(selector: string): { sname: string | undefined; tag: string } | undefined {
+  if (selector.startsWith('.')) return { sname: ANY_ELEMENT_BUCKET, tag: cleanStereotypeToken(selector.slice(1)) };
+  const idx = selector.indexOf(TAG_SELECTOR_INFIX);
+  if (idx <= 0) return undefined;
+  return {
+    sname: resolveElementBucketSelector(selector.slice(0, idx)),
+    tag: cleanStereotypeToken(selector.slice(idx + TAG_SELECTOR_INFIX.length)),
+  };
+}
+
+/**
  * cdd6 T1a: `<sname> { .tag { FontColor X } } }` -- the stereotype-re-signed
  * FontColor (`StyleSignatureBasic#withTOBECHANGED` matching the tag against
  * the element's own stereotype, `Cluster.java:388-389`), merged into
@@ -183,31 +203,39 @@ function isBucketSName(sname: string): boolean {
  * skinparam `<sname>FontColor<<label>>` front-end writes. The caller has
  * already claimed `<sname>.stereotype..<tag>`. Returns whether `selector`
  * was a tag sub-selector.
+ *
+ * codd-T1c: also `BackgroundColor`/`LineColor` (`EntityImageDescription.java
+ * :162-166`) into the maps the skinparam `<<label>>` front-end writes; a
+ * SName-less `.tag` writes {@link ANY_ELEMENT_BUCKET}.
  */
-function collectTagFontColor(
+function collectTagStyle(
   selector: string,
   props: ReadonlyMap<string, string>,
   elements: Record<string, ElementColors>,
 ): boolean {
-  const idx = selector.indexOf(TAG_SELECTOR_INFIX);
-  if (idx <= 0) return false;
-  const sname = resolveElementBucketSelector(selector.slice(0, idx));
-  const tag = cleanStereotypeToken(selector.slice(idx + TAG_SELECTOR_INFIX.length));
+  const target = parseTagSubSelector(selector);
+  if (target === undefined) return false;
+  const { sname, tag } = target;
   if (sname === undefined || tag === '') return true;
-  const fc = props.get('fontcolor');
-  if (fc !== undefined) {
-    const prev = elements[sname]?.fontByStereo;
-    elements[sname] = { ...elements[sname], fontByStereo: { ...prev, [tag]: resolveColor(fc) } };
-  }
+  const merge = (field: TagColourField, raw: string | undefined): void => {
+    if (raw === undefined) return;
+    const prev = elements[sname]?.[field];
+    elements[sname] = { ...elements[sname], [field]: { ...prev, [tag]: resolveColor(raw) } };
+  };
+  merge('fontByStereo', props.get('fontcolor'));
   // cdd6 T3g: the same re-signed style's `PName.HyperLinkColor`
   // (`Style.java:265`) -> `hyperlinkColorByStereo`.
-  const hc = props.get('hyperlinkcolor');
-  if (hc !== undefined) {
-    const prev = elements[sname]?.hyperlinkColorByStereo;
-    elements[sname] = { ...elements[sname], hyperlinkColorByStereo: { ...prev, [tag]: resolveColor(hc) } };
-  }
+  merge('hyperlinkColorByStereo', props.get('hyperlinkcolor'));
+  merge('backgroundColorByStereo', props.get('backgroundcolor'));
+  // `LineColor` is the canonical PName and wins over the `BorderColor` alias,
+  // exactly as for the bare bucket (read last).
+  merge('borderByStereo', props.get('bordercolor'));
+  merge('borderByStereo', props.get('linecolor'));
   return true;
 }
+
+/** The stereotype-keyed colour maps {@link collectTagStyle} fills. */
+type TagColourField = 'fontByStereo' | 'hyperlinkColorByStereo' | 'backgroundColorByStereo' | 'borderByStereo';
 
 /**
  * cdd6 T3g (D2): the bare-bucket properties added for T3g, split out of
@@ -303,7 +331,7 @@ export function collectElementStyleBuckets(styleMap: StyleMap): Record<string, E
   const elements: Record<string, ElementColors> = {};
   for (const [selector, props] of styleMap.entries()) {
     if (collectStereotypeTagFontSize(selector, props, elements)) continue;
-    if (collectTagFontColor(selector, props, elements)) continue;
+    if (collectTagStyle(selector, props, elements)) continue;
     const bucketName = resolveElementBucketSelector(selector);
     if (bucketName !== undefined) {
       const bucket: ElementColors = {};

@@ -244,9 +244,12 @@ export function buildEntityParams(
       ...spriteLabel(node, sprites),
     },
     paint: {
-      forecolor: override.line ?? resolveElementPaint(theme, node.symbol, 'border'),
+      // EntityImageDescription.java:152-166: `<<labels>>` re-sign the style.
+      forecolor: override.line ?? resolveElementPaint(theme, node.symbol, 'border', stereotypeLabels),
       backcolor:
-        override.back ?? businessBackcolor(theme, node.symbol) ?? resolveElementPaint(theme, node.symbol, 'background'),
+        override.back ??
+        businessBackcolor(theme, node.symbol) ??
+        resolveElementPaint(theme, node.symbol, 'background', stereotypeLabels),
       roundCorner: ENTITY_ROUND_CORNER,
       diagonalCorner: 0,
       // mission skin-file-loading (deferred D3 item): was hardcoded 0 --
@@ -438,17 +441,17 @@ const PORT_STROKE_WIDTH = 1.5;
  *  #applyPortLabelPositions` — see that field's doc comment; `undefined`
  *  — a port with no resolved parent cluster, not reachable from any real
  *  `parseDescription()` output — defaults to the "below" branch, same as
- *  upstream's own `false` case). Fill/border resolve through the SAME
- *  `resolveElementPaint` cascade every other entity uses (`sname: 'port'`
- *  has no per-sname override in any sampled fixture, so both fall back to
- *  the shared `nodeBackground`/`border` theme defaults — jar-verified
- *  `#F1F1F1`/`#181818`), NOT `theme.colors.border` for both (the prior,
- *  visibly-wrong fill this replaces). */
+ *  upstream's own `false` case). Fill/border: the entity's inline colours
+ *  first, then the `resolveElementPaint` cascade (`sname: 'port'`, jar-verified
+ *  `#F1F1F1`/`#181818` by default), NOT `theme.colors.border` for both. */
 function drawPortFallback(ug: UGraphic, node: DescriptionNodeGeo, theme: Theme, uid: string): void {
   const info: EntityDecorationInfo = { name: node.id, qualifiedName: node.id, uid, location: null };
   const font = textFont(theme, 'port');
-  const fill = resolveElementPaint(theme, 'port', 'background');
-  const border = resolveElementPaint(theme, 'port', 'border');
+  // EntityImagePort.java:121-130: inline colours, then the port style + `<<labels>>`.
+  const override = node.color !== undefined ? parseColorOverride(node.color) : {};
+  const stereotypes = node.stereotype ?? [];
+  const fill = override.back ?? resolveElementPaint(theme, 'port', 'background', stereotypes);
+  const border = override.line ?? resolveElementPaint(theme, 'port', 'border', stereotypes);
   decorateEntityDrawing(
     requireGroups(ug),
     info,
