@@ -90,15 +90,7 @@ import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
  *  bottom=5, left=0. Applied by `TextBlockExporter#calculateFinalDimension`
  *  on top of `SvekResult#calculateDimension`'s own return value, before it
  *  reaches `SvgOption#minDim`. */
-// `CucaDiagram#getDefaultMargins()` — single owner at
-// `core/atmp/CucaDiagram.ts`. Aliased to the local names so the call
-// sites below read unchanged.
-import {
-  CUCA_DOCUMENT_MARGIN_TOP as DOCUMENT_MARGIN_TOP,
-  CUCA_DOCUMENT_MARGIN_RIGHT as DOCUMENT_MARGIN_RIGHT,
-  CUCA_DOCUMENT_MARGIN_BOTTOM as DOCUMENT_MARGIN_BOTTOM,
-  CUCA_DOCUMENT_MARGIN_LEFT as DOCUMENT_MARGIN_LEFT,
-} from '../../core/atmp/CucaDiagram.js';
+import { CUCA_DOCUMENT_MARGIN, type DocumentMargin } from '../../core/document-margin.js';
 
 /**
  * `UGraphicWithGroups`-shaped decorator (see `DecorateEntityImage.ts`'s own
@@ -254,11 +246,12 @@ export function computeDocumentDims(
   draw: (ug: UGraphic) => void,
   driverBounder: DriverStringBounder,
   measurer: StringMeasurer,
+  margin: DocumentMargin = CUCA_DOCUMENT_MARGIN,
 ): DocumentDimResult {
   const minMax = runInkWalk(draw, driverBounder, measurer);
   const dim = minMax.getDimension().delta(15, 15);
   return {
-    width: dim.getWidth() + DOCUMENT_MARGIN_LEFT + DOCUMENT_MARGIN_RIGHT,
-    height: dim.getHeight() + DOCUMENT_MARGIN_TOP + DOCUMENT_MARGIN_BOTTOM,
+    width: dim.getWidth() + margin.left + margin.right,
+    height: dim.getHeight() + margin.top + margin.bottom,
   };
 }

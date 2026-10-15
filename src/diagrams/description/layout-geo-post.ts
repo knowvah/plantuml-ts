@@ -65,16 +65,12 @@ function clipEdgePoints(
   return result;
 }
 
-function edgeLabelGeo(
-  re: ResultEdge,
-  pts: Array<{ x: number; y: number }>,
-  dx: number,
-  dy: number,
-): { x: number; y: number } {
-  const mid = Math.floor(pts.length / 2);
-  const x = re.labelX !== undefined ? re.labelX + dx : (pts[mid]?.x ?? 0);
-  const y = re.labelY !== undefined ? re.labelY + dy : (pts[mid]?.y ?? 0);
-  return { x, y };
+/** The label position graphviz gave the edge, or `undefined` when it gave none (`SvekEdge#getXY` returns null,
+ *  `SvekEdge.java:742-746`, e.g. "port P unrecognized" on an edge to a `portout`): the jar then keeps
+ *  `labelXY == null` and draws no label (`SvekEdge.java:951-954`). */
+function edgeLabelGeo(re: ResultEdge, dx: number, dy: number): { x: number; y: number } | undefined {
+  if (re.labelX === undefined || re.labelY === undefined) return undefined;
+  return { x: re.labelX + dx, y: re.labelY + dy };
 }
 
 function assembleEdgeGeo(
@@ -108,8 +104,20 @@ function assembleEdgeGeo(
 }
 
 function addEdgeLabel(geo: DescriptionEdgeGeo, link: DescriptiveLink, re: ResultEdge, dx: number, dy: number): void {
-  if (link.label === undefined) return;
-  geo.label = { text: link.label, ...edgeLabelGeo(re, geo.points, dx, dy) };
+  const stereotypeLabel = link.stereotypeIsLinkLabel === true && link.stereotype !== undefined;
+  if (link.label === undefined && !stereotypeLabel) return;
+  const at = edgeLabelGeo(re, dx, dy);
+  if (at === undefined) return;
+  // `labelWidth`/`labelHeight` echo the table the engine was given
+  // (`link-edge-attrs.ts#applyMainLabel` sets them together with
+  // `labelBoxWidth`/`labelBoxHeight`). A `note on link` label is the merged
+  // `EntityImageNoteLink` block -- a separate mechanism, left at its origin.
+  const table =
+    link.linkNote === undefined && re.labelWidth !== undefined && re.labelHeight !== undefined
+      ? { w: re.labelWidth, h: re.labelHeight }
+      : undefined;
+  if (link.label === undefined && table === undefined) return;
+  geo.label = { text: link.label ?? '', ...at, ...table };
 }
 
 /**

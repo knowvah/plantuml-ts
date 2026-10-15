@@ -26,7 +26,7 @@ import {
   CUCA_DOCUMENT_MARGIN_RIGHT,
   CUCA_DOCUMENT_MARGIN_TOP,
 } from '../../core/atmp/CucaDiagram.js';
-import { renderDescription, unwrapKlimtSvg } from './renderer.js';
+import { degenerateBlockDims, renderDescription, unwrapKlimtSvg } from './renderer.js';
 import { isEmpty } from '../../core/annotations/index.js';
 
 /**
@@ -139,12 +139,21 @@ export const descriptionPlugin: SyncPlugin<DescriptionDiagramAST, DescriptionGeo
     // lgm-T1c: chrome is composed around the margin-less block, so the klimt
     // document is unwrapped here and declares that block -- see
     // `DescriptionGeometry#chromed`.
+    const block =
+      geo.degenerate === true
+        ? { preChromeWidth: degenerateBlockDims(geo).width, preChromeHeight: degenerateBlockDims(geo).height }
+        : geo.preChromeWidth !== undefined && geo.preChromeHeight !== undefined
+          ? { preChromeWidth: geo.preChromeWidth, preChromeHeight: geo.preChromeHeight }
+          : {};
     return {
       ...unwrapKlimtSvg(svg, theme.colors.background),
-      ...(geo.preChromeWidth !== undefined && geo.preChromeHeight !== undefined
-        ? { preChromeWidth: geo.preChromeWidth, preChromeHeight: geo.preChromeHeight }
-        : {}),
+      ...block,
       ...(geo.frameInk !== undefined ? { frameInk: geo.frameInk } : {}),
+      // codd-T4: a style `Margin` (`TextBlockExporter.java:510-516`) is the margin the exporter applies AFTER chrome.
+      ...(theme.diagramMargin !== undefined ? { documentMargin: theme.diagramMargin } : {}),
+      // codd-T4: scale/dpi resolve against the chrome-composed dimension, at assembly.
+      ...(geo.scale !== undefined ? { scaleSpec: geo.scale } : {}),
+      ...(theme.dpi !== undefined ? { dpi: theme.dpi } : {}),
     };
   },
 };

@@ -38,7 +38,7 @@ import {
 import {
   emitNode,
   makeDefaultAST,
-  resolveStillUnknown,
+  finalizePage,
   type ElementBlockTerminator,
   type ParseState,
   type PendingElementState,
@@ -67,6 +67,7 @@ function makeInitialState(internal?: InternalSpriteStore, emoji?: InternalEmojiS
     pendingNote: undefined,
     pages: [],
     namespaceSeparator: null,
+    intermediatePackages: true,
     uidCounter: 0,
     executionError: undefined,
   };
@@ -426,7 +427,7 @@ export function parseDescription(
     i += result;
   }
 
-  resolveStillUnknown(state.ast.nodes);
+  finalizePage(state);
 
   if (state.pages.length === 0) {
     return state.ast;

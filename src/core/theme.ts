@@ -22,6 +22,22 @@ export type { ThemeColorFields } from './theme-colors-fields.js';
 export type { ThemeSequenceFields } from './theme-sequence-fields.js';
 export type { ThemeRootFields } from './theme-root-fields.js';
 
+/** The `PackageStyle` enum names (`svek/PackageStyle.java:47`) as `skinparam packageStyle` stores them,
+ *  lowercase; `rect` is RECTANGLE (`PackageStyle.java:56` accepts both spellings). */
+export type PackageStyleSetting =
+  | 'folder'
+  | 'rect'
+  | 'node'
+  | 'frame'
+  | 'cloud'
+  | 'database'
+  | 'agent'
+  | 'storage'
+  | 'component1'
+  | 'component2'
+  | 'artifact'
+  | 'card';
+
 export interface Theme extends ThemeRootFields {
   fontFamily: string;
   fontSize: number;
@@ -156,17 +172,12 @@ export interface Theme extends ThemeRootFields {
    * Absent = 0 (no shadow); Batch 2 draws the shadow filter + reserves ink.
    */
   shadowing?: number;
-  /** G2 N59: `skinparam packageStyle rect|rectangle` -- selects the plain
-   *  `<rect>` package/namespace outline (`svek/PackageStyle.java
-   *  #RECTANGLE`) instead of the default folder-tab notch shape, jar-
-   *  verified via `mucuxi-36-beku683`'s own childCount-2 `<rect>`+`<text>`
-   *  output (no hline, centered title -- `USymbolRectangle#asBig`, NOT
-   *  `USymbolFolder#asBig`). Other `PackageStyle` enum values (NODE/FRAME/
-   *  CLOUD/DATABASE/COMPONENT1/COMPONENT2/STORAGE/AGENT/ARTIFACT/CARD) are
-   *  NOT modeled -- absent/any other value falls back to the pre-existing
-   *  FOLDER default, matching this port's minimal-scope convention (no
-   *  corpus sample exercises them for class diagrams yet). */
-  packageStyle?: 'rect';
+  /** `skinparam packageStyle <value>` -- `SkinParam#packageStyle` (`SkinParam.java:820-826`) is
+   *  `PackageStyle.fromString(value)` (`PackageStyle.java:50-58`: the enum names, case-insensitive, plus `rect`).
+   *  Held as {@link PackageStyleSetting}; absent = FOLDER. `rect` (= RECTANGLE, G2 N59: the plain `<rect>` outline,
+   *  jar-verified via `mucuxi-36-beku683`) is the only value the class engine reads; the description engine
+   *  resolves the whole set through `usymbol-resolve.ts#resolvePackageStyle`. */
+  packageStyle?: PackageStyleSetting;
   /** cdd-T30: `skinparam dpi N` — `SkinParam#getDpi()`
    *  (`skin/SkinParam.java:649-656`): `getAsInt("dpi", 96)`, falling back to
    *  96 when the raw value is absent, non-digit, or `<= 0`. Feeds
@@ -411,7 +422,7 @@ export type ThemeOverride = Partial<ThemeRootFields> & {
   reverseColor?: string;
   /** See `Theme.shadowing`'s own doc comment. */
   shadowing?: number;
-  packageStyle?: 'rect';
+  packageStyle?: PackageStyleSetting;
   nodeSep?: number;
   rankSep?: number;
   wrapWidth?: number;

@@ -132,7 +132,10 @@ export function drawClusters(
     // pass never paints it (jar-verified: component/ciboso-93-romi495's
     // canvas height of 169 reserves comp2's full box + edge even though
     // neither is drawn).
-    if (respectHidden && node.hidden === true) continue;
+    // M5 (codd-T3): the test is the MODEL flag (`group.isHidden()`), not
+    // `ug.getParam().isHidden()`, so it holds on the LimitFinder pass too --
+    // `respectHidden` gates ENTITY hiding only (`drawEntities`).
+    if (node.hidden === true) continue;
     buildCluster(node, theme, plan.nodeUid.get(node.id)!, sprites).drawU(ug);
   }
 }

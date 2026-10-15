@@ -28,10 +28,8 @@ import {
   type DescriptionNodeGeo,
   type Bbox,
   type DescriptionGeometry,
-  CONTAINER_PADDING,
-  CONTAINER_TOP_PAD,
-  EMPTY_CONTAINER_WIDTH,
-  EMPTY_CONTAINER_HEIGHT,
+  type KermorNoteGeo,
+  type KermorNotesGeo,
   LAYOUT_MARGIN,
   LAYOUT_MARGIN_LEADING,
 } from './layout-helpers-types.js';
@@ -42,10 +40,10 @@ export type {
   ResolvedEndpoint,
   DescriptionEdgeGeo,
   DescriptionGeometry,
+  KermorNoteGeo,
+  KermorNotesGeo,
 } from './layout-helpers-types.js';
 export {
-  CONTAINER_PADDING,
-  CONTAINER_TOP_PAD,
   EMPTY_CONTAINER_WIDTH,
   EMPTY_CONTAINER_HEIGHT,
   LAYOUT_MARGIN,
@@ -109,44 +107,23 @@ export function isClusterNode(node: DescriptiveNode): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Container bounding box
-// ---------------------------------------------------------------------------
-
-/**
- * Compute a container's bbox as the padded union of its direct children's
- * bboxes (each child may be a leaf geo or a container geo already padded).
- * Returns EMPTY_CONTAINER dimensions when directChildren is empty.
- */
-export function computeContainerBbox(directChildren: DescriptionNodeGeo[]): Bbox {
-  if (directChildren.length === 0) {
-    return { x: 0, y: 0, width: EMPTY_CONTAINER_WIDTH, height: EMPTY_CONTAINER_HEIGHT };
-  }
-  let minX = Infinity,
-    minY = Infinity,
-    maxX = -Infinity,
-    maxY = -Infinity;
-  for (const c of directChildren) {
-    if (c.x < minX) minX = c.x;
-    if (c.y < minY) minY = c.y;
-    if (c.x + c.width > maxX) maxX = c.x + c.width;
-    if (c.y + c.height > maxY) maxY = c.y + c.height;
-  }
-  return {
-    x: minX - CONTAINER_PADDING,
-    y: minY - CONTAINER_TOP_PAD,
-    width: maxX - minX + 2 * CONTAINER_PADDING,
-    height: maxY - minY + CONTAINER_TOP_PAD + CONTAINER_PADDING,
-  };
-}
-
-// ---------------------------------------------------------------------------
 // Coordinate shift
 // ---------------------------------------------------------------------------
+
+/** `Cluster.moveSvek` (`Cluster.java:126-131`) moves `xyNoteTop`/`xyNoteBottom` with the cluster. */
+function shiftKermorNotes(notes: KermorNotesGeo, dx: number, dy: number): KermorNotesGeo {
+  const move = (n: KermorNoteGeo): KermorNoteGeo => ({ ...n, x: n.x + dx, y: n.y + dy });
+  return {
+    ...(notes.top === undefined ? {} : { top: move(notes.top) }),
+    ...(notes.bottom === undefined ? {} : { bottom: move(notes.bottom) }),
+  };
+}
 
 /** Recursively shift a DescriptionNodeGeo and all its descendants by (dx, dy). */
 export function shiftGeo(geo: DescriptionNodeGeo, dx: number, dy: number): DescriptionNodeGeo {
   return {
     ...geo,
+    ...(geo.kermorNotes === undefined ? {} : { kermorNotes: shiftKermorNotes(geo.kermorNotes, dx, dy) }),
     x: geo.x + dx,
     y: geo.y + dy,
     children: geo.children.map((c) => shiftGeo(c, dx, dy)),
@@ -263,6 +240,7 @@ export function degenerateSingleLeaf(
     totalHeight: dims.height + LAYOUT_MARGIN_LEADING + LAYOUT_MARGIN,
     nodes: [geo],
     edges: [],
+    degenerate: true,
     ...spritesField,
   };
 }

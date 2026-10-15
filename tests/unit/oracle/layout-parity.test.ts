@@ -76,13 +76,12 @@ describe.skipIf(!hasCorpus)('layoutParity over cached jar DOT', () => {
     expect(layoutParity(readJarDot('unknown', 'bamami-10-lava790'), ours!)).toEqual({ equal: true });
   });
 
-  it('xagonu cluster nesting matches (12 vs 12); one root cluster bb differs by 6px in x', () => {
+  // codd-T9 emits the two self links the jar has (sh0050, zaent0019), which
+  // closed the 6px root cluster bb diff this test used to pin.
+  it('xagonu equals the jar once its self links are emitted (codd-T9)', () => {
     const [ours] = captureOurs('unknown', 'xagonu-36-sudi116');
     const r = layoutParity(readJarDot('unknown', 'xagonu-36-sudi116'), ours!);
-    expect(r.firstDiff?.component).toBe('clusterTree');
-    expect(r.firstDiff?.detail).toMatch(
-      /^jar 12 vs ours 12; sorted\[0\] .* bb 449\.700024,.* vs ours .* bb 443\.700024,/,
-    );
+    expect(r.firstDiff).toBeUndefined();
   });
 
   it('is deterministic: identical inputs give deep-equal results', () => {

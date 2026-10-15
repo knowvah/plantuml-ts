@@ -23,6 +23,7 @@ import { GUILLEMET_DOUBLE_COMPARATOR, GUILLEMET_NONE } from '../../core/stereo/S
 import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
 import type { StereotypeSpriteRef } from './ast.js';
 import { resolveInlineLinks } from '../../core/url/inline-links.js';
+import { BackSlash } from '../../core/text/BackSlash.js';
 export { resolveInlineLinks };
 
 // ---------------------------------------------------------------------------
@@ -213,6 +214,14 @@ export function resolveNewlineEscapes(s: string): string {
   while (i < s.length) {
     if (s.startsWith('[[', i)) rawMode = true;
     else if (s.startsWith(']]', i)) rawMode = false;
+    // `Display.java:330-333`: `%n()` reaches the display as the private-use
+    // sentinel `Jaws.BLOCK_E1_NEWLINE` (== `BackSlash.hiddenNewLine()`),
+    // which `getWithNewlines` splits on outside `rawMode`.
+    if (!rawMode && s[i] === BackSlash.hiddenNewLine()) {
+      result += '\n';
+      i++;
+      continue;
+    }
     const pair = rawMode ? undefined : resolveEscapePair(s, i);
     if (pair !== undefined) {
       result += pair.text;
@@ -477,7 +486,29 @@ export function splitLeadingQuote(rest: string): LeadingQuoteSplit | undefined {
   if (quoteChar !== '"' && quoteChar !== "'") return undefined;
   const close = rest.indexOf(quoteChar, 1);
   if (close === -1) return undefined;
-  return { quoted: rest.slice(0, close + 1), tail: rest.slice(close + 1) };
+  const closeAt = quoteChar === '"' ? lazyDisplayClose(rest, close) : close;
+  return { quoted: rest.slice(0, closeAt + 1), tail: rest.slice(closeAt + 1) };
+}
+
+/** What the rest of `CommandCreateElementFull`'s concat can start with after
+ *  the quoted CODE/DISPLAY: the `as` clause (`spaceOneOrMore` after it), a
+ *  stereotype, a tag, a top-level `[[url]]`, a colour, the body `{`, or
+ *  nothing. */
+const RE_AFTER_QUOTED_DISPLAY = /^\s*(?:$|as\s|<<|\$|\[\[|#|\{)/;
+
+/**
+ * The closing quote of a `"` display. Upstream's `[%g].+?[%g]`
+ * (`CommandCreateElementFull.java:130`, `DISPLAY_CORE`/`CODE_WITH_QUOTE`) is
+ * LAZY but the whole regex must still match, so the engine backtracks past an
+ * embedded `"` (`rectangle "A ""B"" C" as he`) until what follows the
+ * closing quote can continue the concat. This takes the EARLIEST close from
+ * `first` whose tail can; when none can it keeps `first`, as before.
+ */
+function lazyDisplayClose(rest: string, first: number): number {
+  for (let at = first; at !== -1; at = rest.indexOf('"', at + 1)) {
+    if (RE_AFTER_QUOTED_DISPLAY.test(rest.slice(at + 1))) return at;
+  }
+  return first;
 }
 
 /**

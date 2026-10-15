@@ -15,24 +15,17 @@
  * exact chrome. Documented approximation, not a T17 acceptance blocker
  * (neither symbol appears in the T17 zero-diff conformance fixture).
  */
+import { bareEntityName } from './namespace-groups.js';
 import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { Theme } from '../../core/theme.js';
-import {
-  resolveElementPaint,
-  resolveElementShadowing,
-  resolveElementLineThickness,
-  resolveElementFontSize,
-} from '../../core/theme.js';
-import type { Paint } from '../../core/paint.js';
-import { parseColor } from '../../core/paint.js';
+import { resolveElementPaint, resolveElementShadowing, resolveElementLineThickness } from '../../core/theme.js';
+import { resolveElementMinimumWidth, resolveElementRoundCorner } from '../../core/theme-element-resolve.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { URectangle } from '../../core/klimt/shape/URectangle.js';
-import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
-import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { Fore } from '../../core/klimt/Fore.js';
 import { Back } from '../../core/klimt/Back.js';
 import type { DescriptionNodeGeo } from './layout-helpers.js';
@@ -41,8 +34,8 @@ import {
   type EntityImageDescriptionParams,
   type EntityImageDescriptionStereotypeSprite,
 } from '../../core/svek/image/EntityImageDescription.js';
+import { titleAlignmentFor } from '../../core/svek/image/leaf-sizing-entity.js';
 import { buildTextBlock } from '../../core/svek/image/EntityImageDescriptionSupport.js';
-import { UGraphicStencil } from '../../core/klimt/drawing/UGraphicStencil.js';
 import {
   decorateEntityDrawing,
   type EntityDecorationInfo,
@@ -52,15 +45,15 @@ import {
   upstreamKeyword,
   mapComponentStyle,
   textFont,
+  stereotypeTextFont,
   entityTitleStyles,
   resolveActorStyle,
 } from '../../core/decoration/symbol/usymbol-resolve.js';
 import { type SpriteRegistry, spriteDimsLookupFor } from '../../core/sprite-commands.js';
 import { resolveStereotypeSprite } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
-import { drawOpaleShape } from './renderer-note-opale.js';
-import { buildNoteBody } from '../../core/svek/image/leaf-sizing.js';
-import { NOTE_FONT_SIZE } from '../../core/svek/image/leaf-sizing-consts.js';
+import { drawNote } from './renderer-note.js';
+import { parseColorOverride, lineStyleStroke, type ColorOverride } from './renderer-color-override.js';
 
 /** Jar-verified default entity corner radius / stroke width for the
  *  rectangle-family `USymbol`s (`test-results/dot-cache/component/
@@ -106,69 +99,6 @@ function businessBackcolor(theme: Theme, symbol: DescriptionNodeGeo['symbol']): 
   return undefined;
 }
 
-/** Per-entity inline color/style override (`#orange;line:blue`,
- *  `#line.dashed`) — mirrors upstream `Colors` (klimt/color/Colors.java)
- *  token parsing: `;`-separated tokens, a bare no-colon/no-dot token is the
- *  mainType (BACK, `ColorParser.simpleColor(ColorType.BACK)` —
- *  CommandCreateElementFull.java:119) color, `name:value` tokens set
- *  `line`/`text`/`back` (ColorType.getType strips the `.dashed` suffix
- *  before matching, so `line.dashed:x` — never emitted by upstream syntax
- *  — would still key on `line`), and a bare `line.dashed`/`line.dotted`/
- *  `line.bold` token (excluded from the color map since it contains a
- *  `.`) sets the line STYLE (`Colors.java:117-122`). `shadowing:` and
- *  `header`/`arrow` keys have no consumer in this renderer (undocumented
- *  gap — no reachable description fixture exercises them; see
- *  `ColorOverride`'s own doc comment). Named CSS colors (`orange`, `blue`),
- *  bare hex without a leading `#` (stripped by this function's own
- *  `data = raw.toLowerCase().replace(/#/g, '')`), and already-`#RRGGBB`
- *  values all flow as plain `Paint` strings into `back`/`line`/`text` and
- *  are resolved to the jar's canonical uppercase hex at SVG-emission time
- *  by `svg-graphics-core.ts`'s `fixColor`/`createSvgGradient` (G1c: the
- *  ~150-name `klimt/color/ColorTrieNode.ts` table; I2, T19 closed).
- *  `back` (only) is additionally run through `paint.ts#parseColor` (G1 I5h):
- *  a compound two-color token (`red|green`, `yellow\ffffff`) resolves to a
- *  {@link Paint} `Gradient`, which `EntityImageDescriptionPaint.backcolor`
- *  already accepts (the klimt draw path was always Paint-aware — only this
- *  parse site never produced one). `line`/`text` stay plain strings: no
- *  reachable fixture exercises a border or text gradient, and
- *  `FontConfiguration.color` is `string | null`, not `Paint`. */
-interface ColorOverride {
-  back?: Paint;
-  line?: string;
-  text?: string;
-  lineStyle?: 'dashed' | 'dotted' | 'bold';
-}
-
-function parseColorOverride(raw: string): ColorOverride {
-  const data = raw.toLowerCase().replace(/#/g, '');
-  const result: ColorOverride = {};
-  for (const token of data.split(';')) {
-    if (token.length === 0) continue;
-    const colonIdx = token.indexOf(':');
-    if (colonIdx === -1) {
-      // G1 I5h: the bare (mainType/BACK) token may be a two-color gradient
-      // (`red|green`, `yellow\ffffff`) -- upstream's `Colors.java` feeds
-      // this same token straight into `ColorParser.simpleColor`, which
-      // resolves through `HColorSet#getColorOrWhite` (gradient-aware,
-      // klimt/color/HColorSet.java:107-119) exactly like a skinparam
-      // background value already does (`skinparam.ts`'s `parseColor` call).
-      if (!token.includes('.')) result.back = parseColor(token);
-      continue;
-    }
-    const name = token.slice(0, colonIdx);
-    const value = token.slice(colonIdx + 1);
-    const dotIdx = name.indexOf('.');
-    const key = dotIdx === -1 ? name : name.slice(0, dotIdx);
-    if (key === 'line') result.line = value;
-    else if (key === 'text') result.text = value;
-    else if (key === 'back') result.back = parseColor(value);
-  }
-  if (data.includes('line.dashed')) result.lineStyle = 'dashed';
-  else if (data.includes('line.dotted')) result.lineStyle = 'dotted';
-  else if (data.includes('line.bold')) result.lineStyle = 'bold';
-  return result;
-}
-
 /** `LinkStyle.getStroke3()` (decoration/LinkStyle.java:97-107) — the
  *  three fixed dash patterns upstream uses for `line.dashed`/`.dotted`/
  *  `.bold`, all with `nonZeroThickness()` = 1 (no thickness override
@@ -178,14 +108,11 @@ function overrideStroke(
   lineStyle: ColorOverride['lineStyle'],
   defaultThickness: number = ENTITY_STROKE_WIDTH,
 ): UStroke {
-  if (lineStyle === 'dashed') return new UStroke(7, 7, 1);
-  if (lineStyle === 'dotted') return new UStroke(1, 3, 1);
-  if (lineStyle === 'bold') return UStroke.withThickness(2);
   // No inline line-style override: the element's own resolved LineThickness
   // (`skin rose`'s `componentDiagram { node { LineThickness 1.5 } }`) stands
   // in for the built-in `ENTITY_STROKE_WIDTH` default -- the dashed/dotted/
   // bold branches keep their fixed upstream thicknesses (LinkStyle.getStroke3).
-  return UStroke.withThickness(defaultThickness);
+  return lineStyleStroke(lineStyle) ?? UStroke.withThickness(defaultThickness);
 }
 
 /** Renderer-side twin of `leaf-sizing-entity.ts#spriteLabel` — the registry is
@@ -212,7 +139,7 @@ export function buildEntityParams(
   // code name in `fontBody`.
   const fontTitle = textFont(theme, node.symbol, 0, entityTitleStyles(node.symbol));
   const fontBody = textFont(theme, node.symbol);
-  const fontStereo = textFont(theme, node.symbol, 0, STEREOTYPE_STYLES, 'stereotype');
+  const fontStereo = stereotypeTextFont(theme, node.symbol, stereotypeLabels, STEREOTYPE_STYLES);
   // D3 (cdd6 T1b/T2f): this entity's own resolved LineThickness -- the SAME
   // value `paint.stroke` below draws the body's border with -- doubles as
   // the sprite decomposition's ambient stroke seed (`SvgNanoParser.java
@@ -225,7 +152,7 @@ export function buildEntityParams(
   // atoms can never disagree on this entity's ambient thickness.
   const lineThickness = resolveElementLineThickness(theme, node.symbol) ?? ENTITY_STROKE_WIDTH;
   return {
-    entity: { name: node.id, uid: '', qualifiedName: node.id, location: null, url: null },
+    entity: { name: bareEntityName(node.id), uid: '', qualifiedName: node.id, location: null, url: null },
     symbol: {
       keyword: upstreamKeyword(node.symbol),
       actorStyle: resolveActorStyle(theme.actorStyle),
@@ -250,7 +177,7 @@ export function buildEntityParams(
         override.back ??
         businessBackcolor(theme, node.symbol) ??
         resolveElementPaint(theme, node.symbol, 'background', stereotypeLabels),
-      roundCorner: ENTITY_ROUND_CORNER,
+      roundCorner: resolveElementRoundCorner(theme, node.symbol) ?? ENTITY_ROUND_CORNER,
       diagonalCorner: 0,
       // mission skin-file-loading (deferred D3 item): was hardcoded 0 --
       // `EntityImageDescription.ts:251`'s `.withShadow(params.paint
@@ -268,7 +195,11 @@ export function buildEntityParams(
       fontTitle: override.text !== undefined ? { ...fontTitle, color: override.text } : fontTitle,
       fontBody: override.text !== undefined ? { ...fontBody, color: override.text } : fontBody,
       fontStereo: override.text !== undefined ? { ...fontStereo, color: override.text } : fontStereo,
-      titleAlignment: HorizontalAlignment.CENTER,
+      titleAlignment: titleAlignmentFor(node.symbol, {
+        own: theme.colors.elements?.[node.symbol]?.horizontalAlignment,
+        root: theme.colors.elements?.root?.horizontalAlignment,
+      }),
+      minimumWidth: resolveElementMinimumWidth(theme, node.symbol) ?? 0,
       stereotypeAlignment: HorizontalAlignment.CENTER,
       ...(theme.wrapWidth !== undefined ? { wrapWidth: theme.wrapWidth } : {}),
       guillemet: {
@@ -295,132 +226,6 @@ export function buildEntityParams(
   // faithfully-ported code during an unrelated change.
 }
 
-/** Fallback draw for `note`/`port` — shares the `startGroup ->
- *  inner.drawU -> closeGroup` `<g class="entity" ...>` wrapper every
- *  entity draw uses (`decorateEntityDrawing`, T11), but WITHOUT the
- *  leading `<!--entity NAME-->` comment: unlike the description entity
- *  path (`EntityImageDescription.java:295`), upstream's port/note
- *  draws never emit that comment (`EntityImagePort.java:110-116`,
- *  `EntityImageNote.java:196-202` go straight to `new UGroup(...)`) —
- *  see `decorateEntityDrawing`'s doc comment (G1 I0 correction) for the
- *  full mechanism, including why drawing it here was also producing
- *  invalid XML for a `set separator`-disambiguated port id. */
-function drawFallbackBox(ug: UGraphic, node: DescriptionNodeGeo, uid: string, fill: string, border: string): void {
-  const info: EntityDecorationInfo = { name: node.id, qualifiedName: node.id, uid, location: null };
-  decorateEntityDrawing(
-    requireGroups(ug),
-    info,
-    {
-      drawU(inner: UGraphic): void {
-        const rect = URectangle.build(node.width, node.height);
-        inner.apply(new Fore(border)).apply(new Back(fill)).draw(rect);
-      },
-    },
-    { withComment: false },
-  );
-}
-
-/** Upstream: `EntityImageNote.java`'s `marginX1 = 6`, `marginY = 5`
- *  (`getTextWidth`/`drawNormal`'s `ug.apply(new UTranslate(marginX1,
- *  marginY))`), jar-verified 2026-07-15 against `component/
- *  basetu-75-xevi153` (single-line: box top-left (127.62,17.5), text
- *  (133.62,32.6111) — x offset 6.0, y offset 15.1111 = marginY(5) +
- *  the SAME font-baseline math `buildTextBlock` already reproduces
- *  correctly for every other entity) and `component/fojamu-08-veku866`
- *  (3-line note: every line shares the SAME x offset 6.0 from the box's
- *  left edge — `HorizontalAlignment.LEFT`, not centered). */
-const NOTE_MARGIN_X = 6;
-import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js';
-
-/**
- * The note body's own font (`EntityImageNote.java:111`'s `style
- * .getFontConfiguration(...)`): family/color/styles exactly as `textFont`
- * resolves them, but the SIZE falls back to `NOTE_FONT_SIZE` (13,
- * `plantuml.skin:312-313`'s `note { FontSize 13 }`) rather than to the
- * diagram-wide `theme.fontSize` (14).
- *
- * That fallback is the RENDERER half of cause C3 (F1-a): `textFont`'s own
- * default is the diagram font, so notes drew at 14 while the sizer measured
- * at 13 — a permanent 1px-per-line box/ink disagreement, jar-refuted by
- * every note-bearing golden (`xufexu-38-fola855`'s cached oracle SVG emits
- * `font-size="13"` on every note line, `font-size="14"` on the use-case
- * label beside it). `resolveElementFontSize(theme, 'note', 'title')` is the
- * SAME call `layout.ts#ClassifyCtx.fontSizeFor` makes into
- * `BoxSizingOpts.fontSize`, so a `<style> note { FontSize N }` override
- * moves box and ink together.
- */
-function noteFont(theme: Theme): FontConfiguration {
-  return { ...textFont(theme, 'note'), size: resolveElementFontSize(theme, 'note', 'title') ?? NOTE_FONT_SIZE };
-}
-
-/**
- * `EntityImageNote.drawU` -> `drawNormal(ug2)` (`EntityImageNote.java:
- * 207,239`): the body block, translated by `marginX1`/`marginY`, drawn
- * inside a `UGraphicStencil` built over the note's OWN box.
- *
- * F1-a (mission `s1l-tail-fix`, group G2) replaced this function's
- * `buildTextBlock` scoped substitute with `leaf-sizing.ts#buildNoteBody` —
- * the real `BodyFactory.create3` -> `BodyEnhanced2` route
- * (`EntityImageNote.java:116-117`), i.e. literally the same function the
- * SIZER now calls. Before that they disagreed three ways: the sizer billed
- * flat 13px lines, this drew `==toto==` as a creole heading plus literal
- * `--` text, and upstream did neither (it removes each block-separator line
- * and draws a `TextBlockLineBefore` rule carrying the title). Sizer and
- * renderer must move together here or the ink stops fitting the box —
- * `planning/sizer-renderer-parity.md`.
- *
- * The stencil is built on the UNTRANSLATED `ug` from the node's own box, not
- * from the block's dimension: upstream's `UGraphicStencil.create(ug, this,
- * UStroke.simple())` (`EntityImageNote.java:207`) stencils the whole note
- * before `drawNormal` applies the margin translate, which is what makes a
- * separator rule span the note's full width (jar: `x1="7" x2="90.4313"` on a
- * box spanning 6..91.43) instead of stopping at the text.
- *
- * The note's own BOX shape (upstream: `Opale`'s folded-corner polygon) is a
- * plain rect UNLESS `node.opale` resolved (T1e, `layout-geo-post.ts
- * #applyOpaleNote` + `renderer-draw-sequence.ts#drawEntities` copying the
- * connector from the note's attachment edge onto the node) — then
- * `renderer-note-opale.ts#drawOpaleShape` draws the fold-outline + corner
- * triangle instead, mirroring `EntityImageNote.java:207-243`'s opale
- * branch. The text-drawing half below (stencil + `NOTE_MARGIN_X`/`_Y`
- * translate) is UNCHANGED for both branches — `Opale.java:221`'s
- * `textBlock.drawU(ug.apply(new UTranslate(marginX1, marginY)))` applies
- * the identical margin regardless of shape.
- */
-function drawNoteFallback(
-  ug: UGraphic,
-  node: DescriptionNodeGeo,
-  theme: Theme,
-  uid: string,
-  sprites: SpriteRegistry | undefined,
-): void {
-  if (node.opale !== undefined) {
-    drawOpaleShape(ug, node, uid, theme, node.opale);
-  } else {
-    drawFallbackBox(ug, node, uid, theme.colors.noteBackground, theme.colors.border);
-  }
-  const block = buildNoteBody(node.display, noteFont(theme), {
-    wrapWidth: theme.wrapWidth,
-    guillemet: {
-      start: theme.colors.graph.guillemetStart ?? GUILLEMET_DEFAULT.start,
-      end: theme.colors.graph.guillemetEnd ?? GUILLEMET_DEFAULT.end,
-    },
-    atomImageResolverFor: makeAtomImageResolverFor(sprites),
-  });
-  // `UGraphicStencil.create` -- REQUIRED here, not optional plumbing: a note
-  // body carrying a block separator (`--`/`==`/`..`/`__`) draws a
-  // `UHorizontalLine` through `TextBlockLineBefore`, and that shape is only
-  // ever intercepted by an `AbstractUGraphicHorizontalLine` wrapper
-  // (upstream: every `UHorizontalLine#drawMe` call REQUIRES one --
-  // `klimt/drawing/LimitFinder.java` has no `UHorizontalLine` branch
-  // either, jar-verified by inspection).
-  // The text draws on the note's `Back` (`EntityImageNote.java:283,288`,
-  // `Opale.java:107,127`) -- a sprite atom tints from it (unwind2-S7).
-  const onFill = ug.apply(new Back(theme.colors.noteBackground));
-  const stencilled = UGraphicStencil.create(onFill, new XDimension2D(node.width, node.height));
-  block.drawU(stencilled.apply(new UTranslate(NOTE_MARGIN_X, NOTE_MARGIN_Y)));
-}
-
 /** Jar-verified port box border thickness (`EntityImagePort
  *  .getUStroke()`, svek/image/EntityImagePort.java:139-141) -- FIXED at
  *  1.5, independent of `ENTITY_STROKE_WIDTH`'s 0.5 (the regular-entity
@@ -445,7 +250,7 @@ const PORT_STROKE_WIDTH = 1.5;
  *  first, then the `resolveElementPaint` cascade (`sname: 'port'`, jar-verified
  *  `#F1F1F1`/`#181818` by default), NOT `theme.colors.border` for both. */
 function drawPortFallback(ug: UGraphic, node: DescriptionNodeGeo, theme: Theme, uid: string): void {
-  const info: EntityDecorationInfo = { name: node.id, qualifiedName: node.id, uid, location: null };
+  const info: EntityDecorationInfo = { name: bareEntityName(node.id), qualifiedName: node.id, uid, location: null };
   const font = textFont(theme, 'port');
   // EntityImagePort.java:121-130: inline colours, then the port style + `<<labels>>`.
   const override = node.color !== undefined ? parseColorOverride(node.color) : {};
@@ -487,7 +292,7 @@ export function drawEntity(
 ): void {
   const translated = ug.apply(new UTranslate(node.x, node.y));
   if (node.symbol === 'note') {
-    drawNoteFallback(translated, node, theme, uid, sprites);
+    drawNote(translated, node, theme, uid, sprites);
     return;
   }
   if (node.symbol === 'port') {

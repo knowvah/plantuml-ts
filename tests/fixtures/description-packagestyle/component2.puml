@@ -1,0 +1,7 @@
+@startuml
+skinparam packagestyle component2
+package "Pk" {
+  [A]
+}
+[B] --> [A]
+@enduml

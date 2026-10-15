@@ -445,15 +445,23 @@ function applyQualifierLabels(
   link: DescriptiveLink,
   ctx: MeasureCtx,
 ): void {
+  // The TEXT is carried beside the box (`taillabel=<TABLE>` /
+  // `headlabel=<TABLE>`, SvekEdge.java:447-468): `graph-layout-build-edges`
+  // emits the end-label TABLE only when `tailLabel`/`headLabel` is set too,
+  // exactly as the class engine does (`class-layout-edge-labels.ts`).
   if (link.firstLabel !== undefined) {
-    const box = computeQuantifierBox(resolveInlineLinks(link.firstLabel), ctx.cardinalityFontSpec, ctx.measurer);
+    const text = resolveInlineLinks(link.firstLabel);
+    const box = computeQuantifierBox(text, ctx.cardinalityFontSpec, ctx.measurer);
     attrs.tailLabelWidth = box.reservedWidth;
     attrs.tailLabelHeight = box.reservedHeight;
+    attrs.tailLabel = text;
   }
   if (link.secondLabel !== undefined) {
-    const box = computeQuantifierBox(resolveInlineLinks(link.secondLabel), ctx.cardinalityFontSpec, ctx.measurer);
+    const text = resolveInlineLinks(link.secondLabel);
+    const box = computeQuantifierBox(text, ctx.cardinalityFontSpec, ctx.measurer);
     attrs.headLabelWidth = box.reservedWidth;
     attrs.headLabelHeight = box.reservedHeight;
+    attrs.headLabel = text;
   }
 }
 

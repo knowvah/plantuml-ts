@@ -8,6 +8,7 @@
 import type { Theme } from './theme.js';
 import type { Paint } from './paint.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
+import { HorizontalAlignment } from './klimt/geom/HorizontalAlignment.js';
 
 /**
  * The pseudo-bucket holding a `<style> .tag { ... }` selector that names no
@@ -234,4 +235,30 @@ export function foldRootBackgroundIntoSequence(theme: Theme): Theme {
   }
   if (raw === undefined) return theme;
   return { ...theme, colors: { ...theme.colors, participantBackground: resolveColorToSvgHex(raw) } };
+}
+
+/**
+ * `ClusterHeader.java:121`: a group title's `style.getHorizontalAlignment()` over the signature
+ * `{root, element, <diagram>, uSymbol.getSNames(), composite, title}` (`:151-163`). Declarations compete by parse
+ * order (`DarkString#mergeWith`, the skin loads first), so a user declaration beats `plantuml.skin:93-99`'s
+ * `element { composite,package { title { HorizontalAlignment center } } }`: the container's own
+ * `<style> <sname> { HorizontalAlignment X }` bucket, then the root bucket (`skinparam defaultTextAlignment X`,
+ * `FromSkinparamToStyle.java:155`). Probed against the jar: `defaultTextAlignment right` right-aligns a
+ * `rectangle` title. With neither, the skin's CENTER.
+ */
+export function resolveClusterTitleAlignment(theme: Theme, sname: string): HorizontalAlignment {
+  const elements = theme.colors.elements;
+  return elements?.[sname]?.horizontalAlignment ?? elements?.root?.horizontalAlignment ?? HorizontalAlignment.CENTER;
+}
+
+/**
+ * `EntityImageDescription.java:167` / `Cluster.java:321`: `style.value(PName.RoundCorner)`, RAW and unhalved (the
+ * rectangle driver halves it into `rx`/`ry`). Declarations compete by parse order, so a user one beats the
+ * componentDiagram skin's `element { RoundCorner 5 }` (`plantuml.skin:193-197`): the element's own bucket
+ * (`skinparam <sname>RoundCorner N` / `<style> <sname> { RoundCorner N }`), then the root tier
+ * (`skinparam roundCorner N`, `FromSkinparamToStyle.java:164`, which the theme stores in
+ * `graph.classCascadeRoundCorner`). `undefined` when neither is set -- the caller applies the skin's 5.
+ */
+export function resolveElementRoundCorner(theme: Theme, sname: string): number | undefined {
+  return theme.colors.elements?.[sname]?.roundCorner ?? theme.colors.graph.classCascadeRoundCorner;
 }
