@@ -10,6 +10,7 @@ Planning facts were measured at main `306a81151` on 2026-10-15. T0 re-measures t
 | bucket | 0 | 1–3 | 4–10 | 11–30 | 31+ | error | Σ diffs |
 |---|---|---|---|---|---|---|---|
 | planning | 61 | 30 | 38 | 46 | 90 | 1 (gutute-00-gaki684) | 21058 |
+| b0 (a80812e21) | 61 | 30 | 38 | 46 | 90 | 1 (gutute-00-gaki684) | 21058 |
 | D1 target | — | all pinned or ledgered | — | — | — | — | ≤ 12635 (60%) |
 
 **Instrument note for T0.** gevaje-94-sajo802, kokebo-27-vafi688 and tusugu-95-geju398 render-diff
@@ -47,15 +48,15 @@ before triaging these rows ([[measurement-artifacts-outnumber-defects]]).
 | unknown/bamami-10-lava790 | T1b/T2 | drawn package box = cluster6 bb 16.07..97.07 (81 tall); ours draws 62 | 0/88 L= | | | | | |
 | component/zosuje-43-zebi775 | T1b/T2 | layout-equal, drawing-side only (dsw row 18) | 20/180 L= | | | | | |
 | unknown/deroxu-29-gude369 | T4 | `skinparam dpi 60` scale, missing title; layout-equal since dsw T9 | 743/2505 L= | | | | | |
-| component/fojamu-08-veku866 | T5 | kermor: note drawn at (6,6), 272×36 (`Cluster.java:302-307`) | | | | | | |
-| component/zubujo-87-xaxa087 | T5 | kermor | 17 census | | | | | |
-| component/siseda-71-napu395 | T5 | kermor | | | | | | |
-| unknown/gerebe-26-neli152 | T8 | `foo1.foo2`: one jar cluster, two of ours | | | | | | |
-| unknown/jafexe-59-muzo362 | T8 | same as gerebe | | | | | | |
+| component/fojamu-08-veku866 | T5 | kermor: note drawn at (6,6), 272×36 (`Cluster.java:302-307`) | 2/22 | | | | | |
+| component/zubujo-87-xaxa087 | T5 | kermor | 2/15 (17 census) | | | | | |
+| component/siseda-71-napu395 | T5 | kermor | 20/168 | | | | | |
+| unknown/gerebe-26-neli152 | T8 | `foo1.foo2`: one jar cluster, two of ours | 3/44 | | | | | |
+| unknown/jafexe-59-muzo362 | T8 | same as gerebe | 35/57 | | | | | |
 | unknown/xagonu-36-sudi116 | T9 | jar self-loop xlabel TABLEs `sh0050->sh0050` 139×38, `zaent0019->zaent0019` 142×25 (dsw row 20, suspected) | 191/586 L≠ bb | | | | | |
-| unknown/golamo-46-lume529 | T7 | per-stereotype StereotypeFontSize in the title table | | | | | | |
-| unknown/juvose-99-mopu040 | T1b/T2 | `skinparam packagestyle node`; `src/core/theme.ts:169` `packageStyle?: 'rect'` only | | | | | | |
-| unknown/rebena-98-kiba723, vuvave-27-saki879, xipane-40-dune740 | T7 | title creole (shared `buildTextBlock`) | | | | | | |
+| unknown/golamo-46-lume529 | T7 | per-stereotype StereotypeFontSize in the title table | 13/21 | | | | | |
+| unknown/juvose-99-mopu040 | T1b/T2 | `skinparam packagestyle node`; `src/core/theme.ts:169` `packageStyle?: 'rect'` only | 58/294 | | | | | |
+| unknown/rebena-98-kiba723, vuvave-27-saki879, xipane-40-dune740 | T7 | title creole (shared `buildTextBlock`) | 4/17, 3/17, 24/24 | | | | | |
 | component/xenusu-76-sabi405 | — (control) | layout-equal, 7/8 post-layout; must not regress | 7/8 L= | | | | | |
 
 T0 fills the b0 column wherever it is blank. The per-batch columns are filled by the close procedure, step 7.

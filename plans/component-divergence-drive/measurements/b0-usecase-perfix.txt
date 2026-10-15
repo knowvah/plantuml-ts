@@ -1,0 +1,477 @@
+Loaded 94 fixtures across types: usecase
+[xmldom fatalError]	comment is not well-formed at position 3151 
+@#[line:1,col:3152]
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:436:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:228:48)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:150:22)
+    at addNeutron (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:188:51)
+    at getSplitted (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:273:7)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:149:21)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+    at measureNote (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing.ts:402:21)
+    at measureLeafNode (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing.ts:141:14)
+    at buildDotNodes (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-dot-tree.ts:210:18)
+    at runLayout (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout.ts:188:12)
+    at layoutDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout.ts:457:69)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:223:15)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:436:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:228:48)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:150:22)
+    at addNeutron (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:188:51)
+    at getSplitted (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:273:7)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:149:21)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:224:10)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at BodyEnhanced2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:97:41)
+    at drawNoteFallback (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:418:9)
+    at drawEntity (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:487:5)
+    at drawEntities (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-draw-sequence.ts:185:5)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-ink-shift.ts:139:7)
+    at runInkWalk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-ink-extent.ts:200:3)
+    at walkRawInk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-ink-shift.ts:134:10)
+    at placeBody (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-ink-shift.ts:170:18)
+    at buildGeoAndEdges (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout.ts:304:21)
+    at layoutDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout.ts:468:39)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:223:15)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+EmbeddedDiagram.drawU: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:459:12)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:244:14)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:235:22)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at BodyEnhanced2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:97:41)
+    at drawNoteFallback (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:418:9)
+    at drawEntity (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:487:5)
+    at drawEntities (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-draw-sequence.ts:185:5)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-ink-shift.ts:139:7)
+    at runInkWalk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-ink-extent.ts:200:3)
+    at walkRawInk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-ink-shift.ts:134:10)
+    at placeBody (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-ink-shift.ts:170:18)
+    at buildGeoAndEdges (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout.ts:304:21)
+    at layoutDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout.ts:468:39)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:223:15)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:436:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:228:48)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:150:22)
+    at addNeutron (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:188:51)
+    at getSplitted (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:273:7)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:149:21)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:224:10)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at BodyEnhanced2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:97:41)
+    at drawNoteFallback (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:418:9)
+    at drawEntity (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:487:5)
+    at drawEntities (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-draw-sequence.ts:185:5)
+    at draw (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:175:5)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:182:39)
+    at runInkWalk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-ink-extent.ts:200:3)
+    at computeDocumentDims (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-ink-extent.ts:258:18)
+    at svekBody (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:182:7)
+    at renderDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:221:50)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:224:23)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+EmbeddedDiagram.drawU: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:459:12)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:244:14)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:235:22)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at BodyEnhanced2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:97:41)
+    at drawNoteFallback (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:418:9)
+    at drawEntity (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:487:5)
+    at drawEntities (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-draw-sequence.ts:185:5)
+    at draw (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:175:5)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:182:39)
+    at runInkWalk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-ink-extent.ts:200:3)
+    at computeDocumentDims (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-ink-extent.ts:258:18)
+    at svekBody (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:182:7)
+    at renderDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:221:50)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:224:23)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:436:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:228:48)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:150:22)
+    at addNeutron (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:188:51)
+    at getSplitted (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:273:7)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:149:21)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:224:10)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at BodyEnhanced2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:97:41)
+    at drawNoteFallback (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:418:9)
+    at drawEntity (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:487:5)
+    at drawEntities (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-draw-sequence.ts:185:5)
+    at draw (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:175:5)
+    at renderDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:247:3)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:224:23)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+EmbeddedDiagram.drawU: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:459:12)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:244:14)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:235:22)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at BodyEnhanced2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:97:41)
+    at drawNoteFallback (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:418:9)
+    at drawEntity (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:487:5)
+    at drawEntities (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-draw-sequence.ts:185:5)
+    at draw (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:175:5)
+    at renderDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:247:3)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:224:23)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:436:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:228:48)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:150:22)
+    at addNeutron (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:188:51)
+    at getSplitted (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:273:7)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:149:21)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+    at measureNote (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing.ts:402:21)
+    at measureLeafNode (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing.ts:141:14)
+    at buildDotNodes (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-dot-tree.ts:210:18)
+    at runLayout (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout.ts:188:12)
+    at layoutDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout.ts:457:69)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:223:15)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:436:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:228:48)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:150:22)
+    at addNeutron (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:188:51)
+    at getSplitted (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:273:7)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:149:21)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:224:10)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at BodyEnhanced2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:97:41)
+    at drawNoteFallback (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:418:9)
+    at drawEntity (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:487:5)
+    at drawEntities (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-draw-sequence.ts:185:5)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-ink-shift.ts:139:7)
+    at runInkWalk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-ink-extent.ts:200:3)
+    at walkRawInk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-ink-shift.ts:134:10)
+    at placeBody (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-ink-shift.ts:170:18)
+    at buildGeoAndEdges (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout.ts:304:21)
+    at layoutDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout.ts:468:39)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:223:15)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+EmbeddedDiagram.drawU: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:459:12)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:244:14)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:235:22)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at BodyEnhanced2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:97:41)
+    at drawNoteFallback (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:418:9)
+    at drawEntity (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:487:5)
+    at drawEntities (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-draw-sequence.ts:185:5)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-ink-shift.ts:139:7)
+    at runInkWalk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-ink-extent.ts:200:3)
+    at walkRawInk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-ink-shift.ts:134:10)
+    at placeBody (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout-ink-shift.ts:170:18)
+    at buildGeoAndEdges (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout.ts:304:21)
+    at layoutDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/layout.ts:468:39)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:223:15)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:436:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:228:48)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:150:22)
+    at addNeutron (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:188:51)
+    at getSplitted (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:273:7)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:149:21)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:224:10)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at BodyEnhanced2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:97:41)
+    at drawNoteFallback (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:418:9)
+    at drawEntity (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:487:5)
+    at drawEntities (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-draw-sequence.ts:185:5)
+    at draw (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:175:5)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:182:39)
+    at runInkWalk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-ink-extent.ts:200:3)
+    at computeDocumentDims (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-ink-extent.ts:258:18)
+    at svekBody (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:182:7)
+    at renderDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:221:50)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:224:23)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+EmbeddedDiagram.drawU: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:459:12)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:244:14)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:235:22)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at BodyEnhanced2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:97:41)
+    at drawNoteFallback (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:418:9)
+    at drawEntity (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:487:5)
+    at drawEntities (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-draw-sequence.ts:185:5)
+    at draw (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:175:5)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:182:39)
+    at runInkWalk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-ink-extent.ts:200:3)
+    at computeDocumentDims (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-ink-extent.ts:258:18)
+    at svekBody (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:182:7)
+    at renderDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:221:50)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:224:23)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:436:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:228:48)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:150:22)
+    at addNeutron (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:188:51)
+    at getSplitted (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Fission.ts:273:7)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:149:21)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:224:10)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at BodyEnhanced2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:97:41)
+    at drawNoteFallback (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:418:9)
+    at drawEntity (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:487:5)
+    at drawEntities (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-draw-sequence.ts:185:5)
+    at draw (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:175:5)
+    at renderDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:247:3)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:224:23)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+EmbeddedDiagram.drawU: renderer failed Error: EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:41:15)
+    at <anonymous> (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:72)
+    at withDeferredFormat (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svg-format.ts:140:12)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:412:26)
+    at EmbeddedDiagram.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:459:12)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:244:14)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:235:22)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at BodyEnhanced2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:97:41)
+    at drawNoteFallback (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:418:9)
+    at drawEntity (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-entity.ts:487:5)
+    at drawEntities (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer-draw-sequence.ts:185:5)
+    at draw (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:175:5)
+    at renderDescription (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/description/renderer.ts:247:3)
+    at renderFixtureDescription (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:224:23)
+    at renderFixtureFor (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:332:14)
+    at census (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:366:23)
+    at main (/Users/scottseely/git/knowvah/plantuml-ts/scripts/svg-conformance-census.ts:474:32)
+
+=== DeterministicMeasurer (ratchet metric) (94 fixtures) ===
+  0 diffs:     29
+  1-3 diffs:   9
+  4-10 diffs:  16
+  11-30 diffs: 22
+  31+ diffs:   17
+  errors:      1
+  zero-diff fixtures:
+    - usecase/bootstrap-0
+    - usecase/camevo-41-suki094
+    - usecase/cimare-47-deke334
+    - usecase/cizolo-88-lake154
+    - usecase/cobuju-30-paxo591
+    - usecase/depabo-06-kato214
+    - usecase/dijico-15-cabu824
+    - usecase/dipixi-71-nuga611
+    - usecase/fosito-02-fegi991
+    - usecase/fubaje-48-xaje065
+    - usecase/kevipe-39-gaji640
+    - usecase/komivo-22-toki497
+    - usecase/majuma-84-loma401
+    - usecase/mofuba-79-came821
+    - usecase/mopimi-10-jaco443
+    - usecase/norebe-58-bixu182
+    - usecase/pecupa-75-zote612
+    - usecase/rabida-94-kula497
+    - usecase/ruziru-69-xixo434
+    - usecase/samicu-23-rula038
+    - usecase/sidame-35-cozu078
+    - usecase/sivamo-20-gaga179
+    - usecase/sprite-svg-archimate-0
+    - usecase/sprite-svg-bootstrap-0
+    - usecase/sprite-svg-multiline-0
+    - usecase/togeke-15-zala124
+    - usecase/xegapu-80-damu730
+    - usecase/xonafo-10-moki423
+    - usecase/zoriso-46-vata931
+
+=== DeterministicMeasurer — per-fixture diff counts (94 fixtures) ===
+       2  usecase/baxodi-80-doto381
+     822  usecase/berufi-69-dara369
+      34  usecase/bivira-53-boja685
+       7  usecase/bixofa-44-siso224
+     569  usecase/bobije-35-nigi914
+       0  usecase/bootstrap-0
+       0  usecase/camevo-41-suki094
+      94  usecase/cevuji-49-bile305
+       0  usecase/cimare-47-deke334
+       0  usecase/cizolo-88-lake154
+       0  usecase/cobuju-30-paxo591
+       4  usecase/cuzuci-92-dugi933
+       0  usecase/depabo-06-kato214
+       0  usecase/dijico-15-cabu824
+       0  usecase/dipixi-71-nuga611
+       9  usecase/dopova-50-digo290
+       3  usecase/exposant-02-usecase
+       7  usecase/fajira-11-xada239
+      13  usecase/fariba-82-xolu802
+   error  usecase/fepuvo-06-rugi981
+       3  usecase/fogiku-22-gone205
+       0  usecase/fosito-02-fegi991
+      27  usecase/fotisa-06-xipe681
+       0  usecase/fubaje-48-xaje065
+      13  usecase/fumitu-00-reji589
+      12  usecase/funeme-74-tenu200
+       6  usecase/fuvosu-10-lixu251
+       1  usecase/gigofe-94-zepe032
+      17  usecase/gogamo-72-pibo470
+       3  usecase/jafuke-47-xepe403
+     120  usecase/jecici-56-bimu826
+       7  usecase/kafexo-72-xupa679
+       0  usecase/kevipe-39-gaji640
+       5  usecase/kijufe-84-colu239
+      43  usecase/kobasu-11-difo566
+       4  usecase/kofuca-08-pafi749
+       1  usecase/kolibo-58-rata251
+       0  usecase/komivo-22-toki497
+      55  usecase/kovaxi-11-reti348
+      61  usecase/lirebi-26-voka556
+       6  usecase/lizutu-99-mapa855
+       3  usecase/lunexo-59-fupo775
+       0  usecase/majuma-84-loma401
+       7  usecase/malumi-33-safu797
+       0  usecase/mofuba-79-came821
+      12  usecase/mogidu-85-roxe269
+      13  usecase/molopu-64-totu560
+       0  usecase/mopimi-10-jaco443
+       4  usecase/mutere-78-geko363
+      30  usecase/nenedo-78-fiva569
+      17  usecase/nipapu-74-roro938
+       6  usecase/nixura-77-bina738
+       3  usecase/nobiza-91-fimo741
+       0  usecase/norebe-58-bixu182
+       0  usecase/pecupa-75-zote612
+      13  usecase/pivudu-29-pele178
+       0  usecase/rabida-94-kula497
+      11  usecase/ridola-99-jija391
+      78  usecase/robiga-73-tedi466
+      36  usecase/rokipo-88-sece008
+       0  usecase/ruziru-69-xixo434
+       2  usecase/sadeja-25-tina867
+      27  usecase/saduja-80-goba120
+       0  usecase/samicu-23-rula038
+     822  usecase/seline-83-vifi756
+       6  usecase/seneso-72-cuje674
+       0  usecase/sidame-35-cozu078
+       0  usecase/sivamo-20-gaga179
+      24  usecase/sotine-10-lore970
+       0  usecase/sprite-svg-archimate-0
+       0  usecase/sprite-svg-bootstrap-0
+      22  usecase/sprite-SVG-fill-management-3
+       0  usecase/sprite-svg-multiline-0
+      21  usecase/style-stereotype-on-arrow-0
+      18  usecase/sumata-59-zavu229
+       5  usecase/tanuna-53-neko979
+      22  usecase/tatori-66-kaci883
+       0  usecase/togeke-15-zala124
+      14  usecase/tozubi-37-feze715
+       4  usecase/vibunu-17-guso486
+      23  usecase/vivido-49-nisu863
+      80  usecase/xacaxe-43-bupe002
+       0  usecase/xegapu-80-damu730
+      13  usecase/xeluxu-64-fozo131
+      18  usecase/xixaca-96-nene831
+     569  usecase/xoculo-95-fuvi894
+       0  usecase/xonafo-10-moki423
+      15  usecase/xozabi-42-pixa842
+      54  usecase/zacute-55-zece399
+     131  usecase/zavitu-69-cemu013
+      55  usecase/zidebi-71-nocu387
+       9  usecase/zilisi-99-rate911
+       0  usecase/zoriso-46-vata931
+      49  usecase/zotiru-33-legi180

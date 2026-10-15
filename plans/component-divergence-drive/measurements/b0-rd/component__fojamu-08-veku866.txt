@@ -1,0 +1,26 @@
+
+### component/fojamu-08-veku866  pass=false structural=2 numeric=22
+  S svg/g[1]/g[2][childCount]  exp=5 | act=1
+  S svg/g[1][childCount]  exp=7 | act=6
+  N svg/@height  exp=246 | act=178 (Δ68)
+  N svg/@viewBox[2]  exp=293 | act=222 (Δ71)
+  N svg/@viewBox[3]  exp=246 | act=178 (Δ68)
+  N svg/@width  exp=293 | act=222 (Δ71)
+  N svg/g[1]/g[1]/rect[1]/@height  exp=146 | act=157 (Δ11)
+  N svg/g[1]/g[1]/rect[1]/@width  exp=186 | act=201.769 (Δ15.769000000000005)
+  N svg/g[1]/g[1]/rect[1]/@x  exp=10 | act=7 (Δ3)
+  N svg/g[1]/g[1]/rect[1]/@y  exp=67 | act=7 (Δ60)
+  N svg/g[1]/g[1]/rect[2]/@x  exp=176 | act=188.769 (Δ12.769000000000005)
+  N svg/g[1]/g[1]/rect[2]/@y  exp=72 | act=12 (Δ60)
+  N svg/g[1]/g[1]/rect[3]/@x  exp=174 | act=186.769 (Δ12.769000000000005)
+  N svg/g[1]/g[1]/rect[3]/@y  exp=74 | act=14 (Δ60)
+  N svg/g[1]/g[1]/rect[4]/@x  exp=174 | act=186.769 (Δ12.769000000000005)
+  N svg/g[1]/g[1]/rect[4]/@y  exp=78 | act=18 (Δ60)
+  N svg/g[1]/g[1]/text[1]/@x  exp=78.85 | act=83.734 (Δ4.884)
+  N svg/g[1]/g[1]/text[1]/@y  exp=90.889 | act=30.889 (Δ60)
+  N svg/g[1]/g[1]/text[2]/@x  exp=38.863 | act=43.747 (Δ4.884)
+  N svg/g[1]/g[1]/text[2]/@y  exp=104.889 | act=44.889 (Δ59.99999999999999)
+  N svg/g[1]/g[3]/text[1]/@x  exp=54.149 | act=59.029 (Δ4.880000000000003)
+  N svg/g[1]/g[3]/text[1]/@y  exp=229.889 | act=158.889 (Δ71)
+  N svg/g[1]/g[3]/rect[1]/@x  exp=91.33 | act=96.21 (Δ4.8799999999999955)
+  N svg/g[1]/g[3]/rect[1]/@y  exp=207 | act=136 (Δ71)

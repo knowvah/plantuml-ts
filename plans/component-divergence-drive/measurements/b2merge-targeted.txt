@@ -1,0 +1,5 @@
+     × usecase-frame-note: only the note entity order differs 18ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  tests/oracle/svg-conformance/lgm-t1c-svek-chrome.test.ts > lgm-T1c: description chrome equals the jar > usecase-frame-note: only the note entity order differs
+ Test Files  1 failed | 507 passed (508)
+      Tests  1 failed | 16631 passed | 7 expected fail | 2 skipped (16641)

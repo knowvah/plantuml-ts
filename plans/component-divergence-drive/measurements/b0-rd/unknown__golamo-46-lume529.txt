@@ -1,0 +1,36 @@
+
+### unknown/golamo-46-lume529  pass=false structural=13 numeric=21
+  S svg/g[1]/g[1]/rect[1]/@stroke  exp=#008000 | act=#181818
+  S svg/g[1]/g[1]/rect[1]/@stroke-dasharray  exp=7,7 | act=
+  S svg/g[1]/g[1]/text[1]/@fill  exp=#008000 | act=#000
+  S svg/g[1]/g[1]/text[1]/@font-size  exp=6 | act=12
+  S svg/g[1]/g[1]/text[1]/@textLength  exp=31.688 | act=63.375
+  S svg/g[1]/g[1]/text[2]/@fill  exp=#008000 | act=#000
+  S svg/g[1]/g[2]/rect[1]/@fill  exp=none | act=#F1F1F1
+  S svg/g[1]/g[2]/rect[1]/@stroke  exp=#008000 | act=#181818
+  S svg/g[1]/g[2]/rect[1]/@stroke-dasharray  exp=7,7 | act=
+  S svg/g[1]/g[2]/text[1]/@fill  exp=#008000 | act=#000
+  S svg/g[1]/g[2]/text[1]/@font-size  exp=6 | act=12
+  S svg/g[1]/g[2]/text[1]/@textLength  exp=31.688 | act=63.375
+  S svg/g[1]/g[2]/text[2]/@fill  exp=#008000 | act=#000
+  N svg/@height  exp=126 | act=111 (Δ15)
+  N svg/@viewBox[3]  exp=126 | act=111 (Δ15)
+  N svg/g[1]/g[1]/rect[1]/@height  exp=105 | act=90 (Δ15)
+  N svg/g[1]/g[1]/rect[1]/@width  exp=252 | act=252.685 (Δ0.6850000000000023)
+  N svg/g[1]/g[1]/text[1]/@x  exp=117.156 | act=101.655 (Δ15.501000000000005)
+  N svg/g[1]/g[1]/text[1]/@y  exp=13.667 | act=18.333 (Δ4.665999999999999)
+  N svg/g[1]/g[1]/text[2]/@x  exp=109.244 | act=10 (Δ99.244)
+  N svg/g[1]/g[1]/text[2]/@y  exp=29.889 | act=31.889 (Δ2)
+  N svg/g[1]/g[2]/rect[1]/@height  exp=44 | act=46 (Δ2)
+  N svg/g[1]/g[2]/rect[1]/@x  exp=22.65 | act=23 (Δ0.3500000000000014)
+  N svg/g[1]/g[2]/rect[1]/@y  exp=51 | act=38 (Δ13)
+  N svg/g[1]/g[2]/text[1]/@x  exp=52.156 | act=36.662 (Δ15.494)
+  N svg/g[1]/g[2]/text[1]/@y  exp=65.667 | act=57.333 (Δ8.334000000000003)
+  N svg/g[1]/g[2]/text[2]/@x  exp=32.65 | act=33 (Δ0.3500000000000014)
+  N svg/g[1]/g[2]/text[2]/@y  exp=81.889 | act=70.889 (Δ11)
+  N svg/g[1]/g[3]/rect[1]/@x  exp=148.66 | act=149.01 (Δ0.3499999999999943)
+  N svg/g[1]/g[3]/rect[1]/@y  exp=50 | act=35 (Δ15)
+  N svg/g[1]/g[3]/text[1]/@x  exp=159.66 | act=160.01 (Δ0.3499999999999943)
+  N svg/g[1]/g[3]/text[1]/@y  exp=69.333 | act=54.333 (Δ15)
+  N svg/g[1]/g[3]/text[2]/@x  exp=161.391 | act=161.741 (Δ0.35000000000002274)
+  N svg/g[1]/g[3]/text[2]/@y  exp=82.889 | act=67.889 (Δ15)
