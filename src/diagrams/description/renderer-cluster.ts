@@ -5,6 +5,7 @@
  * .position` (a `UTranslate`) internally — the caller passes the
  * un-translated `ug` (see `Cluster.ts`'s `ClusterDecoration#drawU`).
  */
+import { bareEntityName } from './namespace-groups.js';
 import type { Theme } from '../../core/theme.js';
 import { resolveElementShadowing } from '../../core/theme.js';
 import { resolveClusterTitleAlignment, resolveElementRoundCorner } from '../../core/theme-element-resolve.js';
@@ -213,7 +214,7 @@ export function buildCluster(node: DescriptionNodeGeo, theme: Theme, uid: string
   const override = node.color === undefined ? {} : parseColorOverride(node.color);
   const group: ClusterGroupInfo = {
     hidden: false,
-    name: node.id,
+    name: bareEntityName(node.id),
     uid,
     qualifiedName: node.id,
     location: null,

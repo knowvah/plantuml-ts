@@ -15,6 +15,7 @@
  * exact chrome. Documented approximation, not a T17 acceptance blocker
  * (neither symbol appears in the T17 zero-diff conformance fixture).
  */
+import { bareEntityName } from './namespace-groups.js';
 import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { Theme } from '../../core/theme.js';
@@ -151,7 +152,7 @@ export function buildEntityParams(
   // atoms can never disagree on this entity's ambient thickness.
   const lineThickness = resolveElementLineThickness(theme, node.symbol) ?? ENTITY_STROKE_WIDTH;
   return {
-    entity: { name: node.id, uid: '', qualifiedName: node.id, location: null, url: null },
+    entity: { name: bareEntityName(node.id), uid: '', qualifiedName: node.id, location: null, url: null },
     symbol: {
       keyword: upstreamKeyword(node.symbol),
       actorStyle: resolveActorStyle(theme.actorStyle),
@@ -249,7 +250,7 @@ const PORT_STROKE_WIDTH = 1.5;
  *  first, then the `resolveElementPaint` cascade (`sname: 'port'`, jar-verified
  *  `#F1F1F1`/`#181818` by default), NOT `theme.colors.border` for both. */
 function drawPortFallback(ug: UGraphic, node: DescriptionNodeGeo, theme: Theme, uid: string): void {
-  const info: EntityDecorationInfo = { name: node.id, qualifiedName: node.id, uid, location: null };
+  const info: EntityDecorationInfo = { name: bareEntityName(node.id), qualifiedName: node.id, uid, location: null };
   const font = textFont(theme, 'port');
   // EntityImagePort.java:121-130: inline colours, then the port style + `<<labels>>`.
   const override = node.color !== undefined ? parseColorOverride(node.color) : {};
