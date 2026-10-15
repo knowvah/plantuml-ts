@@ -1,0 +1,2 @@
+
+### component/zubujo-87-xaxa087  pass=true structural=0 numeric=0

@@ -1,0 +1,10 @@
+@startuml
+<style>
+document {
+  BackgroundColor transparent
+  Margin 20
+}
+</style>
+rectangle r
+'rectangle r1
+@enduml

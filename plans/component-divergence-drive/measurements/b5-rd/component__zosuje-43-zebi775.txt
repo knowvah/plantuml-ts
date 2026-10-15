@@ -1,0 +1,19 @@
+
+### component/zosuje-43-zebi775  pass=false structural=17 numeric=0
+  S svg/g[1]/g[2]/path[1]/@fill  exp=#FFE4C4 | act=none
+  S svg/g[1]/g[2]/path[1]/@stroke  exp=#F00 | act=#181818
+  S svg/g[1]/g[2]/path[2]/@fill  exp=#FFE4C4 | act=none
+  S svg/g[1]/g[2]/path[2]/@stroke  exp=#F00 | act=#181818
+  S svg/g[1]/g[5]/text[1]/@font-style  exp=italic | act=
+  S svg/g[1]/g[6]/path[1]/@stroke  exp=#00BFFF | act=#181818
+  S svg/g[1]/g[7]/path[1]/@stroke  exp=#00BFFF | act=#181818
+  S svg/g[1]/g[7]/polygon[1]/@fill  exp=#00BFFF | act=#181818
+  S svg/g[1]/g[7]/polygon[1]/@stroke  exp=#00BFFF | act=#181818
+  S svg/g[1]/g[8]/path[1]/@stroke  exp=#00BFFF | act=#181818
+  S svg/g[1]/g[8]/polygon[1]/@fill  exp=#00BFFF | act=#181818
+  S svg/g[1]/g[8]/polygon[1]/@stroke  exp=#00BFFF | act=#181818
+  S svg/g[1]/g[9]/path[1]/@stroke  exp=#00BFFF | act=#181818
+  S svg/g[1]/g[9]/polygon[1]/@fill  exp=#00BFFF | act=#181818
+  S svg/g[1]/g[9]/polygon[1]/@stroke  exp=#00BFFF | act=#181818
+  S svg/g[1]/g[9]/polygon[2]/@fill  exp=#00BFFF | act=#181818
+  S svg/g[1]/g[9]/polygon[2]/@stroke  exp=#00BFFF | act=#181818

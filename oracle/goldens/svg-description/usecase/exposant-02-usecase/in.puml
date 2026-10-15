@@ -1,0 +1,9 @@
+@startuml
+actor User
+usecase "Compute Area" as UC
+User --> UC
+note right of UC
+  x<sup>2</sup>
+  <size:20>Big</size:20>
+end note
+@enduml

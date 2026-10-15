@@ -1,5 +1,5 @@
 {
-  "$comment": "Layout-parity ratchet baseline (description-svek-wrappers D3 / T2). Every pinned row's captured DotInputGraph must lay out under dot-engine to the same cluster tree, bb, node sizes/positions and edge pos as the jar's cached svek-N.dot (tests/oracle/layout-parity.ts). Population: component, usecase, c4, and unknown rows whose routing-baseline ourType is DESCRIPTION, plus the four controls (the class and state controls are pinned here although those trees carry byte-exact SVG ratchets). Seeded 2026-10-14 from the T2 survey run at the b1 merge (3c1a8c7f2); shrink-only: rows are added at batch closes, never removed to make the gate pass.",
+  "$comment": "Layout-parity ratchet baseline (description-svek-wrappers D3 / T2). Every pinned row's captured DotInputGraph must lay out under dot-engine to the same cluster tree, bb, node sizes/positions and edge pos as the jar's cached svek-N.dot (tests/oracle/layout-parity.ts). Population: component, usecase, c4, and unknown rows whose routing-baseline ourType is DESCRIPTION, plus the four controls (the class and state controls are pinned here although those trees carry byte-exact SVG ratchets). Seeded 2026-10-14 from the T2 survey run at the b1 merge (3c1a8c7f2); shrink-only: rows are added at batch closes, never removed to make the gate pass. codd T11 (2026-10-15): +20 rows newly layout-equal at the b5 survey.",
   "fixtures": [
     {
       "tree": "c4",
@@ -2345,6 +2345,106 @@
       "tree": "usecase",
       "slug": "zotiru-33-legi180",
       "addedAt": "2026-10-14"
+    },
+    {
+      "tree": "component",
+      "slug": "bozoju-49-kufo528",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "component",
+      "slug": "kanute-77-lacu414",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "component",
+      "slug": "misube-65-seni576",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "component",
+      "slug": "vogefo-33-xeve917",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "usecase",
+      "slug": "saduja-80-goba120",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "c4",
+      "slug": "favasu-27-fesa452",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "c4",
+      "slug": "xizifu-87-siti076",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "bujigu-81-nima035",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "cexoke-68-kici335",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "gerebe-26-neli152",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "golamo-46-lume529",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "jafexe-59-muzo362",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "joliva-50-vuva261",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "juvose-99-mopu040",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "keceji-97-nuza070",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "luzeti-08-lafa321",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "rebena-98-kiba723",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "vuvave-27-saki879",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "xagonu-36-sudi116",
+      "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "xipane-40-dune740",
+      "addedAt": "2026-10-15"
     }
   ]
 }

@@ -1,0 +1,5 @@
+@startuml
+card "Foo%n()x%n()----%n()* y" as Foo {
+  card Bar
+}
+@enduml

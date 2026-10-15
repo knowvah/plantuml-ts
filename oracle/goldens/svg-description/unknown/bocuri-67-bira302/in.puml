@@ -1,0 +1,7 @@
+@startuml
+skinparam rectangle {
+    shadowing true
+}
+
+rectangle "Web Application" as web_app
+@enduml

@@ -1,0 +1,6 @@
+@startuml
+skinparam packageStyle rectangle
+package A {
+   rectangle B
+}
+@enduml

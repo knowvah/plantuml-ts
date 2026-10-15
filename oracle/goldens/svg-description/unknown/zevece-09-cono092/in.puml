@@ -1,0 +1,6 @@
+@startuml
+skinparam rectangle {
+    BorderColor<<LAN-A>> #Red
+}
+rectangle A
+@enduml

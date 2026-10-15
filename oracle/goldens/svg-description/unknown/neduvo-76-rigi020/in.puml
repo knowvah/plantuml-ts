@@ -1,0 +1,8 @@
+@startuml
+
+rectangle "rv" {
+port "hitchReceiver"
+rectangle "cabin"
+}
+
+@enduml

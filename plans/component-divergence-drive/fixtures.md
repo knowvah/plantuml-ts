@@ -11,7 +11,9 @@ Planning facts were measured at main `306a81151` on 2026-10-15. T0 re-measures t
 |---|---|---|---|---|---|---|---|
 | planning | 61 | 30 | 38 | 46 | 90 | 1 (gutute-00-gaki684) | 21058 |
 | b0 (a80812e21) | 61 | 30 | 38 | 46 | 90 | 1 (gutute-00-gaki684) | 21058 |
-| D1 target | — | all pinned or ledgered | — | — | — | — | ≤ 12635 (60%) |
+| b0n (renderSync instrument, a80812e21) | 68 | 30 | 35 | 46 | 87 | 0 | 21319 |
+| b5 (5b4b5c731) | 179 | 22 | 28 | 22 | 15 | 0 | 2201 |
+| D1 target | — | all pinned or ledgered | — | — | — | — | ≤ 12635 (60% of b0) / ≤ 12791 (60% of b0n) |
 
 **Instrument note for T0.** gevaje-94-sajo802, kokebo-27-vafi688 and tusugu-95-geju398 render-diff
 at 0/0, yet the census counts them at 1 or more. The two tools take different paths. Name the path
@@ -45,19 +47,19 @@ before triaging these rows ([[measurement-artifacts-outnumber-defects]]).
 
 | tree/slug | owner | jar fact / known mechanism | b0 | b1 | b2 | b3 | b4 | b5 |
 |---|---|---|---|---|---|---|---|---|
-| unknown/bamami-10-lava790 | T1b/T2 | drawn package box = cluster6 bb 16.07..97.07 (81 tall); ours draws 62 | 0/88 L= | 0/88 | | | | |
-| component/zosuje-43-zebi775 | T1b/T2 | layout-equal, drawing-side only (dsw row 18) | 20/180 L= | 20/180 | | | | |
-| unknown/deroxu-29-gude369 | T4 | `skinparam dpi 60` scale, missing title; layout-equal since dsw T9 | 743/2505 L= | 743/2505 | | | | |
-| component/fojamu-08-veku866 | T5 | kermor: note drawn at (6,6), 272×36 (`Cluster.java:302-307`) | 2/22 | 2/22 | | | | |
-| component/zubujo-87-xaxa087 | T5 | kermor | 2/15 (17 census) | 2/15 | | | | |
-| component/siseda-71-napu395 | T5 | kermor | 20/168 | 20/168 | | | | |
-| unknown/gerebe-26-neli152 | T8 | `foo1.foo2`: one jar cluster, two of ours | 3/44 | 3/44 | | | | |
-| unknown/jafexe-59-muzo362 | T8 | same as gerebe | 35/57 | 35/57 | | | | |
-| unknown/xagonu-36-sudi116 | T9 | jar self-loop xlabel TABLEs `sh0050->sh0050` 139×38, `zaent0019->zaent0019` 142×25 (dsw row 20, suspected) | 191/586 L≠ bb | 191/586 | | | | |
-| unknown/golamo-46-lume529 | T7 | per-stereotype StereotypeFontSize in the title table | 13/21 | 11/21 | | | | |
-| unknown/juvose-99-mopu040 | T1b/T2 | `skinparam packagestyle node`; `src/core/theme.ts:169` `packageStyle?: 'rect'` only | 58/294 | 58/294 | | | | |
-| unknown/rebena-98-kiba723, vuvave-27-saki879, xipane-40-dune740 | T7 | title creole (shared `buildTextBlock`) | 4/17, 3/17, 24/24 | 4/17, 3/17, 24/24 | | | | |
-| component/xenusu-76-sabi405 | — (control) | layout-equal, 7/8 post-layout; must not regress | 7/8 L= | 7/8 | | | | |
+| unknown/bamami-10-lava790 | T1b/T2 | drawn package box = cluster6 bb 16.07..97.07 (81 tall); ours draws 62 | 0/88 L= | 0/88 | (b5) | (b5) | (b5) | 0/0 |
+| component/zosuje-43-zebi775 | T1b/T2 | layout-equal, drawing-side only (dsw row 18) | 20/180 L= | 20/180 | (b5) | (b5) | (b5) | 17/0 |
+| unknown/deroxu-29-gude369 | T4 | `skinparam dpi 60` scale, missing title; layout-equal since dsw T9 | 743/2505 L= | 743/2505 | (b5) | (b5) | (b5) | 719/1237 |
+| component/fojamu-08-veku866 | T5 | kermor: note drawn at (6,6), 272×36 (`Cluster.java:302-307`) | 2/22 | 2/22 | (b5) | (b5) | (b5) | 0/0 |
+| component/zubujo-87-xaxa087 | T5 | kermor | 2/15 (17 census) | 2/15 | (b5) | (b5) | (b5) | 0/0 |
+| component/siseda-71-napu395 | T5 | kermor | 20/168 | 20/168 | (b5) | (b5) | (b5) | 0/0 |
+| unknown/gerebe-26-neli152 | T8 | `foo1.foo2`: one jar cluster, two of ours | 3/44 | 3/44 | (b5) | (b5) | (b5) | 0/0 |
+| unknown/jafexe-59-muzo362 | T8 | same as gerebe | 35/57 | 35/57 | (b5) | (b5) | (b5) | 0/0 |
+| unknown/xagonu-36-sudi116 | T9 | jar self-loop xlabel TABLEs `sh0050->sh0050` 139×38, `zaent0019->zaent0019` 142×25 (dsw row 20, suspected) | 191/586 L≠ bb | 191/586 | (b5) | (b5) | (b5) | 45/887 |
+| unknown/golamo-46-lume529 | T7 | per-stereotype StereotypeFontSize in the title table | 13/21 | 11/21 | (b5) | (b5) | (b5) | 7/0 |
+| unknown/juvose-99-mopu040 | T1b/T2 | `skinparam packagestyle node`; `src/core/theme.ts:169` `packageStyle?: 'rect'` only | 58/294 | 58/294 | (b5) | (b5) | (b5) | 0/0 |
+| unknown/rebena-98-kiba723, vuvave-27-saki879, xipane-40-dune740 | T7 | title creole (shared `buildTextBlock`) | 4/17, 3/17, 24/24 | 4/17, 3/17, 24/24 | (b5) | (b5) | (b5) | 0/0, 0/0, 0/0 |
+| component/xenusu-76-sabi405 | — (control) | layout-equal, 7/8 post-layout; must not regress | 7/8 L= | 7/8 | (b5) | (b5) | (b5) | 7/2 |
 
 T0 fills the b0 column wherever it is blank. The per-batch columns are filled by the close procedure, step 7.
 
@@ -65,3 +67,7 @@ T0 fills the b0 column wherever it is blank. The per-batch columns are filled by
 
 | slug | reason it cannot be pinned (mechanism) | task |
 |---|---|---|
+| component/givape-84-xano421 | b5 1 diff (`g[2]` childCount jar 1 vs ours 5): entity `[[url]]` — the jar wraps the entity's shapes in one `<a>` inside the entity group (`EntityImageDescription.java:139` `entity.getUrl99()`, `:305` `ug.startUrl(url)`, `:328` `ug.closeUrl()`); core `EntityImageDescription.ts:413-419` already supports `entity.url`, but the description parser strips the token (`stripUrl`) and `buildEntityParams` passes `url: null`. Needs parser → `DescriptiveNode.url` → `DescriptionNodeGeo.url` (layout-helpers-types.ts) → `buildEntityParams`. | T3 R2 → next-missions |
+| component/gacida-77-joku810 | b5 2 diffs (two entity groups, childCount 1 vs 5): same entity `[[url]]` mechanism as givape. | T3 R2 → next-missions |
+| component/jazabe-68-bica131 | b5 2 diffs (childCount 1 vs 6 and 1 vs 3): same entity `[[url]]` mechanism as givape (`url of X is [[..]]` form, `CommandUrl.java:93-100`, also unwired). | T3 R2 → next-missions |
+| component/nevuzi-33-duna992 | b5 3 diffs (`g[3]/text[1]` jar `<a>` vs ours `text`; canvas width 193 vs 192): link label `[[http://www.google.com]]` — the jar builds the label through creole with a url atom (`<a>` wrapper, link text width 131.4); ours has no url atom in the label block (T7a residual 2, "label atoms"), so the label is plain text and the ink width differs by 1 px. | T7a R2 → next-missions |

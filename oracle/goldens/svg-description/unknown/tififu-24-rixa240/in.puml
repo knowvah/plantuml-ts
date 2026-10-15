@@ -1,0 +1,7 @@
+@startuml
+'!preprocessorV2
+!define module(x) component x <<module>>
+module(ABC)
+module(XYZ)
+
+@enduml

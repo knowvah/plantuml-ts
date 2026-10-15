@@ -1053,10 +1053,14 @@ describe('routing conformance — jar-error classification', () => {
     // 6195 -> 6196 / 6923 -> 6924 at description-svek-wrappers T10 (b5): 1
     // svg-description clone row (depabo-06-kato214, conformant after T9's
     // inverted links). Derivation: 6196 + 642 + 86 = 6924.
-    expect(pinnedAgree.length).toBe(6196);
+    // 6196 -> 6459 / 6924 -> 7187 at component-divergence-drive T11 (b5): 263
+    // svg-description clone rows (component 117, usecase 31, unknown 115; all
+    // DESCRIPTION -> DESCRIPTION `agree`), zero-diff pins under T1a's per-type
+    // eligibility. Derivation: 6459 + 642 + 86 = 7187.
+    expect(pinnedAgree.length).toBe(6459);
     expect(pinnedMisroutes.length).toBe(642);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(6924);
+    expect(manifest.fixtures.length).toBe(7187);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

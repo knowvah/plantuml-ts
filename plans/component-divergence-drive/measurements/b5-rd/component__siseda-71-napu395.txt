@@ -1,0 +1,2 @@
+
+### component/siseda-71-napu395  pass=true structural=0 numeric=0

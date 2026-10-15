@@ -1,0 +1,2 @@
+
+### component/fojamu-08-veku866  pass=true structural=0 numeric=0

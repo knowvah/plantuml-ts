@@ -918,7 +918,10 @@ describe('refusal coverage — baseline shape', () => {
     // golden clone rows, rendering on both sides. Derivation: 6886 + 37 = 6923.
     // 6923 -> 6924 at description-svek-wrappers T10 (b5): 1 svg-description
     // golden clone row (depabo-06-kato214). Derivation: 6923 + 1 = 6924.
-    expect(manifest.fixtures.length).toBe(6924);
+    // 6924 -> 7187 at component-divergence-drive T11 (b5): 263 svg-description
+    // golden clone rows (component 117, usecase 31, unknown 115), rendering on
+    // both sides. Derivation: 6924 + 263 = 7187.
+    expect(manifest.fixtures.length).toBe(7187);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -1050,7 +1053,9 @@ describe('refusal coverage — baseline shape', () => {
     // 6661 -> 6698 at description-svek-wrappers T6 (b4): +37 rendering
     // svg-description golden clone rows. Derivation: 6661 + 37 = 6698.
     // 6698 -> 6699 at description-svek-wrappers T10 (b5): +1 (depabo-06-kato214).
-    expect(pinnedRendering.length).toBe(6699);
+    // 6699 -> 6962 at component-divergence-drive T11 (b5): +263 rendering
+    // svg-description golden clone rows. Derivation: 6699 + 263 = 6962.
+    expect(pinnedRendering.length).toBe(6962);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
