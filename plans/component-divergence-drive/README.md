@@ -102,7 +102,7 @@ on-disk.
 | Batch | Tasks | Parallel | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) branch, b0, TRACKER ledger | T0 ∥ T0b | ∥ | [x] |
-| [1](batch-1/overview.md) ratchet eligibility; cluster-box diagnosis; colour singletons | T1a ∥ T1b ∥ T1c | all ∥ | [ ] |
+| [1](batch-1/overview.md) ratchet eligibility; cluster-box diagnosis; colour singletons | T1a ∥ T1b ∥ T1c | all ∥ | [x] |
 | [2](batch-2/overview.md) cluster-box fix; childCount | T2 ∥ T3 | ∥ | [ ] |
 | [3](batch-3/overview.md) canvas/dpi; kermor notes; text diagnosis | T4 ∥ T5 ∥ T6 | all ∥ | [ ] |
 | [4](batch-4/overview.md) text fix; containers; xagonu xlabels; stroke-width/rx | T7 ∥ T8 ∥ T9 ∥ T10 | all ∥ | [ ] |

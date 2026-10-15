@@ -1,0 +1,22 @@
+
+### unknown/vuvave-27-saki879  pass=false structural=3 numeric=17
+  S svg/g[1]/g[1]/text[1]/@textLength  exp= | act=89.863
+  S svg/g[1]/g[1]/text[1]/text()[1]  exp=y | act=Foo↵x↵----↵* y
+  S svg/g[1]/g[1][childCount]  exp=7 | act=3
+  N svg/@height  exp=128 | act=85 (Δ43)
+  N svg/@viewBox[2]  exp=96 | act=110 (Δ14)
+  N svg/@viewBox[3]  exp=128 | act=85 (Δ43)
+  N svg/@width  exp=96 | act=110 (Δ14)
+  N svg/g[1]/g[1]/rect[1]/@height  exp=107 | act=64 (Δ43)
+  N svg/g[1]/g[1]/rect[1]/@width  exp=74 | act=73.788 (Δ0.2120000000000033)
+  N svg/g[1]/g[1]/rect[1]/@x  exp=7 | act=17.844 (Δ10.844000000000001)
+  N svg/g[1]/g[1]/line[1]/@x1  exp=31.925 | act=17.844 (Δ14.081)
+  N svg/g[1]/g[1]/line[1]/@x2  exp=56.075 | act=91.631 (Δ35.556)
+  N svg/g[1]/g[1]/line[1]/@y1  exp=42 | act=25 (Δ17)
+  N svg/g[1]/g[1]/line[1]/@y2  exp=42 | act=25 (Δ17)
+  N svg/g[1]/g[1]/text[1]/@x  exp=46.5 | act=6 (Δ40.5)
+  N svg/g[1]/g[1]/text[1]/@y  exp=57.889 | act=19.889 (Δ38)
+  N svg/g[1]/g[2]/rect[1]/@x  exp=23.11 | act=33.844 (Δ10.734000000000002)
+  N svg/g[1]/g[2]/rect[1]/@y  exp=78 | act=35 (Δ43)
+  N svg/g[1]/g[2]/text[1]/@x  exp=33.11 | act=43.844 (Δ10.734000000000002)
+  N svg/g[1]/g[2]/text[1]/@y  exp=91.889 | act=48.889 (Δ42.99999999999999)

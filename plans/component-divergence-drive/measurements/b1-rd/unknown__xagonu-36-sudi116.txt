@@ -1,0 +1,779 @@
+
+### unknown/xagonu-36-sudi116  pass=false structural=191 numeric=586
+  S svg/g[1]/g[1]/@id  exp=ent0003 | act=ent0001
+  S svg/g[1]/g[1]/line[1]/@stroke  exp=#181818 | act=#000
+  S svg/g[1]/g[1]/line[1]/@stroke-width  exp=1 | act=1.5
+  S svg/g[1]/g[1]/text[1]/@textLength  exp=62.125 | act=87.325
+  S svg/g[1]/g[1]/text[1]/text()[1]  exp=mplatform | act=ASPSP Cloud
+  S svg/g[1]/g[1][childCount]  exp=5 | act=3
+  S svg/g[1]/g[2]/@id  exp=ent0005 | act=ent0002
+  S svg/g[1]/g[2]/path[1]/@d  exp=M458.2,411 L561.138,411 A3.75,3.75 0 0 1 563.638,413.5 L570.638,431 L702.35,431 A2.5,2.5 0 0 1 704.85,433.5 L704.85,1136.5 A2.5,2.5 0 0 1 702.35,1139 L458.2,1139 A2.5,2.5 0 0 1 455.7,1136.5 L455.7,413.5 A2.5,2.5 0 0 1 458.2,411 | act=M768.252,307.15 C772.278,300.506 777.259,300.304 781.371,307.066 C786.325,298.885 793.051,300.145 798.017,307.053 C802.545,300.878 807.065,299.966 812.215,306.349 C816.863,299.436 822.867,299.647 827.664,306.177 C833.403,299.133 838.627,300.583 842.34,308.204 C845.923,302.201 852.622,300.633 856.807,307.53 C860.769,300.392 864.948,301.114 869.697,306.735 C874.346,300.492 879.976,299.164 884.359,307.011 C890.034,300.327 896.981,301.389 901.133,308.82 C904.69,301.512 910.762,302.862 914.817,308.285 C919.653,301.478 925.648,301.443 929.953,308.851 C937.134,301.87 946.664,304.657 949.557,314 C950.111,313.567 950.608,313.818 950.599,314.517 C957.257,315.825 959.215,321.796 954.648,326.803 C962.497,331.585 962.029,336.057 954.992,341.195 C962.344,343.25 963.298,349.459 958.71,354.781 C963.902,357.408 965.258,361.847 959.958,365.676 C966.593,371.518 964.313,376.126 957.321,379.336 C964.032,382.787 963.799,388.695 957.287,392.11 C962.261,397.919 960.434,402.37 953.386,404.345 C958.499,414.23 953.538,422.456 942.557,423 C943.521,422.585 944.298,423.195 944.261,424.2 C940.228,430.124 935.127,431.299 930.459,424.911 C926.636,433.882 921.452,434.255 915.323,427.072 C911.369,433.015 904.987,433.218 900.742,427.433 C896.444,434.304 891.928,435.266 886.253,428.946 C882.4,437.72 876.528,438.028 870.976,430.542 C867.891,437.84 861.697,439.581 855.836,433.74 C850.479,439.107 843.397,439.079 840.864,430.671 C836.845,437.206 830.727,437.159 827.134,430.236 C821.63,435.495 816.694,435.487 812.817,428.355 C807.791,434.595 801.931,435.239 797.894,427.313 C792.522,435.612 785.535,434.055 781.901,425.649 C771.982,432.183 760.696,429.889 759.62,416 C760.113,415.264 760.881,415.31 761.344,416.036 C752.95,411.653 754.028,405.938 760.437,400.68 C750.678,396.368 751.227,389.188 759.011,383.427 C749.527,378.504 751.343,373.103 757.589,366.832 C748.918,361.192 750.436,352.448 759.19,348.314 C752.431,343.024 751.7,335.787 760.775,332.039 C749.11,321.869 753.755,311.443 766.62,307 C767.189,306.169 767.831,306.361 768.252,307.15
+  S svg/g[1]/g[2]/path[1]/@stroke  exp=#000 | act=#181818
+  S svg/g[1]/g[2]/path[1]/@stroke-width  exp=1.5 | act=1
+  S svg/g[1]/g[2]/text[1]/@textLength  exp=101.938 | act=31.938
+  S svg/g[1]/g[2]/text[1]/text()[1]  exp=ASPSP on prem | act=AWS
+  S svg/g[1]/g[2][childCount]  exp=3 | act=2
+  S svg/g[1]/g[3]/@id  exp=ent0006 | act=ent0003
+  S svg/g[1]/g[3]/text[1]/@textLength  exp=64.575 | act=62.125
+  S svg/g[1]/g[3]/text[1]/text()[1]  exp=webserver | act=mplatform
+  S svg/g[1]/g[4]/@id  exp=ent0008 | act=ent0005
+  S svg/g[1]/g[4]/line[1]/@stroke  exp=#181818 | act=#000
+  S svg/g[1]/g[4]/line[1]/@stroke-width  exp=1 | act=1.5
+  S svg/g[1]/g[4]/text[1]/@textLength  exp=93.363 | act=101.938
+  S svg/g[1]/g[4]/text[1]/text()[1]  exp=Domain Server | act=ASPSP on prem
+  S svg/g[1]/g[4][childCount]  exp=5 | act=3
+  S svg/g[1]/g[5]/@id  exp=ent0010 | act=ent0006
+  S svg/g[1]/g[5]/text[1]/@textLength  exp=87.938 | act=64.575
+  S svg/g[1]/g[5]/text[1]/text()[1]  exp=Ping Federate | act=webserver
+  S svg/g[1]/g[6]/@id  exp=ent0015 | act=ent0008
+  S svg/g[1]/g[6]/text[1]/@textLength  exp=114.275 | act=93.363
+  S svg/g[1]/g[6]/text[1]/text()[1]  exp=ob gateway server | act=Domain Server
+  S svg/g[1]/g[7]/@id  exp=ent0017 | act=ent0010
+  S svg/g[1]/g[7]/text[1]/@textLength  exp=89.6 | act=87.938
+  S svg/g[1]/g[7]/text[1]/text()[1]  exp=mobile_device | act=Ping Federate
+  S svg/g[1]/g[8]/@id  exp=ent0019 | act=ent0015
+  S svg/g[1]/g[8]/polygon[1]  exp=rect | act=polygon
+  S svg/g[1]/g[8]/line[1]  exp=rect | act=line
+  S svg/g[1]/g[8]/line[2]  exp=rect | act=line
+  S svg/g[1]/g[8]/line[3]  exp=rect | act=line
+  S svg/g[1]/g[8]/text[1]/@textLength  exp=59.938 | act=114.275
+  S svg/g[1]/g[8]/text[1]/text()[1]  exp=MBL_app | act=ob gateway server
+  S svg/g[1]/g[9]/@id  exp=ent0022 | act=ent0017
+  S svg/g[1]/g[9]/text[1]/@textLength  exp=141.488 | act=89.6
+  S svg/g[1]/g[9]/text[1]/text()[1]  exp=OBIE Registery Server | act=mobile_device
+  S svg/g[1]/g[10]/@id  exp=ent0024 | act=ent0019
+  S svg/g[1]/g[10]/rect[1]  exp=polygon | act=rect
+  S svg/g[1]/g[10]/rect[2]  exp=line | act=rect
+  S svg/g[1]/g[10]/rect[3]  exp=line | act=rect
+  S svg/g[1]/g[10]/rect[4]  exp=line | act=rect
+  S svg/g[1]/g[10]/text[1]/@textLength  exp=27.3 | act=59.938
+  S svg/g[1]/g[10]/text[1]/text()[1]  exp=TPP | act=MBL_app
+  S svg/g[1]/g[11]/@class  exp=entity | act=cluster
+  S svg/g[1]/g[11]/@id  exp=ent0004 | act=ent0022
+  S svg/g[1]/g[11]/polygon[1]  exp=rect | act=polygon
+  S svg/g[1]/g[11]/line[1]  exp=rect | act=line
+  S svg/g[1]/g[11]/line[2]  exp=rect | act=line
+  S svg/g[1]/g[11]/line[3]  exp=rect | act=line
+  S svg/g[1]/g[11]/text[1]/@font-weight  exp= | act=700
+  S svg/g[1]/g[11]/text[1]/@textLength  exp=101.938 | act=141.488
+  S svg/g[1]/g[11]/text[1]/text()[1]  exp=OBSSOConsent | act=OBIE Registery Server
+  S svg/g[1]/g[12]/@class  exp=entity | act=cluster
+  S svg/g[1]/g[12]/@id  exp=ent0007 | act=ent0024
+  S svg/g[1]/g[12]/polygon[1]  exp=rect | act=polygon
+  S svg/g[1]/g[12]/line[1]  exp=rect | act=line
+  S svg/g[1]/g[12]/line[2]  exp=rect | act=line
+  S svg/g[1]/g[12]/line[3]  exp=rect | act=line
+  S svg/g[1]/g[12]/text[1]/@font-weight  exp= | act=700
+  S svg/g[1]/g[12]/text[1]/@textLength  exp=129.15 | act=27.3
+  S svg/g[1]/g[12]/text[1]/text()[1]  exp=Open Banking Portal | act=TPP
+  S svg/g[1]/g[13]/@id  exp=ent0009 | act=ent0004
+  S svg/g[1]/g[13]/rect[2]  exp=polygon | act=rect
+  S svg/g[1]/g[13]/rect[3]  exp=line | act=rect
+  S svg/g[1]/g[13]/rect[4]  exp=line | act=rect
+  S svg/g[1]/g[13]/text[1]/@textLength  exp=95.813 | act=101.938
+  S svg/g[1]/g[13]/text[1]/text()[1]  exp=association_file | act=OBSSOConsent
+  S svg/g[1]/g[14]/@id  exp=ent0011 | act=ent0007
+  S svg/g[1]/g[14]/text[1]/@textLength  exp=84 | act=129.15
+  S svg/g[1]/g[14]/text[1]/text()[1]  exp=/authorisation | act=Open Banking Portal
+  S svg/g[1]/g[14][childCount]  exp=2 | act=5
+  S svg/g[1]/g[15]/@id  exp=ent0012 | act=ent0009
+  S svg/g[1]/g[15]/text[1]/@textLength  exp=52.85 | act=95.813
+  S svg/g[1]/g[15]/text[1]/text()[1]  exp=/consent | act=association_file
+  S svg/g[1]/g[15][childCount]  exp=2 | act=5
+  S svg/g[1]/g[16]/@id  exp=ent0013 | act=ent0011
+  S svg/g[1]/g[16]/text[1]/@textLength  exp=38.063 | act=84
+  S svg/g[1]/g[16]/text[1]/text()[1]  exp=/token | act=/authorisation
+  S svg/g[1]/g[17]/@id  exp=ent0014 | act=ent0012
+  S svg/g[1]/g[17]/text[1]/@textLength  exp=53.638 | act=52.85
+  S svg/g[1]/g[17]/text[1]/text()[1]  exp=/userinfo | act=/consent
+  S svg/g[1]/g[18]/@id  exp=ent0016 | act=ent0013
+  S svg/g[1]/g[18]/text[1]/@textLength  exp=101.85 | act=38.063
+  S svg/g[1]/g[18]/text[1]/text()[1]  exp=payment service | act=/token
+  S svg/g[1]/g[18][childCount]  exp=5 | act=2
+  S svg/g[1]/g[19]/@id  exp=ent0018 | act=ent0014
+  S svg/g[1]/g[19]/text[1]/@textLength  exp=58.45 | act=53.638
+  S svg/g[1]/g[19]/text[1]/text()[1]  exp=TPP_app | act=/userinfo
+  S svg/g[1]/g[19][childCount]  exp=5 | act=2
+  S svg/g[1]/g[20]/@id  exp=ent0020 | act=ent0016
+  S svg/g[1]/g[20]/text[1]/@textLength  exp=56.875 | act=101.85
+  S svg/g[1]/g[20]/text[1]/text()[1]  exp=Webview | act=payment service
+  S svg/g[1]/g[21]/@id  exp=ent0023 | act=ent0018
+  S svg/g[1]/g[21]/rect[2]  exp=polygon | act=rect
+  S svg/g[1]/g[21]/rect[3]  exp=line | act=rect
+  S svg/g[1]/g[21]/rect[4]  exp=line | act=rect
+  S svg/g[1]/g[21]/text[1]/@textLength  exp=225.575 | act=58.45
+  S svg/g[1]/g[21]/text[1]/text()[1]  exp=List of ASPSP Authorisation Servers | act=TPP_app
+  S svg/g[1]/g[22]/@id  exp=ent0025 | act=ent0020
+  S svg/g[1]/g[22]/text[1]/@textLength  exp=89.6 | act=56.875
+  S svg/g[1]/g[22]/text[1]/text()[1]  exp=TPP_Backend | act=Webview
+  S svg/g[1]/g[23]/@id  exp=ent0021 | act=ent0023
+  S svg/g[1]/g[23]/text[1]/@textLength  exp=27.212 | act=225.575
+  S svg/g[1]/g[23]/text[1]/text()[1]  exp=user | act=List of ASPSP Authorisation Servers
+  S svg/g[1]/g[23][childCount]  exp=3 | act=5
+  S svg/g[1]/g[24]/@class  exp=link | act=entity
+  S svg/g[1]/g[24]/@id  exp=lnk26 | act=ent0025
+  S svg/g[1]/g[24]/text[1]/@font-size  exp=13 | act=14
+  S svg/g[1]/g[24]/text[1]/@textLength  exp=107.494 | act=89.6
+  S svg/g[1]/g[24]/text[1]/text()[1]  exp=A.Interact with app | act=TPP_Backend
+  S svg/g[1]/g[24][childCount]  exp=4 | act=5
+  S svg/g[1]/g[25]/@class  exp=link | act=entity
+  S svg/g[1]/g[25]/@id  exp=lnk27 | act=ent0021
+  S svg/g[1]/g[25]/path[1]/@d  exp=M76.13,270 C65.81,270 58,270 58,270 C58,270 58,235 58,235 C58,235 195,235 195,235 C195,235 195,263 195,263 C195,263 191.43,263 180.32,263 | act=M81.226,40.5 L81.226,67.5 M68.226,48.5 L94.226,48.5 M81.226,67.5 L68.226,82.5 M81.226,67.5 L94.226,82.5
+  S svg/g[1]/g[25]/path[1]/@id  exp=tapp-to-tapp | act=
+  S svg/g[1]/g[25]/path[1]/@stroke  exp=#008000 | act=#181818
+  S svg/g[1]/g[25]/path[1]/@stroke-width  exp=2 | act=0.5
+  S svg/g[1]/g[25]/text[1]/@font-size  exp=13 | act=14
+  S svg/g[1]/g[25]/text[1]/@textLength  exp=127.075 | act=27.212
+  S svg/g[1]/g[25]/text[1]/text()[1]  exp=B. Authorization event | act=user
+  S svg/g[1]/g[25][childCount]  exp=4 | act=3
+  S svg/g[1]/g[26]/@id  exp=lnk28 | act=lnk26
+  S svg/g[1]/g[26]/path[1]/@d  exp=M175.07,286.5 C209.02,286.5 248,286.5 248,286.5 C248,286.5 248,720.28 248,824.83 | act=M76.56,98.37 C76.56,141.81 76.56,207.1 76.56,242.74
+  S svg/g[1]/g[26]/path[1]/@id  exp=tapp-to-tppbe | act=user-to-tapp
+  S svg/g[1]/g[26]/text[1]/@textLength  exp=179.725 | act=115.375
+  S svg/g[1]/g[26]/text[1]/text()[1]  exp=C. get Authorisation Server List | act=\rA.Interact with app
+  S svg/g[1]/g[26][childCount]  exp=4 | act=3
+  S svg/g[1]/g[27]/@id  exp=lnk29 | act=lnk28
+  S svg/g[1]/g[27]/path[1]/@d  exp=M175.15,275.5 C200.925,275.5 232.138,275.5 256.906,275.5 C269.291,275.5 280.064,275.5 287.741,275.5 C288.701,275.5 289.612,275.5 290.472,275.5 C290.687,275.5 285.899,275.5 286.108,275.5 | act=M130.87,284.67 C167.7,284.67 211.56,284.67 211.56,284.67 C211.56,284.67 211.56,719.87 211.56,824.76
+  S svg/g[1]/g[27]/path[1]/@id  exp=tapp-to-mapp | act=tapp-to-tppbe
+  S svg/g[1]/g[27]/text[1]/@textLength  exp=67.275 | act=187.606
+  S svg/g[1]/g[27]/text[1]/text()[1]  exp=D. Deeplink | act=\rC. get Authorisation Server List
+  S svg/g[1]/g[27][childCount]  exp=4 | act=3
+  S svg/g[1]/g[28]/@id  exp=lnk30 | act=lnk29
+  S svg/g[1]/g[28]/path[1]/@d  exp=M658.71,268.5 C658.619,268.5 658.528,268.5 658.437,268.5 C658.256,268.5 658.077,268.5 657.9,268.5 C657.546,268.5 657.202,268.5 656.872,268.5 C656.212,268.5 655.608,268.5 655.096,268.5 C654.073,268.5 653.418,268.5 653.418,268.5 C653.418,268.5 653.418,258 653.418,258 C653.418,258 654.152,258 655.437,258 C656.08,258 656.86,258 657.755,258 C657.979,258 658.21,258 658.448,258 C658.507,258 653.567,258 653.627,258 | act=M130.63,268.5 C179.66,268.5 243.44,268.5 249.77,268.5
+  S svg/g[1]/g[28]/path[1]/@id  exp=mapp-to-mapp | act=tapp-to-mapp
+  S svg/g[1]/g[28]/path[1]/@stroke  exp=#181818 | act=#008000
+  S svg/g[1]/g[28]/path[1]/@stroke-width  exp=1 | act=2
+  S svg/g[1]/g[28]/polygon[1]/@fill  exp=#181818 | act=#008000
+  S svg/g[1]/g[28]/polygon[1]/@stroke  exp=#181818 | act=#008000
+  S svg/g[1]/g[28]/polygon[1]/@stroke-width  exp=1 | act=2
+  S svg/g[1]/g[28]/text[1]/@textLength  exp=130.081 | act=75.156
+  S svg/g[1]/g[28]/text[1]/text()[1]  exp=1. launch <brand> app | act=\rD. Deeplink
+  S svg/g[1]/g[29]/path[1]/@d  exp=M299,167.683 C299,167.26 299,166.838 299,166.415 C299,163.033 299,159.642 299,156.254 C299,102.045 299,48.67 299,48.67 C299,48.67 185.69,48.67 144.55,48.67 | act=M254.56,268.86 C254.56,262.93 254.56,73.33 254.56,73.33 C254.56,73.33 141.25,73.33 100.11,73.33
+  S svg/g[1]/g[30]/path[1]/@d  exp=M139.62,73.33 C164.75,73.33 215,73.33 215,73.33 C215,73.33 215,323.5 215,323.5 C215,323.5 299,323.5 299,323.5 C299,323.5 299,310.713 299,297.526 C299,290.933 299,284.24 299,278.996 C299,278.341 299,282.708 299,282.101 | act=M95.15,48.67 C141.64,48.67 288.56,48.67 288.56,48.67 C288.56,48.67 288.56,268.5 288.56,268.5 C288.56,268.5 264.28,268.5 260.62,268.5
+  S svg/g[1]/g[31]/path[1]/@d  exp=M621,277.445 C621,278.466 621,279.58 621,280.787 C621,283.2 621,285.978 621,289.097 C621,301.574 621,319.508 621,341.335 C621,384.991 621,444.222 621,506.524 C621,631.127 621,763.015 621,812.15 | act=M255.56,268.25 C255.56,252.82 255.56,6 255.56,6 C255.56,6 480.56,6 480.56,6 C480.56,6 480.56,688.56 480.56,812.1
+  S svg/g[1]/g[32]/path[1]/@d  exp=M299,277.642 C299,277.908 299,278.179 299,278.456 C299,279.01 299,279.587 299,280.186 C299,281.385 299,282.673 299,284.047 C299,286.795 299,289.887 299,293.297 C299,306.935 299,325.651 299,347.714 C299,391.841 299,449.359 299,506.439 C299,620.598 299,733 299,733 C299,733 517.11,733 565.92,733 | act=M255.77,269.5 C270.13,269.5 576.56,269.5 576.56,269.5 C576.56,269.5 576.56,725.5 576.56,725.5 C576.56,725.5 562.31,725.5 550.28,725.5
+  S svg/g[1]/g[33]/path[1]/@d  exp=M570.8,727 C550.16,727 503,727 503,727 C503,727 503,6 503,6 C503,6 300,6 300,6 C300,6 300,67.705 300,131.339 C300,139.293 300,147.277 300,155.175 C300,159.124 300,158.051 300,161.942 | act=M526.43,730 C475.24,730 232.56,730 232.56,730 C232.56,730 232.56,269.5 232.56,269.5 C232.56,269.5 246.19,269.5 249.69,269.5
+  S svg/g[1]/g[34]/path[1]/@d  exp=M291.304,269.5 C291.26,269.5 291.216,269.5 291.172,269.5 C290.461,269.5 289.73,269.5 288.988,269.5 C287.503,269.5 285.972,269.5 284.474,269.5 C278.48,269.5 273,269.5 273,269.5 C273,269.5 273,377 273,377 C273,377 658.74,377 822.83,377 | act=M254.64,269 C246.58,269 160.56,269 160.56,269 C160.56,269 160.56,377 160.56,377 C160.56,377 601.15,377 778.26,377
+  S svg/g[1]/g[35]/@id  exp=lnk39 | act=lnk37
+  S svg/g[1]/g[35]/path[1]/@d  exp=M899,354.66 C899,323.09 899,269.2 899,269.2 C899,269.2 862.992,269.2 808.628,269.2 C781.446,269.2 749.675,269.2 715.522,269.2 C698.445,269.2 680.773,269.2 662.781,269.2 C660.532,269.2 663.278,269.2 661.019,269.2 | act=M830.56,399.35 C830.56,476.95 830.56,730 830.56,730 C830.56,730 600.75,730 550.31,730
+  S svg/g[1]/g[35]/path[1]/@id  exp=obc-to-mapp | act=obc-to-aep
+  S svg/g[1]/g[35]/path[1]/@stroke-dasharray  exp=7,7 | act=
+  S svg/g[1]/g[35]/text[1]/@textLength  exp=131.381 | act=191.1
+  S svg/g[1]/g[35]/text[1]/text()[1]  exp=10 identity reference id | act=8. dropoff (identity , tmx_sess_id)
+  S svg/g[1]/g[36]/@id  exp=lnk37 | act=lnk38
+  S svg/g[1]/g[36]/path[1]/@id  exp=obc-to-aep | act=aep-to-obc
+  S svg/g[1]/g[36]/path[1]/@stroke-dasharray  exp= | act=7,7
+  S svg/g[1]/g[36]/text[1]/@textLength  exp=191.1 | act=127.725
+  S svg/g[1]/g[36]/text[1]/text()[1]  exp=8. dropoff (identity , tmx_sess_id) | act=9. identity reference id
+  S svg/g[1]/g[37]/@id  exp=lnk38 | act=lnk39
+  S svg/g[1]/g[37]/path[1]/@d  exp=M589.75,727 C640.19,727 875,727 875,727 C875,727 875,481.68 875,404.43 | act=M854.56,354.54 C854.56,320.68 854.56,260.5 854.56,260.5 C854.56,260.5 255.56,260.5 255.56,260.5 C255.56,260.5 255.56,261.11 255.56,263.22
+  S svg/g[1]/g[37]/path[1]/@id  exp=aep-to-obc | act=obc-to-mapp
+  S svg/g[1]/g[37]/text[1]/@textLength  exp=127.725 | act=131.381
+  S svg/g[1]/g[37]/text[1]/text()[1]  exp=9. identity reference id | act=10 identity reference id
+  S svg/g[1]/g[38]/path[1]/@d  exp=M300,277.162 C300,277.371 300,277.584 300,277.8 C300,278.666 300,279.591 300,280.573 C300,282.535 300,284.725 300,287.123 C300,296.716 300,309.647 300,324.766 C300,355.006 300,394.001 300,432.554 C300,509.66 300,585 300,585 C300,585 517.32,585 565.95,585 | act=M255.56,269.52 C255.56,283.78 255.56,588 255.56,588 C255.56,588 472.88,588 521.51,588
+  S svg/g[1]/g[39]/path[1]/@d  exp=M571.04,591 C518.52,591 260,591 260,591 C260,591 260,269 260,269 C260,269 268.433,269 277.524,269 C282.069,269 286.78,269 290.683,269 C290.805,269 290.926,269 291.047,269 C291.107,269 286.167,269 286.226,269 | act=M535.56,597.27 C535.56,604.91 535.56,614.5 535.56,614.5 C535.56,614.5 254.56,614.5 254.56,614.5 C254.56,614.5 254.56,284.71 254.56,274.25
+  S svg/g[1]/g[43]/@id  exp=lnk46 | act=lnk45
+  S svg/g[1]/g[43]/path[1]/@id  exp=mwv-to-obp-1 | act=user-to-mwv
+  S svg/g[1]/g[43]/text[1]/@textLength  exp=202.069 | act=149.419
+  S svg/g[1]/g[43]/text[1]/text()[1]  exp=17. Submit (OB Journey Complete) | act=16. Complete OB Journey
+  S svg/g[1]/g[44]/@id  exp=lnk47 | act=lnk46
+  S svg/g[1]/g[44]/path[1]/@id  exp=obp-to-mwv-1 | act=mwv-to-obp-1
+  S svg/g[1]/g[44]/path[1]/@stroke-dasharray  exp=7,7 | act=
+  S svg/g[1]/g[44]/text[1]/@textLength  exp=86.694 | act=202.069
+  S svg/g[1]/g[44]/text[1]/text()[1]  exp=18. Auth_Code | act=17. Submit (OB Journey Complete)
+  S svg/g[1]/g[45]/@id  exp=lnk45 | act=lnk47
+  S svg/g[1]/g[45]/path[1]/@id  exp=user-to-mwv | act=obp-to-mwv-1
+  S svg/g[1]/g[45]/path[1]/@stroke-dasharray  exp= | act=7,7
+  S svg/g[1]/g[45]/text[1]/@textLength  exp=149.419 | act=86.694
+  S svg/g[1]/g[45]/text[1]/text()[1]  exp=16. Complete OB Journey | act=18. Auth_Code
+  S svg/g[1]/g[46]/text[1]/@textLength  exp=102.456 | act=110.338
+  S svg/g[1]/g[46]/text[1]/text()[1]  exp=X. Make Payment | act=\rX. Make Payment
+  S svg/g[1]/g[46][childCount]  exp=4 | act=3
+  S svg/g[1]/g[47]/path[1]/@d  exp=M394.005,795 C394.659,795 391.294,795 391.948,795 C433.76,795 474,795 474,795 C474,795 474,896.5 474,998 C474,1048.75 474,1099.5 474,1137.56 C474,1147.08 474,1155.8 474,1163.53 C474,1165.46 474,1167.34 474,1169.14 C474,1169.59 474,1165.04 474,1165.48 | act=M261.02,795 C273.6,795 429.56,795 429.56,795 C429.56,795 429.56,1201 429.56,1201 C429.56,1201 521.11,1201 530.16,1201
+  S svg/g[1][childCount]  exp=49 | act=47
+  N svg/@height  exp=1323 | act=1314 (Δ9)
+  N svg/@viewBox[2]  exp=1049 | act=988 (Δ61)
+  N svg/@viewBox[3]  exp=1323 | act=1314 (Δ9)
+  N svg/@width  exp=1049 | act=988 (Δ61)
+  N svg/g[1]/g[1]/line[1]/@x1  exp=976 | act=735.62 (Δ240.38)
+  N svg/g[1]/g[1]/line[1]/@x2  exp=976 | act=835.945 (Δ140.05499999999995)
+  N svg/g[1]/g[1]/line[1]/@y1  exp=327 | act=291 (Δ36)
+  N svg/g[1]/g[1]/line[1]/@y2  exp=415 | act=291 (Δ124)
+  N svg/g[1]/g[1]/text[1]/@x  exp=863.968 | act=739.62 (Δ124.34799999999996)
+  N svg/g[1]/g[1]/text[1]/@y  exp=340.889 | act=283.889 (Δ57)
+  N svg/g[1]/g[2]/text[1]/@x  exp=459.7 | act=838.62 (Δ378.92)
+  N svg/g[1]/g[2]/text[1]/@y  exp=423.889 | act=322.889 (Δ101)
+  N svg/g[1]/g[3]/polygon[1]/@points[0]  exp=479.7 | act=767.62 (Δ287.92)
+  N svg/g[1]/g[3]/polygon[1]/@points[1]  exp=1027 | act=337 (Δ690)
+  N svg/g[1]/g[3]/polygon[1]/@points[2]  exp=489.7 | act=777.62 (Δ287.92)
+  N svg/g[1]/g[3]/polygon[1]/@points[3]  exp=1017 | act=327 (Δ690)
+  N svg/g[1]/g[3]/polygon[1]/@points[4]  exp=680.85 | act=941.557 (Δ260.707)
+  N svg/g[1]/g[3]/polygon[1]/@points[5]  exp=1017 | act=327 (Δ690)
+  N svg/g[1]/g[3]/polygon[1]/@points[6]  exp=680.85 | act=941.557 (Δ260.707)
+  N svg/g[1]/g[3]/polygon[1]/@points[7]  exp=1105 | act=405 (Δ700)
+  N svg/g[1]/g[3]/polygon[1]/@points[8]  exp=670.85 | act=931.557 (Δ260.707)
+  N svg/g[1]/g[3]/polygon[1]/@points[9]  exp=1115 | act=415 (Δ700)
+  N svg/g[1]/g[3]/polygon[1]/@points[10]  exp=479.7 | act=767.62 (Δ287.92)
+  N svg/g[1]/g[3]/polygon[1]/@points[11]  exp=1115 | act=415 (Δ700)
+  N svg/g[1]/g[3]/polygon[1]/@points[12]  exp=479.7 | act=767.62 (Δ287.92)
+  N svg/g[1]/g[3]/polygon[1]/@points[13]  exp=1027 | act=337 (Δ690)
+  N svg/g[1]/g[3]/line[1]/@x1  exp=670.85 | act=931.557 (Δ260.707)
+  N svg/g[1]/g[3]/line[1]/@x2  exp=680.85 | act=941.557 (Δ260.707)
+  N svg/g[1]/g[3]/line[1]/@y1  exp=1027 | act=337 (Δ690)
+  N svg/g[1]/g[3]/line[1]/@y2  exp=1017 | act=327 (Δ690)
+  N svg/g[1]/g[3]/line[2]/@x1  exp=479.7 | act=767.62 (Δ287.92)
+  N svg/g[1]/g[3]/line[2]/@x2  exp=670.85 | act=931.557 (Δ260.707)
+  N svg/g[1]/g[3]/line[2]/@y1  exp=1027 | act=337 (Δ690)
+  N svg/g[1]/g[3]/line[2]/@y2  exp=1027 | act=337 (Δ690)
+  N svg/g[1]/g[3]/line[3]/@x1  exp=670.85 | act=931.557 (Δ260.707)
+  N svg/g[1]/g[3]/line[3]/@x2  exp=670.85 | act=931.557 (Δ260.707)
+  N svg/g[1]/g[3]/line[3]/@y1  exp=1027 | act=337 (Δ690)
+  N svg/g[1]/g[3]/line[3]/@y2  exp=1115 | act=415 (Δ700)
+  N svg/g[1]/g[3]/text[1]/@x  exp=543.988 | act=819.526 (Δ275.5379999999999)
+  N svg/g[1]/g[3]/text[1]/@y  exp=1040.89 | act=350.889 (Δ690.0010000000001)
+  N svg/g[1]/g[4]/line[1]/@x1  exp=655.28 | act=419.26 (Δ236.01999999999998)
+  N svg/g[1]/g[4]/line[1]/@x2  exp=655.28 | act=534.198 (Δ121.082)
+  N svg/g[1]/g[4]/line[1]/@y1  exp=789 | act=472 (Δ317)
+  N svg/g[1]/g[4]/line[1]/@y2  exp=871 | act=472 (Δ399)
+  N svg/g[1]/g[4]/text[1]/@x  exp=530.099 | act=423.26 (Δ106.83900000000006)
+  N svg/g[1]/g[4]/text[1]/@y  exp=802.889 | act=464.889 (Δ338)
+  N svg/g[1]/g[5]/polygon[1]/@points[0]  exp=499.28 | act=435.26 (Δ64.01999999999998)
+  N svg/g[1]/g[5]/polygon[1]/@points[1]  exp=462 | act=1037 (Δ575)
+  N svg/g[1]/g[5]/polygon[1]/@points[2]  exp=509.28 | act=445.26 (Δ64.01999999999998)
+  N svg/g[1]/g[5]/polygon[1]/@points[3]  exp=452 | act=1027 (Δ575)
+  N svg/g[1]/g[5]/polygon[1]/@points[4]  exp=662.28 | act=636.41 (Δ25.870000000000005)
+  N svg/g[1]/g[5]/polygon[1]/@points[5]  exp=452 | act=1027 (Δ575)
+  N svg/g[1]/g[5]/polygon[1]/@points[6]  exp=662.28 | act=636.41 (Δ25.870000000000005)
+  N svg/g[1]/g[5]/polygon[1]/@points[7]  exp=745 | act=1105 (Δ360)
+  N svg/g[1]/g[5]/polygon[1]/@points[8]  exp=652.28 | act=626.41 (Δ25.870000000000005)
+  N svg/g[1]/g[5]/polygon[1]/@points[9]  exp=755 | act=1115 (Δ360)
+  N svg/g[1]/g[5]/polygon[1]/@points[10]  exp=499.28 | act=435.26 (Δ64.01999999999998)
+  N svg/g[1]/g[5]/polygon[1]/@points[11]  exp=755 | act=1115 (Δ360)
+  N svg/g[1]/g[5]/polygon[1]/@points[12]  exp=499.28 | act=435.26 (Δ64.01999999999998)
+  N svg/g[1]/g[5]/polygon[1]/@points[13]  exp=462 | act=1037 (Δ575)
+  N svg/g[1]/g[5]/line[1]/@x1  exp=652.28 | act=626.41 (Δ25.870000000000005)
+  N svg/g[1]/g[5]/line[1]/@x2  exp=662.28 | act=636.41 (Δ25.870000000000005)
+  N svg/g[1]/g[5]/line[1]/@y1  exp=462 | act=1037 (Δ575)
+  N svg/g[1]/g[5]/line[1]/@y2  exp=452 | act=1027 (Δ575)
+  N svg/g[1]/g[5]/line[2]/@x1  exp=499.28 | act=435.26 (Δ64.01999999999998)
+  N svg/g[1]/g[5]/line[2]/@x2  exp=652.28 | act=626.41 (Δ25.870000000000005)
+  N svg/g[1]/g[5]/line[2]/@y1  exp=462 | act=1037 (Δ575)
+  N svg/g[1]/g[5]/line[2]/@y2  exp=462 | act=1037 (Δ575)
+  N svg/g[1]/g[5]/line[3]/@x1  exp=652.28 | act=626.41 (Δ25.870000000000005)
+  N svg/g[1]/g[5]/line[3]/@x2  exp=652.28 | act=626.41 (Δ25.870000000000005)
+  N svg/g[1]/g[5]/line[3]/@y1  exp=462 | act=1037 (Δ575)
+  N svg/g[1]/g[5]/line[3]/@y2  exp=755 | act=1115 (Δ360)
+  N svg/g[1]/g[5]/text[1]/@x  exp=532.811 | act=499.547 (Δ33.26400000000001)
+  N svg/g[1]/g[5]/text[1]/@y  exp=475.889 | act=1050.89 (Δ575.0010000000001)
+  N svg/g[1]/g[6]/polygon[1]/@points[0]  exp=485.78 | act=456.93 (Δ28.849999999999966)
+  N svg/g[1]/g[6]/polygon[1]/@points[1]  exp=905 | act=799.5 (Δ105.5)
+  N svg/g[1]/g[6]/polygon[1]/@points[2]  exp=495.78 | act=466.93 (Δ28.849999999999966)
+  N svg/g[1]/g[6]/polygon[1]/@points[3]  exp=895 | act=789.5 (Δ105.5)
+  N svg/g[1]/g[6]/polygon[1]/@points[4]  exp=675.78 | act=614.743 (Δ61.03699999999992)
+  N svg/g[1]/g[6]/polygon[1]/@points[5]  exp=895 | act=789.5 (Δ105.5)
+  N svg/g[1]/g[6]/polygon[1]/@points[6]  exp=675.78 | act=614.743 (Δ61.03699999999992)
+  N svg/g[1]/g[6]/polygon[1]/@points[7]  exp=983 | act=860.5 (Δ122.5)
+  N svg/g[1]/g[6]/polygon[1]/@points[8]  exp=665.78 | act=604.743 (Δ61.03699999999992)
+  N svg/g[1]/g[6]/polygon[1]/@points[9]  exp=993 | act=870.5 (Δ122.5)
+  N svg/g[1]/g[6]/polygon[1]/@points[10]  exp=485.78 | act=456.93 (Δ28.849999999999966)
+  N svg/g[1]/g[6]/polygon[1]/@points[11]  exp=993 | act=870.5 (Δ122.5)
+  N svg/g[1]/g[6]/polygon[1]/@points[12]  exp=485.78 | act=456.93 (Δ28.849999999999966)
+  N svg/g[1]/g[6]/polygon[1]/@points[13]  exp=905 | act=799.5 (Δ105.5)
+  N svg/g[1]/g[6]/line[1]/@x1  exp=665.78 | act=604.743 (Δ61.03699999999992)
+  N svg/g[1]/g[6]/line[1]/@x2  exp=675.78 | act=614.743 (Δ61.03699999999992)
+  N svg/g[1]/g[6]/line[1]/@y1  exp=905 | act=799.5 (Δ105.5)
+  N svg/g[1]/g[6]/line[1]/@y2  exp=895 | act=789.5 (Δ105.5)
+  N svg/g[1]/g[6]/line[2]/@x1  exp=485.78 | act=456.93 (Δ28.849999999999966)
+  N svg/g[1]/g[6]/line[2]/@x2  exp=665.78 | act=604.743 (Δ61.03699999999992)
+  N svg/g[1]/g[6]/line[2]/@y1  exp=905 | act=799.5 (Δ105.5)
+  N svg/g[1]/g[6]/line[2]/@y2  exp=905 | act=799.5 (Δ105.5)
+  N svg/g[1]/g[6]/line[3]/@x1  exp=665.78 | act=604.743 (Δ61.03699999999992)
+  N svg/g[1]/g[6]/line[3]/@x2  exp=665.78 | act=604.743 (Δ61.03699999999992)
+  N svg/g[1]/g[6]/line[3]/@y1  exp=905 | act=799.5 (Δ105.5)
+  N svg/g[1]/g[6]/line[3]/@y2  exp=993 | act=870.5 (Δ122.5)
+  N svg/g[1]/g[6]/text[1]/@x  exp=519.642 | act=485.155 (Δ34.48700000000008)
+  N svg/g[1]/g[6]/text[1]/@y  exp=918.889 | act=813.389 (Δ105.5)
+  N svg/g[1]/g[7]/polygon[1]/@points[0]  exp=60.44 | act=510.84 (Δ450.4)
+  N svg/g[1]/g[7]/polygon[1]/@points[1]  exp=124 | act=490 (Δ366)
+  N svg/g[1]/g[7]/polygon[1]/@points[2]  exp=70.44 | act=520.84 (Δ450.40000000000003)
+  N svg/g[1]/g[7]/polygon[1]/@points[3]  exp=114 | act=480 (Δ366)
+  N svg/g[1]/g[7]/polygon[1]/@points[4]  exp=684.71 | act=560.84 (Δ123.87)
+  N svg/g[1]/g[7]/polygon[1]/@points[5]  exp=114 | act=480 (Δ366)
+  N svg/g[1]/g[7]/polygon[1]/@points[6]  exp=684.71 | act=560.84 (Δ123.87)
+  N svg/g[1]/g[7]/polygon[1]/@points[7]  exp=299 | act=745 (Δ446)
+  N svg/g[1]/g[7]/polygon[1]/@points[8]  exp=674.71 | act=550.84 (Δ123.87)
+  N svg/g[1]/g[7]/polygon[1]/@points[9]  exp=309 | act=755 (Δ446)
+  N svg/g[1]/g[7]/polygon[1]/@points[10]  exp=60.44 | act=510.84 (Δ450.4)
+  N svg/g[1]/g[7]/polygon[1]/@points[11]  exp=309 | act=755 (Δ446)
+  N svg/g[1]/g[7]/polygon[1]/@points[12]  exp=60.44 | act=510.84 (Δ450.4)
+  N svg/g[1]/g[7]/polygon[1]/@points[13]  exp=124 | act=490 (Δ366)
+  N svg/g[1]/g[7]/line[1]/@x1  exp=674.71 | act=550.84 (Δ123.87)
+  N svg/g[1]/g[7]/line[1]/@x2  exp=684.71 | act=560.84 (Δ123.87)
+  N svg/g[1]/g[7]/line[1]/@y1  exp=124 | act=490 (Δ366)
+  N svg/g[1]/g[7]/line[1]/@y2  exp=114 | act=480 (Δ366)
+  N svg/g[1]/g[7]/line[2]/@x1  exp=60.44 | act=510.84 (Δ450.4)
+  N svg/g[1]/g[7]/line[2]/@x2  exp=674.71 | act=550.84 (Δ123.87)
+  N svg/g[1]/g[7]/line[2]/@y1  exp=124 | act=490 (Δ366)
+  N svg/g[1]/g[7]/line[2]/@y2  exp=124 | act=490 (Δ366)
+  N svg/g[1]/g[7]/line[3]/@x1  exp=674.71 | act=550.84 (Δ123.87)
+  N svg/g[1]/g[7]/line[3]/@x2  exp=674.71 | act=550.84 (Δ123.87)
+  N svg/g[1]/g[7]/line[3]/@y1  exp=124 | act=490 (Δ366)
+  N svg/g[1]/g[7]/line[3]/@y2  exp=309 | act=755 (Δ446)
+  N svg/g[1]/g[7]/text[1]/@x  exp=323.775 | act=487.871 (Δ164.096)
+  N svg/g[1]/g[7]/text[1]/@y  exp=137.889 | act=503.889 (Δ366)
+  N svg/g[1]/g[8]/text[1]/@x  exp=442.051 | act=474.697 (Δ32.646000000000015)
+  N svg/g[1]/g[8]/text[1]/@y  exp=191.889 | act=928.889 (Δ737)
+  N svg/g[1]/g[9]/polygon[1]/@points[0]  exp=428.49 | act=16 (Δ412.49)
+  N svg/g[1]/g[9]/polygon[1]/@points[1]  exp=1181 | act=163 (Δ1018)
+  N svg/g[1]/g[9]/polygon[1]/@points[2]  exp=438.49 | act=26 (Δ412.49)
+  N svg/g[1]/g[9]/polygon[1]/@points[3]  exp=1171 | act=153 (Δ1018)
+  N svg/g[1]/g[9]/polygon[1]/@points[4]  exp=732.06 | act=616.275 (Δ115.78499999999997)
+  N svg/g[1]/g[9]/polygon[1]/@points[5]  exp=1171 | act=153 (Δ1018)
+  N svg/g[1]/g[9]/polygon[1]/@points[6]  exp=732.06 | act=616.275 (Δ115.78499999999997)
+  N svg/g[1]/g[9]/polygon[1]/@points[7]  exp=1288 | act=298 (Δ990)
+  N svg/g[1]/g[9]/polygon[1]/@points[8]  exp=722.06 | act=606.275 (Δ115.78499999999997)
+  N svg/g[1]/g[9]/polygon[1]/@points[9]  exp=1298 | act=308 (Δ990)
+  N svg/g[1]/g[9]/polygon[1]/@points[10]  exp=428.49 | act=16 (Δ412.49)
+  N svg/g[1]/g[9]/polygon[1]/@points[11]  exp=1298 | act=308 (Δ990)
+  N svg/g[1]/g[9]/polygon[1]/@points[12]  exp=428.49 | act=16 (Δ412.49)
+  N svg/g[1]/g[9]/polygon[1]/@points[13]  exp=1181 | act=163 (Δ1018)
+  N svg/g[1]/g[9]/line[1]/@x1  exp=722.06 | act=606.275 (Δ115.78499999999997)
+  N svg/g[1]/g[9]/line[1]/@x2  exp=732.06 | act=616.275 (Δ115.78499999999997)
+  N svg/g[1]/g[9]/line[1]/@y1  exp=1181 | act=163 (Δ1018)
+  N svg/g[1]/g[9]/line[1]/@y2  exp=1171 | act=153 (Δ1018)
+  N svg/g[1]/g[9]/line[2]/@x1  exp=428.49 | act=16 (Δ412.49)
+  N svg/g[1]/g[9]/line[2]/@x2  exp=722.06 | act=606.275 (Δ115.78499999999997)
+  N svg/g[1]/g[9]/line[2]/@y1  exp=1181 | act=163 (Δ1018)
+  N svg/g[1]/g[9]/line[2]/@y2  exp=1181 | act=163 (Δ1018)
+  N svg/g[1]/g[9]/line[3]/@x1  exp=722.06 | act=606.275 (Δ115.78499999999997)
+  N svg/g[1]/g[9]/line[3]/@x2  exp=722.06 | act=606.275 (Δ115.78499999999997)
+  N svg/g[1]/g[9]/line[3]/@y1  exp=1181 | act=163 (Δ1018)
+  N svg/g[1]/g[9]/line[3]/@y2  exp=1298 | act=308 (Δ990)
+  N svg/g[1]/g[9]/text[1]/@x  exp=505.531 | act=267.338 (Δ238.19299999999998)
+  N svg/g[1]/g[9]/text[1]/@y  exp=1194.89 | act=176.889 (Δ1018.0010000000001)
+  N svg/g[1]/g[10]/text[1]/@x  exp=282.04 | act=505.869 (Δ223.829)
+  N svg/g[1]/g[10]/text[1]/@y  exp=788.889 | act=204.889 (Δ584)
+  N svg/g[1]/g[11]/text[1]/@x  exp=843.06 | act=461.094 (Δ381.96599999999995)
+  N svg/g[1]/g[11]/text[1]/@y  exp=385.889 | act=1232.39 (Δ846.5010000000001)
+  N svg/g[1]/g[12]/text[1]/@x  exp=510.7 | act=237.6 (Δ273.1)
+  N svg/g[1]/g[12]/text[1]/@y  exp=1085.89 | act=825.889 (Δ260.0010000000001)
+  N svg/g[1]/g[13]/rect[1]/@height  exp=37 | act=44 (Δ7)
+  N svg/g[1]/g[13]/rect[1]/@width  exp=125.813 | act=141.938 (Δ16.124999999999986)
+  N svg/g[1]/g[13]/rect[1]/@x  exp=517.37 | act=783.62 (Δ266.25)
+  N svg/g[1]/g[13]/rect[1]/@y  exp=817.5 | act=355 (Δ462.5)
+  N svg/g[1]/g[13]/text[1]/@x  exp=527.37 | act=798.62 (Δ271.25)
+  N svg/g[1]/g[13]/text[1]/@y  exp=841.389 | act=385.889 (Δ455.5)
+  N svg/g[1]/g[14]/text[1]/@x  exp=538.28 | act=466.26 (Δ72.01999999999998)
+  N svg/g[1]/g[14]/text[1]/@y  exp=757.889 | act=1085.89 (Δ328.0010000000001)
+  N svg/g[1]/g[15]/text[1]/@x  exp=553.855 | act=482.93 (Δ70.92500000000001)
+  N svg/g[1]/g[15]/text[1]/@y  exp=686.889 | act=841.389 (Δ154.5)
+  N svg/g[1]/g[16]/ellipse[1]/@cx  exp=580.28 | act=535.84 (Δ44.43999999999994)
+  N svg/g[1]/g[16]/ellipse[1]/@cy  exp=588 | act=730 (Δ142)
+  N svg/g[1]/g[16]/text[1]/@x  exp=561.249 | act=493.84 (Δ67.40900000000005)
+  N svg/g[1]/g[16]/text[1]/@y  exp=615.889 | act=757.889 (Δ142)
+  N svg/g[1]/g[17]/ellipse[1]/@cx  exp=580.28 | act=535.84 (Δ44.43999999999994)
+  N svg/g[1]/g[17]/ellipse[1]/@cy  exp=517 | act=659 (Δ142)
+  N svg/g[1]/g[17]/text[1]/@x  exp=553.461 | act=509.415 (Δ44.04599999999999)
+  N svg/g[1]/g[17]/text[1]/@y  exp=544.889 | act=686.889 (Δ142)
+  N svg/g[1]/g[18]/text[1]/@x  exp=524.35 | act=516.809 (Δ7.541000000000054)
+  N svg/g[1]/g[18]/text[1]/@y  exp=963.889 | act=615.889 (Δ348)
+  N svg/g[1]/g[19]/text[1]/@x  exp=91.44 | act=509.021 (Δ417.581)
+  N svg/g[1]/g[19]/text[1]/@y  exp=278.889 | act=544.889 (Δ266)
+  N svg/g[1]/g[20]/rect[1]/@width  exp=96.875 | act=141.85 (Δ44.974999999999994)
+  N svg/g[1]/g[20]/rect[1]/@x  exp=531.84 | act=464.91 (Δ66.93)
+  N svg/g[1]/g[20]/rect[1]/@y  exp=209 | act=933 (Δ724)
+  N svg/g[1]/g[20]/rect[2]/@x  exp=608.715 | act=586.76 (Δ21.95500000000004)
+  N svg/g[1]/g[20]/rect[2]/@y  exp=214 | act=938 (Δ724)
+  N svg/g[1]/g[20]/rect[3]/@x  exp=606.715 | act=584.76 (Δ21.95500000000004)
+  N svg/g[1]/g[20]/rect[3]/@y  exp=216 | act=940 (Δ724)
+  N svg/g[1]/g[20]/rect[4]/@x  exp=606.715 | act=584.76 (Δ21.95500000000004)
+  N svg/g[1]/g[20]/rect[4]/@y  exp=220 | act=944 (Δ724)
+  N svg/g[1]/g[20]/text[1]/@x  exp=546.84 | act=479.91 (Δ66.93)
+  N svg/g[1]/g[20]/text[1]/@y  exp=239.889 | act=963.889 (Δ724)
+  N svg/g[1]/g[21]/rect[1]/@height  exp=37 | act=44 (Δ7)
+  N svg/g[1]/g[21]/rect[1]/@width  exp=255.575 | act=98.45 (Δ157.125)
+  N svg/g[1]/g[21]/rect[1]/@x  exp=452.49 | act=32 (Δ420.49)
+  N svg/g[1]/g[21]/rect[1]/@y  exp=1236.5 | act=248 (Δ988.5)
+  N svg/g[1]/g[21]/text[1]/@x  exp=462.49 | act=47 (Δ415.49)
+  N svg/g[1]/g[21]/text[1]/@y  exp=1260.39 | act=278.889 (Δ981.5010000000001)
+  N svg/g[1]/g[22]/rect[1]/@width  exp=129.6 | act=96.875 (Δ32.724999999999994)
+  N svg/g[1]/g[22]/rect[1]/@x  exp=234.89 | act=487.4 (Δ252.51)
+  N svg/g[1]/g[22]/rect[1]/@y  exp=830 | act=209 (Δ621)
+  N svg/g[1]/g[22]/rect[2]/@x  exp=344.49 | act=564.275 (Δ219.78499999999997)
+  N svg/g[1]/g[22]/rect[2]/@y  exp=835 | act=214 (Δ621)
+  N svg/g[1]/g[22]/rect[3]/@x  exp=342.49 | act=562.275 (Δ219.78499999999997)
+  N svg/g[1]/g[22]/rect[3]/@y  exp=837 | act=216 (Δ621)
+  N svg/g[1]/g[22]/rect[4]/@x  exp=342.49 | act=562.275 (Δ219.78499999999997)
+  N svg/g[1]/g[22]/rect[4]/@y  exp=841 | act=220 (Δ621)
+  N svg/g[1]/g[22]/text[1]/@x  exp=249.89 | act=502.4 (Δ252.51)
+  N svg/g[1]/g[22]/text[1]/@y  exp=860.889 | act=239.889 (Δ621)
+  N svg/g[1]/g[23]/text[1]/@x  exp=112.06 | act=418.05 (Δ305.99)
+  N svg/g[1]/g[23]/text[1]/@y  exp=94.889 | act=1260.39 (Δ1165.5010000000002)
+  N svg/g[1]/g[24]/text[1]/@x  exp=13 | act=205.45 (Δ192.45)
+  N svg/g[1]/g[24]/text[1]/@y  exp=197.161 | act=860.889 (Δ663.7280000000001)
+  N svg/g[1]/g[25]/text[1]/@x  exp=129.78 | act=67.62 (Δ62.16)
+  N svg/g[1]/g[25]/text[1]/@y  exp=226.111 | act=94.889 (Δ131.22199999999998)
+  N svg/g[1]/g[26]/polygon[1]/@points[0]  exp=248 | act=76.56 (Δ171.44)
+  N svg/g[1]/g[26]/polygon[1]/@points[1]  exp=829.83 | act=247.74 (Δ582.09)
+  N svg/g[1]/g[26]/polygon[1]/@points[2]  exp=252 | act=80.56 (Δ171.44)
+  N svg/g[1]/g[26]/polygon[1]/@points[3]  exp=820.83 | act=238.74 (Δ582.09)
+  N svg/g[1]/g[26]/polygon[1]/@points[4]  exp=248 | act=76.56 (Δ171.44)
+  N svg/g[1]/g[26]/polygon[1]/@points[5]  exp=824.83 | act=242.74 (Δ582.09)
+  N svg/g[1]/g[26]/polygon[1]/@points[6]  exp=244 | act=72.56 (Δ171.44)
+  N svg/g[1]/g[26]/polygon[1]/@points[7]  exp=820.83 | act=238.74 (Δ582.09)
+  N svg/g[1]/g[26]/polygon[1]/@points[8]  exp=248 | act=76.56 (Δ171.44)
+  N svg/g[1]/g[26]/polygon[1]/@points[9]  exp=829.83 | act=247.74 (Δ582.09)
+  N svg/g[1]/g[26]/text[1]/@x  exp=68 | act=22.06 (Δ45.94)
+  N svg/g[1]/g[26]/text[1]/@y  exp=545.811 | act=187.05 (Δ358.761)
+  N svg/g[1]/g[27]/polygon[1]/@points[0]  exp=291.108 | act=211.56 (Δ79.548)
+  N svg/g[1]/g[27]/polygon[1]/@points[1]  exp=275.5 | act=829.76 (Δ554.26)
+  N svg/g[1]/g[27]/polygon[1]/@points[2]  exp=282.108 | act=215.56 (Δ66.548)
+  N svg/g[1]/g[27]/polygon[1]/@points[3]  exp=271.5 | act=820.76 (Δ549.26)
+  N svg/g[1]/g[27]/polygon[1]/@points[4]  exp=286.108 | act=211.56 (Δ74.548)
+  N svg/g[1]/g[27]/polygon[1]/@points[5]  exp=275.5 | act=824.76 (Δ549.26)
+  N svg/g[1]/g[27]/polygon[1]/@points[6]  exp=282.108 | act=207.56 (Δ74.548)
+  N svg/g[1]/g[27]/polygon[1]/@points[7]  exp=279.5 | act=820.76 (Δ541.26)
+  N svg/g[1]/g[27]/polygon[1]/@points[8]  exp=291.108 | act=211.56 (Δ79.548)
+  N svg/g[1]/g[27]/polygon[1]/@points[9]  exp=275.5 | act=829.76 (Δ554.26)
+  N svg/g[1]/g[27]/text[1]/@x  exp=241.53 | act=121.06 (Δ120.47)
+  N svg/g[1]/g[27]/text[1]/@y  exp=299.611 | act=530.87 (Δ231.25900000000001)
+  N svg/g[1]/g[28]/polygon[1]/@points[0]  exp=658.627 | act=254.77 (Δ403.85699999999997)
+  N svg/g[1]/g[28]/polygon[1]/@points[1]  exp=258 | act=268.5 (Δ10.5)
+  N svg/g[1]/g[28]/polygon[1]/@points[2]  exp=649.627 | act=245.77 (Δ403.85699999999997)
+  N svg/g[1]/g[28]/polygon[1]/@points[3]  exp=254 | act=264.5 (Δ10.5)
+  N svg/g[1]/g[28]/polygon[1]/@points[4]  exp=653.627 | act=249.77 (Δ403.85699999999997)
+  N svg/g[1]/g[28]/polygon[1]/@points[5]  exp=258 | act=268.5 (Δ10.5)
+  N svg/g[1]/g[28]/polygon[1]/@points[6]  exp=649.627 | act=245.77 (Δ403.85699999999997)
+  N svg/g[1]/g[28]/polygon[1]/@points[7]  exp=262 | act=272.5 (Δ10.5)
+  N svg/g[1]/g[28]/polygon[1]/@points[8]  exp=658.627 | act=254.77 (Δ403.85699999999997)
+  N svg/g[1]/g[28]/polygon[1]/@points[9]  exp=258 | act=268.5 (Δ10.5)
+  N svg/g[1]/g[28]/text[1]/@x  exp=692.788 | act=227.2 (Δ465.588)
+  N svg/g[1]/g[28]/text[1]/@y  exp=255.361 | act=282.5 (Δ27.13900000000001)
+  N svg/g[1]/g[29]/polygon[1]/@points[0]  exp=139.55 | act=95.11 (Δ44.44000000000001)
+  N svg/g[1]/g[29]/polygon[1]/@points[1]  exp=48.67 | act=73.33 (Δ24.659999999999997)
+  N svg/g[1]/g[29]/polygon[1]/@points[2]  exp=148.55 | act=104.11 (Δ44.44000000000001)
+  N svg/g[1]/g[29]/polygon[1]/@points[3]  exp=52.67 | act=77.33 (Δ24.659999999999997)
+  N svg/g[1]/g[29]/polygon[1]/@points[4]  exp=144.55 | act=100.11 (Δ44.44000000000001)
+  N svg/g[1]/g[29]/polygon[1]/@points[5]  exp=48.67 | act=73.33 (Δ24.659999999999997)
+  N svg/g[1]/g[29]/polygon[1]/@points[6]  exp=148.55 | act=104.11 (Δ44.44000000000001)
+  N svg/g[1]/g[29]/polygon[1]/@points[7]  exp=44.67 | act=69.33 (Δ24.659999999999997)
+  N svg/g[1]/g[29]/polygon[1]/@points[8]  exp=139.55 | act=95.11 (Δ44.44000000000001)
+  N svg/g[1]/g[29]/polygon[1]/@points[9]  exp=48.67 | act=73.33 (Δ24.659999999999997)
+  N svg/g[1]/g[29]/text[1]/@x  exp=167 | act=188.06 (Δ21.060000000000002)
+  N svg/g[1]/g[29]/text[1]/@y  exp=90.141 | act=98.87 (Δ8.729)
+  N svg/g[1]/g[30]/polygon[1]/@points[0]  exp=299 | act=255.62 (Δ43.379999999999995)
+  N svg/g[1]/g[30]/polygon[1]/@points[1]  exp=277.101 | act=268.5 (Δ8.600999999999999)
+  N svg/g[1]/g[30]/polygon[1]/@points[2]  exp=295 | act=264.62 (Δ30.379999999999995)
+  N svg/g[1]/g[30]/polygon[1]/@points[3]  exp=286.101 | act=272.5 (Δ13.600999999999999)
+  N svg/g[1]/g[30]/polygon[1]/@points[4]  exp=299 | act=260.62 (Δ38.379999999999995)
+  N svg/g[1]/g[30]/polygon[1]/@points[5]  exp=282.101 | act=268.5 (Δ13.600999999999999)
+  N svg/g[1]/g[30]/polygon[1]/@points[6]  exp=303 | act=264.62 (Δ38.379999999999995)
+  N svg/g[1]/g[30]/polygon[1]/@points[7]  exp=286.101 | act=264.5 (Δ21.601)
+  N svg/g[1]/g[30]/polygon[1]/@points[8]  exp=299 | act=255.62 (Δ43.379999999999995)
+  N svg/g[1]/g[30]/polygon[1]/@points[9]  exp=277.101 | act=268.5 (Δ8.600999999999999)
+  N svg/g[1]/g[30]/text[1]/@x  exp=173 | act=310.06 (Δ137.06)
+  N svg/g[1]/g[30]/text[1]/@y  exp=241.011 | act=85.85 (Δ155.161)
+  N svg/g[1]/g[31]/polygon[1]/@points[0]  exp=621 | act=480.56 (Δ140.44)
+  N svg/g[1]/g[31]/polygon[1]/@points[1]  exp=817.15 | act=817.1 (Δ0.049999999999954525)
+  N svg/g[1]/g[31]/polygon[1]/@points[2]  exp=625 | act=484.56 (Δ140.44)
+  N svg/g[1]/g[31]/polygon[1]/@points[3]  exp=808.15 | act=808.1 (Δ0.049999999999954525)
+  N svg/g[1]/g[31]/polygon[1]/@points[4]  exp=621 | act=480.56 (Δ140.44)
+  N svg/g[1]/g[31]/polygon[1]/@points[5]  exp=812.15 | act=812.1 (Δ0.049999999999954525)
+  N svg/g[1]/g[31]/polygon[1]/@points[6]  exp=617 | act=476.56 (Δ140.44)
+  N svg/g[1]/g[31]/polygon[1]/@points[7]  exp=808.15 | act=808.1 (Δ0.049999999999954525)
+  N svg/g[1]/g[31]/polygon[1]/@points[8]  exp=621 | act=480.56 (Δ140.44)
+  N svg/g[1]/g[31]/polygon[1]/@points[9]  exp=817.15 | act=817.1 (Δ0.049999999999954525)
+  N svg/g[1]/g[31]/text[1]/@x  exp=507 | act=538.06 (Δ31.059999999999945)
+  N svg/g[1]/g[31]/text[1]/@y  exp=394.091 | act=175.43 (Δ218.661)
+  N svg/g[1]/g[32]/polygon[1]/@points[0]  exp=570.92 | act=545.28 (Δ25.639999999999986)
+  N svg/g[1]/g[32]/polygon[1]/@points[1]  exp=733 | act=725.5 (Δ7.5)
+  N svg/g[1]/g[32]/polygon[1]/@points[2]  exp=561.92 | act=554.28 (Δ7.639999999999986)
+  N svg/g[1]/g[32]/polygon[1]/@points[3]  exp=729 | act=729.5 (Δ0.5)
+  N svg/g[1]/g[32]/polygon[1]/@points[4]  exp=565.92 | act=550.28 (Δ15.639999999999986)
+  N svg/g[1]/g[32]/polygon[1]/@points[5]  exp=733 | act=725.5 (Δ7.5)
+  N svg/g[1]/g[32]/polygon[1]/@points[6]  exp=561.92 | act=554.28 (Δ7.639999999999986)
+  N svg/g[1]/g[32]/polygon[1]/@points[7]  exp=737 | act=721.5 (Δ15.5)
+  N svg/g[1]/g[32]/polygon[1]/@points[8]  exp=570.92 | act=545.28 (Δ25.639999999999986)
+  N svg/g[1]/g[32]/polygon[1]/@points[9]  exp=733 | act=725.5 (Δ7.5)
+  N svg/g[1]/g[32]/text[1]/@x  exp=107 | act=480.06 (Δ373.06)
+  N svg/g[1]/g[32]/text[1]/@y  exp=648.241 | act=360.24 (Δ288.001)
+  N svg/g[1]/g[33]/polygon[1]/@points[0]  exp=300 | act=254.69 (Δ45.31)
+  N svg/g[1]/g[33]/polygon[1]/@points[1]  exp=166.942 | act=269.5 (Δ102.55799999999999)
+  N svg/g[1]/g[33]/polygon[1]/@points[2]  exp=304 | act=245.69 (Δ58.31)
+  N svg/g[1]/g[33]/polygon[1]/@points[3]  exp=157.942 | act=265.5 (Δ107.55799999999999)
+  N svg/g[1]/g[33]/polygon[1]/@points[4]  exp=300 | act=249.69 (Δ50.31)
+  N svg/g[1]/g[33]/polygon[1]/@points[5]  exp=161.942 | act=269.5 (Δ107.55799999999999)
+  N svg/g[1]/g[33]/polygon[1]/@points[6]  exp=296 | act=245.69 (Δ50.31)
+  N svg/g[1]/g[33]/polygon[1]/@points[7]  exp=157.942 | act=273.5 (Δ115.55799999999999)
+  N svg/g[1]/g[33]/polygon[1]/@points[8]  exp=300 | act=254.69 (Δ45.31)
+  N svg/g[1]/g[33]/polygon[1]/@points[9]  exp=166.942 | act=269.5 (Δ102.55799999999999)
+  N svg/g[1]/g[33]/text[1]/@x  exp=504 | act=117.06 (Δ386.94)
+  N svg/g[1]/g[33]/text[1]/@y  exp=178.891 | act=643.12 (Δ464.22900000000004)
+  N svg/g[1]/g[34]/polygon[1]/@points[0]  exp=827.83 | act=783.26 (Δ44.57000000000005)
+  N svg/g[1]/g[34]/polygon[1]/@points[2]  exp=818.83 | act=774.26 (Δ44.57000000000005)
+  N svg/g[1]/g[34]/polygon[1]/@points[4]  exp=822.83 | act=778.26 (Δ44.57000000000005)
+  N svg/g[1]/g[34]/polygon[1]/@points[6]  exp=818.83 | act=774.26 (Δ44.57000000000005)
+  N svg/g[1]/g[34]/polygon[1]/@points[8]  exp=827.83 | act=783.26 (Δ44.57000000000005)
+  N svg/g[1]/g[34]/text[1]/@x  exp=355.65 | act=306.37 (Δ49.27999999999997)
+  N svg/g[1]/g[34]/text[1]/@y  exp=388.111 | act=384.5 (Δ3.61099999999999)
+  N svg/g[1]/g[35]/polygon[1]/@points[0]  exp=656.019 | act=545.31 (Δ110.70900000000006)
+  N svg/g[1]/g[35]/polygon[1]/@points[1]  exp=269.2 | act=730 (Δ460.8)
+  N svg/g[1]/g[35]/polygon[1]/@points[2]  exp=665.019 | act=554.31 (Δ110.70900000000006)
+  N svg/g[1]/g[35]/polygon[1]/@points[3]  exp=273.2 | act=734 (Δ460.8)
+  N svg/g[1]/g[35]/polygon[1]/@points[4]  exp=661.019 | act=550.31 (Δ110.70900000000006)
+  N svg/g[1]/g[35]/polygon[1]/@points[5]  exp=269.2 | act=730 (Δ460.8)
+  N svg/g[1]/g[35]/polygon[1]/@points[6]  exp=665.019 | act=554.31 (Δ110.70900000000006)
+  N svg/g[1]/g[35]/polygon[1]/@points[7]  exp=265.2 | act=726 (Δ460.8)
+  N svg/g[1]/g[35]/polygon[1]/@points[8]  exp=656.019 | act=545.31 (Δ110.70900000000006)
+  N svg/g[1]/g[35]/polygon[1]/@points[9]  exp=269.2 | act=730 (Δ460.8)
+  N svg/g[1]/g[35]/text[1]/@x  exp=643.41 | act=734.06 (Δ90.64999999999998)
+  N svg/g[1]/g[35]/text[1]/@y  exp=280.311 | act=714.8 (Δ434.489)
+  N svg/g[1]/g[36]/path[1]/@d[0]  exp=923 | act=545 (Δ378)
+  N svg/g[1]/g[36]/path[1]/@d[1]  exp=399.27 | act=734.5 (Δ335.23)
+  N svg/g[1]/g[36]/path[1]/@d[2]  exp=923 | act=599.5 (Δ323.5)
+  N svg/g[1]/g[36]/path[1]/@d[3]  exp=477.21 | act=734.5 (Δ257.29)
+  N svg/g[1]/g[36]/path[1]/@d[4]  exp=923 | act=878.56 (Δ44.440000000000055)
+  N svg/g[1]/g[36]/path[1]/@d[5]  exp=733 | act=734.5 (Δ1.5)
+  N svg/g[1]/g[36]/path[1]/@d[6]  exp=923 | act=878.56 (Δ44.440000000000055)
+  N svg/g[1]/g[36]/path[1]/@d[7]  exp=733 | act=734.5 (Δ1.5)
+  N svg/g[1]/g[36]/path[1]/@d[8]  exp=923 | act=878.56 (Δ44.440000000000055)
+  N svg/g[1]/g[36]/path[1]/@d[9]  exp=733 | act=734.5 (Δ1.5)
+  N svg/g[1]/g[36]/path[1]/@d[10]  exp=648.94 | act=878.56 (Δ229.6199999999999)
+  N svg/g[1]/g[36]/path[1]/@d[11]  exp=733 | act=482.63 (Δ250.37)
+  N svg/g[1]/g[36]/path[1]/@d[12]  exp=594.44 | act=878.56 (Δ284.1199999999999)
+  N svg/g[1]/g[36]/path[1]/@d[13]  exp=733 | act=404.36 (Δ328.64)
+  N svg/g[1]/g[36]/polygon[1]/@points[0]  exp=589.44 | act=878.56 (Δ289.1199999999999)
+  N svg/g[1]/g[36]/polygon[1]/@points[1]  exp=733 | act=399.36 (Δ333.64)
+  N svg/g[1]/g[36]/polygon[1]/@points[2]  exp=598.44 | act=874.56 (Δ276.1199999999999)
+  N svg/g[1]/g[36]/polygon[1]/@points[3]  exp=737 | act=408.36 (Δ328.64)
+  N svg/g[1]/g[36]/polygon[1]/@points[4]  exp=594.44 | act=878.56 (Δ284.1199999999999)
+  N svg/g[1]/g[36]/polygon[1]/@points[5]  exp=733 | act=404.36 (Δ328.64)
+  N svg/g[1]/g[36]/polygon[1]/@points[6]  exp=598.44 | act=882.56 (Δ284.1199999999999)
+  N svg/g[1]/g[36]/polygon[1]/@points[7]  exp=729 | act=408.36 (Δ320.64)
+  N svg/g[1]/g[36]/polygon[1]/@points[8]  exp=589.44 | act=878.56 (Δ289.1199999999999)
+  N svg/g[1]/g[36]/polygon[1]/@points[9]  exp=733 | act=399.36 (Δ333.64)
+  N svg/g[1]/g[36]/text[1]/@x  exp=731 | act=814.06 (Δ83.05999999999995)
+  N svg/g[1]/g[36]/text[1]/@y  exp=744.021 | act=741.21 (Δ2.810999999999922)
+  N svg/g[1]/g[37]/polygon[1]/@points[0]  exp=875 | act=255.56 (Δ619.44)
+  N svg/g[1]/g[37]/polygon[1]/@points[1]  exp=399.43 | act=268.22 (Δ131.20999999999998)
+  N svg/g[1]/g[37]/polygon[1]/@points[2]  exp=871 | act=259.56 (Δ611.44)
+  N svg/g[1]/g[37]/polygon[1]/@points[3]  exp=408.43 | act=259.22 (Δ149.20999999999998)
+  N svg/g[1]/g[37]/polygon[1]/@points[4]  exp=875 | act=255.56 (Δ619.44)
+  N svg/g[1]/g[37]/polygon[1]/@points[5]  exp=404.43 | act=263.22 (Δ141.20999999999998)
+  N svg/g[1]/g[37]/polygon[1]/@points[6]  exp=879 | act=251.56 (Δ627.44)
+  N svg/g[1]/g[37]/polygon[1]/@points[7]  exp=408.43 | act=259.22 (Δ149.20999999999998)
+  N svg/g[1]/g[37]/polygon[1]/@points[8]  exp=875 | act=255.56 (Δ619.44)
+  N svg/g[1]/g[37]/polygon[1]/@points[9]  exp=399.43 | act=268.22 (Δ131.20999999999998)
+  N svg/g[1]/g[37]/text[1]/@x  exp=747 | act=664.72 (Δ82.27999999999997)
+  N svg/g[1]/g[37]/text[1]/@y  exp=716.951 | act=268 (Δ448.951)
+  N svg/g[1]/g[38]/polygon[1]/@points[0]  exp=570.95 | act=526.51 (Δ44.440000000000055)
+  N svg/g[1]/g[38]/polygon[1]/@points[1]  exp=585 | act=588 (Δ3)
+  N svg/g[1]/g[38]/polygon[1]/@points[2]  exp=561.95 | act=517.51 (Δ44.440000000000055)
+  N svg/g[1]/g[38]/polygon[1]/@points[3]  exp=581 | act=584 (Δ3)
+  N svg/g[1]/g[38]/polygon[1]/@points[4]  exp=565.95 | act=521.51 (Δ44.440000000000055)
+  N svg/g[1]/g[38]/polygon[1]/@points[5]  exp=585 | act=588 (Δ3)
+  N svg/g[1]/g[38]/polygon[1]/@points[6]  exp=561.95 | act=517.51 (Δ44.440000000000055)
+  N svg/g[1]/g[38]/polygon[1]/@points[7]  exp=589 | act=592 (Δ3)
+  N svg/g[1]/g[38]/polygon[1]/@points[8]  exp=570.95 | act=526.51 (Δ44.440000000000055)
+  N svg/g[1]/g[38]/polygon[1]/@points[9]  exp=585 | act=588 (Δ3)
+  N svg/g[1]/g[38]/text[1]/@x  exp=301 | act=130.06 (Δ170.94)
+  N svg/g[1]/g[38]/text[1]/@y  exp=573.841 | act=571.73 (Δ2.11099999999999)
+  N svg/g[1]/g[39]/polygon[1]/@points[0]  exp=291.226 | act=254.56 (Δ36.666)
+  N svg/g[1]/g[39]/polygon[1]/@points[1]  exp=269 | act=269.25 (Δ0.25)
+  N svg/g[1]/g[39]/polygon[1]/@points[2]  exp=282.226 | act=250.56 (Δ31.665999999999997)
+  N svg/g[1]/g[39]/polygon[1]/@points[3]  exp=265 | act=278.25 (Δ13.25)
+  N svg/g[1]/g[39]/polygon[1]/@points[4]  exp=286.226 | act=254.56 (Δ31.665999999999997)
+  N svg/g[1]/g[39]/polygon[1]/@points[5]  exp=269 | act=274.25 (Δ5.25)
+  N svg/g[1]/g[39]/polygon[1]/@points[6]  exp=282.226 | act=258.56 (Δ23.665999999999997)
+  N svg/g[1]/g[39]/polygon[1]/@points[7]  exp=273 | act=278.25 (Δ5.25)
+  N svg/g[1]/g[39]/polygon[1]/@points[8]  exp=291.226 | act=254.56 (Δ36.666)
+  N svg/g[1]/g[39]/polygon[1]/@points[9]  exp=269 | act=269.25 (Δ0.25)
+  N svg/g[1]/g[39]/text[1]/@x  exp=7 | act=127.56 (Δ120.56)
+  N svg/g[1]/g[39]/text[1]/@y  exp=577.131 | act=598.49 (Δ21.359000000000037)
+  N svg/g[1]/g[40]/path[1]/@d[0]  exp=300.37 | act=255.93 (Δ44.44)
+  N svg/g[1]/g[40]/path[1]/@d[1]  exp=268.8 | act=269 (Δ0.19999999999998863)
+  N svg/g[1]/g[40]/path[1]/@d[2]  exp=314.41 | act=269.97 (Δ44.44)
+  N svg/g[1]/g[40]/path[1]/@d[3]  exp=268.8 | act=269 (Δ0.19999999999998863)
+  N svg/g[1]/g[40]/path[1]/@d[4]  exp=539 | act=494.56 (Δ44.44)
+  N svg/g[1]/g[40]/path[1]/@d[5]  exp=268.8 | act=269 (Δ0.19999999999998863)
+  N svg/g[1]/g[40]/path[1]/@d[6]  exp=539 | act=494.56 (Δ44.44)
+  N svg/g[1]/g[40]/path[1]/@d[7]  exp=268.8 | act=269 (Δ0.19999999999998863)
+  N svg/g[1]/g[40]/path[1]/@d[8]  exp=539 | act=494.56 (Δ44.44)
+  N svg/g[1]/g[40]/path[1]/@d[9]  exp=268.8 | act=269 (Δ0.19999999999998863)
+  N svg/g[1]/g[40]/path[1]/@d[10]  exp=539 | act=494.56 (Δ44.44)
+  N svg/g[1]/g[40]/path[1]/@d[11]  exp=266.56 | act=266.46 (Δ0.10000000000002274)
+  N svg/g[1]/g[40]/path[1]/@d[12]  exp=539 | act=494.56 (Δ44.44)
+  N svg/g[1]/g[40]/path[1]/@d[13]  exp=258.43 | act=258.1 (Δ0.3299999999999841)
+  N svg/g[1]/g[40]/polygon[1]/@points[0]  exp=539 | act=494.56 (Δ44.44)
+  N svg/g[1]/g[40]/polygon[1]/@points[1]  exp=253.43 | act=253.1 (Δ0.3300000000000125)
+  N svg/g[1]/g[40]/polygon[1]/@points[2]  exp=535 | act=490.56 (Δ44.44)
+  N svg/g[1]/g[40]/polygon[1]/@points[3]  exp=262.43 | act=262.1 (Δ0.3299999999999841)
+  N svg/g[1]/g[40]/polygon[1]/@points[4]  exp=539 | act=494.56 (Δ44.44)
+  N svg/g[1]/g[40]/polygon[1]/@points[5]  exp=258.43 | act=258.1 (Δ0.3299999999999841)
+  N svg/g[1]/g[40]/polygon[1]/@points[6]  exp=543 | act=498.56 (Δ44.44)
+  N svg/g[1]/g[40]/polygon[1]/@points[7]  exp=262.43 | act=262.1 (Δ0.3299999999999841)
+  N svg/g[1]/g[40]/polygon[1]/@points[8]  exp=539 | act=494.56 (Δ44.44)
+  N svg/g[1]/g[40]/polygon[1]/@points[9]  exp=253.43 | act=253.1 (Δ0.3300000000000125)
+  N svg/g[1]/g[40]/text[1]/@x  exp=428.37 | act=447.19 (Δ18.819999999999993)
+  N svg/g[1]/g[40]/text[1]/@y  exp=279.911 | act=276.5 (Δ3.4110000000000014)
+  N svg/g[1]/g[41]/path[1]/@d[0]  exp=628.76 | act=584.32 (Δ44.43999999999994)
+  N svg/g[1]/g[41]/path[1]/@d[2]  exp=646.36 | act=601.92 (Δ44.440000000000055)
+  N svg/g[1]/g[41]/path[1]/@d[4]  exp=662 | act=617.56 (Δ44.440000000000055)
+  N svg/g[1]/g[41]/path[1]/@d[6]  exp=662 | act=617.56 (Δ44.440000000000055)
+  N svg/g[1]/g[41]/path[1]/@d[8]  exp=662 | act=617.56 (Δ44.440000000000055)
+  N svg/g[1]/g[41]/path[1]/@d[10]  exp=662 | act=617.56 (Δ44.440000000000055)
+  N svg/g[1]/g[41]/path[1]/@d[12]  exp=662 | act=617.56 (Δ44.440000000000055)
+  N svg/g[1]/g[41]/polygon[1]/@points[0]  exp=662 | act=617.56 (Δ44.440000000000055)
+  N svg/g[1]/g[41]/polygon[1]/@points[2]  exp=666 | act=621.56 (Δ44.440000000000055)
+  N svg/g[1]/g[41]/polygon[1]/@points[4]  exp=662 | act=617.56 (Δ44.440000000000055)
+  N svg/g[1]/g[41]/polygon[1]/@points[6]  exp=658 | act=613.56 (Δ44.440000000000055)
+  N svg/g[1]/g[41]/polygon[1]/@points[8]  exp=662 | act=617.56 (Δ44.440000000000055)
+  N svg/g[1]/g[41]/text[1]/@x  exp=663 | act=716.56 (Δ53.559999999999945)
+  N svg/g[1]/g[41]/text[1]/@y  exp=630.841 | act=627.23 (Δ3.61099999999999)
+  N svg/g[1]/g[42]/path[1]/@d[0]  exp=657 | act=609.56 (Δ47.440000000000055)
+  N svg/g[1]/g[42]/path[1]/@d[1]  exp=1054.92 | act=1054.72 (Δ0.20000000000004547)
+  N svg/g[1]/g[42]/path[1]/@d[2]  exp=657 | act=609.56 (Δ47.440000000000055)
+  N svg/g[1]/g[42]/path[1]/@d[3]  exp=922.14 | act=922.29 (Δ0.14999999999997726)
+  N svg/g[1]/g[42]/path[1]/@d[4]  exp=657 | act=609.56 (Δ47.440000000000055)
+  N svg/g[1]/g[42]/path[1]/@d[5]  exp=235.4 | act=244.2 (Δ8.799999999999983)
+  N svg/g[1]/g[42]/path[1]/@d[6]  exp=657 | act=609.56 (Δ47.440000000000055)
+  N svg/g[1]/g[42]/path[1]/@d[7]  exp=235.4 | act=244.2 (Δ8.799999999999983)
+  N svg/g[1]/g[42]/path[1]/@d[8]  exp=657 | act=609.56 (Δ47.440000000000055)
+  N svg/g[1]/g[42]/path[1]/@d[9]  exp=235.4 | act=244.2 (Δ8.799999999999983)
+  N svg/g[1]/g[42]/path[1]/@d[10]  exp=649.09 | act=603.31 (Δ45.780000000000086)
+  N svg/g[1]/g[42]/path[1]/@d[11]  exp=235.4 | act=244.2 (Δ8.799999999999983)
+  N svg/g[1]/g[42]/path[1]/@d[12]  exp=633.87 | act=589.6 (Δ44.26999999999998)
+  N svg/g[1]/g[42]/path[1]/@d[13]  exp=235.4 | act=244.2 (Δ8.799999999999983)
+  N svg/g[1]/g[42]/polygon[1]/@points[0]  exp=628.87 | act=584.6 (Δ44.26999999999998)
+  N svg/g[1]/g[42]/polygon[1]/@points[1]  exp=235.4 | act=244.2 (Δ8.799999999999983)
+  N svg/g[1]/g[42]/polygon[1]/@points[2]  exp=637.87 | act=593.6 (Δ44.26999999999998)
+  N svg/g[1]/g[42]/polygon[1]/@points[3]  exp=239.4 | act=248.2 (Δ8.799999999999983)
+  N svg/g[1]/g[42]/polygon[1]/@points[4]  exp=633.87 | act=589.6 (Δ44.26999999999998)
+  N svg/g[1]/g[42]/polygon[1]/@points[5]  exp=235.4 | act=244.2 (Δ8.799999999999983)
+  N svg/g[1]/g[42]/polygon[1]/@points[6]  exp=637.87 | act=593.6 (Δ44.26999999999998)
+  N svg/g[1]/g[42]/polygon[1]/@points[7]  exp=231.4 | act=240.2 (Δ8.799999999999983)
+  N svg/g[1]/g[42]/polygon[1]/@points[8]  exp=628.87 | act=584.6 (Δ44.26999999999998)
+  N svg/g[1]/g[42]/polygon[1]/@points[9]  exp=235.4 | act=244.2 (Δ8.799999999999983)
+  N svg/g[1]/g[42]/text[1]/@x  exp=658 | act=670.56 (Δ12.559999999999945)
+  N svg/g[1]/g[42]/text[1]/@y  exp=642.201 | act=644.48 (Δ2.2789999999999964)
+  N svg/g[1]/g[43]/path[1]/@d[0]  exp=628.79 | act=85.56 (Δ543.23)
+  N svg/g[1]/g[43]/path[1]/@d[1]  exp=226.6 | act=98.17 (Δ128.43)
+  N svg/g[1]/g[43]/path[1]/@d[2]  exp=644.99 | act=85.56 (Δ559.4300000000001)
+  N svg/g[1]/g[43]/path[1]/@d[3]  exp=226.6 | act=147.52 (Δ79.07999999999998)
+  N svg/g[1]/g[43]/path[1]/@d[4]  exp=659 | act=85.56 (Δ573.44)
+  N svg/g[1]/g[43]/path[1]/@d[5]  exp=226.6 | act=228.5 (Δ1.9000000000000057)
+  N svg/g[1]/g[43]/path[1]/@d[6]  exp=659 | act=85.56 (Δ573.44)
+  N svg/g[1]/g[43]/path[1]/@d[7]  exp=226.6 | act=228.5 (Δ1.9000000000000057)
+  N svg/g[1]/g[43]/path[1]/@d[8]  exp=659 | act=85.56 (Δ573.44)
+  N svg/g[1]/g[43]/path[1]/@d[9]  exp=226.6 | act=228.5 (Δ1.9000000000000057)
+  N svg/g[1]/g[43]/path[1]/@d[10]  exp=659 | act=365.79 (Δ293.21)
+  N svg/g[1]/g[43]/path[1]/@d[11]  exp=915.52 | act=228.5 (Δ687.02)
+  N svg/g[1]/g[43]/path[1]/@d[12]  exp=659 | act=482.22 (Δ176.77999999999997)
+  N svg/g[1]/g[43]/path[1]/@d[13]  exp=1049.69 | act=228.5 (Δ821.19)
+  N svg/g[1]/g[43]/polygon[1]/@points[0]  exp=659 | act=487.22 (Δ171.77999999999997)
+  N svg/g[1]/g[43]/polygon[1]/@points[1]  exp=1054.69 | act=228.5 (Δ826.19)
+  N svg/g[1]/g[43]/polygon[1]/@points[2]  exp=663 | act=478.22 (Δ184.77999999999997)
+  N svg/g[1]/g[43]/polygon[1]/@points[3]  exp=1045.69 | act=224.5 (Δ821.19)
+  N svg/g[1]/g[43]/polygon[1]/@points[4]  exp=659 | act=482.22 (Δ176.77999999999997)
+  N svg/g[1]/g[43]/polygon[1]/@points[5]  exp=1049.69 | act=228.5 (Δ821.19)
+  N svg/g[1]/g[43]/polygon[1]/@points[6]  exp=655 | act=478.22 (Δ176.77999999999997)
+  N svg/g[1]/g[43]/polygon[1]/@points[7]  exp=1045.69 | act=232.5 (Δ813.19)
+  N svg/g[1]/g[43]/polygon[1]/@points[8]  exp=659 | act=487.22 (Δ171.77999999999997)
+  N svg/g[1]/g[43]/polygon[1]/@points[9]  exp=1054.69 | act=228.5 (Δ826.19)
+  N svg/g[1]/g[43]/text[1]/@x  exp=456 | act=145.73 (Δ310.27)
+  N svg/g[1]/g[43]/text[1]/@y  exp=621.651 | act=236 (Δ385.65099999999995)
+  N svg/g[1]/g[44]/path[1]/@d[0]  exp=654 | act=584.35 (Δ69.64999999999998)
+  N svg/g[1]/g[44]/path[1]/@d[1]  exp=1054.72 | act=226.6 (Δ828.12)
+  N svg/g[1]/g[44]/path[1]/@d[2]  exp=654 | act=600.55 (Δ53.450000000000045)
+  N svg/g[1]/g[44]/path[1]/@d[3]  exp=922.29 | act=226.6 (Δ695.6899999999999)
+  N svg/g[1]/g[44]/path[1]/@d[4]  exp=654 | act=614.56 (Δ39.440000000000055)
+  N svg/g[1]/g[44]/path[1]/@d[5]  exp=244.2 | act=226.6 (Δ17.599999999999994)
+  N svg/g[1]/g[44]/path[1]/@d[6]  exp=654 | act=614.56 (Δ39.440000000000055)
+  N svg/g[1]/g[44]/path[1]/@d[7]  exp=244.2 | act=226.6 (Δ17.599999999999994)
+  N svg/g[1]/g[44]/path[1]/@d[8]  exp=654 | act=614.56 (Δ39.440000000000055)
+  N svg/g[1]/g[44]/path[1]/@d[9]  exp=244.2 | act=226.6 (Δ17.599999999999994)
+  N svg/g[1]/g[44]/path[1]/@d[10]  exp=647.75 | act=614.56 (Δ33.190000000000055)
+  N svg/g[1]/g[44]/path[1]/@d[11]  exp=244.2 | act=915.52 (Δ671.3199999999999)
+  N svg/g[1]/g[44]/path[1]/@d[12]  exp=634.04 | act=614.56 (Δ19.480000000000018)
+  N svg/g[1]/g[44]/path[1]/@d[13]  exp=244.2 | act=1049.69 (Δ805.49)
+  N svg/g[1]/g[44]/polygon[1]/@points[0]  exp=629.04 | act=614.56 (Δ14.480000000000018)
+  N svg/g[1]/g[44]/polygon[1]/@points[1]  exp=244.2 | act=1054.69 (Δ810.49)
+  N svg/g[1]/g[44]/polygon[1]/@points[2]  exp=638.04 | act=618.56 (Δ19.480000000000018)
+  N svg/g[1]/g[44]/polygon[1]/@points[3]  exp=248.2 | act=1045.69 (Δ797.49)
+  N svg/g[1]/g[44]/polygon[1]/@points[4]  exp=634.04 | act=614.56 (Δ19.480000000000018)
+  N svg/g[1]/g[44]/polygon[1]/@points[5]  exp=244.2 | act=1049.69 (Δ805.49)
+  N svg/g[1]/g[44]/polygon[1]/@points[6]  exp=638.04 | act=610.56 (Δ27.480000000000018)
+  N svg/g[1]/g[44]/polygon[1]/@points[7]  exp=240.2 | act=1045.69 (Δ805.49)
+  N svg/g[1]/g[44]/polygon[1]/@points[8]  exp=629.04 | act=614.56 (Δ14.480000000000018)
+  N svg/g[1]/g[44]/polygon[1]/@points[9]  exp=244.2 | act=1054.69 (Δ810.49)
+  N svg/g[1]/g[44]/text[1]/@x  exp=567 | act=512.56 (Δ54.440000000000055)
+  N svg/g[1]/g[44]/text[1]/@y  exp=633.091 | act=618.04 (Δ15.051000000000045)
+  N svg/g[1]/g[45]/path[1]/@d[0]  exp=130 | act=612.56 (Δ482.55999999999995)
+  N svg/g[1]/g[45]/path[1]/@d[1]  exp=98.34 | act=1054.92 (Δ956.58)
+  N svg/g[1]/g[45]/path[1]/@d[2]  exp=130 | act=612.56 (Δ482.55999999999995)
+  N svg/g[1]/g[45]/path[1]/@d[3]  exp=145.9 | act=922.14 (Δ776.24)
+  N svg/g[1]/g[45]/path[1]/@d[4]  exp=130 | act=612.56 (Δ482.55999999999995)
+  N svg/g[1]/g[45]/path[1]/@d[5]  exp=222 | act=235.4 (Δ13.400000000000006)
+  N svg/g[1]/g[45]/path[1]/@d[6]  exp=130 | act=612.56 (Δ482.55999999999995)
+  N svg/g[1]/g[45]/path[1]/@d[7]  exp=222 | act=235.4 (Δ13.400000000000006)
+  N svg/g[1]/g[45]/path[1]/@d[8]  exp=130 | act=612.56 (Δ482.55999999999995)
+  N svg/g[1]/g[45]/path[1]/@d[9]  exp=222 | act=235.4 (Δ13.400000000000006)
+  N svg/g[1]/g[45]/path[1]/@d[10]  exp=410.23 | act=604.65 (Δ194.41999999999996)
+  N svg/g[1]/g[45]/path[1]/@d[11]  exp=222 | act=235.4 (Δ13.400000000000006)
+  N svg/g[1]/g[45]/path[1]/@d[12]  exp=526.66 | act=589.43 (Δ62.76999999999998)
+  N svg/g[1]/g[45]/path[1]/@d[13]  exp=222 | act=235.4 (Δ13.400000000000006)
+  N svg/g[1]/g[45]/polygon[1]/@points[0]  exp=531.66 | act=584.43 (Δ52.76999999999998)
+  N svg/g[1]/g[45]/polygon[1]/@points[1]  exp=222 | act=235.4 (Δ13.400000000000006)
+  N svg/g[1]/g[45]/polygon[1]/@points[2]  exp=522.66 | act=593.43 (Δ70.76999999999998)
+  N svg/g[1]/g[45]/polygon[1]/@points[3]  exp=218 | act=239.4 (Δ21.400000000000006)
+  N svg/g[1]/g[45]/polygon[1]/@points[4]  exp=526.66 | act=589.43 (Δ62.76999999999998)
+  N svg/g[1]/g[45]/polygon[1]/@points[5]  exp=222 | act=235.4 (Δ13.400000000000006)
+  N svg/g[1]/g[45]/polygon[1]/@points[6]  exp=522.66 | act=593.43 (Δ70.76999999999998)
+  N svg/g[1]/g[45]/polygon[1]/@points[7]  exp=226 | act=231.4 (Δ5.400000000000006)
+  N svg/g[1]/g[45]/polygon[1]/@points[8]  exp=531.66 | act=584.43 (Δ52.76999999999998)
+  N svg/g[1]/g[45]/polygon[1]/@points[9]  exp=222 | act=235.4 (Δ13.400000000000006)
+  N svg/g[1]/g[45]/text[1]/@x  exp=270 | act=568.56 (Δ298.55999999999995)
+  N svg/g[1]/g[45]/text[1]/@y  exp=233.111 | act=638.59 (Δ405.47900000000004)
+  N svg/g[1]/g[46]/path[1]/@d[0]  exp=175.11 | act=130.67 (Δ44.440000000000026)
+  N svg/g[1]/g[46]/path[1]/@d[1]  exp=281 | act=277.33 (Δ3.670000000000016)
+  N svg/g[1]/g[46]/path[1]/@d[2]  exp=279.53 | act=235.09 (Δ44.43999999999997)
+  N svg/g[1]/g[46]/path[1]/@d[3]  exp=281 | act=277.33 (Δ3.670000000000016)
+  N svg/g[1]/g[46]/path[1]/@d[4]  exp=513 | act=468.56 (Δ44.44)
+  N svg/g[1]/g[46]/path[1]/@d[5]  exp=281 | act=277.33 (Δ3.670000000000016)
+  N svg/g[1]/g[46]/path[1]/@d[6]  exp=513 | act=468.56 (Δ44.44)
+  N svg/g[1]/g[46]/path[1]/@d[7]  exp=281 | act=277.33 (Δ3.670000000000016)
+  N svg/g[1]/g[46]/path[1]/@d[8]  exp=513 | act=468.56 (Δ44.44)
+  N svg/g[1]/g[46]/path[1]/@d[9]  exp=281 | act=277.33 (Δ3.670000000000016)
+  N svg/g[1]/g[46]/path[1]/@d[10]  exp=513 | act=468.56 (Δ44.44)
+  N svg/g[1]/g[46]/path[1]/@d[11]  exp=810.63 | act=811.05 (Δ0.4199999999999591)
+  N svg/g[1]/g[46]/path[1]/@d[12]  exp=513 | act=468.56 (Δ44.44)
+  N svg/g[1]/g[46]/path[1]/@d[13]  exp=927.57 | act=927.84 (Δ0.2699999999999818)
+  N svg/g[1]/g[46]/polygon[1]/@points[0]  exp=513 | act=468.56 (Δ44.44)
+  N svg/g[1]/g[46]/polygon[1]/@points[1]  exp=932.57 | act=932.84 (Δ0.2699999999999818)
+  N svg/g[1]/g[46]/polygon[1]/@points[2]  exp=517 | act=472.56 (Δ44.44)
+  N svg/g[1]/g[46]/polygon[1]/@points[3]  exp=923.57 | act=923.84 (Δ0.2699999999999818)
+  N svg/g[1]/g[46]/polygon[1]/@points[4]  exp=513 | act=468.56 (Δ44.44)
+  N svg/g[1]/g[46]/polygon[1]/@points[5]  exp=927.57 | act=927.84 (Δ0.2699999999999818)
+  N svg/g[1]/g[46]/polygon[1]/@points[6]  exp=509 | act=464.56 (Δ44.44)
+  N svg/g[1]/g[46]/polygon[1]/@points[7]  exp=923.57 | act=923.84 (Δ0.2699999999999818)
+  N svg/g[1]/g[46]/polygon[1]/@points[8]  exp=513 | act=468.56 (Δ44.44)
+  N svg/g[1]/g[46]/polygon[1]/@points[9]  exp=932.57 | act=932.84 (Δ0.2699999999999818)
+  N svg/g[1]/g[46]/text[1]/@x  exp=410 | act=416.56 (Δ6.560000000000002)
+  N svg/g[1]/g[46]/text[1]/@y  exp=433.951 | act=422.14 (Δ11.811000000000035)
+  N svg/g[1]/g[47]/polygon[1]/@points[0]  exp=389.005 | act=256.02 (Δ132.985)
+  N svg/g[1]/g[47]/polygon[1]/@points[2]  exp=398.005 | act=265.02 (Δ132.985)
+  N svg/g[1]/g[47]/polygon[1]/@points[4]  exp=394.005 | act=261.02 (Δ132.985)
+  N svg/g[1]/g[47]/polygon[1]/@points[6]  exp=398.005 | act=265.02 (Δ132.985)
+  N svg/g[1]/g[47]/polygon[1]/@points[8]  exp=389.005 | act=256.02 (Δ132.985)
+  N svg/g[1]/g[47]/polygon[2]/@points[0]  exp=474 | act=535.16 (Δ61.15999999999997)
+  N svg/g[1]/g[47]/polygon[2]/@points[1]  exp=1170.48 | act=1201 (Δ30.519999999999982)
+  N svg/g[1]/g[47]/polygon[2]/@points[2]  exp=478 | act=526.16 (Δ48.15999999999997)
+  N svg/g[1]/g[47]/polygon[2]/@points[3]  exp=1161.48 | act=1197 (Δ35.51999999999998)
+  N svg/g[1]/g[47]/polygon[2]/@points[4]  exp=474 | act=530.16 (Δ56.15999999999997)
+  N svg/g[1]/g[47]/polygon[2]/@points[5]  exp=1165.48 | act=1201 (Δ35.51999999999998)
+  N svg/g[1]/g[47]/polygon[2]/@points[6]  exp=470 | act=526.16 (Δ56.15999999999997)
+  N svg/g[1]/g[47]/polygon[2]/@points[7]  exp=1161.48 | act=1205 (Δ43.51999999999998)
+  N svg/g[1]/g[47]/polygon[2]/@points[8]  exp=474 | act=535.16 (Δ61.15999999999997)
+  N svg/g[1]/g[47]/polygon[2]/@points[9]  exp=1170.48 | act=1201 (Δ30.519999999999982)
+  N svg/g[1]/g[47]/text[1]/@x  exp=427 | act=405.56 (Δ21.439999999999998)
+  N svg/g[1]/g[47]/text[1]/@y  exp=975.141 | act=971.53 (Δ3.61099999999999)

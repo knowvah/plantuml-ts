@@ -1,0 +1,95 @@
+Loaded 266 fixtures across types: component, plans/component-divergence-drive/measurements/b1-census.json
+
+=== DeterministicMeasurer (ratchet metric) (266 fixtures) ===
+  0 diffs:     85
+  1-3 diffs:   23
+  4-10 diffs:  28
+  11-30 diffs: 43
+  31+ diffs:   87
+  errors:      0
+  zero-diff fixtures:
+    - component/balotu-54-tuxu203
+    - component/bekeno-37-luna380
+    - component/berome-43-xini276
+    - component/betidu-24-xuku720
+    - component/bijoko-90-riro507
+    - component/bozana-38-xufi750
+    - component/bubemi-25-noxu873
+    - component/buduni-98-bima526
+    - component/buduxo-54-tubo525
+    - component/bujige-52-gase998
+    - component/cedosa-23-nini915
+    - component/cegale-42-loxa672
+    - component/ciboso-93-romi495
+    - component/cifaki-66-boxa005
+    - component/cobadu-43-gabi397
+    - component/cukafa-49-fona812
+    - component/cusubu-18-xacu379
+    - component/diduxa-76-zimu664
+    - component/dinejo-36-mite007
+    - component/dodeni-90-xizu677
+    - component/duvoru-86-lubo341
+    - component/fafeze-50-jomi091
+    - component/fanija-24-xogo706
+    - component/gabogi-09-zoda184
+    - component/gafegu-06-nito976
+    - component/gevaje-94-sajo802
+    - component/gocexi-61-biso565
+    - component/gotofu-80-joku316
+    - component/gutute-00-gaki684
+    - component/jebovo-64-rasa849
+    - component/jenivo-18-zuku513
+    - component/jesibe-85-sozu187
+    - component/jolaru-18-dofi669
+    - component/juvucu-92-bugo434
+    - component/kabasu-44-caxu950
+    - component/kagapo-72-cofe085
+    - component/katane-80-xeka153
+    - component/kavico-81-sonu694
+    - component/kokebo-27-vafi688
+    - component/kucabo-74-cora635
+    - component/levuxi-16-fotu885
+    - component/licapa-79-kepo009
+    - component/lobute-63-tizi096
+    - component/lopite-93-vevo106
+    - component/lovapo-83-xilo457
+    - component/lurupu-11-fubo915
+    - component/malado-53-noso561
+    - component/mamase-39-buto560
+    - component/mekimu-46-luzu886
+    - component/mifexu-61-tada457
+    - component/mifuvu-23-kalu239
+    - component/mobugi-89-tine417
+    - component/murava-69-tago286
+    - component/nadocu-64-juba262
+    - component/nafuta-52-pomo915
+    - component/nidome-87-xesa939
+    - component/nunibu-79-vucu711
+    - component/nuxamo-38-vuxa816
+    - component/pamake-46-sadu464
+    - component/pebace-74-cuca176
+    - component/ponare-43-kazu160
+    - component/rapaji-98-xato067
+    - component/raxata-43-buni314
+    - component/sipuma-82-fene185
+    - component/sojika-99-dopa449
+    - component/somugi-21-doli483
+    - component/sufedi-40-baki261
+    - component/suzemi-86-kuma659
+    - component/tatofi-90-vali632
+    - component/turasu-73-zoni468
+    - component/tusugu-95-geju398
+    - component/vacuxi-18-baxu582
+    - component/vapalu-27-muxa300
+    - component/veboxo-36-nupe102
+    - component/vonipa-26-pudo091
+    - component/vosiju-58-cixu268
+    - component/vumija-03-xise495
+    - component/xevidu-92-texu148
+    - component/xirika-05-beju263
+    - component/zanibo-14-sami874
+    - component/zarabi-01-koka785
+    - component/zijaro-25-kufa588
+    - component/zijase-36-cice967
+    - component/zozutu-82-pupa220
+    - component/zucufi-77-vabo990

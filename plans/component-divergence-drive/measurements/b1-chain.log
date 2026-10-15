@@ -1,0 +1,207 @@
+wait load 43.43
+wait load 35.31
+wait load 29.18
+wait load 25.62
+wait load 19.79
+wait load 18.28
+wait load 18.81
+wait load 20.21
+wait load 25.43
+wait load 21.70
+wait load 20.04
+wait load 49.05
+wait load 64.15
+wait load 54.33
+wait load 60.82
+wait load 58.10
+wait load 47.19
+wait load 39.49
+wait load 37.45
+wait load 30.66
+wait load 38.80
+wait load 34.62
+wait load 26.39
+wait load 20.62
+wait load 20.62
+wait load 17.99
+wait load 16.60
+wait load 15.77
+wait load 15.17
+wait load 14.21
+== activity 11:30:58 { 11.85 24.84 35.76 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-activity.json — {"conformant":448,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 13.76
+== board 11:32:01 { 10.04 22.14 34.02 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 11:32:29 { 9.08 20.73 33.09 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-c4.json — {"conformant":2,"structural-match":0,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+wait load 16.92
+wait load 12.79
+== chart 11:34:16 { 9.99 18.23 30.71 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+== chronology 11:34:49 { 9.73 17.19 29.83 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+wait load 21.81
+wait load 18.20
+wait load 16.88
+wait load 19.54
+wait load 17.08
+wait load 12.41
+wait load 15.51
+wait load 13.75
+== class 11:39:15 { 11.78 16.16 26.24 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-class.json — {"conformant":723,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 20.96
+wait load 16.26
+wait load 13.73
+wait load 17.07
+wait load 20.85
+wait load 17.45
+wait load 20.74
+wait load 16.88
+wait load 14.64
+wait load 16.33
+wait load 41.02
+wait load 45.65
+wait load 55.71
+wait load 75.96
+wait load 77.33
+wait load 65.95
+wait load 51.94
+wait load 41.44
+wait load 41.81
+wait load 35.01
+wait load 33.41
+wait load 29.67
+wait load 23.48
+wait load 21.80
+wait load 18.42
+wait load 16.66
+wait load 15.56
+wait load 15.86
+wait load 19.72
+wait load 29.47
+wait load 25.89
+wait load 26.65
+wait load 27.76
+wait load 32.23
+wait load 24.60
+wait load 20.59
+wait load 18.44
+wait load 36.28
+wait load 31.33
+wait load 26.83
+wait load 28.33
+wait load 23.89
+wait load 20.25
+wait load 22.33
+wait load 17.92
+wait load 15.30
+wait load 17.29
+wait load 22.12
+wait load 29.84
+wait load 34.15
+wait load 31.33
+wait load 28.12
+wait load 30.33
+wait load 27.39
+wait load 50.33
+wait load 36.23
+wait load 25.98
+wait load 24.63
+wait load 19.04
+wait load 15.50
+wait load 16.31
+wait load 13.35
+wait load 12.52
+wait load 24.86
+wait load 36.96
+wait load 30.38
+wait load 26.47
+wait load 41.23
+wait load 41.25
+wait load 39.03
+wait load 39.35
+wait load 43.40
+wait load 48.30
+wait load 62.98
+wait load 56.29
+wait load 58.76
+wait load 65.25
+wait load 70.66
+wait load 84.51
+wait load 84.90
+wait load 58.15
+wait load 51.00
+wait load 60.71
+wait load 53.74
+== component 12:21:35 { 38.01 49.76 40.30 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-component.json — {"conformant":86,"structural-match":72,"diverged":108,"errored":0,"timeout":0,"oracle-error":0}
+wait load 79.99
+wait load 61.29
+wait load 44.98
+wait load 44.94
+wait load 44.95
+== ditaa 12:25:34 { 37.68 48.44 42.48 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 12:25:49 { 31.44 46.54 41.91 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== ebnf 12:26:24 { 30.81 44.47 41.33 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+== files 12:27:06 { 33.75 43.54 41.13 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-files.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 12:27:31 { 29.27 41.74 40.55 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-gantt.json — {"conformant":1,"structural-match":0,"diverged":264,"errored":0,"timeout":0,"oracle-error":0}
+wait load 59.99
+wait load 61.31
+wait load 63.99
+wait load 81.59
+wait load 93.36
+wait load 70.38
+wait load 48.48
+== hcl 12:31:53 { 35.04 51.42 46.20 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== json 12:32:30 { 27.85 47.55 45.02 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-json.json — {"conformant":13,"structural-match":24,"diverged":13,"errored":0,"timeout":0,"oracle-error":0}
+== mindmap 12:33:21 { 33.95 46.09 44.62 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-mindmap.json — {"conformant":142,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== network 12:34:19 { 39.54 45.28 44.40 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-network.json — {"conformant":0,"structural-match":0,"diverged":3,"errored":0,"timeout":0,"oracle-error":0}
+== object 12:34:55 { 32.62 42.89 43.56 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-object.json — {"conformant":63,"structural-match":8,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== packet 12:35:36 { 25.91 39.79 42.38 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+== regex 12:36:12 { 19.79 36.69 41.15 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+== salt 12:36:48 { 18.16 34.35 40.11 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-salt.json — {"conformant":51,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== sequence 12:37:30 { 17.19 31.83 38.88 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-sequence.json — {"conformant":0,"structural-match":0,"diverged":1143,"errored":0,"timeout":0,"oracle-error":0}
+== state 12:38:17 { 15.86 29.37 37.61 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-state.json — {"conformant":78,"structural-match":11,"diverged":184,"errored":0,"timeout":0,"oracle-error":0}
+== timing 12:38:57 { 21.09 28.77 36.99 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-timing.json — {"conformant":6,"structural-match":0,"diverged":120,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 12:39:38 { 19.13 27.29 36.08 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-unknown.json — {"conformant":433,"structural-match":49,"diverged":343,"errored":0,"timeout":0,"oracle-error":0}
+== usecase 12:40:26 { 25.35 27.14 35.48 }
+[xmldom fatalError]	comment is not well-formed at position 3151 
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-usecase.json — {"conformant":30,"structural-match":18,"diverged":40,"errored":0,"timeout":5,"oracle-error":1}
+wait load 114.66
+wait load 118.61
+wait load 131.48
+wait load 145.63
+wait load 152.62
+wait load 105.32
+wait load 77.92
+wait load 59.70
+wait load 46.40
+== wbs 12:46:56 { 36.02 66.56 56.21 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-wbs.json — {"conformant":204,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+wait load 46.45
+== wire 12:48:06 { 34.10 60.24 54.67 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 12:48:41 { 30.77 56.48 53.52 }
+wrote plans/component-divergence-drive/measurements/b1-eng/parity-yaml.json — {"conformant":7,"structural-match":28,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+DONE 12:49:19
