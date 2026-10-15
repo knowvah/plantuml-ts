@@ -32,6 +32,7 @@ import {
   type EntityImageDescriptionParams,
   type EntityImageDescriptionStereotypeSprite,
 } from '../../core/svek/image/EntityImageDescription.js';
+import { titleAlignmentFor } from '../../core/svek/image/leaf-sizing-entity.js';
 import { buildTextBlock } from '../../core/svek/image/EntityImageDescriptionSupport.js';
 import {
   decorateEntityDrawing,
@@ -194,7 +195,10 @@ export function buildEntityParams(
       fontTitle: override.text !== undefined ? { ...fontTitle, color: override.text } : fontTitle,
       fontBody: override.text !== undefined ? { ...fontBody, color: override.text } : fontBody,
       fontStereo: override.text !== undefined ? { ...fontStereo, color: override.text } : fontStereo,
-      titleAlignment: HorizontalAlignment.CENTER,
+      titleAlignment: titleAlignmentFor(node.symbol, {
+        own: theme.colors.elements?.[node.symbol]?.horizontalAlignment,
+        root: theme.colors.elements?.root?.horizontalAlignment,
+      }),
       stereotypeAlignment: HorizontalAlignment.CENTER,
       ...(theme.wrapWidth !== undefined ? { wrapWidth: theme.wrapWidth } : {}),
       guillemet: {

@@ -141,32 +141,31 @@ function sizingFontConfig(fontSpec: FontSpec, size: number): FontConfiguration {
 }
 
 /**
- * `EntityImageDescription.java:175,183-191`'s title-alignment cascade --
- * `plantuml.skin:452-454`'s bare `usecase { HorizontalAlignment center }`
- * selector matches only a usecase title signature (`getSNames()` containing
- * `usecase`, upstream's subsequence cascade); every other description-family
- * symbol falls through to `root { HorizontalAlignment left }`
- * (`plantuml.skin:12`).
+ * `EntityImageDescription.java:175,188,191`'s `defaultAlign = styleTitle.getHorizontalAlignment()` -- the
+ * title-scoped signature `{root, element, <diagram>, symbol.getSNames(), title}`. Cascade, highest first:
+ * the element's own `<style> <sname> { HorizontalAlignment X }` bucket (`own`); `plantuml.skin:452-454`'s
+ * bare `usecase { HorizontalAlignment center }` (matches a usecase title signature only); the root bucket
+ * (`root`, written by `skinparam defaultTextAlignment X`, `FromSkinparamToStyle.java:155`); then
+ * `plantuml.skin:12`'s `root { HorizontalAlignment left }`.
  *
- * T2b (ink-walk-reuses-draw, D5): the SIZING construction hardcoded CENTER
- * unconditionally before this fix, while the DRAW-time construction
- * (`renderer-usymbol-entity.ts#titleAlignmentFor`) already resolved this
- * symbol-scoped cascade correctly. `unknown/gubeca-19-lemu434`'s `file`
- * leaf (LEFT at draw, wrongly CENTER at sizing/ink) is the jar-verified
- * regression this closed: a `{{ }}` embed inside `desc` sits centered
- * within the composed title/desc/stereo width when CENTER, flush left when
- * LEFT -- the ink walk's embed position (52.04, 24) vs the drawn (17, 31)
- * traces to exactly this divergence, not a shift in the embed's own size.
+ * The ONE implementation for the sizing construction (which does not yet receive the overrides -- no
+ * `BoxSizingOpts` producer threads them; only the default cascade is sized) and the draw-time
+ * `renderer-entity.ts#buildEntityParams`, which passes the theme's `own`/`root` buckets.
  *
- * Duplicated rather than imported (same "algorithm, not binding" call as
- * `EmbeddedDiagram.ts`'s own `getEmbeddedType` duplication note):
- * `renderer-usymbol-entity.ts` is a class-render file outside this task's
- * write-set, and its copy is module-private.
+ * T2b (ink-walk-reuses-draw, D5): the SIZING construction hardcoded CENTER unconditionally before the
+ * symbol-scoped cascade; `unknown/gubeca-19-lemu434`'s `file` leaf (LEFT at draw, wrongly CENTER at
+ * sizing/ink) is the jar-verified regression this closed -- a `{{ }}` embed inside `desc` sits centred
+ * within the composed title/desc/stereo width when CENTER, flush left when LEFT.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageDescription.java:175,183-191
  */
-function titleAlignmentFor(symbol: LeafSizingSubject['symbol']): HorizontalAlignment {
-  return symbol === 'usecase' || symbol === 'usecase-business' ? HorizontalAlignment.CENTER : HorizontalAlignment.LEFT;
+export function titleAlignmentFor(
+  symbol: LeafSizingSubject['symbol'],
+  overrides?: { readonly own?: HorizontalAlignment | undefined; readonly root?: HorizontalAlignment | undefined },
+): HorizontalAlignment {
+  if (overrides?.own !== undefined) return overrides.own;
+  if (symbol === 'usecase' || symbol === 'usecase-business') return HorizontalAlignment.CENTER;
+  return overrides?.root ?? HorizontalAlignment.LEFT;
 }
 
 /** `EntityImageDescriptionPaint` assembly, split out to keep

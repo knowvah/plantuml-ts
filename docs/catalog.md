@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1674 modules · 6089 exported names.
+1674 modules · 6091 exported names.
 
 ## `src/`
 
@@ -159,7 +159,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `TextBlockExporter.ts` | `DocumentDims`, `applyCucaDocumentMargin`, `scaleFragmentBody`, `formatScaledFragmentBody`, `BODY_ANCHOR`, `finalizeTitledDiagramFragment` | `TextBlockExporter#calculateFinalDimension` — the diagram's outer margin applied to whatever the inner `TextBlock` measured, plus the truncating `+1` `SvgGraphics` applies when it sizes the canvas. |
 | `theme-colors-fields.ts` | `ThemeColorFields` | `Theme.colors` field shape — split out of theme.ts (cdd-T30) to keep that file under the project's 500-line file-size cap. |
 | `theme-dark.ts` | `DARK_MODE_DEFAULTS` | `skinparam mode dark` default-color table (cdd-T33). |
-| `theme-element-resolve.ts` | `ANY_ELEMENT_BUCKET`, `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth`, `resolveElementMaximumWidth`, `foldRootBackgroundIntoSequence` | Per-element (SName) resolution helpers for {@link Theme} — the color, font-size, and shadowing cascades each element's renderer reads. |
+| `theme-element-resolve.ts` | `ANY_ELEMENT_BUCKET`, `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth`, `resolveElementMaximumWidth`, `foldRootBackgroundIntoSequence`, `resolveClusterTitleAlignment` | Per-element (SName) resolution helpers for {@link Theme} — the color, font-size, and shadowing cascades each element's renderer reads. |
 | `theme-graph-colors-a.ts` | `ThemeGraphColorsA` | theme-graph-colors-a.ts — first half of `ThemeGraphColors` (split further out of ./theme-graph-colors.ts to keep every file under the project's 500-line cap; combined back via intersection in that module). |
 | `theme-graph-colors-b.ts` | `ThemeGraphColorsB` | theme-graph-colors-b.ts — second half of `ThemeGraphColors` (split further out of ./theme-graph-colors.ts to keep every file under the project's 500-line cap; combined back via intersection in that module). |
 | `theme-graph-colors-c.ts` | `ThemeGraphColorsC` | theme-graph-colors-c.ts — third slice of `ThemeGraphColors`, split out because `theme-graph-colors-a.ts`/`-b.ts` are both at the project's 500-line cap (cdd2-T8) — mirrors the `-a`/`-b` split precedent exactly (combined back via intersectio |
@@ -936,7 +936,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `EntityImageNoteLink.ts` | `PureNoteTextDim`, `PureNoteTextMeasurer`, `measureLinkNoteDim` | ONE port of `EntityImageNoteLink`'s dimension -- collapses the FOUR former copies (`class/class-note-link-box.ts:70`, `state/state-dot-graph.ts:172`, `state/state-composite-edge-label.ts:49` -- the last two byte-identical private duplicates |
 | `Footprint.ts` | `Footprint` |  |
 | `leaf-sizing-consts.ts` | `ComponentStyle`, `BoxSizingOpts`, `ACTOR_WIDTH`, `ACTOR_HEIGHT`, `ACTOR_STICKMAN_WIDTH`, `ACTOR_STICKMAN_HEIGHT`, `USECASE_HEIGHT`, `USECASE_ELLIPSE_BIGGER`, `USECASE_ALPHA_MIN`, `USECASE_ALPHA_MAX`, `BOX_MIN_WIDTH_DEFAULT`, `DEFAULT_SIZING_STROKE_THICKNESS`, `SYMBOL_BOX_MARGIN`, `DEFAULT_BOX_MARGIN`, `SYMBOL_ICON_ALLOWANCE`, `STEREO_MARGIN`, `LINE_HEIGHT_FACTOR`, `PORT_SIZE`, `FOLDER_FAMILY_SHOW_TITLE`, `FOLDER_TAB_WIDTH`, `FOLDER_TAB_HEIGHT`, `INTERFACE_CIRCLE_SIZE`, `NOTE_FONT_SIZE`, `NOTE_MARGIN_H`, `NOTE_MARGIN_V`, `Dim` | Shared constants + context types for description leaf sizing. |
-| `leaf-sizing-entity.ts` | `sizingAtomImageResolverFor`, `measureEntityLeaf`, `measureEntityLeafShield`, `measureUsecaseOrActorLeaf`, `LeafSymbolInk`, `measureUsecaseOrActorLeafInk`, `measureEntityLeafInk` | `EntityImageDescription.calculateDimensionSlow` routing for the description engine's leaf sizer (T6/ADR-6). |
+| `leaf-sizing-entity.ts` | `sizingAtomImageResolverFor`, `titleAlignmentFor`, `measureEntityLeaf`, `measureEntityLeafShield`, `measureUsecaseOrActorLeaf`, `LeafSymbolInk`, `measureUsecaseOrActorLeafInk`, `measureEntityLeafInk` | `EntityImageDescription.calculateDimensionSlow` routing for the description engine's leaf sizer (T6/ADR-6). |
 | `leaf-sizing-folder-title.ts` | `measureShownFolderTitle` | The SHOWN folder-family title block (`package`) — the faithful `BodyFactory.create2` → `BodyEnhanced1` route (SI1 T12, ADR-4). |
 | `leaf-sizing-folder.ts` | `measureFolderLeaf`, `measureFolderLeafInk` | `folder` / `package` leaf sizing — `USymbolFolder(sname, showTitle)`. |
 | `leaf-sizing-legacy-fallback.ts` | `hasUnroutedBoxMarkup`, `LegacyBoxFallbackCtx`, `measureLegacyBoxFallback` | Legacy (pre-T6) box-family sizing math, kept ONLY as a fallback for displays this task's `EntityImageDescription` routing (`leaf-sizing.ts`, ADR-6) does not yet reproduce byte-exact: - a `<latex>` atom: the shared svek/ text pipeline (`Enti |
