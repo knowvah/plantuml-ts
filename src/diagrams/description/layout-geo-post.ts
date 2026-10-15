@@ -104,9 +104,20 @@ function assembleEdgeGeo(
 }
 
 function addEdgeLabel(geo: DescriptionEdgeGeo, link: DescriptiveLink, re: ResultEdge, dx: number, dy: number): void {
-  if (link.label === undefined) return;
+  const stereotypeLabel = link.stereotypeIsLinkLabel === true && link.stereotype !== undefined;
+  if (link.label === undefined && !stereotypeLabel) return;
   const at = edgeLabelGeo(re, dx, dy);
-  if (at !== undefined) geo.label = { text: link.label, ...at };
+  if (at === undefined) return;
+  // `labelWidth`/`labelHeight` echo the table the engine was given
+  // (`link-edge-attrs.ts#applyMainLabel` sets them together with
+  // `labelBoxWidth`/`labelBoxHeight`). A `note on link` label is the merged
+  // `EntityImageNoteLink` block -- a separate mechanism, left at its origin.
+  const table =
+    link.linkNote === undefined && re.labelWidth !== undefined && re.labelHeight !== undefined
+      ? { w: re.labelWidth, h: re.labelHeight }
+      : undefined;
+  if (link.label === undefined && table === undefined) return;
+  geo.label = { text: link.label ?? '', ...at, ...table };
 }
 
 /**

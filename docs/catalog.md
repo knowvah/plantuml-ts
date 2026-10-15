@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1674 modules · 6093 exported names.
+1674 modules · 6095 exported names.
 
 ## `src/`
 
@@ -880,7 +880,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svek-edge-extremity.ts` | `PlacedExtremity`, `place`, `placeTailExtremity`, `placeHeadExtremity` |  |
 | `svek-edge-geometry.ts` | `buildDotPathFromSplinePoints`, `edgeMidpoint` |  |
 | `svek-edge-stroke.ts` | `strokeForStyle` |  |
-| `SvekEdge.ts` | `SvekLinkStyle`, `SvekEdgeLabel`, `SvekEdgeInput`, `SvekEdge` |  |
+| `SvekEdge.ts` | `SvekLinkStyle`, `EDGE_LABEL_MARGIN`, `SELF_LOOP_EDGE_LABEL_MARGIN`, `SvekEdgeLabel`, `SvekEdgeInput`, `SvekEdge` |  |
 | `SvekResult.ts` | `INK_DELTA`, `JAR_INK_MARGIN`, `InkExtent`, `svekDimension`, `svekInkShift` | The two constants `SvekResult#calculateDimension` applies to every svek diagram's ink extent — the single owner for all engines. |
 | `WithPorts.ts` | `WithPorts` |  |
 

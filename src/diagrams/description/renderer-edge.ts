@@ -67,6 +67,19 @@ function edgeStyle(edge: DescriptionEdgeGeo): SvekLinkStyle {
   return edge.style;
 }
 
+/** A label placed from its table (`label.w`/`h`) is ONE block: the jar's
+ *  `labelText` holds the stereotype line above the label (`SvekEdge.java
+ *  :296-300`; sized the same way by `link-edge-attrs.ts#mainLabelText`).
+ *  `undefined` for a label without a table (the `note on link` path). */
+function tabledLabelText(edge: DescriptionEdgeGeo, visibleStereotype: string | undefined): string | undefined {
+  const label = edge.label;
+  if (label?.w === undefined || label.h === undefined) return undefined;
+  return [
+    ...(visibleStereotype === undefined ? [] : [`«${visibleStereotype}»`]),
+    ...(label.text === '' ? [] : [label.text]),
+  ].join('\n');
+}
+
 function buildInput(
   edge: DescriptionEdgeGeo,
   theme: Theme,
@@ -81,6 +94,7 @@ function buildInput(
   // `Name<<tag>>`) is a style-selector/`remove` input only.
   const visibleStereotype = edge.stereotypeIsLinkLabel === true ? edge.stereotype : undefined;
   const hasLabelText = visibleStereotype !== undefined || edge.label !== undefined;
+  const blockText = tabledLabelText(edge, visibleStereotype);
   return {
     uid,
     points: edge.points,
@@ -105,8 +119,10 @@ function buildInput(
     backgroundColor: theme.colors.background,
     ...(edge.tailDecor !== undefined ? { tailDecor: edge.tailDecor } : {}),
     ...(headDecor !== undefined ? { headDecor } : {}),
-    ...(visibleStereotype !== undefined ? { stereotype: visibleStereotype } : {}),
-    ...(edge.label !== undefined ? { label: edge.label } : {}),
+    ...(visibleStereotype !== undefined && blockText === undefined ? { stereotype: visibleStereotype } : {}),
+    ...(edge.label !== undefined
+      ? { label: blockText === undefined ? edge.label : { ...edge.label, text: blockText } }
+      : {}),
     ...(hasLabelText ? { labelFont: arrowLabelFontConfig(theme) } : {}),
   };
 }

@@ -107,7 +107,7 @@ interface IdDisplay {
 //
 // F4-d — the DOUBLE-QUOTED display groups capture their QUOTES, not just the
 // inner text. Upstream's `DISPLAY_CORE` alternative is `[%g].+?[%g]`
-// (CommandCreateElementFull.java:128) and `%g` is the double-quote class
+// (CommandCreateElementFull.java:130) and `%g` is the double-quote class
 // (`Pattern2.java:59` — `"`, U+201C, U+201D), so group 1 SPANS the
 // delimiters; `executeArg:311` then unwraps it exactly ONCE via
 // `StringUtils.eventuallyRemoveStartingAndEndingDoubleQuote`, a
@@ -124,9 +124,9 @@ interface IdDisplay {
 // they have no upstream counterpart to be faithful to, and `stripFullWrap`
 // (mirroring `isDoubleQuote`, StringUtils.java:90-92) would not remove `'`
 // delimiters if they were captured.
-const RE_DQ_AS_ALIAS = /^("[^"]+")\s*as\s+(\S+)$/;
+const RE_DQ_AS_ALIAS = /^(".+?")\s*as\s+(\S+)$/;
 const RE_SQ_AS_ALIAS = /^'([^']+)'\s+as\s+(\S+)$/;
-const RE_ID_AS_DQ = /^(\S+)\s+as\s+("[^"]+")$/;
+const RE_ID_AS_DQ = /^(\S+)\s+as\s+(".+?")$/;
 const RE_ID_AS_SQ = /^(\S+)\s+as\s+'([^']+)'$/;
 const RE_PAREN_ALIAS = /^\(([^)]+)\)\s+as\s+(\S+|\([^)]+\)|:[^:]+:)$/;
 // `()bareword` / `()"quoted"` (interface shorthand -- CommandCreateElementFull
@@ -134,7 +134,7 @@ const RE_PAREN_ALIAS = /^\(([^)]+)\)\s+as\s+(\S+|\([^)]+\)|:[^:]+:)$/;
 // java:126) is tried BEFORE the bare-paren alternative since it also starts
 // with `(`; `cleanId` (parseAliasForms's m5b branch) already strips the `()`
 // prefix and any quotes.
-const RE_DQ_AS_WRAPPED = /^("[^"]+")\s*as\s+(\(\)\s*(?:"[^"]+"|\S+)|\([^)]+\)|:[^:]+:|\[[^\]]+\])$/;
+const RE_DQ_AS_WRAPPED = /^(".+?")\s*as\s+(\(\)\s*(?:"[^"]+"|\S+)|\([^)]+\)|:[^:]+:|\[[^\]]+\])$/;
 // CODE as :wrapped: — bare code, colon/paren/bracket-wrapped display
 // (`Admin as :Main Admin:`). Display keeps its notation stripped by cleanId.
 const RE_ID_AS_WRAPPED = /^(\S+)\s+as\s+(\([^)]+\)|:[^:]+:|\[[^\]]+\])$/;
@@ -142,7 +142,7 @@ const RE_PAREN_ONLY = /^\(([^)]+)\)$/;
 const RE_PLAIN_ALIAS = /^(\S+)\s+as\s+(\S+)$/;
 
 // parseNameSection — quoted-only form
-const RE_DQ_ONLY = /^"([^"]+)"$/;
+const RE_DQ_ONLY = /^"(.+?)"$/;
 
 // ---------------------------------------------------------------------------
 // Node factory

@@ -17,7 +17,11 @@
  * `id` (upstream `quark.getName()`) never does.
  */
 import { describe, it, expect } from 'vitest';
-import { resolveInlineLinks, parseNameSection } from '../../../src/diagrams/description/parse-helpers.js';
+import {
+  resolveInlineLinks,
+  parseNameSection,
+  resolveNewlineEscapes,
+} from '../../../src/diagrams/description/parse-helpers.js';
 
 describe('resolveInlineLinks', () => {
   it('replaces `[[url label]]` with the label text -- malumi-33-safu797', () => {
@@ -171,5 +175,45 @@ describe('parseNameSection -- a quoted DISPLAY group is unwrapped exactly once (
     const section = parseNameSection('"Hello World" as HW');
     expect(section.id).toBe('HW');
     expect(section.display).toBe('Hello World');
+  });
+});
+
+describe('resolveNewlineEscapes -- the %n() sentinel (codd-T7a, T6-G)', () => {
+  const NL = '';
+
+  it('splits a display on U+E100 like Display.getWithNewlines (Display.java:330) -- vuvave-27-saki879', () => {
+    const section = parseNameSection(`"Foo${NL}x${NL}----${NL}* y" as Foo`);
+    expect(section.display).toBe('Foo\nx\n----\n* y');
+    expect(section.id).toBe('Foo');
+  });
+
+  it('leaves the sentinel alone inside a [[url]] span, where Java is in rawMode', () => {
+    expect(resolveNewlineEscapes(`a${NL}b [[u c${NL}d]]`)).toBe(`a\nb [[u c${NL}d]]`);
+  });
+});
+
+describe('parseNameSection -- lazy [%g].+?[%g] backtracks past an embedded quote (codd-T7a, T6-H)', () => {
+  // CommandCreateElementFull.java:130: DISPLAY_CORE / CODE_WITH_QUOTE are `[%g].+?[%g]`.
+  it('takes the display up to the quote that lets `as CODE` match (xipane-40-dune740)', () => {
+    const section = parseNameSection('"A ""B"" C" as he #white');
+    expect(section.id).toBe('he');
+    expect(section.display).toBe('A ""B"" C');
+    expect(section.color).toBe('#white');
+  });
+
+  it('does the same for `CODE as "display"` (DISPLAY2/3/4)', () => {
+    const section = parseNameSection('he as "A ""B"" C"');
+    expect(section.id).toBe('he');
+    expect(section.display).toBe('A ""B"" C');
+  });
+
+  it('takes a lone quoted CODE_WITH_QUOTE whole', () => {
+    expect(parseNameSection('"A ""B"" C"').id).toBe('A ""B"" C');
+  });
+
+  it('keeps the first close when it already continues the line', () => {
+    const section = parseNameSection('"Name" as short');
+    expect(section.id).toBe('short');
+    expect(section.display).toBe('Name');
   });
 });
