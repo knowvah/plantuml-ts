@@ -23,6 +23,7 @@ import { GUILLEMET_DOUBLE_COMPARATOR, GUILLEMET_NONE } from '../../core/stereo/S
 import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
 import type { StereotypeSpriteRef } from './ast.js';
 import { resolveInlineLinks } from '../../core/url/inline-links.js';
+import { BackSlash } from '../../core/text/BackSlash.js';
 export { resolveInlineLinks };
 
 // ---------------------------------------------------------------------------
@@ -213,6 +214,14 @@ export function resolveNewlineEscapes(s: string): string {
   while (i < s.length) {
     if (s.startsWith('[[', i)) rawMode = true;
     else if (s.startsWith(']]', i)) rawMode = false;
+    // `Display.java:330-333`: `%n()` reaches the display as the private-use
+    // sentinel `Jaws.BLOCK_E1_NEWLINE` (== `BackSlash.hiddenNewLine()`),
+    // which `getWithNewlines` splits on outside `rawMode`.
+    if (!rawMode && s[i] === BackSlash.hiddenNewLine()) {
+      result += '\n';
+      i++;
+      continue;
+    }
     const pair = rawMode ? undefined : resolveEscapePair(s, i);
     if (pair !== undefined) {
       result += pair.text;
