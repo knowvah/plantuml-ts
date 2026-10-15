@@ -58,15 +58,70 @@ export interface UidPlan {
 // Exact path — every node/edge carries a parse-time `creationIndex`.
 // ---------------------------------------------------------------------------
 
-function everyNodeHasIndex(nodes: readonly DescriptionNodeGeo[]): boolean {
-  return nodes.every((n) => n.creationIndex !== undefined && everyNodeHasIndex(n.children));
+/**
+ * A phantom `set separator` group (namespace-groups.ts) is synthesized at layout time and carries no
+ * `creationIndex`: it is a container with no index whose subtree holds an indexed node. Every parse-time
+ * node and link has one, so a node lacking it is never a real entity.
+ */
+function isPhantomGroup(node: DescriptionNodeGeo): boolean {
+  return node.creationIndex === undefined && node.children.length > 0;
+}
+
+function everyNodeIndexedOrPhantom(nodes: readonly DescriptionNodeGeo[]): boolean {
+  return nodes.every(
+    (n) => (n.creationIndex !== undefined || isPhantomGroup(n)) && everyNodeIndexedOrPhantom(n.children),
+  );
+}
+
+/** The smallest parse-time `creationIndex` under `node` (itself included) -- when its first quark was registered. */
+function firstDeclared(node: DescriptionNodeGeo): number {
+  let min = node.creationIndex ?? Number.POSITIVE_INFINITY;
+  for (const child of node.children) min = Math.min(min, firstDeclared(child));
+  return min;
+}
+
+interface PhantomEntry {
+  node: DescriptionNodeGeo;
+  firstDeclared: number;
+  depth: number;
+}
+
+function collectPhantoms(nodes: readonly DescriptionNodeGeo[], depth: number, out: PhantomEntry[]): void {
+  for (const node of nodes) {
+    if (isPhantomGroup(node)) out.push({ node, firstDeclared: firstDeclared(node), depth });
+    collectPhantoms(node.children, depth + 1, out);
+  }
+}
+
+function maxIndex(nodes: readonly DescriptionNodeGeo[]): number {
+  return nodes.reduce((max, n) => Math.max(max, n.creationIndex ?? 0, maxIndex(n.children)), 0);
 }
 
 function assignFromCreationIndex(nodes: readonly DescriptionNodeGeo[], nodeUid: Map<string, string>): void {
   for (const node of nodes) {
-    nodeUid.set(node.id, entUid(node.creationIndex!));
+    if (node.creationIndex !== undefined) nodeUid.set(node.id, entUid(node.creationIndex));
     assignFromCreationIndex(node.children, nodeUid);
   }
+}
+
+/**
+ * `CucaDiagram#eventuallyBuildPhantomGroups` (CucaDiagram.java:325-336), reached from `getTextBlock`
+ * (:464): the phantom `Entity`s are created AFTER parsing, so their uids continue the shared counter past
+ * the last entity or link, in `quarks()` order. A quark is registered by the first declaration under it
+ * (shallower quarks first: `Quark#child` walks root to leaf), hence (first declared descendant, depth).
+ * `counterBase` is the highest parse-time uid; a burned value after the last entity/link is not recorded
+ * on the AST and would shift every phantom uid (none is known to occur).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/plasma/Plasma.java:57-67
+ */
+function assignPhantomUids(
+  nodes: readonly DescriptionNodeGeo[],
+  counterBase: number,
+  nodeUid: Map<string, string>,
+): void {
+  const phantoms: PhantomEntry[] = [];
+  collectPhantoms(nodes, 0, phantoms);
+  phantoms.sort((a, b) => a.firstDeclared - b.firstDeclared || a.depth - b.depth);
+  phantoms.forEach((p, i) => nodeUid.set(p.node.id, entUid(counterBase + i + 1)));
 }
 
 // ---------------------------------------------------------------------------
@@ -94,9 +149,14 @@ function visitLegacy(nodes: readonly DescriptionNodeGeo[], nodeUid: Map<string, 
  *  narrower type -- Interface Segregation, not a behavior change. */
 export function buildUidPlan(geo: Pick<DescriptionGeometry, 'nodes' | 'edges'>): UidPlan {
   const nodeUid = new Map<string, string>();
-  const exact = everyNodeHasIndex(geo.nodes) && geo.edges.every((e) => e.creationIndex !== undefined);
+  const exact =
+    maxIndex(geo.nodes) > 0 &&
+    everyNodeIndexedOrPhantom(geo.nodes) &&
+    geo.edges.every((e) => e.creationIndex !== undefined);
   if (exact) {
     assignFromCreationIndex(geo.nodes, nodeUid);
+    const counterBase = Math.max(maxIndex(geo.nodes), ...geo.edges.map((e) => e.creationIndex!));
+    assignPhantomUids(geo.nodes, counterBase, nodeUid);
     const edgeUid = geo.edges.map((e) => lnkUid(e.creationIndex!));
     return { nodeUid, edgeUid };
   }
