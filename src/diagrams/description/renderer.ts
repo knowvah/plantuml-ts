@@ -132,21 +132,15 @@ const DIAGRAM_TYPE_DESCRIPTION = 'DESCRIPTION';
  * SvekResult's own `+15` ink-walk delta plus `+5` margin `= +20` on an
  * ink-min that, for a lone leaf, coincides with the leaf's own box size).
  *
- * `geo` alone (no AST access, no `layout.ts` write-set expansion needed)
- * approximates upstream's predicate closely: exactly one node, no
- * children (no group), no edges, not a hexagon. The one upstream
- * refinement this can't see from `geo` — an EXPLICITLY braced empty group
- * (`component X {}`) is excluded from the degenerate path even though it
- * has zero children post-classification (`degenerateSingleLeaf`'s own
- * doc comment: "checked BEFORE empty-group demotion") — is a known,
- * narrow approximation gap (no `declaredAsGroup` flag survives onto
- * `DescriptionNodeGeo`); the census gate is the check for whether this
- * costs any net ground.
+ * codd-T4: the predicate is `DotData#isDegeneratedWithFewEntities`
+ * (`dot/DotData.java:69-71`), which counts the entities, groups and links a
+ * `remove` hides, so it cannot be recomputed from the surviving `geo`
+ * (cenoja/gogosu/sobobi/sodoza: a lone survivor beside removed entities
+ * takes the SvekResult path, 1px larger each way). The layout, which sees
+ * the raw AST (`degenerateSingleLeaf`), flags `geo.degenerate` instead.
  */
 function isDegenerateGeo(geo: DescriptionGeometry): boolean {
-  if (geo.nodes.length !== 1 || geo.edges.length !== 0) return false;
-  const only = geo.nodes[0]!;
-  return only.children.length === 0 && only.symbol !== 'hexagon';
+  return geo.degenerate === true;
 }
 
 /** What a body contributes to the document: its draw pass and its dimension. */
