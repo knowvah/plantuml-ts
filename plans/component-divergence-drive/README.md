@@ -107,7 +107,7 @@ on-disk.
 | [3](batch-3/overview.md) canvas/dpi; kermor notes; text diagnosis | T4 ∥ T5 ∥ T6 | all ∥ | [x] |
 | [4](batch-4/overview.md) text fix; containers; xagonu xlabels; stroke-width/rx | T7 ∥ T8 ∥ T9 ∥ T10 | all ∥ | [x] |
 | [5](batch-5/overview.md) re-measure + re-pin | T11 | — | [x] |
-| [6](batch-6/overview.md) exit | T12 | — | [ ] |
+| [6](batch-6/overview.md) exit | T12 | — | [x] |
 
 ## Index
 
