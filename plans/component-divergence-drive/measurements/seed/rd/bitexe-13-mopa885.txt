@@ -1,0 +1,7 @@
+
+### component/bitexe-13-mopa885  pass=false structural=0 numeric=5
+  N svg/g[1]/g[1]/text[1]/@x  exp=31 | act=38.044 (Δ7.043999999999997)
+  N svg/g[1]/g[1]/text[3]/@x  exp=31 | act=50.075 (Δ19.075000000000003)
+  N svg/g[1]/g[2]/text[1]/@x  exp=161.26 | act=197.441 (Δ36.18100000000001)
+  N svg/g[1]/g[2]/text[3]/@x  exp=161.26 | act=170.579 (Δ9.319000000000017)
+  N svg/g[1]/g[2]/text[4]/@x  exp=161.26 | act=197.441 (Δ36.18100000000001)

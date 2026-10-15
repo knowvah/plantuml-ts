@@ -1,0 +1,4 @@
+
+### component/tajadu-40-juro990  pass=false structural=0 numeric=2
+  N svg/g[1]/g[2]/text[1]/@x  exp=108.96 | act=121.473 (Δ12.513000000000005)
+  N svg/g[1]/g[2]/text[2]/@x  exp=108.96 | act=127.641 (Δ18.68100000000001)

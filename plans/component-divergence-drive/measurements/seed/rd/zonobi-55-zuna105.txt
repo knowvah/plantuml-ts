@@ -1,0 +1,10 @@
+
+### component/zonobi-55-zuna105  pass=false structural=0 numeric=8
+  N svg/g[1]/g[1]/rect[1]/@rx  exp=7.5 | act=2.5 (Δ5)
+  N svg/g[1]/g[1]/rect[1]/@ry  exp=7.5 | act=2.5 (Δ5)
+  N svg/g[1]/g[2]/rect[1]/@rx  exp=7.5 | act=2.5 (Δ5)
+  N svg/g[1]/g[2]/rect[1]/@ry  exp=7.5 | act=2.5 (Δ5)
+  N svg/g[1]/g[2]/text[1]/@x  exp=162.902 | act=139.746 (Δ23.155999999999977)
+  N svg/g[1]/g[2]/text[2]/@x  exp=142.834 | act=129.712 (Δ13.122000000000014)
+  N svg/g[1]/g[4]/text[1]/@x  exp=155.902 | act=132.746 (Δ23.155999999999977)
+  N svg/g[1]/g[4]/text[2]/@x  exp=135.834 | act=122.712 (Δ13.122)

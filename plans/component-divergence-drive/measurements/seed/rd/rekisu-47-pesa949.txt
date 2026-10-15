@@ -1,0 +1,10 @@
+
+### component/rekisu-47-pesa949  pass=false structural=4 numeric=4
+  S svg/g[1]/g[3]/path[1]/@stroke  exp=#F00 | act=#181818
+  S svg/g[1]/g[3]/polygon[1]/@fill  exp=#F00 | act=#181818
+  S svg/g[1]/g[3]/polygon[1]/@stroke  exp=#F00 | act=#181818
+  S svg/g[1]/g[3]/text[1]/@fill  exp=#00F | act=#000
+  N svg/@viewBox[2]  exp=103 | act=126 (Δ23)
+  N svg/@width  exp=103 | act=126 (Δ23)
+  N svg/g[1]/g[3]/text[1]/@x  exp=38.11 | act=62.61 (Δ24.5)
+  N svg/g[1]/g[3]/text[1]/@y  exp=92.111 | act=88.5 (Δ3.611000000000004)

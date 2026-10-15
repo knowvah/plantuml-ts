@@ -1,0 +1,6 @@
+
+### component/cojege-69-ruku138  pass=false structural=2 numeric=2
+  S svg/g[1]/g[1]/ellipse[1]/@fill  exp=#BC8F8F | act=#F1F1F1
+  S svg/g[1]/g[3]/ellipse[1]/@fill  exp=#BC8F8F | act=#F1F1F1
+  N svg/g[1]/g[5]/text[1]/@x  exp=162.287 | act=172.287 (Δ10)
+  N svg/g[1]/g[5]/text[1]/@y  exp=92.111 | act=88.5 (Δ3.611000000000004)

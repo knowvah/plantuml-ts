@@ -1,0 +1,10 @@
+
+### component/lovapo-83-xilo457  pass=false structural=8 numeric=0
+  S svg/g[1]/g[1]/rect[1]/@fill  exp=#BDB76B | act=#F1F1F1
+  S svg/g[1]/g[1]/rect[2]/@fill  exp=#BDB76B | act=#F1F1F1
+  S svg/g[1]/g[1]/rect[3]/@fill  exp=#BDB76B | act=#F1F1F1
+  S svg/g[1]/g[1]/rect[4]/@fill  exp=#BDB76B | act=#F1F1F1
+  S svg/g[1]/g[2]/rect[1]/@fill  exp=#008000 | act=#F1F1F1
+  S svg/g[1]/g[2]/rect[2]/@fill  exp=#008000 | act=#F1F1F1
+  S svg/g[1]/g[2]/rect[3]/@fill  exp=#008000 | act=#F1F1F1
+  S svg/g[1]/g[2]/rect[4]/@fill  exp=#008000 | act=#F1F1F1

@@ -1,0 +1,6 @@
+
+### component/vimulo-11-buni641  pass=false structural=0 numeric=4
+  N svg/@height  exp=312 | act=264 (Δ48)
+  N svg/@viewBox[2]  exp=924 | act=876 (Δ48)
+  N svg/@viewBox[3]  exp=312 | act=264 (Δ48)
+  N svg/@width  exp=924 | act=876 (Δ48)

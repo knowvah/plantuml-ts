@@ -1,0 +1,7 @@
+
+### component/tijexo-10-zipo222  pass=false structural=5 numeric=0
+  S svg/g[1]/g[3]/@id  exp=ent0004 | act=ent0003
+  S svg/g[1]/g[3]/path[1]/@fill  exp=#008000 | act=#FEFFDD
+  S svg/g[1]/g[3]/path[2]/@fill  exp=#008000 | act=#FEFFDD
+  S svg/g[1]/g[3][childCount]  exp=3 | act=2
+  S svg/g[1][childCount]  exp=3 | act=4

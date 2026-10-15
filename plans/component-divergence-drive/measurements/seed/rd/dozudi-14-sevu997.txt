@@ -1,0 +1,6 @@
+
+### component/dozudi-14-sevu997  pass=false structural=2 numeric=2
+  S svg/g[1]/g[3][childCount]  exp=3 | act=1
+  S svg/g[1][childCount]  exp=5 | act=6
+  N svg/@viewBox[2]  exp=229 | act=228 (Δ1)
+  N svg/@width  exp=229 | act=228 (Δ1)

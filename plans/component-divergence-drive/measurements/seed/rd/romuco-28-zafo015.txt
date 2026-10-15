@@ -1,0 +1,8 @@
+
+### component/romuco-28-zafo015  pass=false structural=4 numeric=2
+  S svg/g[1]/g[2]/rect[1]/@fill  exp=#F00 | act=#008000
+  S svg/g[1]/g[2]/rect[2]/@fill  exp=#F00 | act=#008000
+  S svg/g[1]/g[2]/rect[3]/@fill  exp=#F00 | act=#008000
+  S svg/g[1]/g[2]/rect[4]/@fill  exp=#F00 | act=#008000
+  N svg/g[1]/g[6]/text[1]/@x  exp=162.287 | act=172.287 (Δ10)
+  N svg/g[1]/g[6]/text[1]/@y  exp=92.111 | act=88.5 (Δ3.611000000000004)

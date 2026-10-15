@@ -1,0 +1,6 @@
+
+### component/mavicu-17-mago821  pass=false structural=0 numeric=4
+  N svg/@height  exp=84 | act=78 (Δ6)
+  N svg/@viewBox[2]  exp=112 | act=100 (Δ12)
+  N svg/@viewBox[3]  exp=84 | act=78 (Δ6)
+  N svg/@width  exp=112 | act=100 (Δ12)

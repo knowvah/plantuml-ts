@@ -1,0 +1,6 @@
+
+### component/cenoja-47-rodu998  pass=false structural=0 numeric=4
+  N svg/@height  exp=65 | act=64 (Δ1)
+  N svg/@viewBox[2]  exp=88 | act=87 (Δ1)
+  N svg/@viewBox[3]  exp=65 | act=64 (Δ1)
+  N svg/@width  exp=88 | act=87 (Δ1)

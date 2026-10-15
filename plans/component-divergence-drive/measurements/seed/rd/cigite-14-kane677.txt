@@ -1,0 +1,4 @@
+
+### component/cigite-14-kane677  pass=false structural=0 numeric=2
+  N svg/g[1]/g[3]/text[1]/@x  exp=97.52 | act=107.02 (Δ9.5)
+  N svg/g[1]/g[3]/text[1]/@y  exp=21.111 | act=17.5 (Δ3.6110000000000007)

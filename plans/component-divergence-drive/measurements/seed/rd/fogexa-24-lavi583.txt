@@ -1,0 +1,6 @@
+
+### component/fogexa-24-lavi583  pass=false structural=0 numeric=4
+  N svg/@viewBox[2]  exp=142 | act=147 (Δ5)
+  N svg/@width  exp=142 | act=147 (Δ5)
+  N svg/g[1]/g[5]/text[1]/@x  exp=101.68 | act=111.68 (Δ10)
+  N svg/g[1]/g[5]/text[1]/@y  exp=92.111 | act=88.5 (Δ3.611000000000004)

@@ -1,0 +1,6 @@
+
+### component/figika-36-sola271  pass=false structural=0 numeric=4
+  N svg/@viewBox[2]  exp=269 | act=315 (Δ46)
+  N svg/@width  exp=269 | act=315 (Δ46)
+  N svg/g[1]/g[5]/text[1]/@x  exp=160.362 | act=206.862 (Δ46.5)
+  N svg/g[1]/g[5]/text[1]/@y  exp=127.111 | act=111 (Δ16.111000000000004)

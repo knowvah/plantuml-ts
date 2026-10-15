@@ -1,0 +1,3 @@
+
+### component/lobute-63-tizi096  pass=false structural=1 numeric=0
+  S svg/g[1]/g[2]/rect[1]/@fill  exp=#ADD8E6 | act=#FF0

@@ -1,0 +1,4 @@
+
+### component/xadinu-90-vasu322  pass=false structural=0 numeric=2
+  N svg/g[1]/g[1]/rect[1]/@rx  exp=5 | act=2.5 (Δ2.5)
+  N svg/g[1]/g[1]/rect[1]/@ry  exp=5 | act=2.5 (Δ2.5)

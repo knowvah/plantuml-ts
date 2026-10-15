@@ -1,0 +1,10 @@
+
+### component/cumofi-94-lixe862  pass=false structural=4 numeric=4
+  S svg/g[1]/g[1]  exp=polygon | act=g
+  S svg/g[1]/g[2]  exp=text | act=g
+  S svg/g[1]/text[1]  exp=g | act=text
+  S svg/g[1]/text[2]  exp=g | act=text
+  N svg/@height  exp=255 | act=195 (Δ60)
+  N svg/@viewBox[2]  exp=861 | act=765 (Δ96)
+  N svg/@viewBox[3]  exp=255 | act=195 (Δ60)
+  N svg/@width  exp=861 | act=765 (Δ96)

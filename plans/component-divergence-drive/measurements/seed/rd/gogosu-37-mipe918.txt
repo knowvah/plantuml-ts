@@ -1,0 +1,6 @@
+
+### component/gogosu-37-mipe918  pass=false structural=0 numeric=4
+  N svg/@height  exp=65 | act=64 (Δ1)
+  N svg/@viewBox[2]  exp=68 | act=67 (Δ1)
+  N svg/@viewBox[3]  exp=65 | act=64 (Δ1)
+  N svg/@width  exp=68 | act=67 (Δ1)

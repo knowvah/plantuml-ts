@@ -1,0 +1,6 @@
+
+### component/zozutu-82-pupa220  pass=false structural=4 numeric=0
+  S svg/g[1]/g[3]/rect[1]/@fill  exp=#D0E0F0 | act=#F1F1F1
+  S svg/g[1]/g[3]/rect[2]/@fill  exp=#D0E0F0 | act=#F1F1F1
+  S svg/g[1]/g[3]/rect[3]/@fill  exp=#D0E0F0 | act=#F1F1F1
+  S svg/g[1]/g[3]/rect[4]/@fill  exp=#D0E0F0 | act=#F1F1F1

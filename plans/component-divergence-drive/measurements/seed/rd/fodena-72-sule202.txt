@@ -1,0 +1,4 @@
+
+### component/fodena-72-sule202  pass=false structural=0 numeric=2
+  N svg/g[1]/g[3]/text[1]/@x  exp=52.22 | act=65.72 (Δ13.5)
+  N svg/g[1]/g[3]/text[1]/@y  exp=91.111 | act=87.5 (Δ3.611000000000004)

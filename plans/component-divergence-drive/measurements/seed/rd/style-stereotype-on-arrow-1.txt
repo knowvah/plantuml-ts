@@ -1,0 +1,9 @@
+
+### component/style-stereotype-on-arrow-1  pass=false structural=5 numeric=2
+  S svg/g[1]/g[3]/path[1]/@stroke  exp=#00F | act=#181818
+  S svg/g[1]/g[3]/path[1]/@stroke-width  exp=3 | act=1
+  S svg/g[1]/g[3]/polygon[1]/@fill  exp=#00F | act=#181818
+  S svg/g[1]/g[3]/polygon[1]/@stroke  exp=#00F | act=#181818
+  S svg/g[1]/g[3]/polygon[1]/@stroke-width  exp=3 | act=1
+  N svg/g[1]/g[3]/text[1]/@x  exp=80.79 | act=94.29 (Δ13.5)
+  N svg/g[1]/g[3]/text[1]/@y  exp=22.111 | act=18.5 (Δ3.6110000000000007)
