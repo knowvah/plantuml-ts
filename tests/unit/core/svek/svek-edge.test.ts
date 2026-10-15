@@ -44,6 +44,7 @@ import { basicSvgOption } from '../../../../src/core/klimt/drawing/svg/svg-graph
 import type { StringBounder as DriverStringBounder } from '../../../../src/core/klimt/drawing/svg/driver-text-svg.js';
 import type { FontConfiguration } from '../../../../src/core/klimt/shape/UText.js';
 import type { Point2D } from '../../../../src/core/klimt/UTranslate.js';
+import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
 import { compareSvg } from '../../../oracle/svg-conformance/compare.js';
 import { SvekEdge } from '../../../../src/core/svek/SvekEdge.js';
 import type { SvekEdgeInput } from '../../../../src/core/svek/SvekEdge.js';
@@ -71,17 +72,17 @@ const LABEL_FONT: FontConfiguration = {
   styles: new Set(),
 };
 
-/** Real-jar text width for the one labelled fixture (babafi-51's `use`
- *  at 13pt — `textLength="20.963"` in the cached SVG). */
+/** Text widths come from the jar-pinned deterministic measurer (the
+ *  oracle is rendered with `-DPLANTUML_DETERMINISTIC_TEXT=true`). */
+const MEASURER = new DeterministicMeasurer();
 const driverStringBounder: DriverStringBounder = {
   calculateDimension(font, text) {
-    if (text === 'use' && font.size === 13) return { width: 20.9625 };
-    return { width: 0 };
+    return { width: MEASURER.measure(text, font).width };
   },
 };
 
 function newGraphic(): UGraphicSvg {
-  return UGraphicSvg.build(0, basicSvgOption(), '$version$', driverStringBounder);
+  return UGraphicSvg.build(0, basicSvgOption(), '$version$', driverStringBounder, MEASURER);
 }
 
 function extractTopGroup(svg: string): string {
@@ -406,7 +407,7 @@ const PLAIN_WITH_LABEL =
   '<!--link a to b--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-source-line="6" data-link-type="dependency">' +
   '<path d="M59.11,53.5 C74.93,53.5 90.74,53.5 110.71,53.5" style="stroke:#181818;stroke-width:1;" fill="none" id="a-to-b"/>' +
   '<polygon points="115.71,53.5,106.71,49.5,110.71,53.5,106.71,57.5,115.71,53.5" fill="#181818" style="stroke:#181818;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/>' +
-  '<text x="77.43" y="46.611" fill="#000" font-size="13" textLength="20.963">use</text></g>';
+  '<text x="77.43" y="46.611" fill="#000" font-size="13" textLength="20.962">use</text></g>';
 
 test('plain --> edge with label conformant vs cached jar fixture (AC1)', () => {
   const { svg, frag } = drawEdge({
@@ -428,6 +429,81 @@ test('plain --> edge with label conformant vs cached jar fixture (AC1)', () => {
   expectConformant(frag, PLAIN_WITH_LABEL);
   expect(svg).toContain('<!--link a to b-->');
   expect(svg).toContain(/<g class="link"[^>]*>/.exec(PLAIN_WITH_LABEL)![0]);
+});
+
+/** T6-A: the same edge, label placed the way the jar does. The engine hands
+ *  over the label TABLE centre plus the table's integer size (here the
+ *  22x15 `FIXEDSIZE` table in `babafi-51-dixi026/svek-1.dot:6`); the jar
+ *  draws the text block at the table CORNER (`SvekEdge#getXY`, `:808-815`)
+ *  plus `labelShield` (0), and the block carries `marginLabel` 1
+ *  (`SvekEdge.java:372-373`) -- so text x = centre - 22/2 + 1 = 77.43. */
+test('label drawn at table corner + marginLabel, not at the table centre (T6-A)', () => {
+  const { frag } = drawEdge({
+    ...BASE_INPUT,
+    sourceLine: 6,
+    points: [
+      { x: 59.11, y: 53.5 },
+      { x: 74.93, y: 53.5 },
+      { x: 95.74, y: 53.5 },
+      { x: 115.71, y: 53.5 },
+    ],
+    headDecor: '>',
+    label: { text: 'use', x: 87.43, y: 43, w: 22, h: 15 },
+    labelFont: LABEL_FONT,
+  });
+  expectConformant(frag, PLAIN_WITH_LABEL);
+});
+
+/** Jar probe `scripts/oracle-render.sh` (2026-10-15), `[a] [b]` +
+ *  `a --> b : first\nsecond longer line`: DOT table 107x28; text lines
+ *  `first` (x 74.221, y 92.111) and `second longer line` (x 31.89, y 105.111),
+ *  CENTER-aligned inside one block at corner (30.89, 81) + margin 1. */
+describe('label block (T6-A)', () => {
+  const straight: Point2D[] = [
+    { x: 59, y: 20 },
+    { x: 59, y: 40 },
+    { x: 59, y: 60 },
+    { x: 59, y: 80 },
+  ];
+  const textsOf = (svg: string): string[] =>
+    [...svg.matchAll(/<text x="([\d.]+)" y="([\d.]+)"[^>]*>([^<]*)/g)].map((m) => `${m[3]}@${m[1]},${m[2]}`);
+
+  test.each([
+    ['a real newline', 'first\nsecond longer line'],
+    ['the literal \\n token', 'first\\nsecond longer line'],
+  ])('multi-line label via %s is centred inside one block', (_name, text) => {
+    const { svg } = drawEdge({
+      ...BASE_INPUT,
+      points: straight,
+      label: { text, x: 84.39, y: 95, w: 107, h: 28 },
+      labelFont: LABEL_FONT,
+    });
+    expect(textsOf(svg)).toEqual(['first@74.221,92.111', 'second longer line@31.89,105.111']);
+  });
+
+  /** Same probe, `a --> a : loop`: DOT table 36x25 (= 24.619 + 2*6, 13 + 2*6);
+   *  jar text at (95.79, 32.611) => corner (89.79, 16.5) + marginLabel 6
+   *  (`SvekEdge.java:372-373`, `startUid.equalsId(endUid)`). */
+  test('a self-loop label sits inside marginLabel 6, not 1', () => {
+    const { svg } = drawEdge({
+      ...BASE_INPUT,
+      points: straight,
+      toUid: BASE_INPUT.fromUid,
+      label: { text: 'loop', x: 107.79, y: 29, w: 36, h: 25 },
+      labelFont: LABEL_FONT,
+    });
+    expect(textsOf(svg)).toEqual(['loop@95.79,32.611']);
+  });
+
+  test('a label without a table keeps x/y as the text origin (link-note path)', () => {
+    const { svg } = drawEdge({
+      ...BASE_INPUT,
+      points: straight,
+      label: { text: 'use', x: 77.43, y: 46.6111 },
+      labelFont: LABEL_FONT,
+    });
+    expect(textsOf(svg)).toEqual(['use@77.43,46.611']);
+  });
 });
 
 // ---------------------------------------------------------------------------

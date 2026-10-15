@@ -162,7 +162,13 @@ export interface DescriptionEdgeGeo {
   from: string;
   to: string;
   points: Array<{ x: number; y: number }>;
-  label?: { text: string; x: number; y: number };
+  /** `x`/`y`: the CENTRE of the label table the engine placed. `w`/`h`: that
+   *  table's size (`SvekEdge#appendTable`), present for a plain label so the
+   *  renderer can step from the centre to the jar's corner (`SvekEdge#getXY`,
+   *  `SvekEdge.java:808-815`); absent for a `note on link` label, which is a
+   *  separate mechanism and keeps `x`/`y` as the draw origin. `text` is
+   *  empty for a stereotype-only link label. */
+  label?: { text: string; x: number; y: number; w?: number; h?: number };
   stereotype?: string;
   /** G1 I5e: true ONLY for the post-colon-embedded stereotype form (the
    *  one shape upstream actually draws as a visible edge label) -- see
