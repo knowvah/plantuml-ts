@@ -68,3 +68,30 @@ describe('buildEntityParams (T6-B/T6-E)', () => {
     );
   });
 });
+
+describe('buildEntityParams roundCorner (T10)', () => {
+  const RAW_SKIN_DEFAULT = 5;
+  const USER_ROUND_CORNER = 10;
+
+  it('keeps the skin default 5 when nothing is declared', () => {
+    expect(buildEntityParams(node('component'), defaultTheme, undefined).paint.roundCorner).toBe(RAW_SKIN_DEFAULT);
+  });
+
+  it('reads the element bucket (skinparam componentRoundCorner / <style> component)', () => {
+    const theme = themeWith({ component: { roundCorner: USER_ROUND_CORNER } });
+    expect(buildEntityParams(node('component'), theme, undefined).paint.roundCorner).toBe(USER_ROUND_CORNER);
+  });
+
+  it('reads the root tier (bare skinparam roundCorner), and the element bucket beats it', () => {
+    const root: Theme = {
+      ...defaultTheme,
+      colors: {
+        ...defaultTheme.colors,
+        graph: { ...defaultTheme.colors.graph, classCascadeRoundCorner: USER_ROUND_CORNER },
+      },
+    };
+    expect(buildEntityParams(node('component'), root, undefined).paint.roundCorner).toBe(USER_ROUND_CORNER);
+    const both: Theme = { ...root, colors: { ...root.colors, elements: { component: { roundCorner: 0 } } } };
+    expect(buildEntityParams(node('component'), both, undefined).paint.roundCorner).toBe(0);
+  });
+});

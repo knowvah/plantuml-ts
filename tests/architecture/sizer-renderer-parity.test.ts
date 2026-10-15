@@ -143,6 +143,11 @@ const SIZE_NEUTRAL: Record<string, string> = {
     "WIDTH can, and that is resolveElementLineThickness's row, not this one. " +
     "(planning/sizer-renderer-parity.md, 'Per-element resolvers' table, row " +
     "'element BackgroundColor / LineColor / FontColor (Paint)')",
+  resolveElementRoundCorner:
+    "size-neutral (corner radius is drawn INSIDE the rect's own bounds — a rounded corner never changes " +
+    "the bounding box.) (planning/sizer-renderer-parity.md, 'Per-element resolvers' table, row " +
+    "'skinparam roundCorner'; its 'Unreachable anyway' clause no longer holds -- codd T7b surfaces the " +
+    'value through Theme.colors.elements[sname].roundCorner / graph.classCascadeRoundCorner)',
 };
 
 /**

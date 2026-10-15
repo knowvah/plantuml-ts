@@ -19,7 +19,7 @@ import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { Theme } from '../../core/theme.js';
 import { resolveElementPaint, resolveElementShadowing, resolveElementLineThickness } from '../../core/theme.js';
-import { resolveElementMinimumWidth } from '../../core/theme-element-resolve.js';
+import { resolveElementMinimumWidth, resolveElementRoundCorner } from '../../core/theme-element-resolve.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
@@ -179,7 +179,7 @@ export function buildEntityParams(
         override.back ??
         businessBackcolor(theme, node.symbol) ??
         resolveElementPaint(theme, node.symbol, 'background', stereotypeLabels),
-      roundCorner: ENTITY_ROUND_CORNER,
+      roundCorner: resolveElementRoundCorner(theme, node.symbol) ?? ENTITY_ROUND_CORNER,
       diagonalCorner: 0,
       // mission skin-file-loading (deferred D3 item): was hardcoded 0 --
       // `EntityImageDescription.ts:251`'s `.withShadow(params.paint

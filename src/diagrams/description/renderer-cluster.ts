@@ -7,7 +7,7 @@
  */
 import type { Theme } from '../../core/theme.js';
 import { resolveElementShadowing } from '../../core/theme.js';
-import { resolveClusterTitleAlignment } from '../../core/theme-element-resolve.js';
+import { resolveClusterTitleAlignment, resolveElementRoundCorner } from '../../core/theme-element-resolve.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
@@ -166,7 +166,7 @@ export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleD
     // draws a FLAT `UPolygon` only when roundCorner===0; the jar's real
     // unstyled folder default is rounded (a `UPath` with `arcTo` corners),
     // same as every non-folder container.
-    roundCorner: NON_FOLDER_ROUND_CORNER,
+    roundCorner: resolveElementRoundCorner(theme, symbol) ?? NON_FOLDER_ROUND_CORNER,
     strictUmlStyle: false,
     diagonalCorner: 0,
     lineColorDefault: folder ? FOLDER_BORDER_DEFAULT : NON_FOLDER_BORDER_DEFAULT,

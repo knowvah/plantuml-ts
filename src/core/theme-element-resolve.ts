@@ -250,3 +250,15 @@ export function resolveClusterTitleAlignment(theme: Theme, sname: string): Horiz
   const elements = theme.colors.elements;
   return elements?.[sname]?.horizontalAlignment ?? elements?.root?.horizontalAlignment ?? HorizontalAlignment.CENTER;
 }
+
+/**
+ * `EntityImageDescription.java:167` / `Cluster.java:321`: `style.value(PName.RoundCorner)`, RAW and unhalved (the
+ * rectangle driver halves it into `rx`/`ry`). Declarations compete by parse order, so a user one beats the
+ * componentDiagram skin's `element { RoundCorner 5 }` (`plantuml.skin:193-197`): the element's own bucket
+ * (`skinparam <sname>RoundCorner N` / `<style> <sname> { RoundCorner N }`), then the root tier
+ * (`skinparam roundCorner N`, `FromSkinparamToStyle.java:164`, which the theme stores in
+ * `graph.classCascadeRoundCorner`). `undefined` when neither is set -- the caller applies the skin's 5.
+ */
+export function resolveElementRoundCorner(theme: Theme, sname: string): number | undefined {
+  return theme.colors.elements?.[sname]?.roundCorner ?? theme.colors.graph.classCascadeRoundCorner;
+}
