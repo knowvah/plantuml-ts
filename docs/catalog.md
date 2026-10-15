@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1669 modules · 6067 exported names.
+1669 modules · 6069 exported names.
 
 ## `src/`
 
@@ -97,7 +97,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `skinparam-accumulator.ts` | `SkinparamAccumulator`, `createSkinparamAccumulator` | Mutable accumulator threaded through the resolveSkinparam key-processing loop (skinparam-key-handlers.ts, skinparam-stereo-keys.ts) and consumed by the theme-partial builder (skinparam-theme-builder.ts). |
 | `skinparam-element-buckets.ts` | `ELEMENT_BUCKET_SNAMES`, `ElementColorRole`, `matchElementColorKey`, `matchStereotypeSpotColorKey`, `matchElementFontSizeKey`, `matchElementShadowingKey`, `parseShadowingValue`, `matchElementLineThicknessKey` | Per-element (SName) style-bucket matching for the skinparam pipeline. |
 | `skinparam-key-handlers-add-magic.ts` | `ADD_MAGIC_HANDLERS` | The per-`addMagic(SName)` skinparam handlers (`<sname>BorderStyle`, `<sname>RoundCorner`) -- split out of skinparam-key-handlers-table-a.ts (aepp-T1d) when RoundCorner took that file over the 500-line cap. |
-| `skinparam-key-handlers-shared.ts` | `arrowFontColorValue`, `KeyHandler`, `parseFiniteNumber`, `parseFiniteFloat`, `parseFiniteInt`, `parseNonZeroInt`, `parseFontStyleFlags`, `applyGuillemet` | Shared `KeyHandler` type + parse helpers for the skinparam key→handler table. |
+| `skinparam-key-handlers-shared.ts` | `arrowFontColorValue`, `ROOT_LINE_COLOR_KEY`, `KeyHandler`, `parseFiniteNumber`, `parseFiniteFloat`, `parseFiniteInt`, `parseNonZeroInt`, `parseFontStyleFlags`, `applyGuillemet` | Shared `KeyHandler` type + parse helpers for the skinparam key→handler table. |
 | `skinparam-key-handlers-table-a.ts` | `KEY_HANDLERS_A` | Key -> handler table, half A (entries 1-36 of 73: backgroundcolor through style) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this project's 5 |
 | `skinparam-key-handlers-table-b.ts` | `parseHorizontalAlignment`, `KEY_HANDLERS_B` | Key -> handler table, half B (entries 37-73 of 73: footbox through swimlanebordercolor) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this proj |
 | `skinparam-key-handlers-table-c.ts` | `KEY_HANDLERS_C` | Table-driven dispatch, continued — see `skinparam-key-handlers.ts`'s own doc comment for the full module map and why the table is split (`-table- a.ts`/`-table-b.ts` were both already at the 500-line cap). |
@@ -159,7 +159,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `TextBlockExporter.ts` | `DocumentDims`, `applyCucaDocumentMargin`, `scaleFragmentBody`, `formatScaledFragmentBody`, `BODY_ANCHOR`, `finalizeTitledDiagramFragment` | `TextBlockExporter#calculateFinalDimension` — the diagram's outer margin applied to whatever the inner `TextBlock` measured, plus the truncating `+1` `SvgGraphics` applies when it sizes the canvas. |
 | `theme-colors-fields.ts` | `ThemeColorFields` | `Theme.colors` field shape — split out of theme.ts (cdd-T30) to keep that file under the project's 500-line file-size cap. |
 | `theme-dark.ts` | `DARK_MODE_DEFAULTS` | `skinparam mode dark` default-color table (cdd-T33). |
-| `theme-element-resolve.ts` | `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth`, `resolveElementMaximumWidth`, `foldRootBackgroundIntoSequence` | Per-element (SName) resolution helpers for {@link Theme} — the color, font-size, and shadowing cascades each element's renderer reads. |
+| `theme-element-resolve.ts` | `ANY_ELEMENT_BUCKET`, `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth`, `resolveElementMaximumWidth`, `foldRootBackgroundIntoSequence` | Per-element (SName) resolution helpers for {@link Theme} — the color, font-size, and shadowing cascades each element's renderer reads. |
 | `theme-graph-colors-a.ts` | `ThemeGraphColorsA` | theme-graph-colors-a.ts — first half of `ThemeGraphColors` (split further out of ./theme-graph-colors.ts to keep every file under the project's 500-line cap; combined back via intersection in that module). |
 | `theme-graph-colors-b.ts` | `ThemeGraphColorsB` | theme-graph-colors-b.ts — second half of `ThemeGraphColors` (split further out of ./theme-graph-colors.ts to keep every file under the project's 500-line cap; combined back via intersection in that module). |
 | `theme-graph-colors-c.ts` | `ThemeGraphColorsC` | theme-graph-colors-c.ts — third slice of `ThemeGraphColors`, split out because `theme-graph-colors-a.ts`/`-b.ts` are both at the project's 500-line cap (cdd2-T8) — mirrors the `-a`/`-b` split precedent exactly (combined back via intersectio |

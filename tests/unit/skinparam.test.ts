@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { resolveSkinparam, parseStyleBlock, resolveColor } from '../../src/core/skinparam.js';
 import { defaultTheme, deepMergeTheme } from '../../src/core/theme.js';
+import { ROOT_LINE_COLOR_KEY } from '../../src/core/skinparam-key-handlers-shared.js';
 
 // ---------------------------------------------------------------------------
 // resolveSkinparam — direct key matches
@@ -27,10 +28,19 @@ describe('resolveSkinparam — direct key matches', () => {
     expect(theme.colors.backgroundGradient).toBeUndefined();
   });
 
-  it('maps bordercolor to colors.border', () => {
-    const { theme, unknown } = resolveSkinparam(new Map([['bordercolor', '#AABBCC']]), defaultTheme);
+  it('maps the internal root line colour key to colors.border', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([[ROOT_LINE_COLOR_KEY, '#AABBCC']]), defaultTheme);
     expect(theme.colors.border).toBe('#AABBCC');
     expect(unknown).toEqual([]);
+  });
+
+  // FromSkinparamToStyle's knowledge map has no un-prefixed `bordercolor`
+  // (only `<sname>BorderColor`, :273) and ColorParam has no `border` member:
+  // jar-verified diduxa-76-zimu664, every stroke stays #181818.
+  it('discards a bare user `borderColor` to unknown[] without touching colors.border', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['bordercolor', '#AABBCC']]), defaultTheme);
+    expect(theme.colors.border).toBe(defaultTheme.colors.border);
+    expect(unknown).toEqual(['bordercolor']);
   });
 
   it('maps fontcolor to colors.text', () => {

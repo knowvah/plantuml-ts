@@ -20,6 +20,7 @@ import { parseConditionalColor } from './klimt/color/HColorSet.js';
 import { parseClockwise } from './annotations/annotation-clockwise.js';
 import { withActivityCircleStyle } from './activity-circle-style.js';
 import { withSequenceShadowing } from './sequence-shadowing.js';
+import { ROOT_LINE_COLOR_KEY } from './skinparam-key-handlers-shared.js';
 
 /**
  * Five-stage theme resolution:
@@ -229,7 +230,7 @@ function rootCascadeSkinparams(root: ReadonlyMap<string, string> | undefined): M
   if (fontColor !== undefined) out.set('defaultfontcolor', fontColor);
   const lineColor = plain('linecolor');
   if (lineColor !== undefined) {
-    out.set('bordercolor', lineColor);
+    out.set(ROOT_LINE_COLOR_KEY, lineColor);
     out.set('arrowcolor', lineColor);
   }
   return out;

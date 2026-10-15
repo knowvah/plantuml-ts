@@ -17,6 +17,7 @@ import {
   parseFiniteInt,
   parseNonZeroInt,
   parseFontStyleFlags,
+  ROOT_LINE_COLOR_KEY,
 } from './skinparam-key-handlers-shared.js';
 import { ActorStyle } from './skin/ActorStyle.js';
 import { ADD_MAGIC_HANDLERS } from './skinparam-key-handlers-add-magic.js';
@@ -32,8 +33,16 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
       if (typeof paint !== 'string') acc.backgroundGradient = paint;
     },
   ],
+  // codd-T1c: NOT `bordercolor`. A user's bare `skinparam borderColor X` has no
+  // upstream meaning -- `FromSkinparamToStyle`'s `knowledge` map carries no
+  // un-prefixed `bordercolor` key (only `<sname>BorderColor`, :273), and
+  // `ColorParam` (skin/ColorParam.java) has no `border` member -- so it is
+  // discarded to `unknown[]` like any unrecognised key (jar-verified
+  // diduxa-76-zimu664: every stroke stays #181818). This key is the
+  // INTERNAL spelling `build-theme.ts#rootCascadeSkinparams` uses to carry a
+  // `<style> root { LineColor }` into `colors.border`.
   [
-    ['bordercolor'],
+    [ROOT_LINE_COLOR_KEY],
     (acc, _v, color) => {
       acc.border = color;
     },
