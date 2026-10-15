@@ -80,6 +80,14 @@ function tabledLabelText(edge: DescriptionEdgeGeo, visibleStereotype: string | u
   ].join('\n');
 }
 
+function edgeThickness(edge: DescriptionEdgeGeo, theme: Theme): number | undefined {
+  return edge.styleThickness ?? theme.colors.graph.arrowThickness;
+}
+
+function thicknessField(styleThickness: number | undefined): { styleThickness?: number } {
+  return styleThickness === undefined ? {} : { styleThickness };
+}
+
 function buildInput(
   edge: DescriptionEdgeGeo,
   theme: Theme,
@@ -109,7 +117,10 @@ function buildInput(
     fromUid,
     toUid,
     style: edgeStyle(edge),
-    ...(edge.styleThickness !== undefined ? { styleThickness: edge.styleThickness } : {}),
+    // `SvekEdge.java:265` defaultThickness = `getThickness(LineParam.arrow)`
+    // (`skinparam arrowThickness`), applied at `:899` unless the link
+    // carries its own bracket thickness -- as class-edge-geo.ts does.
+    ...thicknessField(edgeThickness(edge, theme)),
     // A bracket `#color` override feeds BOTH the line AND the (same-color)
     // filled extremity upstream (`svek/SvekEdge.java:884-893`) -- this
     // port's `SvekEdgeInput.color` already serves that dual role (no
