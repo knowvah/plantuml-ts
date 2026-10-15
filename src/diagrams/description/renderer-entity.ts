@@ -44,6 +44,7 @@ import {
   upstreamKeyword,
   mapComponentStyle,
   textFont,
+  stereotypeTextFont,
   entityTitleStyles,
   resolveActorStyle,
 } from '../../core/decoration/symbol/usymbol-resolve.js';
@@ -140,7 +141,7 @@ export function buildEntityParams(
   // code name in `fontBody`.
   const fontTitle = textFont(theme, node.symbol, 0, entityTitleStyles(node.symbol));
   const fontBody = textFont(theme, node.symbol);
-  const fontStereo = textFont(theme, node.symbol, 0, STEREOTYPE_STYLES, 'stereotype');
+  const fontStereo = stereotypeTextFont(theme, node.symbol, stereotypeLabels, STEREOTYPE_STYLES);
   // D3 (cdd6 T1b/T2f): this entity's own resolved LineThickness -- the SAME
   // value `paint.stroke` below draws the body's border with -- doubles as
   // the sprite decomposition's ambient stroke seed (`SvgNanoParser.java

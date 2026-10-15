@@ -28,7 +28,12 @@ import { buildStereo, resolveStereotypeSprite } from '../../core/svek/image/Enti
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import { rawStereotypeLabels } from './parse-helpers.js';
 import type { DescriptionNodeGeo } from './layout-helpers.js';
-import { resolvePackageStyle, resolveSymbol, textFont } from '../../core/decoration/symbol/usymbol-resolve.js';
+import {
+  resolvePackageStyle,
+  resolveSymbol,
+  stereotypeTextFont,
+  textFont,
+} from '../../core/decoration/symbol/usymbol-resolve.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import { drawKermorGroupNote } from './renderer-cluster-note.js';
 
@@ -112,7 +117,7 @@ function labelBlock(node: DescriptionNodeGeo, theme: Theme): TextBlock {
   const lines = node.stereotype.map((label, i) => (raw?.[i] === undefined ? `<<${label}>>` : raw[i]));
   return buildTextBlock(
     lines.join('\n'),
-    textFont(theme, node.symbol, 0, STEREOTYPE_STYLES, 'stereotype'),
+    stereotypeTextFont(theme, node.symbol, node.stereotype, STEREOTYPE_STYLES),
     HorizontalAlignment.CENTER,
   );
 }

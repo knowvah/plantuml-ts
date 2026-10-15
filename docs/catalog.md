@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1674 modules · 6091 exported names.
+1675 modules · 6106 exported names.
 
 ## `src/`
 
@@ -332,7 +332,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `SymbolContext.ts` | `SymbolContext` |  |
-| `usymbol-resolve.ts` | `resolveActorStyle`, `JAR_DEFAULT_TEXT_COLOR`, `upstreamKeyword`, `mapComponentStyle`, `resolvePackageStyle`, `resolveSymbol`, `textFontColor`, `textFont`, `entityTitleStyles` | usymbol-resolve.ts — shared symbol/style/font resolution for `USymbol` draw paths (SI27 T2: moved from `diagrams/description/renderer-symbol.ts` — upstream keeps this ONE place, `Entity#getUSymbol`, for every factory; the class engine's `re |
+| `usymbol-resolve.ts` | `resolveActorStyle`, `JAR_DEFAULT_TEXT_COLOR`, `upstreamKeyword`, `mapComponentStyle`, `resolvePackageStyle`, `resolveSymbol`, `textFontColor`, `textFont`, `stereotypeTextFont`, `entityTitleStyles` | usymbol-resolve.ts — shared symbol/style/font resolution for `USymbol` draw paths (SI27 T2: moved from `diagrams/description/renderer-symbol.ts` — upstream keeps this ONE place, `Entity#getUSymbol`, for every factory; the class engine's `re |
 | `USymbol.ts` | `SName`, `USymbol`, `Margin` |  |
 | `USymbolAction.ts` | `USymbolAction` |  |
 | `USymbolActor.ts` | `USymbolActor` |  |
@@ -932,6 +932,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `EntityImageDescriptionShield.ts` | `computeShieldMargins`, `hideTextOffsets`, `requireGroups` | EntityImageDescriptionShield — the three pure geometry/narrowing helpers `EntityImageDescription` delegates to (`computeShieldMargins`, `hideTextOffsets`, `requireGroups`). |
 | `EntityImageDescriptionSupport.ts` | `measureLine`, `buildTextBlock`, `ShapeType`, `Margins`, `HexagonPolygon`, `resolveDescriptionUSymbol`, `resolveUSymbol`, `resolveShapeType` | EntityImageDescriptionSupport — module-level helpers for `EntityImageDescription.ts`, extracted purely to stay under this project's 500-line complexity-hook ceiling (see this project's established "500-line splits" workaround — `EntityImage |
 | `EntityImageDescriptionTextBlock.ts` | `measureLine`, `buildTextBlock` | EntityImageDescriptionTextBlock — the text-construction seam split out of `EntityImageDescriptionSupport.ts` (E2r/L1's own home for it) purely to stay under this project's 500-line complexity-hook ceiling once T9 (svg-sprite-nanoparser) wid |
+| `EntityImageDescriptionTextMeasure.ts` | `ResolvedAtomImageWithRaster`, `MIN_TEXT_RUN_HEIGHT`, `measureLine`, `LineMetrics`, `SEPARATOR_SIZE_HEIGHT`, `SEPARATOR_DRAW_ADVANCE`, `SEPARATOR_WIDTH_CONTRIBUTION`, `SEPARATOR_DEFAULT_THICKNESS`, `LineBuild`, `buildLine`, `hasZeroAltitudeAtom`, `measureBuiltLine`, `measureSingleAtomWidth`, `buildWrappedLines` | EntityImageDescriptionTextMeasure -- the measuring half of `EntityImageDescriptionTextBlock.ts` (`measureLine`, the per-line atom build, `LineMetrics`, the wrap), split out by a pure move only to keep both files under this project's 500-lin |
 | `EntityImageJson.ts` | `JSON_NAME_MARGIN`, `JSON_CELL_MARGIN_X`, `JSON_CELL_MARGIN_Y`, `JSON_X_MARGIN_CIRCLE`, `JSON_EMPTY_HEIGHT_FALLBACK` | `EntityImageJson` / `TextBlockCucaJSon` — the margins a `json` leaf embedded in a cuca diagram insets its cells and title by. |
 | `EntityImageNoteLink.ts` | `PureNoteTextDim`, `PureNoteTextMeasurer`, `measureLinkNoteDim` | ONE port of `EntityImageNoteLink`'s dimension -- collapses the FOUR former copies (`class/class-note-link-box.ts:70`, `state/state-dot-graph.ts:172`, `state/state-composite-edge-label.ts:49` -- the last two byte-identical private duplicates |
 | `Footprint.ts` | `Footprint` |  |
