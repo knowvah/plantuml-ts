@@ -1,0 +1,4 @@
+
+### component/malado-53-noso561  pass=false structural=2 numeric=0
+  S svg/g[1]/g[1]/ellipse[1]/@stroke  exp=#00F | act=#181818
+  S svg/g[1]/g[1]/path[1]/@stroke  exp=#00F | act=#181818

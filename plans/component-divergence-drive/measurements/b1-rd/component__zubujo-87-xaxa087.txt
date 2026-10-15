@@ -1,0 +1,19 @@
+
+### component/zubujo-87-xaxa087  pass=false structural=2 numeric=15
+  S svg/g[1]/g[2][childCount]  exp=5 | act=1
+  S svg/g[1][childCount]  exp=7 | act=6
+  N svg/@height  exp=247 | act=178 (Δ69)
+  N svg/@viewBox[2]  exp=298 | act=222 (Δ76)
+  N svg/@viewBox[3]  exp=247 | act=178 (Δ69)
+  N svg/@width  exp=298 | act=222 (Δ76)
+  N svg/g[1]/g[1]/rect[1]/@height  exp=146 | act=157 (Δ11)
+  N svg/g[1]/g[1]/rect[1]/@width  exp=186 | act=201.769 (Δ15.769000000000005)
+  N svg/g[1]/g[1]/rect[2]/@x  exp=173 | act=188.769 (Δ15.769000000000005)
+  N svg/g[1]/g[1]/rect[3]/@x  exp=171 | act=186.769 (Δ15.769000000000005)
+  N svg/g[1]/g[1]/rect[4]/@x  exp=171 | act=186.769 (Δ15.769000000000005)
+  N svg/g[1]/g[1]/text[1]/@x  exp=75.85 | act=83.734 (Δ7.884)
+  N svg/g[1]/g[1]/text[2]/@x  exp=35.863 | act=43.747 (Δ7.884)
+  N svg/g[1]/g[3]/text[1]/@x  exp=51.149 | act=59.029 (Δ7.880000000000003)
+  N svg/g[1]/g[3]/text[1]/@y  exp=169.889 | act=158.889 (Δ11)
+  N svg/g[1]/g[3]/rect[1]/@x  exp=88.33 | act=96.21 (Δ7.8799999999999955)
+  N svg/g[1]/g[3]/rect[1]/@y  exp=147 | act=136 (Δ11)

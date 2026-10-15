@@ -1,0 +1,6 @@
+
+### component/lakuti-06-dobi447  pass=false structural=4 numeric=0
+  S svg/g[1]/g[3]/path[1]/@d  exp=M31.999,87.872 A10,10 0 0 0 46.141 87.872 | act=M39.07,51.13 C39.07,68.52 39.07,93.06 39.07,110.54
+  S svg/g[1]/g[3]/path[1]/@id  exp= | act=Foo-Bar
+  S svg/g[1]/g[3]/path[1]/@stroke-width  exp=1.5 | act=1
+  S svg/g[1]/g[3][childCount]  exp=3 | act=1

@@ -1,0 +1,2 @@
+
+### component/tusugu-95-geju398  pass=true structural=0 numeric=0

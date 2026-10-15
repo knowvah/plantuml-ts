@@ -1,0 +1,11 @@
+
+### component/xenusu-76-sabi405  pass=false structural=7 numeric=2
+  S svg/g[1]/g[3]/path[1]/@stroke-width  exp=2 | act=1
+  S svg/g[1]/g[3]/polygon[1]/@stroke-width  exp=2 | act=1
+  S svg/g[1]/g[4]/path[1]/@stroke  exp=#00F | act=#008000
+  S svg/g[1]/g[4]/path[1]/@stroke-width  exp=2 | act=1
+  S svg/g[1]/g[4]/polygon[1]/@fill  exp=#00F | act=#008000
+  S svg/g[1]/g[4]/polygon[1]/@stroke  exp=#00F | act=#008000
+  S svg/g[1]/g[4]/polygon[1]/@stroke-width  exp=2 | act=1
+  N svg/@viewBox[2]  exp=354 | act=353 (Δ1)
+  N svg/@width  exp=354 | act=353 (Δ1)

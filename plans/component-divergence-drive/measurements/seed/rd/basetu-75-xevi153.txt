@@ -1,0 +1,6 @@
+
+### component/basetu-75-xevi153  pass=false structural=2 numeric=2
+  S svg/g[1]/g[2][childCount]  exp=3 | act=1
+  S svg/g[1][childCount]  exp=2 | act=3
+  N svg/@viewBox[2]  exp=185 | act=184 (Δ1)
+  N svg/@width  exp=185 | act=184 (Δ1)

@@ -41,7 +41,8 @@
 import { formatShiftedCoordinates } from './annotations/coord-shift.js';
 import type { AssembledSvg, RenderFragment } from './dispatcher.js';
 import { svgRoot, group, rect } from './svg.js';
-import { finalizeActivityFragment } from './assemble-svg-activity.js';
+import { finalizeActivityFragment, scaleActivityBody } from './assemble-svg-activity.js';
+import { resolveScaleFactor } from './scale-command.js';
 import { applySeededDefIds } from './svg-defs-seeded.js';
 import { seedOf } from './klimt/drawing/svg/svg-seed.js';
 import { assembleDocumentShell } from './klimt/document-shell.js';
@@ -59,6 +60,7 @@ import {
  *  root `data-diagram-type`). Each engine declares its own copy to SET `RenderFragment.diagramType`
  *  (`class/renderer.ts`, `json/index.ts`, `mindmap/index.ts`, ...); these are for DISPATCH only. */
 const DIAGRAM_TYPE_CLASS = 'CLASS';
+const DIAGRAM_TYPE_DESCRIPTION = 'DESCRIPTION';
 const DIAGRAM_TYPE_STATE = 'STATE';
 const DIAGRAM_TYPE_JSON = 'JSON';
 const DIAGRAM_TYPE_YAML = 'YAML';
@@ -379,6 +381,42 @@ function finalizeSequenceBody(fragment: RenderFragment): string {
 // ---------------------------------------------------------------------------
 
 /**
+ * codd-T4: description's chrome-composed fragment. Two jobs, both because
+ * chrome is composed OUTSIDE klimt here while the jar draws it through the
+ * same `UGraphic` as the body:
+ *  - the full-canvas background `<rect>` as the content `<g>`'s FIRST child,
+ *    drawn at the FINAL size (`UgDiagram.java:123-135`: `addChrome`, then
+ *    `TextBlockUtils.addBackcolor`);
+ *  - `scale` / `skinparam dpi`, applied to the whole composed block
+ *    (`TextBlockExporter.java:159-177`, title included).
+ * A fragment with neither falls through unchanged, as before.
+ */
+function finalizeDescriptionFragment(fragment: RenderFragment): RenderFragment {
+  const body =
+    fragment.documentBackgroundRect === undefined
+      ? fragment.body
+      : spliceAsFirstChild(
+          fragment.body,
+          rect(0, 0, Math.trunc(fragment.width), Math.trunc(fragment.height), {
+            fill: fragment.documentBackgroundRect,
+            stroke: 'none',
+            strokeWidth: 1,
+          }),
+        );
+  // `TextBlockExporter#computeScaleFactor` (`:204-208`) reads the chrome-and-margin dimension before `ensureVisible`.
+  const dimension = fragment.exportedDimension ?? fragment;
+  const factor = resolveScaleFactor(fragment.scaleSpec, dimension.width, dimension.height, fragment.dpi);
+  if (factor === 1) return { ...fragment, body };
+  return {
+    ...fragment,
+    body: scaleActivityBody(body, factor),
+    scaledCanvas: true,
+    width: fragment.width * factor,
+    height: fragment.height * factor,
+  };
+}
+
+/**
  * Per-`diagramType` body finalization -- the work each of the four former
  * `diagrams/<engine>/renderer-shell.ts` files did to `fragment.body` (and,
  * for json, `fragment.background`) before handing off to
@@ -394,6 +432,8 @@ function finalizeShellFragment(fragment: RenderFragment): RenderFragment {
   switch (fragment.diagramType) {
     case DIAGRAM_TYPE_CLASS:
       return { ...fragment, body: finalizeClassBody(fragment) };
+    case DIAGRAM_TYPE_DESCRIPTION:
+      return finalizeDescriptionFragment(fragment);
     case DIAGRAM_TYPE_STATE:
       return { ...fragment, body: finalizeStateBody(fragment) };
     case DIAGRAM_TYPE_SEQUENCE:

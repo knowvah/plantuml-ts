@@ -1,0 +1,94 @@
+
+### unknown/jafexe-59-muzo362  pass=false structural=35 numeric=57
+  S svg/g[1]/g[1]/@id  exp=ent0006 | act=ent0001
+  S svg/g[1]/g[1]/text[1]/@textLength  exp=45.15 | act=22.487
+  S svg/g[1]/g[1]/text[1]/text()[1]  exp=second | act=first
+  S svg/g[1]/g[2]/@class  exp=entity | act=cluster
+  S svg/g[1]/g[2]/@id  exp=ent0002 | act=ent0003
+  S svg/g[1]/g[2]/polygon[1]  exp=rect | act=polygon
+  S svg/g[1]/g[2]/line[1]  exp=rect | act=line
+  S svg/g[1]/g[2]/line[2]  exp=rect | act=line
+  S svg/g[1]/g[2]/line[3]  exp=rect | act=line
+  S svg/g[1]/g[2]/text[1]/@font-weight  exp= | act=700
+  S svg/g[1]/g[2]/text[1]/@textLength  exp=36.487 | act=58.45
+  S svg/g[1]/g[2]/text[1]/text()[1]  exp=router | act=physical1
+  S svg/g[1]/g[3]/@id  exp=ent0004 | act=ent0002
+  S svg/g[1]/g[3]/text[1]/@textLength  exp=112.262 | act=36.487
+  S svg/g[1]/g[3]/text[1]/text()[1]  exp=Logical_VLAN_10 | act=router
+  S svg/g[1]/g[4]/@id  exp=ent0007 | act=ent0004
+  S svg/g[1]/g[4]/rect[1]  exp=polygon | act=rect
+  S svg/g[1]/g[4]/rect[2]  exp=line | act=rect
+  S svg/g[1]/g[4]/rect[3]  exp=line | act=rect
+  S svg/g[1]/g[4]/rect[4]  exp=line | act=rect
+  S svg/g[1]/g[4]/text[1]/@textLength  exp=58.45 | act=112.262
+  S svg/g[1]/g[4]/text[1]/text()[1]  exp=physical1 | act=Logical_VLAN_10
+  S svg/g[1]/g[5]/@class  exp=link | act=entity
+  S svg/g[1]/g[5]/@id  exp=lnk5 | act=ent0006
+  S svg/g[1]/g[5]/path[1]/@d  exp=M198.32,123.38 C215.68,123.97 233.04,122.42 250.39,118.73 | act=M339.05,65.5 L397.2,65.5 A3.75,3.75 0 0 1 399.7,68 L406.7,85.5 L421.2,85.5 A2.5,2.5 0 0 1 423.7,88 L423.7,100 A2.5,2.5 0 0 1 421.2,102.5 L339.05,102.5 A2.5,2.5 0 0 1 336.55,100 L336.55,68 A2.5,2.5 0 0 1 339.05,65.5
+  S svg/g[1]/g[5]/path[1]/@fill  exp=none | act=#F1F1F1
+  S svg/g[1]/g[5]/path[1]/@id  exp=Logical_VLAN_10-router | act=
+  S svg/g[1]/g[5]/path[1]/@stroke-width  exp=1 | act=0.5
+  S svg/g[1]/g[5][childCount]  exp=1 | act=3
+  S svg/g[1]/g[6]/@id  exp=lnk8 | act=lnk5
+  S svg/g[1]/g[6]/path[1]/@id  exp=Logical_VLAN_10-router-1 | act=Logical_VLAN_10-router
+  S svg/g[1]/g[7]/@id  exp=lnk9 | act=lnk7
+  S svg/g[1]/g[7]/path[1]/@d  exp=M198.61,98.84 C218.31,99.36 233.13,102.08 233.13,107 C233.13,111.92 218.31,114.64 198.61,115.16 | act=M190.67,67.51 C201.99,67.65 213.31,68.93 224.63,71.35
+  S svg/g[1]/g[7]/path[1]/@id  exp=Logical_VLAN_10-Logical_VLAN_10 | act=Logical_VLAN_10-router-1
+  S svg/g[1][childCount]  exp=9 | act=7
+  N svg/@height  exp=184 | act=153 (Δ31)
+  N svg/@viewBox[2]  exp=512 | act=438 (Δ74)
+  N svg/@viewBox[3]  exp=184 | act=153 (Δ31)
+  N svg/@width  exp=512 | act=438 (Δ74)
+  N svg/g[1]/g[1]/path[1]/@d[0]  exp=369.5 | act=8.5 (Δ361)
+  N svg/g[1]/g[1]/path[1]/@d[1]  exp=52 | act=6 (Δ46)
+  N svg/g[1]/g[1]/path[1]/@d[2]  exp=415.65 | act=31.987 (Δ383.66299999999995)
+  N svg/g[1]/g[1]/path[1]/@d[3]  exp=52 | act=6 (Δ46)
+  N svg/g[1]/g[1]/path[1]/@d[9]  exp=418.15 | act=34.487 (Δ383.66299999999995)
+  N svg/g[1]/g[1]/path[1]/@d[10]  exp=54.5 | act=8.5 (Δ46)
+  N svg/g[1]/g[1]/path[1]/@d[11]  exp=425.15 | act=41.487 (Δ383.66299999999995)
+  N svg/g[1]/g[1]/path[1]/@d[12]  exp=72 | act=26 (Δ46)
+  N svg/g[1]/g[1]/path[1]/@d[13]  exp=494.5 | act=314.877 (Δ179.623)
+  N svg/g[1]/g[1]/path[1]/@d[14]  exp=72 | act=26 (Δ46)
+  N svg/g[1]/g[1]/path[1]/@d[20]  exp=497 | act=317.377 (Δ179.623)
+  N svg/g[1]/g[1]/path[1]/@d[21]  exp=74.5 | act=28.5 (Δ46)
+  N svg/g[1]/g[1]/path[1]/@d[22]  exp=497 | act=317.377 (Δ179.623)
+  N svg/g[1]/g[1]/path[1]/@d[23]  exp=142.5 | act=135.5 (Δ7)
+  N svg/g[1]/g[1]/path[1]/@d[29]  exp=494.5 | act=314.877 (Δ179.623)
+  N svg/g[1]/g[1]/path[1]/@d[30]  exp=145 | act=138 (Δ7)
+  N svg/g[1]/g[1]/path[1]/@d[31]  exp=369.5 | act=8.5 (Δ361)
+  N svg/g[1]/g[1]/path[1]/@d[32]  exp=145 | act=138 (Δ7)
+  N svg/g[1]/g[1]/path[1]/@d[38]  exp=367 | act=6 (Δ361)
+  N svg/g[1]/g[1]/path[1]/@d[39]  exp=142.5 | act=135.5 (Δ7)
+  N svg/g[1]/g[1]/path[1]/@d[40]  exp=367 | act=6 (Δ361)
+  N svg/g[1]/g[1]/path[1]/@d[41]  exp=54.5 | act=8.5 (Δ46)
+  N svg/g[1]/g[1]/path[1]/@d[47]  exp=369.5 | act=8.5 (Δ361)
+  N svg/g[1]/g[1]/path[1]/@d[48]  exp=52 | act=6 (Δ46)
+  N svg/g[1]/g[1]/line[1]/@x1  exp=367 | act=6 (Δ361)
+  N svg/g[1]/g[1]/line[1]/@x2  exp=425.15 | act=41.487 (Δ383.66299999999995)
+  N svg/g[1]/g[1]/line[1]/@y1  exp=72 | act=26 (Δ46)
+  N svg/g[1]/g[1]/line[1]/@y2  exp=72 | act=26 (Δ46)
+  N svg/g[1]/g[1]/text[1]/@x  exp=371 | act=10 (Δ361)
+  N svg/g[1]/g[1]/text[1]/@y  exp=64.889 | act=18.889 (Δ46)
+  N svg/g[1]/g[2]/text[1]/@x  exp=265.76 | act=80.906 (Δ184.85399999999998)
+  N svg/g[1]/g[2]/text[1]/@y  exp=115.889 | act=57.889 (Δ57.99999999999999)
+  N svg/g[1]/g[3]/rect[1]/@width  exp=152.262 | act=76.487 (Δ75.775)
+  N svg/g[1]/g[3]/rect[1]/@x  exp=45.87 | act=224.89 (Δ179.01999999999998)
+  N svg/g[1]/g[3]/rect[1]/@y  exp=85 | act=62 (Δ23)
+  N svg/g[1]/g[3]/rect[2]/@x  exp=178.132 | act=281.377 (Δ103.245)
+  N svg/g[1]/g[3]/rect[2]/@y  exp=90 | act=67 (Δ23)
+  N svg/g[1]/g[3]/rect[3]/@x  exp=176.132 | act=279.377 (Δ103.245)
+  N svg/g[1]/g[3]/rect[3]/@y  exp=92 | act=69 (Δ23)
+  N svg/g[1]/g[3]/rect[4]/@x  exp=176.132 | act=279.377 (Δ103.245)
+  N svg/g[1]/g[3]/rect[4]/@y  exp=96 | act=73 (Δ23)
+  N svg/g[1]/g[3]/text[1]/@x  exp=60.87 | act=239.89 (Δ179.01999999999998)
+  N svg/g[1]/g[3]/text[1]/@y  exp=115.889 | act=92.889 (Δ23)
+  N svg/g[1]/g[4]/text[1]/@x  exp=397.78 | act=53 (Δ344.78)
+  N svg/g[1]/g[4]/text[1]/@y  exp=115.889 | act=92.889 (Δ23)
+  N svg/g[1]/g[6]/path[1]/@d[0]  exp=198.32 | act=190.67 (Δ7.650000000000006)
+  N svg/g[1]/g[6]/path[1]/@d[1]  exp=90.62 | act=100.49 (Δ9.86999999999999)
+  N svg/g[1]/g[6]/path[1]/@d[2]  exp=215.68 | act=201.99 (Δ13.689999999999998)
+  N svg/g[1]/g[6]/path[1]/@d[3]  exp=90.03 | act=100.35 (Δ10.319999999999993)
+  N svg/g[1]/g[6]/path[1]/@d[4]  exp=233.04 | act=213.31 (Δ19.72999999999999)
+  N svg/g[1]/g[6]/path[1]/@d[5]  exp=91.58 | act=99.07 (Δ7.489999999999995)
+  N svg/g[1]/g[6]/path[1]/@d[6]  exp=250.39 | act=224.63 (Δ25.75999999999999)
+  N svg/g[1]/g[6]/path[1]/@d[7]  exp=95.27 | act=96.65 (Δ1.3800000000000097)

@@ -1,0 +1,9 @@
+
+### unknown/golamo-46-lume529  pass=false structural=7 numeric=0
+  S svg/g[1]/g[1]/rect[1]/@stroke  exp=#008000 | act=#181818
+  S svg/g[1]/g[1]/rect[1]/@stroke-dasharray  exp=7,7 | act=
+  S svg/g[1]/g[1]/text[1]/@fill  exp=#008000 | act=#000
+  S svg/g[1]/g[1]/text[2]/@fill  exp=#008000 | act=#000
+  S svg/g[1]/g[2]/rect[1]/@stroke-dasharray  exp=7,7 | act=
+  S svg/g[1]/g[2]/text[1]/@fill  exp=#008000 | act=#000
+  S svg/g[1]/g[2]/text[2]/@fill  exp=#008000 | act=#000

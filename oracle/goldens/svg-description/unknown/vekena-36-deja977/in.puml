@@ -1,0 +1,4 @@
+@startuml
+database foo1 #blue
+cloud foo2 #red
+@enduml

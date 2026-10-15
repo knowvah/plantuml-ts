@@ -1,0 +1,8 @@
+
+### component/fopako-15-labi027  pass=false structural=0 numeric=6
+  N svg/g[1]/g[2]/rect[1]/@height  exp=197 | act=192 (Δ5)
+  N svg/g[1]/g[2]/rect[1]/@width  exp=140 | act=139.725 (Δ0.2750000000000057)
+  N svg/g[1]/g[2]/rect[1]/@x  exp=36 | act=36.14 (Δ0.14000000000000057)
+  N svg/g[1]/g[2]/rect[1]/@y  exp=145.611 | act=150.611 (Δ5)
+  N svg/g[1]/g[2]/text[1]/@x  exp=79.531 | act=39.14 (Δ40.391000000000005)
+  N svg/g[1]/g[2]/text[1]/@y  exp=158.5 | act=163.5 (Δ5)

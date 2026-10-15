@@ -1,0 +1,5 @@
+
+### component/rapaji-98-xato067  pass=false structural=3 numeric=0
+  S svg/g[1]/g[4]/rect[1]/@fill  exp=#FFA500 | act=#F1F1F1
+  S svg/g[1]/g[5]/rect[1]/@fill  exp=#008000 | act=#F1F1F1
+  S svg/g[1]/g[5]/rect[1]/@stroke  exp=#00F | act=#181818

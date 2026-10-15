@@ -1,0 +1,4 @@
+
+### component/nedapu-57-dife142  pass=false structural=0 numeric=2
+  N svg/g[1]/g[5]/text[1]/@x  exp=166.55 | act=193.55 (Δ27)
+  N svg/g[1]/g[5]/text[1]/@y  exp=22.111 | act=18.5 (Δ3.6110000000000007)

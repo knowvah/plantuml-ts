@@ -13,6 +13,9 @@ import type { DotPath } from '../klimt/shape/DotPath.js';
 import { buildDotPathFromSplinePoints, edgeMidpoint } from './svek-edge-geometry.js';
 import { placeHeadExtremity, placeTailExtremity } from './svek-edge-extremity.js';
 import type { PlacedExtremity } from './svek-edge-extremity.js';
+import { buildTextBlock } from './image/EntityImageDescriptionTextBlock.js';
+import { splitDisplayLines } from '../klimt/creole/DisplayNewlines.js';
+import { HorizontalAlignment } from '../klimt/geom/HorizontalAlignment.js';
 import { strokeForStyle } from './svek-edge-stroke.js';
 import type { UStroke } from '../klimt/UStroke.js';
 import { getLinkTypeName, looksLikeRevertedForSvg, lookupDecors1, lookupDecors2 } from './extremity/link-decor.js';
@@ -65,10 +68,25 @@ import type { LinkDecorName } from './extremity/link-decor.js';
  */
 export type SvekLinkStyle = 'solid' | 'dashed' | 'dotted' | 'bold';
 
+/** `SvekEdge.java:372-373`: the margin around the label block (`marginLabel`). */
+export const EDGE_LABEL_MARGIN = 1;
+/** `SvekEdge.java:372-373`: the same margin for a self-loop. */
+export const SELF_LOOP_EDGE_LABEL_MARGIN = 6;
+
 export interface SvekEdgeLabel {
   readonly text: string;
+  /** With `w`/`h`: the CENTRE of the DOT label table the engine placed
+   *  (the jar's corner is `SvekEdge#getXY`, the table polygon's min). */
   readonly x: number;
   readonly y: number;
+  /** The label table graphviz was given (`SvekEdge#appendTable`'s
+   *  `(int)`-truncated `WIDTH`/`HEIGHT`). When both are present the label
+   *  is drawn as `SvekEdge#drawU` does (`:951-954`): the text block at the
+   *  table corner plus `labelShield`, inside its `marginLabel`. Absent for
+   *  the link-note labels (a distinct mechanism), which keep `x`/`y` as the
+   *  text origin. */
+  readonly w?: number;
+  readonly h?: number;
 }
 
 export interface SvekEdgeInput {
@@ -287,6 +305,11 @@ export class SvekEdge implements UDrawable {
   private drawLabels(ug: UGraphic): void {
     const font = this.input.labelFont;
     if (font === undefined) return;
+    const label = this.input.label;
+    if (label?.w !== undefined && label.h !== undefined) {
+      this.drawLabelBlock(ug, { ...label, w: label.w, h: label.h }, font);
+      return;
+    }
     if (this.input.stereotype !== undefined) {
       const mid = edgeMidpoint(this.input.points);
       ug.apply(new UTranslate(mid.x, mid.y - 6)).draw(UText.build(`«${this.input.stereotype}»`, font));
@@ -295,5 +318,21 @@ export class SvekEdge implements UDrawable {
       const { text, x, y } = this.input.label;
       ug.apply(new UTranslate(x, y)).draw(UText.build(text, font));
     }
+  }
+
+  /** `SvekEdge.java:951-954`: `labelText.drawU(UTranslate(x + labelXY.x +
+   *  labelShield, ...))` where `labelXY` is the table's min corner
+   *  (`getXY`, `:808-815`) and `labelText` is the label block inside
+   *  `withMargin(block, marginLabel, marginLabel)` (`:372-373`). The engine
+   *  position arrives as the table centre, so the corner is `centre -
+   *  trunc(size) / 2`. `labelShield` is 0: the description port parses no
+   *  middle decor (`link-edge-attrs.ts#computeNoteMergedDims`). */
+  private drawLabelBlock(ug: UGraphic, label: Required<SvekEdgeLabel>, font: FontConfiguration): void {
+    const margin = this.input.fromUid === this.input.toUid ? SELF_LOOP_EDGE_LABEL_MARGIN : EDGE_LABEL_MARGIN;
+    const x = label.x - Math.trunc(label.w) / 2 + margin;
+    const y = label.y - Math.trunc(label.h) / 2 + margin;
+    buildTextBlock(splitDisplayLines(label.text).lines.join('\n'), font, HorizontalAlignment.CENTER).drawU(
+      ug.apply(new UTranslate(x, y)),
+    );
   }
 }

@@ -3,7 +3,7 @@
  * mechanism (b)): `note right: <text>` attached to a leaf entity draws
  * `EntityImageNote.java:207-243`'s opale fold-outline + corner triangle
  * (`Opale.ts#resolveOpaleConnector`, `layout-geo-post.ts#applyOpaleNote`,
- * `renderer-note-opale.ts#drawOpaleShape`) instead of a plain box +
+ * `renderer-note-opale.ts#drawNoteShape`) instead of a plain box +
  * separately-drawn dashed connector (`SvekEdge#drawU`'s `if (opale)
  * return;`).
  *
@@ -60,11 +60,11 @@ describe('description note — Opale connector (T1e)', () => {
     // `descriptive-keywords.ts`'s own dispatch table.
     const svg = render('@startuml\ncloud x\nnote as N1\nplain note\nend note\n@enduml');
 
-    // The note itself draws exactly one `<rect>` (its plain fallback box);
-    // the only `<path>` in the document is `x`'s own cloud shape -- no
-    // Opale outline/corner path for the note.
-    expect(svg).toContain('<rect');
-    expect(svg.match(/<path/g)).toHaveLength(1);
+    // codd-T3: `EntityImageNote#drawNormal` -- the note is `Opale
+    // .getPolygonNormal` + `getCorner` (two `<path>`s, no `<rect>`), plus
+    // `x`'s own cloud path; no connector notch (`A0,0` arcs) in either.
+    expect(svg).not.toContain('<rect x=');
+    expect(svg.match(/<path/g)).toHaveLength(3);
   });
 
   it('a note linked to ANOTHER note does not opalise (isOpalisable: other end not NOTE)', () => {
@@ -72,16 +72,16 @@ describe('description note — Opale connector (T1e)', () => {
       '@startuml\ncloud x\nnote as N1\nfirst\nend note\nnote as N2\nsecond\nend note\nN1 --> N2\n@enduml',
     );
 
-    // Both notes stay plain rects; the N1->N2 link still draws its own line.
-    expect(svg).toContain('<rect');
+    // Both notes stay plain (no notch); the N1->N2 link still draws its own line.
+    expect(svg).not.toContain('A0,0');
     expect(svg).toContain('class="link"');
   });
 
   it('a note touched by two links does not opalise (isOpalisable: onlyOneLink)', () => {
     const svg = render('@startuml\ncloud a\ncloud b\nnote "shared" as N\na .. N\nb --> N\n@enduml');
 
-    // N stays a plain rect; both links to it still draw as separate lines.
-    expect(svg).toContain('<rect');
+    // N stays a plain polygon; both links to it still draw as separate lines.
+    expect(svg).not.toContain('A0,0');
     expect(svg).toContain('class="link"');
   });
 });

@@ -1,0 +1,741 @@
+PIN  component/babafi-51-dixi026 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/balipa-82-feto843 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/basetu-75-xevi153 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/betidu-24-xuku720 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/bisedo-29-kone620 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/bitexe-13-mopa885 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/buduco-56-jeke005 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/bukece-71-miku542 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/butebe-90-dozo380 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/catari-10-xiza828 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/cemutu-31-tuxe792 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/cenoja-47-rodu998 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/cigite-14-kane677 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/codabo-50-mupa164 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/cojege-69-ruku138 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/cukafa-49-fona812 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/cuxeda-73-semi910 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/cuxelu-66-zopu195 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/daxija-24-pozu867 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/detona-13-ziko113 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/dexigu-24-deru622 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/diduxa-76-zimu664 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+skip component/dirofi-81-cuga514 ratchetDiffs=-1 eligibility=NO (dotEqual=false in parity-component.json) => dotEqual=false in parity-component.json
+PIN  component/dozudi-14-sevu997 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/dugovi-24-kupu658 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/fasave-91-jaka816 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/fijido-06-kapu656 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/fimoxe-74-sobi956 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/fodena-72-sule202 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/fogexa-24-lavi583 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/fojamu-08-veku866 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/fopako-15-labi027 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/fuzula-86-temo881 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/gafegu-06-nito976 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/gafico-37-cuma657 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/gekato-87-lisi598 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/gevaje-94-sajo802 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/gezemu-34-kamu453 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/gocexi-61-biso565 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/gogosu-37-mipe918 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/gopomi-26-pome923 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/gutute-00-gaki684 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/junoxu-15-gori632 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/juvucu-92-bugo434 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/kacite-73-sobe773 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/kagapo-72-cofe085 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/kenece-24-juku624 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/keniji-18-tupu819 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/kizobu-64-rozo458 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/kokebo-27-vafi688 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/kucabo-74-cora635 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/kumefo-73-xodu411 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/lesori-32-zeve057 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/levuxi-16-fotu885 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/lobute-63-tizi096 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/loroto-06-fano471 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/lovapo-83-xilo457 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/luniju-97-tuja870 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/malado-53-noso561 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/mavuxi-16-jafi782 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/mejoxi-96-cegu294 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/mevupe-82-meva605 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/mucezi-78-ciki658 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/murava-69-tago286 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/nedapu-57-dife142 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/nidemo-97-domu132 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/nipoga-91-nole703 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/nufofe-18-xani887 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/nujito-06-neca370 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/pafoxe-99-xulo156 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/pegali-65-rotu416 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/pepego-30-kati324 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/ponare-43-kazu160 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/radiga-95-junu817 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/rapaji-98-xato067 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/renita-52-jazi848 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/rigoge-48-ziso050 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/rimiku-31-cigo272 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/riradu-09-xipo824 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/romuco-28-zafo015 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/saxosu-09-nodi002 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/silito-78-vubi253 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/siseda-71-napu395 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/sobobi-72-miri289 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/sodoza-93-nanu557 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/somugi-21-doli483 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/sugaca-11-boma467 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/suzemi-86-kuma659 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/tacixe-99-gesi489 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/tajadu-40-juro990 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/tajuki-26-bime046 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/temufu-00-rira888 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/tijexo-10-zipo222 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/tilexe-28-fiju280 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/tizuza-93-xeto109 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/toxine-81-xofo986 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/turasu-73-zoni468 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/tusugu-95-geju398 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/venoti-11-seza115 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/vixeni-34-nici683 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/vosapi-62-mugu541 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/vosuxa-11-tapu784 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/vovuru-39-sula650 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/vunimi-85-xadu895 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/xadaji-25-cufe655 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/xadinu-90-vasu322 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/xocodo-09-nuxi647 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/zabixa-22-tovi572 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/zajozi-04-dixu500 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/zibumo-62-rije152 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/zifaji-87-raki559 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/zodare-91-rira454 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/zonobi-55-zuna105 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/zotake-65-cabi912 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/zozutu-82-pupa220 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/zubujo-87-xaxa087 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/zugofa-47-risi694 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  component/zusota-76-jagu564 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/bootstrap-0 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/cevuji-49-bile305 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/cuzuci-92-dugi933 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/exposant-02-usecase ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/fariba-82-xolu802 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/fotisa-06-xipe681 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/fumitu-00-reji589 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/fuvosu-10-lixu251 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/gigofe-94-zepe032 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/kijufe-84-colu239 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/kobasu-11-difo566 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/kofuca-08-pafi749 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/kovaxi-11-reti348 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/lirebi-26-voka556 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/molopu-64-totu560 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/mutere-78-geko363 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/nenedo-78-fiva569 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/nipapu-74-roro938 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/nobiza-91-fimo741 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/pivudu-29-pele178 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/robiga-73-tedi466 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/rokipo-88-sece008 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/ruziru-69-xixo434 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/saduja-80-goba120 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/seneso-72-cuje674 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/tanuna-53-neko979 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/tozubi-37-feze715 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/vibunu-17-guso486 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/xeluxu-64-fozo131 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/zacute-55-zece399 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+PIN  usecase/zidebi-71-nocu387 ratchetDiffs=0 eligibility=ok (dotEqual=true) => pin
+skip unknown/activity-legacy1-example-0 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/activity-legacy1-example-1 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/activity-legacy1-example-2 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/activity-legacy1-example-3 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/activity-legacy1-example-4 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/activity-legacy1-example-5 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/bacore-60-gana679 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=STATE, not DESCRIPTION) => routing-baseline ourType=STATE, not DESCRIPTION
+skip unknown/baleco-37-lili752 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/bamami-10-lava790 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/bamudi-49-caxo996 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+PIN  unknown/banomu-15-keni701 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/barada-07-veca157 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/basoto-36-resu245 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/beboke-62-zofu377 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/bekoni-23-xece793 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/bezapo-02-xixu443 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/bibeja-29-goxu033 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/bibigo-23-koli015 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/bidafa-53-lufi179 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/bijufi-98-xafa015 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/bikavu-22-rago633 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/bisefo-56-dumu120 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/bixixe-41-vigu064 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/bizasu-70-vaxa243 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/bobixe-18-riza923 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/bocipi-24-vexi113 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/bocuri-67-bira302 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/bogide-54-buco992 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/boguko-42-zuda981 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/boguze-30-lava691 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/bokupo-95-rede308 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/bonaco-71-xefu608 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/buitin-newline-chr-0 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/bupexo-79-sijo243 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+PIN  unknown/busada-35-veno431 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/buxuvo-46-paco030 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/cagoze-40-tete366 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/catana-32-licu332 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/catigu-77-keje426 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/cececu-91-ruje022 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/cejegu-93-kobo234 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/cemilu-33-voma521 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/cenucu-07-mepi600 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/cepedu-19-namu934 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/cerobi-73-sane324 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/cevoti-40-jeco305 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/cezeje-11-roxe484 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/cikifu-97-pasu472 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/cilefu-21-begi547 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/cilibi-66-tasa181 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/cimice-03-zata362 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/cimono-94-ximu187 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/cisipo-98-dire511 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/citoda-80-dimi195 ratchetDiffs=0 eligibility=NO (dotEqual=false in parity-unknown.json) => dotEqual=false in parity-unknown.json
+skip unknown/Class-visibility-0 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/Class-visibility-1 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/Class-visibility-2 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/Class-visibility-3 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/Class-visibility-4 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/Class-visibility-5 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/colede-79-give418 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/copono-56-kuci969 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/cozinu-92-cuvi600 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/cujime-15-lobi079 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/cuvupe-50-kola234 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/cuzedo-79-geju664 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/dacica-03-jimi244 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/dafitu-05-lumi067 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/dajafo-57-fexi530 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/dajela-44-zovi778 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/dakeja-23-kapi402 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/dakijo-89-mofa766 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/daroli-95-remo515 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/dedumo-33-paco879 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/deployment-last-name-multi-line-0 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/dezobu-62-vuzu421 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/dicoge-13-meso213 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/dilese-24-neku812 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/doboco-09-doba683 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/dobujo-29-rifo090 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+PIN  unknown/dociba-44-deno997 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/dofixa-09-soji615 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/dosixi-10-vetu164 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/doveka-76-fiza931 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+[Log] B.BRIEF
+[Log] B.DETAILS
+PIN  unknown/dovoxo-68-sufa237 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/dufaka-77-jine221 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/dupifu-56-firi787 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/dupufa-70-zuji566 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/duvoxu-73-jine816 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/fabosu-90-kilu899 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/fakone-16-boro774 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/febuci-08-zogi253 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/febuli-89-dusi249 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/felixe-38-dilu011 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/fepiko-26-vobi566 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/fepoko-61-fona364 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/fepudo-00-ziro735 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/fepulu-27-soci473 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/fetajo-61-sesi146 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/fezaro-08-nopo877 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/fidaru-93-zumu093 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/fikaka-55-jeva969 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/finume-86-gada330 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/fipezo-93-zimi512 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/fivisa-32-suzi802 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/fokudi-24-limo685 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/foraba-98-sagi735 ratchetDiffs=-1 eligibility=NO (dotEqual=false in parity-unknown.json) => dotEqual=false in parity-unknown.json
+skip unknown/fotete-48-viga126 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/fukegu-14-zona532 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/fukibe-03-jasu909 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/furepi-72-xivu327 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/gaceme-16-dezo748 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/galata-74-luka487 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/gasevo-58-ciso782 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/gasivu-43-gono952 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/gegosa-79-mini423 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/gejuvu-17-vufu851 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/gemepu-46-dido441 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/gemigi-37-safi979 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/geniku-96-mome670 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/gerebe-26-neli152 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/getozu-01-sibu282 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/gigoru-88-naze087 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/gijoge-27-kito705 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/gimofu-04-raje064 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/girapu-90-pise235 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/gisuvu-77-suti527 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/godego-76-casa114 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/godixi-01-fizo921 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+PIN  unknown/gogaxo-82-mire024 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/gogisu-39-bepa573 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/govuca-53-mili511 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/gufeva-83-vaje876 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=STATE, not DESCRIPTION) => routing-baseline ourType=STATE, not DESCRIPTION
+skip unknown/gujuga-46-vifa350 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/gumulo-94-ziva021 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/gunoxa-58-vico685 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/gurofo-44-xako688 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/gusola-40-gaco027 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/guvali-97-mike476 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/guxico-27-bofu708 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/jadamo-76-xabi141 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/jadavu-33-cono513 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/jafexe-59-muzo362 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/jajebe-95-jomo899 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/jamupa-36-duni483 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/jamuxo-74-diji002 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/japode-92-famo984 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/jatujo-12-done231 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/javari-89-jibo072 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/jefidu-98-gisu131 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/jepide-33-luxo210 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/jiceju-70-copo737 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/jigemu-90-titu666 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/jimizu-14-zole306 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/jipapo-14-kevu587 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/jititi-15-maxe512 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/jixipo-21-mefu703 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/jizilu-55-jexu697 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/jodasa-29-zara935 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/jofetu-26-nofo513 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/jojajo-33-jilo451 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=STATE, not DESCRIPTION) => routing-baseline ourType=STATE, not DESCRIPTION
+skip unknown/jopisi-58-rika067 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/josebu-55-seje426 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/judelo-10-teca860 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/jujuga-39-miva043 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/jupeni-57-nexu873 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/juvopu-66-pipu000 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/juvose-99-mopu040 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/juxeji-51-todu651 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/juzica-68-kava475 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/juzuno-58-gesi397 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/kacecu-90-pudi895 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/kacura-85-tulu518 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/kakitu-70-kuvi013 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/kaneke-33-nili717 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/kavama-92-noro949 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/kefuna-77-kago547 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/kekami-48-nibi969 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/kekese-70-zisa632 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/kelefe-72-cefi192 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/kenari-17-dajo806 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/kevegu-65-zagi834 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/kexaba-26-kobu577 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/kicizi-84-lexu138 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/kigazu-20-ticu127 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/kikudo-03-voto032 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/kojuja-62-xesu266 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/kokofa-47-deni140 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/kokote-73-revo347 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/komoso-43-xika169 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/komuvi-52-vave599 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/kuduba-74-taki821 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/kumuti-42-tace851 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/kupofu-67-cupo145 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/kutazo-93-vumu267 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/labeji-53-pari860 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/laboji-96-jone338 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/lafeze-33-ralu563 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/lagalo-25-fini318 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/lakivi-73-vuko958 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/latilu-49-jebu021 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/lavoke-68-lezi492 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/lazetu-95-lisa969 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/lazuxa-86-dizu716 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/lebuca-31-sese441 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/lejenu-55-paso269 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/leluza-90-kece237 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/lezema-07-vogu604 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/liboma-63-gamu743 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/liciru-76-ruse157 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/lidoxa-65-nusu138 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/lijota-92-sove350 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/likinu-77-pepo298 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/lipiki-79-fapu237 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/lirumo-81-jega996 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/lituge-35-beli050 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/lobana-68-baji893 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/locoge-06-luki835 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/logavi-03-mita108 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/logifa-32-tuzi644 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/lonosi-76-xoka469 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/lubicu-73-fule059 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/ludecu-61-laja912 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/lufano-46-xise868 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/lupano-18-jibi678 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/lusila-47-xiba216 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/maxure-10-temu215 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/mebeva-33-bafu201 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/mefule-86-calo549 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/mejote-23-xeso233 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/melosu-77-sati627 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/mepemu-15-bitu955 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/meramo-02-vasu175 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/mifila-05-suzo732 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/migene-71-rogu145 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/mijape-37-doka854 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/mileba-84-rike349 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/miveni-64-rexo238 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/mixavu-83-xale251 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/mocute-04-lori647 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/molove-42-koxu080 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/momada-03-zeka599 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/mujega-45-mexi048 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/mupavi-50-fijo192 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/mupiso-60-lide159 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/muvici-42-dumo371 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/nadedo-37-nesa665 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/nakavu-98-pela661 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/nakola-11-naga420 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/nakosa-29-zata504 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/naluge-13-mefo624 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/namumi-26-zisi487 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/napaju-13-kuva269 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/nararo-54-kobi940 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/navapo-58-soto151 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/necixe-44-rina124 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/nedeto-35-rete203 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/neduvo-76-rigi020 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/negupo-97-loro420 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/nepevi-24-dune081 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/neticu-06-bafo691 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/nezimo-68-jabo300 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/nibuta-88-lalu236 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/nicere-96-keje834 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/nidezo-51-xevi604 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/nifosu-42-gubi213 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/nijipa-25-pede639 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/nilimi-64-xeco438 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/niraji-17-gipi481 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/nonaja-03-zoki801 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/noxebo-98-foga433 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/nufike-34-rila935 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/nulevu-49-bovi390 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/nunema-69-degi058 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/nupiko-03-cezu269 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/nuveji-19-jabi587 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pacako-16-vudu147 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/padefe-05-bemu901 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pajeki-99-bezu928 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/pajojo-12-kixi425 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/palida-11-pexu992 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/palovo-20-jivo819 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/pavozu-43-tone454 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pavuso-18-rusi688 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pebara-08-raja604 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/peboza-00-roze848 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pefigi-94-raxa740 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/pemare-74-julo947 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/petexo-14-zoju957 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/petiku-70-fogu777 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/petuju-02-zino378 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pevefe-09-zaro044 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pezini-79-mupi337 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pijugo-91-jilo150 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pivexe-31-bade269 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pizegi-06-jiro383 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+PIN  unknown/pocofe-94-ludu000 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/pocoko-23-jupa184 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pocube-36-teja768 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pojeje-60-vata579 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/poluve-80-mire025 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/potase-97-japa248 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/potefu-34-jilu183 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/poxopi-12-jupi541 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/pucazu-91-paxe635 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pucozi-74-zilo936 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/pugesu-08-cove285 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/pugodi-27-kone040 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/punofe-33-loji825 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/punuve-45-baja096 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/pupoko-23-xubo613 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+[Log] vlookup on cm
+skip unknown/puvako-69-suxo633 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/racemi-48-ceni130 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/racujo-01-veme537 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rafaci-22-fiki075 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/ragudu-37-poxi589 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/rebena-98-kiba723 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/regodu-14-peve499 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rexobo-28-rite508 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rexupa-61-nezi165 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rezide-10-dulu504 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/ridofi-55-lexe637 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rilere-84-seba785 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rimeca-17-gice904 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rinidi-95-neko205 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rirelu-80-tagi213 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rivino-95-midu088 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rixeje-01-gava056 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/rixuvo-85-safu077 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/rizisu-50-liza998 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rizoba-79-feco788 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/rodubi-28-vuxi527 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rojida-14-fuli428 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rozugu-82-pera583 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+lost UML.Class_ UML.Stereotype edge
+lost UML.Class_ UML.Behavior edge
+lost UML.Class_ UML.AssociationClass edge
+lost UML.Class_ UML.Component edge
+lost UML.Class_ UML.Node edge
+lost UML.NamedElement UML.PackageableElement edge
+lost UML.NamedElement UML.Namespace edge
+lost UML.NamedElement UML.TypedElement edge
+lost UML.NamedElement UML.RedefinableElement edge
+lost UML.NamedElement UML.DeploymentTarget edge
+lost UML.NamedElement UML.DeployedArtifact edge
+lost UML.NamedElement UML.Vertex edge
+lost UML.NamedElement UML.Trigger edge
+lost UML.NamedElement UML.ParameterSet edge
+lost UML.NamedElement UML.CollaborationUse edge
+lost UML.NamedElement UML.Extend edge
+lost UML.NamedElement UML.Include edge
+lost UML.NamedElement UML.ActivityGroup edge
+lost UML.NamedElement UML.InteractionFragment edge
+lost UML.NamedElement UML.Lifeline edge
+lost UML.NamedElement UML.MessageEnd edge
+lost UML.NamedElement UML.Message edge
+lost UML.NamedElement UML.GeneralOrdering edge
+lost UML.Behavior UML.StateMachine edge
+lost UML.Behavior UML.Activity edge
+lost UML.Behavior UML.Interaction edge
+lost UML.Behavior UML.OpaqueBehavior edge
+lost UML.StructuredActivityNode UML.ConditionalNode edge
+lost UML.StructuredActivityNode UML.ExpansionRegion edge
+lost UML.StructuredActivityNode UML.LoopNode edge
+lost UML.StructuredActivityNode UML.SequenceNode edge
+lost UML.CallAction UML.CallBehaviorAction edge
+lost UML.CallAction UML.CallOperationAction edge
+lost UML.CallAction UML.StartObjectBehaviorAction edge
+skip unknown/rubebe-45-sura795 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rubeku-92-vefi942 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/rucuga-83-tosu408 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/rufala-47-nosa835 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rukate-37-jabu394 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/rumepo-86-tima388 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/runufe-74-dico475 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/rupigu-89-xabo757 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/saduse-90-jama680 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/safuke-64-vuzo599 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/samutu-03-jude646 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/sanima-32-teja660 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/sapofa-97-gizu737 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/sasafi-70-gano653 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/saxomu-54-deza117 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/sejube-03-bote542 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/seloni-75-tuze396 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/semutu-45-zeno907 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/sezupe-60-neko208 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/sikike-36-nexu500 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/sinife-24-fise413 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/sofobo-48-meme531 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/soseka-43-riru110 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/sprite-SVG-fill-management-0 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/sprite-SVG-fill-management-1 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/sprite-SVG-fill-management-4 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/sprite-SVG-Fill-Stroke-Combinatory-1 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/sprite-SVG-stroke-management-0 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/sufaru-98-mifa724 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+[Log] SUBMODULE _not_ defined
+skip unknown/sufura-56-muke185 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/sukazu-57-zozi807 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/taboco-79-pire192 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/tabuma-85-sizi973 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/taliti-27-vuzo488 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/tamovu-79-fifo533 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/tefeco-12-rato895 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/tejevu-11-rafo563 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/tenava-30-cele768 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/tenule-05-fovi294 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/tepili-19-sati986 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/terede-92-fuka839 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/ticemi-41-laze086 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/tififu-24-rixa240 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/tikiti-02-bagu049 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/tilege-34-riki742 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/Timing-short-alias-7 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/Timing-short-alias-8 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/Timing-short-alias-9 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+PIN  unknown/titafe-19-sela022 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/titucu-21-vagi041 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/tivezu-91-bevu722 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/tivifi-47-limi217 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/tmp1-1 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/tobevo-04-mata128 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/togijo-81-zako477 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/tomodo-34-bimi231 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/tonake-05-zibo183 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/topave-65-ceso890 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/toxore-88-ruso838 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/tozizu-96-voka262 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/tububo-41-kezo224 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/tukimi-92-noxu802 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/tumepe-28-zuma441 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/tuvigo-52-redo102 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/vabobu-24-temi990 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/vacapo-27-kizu746 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/vagipu-81-xuse929 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/vajaru-64-loni744 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/vakovo-25-licu237 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/vaxolu-89-boxo515 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/vedine-65-rafo449 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+PIN  unknown/vekena-36-deja977 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/venofe-94-vopu657 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/vesuzo-97-jelo022 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+PIN  unknown/vevako-05-kula611 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/vezozu-78-pici074 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/vijuce-20-xapo285 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/viraki-97-kido395 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/vivoba-16-deze072 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/vovipa-79-gapu674 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/vozeco-89-kune515 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/vozubi-21-seto654 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/vugasu-31-koca724 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/vugime-87-zabe159 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/vuneti-03-madi874 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/vupupa-98-pelo131 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/vuvave-27-saki879 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/vuxexo-42-fija881 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/xadudi-62-pupa491 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/xagabo-19-cege045 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/xagomi-49-caki729 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/xalivi-74-gonu283 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/xamive-55-lipi586 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/xariko-97-zuno323 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/xaxene-93-doka767 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/xemeke-75-copu190 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/xemoba-72-xuvi441 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/xerumu-58-sava024 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+PIN  unknown/xesepu-10-biza064 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/xicili-92-foke737 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/xigumi-63-ranu028 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/xipane-40-dune740 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/xisora-84-faca166 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/xozane-18-becu956 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+PIN  unknown/xubabi-00-bike493 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/xucero-03-kixi746 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+PIN  unknown/xucika-16-zago215 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/xucoma-93-jeko861 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/xukofa-63-ropa738 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/xukono-55-nezi535 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/xuloxo-85-vibu502 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/xurivi-47-gupo448 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/xusuxi-66-zaci221 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zaburu-47-dala032 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/zakaca-67-paxe321 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/zakuke-30-sobi867 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+PIN  unknown/zarelu-57-xika172 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/zasuxe-15-lugo662 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zaxavo-08-rake498 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zecate-11-guta563 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/zedena-31-deso122 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/zefefo-37-xigo245 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zeleni-35-xuzo854 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zelini-86-gelo257 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/zeluge-00-cofi214 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zelura-55-pasa982 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zeraje-11-semu839 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zetebu-58-capa762 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+PIN  unknown/zevece-09-cono092 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/zexaxa-41-kaki432 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zicejo-69-teko349 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+PIN  unknown/zicepa-25-ciri712 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/ziruri-42-maxo237 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/zisizi-13-nuxe218 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/zivebo-26-nagu813 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zivenu-37-nace681 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zivilu-35-leja732 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/zocefi-61-vunu811 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/zodeja-60-gide950 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zodude-13-tito074 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip unknown/zolaza-45-sepi570 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=STATE, not DESCRIPTION) => routing-baseline ourType=STATE, not DESCRIPTION
+skip unknown/zovemu-18-keki646 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=ACTIVITY, not DESCRIPTION) => routing-baseline ourType=ACTIVITY, not DESCRIPTION
+skip unknown/zovojo-65-gocu245 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zozale-62-xene777 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/zumuji-10-tixo987 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/zupagu-81-pona636 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+skip unknown/zuropa-39-cada269 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+PIN  unknown/zurule-27-guko881 ratchetDiffs=0 eligibility=ok (dotEqual=true, routed DESCRIPTION) => pin
+skip unknown/zusibo-75-vate603 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip c4/kipive-74-lele070 ratchetDiffs=-1 eligibility=NO (routing-baseline ourType=NONE, not DESCRIPTION) => routing-baseline ourType=NONE, not DESCRIPTION
+skip c4/xetego-25-dinu652 ratchetDiffs=0 eligibility=NO (routing-baseline ourType=CLASS, not DESCRIPTION) => routing-baseline ourType=CLASS, not DESCRIPTION
+candidates: 263 (component=117, usecase=31, unknown=115, c4=0)

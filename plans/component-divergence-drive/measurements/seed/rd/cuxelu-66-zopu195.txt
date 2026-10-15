@@ -1,0 +1,4 @@
+
+### component/cuxelu-66-zopu195  pass=false structural=2 numeric=0
+  S svg/g[1]/g[4][childCount]  exp=2 | act=3
+  S svg/g[1]/g[5][childCount]  exp=2 | act=3

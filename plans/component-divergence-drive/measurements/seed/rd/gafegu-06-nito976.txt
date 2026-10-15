@@ -1,0 +1,10 @@
+
+### component/gafegu-06-nito976  pass=false structural=8 numeric=0
+  S svg/g[1]/g[2]/rect[1]/@fill  exp=#F00 | act=#F1F1F1
+  S svg/g[1]/g[2]/rect[1]/@stroke  exp=#ADFF2F | act=#181818
+  S svg/g[1]/g[3]/rect[1]/@fill  exp=#F0F | act=#F1F1F1
+  S svg/g[1]/g[3]/rect[1]/@stroke  exp=#F0F | act=#181818
+  S svg/g[1]/g[4]/rect[1]/@fill  exp=#FFA500 | act=#F1F1F1
+  S svg/g[1]/g[4]/rect[1]/@stroke  exp=#ADFF2F | act=#181818
+  S svg/g[1]/g[5]/rect[1]/@fill  exp=#008000 | act=#F1F1F1
+  S svg/g[1]/g[5]/rect[1]/@stroke  exp=#00F | act=#181818

@@ -1,0 +1,5 @@
+
+### component/dugovi-24-kupu658  pass=false structural=1 numeric=2
+  S svg/g[1]/g[4][childCount]  exp=2 | act=3
+  N svg/@viewBox[2]  exp=128 | act=249 (Δ121)
+  N svg/@width  exp=128 | act=249 (Δ121)

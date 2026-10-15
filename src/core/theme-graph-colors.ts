@@ -190,7 +190,7 @@ export interface ElementColors {
    * that has an `addMagic` registration (`skinparam-stereo-keys.ts
    * #applyGroupByStereo`, cdd6 T1a). `fontByStereo` is also written by the
    * `<style> <sname> { .label { FontColor X } }` sub-selector
-   * (`style-map-element.ts#collectTagFontColor`) -- the same
+   * (`style-map-element.ts#collectTagStyle`) -- the same
    * `sig.addStereotype` signature the skinparam front-end builds.
    */
   borderByStereo?: Readonly<Record<string, string>>;

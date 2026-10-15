@@ -17,6 +17,7 @@ import { describe, it, expect } from 'vitest';
 import { resolveSkinparam } from '../../src/core/skinparam.js';
 import { defaultTheme } from '../../src/core/theme.js';
 import { DARK_MODE_DEFAULTS } from '../../src/core/theme-dark.js';
+import { ROOT_LINE_COLOR_KEY } from '../../src/core/skinparam-key-handlers-shared.js';
 
 describe('resolveSkinparam — skinparam mode dark', () => {
   it('is case-insensitive, mirroring SkinParam.isDark', () => {
@@ -142,7 +143,7 @@ describe('resolveSkinparam — skinparam mode dark', () => {
   });
 
   it('no `mode` key is a strict no-op: theme is byte-identical to an empty resolve', () => {
-    const withoutMode = resolveSkinparam(new Map([['bordercolor', '#AAAAAA']]), defaultTheme).theme;
+    const withoutMode = resolveSkinparam(new Map([[ROOT_LINE_COLOR_KEY, '#AAAAAA']]), defaultTheme).theme;
     expect(withoutMode.colors.background).toBe(defaultTheme.colors.background);
     expect(withoutMode.colors.graph.classBackground).toBe(defaultTheme.colors.graph.classBackground);
     expect(withoutMode.colors.elements?.spotclass).toBeUndefined();

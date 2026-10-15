@@ -61,29 +61,14 @@
  *   --families     diff paths de-indexed into structural families, ranked by
  *                  how many fixtures each reaches.
  */
-import { astOrThrow } from '../tests/helpers/parse-ast.js';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { buildBlockUmls } from '../src/core/BlockUmlBuilder.js';
-import type { PreprocessorResult } from '../src/core/preprocessor.js';
-import { resolveTheme } from '../src/core/theme.js';
-import { resolveSkinparam, parseStyleBlock } from '../src/core/skinparam.js';
-import { applyStyleMap } from '../src/core/style-map-theme.js';
-import { computeClassTagCascadeGenerations } from '../src/core/style-cascade-class.js';
-import type { Theme } from '../src/core/theme.js';
-import type { StyleMap } from '../src/core/skinparam.js';
 import type { StringMeasurer } from '../src/core/measurer.js';
 import { jarMeasurer } from '../src/core/measurer-jar.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
-import { parseDescription } from '../src/diagrams/description/parser.js';
-import { layoutDescription } from '../src/diagrams/description/layout.js';
-import { renderDescription, unwrapKlimtSvg } from '../src/diagrams/description/renderer.js';
-import { seedOf } from '../src/core/klimt/drawing/svg/svg-graphics-core.js';
-import { applyChrome, isEmpty } from '../src/core/annotations/index.js';
-import { resolveAnnotationStyles } from '../src/core/annotations/style.js';
-import { assembleSvg, renderSync } from '../src/index.js';
+import { renderSync } from '../src/index.js';
 import { compareSvg } from '../tests/oracle/svg-conformance/compare.js';
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 import { buildSpriteAssetsStore } from './sprite-assets-store.js';
@@ -99,6 +84,7 @@ import {
   renderClassFixture,
   prepareElkOnce,
 } from '../tests/oracle/svg-conformance/render-fixture-class.js';
+import { renderFixtureSurveyStyle } from '../tests/oracle/svg-conformance/render-fixture.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';
 import { renderFixtureSequence } from '../tests/oracle/svg-conformance/render-fixture-sequence.js';
 import { renderFixtureActivity } from '../tests/oracle/svg-conformance/render-fixture-activity.js';
@@ -119,48 +105,6 @@ const ROUTING_BASELINE_PATH = join(REPO, 'oracle', 'goldens', 'svg-conformance',
 // `assetStore` reference across calls -- the referential-identity contract
 // `censusClassFixtureOptions`'s own unit tests assert.
 const CLASS_ASSET_STORE = combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore());
-
-// ---------------------------------------------------------------------------
-// Theme resolution — mirrors src/index.ts#buildTheme (private, not exported).
-// ---------------------------------------------------------------------------
-
-interface ResolvedThemeAndStyles {
-  readonly theme: Theme;
-  readonly styleMap: StyleMap;
-}
-
-function buildThemeForFixture(preprocessed: PreprocessorResult): ResolvedThemeAndStyles {
-  const base = resolveTheme(preprocessed.theme ?? 'default');
-  const withSkinparam = resolveSkinparam(preprocessed.skinparam, base).theme;
-
-  const styleMap = preprocessed.styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
-    m.forEach((props, selector) => {
-      const existing = acc.get(selector) ?? new Map<string, string>();
-      props.forEach((v, k) => existing.set(k, v));
-      acc.set(selector, existing);
-    });
-    return acc;
-  }, new Map());
-
-  const flatRoot = styleMap.get('') ?? new Map<string, string>();
-  const withStyles = resolveSkinparam(flatRoot, withSkinparam).theme;
-  const withStyleMap = applyStyleMap(styleMap, withStyles);
-
-  // G2 N39: mirrors src/index.ts#buildTheme's own Stage 3a extension --
-  // see that function's doc comment.
-  const classTagCascadeGenerations = computeClassTagCascadeGenerations(preprocessed.styles);
-  const theme =
-    classTagCascadeGenerations === undefined
-      ? withStyleMap
-      : {
-          ...withStyleMap,
-          colors: {
-            ...withStyleMap.colors,
-            graph: { ...withStyleMap.colors.graph, classTagCascadeGenerations },
-          },
-        };
-  return { theme, styleMap };
-}
 
 // ---------------------------------------------------------------------------
 // Fixture discovery (mirrors scripts/svg-parity-survey.ts#listFixtureDirs)
@@ -203,36 +147,14 @@ function listUnknownClassFixtureDirs(): FixtureDir[] {
 // Render one fixture through the low-level pipeline with a given measurer.
 // ---------------------------------------------------------------------------
 
-// N0 (G2): renamed from `renderFixture` -- description-specific pipeline;
-// dispatched by `renderFixtureFor` below, alongside the new class pipeline.
+// codd T1a (D4): the description path now calls `renderSync` through the
+// ratchet's own `renderFixtureSurveyStyle`, like the class path (cdd5-T1) --
+// the low-level parse/layout/render pipeline it used to mirror bypassed the
+// router, the plugin's chrome composition and the asset store, and disagreed
+// with the survey on 22 of 266 component rows. An error page is returned as
+// the SVG it is (the survey's behaviour), not thrown.
 function renderFixtureDescription(markup: string, measurer: StringMeasurer): string {
-  // Same stage order as `renderSync` (SI7): split on RAW lines, then preprocess
-  // the first block's interior.
-  // SI5b: the vendored-stdlib store, so <bundle/...> fixtures render instead
-  // of erroring (mirrors the dot-sync-report/parity-ratchet wiring from T9).
-  const blocks = buildBlockUmls(markup, { includeStore: fixtureIncludeStore() });
-  const first = blocks[0];
-  if (first === undefined) throw new Error('no diagram block found');
-  if (!first.ok) throw first.failure.cause;
-
-  const preprocessed = first.preprocessed;
-  const { theme, styleMap } = buildThemeForFixture(preprocessed);
-  const block = { ...first.source, rawStyles: preprocessed.styles };
-  const ast = astOrThrow(parseDescription(block), 'description');
-  const seeded = { ...ast, seed: seedOf(['@startuml', ...block.lines, '@enduml'].join('\n')) };
-  const geo = layoutDescription(seeded, theme, measurer);
-  const completeSvg = renderDescription(geo, theme, measurer);
-
-  // T7 -- wire chrome into the census path too, else a titled fixture
-  // measures with a title-less render (mirrors render-fixture.ts's
-  // identical wiring, both bypassing renderSync per this script's own
-  // doc comment).
-  const annotations = ast.annotations;
-  if (annotations === undefined || isEmpty(annotations)) return completeSvg;
-
-  const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
-  const unwrapped = unwrapKlimtSvg(completeSvg, theme.colors.background);
-  return assembleSvg(applyChrome(unwrapped, annotations, styles, measurer));
+  return renderFixtureSurveyStyle(markup, measurer).svg;
 }
 
 /** The name of the render helper `renderFixtureFor` dispatches to for a given

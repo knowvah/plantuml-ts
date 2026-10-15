@@ -1,0 +1,6 @@
+
+### component/kezodo-14-pume985  pass=false structural=0 numeric=4
+  N svg/@height  exp=156 | act=132 (Δ24)
+  N svg/@viewBox[2]  exp=462 | act=438 (Δ24)
+  N svg/@viewBox[3]  exp=156 | act=132 (Δ24)
+  N svg/@width  exp=462 | act=438 (Δ24)

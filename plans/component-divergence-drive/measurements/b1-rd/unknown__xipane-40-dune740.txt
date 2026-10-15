@@ -1,0 +1,50 @@
+
+### unknown/xipane-40-dune740  pass=false structural=24 numeric=24
+  S svg/g[1]/g[1]/rect[1]/@fill  exp=#FFF | act=none
+  S svg/g[1]/g[1]/text[1]/@textLength  exp=43.487 | act=
+  S svg/g[1]/g[1]/text[1][childCount]  exp=1 | act=0
+  S svg/g[1]/g[1]/text[2]/@textLength  exp= | act=64.488
+  S svg/g[1]/g[1]/text[2][childCount]  exp=0 | act=1
+  S svg/g[1]/g[1]/text[3]/@font-family  exp= | act=monospace
+  S svg/g[1]/g[1]/text[3]/@textLength  exp=64.488 | act=177.8
+  S svg/g[1]/g[1]/text[3]/text()[1]  exp=Post Entry | act=<div class="h-entry">..</div>
+  S svg/g[1]/g[1]/text[4]/@font-family  exp=monospace | act=
+  S svg/g[1]/g[1]/text[4]/@textLength  exp=177.8 | act=43.05
+  S svg/g[1]/g[1]/text[4]/text()[1]  exp=<div class="h-entry">..</div> | act=" as he
+  S svg/g[1]/g[1][childCount]  exp=5 | act=7
+  S svg/g[1]/g[2]/text[1]/@font-weight  exp=700 | act=
+  S svg/g[1]/g[2]/text[1]/@textLength  exp=47.425 | act=
+  S svg/g[1]/g[2]/text[1][childCount]  exp=1 | act=0
+  S svg/g[1]/g[2]/text[2]/@textLength  exp= | act=95.55
+  S svg/g[1]/g[2]/text[2][childCount]  exp=0 | act=1
+  S svg/g[1]/g[2]/text[3]/@font-family  exp= | act=monospace
+  S svg/g[1]/g[2]/text[3]/@textLength  exp=95.55 | act=177.012
+  S svg/g[1]/g[2]/text[3]/text()[1]  exp=Title of the post | act=<h1 class="p-name">..</h1>
+  S svg/g[1]/g[2]/text[4]/@font-family  exp=monospace | act=
+  S svg/g[1]/g[2]/text[4]/@textLength  exp=177.012 | act=43.05
+  S svg/g[1]/g[2]/text[4]/text()[1]  exp=<h1 class="p-name">..</h1> | act=" as pn
+  S svg/g[1]/g[2][childCount]  exp=5 | act=7
+  N svg/@height  exp=188 | act=141 (Δ47)
+  N svg/@viewBox[2]  exp=251 | act=293 (Δ42)
+  N svg/@viewBox[3]  exp=188 | act=141 (Δ47)
+  N svg/@width  exp=251 | act=293 (Δ42)
+  N svg/g[1]/g[1]/rect[1]/@height  exp=167 | act=120 (Δ47)
+  N svg/g[1]/g[1]/rect[1]/@width  exp=230 | act=272.062 (Δ42.06200000000001)
+  N svg/g[1]/g[1]/text[1]/@x  exp=100.256 | act=10 (Δ90.256)
+  N svg/g[1]/g[1]/text[1]/@y  exp=19.889 | act=33.889 (Δ14.000000000000004)
+  N svg/g[1]/g[1]/text[2]/@x  exp=120.075 | act=10 (Δ110.075)
+  N svg/g[1]/g[1]/text[2]/@y  exp=33.889 | act=47.889 (Δ14)
+  N svg/g[1]/g[1]/text[3]/@x  exp=89.756 | act=10 (Δ79.756)
+  N svg/g[1]/g[1]/text[3]/@y  exp=47.889 | act=61.889 (Δ14)
+  N svg/g[1]/g[1]/text[4]/@x  exp=33.1 | act=187.8 (Δ154.70000000000002)
+  N svg/g[1]/g[2]/rect[1]/@width  exp=197.012 | act=240.062 (Δ43.05000000000001)
+  N svg/g[1]/g[2]/rect[1]/@x  exp=23.49 | act=23 (Δ0.48999999999999844)
+  N svg/g[1]/g[2]/rect[1]/@y  exp=82 | act=35 (Δ47)
+  N svg/g[1]/g[2]/text[1]/@x  exp=33.49 | act=141.106 (Δ107.61599999999999)
+  N svg/g[1]/g[2]/text[1]/@y  exp=102.889 | act=69.889 (Δ33)
+  N svg/g[1]/g[2]/text[2]/@x  exp=33.49 | act=95.256 (Δ61.766)
+  N svg/g[1]/g[2]/text[2]/@y  exp=116.889 | act=83.889 (Δ33)
+  N svg/g[1]/g[2]/text[3]/@x  exp=33.49 | act=33 (Δ0.490000000000002)
+  N svg/g[1]/g[2]/text[3]/@y  exp=130.889 | act=97.889 (Δ33.000000000000014)
+  N svg/g[1]/g[2]/text[4]/@x  exp=33.49 | act=210.012 (Δ176.522)
+  N svg/g[1]/g[2]/text[4]/@y  exp=144.889 | act=97.889 (Δ47.000000000000014)

@@ -1,0 +1,5 @@
+@startuml
+rectangle Side
+rectangle By
+rectangle "Si.de"
+@enduml

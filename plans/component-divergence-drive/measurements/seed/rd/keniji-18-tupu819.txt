@@ -1,0 +1,4 @@
+
+### component/keniji-18-tupu819  pass=false structural=0 numeric=2
+  N svg/g[1]/g[5]/text[1]/@x  exp=160.362 | act=170.362 (Δ10)
+  N svg/g[1]/g[5]/text[1]/@y  exp=92.111 | act=88.5 (Δ3.611000000000004)

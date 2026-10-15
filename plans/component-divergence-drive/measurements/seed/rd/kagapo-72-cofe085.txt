@@ -1,0 +1,3 @@
+
+### component/kagapo-72-cofe085  pass=false structural=1 numeric=0
+  S svg/g[1]/g[2]/rect[1]/@fill  exp=#00F | act=#F00

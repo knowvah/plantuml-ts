@@ -1,0 +1,6 @@
+
+### component/sobobi-72-miri289  pass=false structural=0 numeric=4
+  N svg/@height  exp=65 | act=64 (Δ1)
+  N svg/@viewBox[2]  exp=72 | act=71 (Δ1)
+  N svg/@viewBox[3]  exp=65 | act=64 (Δ1)
+  N svg/@width  exp=72 | act=71 (Δ1)

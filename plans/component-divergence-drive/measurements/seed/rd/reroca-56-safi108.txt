@@ -1,0 +1,12 @@
+
+### component/reroca-56-safi108  pass=false structural=10 numeric=0
+  S svg/g[1]/g[1]/rect[1]/@rx  exp= | act=2.5
+  S svg/g[1]/g[1]/rect[1]/@ry  exp= | act=2.5
+  S svg/g[1]/g[1]/rect[1]/@stroke  exp= | act=#C6C6C6
+  S svg/g[1]/g[1]/rect[1]/@stroke-width  exp= | act=0.5
+  S svg/g[1]/g[1]/rect[2]/@stroke  exp= | act=#C6C6C6
+  S svg/g[1]/g[1]/rect[2]/@stroke-width  exp= | act=0.5
+  S svg/g[1]/g[1]/rect[3]/@stroke  exp= | act=#C6C6C6
+  S svg/g[1]/g[1]/rect[3]/@stroke-width  exp= | act=0.5
+  S svg/g[1]/g[1]/rect[4]/@stroke  exp= | act=#C6C6C6
+  S svg/g[1]/g[1]/rect[4]/@stroke-width  exp= | act=0.5

@@ -45,8 +45,13 @@ describe('kermor cluster nesting', () => {
     const plain = layoutGraph(graph(undefined));
     const noted = layoutGraph(graph({ top: { width: 200, height: 50 } }));
     expect(plain.clusters!.map((c) => c.id)).toEqual(['cluster0']);
-    expect(noted.clusters!.map((c) => c.id)).toEqual(['cluster0']);
-    expect(noted.clusters![0]!.width).toBeCloseTo(plain.clusters![0]!.width, 6);
+    // the TOP note's alpha subgraph is published under its own id, with the placed label table (200 x 50)
+    expect(noted.clusters!.map((c) => c.id).sort()).toEqual(['cluster0', 'cluster0#kermor-note-top']);
+    const gamma = noted.clusters!.find((c) => c.id === 'cluster0')!;
+    const alpha = noted.clusters!.find((c) => c.id === 'cluster0#kermor-note-top')!;
+    expect(gamma.width).toBeCloseTo(plain.clusters![0]!.width, 6);
+    expect(alpha.label?.width).toBe(200);
+    expect(alpha.label?.height).toBe(50);
     // alpha/beta reserve room around gamma: the whole graph is shifted further from the origin.
     expect(noted.originShift!.y).toBeGreaterThan(plain.originShift!.y);
   });

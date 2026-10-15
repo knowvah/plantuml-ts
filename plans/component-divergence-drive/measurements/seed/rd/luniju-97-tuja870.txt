@@ -1,0 +1,4 @@
+
+### component/luniju-97-tuja870  pass=false structural=0 numeric=2
+  N svg/g[1]/g[5]/text[1]/@x  exp=182.57 | act=186.57 (Δ4)
+  N svg/g[1]/g[5]/text[1]/@y  exp=92.111 | act=88.5 (Δ3.611000000000004)

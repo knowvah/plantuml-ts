@@ -1,0 +1,3 @@
+
+### component/cukafa-49-fona812  pass=false structural=1 numeric=0
+  S svg/g[1]/g[2]/ellipse[1]/@fill  exp=#FFD700 | act=#F1F1F1

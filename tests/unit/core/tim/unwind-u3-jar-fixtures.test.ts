@@ -103,12 +103,18 @@ describe('unwind-U3 divergence 2: %newline()/%breakline() BLOCK_E1 sentinels', (
   // (`MethodsOrFieldsArea.java:255,264` for members), so the sentinel is drawn
   // as an invisible character (or UText's `↵`) instead of a line break.
   // `it.fails` turns red the day a consumer is fixed -- move it up then.
-  it.fails.each(['newline-class-member-only', 'newline-usecase', 'newline-state'])(
+  it.fails.each(['newline-class-member-only', 'newline-state'])(
     '%s: consumer does not decode BLOCK_E1_NEWLINE yet',
     (name) => {
       expectLikeJar(name, 'texts');
     },
   );
+
+  // codd-T7a decodes the sentinel in description displays the way
+  // `Display.getWithNewlines` does (`Display.java:330-333`).
+  it('newline-usecase: the description consumer decodes BLOCK_E1_NEWLINE', () => {
+    expectLikeJar('newline-usecase', 'texts');
+  });
 
   // TIM function names are case-sensitive: `FunctionsSet` finds call sites
   // through `TrieImpl#getLonguestMatchStartingIn`, an exact-`char` walk

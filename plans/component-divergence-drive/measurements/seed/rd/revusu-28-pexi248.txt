@@ -1,0 +1,7 @@
+
+### component/revusu-28-pexi248  pass=false structural=1 numeric=4
+  S svg/g[1]/g[1]/text[1]/@font-style  exp=italic | act=
+  N svg/@viewBox[2]  exp=77 | act=90 (Δ13)
+  N svg/@width  exp=77 | act=90 (Δ13)
+  N svg/g[1]/g[3]/text[1]/@x  exp=34 | act=47.5 (Δ13.5)
+  N svg/g[1]/g[3]/text[1]/@y  exp=126.111 | act=122.5 (Δ3.611000000000004)

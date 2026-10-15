@@ -95,7 +95,10 @@ import { buildUidPlan } from './renderer-uid.js';
 import { collectByKind, drawClusters, drawEntities, drawEdges } from './renderer-draw-sequence.js';
 import { computeDocumentDims, driverBounderFor } from './renderer-ink-extent.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
+import { CUCA_DOCUMENT_MARGIN, calculateMargin, type DocumentMargin } from '../../core/document-margin.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { extractViewBoxDims, extractFlatContent, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 
 /** `net.sourceforge.plantuml.core.DiagramType#DESCRIPTION` — verified
  *  against `DiagramType.java:45` and every cached jar description-diagram
@@ -131,21 +134,45 @@ const DIAGRAM_TYPE_DESCRIPTION = 'DESCRIPTION';
  * SvekResult's own `+15` ink-walk delta plus `+5` margin `= +20` on an
  * ink-min that, for a lone leaf, coincides with the leaf's own box size).
  *
- * `geo` alone (no AST access, no `layout.ts` write-set expansion needed)
- * approximates upstream's predicate closely: exactly one node, no
- * children (no group), no edges, not a hexagon. The one upstream
- * refinement this can't see from `geo` — an EXPLICITLY braced empty group
- * (`component X {}`) is excluded from the degenerate path even though it
- * has zero children post-classification (`degenerateSingleLeaf`'s own
- * doc comment: "checked BEFORE empty-group demotion") — is a known,
- * narrow approximation gap (no `declaredAsGroup` flag survives onto
- * `DescriptionNodeGeo`); the census gate is the check for whether this
- * costs any net ground.
+ * codd-T4: the predicate is `DotData#isDegeneratedWithFewEntities`
+ * (`dot/DotData.java:69-71`), which counts the entities, groups and links a
+ * `remove` hides, so it cannot be recomputed from the surviving `geo`
+ * (cenoja/gogosu/sobobi/sodoza: a lone survivor beside removed entities
+ * takes the SvekResult path, 1px larger each way). The layout, which sees
+ * the raw AST (`degenerateSingleLeaf`), flags `geo.degenerate` instead.
  */
 function isDegenerateGeo(geo: DescriptionGeometry): boolean {
-  if (geo.nodes.length !== 1 || geo.edges.length !== 0) return false;
-  const only = geo.nodes[0]!;
-  return only.children.length === 0 && only.symbol !== 'hexagon';
+  return geo.degenerate === true;
+}
+
+/**
+ * `EntityImageDegenerated#calculateDimension` (`svek/EntityImageDegenerated
+ * .java:73-75`, `orig.calculateDimension(sb).delta(delta * 2, delta * 2)`)
+ * plus the exporter margin (`TextBlockExporter#calculateFinalDimension`,
+ * `:198-203`). The layout's `geo.totalWidth` bakes in the cuca default margin
+ * (`degenerateSingleLeaf`), so a style `Margin` is applied from the leaf's own
+ * size instead.
+ */
+function degenerateDims(geo: DescriptionGeometry, margin: DocumentMargin): DocumentBody['dims'] {
+  if (margin === CUCA_DOCUMENT_MARGIN) return { width: geo.totalWidth, height: geo.totalHeight };
+  const leaf = geo.nodes[0]!;
+  return {
+    width: leaf.width + DEGENERATE_DELTA * 2 + margin.left + margin.right,
+    height: leaf.height + DEGENERATE_DELTA * 2 + margin.top + margin.bottom,
+  };
+}
+
+/** `EntityImageDegenerated#delta` (`svek/EntityImageDegenerated.java:55`). */
+const DEGENERATE_DELTA = 7;
+
+/**
+ * The margin-less block `DiagramChromeFactory.create` receives for a degenerate geometry:
+ * `EntityImageDegenerated#calculateDimension` (`svek/EntityImageDegenerated.java:73-75`), i.e. the leaf plus
+ * `delta * 2` -- no document margin (`UgDiagram.java:123-135` adds that after chrome).
+ */
+export function degenerateBlockDims(geo: DescriptionGeometry): { width: number; height: number } {
+  const leaf = geo.nodes[0]!;
+  return { width: leaf.width + DEGENERATE_DELTA * 2, height: leaf.height + DEGENERATE_DELTA * 2 };
 }
 
 /** What a body contributes to the document: its draw pass and its dimension. */
@@ -158,7 +185,12 @@ interface DocumentBody {
  * The svek body: `SvekResult#drawU` (clusters, leaves, edges) and the document dimension recipe (see
  * `renderDescription`'s doc comment). Moved out of `renderDescription` verbatim (cdd8 T3b).
  */
-function svekBody(geo: DescriptionGeometry, theme: Theme, measurer: StringMeasurer): DocumentBody {
+function svekBody(
+  geo: DescriptionGeometry,
+  theme: Theme,
+  measurer: StringMeasurer,
+  margin: DocumentMargin,
+): DocumentBody {
   const plan = buildUidPlan(geo);
   const { containers, leaves } = collectByKind(geo.nodes);
   // G1 I-hideshow: `respectHidden` distinguishes the LimitFinder ink-extent
@@ -178,8 +210,8 @@ function svekBody(geo: DescriptionGeometry, theme: Theme, measurer: StringMeasur
 
   const driverBounder = driverBounderFor(measurer);
   const dims = isDegenerateGeo(geo)
-    ? { width: geo.totalWidth, height: geo.totalHeight }
-    : computeDocumentDims((target) => draw(target, false), driverBounder, measurer);
+    ? degenerateDims(geo, margin)
+    : computeDocumentDims((target) => draw(target, false), driverBounder, measurer, margin);
 
   return { draw, dims };
 }
@@ -188,8 +220,19 @@ function svekBody(geo: DescriptionGeometry, theme: Theme, measurer: StringMeasur
  * The ELK body: `MyElkDrawing#drawU` (clusters, nodes, edges; `MyElkDrawing.java:110-114`) with the document
  * dimension the geometry already carries (`MyElkDrawing#calculateDimension` plus the `CucaDiagram` margins).
  */
-function elkBody(elk: NonNullable<DescriptionGeometry['elk']>, geo: DescriptionGeometry): DocumentBody {
-  return { draw: (target) => elk.drawU(target), dims: { width: geo.totalWidth, height: geo.totalHeight } };
+function elkBody(
+  elk: NonNullable<DescriptionGeometry['elk']>,
+  geo: DescriptionGeometry,
+  margin: DocumentMargin,
+): DocumentBody {
+  const dims =
+    margin === CUCA_DOCUMENT_MARGIN
+      ? { width: geo.totalWidth, height: geo.totalHeight }
+      : {
+          width: geo.totalWidth - CUCA_DOCUMENT_MARGIN.left - CUCA_DOCUMENT_MARGIN.right + margin.left + margin.right,
+          height: geo.totalHeight - CUCA_DOCUMENT_MARGIN.top - CUCA_DOCUMENT_MARGIN.bottom + margin.top + margin.bottom,
+        };
+  return { draw: (target) => elk.drawU(target), dims };
 }
 
 /**
@@ -218,7 +261,9 @@ export function renderDescription(
   theme: Theme,
   measurer: StringMeasurer = jarMeasurer,
 ): string {
-  const { draw, dims } = geo.elk === undefined ? svekBody(geo, theme, measurer) : elkBody(geo.elk, geo);
+  const margin = calculateMargin(theme, CUCA_DOCUMENT_MARGIN);
+  const body = geo.elk === undefined ? svekBody(geo, theme, measurer, margin) : elkBody(geo.elk, geo, margin);
+  const { dims } = body;
   const { width, height } = dims;
   const driverBounder = driverBounderFor(measurer);
 
@@ -234,7 +279,9 @@ export function renderDescription(
   // cdd-T30: `theme.dpi` -- `skinParam.getDpi()`
   // (`core/TextBlockExporter.java:206`), default 96 when `skinparam dpi` was
   // never declared (`Theme.dpi`'s own doc comment).
-  const scale = resolveScaleFactor(geo.scale, width, height, theme.dpi);
+  // codd-T4: a chromed geometry is scaled AFTER chrome (`assemble-svg.ts#finalizeDescriptionFragment`), as the jar
+  // scales the chrome-composed block (`TextBlockExporter.java:159-177`).
+  const scale = geo.chromed === true ? 1 : resolveScaleFactor(geo.scale, width, height, theme.dpi);
 
   const option = basicSvgOption({
     minDim: { width, height },
@@ -244,7 +291,8 @@ export function renderDescription(
   });
   const ug = UGraphicSvg.build(geo.seed ?? 0n, option, VERSION_PLACEHOLDER, driverBounder, measurer);
 
-  draw(ug, true);
+  // `TextBlockExporter#exportTo`: `ug.apply(new UTranslate(margin.getLeft(), margin.getTop()))`.
+  body.draw(ug.apply(new UTranslate(margin.left, margin.top)), true);
 
   return ug.getSvgString();
 }
@@ -298,8 +346,34 @@ export function renderDescription(
  */
 export function unwrapKlimtSvg(svg: string, background: string): RenderFragment {
   const { width, height } = extractViewBoxDims(svg);
-  const { body, extraDefs } = extractFlatContent(svg);
-  return extraDefs.length > 0
-    ? { body, width, height, background, extraDefs, diagramType: DIAGRAM_TYPE_DESCRIPTION }
-    : { body, width, height, background, diagramType: DIAGRAM_TYPE_DESCRIPTION };
+  const { body: klimtBody, extraDefs } = extractFlatContent(svg);
+  const { body, documentBackgroundRect } = splitLeadingBackgroundRect(klimtBody);
+  // The root `style="...background:"` carries the resolved hex the jar writes
+  // (`gray` -> `#808080`), as class's own resolve-before-shell convention (N4).
+  background = resolveColorToSvgHex(background);
+  const fragment: RenderFragment = { body, width, height, background, diagramType: DIAGRAM_TYPE_DESCRIPTION };
+  if (extraDefs.length > 0) fragment.extraDefs = extraDefs;
+  if (documentBackgroundRect !== undefined) fragment.documentBackgroundRect = documentBackgroundRect;
+  return fragment;
+}
+
+/** The background `<rect>` `SvgGraphicsCore#paintBackcolor` writes as the
+ *  klimt body's first child (non-default backgrounds only): the canvas origin,
+ *  the fill, and `stroke:none`. */
+const LEADING_BACKGROUND_RECT_RE =
+  /^<rect x="0" y="0" width="\d+" height="\d+" fill="(#[0-9A-Fa-f]{3,8})" style="stroke:none;"\/>/;
+
+/**
+ * codd-T4: the jar's background rect belongs to the FINAL canvas, not to the
+ * klimt body. `UgDiagram#getExporter` (`UgDiagram.java:123-135`) runs
+ * `addChrome` (title, caption, ...) and only then `TextBlockUtils
+ * .addBackcolor`, so the rect spans the chrome-composed canvas and precedes
+ * the title group (`component/sugaca-11-boma467`). The body's own rect, sized
+ * to the margin-less block, is split off here and handed to the assembler as
+ * `documentBackgroundRect` (the class engine's N48 mechanism).
+ */
+function splitLeadingBackgroundRect(body: string): { body: string; documentBackgroundRect?: string } {
+  const match = LEADING_BACKGROUND_RECT_RE.exec(body);
+  if (match === null) return { body };
+  return { body: body.slice(match[0].length), documentBackgroundRect: match[1]! };
 }

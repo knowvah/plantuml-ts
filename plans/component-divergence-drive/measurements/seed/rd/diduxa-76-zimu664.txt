@@ -1,0 +1,12 @@
+
+### component/diduxa-76-zimu664  pass=false structural=10 numeric=0
+  S svg/g[1]/g[1]/ellipse[1]/@fill  exp=#FFD700 | act=#F1F1F1
+  S svg/g[1]/g[1]/ellipse[1]/@stroke  exp=#181818 | act=#FFA500
+  S svg/g[1]/g[2]/rect[1]/@stroke  exp=#181818 | act=#FFA500
+  S svg/g[1]/g[2]/rect[2]/@stroke  exp=#181818 | act=#FFA500
+  S svg/g[1]/g[2]/rect[3]/@stroke  exp=#181818 | act=#FFA500
+  S svg/g[1]/g[2]/rect[4]/@stroke  exp=#181818 | act=#FFA500
+  S svg/g[1]/g[3]/rect[1]/@stroke  exp=#181818 | act=#FFA500
+  S svg/g[1]/g[3]/rect[2]/@stroke  exp=#181818 | act=#FFA500
+  S svg/g[1]/g[3]/rect[3]/@stroke  exp=#181818 | act=#FFA500
+  S svg/g[1]/g[3]/rect[4]/@stroke  exp=#181818 | act=#FFA500

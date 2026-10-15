@@ -29,9 +29,17 @@ import {
 } from '../../../scripts/dot-sync-fixtures.js';
 import { stripDiagramName, stripLayoutPragma } from '../../../scripts/dot-sync-drilldown.js';
 
-/** The three fixtures authored by `svg-sprite-nanoparser`; SI9 exists so that
- *  fixtures like these can be measured and ratcheted. */
-const AUTHORED_USECASE_SLUGS = ['sprite-svg-archimate-0', 'sprite-svg-bootstrap-0', 'sprite-svg-multiline-0'];
+/** The three fixtures authored by `svg-sprite-nanoparser` (SI9 exists so that
+ *  fixtures like these can be measured and ratcheted), plus
+ *  `exposant-02-usecase`: a dot-cache usecase row that is not in the visual
+ *  manifest and gained an `svg-description/usecase/` golden when codd T11
+ *  pinned it, so the enumerator now appends it like an authored golden. */
+const AUTHORED_USECASE_SLUGS = [
+  'exposant-02-usecase',
+  'sprite-svg-archimate-0',
+  'sprite-svg-bootstrap-0',
+  'sprite-svg-multiline-0',
+];
 
 /** The five fixtures authored under `oracle/goldens/svg-class/` (SI13), in
  *  the sorted order `authoredFixtures` returns them. */

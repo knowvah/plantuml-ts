@@ -40,6 +40,16 @@ export function arrowFontColorValue(value: string, color: string): string | unde
 }
 
 /**
+ * codd-T1c: the INTERNAL skinparam key `build-theme.ts#rootCascadeSkinparams`
+ * uses to carry a `<style> root { LineColor }` into `colors.border`. It holds
+ * an interior space so no user-typed key can normalise to it
+ * (`skinparam-key-normalize.ts#normaliseKey` only trims, lowercases and
+ * strips `_`/`.`), keeping a user's bare `skinparam borderColor` -- which has
+ * no upstream meaning -- out of that field.
+ */
+export const ROOT_LINE_COLOR_KEY = 'root linecolor';
+
+/**
  * One `case` arm of upstream `SkinParam.java`'s key switch.
  *
  * @param value the RAW skinparam token, exactly as written

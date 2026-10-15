@@ -17,9 +17,33 @@ import {
   parseFiniteInt,
   parseNonZeroInt,
   parseFontStyleFlags,
+  ROOT_LINE_COLOR_KEY,
 } from './skinparam-key-handlers-shared.js';
 import { ActorStyle } from './skin/ActorStyle.js';
 import { ADD_MAGIC_HANDLERS } from './skinparam-key-handlers-add-magic.js';
+import type { PackageStyleSetting } from './theme.js';
+
+/** `PackageStyle.fromString` (`svek/PackageStyle.java:50-58`): the enum names, case-insensitive, plus `rect`
+ *  for RECTANGLE; anything else is null (and `SkinParam#packageStyle` then answers FOLDER). */
+const PACKAGE_STYLE_SETTINGS: ReadonlyMap<string, PackageStyleSetting> = new Map<string, PackageStyleSetting>([
+  ['folder', 'folder'],
+  ['rectangle', 'rect'],
+  ['rect', 'rect'],
+  ['node', 'node'],
+  ['frame', 'frame'],
+  ['cloud', 'cloud'],
+  ['database', 'database'],
+  ['agent', 'agent'],
+  ['storage', 'storage'],
+  ['component1', 'component1'],
+  ['component2', 'component2'],
+  ['artifact', 'artifact'],
+  ['card', 'card'],
+]);
+
+function parsePackageStyleSetting(value: string): PackageStyleSetting | undefined {
+  return PACKAGE_STYLE_SETTINGS.get(value.trim().toLowerCase());
+}
 
 export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> = [
   [
@@ -32,8 +56,16 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
       if (typeof paint !== 'string') acc.backgroundGradient = paint;
     },
   ],
+  // codd-T1c: NOT `bordercolor`. A user's bare `skinparam borderColor X` has no
+  // upstream meaning -- `FromSkinparamToStyle`'s `knowledge` map carries no
+  // un-prefixed `bordercolor` key (only `<sname>BorderColor`, :273), and
+  // `ColorParam` (skin/ColorParam.java) has no `border` member -- so it is
+  // discarded to `unknown[]` like any unrecognised key (jar-verified
+  // diduxa-76-zimu664: every stroke stays #181818). This key is the
+  // INTERNAL spelling `build-theme.ts#rootCascadeSkinparams` uses to carry a
+  // `<style> root { LineColor }` into `colors.border`.
   [
-    ['bordercolor'],
+    [ROOT_LINE_COLOR_KEY],
     (acc, _v, color) => {
       acc.border = color;
     },
@@ -374,8 +406,8 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   [
     ['packagestyle'],
     (acc, value) => {
-      const v = value.trim().toLowerCase();
-      if (v === 'rect' || v === 'rectangle') acc.packageStyle = 'rect';
+      const style = parsePackageStyleSetting(value);
+      if (style !== undefined) acc.packageStyle = style;
     },
   ],
   [

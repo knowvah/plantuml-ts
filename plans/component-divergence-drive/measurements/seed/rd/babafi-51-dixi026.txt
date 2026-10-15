@@ -1,0 +1,6 @@
+
+### component/babafi-51-dixi026  pass=false structural=0 numeric=4
+  N svg/g[1]/g[1]/text[1]/@x  exp=138.08 | act=187.43 (Δ49.349999999999994)
+  N svg/g[1]/g[2]/text[1]/@x  exp=6 | act=32.425 (Δ26.424999999999997)
+  N svg/g[1]/g[3]/text[1]/@x  exp=84.86 | act=94.86 (Δ10)
+  N svg/g[1]/g[3]/text[1]/@y  exp=46.611 | act=43 (Δ3.610999999999997)

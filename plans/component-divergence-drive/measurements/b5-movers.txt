@@ -1,0 +1,252 @@
+activity: 448/1/0+0 dot=449 layout=1 -> 448/1/0+0 dot=449 layout=1 movers=0
+board: 0/0/4+0 dot=4 layout=0 -> 0/0/4+0 dot=4 layout=0 movers=0
+c4: 2/0/9+0 dot=5 layout=1 -> 2/0/9+0 dot=5 layout=3 movers=2
+  favasu-27-fesa452: layoutEqual false->true
+  xizifu-87-siti076: layoutEqual false->true
+chart: 0/0/29+0 dot=29 layout=0 -> 0/0/29+0 dot=29 layout=0 movers=0
+chronology: 0/0/1+0 dot=1 layout=0 -> 0/0/1+0 dot=1 layout=0 movers=0
+class: 723/0/0+0 dot=715 layout=547 -> 723/0/0+0 dot=715 layout=547 movers=0
+component: 69/70/127+0 dot=262 layout=244 -> 180/12/74+0 dot=262 layout=248 movers=119
+  babafi-51-dixi026: verdict structural-match->conformant
+  balipa-82-feto843: verdict diverged->conformant
+  basetu-75-xevi153: verdict diverged->conformant
+  betidu-24-xuku720: verdict diverged->conformant
+  bisedo-29-kone620: verdict diverged->conformant
+  bitexe-13-mopa885: verdict structural-match->conformant
+  bozoju-49-kufo528: layoutEqual false->true
+  buduco-56-jeke005: verdict structural-match->conformant
+  bukece-71-miku542: verdict structural-match->conformant
+  butebe-90-dozo380: verdict structural-match->conformant
+  catari-10-xiza828: verdict structural-match->conformant
+  cemutu-31-tuxe792: verdict diverged->conformant
+  cenoja-47-rodu998: verdict structural-match->conformant
+  cigite-14-kane677: verdict structural-match->conformant
+  codabo-50-mupa164: verdict structural-match->conformant
+  cojege-69-ruku138: verdict diverged->conformant
+  cukafa-49-fona812: verdict diverged->conformant
+  cuxeda-73-semi910: verdict structural-match->conformant
+  cuxelu-66-zopu195: verdict diverged->conformant
+  daxija-24-pozu867: verdict structural-match->conformant
+  detona-13-ziko113: verdict diverged->conformant
+  dexigu-24-deru622: verdict structural-match->conformant
+  diduxa-76-zimu664: verdict diverged->conformant
+  dozudi-14-sevu997: verdict diverged->conformant
+  dugovi-24-kupu658: verdict diverged->conformant
+  fasave-91-jaka816: verdict structural-match->conformant
+  fijido-06-kapu656: verdict diverged->conformant
+  fimoxe-74-sobi956: verdict structural-match->conformant
+  fodena-72-sule202: verdict structural-match->conformant
+  fogexa-24-lavi583: verdict structural-match->conformant
+  fojamu-08-veku866: verdict diverged->conformant
+  fopako-15-labi027: verdict structural-match->conformant
+  fuzula-86-temo881: verdict diverged->conformant
+  gafegu-06-nito976: verdict diverged->conformant
+  gafico-37-cuma657: verdict structural-match->conformant
+  gekato-87-lisi598: verdict diverged->conformant
+  gevozu-46-sasu860: verdict diverged->structural-match
+  gezemu-34-kamu453: verdict structural-match->conformant
+  gocexi-61-biso565: verdict diverged->conformant
+  gogosu-37-mipe918: verdict structural-match->conformant
+  gopomi-26-pome923: verdict structural-match->conformant
+  gucefa-91-pume734: verdict diverged->structural-match
+  junoxu-15-gori632: verdict structural-match->conformant
+  juvucu-92-bugo434: verdict diverged->conformant
+  kacite-73-sobe773: verdict structural-match->conformant
+  kagapo-72-cofe085: verdict diverged->conformant
+  kanute-77-lacu414: layoutEqual false->true
+  kenece-24-juku624: verdict structural-match->conformant
+  keniji-18-tupu819: verdict structural-match->conformant
+  kizobu-64-rozo458: verdict diverged->conformant
+  kucabo-74-cora635: verdict diverged->conformant
+  kumefo-73-xodu411: verdict structural-match->conformant
+  lesori-32-zeve057: verdict diverged->conformant
+  levuxi-16-fotu885: verdict diverged->conformant
+  lobute-63-tizi096: verdict diverged->conformant
+  loroto-06-fano471: verdict diverged->conformant
+  lovapo-83-xilo457: verdict diverged->conformant
+  luniju-97-tuja870: verdict structural-match->conformant
+  malado-53-noso561: verdict diverged->conformant
+  mavuxi-16-jafi782: verdict structural-match->conformant
+  mejoxi-96-cegu294: verdict structural-match->conformant
+  mevupe-82-meva605: verdict diverged->conformant
+  misube-65-seni576: layoutEqual false->true
+  mucezi-78-ciki658: verdict diverged->conformant
+  nedapu-57-dife142: verdict structural-match->conformant
+  nidemo-97-domu132: verdict structural-match->conformant
+  nipoga-91-nole703: verdict structural-match->conformant
+  nufofe-18-xani887: verdict diverged->conformant
+  nujito-06-neca370: verdict structural-match->conformant
+  pafoxe-99-xulo156: verdict diverged->conformant
+  pegali-65-rotu416: verdict structural-match->conformant
+  pepego-30-kati324: verdict diverged->conformant
+  ponare-43-kazu160: verdict diverged->conformant
+  radiga-95-junu817: verdict structural-match->conformant
+  rapaji-98-xato067: verdict diverged->conformant
+  ravodu-50-siso430: verdict diverged->structural-match
+  renita-52-jazi848: verdict structural-match->conformant
+  rigoge-48-ziso050: verdict structural-match->conformant
+  rimiku-31-cigo272: verdict structural-match->conformant
+  riradu-09-xipo824: verdict structural-match->conformant
+  romuco-28-zafo015: verdict diverged->conformant
+  saxosu-09-nodi002: verdict structural-match->conformant
+  silito-78-vubi253: verdict diverged->conformant
+  siseda-71-napu395: verdict diverged->conformant
+  sobobi-72-miri289: verdict structural-match->conformant
+  sodoza-93-nanu557: verdict structural-match->conformant
+  somugi-21-doli483: verdict diverged->conformant
+  sugaca-11-boma467: verdict diverged->conformant
+  sunuju-01-pote718: verdict diverged->structural-match
+  suzemi-86-kuma659: verdict diverged->conformant
+  tacixe-99-gesi489: verdict diverged->conformant
+  tajadu-40-juro990: verdict structural-match->conformant
+  tajuki-26-bime046: verdict structural-match->conformant
+  temufu-00-rira888: verdict structural-match->conformant
+  tijexo-10-zipo222: verdict diverged->conformant
+  tilexe-28-fiju280: verdict structural-match->conformant
+  tizuza-93-xeto109: verdict diverged->conformant
+  toxine-81-xofo986: verdict diverged->conformant
+  venoti-11-seza115: verdict structural-match->conformant
+  vixeni-34-nici683: verdict structural-match->conformant
+  vogefo-33-xeve917: layoutEqual false->true
+  vosapi-62-mugu541: verdict structural-match->conformant
+  vosuxa-11-tapu784: verdict structural-match->conformant
+  vovuru-39-sula650: verdict diverged->conformant
+  vunimi-85-xadu895: verdict structural-match->conformant
+  xadaji-25-cufe655: verdict structural-match->conformant
+  xadinu-90-vasu322: verdict structural-match->conformant
+  xocodo-09-nuxi647: verdict structural-match->conformant
+  zabixa-22-tovi572: verdict structural-match->conformant
+  zajozi-04-dixu500: verdict structural-match->conformant
+  zibumo-62-rije152: verdict structural-match->conformant
+  zifaji-87-raki559: verdict structural-match->conformant
+  zodare-91-rira454: verdict structural-match->conformant
+  zonobi-55-zuna105: verdict structural-match->conformant
+  zotake-65-cabi912: verdict diverged->conformant
+  zozutu-82-pupa220: verdict diverged->conformant
+  zubujo-87-xaxa087: verdict diverged->conformant
+  zugofa-47-risi694: verdict structural-match->conformant
+  zusota-76-jagu564: verdict structural-match->conformant
+ditaa: 0/0/0+2 dot=0 layout=0 -> 0/0/0+2 dot=0 layout=0 movers=0
+dot: 5/0/0+0 dot=5 layout=0 -> 5/0/0+0 dot=5 layout=0 movers=0
+ebnf: 0/0/44+0 dot=44 layout=0 -> 0/0/44+0 dot=44 layout=0 movers=0
+files: 0/0/1+0 dot=1 layout=0 -> 0/0/1+0 dot=1 layout=0 movers=0
+gantt: 1/0/264+0 dot=265 layout=0 -> 1/0/264+0 dot=265 layout=0 movers=0
+hcl: 1/2/0+0 dot=0 layout=0 -> 1/2/0+0 dot=0 layout=0 movers=0
+json: 13/24/13+0 dot=1 layout=0 -> 13/24/13+0 dot=1 layout=0 movers=0
+mindmap: 142/0/0+0 dot=142 layout=0 -> 142/0/0+0 dot=142 layout=0 movers=0
+network: 0/0/3+0 dot=1 layout=1 -> 1/0/2+0 dot=1 layout=1 movers=1
+  denevo-18-toza672: verdict diverged->conformant
+object: 63/8/9+0 dot=78 layout=59 -> 63/8/9+0 dot=78 layout=59 movers=0
+packet: 0/0/6+0 dot=6 layout=0 -> 0/0/6+0 dot=6 layout=0 movers=0
+regex: 0/0/46+0 dot=46 layout=0 -> 0/0/46+0 dot=46 layout=0 movers=0
+salt: 51/0/0+0 dot=51 layout=0 -> 51/0/0+0 dot=51 layout=0 movers=0
+sequence: 0/0/1143+0 dot=1140 layout=0 -> 0/0/1143+0 dot=1140 layout=0 movers=0
+state: 78/11/184+0 dot=272 layout=252 -> 78/11/184+0 dot=272 layout=252 movers=0
+timing: 6/0/120+0 dot=126 layout=0 -> 6/0/120+0 dot=126 layout=0 movers=0
+unknown: 423/48/354+0 dot=798 layout=351 -> 483/16/326+0 dot=806 layout=364 movers=71
+  bamami-10-lava790: verdict structural-match->conformant
+  banomu-15-keni701: verdict structural-match->conformant
+  bekoni-23-xece793: verdict diverged->conformant
+  bibigo-23-koli015: verdict diverged->conformant
+  bixixe-41-vigu064: verdict diverged->conformant
+  bobixe-18-riza923: verdict structural-match->conformant
+  boguze-30-lava691: verdict structural-match->conformant
+  bujigu-81-nima035: layoutEqual false->true
+  cexoke-68-kici335: layoutEqual false->true
+  dacica-03-jimi244: verdict diverged->conformant
+  dajafo-57-fexi530: verdict structural-match->conformant
+  dakeja-23-kapi402: verdict structural-match->conformant
+  dicoge-13-meso213: verdict structural-match->conformant
+  dofixa-09-soji615: verdict diverged->conformant
+  dosixi-10-vetu164: verdict diverged->conformant
+  fivisa-32-suzi802: verdict diverged->conformant
+  foraba-98-sagi735: verdict diverged->conformant
+  gerebe-26-neli152: verdict diverged->conformant, dotEqual false->true, layoutEqual false->true
+  gigetu-10-funi859: verdict diverged->structural-match
+  gimofu-04-raje064: verdict structural-match->conformant
+  gogaxo-82-mire024: verdict diverged->conformant
+  golamo-46-lume529: dotEqual false->true, layoutEqual false->true
+  guvali-97-mike476: verdict structural-match->conformant
+  jafexe-59-muzo362: verdict diverged->conformant, dotEqual false->true, layoutEqual false->true
+  javari-89-jibo072: verdict structural-match->conformant
+  jiceju-70-copo737: verdict structural-match->conformant
+  joliva-50-vuva261: layoutEqual false->true
+  jujuga-39-miva043: verdict structural-match->conformant
+  jupeni-57-nexu873: verdict structural-match->conformant
+  juvose-99-mopu040: verdict diverged->conformant, dotEqual false->true, layoutEqual false->true
+  keceji-97-nuza070: layoutEqual false->true
+  kekami-48-nibi969: verdict diverged->conformant
+  kekese-70-zisa632: verdict structural-match->conformant
+  kikudo-03-voto032: verdict structural-match->conformant
+  kuduba-74-taki821: verdict diverged->conformant
+  lebuca-31-sese441: verdict structural-match->conformant
+  lituge-35-beli050: verdict structural-match->conformant
+  logifa-32-tuzi644: verdict structural-match->conformant
+  luzeti-08-lafa321: layoutEqual false->true
+  manama-22-joxi528: verdict diverged->structural-match
+  mebeva-33-bafu201: verdict structural-match->conformant
+  mefule-86-calo549: verdict structural-match->conformant
+  melosu-77-sati627: verdict structural-match->conformant
+  migene-71-rogu145: verdict diverged->conformant
+  napaju-13-kuva269: verdict structural-match->conformant
+  nedeto-35-rete203: verdict diverged->conformant
+  neduvo-76-rigi020: verdict structural-match->conformant
+  nibuta-88-lalu236: verdict diverged->conformant
+  nicere-96-keje834: verdict structural-match->conformant
+  palovo-20-jivo819: verdict structural-match->conformant
+  pugodi-27-kone040: verdict structural-match->conformant
+  rebena-98-kiba723: verdict diverged->conformant, dotEqual false->true, layoutEqual false->true
+  sanima-32-teja660: verdict structural-match->conformant
+  selapa-88-lopi279: verdict diverged->structural-match
+  sufaru-98-mifa724: verdict structural-match->conformant
+  tabuma-85-sizi973: verdict diverged->conformant
+  togijo-81-zako477: verdict diverged->conformant
+  vaxolu-89-boxo515: verdict structural-match->conformant
+  vuneti-03-madi874: verdict structural-match->conformant
+  vuvave-27-saki879: verdict diverged->conformant, dotEqual false->true, layoutEqual false->true
+  xagonu-36-sudi116: dotEqual false->true, layoutEqual false->true
+  xipane-40-dune740: verdict diverged->conformant, dotEqual false->true, layoutEqual false->true
+  xubabi-00-bike493: verdict diverged->conformant
+  xucika-16-zago215: verdict structural-match->conformant
+  xurivi-47-gupo448: verdict structural-match->conformant
+  zakaca-67-paxe321: verdict diverged->conformant
+  zedena-31-deso122: verdict structural-match->conformant
+  zicepa-25-ciri712: verdict structural-match->conformant
+  zisizi-13-nuxe218: verdict structural-match->conformant
+  zodela-36-sica712: verdict diverged->structural-match
+  zumuji-10-tixo987: verdict structural-match->conformant
+usecase: 30/17/46+1 dot=93 layout=71 -> 58/2/33+1 dot=93 layout=72 movers=30
+  cevuji-49-bile305: verdict structural-match->conformant
+  cuzuci-92-dugi933: verdict structural-match->conformant
+  dopova-50-digo290: verdict diverged->structural-match
+  exposant-02-usecase: verdict diverged->conformant
+  fariba-82-xolu802: verdict diverged->conformant
+  fotisa-06-xipe681: verdict structural-match->conformant
+  fumitu-00-reji589: verdict structural-match->conformant
+  fuvosu-10-lixu251: verdict structural-match->conformant
+  kijufe-84-colu239: verdict structural-match->conformant
+  kobasu-11-difo566: verdict diverged->conformant
+  kofuca-08-pafi749: verdict diverged->conformant
+  kovaxi-11-reti348: verdict diverged->conformant
+  lirebi-26-voka556: verdict diverged->conformant
+  molopu-64-totu560: verdict structural-match->conformant
+  mutere-78-geko363: verdict structural-match->conformant
+  nenedo-78-fiva569: verdict structural-match->conformant
+  nipapu-74-roro938: verdict structural-match->conformant
+  nobiza-91-fimo741: verdict diverged->conformant
+  pivudu-29-pele178: verdict diverged->conformant
+  robiga-73-tedi466: verdict structural-match->conformant
+  rokipo-88-sece008: verdict diverged->conformant
+  saduja-80-goba120: verdict structural-match->conformant, layoutEqual false->true
+  seneso-72-cuje674: verdict structural-match->conformant
+  tanuna-53-neko979: verdict structural-match->conformant
+  tozubi-37-feze715: verdict structural-match->conformant
+  vibunu-17-guso486: verdict structural-match->conformant
+  xeluxu-64-fozo131: verdict structural-match->conformant
+  zacute-55-zece399: verdict diverged->conformant
+  zidebi-71-nocu387: verdict diverged->conformant
+  zilisi-99-rate911: verdict diverged->structural-match
+wbs: 204/0/0+0 dot=204 layout=0 -> 204/0/0+0 dot=204 layout=0 movers=0
+wire: 0/0/18+0 dot=18 layout=0 -> 0/0/18+0 dot=18 layout=0 movers=0
+yaml: 7/28/4+0 dot=0 layout=0 -> 7/28/4+0 dot=0 layout=0 movers=0
+CONFORMANT LOSSES: 0

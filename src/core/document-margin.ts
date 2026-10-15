@@ -37,6 +37,7 @@
  */
 
 import type { RenderFragment } from './dispatcher.js';
+import type { Theme } from './theme.js';
 import { shiftFragmentBody } from './annotations/coord-shift.js';
 import {
   CUCA_DOCUMENT_MARGIN_BOTTOM,
@@ -61,7 +62,7 @@ const ENSURE_VISIBLE_DELTA = 1;
 export const SEQUENCE_DOCUMENT_MARGIN: DocumentMargin = { top: 5, right: 5, bottom: 5, left: 5 };
 
 /** `CucaDiagram#getDefaultMargins()`. */
-const CUCA_DOCUMENT_MARGIN: DocumentMargin = {
+export const CUCA_DOCUMENT_MARGIN: DocumentMargin = {
   top: CUCA_DOCUMENT_MARGIN_TOP,
   right: CUCA_DOCUMENT_MARGIN_RIGHT,
   bottom: CUCA_DOCUMENT_MARGIN_BOTTOM,
@@ -86,7 +87,18 @@ const DOCUMENT_MARGIN_BY_DIAGRAM_TYPE: Readonly<Record<string, DocumentMargin>> 
  */
 export function documentMarginOf(fragment: RenderFragment): DocumentMargin | undefined {
   if (fragment.preChromeWidth === undefined || fragment.preChromeHeight === undefined) return undefined;
+  if (fragment.documentMargin !== undefined) return fragment.documentMargin;
   return fragment.diagramType === undefined ? undefined : DOCUMENT_MARGIN_BY_DIAGRAM_TYPE[fragment.diagramType];
+}
+
+/**
+ * `TextBlockExporter.Builder#calculateMargin` (`core/TextBlockExporter.java
+ * :510-516`): the merged `{root, document}` style's `Margin` when it has one
+ * (`Theme.diagramMargin`, `build-theme.ts#withDocumentStyle`), else the
+ * diagram class's `getDefaultMargins()` -- `fallback`.
+ */
+export function calculateMargin(theme: Theme, fallback: DocumentMargin): DocumentMargin {
+  return theme.diagramMargin ?? fallback;
 }
 
 /**
@@ -111,6 +123,10 @@ export function applyDocumentMargin(fragment: RenderFragment, margin: DocumentMa
   return {
     ...fragment,
     body: shiftFragmentBody(fragment.body, margin.left, margin.top),
+    exportedDimension: {
+      width: fragment.width + margin.left + margin.right,
+      height: fragment.height + margin.top + margin.bottom,
+    },
     width: Math.floor(fragment.width + margin.left + margin.right + ENSURE_VISIBLE_DELTA),
     height: Math.floor(fragment.height + margin.top + margin.bottom + ENSURE_VISIBLE_DELTA),
   };

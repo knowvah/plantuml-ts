@@ -1,0 +1,11 @@
+
+### component/gekato-87-lisi598  pass=false structural=9 numeric=0
+  S svg/g[1]/g[5]/@id  exp=ent0007 | act=ent0006
+  S svg/g[1]/g[5]/path[1]/@fill  exp=#F00 | act=#FEFFDD
+  S svg/g[1]/g[5]/path[2]/@fill  exp=#F00 | act=#FEFFDD
+  S svg/g[1]/g[5][childCount]  exp=3 | act=2
+  S svg/g[1]/g[6]/@id  exp=ent0010 | act=ent0008
+  S svg/g[1]/g[6]/path[1]/@fill  exp=#00F | act=#FEFFDD
+  S svg/g[1]/g[6]/path[2]/@fill  exp=#00F | act=#FEFFDD
+  S svg/g[1]/g[6][childCount]  exp=4 | act=2
+  S svg/g[1][childCount]  exp=7 | act=10

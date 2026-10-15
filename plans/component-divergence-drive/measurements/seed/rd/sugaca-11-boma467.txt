@@ -1,0 +1,5 @@
+
+### component/sugaca-11-boma467  pass=false structural=3 numeric=0
+  S svg/@background  exp=#808080 | act=gray
+  S svg/g[1]/g[1]  exp=rect | act=g
+  S svg/g[1]/rect[1]  exp=g | act=rect

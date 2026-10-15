@@ -41,14 +41,12 @@ describe('lgm-T1c: description chrome equals the jar', () => {
     expect(pathsOf('deployment-frame')).toEqual([]);
   });
 
-  it('usecase-frame-note: only the note entity order differs', () => {
-    expect(pathsOf('usecase-frame-note')).toEqual([
-      'svg/g[1]/g[4]/@id',
-      'svg/g[1]/g[4][childCount]',
-      'svg/g[1]/g[5]/@id',
-      'svg/g[1]/g[6]/@id',
-      'svg/g[1][childCount]',
-    ]);
+  // codd-T3 closed the note entity order residual: the note leaf takes its
+  // `getUniqueSequence("GMN")` value first (CommandFactoryNoteOnEntity.java:327)
+  // and draws polygon, fold and text inside one entity group
+  // (EntityImageNote.java:154-157, :272-286).
+  it('usecase-frame-note: equals the jar', () => {
+    expect(pathsOf('usecase-frame-note')).toEqual([]);
   });
 });
 

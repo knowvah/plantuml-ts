@@ -32,6 +32,31 @@ export function kermorHasAlpha(c: DotInputCluster): boolean {
   return c.kermorNotes?.top !== undefined || c.kermorNotes?.bottom !== undefined;
 }
 
+/** Which of a group's two kermor note slots a published label box belongs to. */
+export type KermorNoteSlot = 'top' | 'bottom';
+
+/**
+ * The `DotLayoutResult.clusters` id of a kermor note's label table: `alpha` carries the TOP note's table and
+ * `beta` the BOTTOM one (`ClusterDotStringKermor.java:88-99,104-112`). `DotStringFactory.java:454,460` reads
+ * their placed polygons (`Cluster.setNoteTopPosition/BottomPosition`); the `#` keeps the id out of every real
+ * cluster id's namespace.
+ */
+export function kermorNoteClusterId(clusterId: string, slot: KermorNoteSlot): string {
+  return `${clusterId}#kermor-note-${slot}`;
+}
+
+/**
+ * Names the engine subgraphs of one kermor group for the result: `gamma` is the drawn cluster (`idByName` maps it
+ * to the caller's id), and a note's `alpha` (TOP) / `beta` (BOTTOM) subgraph is published under
+ * {@link kermorNoteClusterId} so its label box reaches the caller.
+ */
+export function registerKermorClusterIds(idByName: Map<string, string>, c: DotInputCluster, outerName: string): void {
+  idByName.delete(outerName);
+  idByName.set(`${outerName}gamma`, c.id);
+  if (c.kermorNotes?.top !== undefined) idByName.set(`${outerName}alpha`, kermorNoteClusterId(c.id, 'top'));
+  if (c.kermorNotes?.bottom !== undefined) idByName.set(`${outerName}beta`, kermorNoteClusterId(c.id, 'bottom'));
+}
+
 /** The `main`/`innermost` pair `addClusters` threads; both are `gamma` here. */
 interface ClusterHandlesLike {
   main: GvGraphBuilder;

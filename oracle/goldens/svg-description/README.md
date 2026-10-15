@@ -15,9 +15,11 @@ verdicts even for fixtures whose DOT is `EQUAL` — that gap is the
 pre-existing, already-documented D12 apples-to-oranges gap (see
 `tests/integration/description.test.ts`), not evidence of a rendering bug.
 
-This ratchet instead renders through the description engine's low-level
-pipeline (`parseDescription` -> `layoutDescription` -> `renderDescription`)
-with `DeterministicMeasurer` injected into *both* stages — the same system
+This ratchet instead renders through `renderSync` -- the call the survey makes
+(`render-fixture.ts`, codd T1a: it used to drive `parseDescription` ->
+`layoutDescription` -> `renderDescription` directly, which bypassed the
+router, chrome composition and the asset store) -- with
+`DeterministicMeasurer` injected into *both* stages — the same system
 both sides of the comparison use to measure text — isolating true emission
 regressions from text-metrics noise. See
 `scripts/svg-conformance-census.ts` for the census that discovers
@@ -51,15 +53,26 @@ A fixture may be added to `ratchet.json` only when **both** hold:
    (`compareSvg(ours, golden, 'deterministic').pass === true`) against the
    jar's `in.svg`.
 2. **DOT-EQUAL** — the fixture's DOT emission is structurally `EQUAL`
-   against the oracle DOT (`tests/oracle/svg-conformance/parity.json`,
-   `fixtures[].dotEqual === true`). This is enforced by the suite itself,
-   not just documented — see the "eligibility" describe block in
-   `description.golden.ratchet.test.ts`.
+   against the oracle DOT, read from the row's **per-type** survey file
+   (`tests/oracle/svg-conformance/parity-<type>.json`,
+   `fixtures[].dotEqual === true`), NOT the legacy `parity.json` (stale
+   since 2026-09-21). A `conformant` row with `dotEqual: false` is not
+   eligible. The eligible types are `component`, `usecase`, `c4` and
+   `unknown`; an `unknown` or `c4` row additionally needs
+   `oracle/goldens/svg-conformance/routing-baseline.json` `ourType ===
+   "DESCRIPTION"` (the golden directory and the ratchet are description
+   goldens; a row the router sends to another engine belongs to that
+   engine's ratchet). The rule is `description-eligibility.ts`,
+   enforced by the "eligibility" describe block in
+   `description.golden.ratchet.test.ts`; the golden directory is keyed by
+   the survey type (`<type>/<slug>/`).
 
 To add a slug:
 
 1. Confirm both conditions above (e.g. via
-   `npx tsx scripts/svg-conformance-census.ts <type>` and `parity.json`).
+   `npx tsx scripts/svg-conformance-census.ts <type>` and
+   `parity-<type>.json`, or
+   `plans/component-divergence-drive/measurements/pin-description.mts`).
 2. Copy `test-results/dot-cache/<type>/<slug>/in.puml` and `in.svg` into
    `oracle/goldens/svg-description/<type>/<slug>/` (renaming `in.svg` to
    `golden.svg`).

@@ -1,0 +1,6 @@
+
+### component/nufofe-18-xani887  pass=false structural=4 numeric=0
+  S svg/g[1]/g[4]/path[1]/@stroke-width  exp=4 | act=1
+  S svg/g[1]/g[4]/polygon[1]/@stroke-width  exp=4 | act=1
+  S svg/g[1]/g[5]/path[1]/@stroke-width  exp=4 | act=1
+  S svg/g[1]/g[5]/polygon[1]/@stroke-width  exp=4 | act=1

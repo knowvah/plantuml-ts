@@ -244,6 +244,14 @@ export interface RenderFragment {
    *  `getDefaultMargins()`, TextBlockExporter.java:510-516), applied after chrome by
    *  `TextBlockExporter.ts#finalizeTitledDiagramFragment`. Set by the MINDMAP and SALT chrome paths. */
   exportMargin?: ClockwiseTopRightBottomLeft;
+  /** codd-T4: `TextBlockExporter#calculateFinalDimension` (`:198-203`) -- chrome plus margin, BEFORE `SvgGraphics
+   *  #ensureVisible` floors it; set by `document-margin.ts#applyDocumentMargin`. `computeScaleFactor` (`:204-208`)
+   *  resolves a width/height `scale` against this, not against the floored canvas in `width`/`height`. */
+  exportedDimension?: { readonly width: number; readonly height: number };
+  /** codd-T4: the document margin this fragment was exported with when it is NOT its diagram class's default
+   *  (`TextBlockExporter.Builder#calculateMargin`, a style `Margin`; `document-margin.ts#calculateMargin`).
+   *  Read by `document-margin.ts#documentMarginOf`; absent means the per-`diagramType` default. */
+  documentMargin?: { readonly top: number; readonly right: number; readonly bottom: number; readonly left: number };
   /**
    * lgm-T1a: the `LimitFinder` ink (`TextBlockUtils.getMinMax(block, sb,
    * false)`) of the block `DiagramChromeFactory.decorateWithFrame` frames,

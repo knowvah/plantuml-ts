@@ -1,0 +1,2 @@
+
+### component/kokebo-27-vafi688  pass=true structural=0 numeric=0

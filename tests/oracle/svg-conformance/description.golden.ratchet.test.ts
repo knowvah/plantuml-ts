@@ -32,6 +32,7 @@ import { fileURLToPath } from 'node:url';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { compareSvg } from './compare.js';
 import { renderFixture } from './render-fixture.js';
+import { dotEligibility, type Eligibility, type SurveyRow } from './description-eligibility.js';
 
 // See the matching note in description.diff-baseline.ratchet.test.ts:
 // `usecase/sprite-svg-bootstrap-0` renders in ~1.6s alone but is the slowest
@@ -51,30 +52,43 @@ interface RatchetManifest {
   fixtures: RatchetFixture[];
 }
 
-interface ParityEntry {
-  slug: string;
+interface RoutingRow {
+  tree: string;
   type: string;
-  dotEqual: boolean;
-}
-
-interface ParityReport {
-  fixtures: ParityEntry[];
+  slug: string;
+  ourType: string;
 }
 
 const GOLDENS_ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../../oracle/goldens/svg-description');
 
 const manifest = JSON.parse(readFileSync(join(GOLDENS_ROOT, 'ratchet.json'), 'utf8')) as RatchetManifest;
 
-// Source of DOT-EQUAL truth for eligibility (AC3): the SVG-parity survey's
-// own `dotEqual` field, captured by `scripts/svg-parity-survey.ts` and
-// consumed by the census/dashboard tooling (T15/T17). This is the same
-// artifact `oracle/goldens/svg-description/README.md`'s "Add rule" cites.
-const parity = JSON.parse(
-  readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'parity.json'), 'utf8'),
-) as ParityReport;
+// Source of DOT-EQUAL truth for eligibility (AC3, codd T1a / D4): the PER-TYPE
+// survey file `parity-<type>.json` (current), not the legacy `parity.json`
+// (stale since 2026-09-21). `unknown`/`c4` rows additionally need the routing
+// baseline's `ourType === 'DESCRIPTION'` -- see `./description-eligibility.ts`.
+const HERE = dirname(fileURLToPath(import.meta.url));
 
-function findParityEntry(slug: string, type: string): ParityEntry | undefined {
-  return parity.fixtures.find((f) => f.slug === slug && f.type === type);
+function surveyRows(type: string): SurveyRow[] {
+  return (JSON.parse(readFileSync(join(HERE, `parity-${type}.json`), 'utf8')) as { fixtures: SurveyRow[] }).fixtures;
+}
+
+const routing = (
+  JSON.parse(readFileSync(join(HERE, '../../../oracle/goldens/svg-conformance/routing-baseline.json'), 'utf8')) as {
+    fixtures: RoutingRow[];
+  }
+).fixtures;
+
+function ourTypeOf(type: string, slug: string): string | undefined {
+  return routing.find((r) => r.tree === 'dot-cache' && r.type === type && r.slug === slug)?.ourType;
+}
+
+function eligibilityOf(type: string, slug: string): Eligibility {
+  return dotEligibility(
+    type,
+    surveyRows(type).find((r) => r.slug === slug),
+    ourTypeOf(type, slug),
+  );
 }
 
 function fixtureDir(f: RatchetFixture): string {
@@ -182,38 +196,34 @@ describe('svg-description conformance ratchet — tamper detection (AC2)', () =>
 // ---------------------------------------------------------------------------
 
 describe('svg-description conformance ratchet — eligibility (AC3)', () => {
-  it('every manifest slug has a dotEqual=true parity.json entry', () => {
+  it('every manifest slug is dotEqual=true in its per-type parity file (and routed DESCRIPTION if unknown/c4)', () => {
     for (const f of manifest.fixtures) {
-      const entry = findParityEntry(f.slug, f.type);
-      expect(entry, `${f.type}/${f.slug}: no parity.json entry found`).toBeDefined();
-      expect(entry!.dotEqual, `${f.type}/${f.slug}: manifest entry is not DOT-EQUAL — ineligible for the ratchet`).toBe(
-        true,
-      );
+      const e = eligibilityOf(f.type, f.slug);
+      expect(e.ok, `${f.type}/${f.slug}: ineligible for the ratchet — ${e.reason}`).toBe(true);
     }
   });
 
   it('rejects adding a fixture whose DOT is not EQUAL', () => {
-    // A real corpus slug known (via parity.json) to be dotEqual=false —
-    // proves the eligibility check actually discriminates, rather than
-    // vacuously passing because every parity.json entry happens to be true.
-    // Was `bujige-52-gase998` — G1b J3's title-bar anchor fix
-    // (`layout-helpers.ts#measureTitleLabel`, jar-exact `node`-symbol
-    // dims) made that fixture's DOT emission byte-exact too (confirmed:
-    // `test-results/dot-sync-equal/component.txt` now lists it), so it can
-    // no longer serve as a non-dotEqual example after parity.json's J3
-    // regeneration (`npm run svg:survey`, staleness fix, see ledger.md J3).
-    const ineligible = { slug: 'gutute-00-gaki684', type: 'component' };
-    const entry = findParityEntry(ineligible.slug, ineligible.type);
-    expect(entry, 'expected a known non-dotEqual fixture in parity.json').toBeDefined();
-    expect(entry!.dotEqual).toBe(false);
-
-    function assertEligible(candidate: ParityEntry | undefined): void {
-      if (!candidate || !candidate.dotEqual) {
-        throw new Error(`${ineligible.type}/${ineligible.slug} is not DOT-EQUAL — rejected by the ratchet gate`);
-      }
+    // Real rows known (via parity-component.json) to be dotEqual=false:
+    // `berelu-46-namo819` (diverged; `gutute-00-gaki684` is now dotEqual) and `dirofi-81-cuga514`, which is
+    // verdict=conformant yet dotEqual=false -- conformance alone is not enough.
+    for (const slug of ['berelu-46-namo819', 'dirofi-81-cuga514']) {
+      const entry = surveyRows('component').find((r) => r.slug === slug);
+      expect(entry, `expected ${slug} in parity-component.json`).toBeDefined();
+      expect(entry!.dotEqual).toBe(false);
+      expect(eligibilityOf('component', slug)).toEqual({
+        ok: false,
+        reason: 'dotEqual=false in parity-component.json',
+      });
+      expect(manifest.fixtures.some((f) => f.slug === slug)).toBe(false);
     }
+  });
 
-    expect(() => assertEligible(entry)).toThrow(/not DOT-EQUAL/);
-    expect(manifest.fixtures.some((f) => f.slug === ineligible.slug)).toBe(false);
+  it('rejects a dotEqual unknown row routed to another engine', () => {
+    // Real row: dotEqual=true in parity-unknown.json, but routed CLASS.
+    const slug = surveyRows('unknown').find(
+      (r) => r.dotEqual === true && ourTypeOf('unknown', r.slug) === 'CLASS',
+    )!.slug;
+    expect(eligibilityOf('unknown', slug).reason).toBe('routing-baseline ourType=CLASS, not DESCRIPTION');
   });
 });

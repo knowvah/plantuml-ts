@@ -1,0 +1,6 @@
+
+### component/radiga-95-junu817  pass=false structural=0 numeric=4
+  N svg/@viewBox[2]  exp=119 | act=127 (Δ8)
+  N svg/@width  exp=119 | act=127 (Δ8)
+  N svg/g[1]/g[3]/text[1]/@x  exp=56.08 | act=74.58 (Δ18.5)
+  N svg/g[1]/g[3]/text[1]/@y  exp=91.111 | act=87.5 (Δ3.611000000000004)

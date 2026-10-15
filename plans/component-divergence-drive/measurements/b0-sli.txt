@@ -1,0 +1,43 @@
+activity 448/1/0 dotEq=449 layoutEq=1
+board 0/0/4 dotEq=4 layoutEq=0
+c4 2/0/9 dotEq=5 layoutEq=1
+chart 0/0/29 dotEq=29 layoutEq=0
+chronology 0/0/1 dotEq=1 layoutEq=0
+class 723/0/0 dotEq=715 layoutEq=547
+component 69/70/127 dotEq=262 layoutEq=244
+ditaa 0/0/0 dotEq=0 layoutEq=0
+dot 5/0/0 dotEq=5 layoutEq=0
+ebnf 0/0/44 dotEq=44 layoutEq=0
+files 0/0/1 dotEq=1 layoutEq=0
+gantt 1/0/264 dotEq=265 layoutEq=0
+hcl 1/2/0 dotEq=0 layoutEq=0
+json 13/24/13 dotEq=1 layoutEq=0
+mindmap 142/0/0 dotEq=142 layoutEq=0
+network 0/0/3 dotEq=1 layoutEq=1
+object 63/8/9 dotEq=78 layoutEq=59
+packet 0/0/6 dotEq=6 layoutEq=0
+regex 0/0/46 dotEq=46 layoutEq=0
+salt 51/0/0 dotEq=51 layoutEq=0
+sequence 0/0/1143 dotEq=1140 layoutEq=0
+state 78/11/184 dotEq=272 layoutEq=252
+timing 6/0/120 dotEq=126 layoutEq=0
+unknown 423/48/354 dotEq=798 layoutEq=351
+usecase 30/17/46 dotEq=93 layoutEq=71
+wbs 204/0/0 dotEq=204 layoutEq=0
+wire 0/0/18 dotEq=18 layoutEq=0
+yaml 7/28/4 dotEq=0 layoutEq=0
+oracle/goldens/svg-activity/ratchet.json 433
+oracle/goldens/svg-class/ratchet.json 1003
+oracle/goldens/svg-description/ratchet.json 89
+oracle/goldens/svg-dot/ratchet.json 5
+oracle/goldens/svg-hcl/ratchet.json 1
+oracle/goldens/svg-json/ratchet.json 10
+oracle/goldens/svg-mindmap/ratchet.json 137
+oracle/goldens/svg-object/ratchet.json 34
+oracle/goldens/svg-salt/ratchet.json 50
+oracle/goldens/svg-sequence/ratchet.json 0
+oracle/goldens/svg-skin/ratchet.json 1
+oracle/goldens/svg-state/ratchet.json 60
+oracle/goldens/svg-utility/ratchet.json 15
+oracle/goldens/svg-wbs/ratchet.json 176
+oracle/goldens/svg-yaml/ratchet.json 6
