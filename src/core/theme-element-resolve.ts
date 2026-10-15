@@ -8,6 +8,7 @@
 import type { Theme } from './theme.js';
 import type { Paint } from './paint.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
+import { HorizontalAlignment } from './klimt/geom/HorizontalAlignment.js';
 
 /**
  * The pseudo-bucket holding a `<style> .tag { ... }` selector that names no
@@ -234,4 +235,15 @@ export function foldRootBackgroundIntoSequence(theme: Theme): Theme {
   }
   if (raw === undefined) return theme;
   return { ...theme, colors: { ...theme.colors, participantBackground: resolveColorToSvgHex(raw) } };
+}
+
+/**
+ * `ClusterHeader.java:121`: a group title's `style.getHorizontalAlignment()` over the signature
+ * `{root, element, <diagram>, uSymbol.getSNames(), composite, title}` (`:151-163`). `plantuml.skin:93-99`
+ * (`element { composite,package { title { HorizontalAlignment center } } }`) is more specific than the root
+ * tier, so `skinparam defaultTextAlignment` (root bucket) does not reach it; only the container's own
+ * `<style> <sname> { HorizontalAlignment X }` bucket does.
+ */
+export function resolveClusterTitleAlignment(theme: Theme, sname: string): HorizontalAlignment {
+  return theme.colors.elements?.[sname]?.horizontalAlignment ?? HorizontalAlignment.CENTER;
 }

@@ -7,6 +7,7 @@
  */
 import type { Theme } from '../../core/theme.js';
 import { resolveElementShadowing } from '../../core/theme.js';
+import { resolveClusterTitleAlignment } from '../../core/theme-element-resolve.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
@@ -120,7 +121,7 @@ export function buildHeader(node: DescriptionNodeGeo, theme: Theme, options?: He
   const titleFont = textFont(theme, node.symbol, 0, TITLE_STYLES);
   // `ClusterHeader.java:117-119` builds the title with the full `Display#create`, so a `<$sprite>` in a
   // group's label measures and draws; the ELK path (cdd8 T3b) also passes `style.getHorizontalAlignment()`.
-  const alignment = options?.alignment ?? HorizontalAlignment.LEFT;
+  const alignment = options?.alignment ?? resolveClusterTitleAlignment(theme, node.symbol);
   const title = buildTextBlock(
     node.display,
     titleFont,
@@ -138,7 +139,7 @@ export function buildHeader(node: DescriptionNodeGeo, theme: Theme, options?: He
     options?.sprites === undefined ? undefined : spriteDimsLookupFor(options.sprites),
   );
   const stereo = sprite === undefined ? labelBlock(node, theme) : buildStereo([], titleFont, undefined, sprite);
-  return { title, stereo, titleHorizontalAlignment: HorizontalAlignment.LEFT };
+  return { title, stereo, titleHorizontalAlignment: resolveClusterTitleAlignment(theme, node.symbol) };
 }
 
 export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleDefaults {
