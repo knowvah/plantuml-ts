@@ -2829,9 +2829,11 @@ describe('parseDescription — creationIndex (net.atmp.CucaDiagram#cpt1 shared c
   it('a note-attachment link consumes its own shared-counter value (CommandFactoryNoteOnEntity.java:342-360)', () => {
     const ast = parse('[A]\nnote top of A\n  hello\nend note');
     expect(byId(ast, 'A').creationIndex).toBe(1);
+    // codd-T3: `getUniqueSequence("GMN")` (CommandFactoryNoteOnEntity.java:327)
+    // burns value 2 before the note leaf (3) and its link (4).
     const note = flatNodes(ast.nodes).find((n) => n.symbol === 'note');
-    expect(note?.creationIndex).toBe(2);
-    expect(ast.links[0]?.creationIndex).toBe(3);
+    expect(note?.creationIndex).toBe(3);
+    expect(ast.links[0]?.creationIndex).toBe(4);
   });
 });
 

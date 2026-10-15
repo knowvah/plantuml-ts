@@ -96,6 +96,7 @@ import { collectByKind, drawClusters, drawEntities, drawEdges } from './renderer
 import { computeDocumentDims, driverBounderFor } from './renderer-ink-extent.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { extractViewBoxDims, extractFlatContent, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 
 /** `net.sourceforge.plantuml.core.DiagramType#DESCRIPTION` — verified
  *  against `DiagramType.java:45` and every cached jar description-diagram
@@ -299,6 +300,9 @@ export function renderDescription(
 export function unwrapKlimtSvg(svg: string, background: string): RenderFragment {
   const { width, height } = extractViewBoxDims(svg);
   const { body, extraDefs } = extractFlatContent(svg);
+  // The root `style="...background:"` carries the resolved hex the jar writes
+  // (`gray` -> `#808080`), as class's own resolve-before-shell convention (N4).
+  background = resolveColorToSvgHex(background);
   return extraDefs.length > 0
     ? { body, width, height, background, extraDefs, diagramType: DIAGRAM_TYPE_DESCRIPTION }
     : { body, width, height, background, diagramType: DIAGRAM_TYPE_DESCRIPTION };

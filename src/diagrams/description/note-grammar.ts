@@ -52,23 +52,31 @@ const RE_NOTE_FLOATING_OPEN = new RegExp('^note\\s+as\\s+([\\w.]+)\\s*(.*)$', 'i
 // `<<stereotype>>` token between the `of X` target and the trailing
 // `#color`/`:`/block-open (TAGS1/STEREO/TAGS2 in getRegexConcat*, Stereotag
 // `$tag` support deferred — no corpus fixture exercises it on a note).
-const NOTE_STEREOTYPE_OPT = '(?:\\s+<<[^>]+>>)?';
+// codd-T3: the `<<stereotype>>` (STEREO) and `#color` (ColorParser.simpleColor
+// (BACK)) tokens are CAPTURED -- `EntityImageNote.java:100-103` reads the colour
+// as the fill and `getStyleSignature().withTOBECHANGED(getStereo())` selects the
+// `.tag` style, so both reach the drawn note.
+const NOTE_STEREOTYPE_OPT = '(?:\\s+(<<[^>]+>>))?';
+const NOTE_COLOR_OPT = '(?:\\s+(#\\w+))?';
 const RE_NOTE_ON_ENTITY_SINGLE = new RegExp(
   '^note\\s+(left|right|top|bottom)(?:\\s+of\\s+((?:\\(\\)\\s*)?"[^"]+"|\\(\\)[\\w.]+|\\([^)]+\\)|:[^:]+:|\\[[^\\]]+\\]|[\\w.]+))?' +
     NOTE_STEREOTYPE_OPT +
-    '(?:\\s+#\\w+)?\\s*:\\s*(.+)$',
+    NOTE_COLOR_OPT +
+    '\\s*:\\s*(.+)$',
   'i',
 );
 const RE_NOTE_ON_ENTITY_OPEN_BRACE = new RegExp(
   '^note\\s+(left|right|top|bottom)(?:\\s+of\\s+((?:\\(\\)\\s*)?"[^"]+"|\\(\\)[\\w.]+|\\([^)]+\\)|:[^:]+:|\\[[^\\]]+\\]|[\\w.]+))?' +
     NOTE_STEREOTYPE_OPT +
-    '(?:\\s+#\\w+)?\\s*\\{\\s*$',
+    NOTE_COLOR_OPT +
+    '\\s*\\{\\s*$',
   'i',
 );
 const RE_NOTE_ON_ENTITY_OPEN_PLAIN = new RegExp(
   '^note\\s+(left|right|top|bottom)(?:\\s+of\\s+((?:\\(\\)\\s*)?"[^"]+"|\\(\\)[\\w.]+|\\([^)]+\\)|:[^:]+:|\\[[^\\]]+\\]|[\\w.]+))?' +
     NOTE_STEREOTYPE_OPT +
-    '(?:\\s+#\\w+)?\\s*$',
+    NOTE_COLOR_OPT +
+    '\\s*$',
   'i',
 );
 
@@ -127,16 +135,39 @@ export function noteAttachment(
 // Open-line classification
 // ---------------------------------------------------------------------------
 
+/** The raw `<<stereotype>>` and `#color` tokens of a note-on-entity command
+ *  (`CommandFactoryNoteOnEntity.java` STEREO / `color()` groups), verbatim. */
+export interface NoteDecor {
+  readonly stereotype?: string;
+  readonly color?: string;
+}
+
+/** Builds a {@link NoteDecor} from the two optional capture groups, omitting
+ *  an absent token (`exactOptionalPropertyTypes`). */
+function noteDecor(stereotype: string | undefined, color: string | undefined): NoteDecor {
+  return {
+    ...(stereotype !== undefined ? { stereotype } : {}),
+    ...(color !== undefined ? { color } : {}),
+  };
+}
+
 export type NoteOpenMatch =
   | { kind: 'on-link-single'; position: NotePosition | undefined; text: string }
   | { kind: 'on-link-open'; position: NotePosition | undefined }
   | { kind: 'floating-single'; id: string; text: string }
   | { kind: 'floating-open'; id: string }
-  | { kind: 'on-entity-single'; position: NotePosition; targetId: string | undefined; text: string }
+  | {
+      kind: 'on-entity-single';
+      position: NotePosition;
+      targetId: string | undefined;
+      decor: NoteDecor;
+      text: string;
+    }
   | {
       kind: 'on-entity-open';
       position: NotePosition;
       targetId: string | undefined;
+      decor: NoteDecor;
       terminator: NoteTerminator;
     };
 
@@ -195,7 +226,8 @@ function matchOnEntitySingle(line: string): NoteOpenMatch | undefined {
     kind: 'on-entity-single',
     position: m[1]!.toLowerCase() as NotePosition,
     targetId: onEntityTargetId(m[2]),
-    text: m[3]!,
+    decor: noteDecor(m[3], m[4]),
+    text: m[5]!,
   };
 }
 
@@ -206,6 +238,7 @@ function matchOnEntityOpen(line: string): NoteOpenMatch | undefined {
       kind: 'on-entity-open',
       position: brace[1]!.toLowerCase() as NotePosition,
       targetId: onEntityTargetId(brace[2]),
+      decor: noteDecor(brace[3], brace[4]),
       terminator: 'brace',
     };
   }
@@ -215,6 +248,7 @@ function matchOnEntityOpen(line: string): NoteOpenMatch | undefined {
     kind: 'on-entity-open',
     position: plain[1]!.toLowerCase() as NotePosition,
     targetId: onEntityTargetId(plain[2]),
+    decor: noteDecor(plain[3], plain[4]),
     terminator: 'endnote',
   };
 }

@@ -27,14 +27,16 @@
  *      `renderer-entity.ts#drawNoteFallback`, unchanged for both branches)
  */
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
-import type { Theme } from '../../core/theme.js';
-import { UStroke } from '../../core/klimt/UStroke.js';
+import type { Paint } from '../../core/paint.js';
+import type { UStroke } from '../../core/klimt/UStroke.js';
 import { Fore } from '../../core/klimt/Fore.js';
 import { Back } from '../../core/klimt/Back.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { parseSvgPath } from '../../core/klimt/sprite/SvgPath.js';
+import { moveTo, lineTo } from '../../core/svg-path-builder.js';
 import type { DescriptionNodeGeo } from './layout-helpers.js';
 import {
+  OPALE_CORNERSIZE,
   opalePolygonLeft,
   opalePolygonRight,
   opalePolygonUp,
@@ -44,26 +46,21 @@ import {
   type OpaleConnector,
   type OpaleDirection,
 } from '../../core/svek/image/Opale.js';
-import {
-  decorateEntityDrawing,
-  type EntityDecorationInfo,
-  type UGraphicWithGroups,
-} from '../../core/svek/DecorateEntityImage.js';
 
-/** `plantuml.skin:322-326`'s `note { LineThickness 0.5 }` — the SAME
- *  default `class/renderer-note-stroke.ts#NOTE_STROKE_WIDTH` ports,
- *  jar-verified against this row's own nested fixture (`tefeco-12-rato895`,
- *  and a fresh standalone `cloud cloud` / `note right: cloud's note`
- *  oracle probe): both the already-correct outer CLASS-engine opale note
- *  AND the jar's nested/standalone DESCRIPTION opale note draw
- *  `stroke-width="0.5"`, independent of `drawFallbackBox`'s own
- *  (pre-existing, out of this task's scope) ambient stroke default. The
- *  full per-element `NoteBorderThickness`/`<style> note { LineThickness }`
- *  cascade `class/renderer-note-stroke.ts#resolveNoteStroke` applies is
- *  NOT threaded here — no description-corpus fixture in this task's scope
- *  overrides it, and `theme` carries no matching cascade lookup wired for
- *  description notes yet (documented residual, cdd7-T1e report). */
-const NOTE_STROKE_WIDTH = 0.5;
+/** `plantuml.skin:322-326`'s `note { LineThickness 0.5 }` -- the default
+ *  `style.getStroke()` (`EntityImageNote.java:269`) when no `<style> note {
+ *  LineThickness }` override exists. Jar-verified against `tefeco-12-rato895`
+ *  and a standalone `cloud cloud` / `note right: cloud's note` oracle probe. */
+export const NOTE_STROKE_WIDTH = 0.5;
+
+/** The note's resolved paints (`EntityImageNote.java:100-108`): `back` =
+ *  `entity.getColors().getColor(BACK)` else the style `BackGroundColor`;
+ *  `border` = the style `LineColor`; `stroke` = `style.getStroke()`. */
+export interface NotePaints {
+  readonly back: Paint;
+  readonly border: Paint;
+  readonly stroke: UStroke;
+}
 
 /** Dispatch table mirroring `class/renderer-note.ts#opaleOutline`'s own
  *  switch (`Opale.java:106-115`'s `strategy` dispatch). */
@@ -75,54 +72,53 @@ const OPALE_OUTLINE_BUILDERS: Record<OpaleDirection, (box: OpaleBox, connector: 
     down: opalePolygonDown,
   };
 
-/** Narrows `ug` to `UGraphicWithGroups` (duplicated locally per this
- *  codebase's established one-helper-per-call-site convention — see
- *  `renderer-entity.ts#requireGroups`'s own doc comment). */
-function requireGroups(ug: UGraphic): UGraphicWithGroups {
-  const candidate = ug as Partial<UGraphicWithGroups>;
-  if (typeof candidate.startGroup !== 'function' || typeof candidate.closeGroup !== 'function') {
-    throw new Error('renderer-note-opale: ug does not support startGroup/closeGroup (see UGraphicSvg)');
-  }
-  return ug as UGraphicWithGroups;
+/**
+ * `Opale.getPolygonNormal(width, height, roundCorner)` with `roundCorner`
+ * fixed at 0 (`getRoundCorner()` = `skinParam.getRoundCorner(CornerParam
+ * .DEFAULT, null)`, 0 unless `skinparam roundCorner` is set -- the same
+ * simplification every sibling `opalePolygon*` makes): `moveTo(0,0)
+ * lineTo(0,height) lineTo(width,height) lineTo(width,cornersize)
+ * lineTo(width-cornersize,0) lineTo(0,0)`.
+ * @see ~/git/plantuml/.../svek/image/Opale.java:149-157
+ */
+export function opalePolygonNormal(width: number, height: number): string {
+  return [
+    moveTo(0, 0),
+    lineTo(0, height),
+    lineTo(width, height),
+    lineTo(width, OPALE_CORNERSIZE),
+    lineTo(width - OPALE_CORNERSIZE, 0),
+    lineTo(0, 0),
+  ].join(' ');
 }
 
 /**
- * Draws the fold-outline + corner triangle (`Opale.java:207-220`'s
- * `ug.draw(polygon); ug.draw(getCorner(...))`) for a note whose
- * `DescriptionNodeGeo.opale` resolved. The note's own box origin is LOCAL
- * (0,0) here — `drawEntity`'s caller already applied the node's absolute
- * `UTranslate(node.x, node.y)` (see `renderer-entity.ts#drawEntity`'s own
- * doc comment), matching `drawFallbackBox`'s identical convention for the
- * plain-box case. `k` stays 1 (unscaled): description has no
- * `theme.scaleK`/`ScaledTheme` the way the class engine's `NoteGeo` does
- * (`Opale.ts#opalePolygonLeft`'s own `k` doc comment: "every pre-existing
- * caller...is unscaled").
+ * Draws the note's outline polygon and fold triangle. The note's own box
+ * origin is LOCAL (0,0) -- `drawEntity`'s caller already applied the node's
+ * absolute `UTranslate`.
+ *
+ * - `node.opale` resolved: `Opale.drawU` (`Opale.java:104-127`) applies
+ *   `bg`, `border`, THEN `stroke`, and draws the connector-notched polygon
+ *   and the corner with that stroked graphic.
+ * - otherwise: `EntityImageNote#drawNormal` (`EntityImageNote.java:272-286`)
+ *   applies `bg` and `border`, strokes ONLY the polygon (`stroked.draw
+ *   (polygon)`) and draws the corner (`ug.draw(Opale.getCorner(...))`) on the
+ *   UNstroked graphic, so the fold keeps the default stroke width (1).
+ *
+ * `k` stays 1 (unscaled): description has no `ScaledTheme`.
  */
-export function drawOpaleShape(
-  ug: UGraphic,
-  node: DescriptionNodeGeo,
-  uid: string,
-  theme: Theme,
-  opale: NonNullable<DescriptionNodeGeo['opale']>,
-): void {
-  const info: EntityDecorationInfo = { name: node.id, qualifiedName: node.id, uid, location: null };
-  decorateEntityDrawing(
-    requireGroups(ug),
-    info,
-    {
-      drawU(inner: UGraphic): void {
-        const box: OpaleBox = { origin: { x: 0, y: 0 }, width: node.width, height: node.height };
-        const connector: OpaleConnector = { pp1: opale.pp1, pp2: opale.pp2 };
-        const outline = parseSvgPath(OPALE_OUTLINE_BUILDERS[opale.direction](box, connector), UTranslate.none());
-        const corner = parseSvgPath(opaleCorner(box.origin, box.width), UTranslate.none());
-        const styled = inner
-          .apply(new Fore(theme.colors.border))
-          .apply(new Back(theme.colors.noteBackground))
-          .apply(UStroke.withThickness(NOTE_STROKE_WIDTH));
-        styled.draw(outline);
-        styled.draw(corner);
-      },
-    },
-    { withComment: false },
-  );
+export function drawNoteShape(ug: UGraphic, node: DescriptionNodeGeo, paints: NotePaints): void {
+  const box: OpaleBox = { origin: { x: 0, y: 0 }, width: node.width, height: node.height };
+  const colored = ug.apply(new Back(paints.back)).apply(new Fore(paints.border));
+  const corner = parseSvgPath(opaleCorner(box.origin, box.width), UTranslate.none());
+  const opale = node.opale;
+  if (opale === undefined) {
+    colored.apply(paints.stroke).draw(parseSvgPath(opalePolygonNormal(box.width, box.height), UTranslate.none()));
+    colored.draw(corner);
+    return;
+  }
+  const connector: OpaleConnector = { pp1: opale.pp1, pp2: opale.pp2 };
+  const styled = colored.apply(paints.stroke);
+  styled.draw(parseSvgPath(OPALE_OUTLINE_BUILDERS[opale.direction](box, connector), UTranslate.none()));
+  styled.draw(corner);
 }
