@@ -72,7 +72,7 @@ to main as a merge commit at exit. **Never push.**
 | [2](batch-2/overview.md) bracket shorthand; `url of`; A geo + render | T1b ∥ T1c ∥ T4 | all ∥ | [x] |
 | [3](batch-3/overview.md) cluster URL | T5 | — | [x] |
 | [4](batch-4/overview.md) re-measure, re-pin, D1 | T6 | — | [x] |
-| [5](batch-5/overview.md) exit | T7 | — | [ ] |
+| [5](batch-5/overview.md) exit | T7 | — | [x] |
 
 ## Index
 - [decisions.md](decisions.md) — D1–D9, pre-made; do not re-argue.
@@ -88,3 +88,29 @@ to main as a merge commit at exit. **Never push.**
 **Observability:** SLIs per close — conformant per engine (loss = stop), census Σ and zero-diff
 (component, usecase), target-row render-diff, ratchet pins (description 352, layout-parity 489,
 class 1003). **Rollback:** Reversible (revert the merge).
+
+## Mission summary (2026-10-16)
+
+**Tasks:** 11 of 11 planned (T0, T0b, T1a, T1b, T1c, T2, T3, T4, T5, T6, T7) done. Exit bar D1 **met** on all
+four clauses (journal row 39).
+
+**Outcome b0 → final** (conformant/structural/diverged): component 180/12/74 → 188/13/65, usecase
+58/2/33 → 62/4/27, unknown 483/16/326 → 486/16/323; all other engines unchanged; 0 conformant losses in
+28 engines at every close. 18 fixtures went conformant. Census component Σ 2201 → 1927 (zero-diff
+179 → 187), usecase Σ 688 → 715 (2 explained rises, zero-diff 58 → 62). Pins: description 352 → 367,
+layout-parity 489 → 490, diff-baseline xufexu 2 → 0, census pins on 14 fallen rows, count pins with
+derivations.
+
+**Gates:** green at b0, b1, b2, b4, b4r2 (post-re-pin) and final (1420/1420 collected; 30677 passed).
+
+**Decisions flagged for review:** rows 2, 14 (orchestrator `cd` below root, read-only, reverted);
+3 (`node_modules` predates `c93806188`; run `npm ci`); 7 / 10 (OpenIconic glyph drawn at the AtomOps seam,
+not the resolver); 16, 22 (write-set extensions); 19-20 (signing setup, user decisions); 28-30
+(T5 re-done in core `Cluster.ts`, D7); 29 (D6 premise partly false: tukipe); 32 (b3 close folded into b4);
+35 (tracked census pin stale before the mission); 36-37 (tracked parity JSON refresh, user-approved);
+40 (land through a PR, user change).
+
+**Follow-ups:** `planning/next-missions.md` dur section (url-label flattening, stereotype/edge-label
+glyphs, ridola glyph-first line, link-label sprite, hidden-link draw, note naming, note urls, ELK topurl,
+`layout-dot-tree.ts` split, census pin refresh). Remaining exit steps after this commit: the user's
+signing rebase, verification + gates, push and PR (T7 steps 6-7).
