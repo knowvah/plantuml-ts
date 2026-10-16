@@ -5,7 +5,7 @@ Sequential in the mission checkout, because the tasks share renderer files. Each
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T1 | rufopi: cluster fill from `<style>` | typescript-pro | `description/renderer-cluster*.ts`, `layout-package-style.ts`, tests | T0 | [ ] |
+| T1 | rufopi: cluster fill from `<style>` | typescript-pro | `description/renderer-cluster*.ts`, `layout-package-style.ts`, tests | T0 | [x] |
 | T2 | zosuje: `<style>` group/link colours, font style | typescript-pro | `renderer-cluster*.ts`, `renderer-color-override.ts`, `link-edge-attrs.ts`, tests | T1 | [ ] |
 | T3 | xenusu: `skinparam arrow<<stereo>>`, `line.Bold()`, `[#c,bold]` | typescript-pro | `link-edge-attrs.ts`, `renderer-edge.ts`, tests | T2 | [ ] |
 | T4 | repoge: note-in-component draw order, labels | typescript-pro | `renderer-draw-sequence.ts`, `renderer-cluster-note.ts`, `renderer-note*.ts`, tests | T3 | [ ] |
