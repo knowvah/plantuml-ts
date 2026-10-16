@@ -18,6 +18,8 @@ import type { USymbol } from '../../core/descriptive-keywords.js';
 import { spriteDimsLookupFor } from '../../core/sprite-commands.js';
 import { emojiArtworkResolverFor } from '../../core/internal-emoji-store.js';
 import { visibleStereotypeLabels, nodeWithVisibleStereotype } from './element-grammar.js';
+import { UrlBuilder } from '../../core/url/UrlBuilder.js';
+import { UrlMode } from '../../core/url/UrlMode.js';
 
 // ---------------------------------------------------------------------------
 // Types + sizing constants (moved to layout-helpers-types.ts — file-size
@@ -163,6 +165,21 @@ export function buildNodeGeoIndex(geos: readonly DescriptionNodeGeo[]): Map<stri
 }
 
 /**
+ * The geo's resolved url (`Entity#getUrl99`) from the AST's raw `[[...]]` token. The parser has no theme, so
+ * resolution happens here (flagged deviation: `CommandCreateElementFull.java:333-337` resolves at parse time with
+ * `new UrlBuilder(skinParam.getValue("topurl"), UrlMode.STRICT).getUrl(urlString)`). `Url` keeps private fields, so
+ * the result is copied to a plain object (`EntityUrl`).
+ */
+export function resolveNodeUrl(
+  token: string | undefined,
+  topurl: string | undefined,
+): { readonly url: string; readonly tooltip: string } | undefined {
+  if (token === undefined) return undefined;
+  const url = new UrlBuilder(topurl ?? null, UrlMode.STRICT).getUrl(token);
+  return url === null ? undefined : { url: url.getUrl(), tooltip: url.getTooltip() };
+}
+
+/**
  * GraphvizImageBuilder.buildImage:211-222: a diagram with zero groups, zero
  * links, and exactly one root leaf (DotData.isDegeneratedWithFewEntities —
  * checked BEFORE empty-group demotion, so a lone empty braced container does
@@ -175,7 +192,7 @@ export function degenerateSingleLeaf(
   containersCount: number,
   fontSpec: FontSpec,
   measurer: StringMeasurer,
-  boxOpts: BoxSizingOpts | undefined,
+  boxOpts: (BoxSizingOpts & { topurl?: string }) | undefined,
 ): DescriptionGeometry | undefined {
   // #lizard forgives — pre-existing: CCN is a flat chain of early-return
   // guards (the upstream "does this qualify as a degenerate single leaf?"
@@ -226,6 +243,8 @@ export function degenerateSingleLeaf(
   // exact sizer/renderer split `planning/sizer-renderer-parity.md` exists to
   // prevent.
   if (node.stereotypeSprite !== undefined) geo.stereotypeSprite = node.stereotypeSprite;
+  const url = resolveNodeUrl(node.url, boxOpts?.topurl);
+  if (url !== undefined) geo.url = url;
   if (node.color !== undefined) geo.color = node.color;
   if (node.creationIndex !== undefined) geo.creationIndex = node.creationIndex;
   // Hoisted out of the `return` (was an inline `...(cond ? {…} : {})`

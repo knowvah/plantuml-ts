@@ -36,6 +36,7 @@ import {
   isPortLabelWide,
   portTablePad,
   measureTitleLabel,
+  resolveNodeUrl,
 } from './layout-helpers.js';
 import {
   computePortClusterBbox,
@@ -57,6 +58,8 @@ export interface PortClusterCtx {
    *  geo id -- the drawn box of a non-port container (`ClusterDecoration.java:78,89-90`). Absent only for the
    *  ELK path's structural tree (`description-elk-adapter.ts#structuralGeoTree`), whose boxes the maker places. */
   readonly clusterBoxByAstId?: ReadonlyMap<string, Bbox>;
+  /** `skinparam topurl`, prefixed onto each node's relative `[[url]]` (`UrlBuilder.java:140-146`). */
+  readonly topurl?: string;
 }
 
 // ── Phase 2: DotInputGraph construction ──
@@ -534,6 +537,8 @@ function buildGeoNode(
     // cdd8-T1c: mirrors `layout-helpers.ts:251` -- the sizer measured this
     // sprite, so the renderer must draw it (`EntityImageDescription.java:194-195`).
     if (astNode.stereotypeSprite !== undefined) geo.stereotypeSprite = astNode.stereotypeSprite;
+    const url = resolveNodeUrl(astNode.url, portClusterCtx.topurl);
+    if (url !== undefined) geo.url = url;
     if (astNode.color !== undefined) geo.color = astNode.color;
     if (astNode.creationIndex !== undefined) geo.creationIndex = astNode.creationIndex;
     if (astNode.declaredAsGroup === true) geo.declaredAsGroup = true;
@@ -575,6 +580,8 @@ function buildGeoNode(
   // The sizer measured this sprite (`ContainerDesc.stereotypeSprite`), so the cluster header must draw it
   // (`ClusterHeader.java:187-188`).
   if (astNode.stereotypeSprite !== undefined) geo.stereotypeSprite = astNode.stereotypeSprite;
+  const url = resolveNodeUrl(astNode.url, portClusterCtx.topurl);
+  if (url !== undefined) geo.url = url;
   if (astNode.color !== undefined) geo.color = astNode.color;
   if (astNode.creationIndex !== undefined) geo.creationIndex = astNode.creationIndex;
   if (astNode.declaredAsGroup === true) geo.declaredAsGroup = true;
