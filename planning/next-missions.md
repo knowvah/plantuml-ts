@@ -35,6 +35,57 @@ post-D7 measurements.
 
 ---
 
+## description-url-wrappers (dur) — DONE 2026-10-16 (merged to local main as a merge commit, not pushed; commits unsigned pending the user's signing rebase)
+
+**What changed:** the description engine now emits the jar's hyperlinks and edge ids. Entity
+`[[url]]` (inline, bracket shorthand, `url of|for X is`) is kept as the raw token by the parser
+(`DescriptiveNode.url`), resolved at the layout seam with `UrlBuilder(topurl, STRICT)` and drawn as one
+`<a>` around the entity (`EntityImageDescription.java:139,304-305,327-328`); group urls open the
+`<a>` inside core `Cluster.drawU` (`Cluster.java:339-341,376-379`); creole `[[url label]]` in entity
+text, notes and link labels wraps each text run, sprite, img and OpenIconic atom in its own `<a>`
+(`AtomText.java:197-198,235-236`, `AtomSprite.java:73-80`, `AtomOpenIconic.java:76-82`), and
+OpenIconic glyphs are now measured and drawn in description text; under `set separator` edge
+`path/@id` and link comments use leaf names (`Link.java:106-120`, `Quark.java:84-86`).
+
+**Counts b0 → final** (conformant/structural/diverged): component 180/12/74 → **188/13/65**, usecase
+58/2/33 → **62/4/27**, unknown 483/16/326 → **486/16/323**; every other engine unchanged. 0 conformant
+losses in all 28 engines at b1, b2 and b4 (b3 folded into b4, journal row 32).
+- Census component Σ 2201 → **1927**, zero-diff 179 → 187; usecase Σ 688 → 715 (vivido, ridola rise
+  with stated mechanisms: structural diffs gone, numeric residuals now charged), zero-diff 58 → 62.
+- D1: met, clause by clause (journal row 39).
+- Pins: svg-description 352 → **367**, layout-parity 489 → 490 (nixeka), diff-baseline xufexu 2 → 0,
+  census pins tightened on 14 fallen rows.
+
+**Open residuals (no owner yet; mechanisms in `plans/description-url-wrappers/decision-journal.md`
+and `fixtures.md` ledger):**
+- Url label is flattened where the jar builds one `AtomHorizontalTexts` (`AtomTextUtils.java:96-130`,
+  `AtomHorizontalTexts.java:63-75`): vivido text y 34 px off on the 48 px sprite row — core
+  `StripeSimple`, geometry change.
+- `<&glyph>` in stereotype rows and edge labels still resolves to nothing on the TextBlock
+  `drawAtoms`/`measureAtomsWidthHeight` path (pacope `<< <&file> >>`); measure and draw move together.
+- ridola `(<&arrow-left> test)`: glyph-first line geometry (ellipse rx −0.889, glyph x +2.309, height
+  43 vs 44) — NOT isolated; instrument the Sea line w/h for a glyph-first line against the jar.
+- Link-label sprite not drawn (bivira `g[4]`): `SvekEdge.ts:305-321` takes the un-tabled `UText.build`
+  branch when label w/h are unset.
+- Hidden-link draw gap (jajeve; `-[hidden]-` draws a visible `<g class="link">`): `link.hidden` not in
+  the edge skip (`layout-helpers-types.ts:223-229`, reverted for a canvas regression).
+- Anonymous note id `__note_N` vs the jar's `getUniqueSequence("GMN")` (tuliba;
+  `CommandFactoryNoteOnEntity.java:327`, `parse-state.ts:456`).
+- Note urls: `EntityImageNote.java:194-205` calls `startUrl`; the description parser stores no note url.
+- ELK path: `description-elk-adapter.ts` builds the geo without `topurl` (relative urls unprefixed).
+- jobuje note hyperlink colour `#0FF` vs `#00F` and note text fill; nevuzi width +1 (pre-existing).
+- `layout-dot-tree.ts` is 633 lines (> 500 hook cap since before dur): split it.
+- Tracked census-component pin is stale upward on 5 rows vs a fresh census (cumofi, dirofi, gevozu,
+  ravodu, sunuju; pin measured at `5b4b5c731`): re-pin at the next census refresh.
+- state rows dajipi/dapunu/kenuci: block-level state entity/cluster/link/note urls not emitted.
+
+**Flags for review:** mid-mission user request added GitHub ruleset 25246900 (signed commits on main)
+and repo `commit.gpgsign=true`; mission commits are unsigned until the user runs the signing rebase
+(journal rows 19-20). `node_modules` predates `c93806188` (run `npm ci`). Two orchestrator `cd`s below
+the root (rows 2, 14), both read-only and reverted.
+
+---
+
 ## component-divergence-drive (codd) — DONE 2026-10-15 (merged to local main as a merge commit, not pushed)
 
 **What changed:** post-layout drawing of the description engine. Containers draw at the engine's
@@ -57,11 +108,14 @@ engines at b1 and b5 (b2–b4 closes folded into b5, journal row 41).
   census pins updated where rows fell.
 
 **Open residuals (owners; mechanisms in `plans/component-divergence-drive/decision-journal.md`):**
-- `[[url]]` → `<a>`: entity url never reaches `buildEntityParams` (givape, gacida, jazabe, balopu,
+- ~~`[[url]]` → `<a>`: entity url never reaches `buildEntityParams` (givape, gacida, jazabe, balopu,
   saroje; `EntityImageDescription.java:139,305,328`) and link-label url/sprite/`<img>` atoms (nevuzi,
-  malumi, bivira, ruciga) → next description mission.
-- Edge `path @id` uses the qualified name; the jar uses `Quark.getName` (fidati, kofovu, tojitu: 88
-  diffs each). Needs the separator in the edge geo → next description mission.
+  malumi, bivira, ruciga) → next description mission.~~ DONE by dur (T1a `5b9104d1d`, T1b `07eff7ea0`,
+  T1c `384d0b9f0`, T2 `1c424dc4e`, T4 `5f54d9748`, T5 `25061136f`; pre-signing shas). balopu, saroje
+  and ruciga were mis-listed: their jar SVGs contain no `<a>`. bivira's link-label sprite remains (see dur).
+- ~~Edge `path @id` uses the qualified name; the jar uses `Quark.getName` (fidati, kofovu, tojitu: 88
+  diffs each). Needs the separator in the edge geo → next description mission.~~ DONE by dur
+  (T3 `b3ac1a279`): all three conformant.
 - Link middle decor `-0)-`/`-(0)-` not drawn; core `SvekEdge` has no middle decor (lakuti, bokumi,
   nofunu, saveje; `CommandLinkElement.java:104,149-157`, `SvekEdge.java:353-356`) → core mission.
 - Description magic-arrow glyph (berelu, funeme; glyph only in `class-magic-arrow.ts`) → core.
