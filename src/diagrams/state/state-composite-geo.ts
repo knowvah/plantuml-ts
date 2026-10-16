@@ -204,6 +204,37 @@ function borderPointBox(
   return { box, inkOverflow: empty ? undefined : overflow };
 }
 
+/**
+ * The ClusterHeader-family title's vertical offset from the cluster top, read
+ * from graphviz's placed title table (`clusters[].label`, a centre + size):
+ * `DotStringFactory#solve` stores the table polygon's min corner via
+ * `cluster.setTitlePosition` (`DotStringFactory.java:436-439`,
+ * `Cluster.java:274-276`) and `drawUState` draws the title block's top at
+ * `xyTitle.getY()` (`Cluster.java:496-498`; `HorizontalAlignment.draw` adds a
+ * y padding of 0, `HorizontalAlignment.java:85-88`), so the renderer's
+ * `node.y + margin + ascent` baseline needs `margin = minY - cluster.y`.
+ *
+ * `undefined` when graphviz placed no title: upstream's `xyTitle` is then
+ * null and `drawUState` dereferences it (`Cluster.java:497`), so there is no
+ * upstream value to mirror and the renderer's default applies.
+ */
+export function clusterTitleBaselineMargin(real: NonNullable<DotLayoutResult['clusters']>[number]): number | undefined {
+  if (real.label === undefined) return undefined;
+  return real.label.y - real.label.height / 2 - real.y;
+}
+
+/** Border-point family: `Cluster#manageEntryExitPoint` computes its own
+ *  title position (`Cluster.java:435`), so the spec's margin stands. Every
+ *  other cluster reads graphviz's title table ({@link clusterTitleBaselineMargin}). */
+function titleMarginField(
+  spec: Extract<GeoSpec, { kind: 'cluster' }>,
+  hasBorderPoints: boolean,
+  real: NonNullable<DotLayoutResult['clusters']>[number],
+): { clusterTitleBaselineMargin?: number } {
+  const margin = hasBorderPoints ? spec.titleBaselineMargin : clusterTitleBaselineMargin(real);
+  return margin === undefined ? {} : { clusterTitleBaselineMargin: margin };
+}
+
 function materializeCluster(
   spec: Extract<GeoSpec, { kind: 'cluster' }>,
   posMap: PosMap,
@@ -241,7 +272,7 @@ function materializeCluster(
       transitions: [],
       headerLines: [{ text: spec.display, width: spec.titleWidth }],
       clusterHeaderHeight: spec.clusterHeaderHeight,
-      ...(spec.titleBaselineMargin !== undefined ? { clusterTitleBaselineMargin: spec.titleBaselineMargin } : {}),
+      ...titleMarginField(spec, hasBorderPoints, real),
       ...(spec.creationIndex !== undefined ? { creationIndex: spec.creationIndex } : {}),
     };
   }

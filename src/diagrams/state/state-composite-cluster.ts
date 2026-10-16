@@ -92,8 +92,7 @@ import {
  * ...), whose title moves onto the `${id}ee` subgraph's own `label=`
  * (`DotInputCluster.portRanksLabelOnEe`'s own doc comment) — a DIFFERENT
  * jar code path with its own (verified-but-unimplemented-this-iteration)
- * baseline offset. `CLUSTER_TITLE_BASELINE_MARGIN` below is jar-verified
- * ONLY for the plain case; G7 T14b applies it uniformly to border-point
+ * baseline offset. The plain case's 4 (14.8889 = 4 + `textAscent(14)`) is now read from graphviz's title table (gtc T8); G7 T14b applies it uniformly to border-point
  * composites too, since the WithLabel family's own `=5` correction
  * (withlabel-derivation.md §2b) is OUT of the confirmed ten-item edit list
  * (render-position-only, doesn't affect box width/height) — named residual,
@@ -108,15 +107,6 @@ import {
 // doc comment), so this supersession is behavior-preserving for every
 // fixture the doc block above verified.
 const CLUSTER_HEADER_HEIGHT = 19;
-/** `node.y + CLUSTER_TITLE_BASELINE_MARGIN + textAscent(fontSize)` — jar-
- *  verified 14.8889 = 4 + 10.8889 (`textAscent(14)`) on both real fixtures
- *  this iteration hand-checked (`decede-10-buvu414`'s `E`, `bajelo-54-
- *  dixe684`'s `Track_FSM.Run`) AND the 98-sample corpus-wide probe above —
- *  distinct from the autonom shape's own `MARGIN = 5`
- *  (`renderer-composite-box.ts`), a DIFFERENT upstream code path
- *  (`ClusterHeader`, not `InnerStateAutonom`). */
-const CLUSTER_TITLE_BASELINE_MARGIN = 4;
-
 /** The BORDER-POINT family's own title offset — `IEntityImage.MARGIN`,
  *  literally (`svek/IEntityImage.java:45`). A composite whose title moved onto
  *  the `${id}ee` subgraph never gets its title position from graphviz's own
@@ -468,7 +458,9 @@ export function resolveClusterComposite(
     clusterId,
     titleWidth: title.width,
     clusterHeaderHeight: CLUSTER_HEADER_HEIGHT,
-    titleBaselineMargin: hasBorderPointChildren ? BORDER_POINT_TITLE_BASELINE_MARGIN : CLUSTER_TITLE_BASELINE_MARGIN,
+    // Plain family: no margin here -- `state-composite-geo.ts#clusterTitleBaselineMargin`
+    // reads graphviz's title table (`Cluster#setTitlePosition`, gtc T8/D3).
+    ...(hasBorderPointChildren ? { titleBaselineMargin: BORDER_POINT_TITLE_BASELINE_MARGIN } : {}),
     // lgm-T1d: `solveAcc` lets `materializeCluster` replay this pass's
     // `Cluster#manageEntryExitPoint` calls (`state-composite-drawn-rects.ts`).
     ...(hasBorderPointChildren ? { borderPointMemberIds, solveAcc: acc } : {}),

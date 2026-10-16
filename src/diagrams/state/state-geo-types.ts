@@ -225,9 +225,9 @@ export interface StateNodeGeo {
    */
   clusterHeaderHeight?: number;
   /** G5 C3: title baseline vertical margin for the cluster shape above --
-   *  see `CLUSTER_TITLE_BASELINE_MARGIN`'s own doc comment
-   *  (state-composite-cluster.ts) for why this differs from the autonom
-   *  shape's own `MARGIN`. Always set together with `clusterHeaderHeight`. */
+   *  plain clusters: the title table's min Y relative
+   *  to the cluster top (`state-composite-geo.ts#clusterTitleBaselineMargin`,
+   *  `Cluster.java:274`/`:497`); border-point family: `Cluster.java:435`. Always set together with `clusterHeaderHeight`. */
   clusterTitleBaselineMargin?: number;
   /**
    * mission skin-file-loading Batch 2 (D3's rendering half, STATE-scoped):

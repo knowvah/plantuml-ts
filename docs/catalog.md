@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1677 modules · 6128 exported names.
+1677 modules · 6129 exported names.
 
 ## `src/`
 
@@ -2051,7 +2051,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `state-composite-edge-label.ts` | `buildEdgeAttrs` | Transition edge label/xlabel attribute building — split out of ./state-composite-pass.ts (mission A4 Phase L, 500-line file-cap compliance; pure move, zero behavior change) for its own coherent concern: turning a `Transition`'s guard/action |
 | `state-composite-frontier.ts` | `Box`, `toRect`, `fromRect` | `Box` ({x,y,width,height}) <-> `RectangleArea` conversion for the state engine (`StateNodeGeo`/`DotLayoutResult['clusters']` entries use `Box`; `core/svek/FrontierCalculator.ts` operates in upstream's `RectangleArea` shape). |
 | `state-composite-geo-shift.ts` | `shiftGeo`, `shiftTransition`, `boundingBox` | Coordinate-shifting helpers (`shiftGeo`/`resliceRegions`/`shiftTransition`) and the flat-bounding-box fallback (`boundingBox`) -- split out of `state-composite-geo.ts` purely to keep that file under this project's 500-line cap (a pure move, |
-| `state-composite-geo.ts` | `PosMap`, `ClusterPosMap`, `clusterPosMapOf`, `materializeSpecs`, `layoutComposite` | GeoSpec → StateGeometry materialization (mission A4/T4). |
+| `state-composite-geo.ts` | `PosMap`, `ClusterPosMap`, `clusterPosMapOf`, `clusterTitleBaselineMargin`, `materializeSpecs`, `layoutComposite` | GeoSpec → StateGeometry materialization (mission A4/T4). |
 | `state-composite-header.ts` | `measureLines`, `measureClusterTitle`, `titleAndAttributeWidth` | `ClusterHeader`'s title/stereotype/attribute-text sizing formula — split out of ./state-composite-cluster.ts (G7 T11, 500-line file-cap compliance; pure move of the header-measurement primitives, no behavior change from the split itself). |
 | `state-composite-pass-edges.ts` | `nextClusterId`, `resetEdgeCounter`, `addScopeNotes`, `addLevelEdges`, `collectRegularTransitions`, `sweepOrphanEdges` | Edge/note accumulation for the composite (non-flat) svek-pass pipeline -- split out of ./state-composite-pass.ts (500-line file-cap compliance; pure move, no behavior change) mirroring that file's OWN established split precedent (state-comp |
 | `state-composite-pass-types.ts` | `BorderPointClusterInfo`, `PassAccumulator`, `DiagramCtx`, `GeoSpec`, `ExtractAutonomSpec` | Shared types for the composite (non-flat) svek-pass pipeline -- split out of ./state-composite-pass.ts (G5 C3, 500-line file-cap compliance; pure move, no behavior change) mirroring this file's OWN established split precedent (state-composi |
