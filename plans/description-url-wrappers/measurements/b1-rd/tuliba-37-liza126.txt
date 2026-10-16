@@ -1,0 +1,7 @@
+
+### component/tuliba-37-liza126  pass=false structural=1 numeric=4
+  S svg/g[1]/g[7]/path[1]/@id  exp=GMN7-F1 | act=__note_0-F1
+  N svg/g[1]/g[2]/rect[1]/@rx  exp=12.5 | act=2.5 (Δ10)
+  N svg/g[1]/g[2]/rect[1]/@ry  exp=12.5 | act=2.5 (Δ10)
+  N svg/g[1]/g[4]/rect[1]/@rx  exp=12.5 | act=2.5 (Δ10)
+  N svg/g[1]/g[4]/rect[1]/@ry  exp=12.5 | act=2.5 (Δ10)

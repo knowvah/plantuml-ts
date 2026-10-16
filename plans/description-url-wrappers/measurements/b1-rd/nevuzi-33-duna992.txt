@@ -1,0 +1,4 @@
+
+### component/nevuzi-33-duna992  pass=false structural=0 numeric=2
+  N svg/@viewBox[2]  exp=193 | act=192 (Δ1)
+  N svg/@width  exp=193 | act=192 (Δ1)
