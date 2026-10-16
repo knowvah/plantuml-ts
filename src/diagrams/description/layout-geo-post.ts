@@ -25,6 +25,7 @@ import {
 } from './layout-helpers.js';
 import { clipSplineStart, clipSplineEnd } from '../../core/spline-clip.js';
 import { resolveOpaleConnector } from '../../core/svek/image/Opale.js';
+import { bareEntityName, leafDisplayName } from './namespace-groups.js';
 import { DescriptionSolveRects } from './frontier-cluster-bbox.js';
 
 /** One edge from the graphviz layout result. */
@@ -37,6 +38,9 @@ export interface EdgeMapping {
   geoIndex: Map<string, DescriptionNodeGeo>;
   dx: number;
   dy: number;
+  /** `set separator` (`ast.namespaceSeparator`): `Quark#getName()` is the last segment of the split path
+   *  (`Quark.java:84-86`), so edge ids/comments name endpoints by that leaf. */
+  namespaceSeparator?: string | null | undefined;
 }
 
 // ── Phase 5: edge geo construction ──
@@ -78,11 +82,15 @@ function assembleEdgeGeo(
   link: DescriptiveLink,
   pts: Array<{ x: number; y: number }>,
   hidden: ReadonlySet<string>,
+  namespaceSeparator: string | null | undefined,
 ): DescriptionEdgeGeo {
   const geo: DescriptionEdgeGeo = {
     id: `edge-${linkIdx}`,
     from: link.from,
     to: link.to,
+    // `Link.java:106-120` `idCommentForSvg()` -> `Entity.java:686-688` `getName()` -> `Quark.java:84-86`.
+    fromName: leafDisplayName(bareEntityName(link.from), namespaceSeparator),
+    toName: leafDisplayName(bareEntityName(link.to), namespaceSeparator),
     points: pts,
     style: link.style,
   };
@@ -190,7 +198,7 @@ export function buildEdgeGeos(
     if (link === undefined) continue;
     const clipped = clipEdgePoints(re.points, m.edgeContainerEndpoints.get(re.id), m.geoIndex, solve);
     const pts = clipped.map((p) => ({ x: p.x + m.dx, y: p.y + m.dy }));
-    const geo = assembleEdgeGeo(linkIdx, link, pts, hidden);
+    const geo = assembleEdgeGeo(linkIdx, link, pts, hidden, m.namespaceSeparator);
     addEdgeLabel(geo, link, re, m.dx, m.dy);
     applyOpaleNote(geo, link, pts, links, m);
     byIdx.set(linkIdx, geo);

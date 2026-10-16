@@ -161,6 +161,10 @@ export interface DescriptionEdgeGeo {
   id: string;
   from: string;
   to: string;
+  /** Leaf entity names (`Quark#getName()`, `Quark.java:84-86`) for the SVG `path/@id` and link comment
+   *  (`Link.java:106-120`); `from`/`to` stay the layout keys. */
+  fromName?: string;
+  toName?: string;
   points: Array<{ x: number; y: number }>;
   /** `x`/`y`: the CENTRE of the label table the engine placed. `w`/`h`: that
    *  table's size (`SvekEdge#appendTable`), present for a plain label so the
