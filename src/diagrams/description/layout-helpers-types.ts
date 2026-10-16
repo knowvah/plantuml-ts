@@ -42,6 +42,10 @@ export interface DescriptionNodeGeo {
    *  from `DescriptiveNode.stereotypeSprite` so the renderer can resolve the
    *  SAME sprite the sizer measured (`planning/sizer-renderer-parity.md`). */
   stereotypeSprite?: StereotypeSpriteRef;
+  /** Resolved inline `[[url{tooltip}]]` (`Entity#getUrl99`), built once at the layout seam from
+   *  `DescriptiveNode.url` with `UrlBuilder(topurl, STRICT)`; a plain object because `Url` keeps private fields.
+   *  Set on leaves AND containers (`EntityImageDescription.java:139`; cluster headers consume it later). */
+  url?: { readonly url: string; readonly tooltip: string };
   /** Raw inline color/style override string (`#orange;line:blue`,
    *  `#line.dashed`), verbatim from `DescriptiveNode.color` — parsed at
    *  render time by `renderer-entity.ts#parseColorOverride` (mirrors
@@ -161,6 +165,10 @@ export interface DescriptionEdgeGeo {
   id: string;
   from: string;
   to: string;
+  /** Leaf entity names (`Quark#getName()`, `Quark.java:84-86`) for the SVG `path/@id` and link comment
+   *  (`Link.java:106-120`); `from`/`to` stay the layout keys. */
+  fromName?: string;
+  toName?: string;
   points: Array<{ x: number; y: number }>;
   /** `x`/`y`: the CENTRE of the label table the engine placed. `w`/`h`: that
    *  table's size (`SvekEdge#appendTable`), present for a plain label so the

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-15T18:16:21.925Z",
+  "generatedAt": "2026-10-16T16:11:23.068Z",
   "fixtures": [
     {
       "slug": "baxodi-80-doto381",
@@ -27,7 +27,7 @@
       "layoutEqual": true,
       "verdict": "diverged",
       "maxDelta": 34.611,
-      "firstDiff": "svg/g[1]/g[2]/text[2]",
+      "firstDiff": "svg/g[1]/g[4][childCount]",
       "maxDeltaPath": "svg/g[1]/g[4]/text[1]/@y"
     },
     {
@@ -294,9 +294,7 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[1][childCount]"
+      "verdict": "conformant"
     },
     {
       "slug": "komivo-22-toki497",
@@ -324,9 +322,7 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[3][childCount]"
+      "verdict": "conformant"
     },
     {
       "slug": "lunexo-59-fupo775",
@@ -349,9 +345,7 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[3]/text[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "mofuba-79-came821",
@@ -454,10 +448,9 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 8.658000000000001,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
+      "verdict": "structural-match",
+      "maxDelta": 2.309000000000001,
+      "maxDeltaPath": "svg/g[1]/g[1]/path[1]/@d[8]"
     },
     {
       "slug": "robiga-73-tedi466",
@@ -485,9 +478,7 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[1][childCount]"
+      "verdict": "conformant"
     },
     {
       "slug": "saduja-80-goba120",
@@ -641,10 +632,9 @@
         "component": "edgePos",
         "detail": "page 1: jar 2 vs ours 2; sorted[0] jar 134.14,124.28 134.14,102.36 134.14,69.988 134.14,48.226 vs ours "
       },
-      "verdict": "diverged",
-      "maxDelta": 11.333000000000027,
-      "firstDiff": "svg/g[1]/g[2]/text[3]",
-      "maxDeltaPath": "svg/g[1]/g[4]/rect[1]/@width"
+      "verdict": "structural-match",
+      "maxDelta": 33.999999999999986,
+      "maxDeltaPath": "svg/g[1]/g[3]/a[1]/text[1]/@y"
     },
     {
       "slug": "xacaxe-43-bupe002",

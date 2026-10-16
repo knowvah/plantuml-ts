@@ -1,0 +1,4 @@
+@startuml
+skinparam wrapWidth 200
+rectangle "Wifi <&wifi>" as wifi
+@enduml

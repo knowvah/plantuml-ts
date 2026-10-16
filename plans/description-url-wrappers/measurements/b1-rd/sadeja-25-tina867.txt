@@ -1,0 +1,4 @@
+
+### usecase/sadeja-25-tina867  pass=false structural=2 numeric=0
+  S svg/g[1]/g[1][childCount]  exp=1 | act=3
+  S svg/g[1]/g[2][childCount]  exp=1 | act=2

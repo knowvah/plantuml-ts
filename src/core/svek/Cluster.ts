@@ -148,6 +148,12 @@ export type { ClusterGeometry } from './ClusterDecoration.js';
  * (Entity#getColors()' `ColorType.LINE`/`ColorType.BACK`/
  * `getSpecificLineStroke()`).
  */
+/** The `Url` fields `UGraphicSvg#startUrl` reads (`url`, `tooltip`). */
+export interface ClusterUrl {
+  readonly url: string;
+  readonly tooltip: string;
+}
+
 export interface ClusterGroupInfo {
   readonly hidden: boolean;
   readonly name: string;
@@ -158,6 +164,8 @@ export interface ClusterGroupInfo {
   readonly lineColorOverride: Paint | null;
   readonly backColorOverride: Paint | null;
   readonly specificLineStroke: UStroke | null;
+  /** `group.getUrl99()` (`Cluster.java:339`); `null`/absent draws no anchor. */
+  readonly url?: ClusterUrl | null;
 }
 
 /**
@@ -290,6 +298,11 @@ export class Cluster {
 
     const grouped = requireGroups(ug);
     grouped.startGroup(buildClusterGroup(this.group));
+    // `Cluster.java:339-341,376-379`: the anchor opens right after `startGroup` and closes (finally) before
+    // `closeGroup`. Optional calls: the ink-extent `LimitFinder` pass has no `startUrl` (`UGraphicNo`).
+    const url = this.group.url ?? null;
+    const linkable = grouped as UGraphic & Partial<{ startUrl(u: ClusterUrl): void; closeUrl(): void }>;
+    if (url !== null) linkable.startUrl?.(url);
     try {
       this.drawDecoration(grouped);
     } catch (err) {
@@ -301,6 +314,7 @@ export class Cluster {
       // continues).
       console.error('Cluster.drawU: decoration failed', err);
     } finally {
+      if (url !== null) linkable.closeUrl?.();
       grouped.closeGroup();
     }
   }

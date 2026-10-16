@@ -1,0 +1,3 @@
+
+### usecase/kolibo-58-rata251  pass=false structural=1 numeric=0
+  S svg/g[1]/g[1][childCount]  exp=1 | act=4

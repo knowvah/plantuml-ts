@@ -152,7 +152,7 @@ export function buildEntityParams(
   // atoms can never disagree on this entity's ambient thickness.
   const lineThickness = resolveElementLineThickness(theme, node.symbol) ?? ENTITY_STROKE_WIDTH;
   return {
-    entity: { name: bareEntityName(node.id), uid: '', qualifiedName: node.id, location: null, url: null },
+    entity: { name: bareEntityName(node.id), uid: '', qualifiedName: node.id, location: null, url: node.url ?? null },
     symbol: {
       keyword: upstreamKeyword(node.symbol),
       actorStyle: resolveActorStyle(theme.actorStyle),

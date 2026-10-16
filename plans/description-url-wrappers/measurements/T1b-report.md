@@ -1,0 +1,9 @@
+# T1b report
+- Commit: 07eff7ea0 `feat(description): capture bracket shorthand [[url]] token`
+- Files: src/diagrams/description/element-grammar.ts, src/diagrams/description/command-table-containers.ts (write-set extension, 2 call sites, as anticipated), tests/unit/description/dur-t1b-bracket-url.test.ts (new, 4 tests). command-table-shorthand.ts NOT changed.
+- Render-diff component/jazabe-68-bica131: structural=2 numeric=0 before -> after (unchanged; childCount 1 vs 6 / 1 vs 3 is T4's render seam).
+- Mechanism: parseBracketDeclaration (element-grammar.ts:74) never read the url slot, so BracketDeclaration had no url and callers passed none. Java: CommandCreateElementFull.java:113 `UrlBuilder.OPTIONAL` after TAGS2/STEREOTYPE (:108-113), Url built at :333-337. Port fix: `extractUrlToken(rawExtra)` -> BracketDeclaration.url -> makeNode(..., { url }) at command-table-containers.ts (rule 10 and keyword-prefixed `component [Disp] as Id`). The `() Interface <<st>> [[url]]` form already went through shorthandNode -> parseNameSection (T1a), so it needed no change; test pins it.
+- Ruled out: command-table-shorthand.ts needed no edit (shorthandNode already passes { url }); extractUrlToken skips tokens in quotes/`[ ]`/stereotype spans so display/stereotypes unchanged (test asserts stereotype ['Stereotype'] / ['Other Stereotype']).
+- Survey component before -> after: conformant 184 / structural-match 13 / diverged 69 / errored 0 / timeout 0 / oracle-error 0 both; no movers, no losses. (Before taken by reverting src, survey, reapplying patch.)
+- Tests: tests/unit/description + tests/architecture + tests/oracle/svg-conformance/description.*.test.ts: 83 files collected, 83 passed, 1528 tests passed. typecheck, eslint, prettier clean; catalog produced no diff.
+- Residuals: url not yet consumed by layout/render (T4). Write-set extension: command-table-containers.ts (2 call sites).

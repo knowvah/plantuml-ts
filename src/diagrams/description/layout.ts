@@ -258,6 +258,7 @@ function buildGeoAndEdges(
     geoIndex,
     dx: 0,
     dy: 0,
+    namespaceSeparator: ast.namespaceSeparator,
   };
   const drawLinks = withLinkNoteDrawn(ast.links);
   const rawEdges = buildEdgeGeos(drawLinks, result.edges, rawMapping, hidden);
@@ -411,6 +412,7 @@ export function layoutDescription(
     // Single-leaf diagram: resolve the floor for THAT leaf's own USymbol so a
     // scoped `<style> <sname> { MinimumWidth }` applies (S1L-b T5).
     minimumWidth: resolveElementMinimumWidth(theme, ast.nodes[0]?.symbol ?? ''),
+    ...(theme.topurl !== undefined ? { topurl: theme.topurl } : {}),
   });
   if (degenerate !== undefined) {
     return {
@@ -442,6 +444,7 @@ export function layoutDescription(
       infoByAstId: portClusterInfoByAstId,
       spacing,
       clusterBoxByAstId: clusterBoxesByAstId(ctx, result),
+      ...(theme.topurl !== undefined ? { topurl: theme.topurl } : {}),
     },
     kermorNotesByAstId(ctx, result),
   );

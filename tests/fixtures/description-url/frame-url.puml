@@ -1,0 +1,6 @@
+@startuml
+frame "F" [[http://example.com/f{frame tip}]] {
+  [A]
+}
+[B] --> [A]
+@enduml

@@ -30,7 +30,8 @@ import { UImage } from '../../klimt/shape/UImage.js';
 import { UHorizontalLine } from '../../klimt/shape/UHorizontalLine.js';
 import type { TextBlock } from '../../klimt/shape/TextBlock.js';
 import type { AtomImageResolver } from '../../creole-atoms.js';
-import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
+import type { CreoleAtom, CreoleAtomUrl } from '../../klimt/creole/atom/Atom.js';
+import { urlCapable } from '../../annotations/blocks-creole-atoms.js';
 import { manageGuillemet, type GuillemetPair } from '../../text/Guillemet.js';
 import { renderLatexAsImage } from '../../latex.js';
 import { emojiBoxDim, emojiRenderRun } from '../../klimt/creole/atom/AtomEmoji.js';
@@ -69,6 +70,63 @@ function lineCursorAdvance(isHorizontalLine: boolean, m: LineMetrics): number {
   return isHorizontalLine ? SEPARATOR_DRAW_ADVANCE : m.height;
 }
 
+/** `AtomSprite.java:73-80` / `AtomImg.java:246-254` / `AtomOpenIconic.java:
+ *  76-82`: every inline atom brackets its draw in `ug.startUrl(url)` /
+ *  `ug.closeUrl()` when it carries one -- and so does `AtomText.java:197-198,
+ *  235-236` for a text run. ONE `<a>` per atom, never per url span. A
+ *  graphic with no link support (measuring/limit-finding) just draws. */
+export function drawWithAtomUrl(ug: UGraphic, url: CreoleAtomUrl | undefined, draw: () => void): void {
+  const linkable = url === undefined ? undefined : urlCapable(ug);
+  if (linkable === undefined || url === undefined) {
+    draw();
+    return;
+  }
+  linkable.startUrl(url);
+  draw();
+  linkable.closeUrl();
+}
+
+/** One resolved inline atom's draw at `(x, y)` (the tail of `drawAtoms`'s
+ *  loop, extracted unchanged so `drawWithAtomUrl` can bracket it). */
+function drawResolvedInline(
+  ug: UGraphic,
+  resolved: NonNullable<ResolvedAtomImageWithRaster>,
+  x: number,
+  y: number,
+): void {
+  if (resolved.kind === 'image') {
+    // SI15 T1 (ADR-1): raster dims present only for a real raster-backed
+    // atom (sprite/img) -- guarded fallback keeps `UImage.build`'s 4th
+    // arg `undefined` otherwise, so `Footprint.drawImage` falls back to
+    // the declared dims exactly as before this task.
+    const rasterDims =
+      resolved.rasterWidth !== undefined && resolved.rasterHeight !== undefined
+        ? { rasterWidth: resolved.rasterWidth, rasterHeight: resolved.rasterHeight }
+        : undefined;
+    ug.apply(new UTranslate(x, y)).draw(
+      UImage.build(resolved.width, resolved.height, spriteHrefOver(resolved, ug.getParam().getBackcolor()), rasterDims),
+    );
+  } else {
+    const translated = ug.apply(new UTranslate(x, y)); // @see SvgNanoParser.java#drawU
+    // Each primitive re-applies its OWN translate+paint on top of the
+    // atom's origin (`DrawablePrimitive`, creole-atoms.ts): `UPath`'s
+    // translate is always `(0,0)` (its geometry is already absolute), but
+    // `UEllipse`/`UText` carry no position of their own; fore/back/stroke
+    // are the SAME `SvgNanoParser` paint state, snapshotted rather than
+    // forwarded when it was resolved (T9 amendment 2) -- `DriverPathSvg`
+    // collapses `fore === back` to a strokeless flat fill on its own, so
+    // an absent jar stroke reproduces without special-casing it here.
+    for (const primitive of resolved.primitives) {
+      translated
+        .apply(primitive.translate)
+        .apply(new Fore(primitive.fore))
+        .apply(new Back(primitive.back))
+        .apply(primitive.stroke)
+        .draw(primitive.shape);
+    }
+  }
+}
+
 /**
  * Draws one line's already-built atom sequence (E2r/L1): each atom draws as
  * its OWN `UText` (a text run) or `UImage`/`DrawablePrimitive[]` (a resolved
@@ -100,7 +158,9 @@ function drawAtoms(
   for (const atom of atoms) {
     if (atom.kind === 'text') {
       const segM = measureLine(stringBounder, atom.text, atom.font);
-      ug.apply(new UTranslate(x, origin.y + baselineDy)).draw(UText.build(atom.text, atom.font));
+      drawWithAtomUrl(ug, atom.url, () =>
+        ug.apply(new UTranslate(x, origin.y + baselineDy)).draw(UText.build(atom.text, atom.font)),
+      );
       x += segM.width;
       continue;
     }
@@ -127,42 +187,8 @@ function drawAtoms(
     // ADR-2: cursor advances by DECLARED width, never ink.
     const resolved: ResolvedAtomImageWithRaster | undefined = resolveAtomImage?.(atom.atom);
     if (resolved === undefined) continue;
-    if (resolved.kind === 'image') {
-      // SI15 T1 (ADR-1): raster dims present only for a real raster-backed
-      // atom (sprite/img) -- guarded fallback keeps `UImage.build`'s 4th
-      // arg `undefined` otherwise, so `Footprint.drawImage` falls back to
-      // the declared dims exactly as before this task.
-      const rasterDims =
-        resolved.rasterWidth !== undefined && resolved.rasterHeight !== undefined
-          ? { rasterWidth: resolved.rasterWidth, rasterHeight: resolved.rasterHeight }
-          : undefined;
-      ug.apply(new UTranslate(x, origin.y)).draw(
-        UImage.build(
-          resolved.width,
-          resolved.height,
-          spriteHrefOver(resolved, ug.getParam().getBackcolor()),
-          rasterDims,
-        ),
-      );
-    } else {
-      const translated = ug.apply(new UTranslate(x, origin.y)); // @see SvgNanoParser.java#drawU
-      // Each primitive re-applies its OWN translate+paint on top of the
-      // atom's origin (`DrawablePrimitive`, creole-atoms.ts): `UPath`'s
-      // translate is always `(0,0)` (its geometry is already absolute), but
-      // `UEllipse`/`UText` carry no position of their own; fore/back/stroke
-      // are the SAME `SvgNanoParser` paint state, snapshotted rather than
-      // forwarded when it was resolved (T9 amendment 2) -- `DriverPathSvg`
-      // collapses `fore === back` to a strokeless flat fill on its own, so
-      // an absent jar stroke reproduces without special-casing it here.
-      for (const primitive of resolved.primitives) {
-        translated
-          .apply(primitive.translate)
-          .apply(new Fore(primitive.fore))
-          .apply(new Back(primitive.back))
-          .apply(primitive.stroke)
-          .draw(primitive.shape);
-      }
-    }
+    const drawX = x;
+    drawWithAtomUrl(ug, atom.url, () => drawResolvedInline(ug, resolved, drawX, origin.y));
     x += resolved.width;
   }
   // #lizard forgives -- ADR-2's two-variant branch pushed NLOC over 30 (T7).

@@ -112,8 +112,8 @@ function buildInput(
     // `SCOPE_KEY_SEP` disambiguation separator for a collision-resolved
     // qualified endpoint); `bareEntityName` strips that back to the
     // bare leaf name for display, matching `Quark#getName()`.
-    from: bareEntityName(edge.from),
-    to: bareEntityName(edge.to),
+    from: edge.fromName ?? bareEntityName(edge.from),
+    to: edge.toName ?? bareEntityName(edge.to),
     fromUid,
     toUid,
     style: edgeStyle(edge),

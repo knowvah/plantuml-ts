@@ -1,0 +1,6 @@
+@startuml
+rectangle "R" [[http://example.com/r{rect tip}]] {
+  [A]
+}
+[B] --> [A]
+@enduml

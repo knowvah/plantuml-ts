@@ -1,0 +1,2 @@
+
+### component/gacida-77-joku810  pass=true structural=0 numeric=0

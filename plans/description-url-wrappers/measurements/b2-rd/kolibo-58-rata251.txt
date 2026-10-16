@@ -1,0 +1,2 @@
+
+### usecase/kolibo-58-rata251  pass=true structural=0 numeric=0

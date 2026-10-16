@@ -20,6 +20,7 @@ import {
   rawStereotypeLabels,
   carryRawStereotypeLabels,
   resolveNewlineEscapes,
+  extractUrlToken,
 } from './parse-helpers.js';
 import type { StereotypeSpriteRef } from './parse-helpers.js';
 
@@ -37,6 +38,8 @@ export interface BracketDeclaration {
   /** `StereotypeResult.sprite` — see `DescriptiveNode.stereotypeSprite`. */
   stereotypeSprite?: StereotypeSpriteRef;
   color?: string;
+  /** Raw `[[url]]` token (D4); the layout seam builds the Url. */
+  url?: string;
 }
 
 /** Imperative assignment satisfies exactOptionalPropertyTypes (spreading
@@ -47,11 +50,13 @@ function buildBracketDeclaration(
   display: string,
   stereo: { stereotype?: readonly string[] | undefined; sprite?: StereotypeSpriteRef | undefined },
   color: string | undefined,
+  url: string | undefined,
 ): BracketDeclaration {
   const decl: BracketDeclaration = { id, display };
   if (stereo.stereotype !== undefined) decl.stereotype = stereo.stereotype;
   if (stereo.sprite !== undefined) decl.stereotypeSprite = stereo.sprite;
   if (color !== undefined) decl.color = color;
+  if (url !== undefined) decl.url = url;
   return decl;
 }
 
@@ -75,6 +80,8 @@ export function parseBracketDeclaration(bracketName: string, rawExtra: string): 
   let extra = rawExtra.trim();
   const stereo: { stereotype?: readonly string[] | undefined; sprite?: StereotypeSpriteRef | undefined } = {};
   let color: string | undefined;
+  // UrlBuilder.OPTIONAL (CommandCreateElementFull.java:113), captured raw.
+  const url = extractUrlToken(extra);
   const sr = extractNodeStereotype(extra);
   if (sr !== undefined) {
     stereo.stereotype = sr.stereotypes;
@@ -109,7 +116,7 @@ export function parseBracketDeclaration(bracketName: string, rawExtra: string): 
   // `[plain]` draws `plain`, `["quoted"]` draws `"quoted"`, while the
   // ordinary quoted forms (`component "cq"`, `component cq2 as "dq"`) do
   // strip. Only the newline-escape half applies.
-  return buildBracketDeclaration(cleanId(id), resolveNewlineEscapes(bracketName), stereo, color);
+  return buildBracketDeclaration(cleanId(id), resolveNewlineEscapes(bracketName), stereo, color, url);
 }
 
 // ---------------------------------------------------------------------------

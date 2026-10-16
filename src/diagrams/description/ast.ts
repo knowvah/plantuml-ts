@@ -113,6 +113,10 @@ export interface DescriptiveNode {
    *  `restore`/`hide` (HideOrShow#isApplyableTag) — see
    *  `parser.ts#removeEntity`. */
   tags?: string[];
+  /** Raw inline `[[url]]` token as written, brackets included (e.g.
+   *  `[[http://x{tip}]]`). The layout/render seam builds the Url with the
+   *  theme's topurl (`CommandCreateElementFull.java:333-337`). */
+  url?: string;
   /**
    * I3b write-set expansion (journaled): parse-time creation-order value,
    * ONE shared sequence across every node AND link in the diagram -- mirrors

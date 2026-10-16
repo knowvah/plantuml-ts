@@ -1057,10 +1057,13 @@ describe('routing conformance — jar-error classification', () => {
     // svg-description clone rows (component 117, usecase 31, unknown 115; all
     // DESCRIPTION -> DESCRIPTION `agree`), zero-diff pins under T1a's per-type
     // eligibility. Derivation: 6459 + 642 + 86 = 7187.
-    expect(pinnedAgree.length).toBe(6459);
+    // 6459 -> 6474 agree at description-url-wrappers T6 (b4): +15 svg-description
+    // golden clones (component 8, usecase 4, unknown 3) of agree-classified
+    // dot-cache rows. Derivation: 6474 + 642 + 86 = 7202.
+    expect(pinnedAgree.length).toBe(6474);
     expect(pinnedMisroutes.length).toBe(642);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(7187);
+    expect(manifest.fixtures.length).toBe(7202);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

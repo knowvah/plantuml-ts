@@ -1,0 +1,47 @@
+activity: 448/1/0+0 dot=449 layout=1 -> 448/1/0+0 dot=449 layout=1 movers=0
+board: 0/0/4+0 dot=4 layout=0 -> 0/0/4+0 dot=4 layout=0 movers=0
+c4: 2/0/9+0 dot=5 layout=3 -> 2/0/9+0 dot=5 layout=3 movers=0
+chart: 0/0/29+0 dot=29 layout=0 -> 0/0/29+0 dot=29 layout=0 movers=0
+chronology: 0/0/1+0 dot=1 layout=0 -> 0/0/1+0 dot=1 layout=0 movers=0
+class: 723/0/0+0 dot=715 layout=547 -> 723/0/0+0 dot=715 layout=547 movers=0
+component: 180/12/74+0 dot=262 layout=248 -> 188/13/65+0 dot=262 layout=248 movers=9
+  fidati-41-kofe029: verdict diverged->conformant
+  gacida-77-joku810: verdict diverged->conformant
+  givape-84-xano421: verdict diverged->conformant
+  jazabe-68-bica131: verdict diverged->conformant
+  kofovu-01-niti223: verdict diverged->conformant
+  nevuzi-33-duna992: verdict diverged->structural-match
+  tojitu-03-ruto643: verdict diverged->conformant
+  tukipe-82-ziva562: verdict diverged->conformant
+  xufexu-38-fola855: verdict diverged->conformant
+ditaa: 0/0/0+2 dot=0 layout=0 -> 0/0/0+2 dot=0 layout=0 movers=0
+dot: 5/0/0+0 dot=5 layout=0 -> 5/0/0+0 dot=5 layout=0 movers=0
+ebnf: 0/0/44+0 dot=44 layout=0 -> 0/0/44+0 dot=44 layout=0 movers=0
+files: 0/0/1+0 dot=1 layout=0 -> 0/0/1+0 dot=1 layout=0 movers=0
+gantt: 1/0/264+0 dot=265 layout=0 -> 1/0/264+0 dot=265 layout=0 movers=0
+hcl: 1/2/0+0 dot=0 layout=0 -> 1/2/0+0 dot=0 layout=0 movers=0
+json: 13/24/13+0 dot=1 layout=0 -> 13/24/13+0 dot=1 layout=0 movers=0
+mindmap: 142/0/0+0 dot=142 layout=0 -> 142/0/0+0 dot=142 layout=0 movers=0
+network: 1/0/2+0 dot=1 layout=1 -> 1/0/2+0 dot=1 layout=1 movers=0
+object: 63/8/9+0 dot=78 layout=59 -> 63/8/9+0 dot=78 layout=59 movers=0
+packet: 0/0/6+0 dot=6 layout=0 -> 0/0/6+0 dot=6 layout=0 movers=0
+regex: 0/0/46+0 dot=46 layout=0 -> 0/0/46+0 dot=46 layout=0 movers=0
+salt: 51/0/0+0 dot=51 layout=0 -> 51/0/0+0 dot=51 layout=0 movers=0
+sequence: 0/0/1143+0 dot=1140 layout=0 -> 0/0/1143+0 dot=1140 layout=0 movers=0
+state: 78/11/184+0 dot=272 layout=252 -> 78/11/184+0 dot=272 layout=252 movers=0
+timing: 6/0/120+0 dot=126 layout=0 -> 6/0/120+0 dot=126 layout=0 movers=0
+unknown: 483/16/326+0 dot=806 layout=364 -> 486/16/323+0 dot=806 layout=365 movers=3
+  cakutu-40-lece271: verdict diverged->conformant
+  gubexu-05-dufu787: verdict diverged->conformant
+  nixeka-00-nuni016: verdict diverged->conformant, layoutEqual false->true
+usecase: 58/2/33+1 dot=93 layout=72 -> 62/4/27+1 dot=93 layout=72 movers=6
+  kolibo-58-rata251: verdict diverged->conformant
+  lizutu-99-mapa855: verdict diverged->conformant
+  malumi-33-safu797: verdict diverged->conformant
+  ridola-99-jija391: verdict diverged->structural-match
+  sadeja-25-tina867: verdict diverged->conformant
+  vivido-49-nisu863: verdict diverged->structural-match
+wbs: 204/0/0+0 dot=204 layout=0 -> 204/0/0+0 dot=204 layout=0 movers=0
+wire: 0/0/18+0 dot=18 layout=0 -> 0/0/18+0 dot=18 layout=0 movers=0
+yaml: 7/28/4+0 dot=0 layout=0 -> 7/28/4+0 dot=0 layout=0 movers=0
+CONFORMANT LOSSES: 0

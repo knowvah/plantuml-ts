@@ -15,6 +15,9 @@ import { matchScaleCommand } from '../../core/scale-command.js';
 import { RE_ASSUME_TRANSPARENT } from '../../core/assume-transparent.js';
 import { cleanId } from './parse-helpers.js';
 import { openTogetherFrame } from './together.js';
+import { countQuarksByName, leafDisplayName, resolveQualifiedNode } from './namespace-groups.js';
+import type { DescriptiveNode } from './ast.js';
+import type { ParseState } from './parse-state.js';
 
 // ---------------------------------------------------------------------------
 // Module-level regex constants
@@ -71,6 +74,24 @@ const RE_URL_STATEMENT = new RegExp(
   '^url\\s*(?:of|for)?\\s+([\\p{L}\\p{N}_.]+|"[^"]+")\\s+(?:is\\s*)?' + '(\\[\\[[^\\]]*(?:\\][^\\]]+)*\\]\\])\\s*$',
   'iu',
 );
+
+/**
+ * `CucaDiagram#quarkInContext(true, id)` (CucaDiagram.java:246-275) reduced
+ * to the entity it yields (`Quark#getData()`): no separator -> global
+ * `firstWithName`; a dotted path -> walk from the root; an undotted name ->
+ * the unique quark of that name unless it is the current group, else a child
+ * of the current group.
+ * @see ~/git/plantuml/src/main/java/net/atmp/CucaDiagram.java:250-275 */
+function resolveUrlTarget(state: ParseState, id: string): DescriptiveNode | undefined {
+  const sep = state.namespaceSeparator;
+  if (sep === null) return state.nodesById.get(id);
+  const dotted = resolveQualifiedNode(state.ast.nodes, id, sep);
+  if (dotted !== undefined || id.includes(sep)) return dotted?.node;
+  const current = state.containerStack[state.containerStack.length - 1];
+  const byName = state.nodesById.get(id);
+  if (byName !== undefined && byName !== current && countQuarksByName(state.ast.nodes, id, sep) === 1) return byName;
+  return (current?.children ?? state.ast.nodes).find((n) => n.id === id);
+}
 
 /**
  * Order matters: patterns are tested top-to-bottom; first match wins.
@@ -270,24 +291,25 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
   //     (dispatch-by-parse-attempt): `url of APP is [[...]]` / `url for Foo
   //     is [[...]]` are real, registered Commands upstream accepts, newly
   //     refused once unrecognised lines stopped being silently dropped.
-  //     `entity.addUrl(url)` (java:100) has no observable effect in this
-  //     port -- this engine already discards every INLINE `[[url]]` token
-  //     on a declaration line unread (`parse-helpers-strings.ts`'s
-  //     `stripUrl`/`stripTrailingUrl`), an established scope boundary this
-  //     rule follows rather than introduces. `quark.getData() == null`
-  //     (java:93-94) DOES have an observable effect -- an execution error
-  //     (D1) -- so an unresolved target still refuses, matching the port's
-  //     other execution-error precedent (parser.ts's port/portin/portout
-  //     case, `CommandCreateElementFull.java:316-317`).
+  //     `entity.addUrl(url)` (java:100) stores the raw `[[…]]` token on the
+  //     resolved node (`DescriptiveNode.url`, D4: the layout seam builds the
+  //     Url) and REPLACES any inline one -- it IS observable, the jar draws
+  //     the anchor (component/givape-84-xano421, tukipe-82-ziva562; the
+  //     target may be a group). `quarkInContext(true, …)` (java:91) is
+  //     `resolveUrlTarget`. `quark.getData() == null` (java:93-94) is an
+  //     execution error (D1) -- an unresolved target refuses, matching the
+  //     port's other execution-error precedent (parser.ts's
+  //     port/portin/portout case, `CommandCreateElementFull.java:316-317`).
   // @see ~/git/plantuml/.../classdiagram/command/CommandUrl.java:62-101
   {
     pattern: RE_URL_STATEMENT,
     execute(state, match) {
       const rawCode = match[1]!;
       const id = cleanId(rawCode.startsWith('"') ? rawCode.slice(1, -1) : rawCode);
-      if (!state.nodesById.has(id)) {
-        state.executionError = `${id} does not exist`;
-      }
+      const target = resolveUrlTarget(state, id);
+      if (target === undefined)
+        state.executionError = `${leafDisplayName(id, state.namespaceSeparator)} does not exist`; // quark.getName()
+      else target.url = match[2]!;
     },
   },
 

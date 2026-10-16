@@ -1,0 +1,2 @@
+
+### component/tukipe-82-ziva562  pass=true structural=0 numeric=0
