@@ -1,0 +1,5 @@
+
+### unknown/jobuje-80-mopu051  pass=false structural=3 numeric=0
+  S svg/g[1]/g[2]/text[1]/@fill  exp=#FFF | act=#000
+  S svg/g[1]/g[2]/text[2]/@fill  exp=#FFF | act=#000
+  S svg/g[1]/g[2]/a[1]/text[1]/@fill  exp=#0FF | act=#00F

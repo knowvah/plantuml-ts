@@ -1,0 +1,2 @@
+
+### usecase/malumi-33-safu797  pass=true structural=0 numeric=0
