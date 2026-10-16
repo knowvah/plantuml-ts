@@ -7,6 +7,7 @@
  */
 import { bareEntityName } from './namespace-groups.js';
 import type { Theme } from '../../core/theme.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { resolveElementShadowing } from '../../core/theme.js';
 import { resolveClusterTitleAlignment, resolveElementRoundCorner } from '../../core/theme-element-resolve.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
@@ -150,6 +151,12 @@ export function buildHeader(node: DescriptionNodeGeo, theme: Theme, options?: He
   return { title, stereo, titleHorizontalAlignment: resolveClusterTitleAlignment(theme, node.symbol) };
 }
 
+/** The bare `root`/`element` BackgroundColor as a drawable colour, when a style or skin set one. */
+function rootBackground(theme: Theme): string | undefined {
+  const raw = theme.colors.graph.rootElementBackground;
+  return raw === undefined ? undefined : resolveColorToSvgHex(raw);
+}
+
 export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleDefaults {
   const folder = isFolderStyled(symbol);
   return {
@@ -180,7 +187,10 @@ export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleD
     // see that field's doc comment) -- this call site supplies its own
     // `'none'` (`Cluster.java:285-296`'s unstyled `BackGroundColor`,
     // `plantuml.skin:102-114`) explicitly, matching the pre-T18b value.
-    backGroundColorDefault: theme.colors.graph.packageBackground ?? 'none',
+    // gtc T1 (rufopi): `Cluster#getStyle` (`Cluster.java:385-391`) merges `root, element, <diagram>, group,
+    // <uSymbol SNames>` (`:286-296`); a user `root { BackgroundColor }` is merged after `plantuml.skin:102-103`'s
+    // `group { BackGroundColor transparent }` and wins, so it sits between the `package` bucket and `'none'`.
+    backGroundColorDefault: theme.colors.graph.packageBackground ?? rootBackground(theme) ?? 'none',
     strokeDefault: UStroke.withThickness(folder ? CLUSTER_STROKE_WIDTH : NON_FOLDER_STROKE_WIDTH),
   };
 }
