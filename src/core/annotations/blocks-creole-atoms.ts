@@ -170,12 +170,12 @@ function drawTextAtom(atom: CreoleAtom & { kind: 'text' }, ug: UGraphic): void {
  *  check for the sibling `startGroup`/`closeGroup` pair: `UGraphicSvg` is
  *  the only implementor that can emit an `<a>`, and a measuring/limit-
  *  finding graphic legitimately has nothing to open. */
-interface UrlCapableUGraphic {
+export interface UrlCapableUGraphic {
   startUrl(url: CreoleAtomUrl): void;
   closeUrl(): void;
 }
 
-function urlCapable(ug: UGraphic): UrlCapableUGraphic | undefined {
+export function urlCapable(ug: UGraphic): UrlCapableUGraphic | undefined {
   const candidate = ug as unknown as Partial<UrlCapableUGraphic>;
   return typeof candidate.startUrl === 'function' && typeof candidate.closeUrl === 'function'
     ? (candidate as UrlCapableUGraphic)

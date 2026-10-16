@@ -227,7 +227,12 @@ class StripeAtomBuilder implements StripeBuilder {
           // consumed by an OpenIconic glyph atom (`Atom.ts`'s own field
           // doc comment); every other atom kind ignores it, so this is a
           // zero-behavior-change addition for img/sprite.
-          this.built.push({ kind: 'inline', atom: this.markUrlProvenance(atomMatch.atom), ambientFont: this.font });
+          this.built.push({
+            kind: 'inline',
+            atom: this.markUrlProvenance(atomMatch.atom),
+            ambientFont: this.font,
+            ...(this.activeUrl !== undefined ? { url: this.activeUrl } : {}),
+          });
         } else if (atomMatch.fallbackText !== undefined) {
           // Its own run at the hardcoded fallback font — see `IMG_FALLBACK_FONT`.
           this.flushPending(pending);
