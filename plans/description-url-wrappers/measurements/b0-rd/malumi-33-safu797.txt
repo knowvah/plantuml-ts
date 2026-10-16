@@ -1,0 +1,3 @@
+
+### usecase/malumi-33-safu797  pass=false structural=1 numeric=0
+  S svg/g[1]/g[3]/text[2]  exp=a | act=text

@@ -1,0 +1,10 @@
+
+### usecase/vivido-49-nisu863  pass=false structural=7 numeric=1
+  S svg/g[1]/g[2]/text[3]  exp=a | act=text
+  S svg/g[1]/g[2]/image[1]  exp=a | act=image
+  S svg/g[1]/g[2]/text[4]  exp=a | act=text
+  S svg/g[1]/g[3]/text[3]  exp=a | act=text
+  S svg/g[1]/g[3]/image[1]  exp=a | act=image
+  S svg/g[1]/g[3]/text[4]  exp=a | act=text
+  S svg/g[1]/g[4][childCount]  exp=6 | act=5
+  N svg/g[1]/g[4]/rect[1]/@width  exp=268.283 | act=256.95 (Δ11.333000000000027)

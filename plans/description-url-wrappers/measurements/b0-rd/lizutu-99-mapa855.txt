@@ -1,0 +1,3 @@
+
+### usecase/lizutu-99-mapa855  pass=false structural=1 numeric=0
+  S svg/g[1]/g[3][childCount]  exp=1 | act=3

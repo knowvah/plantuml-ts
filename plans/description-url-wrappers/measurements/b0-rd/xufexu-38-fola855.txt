@@ -1,0 +1,4 @@
+
+### component/xufexu-38-fola855  pass=false structural=2 numeric=0
+  S svg/g[1]/g[2]/text[6]  exp=a | act=text
+  S svg/g[1]/g[3]/text[7]  exp=a | act=text
