@@ -10,6 +10,7 @@ import type { Theme } from '../../core/theme.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { resolveElementShadowing } from '../../core/theme.js';
 import { resolveClusterTitleAlignment, resolveElementRoundCorner } from '../../core/theme-element-resolve.js';
+import type { Paint } from '../../core/paint.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
@@ -95,6 +96,10 @@ const STEREOTYPE_STYLES: ReadonlySet<FontStyle> = new Set([FontStyle.ITALIC]);
  *  finding, jar-verified against `component/balomu-94-kegi822`,
  *  `bijoko-90-riro507`, `bisedo-29-kone620`). Leaf-entity titles never get
  *  this (`renderer-entity.ts`'s `fontTitle` carries no style flags). */
+/** `SName.group` (`Cluster.java:291,293`): the SName every non-state cluster signature carries. */
+const GROUP_SNAME = 'group';
+/** The universal selectors every style signature contains (`Cluster.java:291`). */
+const ROOT_SELECTORS = ['root', 'element'] as const;
 const TITLE_STYLES: ReadonlySet<FontStyle> = new Set([FontStyle.BOLD]);
 
 /** `USymbolFolder`'s style is the only container USymbol whose jar default
@@ -157,6 +162,48 @@ function rootBackground(theme: Theme): string | undefined {
   return raw === undefined ? undefined : resolveColorToSvgHex(raw);
 }
 
+/**
+ * gtc T1/T2: a container's fill. `Cluster#getStyle` (`Cluster.java:385-391`) merges every declaration matching
+ * `root, element, <diagram>, group, <uSymbol SNames>` (`:286-296`); `Cluster.getBackColor` (`:701-710`) reads
+ * `BackGroundColor` off it. Upstream the LATER declaration wins (`StyleStorage#computeMergedStyle`,
+ * `StyleStorage.java:102-116`, OVERWRITE_EXISTING_VALUE), over `plantuml.skin:102-103`'s `group { BackGroundColor
+ * transparent }`. The theme keeps no declaration order, so the tiers run most-specific first (the container's own
+ * USymbol bucket, the `group` bucket, the `package` bucket, then `root`), which agrees with source order whenever the
+ * style is written general-to-specific.
+ */
+function clusterBackground(theme: Theme, symbol: USymbol): Paint {
+  return (
+    theme.colors.elements?.[symbol]?.background ??
+    theme.colors.elements?.[GROUP_SNAME]?.background ??
+    theme.colors.graph.packageBackground ??
+    rootBackground(theme) ??
+    'none'
+  );
+}
+
+/**
+ * gtc T2: a container's border colour (`Cluster.java:312-319`, `style.value(PName.LineColor)`), same signature and
+ * tiers as {@link clusterBackground}. The last tier is the bare `root`/`element` LineColor, read off the theme's
+ * ordered `styleOverrides` (a plain `theme.colors.border` cannot say whether a style set it); `fallback` is the
+ * skin's default for the symbol.
+ */
+function clusterBorder(theme: Theme, symbol: USymbol, fallback: string): Paint {
+  return (
+    theme.colors.elements?.[symbol]?.border ??
+    theme.colors.elements?.[GROUP_SNAME]?.border ??
+    rootLineColor(theme) ??
+    fallback
+  );
+}
+
+/** The last bare `root`/`element` LineColor declared in a `<style>`, same last-wins walk as
+ *  `foldRootBackgroundIntoSequence`. */
+function rootLineColor(theme: Theme): string | undefined {
+  let raw: string | undefined;
+  for (const selector of ROOT_SELECTORS) raw = theme.styleOverrides?.[selector]?.['linecolor'] ?? raw;
+  return raw === undefined ? undefined : resolveColorToSvgHex(raw);
+}
+
 export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleDefaults {
   const folder = isFolderStyled(symbol);
   return {
@@ -181,16 +228,13 @@ export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleD
     roundCorner: resolveElementRoundCorner(theme, symbol) ?? NON_FOLDER_ROUND_CORNER,
     strictUmlStyle: false,
     diagonalCorner: 0,
-    lineColorDefault: folder ? FOLDER_BORDER_DEFAULT : NON_FOLDER_BORDER_DEFAULT,
+    lineColorDefault: clusterBorder(theme, symbol, folder ? FOLDER_BORDER_DEFAULT : NON_FOLDER_BORDER_DEFAULT),
     // CDD T18b: `theme.colors.graph.packageBackground` is optional now
     // (theme.ts no longer bakes the cluster's own unstyled default in --
     // see that field's doc comment) -- this call site supplies its own
     // `'none'` (`Cluster.java:285-296`'s unstyled `BackGroundColor`,
     // `plantuml.skin:102-114`) explicitly, matching the pre-T18b value.
-    // gtc T1 (rufopi): `Cluster#getStyle` (`Cluster.java:385-391`) merges `root, element, <diagram>, group,
-    // <uSymbol SNames>` (`:286-296`); a user `root { BackgroundColor }` is merged after `plantuml.skin:102-103`'s
-    // `group { BackGroundColor transparent }` and wins, so it sits between the `package` bucket and `'none'`.
-    backGroundColorDefault: theme.colors.graph.packageBackground ?? rootBackground(theme) ?? 'none',
+    backGroundColorDefault: clusterBackground(theme, symbol),
     strokeDefault: UStroke.withThickness(folder ? CLUSTER_STROKE_WIDTH : NON_FOLDER_STROKE_WIDTH),
   };
 }

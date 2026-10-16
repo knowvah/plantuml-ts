@@ -1270,17 +1270,14 @@ describe('renderDescription — per-element Paint (T7)', () => {
     expect(svg).toContain(defaultTheme.colors.nodeBackground);
   });
 
-  it("a container does NOT yet honor a per-element bucket background override (documented gap: renderer-cluster.ts#buildCluster hardcodes backColorOverride: null — out of this task's write-set, see mission report)", () => {
+  it("a container honors its own USymbol bucket's background (gtc-T2: Cluster.java:285-296,701-710)", () => {
     const child = makeDNode({ id: 'c1', symbol: 'component', display: 'Inner' });
     const over = makeDNode({ id: 'pkg', symbol: 'package', display: 'P', width: 200, height: 120, children: [child] });
     const overridden = renderDescription(
       makeGeo({ nodes: [over] }),
       withElements({ package: { background: '#ABCDEF' } }),
     );
-    // Current (unfixed) behavior: falls back to the package style default
-    // (ClusterStyleDefaults.backGroundColorDefault -> theme.colors.graph.packageBackground, 'none').
-    expect(overridden).not.toContain('fill="#ABCDEF"');
-    expect(overridden).toContain('fill="none"');
+    expect(overridden).toContain('fill="#ABCDEF"');
   });
 });
 
