@@ -363,10 +363,10 @@ function buildInkBox(
  * lgm-T1c: the `LimitFinder` ink {@link computeStateDocumentDims} and
  * {@link computeStateInkShift} measure, un-reduced -- what a mainframe frames
  * (`BigFrame.java:77-91`, `DiagramChromeFactory.java:332-337`). Same
- * `labelInk: false` fold as the two document-level functions.
+ * `labelInk: true` fold as the two document-level functions.
  */
 export function computeStateInkBox(states: readonly StateNodeGeo[], transitions: readonly TransitionGeo[]): InkBox {
-  return buildInkBox(states, transitions, false, 'always');
+  return buildInkBox(states, transitions, true, 'always');
 }
 
 export interface StateDocumentDims {
@@ -385,10 +385,11 @@ export function computeStateDocumentDims(
   states: readonly StateNodeGeo[],
   transitions: readonly TransitionGeo[],
 ): StateDocumentDims {
-  // `labelInk: false` -- this function is already jar-verified/pinned
-  // (57 svg-state goldens) at the pre-existing point-only label fold;
-  // G8 T2's box fold is scoped to `computeSvekResultGeometry` below.
-  const raw = svekDimension(buildInkBox(states, transitions, false, 'always'));
+  // `labelInk: true` -- the label's `TextBlockMarged` draws its whole-block
+  // `UEmpty` (`TextBlockMarged.java:79-87`, `SvekEdge.java:950-953`), which
+  // `LimitFinder#drawEmpty` folds (`LimitFinder.java:159-162`); gtc T7b
+  // (pavuzo-79-zodu430: ortho xlabel box at x=0 -> shift 6, canvas 219).
+  const raw = svekDimension(buildInkBox(states, transitions, true, 'always'));
   // Empty diagram (no ink at all): stay {0, 0} rather than applying the
   // margin to nothing, which would yield 6x6. The pre-refactor code got this
   // from an early `return {width: 0, height: 0}` before the margin
@@ -417,10 +418,9 @@ export function computeStateInkShift(
   states: readonly StateNodeGeo[],
   transitions: readonly TransitionGeo[],
 ): StateInkShift {
-  // `labelInk: false` -- same already-pinned point-only fold as
-  // `computeStateDocumentDims` above (shares its own ink-extent bbox
-  // mechanism, must stay consistent with it).
-  return svekInkShift(buildInkBox(states, transitions, false, 'always'));
+  // `labelInk: true` -- same box fold as `computeStateDocumentDims` above
+  // (shares its own ink-extent bbox mechanism, must stay consistent with it).
+  return svekInkShift(buildInkBox(states, transitions, true, 'always'));
 }
 
 export interface SvekResultGeometry {

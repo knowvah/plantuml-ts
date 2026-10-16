@@ -121,19 +121,21 @@ describe('computeSvekResultGeometry — the composite ink folds that box', () =>
     expect(357.86168 + 15 - computeSvekResultGeometry([], [geo()]).width).toBeCloseTo(0.52668, 5);
   });
 
-  it('leaves the document-level (labelInk: false) fold untouched — decision D5', () => {
-    // `computeStateDocumentDims` folds the label as a POINT and must not see
-    // the box at all; it is jar-verified separately and holds 59 svg pins.
-    // Asserted as an invariance, so it fails if that path ever starts
-    // reading `inkBox` — the box is 0.475 wider than the reserved 113 and
-    // sits at a different corner, so no value could coincide.
+  it('folds the same box at the document level (gtc T7b, supersedes D5)', () => {
+    // `SvekEdge.java:950-953` draws the marged label at document level too, so
+    // `computeStateDocumentDims` folds `inkBox` like the composite walk does:
+    // minX is the `points` entry at 0, maxX the box right edge 357.335, plus
+    // `SvekResult`'s delta(15,15) and the cuca document margin.
     const l = label(300.36168, 254.5)!;
     const withBox = computeStateDocumentDims([], [{ from: 'a', to: 'b', points: [{ x: 0, y: 0 }], label: l }]);
-    const withoutBox = computeStateDocumentDims(
+    const pointOnly = computeStateDocumentDims(
       [],
       [{ from: 'a', to: 'b', points: [{ x: 0, y: 0 }], label: { text: l.text, x: l.x, y: l.y } }],
     );
-    expect(withBox).toEqual(withoutBox);
+    // The point fold's right edge is the glyph anchor (244.86); the box fold's
+    // is 357.335. Document dims are whole pixels (`SvgGraphics` truncation),
+    // so the widths differ by the 112.47 gap rounded up to 113.
+    expect(withBox.width - pointOnly.width).toBe(113);
   });
 });
 

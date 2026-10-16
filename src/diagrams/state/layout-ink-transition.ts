@@ -66,8 +66,8 @@ export function addTransitionInk(
   for (const p of transition.points) addPoint(box, p.x, p.y);
   // G8 T2: fold the label's own BOX at the RETURNED (graphviz) position, not
   // just its anchor POINT -- only when present AND opted in (`labelInk`);
-  // `computeStateDocumentDims`/`computeStateInkShift` pass `false` and keep
-  // the point-only fold. `transition-label-ink` T3: `TextBlockMarged#drawU`'s
+  // every state ink walk now passes `true` (gtc T7b); `false` keeps the
+  // point-only fold. `transition-label-ink` T3: `TextBlockMarged#drawU`'s
   // own `UEmpty` (`klimt/shape/TextBlockMarged.java:79-87`), so this is
   // `drawEmpty` over `label.inkBox` (`LimitFinder.java:159-162`).
   if (transition.label !== undefined) {

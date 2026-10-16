@@ -116,7 +116,7 @@ function anchorFromCentre(centre: { x: number; y: number }, { box, ascent }: Mea
  * once the marged-box fold is correct.
  *
  * Applied to the ink box ONLY, never to `label.x`/`label.y`: the draw
- * anchor and the document-level (`labelInk: false`) point fold are pinned
+ * anchor is pinned
  * and must stay byte-identical (mission decision D5). We therefore draw the
  * label at the unquantized x where jar draws the quantized one — ≤0.005px,
  * inside the 0.01px SVG-conformance band.
