@@ -1,0 +1,2 @@
+
+### component/kofovu-01-niti223  pass=true structural=0 numeric=0

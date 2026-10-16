@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-15T18:15:46.555Z",
+  "generatedAt": "2026-10-16T16:10:52.637Z",
   "fixtures": [
     {
       "slug": "activity-legacy1-example-0",
@@ -504,10 +504,7 @@
       "type": "unknown",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 11.333999999999996,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
+      "verdict": "conformant"
     },
     {
       "slug": "caluni-22-noci624",
@@ -1892,9 +1889,7 @@
       "type": "unknown",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[1]/text[1]"
+      "verdict": "conformant"
     },
     {
       "slug": "gucipa-88-xoti966",
@@ -2231,7 +2226,7 @@
       "layoutEqual": true,
       "verdict": "diverged",
       "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[1]/text[2]"
+      "firstDiff": "svg/g[1]/g[2]/text[1]/@fill"
     },
     {
       "slug": "jodasa-29-zara935",
@@ -3723,15 +3718,8 @@
       "slug": "nixeka-00-nuni016",
       "type": "unknown",
       "dotEqual": true,
-      "layoutEqual": false,
-      "layoutFirstDiff": {
-        "component": "bb",
-        "detail": "page 1: jar 0,0,269.03747599999997,36 vs ours 0,0,267.370828,36"
-      },
-      "verdict": "diverged",
-      "maxDelta": 13,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "layoutEqual": true,
+      "verdict": "conformant"
     },
     {
       "slug": "nixuje-20-bobu879",
@@ -3881,9 +3869,9 @@
       "dotEqual": true,
       "layoutEqual": true,
       "verdict": "diverged",
-      "maxDelta": 11.332999999999998,
-      "firstDiff": "svg/g[1]/g[1][childCount]",
-      "maxDeltaPath": "svg/g[1]/g[1]/path[1]/@d[10]"
+      "maxDelta": 5.667000000000002,
+      "firstDiff": "svg/g[1]/g[3][childCount]",
+      "maxDeltaPath": "svg/g[1]/g[3]/text[2]/@x"
     },
     {
       "slug": "padefe-05-bemu901",

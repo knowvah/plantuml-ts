@@ -70,8 +70,8 @@ to main as a merge commit at exit. **Never push.**
 | [0](batch-0/overview.md) baseline; class/state anchor check | T0 ∥ T0b | ∥ | [x] |
 | [1](batch-1/overview.md) A parse core; B core wrap; C edge ids | T1a ∥ T2 ∥ T3 | all ∥ | [x] |
 | [2](batch-2/overview.md) bracket shorthand; `url of`; A geo + render | T1b ∥ T1c ∥ T4 | all ∥ | [x] |
-| [3](batch-3/overview.md) cluster URL | T5 | — | [ ] |
-| [4](batch-4/overview.md) re-measure, re-pin, D1 | T6 | — | [ ] |
+| [3](batch-3/overview.md) cluster URL | T5 | — | [x] |
+| [4](batch-4/overview.md) re-measure, re-pin, D1 | T6 | — | [x] |
 | [5](batch-5/overview.md) exit | T7 | — | [ ] |
 
 ## Index

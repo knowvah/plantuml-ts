@@ -1,0 +1,1461 @@
+{
+  "generatedAt": "2026-10-16T16:11:52.041Z",
+  "fixtures": [
+    {
+      "slug": "bacole-35-fiki903",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bigare-83-rupe735",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bikopa-92-joza078",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bizele-33-tubi926",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bizepe-66-putu551",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bonina-19-baje036",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bujigo-66-zepu613",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "cesoke-21-muro498",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "cijugo-75-butu330",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "codalo-68-gere629",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cofele-91-sanu676",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "cogalo-85-side555",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cozofa-82-fefe432",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cunoja-00-nobi445",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cupuri-11-piru303",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "danoji-66-rure273",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "detalo-19-racu448",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "diveva-04-moze399",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dulato-78-nefo038",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "duzoxe-13-bocu532",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "facibu-72-dako171",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fasuti-82-dire353",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "fazafa-49-leka582",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fecabu-55-foba097",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fibiti-49-faga748",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fiboto-83-pida880",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "filara-76-xifu577",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fimilo-56-jibo267",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fipina-75-bago028",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fitemu-52-fica491",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fodobe-85-beco281",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "goduxe-93-xuje240",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gogige-30-peba786",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "guximi-08-cako621",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jekubu-85-fimi106",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jibiba-77-jixa314",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jofuna-02-xova357",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jujugo-23-bede484",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jumiso-12-teba464",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jurupa-07-funi255",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jusapa-97-rege604",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kadixe-30-pasa212",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kajefo-25-dazo761",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kajene-76-pele833",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kamimo-14-sazi079",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kekube-11-reni885",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "keloxe-59-zalu422",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kemola-59-lipa866",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kifona-80-bufa102",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "kipadu-03-dine934",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kofumu-64-gife734",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kokisi-26-tixi824",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "konipe-99-jafu307",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "kugane-77-moce175",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kugunu-20-jisu885",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kulozi-99-fapu866",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lacufo-38-basi662",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lagoda-51-zuna611",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "lazigo-83-tevi855",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lazila-98-copu420",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lecexi-03-capi482",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "ledama-83-xoko366",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "lesene-63-xeza963",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "link-URL-tooltip-0",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "link-URL-tooltip-1",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "link-URL-tooltip-2",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lozolo-55-gole805",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lucema-49-bolo727",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "mifoxa-71-mago795",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "mogume-53-tuxe939",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "mufute-30-juja962",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "mupade-59-nizi762",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "muzufe-40-vami290",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nagatu-54-xevo656",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "naveve-56-sezu031",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "navoxe-03-mala012",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nedose-30-toro694",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nelisi-61-zuto337",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nerove-94-mase209",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nijoci-28-tubo657",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "norutu-85-pana593",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nulici-21-suxa818",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nutodi-72-gesi011",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pagede-80-rapu405",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "palupu-85-neno098",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pejago-53-vaca955",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pivuma-60-capa371",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "podeku-19-gofi018",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "popavi-72-rabi940",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "potipu-03-nulo609",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pubebu-15-gavo856",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "puxezu-74-bile194",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "ranoce-59-jela729",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "rexuri-90-teja825",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "rufaci-77-nala420",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "runula-63-gora344",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "ruseba-92-sene615",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "sabeca-21-dodo233",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "sacile-96-fose945",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "sefovi-44-zega151",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "sefoxo-37-zuvo274",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "sipuja-30-deto581",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "sipuxu-89-ciji559",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "solive-57-nola542",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "sotaso-86-migu035",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "suciri-22-jedu341",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "sugepe-47-ruxa931",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "supeno-33-jabe921",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "supori-51-meba536",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "sutesu-19-lufu844",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tacenu-64-cofi013",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tefobe-51-jefu626",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "titito-29-gise261",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tojixi-05-lusu056",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "tubeli-58-kadi729",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "tugejo-32-tuna198",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tuvake-29-namo853",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tuzeme-92-metu703",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vavibi-10-maso573",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "vazalu-10-cebi060",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vecovi-94-givo515",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vezati-14-vupe612",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-arrow-0",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-arrow-depending-leaf-direction-0",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-arrow-depending-leaf-direction-1",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-arrow-depending-leaf-direction-2",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-arrow-depending-leaf-direction-3",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-arrow-depending-leaf-direction-4",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-arrow-depending-leaf-direction-5",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-arrow-depending-leaf-direction-6",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-direction-0",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-easter-egg-0",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-easter-egg-1",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-0",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-1",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-10",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-11",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "WBS-monoline-def-0-12",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-13",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-14",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-15",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-16",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-17",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "WBS-monoline-def-0-18",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "WBS-monoline-def-0-19",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-2",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-20",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-21",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-22",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-23",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-24",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "WBS-monoline-def-0-3",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "WBS-monoline-def-0-4",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-5",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-6",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "WBS-monoline-def-0-7",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-8",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-monoline-def-0-9",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-0-0",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-0-1",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-0",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-1",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-10",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-11",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-12",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-13",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-14",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "WBS-multiline-def-1-15",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "WBS-multiline-def-1-16",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-17",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-18",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-19",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-2",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-20",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-21",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "WBS-multiline-def-1-3",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "WBS-multiline-def-1-4",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-5",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-6",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-7",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "WBS-multiline-def-1-8",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "WBS-multiline-def-1-9",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xagelu-70-fota123",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xakubu-65-cumo769",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xalape-44-sipa811",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xasinu-75-sabe690",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xecoxa-01-timo183",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xekazo-08-vozi430",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xeruno-72-nape751",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xesafo-81-reca540",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xifiti-28-jati059",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xiruxo-19-repo052",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xiveti-07-suzu992",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xuzuda-76-bunu077",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zagudu-70-loto412",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zapabe-95-nige175",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zecavo-98-kini554",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "zeneno-39-bize297",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zipise-65-bevo360",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zodobi-82-dura410",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zogadi-16-bore748",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zogoke-27-tupa218",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zoxifo-84-pesu554",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zutivo-71-kaki153",
+      "type": "wbs",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    }
+  ]
+}

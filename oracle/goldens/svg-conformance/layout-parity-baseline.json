@@ -1,5 +1,5 @@
 {
-  "$comment": "Layout-parity ratchet baseline (description-svek-wrappers D3 / T2). Every pinned row's captured DotInputGraph must lay out under dot-engine to the same cluster tree, bb, node sizes/positions and edge pos as the jar's cached svek-N.dot (tests/oracle/layout-parity.ts). Population: component, usecase, c4, and unknown rows whose routing-baseline ourType is DESCRIPTION, plus the four controls (the class and state controls are pinned here although those trees carry byte-exact SVG ratchets). Seeded 2026-10-14 from the T2 survey run at the b1 merge (3c1a8c7f2); shrink-only: rows are added at batch closes, never removed to make the gate pass. codd T11 (2026-10-15): +20 rows newly layout-equal at the b5 survey.",
+  "$comment": "Layout-parity ratchet baseline (description-svek-wrappers D3 / T2). Every pinned row's captured DotInputGraph must lay out under dot-engine to the same cluster tree, bb, node sizes/positions and edge pos as the jar's cached svek-N.dot (tests/oracle/layout-parity.ts). Population: component, usecase, c4, and unknown rows whose routing-baseline ourType is DESCRIPTION, plus the four controls (the class and state controls are pinned here although those trees carry byte-exact SVG ratchets). Seeded 2026-10-14 from the T2 survey run at the b1 merge (3c1a8c7f2); shrink-only: rows are added at batch closes, never removed to make the gate pass. codd T11 (2026-10-15): +20 rows newly layout-equal at the b5 survey. dur T6 (2026-10-16): +1 unknown/nixeka-00-nuni016 (layoutEqual false->true: dur-T2 draws and measures the <&icon> OpenIconic glyph, AtomOpenIconic.java:63-82) -> 490.",
   "fixtures": [
     {
       "tree": "c4",
@@ -2445,6 +2445,11 @@
       "tree": "unknown",
       "slug": "xipane-40-dune740",
       "addedAt": "2026-10-15"
+    },
+    {
+      "tree": "unknown",
+      "slug": "nixeka-00-nuni016",
+      "addedAt": "2026-10-16"
     }
   ]
 }

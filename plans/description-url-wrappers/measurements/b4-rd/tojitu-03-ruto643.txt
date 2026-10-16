@@ -1,0 +1,2 @@
+
+### component/tojitu-03-ruto643  pass=true structural=0 numeric=0
