@@ -7,6 +7,9 @@ set -euo pipefail
 R="$(git rev-parse --show-toplevel)"; t="$1"; W="$R/.claude/worktrees/dur-$t"
 git -C "$R" worktree add -q -b "dur/$t" "$W" "${2:-feat/description-url-wrappers}"
 cd "$W"
+# signing (2026-10-16): agents never block on the YubiKey; the orchestrator
+# re-signs dur/Tn when it rebases the branch onto the mission tip.
+git config --worktree commit.gpgsign false
 for p in .husky/_ node_modules oracle/dist assets/stdlib tests/corpus plans/class-divergence-drive/tools/node_modules packages/emoji/assets packages/sprites-archimate/assets packages/stdlib-all/generated packages/stdlib-aws/assets packages/stdlib-aws/generated packages/stdlib-tupadr3/assets packages/stdlib-tupadr3/generated packages/stdlib/assets packages/stdlib/generated; do
   [ -e "$R/$p" ] && { rm -rf "$W/$p"; mkdir -p "$(dirname "$W/$p")"; ln -s "$R/$p" "$W/$p"; }
 done
