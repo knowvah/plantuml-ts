@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1677 modules · 6127 exported names.
+1677 modules · 6128 exported names.
 
 ## `src/`
 
@@ -867,7 +867,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `Boundary.ts` | `Boundary` |  |
 | `CircleInterface2.ts` | `CircleInterface2` |  |
-| `Cluster.ts` | `ClusterGeometry`, `ClusterGroupInfo`, `ClusterStyleDefaults`, `ClusterHeaderInfo`, `ClusterSymbolInfo`, `resolveBorderColor`, `resolveRoundCorner`, `getStrokeInternal`, `resolveBackColor`, `Cluster` | Cluster — the DRAWING half of a description/component/usecase-diagram container (a `package`, `frame`, `node`, or component/interface acting as a group): the `<!--cluster X-->` comment, the `<g class="cluster" data-qualified-name="..." id=" |
+| `Cluster.ts` | `ClusterGeometry`, `ClusterUrl`, `ClusterGroupInfo`, `ClusterStyleDefaults`, `ClusterHeaderInfo`, `ClusterSymbolInfo`, `resolveBorderColor`, `resolveRoundCorner`, `getStrokeInternal`, `resolveBackColor`, `Cluster` | Cluster — the DRAWING half of a description/component/usecase-diagram container (a `package`, `frame`, `node`, or component/interface acting as a group): the `<!--cluster X-->` comment, the `<g class="cluster" data-qualified-name="..." id=" |
 | `ClusterDecoration.ts` | `ClusterGeometry`, `ClusterDecoration` | ClusterDecoration — resolves a Cluster's `USymbol` (an explicit one, or a `PackageStyle` fallback) and draws its `asBig` chrome (body outline + title + stereotype) at the cluster's own geometry. |
 | `Control.ts` | `Control` |  |
 | `DecorateEntityImage.ts` | `UGraphicWithGroups`, `DecorateEntityImage`, `EntityDecorationInfo`, `decorateEntityDrawing` |  |

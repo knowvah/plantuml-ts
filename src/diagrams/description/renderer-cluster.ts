@@ -222,6 +222,8 @@ export function buildCluster(node: DescriptionNodeGeo, theme: Theme, uid: string
     lineColorOverride: override.line ?? null,
     backColorOverride: override.back ?? null,
     specificLineStroke: lineStyleStroke(override.lineStyle) ?? null,
+    // `Cluster.java:339` `group.getUrl99()` (T4 resolved it onto the geo with topurl).
+    url: node.url ?? null,
   };
   const symbolInfo: ClusterSymbolInfo = {
     symbol: resolveSymbol(node.symbol, theme),
