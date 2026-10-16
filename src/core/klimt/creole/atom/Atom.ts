@@ -66,6 +66,12 @@ export type CreoleAtom =
        *  (`undefined` for every pre-N41 call site, 100% backward-compatible).
        */
       readonly ambientFont?: FontConfiguration;
+      /** DUR T2: set when the atom was recognized inside a `[[url ...]]`
+       *  label -- the jar gives each such atom its own `startUrl`/`closeUrl`
+       *  pair (`AtomSprite.java:73-80`, `AtomImg.java:246-254`,
+       *  `AtomOpenIconic.java:76-82`), exactly as `AtomText.java:197-198,
+       *  235-236` does for a text run. Unset everywhere else. */
+      readonly url?: CreoleAtomUrl;
     }
   /** `AtomSpace` (`<space:N>`): `calculateDimensionSlow` = (width, 1), `getStartingAltitude` 0, empty `drawU`
    *  (AtomSpace.java; see `atom/AtomSpace.ts`). */
