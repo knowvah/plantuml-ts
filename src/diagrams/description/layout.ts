@@ -258,6 +258,7 @@ function buildGeoAndEdges(
     geoIndex,
     dx: 0,
     dy: 0,
+    namespaceSeparator: ast.namespaceSeparator,
   };
   const drawLinks = withLinkNoteDrawn(ast.links);
   const rawEdges = buildEdgeGeos(drawLinks, result.edges, rawMapping, hidden);
