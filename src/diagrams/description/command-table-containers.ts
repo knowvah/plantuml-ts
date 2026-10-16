@@ -58,7 +58,9 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       const decl = parseBracketDeclaration(match[1]!, match[2] ?? '');
       emitNode(
         state,
-        makeNode(decl.id, decl.display, 'component', decl.stereotype, decl.color, undefined, decl.stereotypeSprite),
+        makeNode(decl.id, decl.display, 'component', decl.stereotype, decl.color, undefined, decl.stereotypeSprite, {
+          url: decl.url,
+        }),
       );
     },
   },
@@ -195,7 +197,9 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
         const bdecl = parseBracketDeclaration(bracketAs[1]!, bracketAs[2]!);
         emitNode(
           state,
-          makeNode(bdecl.id, bdecl.display, symbol, bdecl.stereotype, bdecl.color, undefined, bdecl.stereotypeSprite),
+          makeNode(bdecl.id, bdecl.display, symbol, bdecl.stereotype, bdecl.color, undefined, bdecl.stereotypeSprite, {
+            url: bdecl.url,
+          }),
         );
         return;
       }
