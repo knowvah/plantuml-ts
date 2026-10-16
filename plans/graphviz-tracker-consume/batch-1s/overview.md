@@ -7,6 +7,6 @@ happen then.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T7a | pavuzo: 4 missing `textLength` | typescript-pro | state transition-label renderer files, tests | T0 | [ ] |
-| T7b | pavuzo: uniform 1 px x shift (width 218 vs 219) | typescript-pro | state ink-extent / composite sizing files, tests | T7a | [ ] |
-| T8 | Item 14: state composite title Y from `clusters[].label` (D3) | typescript-pro | `state-composite-cluster.ts` + label plumbing in `src/diagrams/state/**`, tests | T7b | [ ] |
+| T7a | pavuzo: 4 missing `textLength` | typescript-pro | state transition-label renderer files, tests | T0 | [x] |
+| T7b | pavuzo: uniform 1 px x shift (width 218 vs 219) | typescript-pro | state ink-extent / composite sizing files, tests | T7a | [x] |
+| T8 | Item 14: state composite title Y from `clusters[].label` (D3) | typescript-pro | `state-composite-cluster.ts` + label plumbing in `src/diagrams/state/**`, tests | T7b | [x] |

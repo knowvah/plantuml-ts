@@ -11,6 +11,7 @@ import re
 import sys
 
 n, label, breakdown = int(sys.argv[1]), sys.argv[2], sys.argv[3]
+kind = sys.argv[4] if len(sys.argv) > 4 else 'svg-description'
 T = 'tests/oracle/svg-conformance/'
 
 
@@ -32,15 +33,15 @@ def bump(path, expect_re, comment):
 R = T + 'routing-conformance.test.ts'
 F = T + 'refusal-coverage.test.ts'
 bump(R, r'( *)expect\(pinnedAgree\.length\)\.toBe\((\d+)\);\n',
-     lambda o, w: [f'{o} -> {w} agree at {label}: +{n} svg-description golden',
+     lambda o, w: [f'{o} -> {w} agree at {label}: +{n} {kind} golden',
                    f'clones ({breakdown}) of agree-classified dot-cache rows.',
                    f'Derivation: {w} + 642 + 86 = {w + 728}.'])
 bump(R, r'( *)expect\(manifest\.fixtures\.length\)\.toBe\((\d+)\);\n',
      lambda o, w: [f'{o} -> {w} at {label} (see the agree derivation above).'])
 bump(F, r'( *)expect\(manifest\.fixtures\.length\)\.toBe\((\d+)\);\n',
-     lambda o, w: [f'{o} -> {w} at {label}: {n} svg-description golden clone',
+     lambda o, w: [f'{o} -> {w} at {label}: {n} {kind} golden clone',
                    f'row(s) ({breakdown}), rendering on both sides.',
                    f'Derivation: {o} + {n} = {w}.'])
 bump(F, r'( *)expect\(pinnedRendering\.length\)\.toBe\((\d+)\);\n',
-     lambda o, w: [f'{o} -> {w} at {label}: +{n} rendering svg-description',
+     lambda o, w: [f'{o} -> {w} at {label}: +{n} rendering {kind}',
                    f'golden clone row(s). Derivation: {o} + {n} = {w}.'])

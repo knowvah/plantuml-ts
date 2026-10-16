@@ -119,7 +119,7 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         in portLabelAnchor (class-edge-geo.ts:202-223). 
         CONSUMED 2026-10-15 (codd): T9 carries quantifier text to taillabel/headlabel (link-edge-attrs.ts applyQualifierLabels; SvekEdge.java:447-468); builder == native incl. tail_lp/head_lp on fetefi, nofunu, purevo; T8 fixed misube's node order (GraphvizImageBuilder.java:226-227). Render-diff b5: purevo 1/0, misube 1/0, fetefi 3/2, nofunu 23/4 -- the quantifier TEXT is not drawn yet (ours, renderer-edge/SvekEdge). -->
 - [x] 13-edge-tail-head-label-positions-not-in-getlayout.md
-- [ ] 14-cluster-label-position-not-in-getlayout.md  <!-- FIXED upstream
+- [x] 14-cluster-label-position-not-in-getlayout.md  <!-- FIXED upstream
         2026-08-14: ClusterGeometry carries label {x, y, width, height}, where
         x/y is the label CENTRE (the box's own x/y is a corner, and render()'s
         <text> carries the baseline — three conventions in one object).
@@ -148,7 +148,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         moment T7 landed the bump recorded above, and removed 2026-08-15.)
         2026-10-12 (dot-engine plantuml-tracker-2): consumer-side; no
         dot-engine work. 
-        CONSUMED 2026-10-15 (codd): engine == native; cluster.label still never consumed. T2 draws containers at the engine cluster rect; T7b centres rect/rectangle/card titles from the composite title style (ClusterHeader.java:121-128, USymbolRectangle.java:126-131) while package/folder titles stay at USymbolFolder.java:228 UTranslate(4, 2). Box stays open: no upstream fix to consume; ours on the remaining title rows. -->
+        CONSUMED 2026-10-15 (codd): engine == native; cluster.label still never consumed. T2 draws containers at the engine cluster rect; T7b centres rect/rectangle/card titles from the composite title style (ClusterHeader.java:121-128, USymbolRectangle.java:126-131) while package/folder titles stay at USymbolFolder.java:228 UTranslate(4, 2). Box stays open: no upstream fix to consume; ours on the remaining title rows. 
+        TICKED 2026-10-16 (gtc T8, D3): the ClusterHeader-family state composite title Y now reads `clusters[].label` (min Y = label.y - label.height/2), as DotStringFactory.java:436-439 / Cluster.java:274-276 / :496-498 do; CLUSTER_TITLE_BASELINE_MARGIN removed. Zero conformant losses in all engines; output byte-identical on all 273 state rows, 0 state census rows moving away. Border-point family and class/description package titles unchanged by D3. -->
 - [~] 15-cluster-anchor-point-ranked-with-target.md  <!-- RECLASSIFIED 2026-08-19:
         NOT a dot-engine defect. The filing compared two different quantities --
         the jar's DRAWN spline start (88.187, i.e. where PlantUML clips the path
@@ -170,7 +171,7 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         clip we already ship (DIVERGENCES.md:688) to state composite-anchor
         transitions before LimitFinder folds the spline into the ink extent. 
         CONSUMED 2026-10-15 (codd): IDENTICAL on 50/50 zaent fixtures (T0b). codd T2 draws the cluster box at the engine rect, which moved the ours-draw zaent rows (e.g. repoge 36/18 -> 37/16, link label + magic-arrow residuals). -->
-- [ ] 16-edge-xlabel-position-not-in-getlayout.md  <!-- FIXED upstream
+- [x] 16-edge-xlabel-position-not-in-getlayout.md  <!-- FIXED upstream
         2026-08-19: EdgeGeometry carries `xlabel {x, y}`, snapshotted from
         edge.info.xlabel through the same flipY as every other coordinate and
         gated on the SAME `lp->set` flag issue 13 introduced (an xlabel the
@@ -320,7 +321,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         2026-10-12 (dot-engine plantuml-tracker-2): consumer-side; no
         dot-engine work. 03 is consumed -- re-measure pavuzo-79-zodu430 and
         tick if clean.
-        RE-MEASURED 2026-10-14 (dot-engine pinned at 2.4.0): state/pavuzo-79-zodu430 is still 4/85, so the box stays open. Our builder graph lays out identically to native `dot -Tdot` on the jar DOT (bb and all 6 edge pos), so the residual is plantuml-ts post-layout work. -->
+        RE-MEASURED 2026-10-14 (dot-engine pinned at 2.4.0): state/pavuzo-79-zodu430 is still 4/85, so the box stays open. Our builder graph lays out identically to native `dot -Tdot` on the jar DOT (bb and all 6 edge pos), so the residual is plantuml-ts post-layout work. 
+        TICKED 2026-10-16 (gtc T7a/T7b): state/pavuzo-79-zodu430 conformant on dot-engine 2.4.0; render-diff 0/0. T7a emits textLength on transition label text (SvgGraphics.java:700-706); T7b folds the xlabel's marged-block UEmpty into the document ink walk (TextBlockMarged.java:79-87, LimitFinder.java:159-162, SvekResult.java:130-135), closing the uniform 1 px x shift. -->
 - [~] 18-compound-clip-last-segment-shape-delta.md  <!-- RECLASSIFIED 2026-09-26: NOT
         dot-engine. On the cached svek-1.dot of bejusa-95-gafo325 and
         pecabi-95-demu756, dot-engine (main and branch), native graphviz 15.1 and

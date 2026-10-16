@@ -16,8 +16,8 @@ T0 fills `b0`. Each task close fills the column for its own tag.
 | 30 | component/repoge-41-demu604 | 37/16 | diverged | 37/16 diverged | | |
 | 29 | unknown/xagonu-36-sudi116 | 45/887 | diverged | 45/887 diverged | | |
 | 28 | unknown/deroxu-29-gude369 | 719/1237 | diverged | 719/1237 diverged | T2 687/1237 diverged | |
-| 16 | state/pavuzo-79-zodu430 | 4/85 | diverged | 4/85 diverged | | |
-| 14 | (no row: D3 criterion) | — | — | | | |
+| 16 | state/pavuzo-79-zodu430 | 4/85 | diverged | 4/85 diverged | S 0/0 conformant | [x] 2026-10-16 gtc S |
+| 14 | (no row: D3 criterion) | — | — | | T8 byte-identical, 0 losses | [x] 2026-10-16 gtc S |
 
 Out of scope (record only): 36 unknown/zodela-36-sica712 0/1, usecase/cimare-47-deke334 conformant.
 Already `[~]`: 31 class/zuduxu-90-kosi876 (conformant, errorPage).
@@ -27,3 +27,5 @@ One line per tick or open residual: `<item> <date> <task> <verdict> <mechanism /
 34 2026-10-16 T0 TICKED: rubebe conformant (errorPage; stock jar NPE `pt4` is null), dot-engine 2.4.0
 32 2026-10-16 T1 rufopi conformant 0/0 (root style BackgroundColor fills containers); box open on zosuje (T2)
 32 2026-10-16 T2 zosuje 13/0 open: font-style + link colour originate in src/core (stop 1, awaiting ruling)
+16 2026-10-16 S TICKED: pavuzo conformant 0/0 (T7a textLength, T7b label-box ink fold)
+14 2026-10-16 S TICKED (D3): title Y from clusters[].label; 0 losses, 0 state census rows away
