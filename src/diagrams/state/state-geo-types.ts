@@ -357,6 +357,9 @@ export interface TransitionGeo {
     text: string;
     x: number;
     y: number;
+    /** The drawn string's measured width (`SvgGraphics.java:700-706`
+     *  `textLength`); absent when the drawn text is not one measured line. */
+    textLength?: number;
     width?: number;
     height?: number;
     inkBox?: LabelInkBox;
