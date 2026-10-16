@@ -1,0 +1,6 @@
+@startuml
+package "P" [[http://example.com/p{pkg tip}]] {
+  [A]
+}
+[B] --> [A]
+@enduml

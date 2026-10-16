@@ -1,0 +1,9 @@
+@startuml
+package "Outer" [[http://example.com/outer{outer tip}]] {
+  rectangle "Inner" [[http://example.com/inner{inner tip}]] {
+    [A]
+  }
+  [C]
+}
+[B] --> [A]
+@enduml
