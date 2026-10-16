@@ -42,6 +42,10 @@ export interface DescriptionNodeGeo {
    *  from `DescriptiveNode.stereotypeSprite` so the renderer can resolve the
    *  SAME sprite the sizer measured (`planning/sizer-renderer-parity.md`). */
   stereotypeSprite?: StereotypeSpriteRef;
+  /** Resolved inline `[[url{tooltip}]]` (`Entity#getUrl99`), built once at the layout seam from
+   *  `DescriptiveNode.url` with `UrlBuilder(topurl, STRICT)`; a plain object because `Url` keeps private fields.
+   *  Set on leaves AND containers (`EntityImageDescription.java:139`; cluster headers consume it later). */
+  url?: { readonly url: string; readonly tooltip: string };
   /** Raw inline color/style override string (`#orange;line:blue`,
    *  `#line.dashed`), verbatim from `DescriptiveNode.color` — parsed at
    *  render time by `renderer-entity.ts#parseColorOverride` (mirrors
