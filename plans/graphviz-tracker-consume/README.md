@@ -76,7 +76,7 @@ merge-commit PR (D7).
 
 | Batch | Tasks | Lane | Done |
 |---|---|---|---|
-| [0](batch-0/overview.md) baseline; tick 34 | T0 | orchestrator | [ ] |
+| [0](batch-0/overview.md) baseline; tick 34 | T0 | orchestrator | [x] |
 | [1a](batch-1a/overview.md) styles, arrows, draw order (32, 33, 30) | T1 → T2 → T3 → T4 | description | [ ] |
 | [1b](batch-1b/overview.md) xagonu (29) | T5a → T5b | description | [ ] |
 | [1c](batch-1c/overview.md) deroxu (28) | T6a → T6b… | description | [ ] |

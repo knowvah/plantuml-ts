@@ -697,7 +697,7 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): parallel labelled non-flat edges, second edge's Bezier join at other label-box end; xenusu-76-sabi405.
         RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-33.test.ts (inline, xenusu, quote)
         CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): component/xenusu-76-sabi405 render-diff 7/29 -> 7/8 (the bend moved to the jar's side). Our own builder graph lays out identically to native `dot -Tdot` on the jar DOT (bb and every edge pos), so the residual is plantuml-ts post-layout work, not an upstream wait. -->
-- [ ] 34-html-table-border-emitted-before-cells.md  <!-- FIXED 2026-10-14, on dot-engine main 67f3ad3a
+- [x] 34-html-table-border-emitted-before-cells.md  <!-- FIXED 2026-10-14, on dot-engine main 67f3ad3a
         (PR #86, rebase-merged; branch sha 704a97ed), NOT YET PUBLISHED.
         Mechanism: port of graphviz 16.1 commit f0d07786b, which draws the table
         rules and border before the cells (emit_html_tbl); dot-engine drew them
@@ -708,7 +708,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         16.1.0 sync follow-on. No dot-engine fix on the 15.x oracle.
         PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): 16.1.0 draws table border before cells, dot-engine after (matches 15.0 source); order-only; seen in rubebe-45-sura795.
         RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-34.test.ts (inline, rubebe, quote)
-        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): published in 2.4.0 (PR #86; the branch sha 704a97ed was rebased to 67f3ad3a). The emission order only affects dot-engine's own SVG renderer, which svek discards; unknown/rubebe-45-sura795 is still 160/63, bytes unchanged. Our own builder graph lays out identically to native `dot -Tdot` on the jar DOT (bb and every edge pos), so the residual is plantuml-ts post-layout work, not an upstream wait. -->
+        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): published in 2.4.0 (PR #86; the branch sha 704a97ed was rebased to 67f3ad3a). The emission order only affects dot-engine's own SVG renderer, which svek discards; unknown/rubebe-45-sura795 is still 160/63, bytes unchanged. Our own builder graph lays out identically to native `dot -Tdot` on the jar DOT (bb and every edge pos), so the residual is plantuml-ts post-layout work, not an upstream wait.
+        TICKED 2026-10-16 (gtc T0): unknown/rubebe-45-sura795 conformant on dot-engine 2.4.0 (survey verdict conformant, errorPage: true; the stock jar crashes with an NPE, `pt4` is null, and stock-error-pages.json carries provenance oracle-widths); render-diff n/a (error page, docs/svg-conformance.md "Error pages"). -->
 - [x] 35-narrow-edge-label-parallel-edges-layout-offset.md  <!-- FIXED 2026-10-12, on main cdf597bc (PR #85, rebase-merged),
         published in @knowvah/dot-engine 2.3.1 (2026-10-12T13:41Z).
         PREVIOUS NOTE FOLLOWS: FIXED 2026-10-12 on
