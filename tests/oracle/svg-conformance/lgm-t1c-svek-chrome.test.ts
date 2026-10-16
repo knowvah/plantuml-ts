@@ -19,7 +19,6 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { compareSvg, type Diff } from './compare.js';
 
 const DIR = 'tests/fixtures/lgm-T1c';
-const LABEL_TEXT_LENGTH = 'svg/g[1]/g[6]/text[1]/@textLength';
 
 function diffsOf(name: string): readonly Diff[] {
   const read = (ext: string) => readFileSync(join(DIR, `${name}.${ext}`), 'utf8');
@@ -51,11 +50,10 @@ describe('lgm-T1c: description chrome equals the jar', () => {
 });
 
 describe('lgm-T1c: state chrome equals the jar', () => {
-  it.each([
-    ['state-title-only', LABEL_TEXT_LENGTH],
-    ['state-frame-chrome', 'svg/g[1]/g[7]/text[1]/@textLength'],
-  ])('%s', (name, residual) => {
-    expect(pathsOf(name)).toEqual([residual]);
+  // gtc-T7a closed the transition label textLength residual both rows carried
+  // (`SvgGraphics.java:700-706` emits it on every multi-char <text>).
+  it.each(['state-title-only', 'state-frame-chrome'])('%s', (name) => {
+    expect(pathsOf(name)).toEqual([]);
   });
 
   it('state-frame-notes: frame, canvas and positions exact; note draw order differs', () => {

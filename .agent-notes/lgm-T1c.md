@@ -31,7 +31,7 @@ Jar state-frame: box x=11 with frame (block at x=1) vs x=7 without; reproduced e
 - comment refs to computeInkShift remain in description/renderer*.ts (not in write-set; stale name only)
 
 ## Fixtures before -> after (probe: renderSync+DeterministicMeasurer vs jar)
-state-frame 85 -> 1 (label textLength, chrome-independent); component-frame 44 -> 0; usecase-frame 48 -> 0;
+state-frame 85 -> 1 (label textLength, chrome-independent; closed 2026-10-16 by gtc-T7a); component-frame 44 -> 0; usecase-frame 48 -> 0;
 state-frame-chrome 98 -> 1; state-title-only 32 -> 1; state-frame-notes 88 -> 8 (note draw order, body);
 component-frame-chrome 55 -> 0; component-title-only 21 -> 0; deployment-frame -> 1 (cloud glyph path coord);
 usecase-frame-note -> 5 (note entity order, body); state-frame-composite 124 -> 62 (OPEN, below) -> 0 with patch.
