@@ -464,6 +464,37 @@ export function stripUrl(rest: string): string {
 }
 
 /**
+ * The element's own `[[url]]` token, verbatim (brackets included), or
+ * `undefined`. Same quote/bracket walk as {@link stripUrl}, so a token inside
+ * a quoted display or a `[ ... ]` code is display text, not the URL.
+ * Upstream captures the group raw (`CommandCreateElementFull.java:113`,
+ * `UrlBuilder.OPTIONAL`) and builds the Url at `:333-337`; the parser has no
+ * theme, so the token travels raw (D4).
+ */
+export function extractUrlToken(rest: string): string | undefined {
+  let i = 0;
+  let quote: string | undefined;
+  let bracket = false;
+  while (i < rest.length) {
+    const ch = rest[i]!;
+    if (quote !== undefined || bracket) {
+      if (ch === quote) quote = undefined;
+      else if (bracket && ch === ']') bracket = false;
+      i += 1;
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+      i += 1;
+    } else {
+      const token = stripUrlTokenAt(rest, i);
+      if (token !== undefined && token.keep === '') return rest.slice(i, i + token.length);
+      if (ch === '[') bracket = true;
+      i += token?.length ?? 1;
+    }
+  }
+  return undefined;
+}
+
+/**
  * Splits `rest` into a leading quoted span (delimiters + content, BOTH
  * untouched) and everything after it. `undefined` when `rest` does not
  * start with `"` or `'`.

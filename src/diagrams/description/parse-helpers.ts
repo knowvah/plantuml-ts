@@ -17,6 +17,7 @@ import {
   extractColor,
   extractNodeStereotype,
   extractTags,
+  extractUrlToken,
   finalizeDisplay,
   splitLeadingQuote,
   stripTrailingUrl,
@@ -34,6 +35,7 @@ export {
   rawStereotypeLabels,
   carryRawStereotypeLabels,
   stripUrl,
+  extractUrlToken,
   resolveInlineLinks,
   extractColor,
   extractTags,
@@ -85,6 +87,8 @@ export interface NameSection {
   stereotypeSprite?: StereotypeSpriteRef;
   color?: string;
   tags?: string[];
+  /** Raw `[[url]]` token — see `DescriptiveNode.url`. */
+  url?: string;
 }
 
 interface IdDisplay {
@@ -157,12 +161,14 @@ export function makeNode(
   color?: string,
   tags?: string[],
   stereotypeSprite?: StereotypeSpriteRef,
+  decorations?: { url?: string | undefined },
 ): DescriptiveNode {
   const node: DescriptiveNode = { id, display, symbol, children: [] };
   if (stereotype !== undefined) node.stereotype = stereotype;
   if (color !== undefined) node.color = color;
   if (tags !== undefined) node.tags = tags;
   if (stereotypeSprite !== undefined) node.stereotypeSprite = stereotypeSprite;
+  if (decorations?.url !== undefined) node.url = decorations.url;
   return node;
 }
 
@@ -220,6 +226,7 @@ function buildNameSection(
   const section: NameSection = { id, display };
   if (decoration.stereotype !== undefined) section.stereotype = decoration.stereotype;
   if (decoration.stereotypeSprite !== undefined) section.stereotypeSprite = decoration.stereotypeSprite;
+  if (decoration.url !== undefined) section.url = decoration.url;
   if (color !== undefined) section.color = color;
   if (tags !== undefined && tags.length > 0) section.tags = tags;
   return section;
@@ -230,6 +237,7 @@ function buildNameSection(
 interface NameDecoration {
   stereotype?: readonly string[] | undefined;
   stereotypeSprite?: StereotypeSpriteRef | undefined;
+  url?: string | undefined;
 }
 
 /**
@@ -256,6 +264,8 @@ export function parseNameSection(rest: string): NameSection {
   // `rectangle "<<something>>\n==label\n..."` node (S1L-f).
   let remainder = leading === undefined ? stripUrl(trimmedRest) : stripTrailingUrl(leading.tail);
   const decoration: NameDecoration = {};
+  const url = extractUrlToken(leading === undefined ? trimmedRest : leading.tail);
+  if (url !== undefined) decoration.url = url;
   let color: string | undefined;
 
   const sr = extractNodeStereotype(remainder);
