@@ -57,3 +57,10 @@ One branch, `fix/graphviz-tracker-consume`, one commit per task, no attribution 
 unsigned (main requires signed commits; the YubiKey needs a PIN). At exit you run
 `git rebase -S 9094705aa`. After that, push the branch and open a **merge-commit** PR (mission
 branches keep per-task shas for the journal).
+
+### D5 amendment (user ruling 2026-10-18, after T2's stop 1)
+The description lane may also write `src/core/**` for the **style-cascade mechanisms**: T2's two (component
+`<style> FontStyle` reaching the theme, `style-map-element.ts`; a description-diagram `arrow` style cascade,
+`style-cascade-class*.ts` + a Theme field), and T3's `;line.Bold()` skinparam parsing if it lives in core.
+Core edits follow the T6b core rules: the task also runs the class/object/state golden ratchets, and its close
+runs the all-engine survey (`chain.sh`), not just the description trees. Flagged for review.
