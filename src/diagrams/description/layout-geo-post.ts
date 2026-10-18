@@ -111,11 +111,10 @@ function assembleEdgeGeo(
   if (link.tailDecor !== undefined) geo.tailDecor = link.tailDecor;
   if (link.headDecor !== undefined) geo.headDecor = link.headDecor;
   if (link.creationIndex !== undefined) geo.creationIndex = link.creationIndex;
-  // G1 I-hideshow: `Link#isHidden()`'s `cl1.isHidden() || cl2.isHidden()`
-  // disjunct (abel/Link.java:458-459) -- see `DescriptionEdgeGeo.hidden`'s
-  // doc comment for why the `-[hidden]-` keyword disjunct is NOT folded in
-  // here (G1 I-linkstyle: attempted and REVERTED -- see that doc comment).
-  if (hidden.has(link.from) || hidden.has(link.to)) geo.hidden = true;
+  // `Link#isHidden()` (abel/Link.java:458-459): `hidden || cl1.isHidden() || cl2.isHidden()` -- the
+  // `-[hidden]-` keyword (`WithLinkType#goHidden`, WithLinkType.java:149-150) and the two endpoint
+  // disjuncts. The renderer paints nothing for it but still feeds the LimitFinder pass.
+  if (link.hidden === true || hidden.has(link.from) || hidden.has(link.to)) geo.hidden = true;
   return geo;
 }
 

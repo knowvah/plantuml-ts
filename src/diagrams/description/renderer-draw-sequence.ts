@@ -244,7 +244,6 @@ export function drawEdges(
     // entirely absent once `comp2` is hidden, but still fully
     // ink-measured). uid assignment (`plan.edgeUid`, above) already ran
     // unconditionally.
-    if (respectHidden && edge.hidden === true) return;
     // T1e (opale note port): `SvekEdge#drawU`'s `if (opale) return;` --
     // this edge's note end already drew the connector as part of its own
     // Opale outline (`renderer-entity.ts#drawEntity` -> `drawOpaleShape`);
@@ -254,7 +253,7 @@ export function drawEdges(
     // precedent for the class engine).
     if (edge.consumedByOpaleNote === true) return;
     try {
-      drawEdge(ug, edge, theme, plan.edgeUid[i]!, plan.nodeUid, sharedIds);
+      drawEdge(ug, edge, theme, plan.edgeUid[i]!, plan.nodeUid, sharedIds, respectHidden && edge.hidden === true);
     } catch (err) {
       console.error('renderDescription: edge draw failed', edge.id, err);
     }

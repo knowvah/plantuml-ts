@@ -303,6 +303,18 @@ export class SvekEdge implements UDrawable {
     groupable.closeGroup?.();
   }
 
+  /**
+   * `SvekResult#drawU` draws a hidden edge through `ug.apply(UHidden.HIDDEN)` (SvekResult.java:98): each
+   * `SvgGraphics` element writer is gated by `if (hidden == false)` (SvgGraphics.java:337,352,...), so the
+   * `<g class="link">` stays empty (and is dropped), while `SvekEdge#drawU`'s comment (SvekEdge.java:845) is
+   * still written and `uniq(ids, ...)` still consumes the path id (SvekEdge.java:944). The ink extent is
+   * counted by the LimitFinder pass, which draws the edge un-hidden (it never sees `UHidden`).
+   */
+  drawHiddenU(ug: UGraphic): void {
+    ug.draw(this.commentForSvg());
+    this.uniq(this.ids, this.idCommentForSvg());
+  }
+
   private drawExtremity(ug: UGraphic, placed: PlacedExtremity | undefined, thicknessOnlyStroke: UStroke): void {
     if (placed === undefined) return;
     const backed = ug.apply(thicknessOnlyStroke).apply(new Back(placed.isFill ? this.input.color : 'none'));

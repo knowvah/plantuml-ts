@@ -175,10 +175,12 @@ export function drawEdge(
   uid: string,
   nodeUid: ReadonlyMap<string, string>,
   sharedIds: Set<string>,
+  hidden = false,
 ): void {
   const fromUid = nodeUid.get(edge.from) ?? edge.from;
   const toUid = nodeUid.get(edge.to) ?? edge.to;
   const svekEdge = new SvekEdge(buildInput(edge, theme, uid, fromUid, toUid));
   svekEdge.setSharedIds(sharedIds);
-  svekEdge.drawU(ug);
+  if (hidden) svekEdge.drawHiddenU(ug);
+  else svekEdge.drawU(ug);
 }
