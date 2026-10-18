@@ -701,7 +701,8 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         Re-measure on the next .tgz bump: component/xenusu-76-sabi405.
         PREVIOUS NOTE FOLLOWS: FILED 2026-10-08 (lgm-T0c): parallel labelled non-flat edges, second edge's Bezier join at other label-box end; xenusu-76-sabi405.
         RE-VERIFIED 2026-10-14 against graphviz 16.1.0 (dot-engine oracle now matches homebrew 16.1.0): pass — test/golden/pt-issue-33.test.ts (inline, xenusu, quote)
-        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): component/xenusu-76-sabi405 render-diff 7/29 -> 7/8 (the bend moved to the jar's side). Our own builder graph lays out identically to native `dot -Tdot` on the jar DOT (bb and every edge pos), so the residual is plantuml-ts post-layout work, not an upstream wait. -->
+        CONSUMED 2026-10-14 in plantuml-ts (dot-engine pinned at 2.4.0): component/xenusu-76-sabi405 render-diff 7/29 -> 7/8 (the bend moved to the jar's side). Our own builder graph lays out identically to native `dot -Tdot` on the jar DOT (bb and every edge pos), so the residual is plantuml-ts post-layout work, not an upstream wait. 
+        MEASURED 2026-10-18 (gtc T3): component/xenusu-76-sabi405 7/2 -> 0/2 (structural-match): `skinparam arrow<<tag>> { Color X;line.Bold() }` now reaches the link (FromSkinparamToStyle.java:292-410; SvekEdge.java:816-821). The 2 numeric are svg/@width + viewBox 354 vs 353: the edge label's TextBlockMarged UEmpty (SvekEdge.java:372-373, TextBlockMarged.java:81-87) is not drawn by src/core/svek/SvekEdge.ts:330-336; user allowed that file 2026-10-18 (T3b). -->
 - [x] 34-html-table-border-emitted-before-cells.md  <!-- FIXED 2026-10-14, on dot-engine main 67f3ad3a
         (PR #86, rebase-merged; branch sha 704a97ed), NOT YET PUBLISHED.
         Mechanism: port of graphviz 16.1 commit f0d07786b, which draws the table

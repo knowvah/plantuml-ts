@@ -64,3 +64,8 @@ The description lane may also write `src/core/**` for the **style-cascade mechan
 `style-cascade-class*.ts` + a Theme field), and T3's `;line.Bold()` skinparam parsing if it lives in core.
 Core edits follow the T6b core rules: the task also runs the class/object/state golden ratchets, and its close
 runs the all-engine survey (`chain.sh`), not just the description trees. Flagged for review.
+
+### D5 amendment 2 (user ruling 2026-10-18, after T3's stop 1)
+The description lane may also write `src/core/svek/SvekEdge.ts` (imported only by
+`src/diagrams/description/renderer-edge.ts`) for the edge label's `TextBlockMarged` UEmpty
+(`SvekEdge.java:372-373`, `TextBlockMarged.java:81-87`), as T3b under the core rules. Flagged for review.

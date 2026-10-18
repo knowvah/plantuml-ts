@@ -2285,6 +2285,18 @@
       "type": "unknown",
       "addedAt": "2026-10-18",
       "source": "dot-cache"
+    },
+    {
+      "slug": "style-stereotype-on-arrow-1",
+      "type": "component",
+      "addedAt": "2026-10-18",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "style-stereotype-on-arrow-0",
+      "type": "usecase",
+      "addedAt": "2026-10-18",
+      "source": "dot-cache"
     }
   ]
 }
