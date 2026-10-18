@@ -36,7 +36,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | state | state | 278 | 273 | 267/268 (100%) | 78 / 11 / 184 (4 error) | 252/269 | 71 | 95 | n/a (no diff-baseline yet) | 269/273 | 273/273 |
 | timing | n/a (no engine (D1 todo)) | 126 | 126 | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) |
 | unknown | n/a (accounting bucket) | 825 | 825 | n/a (no data-diagram-type classification) | 486 / 16 / 323 (25 error) | 365/376 | n/a (no census yet) | 15 | 0 · 0 | 696/825 | 780/825 |
-| usecase | description | 351 | 94 | 93/93 (100%) | 62 / 4 / 27 | 72/73 | 62 | 65 | 6 · 107 | 94/94 | 94/94 |
+| usecase | description | 351 | 94 | 93/93 (100%) | 62 / 4 / 27 | 72/73 | 62 | 66 | 6 · 107 | 94/94 | 94/94 |
 | wbs | wbs | 204 | 204 | n/a (no DOT stage (non-svek)) | 204 / 0 / 0 (28 error) | n/a (no DOT stage (non-svek)) | n/a (no census yet) | 176 | 28 · 1070 | 178/204 | 180/204 |
 | wire | n/a (no engine (D12 todo)) | 18 | 18 | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) |
 | yaml | yaml | 40 | 39 | n/a (no DOT stage (non-svek)) | 7 / 28 / 4 | n/a (no DOT stage (non-svek)) | 7 | 6 | n/a (no diff-baseline yet) | 39/39 | 39/39 |
