@@ -1078,7 +1078,10 @@ describe('routing conformance — jar-error classification', () => {
     // 6525 -> 6531 agree at gtc T3b: +6 svg-description golden
     // clones (component 4, usecase 2) of agree-classified dot-cache rows.
     // Derivation: 6531 + 642 + 86 = 7259.
-    expect(pinnedAgree.length).toBe(6531);
+    // 6531 -> 6537 agree at gtc T4: +6 svg-description golden
+    // clones (component 5, unknown 1) of agree-classified dot-cache rows.
+    // Derivation: 6537 + 642 + 86 = 7265.
+    expect(pinnedAgree.length).toBe(6537);
     expect(pinnedMisroutes.length).toBe(642);
     expect(pinnedJarErrors.length).toBe(86);
     // 7202 -> 7203 at gtc T1 (see the agree derivation above).
@@ -1087,7 +1090,8 @@ describe('routing conformance — jar-error classification', () => {
     // 7249 -> 7251 at gtc T2b (see the agree derivation above).
     // 7251 -> 7253 at gtc T3 (see the agree derivation above).
     // 7253 -> 7259 at gtc T3b (see the agree derivation above).
-    expect(manifest.fixtures.length).toBe(7259);
+    // 7259 -> 7265 at gtc T4 (see the agree derivation above).
+    expect(manifest.fixtures.length).toBe(7265);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
