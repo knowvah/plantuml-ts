@@ -18,7 +18,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | chart | chart | 29 | 29 | n/a (no DOT stage (non-svek)) | 0 / 0 / 29 | n/a (no DOT stage (non-svek)) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/29 | 29/29 |
 | chronology | chronology | 1 | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) |
 | class | class | 768 | 723 | 712/712 (100%) | 723 / 0 / 0 (3 error) | 547/548 | 1003 | 1003 | n/a (no diff-baseline yet) | 720/723 | 723/723 |
-| component | description | 384 | 266 | 260/263 (99%) | 188 / 13 / 65 | 248/251 | 187 | 193 | 15 · 42 | 266/266 | 266/266 |
+| component | description | 384 | 266 | 260/263 (99%) | 188 / 13 / 65 | 248/251 | 187 | 197 | 15 · 42 | 266/266 | 266/266 |
 | ditaa | n/a (no engine (D8 todo)) | 2 | 2 | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) |
 | dot | dot | 62 | 5 | n/a (no DOT stage (non-svek)) | 5 / 0 / 0 | n/a (no DOT stage (non-svek)) | 5 | 5 | n/a (no diff-baseline yet) | 5/5 | 5/5 |
 | ebnf | n/a (no engine (D10 todo)) | 44 | 44 | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) |
@@ -36,7 +36,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | state | state | 278 | 273 | 267/268 (100%) | 78 / 11 / 184 (4 error) | 252/269 | 71 | 95 | n/a (no diff-baseline yet) | 269/273 | 273/273 |
 | timing | n/a (no engine (D1 todo)) | 126 | 126 | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) |
 | unknown | n/a (accounting bucket) | 825 | 825 | n/a (no data-diagram-type classification) | 486 / 16 / 323 (25 error) | 365/376 | n/a (no census yet) | 15 | 0 · 0 | 696/825 | 780/825 |
-| usecase | description | 351 | 94 | 93/93 (100%) | 62 / 4 / 27 | 72/73 | 62 | 63 | 6 · 107 | 94/94 | 94/94 |
+| usecase | description | 351 | 94 | 93/93 (100%) | 62 / 4 / 27 | 72/73 | 62 | 65 | 6 · 107 | 94/94 | 94/94 |
 | wbs | wbs | 204 | 204 | n/a (no DOT stage (non-svek)) | 204 / 0 / 0 (28 error) | n/a (no DOT stage (non-svek)) | n/a (no census yet) | 176 | 28 · 1070 | 178/204 | 180/204 |
 | wire | n/a (no engine (D12 todo)) | 18 | 18 | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) |
 | yaml | yaml | 40 | 39 | n/a (no DOT stage (non-svek)) | 7 / 28 / 4 | n/a (no DOT stage (non-svek)) | 7 | 6 | n/a (no diff-baseline yet) | 39/39 | 39/39 |

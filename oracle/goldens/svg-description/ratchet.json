@@ -2297,6 +2297,42 @@
       "type": "usecase",
       "addedAt": "2026-10-18",
       "source": "dot-cache"
+    },
+    {
+      "slug": "figika-36-sola271",
+      "type": "component",
+      "addedAt": "2026-10-18",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "nevuzi-33-duna992",
+      "type": "component",
+      "addedAt": "2026-10-18",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "revusu-28-pexi248",
+      "type": "component",
+      "addedAt": "2026-10-18",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "xenusu-76-sabi405",
+      "type": "component",
+      "addedAt": "2026-10-18",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "dopova-50-digo290",
+      "type": "usecase",
+      "addedAt": "2026-10-18",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "zilisi-99-rate911",
+      "type": "usecase",
+      "addedAt": "2026-10-18",
+      "source": "dot-cache"
     }
   ]
 }
