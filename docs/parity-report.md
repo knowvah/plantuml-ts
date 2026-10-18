@@ -36,7 +36,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | state | state | 278 | 273 | 267/268 (100%) | 78 / 11 / 184 (4 error) | 252/269 | 71 | 95 | n/a (no diff-baseline yet) | 269/273 | 273/273 |
 | timing | n/a (no engine (D1 todo)) | 126 | 126 | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) |
 | unknown | n/a (accounting bucket) | 825 | 825 | n/a (no data-diagram-type classification) | 486 / 16 / 323 (25 error) | 365/376 | n/a (no census yet) | 15 | 0 · 0 | 696/825 | 780/825 |
-| usecase | description | 351 | 94 | 93/93 (100%) | 62 / 4 / 27 | 72/73 | 62 | 66 | 6 · 107 | 94/94 | 94/94 |
+| usecase | description | 351 | 94 | 93/93 (100%) | 62 / 4 / 27 | 72/73 | 62 | 66 | 6 · 4 | 94/94 | 94/94 |
 | wbs | wbs | 204 | 204 | n/a (no DOT stage (non-svek)) | 204 / 0 / 0 (28 error) | n/a (no DOT stage (non-svek)) | n/a (no census yet) | 176 | 28 · 1070 | 178/204 | 180/204 |
 | wire | n/a (no engine (D12 todo)) | 18 | 18 | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) | n/a (no engine (D12 todo)) |
 | yaml | yaml | 40 | 39 | n/a (no DOT stage (non-svek)) | 7 / 28 / 4 | n/a (no DOT stage (non-svek)) | 7 | 6 | n/a (no diff-baseline yet) | 39/39 | 39/39 |
@@ -69,7 +69,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | state | 2026-10-14T22:23:45.423Z | 2026-10-14T22:00:15.919Z | 2026-09-20T18:49:43.659Z | 2026-10-16 | — | 2026-08-23 | 2026-08-24 |
 | timing | — | — | — | — | — | — | — |
 | unknown | — | 2026-10-16T16:10:52.637Z | — | 2026-10-13 | 2026-10-14 | 2026-10-14 | 2026-10-14 |
-| usecase | 2026-10-14T22:23:45.423Z | 2026-10-16T16:11:23.068Z | 2026-10-15T17:56:48.384Z | 2026-10-18 | 2026-10-14 | 2026-08-23 | 2026-08-24 |
+| usecase | 2026-10-14T22:23:45.423Z | 2026-10-16T16:11:23.068Z | 2026-10-15T17:56:48.384Z | 2026-10-18 | 2026-10-18 | 2026-08-23 | 2026-08-24 |
 | wbs | — | 2026-10-13T19:54:29.653Z | — | 2026-10-13 | 2026-10-13 | 2026-10-13 | 2026-10-13 |
 | wire | — | — | — | — | — | — | — |
 | yaml | — | 2026-10-10T12:15:10.430Z | 2026-09-20T18:50:12.452Z | 2026-08-09 | — | 2026-08-23 | 2026-08-24 |
