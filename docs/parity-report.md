@@ -18,7 +18,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | chart | chart | 29 | 29 | n/a (no DOT stage (non-svek)) | 0 / 0 / 29 | n/a (no DOT stage (non-svek)) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/29 | 29/29 |
 | chronology | chronology | 1 | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) |
 | class | class | 768 | 723 | 712/712 (100%) | 723 / 0 / 0 (3 error) | 547/548 | 1003 | 1003 | n/a (no diff-baseline yet) | 720/723 | 723/723 |
-| component | description | 384 | 266 | 260/263 (99%) | 188 / 13 / 65 | 248/251 | 187 | 202 | 15 · 42 | 266/266 | 266/266 |
+| component | description | 384 | 266 | 260/263 (99%) | 188 / 13 / 65 | 248/251 | 187 | 203 | 15 · 42 | 266/266 | 266/266 |
 | ditaa | n/a (no engine (D8 todo)) | 2 | 2 | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) |
 | dot | dot | 62 | 5 | n/a (no DOT stage (non-svek)) | 5 / 0 / 0 | n/a (no DOT stage (non-svek)) | 5 | 5 | n/a (no diff-baseline yet) | 5/5 | 5/5 |
 | ebnf | n/a (no engine (D10 todo)) | 44 | 44 | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) |
