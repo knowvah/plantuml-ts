@@ -26,6 +26,7 @@ import {
   resolveGlobalBorder,
 } from './style-map-element.js';
 import { computeClassStyleCascadeOverrides } from './style-cascade-class.js';
+import { computeDescriptionStyleCascadeOverrides } from './style-cascade-description.js';
 // T11 (cdd3): moved to a sibling module (500-line cap on style-cascade-
 // class.ts) -- see that file's own doc comment.
 import { computeCardinalityFontOverride, computeArrowFontOverride } from './style-cascade-class-arrow-font.js';
@@ -80,6 +81,7 @@ function computeGraphOverride(styleMap: StyleMap, base: Theme): Partial<GraphCol
   // B4 (A2s): `skinparam wrapWidth` seeds the MaximumWidth cascade defaults;
   // an explicit <style> MaximumWidth still wins (per-field ??= inside).
   Object.assign(graphOverride, computeClassStyleCascadeOverrides(styleMap, base.wrapWidth));
+  Object.assign(graphOverride, computeDescriptionStyleCascadeOverrides(styleMap));
   // D3/D4 (T2 + T6): `<style> arrow { FontName/FontSize/FontStyle }` cascade
   // -- all three fields land in `graphOverride`, mirroring
   // `skinparam-theme-builder.ts`'s `GRAPH_OVERRIDE_FIELDS`. `arrowFontSize`

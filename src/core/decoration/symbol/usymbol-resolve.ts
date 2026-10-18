@@ -219,6 +219,20 @@ export function stereotypeTextFont(
   );
 }
 
+/**
+ * gtc T2b: the bucket's own `FontStyle` (`<style> <sname> { FontStyle italic }`) REPLACES the caller's default face --
+ * `Style.java:241-253 getUFont` builds the face from the merged `PName.FontStyle`, and a user declaration overwrites
+ * the skin's (`StyleStorage.java:102-116`). `undefined` when the bucket declares none.
+ */
+function styleOverride(theme: Theme, symbol: string): ReadonlySet<FontStyle> | undefined {
+  const flags = theme.colors.elements?.[symbol]?.fontStyle;
+  if (flags === undefined) return undefined;
+  const out = new Set<FontStyle>();
+  if (flags.bold) out.add(FontStyle.BOLD);
+  if (flags.italic) out.add(FontStyle.ITALIC);
+  return out;
+}
+
 function fontConfigurationFor(
   theme: Theme,
   symbol: string,
@@ -234,7 +248,7 @@ function fontConfigurationFor(
     family: theme.fontFamily,
     size,
     color: textFontColor(theme, symbol),
-    styles,
+    styles: styleOverride(theme, symbol) ?? styles,
     ...(hyperlinkColor === undefined ? {} : { hyperlinkColor }),
   };
 }

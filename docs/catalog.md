@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1677 modules · 6129 exported names.
+1678 modules · 6132 exported names.
 
 ## `src/`
 
@@ -124,8 +124,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `style-cascade-class-font.ts` | `applyFontCascadeOverrides` | cdd-B7FU-R3 (`ropera-76-jico895`): the class-diagram FontSize/FontStyle `<style>` cascade — split out of `style-cascade-class.ts` (500-line cap), a pure addition, not a move. |
 | `style-cascade-class-generic.ts` | `applyGenericCascadeOverrides` | T11 (cdd3, Q-4): the generic type-parameter tag's own ancestor cascade -- split out of `style-cascade-class.ts` (500-line cap), mirrors `style-cascade-visibility-icon.ts`'s own split-for-size precedent (a pure addition, same import shape: ` |
 | `style-cascade-class-line.ts` | `applyLineCascadeOverrides` | cdd3-T24 (C-6, E3-8): the class box's and the class note's own stroke reads -- `LineThickness` for both, `LineColor` for the note (the class box's `LineColor` is `classCascadeBorder`, `style-cascade-class.ts`). |
-| `style-cascade-class-snames.ts` | `CLASS_SNAMES`, `HEADER_SNAMES`, `ARROW_SNAMES`, `CARDINALITY_SNAMES`, `SPOT_SNAMES`, `NOTE_SNAMES`, `QUALIFIED_SNAMES`, `GENERIC_SNAMES` | cdd-T15: the class-diagram `<style>` SIGNATURES `style-cascade-class.ts` queries — split out verbatim when the `class.qualified` signature pushed that file past the repo's 500-line cap (a pre-authorised split; each constant's upstream citat |
+| `style-cascade-class-snames.ts` | `CLASS_SNAMES`, `HEADER_SNAMES`, `ARROW_SNAMES`, `CARDINALITY_SNAMES`, `SPOT_SNAMES`, `NOTE_SNAMES`, `QUALIFIED_SNAMES`, `GENERIC_SNAMES`, `DESCRIPTION_ARROW_SNAMES` | cdd-T15: the class-diagram `<style>` SIGNATURES `style-cascade-class.ts` queries — split out verbatim when the `class.qualified` signature pushed that file past the repo's 500-line cap (a pre-authorised split; each constant's upstream citat |
 | `style-cascade-class.ts` | `GraphCascadeOverride`, `cascadeHex`, `cascadeFontColorHex`, `computeClassStyleCascadeOverrides`, `resolveClassTagCascadeEntry`, `computeClassTagCascadeGenerations` | Class-diagram `<style>` ancestor cascade (G2 N36) -- computes every `theme.colors.graph.classCascade*`/`spotCascade*` field from a raw StyleMap, pre-resolved to SVG-ready hex via {@link resolveColorToSvgHex} (the inline-`#color`-override pr |
+| `style-cascade-description.ts` | `DescriptionCascadeOverride`, `computeDescriptionStyleCascadeOverrides` | gtc T2b: the description diagram's `<style>` cascades -- the description twin of `style-cascade-class.ts`, over the description diagram's OWN style name (`componentDiagram`, `DiagramType.java:250-251`) instead of `classDiagram`. |
 | `style-cascade-visibility-icon.ts` | `applyVisibilityIconCascadeOverrides` | cdd2-T8 (S-7): `<style> visibilityIcon { <kind> { LineColor/ BackgroundColor } } }` -- split out of `style-cascade-class.ts` (500-line cap), a pure addition mirroring `style-cascade-class-font.ts`'s own split-for-size precedent. |
 | `style-line-style.ts` | `LineStyleDash`, `lineStyleDash`, `BorderStyleConversion`, `convertBorderStyleValue` | `PName.LineStyle` -- the dash half of a style's stroke, and the skinparam front-end that writes it (`skinparam <sname>BorderStyle`). |
 | `style-map-element.ts` | `collectElementStyleBuckets`, `resolveDocumentBackground`, `cleanStereotypeToken`, `collectStyleTagNames`, `resolveStyleCascade`, `computeShowStereotypeByTag`, `computeNoteStyleTagCascade`, `resolveGlobalShadowing`, `resolveGlobalBackground`, `resolveGlobalBorder` | Element-scoped `<style>` block routing — decision D4. |

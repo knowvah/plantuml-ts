@@ -22,6 +22,10 @@ import type { SequenceShadowing } from './sequence-shadowing.js';
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/SkinParam.java:1092
  */
 export interface ThemeGraphColorsC {
+  /** gtc T2b: `<style> arrow { LineColor }` over a description diagram's link signature `{root, element,
+   *  componentDiagram, arrow}` (`SvekEdge.java:816-821`); `style-cascade-description.ts`. Read by
+   *  `description/renderer-edge.ts` below an inline link colour and above `theme.colors.arrow`. */
+  descriptionCascadeArrowColor?: string;
   monospacedFontName?: string;
   /** cdd2-T8 (S-13): `skinparam classFontColor automatic` -- see
    *  `skinparam-accumulator.ts#classFontColorAutomatic`'s own doc comment.

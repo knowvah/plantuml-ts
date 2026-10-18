@@ -30,9 +30,13 @@ function collectObjectKindFont(
   bucket: Partial<ElementColors>,
   header: boolean,
 ): void {
-  if (!OBJECT_KIND_SNAMES.has(sname)) return;
-  const family = props.get('fontname');
   const style = props.get('fontstyle');
+  // gtc T2b: FontStyle reaches every bucket (`EntityImageDescription.java:142-172`); FontName stays object-kind.
+  if (!OBJECT_KIND_SNAMES.has(sname)) {
+    if (style !== undefined && !header) bucket.fontStyle = parseFontStyleFlags(style);
+    return;
+  }
+  const family = props.get('fontname');
   if (family !== undefined) bucket[header ? 'headerFontFamily' : 'fontFamily'] = family;
   if (style !== undefined) bucket[header ? 'headerFontStyle' : 'fontStyle'] = parseFontStyleFlags(style);
 }

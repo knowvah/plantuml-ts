@@ -126,7 +126,7 @@ function buildInput(
     // port's `SvekEdgeInput.color` already serves that dual role (no
     // multi-color Rainbow, see `SvekEdge.ts`'s class doc comment), so the
     // override simply replaces the theme default here.
-    color: edge.styleColor ?? theme.colors.arrow,
+    color: edge.styleColor ?? theme.colors.graph.descriptionCascadeArrowColor ?? theme.colors.arrow,
     backgroundColor: theme.colors.background,
     ...(edge.tailDecor !== undefined ? { tailDecor: edge.tailDecor } : {}),
     ...(headDecor !== undefined ? { headDecor } : {}),
