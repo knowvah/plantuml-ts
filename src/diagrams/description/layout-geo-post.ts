@@ -38,6 +38,10 @@ export interface EdgeMapping {
   geoIndex: Map<string, DescriptionNodeGeo>;
   dx: number;
   dy: number;
+  /** The `xlabel` table each dot edge was given under `skinparam linetype ortho` (`xlabelWidth`/`xlabelHeight`,
+   *  `link-edge-attrs.ts#applyMainLabel`). The engine echoes only `labelWidth`/`labelHeight`, which an ortho edge
+   *  never carries, yet the jar draws the xlabel as the same label block (`SvekEdge.java:434-441`, :951-954). */
+  xlabelTableByDotId?: ReadonlyMap<string, { w: number; h: number }>;
   /** `set separator` (`ast.namespaceSeparator`): `Quark#getName()` is the last segment of the split path
    *  (`Quark.java:84-86`), so edge ids/comments name endpoints by that leaf. */
   namespaceSeparator?: string | null | undefined;
@@ -111,7 +115,8 @@ function assembleEdgeGeo(
   return geo;
 }
 
-function addEdgeLabel(geo: DescriptionEdgeGeo, link: DescriptiveLink, re: ResultEdge, dx: number, dy: number): void {
+function addEdgeLabel(geo: DescriptionEdgeGeo, link: DescriptiveLink, re: ResultEdge, m: EdgeMapping): void {
+  const { dx, dy } = m;
   const stereotypeLabel = link.stereotypeIsLinkLabel === true && link.stereotype !== undefined;
   if (link.label === undefined && !stereotypeLabel) return;
   const at = edgeLabelGeo(re, dx, dy);
@@ -123,7 +128,9 @@ function addEdgeLabel(geo: DescriptionEdgeGeo, link: DescriptiveLink, re: Result
   const table =
     link.linkNote === undefined && re.labelWidth !== undefined && re.labelHeight !== undefined
       ? { w: re.labelWidth, h: re.labelHeight }
-      : undefined;
+      : link.linkNote === undefined
+        ? m.xlabelTableByDotId?.get(re.id)
+        : undefined;
   if (link.label === undefined && table === undefined) return;
   geo.label = { text: link.label ?? '', ...at, ...table };
 }
@@ -204,7 +211,7 @@ export function buildEdgeGeos(
     const clipped = clipEdgePoints(re.points, m.edgeContainerEndpoints.get(re.id), m.geoIndex, solve);
     const pts = clipped.map((p) => ({ x: p.x + m.dx, y: p.y + m.dy }));
     const geo = assembleEdgeGeo(linkIdx, link, pts, hidden, m.namespaceSeparator);
-    addEdgeLabel(geo, link, re, m.dx, m.dy);
+    addEdgeLabel(geo, link, re, m);
     applyOpaleNote(geo, link, pts, links, m);
     byIdx.set(linkIdx, geo);
   }

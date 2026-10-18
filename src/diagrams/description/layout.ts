@@ -20,7 +20,7 @@ import type { DescriptionDiagramAST, DescriptiveLink } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import { resolveElementFontSize, resolveElementLineThickness, resolveElementMinimumWidth } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
-import type { DotInputGraph, DotLayoutResult } from '../../core/graph-layout.js';
+import type { DotInputEdge, DotInputGraph, DotLayoutResult } from '../../core/graph-layout.js';
 import { layoutGraph } from '../../core/graph-layout.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import {
@@ -221,6 +221,17 @@ function withLinkNoteDrawn(links: readonly DescriptiveLink[]): readonly Descript
   });
 }
 
+/** The `xlabel` table of each dot edge (ortho main labels); see `EdgeMapping.xlabelTableByDotId`. */
+function xlabelTables(dotEdges: readonly DotInputEdge[]): ReadonlyMap<string, { w: number; h: number }> {
+  const out = new Map<string, { w: number; h: number }>();
+  for (const e of dotEdges) {
+    const a = e.attributes;
+    if (a?.xlabelWidth !== undefined && a.xlabelHeight !== undefined)
+      out.set(e.id, { w: a.xlabelWidth, h: a.xlabelHeight });
+  }
+  return out;
+}
+
 function buildGeoAndEdges(
   ast: DescriptionDiagramAST,
   result: DotLayoutResult,
@@ -258,6 +269,7 @@ function buildGeoAndEdges(
     geoIndex,
     dx: 0,
     dy: 0,
+    xlabelTableByDotId: xlabelTables(edgeDotBuild.dotEdges),
     namespaceSeparator: ast.namespaceSeparator,
   };
   const drawLinks = withLinkNoteDrawn(ast.links);
