@@ -7,7 +7,7 @@ each task.
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
 | T6a | Classify every deroxu diff into mechanism families | general-purpose (read-only on `src/`) | `measurements/deroxu-families.json`, `.agent-notes/gtc-T6a.md` | T5b | [x] |
-| T6b | hidden-link-drawn: suppress paint of `-[hidden]-` edges, keep ink extent (cascade of 1814) | typescript-pro | description layout-geo-post/renderer-draw-sequence/renderer-ink-extent (maybe SvekEdge.ts), tests | T6a | [ ] |
+| T6b | hidden-link-drawn: suppress paint of `-[hidden]-` edges, keep ink extent (cascade of 1814) | typescript-pro | description layout-geo-post/renderer-draw-sequence/renderer-ink-extent (maybe SvekEdge.ts), tests | T6a | [x] |
 | T6c | stereo-only-skinparam-block: `skinparam <<X>> {` opener (78 latent) | typescript-pro | core preprocessor-collector.ts, tests | T6b | [ ] |
 | T6d | hide-stereotype-drops-stereo-style: style from the full stereotype list (48 latent) | typescript-pro | description layout-dot-tree/renderer-entity/renderer-cluster, tests | T6c | [ ] |
 | T6e | dpi-scale-double-rounding: format scaled numbers once (30 latent) | typescript-pro | description index/renderer (+ core assemble-svg if needed), tests | T6d | [ ] |

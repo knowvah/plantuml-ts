@@ -1,5 +1,5 @@
 {
-  "$comment": "NOT a golden manifest. Each diffCount below is a record of how WRONG our description-engine SVG emission is today against the jar oracle under DeterministicMeasurer -- see ADR-5 AMENDMENT (plans/bodyenhanced-atom-seams/decisions.md) and README.md's 'Diff-count ratchet' section. A rise vs the recorded diffCount is a regression; a fall is progress; reaching 0 makes the fixture eligible for promotion into ratchet.json as a real byte-exact golden (never automatic -- see README). Do not hand-edit a diffCount to make the suite pass: change measuredAt/measuredAgainstCommit/note together, and the value must be produced by actually re-running the measurement (see description.diff-baseline.ratchet.test.ts's header comment for the exact command).",
+  "$comment": "NOT a golden manifest. Each diffCount below is a record of how WRONG our description-engine SVG emission is today against the jar oracle under DeterministicMeasurer -- see ADR-5 AMENDMENT (plans/bodyenhanced-atom-seams/decisions.md) and README.md's 'Diff-count ratchet' section. A rise vs the recorded diffCount is a regression; a fall is progress; reaching 0 makes the fixture eligible for promotion into ratchet.json as a real byte-exact golden (never automatic -- see README). Do not hand-edit a diffCount to make the suite pass: change measuredAt/measuredAgainstCommit/note together, and the value must be produced by actually re-running the measurement (see description.diff-baseline.ratchet.test.ts's header comment for the exact command). Tightened 2026-10-18 at 081624e05 by graphviz-tracker-consume (gtc T6b close): usecase/jecici-56-bimu826 105 -> 2 after gtc-T5b svek link ordering (CucaDiagramFileMakerSvek.java:90-114).",
   "fixtures": [
     {
       "type": "component",
@@ -98,9 +98,9 @@
       "slug": "jecici-56-bimu826",
       "group": 1,
       "status": "baseline",
-      "diffCount": 105,
-      "measuredAt": "2026-10-14",
-      "measuredAgainstCommit": "7b59644e3",
+      "diffCount": 2,
+      "measuredAt": "2026-10-18",
+      "measuredAgainstCommit": "081624e05",
       "note": "LOWERED 151 -> 138 by the edge-label-box mission, batches 1-2. The label boxes this fixture emits are now byte-exact against its oracle (72x22 and 67x12, previously 346x13 and 156x13): creole tags are stripped before measuring, multi-line labels take the max line width rather than the concatenation, `skinparam arrowFontSize 10` is honoured, and the reserved box is handed to the layout engine instead of plain text. The earlier RAISED-to-151 note is superseded; its cause -- ~5x oversized label boxes -- is what these batches fixed. Still ABOVE the mission's <=133 exit bar, which is recorded as unmet rather than redefined; the residue is not the label box."
     },
     {
