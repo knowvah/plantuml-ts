@@ -69,8 +69,14 @@ const RE_SKINPARAM_BLOCK_OPEN = /^skinparam\s*\{$/i;
  *  `dispatcher.ts#resolve` fell back to the block's own detected type --
  *  handing an AWS deployment diagram to the CLASS engine, which then
  *  measured each node's raw `<img data:image/png;base64,...>` markup as
- *  label text (19214px wide vs the jar's 142px). Found closing S1L-f. */
-const RE_SKINPARAM_SELECTOR_BLOCK_OPEN = /^skinparam\s+(\w+)(<<[^<>]+>>)?\s*\{$/i;
+ *  label text (19214px wide vs the jar's 142px). Found closing S1L-f.
+ *
+ *  The name is optional: `CommandSkinParamMultilines.java:50`'s opener
+ *  `[\w.]*(?:<<.*>>)?[\w.]*` accepts an EMPTY name, so `skinparam <<Public>> {`
+ *  pushes `<<Public>>` (`SkinLoader.java:78-80`), keys `<<public>>arrowcolor`
+ *  (`:101`) and `cleanSkinKey` moves the stereotype to the end
+ *  (`SkinParam.java:292-297`). */
+const RE_SKINPARAM_SELECTOR_BLOCK_OPEN = /^skinparam\s+(\w+)?(<<[^<>]+>>)?\s*\{$/i;
 /** A stereotype sub-block inside a selector block: `<<Foo1>> {`. */
 /**
  * A nested scope opener inside a `skinparam` block: any name followed by `{`.
@@ -284,7 +290,7 @@ export class StyleAndSkinparamCollector {
     }
     const selectorBlock = RE_SKINPARAM_SELECTOR_BLOCK_OPEN.exec(trimmed);
     if (selectorBlock !== null) {
-      this.skinparamStack.push(selectorBlock[1]!.trim() + (selectorBlock[2] ?? ''));
+      this.skinparamStack.push((selectorBlock[1] ?? '').trim() + (selectorBlock[2] ?? ''));
       return true;
     }
     const single = RE_SKINPARAM_LINE.exec(trimmed);
