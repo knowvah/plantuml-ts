@@ -151,6 +151,10 @@ function buildInput(
       ? { label: blockText === undefined ? edge.label : { ...edge.label, text: blockText } }
       : {}),
     ...(hasLabelText ? { labelFont: arrowLabelFontConfig(theme) } : {}),
+    // `SvekEdge.java:376-381`: `skinparam defaultTextAlignment` (the root style bucket, as for a cluster title).
+    ...(theme.colors.elements?.root?.horizontalAlignment !== undefined
+      ? { labelAlignment: theme.colors.elements.root.horizontalAlignment }
+      : {}),
   };
 }
 

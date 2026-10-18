@@ -16,7 +16,8 @@ import { buildDotPathFromSplinePoints, edgeMidpoint } from './svek-edge-geometry
 import { placeHeadExtremity, placeTailExtremity } from './svek-edge-extremity.js';
 import type { PlacedExtremity } from './svek-edge-extremity.js';
 import { buildTextBlock } from './image/EntityImageDescriptionTextBlock.js';
-import { splitDisplayLines } from '../klimt/creole/DisplayNewlines.js';
+import { parseWithNewlines } from '../klimt/creole/DisplayNewlines.js';
+import { Pragma } from '../skin/Pragma.js';
 import { HorizontalAlignment } from '../klimt/geom/HorizontalAlignment.js';
 import { strokeForStyle } from './svek-edge-stroke.js';
 import type { UStroke } from '../klimt/UStroke.js';
@@ -143,6 +144,10 @@ export interface SvekEdgeInput {
   /** Font for both `label` and `stereotype` text — required only when
    *  either is present (see `drawLabels`). */
   readonly labelFont?: FontConfiguration;
+  /** `SvekEdge.java:376-381` `getMessageTextAlignment`: `skinParam.getDefaultTextAlignment(CENTER)` -- the label
+   *  block's alignment when the text carries no `\l`/`\r` marker (`Display.java:648-649` lets a marker override it).
+   *  Absent means CENTER. */
+  readonly labelAlignment?: HorizontalAlignment;
 }
 
 /** Duck-typed widening of `UGraphic` for the two group methods T2
@@ -333,7 +338,10 @@ export class SvekEdge implements UDrawable {
     const margin = this.input.fromUid === this.input.toUid ? SELF_LOOP_EDGE_LABEL_MARGIN : EDGE_LABEL_MARGIN;
     const x = label.x - Math.trunc(label.w) / 2 + margin;
     const y = label.y - Math.trunc(label.h) / 2 + margin;
-    const block = buildTextBlock(splitDisplayLines(label.text).lines.join('\n'), font, HorizontalAlignment.CENTER);
+    // `Display.java:648-649`: `if (getNaturalHorizontalAlignment() != null) horizontalAlignment = natural`.
+    const parsed = parseWithNewlines(Pragma.createEmpty(), label.text)!;
+    const alignment = parsed.naturalHorizontalAlignment ?? this.input.labelAlignment ?? HorizontalAlignment.CENTER;
+    const block = buildTextBlock(parsed.lines.join('\n'), font, alignment);
     // `TextBlockMarged#drawU` (`TextBlockMarged.java:81-87`): the marged block first draws `UEmpty.create(dim)` over
     // text + 2 x margin (drawn only when that width is > 0), which `LimitFinder#drawEmpty` folds into the ink extent.
     const text = block.calculateDimension(ug.getStringBounder());

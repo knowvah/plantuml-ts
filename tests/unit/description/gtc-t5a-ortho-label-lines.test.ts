@@ -26,9 +26,7 @@ const SRC = [
 
 function linkTexts(svg: string): string[][] {
   return [...svg.matchAll(/<g class="link"[\s\S]*?<\/g>/g)].map((g) =>
-    [...g[0].matchAll(/<text [^>]*>[^<]*<\/text>/g)].map((t) =>
-      t[0].replace(/^(<text x=")[\d.]+("[^>]*>\s<\/text>)$/, '$1*$2'),
-    ),
+    [...g[0].matchAll(/<text [^>]*>[^<]*<\/text>/g)].map((t) => t[0]),
   );
 }
 
@@ -37,9 +35,7 @@ describe('ortho (xlabel) link label lines', () => {
     const svg = renderSync(SRC, { measurer: new DeterministicMeasurer() });
     expect(linkTexts(svg)).toEqual([
       [
-        // x is the jar's 98.37 (right-aligned blank line); ours is centred until `SvekEdge.ts:336` (core) honours
-        // `splitDisplayLines().align` and `defaultTextAlignment` -- so x is masked here.
-        '<text x="*" y="81.111" fill="#000" font-size="13">\u00a0</text>',
+        '<text x="98.37" y="81.111" fill="#000" font-size="13">\u00a0</text>',
         '<text x="65.22" y="94.111" fill="#000" font-size="13" textLength="36.725">A. text</text>',
       ],
       [
