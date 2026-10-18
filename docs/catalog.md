@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1679 modules · 6134 exported names.
+1680 modules · 6135 exported names.
 
 ## `src/`
 
@@ -1710,6 +1710,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `link-grammar-regex.ts` | `DECOR_ESCAPE_RE`, `escapeDecorToken`, `buildDecorAlt`, `DECORS1_TOKENS`, `DECORS2_TOKENS`, `DECORS1_ALT`, `DECORS2_ALT`, `TAIL_TO_HEAD_TOKEN`, `HEAD_TO_TAIL_TOKEN`, `STYLE_KEY1`, `STYLE_KEY2`, `LINE_STYLE`, `LINE_STYLE_MULTIPLES`, `LINK_ENT_ALT`, `COLOR_TOKEN`, `COLOR_KEY_ALT`, `COLOR_PART2`, `COLORS_BODY_ALT`, `LINK_LINE_SOURCE`, `LINK_LINE_RE`, `LinkGroups` | Descriptive link-line regex construction (LINK_LINE_RE + its decor/style/ color/token building blocks). |
 | `link-grammar.ts` | `LINK_LINE_RE`, `classifyEndpointShape`, `EndpointShape`, `ParsedLink`, `parseLinkLine` | Link grammar for the descriptive-diagram parser — a faithful port of `CommandLinkElement.java` (`net.sourceforge.plantuml.descdiagram.command`), `LinkDecor.java` (`net.sourceforge.plantuml.decoration`), and `StringUtils.getQueueDirection` ( |
 | `link-note-box.ts` | `measureLinkNoteDim` | The `note on link` operand `computeMergedLabelBox` merges into a description-engine edge label -- `EntityImageNoteLink`'s dimension (`svek/SvekEdge.java:309-310`, `new EntityImageNoteLink(note.getDisplay(), note.getColors(), skinParam, link |
+| `link-order.ts` | `orderLinks` | `CucaDiagramFileMakerSvek#getOrderedLinks`/`addLinkNew` (`svek/CucaDiagramFileMakerSvek.java:90-114`): the link list the svek pipeline lays out and draws (`DotData.links` -> `Bibliotekon#allLines` -> `SvekResult#drawU` :97-101). |
 | `magma.ts` | `buildMagmaEdges`, `MagmaGroupInput`, `MagmaCtxLike`, `magmaGroups` | Description-engine binding for the shared "Magma" standalone-chaining feature. |
 | `namespace-groups.ts` | `splitNamespacePath`, `leafDisplayName`, `QualifiedNodeMatch`, `resolveQualifiedNode`, `countQuarksByName`, `SCOPE_KEY_SEP`, `scopedKey`, `bareEntityName`, `findCollidingIds`, `dotKeyFor`, `buildNamespaceGroups` | `set separator`-driven namespace splitting for descriptive diagrams (component / use-case / deployment) — the shared `Quark<Entity>` resolution behind `CucaDiagram#quarkInContext`/`quarkInContextSafe` (net/atmp/CucaDiagram.java:244-283), po |
 | `namespace-pack.ts` | `packSomePackage` | `!pragma useIntermediatePackages false` for descriptive diagrams -- the end-of-parse group packing pass `DescriptionDiagram#checkFinalError` runs (before `applySingleStrategy`) through `AbstractEntityDiagram#packSomePackage`: a package whos |

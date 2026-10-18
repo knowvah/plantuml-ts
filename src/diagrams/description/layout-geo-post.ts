@@ -38,6 +38,10 @@ export interface EdgeMapping {
   geoIndex: Map<string, DescriptionNodeGeo>;
   dx: number;
   dy: number;
+  /** The final draw's `SvekResult#calculateDimension` `moveDelta` x (`SvekResult.java:133`) in the jar's svek frame:
+   *  `dx - originShift.x` (the layout frame + `DotLayoutResult.originShift` is the svek frame). Absent on the
+   *  measuring pass (`dx = 0`), where the jar has not yet moved anything. Read only by `autoLinkOfAGroupShift`. */
+  svekMoveDeltaX?: number;
   /** The `xlabel` table each dot edge was given under `skinparam linetype ortho` (`xlabelWidth`/`xlabelHeight`,
    *  `link-edge-attrs.ts#applyMainLabel`). The engine echoes only `labelWidth`/`labelHeight`, which an ortho edge
    *  never carries, yet the jar draws the xlabel as the same label block (`SvekEdge.java:434-441`, :951-954). */
@@ -189,6 +193,28 @@ function applyOpaleNote(
   geo.opale = resolved;
 }
 
+/**
+ * `SvekEdge.java:863-869` (`Link#isAutoLinkOfAGroup`, `abel/Link.java:341-352`): a link from a group to itself is drawn
+ * `x = cluster.width - (dotPath.start.x - cluster.minX)` further right, on top of the `moveDelta` the final draw adds. The cluster
+ * rectangle has been `moveDelta`d by it by then (`SvekResult.java:133`, `Cluster.java:127-137`) while the edge's
+ * `dotPath` has not (the edge only accumulates `dx`, `SvekEdge.java:1241-1244`), so the formula carries that delta a
+ * second time (`EdgeMapping.svekMoveDeltaX`). The measuring pass has moved nothing. `0` for any other link.
+ */
+function autoLinkOfAGroupShift(
+  info: EdgeContainerEndpoints | undefined,
+  clipped: ReadonlyArray<{ x: number; y: number }>,
+  m: EdgeMapping,
+  solve: DescriptionSolveRects,
+): number {
+  const id = info?.fromContainerAstId;
+  const start = clipped[0];
+  if (id === undefined || id !== info?.toContainerAstId || start === undefined) return 0;
+  const group = m.geoIndex.get(id);
+  if (group === undefined) return 0;
+  const rect = clipRectOf(group, solve);
+  return rect.width - (start.x - rect.x) + (m.svekMoveDeltaX ?? 0);
+}
+
 export function buildEdgeGeos(
   links: readonly DescriptiveLink[],
   resultEdges: ResultEdge[],
@@ -209,9 +235,10 @@ export function buildEdgeGeos(
     const link = links[linkIdx];
     if (link === undefined) continue;
     const clipped = clipEdgePoints(re.points, m.edgeContainerEndpoints.get(re.id), m.geoIndex, solve);
-    const pts = clipped.map((p) => ({ x: p.x + m.dx, y: p.y + m.dy }));
+    const shift = autoLinkOfAGroupShift(m.edgeContainerEndpoints.get(re.id), clipped, m, solve);
+    const pts = clipped.map((p) => ({ x: p.x + m.dx + shift, y: p.y + m.dy }));
     const geo = assembleEdgeGeo(linkIdx, link, pts, hidden, m.namespaceSeparator);
-    addEdgeLabel(geo, link, re, m);
+    addEdgeLabel(geo, link, re, { ...m, dx: m.dx + shift });
     applyOpaleNote(geo, link, pts, links, m);
     byIdx.set(linkIdx, geo);
   }

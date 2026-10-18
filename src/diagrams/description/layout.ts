@@ -50,6 +50,7 @@ import { emojiArtworkResolverFor } from '../../core/internal-emoji-store.js';
 import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
 import { buildMagmaEdges, magmaGroups } from './magma.js';
 import { effectiveRemovedIds, effectiveHiddenIds } from './element-grammar.js';
+import { orderLinks } from './link-order.js';
 import { buildNamespaceGroups, findCollidingIds } from './namespace-groups.js';
 import {
   computePortRanksByCluster,
@@ -288,7 +289,14 @@ function buildGeoAndEdges(
   const { dx, dy } = placement;
   const nodes = rawNodes.map((n) => shiftGeo(n, dx, dy));
   const edges =
-    dx === 0 && dy === 0 ? rawEdges : buildEdgeGeos(drawLinks, result.edges, { ...rawMapping, dx, dy }, hidden);
+    dx === 0 && dy === 0
+      ? rawEdges
+      : buildEdgeGeos(
+          drawLinks,
+          result.edges,
+          { ...rawMapping, dx, dy, svekMoveDeltaX: dx - (result.originShift?.x ?? 0) },
+          hidden,
+        );
   // #lizard forgives -- pre-existing (8 params): the cohesive geo-tree +
   // edge-geometry assembly context threaded from layoutDescription's own
   // single call site -- mission G5/C1 500-line split (pure move), not
@@ -341,7 +349,8 @@ export function layoutDescription(
 ): DescriptionGeometry {
   // `skinparam packagestyle`: the `package` keyword's group symbol (`CommandPackageWithUSymbol.java:194`).
   const styledNodes = applyPackageStyle(authoredAst.nodes, theme);
-  const ast = styledNodes === authoredAst.nodes ? authoredAst : { ...authoredAst, nodes: styledNodes };
+  // `CucaDiagramFileMakerSvek#getOrderedLinks` (java:90-114): the svek pipeline lays out and draws the regrouped list.
+  const ast = { ...authoredAst, nodes: styledNodes, links: orderLinks(authoredAst.links) };
   if (ast.nodes.length === 0) {
     return {
       totalWidth: 0,
