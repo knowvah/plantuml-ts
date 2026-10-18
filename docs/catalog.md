@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1678 modules · 6132 exported names.
+1679 modules · 6134 exported names.
 
 ## `src/`
 
@@ -95,6 +95,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `skin-command.ts` | `skinCommandError`, `SkinCut`, `skinCutOf` | The `skin <name>` command's failure path — unwind2-S8. |
 | `skin-loader.ts` | `skinRunsOf`, `applySkinRun`, `applySkinLayer` | `skin <name>` directive resolution — skin-file-loading mission, Batch 1 (decisions D1/D2/D6); unwind2-S8. |
 | `skinparam-accumulator.ts` | `SkinparamAccumulator`, `createSkinparamAccumulator` | Mutable accumulator threaded through the resolveSkinparam key-processing loop (skinparam-key-handlers.ts, skinparam-stereo-keys.ts) and consumed by the theme-partial builder (skinparam-theme-builder.ts). |
+| `skinparam-arrow-stereo.ts` | `applyArrowColorByStereo` | gtc T3: `skinparam arrow<<tag>> { Color X;line.Bold() }` (and the flat `arrowColor<<tag>>`; the preprocessor normalizes both to `arrowcolor<<tag>>`) -- the stereotype-signed LineColor / LineThickness of a description link. |
 | `skinparam-element-buckets.ts` | `ELEMENT_BUCKET_SNAMES`, `ElementColorRole`, `matchElementColorKey`, `matchStereotypeSpotColorKey`, `matchElementFontSizeKey`, `matchElementShadowingKey`, `parseShadowingValue`, `matchElementLineThicknessKey` | Per-element (SName) style-bucket matching for the skinparam pipeline. |
 | `skinparam-key-handlers-add-magic.ts` | `ADD_MAGIC_HANDLERS` | The per-`addMagic(SName)` skinparam handlers (`<sname>BorderStyle`, `<sname>RoundCorner`) -- split out of skinparam-key-handlers-table-a.ts (aepp-T1d) when RoundCorner took that file over the 500-line cap. |
 | `skinparam-key-handlers-shared.ts` | `arrowFontColorValue`, `ROOT_LINE_COLOR_KEY`, `KeyHandler`, `parseFiniteNumber`, `parseFiniteFloat`, `parseFiniteInt`, `parseNonZeroInt`, `parseFontStyleFlags`, `applyGuillemet` | Shared `KeyHandler` type + parse helpers for the skinparam key→handler table. |
@@ -125,7 +126,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `style-cascade-class-generic.ts` | `applyGenericCascadeOverrides` | T11 (cdd3, Q-4): the generic type-parameter tag's own ancestor cascade -- split out of `style-cascade-class.ts` (500-line cap), mirrors `style-cascade-visibility-icon.ts`'s own split-for-size precedent (a pure addition, same import shape: ` |
 | `style-cascade-class-line.ts` | `applyLineCascadeOverrides` | cdd3-T24 (C-6, E3-8): the class box's and the class note's own stroke reads -- `LineThickness` for both, `LineColor` for the note (the class box's `LineColor` is `classCascadeBorder`, `style-cascade-class.ts`). |
 | `style-cascade-class-snames.ts` | `CLASS_SNAMES`, `HEADER_SNAMES`, `ARROW_SNAMES`, `CARDINALITY_SNAMES`, `SPOT_SNAMES`, `NOTE_SNAMES`, `QUALIFIED_SNAMES`, `GENERIC_SNAMES`, `DESCRIPTION_ARROW_SNAMES` | cdd-T15: the class-diagram `<style>` SIGNATURES `style-cascade-class.ts` queries — split out verbatim when the `class.qualified` signature pushed that file past the repo's 500-line cap (a pre-authorised split; each constant's upstream citat |
-| `style-cascade-class.ts` | `GraphCascadeOverride`, `cascadeHex`, `cascadeFontColorHex`, `computeClassStyleCascadeOverrides`, `resolveClassTagCascadeEntry`, `computeClassTagCascadeGenerations` | Class-diagram `<style>` ancestor cascade (G2 N36) -- computes every `theme.colors.graph.classCascade*`/`spotCascade*` field from a raw StyleMap, pre-resolved to SVG-ready hex via {@link resolveColorToSvgHex} (the inline-`#color`-override pr |
+| `style-cascade-class.ts` | `GraphCascadeOverride`, `cascadeHex`, `cascadeFontColorHex`, `arrowTagCascadeEntry`, `computeClassStyleCascadeOverrides`, `resolveClassTagCascadeEntry`, `computeClassTagCascadeGenerations` | Class-diagram `<style>` ancestor cascade (G2 N36) -- computes every `theme.colors.graph.classCascade*`/`spotCascade*` field from a raw StyleMap, pre-resolved to SVG-ready hex via {@link resolveColorToSvgHex} (the inline-`#color`-override pr |
 | `style-cascade-description.ts` | `DescriptionCascadeOverride`, `computeDescriptionStyleCascadeOverrides` | gtc T2b: the description diagram's `<style>` cascades -- the description twin of `style-cascade-class.ts`, over the description diagram's OWN style name (`componentDiagram`, `DiagramType.java:250-251`) instead of `classDiagram`. |
 | `style-cascade-visibility-icon.ts` | `applyVisibilityIconCascadeOverrides` | cdd2-T8 (S-7): `<style> visibilityIcon { <kind> { LineColor/ BackgroundColor } } }` -- split out of `style-cascade-class.ts` (500-line cap), a pure addition mirroring `style-cascade-class-font.ts`'s own split-for-size precedent. |
 | `style-line-style.ts` | `LineStyleDash`, `lineStyleDash`, `BorderStyleConversion`, `convertBorderStyleValue` | `PName.LineStyle` -- the dash half of a style's stroke, and the skinparam front-end that writes it (`skinparam <sname>BorderStyle`). |

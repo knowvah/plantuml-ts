@@ -123,6 +123,7 @@ const GRAPH_OVERRIDE_FIELDS: FieldTable = [
   ['classBorder', (acc) => acc.classBorder],
   ['classBorderThickness', (acc) => acc.classBorderThickness],
   ['classBorderThicknessByStereo', (acc) => acc.classBorderThicknessByStereo],
+  ['descriptionArrowTagCascade', (acc) => acc.descriptionArrowTagCascade],
   ['classBackgroundColorByStereo', (acc) => acc.classBackgroundColorByStereo],
   ['classBorderColorByStereo', (acc) => acc.classBorderColorByStereo],
   ['classFontColorByStereo', (acc) => acc.classFontColorByStereo],

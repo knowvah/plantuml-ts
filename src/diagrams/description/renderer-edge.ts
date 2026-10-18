@@ -8,6 +8,7 @@ import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { Theme } from '../../core/theme.js';
 import { SvekEdge, type SvekEdgeInput, type SvekLinkStyle } from '../../core/svek/SvekEdge.js';
 import type { DescriptionEdgeGeo } from './layout-helpers.js';
+import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import { bareEntityName } from './namespace-groups.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import { FontStyle, type FontConfiguration } from '../../core/klimt/shape/UText.js';
@@ -80,8 +81,19 @@ function tabledLabelText(edge: DescriptionEdgeGeo, visibleStereotype: string | u
   ].join('\n');
 }
 
+/**
+ * The stereotype-signed arrow style of a link: `getDefaultStyleDefinition(stereotype)` is the arrow signature
+ * `.withTOBECHANGED(stereotype)` (`SvekEdge.java:816-821`). The link keeps one label (`DescriptiveLink.stereotype`);
+ * the cascade is keyed by the cleaned tag (`StyleSignatureBasic#clean`).
+ */
+function tagStyle(edge: DescriptionEdgeGeo, theme: Theme): { color?: string; thickness?: number } | undefined {
+  const cascade = theme.colors.graph.descriptionArrowTagCascade;
+  if (edge.stereotype === undefined || cascade === undefined) return undefined;
+  return cascade[cleanStereotypeToken(edge.stereotype)];
+}
+
 function edgeThickness(edge: DescriptionEdgeGeo, theme: Theme): number | undefined {
-  return edge.styleThickness ?? theme.colors.graph.arrowThickness;
+  return edge.styleThickness ?? tagStyle(edge, theme)?.thickness ?? theme.colors.graph.arrowThickness;
 }
 
 function thicknessField(styleThickness: number | undefined): { styleThickness?: number } {
@@ -126,7 +138,11 @@ function buildInput(
     // port's `SvekEdgeInput.color` already serves that dual role (no
     // multi-color Rainbow, see `SvekEdge.ts`'s class doc comment), so the
     // override simply replaces the theme default here.
-    color: edge.styleColor ?? theme.colors.graph.descriptionCascadeArrowColor ?? theme.colors.arrow,
+    color:
+      edge.styleColor ??
+      tagStyle(edge, theme)?.color ??
+      theme.colors.graph.descriptionCascadeArrowColor ??
+      theme.colors.arrow,
     backgroundColor: theme.colors.background,
     ...(edge.tailDecor !== undefined ? { tailDecor: edge.tailDecor } : {}),
     ...(headDecor !== undefined ? { headDecor } : {}),

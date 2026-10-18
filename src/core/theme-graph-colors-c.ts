@@ -26,6 +26,11 @@ export interface ThemeGraphColorsC {
    *  componentDiagram, arrow}` (`SvekEdge.java:816-821`); `style-cascade-description.ts`. Read by
    *  `description/renderer-edge.ts` below an inline link colour and above `theme.colors.arrow`. */
   descriptionCascadeArrowColor?: string;
+  /** gtc T3: the per-stereotype tier of the description arrow signature -- `{root, element, componentDiagram,
+   *  arrow}.withTOBECHANGED(stereotype)` (`SvekEdge.java:816-821`) -- keyed by CLEANED tag. Written by `<style> arrow {
+   *  .tag { LineColor; LineThickness } }` (`style-cascade-description.ts`) and by `skinparam arrow<<tag>> { Color
+   *  X;line.Bold() }` (`skinparam-arrow-stereo.ts`). Absent = no tagged declaration. */
+  descriptionArrowTagCascade?: Readonly<Record<string, { color?: string; thickness?: number }>>;
   monospacedFontName?: string;
   /** cdd2-T8 (S-13): `skinparam classFontColor automatic` -- see
    *  `skinparam-accumulator.ts#classFontColorAutomatic`'s own doc comment.

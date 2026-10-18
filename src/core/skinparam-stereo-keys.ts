@@ -15,6 +15,7 @@
 
 import type { SkinparamAccumulator } from './skinparam-accumulator.js';
 import { resolveColor } from './skinparam-key-normalize.js';
+import { applyArrowColorByStereo } from './skinparam-arrow-stereo.js';
 // Imported from the leaf module, not the `skinparam.ts` barrel that
 // re-exports it -- that barrel imports THIS file, so the barrel spelling
 // would close an ESM import cycle.
@@ -434,6 +435,7 @@ function applyElementBackgroundColorByStereo(acc: SkinparamAccumulator, key: str
  * `acc.unknown`.
  */
 export function applyStereoOverride(acc: SkinparamAccumulator, key: string, value: string): void {
+  if (applyArrowColorByStereo(acc, key, value)) return;
   if (applyElementStereotypeFontSize(acc, key, value)) return;
   if (applyGroupByStereo(acc, key, value)) return;
   for (const [re, handler] of STEREO_KEY_MATCHERS) {

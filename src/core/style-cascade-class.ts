@@ -191,14 +191,15 @@ function classTagCascadeEntry(
  * are resolved together here rather than as two independent cascades.
  * Mirrors {@link classTagCascadeEntry} exactly in shape.
  */
-function arrowTagCascadeEntry(
+export function arrowTagCascadeEntry(
   styleMap: StyleMap,
   tag: string,
+  snames: readonly string[] = ARROW_SNAMES,
 ): NonNullable<Theme['colors']['graph']['arrowTagCascade']>[string] | undefined {
   const entry: NonNullable<Theme['colors']['graph']['arrowTagCascade']>[string] = {};
-  const color = cascadeHex(styleMap, ARROW_SNAMES, 'linecolor', [tag]);
+  const color = cascadeHex(styleMap, snames, 'linecolor', [tag]);
   if (color !== undefined) entry.color = color;
-  const thicknessRaw = resolveStyleCascade(styleMap, ARROW_SNAMES, 'linethickness', [tag]);
+  const thicknessRaw = resolveStyleCascade(styleMap, snames, 'linethickness', [tag]);
   if (thicknessRaw !== undefined) {
     const n = Number(thicknessRaw);
     if (Number.isFinite(n)) entry.thickness = n;
