@@ -168,6 +168,11 @@ function applyOpaleNote(
   if (noteNode === undefined) return;
   const otherNode = noteNode === fromNode ? toNode : fromNode;
   if (otherNode === undefined || otherNode.symbol === 'note') return;
+  // `GraphvizImageBuilder.java:245-259`: `setOpaleLine`/`line.setOpale(true)` only `if (other != null)`,
+  // `other = Bibliotekon#getNode(entity)` (`Bibliotekon.java:120-122`) -- `nodeMap` holds leaf nodes, so
+  // a cluster has none. The note is then drawn by `EntityImageNote#drawNormal` (:272-286) and its
+  // dashed link by `SvekEdge#drawU` (:833).
+  if (otherNode.children.length > 0) return;
   const touchingLinks = allLinks.filter((l) => l.from === noteNode.id || l.to === noteNode.id);
   if (touchingLinks.length !== 1) return;
   const origin = { x: noteNode.x + m.dx, y: noteNode.y + m.dy };

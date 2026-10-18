@@ -199,6 +199,6 @@ describe.skipIf(!hasCorpus)('description plain-family wrappers vs cached jar DOT
     );
     const p = g!.clusters![0]!;
     expect(Object.keys(p.kermorNotes ?? {})).toEqual(['top']);
-    expect(g!.nodes.some((n) => n.id.startsWith('__note_'))).toBe(true);
+    expect(g!.nodes.some((n) => /^GMN\d+$/.test(n.id))).toBe(true);
   });
 });

@@ -2584,7 +2584,7 @@ describe('parseDescription — newpage', () => {
       a --> (do)
     `);
     expect(ast.pages).toBeUndefined();
-    expect(ast.nodes.map((n) => n.id)).toEqual(['a', '__note_0', 'do']);
+    expect(ast.nodes.map((n) => n.id)).toEqual(['a', 'GMN2', 'do']);
   });
 });
 

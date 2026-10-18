@@ -76,10 +76,6 @@ export interface ParseState {
    *  Group/container creation (`createGroup`) never touches it. Resolves
    *  `note <pos> : text` / `note <pos>` (CODE omitted) attachment targets. */
   lastEntityId: string | undefined;
-  /** Sequence for auto-generated note-on-entity ids (`CucaDiagram
-   *  .getUniqueSequence("GMN")`) — floating notes always carry an explicit
-   *  `as N` id and never consume this counter. */
-  noteCounter: number;
   /** In-progress `CommandMultilines2` note block (floating, on-entity, or a
    *  dropped note-on-link). Every subsequent raw line is consumed as note
    *  body text until its terminator — never re-dispatched through COMMANDS,
@@ -370,7 +366,6 @@ export function startNewPage(state: ParseState): void {
   state.parentArrayById = new Map();
   state.qualifiedNodesById = new Map();
   state.lastEntityId = undefined;
-  state.noteCounter = 0;
   state.pendingNote = undefined;
   state.namespaceSeparator = null;
   state.intermediatePackages = true;
@@ -453,7 +448,9 @@ function attachNoteToEntity(
     return;
   }
   const pos = resolvePosition(position, state.ast.rankdir);
-  const noteId = `__note_${state.noteCounter++}`;
+  // `CommandFactoryNoteOnEntity.java:327`: the note's quark name is `GMN<n>`, `n` being the
+  // `getUniqueSequence("GMN")` value `emitGeneratedNoteLeaf` draws next from the shared counter.
+  const noteId = `GMN${state.uidCounter + 1}`;
   emitGeneratedNoteLeaf(state, noteId, text, decor);
   const link = noteAttachment(pos, resolvedTarget, noteId);
   // CommandFactoryNoteOnEntity.java:342-360: a real `new Link(...)` (goDashed
