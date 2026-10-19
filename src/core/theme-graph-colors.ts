@@ -202,6 +202,10 @@ export interface ElementColors {
    *  RAW unhalved values, as {@link roundCorner}. Read by the class usymbol
    *  leaf draw (`EntityImageDescription.java:168-169`). */
   roundCornerByStereo?: Readonly<Record<string, number>>;
+  /** `skinparam <sname>Shadowing<<label>>`: the same +1000 re-signing as {@link borderByStereo}
+   *  (`FromSkinparamToStyle.java:282,306-310,396-408`), the value already converted (`true` -> 3). Read through
+   *  `Style#getShadowing()` by `Cluster.java:314-315` and `EntityImageDescription`. */
+  shadowingByStereo?: Readonly<Record<string, number>>;
   diagonalCornerByStereo?: Readonly<Record<string, number>>;
   stereotypeFontByStereo?: Readonly<Record<string, string>>;
   /**

@@ -924,7 +924,55 @@ describe('refusal coverage — baseline shape', () => {
     // 7187 -> 7202 at description-url-wrappers T6 (b4): 15 svg-description
     // golden clone rows (component 8, usecase 4, unknown 3), rendering on
     // both sides. Derivation: 7187 + 15 = 7202.
-    expect(manifest.fixtures.length).toBe(7202);
+    // 7202 -> 7203 at gtc T1: 1 svg-description golden clone
+    // row(s) (unknown 1: rufopi-30-roro642), rendering on both sides.
+    // Derivation: 7202 + 1 = 7203.
+    // 7203 -> 7214 at gtc T2: 11 svg-description golden clone
+    // row(s) (component 4, unknown 7), rendering on both sides.
+    // Derivation: 7203 + 11 = 7214.
+    // 7214 -> 7249 at gtc S (state lane close): 35 svg-state golden clone
+    // row(s) (35 state rows), rendering on both sides.
+    // Derivation: 7214 + 35 = 7249.
+    // 7249 -> 7251 at gtc T2b: 2 svg-description golden clone
+    // row(s) (component 1, unknown 1), rendering on both sides.
+    // Derivation: 7249 + 2 = 7251.
+    // 7251 -> 7253 at gtc T3: 2 svg-description golden clone
+    // row(s) (component 1, usecase 1), rendering on both sides.
+    // Derivation: 7251 + 2 = 7253.
+    // 7253 -> 7259 at gtc T3b: 6 svg-description golden clone
+    // row(s) (component 4, usecase 2), rendering on both sides.
+    // Derivation: 7253 + 6 = 7259.
+    // 7259 -> 7265 at gtc T4: 6 svg-description golden clone
+    // row(s) (component 5, unknown 1), rendering on both sides.
+    // Derivation: 7259 + 6 = 7265.
+    // 7265 -> 7266 at gtc T5a: 1 svg-description golden clone
+    // row(s) (component 1: zosaxo-93-nici652), rendering on both sides.
+    // Derivation: 7265 + 1 = 7266.
+    // 7266 -> 7268 at gtc T5b: 2 svg-description golden clone
+    // row(s) (unknown 1, usecase 1), rendering on both sides.
+    // Derivation: 7266 + 2 = 7268.
+    // 7268 -> 7274 at gtc T6b: 6 svg-description golden clone
+    // row(s) (component 4, unknown 2), rendering on both sides.
+    // Derivation: 7268 + 6 = 7274.
+    // 7274 -> 7281 at gtc T6d: 7 svg-description golden clone
+    // row(s) (component 4, unknown 3), rendering on both sides.
+    // Derivation: 7274 + 7 = 7281.
+    // 7281 -> 7283 at gtc T6e: 2 svg-description golden clone
+    // row(s) (unknown 2), rendering on both sides.
+    // Derivation: 7281 + 2 = 7283.
+    // 7283 -> 7284 at gtc T6f: 1 svg-description golden clone
+    // row(s) (component 1: rekisu-47-pesa949), rendering on both sides.
+    // Derivation: 7283 + 1 = 7284.
+    // 7284 -> 7285 at gtc T6g: 1 svg-description golden clone
+    // row(s) (unknown 1: fefeza-33-xute344), rendering on both sides.
+    // Derivation: 7284 + 1 = 7285.
+    // 7285 -> 7287 at gtc T6h: 2 svg-description golden clone
+    // row(s) (component 1, usecase 1), rendering on both sides.
+    // Derivation: 7285 + 2 = 7287.
+    // 7287 -> 7288 at gtc T6j: 1 svg-description golden clone
+    // row(s) (unknown 1: deroxu-29-gude369), rendering on both sides.
+    // Derivation: 7287 + 1 = 7288.
+    expect(manifest.fixtures.length).toBe(7288);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -1060,7 +1108,39 @@ describe('refusal coverage — baseline shape', () => {
     // svg-description golden clone rows. Derivation: 6699 + 263 = 6962.
     // 6962 -> 6977 at description-url-wrappers T6 (b4): +15 rendering
     // svg-description golden clone rows. Derivation: 6962 + 15 = 6977.
-    expect(pinnedRendering.length).toBe(6977);
+    // 6977 -> 6978 at gtc T1: +1 rendering svg-description
+    // golden clone row(s). Derivation: 6977 + 1 = 6978.
+    // 6978 -> 6989 at gtc T2: +11 rendering svg-description
+    // golden clone row(s). Derivation: 6978 + 11 = 6989.
+    // 6989 -> 7024 at gtc S (state lane close): +35 rendering svg-state
+    // golden clone row(s). Derivation: 6989 + 35 = 7024.
+    // 7024 -> 7026 at gtc T2b: +2 rendering svg-description
+    // golden clone row(s). Derivation: 7024 + 2 = 7026.
+    // 7026 -> 7028 at gtc T3: +2 rendering svg-description
+    // golden clone row(s). Derivation: 7026 + 2 = 7028.
+    // 7028 -> 7034 at gtc T3b: +6 rendering svg-description
+    // golden clone row(s). Derivation: 7028 + 6 = 7034.
+    // 7034 -> 7040 at gtc T4: +6 rendering svg-description
+    // golden clone row(s). Derivation: 7034 + 6 = 7040.
+    // 7040 -> 7041 at gtc T5a: +1 rendering svg-description
+    // golden clone row(s). Derivation: 7040 + 1 = 7041.
+    // 7041 -> 7043 at gtc T5b: +2 rendering svg-description
+    // golden clone row(s). Derivation: 7041 + 2 = 7043.
+    // 7043 -> 7049 at gtc T6b: +6 rendering svg-description
+    // golden clone row(s). Derivation: 7043 + 6 = 7049.
+    // 7049 -> 7056 at gtc T6d: +7 rendering svg-description
+    // golden clone row(s). Derivation: 7049 + 7 = 7056.
+    // 7056 -> 7058 at gtc T6e: +2 rendering svg-description
+    // golden clone row(s). Derivation: 7056 + 2 = 7058.
+    // 7058 -> 7059 at gtc T6f: +1 rendering svg-description
+    // golden clone row(s). Derivation: 7058 + 1 = 7059.
+    // 7059 -> 7060 at gtc T6g: +1 rendering svg-description
+    // golden clone row(s). Derivation: 7059 + 1 = 7060.
+    // 7060 -> 7062 at gtc T6h: +2 rendering svg-description
+    // golden clone row(s). Derivation: 7060 + 2 = 7062.
+    // 7062 -> 7063 at gtc T6j: +1 rendering svg-description
+    // golden clone row(s). Derivation: 7062 + 1 = 7063.
+    expect(pinnedRendering.length).toBe(7063);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

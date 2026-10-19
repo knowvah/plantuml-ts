@@ -268,11 +268,9 @@ export type GeoSpec =
        *  set, instead of the pre-C3 `boundingBox(children)` approximation +
        *  dashed-rect fallback. */
       clusterHeaderHeight?: number;
-      /** G5 C3: title baseline vertical margin (`CLUSTER_TITLE_BASELINE
-       *  _MARGIN`) -- see that constant's own doc comment
-       *  (state-composite-cluster.ts) for why this differs from the autonom
-       *  shape's own `MARGIN`. Always set together with
-       *  `clusterHeaderHeight`. */
+      /** G5 C3: title baseline vertical margin for the border-point
+       *  family ONLY (`BORDER_POINT_TITLE_BASELINE_MARGIN`); plain clusters
+       *  read graphviz's title table instead (gtc T8). */
       titleBaselineMargin?: number;
       /** G7 T14b (`plans/g6-cluster-geometry/batch-4/withlabel-derivation.md`
        *  §2c/§5, `Cluster#manageEntryExitPoint`): direct border-point

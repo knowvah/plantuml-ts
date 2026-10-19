@@ -20,12 +20,16 @@ import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { Theme } from '../../core/theme.js';
 import { resolveElementPaint, resolveElementShadowing, resolveElementLineThickness } from '../../core/theme.js';
-import { resolveElementMinimumWidth, resolveElementRoundCorner } from '../../core/theme-element-resolve.js';
+import {
+  resolveElementMinimumWidth,
+  resolveElementRoundCorner,
+  stereotypeFontColor,
+} from '../../core/theme-element-resolve.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { URectangle } from '../../core/klimt/shape/URectangle.js';
-import { FontStyle } from '../../core/klimt/shape/UText.js';
+import { FontStyle, type FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { Fore } from '../../core/klimt/Fore.js';
 import { Back } from '../../core/klimt/Back.js';
 import type { DescriptionNodeGeo } from './layout-helpers.js';
@@ -132,14 +136,21 @@ export function buildEntityParams(
   theme: Theme,
   sprites: SpriteRegistry | undefined,
 ): EntityImageDescriptionParams {
+  // Style comes from the FULL stereotype list; only the printed labels are filtered (EntityImageDescription.java:151-159,193).
   const stereotypeLabels = node.stereotype ?? [];
+  const styleLabels = node.styleStereotype ?? stereotypeLabels;
   const override = node.color !== undefined ? parseColorOverride(node.color) : {};
   // cdd3-T28 (E3-14): `fcTitle` (styleTitle, bold for `package`) vs `fc`
   // (style) -- java:172-173; `buildDesc` draws a label that differs from the
   // code name in `fontBody`.
-  const fontTitle = textFont(theme, node.symbol, 0, entityTitleStyles(node.symbol));
-  const fontBody = textFont(theme, node.symbol);
-  const fontStereo = stereotypeTextFont(theme, node.symbol, stereotypeLabels, STEREOTYPE_STYLES);
+  // `<sname>FontColor<<label>>` is a stereotype-signed style (+1000 priority), over the plain element font colour.
+  const titleColor = stereotypeFontColor(theme, node.symbol, 'title', styleLabels);
+  const stereoColor = stereotypeFontColor(theme, node.symbol, 'stereotype', styleLabels);
+  const recolor = (font: FontConfiguration, color: string | undefined): FontConfiguration =>
+    color === undefined ? font : { ...font, color };
+  const fontTitle = recolor(textFont(theme, node.symbol, 0, entityTitleStyles(node.symbol)), titleColor);
+  const fontBody = recolor(textFont(theme, node.symbol), titleColor);
+  const fontStereo = recolor(stereotypeTextFont(theme, node.symbol, styleLabels, STEREOTYPE_STYLES), stereoColor);
   // D3 (cdd6 T1b/T2f): this entity's own resolved LineThickness -- the SAME
   // value `paint.stroke` below draws the body's border with -- doubles as
   // the sprite decomposition's ambient stroke seed (`SvgNanoParser.java
@@ -172,11 +183,11 @@ export function buildEntityParams(
     },
     paint: {
       // EntityImageDescription.java:152-166: `<<labels>>` re-sign the style.
-      forecolor: override.line ?? resolveElementPaint(theme, node.symbol, 'border', stereotypeLabels),
+      forecolor: override.line ?? resolveElementPaint(theme, node.symbol, 'border', styleLabels),
       backcolor:
         override.back ??
         businessBackcolor(theme, node.symbol) ??
-        resolveElementPaint(theme, node.symbol, 'background', stereotypeLabels),
+        resolveElementPaint(theme, node.symbol, 'background', styleLabels),
       roundCorner: resolveElementRoundCorner(theme, node.symbol) ?? ENTITY_ROUND_CORNER,
       diagonalCorner: 0,
       // mission skin-file-loading (deferred D3 item): was hardcoded 0 --
@@ -190,7 +201,7 @@ export function buildEntityParams(
       // Shadowing N } }`), matching jar's `EntityImageDescription`-family
       // shared `getStyle().getShadowing()` read. Jar-verified
       // malado-53-noso561.
-      deltaShadow: resolveElementShadowing(theme, node.symbol),
+      deltaShadow: resolveElementShadowing(theme, node.symbol, styleLabels),
       stroke: overrideStroke(override.lineStyle, lineThickness),
       fontTitle: override.text !== undefined ? { ...fontTitle, color: override.text } : fontTitle,
       fontBody: override.text !== undefined ? { ...fontBody, color: override.text } : fontBody,
@@ -254,7 +265,7 @@ function drawPortFallback(ug: UGraphic, node: DescriptionNodeGeo, theme: Theme, 
   const font = textFont(theme, 'port');
   // EntityImagePort.java:121-130: inline colours, then the port style + `<<labels>>`.
   const override = node.color !== undefined ? parseColorOverride(node.color) : {};
-  const stereotypes = node.stereotype ?? [];
+  const stereotypes = node.styleStereotype ?? node.stereotype ?? [];
   const fill = override.back ?? resolveElementPaint(theme, 'port', 'background', stereotypes);
   const border = override.line ?? resolveElementPaint(theme, 'port', 'border', stereotypes);
   decorateEntityDrawing(

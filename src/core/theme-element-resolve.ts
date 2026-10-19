@@ -7,6 +7,7 @@
  */
 import type { Theme } from './theme.js';
 import type { Paint } from './paint.js';
+import type { ElementColors } from './theme-graph-colors.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
 import { HorizontalAlignment } from './klimt/geom/HorizontalAlignment.js';
 
@@ -26,31 +27,75 @@ const STEREOTYPE_PAINT_FIELD = {
 } as const;
 
 /**
+ * The first of an element's labels, in the order the element declares them, that has a tagged value. Upstream fans the
+ * signature out one label at a time (`StyleSignatureBasic#withTOBECHANGED`, StyleSignatureBasic.java:119-132) and merges
+ * the per-label styles in that order; on a priority tie `DarkString#mergeWith` returns `other`, the PREVIOUS (earlier)
+ * value (DarkString.java:50-57, `Style.java:132` `ent.getValue().mergeWith(previous)`), so the earliest label wins and
+ * the declaration order of the skinparam/`<style>` lines does not matter (jar oracles gtc-T6j: label order alone decides,
+ * for both spellings). The SName's own bucket is consulted before the SName-less one for the SAME label.
+ */
+function firstTaggedValue<T>(
+  theme: Theme,
+  sname: string,
+  field: {
+    [K in keyof ElementColors]-?: NonNullable<ElementColors[K]> extends Readonly<Record<string, T>> ? K : never;
+  }[keyof ElementColors],
+  stereotypes: readonly string[],
+): T | undefined {
+  for (const label of stereotypes) {
+    const key = cleanStereoKey(label);
+    for (const bucketName of [sname, ANY_ELEMENT_BUCKET]) {
+      const value = (theme.colors.elements?.[bucketName]?.[field] as Readonly<Record<string, T>> | undefined)?.[key];
+      if (value !== undefined) return value;
+    }
+  }
+  return undefined;
+}
+
+/**
  * The stereotype tier of one element's colour: a `<<label>>`-qualified
  * `skinparam <sname>BackgroundColor<<label>>` / `<style> <sname> { .label {
  * BackgroundColor } }` (or the SName-less `<style> .label { ... }`) beats the
  * un-qualified bucket, because upstream re-signs such a style at +1000
  * priority (`FromSkinparamToStyle.java#addStyle`, `StyleLoader.java:178-186`
  * `addPriorityForStereotype`; `Context.java#toStyles` for the `<style>`
- * spelling). Keys are CLEANED tags; the LAST label with a value wins,
+ * spelling). Keys are CLEANED tags; the FIRST label with a value wins,
  * mirroring `StyleSignatureBasic#withTOBECHANGED` fanning the signature out
  * one label at a time and the merge keeping the last-registered value. The
  * SName's own bucket is consulted after the SName-less one.
  */
-function stereotypePaint(
+export function stereotypePaint(
   theme: Theme,
   sname: string,
   role: keyof typeof STEREOTYPE_PAINT_FIELD,
   stereotypes: readonly string[],
 ): Paint | undefined {
   const field = STEREOTYPE_PAINT_FIELD[role];
-  let hit: Paint | undefined;
-  for (const bucketName of [ANY_ELEMENT_BUCKET, sname]) {
-    const byTag = theme.colors.elements?.[bucketName]?.[field];
-    if (byTag === undefined) continue;
-    for (const label of stereotypes) hit = byTag[cleanStereoKey(label)] ?? hit;
+  return firstTaggedValue<Paint>(theme, sname, field, stereotypes);
+}
+
+/**
+ * The stereotype tier of an element's FONT colour: `skinparam <sname>FontColor<<label>>` (`addConFont(sname)`,
+ * FromSkinparamToStyle.java:149,270-283 re-signed at +1000, :292-302,396-408). It colours the element's title AND, by
+ * inheritance of the merged style, its stereotype text; `<sname>StereotypeFontColor<<label>>` and the declaration-order
+ * `stereoTextFontByStereo` refine the stereotype text only (see `ElementColors.stereoTextFontByStereo`). The LAST label
+ * with a value wins, as for {@link stereotypePaint}. `undefined` when no tagged declaration matches.
+ */
+export function stereotypeFontColor(
+  theme: Theme,
+  sname: string,
+  role: 'title' | 'stereotype',
+  stereotypes: readonly string[],
+): string | undefined {
+  const fields =
+    role === 'title'
+      ? (['fontByStereo'] as const)
+      : (['stereoTextFontByStereo', 'stereotypeFontByStereo', 'fontByStereo'] as const);
+  for (const field of fields) {
+    const hit = firstTaggedValue<string>(theme, sname, field, stereotypes);
+    if (hit !== undefined) return hit;
   }
-  return hit;
+  return undefined;
 }
 
 /**
@@ -164,7 +209,11 @@ export function resolveElementFontSize(
  * `resolveElementPaint`'s two-tier cascade; always returns a number (never
  * `undefined`), matching `Style#getShadowing()`'s "absent -> 0" default.
  */
-export function resolveElementShadowing(theme: Theme, sname: string): number {
+export function resolveElementShadowing(theme: Theme, sname: string, stereotypes: readonly string[] = []): number {
+  // The stereotype tier (`skinparam <sname>Shadowing<<label>>`, +1000 priority, FromSkinparamToStyle.java:396-408):
+  // the FIRST label with a value wins, as for `stereotypePaint`.
+  const tagged = firstTaggedValue<number>(theme, sname, 'shadowingByStereo', stereotypes);
+  if (tagged !== undefined) return tagged;
   const specific = theme.colors.elements?.[sname]?.shadowing;
   if (specific !== undefined) return specific;
   return theme.shadowing ?? 0;

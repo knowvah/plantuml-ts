@@ -209,7 +209,7 @@ export function drawEntities(
  * the clip is now a faithful port of upstream `DotPath#simulateCompound`
  * (`spline-clip.ts`), which clips bezier-by-bezier and so preserves the
  * `1 + 3n` invariant, so no edge is dropped for that reason. Verified:
- * `berufi-69-dara369` (edge `__note_1 -> SRFRet`,
+ * `berufi-69-dara369` (edge `GMN<n> -> SRFRet`,
  * previously clipped to 3 points) and `lirebi-26-voka556` now render
  * every edge; the full description golden corpus drops zero. The catch
  * is retained as a general safety net — the same "never throws, never
@@ -244,7 +244,6 @@ export function drawEdges(
     // entirely absent once `comp2` is hidden, but still fully
     // ink-measured). uid assignment (`plan.edgeUid`, above) already ran
     // unconditionally.
-    if (respectHidden && edge.hidden === true) return;
     // T1e (opale note port): `SvekEdge#drawU`'s `if (opale) return;` --
     // this edge's note end already drew the connector as part of its own
     // Opale outline (`renderer-entity.ts#drawEntity` -> `drawOpaleShape`);
@@ -254,7 +253,7 @@ export function drawEdges(
     // precedent for the class engine).
     if (edge.consumedByOpaleNote === true) return;
     try {
-      drawEdge(ug, edge, theme, plan.edgeUid[i]!, plan.nodeUid, sharedIds);
+      drawEdge(ug, edge, theme, plan.edgeUid[i]!, plan.nodeUid, sharedIds, respectHidden && edge.hidden === true);
     } catch (err) {
       console.error('renderDescription: edge draw failed', edge.id, err);
     }

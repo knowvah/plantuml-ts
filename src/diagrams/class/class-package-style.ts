@@ -68,17 +68,15 @@ function cleanStyleTag(tag: string): string {
   return tag.toLowerCase().replace(/[_.]/g, '');
 }
 
-/** The stereotype tier: the LAST of `tags` with a value wins, mirroring the
- *  merge's last-registered-wins rule (`renderer-classifier-colors.ts
- *  #resolveElementBackground`'s identical convention). */
+/** The stereotype tier: the FIRST of `tags` with a value wins (a priority tie keeps the earlier label's value,
+ *  `DarkString.java:50-57`; `renderer-classifier-colors.ts#resolveElementBackground`'s identical convention). */
 export function byStereo<T>(map: Readonly<Record<string, T>> | undefined, tags: readonly string[]): T | undefined {
   if (map === undefined) return undefined;
-  let hit: T | undefined;
   for (const tag of tags) {
     const v = map[cleanStyleTag(tag)];
-    if (v !== undefined) hit = v;
+    if (v !== undefined) return v;
   }
-  return hit;
+  return undefined;
 }
 
 /** A colour that paints nothing (`HColors.transparent()`): upstream emits no

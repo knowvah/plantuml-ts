@@ -63,7 +63,6 @@ function makeInitialState(internal?: InternalSpriteStore, emoji?: InternalEmojiS
     parentArrayById: new Map(),
     qualifiedNodesById: new Map(),
     lastEntityId: undefined,
-    noteCounter: 0,
     pendingNote: undefined,
     pages: [],
     namespaceSeparator: null,

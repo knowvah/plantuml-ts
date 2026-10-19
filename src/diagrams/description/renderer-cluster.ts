@@ -7,8 +7,15 @@
  */
 import { bareEntityName } from './namespace-groups.js';
 import type { Theme } from '../../core/theme.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { resolveElementShadowing } from '../../core/theme.js';
-import { resolveClusterTitleAlignment, resolveElementRoundCorner } from '../../core/theme-element-resolve.js';
+import {
+  resolveClusterTitleAlignment,
+  resolveElementRoundCorner,
+  stereotypeFontColor,
+  stereotypePaint,
+} from '../../core/theme-element-resolve.js';
+import type { Paint } from '../../core/paint.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
@@ -94,6 +101,10 @@ const STEREOTYPE_STYLES: ReadonlySet<FontStyle> = new Set([FontStyle.ITALIC]);
  *  finding, jar-verified against `component/balomu-94-kegi822`,
  *  `bijoko-90-riro507`, `bisedo-29-kone620`). Leaf-entity titles never get
  *  this (`renderer-entity.ts`'s `fontTitle` carries no style flags). */
+/** `SName.group` (`Cluster.java:291,293`): the SName every non-state cluster signature carries. */
+const GROUP_SNAME = 'group';
+/** The universal selectors every style signature contains (`Cluster.java:291`). */
+const ROOT_SELECTORS = ['root', 'element'] as const;
 const TITLE_STYLES: ReadonlySet<FontStyle> = new Set([FontStyle.BOLD]);
 
 /** `USymbolFolder`'s style is the only container USymbol whose jar default
@@ -111,25 +122,27 @@ export interface HeaderOptions {
 }
 
 /** `ClusterHeader.java:197-207`: one centered guillemet line per visible tag, or an empty block. */
-function labelBlock(node: DescriptionNodeGeo, theme: Theme): TextBlock {
+function labelBlock(node: DescriptionNodeGeo, theme: Theme, styleLabels: readonly string[]): TextBlock {
   if (node.stereotype === undefined || node.stereotype.length === 0) return TextBlockUtils.empty(0, 0);
   // `Display.create(visibleStereotypes)` takes the RAW `<<...>>` runs (`CucaDiagram.java:596-602`, DOUBLE_COMPARATOR)
   // and the creole parser's `Guillemet#manageGuillemet` (`CreoleParser.java:175`) turns each into `«x»` -- except a
   // run holding a creole tag (`<< <U+00B5>Service >>`), which its `[^<>]` class rejects and stays literal.
   const raw = rawStereotypeLabels(node.stereotype);
   const lines = node.stereotype.map((label, i) => (raw?.[i] === undefined ? `<<${label}>>` : raw[i]));
-  return buildTextBlock(
-    lines.join('\n'),
-    stereotypeTextFont(theme, node.symbol, node.stereotype, STEREOTYPE_STYLES),
-    HorizontalAlignment.CENTER,
-  );
+  const font = stereotypeTextFont(theme, node.symbol, node.stereotype, STEREOTYPE_STYLES);
+  const color = stereotypeFontColor(theme, node.symbol, 'stereotype', styleLabels);
+  return buildTextBlock(lines.join('\n'), color === undefined ? font : { ...font, color }, HorizontalAlignment.CENTER);
 }
 
 export function buildHeader(node: DescriptionNodeGeo, theme: Theme, options?: HeaderOptions): ClusterHeaderInfo {
   // `ClusterHeader.java:111`: the title font is built with `g.getColors()`, so an inline `text:` colour wins.
   const text = node.color === undefined ? undefined : parseColorOverride(node.color).text;
+  // `<sname>FontColor<<label>>` re-signs the group's style (+1000, `Cluster.java:384-390` signs the stereotype); the
+  // group's own inline `text:` is applied last.
+  const styleLabels = node.styleStereotype ?? node.stereotype ?? [];
   const baseFont = textFont(theme, node.symbol, 0, TITLE_STYLES);
-  const titleFont = text === undefined ? baseFont : { ...baseFont, color: text };
+  const tagged = stereotypeFontColor(theme, node.symbol, 'title', styleLabels);
+  const titleFont = text === undefined && tagged === undefined ? baseFont : { ...baseFont, color: text ?? tagged! };
   // `ClusterHeader.java:117-119` builds the title with the full `Display#create`, so a `<$sprite>` in a
   // group's label measures and draws; the ELK path (cdd8 T3b) also passes `style.getHorizontalAlignment()`.
   const alignment = options?.alignment ?? resolveClusterTitleAlignment(theme, node.symbol);
@@ -146,11 +159,66 @@ export function buildHeader(node: DescriptionNodeGeo, theme: Theme, options?: He
     node.stereotypeSprite,
     options?.sprites === undefined ? undefined : spriteDimsLookupFor(options.sprites),
   );
-  const stereo = sprite === undefined ? labelBlock(node, theme) : buildStereo([], titleFont, undefined, sprite);
+  const stereo =
+    sprite === undefined ? labelBlock(node, theme, styleLabels) : buildStereo([], titleFont, undefined, sprite);
   return { title, stereo, titleHorizontalAlignment: resolveClusterTitleAlignment(theme, node.symbol) };
 }
 
-export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleDefaults {
+/** The bare `root`/`element` BackgroundColor as a drawable colour, when a style or skin set one. */
+function rootBackground(theme: Theme): string | undefined {
+  const raw = theme.colors.graph.rootElementBackground;
+  return raw === undefined ? undefined : resolveColorToSvgHex(raw);
+}
+
+/**
+ * gtc T1/T2: a container's fill. `Cluster#getStyle` (`Cluster.java:385-391`) merges every declaration matching
+ * `root, element, <diagram>, group, <uSymbol SNames>` (`:286-296`); `Cluster.getBackColor` (`:701-710`) reads
+ * `BackGroundColor` off it. Upstream the LATER declaration wins (`StyleStorage#computeMergedStyle`,
+ * `StyleStorage.java:102-116`, OVERWRITE_EXISTING_VALUE), over `plantuml.skin:102-103`'s `group { BackGroundColor
+ * transparent }`. The theme keeps no declaration order, so the tiers run most-specific first (the container's own
+ * USymbol bucket, the `group` bucket, the `package` bucket, then `root`), which agrees with source order whenever the
+ * style is written general-to-specific.
+ */
+function clusterBackground(theme: Theme, symbol: USymbol, stereotypes: readonly string[]): Paint {
+  return (
+    stereotypePaint(theme, symbol, 'background', stereotypes) ??
+    theme.colors.elements?.[symbol]?.background ??
+    theme.colors.elements?.[GROUP_SNAME]?.background ??
+    theme.colors.graph.packageBackground ??
+    rootBackground(theme) ??
+    'none'
+  );
+}
+
+/**
+ * gtc T2: a container's border colour (`Cluster.java:312-319`, `style.value(PName.LineColor)`), same signature and
+ * tiers as {@link clusterBackground}. The last tier is the bare `root`/`element` LineColor, read off the theme's
+ * ordered `styleOverrides` (a plain `theme.colors.border` cannot say whether a style set it); `fallback` is the
+ * skin's default for the symbol.
+ */
+function clusterBorder(theme: Theme, symbol: USymbol, fallback: string, stereotypes: readonly string[]): Paint {
+  return (
+    stereotypePaint(theme, symbol, 'border', stereotypes) ??
+    theme.colors.elements?.[symbol]?.border ??
+    theme.colors.elements?.[GROUP_SNAME]?.border ??
+    rootLineColor(theme) ??
+    fallback
+  );
+}
+
+/** The last bare `root`/`element` LineColor declared in a `<style>`, same last-wins walk as
+ *  `foldRootBackgroundIntoSequence`. */
+function rootLineColor(theme: Theme): string | undefined {
+  let raw: string | undefined;
+  for (const selector of ROOT_SELECTORS) raw = theme.styleOverrides?.[selector]?.['linecolor'] ?? raw;
+  return raw === undefined ? undefined : resolveColorToSvgHex(raw);
+}
+
+export function buildStyleDefaults(
+  theme: Theme,
+  symbol: USymbol,
+  stereotypes: readonly string[] = [],
+): ClusterStyleDefaults {
   const folder = isFolderStyled(symbol);
   return {
     // mission skin-file-loading (deferred D3 item): was hardcoded 0 --
@@ -161,7 +229,7 @@ export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleD
     // Shadowing N }`) over the diagram-wide `theme.shadowing` (`skin
     // rose`/`<style> element { Shadowing N } }`), matching jar's
     // `Cluster.java` shared `getStyle().getShadowing()` read.
-    shadowing: resolveElementShadowing(theme, symbol),
+    shadowing: resolveElementShadowing(theme, symbol, stereotypes),
     // G1 I10: folder-style clusters use the SAME roundCorner as every
     // other container (5 -- jar-verified `A2.5,2.5`/`A3.75,3.75` arcs on
     // component/fetefi-28-figu176, sacuso-94-gugi476, texacu-57-daci050,
@@ -174,13 +242,18 @@ export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleD
     roundCorner: resolveElementRoundCorner(theme, symbol) ?? NON_FOLDER_ROUND_CORNER,
     strictUmlStyle: false,
     diagonalCorner: 0,
-    lineColorDefault: folder ? FOLDER_BORDER_DEFAULT : NON_FOLDER_BORDER_DEFAULT,
+    lineColorDefault: clusterBorder(
+      theme,
+      symbol,
+      folder ? FOLDER_BORDER_DEFAULT : NON_FOLDER_BORDER_DEFAULT,
+      stereotypes,
+    ),
     // CDD T18b: `theme.colors.graph.packageBackground` is optional now
     // (theme.ts no longer bakes the cluster's own unstyled default in --
     // see that field's doc comment) -- this call site supplies its own
     // `'none'` (`Cluster.java:285-296`'s unstyled `BackGroundColor`,
     // `plantuml.skin:102-114`) explicitly, matching the pre-T18b value.
-    backGroundColorDefault: theme.colors.graph.packageBackground ?? 'none',
+    backGroundColorDefault: clusterBackground(theme, symbol, stereotypes),
     strokeDefault: UStroke.withThickness(folder ? CLUSTER_STROKE_WIDTH : NON_FOLDER_STROKE_WIDTH),
   };
 }
@@ -237,7 +310,7 @@ export function buildCluster(node: DescriptionNodeGeo, theme: Theme, uid: string
     group,
     buildHeader(node, theme, { sprites }),
     { position: new UTranslate(node.x, node.y), width: node.width, height: node.height },
-    buildStyleDefaults(theme, node.symbol),
+    buildStyleDefaults(theme, node.symbol, node.styleStereotype ?? node.stereotype ?? []),
     symbolInfo,
   ];
   return node.kermorNotes === undefined

@@ -38,6 +38,12 @@ export interface DescriptionNodeGeo {
   /** G1 I5b: ALL stereotype tags, in source order (see
    *  `DescriptiveNode.stereotype`'s doc comment). */
   stereotype?: readonly string[];
+  /** The FULL stereotype list, set only when `hide stereotype` filtered {@link stereotype} down. Upstream
+   *  styles an element from the whole `entity.getStereotype()` (`EntityImageDescription.java:151-159`:
+   *  `getStyleSignature().withTOBECHANGED(stereotype)`) and filters only the PRINTED labels through
+   *  `portionShower.getVisibleStereotypeLabels(entity)` (`:193`). Renderers resolve style keys from
+   *  `styleStereotype ?? stereotype`; `stereotype` stays the printed list. */
+  styleStereotype?: readonly string[];
   /** The `<<$name>>` sprite half of that same run, copied straight through
    *  from `DescriptiveNode.stereotypeSprite` so the renderer can resolve the
    *  SAME sprite the sizer measured (`planning/sizer-renderer-parity.md`). */
@@ -196,6 +202,8 @@ export interface DescriptionEdgeGeo {
    *  BOTH the line stroke and the (same-color) filled extremity, matching
    *  upstream `svek/SvekEdge.java:884-893`. */
   styleColor?: string;
+  /** `DescriptiveLink.textColor`: label font colour override (SvekEdge.java:260-262). */
+  styleTextColor?: string;
   arrowHead?: 'open' | 'filled' | 'none';
   /**
    * T17 write-set expansion (journaled — see the mission decision journal):
@@ -212,35 +220,15 @@ export interface DescriptionEdgeGeo {
    *  -- see that field's doc comment. Consumed only by
    *  `renderer-uid.ts#buildUidPlan`; no layout math reads it. */
   creationIndex?: number;
-  /** `true` when EITHER endpoint entity is hidden by a `hide`/`show`
-   *  rule (`Link#isHidden()`, abel/Link.java:458-459's `cl1.isHidden() ||
-   *  cl2.isHidden()` disjunct ONLY). Computed by `layout-geo-post.ts
-   *  #assembleEdgeGeo` from the SAME `hidden` id set `buildGeoNode` uses;
-   *  consumed by `renderer.ts#drawEdges` to skip the edge entirely
-   *  (jar-verified: comp1--comp2 with comp2 hidden draws neither entity
-   *  NOR the connecting edge, component/ciboso-93-romi495).
+  /** `Link#isHidden()` (abel/Link.java:458-459): `hidden || cl1.isHidden() || cl2.isHidden()` -- the
+   *  `-[hidden]-` keyword (`WithLinkType#goHidden`, WithLinkType.java:149-150) or either endpoint hidden
+   *  by a `hide`/`show` rule (jar-verified: comp1--comp2 with comp2 hidden draws neither entity NOR the
+   *  connecting edge, component/ciboso-93-romi495). Computed by `layout-geo-post.ts#assembleEdgeGeo`.
    *
-   *  G1 I-linkstyle: the THIRD upstream disjunct, `Link#isHidden()`'s own
-   *  `this.hidden` field (the `-[hidden]-` bracket keyword,
-   *  `DescriptiveLink.hidden`) is DELIBERATELY still not folded in here --
-   *  attempted and reverted. Wiring it (OR-ing `link.hidden` into this
-   *  field) correctly elides the edge's `<path>`/`<polygon>` (jar-verified
-   *  component/balopu-66-jagu236: `-[hidden]->` draws nothing, matching
-   *  the jar) but REGRESSES the diagram's overall canvas size on fixtures
-   *  where that edge's un-drawn geometry would otherwise have extended the
-   *  ink-extent bounding box (component/dujodu-23-viba393: 5->159 diffs,
-   *  component/tujica-34-tire129: 1->62 diffs -- both `svg/@width
-   *  @height @viewBox` shrink below the jar's value). This is the SAME
-   *  class of gap I-hideshow already root-caused and partially fixed for
-   *  hidden ENTITIES ("hidden entities must still reserve canvas space" --
-   *  upstream's `UHidden` wraps the `UGraphic` so draw calls still run
-   *  (and still register ink-extent) but paint nothing; this port's
-   *  coarse "skip the draw call entirely" approximation loses that
-   *  ink-extent registration) -- not yet extended to hidden EDGES. Fixing
-   *  it requires the edge to still contribute its spline's ink extent to
-   *  the canvas-size computation while suppressing only the visible paint,
-   *  a LimitFinder-adjacent mechanism out of a bracket-modifier-parsing
-   *  iteration's scope. */
+   *  Consumed by `renderer-draw-sequence.ts#drawEdges`: `SvekResult#drawU` (SvekResult.java:97-100) draws
+   *  such an edge through `UHidden`, so on the real pass only the `<!--link X to Y-->` comment is written
+   *  (`SvekEdge#drawHiddenU`'s `drawHiddenU`) while the LimitFinder pass (`respectHidden === false`) still draws
+   *  it in full and so keeps its ink extent in the canvas. */
   hidden?: true;
   /** T1e (opale note port): `true` when this edge attaches exactly one
    *  `symbol === 'note'` leaf (touching no other link) to a non-note

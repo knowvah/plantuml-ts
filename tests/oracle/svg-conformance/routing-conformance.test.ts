@@ -1060,10 +1060,74 @@ describe('routing conformance — jar-error classification', () => {
     // 6459 -> 6474 agree at description-url-wrappers T6 (b4): +15 svg-description
     // golden clones (component 8, usecase 4, unknown 3) of agree-classified
     // dot-cache rows. Derivation: 6474 + 642 + 86 = 7202.
-    expect(pinnedAgree.length).toBe(6474);
+    // 6474 -> 6475 agree at gtc T1: +1 svg-description golden
+    // clones (unknown 1: rufopi-30-roro642) of agree-classified dot-cache rows.
+    // Derivation: 6475 + 642 + 86 = 7203.
+    // 6475 -> 6486 agree at gtc T2: +11 svg-description golden
+    // clones (component 4, unknown 7) of agree-classified dot-cache rows.
+    // Derivation: 6486 + 642 + 86 = 7214.
+    // 6486 -> 6521 agree at gtc S (state lane close): +35 svg-state golden
+    // clones (35 state rows) of agree-classified dot-cache rows.
+    // Derivation: 6521 + 642 + 86 = 7249.
+    // 6521 -> 6523 agree at gtc T2b: +2 svg-description golden
+    // clones (component 1, unknown 1) of agree-classified dot-cache rows.
+    // Derivation: 6523 + 642 + 86 = 7251.
+    // 6523 -> 6525 agree at gtc T3: +2 svg-description golden
+    // clones (component 1, usecase 1) of agree-classified dot-cache rows.
+    // Derivation: 6525 + 642 + 86 = 7253.
+    // 6525 -> 6531 agree at gtc T3b: +6 svg-description golden
+    // clones (component 4, usecase 2) of agree-classified dot-cache rows.
+    // Derivation: 6531 + 642 + 86 = 7259.
+    // 6531 -> 6537 agree at gtc T4: +6 svg-description golden
+    // clones (component 5, unknown 1) of agree-classified dot-cache rows.
+    // Derivation: 6537 + 642 + 86 = 7265.
+    // 6537 -> 6538 agree at gtc T5a: +1 svg-description golden
+    // clones (component 1: zosaxo-93-nici652) of agree-classified dot-cache rows.
+    // Derivation: 6538 + 642 + 86 = 7266.
+    // 6538 -> 6540 agree at gtc T5b: +2 svg-description golden
+    // clones (unknown 1, usecase 1) of agree-classified dot-cache rows.
+    // Derivation: 6540 + 642 + 86 = 7268.
+    // 6540 -> 6546 agree at gtc T6b: +6 svg-description golden
+    // clones (component 4, unknown 2) of agree-classified dot-cache rows.
+    // Derivation: 6546 + 642 + 86 = 7274.
+    // 6546 -> 6553 agree at gtc T6d: +7 svg-description golden
+    // clones (component 4, unknown 3) of agree-classified dot-cache rows.
+    // Derivation: 6553 + 642 + 86 = 7281.
+    // 6553 -> 6555 agree at gtc T6e: +2 svg-description golden
+    // clones (unknown 2) of agree-classified dot-cache rows.
+    // Derivation: 6555 + 642 + 86 = 7283.
+    // 6555 -> 6556 agree at gtc T6f: +1 svg-description golden
+    // clones (component 1: rekisu-47-pesa949) of agree-classified dot-cache rows.
+    // Derivation: 6556 + 642 + 86 = 7284.
+    // 6556 -> 6557 agree at gtc T6g: +1 svg-description golden
+    // clones (unknown 1: fefeza-33-xute344) of agree-classified dot-cache rows.
+    // Derivation: 6557 + 642 + 86 = 7285.
+    // 6557 -> 6559 agree at gtc T6h: +2 svg-description golden
+    // clones (component 1, usecase 1) of agree-classified dot-cache rows.
+    // Derivation: 6559 + 642 + 86 = 7287.
+    // 6559 -> 6560 agree at gtc T6j: +1 svg-description golden
+    // clones (unknown 1: deroxu-29-gude369) of agree-classified dot-cache rows.
+    // Derivation: 6560 + 642 + 86 = 7288.
+    expect(pinnedAgree.length).toBe(6560);
     expect(pinnedMisroutes.length).toBe(642);
     expect(pinnedJarErrors.length).toBe(86);
-    expect(manifest.fixtures.length).toBe(7202);
+    // 7202 -> 7203 at gtc T1 (see the agree derivation above).
+    // 7203 -> 7214 at gtc T2 (see the agree derivation above).
+    // 7214 -> 7249 at gtc S (state lane close) (see the agree derivation above).
+    // 7249 -> 7251 at gtc T2b (see the agree derivation above).
+    // 7251 -> 7253 at gtc T3 (see the agree derivation above).
+    // 7253 -> 7259 at gtc T3b (see the agree derivation above).
+    // 7259 -> 7265 at gtc T4 (see the agree derivation above).
+    // 7265 -> 7266 at gtc T5a (see the agree derivation above).
+    // 7266 -> 7268 at gtc T5b (see the agree derivation above).
+    // 7268 -> 7274 at gtc T6b (see the agree derivation above).
+    // 7274 -> 7281 at gtc T6d (see the agree derivation above).
+    // 7281 -> 7283 at gtc T6e (see the agree derivation above).
+    // 7283 -> 7284 at gtc T6f (see the agree derivation above).
+    // 7284 -> 7285 at gtc T6g (see the agree derivation above).
+    // 7285 -> 7287 at gtc T6h (see the agree derivation above).
+    // 7287 -> 7288 at gtc T6j (see the agree derivation above).
+    expect(manifest.fixtures.length).toBe(7288);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

@@ -79,6 +79,19 @@ function measureLabel(text: string, font: FontSpec, measurer: StringMeasurer, is
   return { box, ascent: font.size - measurer.getDescent(font, box.lines[0]!) };
 }
 
+/** `SvgGraphics.java:700-706`: the drawn `<text>`'s `textLength` is the
+ *  string's measured width. Only a single-line label drawn verbatim has one
+ *  string to measure; a label whose drawn text differs from its measured
+ *  line (creole markup, multi-line) keeps no `textLength`, as before. */
+function drawnTextLength(
+  labelText: string,
+  { box }: MeasuredLabel,
+  ctx: LabelMeasureCtx,
+): { textLength: number } | Record<string, never> {
+  if (box.lines.length !== 1 || box.lines[0] !== labelText) return {};
+  return { textLength: ctx.measurer.measure(labelText, ctx.font).width };
+}
+
 function anchorFromCentre(centre: { x: number; y: number }, { box, ascent }: MeasuredLabel): { x: number; y: number } {
   return {
     x: centre.x - box.reservedWidth / 2 + box.marginLabel,
@@ -103,7 +116,7 @@ function anchorFromCentre(centre: { x: number; y: number }, { box, ascent }: Mea
  * once the marged-box fold is correct.
  *
  * Applied to the ink box ONLY, never to `label.x`/`label.y`: the draw
- * anchor and the document-level (`labelInk: false`) point fold are pinned
+ * anchor is pinned
  * and must stay byte-identical (mission decision D5). We therefore draw the
  * label at the unquantized x where jar draws the quantized one — ≤0.005px,
  * inside the 0.01px SVG-conformance band.
@@ -186,6 +199,7 @@ type TransitionLabelResult = {
   text: string;
   x: number;
   y: number;
+  textLength?: number;
   width?: number;
   height?: number;
   inkBox?: LabelInkBox;
@@ -371,7 +385,13 @@ function attachInlineTransitionLabel(
   // `ge.label` pair).
   if (edgeResult?.labelX !== undefined && measured !== undefined) {
     const anchor = anchorFromCentre({ x: edgeResult.labelX, y: edgeResult.labelY! }, measured);
-    return { text: labelText, x: anchor.x, y: anchor.y, ...labelBoxFields(anchor, measured) };
+    return {
+      text: labelText,
+      x: anchor.x,
+      y: anchor.y,
+      ...drawnTextLength(labelText, measured, ctx!),
+      ...labelBoxFields(anchor, measured),
+    };
   }
 
   const legacy = perpendicularOffsetLabel(points);
@@ -380,7 +400,8 @@ function attachInlineTransitionLabel(
   // when graphviz returned no position), so it keeps the SAME box
   // convention rather than a second one.
   const boxFields = measured !== undefined ? labelBoxFields(legacy, measured) : {};
-  return { text: labelText, x: legacy.x, y: legacy.y, ...boxFields };
+  const lengthField = measured !== undefined ? drawnTextLength(labelText, measured, ctx!) : {};
+  return { text: labelText, x: legacy.x, y: legacy.y, ...lengthField, ...boxFields };
 }
 
 /** Attach a transition's label. D1: when the layout result placed the label

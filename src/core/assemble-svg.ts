@@ -44,6 +44,7 @@ import { svgRoot, group, rect } from './svg.js';
 import { finalizeActivityFragment, scaleActivityBody } from './assemble-svg-activity.js';
 import { resolveScaleFactor } from './scale-command.js';
 import { applySeededDefIds } from './svg-defs-seeded.js';
+import { scaleShadowFilterDefs } from './svg-defs-scale.js';
 import { seedOf } from './klimt/drawing/svg/svg-seed.js';
 import { assembleDocumentShell } from './klimt/document-shell.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
@@ -406,10 +407,12 @@ function finalizeDescriptionFragment(fragment: RenderFragment): RenderFragment {
   // `TextBlockExporter#computeScaleFactor` (`:204-208`) reads the chrome-and-margin dimension before `ensureVisible`.
   const dimension = fragment.exportedDimension ?? fragment;
   const factor = resolveScaleFactor(fragment.scaleSpec, dimension.width, dimension.height, fragment.dpi);
-  if (factor === 1) return { ...fragment, body };
+  // A `numbersDeferred` body is formatted by this pass alone, so it runs at factor 1 too (assemble-svg-activity.ts).
+  if (factor === 1 && fragment.numbersDeferred !== true) return { ...fragment, body };
   return {
     ...fragment,
     body: scaleActivityBody(body, factor),
+    ...(fragment.extraDefs === undefined ? {} : { extraDefs: scaleShadowFilterDefs(fragment.extraDefs, factor) }),
     scaledCanvas: true,
     width: fragment.width * factor,
     height: fragment.height * factor,

@@ -42,3 +42,8 @@ export const QUALIFIED_SNAMES = [...CLASS_SNAMES, 'qualified'] as const;
  *  `resolveStyleCascade`'s subset-match algorithm needs no separate
  *  fallback tier for that case, jar-verified cdd2-T13 Q-4 probe a. */
 export const GENERIC_SNAMES = [...CLASS_SNAMES, 'generic'] as const;
+
+/** `SvekEdge.java:816-821`: `{root,element,<diagramType().getStyleName()>,arrow}`. A description diagram's style name
+ *  is `componentDiagram` (`DiagramType.java:250-251`, `DESCRIPTION` -> `SName.componentDiagram`) -- usecase and
+ *  deployment diagrams included -- so a `classDiagram { arrow }` selector never reaches its links. */
+export const DESCRIPTION_ARROW_SNAMES = ['root', 'element', 'componentdiagram', 'arrow'] as const;

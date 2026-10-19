@@ -160,6 +160,7 @@ function buildTransitionLabelMarkup(transition: TransitionGeo, theme: Theme): st
   return text(transition.label.x, transition.label.y, transition.label.text, {
     ...fontAttrs,
     fill: color,
+    ...(transition.label.textLength !== undefined ? { textLength: transition.label.textLength } : {}),
   });
 }
 

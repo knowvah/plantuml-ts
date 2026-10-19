@@ -6,13 +6,13 @@
  * Moved out of `layout.ts` (500-line cap) -- `buildPortClusterInfoByAstId` and `clusterRectsByAstId`
  * are a pure move; `clusterBoxesByAstId` is new (codd-T2 M1).
  */
-import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { RectangleArea } from '../../core/svek/FrontierCalculator.js';
 import type { PortClusterInfo } from './frontier-cluster-bbox.js';
-import { measureTitleLabel, type Bbox, type DescriptionNodeGeo, type KermorNotesGeo } from './layout-helpers.js';
+import { type Bbox, type DescriptionNodeGeo, type KermorNotesGeo } from './layout-helpers.js';
 import { kermorNoteClusterId, type KermorNoteSlot } from '../../core/graph-layout-build-kermor.js';
 import type { ClassifyCtx } from './layout-types.js';
+import type { ClusterTitleDims } from './layout-dot-tree.js';
 
 /** Builds the `PortClusterInfo` (frontier-cluster-bbox.ts) for every
  *  container with port children -- the clusters `Cluster#drawU` runs
@@ -28,7 +28,7 @@ import type { ClassifyCtx } from './layout-types.js';
 export function buildPortClusterInfoByAstId(
   ctx: ClassifyCtx,
   portRanksByCluster: ReadonlyMap<string, { rank: 'source' | 'sink'; nodeIds: string[] }[]>,
-  fonts: { fontSpec: FontSpec; measurer: StringMeasurer },
+  titleDimsByClusterId: ReadonlyMap<string, ClusterTitleDims | undefined>,
   result: DotLayoutResult,
 ): Map<string, PortClusterInfo> {
   const out = new Map<string, PortClusterInfo>();
@@ -38,7 +38,10 @@ export function buildPortClusterInfoByAstId(
     // No rect -> no `PortClusterInfo`: `buildGeoNode` then draws the engine's own
     // cluster rect for that container.
     if (!portRanksByCluster.has(c.clusterId) || initial === undefined) continue;
-    const title = measureTitleLabel(c.display, c.symbol, fonts.fontSpec, fonts.measurer);
+    // `Cluster.java:427-428` `getTitleAndAttributeWidth()`: the SAME D5 dims the cluster's DOT label table prints
+    // (`ClusterHeader.java:79-92`, a title block of the group's wrapped lines in the group's own bold font), not the
+    // raw display measured as one plain line. No label -> 0/0 (`Cluster.java:671-673`).
+    const title = titleDimsByClusterId.get(c.clusterId) ?? { width: 0, height: 0 };
     out.set(c.astId, { initial, clusterRects, titleWidth: title.width, titleHeight: title.height });
   }
   return out;

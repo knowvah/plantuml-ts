@@ -5,6 +5,8 @@ import type { Paint } from '../paint.js';
 import type { FontConfiguration } from '../klimt/shape/UText.js';
 import { UTranslate } from '../klimt/UTranslate.js';
 import { UText } from '../klimt/shape/UText.js';
+import { UEmpty } from '../klimt/shape/UEmpty.js';
+import { XDimension2D } from '../klimt/geom/XDimension2D.js';
 import { UComment } from '../klimt/shape/UComment.js';
 import { UGroup, UGroupType } from '../klimt/shape/UGroup.js';
 import { Fore } from '../klimt/Fore.js';
@@ -14,7 +16,8 @@ import { buildDotPathFromSplinePoints, edgeMidpoint } from './svek-edge-geometry
 import { placeHeadExtremity, placeTailExtremity } from './svek-edge-extremity.js';
 import type { PlacedExtremity } from './svek-edge-extremity.js';
 import { buildTextBlock } from './image/EntityImageDescriptionTextBlock.js';
-import { splitDisplayLines } from '../klimt/creole/DisplayNewlines.js';
+import { parseWithNewlines } from '../klimt/creole/DisplayNewlines.js';
+import { Pragma } from '../skin/Pragma.js';
 import { HorizontalAlignment } from '../klimt/geom/HorizontalAlignment.js';
 import { strokeForStyle } from './svek-edge-stroke.js';
 import type { UStroke } from '../klimt/UStroke.js';
@@ -141,6 +144,10 @@ export interface SvekEdgeInput {
   /** Font for both `label` and `stereotype` text — required only when
    *  either is present (see `drawLabels`). */
   readonly labelFont?: FontConfiguration;
+  /** `SvekEdge.java:376-381` `getMessageTextAlignment`: `skinParam.getDefaultTextAlignment(CENTER)` -- the label
+   *  block's alignment when the text carries no `\l`/`\r` marker (`Display.java:648-649` lets a marker override it).
+   *  Absent means CENTER. */
+  readonly labelAlignment?: HorizontalAlignment;
 }
 
 /** Duck-typed widening of `UGraphic` for the two group methods T2
@@ -296,6 +303,18 @@ export class SvekEdge implements UDrawable {
     groupable.closeGroup?.();
   }
 
+  /**
+   * `SvekResult#drawU` draws a hidden edge through `ug.apply(UHidden.HIDDEN)` (SvekResult.java:98): each
+   * `SvgGraphics` element writer is gated by `if (hidden == false)` (SvgGraphics.java:337,352,...), so the
+   * `<g class="link">` stays empty (and is dropped), while `SvekEdge#drawU`'s comment (SvekEdge.java:845) is
+   * still written and `uniq(ids, ...)` still consumes the path id (SvekEdge.java:944). The ink extent is
+   * counted by the LimitFinder pass, which draws the edge un-hidden (it never sees `UHidden`).
+   */
+  drawHiddenU(ug: UGraphic): void {
+    ug.draw(this.commentForSvg());
+    this.uniq(this.ids, this.idCommentForSvg());
+  }
+
   private drawExtremity(ug: UGraphic, placed: PlacedExtremity | undefined, thicknessOnlyStroke: UStroke): void {
     if (placed === undefined) return;
     const backed = ug.apply(thicknessOnlyStroke).apply(new Back(placed.isFill ? this.input.color : 'none'));
@@ -331,8 +350,15 @@ export class SvekEdge implements UDrawable {
     const margin = this.input.fromUid === this.input.toUid ? SELF_LOOP_EDGE_LABEL_MARGIN : EDGE_LABEL_MARGIN;
     const x = label.x - Math.trunc(label.w) / 2 + margin;
     const y = label.y - Math.trunc(label.h) / 2 + margin;
-    buildTextBlock(splitDisplayLines(label.text).lines.join('\n'), font, HorizontalAlignment.CENTER).drawU(
-      ug.apply(new UTranslate(x, y)),
-    );
+    // `Display.java:648-649`: `if (getNaturalHorizontalAlignment() != null) horizontalAlignment = natural`.
+    const parsed = parseWithNewlines(Pragma.createEmpty(), label.text)!;
+    const alignment = parsed.naturalHorizontalAlignment ?? this.input.labelAlignment ?? HorizontalAlignment.CENTER;
+    const block = buildTextBlock(parsed.lines.join('\n'), font, alignment);
+    // `TextBlockMarged#drawU` (`TextBlockMarged.java:81-87`): the marged block first draws `UEmpty.create(dim)` over
+    // text + 2 x margin (drawn only when that width is > 0), which `LimitFinder#drawEmpty` folds into the ink extent.
+    const text = block.calculateDimension(ug.getStringBounder());
+    const marged = new XDimension2D(text.getWidth() + 2 * margin, text.getHeight() + 2 * margin);
+    if (marged.getWidth() > 0) ug.apply(new UTranslate(x - margin, y - margin)).draw(UEmpty.create(marged));
+    block.drawU(ug.apply(new UTranslate(x, y)));
   }
 }

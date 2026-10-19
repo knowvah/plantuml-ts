@@ -20,7 +20,7 @@ import type { DescriptionDiagramAST, DescriptiveLink } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import { resolveElementFontSize, resolveElementLineThickness, resolveElementMinimumWidth } from '../../core/theme.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
-import type { DotInputGraph, DotLayoutResult } from '../../core/graph-layout.js';
+import type { DotInputEdge, DotInputGraph, DotLayoutResult } from '../../core/graph-layout.js';
 import { layoutGraph } from '../../core/graph-layout.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import {
@@ -50,6 +50,7 @@ import { emojiArtworkResolverFor } from '../../core/internal-emoji-store.js';
 import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
 import { buildMagmaEdges, magmaGroups } from './magma.js';
 import { effectiveRemovedIds, effectiveHiddenIds } from './element-grammar.js';
+import { orderLinks } from './link-order.js';
 import { buildNamespaceGroups, findCollidingIds } from './namespace-groups.js';
 import {
   computePortRanksByCluster,
@@ -178,7 +179,12 @@ function runLayout(
   applyShieldEdgePorts(input);
   const spacing: ClusterSpacing = { rankdir: ast.rankdir === 'LR' ? 'LR' : 'TB' };
   const result = layoutGraph(input);
-  const portClusterInfoByAstId = buildPortClusterInfoByAstId(ctx, portRanksByCluster, { fontSpec, measurer }, result);
+  const portClusterInfoByAstId = buildPortClusterInfoByAstId(
+    ctx,
+    portRanksByCluster,
+    clusterTitleDimsById(ctx, wrapperInputs),
+    result,
+  );
   // #lizard forgives -- NLOC 47, CCN 9 pre-existing (mission G5/C1
   // 500-line split, pure move); 8 params after this iteration's own
   // `edgeFontSpec` addition -- a flat sequence of DOT-input-assembly
@@ -221,6 +227,17 @@ function withLinkNoteDrawn(links: readonly DescriptiveLink[]): readonly Descript
   });
 }
 
+/** The `xlabel` table of each dot edge (ortho main labels); see `EdgeMapping.xlabelTableByDotId`. */
+function xlabelTables(dotEdges: readonly DotInputEdge[]): ReadonlyMap<string, { w: number; h: number }> {
+  const out = new Map<string, { w: number; h: number }>();
+  for (const e of dotEdges) {
+    const a = e.attributes;
+    if (a?.xlabelWidth !== undefined && a.xlabelHeight !== undefined)
+      out.set(e.id, { w: a.xlabelWidth, h: a.xlabelHeight });
+  }
+  return out;
+}
+
 function buildGeoAndEdges(
   ast: DescriptionDiagramAST,
   result: DotLayoutResult,
@@ -258,6 +275,7 @@ function buildGeoAndEdges(
     geoIndex,
     dx: 0,
     dy: 0,
+    xlabelTableByDotId: xlabelTables(edgeDotBuild.dotEdges),
     namespaceSeparator: ast.namespaceSeparator,
   };
   const drawLinks = withLinkNoteDrawn(ast.links);
@@ -276,7 +294,14 @@ function buildGeoAndEdges(
   const { dx, dy } = placement;
   const nodes = rawNodes.map((n) => shiftGeo(n, dx, dy));
   const edges =
-    dx === 0 && dy === 0 ? rawEdges : buildEdgeGeos(drawLinks, result.edges, { ...rawMapping, dx, dy }, hidden);
+    dx === 0 && dy === 0
+      ? rawEdges
+      : buildEdgeGeos(
+          drawLinks,
+          result.edges,
+          { ...rawMapping, dx, dy, svekMoveDeltaX: dx - (result.originShift?.x ?? 0) },
+          hidden,
+        );
   // #lizard forgives -- pre-existing (8 params): the cohesive geo-tree +
   // edge-geometry assembly context threaded from layoutDescription's own
   // single call site -- mission G5/C1 500-line split (pure move), not
@@ -329,7 +354,8 @@ export function layoutDescription(
 ): DescriptionGeometry {
   // `skinparam packagestyle`: the `package` keyword's group symbol (`CommandPackageWithUSymbol.java:194`).
   const styledNodes = applyPackageStyle(authoredAst.nodes, theme);
-  const ast = styledNodes === authoredAst.nodes ? authoredAst : { ...authoredAst, nodes: styledNodes };
+  // `CucaDiagramFileMakerSvek#getOrderedLinks` (java:90-114): the svek pipeline lays out and draws the regrouped list.
+  const ast = { ...authoredAst, nodes: styledNodes, links: orderLinks(authoredAst.links) };
   if (ast.nodes.length === 0) {
     return {
       totalWidth: 0,

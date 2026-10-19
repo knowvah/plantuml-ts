@@ -38,6 +38,14 @@ export interface EdgeMapping {
   geoIndex: Map<string, DescriptionNodeGeo>;
   dx: number;
   dy: number;
+  /** The final draw's `SvekResult#calculateDimension` `moveDelta` x (`SvekResult.java:133`) in the jar's svek frame:
+   *  `dx - originShift.x` (the layout frame + `DotLayoutResult.originShift` is the svek frame). Absent on the
+   *  measuring pass (`dx = 0`), where the jar has not yet moved anything. Read only by `autoLinkOfAGroupShift`. */
+  svekMoveDeltaX?: number;
+  /** The `xlabel` table each dot edge was given under `skinparam linetype ortho` (`xlabelWidth`/`xlabelHeight`,
+   *  `link-edge-attrs.ts#applyMainLabel`). The engine echoes only `labelWidth`/`labelHeight`, which an ortho edge
+   *  never carries, yet the jar draws the xlabel as the same label block (`SvekEdge.java:434-441`, :951-954). */
+  xlabelTableByDotId?: ReadonlyMap<string, { w: number; h: number }>;
   /** `set separator` (`ast.namespaceSeparator`): `Quark#getName()` is the last segment of the split path
    *  (`Quark.java:84-86`), so edge ids/comments name endpoints by that leaf. */
   namespaceSeparator?: string | null | undefined;
@@ -96,6 +104,7 @@ function assembleEdgeGeo(
   };
   if (link.thicknessOverride !== undefined) geo.styleThickness = link.thicknessOverride;
   if (link.colorOverride !== undefined) geo.styleColor = link.colorOverride;
+  if (link.textColor !== undefined) geo.styleTextColor = link.textColor;
   if (link.stereotype !== undefined) geo.stereotype = link.stereotype;
   if (link.stereotypeIsLinkLabel) geo.stereotypeIsLinkLabel = true;
   if (link.arrowHead !== undefined) geo.arrowHead = link.arrowHead;
@@ -103,15 +112,15 @@ function assembleEdgeGeo(
   if (link.tailDecor !== undefined) geo.tailDecor = link.tailDecor;
   if (link.headDecor !== undefined) geo.headDecor = link.headDecor;
   if (link.creationIndex !== undefined) geo.creationIndex = link.creationIndex;
-  // G1 I-hideshow: `Link#isHidden()`'s `cl1.isHidden() || cl2.isHidden()`
-  // disjunct (abel/Link.java:458-459) -- see `DescriptionEdgeGeo.hidden`'s
-  // doc comment for why the `-[hidden]-` keyword disjunct is NOT folded in
-  // here (G1 I-linkstyle: attempted and REVERTED -- see that doc comment).
-  if (hidden.has(link.from) || hidden.has(link.to)) geo.hidden = true;
+  // `Link#isHidden()` (abel/Link.java:458-459): `hidden || cl1.isHidden() || cl2.isHidden()` -- the
+  // `-[hidden]-` keyword (`WithLinkType#goHidden`, WithLinkType.java:149-150) and the two endpoint
+  // disjuncts. The renderer paints nothing for it but still feeds the LimitFinder pass.
+  if (link.hidden === true || hidden.has(link.from) || hidden.has(link.to)) geo.hidden = true;
   return geo;
 }
 
-function addEdgeLabel(geo: DescriptionEdgeGeo, link: DescriptiveLink, re: ResultEdge, dx: number, dy: number): void {
+function addEdgeLabel(geo: DescriptionEdgeGeo, link: DescriptiveLink, re: ResultEdge, m: EdgeMapping): void {
+  const { dx, dy } = m;
   const stereotypeLabel = link.stereotypeIsLinkLabel === true && link.stereotype !== undefined;
   if (link.label === undefined && !stereotypeLabel) return;
   const at = edgeLabelGeo(re, dx, dy);
@@ -123,7 +132,9 @@ function addEdgeLabel(geo: DescriptionEdgeGeo, link: DescriptiveLink, re: Result
   const table =
     link.linkNote === undefined && re.labelWidth !== undefined && re.labelHeight !== undefined
       ? { w: re.labelWidth, h: re.labelHeight }
-      : undefined;
+      : link.linkNote === undefined
+        ? m.xlabelTableByDotId?.get(re.id)
+        : undefined;
   if (link.label === undefined && table === undefined) return;
   geo.label = { text: link.label ?? '', ...at, ...table };
 }
@@ -168,6 +179,11 @@ function applyOpaleNote(
   if (noteNode === undefined) return;
   const otherNode = noteNode === fromNode ? toNode : fromNode;
   if (otherNode === undefined || otherNode.symbol === 'note') return;
+  // `GraphvizImageBuilder.java:245-259`: `setOpaleLine`/`line.setOpale(true)` only `if (other != null)`,
+  // `other = Bibliotekon#getNode(entity)` (`Bibliotekon.java:120-122`) -- `nodeMap` holds leaf nodes, so
+  // a cluster has none. The note is then drawn by `EntityImageNote#drawNormal` (:272-286) and its
+  // dashed link by `SvekEdge#drawU` (:833).
+  if (otherNode.children.length > 0) return;
   const touchingLinks = allLinks.filter((l) => l.from === noteNode.id || l.to === noteNode.id);
   if (touchingLinks.length !== 1) return;
   const origin = { x: noteNode.x + m.dx, y: noteNode.y + m.dy };
@@ -175,6 +191,28 @@ function applyOpaleNote(
   if (resolved === undefined) return;
   geo.consumedByOpaleNote = true;
   geo.opale = resolved;
+}
+
+/**
+ * `SvekEdge.java:863-869` (`Link#isAutoLinkOfAGroup`, `abel/Link.java:341-352`): a link from a group to itself is drawn
+ * `x = cluster.width - (dotPath.start.x - cluster.minX)` further right, on top of the `moveDelta` the final draw adds. The cluster
+ * rectangle has been `moveDelta`d by it by then (`SvekResult.java:133`, `Cluster.java:127-137`) while the edge's
+ * `dotPath` has not (the edge only accumulates `dx`, `SvekEdge.java:1241-1244`), so the formula carries that delta a
+ * second time (`EdgeMapping.svekMoveDeltaX`). The measuring pass has moved nothing. `0` for any other link.
+ */
+function autoLinkOfAGroupShift(
+  info: EdgeContainerEndpoints | undefined,
+  clipped: ReadonlyArray<{ x: number; y: number }>,
+  m: EdgeMapping,
+  solve: DescriptionSolveRects,
+): number {
+  const id = info?.fromContainerAstId;
+  const start = clipped[0];
+  if (id === undefined || id !== info?.toContainerAstId || start === undefined) return 0;
+  const group = m.geoIndex.get(id);
+  if (group === undefined) return 0;
+  const rect = clipRectOf(group, solve);
+  return rect.width - (start.x - rect.x) + (m.svekMoveDeltaX ?? 0);
 }
 
 export function buildEdgeGeos(
@@ -197,9 +235,10 @@ export function buildEdgeGeos(
     const link = links[linkIdx];
     if (link === undefined) continue;
     const clipped = clipEdgePoints(re.points, m.edgeContainerEndpoints.get(re.id), m.geoIndex, solve);
-    const pts = clipped.map((p) => ({ x: p.x + m.dx, y: p.y + m.dy }));
+    const shift = autoLinkOfAGroupShift(m.edgeContainerEndpoints.get(re.id), clipped, m, solve);
+    const pts = clipped.map((p) => ({ x: p.x + m.dx + shift, y: p.y + m.dy }));
     const geo = assembleEdgeGeo(linkIdx, link, pts, hidden, m.namespaceSeparator);
-    addEdgeLabel(geo, link, re, m.dx, m.dy);
+    addEdgeLabel(geo, link, re, { ...m, dx: m.dx + shift });
     applyOpaleNote(geo, link, pts, links, m);
     byIdx.set(linkIdx, geo);
   }

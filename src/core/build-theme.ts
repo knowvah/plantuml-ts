@@ -188,9 +188,9 @@ function applySegment(theme: Theme, segment: StyleSkinparamSegment): Theme {
  */
 function withoutSupersededArrowCascade(theme: Theme, entries: ReadonlyMap<string, string>): Theme {
   const graph = theme.colors.graph;
-  if (graph.classCascadeArrowColor === undefined) return theme;
+  if (graph.classCascadeArrowColor === undefined && graph.descriptionCascadeArrowColor === undefined) return theme;
   if (![...entries.keys()].some((key) => cleanForKeySlow(key).includes('arrowcolor'))) return theme;
-  const { classCascadeArrowColor: _superseded, ...rest } = graph;
+  const { classCascadeArrowColor: _superseded, descriptionCascadeArrowColor: _superseded2, ...rest } = graph;
   return { ...theme, colors: { ...theme.colors, graph: rest } };
 }
 

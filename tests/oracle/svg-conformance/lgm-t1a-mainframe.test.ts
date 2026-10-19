@@ -109,9 +109,8 @@ describe('lgm-T1c: state and description mainframe (raw svek frame)', () => {
     expect(diffsOf(name)).toEqual([]);
   });
 
-  it('state-frame equals the jar render but for the transition label textLength', () => {
-    // `textLength` of the "go" label is empty in ours with or without chrome
-    // (a measurement-side residual of the state label, independent of chrome).
-    expect(diffsOf('state-frame').map((d) => d.path)).toEqual(['svg/g[1]/g[6]/text[1]/@textLength']);
+  // gtc-T7a closed the "go" label's textLength residual (SvgGraphics.java:700-706).
+  it('state-frame equals the jar render', () => {
+    expect(diffsOf('state-frame').map((d) => d.path)).toEqual([]);
   });
 });
