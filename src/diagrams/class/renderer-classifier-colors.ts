@@ -77,13 +77,11 @@ export function resolveElementBackground(
 ): string | undefined {
   const byStereo = theme.colors.elements?.[sname]?.backgroundColorByStereo;
   if (byStereo !== undefined && stereotypeLabels !== undefined) {
-    // Last label wins, mirroring the merge's own last-registered-wins rule.
-    let hit: string | undefined;
+    // First label wins: a priority tie keeps the earlier label's value (DarkString.java:50-57).
     for (const label of stereotypeLabels) {
       const v = byStereo[label];
-      if (v !== undefined) hit = v;
+      if (v !== undefined) return resolveColorToSvgHex(v);
     }
-    if (hit !== undefined) return resolveColorToSvgHex(hit);
   }
   const bucket = theme.colors.elements?.[sname]?.background;
   if (typeof bucket === 'string') return resolveColorToSvgHex(bucket);

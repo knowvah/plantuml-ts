@@ -78,11 +78,14 @@ describe('resolveElementPaint stereotype tier', () => {
     expect(resolveElementPaint(theme, 'component', 'background', ['shared lib'])).toBe(theme.colors.nodeBackground);
   });
 
-  it('the SName bucket wins over the SName-less tag; the last matching label wins', () => {
+  it('the SName bucket wins over the SName-less tag; the first matching label wins', () => {
     const both = themeOf('<style>\n.t { BackgroundColor #aaa }\ncomponent { .t { BackgroundColor #bbb } }\n</style>');
     expect(resolveElementPaint(both, 'component', 'background', ['t'])).toBe('#bbb');
     const two = themeOf('<style>\n.a { BackgroundColor #111 }\n.b { BackgroundColor #222 }\n</style>');
-    expect(resolveElementPaint(two, 'node', 'background', ['a', 'b'])).toBe('#222');
+    // gtc-T6j: jar oracle `node N1 <<a>> <<b>>` fills #F00 (the `.a` value), `<<b>> <<a>>` fills #00F --
+    // a priority tie keeps the earlier label's value (DarkString.java:50-57).
+    expect(resolveElementPaint(two, 'node', 'background', ['a', 'b'])).toBe('#111');
+    expect(resolveElementPaint(two, 'node', 'background', ['b', 'a'])).toBe('#222');
   });
 
   it('font has no stereotype tier', () => {

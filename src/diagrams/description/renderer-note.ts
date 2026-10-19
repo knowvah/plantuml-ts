@@ -94,9 +94,12 @@ export function buildNoteBlock(display: string, theme: Theme, sprites: SpriteReg
 function tagBackground(theme: Theme, labels: readonly string[]): Paint | undefined {
   const cascade = theme.colors.noteTagCascade;
   if (cascade === undefined) return undefined;
-  let hit: Paint | undefined;
-  for (const label of labels) hit = cascade[cleanStereotypeToken(label)]?.background ?? hit;
-  return hit;
+  // The FIRST label with a value wins (StyleSignatureBasic.java:119-132; DarkString.java:50-57).
+  for (const label of labels) {
+    const hit = cascade[cleanStereotypeToken(label)]?.background;
+    if (hit !== undefined) return hit;
+  }
+  return undefined;
 }
 
 /** `EntityImageNote.java:100-108`: see the module doc comment. */

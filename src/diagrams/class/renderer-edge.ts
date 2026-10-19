@@ -173,12 +173,11 @@ function resolveArrowTagStyle(
 ): { color?: string; thickness?: number } | undefined {
   const cascade = theme.colors.graph.arrowTagCascade;
   if (tags === undefined || cascade === undefined) return undefined;
-  let found: { color?: string; thickness?: number } | undefined;
   for (const tag of tags) {
     const entry = cascade[tag];
-    if (entry !== undefined) found = entry;
+    if (entry !== undefined) return entry;
   }
-  return found;
+  return undefined;
 }
 
 /** cdd-T29 R2: `geo.strokeWidth` is ALREADY scaled (`class-scale-geo-
@@ -214,8 +213,8 @@ function resolveEdgeStrokeWidth(
  * colour and the thickness come off that ONE merged style
  * (`SvekEdge.java:874-876`). It sits BELOW an explicit `-[#color]->`
  * bracket override and ABOVE the diagram-wide arrow cascade -- the same
- * order the bracket/cascade/default chain below already uses. Last tag
- * wins, mirroring the merge's own last-registered-wins rule.
+ * order the bracket/cascade/default chain below already uses. First tag
+ * wins (a priority tie keeps the earlier label, DarkString.java:50-57).
  *
  * Split out of {@link renderEdge} (cdd3-T33, NLOC cap -- adding
  * `contactRects` threading pushed it over) -- pure extraction, no
