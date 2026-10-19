@@ -79,7 +79,7 @@ merge-commit PR (D7).
 | [0](batch-0/overview.md) baseline; tick 34 | T0 | orchestrator | [x] |
 | [1a](batch-1a/overview.md) styles, arrows, draw order (32, 33, 30) | T1 → T2 → T3 → T4 | description | [x] |
 | [1b](batch-1b/overview.md) xagonu (29) | T5a → T5b | description | [x] |
-| [1c](batch-1c/overview.md) deroxu (28) | T6a → T6b… | description | [ ] |
+| [1c](batch-1c/overview.md) deroxu (28) | T6a → T6b… | description | [x] |
 | [1s](batch-1s/overview.md) pavuzo (16); item 14 | T7a → T7b → T8 | state (worktree, ∥ 1a–1c) | [x] |
 | [2](batch-2/overview.md) merge, re-measure, exit | T9 | orchestrator | [ ] |
 
