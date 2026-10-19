@@ -5,7 +5,7 @@ T0 fills `b0`. Each task close fills the column for its own tag.
 
 | Item | Row | plan | survey (plan) | b0 | after | Ticked |
 |---|---|---|---|---|---|---|
-| 34 | unknown/rubebe-45-sura795 | (error page) | conformant, errorPage | 160/63 conformant errorPage | | [x] 2026-10-16 gtc T0 |
+| 34 | unknown/rubebe-45-sura795 | (error page) | conformant, errorPage | 160/63 conformant errorPage | final conformant errorPage | [x] 2026-10-16 gtc T0 |
 | 32 | unknown/rufopi-30-roro642 | 2/0 | diverged | 2/0 diverged | T1 0/0 conformant | [x] 2026-10-18 gtc T2b |
 | 32 | component/zosuje-43-zebi775 | 17/0 | diverged | 17/0 diverged | T2b 0/0 conformant | [x] 2026-10-18 gtc T2b |
 | 32 | unknown/bamami-10-lava790 | 0/0 | conformant | 0/0 conformant | | [x] 2026-10-18 gtc T2b |

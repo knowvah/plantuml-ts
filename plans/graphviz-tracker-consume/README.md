@@ -81,7 +81,7 @@ merge-commit PR (D7).
 | [1b](batch-1b/overview.md) xagonu (29) | T5a → T5b | description | [x] |
 | [1c](batch-1c/overview.md) deroxu (28) | T6a → T6b… | description | [x] |
 | [1s](batch-1s/overview.md) pavuzo (16); item 14 | T7a → T7b → T8 | state (worktree, ∥ 1a–1c) | [x] |
-| [2](batch-2/overview.md) merge, re-measure, exit | T9 | orchestrator | [ ] |
+| [2](batch-2/overview.md) merge, re-measure, exit | T9 | orchestrator | [x] |
 
 ## Index
 - [decisions.md](decisions.md): D1–D7, pre-made; do not re-argue.
@@ -97,3 +97,37 @@ merge-commit PR (D7).
 **Observability:** the SLIs at every close are conformant count per engine (a loss is a stop), target-row
 render-diff, census Σ and away-from-jar attributes, and ratchet pins. **Rollback:** reversible (revert the
 task commit or the lane merge).
+
+## Mission summary (2026-10-19)
+
+**Tasks:** 25 completed. 13 were planned (T0, T1–T4, T5a, T5b, T6a, one T6b family template, T7a, T7b, T8,
+T9); 12 were added: T2b, T3b, T5a2, and T6b–T6j from T6a's census (9 deroxu families). Every task has
+exactly one commit, plus one orchestrator fix commit (9124a3dcb) that tightened three tests pinning a
+residual T7a closed.
+
+**Exit bar:**
+1. Met. All 8 in-scope boxes (14, 16, 28, 29, 30, 32, 33, 34) are ticked per D2 with dated notes; no
+   item left open.
+2. Met. 0 conformant losses in all 28 engines at every close. b0 → final conformant: component
+   188 → 214, usecase 62 → 67, unknown 486 → 506, state 78 → 99; every other engine unchanged.
+3. Met. 0 ratchet-pin rises: pin JSONs are append-only apart from `$comment` lines and one tightening
+   (diff-baseline jecici 105 → 2). 0 census rows moved away from the jar in any close (final Σ
+   component 1927 → 1035, usecase 715 → 381, unknown 22449 → 19025, state 8201 → 7801, class/object
+   unchanged). The one maxDelta rise (state/lurage, T7b) carries its mechanism (journal row 14).
+4. Met. Final gates: npm test exit 0, collected 1442 = on-disk 1442 (30853 passed), typecheck, lint
+   and build exit 0.
+
+**Pins:** svg-description 367 → 418; svg-state 60 → 95; routing/refusal manifests 7202 → 7288 (count pins
+bumped with derivations by `measurements/bump-counts.py`).
+
+**Decisions to review:** D5 amendment (user, 2026-10-18: src/core style-cascade seam); D5 amendment 2
+(user, 2026-10-18: `SvekEdge.ts`); journal row 41 (orchestrator read T5a2's label alignment as inside
+amendment 2); row 47 (T6 families ordered by dependency rather than raw count); row 62 (user kept T6j's
+class-engine edits). Four stop-1 halts in total (T2, T3, T4, T6j); T4's was resolved as an in-lane
+write-set extension, the other three by user ruling.
+
+**Follow-ups:** `planning/next-missions.md` "graphviz-tracker-consume (gtc)"; observations in
+`.agent-notes/gtc-findings.md`. Out of scope and still open: TRACKER 36 (engine-side).
+
+**Agents:** typescript-pro (gtc-S: T7a, T7b, T8 in worktree gtc-S; gtc-T1: T1, T2, T2b, T3, T3b;
+gtc-T4: T4, T5a, T5a2, T5b; gtc-T6: T6b–T6j) and general-purpose (gtc-T6a: read-only census).

@@ -35,6 +35,44 @@ post-D7 measurements.
 
 ---
 
+## graphviz-tracker-consume (gtc) — DONE 2026-10-19 (branch `fix/graphviz-tracker-consume`, unsigned, not pushed; lands via merge-commit PR after the user's `git rebase -S 9094705aa`)
+
+**What changed:** every in-scope TRACKER box (14, 16, 28, 29, 30, 32, 33, 34) is ticked per D2 on
+dot-engine 2.4.0; no residual traced into dot-engine. Fixes were all post-layout drawing: `<style>`/root
+container colours, component FontStyle and a description arrow cascade (`root, element, componentdiagram,
+arrow`), `skinparam arrow<<tag>> { Color;line.Bold() }`, the edge-label TextBlockMarged UEmpty and
+alignment (`SvekEdge.java:372-381`), note-on-cluster not opalised and `GMN<n>` note names, ortho xlabel
+line split, svek link order (`CucaDiagramFileMakerSvek.java:90-114`) and the group auto-link offset,
+state label `textLength` and label-box ink fold, state title Y from `clusters[].label` (D3), and nine
+deroxu families (hidden links via UHidden, `skinparam <<X>> {`, hide-stereotype styling, single rounding
+under dpi/scale, trailing link `#color`, stereotype Shadowing + scaled filter, stereotype font/border/
+arrow-font keys, port-cluster title width, earliest-label stereotype ties).
+
+**Counts b0 → final** (conformant/structural/diverged): component 188/13/65 → **214/12/40**, usecase
+62/4/27 → **67/7/19**, unknown 486/16/323 → **506/18/301**, state 78/11/184 → **99/14/160**; every other
+engine unchanged. 0 conformant losses in all 28 engines at every close. Census Σ component 1927 → 1035,
+usecase 715 → 381, unknown 22449 → 19025, state 8201 → 7801, class/object unchanged; 0 rows rose. Pins:
+svg-description 367 → **418**, svg-state 60 → **95**, diff-baseline jecici 105 → 2. User rulings
+2026-10-18/19: D5 amended twice (src/core style seam, `SvekEdge.ts`) and class edits kept at T6j.
+
+**Open residuals (no owner yet; mechanisms in `plans/graphviz-tracker-consume/decision-journal.md`):**
+- state/lurage-50-kobo763: `skinparam maxMessageSize` not threaded into `computeReservedLabelBox`
+  (`attachInlineTransitionLabel`); one 495-wide line vs the jar's 8.
+- banatu-09/xusuxe-62: root `FontColor` tier missing in `textFontColor` (`usymbol-resolve.ts:140`).
+- Description arrow tag cascade has no FontSize/LineStyle; skinparam `line.dashed`/`line.dotted` tokens
+  on stereotyped arrows ignored (pemifo, kokodo, koxeca, minulo, vaseda); `link-grammar` keeps only the
+  first `<<..>>` of a link; `<style>` and skinparam arrow-tag spellings share one field.
+- Single-line-title port cluster sits 3.75 px left of the jar (T6i probe `one`; jar dot warns "table
+  size too small").
+- Unchromed canvas width ignores a group-autolink label's ink (`computeTotalDimensions`; T5b probe).
+- Chrome legend rect writes stroke attributes where the jar writes `style="stroke:…"`.
+- `data-qualified-name` of an entity inside a cluster is the leaf name, the jar's is `Cluster.Leaf`.
+- With `RectangleBackgroundColor<<X>>` then `PackageBackgroundColor<<X>>` the jar's rectangle cluster
+  takes the Package value (unexplained).
+- tuliba-37 rect rx/ry 12.5 vs 2.5; usecase zotiru-33 x offset 218.787 (both structural-match, undiagnosed).
+- `onlyOneLink` (`GraphvizImageBuilder.java:313`) ignores invisible links; port `touchingLinks` counts all.
+- `src/core/assemble-svg.ts` is 538 lines (> 500 cap, pre-existing): split it.
+
 ## description-url-wrappers (dur) — DONE 2026-10-16 (merged to local main as a merge commit, not pushed; commits unsigned pending the user's signing rebase)
 
 **What changed:** the description engine now emits the jar's hyperlinks and edge ids. Entity
@@ -67,9 +105,9 @@ and `fixtures.md` ledger):**
   43 vs 44) — NOT isolated; instrument the Sea line w/h for a glyph-first line against the jar.
 - Link-label sprite not drawn (bivira `g[4]`): `SvekEdge.ts:305-321` takes the un-tabled `UText.build`
   branch when label w/h are unset.
-- Hidden-link draw gap (jajeve; `-[hidden]-` draws a visible `<g class="link">`): `link.hidden` not in
+- CLOSED by gtc T6b (2026-10-18). Hidden-link draw gap (jajeve; `-[hidden]-` draws a visible `<g class="link">`): `link.hidden` not in
   the edge skip (`layout-helpers-types.ts:223-229`, reverted for a canvas regression).
-- Anonymous note id `__note_N` vs the jar's `getUniqueSequence("GMN")` (tuliba;
+- CLOSED by gtc T4 (2026-10-18). Anonymous note id `__note_N` vs the jar's `getUniqueSequence("GMN")` (tuliba;
   `CommandFactoryNoteOnEntity.java:327`, `parse-state.ts:456`).
 - Note urls: `EntityImageNote.java:194-205` calls `startUrl`; the description parser stores no note url.
 - ELK path: `description-elk-adapter.ts` builds the geo without `topurl` (relative urls unprefixed).
