@@ -16,7 +16,8 @@ T = 'tests/oracle/svg-conformance/'
 
 
 def bump(path, expect_re, comment):
-    src = open(path).read()
+    with open(path) as f:
+        src = f.read()
     m = re.search(expect_re, src)
     assert m, (path, expect_re)
     old = int(m.group(2))
@@ -26,7 +27,8 @@ def bump(path, expect_re, comment):
     text = comment(old, new)
     block = ''.join(f'{indent}// {t}\n' for t in text)
     src = src.replace(line, block + line.replace(str(old), str(new)), 1)
-    open(path, 'w').write(src)
+    with open(path, 'w') as f:
+        f.write(src)
     print(path, old, '->', new)
 
 
