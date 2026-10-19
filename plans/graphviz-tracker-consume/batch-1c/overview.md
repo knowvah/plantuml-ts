@@ -10,7 +10,7 @@ each task.
 | T6b | hidden-link-drawn: suppress paint of `-[hidden]-` edges, keep ink extent (cascade of 1814) | typescript-pro | description layout-geo-post/renderer-draw-sequence/renderer-ink-extent (maybe SvekEdge.ts), tests | T6a | [x] |
 | T6c | stereo-only-skinparam-block: `skinparam <<X>> {` opener (78 latent) | typescript-pro | core preprocessor-collector.ts, tests | T6b | [x] |
 | T6d | hide-stereotype-drops-stereo-style: style from the full stereotype list (48 latent) | typescript-pro | description layout-dot-tree/renderer-entity/renderer-cluster, tests | T6c | [x] |
-| T6e | dpi-scale-double-rounding: format scaled numbers once (30 latent) | typescript-pro | description index/renderer (+ core assemble-svg if needed), tests | T6d | [ ] |
+| T6e | dpi-scale-double-rounding: format scaled numbers once (30 latent) | typescript-pro | description index/renderer (+ core assemble-svg if needed), tests | T6d | [x] |
 | T6f | inline-link-colour-dropped: trailing `#color` on a link (18) | typescript-pro | description link-grammar.ts, tests | T6e | [ ] |
 | T6g | cluster-stereo-shadowing: `Shadowing<<X>>` on clusters (+ canvas-shadow-extent cascade) | typescript-pro | core skinparam-stereo-keys/theme-element-resolve; description renderer-cluster, tests | T6f | [ ] |
 | T6h | stereo-font-and-interface-border-keys: `ComponentFontColor<<X>>` etc. (16 latent) | typescript-pro | core skinparam-stereo-keys/theme-element-resolve; description renderer-entity/edge, tests | T6g | [ ] |

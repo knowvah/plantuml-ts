@@ -1,0 +1,448 @@
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+lost UML.Class_ UML.Stereotype edge
+lost UML.Class_ UML.Behavior edge
+lost UML.Class_ UML.AssociationClass edge
+lost UML.Class_ UML.Component edge
+lost UML.Class_ UML.Node edge
+lost UML.NamedElement UML.PackageableElement edge
+lost UML.NamedElement UML.Namespace edge
+lost UML.NamedElement UML.TypedElement edge
+lost UML.NamedElement UML.RedefinableElement edge
+lost UML.NamedElement UML.DeploymentTarget edge
+lost UML.NamedElement UML.DeployedArtifact edge
+lost UML.NamedElement UML.Vertex edge
+lost UML.NamedElement UML.Trigger edge
+lost UML.NamedElement UML.ParameterSet edge
+lost UML.NamedElement UML.CollaborationUse edge
+lost UML.NamedElement UML.Extend edge
+lost UML.NamedElement UML.Include edge
+lost UML.NamedElement UML.ActivityGroup edge
+lost UML.NamedElement UML.InteractionFragment edge
+lost UML.NamedElement UML.Lifeline edge
+lost UML.NamedElement UML.MessageEnd edge
+lost UML.NamedElement UML.Message edge
+lost UML.NamedElement UML.GeneralOrdering edge
+lost UML.Behavior UML.StateMachine edge
+lost UML.Behavior UML.Activity edge
+lost UML.Behavior UML.Interaction edge
+lost UML.Behavior UML.OpaqueBehavior edge
+lost UML.StructuredActivityNode UML.ConditionalNode edge
+lost UML.StructuredActivityNode UML.ExpansionRegion edge
+lost UML.StructuredActivityNode UML.LoopNode edge
+lost UML.StructuredActivityNode UML.SequenceNode edge
+lost UML.CallAction UML.CallBehaviorAction edge
+lost UML.CallAction UML.CallOperationAction edge
+lost UML.CallAction UML.StartObjectBehaviorAction edge
+
+### unknown/rubebe-45-sura795  pass=false structural=160 numeric=63
+  S svg/@background  exp=#FFFFFF | act=#000000
+  S svg/g[1]/text[1]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[1]/@font-style  exp= | act=italic
+  S svg/g[1]/text[1]/@font-weight  exp= | act=700
+  S svg/g[1]/text[1]/@textLength  exp= | act=319.2
+  S svg/g[1]/text[1][childCount]  exp=0 | act=1
+  S svg/g[1]/text[2]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[2]/@font-weight  exp= | act=700
+  S svg/g[1]/text[2]/@textLength  exp=252.6 | act=152.25
+  S svg/g[1]/text[2]/text()[1]  exp=You should send this diagram and this image to | act=[From string (line 1213) ]
+  S svg/g[1]/text[3]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[3]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[3]/@textLength  exp=112.275 | act=
+  S svg/g[1]/text[3][childCount]  exp=1 | act=0
+  S svg/g[1]/text[4]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[4]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[4]/@font-weight  exp= | act=700
+  S svg/g[1]/text[4]/@textLength  exp=10.65 | act=63.963
+  S svg/g[1]/text[4]/text()[1]  exp=or | act=@startuml
+  S svg/g[1]/text[5]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[5]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[5]/@font-weight  exp= | act=700
+  S svg/g[1]/text[5]/@textLength  exp=35.925 | act=185.063
+  S svg/g[1]/text[5]/text()[1]  exp=post to | act=skinparam groupInheritance 3
+  S svg/g[1]/text[6]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[6]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[6]/@textLength  exp=123.825 | act=
+  S svg/g[1]/text[6][childCount]  exp=1 | act=0
+  S svg/g[1]/text[7]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[7]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[7]/@font-weight  exp= | act=700
+  S svg/g[1]/text[7]/@textLength  exp=97.95 | act=192.325
+  S svg/g[1]/text[7]/text()[1]  exp=to solve this issue. | act=!define SHOW_INHERITANCE
+  S svg/g[1]/text[8]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[8]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[8]/@font-weight  exp= | act=700
+  S svg/g[1]/text[8]/@textLength  exp=337.725 | act=
+  S svg/g[1]/text[8][childCount]  exp=1 | act=0
+  S svg/g[1]/text[9]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[9]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[9]/@font-weight  exp= | act=700
+  S svg/g[1]/text[9]/@textLength  exp= | act=11.55
+  S svg/g[1]/text[9][childCount]  exp=0 | act=1
+  S svg/g[1]/text[10]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[10]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[10]/@font-weight  exp= | act=700
+  S svg/g[1]/text[10]/@textLength  exp=652.5 | act=151.55
+  S svg/g[1]/text[10]/text()[1]  exp=java.lang.NullPointerException: Cannot invoke "net.sourceforge.plantuml.klimt.geom.XPoint2D.getX()" because "pt4" is null | act=... ( skipping 1188 lines )
+  S svg/g[1]/text[11]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[11]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[11]/@font-weight  exp= | act=700
+  S svg/g[1]/text[11]/@textLength  exp=427.35 | act=11.55
+  S svg/g[1]/text[11]/text()[1]  exp=net.sourceforge.plantuml.dot.Neighborhood.intersection(Neighborhood.java:151) | act=...
+  S svg/g[1]/text[12]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[12]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[12]/@font-weight  exp= | act=700
+  S svg/g[1]/text[12]/@textLength  exp=427.35 | act=330.313
+  S svg/g[1]/text[12]/text()[1]  exp=net.sourceforge.plantuml.dot.Neighborhood.intersection(Neighborhood.java:125) | act=WriteVariableAction <|-- RemoveVariableValueAction
+  S svg/g[1]/text[13]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[13]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[13]/@font-weight  exp= | act=700
+  S svg/g[1]/text[13]/@textLength  exp=394.05 | act=142.625
+  S svg/g[1]/text[13]/text()[1]  exp=net.sourceforge.plantuml.dot.Neighborhood.drawU(Neighborhood.java:80) | act=Action <|-- ReplyAction
+  S svg/g[1]/text[14]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[14]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[14]/@font-weight  exp= | act=700
+  S svg/g[1]/text[14]/@textLength  exp=539.7 | act=243.688
+  S svg/g[1]/text[14]/text()[1]  exp=net.sourceforge.plantuml.svek.EntityImageProtected.drawUntranslated(EntityImageProtected.java:88) | act=InvocationAction <|-- SendObjectAction
+  S svg/g[1]/text[15]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[15]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[15]/@font-weight  exp= | act=700
+  S svg/g[1]/text[15]/@textLength  exp=372.675 | act=242.288
+  S svg/g[1]/text[15]/text()[1]  exp=net.sourceforge.plantuml.svek.SvekResult.drawU(SvekResult.java:89) | act=InvocationAction <|-- SendSignalAction
+  S svg/g[1]/text[16]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[16]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[16]/@font-weight  exp= | act=700
+  S svg/g[1]/text[16]/@textLength  exp=470.025 | act=267.837
+  S svg/g[1]/text[16]/text()[1]  exp=net.sourceforge.plantuml.klimt.shape.TextBlockUtils.getMinMax(TextBlockUtils.java:140) | act=StructuredActivityNode <|-- SequenceNode
+  S svg/g[1]/text[17]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[17]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[17]/@font-weight  exp= | act=700
+  S svg/g[1]/text[17]/@textLength  exp=448.8 | act=196.262
+  S svg/g[1]/text[17]/text()[1]  exp=net.sourceforge.plantuml.svek.SvekResult.calculateDimension(SvekResult.java:132) | act=MessageEvent <|-- SignalEvent
+  S svg/g[1]/text[18]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[18]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[18]/@font-weight  exp= | act=700
+  S svg/g[1]/text[18]/@textLength  exp=528.9 | act=249.2
+  S svg/g[1]/text[18]/text()[1]  exp=net.sourceforge.plantuml.klimt.shape.TextBlockUtils$2.calculateDimension(TextBlockUtils.java:170) | act=Action <|-- StartClassifierBehaviorAction
+  S svg/g[1]/text[19]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[19]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[19]/@font-weight  exp= | act=700
+  S svg/g[1]/text[19]/@textLength  exp=548.1 | act=256.2
+  S svg/g[1]/text[19]/text()[1]  exp=net.sourceforge.plantuml.core.TextBlockExporter.calculateFinalDimension(TextBlockExporter.java:200) | act=CallAction <|-- StartObjectBehaviorAction
+  S svg/g[1]/text[20]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[20]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[20]/@font-weight  exp= | act=700
+  S svg/g[1]/text[20]/@textLength  exp=465.15 | act=240.275
+  S svg/g[1]/text[20]/text()[1]  exp=net.sourceforge.plantuml.core.TextBlockExporter.exportTo(TextBlockExporter.java:160) | act=InteractionFragment <|-- StateInvariant
+  S svg/g[1]/text[21]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[21]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[21]/@font-weight  exp= | act=700
+  S svg/g[1]/text[21]/@textLength  exp=388.65 | act=179.025
+  S svg/g[1]/text[21]/text()[1]  exp=net.sourceforge.plantuml.UgDiagram.exportDiagram(UgDiagram.java:96) | act=Action <|-- TestIdentityAction
+  S svg/g[1]/text[22]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[22]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[22]/@font-weight  exp= | act=700
+  S svg/g[1]/text[22]/@textLength  exp=460.65 | act=233.45
+  S svg/g[1]/text[22]/text()[1]  exp=net.sourceforge.plantuml.PSystemUtils.exportDiagramsDefault(PSystemUtils.java:205) | act=IntervalConstraint <|-- TimeConstraint
+  S svg/g[1]/text[23]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[23]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[23]/@font-weight  exp= | act=700
+  S svg/g[1]/text[23]/@textLength  exp=415.95 | act=151.725
+  S svg/g[1]/text[23]/text()[1]  exp=net.sourceforge.plantuml.PSystemUtils.exportDiagrams(PSystemUtils.java:94) | act=Interval <|-- TimeInterval
+  S svg/g[1]/text[24]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[24]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[24]/@font-weight  exp= | act=700
+  S svg/g[1]/text[24]/@textLength  exp=589.275 | act=244.65
+  S svg/g[1]/text[24]/text()[1]  exp=net.sourceforge.plantuml.SourceFileReaderAbstract.getGeneratedImages(SourceFileReaderAbstract.java:206) | act=ValueSpecification <|-- TimeExpression
+  S svg/g[1]/text[25]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[25]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[25]/@font-weight  exp= | act=700
+  S svg/g[1]/text[25]/@textLength  exp=342 | act=131.6
+  S svg/g[1]/text[25]/text()[1]  exp=net.sourceforge.plantuml.Run.manageFileInternal(Run.java:355) | act=Event <|-- TimeEvent
+  S svg/g[1]/text[26]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[26]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[26]/@font-weight  exp= | act=700
+  S svg/g[1]/text[26]/@textLength  exp=430.05 | act=210.875
+  S svg/g[1]/text[26]/text()[1]  exp=net.sourceforge.plantuml.Run.lambda$processInputsInParallel$12(Run.java:316) | act=Observation <|-- TimeObservation
+  S svg/g[1]/text[27]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[27]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[27]/@font-weight  exp= | act=700
+  S svg/g[1]/text[27]/@textLength  exp=397.425 | act=177.625
+  S svg/g[1]/text[27]/text()[1]  exp=net.sourceforge.plantuml.Run.lambda$processInParallel$14(Run.java:332) | act=Action <|-- UnmarshallAction
+  S svg/g[1]/text[28]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[28]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[28]/@font-weight  exp= | act=700
+  S svg/g[1]/text[28]/@textLength  exp=443.4 | act=136.413
+  S svg/g[1]/text[28]/text()[1]  exp=java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572) | act=InputPin <|-- ValuePin
+  S svg/g[1]/text[29]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[29]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[29]/@font-weight  exp= | act=700
+  S svg/g[1]/text[29]/@textLength  exp=357.225 | act=222.075
+  S svg/g[1]/text[29]/text()[1]  exp=java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) | act=Action <|-- ValueSpecificationAction
+  S svg/g[1]/text[30]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[30]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[30]/@font-weight  exp= | act=700
+  S svg/g[1]/text[30]/@textLength  exp=500.025 | act=34.213
+  S svg/g[1]/text[30]/text()[1]  exp=java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) | act=!endif
+  S svg/g[1]/text[31]/@fill  exp=#000 | act=#33FF02
+  S svg/g[1]/text[31]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[31]/@font-weight  exp= | act=700
+  S svg/g[1]/text[31]/@text-decoration  exp= | act=wavy underline
+  S svg/g[1]/text[31]/@textLength  exp=500.025 | act=60.2
+  S svg/g[1]/text[31]/text()[1]  exp=java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) | act=@enduml
+  S svg/g[1]/text[32]/@fill  exp=#000 | act=#F00
+  S svg/g[1]/text[32]/@font-size  exp=12 | act=14
+  S svg/g[1]/text[32]/@font-weight  exp= | act=700
+  S svg/g[1]/text[32]/@textLength  exp=266.025 | act=722.05
+  S svg/g[1]/text[32]/text()[1]  exp=java.base/java.lang.Thread.run(Thread.java:1583) | act=Cannot draw grouped inheritance: no route was found for the link UML.PackageableElement -> UML.NamedElement
+  S svg/g[1][childCount]  exp=47 | act=33
+  N svg/@height  exp=515 | act=470 (Δ45)
+  N svg/@viewBox[2]  exp=849 | act=736 (Δ113)
+  N svg/@viewBox[3]  exp=515 | act=470 (Δ45)
+  N svg/@width  exp=849 | act=736 (Δ113)
+  N svg/g[1]/text[1]/@y  exp=182.333 | act=17 (Δ165.333)
+  N svg/g[1]/text[2]/@x  exp=5 | act=6 (Δ1)
+  N svg/g[1]/text[2]/@y  exp=194.333 | act=40 (Δ154.333)
+  N svg/g[1]/text[3]/@x  exp=260.9 | act=5 (Δ255.89999999999998)
+  N svg/g[1]/text[3]/@y  exp=194.333 | act=58 (Δ136.333)
+  N svg/g[1]/text[4]/@x  exp=376.475 | act=5 (Δ371.475)
+  N svg/g[1]/text[4]/@y  exp=194.333 | act=72 (Δ122.333)
+  N svg/g[1]/text[5]/@y  exp=206.333 | act=86 (Δ120.333)
+  N svg/g[1]/text[6]/@x  exp=44.225 | act=5 (Δ39.225)
+  N svg/g[1]/text[6]/@y  exp=206.333 | act=100 (Δ106.333)
+  N svg/g[1]/text[7]/@x  exp=171.35 | act=5 (Δ166.35)
+  N svg/g[1]/text[7]/@y  exp=206.333 | act=114 (Δ92.333)
+  N svg/g[1]/text[8]/@y  exp=218.333 | act=128 (Δ90.333)
+  N svg/g[1]/text[9]/@y  exp=230.333 | act=142 (Δ88.333)
+  N svg/g[1]/text[10]/@y  exp=242.333 | act=156 (Δ86.333)
+  N svg/g[1]/text[11]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[11]/@y  exp=254.333 | act=170 (Δ84.333)
+  N svg/g[1]/text[12]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[12]/@y  exp=266.333 | act=184 (Δ82.33300000000003)
+  N svg/g[1]/text[13]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[13]/@y  exp=278.333 | act=198 (Δ80.33300000000003)
+  N svg/g[1]/text[14]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[14]/@y  exp=290.333 | act=212 (Δ78.33300000000003)
+  N svg/g[1]/text[15]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[15]/@y  exp=302.333 | act=226 (Δ76.33300000000003)
+  N svg/g[1]/text[16]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[16]/@y  exp=314.333 | act=240 (Δ74.33300000000003)
+  N svg/g[1]/text[17]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[17]/@y  exp=326.333 | act=254 (Δ72.33300000000003)
+  N svg/g[1]/text[18]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[18]/@y  exp=338.333 | act=268 (Δ70.33300000000003)
+  N svg/g[1]/text[19]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[19]/@y  exp=350.333 | act=282 (Δ68.33300000000003)
+  N svg/g[1]/text[20]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[20]/@y  exp=362.333 | act=296 (Δ66.33300000000003)
+  N svg/g[1]/text[21]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[21]/@y  exp=374.333 | act=310 (Δ64.33300000000003)
+  N svg/g[1]/text[22]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[22]/@y  exp=386.333 | act=324 (Δ62.33300000000003)
+  N svg/g[1]/text[23]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[23]/@y  exp=398.333 | act=338 (Δ60.33300000000003)
+  N svg/g[1]/text[24]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[24]/@y  exp=410.333 | act=352 (Δ58.33300000000003)
+  N svg/g[1]/text[25]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[25]/@y  exp=422.333 | act=366 (Δ56.33300000000003)
+  N svg/g[1]/text[26]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[26]/@y  exp=434.333 | act=380 (Δ54.33300000000003)
+  N svg/g[1]/text[27]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[27]/@y  exp=446.333 | act=394 (Δ52.33300000000003)
+  N svg/g[1]/text[28]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[28]/@y  exp=458.333 | act=408 (Δ50.33300000000003)
+  N svg/g[1]/text[29]/@x  exp=11.6 | act=12.7 (Δ1.0999999999999996)
+  N svg/g[1]/text[29]/@y  exp=470.333 | act=422 (Δ48.33300000000003)
+  N svg/g[1]/text[30]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[30]/@y  exp=482.333 | act=436 (Δ46.33300000000003)
+  N svg/g[1]/text[31]/@x  exp=11.6 | act=5 (Δ6.6)
+  N svg/g[1]/text[31]/@y  exp=494.333 | act=450 (Δ44.33300000000003)
+  N svg/g[1]/text[32]/@x  exp=11.6 | act=8.85 (Δ2.75)
+  N svg/g[1]/text[32]/@y  exp=506.333 | act=464 (Δ42.33300000000003)
+
+### unknown/rufopi-30-roro642  pass=true structural=0 numeric=0
+
+### component/zosuje-43-zebi775  pass=true structural=0 numeric=0
+
+### component/xenusu-76-sabi405  pass=true structural=0 numeric=0
+
+### component/repoge-41-demu604  pass=true structural=0 numeric=0
+
+### unknown/xagonu-36-sudi116  pass=true structural=0 numeric=0
+
+### unknown/deroxu-29-gude369  pass=false structural=56 numeric=43
+  S svg/defs[1][childCount]  exp=1 | act=0
+  S svg/g[1]/g[3]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[4]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[5]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[6]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[7]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[8]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[9]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[10]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[11]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[12]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[13]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[15]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[16]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[17]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[18]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[19]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[20]/rect[1]/@filter  exp=url(#f2dozbb6s8uep) | act=
+  S svg/g[1]/g[106]/rect[1]/@fill  exp=#8FF | act=#FF0
+  S svg/g[1]/g[106]/rect[2]/@fill  exp=#8FF | act=#FF0
+  S svg/g[1]/g[106]/rect[3]/@fill  exp=#8FF | act=#FF0
+  S svg/g[1]/g[106]/rect[4]/@fill  exp=#8FF | act=#FF0
+  S svg/g[1]/g[109]/text[1]/@fill  exp=#A00 | act=#000
+  S svg/g[1]/g[109]/text[2]/@fill  exp=#A00 | act=#000
+  S svg/g[1]/g[110]/ellipse[1]/@stroke  exp=#A00 | act=#181818
+  S svg/g[1]/g[110]/text[1]/@fill  exp=#A00 | act=#000
+  S svg/g[1]/g[111]/text[1]/@fill  exp=#0A0 | act=#000
+  S svg/g[1]/g[112]/ellipse[1]/@stroke  exp=#0A0 | act=#181818
+  S svg/g[1]/g[112]/text[1]/@fill  exp=#0A0 | act=#000
+  S svg/g[1]/g[178]/text[1]/@fill  exp=#0A0 | act=#000
+  S svg/g[1]/g[179]/text[1]/@fill  exp=#0A0 | act=#000
+  S svg/g[1]/g[180]/text[1]/@fill  exp=#A00 | act=#000
+  S svg/g[1]/g[181]/text[1]/@fill  exp=#A00 | act=#000
+  S svg/g[1]/g[192]/text[1]/@fill  exp=#A00 | act=#000
+  S svg/g[1]/g[200]/path[1]/@stroke  exp=#000 | act=#181818
+  S svg/g[1]/g[200]/polygon[1]/@fill  exp=#000 | act=#181818
+  S svg/g[1]/g[200]/polygon[1]/@stroke  exp=#000 | act=#181818
+  S svg/g[1]/g[203]/text[1]/@fill  exp=#0A0 | act=#000
+  S svg/g[1]/g[204]/text[1]/@fill  exp=#0A0 | act=#000
+  S svg/g[1]/g[205]/text[1]/@fill  exp=#A00 | act=#000
+  S svg/g[1]/g[206]/text[1]/@fill  exp=#A00 | act=#000
+  S svg/g[1]/g[209]/path[1]/@stroke  exp=#AAA | act=#181818
+  S svg/g[1]/g[209]/polygon[1]/@fill  exp=#AAA | act=#181818
+  S svg/g[1]/g[209]/polygon[1]/@stroke  exp=#AAA | act=#181818
+  S svg/g[1]/g[210]/path[1]/@stroke  exp=#AAA | act=#181818
+  S svg/g[1]/g[210]/polygon[1]/@fill  exp=#AAA | act=#181818
+  S svg/g[1]/g[210]/polygon[1]/@stroke  exp=#AAA | act=#181818
+  S svg/g[1]/g[211]/path[1]/@stroke  exp=#AAA | act=#181818
+  S svg/g[1]/g[211]/polygon[1]/@fill  exp=#AAA | act=#181818
+  S svg/g[1]/g[211]/polygon[1]/@stroke  exp=#AAA | act=#181818
+  S svg/g[1]/g[212]/path[1]/@stroke  exp=#AAA | act=#181818
+  S svg/g[1]/g[212]/polygon[1]/@fill  exp=#AAA | act=#181818
+  S svg/g[1]/g[212]/polygon[1]/@stroke  exp=#AAA | act=#181818
+  S svg/g[1]/g[213]/path[1]/@stroke  exp=#AAA | act=#181818
+  S svg/g[1]/g[213]/polygon[1]/@fill  exp=#AAA | act=#181818
+  S svg/g[1]/g[213]/polygon[1]/@stroke  exp=#AAA | act=#181818
+  N svg/@height  exp=1345 | act=1341 (Δ4)
+  N svg/@viewBox[2]  exp=2359 | act=2355 (Δ4)
+  N svg/@viewBox[3]  exp=1345 | act=1341 (Δ4)
+  N svg/@width  exp=2359 | act=2355 (Δ4)
+  N svg/g[1]/g[1]/text[1]/@x  exp=1131.07 | act=1129.19 (Δ1.8799999999998818)
+  N svg/g[1]/g[2]/rect[1]/@x  exp=1122.83 | act=1120.96 (Δ1.8699999999998909)
+  N svg/g[1]/g[2]/text[1]/@x  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/text[2]/@x  exp=1149.31 | act=1147.43 (Δ1.8799999999998818)
+  N svg/g[1]/g[2]/rect[2]/@x  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/text[3]/@x  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/text[4]/@x  exp=1149.31 | act=1147.43 (Δ1.8799999999998818)
+  N svg/g[1]/g[2]/rect[3]/@x  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/text[5]/@x  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/text[6]/@x  exp=1149.31 | act=1147.43 (Δ1.8799999999998818)
+  N svg/g[1]/g[2]/rect[4]/@x  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/text[7]/@x  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/text[8]/@x  exp=1149.31 | act=1147.43 (Δ1.8799999999998818)
+  N svg/g[1]/g[2]/rect[5]/@x  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/text[9]/@x  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/text[10]/@x  exp=1149.31 | act=1147.43 (Δ1.8799999999998818)
+  N svg/g[1]/g[2]/line[1]/@x1  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/line[1]/@x2  exp=1229.04 | act=1227.17 (Δ1.8699999999998909)
+  N svg/g[1]/g[2]/line[2]/@x1  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/line[2]/@x2  exp=1229.04 | act=1227.17 (Δ1.8699999999998909)
+  N svg/g[1]/g[2]/line[3]/@x1  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/line[3]/@x2  exp=1229.04 | act=1227.17 (Δ1.8699999999998909)
+  N svg/g[1]/g[2]/line[4]/@x1  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/line[4]/@x2  exp=1229.04 | act=1227.17 (Δ1.8699999999998909)
+  N svg/g[1]/g[2]/line[5]/@x1  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/line[5]/@x2  exp=1229.04 | act=1227.17 (Δ1.8699999999998909)
+  N svg/g[1]/g[2]/line[6]/@x1  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/line[6]/@x2  exp=1229.04 | act=1227.17 (Δ1.8699999999998909)
+  N svg/g[1]/g[2]/line[7]/@x1  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/line[7]/@x2  exp=1125.96 | act=1124.08 (Δ1.8800000000001091)
+  N svg/g[1]/g[2]/line[8]/@x1  exp=1146.9 | act=1145.03 (Δ1.8700000000001182)
+  N svg/g[1]/g[2]/line[8]/@x2  exp=1146.9 | act=1145.03 (Δ1.8700000000001182)
+  N svg/g[1]/g[2]/line[9]/@x1  exp=1229.04 | act=1227.17 (Δ1.8699999999998909)
+  N svg/g[1]/g[2]/line[9]/@x2  exp=1229.04 | act=1227.17 (Δ1.8699999999998909)
+  N svg/g[1]/g[19]/rect[1]/@width  exp=163.125 | act=186.875 (Δ23.75)
+  N svg/g[1]/g[19]/rect[1]/@x  exp=351.25 | act=339.375 (Δ11.875)
+  N svg/g[1]/g[19]/rect[2]/@x  exp=501.875 | act=513.75 (Δ11.875)
+  N svg/g[1]/g[19]/rect[3]/@x  exp=500.625 | act=512.5 (Δ11.875)
+  N svg/g[1]/g[19]/rect[4]/@x  exp=500.625 | act=512.5 (Δ11.875)
+
+### state/pavuzo-79-zodu430  pass=true structural=0 numeric=0
+
+### unknown/bamami-10-lava790  pass=true structural=0 numeric=0
+
+### unknown/bobixe-18-riza923  pass=true structural=0 numeric=0
+
+### unknown/pugodi-27-kone040  pass=true structural=0 numeric=0
+
+### class/sokevu-87-toce485  pass=true structural=0 numeric=0
