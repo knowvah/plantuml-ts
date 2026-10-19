@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1681 modules · 6138 exported names.
+1682 modules · 6139 exported names.
 
 ## `src/`
 
@@ -147,6 +147,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svek-dot-together.ts` | `ROOT_TOGETHER_PREFIX`, `togetherClusters` | `together { }` blocks as svek prints them: an unlabelled `subgraph <clusterId>t<k> { ... |
 | `svek-dot-top.ts` | `IsNormalPosition`, `nodesOrderedTop`, `nodesOrderedWithoutTop`, `normalPositionOf`, `topsFirstClusters`, `rootTops` | `Cluster#getNodesOrderedTop` / `getNodesOrderedWithoutTop` — the split `printCluster1` / `printCluster2` make of one cluster's own nodes. |
 | `svek-dot-wrappers.ts` | `WrapperLevels`, `wrapperLevels`, `subgraphNoLabel`, `outerWrapperLines`, `innerWrapperLines`, `closeCount` | ClusterDotString's protection-wrapper nesting, shared by the two consumers of one `DotInputGraph`: the LAYOUT builder (`graph-layout-build.ts` #addClusters, which already built this nesting) and the DOT-TEXT emitter (`svek-dot-emit.ts`, whi |
+| `svg-defs-scale.ts` | `scaleShadowFilterDefs` | svg-defs-scale.ts -- the document scale applied to the shadow `<filter>` def. |
 | `svg-defs-seeded.ts` | `getSeed`, `seededDefIdRenames`, `applySeededDefIds` | svg-defs-seeded.ts — the seeded def-id pass over an assembled document. |
 | `svg-defs.ts` | `nextDef`, `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `ANY_ID_RE`, `idOfElement`, `collapseDuplicateFilterDefs`, `DQUOTE`, `collapseDuplicateGradientDefs`, `collectDocumentDefs`, `INLINE_DEF_OPENS`, `mapOutsideInlineDefs` | svg-defs.ts — `<defs>` collection for the pure-string SVG assembler. |
 | `svg-format.ts` | `DEFAULT_SVG_DECIMALS`, `trimZeros`, `formatDecimal`, `withDeferredFormat`, `fmt`, `shortenColor`, `formatOpacity`, `formatPercent`, `escapeAttribute`, `escapeText`, `escapeComment` | Shared SVG formatting rules — decimal precision, color shortening, and opacity/percent formatting. |

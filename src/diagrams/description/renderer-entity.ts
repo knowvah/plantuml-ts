@@ -192,7 +192,7 @@ export function buildEntityParams(
       // Shadowing N } }`), matching jar's `EntityImageDescription`-family
       // shared `getStyle().getShadowing()` read. Jar-verified
       // malado-53-noso561.
-      deltaShadow: resolveElementShadowing(theme, node.symbol),
+      deltaShadow: resolveElementShadowing(theme, node.symbol, styleLabels),
       stroke: overrideStroke(override.lineStyle, lineThickness),
       fontTitle: override.text !== undefined ? { ...fontTitle, color: override.text } : fontTitle,
       fontBody: override.text !== undefined ? { ...fontBody, color: override.text } : fontBody,

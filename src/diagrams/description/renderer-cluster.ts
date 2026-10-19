@@ -225,7 +225,7 @@ export function buildStyleDefaults(
     // Shadowing N }`) over the diagram-wide `theme.shadowing` (`skin
     // rose`/`<style> element { Shadowing N } }`), matching jar's
     // `Cluster.java` shared `getStyle().getShadowing()` read.
-    shadowing: resolveElementShadowing(theme, symbol),
+    shadowing: resolveElementShadowing(theme, symbol, stereotypes),
     // G1 I10: folder-style clusters use the SAME roundCorner as every
     // other container (5 -- jar-verified `A2.5,2.5`/`A3.75,3.75` arcs on
     // component/fetefi-28-figu176, sacuso-94-gugi476, texacu-57-daci050,

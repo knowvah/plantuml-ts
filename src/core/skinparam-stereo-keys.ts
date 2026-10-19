@@ -19,7 +19,7 @@ import { applyArrowColorByStereo } from './skinparam-arrow-stereo.js';
 // Imported from the leaf module, not the `skinparam.ts` barrel that
 // re-exports it -- that barrel imports THIS file, so the barrel spelling
 // would close an ESM import cycle.
-import { ELEMENT_BUCKET_SNAMES } from './skinparam-element-buckets.js';
+import { ELEMENT_BUCKET_SNAMES, parseShadowingValue } from './skinparam-element-buckets.js';
 import type { ElementColors } from './theme-graph-colors.js';
 import { convertBorderStyleValue, lineStyleDash } from './style-line-style.js';
 
@@ -188,7 +188,7 @@ const ELEMENT_BACKGROUND_COLOR_STEREO_RE = new RegExp('^(\\w+)backgroundcolor<<(
  */
 const GROUP_BY_STEREO_RE = new RegExp(
   '^(package|rectangle|hexagon|node|artifact|folder|file|frame|cloud|database|storage|component|card|queue|stack)' +
-    '(bordercolor|fontcolor|borderthickness|stereotypefontcolor|borderstyle|roundcorner|diagonalcorner)<<(.+)>>$',
+    '(bordercolor|fontcolor|borderthickness|stereotypefontcolor|borderstyle|roundcorner|diagonalcorner|shadowing)<<(.+)>>$',
 );
 
 /** The numeric roles and their `*ByStereo` field. cdd7 T2b (xuloxo-85):
@@ -238,12 +238,21 @@ function applyFontColorByStereo(bucket: ElementColors, role: string, label: stri
   bucket.stereoTextFontByStereo = { ...bucket.stereoTextFontByStereo, [label]: color };
 }
 
+/** The `shadowing` role: `FromSkinparamToStyle#convertNow` maps `true`/`false` to 3/0 (`:306-310`). */
+function applyShadowingByStereo(bucket: ElementColors, label: string, value: string): boolean {
+  const parsed = parseShadowingValue(value.trim());
+  if (parsed === undefined) return false;
+  bucket.shadowingByStereo = { ...bucket.shadowingByStereo, [label]: parsed };
+  return true;
+}
+
 function applyGroupByStereo(acc: SkinparamAccumulator, key: string, value: string): boolean {
   const m = GROUP_BY_STEREO_RE.exec(key);
   if (m === null) return false;
   const role = m[2]!;
   const label = m[3]!.trim();
   const bucket = (acc.elements[m[1]!] ??= {});
+  if (role === 'shadowing') return applyShadowingByStereo(bucket, label, value);
   if (role === 'borderstyle') {
     applyBorderStyleByStereo(bucket, label, value);
     return true;

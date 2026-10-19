@@ -164,7 +164,13 @@ export function resolveElementFontSize(
  * `resolveElementPaint`'s two-tier cascade; always returns a number (never
  * `undefined`), matching `Style#getShadowing()`'s "absent -> 0" default.
  */
-export function resolveElementShadowing(theme: Theme, sname: string): number {
+export function resolveElementShadowing(theme: Theme, sname: string, stereotypes: readonly string[] = []): number {
+  // The stereotype tier (`skinparam <sname>Shadowing<<label>>`, +1000 priority, FromSkinparamToStyle.java:396-408):
+  // the LAST label with a value wins, as for `stereotypePaint`.
+  const byTag = theme.colors.elements?.[sname]?.shadowingByStereo;
+  let tagged: number | undefined;
+  if (byTag !== undefined) for (const label of stereotypes) tagged = byTag[cleanStereoKey(label)] ?? tagged;
+  if (tagged !== undefined) return tagged;
   const specific = theme.colors.elements?.[sname]?.shadowing;
   if (specific !== undefined) return specific;
   return theme.shadowing ?? 0;

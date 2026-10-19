@@ -44,6 +44,7 @@ import { svgRoot, group, rect } from './svg.js';
 import { finalizeActivityFragment, scaleActivityBody } from './assemble-svg-activity.js';
 import { resolveScaleFactor } from './scale-command.js';
 import { applySeededDefIds } from './svg-defs-seeded.js';
+import { scaleShadowFilterDefs } from './svg-defs-scale.js';
 import { seedOf } from './klimt/drawing/svg/svg-seed.js';
 import { assembleDocumentShell } from './klimt/document-shell.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
@@ -411,6 +412,7 @@ function finalizeDescriptionFragment(fragment: RenderFragment): RenderFragment {
   return {
     ...fragment,
     body: scaleActivityBody(body, factor),
+    ...(fragment.extraDefs === undefined ? {} : { extraDefs: scaleShadowFilterDefs(fragment.extraDefs, factor) }),
     scaledCanvas: true,
     width: fragment.width * factor,
     height: fragment.height * factor,
