@@ -28,6 +28,8 @@ import {
 } from '../../core/atmp/CucaDiagram.js';
 import { degenerateBlockDims, renderDescription, unwrapKlimtSvg } from './renderer.js';
 import { isEmpty } from '../../core/annotations/index.js';
+import { isExportScaled } from '../../core/scale-command.js';
+import { withDeferredFormat } from '../../core/svg-format.js';
 
 /**
  * Reconstructs the raw `@start.../@end...` block text `UmlSource.seed()`
@@ -133,8 +135,12 @@ export const descriptionPlugin: SyncPlugin<DescriptionDiagramAST, DescriptionGeo
     // klimt (renderDescription) emits a complete document itself and does
     // not route through the shared svgRoot assembler (decisions.md D2) —
     // its chrome, when T7 lands, applies inside its own klimt pipeline.
-    const svg =
-      geo.measurer === undefined ? renderDescription(geo, theme) : renderDescription(geo, theme, geo.measurer);
+    // A chromed, scaled geometry is formatted ONCE by the export's scale pass, as `SvgGraphics#format` multiplies
+    // then rounds (`SvgGraphics.java:468-475`); drawn at 1x it would round twice (`withDeferredFormat`'s doc).
+    const deferred = geo.chromed === true && isExportScaled(geo.scale, theme.dpi);
+    const svg = withDeferredFormat(deferred, () =>
+      geo.measurer === undefined ? renderDescription(geo, theme) : renderDescription(geo, theme, geo.measurer),
+    );
     if (geo.chromed !== true) return { completeSvg: svg };
     // lgm-T1c: chrome is composed around the margin-less block, so the klimt
     // document is unwrapped here and declares that block -- see
@@ -147,6 +153,7 @@ export const descriptionPlugin: SyncPlugin<DescriptionDiagramAST, DescriptionGeo
           : {};
     return {
       ...unwrapKlimtSvg(svg, theme.colors.background),
+      ...(deferred ? { numbersDeferred: true as const } : {}),
       ...block,
       ...(geo.frameInk !== undefined ? { frameInk: geo.frameInk } : {}),
       // codd-T4: a style `Margin` (`TextBlockExporter.java:510-516`) is the margin the exporter applies AFTER chrome.

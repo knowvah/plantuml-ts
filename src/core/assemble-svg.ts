@@ -406,7 +406,8 @@ function finalizeDescriptionFragment(fragment: RenderFragment): RenderFragment {
   // `TextBlockExporter#computeScaleFactor` (`:204-208`) reads the chrome-and-margin dimension before `ensureVisible`.
   const dimension = fragment.exportedDimension ?? fragment;
   const factor = resolveScaleFactor(fragment.scaleSpec, dimension.width, dimension.height, fragment.dpi);
-  if (factor === 1) return { ...fragment, body };
+  // A `numbersDeferred` body is formatted by this pass alone, so it runs at factor 1 too (assemble-svg-activity.ts).
+  if (factor === 1 && fragment.numbersDeferred !== true) return { ...fragment, body };
   return {
     ...fragment,
     body: scaleActivityBody(body, factor),
