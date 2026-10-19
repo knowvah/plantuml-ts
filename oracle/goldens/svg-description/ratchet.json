@@ -2489,6 +2489,18 @@
       "type": "unknown",
       "addedAt": "2026-10-19",
       "source": "dot-cache"
+    },
+    {
+      "slug": "favega-89-rado990",
+      "type": "component",
+      "addedAt": "2026-10-19",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "xozabi-42-pixa842",
+      "type": "usecase",
+      "addedAt": "2026-10-19",
+      "source": "dot-cache"
     }
   ]
 }
