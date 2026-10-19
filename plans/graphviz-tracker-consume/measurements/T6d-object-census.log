@@ -1,0 +1,73 @@
+Loaded 80 fixtures across types: object, plans/graphviz-tracker-consume/measurements/T6d-object-census.json
+
+=== DeterministicMeasurer (ratchet metric) (80 fixtures) ===
+  0 diffs:     63
+  1-3 diffs:   3
+  4-10 diffs:  2
+  11-30 diffs: 7
+  31+ diffs:   5
+  errors:      0
+  zero-diff fixtures:
+    - object/baloca-83-nadu916
+    - object/beleso-08-ruca459
+    - object/bepafe-03-teda035
+    - object/beruju-17-jigi548
+    - object/diveje-52-xefe514
+    - object/donoki-79-riku189
+    - object/fafozi-27-reja300
+    - object/fajafu-44-cuve930
+    - object/febadi-87-zozu271
+    - object/figeze-77-fozi735
+    - object/fikojo-87-tine499
+    - object/fusopu-05-loxo960
+    - object/gapisu-00-celo011
+    - object/gizini-87-vuve916
+    - object/guzojo-14-muxa584
+    - object/jabote-02-rajo672
+    - object/janoma-30-dovo501
+    - object/jaxere-74-cole479
+    - object/jocamu-71-nuvo330
+    - object/jotaga-99-fatu830
+    - object/juciri-29-tamu404
+    - object/kagope-09-kubu001
+    - object/kavako-54-zipa815
+    - object/kexica-21-gega428
+    - object/kiluja-96-pado371
+    - object/kocupi-02-ripa662
+    - object/lafemo-98-ruri220
+    - object/lalizo-85-paxe277
+    - object/lapato-45-neje847
+    - object/lecali-51-funo316
+    - object/lijoda-62-teci632
+    - object/linazi-45-gevo553
+    - object/linuxu-41-cogo780
+    - object/majake-62-pero492
+    - object/meloxo-38-jeti489
+    - object/niloru-34-nuve651
+    - object/nitica-38-cere665
+    - object/nufoju-44-dabi767
+    - object/nukera-08-dige359
+    - object/pagidu-67-doxa131
+    - object/pavizi-27-xupe815
+    - object/rocepa-35-gepo708
+    - object/rotele-89-cuva650
+    - object/rozuxo-44-fudi093
+    - object/ruloso-59-nato909
+    - object/ruturo-47-kapi300
+    - object/sajege-04-zuce784
+    - object/sarepa-89-cevi460
+    - object/sigado-12-rina240
+    - object/sinepa-64-beze711
+    - object/sivime-00-gudo607
+    - object/sobosi-40-xuda813
+    - object/sorisi-53-xebi982
+    - object/soxufi-98-nita528
+    - object/style-stereotype-on-arrow-3
+    - object/tobuka-93-jale775
+    - object/tujasu-04-nota700
+    - object/tusiri-92-catu943
+    - object/vimavu-26-civo110
+    - object/vozomu-86-rodo657
+    - object/xuvesu-44-laru205
+    - object/zagodo-28-ranu153
+    - object/zebufu-01-pevo013

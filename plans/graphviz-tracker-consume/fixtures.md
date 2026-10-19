@@ -15,7 +15,7 @@ T0 fills `b0`. Each task close fills the column for its own tag.
 | 30 | class/sokevu-87-toce485 | 0/0 | conformant | 0/0 conformant | T4 0/0 conformant | [x] 2026-10-18 gtc T4 |
 | 30 | component/repoge-41-demu604 | 37/16 | diverged | 37/16 diverged | T4 0/0 conformant | [x] 2026-10-18 gtc T4 |
 | 29 | unknown/xagonu-36-sudi116 | 45/887 | diverged | 45/887 diverged | T5b 0/0 conformant | [x] 2026-10-18 gtc T5b |
-| 28 | unknown/deroxu-29-gude369 | 719/1237 | diverged | 719/1237 diverged | T6c 144/43 diverged | |
+| 28 | unknown/deroxu-29-gude369 | 719/1237 | diverged | 719/1237 diverged | T6d 86/43 diverged | |
 | 16 | state/pavuzo-79-zodu430 | 4/85 | diverged | 4/85 diverged | S 0/0 conformant | [x] 2026-10-16 gtc S |
 | 14 | (no row: D3 criterion) | — | — | | T8 byte-identical, 0 losses | [x] 2026-10-16 gtc S |
 
