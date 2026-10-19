@@ -14,7 +14,7 @@ each task.
 | T6f | inline-link-colour-dropped: trailing `#color` on a link (18) | typescript-pro | description link-grammar.ts, tests | T6e | [x] |
 | T6g | cluster-stereo-shadowing: `Shadowing<<X>>` on clusters (+ canvas-shadow-extent cascade) | typescript-pro | core skinparam-stereo-keys/theme-element-resolve; description renderer-cluster, tests | T6f | [x] |
 | T6h | stereo-font-and-interface-border-keys: `ComponentFontColor<<X>>` etc. (16 latent) | typescript-pro | core skinparam-stereo-keys/theme-element-resolve; description renderer-entity/edge, tests | T6g | [x] |
-| T6i | port-cluster-title-min-width: two-line port cluster title (5 latent) | typescript-pro | description layout-cluster-boxes/layout, tests | T6h | [ ] |
+| T6i | port-cluster-title-min-width: two-line port cluster title (5 latent) | typescript-pro | description layout-cluster-boxes/layout, tests | T6h | [x] |
 | T6j | multi-stereotype-tie-order: first-defined style wins on ties (4 latent; shared core resolver, all-engine) | typescript-pro | core theme-element-resolve.ts, tests | T6i | [ ] |
 
 T6a's census (2026-10-18, `measurements/deroxu-families.json`) replaced the planning labels; rows are ordered by dependency (journal row 47), each instantiated from the T6b template.
