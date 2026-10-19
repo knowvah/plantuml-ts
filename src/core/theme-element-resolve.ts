@@ -37,7 +37,7 @@ const STEREOTYPE_PAINT_FIELD = {
  * one label at a time and the merge keeping the last-registered value. The
  * SName's own bucket is consulted after the SName-less one.
  */
-function stereotypePaint(
+export function stereotypePaint(
   theme: Theme,
   sname: string,
   role: keyof typeof STEREOTYPE_PAINT_FIELD,

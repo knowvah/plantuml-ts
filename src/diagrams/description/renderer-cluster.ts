@@ -9,7 +9,11 @@ import { bareEntityName } from './namespace-groups.js';
 import type { Theme } from '../../core/theme.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { resolveElementShadowing } from '../../core/theme.js';
-import { resolveClusterTitleAlignment, resolveElementRoundCorner } from '../../core/theme-element-resolve.js';
+import {
+  resolveClusterTitleAlignment,
+  resolveElementRoundCorner,
+  stereotypePaint,
+} from '../../core/theme-element-resolve.js';
 import type { Paint } from '../../core/paint.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
@@ -171,8 +175,9 @@ function rootBackground(theme: Theme): string | undefined {
  * USymbol bucket, the `group` bucket, the `package` bucket, then `root`), which agrees with source order whenever the
  * style is written general-to-specific.
  */
-function clusterBackground(theme: Theme, symbol: USymbol): Paint {
+function clusterBackground(theme: Theme, symbol: USymbol, stereotypes: readonly string[]): Paint {
   return (
+    stereotypePaint(theme, symbol, 'background', stereotypes) ??
     theme.colors.elements?.[symbol]?.background ??
     theme.colors.elements?.[GROUP_SNAME]?.background ??
     theme.colors.graph.packageBackground ??
@@ -187,8 +192,9 @@ function clusterBackground(theme: Theme, symbol: USymbol): Paint {
  * ordered `styleOverrides` (a plain `theme.colors.border` cannot say whether a style set it); `fallback` is the
  * skin's default for the symbol.
  */
-function clusterBorder(theme: Theme, symbol: USymbol, fallback: string): Paint {
+function clusterBorder(theme: Theme, symbol: USymbol, fallback: string, stereotypes: readonly string[]): Paint {
   return (
+    stereotypePaint(theme, symbol, 'border', stereotypes) ??
     theme.colors.elements?.[symbol]?.border ??
     theme.colors.elements?.[GROUP_SNAME]?.border ??
     rootLineColor(theme) ??
@@ -204,7 +210,11 @@ function rootLineColor(theme: Theme): string | undefined {
   return raw === undefined ? undefined : resolveColorToSvgHex(raw);
 }
 
-export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleDefaults {
+export function buildStyleDefaults(
+  theme: Theme,
+  symbol: USymbol,
+  stereotypes: readonly string[] = [],
+): ClusterStyleDefaults {
   const folder = isFolderStyled(symbol);
   return {
     // mission skin-file-loading (deferred D3 item): was hardcoded 0 --
@@ -228,13 +238,18 @@ export function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleD
     roundCorner: resolveElementRoundCorner(theme, symbol) ?? NON_FOLDER_ROUND_CORNER,
     strictUmlStyle: false,
     diagonalCorner: 0,
-    lineColorDefault: clusterBorder(theme, symbol, folder ? FOLDER_BORDER_DEFAULT : NON_FOLDER_BORDER_DEFAULT),
+    lineColorDefault: clusterBorder(
+      theme,
+      symbol,
+      folder ? FOLDER_BORDER_DEFAULT : NON_FOLDER_BORDER_DEFAULT,
+      stereotypes,
+    ),
     // CDD T18b: `theme.colors.graph.packageBackground` is optional now
     // (theme.ts no longer bakes the cluster's own unstyled default in --
     // see that field's doc comment) -- this call site supplies its own
     // `'none'` (`Cluster.java:285-296`'s unstyled `BackGroundColor`,
     // `plantuml.skin:102-114`) explicitly, matching the pre-T18b value.
-    backGroundColorDefault: clusterBackground(theme, symbol),
+    backGroundColorDefault: clusterBackground(theme, symbol, stereotypes),
     strokeDefault: UStroke.withThickness(folder ? CLUSTER_STROKE_WIDTH : NON_FOLDER_STROKE_WIDTH),
   };
 }
@@ -291,7 +306,7 @@ export function buildCluster(node: DescriptionNodeGeo, theme: Theme, uid: string
     group,
     buildHeader(node, theme, { sprites }),
     { position: new UTranslate(node.x, node.y), width: node.width, height: node.height },
-    buildStyleDefaults(theme, node.symbol),
+    buildStyleDefaults(theme, node.symbol, node.styleStereotype ?? node.stereotype ?? []),
     symbolInfo,
   ];
   return node.kermorNotes === undefined

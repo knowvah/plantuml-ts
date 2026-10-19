@@ -237,6 +237,9 @@ export function degenerateSingleLeaf(
     children: [],
   };
   if (visibleStereotype !== undefined && visibleStereotype.length > 0) geo.stereotype = visibleStereotype;
+  if (node.stereotype !== undefined && node.stereotype.length > (visibleStereotype?.length ?? 0)) {
+    geo.styleStereotype = node.stereotype;
+  }
   // The `<<$name>>` half of the same stereotype run. Threaded so the RENDERER
   // resolves the same sprite the sizer just measured — without it the sizer
   // reserves the sprite box while the renderer draws `«name»` as text, the

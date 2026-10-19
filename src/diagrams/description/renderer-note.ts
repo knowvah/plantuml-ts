@@ -103,7 +103,7 @@ function tagBackground(theme: Theme, labels: readonly string[]): Paint | undefin
 export function resolveNotePaints(node: DescriptionNodeGeo, theme: Theme): NotePaints {
   const override = node.color !== undefined ? parseColorOverride(node.color) : {};
   const bucket = theme.colors.elements?.['note'];
-  const styled = tagBackground(theme, node.stereotype ?? []) ?? bucket?.background;
+  const styled = tagBackground(theme, node.styleStereotype ?? node.stereotype ?? []) ?? bucket?.background;
   const back = override.back ?? (styled !== undefined ? resolveStyled(styled) : theme.colors.noteBackground);
   const thickness = resolveElementLineThickness(theme, 'note') ?? NOTE_STROKE_WIDTH;
   return { back, border: bucket?.border ?? theme.colors.border, stroke: UStroke.withThickness(thickness) };

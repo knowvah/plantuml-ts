@@ -38,6 +38,12 @@ export interface DescriptionNodeGeo {
   /** G1 I5b: ALL stereotype tags, in source order (see
    *  `DescriptiveNode.stereotype`'s doc comment). */
   stereotype?: readonly string[];
+  /** The FULL stereotype list, set only when `hide stereotype` filtered {@link stereotype} down. Upstream
+   *  styles an element from the whole `entity.getStereotype()` (`EntityImageDescription.java:151-159`:
+   *  `getStyleSignature().withTOBECHANGED(stereotype)`) and filters only the PRINTED labels through
+   *  `portionShower.getVisibleStereotypeLabels(entity)` (`:193`). Renderers resolve style keys from
+   *  `styleStereotype ?? stereotype`; `stereotype` stays the printed list. */
+  styleStereotype?: readonly string[];
   /** The `<<$name>>` sprite half of that same run, copied straight through
    *  from `DescriptiveNode.stereotypeSprite` so the renderer can resolve the
    *  SAME sprite the sizer measured (`planning/sizer-renderer-parity.md`). */

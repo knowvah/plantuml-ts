@@ -341,18 +341,26 @@ export class DescriptionElkAdapter implements ElkDiagramAdapter {
     return { getTitleAndAttributeHeight: () => height, getTitle: () => header.title, getStereo: () => header.stereo };
   }
 
+  /** `MyElkCluster#drawU` (MyElkCluster.java:92-96,99-101): the style is merged WITHOUT `withTOBECHANGED(stereotype)`,
+   *  so the drawn ELK cluster never reads a stereotype-scoped colour (unlike `Cluster#getStyle`, Cluster.java:364). */
   getClusterStyle(groupId: string): ElkClusterStyle {
-    const defaults = buildStyleDefaults(this.input.theme, this.nodeGeo(groupId).symbol);
+    return this.clusterStyle(groupId, []);
+  }
+
+  /** `MyElkCluster#getMagneticBorder` (MyElkCluster.java:147-149) DOES sign the group stereotype. */
+  getClusterStyleForMagneticBorder(groupId: string, _uSymbol: UpstreamUSymbol): ElkClusterStyle {
+    const geo = this.nodeGeo(groupId);
+    return this.clusterStyle(groupId, geo.styleStereotype ?? geo.stereotype ?? []);
+  }
+
+  private clusterStyle(groupId: string, stereotypes: readonly string[]): ElkClusterStyle {
+    const defaults = buildStyleDefaults(this.input.theme, this.nodeGeo(groupId).symbol, stereotypes);
     return {
       shadowing: defaults.shadowing,
       stroke: defaults.strokeDefault,
       roundCorner: defaults.roundCorner,
       lineColor: defaults.lineColorDefault,
     };
-  }
-
-  getClusterStyleForMagneticBorder(groupId: string, _uSymbol: UpstreamUSymbol): ElkClusterStyle {
-    return this.getClusterStyle(groupId);
   }
 
   getClusterBackColor(groupId: string): Paint {

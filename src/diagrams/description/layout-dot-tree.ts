@@ -534,6 +534,9 @@ function buildGeoNode(
     };
     const visibleStereotype = visibleStereotypeLabels(astNode.stereotype, stereotypeRules);
     if (visibleStereotype !== undefined && visibleStereotype.length > 0) geo.stereotype = visibleStereotype;
+    if (astNode.stereotype !== undefined && astNode.stereotype.length > (visibleStereotype?.length ?? 0)) {
+      geo.styleStereotype = astNode.stereotype;
+    }
     // cdd8-T1c: mirrors `layout-helpers.ts:251` -- the sizer measured this
     // sprite, so the renderer must draw it (`EntityImageDescription.java:194-195`).
     if (astNode.stereotypeSprite !== undefined) geo.stereotypeSprite = astNode.stereotypeSprite;
@@ -577,6 +580,9 @@ function buildGeoNode(
   };
   const visibleStereotype = visibleStereotypeLabels(astNode.stereotype, stereotypeRules);
   if (visibleStereotype !== undefined && visibleStereotype.length > 0) geo.stereotype = visibleStereotype;
+  if (astNode.stereotype !== undefined && astNode.stereotype.length > (visibleStereotype?.length ?? 0)) {
+    geo.styleStereotype = astNode.stereotype;
+  }
   // The sizer measured this sprite (`ContainerDesc.stereotypeSprite`), so the cluster header must draw it
   // (`ClusterHeader.java:187-188`).
   if (astNode.stereotypeSprite !== undefined) geo.stereotypeSprite = astNode.stereotypeSprite;
