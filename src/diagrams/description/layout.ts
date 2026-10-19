@@ -179,7 +179,12 @@ function runLayout(
   applyShieldEdgePorts(input);
   const spacing: ClusterSpacing = { rankdir: ast.rankdir === 'LR' ? 'LR' : 'TB' };
   const result = layoutGraph(input);
-  const portClusterInfoByAstId = buildPortClusterInfoByAstId(ctx, portRanksByCluster, { fontSpec, measurer }, result);
+  const portClusterInfoByAstId = buildPortClusterInfoByAstId(
+    ctx,
+    portRanksByCluster,
+    clusterTitleDimsById(ctx, wrapperInputs),
+    result,
+  );
   // #lizard forgives -- NLOC 47, CCN 9 pre-existing (mission G5/C1
   // 500-line split, pure move); 8 params after this iteration's own
   // `edgeFontSpec` addition -- a flat sequence of DOT-input-assembly
