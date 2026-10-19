@@ -18,6 +18,7 @@
 
 import type { DescriptiveLink, DescriptiveLinkStyle } from './ast.js';
 import { extractLinkStereotype } from './parse-helpers.js';
+import { parseLinkColors } from './link-colors.js';
 
 import { LINK_LINE_RE, TAIL_TO_HEAD_TOKEN, HEAD_TO_TAIL_TOKEN, type LinkGroups } from './link-grammar-regex.js';
 export { LINK_LINE_RE };
@@ -363,6 +364,7 @@ interface LinkBuildArgs {
   rawStyle: string | undefined;
   thicknessOverride: number | undefined;
   colorOverride: string | undefined;
+  textColor: string | undefined;
   stereotype: string | undefined;
   stereotypeIsLinkLabel: boolean;
   label: string | undefined;
@@ -386,6 +388,7 @@ function buildLinkFromArgs(a: LinkBuildArgs): DescriptiveLink {
   if (a.rawStyle !== undefined) link.rawStyle = a.rawStyle;
   if (a.thicknessOverride !== undefined) link.thicknessOverride = a.thicknessOverride;
   if (a.colorOverride !== undefined) link.colorOverride = a.colorOverride;
+  if (a.textColor !== undefined) link.textColor = a.textColor;
   if (a.stereotype !== undefined) link.stereotype = a.stereotype;
   if (a.stereotypeIsLinkLabel) link.stereotypeIsLinkLabel = true;
   if (a.label !== undefined) link.label = a.label;
@@ -427,6 +430,10 @@ export function parseLinkLine(groups: Record<string, string>): ParsedLink {
   const arrowStyle = parseArrowStyle(g.style1, g.style2);
   const { hidden, norank, single, rawStyle, thickness, color } = arrowStyle;
   const { stereotype, label, stereotypeIsLinkLabel } = resolveStereotypeAndLabel(g);
+  // The trailing `#color` (CommandLinkElement.java:329) is set BEFORE the bracket style (`:330`), which wins on LINE;
+  // ARROW outranks LINE in `getColor(ARROW, LINE)` (SvekEdge.java:885); a `line.dashed` colour-style outranks the type.
+  const trailing = parseLinkColors(g.color);
+  const lineStyle = trailing.lineStyle;
 
   const link = buildLinkFromArgs({
     from: from.id,
@@ -434,7 +441,7 @@ export function parseLinkLine(groups: Record<string, string>): ParsedLink {
     // A bracket dashed/dotted/bold keyword OVERRIDES the queue-char style --
     // upstream applies `applyStyle` strictly after `getLinkType`
     // (`CommandLinkElement.executeArg:301,330`).
-    style: arrowStyle.style ?? linkStyleFromQueue(queue),
+    style: lineStyle ?? arrowStyle.style ?? linkStyleFromQueue(queue),
     arrowHead,
     length,
     firstLabel: labels.first,
@@ -445,8 +452,9 @@ export function parseLinkLine(groups: Record<string, string>): ParsedLink {
     norank,
     single,
     rawStyle,
-    thicknessOverride: thickness,
-    colorOverride: color,
+    thicknessOverride: lineStyle === undefined ? thickness : undefined,
+    colorOverride: trailing.arrow ?? color ?? trailing.line,
+    textColor: trailing.text,
     stereotype,
     stereotypeIsLinkLabel,
     label,

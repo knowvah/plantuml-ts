@@ -33,6 +33,12 @@ export function arrowLabelFontConfig(theme: Theme): FontConfiguration {
   return { family: font.family, size: font.size, color: font.color, styles };
 }
 
+/** `SvekEdge.java:260-262`: the link's own `Colors` mute the label font (TEXT). */
+function edgeLabelFont(edge: DescriptionEdgeGeo, theme: Theme): FontConfiguration {
+  const font = arrowLabelFontConfig(theme);
+  return edge.styleTextColor === undefined ? font : { ...font, color: edge.styleTextColor };
+}
+
 /**
  * Fallback raw decor token when `DescriptionEdgeGeo.tailDecor`/`.headDecor`
  * (T17 write-set expansion — see `layout-helpers.ts`'s doc comment) are
@@ -150,7 +156,7 @@ function buildInput(
     ...(edge.label !== undefined
       ? { label: blockText === undefined ? edge.label : { ...edge.label, text: blockText } }
       : {}),
-    ...(hasLabelText ? { labelFont: arrowLabelFontConfig(theme) } : {}),
+    ...(hasLabelText ? { labelFont: edgeLabelFont(edge, theme) } : {}),
     // `SvekEdge.java:376-381`: `skinparam defaultTextAlignment` (the root style bucket, as for a cluster title).
     ...(theme.colors.elements?.root?.horizontalAlignment !== undefined
       ? { labelAlignment: theme.colors.elements.root.horizontalAlignment }

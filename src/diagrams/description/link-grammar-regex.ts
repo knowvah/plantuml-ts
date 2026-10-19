@@ -195,6 +195,7 @@ export interface LinkGroups {
   style1?: string;
   style2?: string;
   direction?: string;
+  color?: string;
   stereotype?: string;
   label?: string;
 }

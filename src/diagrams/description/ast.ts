@@ -303,6 +303,8 @@ export interface DescriptiveLink {
    * to the jar's own uppercase-hex emission.
    */
   colorOverride?: string;
+  /** The trailing `#text:<c>` of the link line: the label font colour (`link-colors.ts`). */
+  textColor?: string;
   /**
    * I3b write-set expansion (journaled) -- see `DescriptiveNode
    * .creationIndex`'s doc comment for the shared-counter mechanism. A

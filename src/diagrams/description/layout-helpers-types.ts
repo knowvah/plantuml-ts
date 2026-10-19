@@ -202,6 +202,8 @@ export interface DescriptionEdgeGeo {
    *  BOTH the line stroke and the (same-color) filled extremity, matching
    *  upstream `svek/SvekEdge.java:884-893`. */
   styleColor?: string;
+  /** `DescriptiveLink.textColor`: label font colour override (SvekEdge.java:260-262). */
+  styleTextColor?: string;
   arrowHead?: 'open' | 'filled' | 'none';
   /**
    * T17 write-set expansion (journaled — see the mission decision journal):

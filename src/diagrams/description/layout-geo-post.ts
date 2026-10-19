@@ -104,6 +104,7 @@ function assembleEdgeGeo(
   };
   if (link.thicknessOverride !== undefined) geo.styleThickness = link.thicknessOverride;
   if (link.colorOverride !== undefined) geo.styleColor = link.colorOverride;
+  if (link.textColor !== undefined) geo.styleTextColor = link.textColor;
   if (link.stereotype !== undefined) geo.stereotype = link.stereotype;
   if (link.stereotypeIsLinkLabel) geo.stereotypeIsLinkLabel = true;
   if (link.arrowHead !== undefined) geo.arrowHead = link.arrowHead;

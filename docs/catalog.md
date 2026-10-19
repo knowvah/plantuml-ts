@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1680 modules · 6136 exported names.
+1681 modules · 6138 exported names.
 
 ## `src/`
 
@@ -1705,6 +1705,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `layout-package-style.ts` | `applyPackageStyle` | `skinparam packagestyle` -> the `package` keyword's group symbol. |
 | `layout-types.ts` | `ContainerDesc`, `ClassifyCtx`, `EdgeDotBuildResult` | The layout engine's shared context/result TYPES, split out of `layout.ts` (this project's established "500-line splits" workaround — mechanical move only, no behavior and no upstream divergence). |
 | `layout.ts` | `isEffectiveCluster`, `DescriptionNodeGeo`, `DescriptionEdgeGeo`, `DescriptionGeometry`, `ClassifyCtx`, `ContainerDesc`, `EdgeDotBuildResult`, `createClassifyCtx`, `layoutDescription`, `USymbol` | Unified layout engine for PlantUML descriptive diagrams (component / use-case / deployment). |
+| `link-colors.ts` | `LinkColors`, `parseLinkColors` | link-colors.ts -- the trailing `#color` of a description link line (`A --> B #aaa`, `#line:blue;text:red`). |
 | `link-edge-attrs.ts` | `EdgeFontSpecs`, `computeGraphSpacing`, `buildLinkEdgeAttributes` | Link-derived DOT edge attributes + graph spacing for the description engine. |
 | `link-grammar-endpoints.ts` | `EndpointShape`, `classifyEndpointShape`, `EndpointPair` | Endpoint shape classification (`CommandLinkElement.getDummy`) -- split out of `link-grammar.ts` purely to keep that file under this project's 500-line cap. |
 | `link-grammar-regex.ts` | `DECOR_ESCAPE_RE`, `escapeDecorToken`, `buildDecorAlt`, `DECORS1_TOKENS`, `DECORS2_TOKENS`, `DECORS1_ALT`, `DECORS2_ALT`, `TAIL_TO_HEAD_TOKEN`, `HEAD_TO_TAIL_TOKEN`, `STYLE_KEY1`, `STYLE_KEY2`, `LINE_STYLE`, `LINE_STYLE_MULTIPLES`, `LINK_ENT_ALT`, `COLOR_TOKEN`, `COLOR_KEY_ALT`, `COLOR_PART2`, `COLORS_BODY_ALT`, `LINK_LINE_SOURCE`, `LINK_LINE_RE`, `LinkGroups` | Descriptive link-line regex construction (LINK_LINE_RE + its decor/style/ color/token building blocks). |
