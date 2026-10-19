@@ -36,7 +36,10 @@ export function arrowLabelFontConfig(theme: Theme): FontConfiguration {
 /** `SvekEdge.java:260-262`: the link's own `Colors` mute the label font (TEXT). */
 function edgeLabelFont(edge: DescriptionEdgeGeo, theme: Theme): FontConfiguration {
   const font = arrowLabelFontConfig(theme);
-  return edge.styleTextColor === undefined ? font : { ...font, color: edge.styleTextColor };
+  // The link's own `Colors` mute the style-resolved font AFTER it (SvekEdge.java:260-262), so `text:` outranks the
+  // stereotype-signed arrow `FontColor` (`SvekEdge.java:816-821`), which outranks the theme's arrow font colour.
+  const color = edge.styleTextColor ?? tagStyle(edge, theme)?.fontColor;
+  return color === undefined ? font : { ...font, color };
 }
 
 /**
@@ -92,7 +95,10 @@ function tabledLabelText(edge: DescriptionEdgeGeo, visibleStereotype: string | u
  * `.withTOBECHANGED(stereotype)` (`SvekEdge.java:816-821`). The link keeps one label (`DescriptiveLink.stereotype`);
  * the cascade is keyed by the cleaned tag (`StyleSignatureBasic#clean`).
  */
-function tagStyle(edge: DescriptionEdgeGeo, theme: Theme): { color?: string; thickness?: number } | undefined {
+function tagStyle(
+  edge: DescriptionEdgeGeo,
+  theme: Theme,
+): { color?: string; thickness?: number; fontColor?: string } | undefined {
   const cascade = theme.colors.graph.descriptionArrowTagCascade;
   if (edge.stereotype === undefined || cascade === undefined) return undefined;
   return cascade[cleanStereotypeToken(edge.stereotype)];

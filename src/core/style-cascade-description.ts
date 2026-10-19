@@ -27,8 +27,12 @@ export function computeDescriptionStyleCascadeOverrides(styleMap: StyleMap): Par
   // gtc T3: the stereotype-signed tier (`withTOBECHANGED(stereotype)`, `SvekEdge.java:819-821`).
   const tags: Record<string, NonNullable<DescriptionCascadeOverride['descriptionArrowTagCascade']>[string]> = {};
   for (const tag of collectStyleTagNames(styleMap)) {
-    const entry = arrowTagCascadeEntry(styleMap, tag, DESCRIPTION_ARROW_SNAMES);
-    if (entry !== undefined) tags[cleanStereotypeToken(tag)] = entry;
+    const fontColor = cascadeHex(styleMap, DESCRIPTION_ARROW_SNAMES, 'fontcolor', [tag]);
+    const entry = {
+      ...arrowTagCascadeEntry(styleMap, tag, DESCRIPTION_ARROW_SNAMES),
+      ...(fontColor === undefined ? {} : { fontColor }),
+    };
+    if (Object.keys(entry).length > 0) tags[cleanStereotypeToken(tag)] = entry;
   }
   if (Object.keys(tags).length > 0) override.descriptionArrowTagCascade = tags;
   return override;

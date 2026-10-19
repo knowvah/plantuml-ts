@@ -14,11 +14,23 @@ import type { SkinparamAccumulator } from './skinparam-accumulator.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
 
 const ARROW_COLOR_STEREO_RE = new RegExp('^arrowcolor<<(.+)>>$');
+/** `addConFont("arrow", SName.arrow)` (`FromSkinparamToStyle.java:149`): `arrowFontColor<<tag>>` -> `FontColor`. */
+const ARROW_FONT_COLOR_STEREO_RE = new RegExp('^arrowfontcolor<<(.+)>>$');
 /** `FromSkinparamToStyle.java:374`: `read.toLowerCase().contains("bold")` -> `LineThickness 2`. */
 const BOLD_LINE_THICKNESS = 2;
 
 /** Whether `key` was an `arrowcolor<<tag>>` key (consumed). */
 export function applyArrowColorByStereo(acc: SkinparamAccumulator, key: string, value: string): boolean {
+  const font = ARROW_FONT_COLOR_STEREO_RE.exec(key);
+  if (font !== null) {
+    const tag = font[1]!.trim();
+    const fontColor = resolveColorToSvgHex(value.trim());
+    acc.descriptionArrowTagCascade = {
+      ...acc.descriptionArrowTagCascade,
+      [tag]: { ...acc.descriptionArrowTagCascade?.[tag], fontColor },
+    };
+    return true;
+  }
   const m = ARROW_COLOR_STEREO_RE.exec(key);
   if (m === null) return false;
   const [first = '', ...rest] = (value.startsWith(';') ? ` ${value}` : value).split(';');
@@ -26,7 +38,11 @@ export function applyArrowColorByStereo(acc: SkinparamAccumulator, key: string, 
   if (first.trim() !== '') entry.color = resolveColorToSvgHex(first.trim());
   if (rest.some((token) => token.toLowerCase().includes('bold'))) entry.thickness = BOLD_LINE_THICKNESS;
   if (Object.keys(entry).length > 0) {
-    acc.descriptionArrowTagCascade = { ...acc.descriptionArrowTagCascade, [m[1]!.trim()]: entry };
+    const tag = m[1]!.trim();
+    acc.descriptionArrowTagCascade = {
+      ...acc.descriptionArrowTagCascade,
+      [tag]: { ...acc.descriptionArrowTagCascade?.[tag], ...entry },
+    };
   }
   return true;
 }

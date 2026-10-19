@@ -187,7 +187,8 @@ const ELEMENT_BACKGROUND_COLOR_STEREO_RE = new RegExp('^(\\w+)backgroundcolor<<(
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:127-129,270-283,292-302,396-408
  */
 const GROUP_BY_STEREO_RE = new RegExp(
-  '^(package|rectangle|hexagon|node|artifact|folder|file|frame|cloud|database|storage|component|card|queue|stack)' +
+  '^(package|rectangle|hexagon|node|artifact|folder|file|frame|cloud|database|storage|component|card|queue|stack|' +
+    'agent|interface|person|usecase|actor)' +
     '(bordercolor|fontcolor|borderthickness|stereotypefontcolor|borderstyle|roundcorner|diagonalcorner|shadowing)<<(.+)>>$',
 );
 

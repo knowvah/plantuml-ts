@@ -54,6 +54,35 @@ export function stereotypePaint(
 }
 
 /**
+ * The stereotype tier of an element's FONT colour: `skinparam <sname>FontColor<<label>>` (`addConFont(sname)`,
+ * FromSkinparamToStyle.java:149,270-283 re-signed at +1000, :292-302,396-408). It colours the element's title AND, by
+ * inheritance of the merged style, its stereotype text; `<sname>StereotypeFontColor<<label>>` and the declaration-order
+ * `stereoTextFontByStereo` refine the stereotype text only (see `ElementColors.stereoTextFontByStereo`). The LAST label
+ * with a value wins, as for {@link stereotypePaint}. `undefined` when no tagged declaration matches.
+ */
+export function stereotypeFontColor(
+  theme: Theme,
+  sname: string,
+  role: 'title' | 'stereotype',
+  stereotypes: readonly string[],
+): string | undefined {
+  const fields =
+    role === 'title'
+      ? (['fontByStereo'] as const)
+      : (['stereoTextFontByStereo', 'stereotypeFontByStereo', 'fontByStereo'] as const);
+  for (const field of fields) {
+    let hit: string | undefined;
+    for (const bucketName of [ANY_ELEMENT_BUCKET, sname]) {
+      const byTag = theme.colors.elements?.[bucketName]?.[field];
+      if (byTag === undefined) continue;
+      for (const label of stereotypes) hit = byTag[cleanStereoKey(label)] ?? hit;
+    }
+    if (hit !== undefined) return hit;
+  }
+  return undefined;
+}
+
+/**
  * Resolve the {@link Paint} for one element's color role, cascading
  * element-specific (SName) bucket → root default (decision D4). Never throws on
  * an unrecognized `sname` — it falls through to the root default.

@@ -12,6 +12,7 @@ import { resolveElementShadowing } from '../../core/theme.js';
 import {
   resolveClusterTitleAlignment,
   resolveElementRoundCorner,
+  stereotypeFontColor,
   stereotypePaint,
 } from '../../core/theme-element-resolve.js';
 import type { Paint } from '../../core/paint.js';
@@ -121,25 +122,27 @@ export interface HeaderOptions {
 }
 
 /** `ClusterHeader.java:197-207`: one centered guillemet line per visible tag, or an empty block. */
-function labelBlock(node: DescriptionNodeGeo, theme: Theme): TextBlock {
+function labelBlock(node: DescriptionNodeGeo, theme: Theme, styleLabels: readonly string[]): TextBlock {
   if (node.stereotype === undefined || node.stereotype.length === 0) return TextBlockUtils.empty(0, 0);
   // `Display.create(visibleStereotypes)` takes the RAW `<<...>>` runs (`CucaDiagram.java:596-602`, DOUBLE_COMPARATOR)
   // and the creole parser's `Guillemet#manageGuillemet` (`CreoleParser.java:175`) turns each into `«x»` -- except a
   // run holding a creole tag (`<< <U+00B5>Service >>`), which its `[^<>]` class rejects and stays literal.
   const raw = rawStereotypeLabels(node.stereotype);
   const lines = node.stereotype.map((label, i) => (raw?.[i] === undefined ? `<<${label}>>` : raw[i]));
-  return buildTextBlock(
-    lines.join('\n'),
-    stereotypeTextFont(theme, node.symbol, node.stereotype, STEREOTYPE_STYLES),
-    HorizontalAlignment.CENTER,
-  );
+  const font = stereotypeTextFont(theme, node.symbol, node.stereotype, STEREOTYPE_STYLES);
+  const color = stereotypeFontColor(theme, node.symbol, 'stereotype', styleLabels);
+  return buildTextBlock(lines.join('\n'), color === undefined ? font : { ...font, color }, HorizontalAlignment.CENTER);
 }
 
 export function buildHeader(node: DescriptionNodeGeo, theme: Theme, options?: HeaderOptions): ClusterHeaderInfo {
   // `ClusterHeader.java:111`: the title font is built with `g.getColors()`, so an inline `text:` colour wins.
   const text = node.color === undefined ? undefined : parseColorOverride(node.color).text;
+  // `<sname>FontColor<<label>>` re-signs the group's style (+1000, `Cluster.java:384-390` signs the stereotype); the
+  // group's own inline `text:` is applied last.
+  const styleLabels = node.styleStereotype ?? node.stereotype ?? [];
   const baseFont = textFont(theme, node.symbol, 0, TITLE_STYLES);
-  const titleFont = text === undefined ? baseFont : { ...baseFont, color: text };
+  const tagged = stereotypeFontColor(theme, node.symbol, 'title', styleLabels);
+  const titleFont = text === undefined && tagged === undefined ? baseFont : { ...baseFont, color: text ?? tagged! };
   // `ClusterHeader.java:117-119` builds the title with the full `Display#create`, so a `<$sprite>` in a
   // group's label measures and draws; the ELK path (cdd8 T3b) also passes `style.getHorizontalAlignment()`.
   const alignment = options?.alignment ?? resolveClusterTitleAlignment(theme, node.symbol);
@@ -156,7 +159,8 @@ export function buildHeader(node: DescriptionNodeGeo, theme: Theme, options?: He
     node.stereotypeSprite,
     options?.sprites === undefined ? undefined : spriteDimsLookupFor(options.sprites),
   );
-  const stereo = sprite === undefined ? labelBlock(node, theme) : buildStereo([], titleFont, undefined, sprite);
+  const stereo =
+    sprite === undefined ? labelBlock(node, theme, styleLabels) : buildStereo([], titleFont, undefined, sprite);
   return { title, stereo, titleHorizontalAlignment: resolveClusterTitleAlignment(theme, node.symbol) };
 }
 

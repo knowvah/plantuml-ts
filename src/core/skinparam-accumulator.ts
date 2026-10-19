@@ -130,7 +130,7 @@ export interface SkinparamAccumulator {
   classBorderThickness: number | undefined;
   classBorderThicknessByStereo: Record<string, number> | undefined;
   /** gtc T3: `skinparam arrow<<tag>> { Color X;line.Bold() }` -- see `skinparam-arrow-stereo.ts`. */
-  descriptionArrowTagCascade: Record<string, { color?: string; thickness?: number }> | undefined;
+  descriptionArrowTagCascade: Record<string, { color?: string; thickness?: number; fontColor?: string }> | undefined;
   /** CDD T6FU: `skinparam classBackgroundColor<<stereo>>` (and the nested
    *  `skinparam class { <<stereo>> { BackgroundColor X } }` form -- one
    *  normalised key, `SkinParam#cleanForKeySlow` java:285-300). Stored RAW
