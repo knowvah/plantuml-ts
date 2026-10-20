@@ -226,6 +226,7 @@ function geometryWithRun(run: TextRun): SequenceGeometry {
     ],
     headHeight: 30,
     lifelineEndY: 90,
+    lifelineSegments: {},
     footerShapeY: 90,
     boxes: [],
     showFootbox: true,

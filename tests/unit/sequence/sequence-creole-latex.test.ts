@@ -141,6 +141,7 @@ describe('scaleRun — the image is a length and scales with the diagram', () =>
       ],
       headHeight: 30,
       lifelineEndY: 90,
+      lifelineSegments: {},
       footerShapeY: 90,
       boxes: [],
       showFootbox: true,

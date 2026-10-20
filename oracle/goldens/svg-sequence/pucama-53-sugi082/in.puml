@@ -1,0 +1,6 @@
+@startuml
+
+Bob -> Alice : synchronous call
+Bob ->> Alice : asynchronous call
+
+@enduml

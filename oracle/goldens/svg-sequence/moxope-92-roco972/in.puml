@@ -1,0 +1,11 @@
+@startuml
+participant Bob
+participant Alice
+
+note right of Alice: <u>underline</u>
+note right of Alice: <b>bold</b>
+note right of Alice: <i>italic</i>
+note right of Alice: <s>strike</s>
+note right of Alice: <b><i>boldItalic
+note right of Alice: <b><i><u>boldItalicUnderline
+@enduml

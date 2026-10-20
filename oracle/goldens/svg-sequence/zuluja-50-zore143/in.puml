@@ -1,0 +1,25 @@
+@startuml
+skinparam sequence {
+    ArrowColor Black
+    ActorBorderColor Black
+    ActorBackgroundColor #BBBBBB
+    LifeLineBorderColor Black
+    LifeLineBackgroundColor #BBBBBB
+    
+    ParticipantBorderColor Black
+    ParticipantBackgroundColor #AAAAAA
+ 
+    BoxBorderColor Black
+ 
+    'ParticipantFontName Impact
+    'ParticipantFontSize 17
+    'ParticipantFontColor #BBBBBB
+    
+    'ActorBackgroundColor aqua
+    'ActorFontColor DeepSkyBlue
+    'ActorFontSize 17
+    'ActorFontName Aapex
+}
+
+Alice -> Bob : hello
+@enduml

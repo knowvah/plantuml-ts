@@ -47,6 +47,7 @@ import { MESSAGE_NUMBER_MARGIN, messageLabelBlock, messageLabelRows, numberTextO
 import { ARROW_DELTA_X, DIAM_CIRCLE } from './sequence-arrowhead.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
 import { sequenceAtomContext, sequenceLabelBlockWidth } from './sequence-creole.js';
+import { messagePaint } from './sequence-arrow-paint.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -229,6 +230,9 @@ function buildExoGeo(event: MessageExoEvent, span: ExoSpan, y: number, ctx: Even
   // component, and is deliberately unchanged by this task.
   const block = messageLabelBlock(event.label, numberTextOf(event), exoLabelLeft(event, span), y, ctx);
   return {
+    // An exo arrow is `ComponentRoseArrow`, never the self component: its
+    // direction is never SELF (`CommunicationExoTile.java:96-98,107`).
+    paint: messagePaint(event.styleBuilder, event.stereotype, event.arrow, false),
     kind: 'message',
     fromX: rightwards ? span.x1 : span.x2,
     toX: rightwards ? span.x2 : span.x1,

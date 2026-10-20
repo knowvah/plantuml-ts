@@ -35,7 +35,7 @@
 import type { ScaleSpec } from '../../core/scale-command.js';
 import type { TextRun } from './text-block-geo.js';
 import type { ParticipantGeo } from './geo-participant.js';
-import type { MessageGeo, ActivationGeo } from './geo-message.js';
+import type { MessageGeo, ActivationGeo, DestroyGeo } from './geo-message.js';
 import type { FrameGeo } from './geo-frame.js';
 import type { NoteGeo, DividerGeo, SpaceGeo, NewpageGeo, BoxGeo, DelayGeo, LifelineSegment } from './geo-annotation.js';
 
@@ -45,7 +45,8 @@ export type * from './geo-message.js';
 export type * from './geo-frame.js';
 export type * from './geo-annotation.js';
 
-export type EventGeo = MessageGeo | NoteGeo | ActivationGeo | FrameGeo | DividerGeo | SpaceGeo | NewpageGeo | DelayGeo;
+export type EventGeo =
+  MessageGeo | NoteGeo | ActivationGeo | DestroyGeo | FrameGeo | DividerGeo | SpaceGeo | NewpageGeo | DelayGeo;
 
 export interface SequenceGeometry {
   totalWidth: number;
@@ -80,11 +81,10 @@ export interface SequenceGeometry {
   /**
    * Each participant's lifeline, by id, cut at every delay
    * (`MutingLine#drawLine`) and started at its `createY` when it was created
-   * (`LivingSpace#drawLineAndLiveboxes`). Present only when the diagram has
-   * a delay or a create; absent means one `PARTICIPANT_LINE` from
-   * `headHeight` to `lifelineEndY` for everyone.
+   * (`LivingSpace#drawLineAndLiveboxes`), every piece carrying its own paint.
+   * One entry per participant, built by `sequence-layout-lifeline.ts`.
    */
-  lifelineSegments?: Readonly<Record<string, readonly LifelineSegment[]>>;
+  lifelineSegments: Readonly<Record<string, readonly LifelineSegment[]>>;
   /**
    * The top of the footbox row: `UTranslate.dy(pageHeight + headHeight)`
    * (`PlayingSpaceWithParticipants.java:225-226`). Equal to `lifelineEndY`

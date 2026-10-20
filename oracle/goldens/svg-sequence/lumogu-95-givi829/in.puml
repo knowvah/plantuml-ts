@@ -1,0 +1,8 @@
+@startuml
+'!preprocessorV2
+
+!function double($a) return $a+$a
+
+
+alice -> bob : expected of 8 is double(%strlen(double("aa")))
+@enduml

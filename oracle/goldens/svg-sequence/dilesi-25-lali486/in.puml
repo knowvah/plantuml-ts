@@ -1,0 +1,6 @@
+@startuml
+!definelong test_me()
+a->b:test
+!enddefinelong
+test_me()
+@enduml

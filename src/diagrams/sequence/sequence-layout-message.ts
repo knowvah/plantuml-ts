@@ -20,6 +20,8 @@ import type { EventCursor, EventProcessingContext } from './sequence-layout-even
 import { activationLevel, emitActivation, openActivation, pushActivation } from './sequence-layout-events.js';
 import { arrowFontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
 import { markCreated, withCreateEnd } from './sequence-layout-create.js';
+import { messageDestroyCrosses } from './sequence-layout-life-event.js';
+import { messagePaint } from './sequence-arrow-paint.js';
 import {
   ARROW_LABEL_HEAD_CLEARANCE,
   ARROW_LABEL_PADDING_X1,
@@ -41,7 +43,8 @@ export function handleMessageEvent(
 
   // `addMessage` sets `lastEventWithDeactivate = m` (`SequenceDiagram.java:
   // 204`); `dealWith` is participant1-or-participant2 membership.
-  ctx.lastMessageParticipants = [event.from, event.to];
+  const participants = [event.from, event.to];
+  ctx.lastMessageParticipants = participants;
 
   const resolved = withCreateEnd(event, resolveMessageEndpoints(event, fromGeo, toGeo, ctx), toGeo);
   const endpoints = liveOffsetEndpoints(resolved, event, ctx, bound);
@@ -63,6 +66,11 @@ export function handleMessageEvent(
 
   cursor.y += tileHeight ?? advance.tileHeight;
 
+  // A self arrow's end point is `getArrowOnlyHeight` below its start
+  // (`ComponentRoseSelfArrow.java:298-307`); a flat arrow's ends share its y.
+  const loop = endpoints.arrowDirection === 'self' ? SELF_ARROW_ONLY_HEIGHT : 0;
+  const arrow = { start: messageGeo.y, end: messageGeo.y + loop, self: loop > 0 };
+  ctx.lastMessageCrosses = { of: participants, crosses: messageDestroyCrosses(event, arrow, bound, ctx) };
   // Handle auto-activate/deactivate via ++ / -- shorthand on message
   applyMessageActivation(event, messageGeo, cursor, ctx);
 }
@@ -193,6 +201,10 @@ function buildMessageGeo(
 ): MessageGeo {
   const block = messageLabelBlock(event.label, numberTextOf(event), labelLeftOf(event, endpoints), y, ctx);
   return {
+    // `message.getUsedStyles()` at tile time (`CommunicationTile.java:163`,
+    // `CommunicationTileSelf.java:106`) over the builder captured at the
+    // command (`AbstractMessage.java:89-97`).
+    paint: messagePaint(event.styleBuilder, event.stereotype, event.arrow, endpoints.arrowDirection === 'self'),
     labelLines: block.lines,
     ...(block.number !== undefined ? { labelNumber: block.number } : {}),
     kind: 'message',

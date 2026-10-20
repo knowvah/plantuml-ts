@@ -1,0 +1,5 @@
+@startuml
+skinparam titleBorderThickness 1
+title My Title
+Bob -> Alice : hello
+@enduml

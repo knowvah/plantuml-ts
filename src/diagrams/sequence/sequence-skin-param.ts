@@ -281,9 +281,9 @@ function mergedStyle(signature: StyleSignature, builder: StyleBuilder): Style {
   return style;
 }
 
-/** `type.getStyleSignature().getMergedStyle(styleBuilder)`. @see ComponentType.java:75-111 */
-export function componentStyle(builder: StyleBuilder, type: SequenceComponentType): Style {
-  return mergedStyle(componentTypeStyleSignature(type), builder);
+/** `type.getStyleSignature().withTOBECHANGED(stereotype).getMergedStyle(b)` (`MutingLine.java:105-106`, `LiveBoxesDrawer.java:140`). @see ComponentType.java:75-111 */
+export function componentStyle(builder: StyleBuilder, type: SequenceComponentType, stereotype?: Stereotype): Style {
+  return mergedStyle(componentTypeStyleSignature(type).withTOBECHANGED(stereotype), builder);
 }
 
 /** `ComponentType.NEWPAGE`, merged in the constructor. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/Newpage.java:48-58 */

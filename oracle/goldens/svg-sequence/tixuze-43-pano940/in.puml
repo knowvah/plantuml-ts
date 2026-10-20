@@ -1,0 +1,10 @@
+@startuml
+!pragma teoz true
+skinparam useBetaStyle true 
+<style>
+arrow {
+  LineThickness 3.5
+}
+</style>
+Alice -> Bob : hello
+@enduml

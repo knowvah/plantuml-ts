@@ -116,6 +116,10 @@ export interface MessageEvent extends AbstractMessageEvent {
   to: string; // participant id
   activates?: string; // participant id to auto-activate (++ shorthand)
   deactivates?: string; // participant id to auto-deactivate (-- shorthand)
+  /** Participant id destroyed by the `!!` shorthand: a `LifeEventType.DESTROY`
+   *  bound to this message (`CommandArrow.java`, `SequenceDiagram.java#activate`).
+   *  sdd1: declared ahead of T3d, which sets and reads it. */
+  destroys?: string;
   /** The extra targets of `A -> B, C, D : msg` — `getMulticasts`
    *  (`CommandArrow.java:139-155`), `msg.setMulticast(...)` at `:404`. */
   multicast?: readonly string[];
@@ -256,7 +260,8 @@ export interface ActivationEvent {
    * upstream could not bind to a message —
    * `LifeEventTile#isDestroyWithoutMessage:124-126` — reserves the cross's own
    * `crossSize * 2` = 18 (`:132-136`, `ComponentRoseDestroy:57,68-70`); every
-   * other life event reserves 0 (`:137`). The cross itself is still not drawn.
+   * other life event reserves 0 (`:137`). The cross, and where the lifeline
+   * stops, are `sequence-layout-life-event.ts`'s.
    */
   destroy?: true;
   /** `LifeEvent`'s builder (`SequenceDiagram.java:371-372`), read per
@@ -346,6 +351,16 @@ export interface BoxGroup {
 export interface SequenceDiagramAST {
   participants: Participant[];
   events: SequenceEvent[];
+  /**
+   * `skinParam.getCurrentStyleBuilder()` read at TILE time, i.e. after every
+   * command and every trailing declaration has executed: the builder a
+   * lifeline (`MutingLine.java:70`, built by `LivingSpace.java:147`) and a
+   * destroy cross (`LiveBoxesDrawer.java:78-81`, `LifeEventTile.java:107-110`)
+   * merge from. Set by `parseSequence`; absent only on an AST built without a
+   * parse, which `layoutSequence` refuses (`sequence-layout-lifeline.ts`).
+   * sdd1 D2.
+   */
+  readonly styleBuilder?: StyleBuilder;
   /**
    * `current`/`start` are `DottedNumber.incrementMinor`'s LAST segment only
    * (`DottedNumber.java:75-79`); `prefix` carries every segment before it

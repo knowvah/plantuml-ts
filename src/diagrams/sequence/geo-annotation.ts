@@ -192,11 +192,12 @@ export interface DelayGeo {
  */
 export interface LifelineSegment {
   /**
-   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
-   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
-   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   * The piece's merged `PARTICIPANT_LINE` / `DELAY_LINE` style with the
+   * participant's stereotype (`MutingLine.java:105-106`), resolved by
+   * `sequence-layout-lifeline.ts`. NOT scaled by `scale-geo`: the jar scales
+   * at emission (`SvgGraphics#format`), see `scale-geo.ts` header.
    */
-  readonly paint?: SequencePaint;
+  readonly paint: SequencePaint;
   y1: number;
   y2: number;
   delay: boolean;

@@ -45,7 +45,7 @@ const PINS: Readonly<Record<string, number>> = {
   'skin-object-reddress': 5,
   'skin-object-sonyxperiadev': 2,
   'skin-sequence-reddress': 5,
-  'skin-sequence-sonyxperiadev': 27,
+  'skin-sequence-sonyxperiadev': 4,
   'skin-state-reddress': 5,
   'skin-state-sonyxperiadev': 2,
   'skin-strictuml': 5,

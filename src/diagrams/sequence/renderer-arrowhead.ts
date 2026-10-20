@@ -62,13 +62,40 @@ import {
 } from './sequence-arrowhead.js';
 import type { ArrowConfiguration, ArrowDressing, HeadGeometry } from './sequence-arrowhead.js';
 import type { ScaledTheme } from './scale-geo.js';
-import { scaledDashPattern } from './scale-geo.js';
+import type { SequencePaint } from './sequence-skin-param.js';
+import { fmt } from '../../core/svg-format.js';
+import type { Paint } from '../../core/paint.js';
+import { niceArrowOf, renderArrowHead } from './renderer-arrowhead-glyph.js';
+import { messagePaintOf } from './sequence-arrow-paint.js';
 
 // ---------------------------------------------------------------------------
 // Paint
 // ---------------------------------------------------------------------------
 
-import { ARROW_THICKNESS, niceArrowOf, paintOf, renderArrowHead } from './renderer-arrowhead-glyph.js';
+/** The `line()` style a shaft stroke takes. */
+interface ShaftStyle {
+  readonly stroke: Paint;
+  readonly strokeWidth: number;
+  readonly strokeDasharray?: string;
+}
+
+/**
+ * A shaft's stroke, from the message's paint: the style's line colour and
+ * thickness and the dash `ArrowConfiguration#applyStroke` resolved
+ * (`sequence-arrow-paint.ts`). Scaled here, at emission, as the jar scales
+ * every width and dash length in `SvgGraphics#setStrokeWidth` (`:555-561`),
+ * the two dash lengths formatted separately and joined with `,` (`:559`).
+ * Shared with the self loop (`renderer-message.ts`).
+ */
+export function shaftStyleOf(paint: SequencePaint, k: number): ShaftStyle {
+  const dash = paint.dash;
+  return {
+    stroke: paint.stroke,
+    strokeWidth: paint.thickness * k,
+    ...(dash !== undefined ? { strokeDasharray: `${fmt(dash[0]! * k)},${fmt(dash[1]! * k)}` } : {}),
+  };
+}
+
 /**
  * `ArrowConfiguration#reverse` — both dressings and both decorations swap,
  * and upstream's constructor call passes EVERY other field straight through:
@@ -234,12 +261,9 @@ export function renderFlatMessageArrow(msg: MessageGeo, configuration: ArrowConf
   const extent = arrowExtent(drawn, lenFull, k);
   const slope = arrowSlope(drawn, lenFull, k);
   const [from, to] = arrowBodyEnds(extent, slope);
-  const body = line(origin.x + from.x, origin.y + from.y, origin.x + to.x, origin.y + to.y, {
-    stroke: theme.colors.arrow,
-    strokeWidth: ARROW_THICKNESS * k,
-    ...(configuration.dashed ? { strokeDasharray: scaledDashPattern(k) } : {}),
-  });
-  return flatArrowHeads(drawn, origin, extent, slope, theme) + body;
+  const paint = messagePaintOf(msg);
+  const body = line(origin.x + from.x, origin.y + from.y, origin.x + to.x, origin.y + to.y, shaftStyleOf(paint, k));
+  return flatArrowHeads(drawn, origin, extent, slope, paint, theme) + body;
 }
 
 /** `drawDressing1` at `(pos1, inclination1)` then `drawDressing2` at
@@ -251,9 +275,9 @@ function flatArrowHeads(
   origin: Point2D,
   extent: ArrowExtent,
   slope: ArrowSlope,
+  paint: SequencePaint,
   theme: ScaledTheme,
 ): string {
-  const paint = paintOf(theme);
   const niceArrow = niceArrowOf(theme);
   const k = theme.scaleK;
   const head1 = renderArrowHead(
@@ -332,7 +356,7 @@ export function renderSelfMessageHead(
     // The returning segment's left end, not the outgoing one's -- they
     // differ by at least a pixel (`MessageGeo.selfReturnX`).
     { x: msg.selfReturnX ?? msg.fromX, y: tipY },
-    paintOf(theme),
+    messagePaintOf(msg),
     theme.scaleK,
   );
 }

@@ -1,0 +1,4 @@
+@startuml
+skinparam defaultFontName Pristina
+Alice -> Bob : hello
+@enduml

@@ -34,9 +34,17 @@ import {
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { scaleSequenceTheme } from '../../../src/diagrams/sequence/scale-geo.js';
+import { paintOfGeo } from '../../../src/diagrams/sequence/sequence-participant-paints.js';
+import type { SequencePaint } from '../../../src/diagrams/sequence/sequence-skin-param.js';
+import type { ParticipantType } from '../../../src/diagrams/sequence/ast.js';
 
 const MEASURER = new DeterministicMeasurer();
 const THEME = scaleSequenceTheme(defaultTheme, 1, MEASURER);
+
+/** The default skin's merged-style paint for `type` (`plantuml.skin`). */
+function paint(type: ParticipantType): SequencePaint {
+  return paintOfGeo({ type });
+}
 
 /** Box wide enough that `dx = (136 - 36) / 2 = 50` and tall enough that the
  *  tail flip's `dy = 66 - 46 = 20` are both integers. */
@@ -45,8 +53,7 @@ const GEO: ParticipantSymbolGeo = {
   y: 59,
   width: 136,
   height: 66,
-  background: '#E2E2F0',
-  border: '#181818',
+  paint: paint('database'),
 };
 
 const ALL_TYPES: readonly SymbolParticipantType[] = [
@@ -63,7 +70,7 @@ function dAttrs(svg: string): string[] {
 }
 
 function draw(type: SymbolParticipantType, head: boolean, geo = GEO, theme = THEME): string {
-  return renderParticipantSymbol(type, geo, { head, display: 'Supporting Actor', theme });
+  return renderParticipantSymbol(type, { ...geo, paint: paint(type) }, { head, display: 'Supporting Actor', theme });
 }
 
 describe('renderParticipantSymbol — database', () => {
@@ -154,47 +161,69 @@ describe('measureParticipantSymbol', () => {
   it('returns asSmall(null, empty(16,17), empty(0,0)) for database', () => {
     // Margin(10,10,24,5) + (16,17) = (36,46) — the dimension the junaxa
     // golden's own path arithmetic independently fixes.
-    expect(measureParticipantSymbol('database', THEME, MEASURER)).toEqual({ width: 36, height: 46 });
+    expect(measureParticipantSymbol('database', paint('database'), THEME, MEASURER)).toEqual({ width: 36, height: 46 });
   });
 
   it('returns the svek drawing dimensions for boundary, control and entity', () => {
     // Boundary.java:97-98 — radius*2 + left + 2*margin, radius*2 + 2*margin.
-    expect(measureParticipantSymbol('boundary', THEME, MEASURER)).toEqual({ width: 49, height: 32 });
+    expect(measureParticipantSymbol('boundary', paint('boundary'), THEME, MEASURER)).toEqual({ width: 49, height: 32 });
     // Control.java:87-88 and EntityDomain.java:74-75 — radius*2 + 2*margin.
-    expect(measureParticipantSymbol('control', THEME, MEASURER)).toEqual({ width: 32, height: 32 });
-    expect(measureParticipantSymbol('entity', THEME, MEASURER)).toEqual({ width: 32, height: 32 });
+    expect(measureParticipantSymbol('control', paint('control'), THEME, MEASURER)).toEqual({ width: 32, height: 32 });
+    expect(measureParticipantSymbol('entity', paint('entity'), THEME, MEASURER)).toEqual({ width: 32, height: 32 });
   });
 
   it('returns USymbolQueue#getMargin for queue', () => {
     // Margin(5,15,5,5) — the extent the label is composed INTO, not a glyph.
-    expect(measureParticipantSymbol('queue', THEME, MEASURER)).toEqual({ width: 20, height: 10 });
+    expect(measureParticipantSymbol('queue', paint('queue'), THEME, MEASURER)).toEqual({ width: 20, height: 10 });
   });
 
   it('returns getDeltaCollection() for collections', () => {
-    expect(measureParticipantSymbol('collections', THEME, MEASURER)).toEqual({ width: 4, height: 4 });
+    expect(measureParticipantSymbol('collections', paint('collections'), THEME, MEASURER)).toEqual({
+      width: 4,
+      height: 4,
+    });
   });
 
   it('is independent of the theme', () => {
     for (const type of ALL_TYPES) {
-      expect(measureParticipantSymbol(type, scaleSequenceTheme(defaultTheme, 3, MEASURER), MEASURER)).toEqual(
-        measureParticipantSymbol(type, THEME, MEASURER),
-      );
+      expect(
+        measureParticipantSymbol(type, paint(type), scaleSequenceTheme(defaultTheme, 3, MEASURER), MEASURER),
+      ).toEqual(measureParticipantSymbol(type, paint(type), THEME, MEASURER));
     }
   });
 });
 
 describe('renderParticipantSymbol — paint and stroke resolution', () => {
-  it('honours a per-element LineThickness override', () => {
-    const theme = scaleSequenceTheme(
-      { ...defaultTheme, colors: { ...defaultTheme.colors, elements: { database: { lineThickness: 3 } } } },
-      1,
-      MEASURER,
+  it('strokes at the paint thickness, which klimt scales at emission', () => {
+    // SvgGraphics.java:468-469 (`format` multiplies by the scale), :556-561.
+    const thick = { ...paint('database'), thickness: 3 };
+    expect(
+      renderParticipantSymbol('database', { ...GEO, paint: thick }, { head: true, display: '', theme: THEME }),
+    ).toContain('stroke-width:3;');
+    const scaled = scaleSequenceTheme(defaultTheme, 2, MEASURER);
+    const svg = renderParticipantSymbol(
+      'database',
+      { ...GEO, paint: thick },
+      { head: true, display: '', theme: scaled },
     );
-    expect(draw('database', true, GEO, theme)).toContain('stroke-width:3;');
+    expect(svg).toContain('stroke-width:6;');
   });
 
-  it('falls back to no fill when the geo carries no colours', () => {
-    const bare: ParticipantSymbolGeo = { x: 100, y: 59, width: 136, height: 66 };
-    expect(draw('database', true, bare)).toContain('<path');
+  it('dashes the stroke when the style names a LineStyle (Style.java:299-320)', () => {
+    const dashed = { ...paint('database'), dash: [5, 3] as const };
+    const svg = renderParticipantSymbol(
+      'database',
+      { ...GEO, paint: dashed },
+      { head: true, display: '', theme: THEME },
+    );
+    expect(svg).toContain('stroke-dasharray:5,3;');
+  });
+
+  it('draws no stroke on a glyph path whose LineColor is transparent, as DriverPathSvg.java:64-68 does', () => {
+    const none = { ...paint('actor'), stroke: '#00000000' };
+    const svg = renderParticipantSymbol('actor', { ...GEO, paint: none }, { head: true, display: '', theme: THEME });
+    const limbs = svg.match(/<path[^>]*>/g) ?? [];
+    expect(limbs).toHaveLength(1);
+    expect(limbs[0]).not.toContain('stroke');
   });
 });

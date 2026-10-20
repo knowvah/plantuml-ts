@@ -9,9 +9,8 @@
 
 import type {
   ActivationEvent,
-  ActivationGeo,
   DelayEvent,
-  DividerEvent,
+  DestroyCross,
   DividerGeo,
   EventGeo,
   FrameEvent,
@@ -25,8 +24,8 @@ import type {
   TextRun,
 } from './ast.js';
 import type { FontSpec } from '../../core/measurer.js';
+import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 import { handleNoteEvent, noteTileExtent } from './sequence-layout-note.js';
-import { DIVIDER_PADDING, DIVIDER_LABEL_DELTA_X, dividerFontSpecOf, dividerPreferredHeight } from './divider-style.js';
 import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
 import { displayLines } from './text-block-geo.js';
 import type { MessageLabelEnv } from './text-block-geo.js';
@@ -44,27 +43,19 @@ import {
   GROUP_FONT_SIZE,
   GROUP_FONT_BOLD,
 } from './frame-style.js';
+import type { ActivationStack } from './sequence-layout-activation.js';
+import { handleActivateEvent, handleDeactivateEvent } from './sequence-layout-life-event.js';
+import { handleDividerEvent } from './sequence-layout-divider.js';
 
-/** Pending activation-bar start record. `level` is 1-based and fixed when
- *  the bar OPENS — upstream's `Step#getIndent` for this bar's steps. */
-type ActivationRecord = { y: number; level: number; color?: string };
-
-/**
- * The open activation bars for one participant, innermost LAST.
- *
- * A STACK, not a single record, because upstream's activation state is a
- * nesting LEVEL: `LiveBoxes#getLevelAtInternal` replays the event list
- * counting `level++` on every activate and `level = Math.max(0, level - 1)`
- * on every deactivate (`:100-108`), and `getStairs` emits one step per level
- * change. `A -> B++` four deep is four boxes, each with its own extent, which
- * one record per participant cannot hold: the inner activate would overwrite
- * the outer one's start.
- *
- * `Math.max(0, ...)` is the other half, and it is why {@link emitActivation}
- * returns on an empty stack instead of inventing a start: a deactivate that
- * arrives at level 0 leaves the level at 0 and draws nothing at all.
- */
-export type ActivationStack = Map<string, ActivationRecord[]>;
+export {
+  activationLevel,
+  emitActivation,
+  flushOpenActivations,
+  newActivationStack,
+  openActivation,
+  pushActivation,
+  type ActivationStack,
+} from './sequence-layout-activation.js';
 
 /**
  * Shared, mutable context threaded through event processing. Grouping these
@@ -95,6 +86,14 @@ export interface EventProcessingContext extends MessageLabelEnv {
    * which are the same answer.
    */
   lastMessageParticipants?: readonly string[] | undefined;
+  /** The destroy crosses a MESSAGE's step yields, by participant
+   *  (`sequence-layout-life-event.ts#messageDestroyCrosses`), valid while
+   *  `of` is still {@link lastMessageParticipants}: an exo message replaces
+   *  that array, and its step draws none (`LiveBoxes.java:218`). */
+  lastMessageCrosses?: { readonly of: readonly string[]; readonly crosses: Map<string, DestroyCross[]> } | undefined;
+  /** The builder the tiles read after the parse: a destroy cross's
+   *  (`LiveBoxesDrawer.java:78-81`, `LifeEventTile.java:107-110`). */
+  endStyleBuilder: StyleBuilder;
   /** Where the walk records each message's two live levels for the
    *  participant row's next pass -- see `sequence-layout-participants.ts
    *  #MessageLevels`. */
@@ -162,6 +161,9 @@ function dispatchEvent(
 ): void {
   switch (event.kind) {
     case 'message':
+      // Every bar this message opens is painted from its builder (see
+      // `sequence-layout-activation.ts`'s head).
+      ctx.activationStart.lastMessageStyleBuilder = event.styleBuilder;
       handleMessageEvent(event, cursor, ctx, bound);
       return;
     // Exo geometry is its own module, never `handleMessageEvent`'s:
@@ -169,6 +171,7 @@ function dispatchEvent(
     // although both of its participants are the same, so the `from === to`
     // reading there would put every exo arrow on a self loop.
     case 'messageExo':
+      ctx.activationStart.lastMessageStyleBuilder = event.styleBuilder;
       handleMessageExoEvent(event, cursor, ctx);
       return;
     case 'note':
@@ -197,52 +200,6 @@ function dispatchEvent(
       return;
   }
 }
-
-function handleActivateEvent(event: ActivationEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
-  // Use the last message arrow y when available so the bar top aligns
-  // with its triggering arrow, not with the post-arrow spacing position.
-  pushActivation(ctx.activationStart, event.participantId, {
-    y: cursor.lastMessageY ?? cursor.y,
-    ...(event.color !== undefined ? { color: event.color } : {}),
-  });
-  cursor.lastMessageY = undefined;
-}
-
-function handleDeactivateEvent(event: ActivationEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
-  // End at the last message arrow y. If that would give zero/negative
-  // height (activate and deactivate at the same y), fall back to
-  // post-spacing cursor.y so the bar is always visible.
-  const deactStartY = openActivation(ctx.activationStart, event.participantId)?.y;
-  const rawEndY = cursor.lastMessageY ?? cursor.y;
-  const deactEndY = deactStartY !== undefined && rawEndY <= deactStartY ? cursor.y : rawEndY;
-  emitActivation(event.participantId, deactEndY, ctx.participantMap, ctx.activationStart, ctx.eventGeos);
-  cursor.lastMessageY = undefined;
-  if (isDestroyWithoutMessage(event, ctx)) cursor.y += DESTROY_CROSS_SIZE * 2;
-}
-
-/**
- * `LifeEventTile#isDestroyWithoutMessage:124-126` — `lifeEvent.getMessage() ==
- * null && lifeEvent.getType() == DESTROY`.
- *
- * `getMessage()` is set only when `SequenceDiagram#activate` reaches its
- * `setMessage` line (`:396-398`), which two earlier guards can skip: a
- * `lastEventWithDeactivate` that does not `dealWith(p)` returns at `:387`, and
- * one that is not an `AbstractMessage` — a group `end`, per `:438` — falls
- * past the `instanceof` test. Both leave the message null, so both make the
- * destroy standalone. `X -> X` followed by `destroy Y` is upstream's own
- * worked example, in the comment above `:387`.
- */
-function isDestroyWithoutMessage(event: ActivationEvent, ctx: EventProcessingContext): boolean {
-  if (event.destroy !== true) return false;
-  return ctx.lastMessageParticipants?.includes(event.participantId) !== true;
-}
-
-/** `ComponentRoseDestroy.crossSize` (`:57`); the component is `crossSize * 2`
- *  on both axes (`:68-70,72-74`), and `LifeEventTile:132-136` reserves that
- *  height for a destroy with no message. The cross itself is not drawn here —
- *  reserving its space is the vertical term; emitting its two strokes is an
- *  element-deficit task. */
-const DESTROY_CROSS_SIZE = 9;
 
 /**
  * Vertical room an `else` separator plus its bracketed condition occupies.
@@ -600,80 +557,6 @@ const FRAME_EXTERNAL_MARGINY = 4;
 const FRAME_MARGINY_MAGIC = 20;
 
 /**
- * `DividerTile` (`teoz/DividerTile.java`) reserves exactly its component's own
- * `getPreferredHeight` and nothing more — tiles stack on `YGauge` with no gap
- * between them — so the cursor advances by that height, not by a spacing.
- *
- * This replaced a fitted `cursor.y += 30` that carried no upstream citation.
- * The label's own box is sized here too, from the SAME measurement, and the
- * renderer only reads it: see `DividerGeo`'s own doc comment.
- *
- * The divider's font is `sequenceDiagram { separator { FontSize 13,
- * FontStyle bold } }` (`plantuml.skin:174-175`), not the diagram font, so it
- * is measured with its own spec.
- */
-/**
- * A divider label's runs, positioned RELATIVE to the label box's own top-left.
- *
- * `ComponentRoseDivider#drawInternalU` draws the block at
- * `(xpos + deltaX, ypos + getOldPaddingY())` (`:75-83,104`), where `deltaX` is
- * 6 and the padding is `topRightBottomLeft(4, 4, 4, 4)`. Both terms are known
- * here; `xpos`/`ypos` are not, because they are centred within a band whose
- * width `backfillDividerWidth` resolves in Step 3 — so these carry the inner
- * offset and that function adds the outer one.
- */
-function dividerLabelRuns(lines: readonly string[], spec: FontSpec, ctx: EventProcessingContext): readonly TextRun[] {
-  const font = sequenceCreoleFont(spec);
-  const lineHeight = ctx.measurer.measure('M', spec).height;
-  const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
-  // C6: one run per creole atom -- a divider's label is an
-  // `AbstractTextualComponent` `Display` like every other sequence label
-  // (`ComponentRoseDivider.java:57-62`); `bakuba-09-fica741` is the last one.
-  return lines.flatMap((line, i) =>
-    sequenceCreoleRuns(
-      line,
-      font,
-      { leftX: DIVIDER_LABEL_DELTA_X, baselineY: DIVIDER_PADDING + ascent + i * lineHeight },
-      ctx.measurer,
-    ),
-  );
-}
-
-function handleDividerEvent(event: DividerEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
-  const font = dividerFontSpecOf(ctx.theme);
-  // `\n` splits the label into a multi-line text block, exactly as it does for
-  // a `ref` body (`text-block-geo.ts#refBodyLines`): the widest line drives the
-  // width and the line COUNT drives the height. Jar-verified on
-  // `pigifu-13-kele137`, whose `== divi\ndummy ==` golden carries a 34-tall
-  // label box (two 13px lines plus the 4+4 padding), not a 21-tall one.
-  const lines = event.text.split('\n');
-  const lineHeight = ctx.measurer.measure('M', font).height;
-  // Relative to the label BOX's own top-left; `backfillDividerWidth` drops
-  // them onto the band once `bandX`/`bandWidth` are known (Step 3), the same
-  // construct-then-resolve split `y`/`branchSeparators` use above. C6: the
-  // reserved width is that CREOLE block's, less the `deltaX` the runs already
-  // carry -- `getTextWidth` reads `calculateDimension`, not the display string.
-  const labelRuns = dividerLabelRuns(lines, font, ctx);
-  const blockWidth = Math.max(0, blockWidthOf(labelRuns) - DIVIDER_LABEL_DELTA_X);
-  const blockHeight = lines.length * lineHeight;
-  const dividerGeo: DividerGeo = {
-    kind: 'divider',
-    text: event.text,
-    lines,
-    y: cursor.y,
-    bandX: 0, // both back-filled once totalWidth is known (Step 3)
-    bandWidth: 0,
-    height: dividerPreferredHeight(blockHeight),
-    textWidth: blockWidth + DIVIDER_PADDING * 2,
-    textHeight: blockHeight + DIVIDER_PADDING * 2,
-    labelRuns,
-  };
-  ctx.eventGeos.push(dividerGeo);
-  ctx.dividerGeos.push(dividerGeo);
-  cursor.y += dividerGeo.height;
-}
-
-/**
  * `DelayTile` (`teoz/DelayTile.java`): the tile reserves its `DELAY_TEXT`
  * component's height -- a bare `...` included, whose `Display.empty()` makes
  * it `0 + 4 + 4 + 20` -- and is laid out, drawn and allowed to cut the
@@ -724,14 +607,6 @@ function handleSpaceEvent(event: SpaceEvent, cursor: EventCursor, ctx: EventProc
 }
 
 /**
- * Resolve participant centerX by id, returning 0 as a safe fallback for
- * participants not in the map (e.g., notes referencing unknown participants).
- */
-function centerXOf(participantMap: Map<string, ParticipantGeo>, id: string): number {
-  return participantMap.get(id)?.centerX ?? 0;
-}
-
-/**
  * Compute the bounding centerX range across all participants.
  * Returns [0, 0] when the map is empty (only possible in degenerate inputs
  * since layoutSequence returns early for empty participants).
@@ -740,101 +615,4 @@ function participantCenterXBounds(participantMap: Map<string, ParticipantGeo>): 
   const centerXs = [...participantMap.values()].map((g) => g.centerX);
   if (centerXs.length === 0) return { minCx: 0, maxCx: 0 };
   return { minCx: Math.min(...centerXs), maxCx: Math.max(...centerXs) };
-}
-
-/**
- * Emit an ActivationGeo for a participant, consuming any pending activation
- * start record. When no record exists, height is 0 (deactivate without prior
- * activate).
- */
-/** Open one activation bar for `participantId`, nested inside any already
- *  open — `level++` in `LiveBoxes#getLevelAtInternal` (`:102-103`). */
-export function pushActivation(
-  activationStart: ActivationStack,
-  participantId: string,
-  record: Omit<ActivationRecord, 'level'>,
-): void {
-  const stack = activationStart.get(participantId);
-  if (stack === undefined) activationStart.set(participantId, [{ ...record, level: 1 }]);
-  else stack.push({ ...record, level: stack.length + 1 });
-}
-
-/** The INNERMOST open activation for `participantId`, or `undefined` at
- *  level 0. */
-export function openActivation(activationStart: ActivationStack, participantId: string): ActivationRecord | undefined {
-  const stack = activationStart.get(participantId);
-  return stack === undefined ? undefined : stack[stack.length - 1];
-}
-
-/** How deep `participantId` is currently activated — upstream's own `level`
- *  (`LiveBoxes#getLevelAt`). 0 when nothing is open. */
-export function activationLevel(activationStart: ActivationStack, participantId: string): number {
-  return activationStart.get(participantId)?.length ?? 0;
-}
-
-/**
- * Close every activation still open when the diagram ends, at the body's
- * bottom.
- *
- * Upstream has nothing to close: the level simply never returns to 0, so
- * `getStairs` (`LiveBoxes.java:245-300`) records its last step at that level
- * and `LiveBoxesDrawer` draws the bar on to the end of the lifeline. This
- * port materialises each bar at its deactivate, so an activation with no
- * deactivate needs the equivalent flush -- without it the bar vanishes.
- *
- * Jar-verified on `micaki-01-rexa741`, whose third `alt` branch opens an
- * activation that is never closed: the golden's second bar ends at `y=190`,
- * exactly where its lifelines do.
- *
- * Innermost first, then outward, then participant by participant in
- * declaration order -- deterministic, and the reverse of the order the walk
- * opened them in.
- */
-export function flushOpenActivations(
-  activationStart: ActivationStack,
-  endY: number,
-  participantMap: Map<string, ParticipantGeo>,
-  eventGeos: EventGeo[],
-): void {
-  for (const participantId of [...activationStart.keys()])
-    while (activationLevel(activationStart, participantId) > 0)
-      emitActivation(participantId, endY, participantMap, activationStart, eventGeos);
-}
-
-export function emitActivation(
-  participantId: string,
-  currentY: number,
-  participantMap: Map<string, ParticipantGeo>,
-  activationStart: ActivationStack,
-  eventGeos: EventGeo[],
-): void {
-  const record = activationStart.get(participantId)?.pop();
-  // A deactivate with nothing open draws NOTHING -- not a zero-height box.
-  //
-  // Upstream never tracks "the open activation": it recomputes a nesting
-  // LEVEL per participant by replaying the event list, and every deactivate
-  // is clamped -- `level = Math.max(0, level - 1)`
-  // (`LiveBoxes#getLevelAtInternal:104-108`, and again at `:136-141` for the
-  // future-deactivate lookahead). A deactivate that arrives at level 0 leaves
-  // it at 0, so `getStairs` records no step and `LiveBoxesDrawer` draws no
-  // box. This port models that level as one open record per participant, and
-  // "no record" IS level 0.
-  //
-  // Without this, `rugeco-70-muro754` emitted a fourth activation -- `a`
-  // deactivated twice, once by `a ->> b --++`'s own `--` and once by the
-  // standalone `deactivate a` after the group -- as a `height: 0` bar that
-  // the renderer then wrapped in a `<g>`, one surplus top-level child
-  // against a golden this port otherwise matched element for element.
-  if (record === undefined) return;
-  const startY = record.y;
-  const activationGeo: ActivationGeo = {
-    kind: 'activation',
-    participantId,
-    lifelineX: centerXOf(participantMap, participantId),
-    y: startY,
-    height: currentY - startY,
-    level: record.level,
-    ...(record.color !== undefined ? { color: record.color } : {}),
-  };
-  eventGeos.push(activationGeo);
 }

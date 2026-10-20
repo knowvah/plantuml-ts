@@ -1,0 +1,6 @@
+@startuml
+skinparam NoteFontColor<<red>> red
+participant A
+participant B
+note<<red>> over A, B : test
+@enduml

@@ -1,0 +1,9 @@
+@startuml
+!pragma teoz true
+alice->bob:v1
+bob->chloe:v2
+note across
+  foo
+  dummy
+end note
+@enduml

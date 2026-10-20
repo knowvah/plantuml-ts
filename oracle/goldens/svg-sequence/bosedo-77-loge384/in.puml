@@ -1,0 +1,5 @@
+@startuml
+bob -> alice : 12345
+bob -> alice : こんにちわ
+bob <- alice : さようなら
+@enduml

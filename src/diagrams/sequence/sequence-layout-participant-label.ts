@@ -14,27 +14,26 @@
 import type { Participant, ParticipantBadge, ParticipantGeo, TextRun } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
-import { resolveBareOrBackColor } from '../../core/color-override.js';
-import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
-import { fontSpecOf } from './sequence-layout-shared.js';
-import {
-  sequenceAtomContext,
-  sequenceCreoleFont,
-  sequenceCreoleRuns,
-  type SequenceAtomContext,
-} from './sequence-creole.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import type { StringMeasurer } from '../../core/measurer.js';
+import type { SequencePaint } from './sequence-skin-param.js';
+import { paintOfGeo, participantPaintsOf } from './sequence-participant-paints.js';
+import { sequenceAtomContext, sequenceCreoleRuns, type SequenceAtomContext } from './sequence-creole.js';
 import {
   parseCircledCharDecoration,
   parseCircledSpriteDecoration,
   resolveBadgeRadius,
   splitStereotypeLabels,
-  splitStereotypeStyleTags,
   wrapGuillemet,
 } from '../../core/stereotype-decoration.js';
-import { cleanStereotypeToken } from '../../core/style-map-element.js';
-import { participantBadgeGeo, participantLabelCy } from './sequence-layout-participant-sizing.js';
+import {
+  participantBadgeGeo,
+  participantLabelCy,
+  participantLabelMetricsOf,
+} from './sequence-layout-participant-sizing.js';
 import { displayLines } from './text-block-geo.js';
+import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { getSpriteMonochrome } from '../../core/sprite-registry.js';
 import { spriteToPngDataUri, spriteMonochromeAsLike } from '../../core/klimt/sprite/sprite-raster.js';
@@ -71,28 +70,11 @@ function stereotypeInner(raw: string): string {
 }
 
 /**
- * The visible stereotype label, or undefined when the resolved style hides it.
- *
- * `AbstractTextualComponent`'s constructor runs the display through
- * `Display#withoutStereotypeIfNeeded(style)` (`:84`), which strips the
- * stereotype only on an explicit `ShowStereotype false` -- an unset value is
- * `ValueNull` and keeps it (`Display.java:127-136`). `theme.colors
- * .showStereotypeByTag` carries exactly the tags that declared the property,
- * so an absent entry is upstream's absent value; `resolveStyleCascade` cleans
- * the token, so the lookup key is the raw `<<tag>>` de-guillemeted here.
+ * The visible stereotype labels; none when the merged style hides them
+ * (`sequence-participant-paints.ts#ParticipantPaints.showStereotype`).
  */
-export function visibleStereotypeLines(p: Participant, theme: Theme): readonly string[] {
-  if (p.stereotype === undefined) return [];
-  const byTag = theme.colors.showStereotypeByTag;
-  if (byTag !== undefined) {
-    // The style tags are the chunk labels with any BADGE spec stripped and
-    // regardless of bracket count (`splitStereotypeStyleTags`), NOT the raw
-    // run: `<< ($APIGateway, #CC2264) APIGateway >>` matches `.APIGateway`.
-    // Cleaned through `cleanStereotypeToken`, which is what
-    // `collectStyleTagNames` keys the map by.
-    const tags = splitStereotypeStyleTags(stereotypeInner(p.stereotype)).map(cleanStereotypeToken);
-    if (tags.some((t) => byTag[t] === false)) return [];
-  }
+export function visibleStereotypeLines(p: Participant): readonly string[] {
+  if (p.stereotype === undefined || !participantPaintsOf(p).showStereotype) return [];
   return stereotypeLabels(p.stereotype);
 }
 
@@ -123,20 +105,36 @@ interface LabelRow {
   readonly ascent: number;
 }
 
-/** A head's rows, measured. Callers pass them in DRAW order -- the visible
- *  stereotype labels, then the display's own lines -- and the box's width, its
- *  height and its placed runs all come from this ONE list: a disagreement
- *  between any two is text overhanging its own box. */
-export function labelRows(
-  rows: readonly string[],
-  spec: FontSpec,
-  ctx: ParticipantLayoutCtx,
-  backColor?: Paint,
-): readonly LabelRow[] {
-  const font = sequenceCreoleFont(spec);
-  const atomContext = labelAtomContext(ctx, backColor);
+/** One head row before measurement: its text and the font it is set in. */
+export interface HeadRow {
+  readonly text: string;
+  readonly font: FontConfiguration;
+}
+
+/**
+ * A head's rows in DRAW order: the visible stereotype labels in the
+ * stereotype font, then the display's own lines in the name font
+ * (`Display#createStereotype` -> `getCreole(fc, ..., stereotypeConfiguration)`,
+ * `Display.java:671-689`).
+ */
+export function headRowsOf(
+  stereotypeLines: readonly string[],
+  display: string,
+  fonts: { readonly font: FontConfiguration; readonly stereoFont: FontConfiguration },
+): readonly HeadRow[] {
+  return [
+    ...stereotypeLines.map((text) => ({ text, font: fonts.stereoFont })),
+    ...displayLines(display).map((text) => ({ text, font: fonts.font })),
+  ];
+}
+
+/** A head's rows, measured. The box's width, its height and its placed runs
+ *  all come from this ONE list: a disagreement between any two is text
+ *  overhanging its own box. */
+export function labelRows(rows: readonly HeadRow[], ctx: ParticipantLayoutCtx, backColor?: Paint): readonly LabelRow[] {
   return rows.map((row) => {
-    const runs = sequenceCreoleRuns(row, font, { leftX: 0, baselineY: 0 }, ctx.measurer, atomContext);
+    const atomContext = labelAtomContext(ctx, row.font, backColor);
+    const runs = sequenceCreoleRuns(row.text, row.font, { leftX: 0, baselineY: 0 }, ctx.measurer, atomContext);
     const last = runs.at(-1);
     return {
       runs,
@@ -145,55 +143,6 @@ export function labelRows(
       ascent: Math.max(0, ...runs.map((r) => r.textAscent)),
     };
   });
-}
-
-/**
- * The box's fill, in `Participant#getUsedStyles`' own precedence: the
- * participant's inline `#color` overrides the merged style
- * (`eventuallyOverride(getColors())`, `Participant.java:88`), which itself
- * comes from the kind's signature `root, element, sequenceDiagram, <kind>`
- * (`ParticipantType.java:55-80`) -- so the `<style>` bucket key IS the
- * participant kind. Falls back to the theme's own background.
- *
- * A bucket value is a raw `parseColor` result: a plain NAME still needs
- * HColorSet resolution, a Gradient is already a `Paint` and passes through
- * (the same two cases `class/renderer-note.ts#resolveNoteBackground`
- * handles).
- */
-export function resolveParticipantBackground(p: Participant, theme: Theme): Paint {
-  const inline = resolveBareOrBackColor(p.color);
-  if (inline !== undefined) return resolveColorToSvgHex(inline);
-  const bucket = theme.colors.elements?.[p.type]?.background;
-  // `participantBackgroundColor<<X>>` (`FromSkinparamToStyle.java:272,
-  // 290-296` tokenises the key on `<>`): the stereotype-scoped tier sits
-  // above the bare bucket, keyed like `state-render-colors.ts
-  // #resolveStateBackgroundByStereo`. `p.stereotype` carries its guillemets
-  // (`sequence-parse-helpers.ts`), so strip them before the lookup.
-  const byStereo = theme.colors.elements?.[p.type]?.backgroundColorByStereo;
-  if (byStereo !== undefined && p.stereotype !== undefined) {
-    const scoped =
-      byStereo[
-        p.stereotype
-          .replace(/^<<|>>$/g, '')
-          .trim()
-          .toLowerCase()
-      ];
-    if (scoped !== undefined) return resolveColorToSvgHex(scoped);
-  }
-  // Not the canvas: `plantuml.skin:197-201` scopes the heads' grey-blue to
-  // `sequenceDiagram { }` and the jar keeps them there under `skinparam
-  // backgroundColor` (`ColorParam.background` and the participant style are
-  // separate). See `Theme.colors.participantBackground`.
-  if (bucket === undefined) return theme.colors.participantBackground;
-  return typeof bucket === 'string' ? resolveColorToSvgHex(bucket) : bucket;
-}
-
-/** The box's stroke -- the same cascade, minus the inline override, which
- *  `participant X #color` only ever sets the BACKGROUND with. */
-export function resolveParticipantBorder(p: Participant, theme: Theme): Paint {
-  const bucket = theme.colors.elements?.[p.type]?.border;
-  if (bucket === undefined) return theme.colors.border;
-  return typeof bucket === 'string' ? resolveColorToSvgHex(bucket) : bucket;
 }
 
 /**
@@ -236,11 +185,10 @@ function badgeFor(
   //
   // The START is `ug.getParam().getBackcolor()`, i.e. whatever the box is
   // filled with, so the sprite blends into it. Sourced from the same
-  // expression `renderParticipantBox` paints the box with, so a box-fill
-  // divergence is inherited once rather than doubled (`birocu-87-xubi808`:
-  // the jar fills `#FF0` from `<style> participant { BackgroundColor }`,
-  // which this port routes to neither). Passing these two the other way
-  // round tints every sprite toward the theme's TEXT colour.
+  // value `renderParticipantBox` paints the box with -- the merged style's
+  // `BackGroundColor` (`birocu-87-xubi808`: `#FF0` from `<style> participant
+  // { BackgroundColor }`). Passing these two the other way round tints every
+  // sprite toward the TEXT colour.
   const png = spriteToPngDataUri(
     spriteMonochromeAsLike(sprite),
     deco.color,
@@ -278,14 +226,22 @@ export function anyBadgeFor(
   return badgeFor(p, ctx.sprites, background) ?? charBadgeFor(p, ctx.theme);
 }
 
+/** `HColorSet#parseColor("transparent")`'s SVG form: a transparent font
+ *  colour reaches the bridge as `null` (`FontConfigurationBridge.ts`). */
+const TRANSPARENT_SVG = '#00000000';
+
 /**
  * What a head's creole needs to draw `<$sprite>`/`<img>` atoms (cdd7 T1f):
- * the diagram's sprites and the head's font colour, which `AtomSprite` tints
+ * the diagram's sprites and the row's font colour, which `AtomSprite` tints
  * a monochrome sprite with (`StripeSimple.java:228-235`). `undefined` with no
  * registry -- the pre-T1f whole-line literal, unchanged.
  */
-function labelAtomContext(ctx: ParticipantLayoutCtx, backColor: Paint | undefined): SequenceAtomContext | undefined {
-  return sequenceAtomContext(ctx.sprites, ctx.theme.colors.text, backColor);
+function labelAtomContext(
+  ctx: ParticipantLayoutCtx,
+  font: FontConfiguration,
+  backColor: Paint | undefined,
+): SequenceAtomContext | undefined {
+  return sequenceAtomContext(ctx.sprites, font.color ?? TRANSPARENT_SVG, backColor);
 }
 
 /**
@@ -314,6 +270,32 @@ function translateRun(run: TextRun, dx: number, baselineY: number): TextRun {
 }
 
 /**
+ * The name block's horizontal centre. `ComponentRoseParticipant` draws the
+ * text block at `padding.getTranslate()` inside the FRONT rectangle, which is
+ * `getTextWidth` wide (`ComponentRoseParticipant.java:101-111,118`), so
+ * the block spans `[x + left, x + width - delta - right]` -- `delta` being
+ * `getDeltaCollection()` (`:121-126`). Every other kind keeps its column
+ * centre.
+ */
+function nameCenterX(p: ParticipantGeo, paint: SequencePaint): number {
+  if (p.type !== 'participant' && p.type !== 'collections') return p.centerX;
+  const delta = p.type === 'collections' ? COLLECTIONS_DELTA : 0;
+  const left = p.x + paint.padding.getLeft();
+  return (left + p.x + p.width - delta - paint.padding.getRight()) / 2;
+}
+
+/**
+ * A row's left edge in a block centred on `cx`, by the style's
+ * `HorizontalAlignment` (`AbstractTextualComponent.java:81,89-92`): the
+ * sheet aligns each stripe inside the block's widest one.
+ */
+function rowLeft(rowWidth: number, cx: number, blockWidth: number, align: HorizontalAlignment | undefined): number {
+  if (align === HorizontalAlignment.LEFT) return cx - blockWidth / 2;
+  if (align === HorizontalAlignment.RIGHT) return cx + blockWidth / 2 - rowWidth;
+  return cx - rowWidth / 2;
+}
+
+/**
  * A participant head's label, as placed and measured runs (A3, C4).
  * `birocu-87-xubi808` box 1 is the reference: box x=55.575 w=107.363 y=46
  * h=42, `«APIGateway»` at x=62.575 w=93.363 baseline 63.889, `OnlyLabel` at
@@ -325,26 +307,32 @@ function translateRun(run: TextRun, dx: number, baselineY: number): TextRun {
  *      `y += height` per stripe (`SheetBlock1.java:139-142`).
  *   2. A row's BASELINE is its own line box's top plus its measured ascent:
  *      row centre 60 gives `60 - 14/2 + 10.889 = 63.889`, 74 gives 77.889.
- *   3. A row's LEFT edge is `cx - width / 2` (D4) — the centre stays the
- *      authoritative anchor and no left edge is stored. C4: `width` is the
- *      ROW's, so a row of several runs is centred as one block.
+ *   3. A row's LEFT edge is its alignment inside the block ({@link rowLeft});
+ *      centred by default (`plantuml.skin:199`). C4: `width` is the ROW's,
+ *      so a row of several runs moves as one block.
  *
- * `hide stereotype` is resolved upstream (`visibleStereotypeLines`), so an
- * absent row is simply an absent entry.
+ * `p` is the painted box (`participantBoxOf`); `stereoFont` is
+ * `ParticipantPaints.stereoFont` (`sequence-participant-paints.ts`). `hide stereotype` is resolved
+ * upstream (`visibleStereotypeLines`), so an absent row is an absent entry.
  */
-export function buildLabelRuns(p: ParticipantGeo, ctx: ParticipantLayoutCtx): readonly TextRun[] {
-  const { theme } = ctx;
-  const spec = fontSpecOf(theme);
-  const rows = labelRows([...(p.stereotypeLines ?? []), ...displayLines(p.display)], spec, ctx, labelBackColor(p));
-  const cx = participantBadgeGeo(p.badge, p.x, p.width, theme)?.nameCx ?? p.centerX;
+export function buildLabelRuns(
+  p: ParticipantGeo,
+  ctx: ParticipantLayoutCtx,
+  stereoFont: FontConfiguration,
+): readonly TextRun[] {
+  const paint = paintOfGeo(p);
+  const fonts = { font: paint.font, stereoFont };
+  const rows = labelRows(headRowsOf(p.stereotypeLines ?? [], p.display, fonts), ctx, labelBackColor(p));
+  const cx = participantBadgeGeo(p.badge, p.x, p.width, paint.padding)?.nameCx ?? nameCenterX(p, paint);
   // The block is centred on `cy`, and the rows stack from its top downward.
-  const cy = participantLabelCy(p.type, p.height, p.y, true, theme);
+  const cy = participantLabelCy(p.type, p.height, p.y, true, participantLabelMetricsOf(paint));
+  const blockWidth = Math.max(0, ...rows.map((r) => r.width));
   let top = cy - rows.reduce((h, r) => h + r.height, 0) / 2;
   const placed: TextRun[] = [];
   for (const row of rows) {
-    // D4, over the ROW: every run of a row shifts by ONE dx, so the row is
-    // centred as a block and the runs keep the spacing the seam gave them.
-    const dx = cx - row.width / 2;
+    // D4, over the ROW: every run of a row shifts by ONE dx, so the row moves
+    // as a block and the runs keep the spacing the seam gave them.
+    const dx = rowLeft(row.width, cx, blockWidth, paint.align);
     const y = top + row.ascent;
     for (const run of row.runs) placed.push(translateRun(run, dx, y));
     top += row.height;

@@ -1,0 +1,11 @@
+@startuml
+'!preprocessorV2
+
+!function id($text1, $text2 = "default")
+!return $text1 + $text2
+!endfunction
+
+
+alice -> bob : id("aa")
+alice -> bob : id("ab", "cd")
+@enduml

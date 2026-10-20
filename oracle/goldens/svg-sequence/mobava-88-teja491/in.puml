@@ -1,0 +1,8 @@
+@startuml
+
+participant IT
+participant FKM
+
+FKM-->IT:The system <b>displays</b> all action this user has done in list with fields
+
+@enduml

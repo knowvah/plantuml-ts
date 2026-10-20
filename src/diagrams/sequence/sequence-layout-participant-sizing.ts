@@ -20,7 +20,9 @@
 import type { ParticipantBadge, ParticipantType } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
+import type { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 import { measureParticipantSymbol } from './renderer-participant-symbol.js';
+import type { SequencePaint } from './sequence-skin-param.js';
 
 /**
  * `ComponentRoseDatabase`'s constructor passes
@@ -31,9 +33,9 @@ import { measureParticipantSymbol } from './renderer-participant-symbol.js';
  * (`AbstractTextualComponent.java:106-108`). `getTextHeight` adds
  * `padding.getTop() + padding.getBottom()`, which is 0 here (`:110-114`).
  *
- * This is NOT `theme.sequence.participantPadding`: that knob is this port's
- * own plain-participant-box padding, and upstream's database component has a
- * padding of its own that no skinparam feeds.
+ * This is NOT the style's `Padding`: `ComponentRoseParticipant` alone reads
+ * that (`Rose.java:134`); the glyph components pass their own constant, which
+ * no skinparam feeds.
  */
 const DB_TEXT_PADDING_X = 3;
 
@@ -67,8 +69,8 @@ const DB_TEXT_PADDING_X = 3;
 export function symbolPreferredWidth(
   type: ParticipantType,
   blockWidth: number,
+  paint: SequencePaint,
   theme: Theme,
-  shadow: number,
   measurer: StringMeasurer,
 ): number | undefined {
   switch (type) {
@@ -77,12 +79,9 @@ export function symbolPreferredWidth(
     case 'boundary':
     case 'control':
     case 'entity':
-      return Math.max(
-        measureParticipantSymbol(type, theme, measurer, shadow).width,
-        blockWidth + DB_TEXT_PADDING_X * 2,
-      );
+      return Math.max(measureParticipantSymbol(type, paint, theme, measurer).width, blockWidth + DB_TEXT_PADDING_X * 2);
     case 'queue':
-      return measureParticipantSymbol('queue', theme, measurer).width + blockWidth;
+      return measureParticipantSymbol('queue', paint, theme, measurer).width + blockWidth;
     default:
       return undefined;
   }
@@ -92,13 +91,13 @@ export function symbolPreferredWidth(
  *  height to `getTextHeight()`, which is the text block plus a vertical
  *  padding of 0 for the four stacked kinds
  *  (`ComponentRoseDatabase.java:62-63,:96-99`) and the queue margin's own
- *  5 + 5 for `queue` (`USymbolQueue.java:131`). `shadow` reaches only the
- *  actor glyph's own dimension (`ActorStickMan.java:121`). */
+ *  5 + 5 for `queue` (`USymbolQueue.java:131`). The paint's stroke and shadow
+ *  reach only the actor glyph's own dimension (`ActorStickMan.java:116-122`). */
 export function symbolPreferredHeight(
   type: ParticipantType,
   blockHeight: number,
+  paint: SequencePaint,
   theme: Theme,
-  shadow: number,
   measurer: StringMeasurer,
 ): number | undefined {
   switch (type) {
@@ -108,7 +107,7 @@ export function symbolPreferredHeight(
     case 'control':
     case 'entity':
     case 'queue':
-      return measureParticipantSymbol(type, theme, measurer, shadow).height + blockHeight;
+      return measureParticipantSymbol(type, paint, theme, measurer).height + blockHeight;
     default:
       return undefined;
   }
@@ -127,20 +126,49 @@ export function symbolPreferredHeight(
 // built.
 
 /** `getDeltaCollection()` -- how far the FRONT rectangle of a `collections`
- *  stack is pushed down and in (`ComponentRoseParticipant.java:114-124`). */
+ *  stack is pushed down and in (`ComponentRoseParticipant.java:121-126`). */
 const COLLECTIONS_LABEL_DELTA = 4;
 
 /**
+ * What {@link participantLabelCy} reads, in the caller's units (layout: k = 1;
+ * render: every length already multiplied by `scaleK`, as `SvgGraphics#format`
+ * scales at emission, `SvgGraphics.java:468-469`). `Theme` satisfies it.
+ */
+export interface ParticipantLabelMetrics {
+  /** The name font's size (`AbstractComponent#getFontConfiguration`, `AbstractComponent.java:129-131`). */
+  readonly fontSize: number;
+  readonly scaleK?: number;
+  /** `ComponentRoseParticipant`'s padding top/bottom (`Rose.java:134`); 0 when absent. */
+  readonly padTop?: number;
+  readonly padBottom?: number;
+}
+
+/** A participant paint's {@link ParticipantLabelMetrics}, scaled by `k`. */
+export function participantLabelMetricsOf(paint: SequencePaint, k = 1): ParticipantLabelMetrics {
+  return {
+    fontSize: paint.font.size * k,
+    scaleK: k,
+    padTop: paint.padding.getTop() * k,
+    padBottom: paint.padding.getBottom() * k,
+  };
+}
+
+/**
  * Where a participant's label block is CENTRED vertically, per the
- * composition its `ComponentRose*` uses.
+ * composition its `ComponentRose*` uses. `blockTopY`/`height` are the painted
+ * box's for `participant` and `collections` (`participantBoxOf`), the block's
+ * for the glyph kinds.
  *
+ * - `participant` draws the text block at `padding.getTranslate()` inside its
+ *   rectangle (`ComponentRoseParticipant.java:118`), so the block spans
+ *   `[top + padTop, top + height - padBottom]`.
+ * - `collections` does the same inside the FRONT rectangle, which
+ *   `ComponentRoseParticipant#drawInternalU:109` has already pushed down
+ *   by `getDeltaCollection() = 4`.
  * - `queue` puts the text INSIDE the glyph: `ComponentRoseQueue`'s constructor
  *   passes `getTextBlock()` as `USymbols.QUEUE.asSmall`'s label, and
  *   `USymbolQueue#getMargin()` is `Margin(5,15,5,5)`, so the text's vertical
  *   centre is the block's own centre.
- * - `collections` puts it inside the FRONT rectangle, which
- *   `ComponentRoseParticipant#drawInternalU:95` has already pushed down by
- *   `getDeltaCollection() = 4`.
  * - the glyph-above-text kinds (`database`, `boundary`, `control`, `entity`)
  *   put it below the glyph at the head and above it at the tail
  *   (`ComponentRoseDatabase.java:81-87`) -- which is why this is NOT a
@@ -151,21 +179,31 @@ export function participantLabelCy(
   height: number,
   blockTopY: number,
   head: boolean,
-  theme: Theme & { readonly scaleK?: number },
+  metrics: ParticipantLabelMetrics,
 ): number {
+  const k = metrics.scaleK ?? 1;
+  if (kind === 'participant') return paddedCentreY(blockTopY, height, metrics);
   if (kind === 'queue') return blockTopY + height / 2;
   if (kind === 'collections') {
-    return blockTopY + COLLECTIONS_LABEL_DELTA + (height - COLLECTIONS_LABEL_DELTA) / 2;
+    const delta = COLLECTIONS_LABEL_DELTA * k;
+    return paddedCentreY(blockTopY + delta, height - delta, metrics);
   }
-  const labelYOffset = theme.fontSize / 2 + 4 * (theme.scaleK ?? 1);
+  const labelYOffset = metrics.fontSize / 2 + 4 * k;
   return head ? blockTopY + height - labelYOffset : blockTopY + labelYOffset;
+}
+
+/** The centre of `[top + padTop, top + height - padBottom]`. */
+function paddedCentreY(top: number, height: number, metrics: ParticipantLabelMetrics): number {
+  const padTop = metrics.padTop ?? 0;
+  return top + padTop + (height - padTop - (metrics.padBottom ?? 0)) / 2;
 }
 
 /**
  * `TextBlockSprited#drawU` -- the badge draws at the block origin and the
  * label block is translated right by `sprite.width + 6.0` (`:70-77`). So the
  * badge sits at the box's left padding and the name block centres in what is
- * left, which is exactly the box layout sized it for.
+ * left, which is exactly the box layout sized it for. `padding` is the
+ * merged style's (`Rose.java:134`), in the caller's units.
  *
  * Jar-verified on `birocu-87-xubi808`: box x=172.938 w=177.363 with a 64-wide
  * image gives image x=179.938 (`x + 7`) and a name block centred on 296.62 --
@@ -178,12 +216,12 @@ export function participantBadgeGeo(
   badge: ParticipantBadge | undefined,
   x: number,
   width: number,
-  theme: Theme,
+  padding: Pick<ClockwiseTopRightBottomLeft, 'getLeft' | 'getRight'>,
+  k = 1,
 ): { readonly x: number; readonly nameCx: number } | undefined {
   if (badge === undefined) return undefined;
-  const pad = theme.sequence.participantPadding;
-  const badgeX = x + pad;
-  return { x: badgeX, nameCx: (badgeX + badge.width + BADGE_GAP + (x + width - pad)) / 2 };
+  const badgeX = x + padding.getLeft() * k;
+  return { x: badgeX, nameCx: (badgeX + badge.width + BADGE_GAP + (x + width - padding.getRight() * k)) / 2 };
 }
 
 /** `TextBlockSprited`'s own gap between the sprite and the label block

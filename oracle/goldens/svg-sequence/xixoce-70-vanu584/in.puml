@@ -1,0 +1,19 @@
+@startuml
+'!preprocessorV2
+
+!function id($text)
+!return $text
+!endfunction
+
+!function id($text1, $text2)
+!return $text1 + $text2
+!endfunction
+
+!function id($text1, $text2)
+!return $text1 + $text2
+!endfunction
+
+
+alice -> bob : id("aa")
+alice -> bob : id("ab", "cd")
+@enduml

@@ -1,0 +1,9 @@
+@startuml
+!pragma teoz true
+participant Bob
+participant Alice
+Bob -> Alice : Hello
+activate Alice
+note over Alice : Decides not\nto answer
+deactivate Alice
+@enduml

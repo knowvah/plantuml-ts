@@ -1,0 +1,9 @@
+@startuml
+'!preprocessorV2
+!define ijk foo
+Alice -> Bob : A
+!if ijk == "foo"
+Alice -> Bob : yes
+!endif
+Alice -> Bob : B
+@enduml

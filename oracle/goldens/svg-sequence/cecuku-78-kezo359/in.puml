@@ -1,0 +1,11 @@
+@startuml
+skinparam useBetaStyle true
+<style>
+note {
+  fontColor red
+}
+</style>
+participant A
+participant B
+note over A, B : test
+@enduml

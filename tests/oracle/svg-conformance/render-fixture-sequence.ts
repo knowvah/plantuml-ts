@@ -62,6 +62,7 @@ import { isEmpty } from '../../../src/core/annotations/index.js';
 import { applyExportedChrome } from '../../../src/core/annotations/chrome-export.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg } from '../../../src/index.js';
+import { seedOfUmlSource } from '../../../src/core/assemble-svg.js';
 
 /** `renderFixtureSequence`'s own options bag: `PreprocessOptions` (forwarded
  *  to `buildBlockUmls`) UNION `ParseOptions` (`assetStore`, forwarded to
@@ -117,10 +118,22 @@ export function renderFixtureSequence(
   const geo = layoutSequence(ast, theme, measurer);
   const fragment = renderSequence(geo, theme, measurer);
 
+  // sdd1 close-b2 (journal row 40): seed every `<linearGradient>`/`<filter>`
+  // id as production does -- `src/index.ts` passes `seedOfUmlSource(
+  // umlSource)` to `assembleSvg` (upstream `UmlSource#seed()`,
+  // `SvgGraphics.java:160-162`); the activity harness mirrors it the same
+  // way (`render-fixture-activity.ts`). Unseeded, 8 fixtures read conformant
+  // in the survey and diverged here on `@id` alone.
+  const seed = seedOfUmlSource({
+    lines: first.source.lines,
+    rawSourceLines: first.rawSource.map((s) => s.getString()),
+    seedSourceLines: first.seedSource,
+  });
+
   const annotations = ast.annotations;
-  if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
+  if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment, seed);
 
   const styles = resolveAnnotationStyles(theme, preprocessed, styleMap);
   const chromed = applyExportedChrome(fragment, annotations, styles, measurer, ast.sprites);
-  return assembleSvg(chromed);
+  return assembleSvg(chromed, seed);
 }

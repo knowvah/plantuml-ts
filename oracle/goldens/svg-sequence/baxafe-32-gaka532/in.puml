@@ -1,0 +1,13 @@
+@startuml
+
+<style>
+element {
+  BackGroundColor #AAA
+}
+</style>
+
+participant Alice
+participant Bob
+Alice -> Bob : hello1
+
+@enduml

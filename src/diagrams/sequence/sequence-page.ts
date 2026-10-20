@@ -55,6 +55,7 @@
 
 import type {
   ActivationGeo,
+  DestroyGeo,
   DelayGeo,
   LifelineSegment,
   NewpageEvent,
@@ -75,6 +76,7 @@ import { noneDisplayPositioned, singleDisplayPositioned } from '../../core/annot
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { VerticalAlignment } from '../../core/klimt/geom/VerticalAlignment.js';
 import { ARROW_DELTA_Y } from './sequence-arrowhead.js';
+import { DESTROY_CROSS_SIZE } from './sequence-layout-life-event.js';
 
 // ---------------------------------------------------------------------------
 // The band
@@ -258,6 +260,17 @@ function clipNewpage(n: NewpageGeo, band: PageBand): NewpageGeo | undefined {
   return { ...n, y: shift(band, n.y) };
 }
 
+/**
+ * A destroy: its y moves with the page; a cross survives only whole. Each
+ * stroke is diagonal, and `UClip#getClippedLine` keeps a line that is not
+ * vertical or horizontal only when BOTH ends are inside (`UClip.java:
+ * 128-142`); the two strokes span the same rows.
+ */
+function clipDestroy(d: DestroyGeo, band: PageBand): DestroyGeo {
+  const kept = d.crosses.filter((c) => inBand(band, c.y) && inBand(band, c.y + 2 * DESTROY_CROSS_SIZE));
+  return { ...d, y: shift(band, d.y), crosses: kept.map((c) => ({ ...c, y: shift(band, c.y) })) };
+}
+
 /** A `space` reserves height and emits no ink, so there is nothing for a
  *  clip to trim; it is carried through translated. */
 function shiftSpace(s: SpaceGeo, band: PageBand): SpaceGeo {
@@ -306,6 +319,8 @@ function clipEvent(event: EventGeo, band: PageBand): EventGeo | undefined {
       return clipNote(event, band);
     case 'activation':
       return clipActivation(event, band);
+    case 'destroy':
+      return clipDestroy(event, band);
     case 'frame':
       return clipFrame(event, band);
     case 'divider':
@@ -379,7 +394,7 @@ export function paginateSequence(geo: SequenceGeometry, pageIndex: number): Sequ
     ...geo,
     events: geo.events.map((e) => clipEvent(e, band)).filter((e): e is EventGeo => e !== undefined),
     lifelineEndY,
-    ...(geo.lifelineSegments !== undefined ? { lifelineSegments: clipLifelines(geo.lifelineSegments, band) } : {}),
+    lifelineSegments: clipLifelines(geo.lifelineSegments, band),
     footerShapeY,
     totalHeight,
     // `dolls.drawEnglobers` is handed `body.calculateDimension().getHeight()

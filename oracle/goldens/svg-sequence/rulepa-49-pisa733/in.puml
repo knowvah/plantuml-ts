@@ -1,0 +1,5 @@
+@startuml
+!pragma teoz true
+participant Bob as "Long Bob" [[http://www.google.com]]
+Bob -> Alice : hello  [[http://www.yahoo.com]]
+@enduml

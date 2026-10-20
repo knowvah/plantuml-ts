@@ -15,9 +15,10 @@
  * Pins are `[colour diffs, all diffs]`. Non-zero entries are OTHER, theme-
  * independent gaps (each reproduces with no `!theme`; see
  * `.agent-notes/unwind2-S5.md`): `root { Margin }` unread by class/
- * mindmap (usecase reads it since codd-T4: the description exporter margin); sequence lifelines ignore `root { LineColor }` and
- * `SequenceLifeLineBorderColor`; sequence ignores `root { LineThickness /
- * RoundCorner }` and participant/arrow font skinparams (reddress, mars); the
+ * mindmap (usecase reads it since codd-T4: the description exporter margin);
+ * sequence still ignores the arrow label font skinparams (reddress, mars;
+ * sdd1 T3d) — its lifelines, participants and `root { LineThickness /
+ * RoundCorner }` read the merged Style since sdd1 T2a/T2f; the
  * usecase actor label ignores `root { FontColor }`; class-reddress is the
  * counter rule between two NARROWER selectors (`classAttributeFontColor`
  * after `classFontColor`), which `style-root-shadowing.ts` does not cover.
@@ -53,14 +54,14 @@ const PINS: Readonly<Record<string, readonly [number, number]>> = {
   'mindmap-style-before': [0, 42],
   'mindmap-style-root': [0, 0],
   'mindmap-theme-only': [0, 42],
-  'sequence-mars': [8, 24],
-  'sequence-reddress': [14, 108],
-  'sequence-skinparam-after': [2, 87],
-  'sequence-skinparam-before': [2, 87],
-  'sequence-style-after': [2, 87],
-  'sequence-style-before': [2, 87],
-  'sequence-style-root': [2, 17],
-  'sequence-theme-only': [2, 87],
+  'sequence-mars': [2, 3],
+  'sequence-reddress': [4, 50],
+  'sequence-skinparam-after': [0, 0],
+  'sequence-skinparam-before': [0, 0],
+  'sequence-style-after': [0, 0],
+  'sequence-style-before': [0, 0],
+  'sequence-style-root': [0, 0],
+  'sequence-theme-only': [0, 0],
   'usecase-skinparam-after': [2, 17],
   'usecase-skinparam-before': [2, 17],
   'usecase-style-after': [2, 17],

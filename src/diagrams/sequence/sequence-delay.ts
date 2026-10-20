@@ -36,15 +36,16 @@ const DELAY_HEIGHT_ALLOWANCE = 20;
 const DELAY_PADDING_Y = 4;
 /** `delay { FontSize 11 }` (`plantuml.skin:300-305`). */
 export const DELAY_FONT_SIZE = 11;
-/** `delay { LineStyle 1-4 }` (`plantuml.skin:304`). */
-export const DELAY_LINE_DASH = 1;
-export const DELAY_LINE_GAP = 4;
 
 /** A `[y1, y2]` span on the y axis -- upstream's `Segment`. */
-interface Span {
+export interface Span {
   readonly y1: number;
   readonly y2: number;
 }
+
+/** One `MutingLine#drawInternal` call's span and type, before its style is
+ *  resolved (`sequence-layout-lifeline.ts`). */
+export type LinePiece = Pick<LifelineSegment, 'y1' | 'y2' | 'delay'>;
 
 function delayFontSpec(theme: Theme): FontSpec {
   return { family: theme.fontFamily, size: DELAY_FONT_SIZE };
@@ -135,9 +136,9 @@ export function delaySpansOf(events: readonly EventGeo[]): Span[] {
  * piece (`:96-97`), which is how two back-to-back delays leave no solid
  * line between them.
  */
-export function lifelineSegments(start: number, end: number, delays: readonly Span[]): LifelineSegment[] {
+export function lifelineSegments(start: number, end: number, delays: readonly Span[]): LinePiece[] {
   const sorted = [...delays].sort((a, b) => a.y1 - b.y1);
-  const out: LifelineSegment[] = [];
+  const out: LinePiece[] = [];
   const push = (y1: number, y2: number, delay: boolean): void => {
     if (y2 !== y1) out.push({ y1, y2, delay });
   };
@@ -150,23 +151,6 @@ export function lifelineSegments(start: number, end: number, delays: readonly Sp
   }
   push(y, end, false);
   return out;
-}
-
-/**
- * Every participant's pieces: `LivingSpace#drawLineAndLiveboxes`
- * (`teoz/LivingSpace.java:150-167`) draws the line from `aliveSince` -- the
- * create y, else 0 (this port's `headHeight`). The field is absent when no
- * participant needs more than the one plain line.
- */
-export function lifelineSegmentsByParticipant(
-  participants: readonly ParticipantGeo[],
-  headHeight: number,
-  end: number,
-  delays: readonly Span[],
-): { lifelineSegments?: Record<string, LifelineSegment[]> } {
-  if (delays.length === 0 && participants.every((p) => p.createY === undefined)) return {};
-  const pieces = participants.map((p) => [p.id, lifelineSegments(p.createY ?? headHeight, end, delays)] as const);
-  return { lifelineSegments: Object.fromEntries(pieces) };
 }
 
 /** `DelayTile#getMaxX` (`:126-129`), `middle + preferredWidth / 2`, maxed

@@ -1,0 +1,4 @@
+@startuml
+newpage
+A -> B : A Message 
+@enduml

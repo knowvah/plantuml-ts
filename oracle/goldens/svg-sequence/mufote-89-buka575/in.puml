@@ -1,0 +1,5 @@
+@startuml
+skinparam titleFontSize 17
+title test
+Bob -> Alice : ok
+@enduml

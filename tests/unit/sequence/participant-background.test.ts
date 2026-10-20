@@ -19,7 +19,9 @@ import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../src/index.js';
 
 const JAR_PARTICIPANT_FILL = '#E2E2F0';
-const HEAD_RECT = /<rect [^>]*stroke="#[0-9A-Fa-f]+"[^>]*>/g;
+/** A head rectangle as the jar writes it: stroke in `style`
+ *  (`SvgGraphics#styleMe`, `SvgGraphics.java:624-640`). */
+const HEAD_RECT = /<rect [^>]*style="stroke:#[0-9A-Fa-f]+;[^>]*>/g;
 
 function headFills(source: string): string[] {
   const svg = renderSync(source);

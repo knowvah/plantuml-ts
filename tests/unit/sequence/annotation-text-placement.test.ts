@@ -100,8 +100,12 @@ describe('renderer.ts emits no anchored text at all (D3)', () => {
     // visible line in a diff, where an attribute buried in an options object
     // is not.
     const src = readFileSync(join(ROOT, 'src/diagrams/sequence/renderer.ts'), 'utf8');
-    expect(src).toContain("import { rect, line, noteBox } from '../../core/svg.js';");
+    expect(src).toContain("import { line } from '../../core/svg.js';");
     expect(/^import \{[^}]*\btext\b[^}]*\} from/m.test(src)).toBe(false);
+    // T2e split the note and box drawing out; the rule follows them.
+    const notes = readFileSync(join(ROOT, 'src/diagrams/sequence/renderer-note.ts'), 'utf8');
+    expect(notes).toContain("import { path, rect } from '../../core/svg.js';");
+    expect(/^import \{[^}]*\btext\b[^}]*\} from/m.test(notes)).toBe(false);
   });
 
   it('emits neither anchor across every fixture these four sites appear in', () => {
@@ -158,11 +162,12 @@ describe('note bodies through creole (C6)', () => {
     const bold = svg.indexOf('>bold</text>');
     expect(bold).toBeGreaterThan(-1);
     // The jar's own box for this note runs 86.163..131.163 x 85..108
-    // (`test-results/dot-cache/sequence/moxope-92-roco972/in.svg`; the same
-    // vertices in the polygon's own order). 131.163 - 86.163 = 45 =
-    // (int) (24.619 + 6 + 15): `ComponentRoseNote.java:70-72` pads 6 + 15, and
-    // the box starts `getPaddingX` (5) right of its tile (`NoteTile#getX`).
-    const box = /<path d="M86\.163,85 L121\.163,85 L131\.163,95 L131\.163,108 L86\.163,108 Z"/;
+    // (`test-results/dot-cache/sequence/moxope-92-roco972/in.svg`, byte for
+    // byte: `Opale.getPolygonNormal`'s own vertex order, `Opale.java:152-157`).
+    // 131.163 - 86.163 = 45 = (int) (24.619 + 6 + 15):
+    // `ComponentRoseNote.java:70-72` pads 6 + 15, and the box starts
+    // `getPaddingX` (5) right of its tile (`NoteTile#getX`).
+    const box = /<path d="M86\.163,85 L86\.163,108 L131\.163,108 L131\.163,95 L121\.163,85 L86\.163,85"/;
     expect(box.test(svg)).toBe(true);
     expect(textFor(svg, 'bold')['textLength']).toBe('24.619');
   });

@@ -1,0 +1,18 @@
+@startuml
+skinparam useBetaStyle true
+<style>
+participant {
+  BackgroundColor AntiqueWhite/Gold
+  clickable {
+     BackgroundColor red
+     LineColor green
+  }
+}
+</style>
+
+participant Alice
+participant Bob [[foo]]
+Alice -> Bob : hello
+'url of Bob is [[foo]]
+
+@enduml

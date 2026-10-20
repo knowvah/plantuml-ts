@@ -1,0 +1,7 @@
+@startuml
+Dummy -> Alice : foo1
+ref over Alice, Dummy : Foo2
+
+Alice -> Bob : hello
+
+@enduml

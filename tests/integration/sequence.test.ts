@@ -263,16 +263,26 @@ describe('theme variants', () => {
     expect(svg).toContainText('Courier New, monospace');
   });
 
-  it('Partial<Theme> override — custom border color appears in SVG', () => {
-    // colors must be the full object (not a partial) due to exactOptionalPropertyTypes
-    const svg = renderSync(BASIC_PUML, {
+  it('Partial<Theme> border override no longer reaches a participant (sdd1 D5)', () => {
+    // Participant paint is style-owned since sdd1 T2a: it comes from the
+    // merged `participant` Style, as the jar draws it, never from
+    // `theme.colors.border`. The jar's route is `skinparam
+    // participantBorderColor` (FromSkinparamToStyle).
+    const viaTheme = renderSync(BASIC_PUML, {
       measurer: testMeasurer,
       theme: {
         colors: { ...defaultTheme.colors, border: '#FF0000' },
       },
     });
-    expect(svg).toBeValidSvg();
-    expect(svg).toContainText('#F00');
+    expect(viaTheme).toBeValidSvg();
+    expect(viaTheme).not.toContainText('#F00');
+    const viaSkinparam = renderSync(
+      BASIC_PUML.replace('@startuml', '@startuml\nskinparam participantBorderColor #FF0000'),
+      {
+        measurer: testMeasurer,
+      },
+    );
+    expect(viaSkinparam).toContainText('stroke:#F00;');
   });
 
   // The `!theme` line sits INSIDE the block: `@start…@end` is split before the

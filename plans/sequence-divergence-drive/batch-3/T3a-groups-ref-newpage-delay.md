@@ -34,8 +34,29 @@ ComponentRoseNewpage,ComponentRoseDelayLine,ComponentRoseDelayText}.java`.
 ## Write-set
 `src/diagrams/sequence/{renderer,frame-style,renderer-frame-header,
 renderer-frame-blotter,ref-body-geo,newpage-style,sequence-delay}.ts`, their
-tests under `tests/unit/sequence/`. Delete `frame-style.ts` /
+tests under `tests/unit/sequence/` Added 2026-10-20 (journal row 23): the geo
+builders for your family, which no batch-3 task otherwise owns:
+`sequence-layout-events.ts` (frame and newpage geo only),
+`sequence-layout-ref.ts`, and `layout.ts` (newpage geo only). Delete `frame-style.ts` /
 `newpage-style.ts` if nothing is left in them.
+
+## Updates from batch 1b (journal rows 16-20)
+- Group and reference HEADERS resolve: `groupingStyle(b, type, true,
+  backColor?)` and `referenceStyle(b, true)` layer the nested
+  `group { header }` / `reference { header }` with
+  `Style#mergeNestedChildOver` (T1d). The reference header's
+  `BackGroundColor` override (`Reference.java:99-101`) is yours to apply.
+- Each `else` branch has its own builder: `FrameEvent.branchStyleBuilders`,
+  aligned with `branchLabels` (`SequenceDiagram.java:431-432`,
+  `ElseTile.java:98`).
+
+## From T3b (journal row 38)
+- `ref-body-geo.ts:130` reads `theme.colors.graph.sequenceShadowing?.reference`;
+  read the reference style's shadowing instead (`ComponentRoseReference.java:
+  155-159`), the same value as `frame.paint.shadowing`.
+- `sequence-shadow.ts#frameShadowDelta` falls back to the theme while
+  `FrameGeo.paint` is unset. Once you paint every frame (group body, ref
+  body), that branch is dead; say so in your hand-back so T3c deletes it.
 
 ## Read-set
 `family-contract.md`; `decisions.md#d1`, `#d2`, `#d5`; the write-set files;

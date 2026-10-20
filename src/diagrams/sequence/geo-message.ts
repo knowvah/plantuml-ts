@@ -124,3 +124,52 @@ export interface ActivationGeo {
    */
   open?: { closeUp: boolean; closeDown: boolean };
 }
+
+/**
+ * Where one `ComponentRoseDestroy` cross is drawn, and by whom. The two
+ * strokes span `2 * crossSize` from the top-left corner (`ComponentRoseDestroy
+ * .java:57,63-64`).
+ */
+export interface DestroyCross {
+  x: number;
+  y: number;
+  /**
+   * `tile`: a destroy bound to no message draws its own cross in the
+   * foreground pass (`LifeEventTile#drawU`, `teoz/LifeEventTile.java:112-122`).
+   * `liveboxes`: one bound to a message is drawn in the lifeline pass from
+   * that message's step (`LiveBoxes.java:374-396,398-420`).
+   */
+  drawnBy: 'tile' | 'liveboxes';
+  /**
+   * Which `LiveBoxes` pass draws a `liveboxes` cross: 0 is `drawDestroys`,
+   * after every bar of its participant (`LiveBoxes.java:387-396`), for a step
+   * at indent 0; `L` is `drawOneLevel(L)`, right after the level-`L` bar the
+   * step closes (`:409-417`). Always 0 for a `tile` cross. A COUNT: not
+   * scaled.
+   */
+  level: number;
+}
+
+/**
+ * A `destroy` life event (`LifeEventType.DESTROY`), as laid out: where its
+ * participant's lifeline stops, and the crosses upstream draws for it.
+ */
+export interface DestroyGeo {
+  /**
+   * `ComponentType.DESTROY`'s merged style from the end-of-parse builder, no
+   * stereotype (`LiveBoxesDrawer.java:78-81`, `LifeEventTile.java:107-110`).
+   * NOT scaled by `scale-geo`: the jar scales at emission (`SvgGraphics
+   * #format`), see `scale-geo.ts` header.
+   */
+  readonly paint: SequencePaint;
+  kind: 'destroy';
+  participantId: string;
+  /**
+   * The tile's gauge min, where `onGaugeResolved` calls `goDestroy(y)`
+   * (`LifeEventTile.java:65-72`): the lifeline stops here
+   * (`LivingSpace.java:151-165`).
+   */
+  y: number;
+  /** Empty where upstream draws none (`sequence-layout-life-event.ts`). */
+  crosses: readonly DestroyCross[];
+}

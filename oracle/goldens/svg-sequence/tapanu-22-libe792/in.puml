@@ -1,0 +1,4 @@
+@startuml
+!$foo = "John"
+Alice -> Bob : Do you know $foo ?
+@enduml

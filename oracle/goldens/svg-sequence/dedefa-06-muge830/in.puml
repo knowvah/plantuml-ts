@@ -1,0 +1,10 @@
+@startuml
+Alice -> Bob: message()
+
+skinparam noteBackgroundColor blue
+skinparam noteBackgroundColor<<myStyle>> red
+
+note<<myStyle>> over Alice
+... note text
+end note
+@enduml

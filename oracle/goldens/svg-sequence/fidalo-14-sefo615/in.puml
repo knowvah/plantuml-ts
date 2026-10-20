@@ -1,0 +1,5 @@
+@startuml
+'!preprocessorV2
+Alice -> Bob : 2 expected %strpos("abcdef", "cd")
+!assert %strpos("abcdef", "cd")
+@enduml

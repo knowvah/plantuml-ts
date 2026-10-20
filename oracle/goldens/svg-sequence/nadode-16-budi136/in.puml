@@ -1,0 +1,7 @@
+@startuml
+Bob -> Alice
+Bob /- Alice
+Alice -\ Bob
+Alice -/ Bob
+Bob \- Alice
+@enduml

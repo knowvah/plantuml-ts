@@ -8,8 +8,9 @@
  * layout→render boundary, mirroring `json/renderer.ts` — `scale-geo.ts`
  * scales `SequenceGeometry` and `Theme.fontSize` as pure data BEFORE this
  * module ever sees them, and every OTHER local pixel-literal constant this
- * file owns (`ACTIVATION_HALF_WIDTH`, `SELF_LOOP_WIDTH`/`HEIGHT`,
- * `BOX_LABEL_FONT_SIZE`/`PADDING`, and the small inline offsets throughout)
+ * file owns (`ACTIVATION_HALF_WIDTH`, `SELF_LOOP_WIDTH`/`HEIGHT`, and the
+ * small inline offsets throughout; a style paint's lengths in
+ * `renderer-note.ts`)
  * is scaled at its point of use via the `ScaledTheme.scaleK` this module
  * threads everywhere `theme` already flowed. See `scale-geo.ts`'s header
  * for the full rationale and the jar measurements this replaces (a
@@ -18,16 +19,7 @@
  * `SvgGraphics.java:1035-1051`, is for embedded sprites only).
  */
 
-import type {
-  BoxGeo,
-  SequenceGeometry,
-  EventGeo,
-  ActivationGeo,
-  NoteGeo,
-  FrameGeo,
-  NewpageGeo,
-  DelayGeo,
-} from './ast.js';
+import type { SequenceGeometry, EventGeo, FrameGeo, NewpageGeo, DelayGeo } from './ast.js';
 import { DELAY_FONT_SIZE } from './sequence-delay.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
@@ -35,16 +27,15 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 // No `text` import: D3 -- every `<text>` this file emits goes through
 // `sequenceText`, and dropping the direct import is what makes that
 // structural rather than a convention.
-import { rect, line, noteBox } from '../../core/svg.js';
+import { line } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import { REFERENCE_FONT_SIZE, type TextRun } from './text-block-geo.js';
-import { NOTE_FONT_SIZE } from './sequence-layout-shared.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { fmt } from '../../core/svg-format.js';
 import { renderMessage } from './renderer-message.js';
 import { renderParticipantBox, renderFooterBox } from './renderer-participant-shapes.js';
-import { renderLifelinePass } from './renderer-lifeline.js';
+import { lifelineOf, renderDestroyCrosses, renderLifelinePass, type LiveboxItem } from './renderer-lifeline.js';
 import { renderFrameBlotter } from './renderer-frame-blotter.js';
 import { renderGroupingHeaderBackground, renderGroupingHeaderForeground } from './renderer-frame-header.js';
 import { GROUP_FONT_SIZE, GROUP_FONT_BOLD } from './frame-style.js';
@@ -53,7 +44,8 @@ import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
 import { paginateSequence } from './sequence-page.js';
 import { SEQUENCE_DOCUMENT_MARGIN } from '../../core/document-margin.js';
-import { sequenceShadowDefs, withNoteShadow } from './sequence-shadow.js';
+import { sequenceShadowDefs } from './sequence-shadow.js';
+import { renderBoxBackground, renderNote } from './renderer-note.js';
 import { NEWPAGE_DASH_UNIT, NEWPAGE_LINE_COLOR, NEWPAGE_LINE_THICKNESS, NEWPAGE_MARGIN_Y } from './newpage-style.js';
 
 /**
@@ -86,34 +78,6 @@ export function creoleRunText(run: TextRun, theme: ScaledTheme, fontSize: number
     // (`sequence-text.ts#SequenceRunImage`, `AtomMath.java:78-97`).
     ...(run.image !== undefined ? { image: run.image } : {}),
   });
-}
-
-// ---------------------------------------------------------------------------
-// Note helpers
-// ---------------------------------------------------------------------------
-
-function renderNote(note: NoteGeo, theme: ScaledTheme): string {
-  const fill = note.color ?? theme.colors.noteBackground;
-  const { x, y, width: w, height: h } = note;
-  const strokeWidth = 1.5 * theme.scaleK;
-  // T13: `rnote`/`hnote` (`NoteEvent.shape`) draw as a plain rectangle,
-  // never the folded-corner `note` shape -- see `ast.ts`'s `NoteEvent.shape`
-  // doc comment for the hexagon-vs-rectangle scope cut.
-  const noteShape = withNoteShadow(
-    note.shape === 'rect'
-      ? rect(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth })
-      : noteBox(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth }),
-    note.shadow ?? 0,
-  );
-  // A5: placed and measured in layout (D1). The block is LEFT-aligned at the
-  // box's padding -- `ComponentRoseNoteBox#drawInternalU:105` translates it by
-  // `(getOldPaddingX1() + diffX / 2, getOldPaddingY())` -- where this used to
-  // centre it with a `text-anchor`, and its line advance is now the MEASURED
-  // line height where it used to be a `fontSize * 1.4` ratio. C6: one run per
-  // creole atom, at `note { FontSize 13 }` (`plantuml.skin:312-316`) scaled,
-  // the same spec layout measured the box with.
-  const textEls = note.textRuns.map((run) => creoleRunText(run, theme, NOTE_FONT_SIZE * theme.scaleK)).join('');
-  return noteShape + textEls;
 }
 
 // ---------------------------------------------------------------------------
@@ -290,6 +254,10 @@ function renderForeground(event: Exclude<EventGeo, FrameGeo>, theme: ScaledTheme
   switch (event.kind) {
     case 'message':
       return renderMessage(event, theme);
+    case 'destroy':
+      // Only an unbound destroy's own tile draws here (`LifeEventTile
+      // #drawU:112-122`); `LiveBoxes` draws the rest in step 2.
+      return renderDestroyCrosses(event, 'tile', theme);
     case 'activation':
     // Drawn in the lifeline pass (step 2), not here -- see the comment
     // there and `LivingSpace#drawLineAndLiveboxes`.
@@ -318,25 +286,6 @@ function renderDelayText(delay: DelayGeo, theme: ScaledTheme): string {
  *  `drawUInternal` both drawBackground/drawForeground share. */
 function renderEventPass(events: readonly EventGeo[], theme: ScaledTheme, isBackground: boolean): string[] {
   return events.map((event) => renderEvent(event, theme, isBackground));
-}
-
-// ---------------------------------------------------------------------------
-// Box background helpers
-// ---------------------------------------------------------------------------
-
-const BOX_DEFAULT_COLOR = '#EEEEEE';
-/** See `layout.ts#boxLabelRun`, which measures at this same size and owns
- *  the divergence note for it. */
-const BOX_LABEL_FONT_SIZE = 11;
-
-function renderBoxBackground(box: BoxGeo, theme: ScaledTheme): string {
-  const k = theme.scaleK;
-  const fill = box.color !== '' ? box.color : BOX_DEFAULT_COLOR;
-  const boxRect = rect(box.x, box.y, box.width, box.height, {
-    fill,
-    stroke: theme.colors.border,
-  });
-  return boxRect + box.labelRuns.map((run) => creoleRunText(run, theme, BOX_LABEL_FONT_SIZE * k)).join('');
 }
 
 // ---------------------------------------------------------------------------
@@ -459,9 +408,8 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
   children.push(
     renderLifelinePass(
       scaledGeo.participants,
-      scaledGeo.events.filter((e): e is ActivationGeo => e.kind === 'activation'),
-      (p) =>
-        scaledGeo.lifelineSegments?.[p.id] ?? [{ y1: scaledGeo.headHeight, y2: scaledGeo.lifelineEndY, delay: false }],
+      scaledGeo.events.filter((e): e is LiveboxItem => e.kind === 'activation' || e.kind === 'destroy'),
+      (p) => lifelineOf(scaledGeo.lifelineSegments, p),
       scaledTheme,
     ),
   );

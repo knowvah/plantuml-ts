@@ -1,0 +1,11 @@
+@startuml
+rotate
+
+Bob -> Alice : hello1
+Bob -> Alice : hello2
+Bob -> Alice : hello3
+Bob -> Alice : hello4
+Bob -> Alice : hello5
+Bob -> Alice : hello6
+
+@enduml

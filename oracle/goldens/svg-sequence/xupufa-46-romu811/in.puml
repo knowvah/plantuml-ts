@@ -1,0 +1,9 @@
+@startuml
+
+Alice -> Bob: ok
+
+ref over Alice
+  A
+end
+ref over Bob : this is very long
+@enduml

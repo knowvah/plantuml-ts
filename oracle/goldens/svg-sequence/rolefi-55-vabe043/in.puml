@@ -1,0 +1,5 @@
+@startuml
+participant A
+participant B
+A -> B : ABcdef gh 1666
+@enduml

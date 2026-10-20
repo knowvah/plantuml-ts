@@ -1,0 +1,4 @@
+@startuml
+Alice -> Bob : this is\
+ on several line
+@enduml

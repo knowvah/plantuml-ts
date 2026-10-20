@@ -28,6 +28,7 @@ import type {
   SpaceGeo,
 } from '../../../src/diagrams/sequence/ast.js';
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
+import { wholeLifelines } from '../../helpers/sequence-source.js';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -39,7 +40,7 @@ const LIFELINE_END = 500;
 /** A geometry with one head row of `HEAD_HEIGHT`, body ending at
  *  `LIFELINE_END`, and whatever events the case needs. */
 function geo(events: EventGeo[], overrides?: Partial<SequenceGeometry>): SequenceGeometry {
-  return {
+  const base: Omit<SequenceGeometry, 'lifelineSegments'> = {
     totalWidth: 400,
     totalHeight: 560,
     participants: [
@@ -66,6 +67,8 @@ function geo(events: EventGeo[], overrides?: Partial<SequenceGeometry>): Sequenc
     boxes: [],
     ...overrides,
   };
+  const ids = base.participants.map((p) => p.id);
+  return { lifelineSegments: wholeLifelines(ids, base.headHeight, base.lifelineEndY), ...base };
 }
 
 function newpage(y: number): NewpageGeo {

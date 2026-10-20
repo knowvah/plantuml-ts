@@ -1,0 +1,12 @@
+@startuml
+skinparam NoteBackgroundColor green
+skinparam NoteFontColor red
+skinparam NoteFontSize 30
+skinparam NoteBackgroundColor<<test>> yellow
+skinparam NoteFontColor<<test>> blue
+skinparam NoteFontSize<<test>> 50
+
+Bob -> Alice : hello
+note over Bob: test note 1
+note<<test>> over Bob: test note 2
+@enduml

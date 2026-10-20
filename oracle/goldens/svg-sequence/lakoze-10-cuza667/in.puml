@@ -1,0 +1,4 @@
+@startuml
+Bob -> Alice : default\non two different lines
+Bob -> Alice : very very long message
+@enduml

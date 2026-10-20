@@ -1,0 +1,7 @@
+@startuml
+skinparam shadowing false
+'!preprocessorV2
+!define ijk 123
+Alice -> Bob : ijk
+' Some comment
+@enduml

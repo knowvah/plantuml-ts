@@ -1,0 +1,5 @@
+@startuml
+/' 1 '/      ABC -> DEF   :  This is message 1
+             GHI -> JKL   :  This is message 2
+/' 2 '/      MNO -> PQR   :  This is message 3
+@enduml

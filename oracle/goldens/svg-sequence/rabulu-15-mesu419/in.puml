@@ -1,0 +1,12 @@
+@startuml
+!unquoted procedure $f($x)
+title $x
+!endprocedure
+
+$f(xxxx\
+ddada\
+ok\
+)
+a->b
+
+@enduml

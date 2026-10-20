@@ -33,7 +33,7 @@ import { newLifeState } from './sequence-life-state.js';
 import { removeEmptyColumns } from './remove-empty-columns.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 import type { UmlSource } from '../../core/block-extractor.js';
-import { createSequenceStyleDispatch, executeDeclarationsBefore } from './sequence-skin-param.js';
+import { createSequenceStyleDispatch, currentStyleBuilder, executeDeclarationsBefore } from './sequence-skin-param.js';
 
 // ---------------------------------------------------------------------------
 // Line-dispatch helpers
@@ -436,7 +436,9 @@ export function parseSequence(source: UmlSource, options?: ParseOptions): Sequen
 
   applyHideStereotype(state.ast);
   applyHideUnlinked(state.ast);
-  return state.ast;
+  // The builder the tiles read after the parse (`MutingLine.java:70`,
+  // `LiveBoxesDrawer.java:78-81`), every declaration above executed.
+  return { ...state.ast, styleBuilder: currentStyleBuilder(state.style) };
 }
 
 /** A fresh {@link ParseState} over `source`'s style sources. */

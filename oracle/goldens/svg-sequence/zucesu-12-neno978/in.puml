@@ -1,0 +1,12 @@
+@startuml
+legend top
+Some legend.
+end legend
+
+right header
+<size:50>HEADER
+end header
+
+
+A -> B
+@enduml

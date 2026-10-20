@@ -124,9 +124,9 @@ Measurement (sequence has NO DOT gate — it never emits `svek-N.dot`):
 |---|---|---|---|---|
 | [0](batch-0/overview.md) | branch, b0, classifier, ledger; pin tool | T0a, T0b | both ∥ | [x] |
 | [1](batch-1/overview.md) | style seam module (D1/D2/D4) | T1a | — | [x] |
-| [1b](batch-1b/overview.md) | parser capture + `UmlSource` (D3); geo paint fields; `mergeNestedChildOver` port — no-op seam | T1b, T1c, T1d | all ∥ | [ ] |
-| [2](batch-2/overview.md) | families: participant, lifeline, arrow, divider, note+box; pin round 1 | T2a–T2e, close | all ∥ | [ ] |
-| [3](batch-3/overview.md) | groups/ref/newpage/delay; shadowing | T3a, T3b | both ∥ | [ ] |
+| [1b](batch-1b/overview.md) | parser capture + `UmlSource` (D3); geo paint fields; `mergeNestedChildOver` port; skinparam positions — no-op seam | T1b, T1c, T1d, T1e | all ∥ | [x] |
+| [2](batch-2/overview.md) | families: participant, lifeline, arrow, divider, note+box; lifeline/destroy; pin round 1 (367) | T2a–T2c, T2e, T2f, close | all ∥ | [x] |
+| [3](batch-3/overview.md) | groups/ref/newpage/delay; shadowing; arrow colour + label font; notes/box follow-ups | T3a, T3b, T3d, T3e | all ∥ | [ ] |
 | [3b](batch-3b/overview.md) | retire dead theme fields (D5); pin round 2 | T3c, close | — | [ ] |
 | [4](batch-4/overview.md) | drive round on the paint residue; pin round 3 | T4x, close | all ∥ | [ ] |
 | [5](batch-5/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |

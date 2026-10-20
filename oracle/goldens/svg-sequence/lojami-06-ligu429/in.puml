@@ -1,0 +1,9 @@
+@startuml
+Bob -> Alice : hello
+
+left footer
+* one
+* two
+* three
+endfooter
+@enduml

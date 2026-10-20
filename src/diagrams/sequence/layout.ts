@@ -22,11 +22,10 @@ import type {
   ParticipantGeo,
   SequenceDiagramAST,
   SequenceGeometry,
-  TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import { REF_X_MARGIN } from './ref-body-geo.js';
-import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import {
   computeParticipantLayout,
   type MessageLevels,
@@ -34,6 +33,7 @@ import {
 } from './sequence-layout-participants.js';
 import {
   flushOpenActivations,
+  newActivationStack,
   processEvents,
   type ActivationStack,
   type EventProcessingContext,
@@ -47,19 +47,12 @@ import {
 } from './sequence-layout-shared.js';
 import { DIVIDER_WIDTH_ALLOWANCE, DIVIDER_LABEL_DELTA_X } from './divider-style.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
-import {
-  cutActivationsAtDelays,
-  delayContentRight,
-  delaySpansOf,
-  lifelineSegmentsByParticipant,
-} from './sequence-delay.js';
+import { cutActivationsAtDelays, delayContentRight } from './sequence-delay.js';
+import { endOfParseStyleBuilder, lifelinesOf } from './sequence-layout-lifeline.js';
+import { clampDestroySteps } from './sequence-layout-life-event.js';
 import { anchorExoBorders, exoRightExtent } from './sequence-layout-exo.js';
-import {
-  sequenceAtomContext,
-  sequenceCreoleFont,
-  sequenceCreoleRuns,
-  sequenceLabelLineWidth,
-} from './sequence-creole.js';
+import { sequenceAtomContext, sequenceLabelLineWidth } from './sequence-creole.js';
+import { boxLabelRuns, boxPaint } from './sequence-layout-box.js';
 import type { MessageLabelEnv } from './text-block-geo.js';
 
 // ---------------------------------------------------------------------------
@@ -143,14 +136,13 @@ function assembleGeometry(
     showFootbox,
   );
   flushOpenActivations(eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventLayout.eventGeos);
-  const eventGeos = cutActivationsAtDelays(eventLayout.eventGeos);
+  const eventGeos = clampDestroySteps(cutActivationsAtDelays(eventLayout.eventGeos), participantGeos);
   const headHeight = TOP_MARGIN + maxParticipantHeight;
-  const delays = delaySpansOf(eventGeos);
   const totalWidth = computeTotalWidth(participantGeos, eventGeos, { theme, measurer, sprites: ast.sprites });
   backfillDividerWidth(dividerGeos, totalWidth, originX);
   backfillNewpageWidth(newpageGeos, totalWidth, originX);
   anchorExoBorders(messageGeosOf(eventGeos), totalWidth - RIGHT_MARGIN);
-  const boxGeos = computeBoxGeos(ast.boxes, participantGeos, totalHeight, theme, measurer);
+  const boxGeos = computeBoxGeos(ast.boxes, participantGeos, totalHeight, measurer);
 
   return {
     totalWidth,
@@ -164,7 +156,7 @@ function assembleGeometry(
     // an absolute coordinate.
     headHeight,
     lifelineEndY,
-    ...lifelineSegmentsByParticipant(participantGeos, headHeight, lifelineEndY, delays),
+    lifelineSegments: lifelinesOf(ast, participantGeos, { headHeight, end: lifelineEndY, events: eventGeos }),
     footerShapeY,
     showFootbox,
     boxes: boxGeos,
@@ -183,19 +175,17 @@ function runEventLayout(
   participantLayout: ParticipantLayoutResult,
   messageLevels?: MessageLevels,
 ): EventLayoutResult {
-  const eventGeos: EventGeo[] = [];
-  const dividerGeos: DividerGeo[] = [];
-  const newpageGeos: NewpageGeo[] = [];
   const ctx: EventProcessingContext = {
     theme,
     measurer,
     sprites: ast.sprites,
     participantMap: participantLayout.participantMap,
     participantIndex: participantLayout.participantIndex,
-    activationStart: new Map(),
-    eventGeos,
-    dividerGeos,
-    newpageGeos,
+    activationStart: newActivationStack(ast.participants),
+    endStyleBuilder: endOfParseStyleBuilder(ast),
+    eventGeos: [],
+    dividerGeos: [],
+    newpageGeos: [],
     ...(messageLevels !== undefined ? { messageLevels } : {}),
   };
   // `PlayingSpace:55,89` — the body's first tile sits `startingY` below the
@@ -205,9 +195,9 @@ function runEventLayout(
   const currentY = processEvents(ast.events, startY, ctx);
 
   return {
-    eventGeos,
-    dividerGeos,
-    newpageGeos,
+    eventGeos: ctx.eventGeos,
+    dividerGeos: ctx.dividerGeos,
+    newpageGeos: ctx.newpageGeos,
     openActivations: ctx.activationStart,
     participantMap: participantLayout.participantMap,
     currentY,
@@ -300,6 +290,7 @@ function emptyGeometry(): SequenceGeometry {
     events: [],
     headHeight: 0,
     lifelineEndY: 0,
+    lifelineSegments: {},
     footerShapeY: 0,
     showFootbox: true,
     boxes: [],
@@ -520,53 +511,13 @@ function backfillNewpageWidth(newpageGeos: NewpageGeo[], totalWidth: number, ori
   }
 }
 
-/**
- * A `box` group's label as a placed, measured run (A5).
- *
- * The x and the baseline are exactly where `renderBoxBackground` put them
- * before -- `box.x + padding` and `box.y + fontSize + padding` -- so this
- * moves nothing; what it adds is the measured width the emitter needs.
- *
- * DIVERGENCE, recorded not fixed: the jar draws a box label at `box {
- * FontSize 13, FontStyle bold }` (`plantuml.skin:162-167`), emitting
- * `font-size="13" font-weight="700"` -- `binupo-93-begi656` is the reference.
- * This port uses 11 plain. Correcting it also moves the label's x and reopens
- * how nested boxes lay out, which that same fixture exercises and this engine
- * does not yet port, so it is a task of its own rather than a side effect of
- * routing the text through the emitter.
- */
-function boxLabelRuns(label: string, boxX: number, theme: Theme, measurer: StringMeasurer): readonly TextRun[] {
-  const font: FontSpec = { family: theme.fontFamily, size: BOX_LABEL_FONT_SIZE };
-  // C6: `ComponentRoseEnglober` extends `AbstractTextualComponent` and builds
-  // its label through the same `create0` every other sequence text uses
-  // (`~/git/plantuml/.../skin/rose/ComponentRoseEnglober.java:57-60`), so the
-  // label goes through the same seam. Measured reach today is zero -- all 59
-  // `box` declarations in the corpus carry a plain label -- so this closes the
-  // last text kind for CONSISTENCY, not for a number; measurement identity
-  // means every one of those 59 renders byte-identically.
-  return sequenceCreoleRuns(
-    label,
-    sequenceCreoleFont(font),
-    {
-      leftX: boxX + BOX_LABEL_PADDING,
-      baselineY: BOX_LABEL_FONT_SIZE + BOX_LABEL_PADDING,
-    },
-    measurer,
-  );
-}
-
-/** `renderer.ts`'s own box-label style, mirrored here so the measurement and
- *  the drawing share one number. See {@link boxLabelRun}'s divergence note. */
-const BOX_LABEL_FONT_SIZE = 11;
-const BOX_LABEL_PADDING = 4;
-
 /** Box background geometries (Step 4): from the leftmost participant edge
- *  - 8 to the rightmost + 8, y = 0, the full diagram height. */
+ *  - 8 to the rightmost + 8, y = 0, the full diagram height. The paint and
+ *  the placed title are `Doll`'s (`sequence-layout-box.ts`). */
 function computeBoxGeos(
   boxes: BoxGroup[],
   participantGeos: ParticipantGeo[],
   totalHeight: number,
-  theme: Theme,
   measurer: StringMeasurer,
 ): BoxGeo[] {
   const BOX_PAD = 8;
@@ -580,14 +531,15 @@ function computeBoxGeos(
     if (contained.length === 0) continue;
     const leftEdge = Math.min(...contained.map((g) => g.x));
     const rightEdge = Math.max(...contained.map((g) => g.x + g.width));
+    const frame = { x: leftEdge - BOX_PAD, y: 0, width: rightEdge - leftEdge + BOX_PAD * 2 };
+    const paint = boxPaint(box);
     boxGeos.push({
-      x: leftEdge - BOX_PAD,
-      y: 0,
-      width: rightEdge - leftEdge + BOX_PAD * 2,
+      ...frame,
+      paint,
       height: totalHeight,
       label: box.label,
       color: box.color,
-      labelRuns: box.label === '' ? [] : boxLabelRuns(box.label, leftEdge - BOX_PAD, theme, measurer),
+      labelRuns: boxLabelRuns(box.label, frame, paint, measurer),
     });
   }
 

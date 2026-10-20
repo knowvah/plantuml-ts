@@ -29,38 +29,24 @@
 
 import type { Theme } from '../../core/theme.js';
 import type { ScaledTheme } from './scale-geo.js';
-import type { ParticipantBadge, ParticipantGeo, ParticipantType, TextRun } from './ast.js';
-import { ellipse, image, rect, linkWrap } from '../../core/svg.js';
+import type { ParticipantGeo, TextRun } from './ast.js';
+import { ellipse, image, linkWrap } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
-import { participantBadgeGeo, participantLabelCy } from './sequence-layout-participant-sizing.js';
-import { participantBoxOf } from './sequence-layout-participants.js';
-import { sequenceShadowFilter } from './sequence-shadow.js';
 import {
-  COLLECTIONS_DELTA,
-  renderParticipantSymbol,
-  type GlyphParticipantType,
-} from './renderer-participant-symbol.js';
-
-/** The seven participant kinds `Rose.java#createComponentParticipant` gives a
- *  glyph to. `participant` is the only one left out: `ComponentRoseParticipant`
- *  with `collections=false` draws a bare rectangle and nothing else. */
-const GLYPH_TYPES: ReadonlySet<string> = new Set<GlyphParticipantType>([
-  'actor',
-  'database',
-  'collections',
-  'queue',
-  'entity',
-  'boundary',
-  'control',
-]);
-
-function hasParticipantGlyph(type: ParticipantType): type is GlyphParticipantType {
-  return GLYPH_TYPES.has(type);
-}
+  participantBadgeGeo,
+  participantLabelCy,
+  participantLabelMetricsOf,
+  type ParticipantLabelMetrics,
+} from './sequence-layout-participant-sizing.js';
+import { participantBoxOf } from './sequence-layout-participants.js';
+import { paintOfGeo } from './sequence-participant-paints.js';
+import { renderParticipantSymbol } from './renderer-participant-symbol.js';
 
 /**
- * A participant's glyph, drawn through the seam.
+ * A participant's glyph -- or, for `participant`/`collections`, its
+ * rectangle(s) (`ComponentRoseParticipant#drawInternalU:101-111`) -- drawn
+ * through the seam with the merged style's paint (sdd1 T2a).
  *
  * `database` and `actor` used to be hand-rolled here — the cylinder as
  * `rect + line + line + ellipse` (five top-level elements per glyph where
@@ -77,18 +63,9 @@ function hasParticipantGlyph(type: ParticipantType): type is GlyphParticipantTyp
  * @see ~/git/plantuml/.../skin/rose/Rose.java:137-190
  */
 function renderSymbolShape(p: ParticipantGeo, blockTopY: number, head: boolean, theme: ScaledTheme): string {
-  if (!hasParticipantGlyph(p.type)) return '';
   return renderParticipantSymbol(
     p.type,
-    {
-      x: p.x,
-      y: blockTopY,
-      width: p.width,
-      height: p.height,
-      background: p.background,
-      border: p.border,
-      shadow: p.shadow ?? 0,
-    },
+    { x: p.x, y: blockTopY, width: p.width, height: p.height, paint: paintOfGeo(p), shadow: p.shadow ?? 0 },
     { head, display: p.display, theme },
   );
 }
@@ -175,20 +152,29 @@ function renderLabelRun(run: TextRun, dy: number, theme: Theme): string {
  * Vertically centred on the name block's own centre, which is what
  * `TextBlockSprited`'s `max(spriteHeight, textHeight)` box amounts to.
  */
-function renderBadge(badge: ParticipantBadge, x: number, cy: number, theme: ScaledTheme): string {
+function renderBadge(p: ParticipantGeo, x: number, cy: number, theme: ScaledTheme): string {
+  const badge = p.badge!;
   const top = cy - badge.height / 2;
   if (badge.kind === 'sprite') return image(x, top, badge.width, badge.height, badge.dataUri);
   const r = badge.width / 2;
+  // `CircledCharacter` is built with a null border (`Display.java:677-678`)
+  // and draws in the head's current colour: the style's `LineColor`, at the
+  // `UStroke.simple()` the component reset to before its text
+  // (`ComponentRoseParticipant.java:94-95,112`).
   return ellipse(x + r, cy, r, r, {
     fill: badge.color ?? theme.colors.background,
-    stroke: theme.colors.border,
+    stroke: p.border,
     'stroke-width': 1 * theme.scaleK,
   });
 }
 
-function renderNameBlock(p: ParticipantGeo, cy: number, theme: ScaledTheme): string {
-  const badge = participantBadgeGeo(p.badge, p.x, p.width, theme);
-  const badgeEl = badge === undefined || p.badge === undefined ? '' : renderBadge(p.badge, badge.x, cy, theme);
+/**
+ * The name block of the row whose label is centred on `cy`. `p` is the HEAD
+ * row's painted box (the runs were placed against it in layout).
+ */
+function renderNameBlock(p: ParticipantGeo, cy: number, metrics: ParticipantLabelMetrics, theme: ScaledTheme): string {
+  const badge = participantBadgeGeo(p.badge, p.x, p.width, paintOfGeo(p).padding, theme.scaleK);
+  const badgeEl = badge === undefined ? '' : renderBadge(p, badge.x, cy, theme);
   // The runs were placed against the HEAD's own centre; every other row of the
   // diagram draws the same text translated. `dy` is a difference of two
   // `participantLabelCy` values rather than of two block tops, because a
@@ -196,23 +182,8 @@ function renderNameBlock(p: ParticipantGeo, cy: number, theme: ScaledTheme): str
   // at the tail (`ComponentRoseDatabase.java:81-87`) — the offset is not the
   // same on both rows, so a block-top delta would be wrong for exactly those
   // kinds.
-  const dy = cy - participantLabelCy(p.type, p.height, p.y, true, theme);
+  const dy = cy - participantLabelCy(p.type, p.height, p.y, true, metrics);
   return badgeEl + p.labelRuns.map((run) => renderLabelRun(run, dy, theme)).join('');
-}
-
-/** `ComponentRoseParticipant#drawInternalU:97` — the FRONT rectangle of a
- *  `collections` stack. The back one is the glyph the seam draws; this is the
- *  one the text goes in, pushed down by `getDeltaCollection()` and that much
- *  smaller in both axes. Empty for every other kind. */
-function collectionsFrontBox(p: ParticipantGeo, blockTopY: number): string {
-  if (p.type !== 'collections') return '';
-  return rect(p.x, blockTopY + COLLECTIONS_DELTA, p.width - COLLECTIONS_DELTA, p.height - COLLECTIONS_DELTA, {
-    fill: p.background,
-    stroke: p.border,
-    // `rect.setDeltaShadow(deltaShadow)` before BOTH draws
-    // (`ComponentRoseParticipant.java:104-109`).
-    ...sequenceShadowFilter(p.shadow ?? 0),
-  });
 }
 
 /**
@@ -223,39 +194,26 @@ function collectionsFrontBox(p: ParticipantGeo, blockTopY: number): string {
  * `ComponentRose*` threads into `drawInternalU` to flip the glyph/text order.
  */
 function renderParticipantBlock(geo: ParticipantGeo, blockTopY: number, head: boolean, theme: ScaledTheme): string {
+  const k = theme.scaleK;
   // The painted box, not the preferred one: a `participant`/`collections`
-  // head reserves its shadow outside the rectangle it draws.
-  const p = participantBoxOf({ ...geo, shadow: (geo.shadow ?? 0) * theme.scaleK });
-  const label = renderNameBlock(p, participantLabelCy(p.type, p.height, blockTopY, head, theme), theme);
-  if (hasParticipantGlyph(p.type)) {
-    const glyph = renderSymbolShape(p, blockTopY, head, theme);
-    // DRAW ORDER, and it is not the obvious one. Every stacked
-    // `ComponentRose*#drawInternalU` calls `textBlock.drawU(...)` in BOTH arms
-    // of its `head` branch and `stickman.drawU(ug)` only afterwards
-    // (`ComponentRoseDatabase.java:81-88`, `ComponentRoseActor.java:73-80`,
-    // and the identical bodies in Boundary/Control/Entity) -- so the label
-    // precedes the glyph in document order whether it sits above it or below.
-    // `queue` and `collections` are the two exceptions, and they are
-    // exceptions in upstream too: `ComponentRoseQueue#drawInternalU` draws
-    // only the glyph (its text is `asSmall`'s own label, drawn inside it), and
-    // `ComponentRoseParticipant` draws both rectangles before its text.
-    if (p.type === 'queue') return glyph + label;
-    if (p.type === 'collections') return glyph + collectionsFrontBox(p, blockTopY) + label;
-    return label + glyph;
-  }
-  // `PARTICIPANT_HEAD` -> `ComponentRoseParticipant` with `collections=false`:
-  // one plain rectangle with the text inside it.
-  //
-  // `Participant#getUsedStyles` -- the kind's `<style>` bucket merged with
-  // the participant's own inline colour, resolved in layout
-  // (`sequence-layout-participants.ts#resolveParticipantBackground`).
-  const box = rect(p.x, blockTopY, p.width, p.height, {
-    fill: p.background,
-    stroke: p.border,
-    // `rect.setDeltaShadow(deltaShadow)` (`ComponentRoseParticipant.java:104`).
-    ...sequenceShadowFilter(p.shadow ?? 0),
-  });
-  return box + renderNameBlock(p, blockTopY + p.height / 2, theme);
+  // head reserves its shadow and margin outside the rectangle it draws.
+  const p = participantBoxOf({ ...geo, shadow: (geo.shadow ?? 0) * k }, k);
+  const rowTop = p.y + (blockTopY - geo.y);
+  const metrics = participantLabelMetricsOf(paintOfGeo(geo), k);
+  const label = renderNameBlock(p, participantLabelCy(p.type, p.height, rowTop, head, metrics), metrics, theme);
+  const shape = renderSymbolShape(p, rowTop, head, theme);
+  // DRAW ORDER, and it is not the obvious one. Every stacked
+  // `ComponentRose*#drawInternalU` calls `textBlock.drawU(...)` in BOTH arms
+  // of its `head` branch and `stickman.drawU(ug)` only afterwards
+  // (`ComponentRoseDatabase.java:81-88`, `ComponentRoseActor.java:73-80`,
+  // and the identical bodies in Boundary/Control/Entity) -- so the label
+  // precedes the glyph in document order whether it sits above it or below.
+  // `queue`, `participant` and `collections` are the exceptions, and they are
+  // exceptions in upstream too: `ComponentRoseQueue#drawInternalU` draws
+  // only the glyph (its text is `asSmall`'s own label, drawn inside it), and
+  // `ComponentRoseParticipant` draws its rectangle(s) before its text.
+  if (p.type === 'queue' || p.type === 'participant' || p.type === 'collections') return shape + label;
+  return label + shape;
 }
 
 /** The head a create message draws at its tile top

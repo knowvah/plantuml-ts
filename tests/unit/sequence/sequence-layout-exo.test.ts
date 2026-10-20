@@ -58,6 +58,7 @@ function makeAst(participants: string[], events: SequenceEvent[]): SequenceDiagr
     autonumber: { enabled: false, start: 1, current: 1, step: 1, prefix: '' },
     options: { hideFootbox: false, messageAlign: 'center' },
     boxes: [],
+    styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
   };
 }
 

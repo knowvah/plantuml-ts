@@ -1,0 +1,11 @@
+@startuml
+!function $inner($param1, $param2 = "arg2default")
+!return $param1 + " " + $param2
+!endfunction
+
+!function $test($param)
+!return $param
+!endfunction
+
+A -> B: $test($inner("arg1"))
+@enduml

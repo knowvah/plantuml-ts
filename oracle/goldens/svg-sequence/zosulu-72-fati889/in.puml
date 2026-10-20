@@ -1,0 +1,7 @@
+@startuml
+participant Alice as a
+participant Bob   as b
+
+   [<- b : ""   [<-""
+
+@enduml

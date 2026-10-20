@@ -1,0 +1,4 @@
+@startuml
+'!preprocessorV2
+Alice -> Bob : hello %getenv("OS")
+@enduml

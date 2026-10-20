@@ -1,0 +1,9 @@
+@startuml
+hide footbox
+header titi
+footer tutu
+title toto
+Bob -> Alice : hello
+create Dog
+Alice -> Dog : create
+@enduml

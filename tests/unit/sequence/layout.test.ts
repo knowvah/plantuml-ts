@@ -38,6 +38,7 @@ function makeAst(participants: string[], events: SequenceEvent[]): SequenceDiagr
     autonumber: { enabled: false, start: 1, current: 1, step: 1, prefix: '' },
     options: { hideFootbox: false, messageAlign: 'center' },
     boxes: [],
+    styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
   };
 }
 
@@ -1069,6 +1070,7 @@ describe('layoutSequence — message from unknown participant', () => {
       autonumber: { enabled: false, start: 1, current: 1, step: 1, prefix: '' },
       options: { hideFootbox: false, messageAlign: 'center' },
       boxes: [],
+      styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
     };
     const geo = layoutSequence(ast, defaultTheme, measurer);
     // The unknown-participant message is skipped — no message geo emitted

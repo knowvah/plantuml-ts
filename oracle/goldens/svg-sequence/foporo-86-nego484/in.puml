@@ -1,0 +1,14 @@
+@startuml
+title
+foo
+!if %feature("theme")
+theme ok
+!endif
+!if %feature("future")
+future ok
+!else
+no future
+!endif
+endtitle
+alice->bob
+@enduml

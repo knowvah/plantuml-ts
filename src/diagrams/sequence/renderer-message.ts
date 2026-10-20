@@ -10,13 +10,13 @@
 import { renderCreatedHead } from './renderer-participant-shapes.js';
 import type { MessageGeo, TextRun } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
-import { scaledDashPattern } from './scale-geo.js';
 import { line } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import { ARROW_FONT_SIZE } from './sequence-layout-shared.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
-import { renderFlatMessageArrow, renderSelfMessageHead } from './renderer-arrowhead.js';
+import { renderFlatMessageArrow, renderSelfMessageHead, shaftStyleOf } from './renderer-arrowhead.js';
+import { messagePaintOf } from './sequence-arrow-paint.js';
 
 // ---------------------------------------------------------------------------
 // Message helpers
@@ -93,11 +93,10 @@ function renderSelfMessage(msg: MessageGeo, configuration: ArrowConfiguration, t
   // what {@link SELF_LOOP_WIDTH} measures from the outgoing segment's start.
   const xRight = x1 + loopWidth;
   const yBottom = y1 + loopHeight;
-  const stroke = {
-    stroke: theme.colors.arrow,
-    strokeWidth: 1 * k,
-    ...(configuration.dashed ? { strokeDasharray: scaledDashPattern(k) } : {}),
-  };
+  // The deprecated `applyStroke(ug)` (`ComponentRoseSelfArrow.java:81`): the
+  // style's thickness, 2,2 when dotted, and never the style's `LineStyle`
+  // (`sequence-arrow-paint.ts#applyStrokeDeprecated`).
+  const stroke = shaftStyleOf(messagePaintOf(msg), k);
   const loop =
     line(x1, y1, xRight, y1, stroke) +
     line(xRight, y1, xRight, yBottom, stroke) +
@@ -190,13 +189,9 @@ function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
  * withTOBECHANGED(stereotype)`) -- confirmed on `terapo-81-puzi168`
  * (`<style>.a { Linecolor red }` + `alice -> bob <<a>> : red`): the golden
  * arrow LINE turns `stroke:#F00`, but the label text stays plain
- * `fill="#000"` with no guillemet run drawn anywhere. Wiring the stereotype
- * to the arrow's line style is a real feature (a `<style>`-bucket lookup
- * keyed by stereotype, mirroring the participant-color bucket this engine
- * already has) but touches `sequence-arrowhead.ts`/`renderer-arrowhead.ts`,
- * which are out of this task's write-set this batch (T15). Left parsed and
- * carried on `MessageGeo`, not drawn, matching upstream's own dead-visually
- * behavior until that bucket is ported.
+ * `fill="#000"` with no guillemet run drawn anywhere. It reaches the line
+ * through the merged arrow style (`sequence-arrow-paint.ts#messagePaint`,
+ * sdd1 T2c), never as text.
  */
 export function renderMessage(msg: MessageGeo, theme: ScaledTheme): string {
   // A create message draws the created head FIRST, then the arrow

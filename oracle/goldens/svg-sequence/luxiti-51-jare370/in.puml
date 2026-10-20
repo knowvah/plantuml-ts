@@ -1,0 +1,8 @@
+@startuml
+'!preprocessorV2
+!procedure msg(source, destination)
+source --> destination
+!endprocedure
+
+Alice -> Bob : A
+@enduml

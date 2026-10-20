@@ -1,0 +1,10 @@
+@startuml
+'!preprocessorV2
+!function bold($text)
+!return "<b>"+$text+"</b>"
+!endfunction
+
+!$var1 = bold("toto")
+
+a -> b : $var1
+@enduml

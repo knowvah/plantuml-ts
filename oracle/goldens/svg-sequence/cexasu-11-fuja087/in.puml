@@ -1,0 +1,9 @@
+@startuml
+'!preprocessorV2
+!function bold($text)
+!return "<b>" + $text + "</b>"
+!endfunction
+
+
+alice -> bob : this is bold("foo") here
+@enduml

@@ -113,6 +113,7 @@ function makeGeometry(frame: FrameGeo): SequenceGeometry {
     events: [frame],
     headHeight: 36,
     lifelineEndY: 200,
+    lifelineSegments: {},
     footerShapeY: 210,
     boxes: [],
     showFootbox: true,

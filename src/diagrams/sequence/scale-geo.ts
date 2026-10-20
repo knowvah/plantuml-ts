@@ -88,6 +88,7 @@ import type {
   MessageGeo,
   NoteGeo,
   ActivationGeo,
+  DestroyGeo,
   FrameGeo,
   DividerGeo,
   SpaceGeo,
@@ -213,6 +214,11 @@ function scaleActivation(a: ActivationGeo, k: number): ActivationGeo {
   return { ...a, lifelineX: a.lifelineX * k, y: a.y * k, height: a.height * k };
 }
 
+/** A destroy's y and its crosses' corners; `indent` is a count. */
+function scaleDestroy(d: DestroyGeo, k: number): DestroyGeo {
+  return { ...d, y: d.y * k, crosses: d.crosses.map((c) => ({ ...c, x: c.x * k, y: c.y * k })) };
+}
+
 /**
  * A frame's geometry, scaled. `backColorElement`/`backColorGeneral` and each
  * separator's `backColorGeneral` are RAW colour tokens (`ast.ts`'s "stored
@@ -284,6 +290,8 @@ function scaleEvent(event: EventGeo, k: number): EventGeo {
       return scaleNote(event, k);
     case 'activation':
       return scaleActivation(event, k);
+    case 'destroy':
+      return scaleDestroy(event, k);
     case 'frame':
       return scaleFrame(event, k);
     case 'divider':
@@ -333,7 +341,7 @@ export function scaleSequenceGeometry(geo: SequenceGeometry, k: number): Sequenc
     headHeight: geo.headHeight * k,
     lifelineEndY: geo.lifelineEndY * k,
     footerShapeY: geo.footerShapeY * k,
-    ...(geo.lifelineSegments !== undefined ? { lifelineSegments: scaleLifelines(geo.lifelineSegments, k) } : {}),
+    lifelineSegments: scaleLifelines(geo.lifelineSegments, k),
     participants: geo.participants.map((p) => scaleParticipant(p, k)),
     events: geo.events.map((e) => scaleEvent(e, k)),
     boxes: geo.boxes.map((b) => scaleBox(b, k)),

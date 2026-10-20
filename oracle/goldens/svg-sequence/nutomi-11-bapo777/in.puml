@@ -1,0 +1,5 @@
+@startuml
+!define COLOR_BOX #ccccc
+!define COLOR_BOX #ccccc
+alice -> bob : print COLOR_BOX
+@enduml

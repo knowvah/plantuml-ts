@@ -1,0 +1,10 @@
+@startuml
+participant A as "This is A"
+participant B as "This is B"
+participant C as "This is C"
+participant D as "This is D"
+A -> B
+B -> C
+C -> D
+note over A,C : i
+@enduml

@@ -1,0 +1,8 @@
+@startuml
+Alice -> Bob : Cok4
+/'
+this is a comment
+'/
+Bob -> Alice : Cok2
+/' antoher comment '/ 
+@enduml

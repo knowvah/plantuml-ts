@@ -1,0 +1,7 @@
+@startuml
+alice -> bob: hello
+!if %and(-1,0)
+alice -> bob: not seen, otherwise bug
+!endif
+
+@enduml

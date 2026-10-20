@@ -45,6 +45,7 @@ const geo = (events: SequenceGeometry['events']): SequenceGeometry => ({
   events,
   headHeight: 1,
   lifelineEndY: 1,
+  lifelineSegments: {},
   footerShapeY: 1,
   boxes: [],
   showFootbox: true,
