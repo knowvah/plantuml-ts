@@ -1,0 +1,12 @@
+== component 15:20:35 { 188.99 189.27 170.41 }
+wrote plans/sequence-divergence-drive/measurements/final-eng/parity-component.json — {"conformant":214,"structural-match":12,"diverged":40,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 15:21:54 { 205.46 194.03 173.89 }
+wrote plans/sequence-divergence-drive/measurements/final-eng/parity-gantt.json — {"conformant":1,"structural-match":0,"diverged":264,"errored":0,"timeout":0,"oracle-error":0}
+== state 15:23:03 { 168.42 185.73 172.38 }
+wrote plans/sequence-divergence-drive/measurements/final-eng/parity-state.json — {"conformant":99,"structural-match":14,"diverged":160,"errored":0,"timeout":0,"oracle-error":0}
+== timing 15:24:14 { 190.46 185.97 173.35 }
+wrote plans/sequence-divergence-drive/measurements/final-eng/parity-timing.json — {"conformant":6,"structural-match":0,"diverged":120,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 15:25:25 { 192.92 188.79 175.50 }
+wrote plans/sequence-divergence-drive/measurements/final-eng/parity-unknown.json — {"conformant":521,"structural-match":36,"diverged":268,"errored":0,"timeout":0,"oracle-error":0}
+== usecase 15:26:40 { 236.85 203.24 182.10 }
+wrote plans/sequence-divergence-drive/measurements/final-eng/parity-usecase.json — {"conformant":67,"structural-match":7,"diverged":19,"errored":0,"timeout":0,"oracle-error":1}

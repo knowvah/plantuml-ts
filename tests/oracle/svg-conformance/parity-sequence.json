@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-20T17:49:20.032Z",
+  "generatedAt": "2026-10-20T20:03:18.357Z",
   "fixtures": [
     {
       "slug": "bacupi-77-fuke586",
@@ -584,9 +584,8 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
+      "verdict": "structural-match",
       "maxDelta": 69,
-      "firstDiff": "svg/g[1][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1148,9 +1147,9 @@
       "dotEqual": true,
       "layoutEqual": "n/a",
       "verdict": "diverged",
-      "maxDelta": 114,
-      "firstDiff": "svg/g[1]/rect[1]/@fill",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@height"
+      "maxDelta": 44,
+      "firstDiff": "svg/g[1]/rect[2]/@fill",
+      "maxDeltaPath": "svg/g[1]/rect[2]/@width"
     },
     {
       "slug": "dasutu-58-saje713",
@@ -3698,9 +3697,9 @@
       "dotEqual": true,
       "layoutEqual": "n/a",
       "verdict": "diverged",
-      "maxDelta": 254,
-      "firstDiff": "svg/g[1]/rect[1]/@fill",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@height"
+      "maxDelta": 44,
+      "firstDiff": "svg/g[1]/rect[2]/@fill",
+      "maxDeltaPath": "svg/g[1]/rect[2]/@width"
     },
     {
       "slug": "komafa-88-zutu920",
@@ -5509,9 +5508,9 @@
       "dotEqual": true,
       "layoutEqual": "n/a",
       "verdict": "diverged",
-      "maxDelta": 254,
-      "firstDiff": "svg/g[1]/rect[1]/@fill",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@height"
+      "maxDelta": 44,
+      "firstDiff": "svg/g[1]/rect[2]/@fill",
+      "maxDeltaPath": "svg/g[1]/rect[2]/@width"
     },
     {
       "slug": "nofola-68-nobe068",
@@ -5719,9 +5718,8 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
+      "verdict": "structural-match",
       "maxDelta": 69,
-      "firstDiff": "svg/g[1][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -8672,9 +8670,9 @@
       "dotEqual": true,
       "layoutEqual": "n/a",
       "verdict": "diverged",
-      "maxDelta": 114,
-      "firstDiff": "svg/g[1]/rect[1]/@fill",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@height"
+      "maxDelta": 44,
+      "firstDiff": "svg/g[1]/rect[2]/@fill",
+      "maxDeltaPath": "svg/g[1]/rect[2]/@width"
     },
     {
       "slug": "xecame-98-cuma671",
@@ -8755,9 +8753,9 @@
       "dotEqual": true,
       "layoutEqual": "n/a",
       "verdict": "diverged",
-      "maxDelta": 254,
-      "firstDiff": "svg/g[1]/rect[1]/@fill",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@height"
+      "maxDelta": 44,
+      "firstDiff": "svg/g[1]/rect[2]/@fill",
+      "maxDeltaPath": "svg/g[1]/rect[2]/@width"
     },
     {
       "slug": "xepoda-56-xema668",

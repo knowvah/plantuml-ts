@@ -181,3 +181,25 @@ Measurement (sequence has NO DOT gate — it never emits `svek-N.dot`):
   `Theme` fields are deleted (T3g, `55f40735a`, BREAKING CHANGE on
   `RenderOptions['theme']`), byte-neutral.
 - Next: batch 4 (T4a), then batch 5.
+
+## Status — FINAL (T-exit, 2026-10-20)
+
+| D10 clause / measure | b0 | final | verdict |
+|---|---:|---:|---|
+| sequence pins (target ≥ 250) | 0 | **419** | met |
+| b0 paint-only rows pinned | — | 334 of 338 | — |
+| paint-only rows open with mechanism + sdd2 owner | — | 4 (HSLuv title rounding, TIM builtin) | met |
+| paint-only rows open without mechanism | — | 0 | met |
+| survey sequence conformant | 0 | **419** (structural-match 486, diverged 238, 0 timeouts) | — |
+| ratchet Σ weightedScore | 150864 | **73273** (−51.4%) | — |
+| cohorts zero / paint-only / geometry / structural / error | 0 / 338 / 513 / 277 / 13 | 419 / 4 / 539 / 166 / 13 | — |
+| all-engine conformant losses vs b0 | — | **0** (28 engines) | met |
+| non-sequence movers vs b0 | — | 33, all SEQUENCE diagrams in `unknown`, all up (506 → 521) | — |
+
+Every pinned slug is zero-diff on both paths: the ratchet classify and the
+`renderSync` survey agree on all 1141 rows. `fixtures.md`: all 444 rows carry
+a `final`. The final all-engine survey ran under external load of 100–236
+(another repo's Python job plus a `java` process). The six engines with
+timeouts were re-surveyed with `SVG_PARITY_TIMEOUT_MS=300000`, a
+measurement budget rather than a gate, and returned 0 timeouts
+(`$M/final-rerun.log`).
