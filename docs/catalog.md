@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1682 modules · 6140 exported names.
+1683 modules · 6169 exported names.
 
 ## `src/`
 
@@ -2020,6 +2020,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-parse-helpers.ts` | `ParseState`, `Command`, `SequenceCommandRefusal`, `makeDefaultAST`, `currentEvents`, `ensureParticipant`, `emit`, `setLastEventWithNoteSpan`, `applyAutonumber`, `formatAutonumber`, `ArrowSpec`, `arrowConfigurationOf`, `ParticipantDeclaration`, `ParticipantUrl`, `parseParticipantDeclaration`, `participantUrlOf`, `urlOf`, `autoActivationFlags`, `activationFlags`, `DottedStart`, `parseDottedStart`, `linkedParticipantIds`, `applyHideStereotype`, `applyHideUnlinked` | Mutable parse state and shared helpers for the sequence diagram parser. |
 | `sequence-participant-declaration.ts` | `ParticipantDeclaration`, `ParticipantUrl`, `parseParticipantDeclaration`, `participantUrlOf` | The `participant`-family declaration grammar shared by `CommandParticipantA`/`A2`/`A3`/`A4` (`SequenceDiagramFactory.java:106`) -- split out of `sequence-parse-helpers.ts` purely to stay under the 500-line file cap (the same reason that fil |
 | `sequence-shadow.ts` | `sequenceShadowFilterDef`, `sequenceShadowFilter`, `frameShadowDelta`, `sequenceShadowDefs`, `withNoteShadow`, `activationShadowFilter` | sequence-shadow.ts -- the drop-shadow `<filter>` a shadowed sequence frame references (unwind2-S9). |
+| `sequence-skin-param.ts` | `SequenceStyleDispatch`, `createSequenceStyleDispatch`, `executeDeclarationsBefore`, `currentStyleBuilder`, `SequenceComponentType`, `SequenceParticipantSName`, `SequenceNoteStyle`, `GroupingType`, `componentTypeStyleSignature`, `messageStyleSignature`, `participantTypeStyleSignature`, `participantStyleSignature`, `noteStyleSignature`, `groupingStyleSignature`, `groupingHeaderStyleSignature`, `referenceStyleSignature`, `referenceHeaderStyleSignature`, `componentStyle`, `newpageStyle`, `delayStyle`, `dividerStyle`, `messageStyle`, `participantStyle`, `noteStyle`, `groupingStyle`, `referenceStyle`, `dollStyle`, `SequencePaint`, `paintOf` | The sequence engine's style seam (sdd1 D1-D4): the style half of upstream's `SkinParam` replayed per command, each sequence element's `getStyleSignature`/`getUsedStyles`, and {@link paintOf}, the reads the `skin/rose/ComponentRose*` classes |
 | `sequence-text.ts` | `SequenceRunImage`, `SequenceTextSpec`, `sequenceText` | sequence-text.ts — the ONE `<text>` emitter the sequence engine routes through (mission `sequence-text-and-y-convergence`, D3). |
 | `text-block-geo.ts` | `displayLines`, `textBlockRuns`, `TextRun`, `REFERENCE_FONT_SIZE`, `refBodyFontSpecOf`, `refHeaderFontSpecOf`, `refBodyLines`, `refBodyHeight`, `refBodyWidth`, `MESSAGE_NUMBER_MARGIN`, `numberTextOf`, `ARROW_LABEL_PADDING_X1`, `ARROW_LABEL_HEAD_CLEARANCE`, `MessageLabelBlock`, `messageLabelBlock`, `MessageLabelEnv`, `messageLabelRows` | text-block-geo.ts — how a sequence-diagram `Display` becomes POSITIONED text runs. |
 

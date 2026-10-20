@@ -123,7 +123,7 @@ Measurement (sequence has NO DOT gate — it never emits `svek-N.dot`):
 | Batch | Scope | Tasks | Parallel | Done |
 |---|---|---|---|---|
 | [0](batch-0/overview.md) | branch, b0, classifier, ledger; pin tool | T0a, T0b | both ∥ | [x] |
-| [1](batch-1/overview.md) | style seam module (D1/D2/D4) | T1a | — | [ ] |
+| [1](batch-1/overview.md) | style seam module (D1/D2/D4) | T1a | — | [x] |
 | [1b](batch-1b/overview.md) | parser capture + `UmlSource` (D3); geo paint fields — no-op seam | T1b, T1c | both ∥ | [ ] |
 | [2](batch-2/overview.md) | families: participant, lifeline, arrow, divider, note+box; pin round 1 | T2a–T2e, close | all ∥ | [ ] |
 | [3](batch-3/overview.md) | groups/ref/newpage/delay; shadowing | T3a, T3b | both ∥ | [ ] |
@@ -153,3 +153,16 @@ Measurement (sequence has NO DOT gate — it never emits `svek-N.dot`):
 - `plans/activity-divergence-drive/` — add1, the template this brief follows
 - `src/diagrams/wbs/WBSDiagramFactory.ts:160-200` — the per-command style
   dispatch template (D2)
+
+## Status — halted 2026-10-19 (after batch 1)
+
+- Done: batch 0 (`221de2f1a`), batch 1 (T1a, merge `ef9947cc5`). b0 is
+  identical to planning: paint-only 338 / geometry 513 / structural 277 /
+  error 13, Σ 150864. Gates green at both closes. 0 pins (none planned yet).
+- **Halt: stop 3 on D4** (decisions.md D4 Amendment 1, journal rows 11 and 15).
+  `Style#mergeNestedChildOver` (`Style.java:158-173`) is not ported, and
+  upstream's group header (`Grouping.java:83-96`) and reference header
+  (`Reference.java:85-97`) read it (T3a). Ruling needed: (a) lift stop 8 for a
+  one-method port into `src/core/style/Style.ts` (recommended), or (b) leave
+  those two headers open → sdd2.
+- Resume at batch 1b (T1b, T1c); it does not depend on the ruling.
