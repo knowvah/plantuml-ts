@@ -19,7 +19,7 @@
  * `SvgGraphics.java:1035-1051`, is for embedded sprites only).
  */
 
-import type { SequenceGeometry, EventGeo, FrameGeo, NewpageGeo, DelayGeo } from './ast.js';
+import type { SequenceGeometry, EventGeo, ElseGeo, FrameGeo, NewpageGeo, DelayGeo } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
@@ -31,6 +31,7 @@ import { sequenceText } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import type { TextRun } from './text-block-geo.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { fmt } from '../../core/svg-format.js';
 import { renderMessage } from './renderer-message.js';
 import { renderParticipantBox, renderFooterBox } from './renderer-participant-shapes.js';
@@ -65,7 +66,7 @@ import { NEWPAGE_MARGIN_Y } from './newpage-style.js';
  * than decorating it -- so the url reaches `sequence-text.ts`, the single `<a>`
  * emitter, and no measurer is acquired here (D1, D5). `boldFallback` is the
  * component STYLE's own weight, which a run that set its own beats -- exactly
- * as `renderBranchSeparators` resolves the group style's. */
+ * as `renderElse` resolves the leaf style's. */
 export function creoleRunText(run: TextRun, theme: ScaledTheme, fontSize: number, boldFallback = false): string {
   return sequenceText({
     leftX: drawnLeftX(run),
@@ -118,13 +119,12 @@ function renderRefBody(frame: FrameGeo, theme: ScaledTheme): string {
 /**
  * `GroupingTile#drawU`'s foreground half (`:267`): `comp.drawU(...)`,
  * dispatched with `isBackground()` false, reaches `drawInternalU` --
- * `renderGroupingHeaderForeground` (T4). `drawNotes` + child tiles
- * (`:268-274`) are `renderRefBody`/`renderBranchSeparators`, same order.
+ * `renderGroupingHeaderForeground` (T4) -- then a `ref`'s body. The child
+ * tiles (`:280-281`), each `else` among them, are the events that follow
+ * the frame in the stream ({@link renderElse}).
  */
 function renderFrame(frame: FrameGeo, theme: ScaledTheme): string {
-  return (
-    renderGroupingHeaderForeground(frame, theme) + renderRefBody(frame, theme) + renderBranchSeparators(frame, theme)
-  );
+  return renderGroupingHeaderForeground(frame, theme) + renderRefBody(frame, theme);
 }
 
 /**
@@ -151,32 +151,31 @@ const ELSE_RULE_THICKNESS = 1;
 const ELSE_RULE_DY = 1;
 
 /**
- * The dashed rule + bracketed condition each `else` branch opens with:
- * `ComponentRoseGroupingElse#drawInternalU` (`:103-113`) strokes a
- * `ULine.hline` the frame's width, one pixel down, in `groupBorder`, the leaf style's
- * `LineColor` (`:70`), under `stroke(2, 2, 1)`; then the text block under
- * `UStroke.simple()`. The colour is the frame's body paint: `FrameGeo`
- * keeps no per-branch paint, and an `else` differs from its opener only when
- * a `skinparam`/`<style>` sits between them (the runs carry the leaf's font).
+ * The dashed rule + bracketed condition an `else` tile draws, in the
+ * foreground pass, at its place among its group's child tiles
+ * (`ElseTile#drawU:103-133`): `ComponentRoseGroupingElse#drawInternalU`
+ * (`:103-113`) strokes a `ULine.hline` the frame's width, one pixel down, in
+ * `groupBorder` (`:70`), under `stroke(2, 2, 1)`; then the text block under
+ * `UStroke.simple()`. The paint is the else's OWN leaf style, merged from the
+ * builder current at its `else` line (`ElseTile#getComponent:92-101`,
+ * `SequenceDiagram.java:431-432`), so a `skinparam`/`<style>` between the
+ * opener and the `else` reaches the rule and the condition font. The dash and
+ * thickness are fixed whatever the style says.
  */
-function renderBranchSeparators(frame: FrameGeo, theme: ScaledTheme): string {
+function renderElse(elseGeo: ElseGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
-  const { paint } = framePaintsOf(frame);
+  const { paint } = elseGeo;
   const dash = fmt(ELSE_RULE_DASH * k);
-  return frame.branchSeparators
-    .map((sep) => {
-      const y = sep.y + ELSE_RULE_DY * k;
-      const rule = line(frame.x, y, frame.x + frame.width, y, {
-        stroke: svgFixColor(paint.stroke),
-        strokeWidth: ELSE_RULE_THICKNESS * k,
-        strokeDasharray: `${dash},${dash}`,
-      });
-      // A5: the runs are empty exactly when the branch carries no condition,
-      // which is the case that draws the rule alone. C5: several runs where
-      // creole styled the condition, each its own `<text>` (D3).
-      return rule + styledRunsText(sep.runs, paint.font, theme);
-    })
-    .join('');
+  const y = elseGeo.y + ELSE_RULE_DY * k;
+  const rule = line(elseGeo.x, y, elseGeo.x + elseGeo.width, y, {
+    stroke: svgFixColor(paint.stroke),
+    strokeWidth: ELSE_RULE_THICKNESS * k,
+    strokeDasharray: `${dash},${dash}`,
+  });
+  // A5: the runs are empty exactly when the branch carries no condition,
+  // which is the case that draws the rule alone. C5: several runs where
+  // creole styled the condition, each its own `<text>` (D3).
+  return rule + styledRunsText(elseGeo.runs, paint.font, theme);
 }
 
 // ---------------------------------------------------------------------------
@@ -257,6 +256,8 @@ function renderForeground(event: Exclude<EventGeo, FrameGeo>, theme: ScaledTheme
       return '';
     case 'note':
       return renderNote(event, theme);
+    case 'else':
+      return renderElse(event, theme);
     case 'divider':
       return renderDivider(event, theme);
     case 'newpage':
@@ -439,7 +440,11 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
     width: scaledGeo.totalWidth + ENSURE_VISIBLE_DELTA,
     height: scaledGeo.totalHeight + ENSURE_VISIBLE_DELTA,
     ...preChromeDims(scaledGeo, k),
-    background: theme.colors.background,
+    // `SvgGraphics` receives the background as `HColor#toSvg` and paints the
+    // canvas rect unless that string is `#00000000`, `#000000` or `#FFFFFF`
+    // (`SvgGraphics.java:189-191`). Handing over the raw token (`white`, as
+    // `!theme plain` writes it) failed that test and drew an extra rect.
+    background: resolveColorToSvgHex(theme.colors.background),
     // T2's `finalizeSequenceBody` (`core/assemble-svg.ts`) owns the content
     // `<g>` wrap and the background rect, so the body is handed over bare.
     diagramType: DIAGRAM_TYPE_SEQUENCE,

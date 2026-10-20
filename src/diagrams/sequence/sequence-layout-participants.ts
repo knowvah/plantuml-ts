@@ -17,11 +17,13 @@ import type {
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import { ARROW_PADDING_X, arrowFontSpecOf, LIVE_DELTA_SIZE, TOP_MARGIN } from './sequence-layout-shared.js';
+import { ARROW_PADDING_X, LIVE_DELTA_SIZE, TOP_MARGIN } from './sequence-layout-shared.js';
+import { messagePaint } from './sequence-arrow-paint.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
 import { symbolPreferredHeight, symbolPreferredWidth } from './sequence-layout-participant-sizing.js';
 import { ARROW_DELTA_X } from './sequence-arrowhead.js';
-import { displayLines, MESSAGE_NUMBER_MARGIN, numberTextOf, refBodyLines, refBodyWidth } from './text-block-geo.js';
+import { messageLabelWidth, numberTextOf, refBodyLines } from './text-block-geo.js';
+import { refComponentWidth, referencePaints } from './ref-body-geo.js';
 import {
   BADGE_GAP,
   buildLabelRuns,
@@ -32,7 +34,6 @@ import {
 import { displayedBadgeOf, displayedStereotypeLines } from './sequence-hide-passes.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { paintOfGeo, participantPaintsOf } from './sequence-participant-paints.js';
-import { sequenceAtomContext, sequenceLabelBlockWidth, sequenceLabelLineWidth } from './sequence-creole.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 
 /**
@@ -71,7 +72,7 @@ export function computeParticipantLayout(
 ): ParticipantLayoutResult {
   const sortedParticipants = [...ast.participants].sort((a, b) => a.order - b.order);
   const constraints: SpanConstraint[] = [];
-  scanMessageLabels(ast.events, sortedParticipants, { theme, measurer, levels, sprites: ast.sprites }, constraints);
+  scanMessageLabels(ast.events, sortedParticipants, { measurer, levels, sprites: ast.sprites }, constraints);
 
   const ctx: ParticipantLayoutCtx = { theme, measurer, sprites: ast.sprites };
   const participantWidths = computeParticipantWidths(sortedParticipants, ctx);
@@ -134,7 +135,6 @@ interface SpanConstraint {
 export type MessageLevels = Map<SequenceEvent, { level1: number; level2: number }>;
 
 interface ScanContext {
-  readonly theme: Theme;
   readonly measurer: StringMeasurer;
   readonly levels: MessageLevels | undefined;
   readonly sprites: SpriteRegistry | undefined;
@@ -166,24 +166,15 @@ function scanMessageLabels(
   scan: ScanContext,
   out: SpanConstraint[],
 ): void {
-  const { theme, measurer } = scan;
-  const arrowSpec = arrowFontSpecOf(theme);
-  const atoms = sequenceAtomContext(scan.sprites, theme.colors.text);
   for (const ev of events) {
     if (ev.kind === 'message' && ev.from !== ev.to) {
       const fi = sortedParticipants.findIndex((p) => p.id === ev.from);
       const ti = sortedParticipants.findIndex((p) => p.id === ev.to);
       if (fi >= 0 && ti >= 0 && fi !== ti) {
-        const lines = ev.label === '' ? [] : displayLines(ev.label);
-        // `Display#createMessageNumber` (`Display.java:703-712`) merges the
-        // number, a 4px right margin and the label, so the component's text
-        // block -- hence `getPreferredWidth` -- is that sum.
-        const numberText = numberTextOf(ev);
-        const numberWidth =
-          numberText === undefined
-            ? 0
-            : sequenceLabelLineWidth(numberText, arrowSpec, measurer, atoms) + MESSAGE_NUMBER_MARGIN;
-        const labelWidth = numberWidth + sequenceLabelBlockWidth(lines, arrowSpec, measurer, atoms);
+        // The component is `createComponentArrow(message.getUsedStyles(), …)`
+        // (`CommunicationTile.java:153-166`): its block is in the arrow style's font.
+        const font = messagePaint(ev.styleBuilder, ev.stereotype, ev.arrow, false).font;
+        const labelWidth = messageLabelWidth(ev.label, numberTextOf(ev), font, scan);
         out.push({
           from: Math.min(fi, ti),
           to: Math.max(fi, ti),
@@ -222,7 +213,8 @@ function scanFrame(ev: FrameEvent, sorted: Participant[], scan: ScanContext, out
  * and `last.ensureBiggerThan(first.addFixed(dim.getWidth()))` pushes the
  * rightmost box until the component's preferred width fits between them.
  * A one-participant `ref` binds nothing: `last.addAtLeast(0)` (`:112-113`)
- * is a fresh variable, so only the frame widens.
+ * is a fresh variable, so only the frame widens. `dim` is the preferred
+ * width of the component the tile draws, off the reference's own styles.
  */
 function refConstraint(ev: FrameEvent, sorted: Participant[], scan: ScanContext): SpanConstraint[] {
   if (ev.frameType !== 'ref' || ev.participants === undefined) return [];
@@ -230,7 +222,7 @@ function refConstraint(ev: FrameEvent, sorted: Participant[], scan: ScanContext)
   const from = Math.min(...indices);
   const to = Math.max(...indices);
   if (indices.length === 0 || from === to) return [];
-  const span = refBodyWidth(refBodyLines(ev.frameType, ev.label), scan.theme, scan.measurer);
+  const span = refComponentWidth(refBodyLines(ev.frameType, ev.label), referencePaints(ev), scan.measurer);
   return [{ from, to, span, edge: true }];
 }
 

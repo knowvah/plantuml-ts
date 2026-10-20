@@ -36,7 +36,7 @@ import type { ScaleSpec } from '../../core/scale-command.js';
 import type { TextRun } from './text-block-geo.js';
 import type { ParticipantGeo } from './geo-participant.js';
 import type { MessageGeo, ActivationGeo, DestroyGeo } from './geo-message.js';
-import type { FrameGeo } from './geo-frame.js';
+import type { ElseGeo, FrameGeo } from './geo-frame.js';
 import type { NoteGeo, DividerGeo, SpaceGeo, NewpageGeo, BoxGeo, DelayGeo, LifelineSegment } from './geo-annotation.js';
 
 export type { TextRun };
@@ -46,7 +46,16 @@ export type * from './geo-frame.js';
 export type * from './geo-annotation.js';
 
 export type EventGeo =
-  MessageGeo | NoteGeo | ActivationGeo | DestroyGeo | FrameGeo | DividerGeo | SpaceGeo | NewpageGeo | DelayGeo;
+  | MessageGeo
+  | NoteGeo
+  | ActivationGeo
+  | DestroyGeo
+  | FrameGeo
+  | ElseGeo
+  | DividerGeo
+  | SpaceGeo
+  | NewpageGeo
+  | DelayGeo;
 
 export interface SequenceGeometry {
   totalWidth: number;

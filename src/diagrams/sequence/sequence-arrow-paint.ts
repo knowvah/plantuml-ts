@@ -28,13 +28,7 @@
  * keys on BOTH dash lengths being 0 (`ArrowConfiguration.java:248`), and
  * `getDasharraySvg` drops the space when the visible part is 0.
  */
-import { Colors } from '../../core/abel/Colors.js';
-import { ColorType } from '../../core/abel/ColorType.js';
-import { ColorMapper, toSvgPaint } from '../../core/klimt/color/ColorMapper.js';
-import { HColorAutomagic } from '../../core/klimt/color/HColorAutomagic.js';
-import { HColorGradient } from '../../core/klimt/color/HColorGradient.js';
-import { HColorSet, parseConditionalColor, resolveConditionalColor } from '../../core/klimt/color/HColorSet.js';
-import { HColorSimple } from '../../core/klimt/color/HColorSimple.js';
+import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { Stereotype } from '../../core/stereo/Stereotype.js';
@@ -51,6 +45,7 @@ import {
   paintOf,
   type SequencePaint,
 } from './sequence-skin-param.js';
+import { withTextColorFor } from './sequence-participant-paints.js';
 
 /** `new UStroke(2, 2, thickness)`: a dotted body's dash. @see skin/ArrowConfiguration.java:249,257 */
 const DOTTED_DASH = 2;
@@ -141,35 +136,6 @@ function withDashAndFont(
   };
 }
 
-/** A back colour's simple part: a gradient answers for its first colour
- *  (`HColorGradient#opposite`, `HColorGradient.java:108-110`). */
-function simpleBack(back: HColor): HColorSimple {
-  const base = back instanceof HColorGradient ? back.getColor1() : back;
-  if (!(base instanceof HColorSimple)) throw new Error('UnsupportedOperationException: HColor#opposite');
-  return base;
-}
-
-/**
- * The colour a context-dependent `FontColor` is drawn in, or `undefined` for
- * a plain one (`HColor#getAppropriateColor`, `HColor.java:121-123`):
- * `#?light:dark[:transparent]` is `HColorScheme#getAppropriateColor(back)`
- * (`HColorScheme.java:50-60`), resolved at the string level
- * (`HColorSet.ts#resolveConditionalColor`; the `HColorScheme` class is not
- * ported, so `asColor` would throw); `automatic` is `back.opposite()`
- * (`HColorAutomagic.java:38-41`). The same reads
- * `sequence-participant-paints.ts#appropriateTextColor` makes for a head.
- */
-function appropriateTextColor(style: Style, back: () => HColor): HColor | undefined {
-  const raw = style.value('FontColor').asString() ?? '';
-  const spec = raw.startsWith('#') ? raw : `#${raw}`;
-  if (parseConditionalColor(spec) !== undefined) {
-    const backHex = toSvgPaint(simpleBack(back()), ColorMapper.IDENTITY) as string;
-    return HColorSet.instance().getColor(resolveConditionalColor(spec, backHex)!);
-  }
-  if (!(style.value('FontColor').asColor(HColorSet.instance()) instanceof HColorAutomagic)) return undefined;
-  return simpleBack(back()).opposite();
-}
-
 /**
  * The label's font: the arrow style's `getFontConfiguration` with its colour
  * as `AtomText#drawU` draws it -- `fontConfiguration.adjustColorForBackground
@@ -187,9 +153,7 @@ function labelFont(style: Style, builder: StyleBuilder): FontConfiguration {
       .getMergedStyle(builder)!
       .value('BackGroundColor')
       .asColor(HColorSet.instance());
-  const color = appropriateTextColor(style, back);
-  const drawn = color === undefined ? style : style.eventuallyOverride(Colors.empty().add(ColorType.TEXT, color));
-  return paintOf(drawn, HColorSet.instance()).font;
+  return paintOf(withTextColorFor(style, back), HColorSet.instance()).font;
 }
 
 /**

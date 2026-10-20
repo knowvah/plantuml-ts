@@ -27,6 +27,9 @@
 
 import type { DelayEvent, DividerEvent, FrameEvent, SpaceEvent } from './ast.js';
 import { currentStyleBuilder } from './sequence-skin-param.js';
+import { HColorSet } from '../../core/klimt/color/HColorSet.js';
+import { NoSuchColorException } from '../../core/klimt/color/NoSuchColorException.js';
+import { NO_SUCH_COLOR } from './command-note-factory.js';
 import {
   emit,
   ensureParticipant,
@@ -199,8 +202,9 @@ export const setSeparatorCommand: Command = {
  *  matches this engine's STANDING simplification for every other frame kind
  *  (`loop`/`alt`/… already span the whole diagram width, not just their
  *  referenced participants) — not a new divergence introduced here. The
- *  leading `REF` background-color group and the inline `[[url]]` are
- *  matched and discarded: `FrameGeo` carries no per-frame color or URL.
+ *  inline `[[url]]` is matched and discarded: `FrameGeo` carries no URL.
+ *  The leading `REF` colour is the reference's `backColorElement`
+ *  ({@link refBackColorElement}).
  *
  *  Returns the resolved participant ids (T11, ubrr batch 2): `Reference
  *  implements EventWithNote` (`Reference.java:54`), so its own
@@ -219,8 +223,31 @@ function ensureRefParticipants(state: ParseState, raw: string): string[] {
   return participants;
 }
 
+/**
+ * The `REF` group, resolved where both ref commands resolve it, before any
+ * participant is created: `getIHtmlColorSet().getColor(s1)`
+ * (`CommandReferenceOverSeveral.java:118-119`,
+ * `CommandReferenceMultilinesOverSeveral.java:130-131`). An unknown colour
+ * throws `NoSuchColorException`, the command's `badColor()`
+ * (`SingleLineCommand2.java:174-177`, `AbstractDiagram.java:173-178`), so
+ * the line refuses (`state.executionError`) and `refused` is returned. The
+ * colour is kept raw, resolved late (`ref-body-geo.ts#referencePaints` lays
+ * it over the header's `BackGroundColor`, `Reference.java:99-101`).
+ */
+function refBackColorElement(state: ParseState, raw: string | undefined): { readonly color?: string } | 'refused' {
+  if (raw === undefined) return {};
+  try {
+    HColorSet.instance().getColor(raw);
+  } catch (e) {
+    if (!(e instanceof NoSuchColorException)) throw e;
+    state.executionError = NO_SUCH_COLOR;
+    return 'refused';
+  }
+  return { color: raw };
+}
+
 /** A `Reference` (`Reference.java:104-106`) with the builder current now. */
-function refFrame(state: ParseState, label: string, participants: string[]): FrameEvent {
+function refFrame(state: ParseState, label: string, participants: string[], backColorElement?: string): FrameEvent {
   const styleBuilder = currentStyleBuilder(state.style);
   const branchStyleBuilders = [styleBuilder];
   return {
@@ -232,16 +259,19 @@ function refFrame(state: ParseState, label: string, participants: string[]): Fra
     participants,
     styleBuilder,
     branchStyleBuilders,
+    ...(backColorElement !== undefined ? { backColorElement } : {}),
   };
 }
 
 export const refOverCommand: Command = {
   pattern: /^ref(#\w+)?\s+over\s+([^:[\]]+?)(?:\s*\[\[.*?\]\])?\s*:\s*(.*)$/i,
   execute(state, match) {
+    const back = refBackColorElement(state, match[1]);
+    if (back === 'refused') return;
     const participants = ensureRefParticipants(state, match[2]!);
     setLastEventWithNoteSpan(state, participants);
     const label = match[3]!.trim();
-    emit(state, refFrame(state, label, participants)); // `CommandReferenceOverSeveral.java:140-141`
+    emit(state, refFrame(state, label, participants, back.color)); // `CommandReferenceOverSeveral.java:140-141`
   },
 };
 
@@ -265,10 +295,12 @@ export const refOverCommand: Command = {
 export const refOverMultilineCommand: Command = {
   pattern: /^ref(#\w+)?\s+over\s+([^:[\]]+?)(?:\s*\[\[.*?\]\])?(?:\s*#\w+)?\s*$/i,
   execute(state, match) {
+    const back = refBackColorElement(state, match[1]);
+    if (back === 'refused') return;
     const participants = ensureRefParticipants(state, match[2]!);
     setLastEventWithNoteSpan(state, participants);
     // Captured at the opener: upstream executes the whole block as one
     // command (`CommandReferenceMultilinesOverSeveral.java:152-153`).
-    state.pendingRef = refFrame(state, '', participants);
+    state.pendingRef = refFrame(state, '', participants, back.color);
   },
 };

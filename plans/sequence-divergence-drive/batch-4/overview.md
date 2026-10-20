@@ -19,9 +19,20 @@ keys; confirm or drop at b3):
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T4x | (seeded at b3 close) | typescript-pro | (per family) | b3 close | [ ] |
+| [T4a](T4a-legacy-skinparam-store.md) | legacy `SkinParam#params` store; `sequenceGroupBodyBackgroundColor` (T3f item 3) | typescript-pro | `sequence-skin-param.ts`, `command-grouping.ts`, `parser.ts`, `sequence-parse-helpers.ts` + tests | b3 close | [ ] |
 | close | re-pin, all-engine survey, pin round 3 | orchestrator | per close-procedure | all T4x | [ ] |
 
 A family whose mechanism lies outside the sequence engine (creole, klimt,
 chrome) is not a T4x task: file it in `fixtures.md` as `open -> sdd2` with the
 mechanism (D10).
+
+## Seeded at the b3 close (2026-10-20, journal row 51)
+
+b3 classify leaves **4** paint-only rows, all one mechanism outside the
+sequence engine: the title `FontColor %reverse_hsluv_color(...)` is off by
+one in the last hex digit (davipu-63, fixecu-74, losilu-30, naliba-15),
+a TIM builtin's HSLuv rounding on chrome → `open -> sdd2` per the rule
+above. The planning candidates (font residue, creole fill, dash residue,
+`svg/@background`) are gone from the paint-only cohort. One family remains
+with a sequence-owned PAINT mechanism inside geometry rows, T3f item 3 →
+T4a.

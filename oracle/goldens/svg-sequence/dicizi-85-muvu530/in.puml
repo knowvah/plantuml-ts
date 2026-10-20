@@ -1,0 +1,11 @@
+@startuml
+<style>
+arrow {
+  LineStyle 10
+  LineColor red
+  FontColor blue
+}
+</style>
+alice ->  bob : msg
+alice --> bob : msg
+@enduml

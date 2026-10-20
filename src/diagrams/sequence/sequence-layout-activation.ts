@@ -26,9 +26,10 @@
 
 import type { ActivationGeo, EventGeo, Participant, ParticipantGeo } from './ast.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
-import { Stereotype } from '../../core/stereo/Stereotype.js';
+import type { Stereotype } from '../../core/stereo/Stereotype.js';
 import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 import { componentStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
+import { participantStereotype } from './sequence-participant-paints.js';
 
 /** `ComponentRoseActiveLine#getPreferredWidth` (`:114-116`) returns 10, and
  *  `LiveBoxesDrawer#getWidth` is that width (`LiveBoxesDrawer.java:95-97`):
@@ -72,7 +73,8 @@ export type ActivationStack = Map<string, ActivationRecord[]> & {
 export function newActivationStack(participants: readonly Participant[]): ActivationStack {
   const stereotypes = new Map<string, Stereotype>();
   for (const p of participants) {
-    const stereotype = Stereotype.build(p.stereotype);
+    // `participant.getStereotype()`: the decorated build (`CommandParticipant.java:176-181`).
+    const stereotype = participantStereotype(p);
     if (stereotype !== undefined) stereotypes.set(p.id, stereotype);
   }
   return Object.assign(new Map<string, ActivationRecord[]>(), { stereotypes });

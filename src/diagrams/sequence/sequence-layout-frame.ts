@@ -22,7 +22,7 @@
  * - `GroupingTile#drawBackground` (`GroupingTile.java:308-316`): the body
  *   style's `BackGroundColor` and `RoundCorner` for the `Blotter`.
  */
-import type { FrameEvent, FrameGeo, ParticipantGeo, SequenceEvent, TextRun } from './ast.js';
+import type { ElseGeo, FrameEvent, FrameGeo, ParticipantGeo, SequenceEvent, TextRun } from './ast.js';
 import type { HColor } from '../../core/style/Value.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
@@ -35,6 +35,7 @@ import { groupingHeaderDisplay, HEADER_PADDING } from './frame-style.js';
 import { groupingStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
 import { handleRefEvent } from './sequence-layout-ref.js';
 import { processEvents, type EventCursor, type EventProcessingContext } from './sequence-layout-events.js';
+import { TRANSPARENT_SVG } from './text-block-geo.js';
 
 /** A frame's two paints: its body (`style`) and its header (`styleHeader`). */
 export interface FramePaints {
@@ -80,7 +81,6 @@ function elsePaint(event: FrameEvent, index: number): SequencePaint {
 
 /** `HColor#toSvg` of a transparent colour (`HColor.java:76`): the bridge
  *  reads a transparent font colour as `null` (`FontConfigurationBridge.ts`). */
-const TRANSPARENT_SVG = '#00000000';
 
 /**
  * What a frame text block's creole needs to draw a `<$sprite>` (unwind2-S9b):
@@ -211,6 +211,15 @@ interface HeaderTab {
 }
 
 /**
+ * The title's display lines. An empty title (`group [c]`, whose rewritten
+ * title is `""`) is a `TextBlockEmpty`, no line at all
+ * (`AbstractTextualComponent.java:87-88`), so its tab is its padding alone.
+ */
+function titleLinesOf(tabText: string): readonly string[] {
+  return tabText === '' ? [] : displayLines(tabText);
+}
+
+/**
  * The header tab's `Display`, split by `groupingHeaderDisplay`
  * (`GroupingTile.java:127-128`), then measured at `styleHeader`'s font --
  * `ComponentRoseGroupingHeader.java:107-123` / `AbstractTextualComponent
@@ -221,17 +230,19 @@ interface HeaderTab {
 function computeHeaderTab(event: FrameEvent, headerPaint: SequencePaint, ctx: EventProcessingContext): HeaderTab {
   const rawComment = event.branchLabels[0];
   const comment = rawComment === undefined || rawComment === '' ? undefined : rawComment;
-  const { tabText, tabComment } = groupingHeaderDisplay(event.frameType, comment);
+  // `start.getTitle()`: the rewritten `group T [c]` title, else the keyword.
+  const { tabText, tabComment } = groupingHeaderDisplay(event.title ?? event.frameType, comment);
   const font = headerPaint.font;
   // `getPureTextWidth`/`getTextHeight` over the title's own text BLOCK; the
   // corner is drawn at exactly those (`ComponentRoseGroupingHeader.java:
   // 138-142`), so the tab grows with the TITLE's escaped newlines, never with
   // the comment beside it. C5: at the title's own CREOLE width --
   // `groupingHeaderDisplay` makes a `group`'s comment its TITLE.
-  const titleLines = displayLines(tabText);
+  const titleLines = titleLinesOf(tabText);
   const measured = ctx.measurer.measure(tabText, atomFontSpec(font));
   const atoms = atomsOf(headerPaint, ctx);
   const tabTextWidth = Math.max(
+    0,
     ...titleLines.map((l) =>
       creoleLineWidth(sequenceCreoleRuns(l, font, { leftX: 0, baselineY: 0 }, ctx.measurer, atoms)),
     ),
@@ -256,7 +267,7 @@ function buildTabRuns(tab: HeaderTab, paints: FramePaints, x: number, y: number,
   const left = x + HEADER_PADDING.left;
   const top = y + HEADER_PADDING.top;
   const { headerPaint, paint } = paints;
-  const title = alignedBlockRuns(displayLines(tab.tabText), headerPaint.font, { leftX: left, top }, headerPaint.align, {
+  const title = alignedBlockRuns(titleLinesOf(tab.tabText), headerPaint.font, { leftX: left, top }, headerPaint.align, {
     measurer: ctx.measurer,
     atoms: atomsOf(headerPaint, ctx),
   }).runs;
@@ -273,27 +284,48 @@ function buildTabRuns(tab: HeaderTab, paints: FramePaints, x: number, y: number,
 }
 
 /**
- * Every branch in turn: an `else` (each branch after the first) is an
- * `ElseTile` -- a dashed separator carrying its own bracketed condition, at
- * the y the cursor reached -- then the branch's own events. The colour is
- * index-aligned with `branchLabels` (`event.branchColors`, T2 D10);
- * `renderer-frame-blotter.ts` falls back to the group colour when a band has
- * none (`GroupingTile.java:333-339`).
+ * One `ElseTile` (`ElseTile.java:74-81`), at the y the cursor reached: pushed
+ * into the event stream where it falls among the group's child tiles
+ * (`GroupingTile.java:162-170`), so it is drawn in their order
+ * (`GroupingTile#drawU:280-281`), and recorded on the frame for the
+ * `Blotter`, which reads each else tile's top and general colour
+ * (`GroupingTile.java:318-347`). The colour is index-aligned with
+ * `branchLabels` (`event.branchColors`, T2 D10); `renderer-frame-blotter.ts`
+ * falls back to the group colour when a band has none (`:333-339`).
  */
+function pushElseTile(
+  event: FrameEvent,
+  i: number,
+  frameGeo: FrameGeo,
+  cursor: EventCursor,
+  ctx: EventProcessingContext,
+) {
+  const paint = elsePaint(event, i);
+  const branchColor = event.branchColors?.[i];
+  const branchLabel = event.branchLabels[i] ?? '';
+  const y = cursor.y;
+  frameGeo.branchSeparators.push({
+    y,
+    label: branchLabel,
+    ...(branchColor !== undefined ? { backColorGeneral: branchColor } : {}),
+  });
+  const elseGeo: ElseGeo = {
+    paint,
+    kind: 'else',
+    x: frameGeo.x,
+    width: frameGeo.width,
+    y,
+    runs: branchConditionRuns(branchLabel, paint, { frameX: frameGeo.x, separatorY: y }, ctx),
+  };
+  ctx.eventGeos.push(elseGeo);
+  cursor.y += separatorHeight(branchLabel, paint, ctx);
+}
+
+/** Every branch in turn: an `else` tile before each branch after the first,
+ *  then the branch's own events. */
 function walkBranches(event: FrameEvent, frameGeo: FrameGeo, cursor: EventCursor, ctx: EventProcessingContext): void {
   event.branches.forEach((branch, i) => {
-    if (i > 0) {
-      const paint = elsePaint(event, i);
-      const branchColor = event.branchColors?.[i];
-      const branchLabel = event.branchLabels[i] ?? '';
-      frameGeo.branchSeparators.push({
-        y: cursor.y,
-        label: branchLabel,
-        ...(branchColor !== undefined ? { backColorGeneral: branchColor } : {}),
-        runs: branchConditionRuns(branchLabel, paint, { frameX: frameGeo.x, separatorY: cursor.y }, ctx),
-      });
-      cursor.y += separatorHeight(branchLabel, paint, ctx);
-    }
+    if (i > 0) pushElseTile(event, i, frameGeo, cursor, ctx);
     cursor.y = processEvents(branch, cursor.y, ctx);
   });
 }

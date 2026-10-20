@@ -1,0 +1,3 @@
+@startuml
+participant "Famous Bob" as Bob << Generated >>
+@enduml

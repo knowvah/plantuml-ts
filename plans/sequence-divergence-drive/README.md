@@ -126,8 +126,8 @@ Measurement (sequence has NO DOT gate — it never emits `svek-N.dot`):
 | [1](batch-1/overview.md) | style seam module (D1/D2/D4) | T1a | — | [x] |
 | [1b](batch-1b/overview.md) | parser capture + `UmlSource` (D3); geo paint fields; `mergeNestedChildOver` port; skinparam positions — no-op seam | T1b, T1c, T1d, T1e | all ∥ | [x] |
 | [2](batch-2/overview.md) | families: participant, lifeline, arrow, divider, note+box; lifeline/destroy; pin round 1 (367) | T2a–T2c, T2e, T2f, close | all ∥ | [x] |
-| [3](batch-3/overview.md) | groups/ref/newpage/delay; shadowing; arrow colour + label font; notes/box follow-ups | T3a, T3b, T3d, T3e | all ∥ | [ ] |
-| [3b](batch-3b/overview.md) | retire dead theme fields (D5); pin round 2 | T3c, close | — | [ ] |
+| [3](batch-3/overview.md) | groups/ref/newpage/delay; shadowing; arrow colour + label font; notes/box follow-ups | T3a, T3b, T3d, T3e | all ∥ | [x] |
+| [3b](batch-3b/overview.md) | retire dead theme fields (D5; deletion pending stop-11 ruling); frame follow-ups; pin round 2 (419) | T3c, T3f, close | ∥ | [x] |
 | [4](batch-4/overview.md) | drive round on the paint residue; pin round 3 | T4x, close | all ∥ | [ ] |
 | [5](batch-5/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
 
@@ -172,3 +172,12 @@ Measurement (sequence has NO DOT gate — it never emits `svek-N.dot`):
 - Ruling on the halt: option (a), widened. Additive ports of unported
   upstream `core/style` members are allowed (D4 Amendment 2; stop 8 narrowed).
   T1d ports `Style#mergeNestedChildOver` in batch 1b. Journal row 16.
+
+## Status — 2026-10-20, after the b3 close
+
+- Pins: **419** (pin round 1: 367 at close-b2; round 2: 52 at close-b3). D10
+  (≥ 250) met. Survey sequence conformant 0 → 419; Σ 150864 → 73380.
+- **Ruling pending (stop 11, D5 Amendment 1):** delete the 10 sequence
+  `Theme` fields that lost every reader (reachable via `RenderOptions`'
+  `Partial<Theme>`), or keep them inert → sdd2. Nothing else waits on it.
+- Next: batch 4 (T4a), then batch 5.

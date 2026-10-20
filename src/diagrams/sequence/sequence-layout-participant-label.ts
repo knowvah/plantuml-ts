@@ -32,7 +32,7 @@ import {
   participantLabelCy,
   participantLabelMetricsOf,
 } from './sequence-layout-participant-sizing.js';
-import { displayLines } from './text-block-geo.js';
+import { displayLines, TRANSPARENT_SVG } from './text-block-geo.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { getSpriteMonochrome } from '../../core/sprite-registry.js';
@@ -225,10 +225,6 @@ export function anyBadgeFor(
 ): ParticipantBadge | undefined {
   return badgeFor(p, ctx.sprites, background) ?? charBadgeFor(p, ctx.theme);
 }
-
-/** `HColorSet#parseColor("transparent")`'s SVG form: a transparent font
- *  colour reaches the bridge as `null` (`FontConfigurationBridge.ts`). */
-const TRANSPARENT_SVG = '#00000000';
 
 /**
  * What a head's creole needs to draw `<$sprite>`/`<img>` atoms (cdd7 T1f):

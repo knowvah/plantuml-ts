@@ -80,8 +80,8 @@ describe('renderFrameBlotter', () => {
   it('splits into three bands at each else separator y + 1', () => {
     const frame = coloured('#0000ff', {
       branchSeparators: [
-        { y: 130, label: 'x', backColorGeneral: '#ff0000', runs: [] },
-        { y: 160, label: 'y', backColorGeneral: '#00ff00', runs: [] },
+        { y: 130, label: 'x', backColorGeneral: '#ff0000' },
+        { y: 160, label: 'y', backColorGeneral: '#00ff00' },
       ],
     });
     const svg = renderFrameBlotter(frame, 1);
@@ -96,7 +96,7 @@ describe('renderFrameBlotter', () => {
 
   it('an else with no colour of its own inherits the group colour', () => {
     const inherited = coloured('#123456', {
-      branchSeparators: [{ y: 130, label: 'x', runs: [] }],
+      branchSeparators: [{ y: 130, label: 'x' }],
     });
     const svg = renderFrameBlotter(inherited, 1);
     // If the else had NOT inherited (i.e. fell back to transparent instead
@@ -109,7 +109,7 @@ describe('renderFrameBlotter', () => {
 
   it('skips the band before the first colour change when the default is transparent', () => {
     const frame = makeFrame({
-      branchSeparators: [{ y: 130, label: 'x', backColorGeneral: '#ff0000', runs: [] }],
+      branchSeparators: [{ y: 130, label: 'x', backColorGeneral: '#ff0000' }],
     });
     const svg = renderFrameBlotter(frame, 1);
     // Only the second band (from the separator to the frame end) is
@@ -121,8 +121,8 @@ describe('renderFrameBlotter', () => {
   it('de-duplicates two adjacent elses that carry the same colour', () => {
     const frame = coloured('#111111', {
       branchSeparators: [
-        { y: 130, label: 'x', backColorGeneral: '#222222', runs: [] },
-        { y: 160, label: 'y', backColorGeneral: '#222222', runs: [] },
+        { y: 130, label: 'x', backColorGeneral: '#222222' },
+        { y: 160, label: 'y', backColorGeneral: '#222222' },
       ],
     });
     const svg = renderFrameBlotter(frame, 1);
@@ -145,8 +145,8 @@ describe('renderFrameBlotter', () => {
   it('round corner with multiple bands arcs the first and last, leaves middles plain', () => {
     const frame = rounded('#0000ff', {
       branchSeparators: [
-        { y: 130, label: 'x', backColorGeneral: '#ff0000', runs: [] },
-        { y: 160, label: 'y', backColorGeneral: '#00ff00', runs: [] },
+        { y: 130, label: 'x', backColorGeneral: '#ff0000' },
+        { y: 160, label: 'y', backColorGeneral: '#00ff00' },
       ],
     });
     const svg = renderFrameBlotter(frame, 1);

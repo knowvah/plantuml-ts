@@ -89,6 +89,7 @@ import type {
   NoteGeo,
   ActivationGeo,
   DestroyGeo,
+  ElseGeo,
   FrameGeo,
   DividerGeo,
   SpaceGeo,
@@ -233,11 +234,7 @@ function scaleFrame(f: FrameGeo, k: number): FrameGeo {
     y: f.y * k,
     width: f.width * k,
     height: f.height * k,
-    branchSeparators: f.branchSeparators.map((s) => ({
-      ...s,
-      y: s.y * k,
-      runs: s.runs.map((r) => scaleRun(r, k)),
-    })),
+    branchSeparators: f.branchSeparators.map((s) => ({ ...s, y: s.y * k })),
     // A4: `refBody` became placed, measured runs, so its `y` and its three
     // metrics scale too — scaling only `x`, as this did while a body entry was
     // `{ text, x }`, left every scaled `ref` drawing its text at the unscaled
@@ -248,6 +245,11 @@ function scaleFrame(f: FrameGeo, k: number): FrameGeo {
     tabWidth: f.tabWidth * k,
     tabHeight: f.tabHeight * k,
   };
+}
+
+/** An `else` tile's geometry, scaled; its `paint` is scaled at emission. */
+function scaleElse(e: ElseGeo, k: number): ElseGeo {
+  return { ...e, x: e.x * k, y: e.y * k, width: e.width * k, runs: e.runs.map((r) => scaleRun(r, k)) };
 }
 
 function scaleDivider(d: DividerGeo, k: number): DividerGeo {
@@ -294,6 +296,8 @@ function scaleEvent(event: EventGeo, k: number): EventGeo {
       return scaleDestroy(event, k);
     case 'frame':
       return scaleFrame(event, k);
+    case 'else':
+      return scaleElse(event, k);
     case 'divider':
       return scaleDivider(event, k);
     case 'space':

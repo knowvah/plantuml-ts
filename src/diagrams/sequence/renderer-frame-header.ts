@@ -23,6 +23,7 @@ import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
 import { frameShadowDelta, sequenceShadowFilter } from './sequence-shadow.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { CORNER_SIZE } from './frame-style.js';
+import { TRANSPARENT_SVG } from './text-block-geo.js';
 
 /** A frame's two paints, as layout resolved them (sdd1 D1): the body
  *  `style` and the `styleHeader` (`sequence-layout-frame.ts`,
@@ -41,7 +42,6 @@ export function framePaintsOf(frame: FrameGeo): FramePaintPair {
 }
 
 /** `HColor#toSvg` of a fully transparent colour (`HColor.java:76`). */
-const TRANSPARENT_SVG = '#00000000';
 
 /** `SvgGraphics#fixColor` (`SvgGraphics.java:539-541`): a transparent fill or
  *  stroke is written `none`. */
@@ -137,7 +137,7 @@ export function renderGroupingHeaderBackground(frame: FrameGeo, theme: ScaledThe
     fill: 'none',
     ...strokeOf(paint, k),
     ...roundedOf(paint.roundCorner, k),
-    ...sequenceShadowFilter(frameShadowDelta(frame, theme)),
+    ...sequenceShadowFilter(frameShadowDelta(frame)),
   });
 }
 
@@ -227,7 +227,7 @@ function renderBodyRect(frame: FrameGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
   const { paint } = framePaintsOf(frame);
   const isRef = frame.frameType === 'ref';
-  const delta = isRef ? frameShadowDelta(frame, theme) : 0;
+  const delta = isRef ? frameShadowDelta(frame) : 0;
   return rect(frame.x, frame.y, frame.width - delta * k, frame.height, {
     fill: isRef ? svgFixColor(paint.fill) : 'none',
     ...strokeOf(paint, k),

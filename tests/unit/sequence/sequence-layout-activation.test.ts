@@ -110,6 +110,23 @@ describe('activation paint (LiveBoxesDrawer.java:137-146)', () => {
     ]);
   });
 
+  it('merges the decorated stereotype, without its (C, #color) spot (CommandParticipant.java:176-181; jar: fill="#F00")', () => {
+    // `participant.getStereotype()` is the four-argument build, whose label --
+    // hence its style name -- is `foo`, not `(C,#ADD1B2) foo`.
+    const body = [
+      '<style>',
+      '.foo {',
+      '  BackGroundColor red',
+      '}',
+      '</style>',
+      'participant Alice',
+      'participant Bob << (C,#ADD1B2) foo >>',
+      'Alice -> Bob ++ : hi',
+      'Bob --> Alice -- : ok',
+    ];
+    expect(fills(body)).toEqual([RED]);
+  });
+
   it('a bar left open is flushed with its opening builder', () => {
     const [bar] = activations(['A -> B ++ : hi']);
     expect(bar?.paint?.fill).toBe(ACTIVATION_WHITE);

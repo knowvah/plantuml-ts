@@ -213,6 +213,12 @@ export interface FrameEvent {
      *  as a one-branch, label-only frame; see `command-misc.ts`. */
     | 'ref';
   label: string;
+  /** The header title `CommandGrouping` rewrote a `group T [c]` line to:
+   *  `type = m.group(1)` (`CommandGrouping.java:143-148`), kept verbatim (its
+   *  space before the bracket included, possibly empty). Absent where the
+   *  title is the keyword itself -- every other line -- which `GroupingTile`
+   *  reads as `getTitle()` (`GroupingTile.java:126-127`). */
+  title?: string;
   branches: SequenceEvent[][]; // alt has multiple; others have one
   /** Condition text per branch, index-aligned with `branches`: entry 0 is
    *  the frame's own `label`, 1..n are `else <condition>` labels, drawn

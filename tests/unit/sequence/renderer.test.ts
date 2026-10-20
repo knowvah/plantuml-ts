@@ -6,6 +6,7 @@ import type {
   MessageGeo,
   ActivationGeo,
   NoteGeo,
+  ElseGeo,
   FrameGeo,
   DividerGeo,
   ParticipantGeo,
@@ -27,9 +28,8 @@ import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import type { ArrowConfiguration } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
 import { inflateSync } from 'node:zlib';
-import { arrowFontSpecOf, fontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
+import { fontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
 import { participantLabelCy } from '../../../src/diagrams/sequence/sequence-layout-participant-sizing.js';
-import { noteFontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
 import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
 import {
   componentStyle,
@@ -43,6 +43,7 @@ import {
 import { boxLabelRuns, boxPaint, type BoxFrame } from '../../../src/diagrams/sequence/sequence-layout-box.js';
 import { DIVIDER_PADDING, DIVIDER_LABEL_DELTA_X } from '../../../src/diagrams/sequence/divider-style.js';
 import { atomFontSpec } from '../../../src/diagrams/sequence/sequence-creole-text-atom.js';
+import { defaultMessageFont } from '../../../src/diagrams/sequence/sequence-arrow-paint.js';
 
 /** The default skin's builder: a source with no style declarations. */
 const DEFAULT_STYLE = currentStyleBuilder(createSequenceStyleDispatch({ lines: [], type: 'sequence' }));
@@ -157,7 +158,7 @@ function tabRunsFor(f: Pick<FrameGeo, 'x' | 'y' | 'tabText' | 'tabComment' | 'ta
  *  A5 moved that placement into layout. Measured at `note { FontSize 13 }`. */
 function noteRunsFor(n: { x: number; y: number; text: string }): TextRun[] {
   const measurer = new DeterministicMeasurer();
-  const font = noteFontSpecOf(defaultTheme);
+  const font = atomFontSpec(NOTE_PAINT.font);
   const lineHeight = measurer.measure('M', font).height;
   const ascent = lineHeight - measurer.getDescent(font, 'M');
   const NOTE_PADDING = 10;
@@ -269,6 +270,24 @@ function makeSyncMessage(overrides?: Partial<MessageGeo>): MessageGeo {
 // Acceptance criterion 1: Two participants → ≥ 2 <rect elements
 // ---------------------------------------------------------------------------
 
+describe('renderSequence — document background (SvgGraphics.java:189-191)', () => {
+  const withBackground = (background: string) => ({ ...defaultTheme, colors: { ...defaultTheme.colors, background } });
+
+  it('hands the shell the HColor#toSvg form, so `white` (!theme plain) is #FFFFFF and draws no canvas rect', () => {
+    const fragment = renderSequence(makeGeo(), withBackground('white'), TEST_MEASURER);
+    expect(fragment.background).toBe('#FFFFFF');
+    const svg = assembleSvg(fragment);
+    expect(svg).toContain('background:#FFFFFF;');
+    expect(svg).not.toContain('<rect x="0" y="0"');
+  });
+
+  it("still paints a non-white background as the content group's first rect, in its #RRGGBB form", () => {
+    const svg = assembleSvg(renderSequence(makeGeo(), withBackground('lightblue'), TEST_MEASURER));
+    expect(svg).toContain('background:#ADD8E6;');
+    expect(svg).toMatch(/<rect x="0" y="0" width="\d+" height="\d+" fill="#ADD8E6"/);
+  });
+});
+
 describe('renderSequence — participant boxes', () => {
   it('emits at least 2 rects for two participants', () => {
     const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme, TEST_MEASURER));
@@ -362,9 +381,9 @@ describe('renderSequence — messages', () => {
     const numberRun = msg.labelNumber;
     expect(numberRun).toBeDefined();
     // Measured at the ARROW font, which is what `messageLabelBlock` lays the
-    // block out with: `arrow { FontSize 13 }` (`plantuml.skin:306-308`), not
-    // the ambient 14 every other sequence element uses.
-    const numberWidth = new FormulaMeasurer().measure('3', arrowFontSpecOf(defaultTheme)).width;
+    // block out with: `arrow { FontSize 13 }` (`plantuml.skin:317`), not the
+    // ambient 14 every other sequence element uses.
+    const numberWidth = new FormulaMeasurer().measure('3', atomFontSpec(defaultMessageFont())).width;
     // `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` -- `Display.java:706`.
     expect(msg.labelLines[0]?.x).toBeCloseTo((numberRun?.x ?? 0) + numberWidth + 4, 6);
     // `VerticalAlignment.CENTER` against a one-line label puts both on one row.
@@ -942,7 +961,8 @@ describe('renderSequence — frames', () => {
     // The frame's own outer border is a SOLID rect
     // (`ComponentRoseGroupingHeader#drawInternalU`, no dash anywhere in that
     // component) -- dashing lives on the `else` divider only (`ElseTile
-    // .java:104`: "its OWN divider (dashed line + label strip)").
+    // .java:104`: "its OWN divider (dashed line + label strip)"), which is
+    // its own tile in the stream.
     const frame: FrameGeo = {
       ...DEFAULT_GROUP_PAINTS,
       kind: 'frame',
@@ -952,7 +972,7 @@ describe('renderSequence — frames', () => {
       y: 60,
       width: 300,
       height: 100,
-      branchSeparators: [{ y: 110, label: 'x <= 0', runs: [] }],
+      branchSeparators: [{ y: 110, label: 'x <= 0' }],
       refBody: [],
       // A4: tab text is placed in layout; these cases assert frame boxes.
       tabRuns: [],
@@ -961,9 +981,14 @@ describe('renderSequence — frames', () => {
       tabWidth: 69,
       tabHeight: 17,
     };
-    const geo = makeGeo({ events: [frame] });
+    const frameOnly = assembleSvg(renderSequence(makeGeo({ events: [frame] }), defaultTheme, TEST_MEASURER));
+    expect(frameOnly).not.toContain('stroke-dasharray="2,2"');
+    const elseGeo: ElseGeo = { paint: DEFAULT_GROUP_PAINTS.paint, kind: 'else', x: 30, width: 300, y: 110, runs: [] };
+    const geo = makeGeo({ events: [frame, elseGeo] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
-    expect(svg).toContain('stroke-dasharray');
+    expect(svg).toContain(
+      '<line x1="30" y1="111" x2="330" y2="111" stroke="#000" stroke-width="1" stroke-dasharray="2,2"/>',
+    );
   });
 
   it('frame label includes frameType + comment text', () => {

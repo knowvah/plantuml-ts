@@ -1,0 +1,15 @@
+@startuml
+skinparam sequencearrowcolor #black
+
+Alice -> Bob: Good Request
+Alice <[#green]- Bob: Positive Response
+Alice -> Bob: Bad Request
+Alice <[#red]- Bob: Negative Response
+
+...
+
+Alice -> Bob ++: Good Request
+return #green Positive Response
+Alice -> Bob ++: Bad Request
+return #red Negative Response
+@enduml

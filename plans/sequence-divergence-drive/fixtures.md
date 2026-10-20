@@ -17,6 +17,7 @@ Planning-time cohorts (`measurements/plan-classify.json`, ratchet path, HEAD
 | b0 | 0 | 338 | 513 | 277 | 13 | 0 | 150864 |
 | b1b | 0 | 338 | 513 | 277 | 13 | 0 | 150864 |
 | b2 | 367 | 25 | 483 | 253 | 13 | 367 | 109682 |
+| b3 | 419 | 4 | 532 | 173 | 13 | 419 | 73380 |
 
 ## Paint-only rows
 
@@ -41,11 +42,11 @@ named, with Java `file:line`) · `final` (`pinned (<commit>)` or
 | birike-24-lete111 | 25 | svg/g/rect@rx ×6, svg/g/rect@ry ×6, svg/g/rect@stroke-width ×6, svg/g/g/line@stroke-width ×3, svg/g/line@stroke-dasharray ×2, svg/g/g/rect@fill, svg/g/g/rect@stroke-width | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | bitutu-89-luju788 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | bobofu-53-coje821 | 26 | svg/g/g/line@stroke-width ×8, svg/g/line@stroke-width ×6, svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| boguvi-37-ralo631 | 34 | svg/g/rect@rx ×8, svg/g/rect@ry ×8, svg/g/rect@stroke-width ×8, svg/g/g/line@stroke-width ×4, svg/g/text@font-weight ×4, svg/g/line@stroke-dasharray ×2 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | open -> T3d |
+| boguvi-37-ralo631 | 34 | svg/g/rect@rx ×8, svg/g/rect@ry ×8, svg/g/rect@stroke-width ×8, svg/g/g/line@stroke-width ×4, svg/g/text@font-weight ×4, svg/g/line@stroke-dasharray ×2 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | pinned (close-b3) |
 | bokazo-24-tefu124 | 16 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/g/rect@fill, svg/g/g/rect@stroke-width | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| bopizu-70-rese737 | 40 | svg/g/rect@rx ×8, svg/g/rect@ry ×8, svg/g/rect@stroke-width ×8, svg/g/text@font-weight ×8, svg/g/g/line@stroke-width ×4, svg/g/line@stroke-dasharray ×4 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | open -> T3d |
+| bopizu-70-rese737 | 40 | svg/g/rect@rx ×8, svg/g/rect@ry ×8, svg/g/rect@stroke-width ×8, svg/g/text@font-weight ×8, svg/g/g/line@stroke-width ×4, svg/g/line@stroke-dasharray ×4 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | pinned (close-b3) |
 | bosedo-77-loge384 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| bovuda-87-dale466 | 22 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/line@stroke ×2, svg/g/polygon@fill ×2, svg/g/polygon@stroke ×2, svg/g/text@fill ×2 | T3d | `arrow { FontColor }` does not reach the message label (label font still theme-driven, journal row 27b) | open -> T3d |
+| bovuda-87-dale466 | 22 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/line@stroke ×2, svg/g/polygon@fill ×2, svg/g/polygon@stroke ×2, svg/g/text@fill ×2 | T3d | `arrow { FontColor }` does not reach the message label (label font still theme-driven, journal row 27b) | pinned (close-b3) |
 | boxibe-39-luco835 | 15 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/line@stroke-dasharray | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | bozama-65-pexo274 | 15 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/line@stroke-width | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | bugaju-81-ciko758 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
@@ -70,7 +71,7 @@ named, with Java `file:line`) · `final` (`pinned (<commit>)` or
 | devamo-31-coji129 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | dexigo-61-soge505 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | dibero-91-ruvu458 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| dicizi-85-muvu530 | 24 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/line@stroke ×2, svg/g/line@stroke-dasharray ×2, svg/g/polygon@fill ×2, svg/g/polygon@stroke ×2, svg/g/text@fill ×2 | T3d | `arrow { FontColor }` does not reach the message label (label font still theme-driven, journal row 27b) | open -> T3d |
+| dicizi-85-muvu530 | 24 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/line@stroke ×2, svg/g/line@stroke-dasharray ×2, svg/g/polygon@fill ×2, svg/g/polygon@stroke ×2, svg/g/text@fill ×2 | T3d | `arrow { FontColor }` does not reach the message label (label font still theme-driven, journal row 27b) | pinned (close-b3) |
 | dilesi-25-lali486 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | dinaze-10-xedi714 | 21 | svg/g/rect@rx ×6, svg/g/rect@ry ×6, svg/g/rect@stroke-width ×6, svg/g/g/line@stroke-width ×3 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | dinita-73-tige486 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
@@ -84,13 +85,13 @@ named, with Java `file:line`) · `final` (`pinned (<commit>)` or
 | dulaca-47-neta380 | 7 | svg/g/rect@rx ×2, svg/g/rect@ry ×2, svg/g/rect@stroke-width ×2, svg/g/g/line@stroke-width | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | dutova-31-coci211 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | fajixi-56-dete708 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| fakifa-13-puve679 | 30 | svg/g/g/line@stroke-width ×8, svg/g/line@stroke-width ×6, svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/text@fill ×4 | T3d | `arrow { FontColor }` does not reach the message label (label font still theme-driven, journal row 27b) | open -> T3d |
+| fakifa-13-puve679 | 30 | svg/g/g/line@stroke-width ×8, svg/g/line@stroke-width ×6, svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/text@fill ×4 | T3d | `arrow { FontColor }` does not reach the message label (label font still theme-driven, journal row 27b) | pinned (close-b3) |
 | fakune-74-geba235 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | falolu-20-sepu020 | 17 | svg/g/rect@rx ×5, svg/g/rect@ry ×5, svg/g/rect@stroke-width ×5, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | fareko-61-fige194 | 15 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/line@stroke-dasharray | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | faviki-72-kete653 | 15 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/line@stroke-width | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | fazaba-22-nusi829 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| fazubu-21-roxo367 | 22 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/line@stroke ×2, svg/g/polygon@fill ×2, svg/g/polygon@stroke ×2, svg/g/text@fill ×2 | T3d | `arrow { FontColor }` does not reach the message label (label font still theme-driven, journal row 27b) | open -> T3d |
+| fazubu-21-roxo367 | 22 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/line@stroke ×2, svg/g/polygon@fill ×2, svg/g/polygon@stroke ×2, svg/g/text@fill ×2 | T3d | `arrow { FontColor }` does not reach the message label (label font still theme-driven, journal row 27b) | pinned (close-b3) |
 | fazuzo-56-xoge438 | 15 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/line@stroke-dasharray | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | fekatu-96-kele513 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | femixi-54-maja138 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
@@ -109,7 +110,7 @@ named, with Java `file:line`) · `final` (`pinned (<commit>)` or
 | fusavi-61-disa620 | 16 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/g/rect@fill, svg/g/g/rect@stroke-width | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | futaxe-10-xonu513 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | gacavi-49-zeki744 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| gadasu-04-kada675 | 18 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/text@font-weight ×4, svg/g/g/line@stroke-width ×2 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | open -> T3d |
+| gadasu-04-kada675 | 18 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/text@font-weight ×4, svg/g/g/line@stroke-width ×2 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | pinned (close-b3) |
 | ganefo-61-leka777 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | gefobi-11-jena493 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | gekuko-59-muta575 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
@@ -138,11 +139,11 @@ named, with Java `file:line`) · `final` (`pinned (<commit>)` or
 | jorari-47-buje011 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | joroli-85-vace726 | 17 | svg/g/rect@rx ×5, svg/g/rect@ry ×5, svg/g/rect@stroke-width ×5, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | jozete-34-kete358 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| jutexi-93-zeta646 | 15 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/text@fill | T3d | `arrow { FontColor }` does not reach the message label (label font still theme-driven, journal row 27b) | open -> T3d |
+| jutexi-93-zeta646 | 15 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/text@fill | T3d | `arrow { FontColor }` does not reach the message label (label font still theme-driven, journal row 27b) | pinned (close-b3) |
 | jutomu-49-kemi074 | 15 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/line@stroke-dasharray | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | kafobi-95-risi292 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | kakune-11-vusu073 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| kaporo-80-vace949 | 18 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/text@font-weight ×4, svg/g/g/line@stroke-width ×2 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | open -> T3d |
+| kaporo-80-vace949 | 18 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/text@font-weight ×4, svg/g/g/line@stroke-width ×2 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | pinned (close-b3) |
 | kefila-88-kage602 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | kemira-27-jaxe643 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | kerezi-79-cepe665 | 21 | svg/g/rect@rx ×6, svg/g/rect@ry ×6, svg/g/rect@stroke-width ×6, svg/g/g/line@stroke-width ×3 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
@@ -160,7 +161,7 @@ named, with Java `file:line`) · `final` (`pinned (<commit>)` or
 | labima-56-kone976 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | lakoze-10-cuza667 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | lalite-31-joxu896 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| lavaba-76-lepi228 | 18 | svg/g/rect@stroke-width ×6, svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/g/line@stroke-width ×2, svg/g/text@font-weight ×2 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | open -> T3d |
+| lavaba-76-lepi228 | 18 | svg/g/rect@stroke-width ×6, svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/g/line@stroke-width ×2, svg/g/text@font-weight ×2 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | pinned (close-b3) |
 | laveli-73-zuse406 | 18 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/text@fill ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | leceju-60-doxa170 | 32 | svg/g/rect@rx ×8, svg/g/rect@ry ×8, svg/g/rect@stroke-width ×8, svg/g/g/line@stroke-width ×4, svg/g/g/rect@fill ×2, svg/g/g/rect@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | lemevu-44-gupu133 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
@@ -180,7 +181,7 @@ named, with Java `file:line`) · `final` (`pinned (<commit>)` or
 | luleji-91-jera958 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | lumogu-95-givi829 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | luxiti-51-jare370 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| luxiti-90-beca090 | 17 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/text@font-weight ×2, svg/g/line@stroke-dasharray | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | open -> T3d |
+| luxiti-90-beca090 | 17 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/text@font-weight ×2, svg/g/line@stroke-dasharray | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | pinned (close-b3) |
 | maxabo-82-soto406 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | maxubu-98-roca477 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | mebici-98-foji026 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
@@ -259,7 +260,7 @@ named, with Java `file:line`) · `final` (`pinned (<commit>)` or
 | rufoko-60-jori485 | 16 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/g/rect@fill, svg/g/g/rect@stroke-width | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | rulepa-49-pisa733 | 14 | svg/g/a/rect@rx ×2, svg/g/a/rect@ry ×2, svg/g/a/rect@stroke-width ×2, svg/g/g/line@stroke-width ×2, svg/g/rect@rx ×2, svg/g/rect@ry ×2, svg/g/rect@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | rumima-16-tevo172 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| sameli-92-dape565 | 40 | svg/g/rect@rx ×8, svg/g/rect@ry ×8, svg/g/rect@stroke-width ×8, svg/g/text@font-weight ×8, svg/g/g/line@stroke-width ×4, svg/g/line@stroke-dasharray ×4 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | open -> T3d |
+| sameli-92-dape565 | 40 | svg/g/rect@rx ×8, svg/g/rect@ry ×8, svg/g/rect@stroke-width ×8, svg/g/text@font-weight ×8, svg/g/g/line@stroke-width ×4, svg/g/line@stroke-dasharray ×4 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | pinned (close-b3) |
 | sanigu-59-puro802 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | sapice-55-zono098 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | sarevu-71-nona699 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
@@ -274,7 +275,7 @@ named, with Java `file:line`) · `final` (`pinned (<commit>)` or
 | sixafa-45-faxi184 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | sobiga-51-damo304 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | sobobe-86-zebo638 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| sogafu-39-fone585 | 36 | svg/g/g/line@stroke-width ×4, svg/g/line@stroke ×4, svg/g/polygon@fill ×4, svg/g/polygon@stroke ×4, svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/rect@fill ×2, svg/g/g/rect@stroke-width ×2, svg/g/line@stroke-dasharray ×2, svg/g/line@stroke-width ×2 | T3d | per-message `[#green]` colour dropped by the parser (`AbstractMessage.java:69-70`, journal row 27a) | open -> T3d |
+| sogafu-39-fone585 | 36 | svg/g/g/line@stroke-width ×4, svg/g/line@stroke ×4, svg/g/polygon@fill ×4, svg/g/polygon@stroke ×4, svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/rect@fill ×2, svg/g/g/rect@stroke-width ×2, svg/g/line@stroke-dasharray ×2, svg/g/line@stroke-width ×2 | T3d | per-message `[#green]` colour dropped by the parser (`AbstractMessage.java:69-70`, journal row 27a) | pinned (close-b3) |
 | somana-58-lili386 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | sonuse-17-poku104 | 15 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/line@stroke-dasharray | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | sopapu-09-riza536 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
@@ -306,7 +307,7 @@ named, with Java `file:line`) · `final` (`pinned (<commit>)` or
 | vatero-29-bice360 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | vemuja-48-deku981 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | vepesa-08-toju745 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| vetuvo-45-gaku910 | 11 | svg/g/g/line@stroke-width ×2, svg/g/rect@rx ×2, svg/g/rect@ry ×2, svg/g/rect@stroke-width ×2, svg/g/text@font-weight ×2, svg/g/line@stroke-dasharray | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | open -> T3d |
+| vetuvo-45-gaku910 | 11 | svg/g/g/line@stroke-width ×2, svg/g/rect@rx ×2, svg/g/rect@ry ×2, svg/g/rect@stroke-width ×2, svg/g/text@font-weight ×2, svg/g/line@stroke-dasharray | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | pinned (close-b3) |
 | vezozi-51-kese404 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | vicevi-92-zeda652 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | vigoga-79-pita532 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
@@ -355,7 +356,7 @@ named, with Java `file:line`) · `final` (`pinned (<commit>)` or
 | zexuna-08-kuci388 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | zidova-39-bapi223 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | zigire-72-muga285 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
-| ziloke-42-lodi019 | 34 | svg/g/rect@rx ×8, svg/g/rect@ry ×8, svg/g/rect@stroke-width ×8, svg/g/g/line@stroke-width ×4, svg/g/text@font-weight ×4, svg/g/line@stroke-dasharray ×2 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | open -> T3d |
+| ziloke-42-lodi019 | 34 | svg/g/rect@rx ×8, svg/g/rect@ry ×8, svg/g/rect@stroke-width ×8, svg/g/g/line@stroke-width ×4, svg/g/text@font-weight ×4, svg/g/line@stroke-dasharray ×2 | T3d | autonumber drawn without the jar's bold (font-weight 700): the message label/number font is not yet the arrow style font | pinned (close-b3) |
 | zogici-88-nini947 | 18 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2, svg/g/g/rect@fill ×2, svg/g/g/rect@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | zonadu-68-gido115 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
 | zosulu-72-fati889 | 14 | svg/g/rect@rx ×4, svg/g/rect@ry ×4, svg/g/rect@stroke-width ×4, svg/g/g/line@stroke-width ×2 | T2a/T2b/T2c/T2e/T2f | participant/lifeline/arrow/note/box paint from the merged Style (journal rows 26-33) | pinned (close-b2) |
@@ -418,12 +419,12 @@ stroke-width/padding the Style path now supplies, or the destroy cross).
 
 | slug | b0 cohort | b2 ws | b2 keys | mechanism | final |
 |---|---|---:|---|---|---|
-| fojagu-59-rife557 | geometry | 2 | g/text@fill ×2 | `arrow { FontColor }` does not reach the message label (journal row 27b) | open -> T3d |
-| munuje-51-pejo542 | geometry | 2 | g/text@fill ×2 | same as fojagu | open -> T3d |
-| xarifa-42-kiku597 | geometry | 1 | g/text@fill | same as fojagu | open -> T3d |
-| sedule-54-falo457 | geometry | 2 | g/line@stroke ×2 | divider rules emit the gradient as `url(#…)` on a `<line>`; `DriverLineSvg.java:76-80` strokes a line with the gradient's `getColor1()` (T2f applied it to lifelines only) | open -> T3e |
-| secida-27-jaco323 | geometry | 21 | lifeline/activation/head paint | `hide stereotype` deletes `Participant.stereotype` (`sequence-hide-passes.ts:45-48`); upstream hides only the display (`Participant.java:125-135`), so `.alice`/`.bob` styles never apply | open -> T3e |
-| xuxugi-47-vuzu867 | geometry | 21 | same as secida | same as secida | open -> T3e |
+| fojagu-59-rife557 | geometry | 2 | g/text@fill ×2 | `arrow { FontColor }` does not reach the message label (journal row 27b) | pinned (close-b3) |
+| munuje-51-pejo542 | geometry | 2 | g/text@fill ×2 | same as fojagu | pinned (close-b3) |
+| xarifa-42-kiku597 | geometry | 1 | g/text@fill | same as fojagu | pinned (close-b3) |
+| sedule-54-falo457 | geometry | 2 | g/line@stroke ×2 | divider rules emit the gradient as `url(#…)` on a `<line>`; `DriverLineSvg.java:76-80` strokes a line with the gradient's `getColor1()` (T2f applied it to lifelines only) | pinned (close-b3) |
+| secida-27-jaco323 | geometry | 21 | lifeline/activation/head paint | `hide stereotype` deletes `Participant.stereotype` (`sequence-hide-passes.ts:45-48`); upstream hides only the display (`Participant.java:125-135`), so `.alice`/`.bob` styles never apply | pinned (close-b3) |
+| xuxugi-47-vuzu867 | geometry | 21 | same as secida | same as secida | pinned (close-b3) |
 
 ## Pinned after the harness seed fix (journal row 40)
 
@@ -440,3 +441,60 @@ does; their only diffs were gradient/filter `@id`.
 | netuvi-29-jiti924 | geometry | 21 | pinned (close-b2) |
 | xeroce-52-moso281 | structural | 23 | pinned (close-b2) |
 | zupora-06-pazi006 | geometry | 37 | pinned (close-b2) |
+
+## Pinned at close-b3 (pin round 2)
+
+| slug | b0 cohort | b0 ws | b2 ws | final |
+|---|---|---:|---:|---|
+| boguvi-37-ralo631 | paint-only | 34 | 4 | pinned (close-b3) |
+| bopizu-70-rese737 | paint-only | 40 | 8 | pinned (close-b3) |
+| bovuda-87-dale466 | paint-only | 22 | 2 | pinned (close-b3) |
+| bulixe-06-boge494 | structural | 36 | 15 | pinned (close-b3) |
+| burujo-63-puti396 | geometry | 19 | 2 | pinned (close-b3) |
+| butali-53-kige134 | geometry | 34 | 3 | pinned (close-b3) |
+| buxuba-45-tela497 | geometry | 10 | 1 | pinned (close-b3) |
+| cinilo-67-macu207 | structural | 29 | 15 | pinned (close-b3) |
+| cituda-50-mema409 | geometry | 17 | 1 | pinned (close-b3) |
+| culegi-37-paji732 | geometry | 13 | 1 | pinned (close-b3) |
+| dakake-85-nemi992 | geometry | 16 | 1 | pinned (close-b3) |
+| dicizi-85-muvu530 | paint-only | 24 | 2 | pinned (close-b3) |
+| ducaba-11-xogo576 | geometry | 22 | 1 | pinned (close-b3) |
+| fakifa-13-puve679 | paint-only | 30 | 4 | pinned (close-b3) |
+| fazubu-21-roxo367 | paint-only | 22 | 2 | pinned (close-b3) |
+| finalo-84-toxa600 | geometry | 22 | 1 | pinned (close-b3) |
+| fojagu-59-rife557 | geometry | 104 | 2 | pinned (close-b3) |
+| gadasu-04-kada675 | paint-only | 18 | 4 | pinned (close-b3) |
+| gazave-48-zapu688 | structural | 22 | 8 | pinned (close-b3) |
+| gevere-74-caba556 | geometry | 32 | 4 | pinned (close-b3) |
+| gozoxo-34-nuju154 | geometry | 27 | 1 | pinned (close-b3) |
+| h-rnote-style | structural | 36 | 15 | pinned (close-b3) |
+| jonasa-65-teci533 | geometry | 14 | 1 | pinned (close-b3) |
+| jutexi-93-zeta646 | paint-only | 15 | 1 | pinned (close-b3) |
+| kaporo-80-vace949 | paint-only | 18 | 4 | pinned (close-b3) |
+| kotixe-11-cufa733 | structural | 36 | 15 | pinned (close-b3) |
+| labudu-49-fove649 | geometry | 16 | 1 | pinned (close-b3) |
+| lavaba-76-lepi228 | paint-only | 18 | 2 | pinned (close-b3) |
+| luxiti-90-beca090 | paint-only | 17 | 2 | pinned (close-b3) |
+| maboju-34-soxi895 | geometry | 73 | 1 | pinned (close-b3) |
+| mitefi-27-cubo687 | structural | 251 | 199 | pinned (close-b3) |
+| munuje-51-pejo542 | geometry | 94 | 2 | pinned (close-b3) |
+| note-color | structural | 57 | 30 | pinned (close-b3) |
+| nucumi-51-posa953 | structural | 159 | 105 | pinned (close-b3) |
+| rogube-67-sova611 | structural | 61 | 45 | pinned (close-b3) |
+| sameli-92-dape565 | paint-only | 40 | 8 | pinned (close-b3) |
+| secida-27-jaco323 | geometry | 53 | 21 | pinned (close-b3) |
+| sedule-54-falo457 | structural | 48 | 2 | pinned (close-b3) |
+| seloli-77-rixi778 | structural | 57 | 30 | pinned (close-b3) |
+| sogafu-39-fone585 | paint-only | 36 | 12 | pinned (close-b3) |
+| solivu-37-vika919 | geometry | 20 | 2 | pinned (close-b3) |
+| taxude-25-lamo370 | geometry | 15 | 1 | pinned (close-b3) |
+| tixefu-75-vono728 | geometry | 82 | 38 | pinned (close-b3) |
+| tojabu-38-lima321 | geometry | 19 | 1 | pinned (close-b3) |
+| vetuvo-45-gaku910 | paint-only | 11 | 2 | pinned (close-b3) |
+| voruto-32-rona048 | geometry | 15 | 1 | pinned (close-b3) |
+| xarifa-42-kiku597 | geometry | 79 | 1 | pinned (close-b3) |
+| xutuvu-44-zoko423 | structural | 29 | 15 | pinned (close-b3) |
+| xuxugi-47-vuzu867 | geometry | 53 | 21 | pinned (close-b3) |
+| zacoco-81-robo032 | structural | 32 | 15 | pinned (close-b3) |
+| zerovu-57-cumo773 | geometry | 16 | 2 | pinned (close-b3) |
+| ziloke-42-lodi019 | paint-only | 34 | 4 | pinned (close-b3) |

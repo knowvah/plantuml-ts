@@ -1,0 +1,21 @@
+@startuml
+<style>
+document {
+	backgroundColor: #EEE;
+}
+element {
+	backgroundColor: #F00;
+}
+
+@media (prefers-color-scheme:dark) {
+	document {
+		backgroundColor: #222;
+	}
+	element {
+		backgroundColor: #00F;
+	}
+}
+</style>
+
+Alice -> Bob
+@enduml

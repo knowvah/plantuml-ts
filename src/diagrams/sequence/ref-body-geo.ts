@@ -14,8 +14,7 @@
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/rose/ComponentRoseReference.java
  */
-import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
-import type { Theme } from '../../core/theme.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import type { FrameEvent } from './ast.js';
 import { displayLines } from './text-block-geo.js';
@@ -128,45 +127,4 @@ export function refComponentWidth(body: readonly string[], paints: ReferencePain
   const widest = Math.max(0, ...body.map((l) => measurer.measure(l, spec).width));
   const headerWidth = refHeaderWidth(paints.headerPaint, measurer);
   return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN + paints.paint.shadowing;
-}
-
-// ---------------------------------------------------------------------------
-// Transitional: the participant-row constraint
-// ---------------------------------------------------------------------------
-//
-// `sequence-layout-participants.ts#refConstraint` (sdd1 T3e's file) still
-// sizes a `ref` through the theme, by `refBodyWidth(lines, theme, measurer)`,
-// which `text-block-geo.ts` re-exports. The layout itself sizes it through
-// the style (`refComponentWidth`). Until that caller passes the event's
-// paints (`refComponentWidth(lines, referencePaints(ev), measurer)`), the
-// theme path below stays; T3c deletes it with the fields it reads.
-
-/**
- * `reference { FontSize 12 }` (`plantuml.skin:156`) -- the transitional
- * participant-row path's body size. The layout reads the style's.
- */
-export const REFERENCE_FONT_SIZE = 12;
-
-/** `referenceHeader { FontSize 13 }` (`plantuml.skin:167`), the transitional
- *  participant-row path's header size. */
-const REFERENCE_HEADER_FONT_SIZE = 13;
-
-/** The transitional path's body font. */
-export function refBodyFontSpecOf(theme: Theme): FontSpec {
-  return { family: theme.fontFamily, size: REFERENCE_FONT_SIZE };
-}
-
-/** The transitional path's header font: `referenceHeader { FontSize 13,
- *  FontStyle bold }` (`plantuml.skin:167-168`). */
-export function refHeaderFontSpecOf(theme: Theme): FontSpec {
-  return { family: theme.fontFamily, size: REFERENCE_HEADER_FONT_SIZE, weight: 'bold' };
-}
-
-/** {@link refComponentWidth} over the theme, for the participant-row
- *  constraint only (see the section comment above). */
-export function refBodyWidth(body: readonly string[], theme: Theme, measurer: StringMeasurer): number {
-  const widest = Math.max(0, ...body.map((l) => measurer.measure(l, refBodyFontSpecOf(theme)).width));
-  const headerWidth = measurer.measure(REF_HEADER_TEXT, refHeaderFontSpecOf(theme)).width + REF_HEADER_EXTRA_WIDTH;
-  const deltaShadow = theme.colors.graph.sequenceShadowing?.reference ?? 0;
-  return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN + deltaShadow;
 }

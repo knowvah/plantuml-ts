@@ -75,29 +75,23 @@ export const boxEndCommand: Command = {
 // is the bracket's own content.
 const TRAILING_BRACKET_CONTENT_PATTERN = /^(.*\[\[.*\]\].*?|.*?)\[(.*)\]$/;
 
-// T2: `group`'s header-rewrite (`CommandGrouping.java:139-149`). `type` at
-// `:139` -- our `frameType` -- is read BEFORE this runs and this function
-// never touches it, mirroring `GroupingType.getType(type)`'s original-token
-// ordering. `:140-142`: an empty comment on `group` becomes the literal
-// `"group"`. `:143-148`: a non-empty comment matching
-// TRAILING_BRACKET_CONTENT_PATTERN reassigns upstream's local `type` to
-// group 1 (the custom header, e.g. "Alpha" from `group Alpha [beta]`) and
-// `comment` to group 2 ("beta").
-//
-// GAP (flagged in the T2 report): `FrameEvent` (`ast.ts:154-194`) has one
-// label slot, not upstream's independent title/comment pair, and T5's
-// `computeHeaderTab` (`sequence-layout-events.ts`) feeds this slot straight
-// through as `groupingHeaderDisplay`'s COMMENT argument against the FIXED
-// `frameType` -- never a rewritten title. Returning the header text here is
-// the higher-fidelity of the two lossy choices: it is what a reader
-// actually sees on the tab. The bracket body ("beta") has nowhere to go and
-// is dropped -- unlike the else-color gap this port's D10 amendment does
-// NOT cover, since there is no per-branch analogue here to widen into.
-function resolveGroupLabel(frameType: FrameEvent['frameType'], comment: string): string {
-  if (frameType !== 'group') return comment;
-  if (comment === '') return 'group';
+/**
+ * `group`'s header rewrite (`CommandGrouping.java:139-149`): an empty comment
+ * on `group` becomes the literal `"group"` (`:140-142`); a comment matching
+ * TRAILING_BRACKET_CONTENT_PATTERN reassigns upstream's local `type` -- the
+ * TITLE `SequenceDiagram#grouping` receives -- to group 1, verbatim, and the
+ * comment to group 2 (`:143-148`). `frameType` (`GroupingType.getType(type)`,
+ * `:139`) is read before the rewrite and never changes. The title is returned
+ * only when rewritten; otherwise it is the keyword, `frameType`.
+ */
+function resolveGroupTitle(
+  frameType: FrameEvent['frameType'],
+  comment: string,
+): { readonly title?: string; readonly comment: string } {
+  if (frameType !== 'group') return { comment };
+  if (comment === '') return { comment: 'group' };
   const bracketMatch = TRAILING_BRACKET_CONTENT_PATTERN.exec(comment);
-  return bracketMatch ? bracketMatch[1]!.trim() : comment;
+  return bracketMatch ? { title: bracketMatch[1]!, comment: bracketMatch[2]! } : { comment };
 }
 
 // 10. Frame types (loop, alt, opt, par, par2, break, critical, group).
@@ -131,12 +125,13 @@ export const groupingCommand: Command = {
     const frameType = match[2]!.toLowerCase() as FrameEvent['frameType'];
     const backColorElement = match[3];
     const backColorGeneral = match[4];
-    const label = resolveGroupLabel(frameType, match[5]?.trim() ?? '');
+    const { title, comment: label } = resolveGroupTitle(frameType, match[5]?.trim() ?? '');
     const styleBuilder = currentStyleBuilder(state.style); // `SequenceDiagram.java:427-428`
     const frame: FrameEvent = {
       kind: 'frame',
       frameType,
       label,
+      ...(title !== undefined ? { title } : {}),
       branches: [[]],
       branchLabels: [label],
       branchColors: [backColorGeneral],

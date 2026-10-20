@@ -88,7 +88,7 @@ function participantColors(color: string | undefined): Colors | undefined {
  * #buildComplex`). Radius and circled font feed only the badge, which
  * `charBadgeFor` sizes from the skinparam; neither reaches a style name.
  */
-function participantStereotype(p: Participant): Stereotype | undefined {
+export function participantStereotype(p: Pick<Participant, 'stereotype'>): Stereotype | undefined {
   return p.stereotype === undefined ? undefined : Stereotype.build(p.stereotype, 0, undefined, parseSimpleColor);
 }
 
@@ -141,8 +141,12 @@ function appropriateTextColor(style: Style, back: () => HColor): HColor | undefi
   return simpleBack(back()).opposite();
 }
 
-/** `style` with its `FontColor` resolved as the text is drawn ({@link appropriateTextColor}). */
-function withTextColorFor(style: Style, back: () => HColor): Style {
+/** `style` with its `FontColor` resolved as the text is drawn
+ *  ({@link appropriateTextColor}) against `back`: `fontConfiguration
+ *  .adjustColorForBackground(ug)` (`AtomText.java:205`,
+ *  `FontConfiguration.java:349-356`). A head passes its own back, a message
+ *  label the document's (`sequence-arrow-paint.ts#labelFont`). */
+export function withTextColorFor(style: Style, back: () => HColor): Style {
   const color = appropriateTextColor(style, back);
   return color === undefined ? style : style.eventuallyOverride(Colors.empty().add(ColorType.TEXT, color));
 }

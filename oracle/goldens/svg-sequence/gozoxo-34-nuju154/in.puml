@@ -1,0 +1,9 @@
+@startuml
+skinparam backgroundColor grey
+A -> B: request
+...5 seconds...
+A -> B: request
+...W...
+A -> B: request
+...this is a very long sentence that is very long...
+@enduml

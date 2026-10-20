@@ -553,13 +553,14 @@ describe('frame events', () => {
     expect(ev?.label).toBe('group');
   });
 
-  it('`group Title [comment]` rewrites the label to the bracketed header', () => {
+  it('`group Title [comment]` rewrites the title and keeps the bracket as the comment', () => {
     const ast = parse(['group Alpha [beta]', 'Alice -> Bob: msg', 'end']);
     const ev = ast.events[0] as FrameEvent | undefined;
     // frameType stays the ORIGINAL "group" token -- never the rewritten
     // header (CommandGrouping.java:139, computed before the reassignment).
     expect(ev?.frameType).toBe('group');
-    expect(ev?.label).toBe('Alpha');
+    expect(ev?.title).toBe('Alpha ');
+    expect(ev?.label).toBe('beta');
   });
 
   it('nested frames: inner frame appears inside outer branch', () => {

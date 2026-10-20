@@ -23,7 +23,6 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { EventGeo, FrameGeo, ParticipantGeo } from '../../../src/diagrams/sequence/ast.js';
 import { renderSync } from '../../../src/index.js';
-import type { SequenceShadowing } from '../../../src/core/sequence-shadowing.js';
 import type { SequencePaint } from '../../../src/diagrams/sequence/sequence-skin-param.js';
 import {
   activationShadowFilter,
@@ -254,22 +253,13 @@ describe('sequenceShadowDefs reads each element’s own paint', () => {
 
 describe('frameShadowDelta', () => {
   it("reads a painted frame's own style, for a group and a ref alike", () => {
-    expect([frameShadowDelta(frame('group', 3), SCALED), frameShadowDelta(frame('ref', 2), SCALED)]).toEqual([3, 2]);
+    expect([frameShadowDelta(frame('group', 3)), frameShadowDelta(frame('ref', 2))]).toEqual([3, 2]);
     expect(defsOf([frame('alt', 3)])).toBe(sequenceShadowFilterDef(1));
   });
 
-  it('falls back to the document resolution for a frame layout has not painted yet', () => {
-    const sequenceShadowing: SequenceShadowing = {
-      group: 3,
-      reference: 2,
-      activation: 0,
-      divider: 0,
-      participant: () => 0,
-      note: () => 0,
-    };
-    const theme = { ...SCALED, colors: { ...SCALED.colors, graph: { ...SCALED.colors.graph, sequenceShadowing } } };
-    expect([frameShadowDelta(frame('group'), theme), frameShadowDelta(frame('ref'), theme)]).toEqual([3, 2]);
-    expect(frameShadowDelta(frame('group'), SCALED)).toBe(0);
+  it('throws for a frame layout did not paint, as an activation or divider does', () => {
+    expect(() => frameShadowDelta(frame('group'))).toThrow('group frame carries no paint');
+    expect(() => defsOf([frame('ref')])).toThrow('ref frame carries no paint');
   });
 });
 

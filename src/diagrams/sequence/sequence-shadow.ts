@@ -109,16 +109,16 @@ export function sequenceShadowFilter(deltaShadow: number): { readonly filter?: s
  * The delta a frame's shadowed rect carries: the BODY style's symbol context
  * for a grouping frame's background rect (`ComponentRoseGroupingHeader
  * .java:81,126-131`) and for a `ref`'s body rect (`ComponentRoseReference
- * .java:73,89-94`), i.e. the frame's own `paint`.
+ * .java:73,89-94`), i.e. the frame's own `paint`. Layout paints every frame
+ * (`sequence-layout-frame.ts`, `sequence-layout-ref.ts`), so an unpainted one
+ * throws, as {@link paintOf} does for an activation or a divider.
  *
- * Transitional: a frame layout has not painted yet (FrameGeo.paint is
- * sdd1 T3a's) falls back to the document-wide resolution
- * (`core/sequence-shadowing.ts`); that branch goes with the theme field.
+ * `_theme` is unread: `renderer-frame-header.ts` (sdd1 T3f's file) still
+ * passes it, and drops it when it next changes.
  */
-export function frameShadowDelta(frame: Pick<FrameGeo, 'frameType' | 'paint'>, theme: Theme): number {
-  if (frame.paint !== undefined) return frame.paint.shadowing;
-  const shadowing = theme.colors.graph.sequenceShadowing;
-  return (frame.frameType === 'ref' ? shadowing?.reference : shadowing?.group) ?? 0;
+export function frameShadowDelta(frame: Pick<FrameGeo, 'frameType' | 'paint'>): number {
+  if (frame.paint === undefined) throw new Error(`${frame.frameType} frame carries no paint`);
+  return frame.paint.shadowing;
 }
 
 /** The paint layout resolved for a geo its renderer draws from paint alone
@@ -133,10 +133,10 @@ function paintOf(geo: ActivationGeo | DividerGeo): SequencePaint {
  *  it: the activation box (`renderer-lifeline.ts`), the divider band
  *  (`renderer-divider.ts`, `ComponentRoseDivider.java:74,115`), the note body
  *  (`NoteGeo.shadow`, set from the note's paint) and the frame. */
-function eventShadowed(e: EventGeo, theme: Theme): boolean {
+function eventShadowed(e: EventGeo): boolean {
   switch (e.kind) {
     case 'frame':
-      return frameShadowDelta(e, theme) > 0;
+      return frameShadowDelta(e) > 0;
     case 'activation':
       return e.height > 0 && activationShadowFilter(paintOf(e)).filter !== undefined;
     case 'divider':
@@ -157,7 +157,7 @@ export function sequenceShadowDefs(
   geo: Pick<SequenceGeometry, 'events' | 'participants'>,
   theme: Theme & { readonly scaleK: number },
 ): string {
-  const shadowed = geo.participants.some((p) => (p.shadow ?? 0) > 0) || geo.events.some((e) => eventShadowed(e, theme));
+  const shadowed = geo.participants.some((p) => (p.shadow ?? 0) > 0) || geo.events.some(eventShadowed);
   return shadowed ? sequenceShadowFilterDef(theme.scaleK) : '';
 }
 

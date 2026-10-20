@@ -159,12 +159,24 @@ describe('group header rewrite', () => {
     expect(frame.label).toBe('G1');
   });
 
-  it('`group Alpha [beta]` rewrites the header to "Alpha"', () => {
+  it('`group Alpha [beta]` rewrites the title to "Alpha " and the comment to "beta"', () => {
     const frame = firstFrame(['group Alpha [beta]', 'Alice -> Bob: hi', 'end']);
-    // The bracket body ("beta") is not separately retrievable from
-    // FrameEvent -- see the GAP comment on `resolveGroupLabel` in
-    // command-grouping.ts. Only the header rewrite is asserted here.
-    expect(frame.label).toBe('Alpha');
+    // `type = m.group(1)`, `comment = m.group(2)` (`CommandGrouping.java:
+    // 143-148`): group 1 keeps the space before the bracket.
+    expect(frame.title).toBe('Alpha ');
+    expect(frame.label).toBe('beta');
+    expect(frame.branchLabels[0]).toBe('beta');
+  });
+
+  it('`group [beta]` rewrites the title to the empty string', () => {
+    const frame = firstFrame(['group [beta]', 'Alice -> Bob: hi', 'end']);
+    expect(frame.title).toBe('');
+    expect(frame.label).toBe('beta');
+  });
+
+  it('keeps no title for a group the pattern does not rewrite', () => {
+    expect(firstFrame(['group G1', 'Alice -> Bob: hi', 'end']).title).toBeUndefined();
+    expect(firstFrame(['alt Alpha [beta]', 'Alice -> Bob: hi', 'end']).title).toBeUndefined();
   });
 
   it('frameType stays the ORIGINAL "group" token, never the rewritten header', () => {

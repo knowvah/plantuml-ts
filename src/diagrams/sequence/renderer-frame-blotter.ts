@@ -33,10 +33,10 @@ import { ColorMapper, toSvgPaint } from '../../core/klimt/color/ColorMapper.js';
 import { HColorGradient } from '../../core/klimt/color/HColorGradient.js';
 import { HColorSimple } from '../../core/klimt/color/HColorSimple.js';
 import { framePaintsOf } from './renderer-frame-header.js';
+import { TRANSPARENT_SVG } from './text-block-geo.js';
 
 /** `HColor#toSvg` of a fully transparent colour (`HColor.java:76`) -- what
  *  `HColorSimple#isTransparent` (`alpha == 0`) reads as transparent. */
-const TRANSPARENT_SVG = '#00000000';
 
 /** `HColor#isTransparent` on a resolved paint: a gradient never is. A
  *  transparent simple colour resolves to `PAINT_NONE` through `svgPaint`

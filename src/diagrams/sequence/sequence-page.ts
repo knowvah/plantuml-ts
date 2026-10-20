@@ -62,6 +62,7 @@ import type {
   SequenceDiagramAST,
   SequenceEvent,
   DividerGeo,
+  ElseGeo,
   EventGeo,
   FrameGeo,
   MessageGeo,
@@ -246,6 +247,16 @@ function clipFrame(f: FrameGeo, band: PageBand): FrameGeo | undefined {
 }
 
 /**
+ * An `else` tile answers for itself by its own top, the y its group's
+ * `branchSeparators` entry is filtered on above, so the band split and the
+ * rule stay together. Its condition runs move with it.
+ */
+function clipElse(e: ElseGeo, band: PageBand): ElseGeo | undefined {
+  if (!inBand(band, e.y)) return undefined;
+  return { ...e, y: shift(band, e.y), runs: e.runs.map((r) => ({ ...r, y: shift(band, r.y) })) };
+}
+
+/**
  * ALL-OR-NOTHING on the separator's own y, `tile.y + MARGINY`
  * (`NewpageTile.java:88`) — a horizontal `ULine`, so `getClippedLine`
  * returns `null` the moment that y leaves the band.
@@ -323,6 +334,8 @@ function clipEvent(event: EventGeo, band: PageBand): EventGeo | undefined {
       return clipDestroy(event, band);
     case 'frame':
       return clipFrame(event, band);
+    case 'else':
+      return clipElse(event, band);
     case 'divider':
       return clipDivider(event, band);
     case 'space':

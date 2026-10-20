@@ -23,7 +23,12 @@ import { runDrawMetrics } from './run-draw-metrics.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { defaultMessageFont } from './sequence-arrow-paint.js';
 import { atomFontSpec } from './sequence-creole-text-atom.js';
-import { sequenceAtomContext, sequenceCreoleRuns } from './sequence-creole.js';
+import {
+  sequenceAtomContext,
+  sequenceCreoleRuns,
+  sequenceLabelBlockWidth,
+  sequenceLabelLineWidth,
+} from './sequence-creole.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import type { SequenceRunImage } from './sequence-text.js';
 
@@ -251,14 +256,7 @@ export interface TextRun {
 // no caller's import moved with it.
 // ---------------------------------------------------------------------------
 
-export {
-  REFERENCE_FONT_SIZE,
-  refBodyFontSpecOf,
-  refHeaderFontSpecOf,
-  refBodyLines,
-  refBodyHeight,
-  refBodyWidth,
-} from './ref-body-geo.js';
+export { refBodyLines, refBodyHeight } from './ref-body-geo.js';
 
 // ---------------------------------------------------------------------------
 // Message label — ComponentRoseArrow + Display#createMessageNumber
@@ -442,4 +440,27 @@ export interface MessageLabelEnv {
 export function messageLabelRows(label: string, numberText: string | undefined): number {
   if (label === '') return numberText === undefined ? 0 : 1;
   return displayLines(label).length;
+}
+
+/**
+ * The width of the label block {@link messageLabelBlock} lays out, for the
+ * participant row: `Display#createMessageNumber` merges the number, a 4px
+ * right margin and the label (`Display.java:703-712`), measured in `font`,
+ * the message's ARROW-style font (`AbstractTextualComponent.java:80-92`),
+ * with sprites tinted to its colour as the block draws them.
+ */
+export function messageLabelWidth(
+  label: string,
+  numberText: string | undefined,
+  font: FontConfiguration,
+  env: Pick<MessageLabelEnv, 'measurer' | 'sprites'>,
+): number {
+  const spec = atomFontSpec(font);
+  const atoms = sequenceAtomContext(env.sprites, font.color ?? TRANSPARENT_SVG);
+  const numberWidth =
+    numberText === undefined
+      ? 0
+      : sequenceLabelLineWidth(numberText, spec, env.measurer, atoms) + MESSAGE_NUMBER_MARGIN;
+  const lines = label === '' ? [] : displayLines(label);
+  return numberWidth + sequenceLabelBlockWidth(lines, spec, env.measurer, atoms);
 }

@@ -16,9 +16,8 @@
  * independent gaps (each reproduces with no `!theme`; see
  * `.agent-notes/unwind2-S5.md`): `root { Margin }` unread by class/
  * mindmap (usecase reads it since codd-T4: the description exporter margin);
- * sequence still ignores the arrow label font skinparams (reddress, mars;
- * sdd1 T3d) — its lifelines, participants and `root { LineThickness /
- * RoundCorner }` read the merged Style since sdd1 T2a/T2f; the
+ * every sequence row is exact since sdd1 (T2a/T2f/T3d: participants,
+ * lifelines and arrow label fonts read the merged Style); the
  * usecase actor label ignores `root { FontColor }`; class-reddress is the
  * counter rule between two NARROWER selectors (`classAttributeFontColor`
  * after `classFontColor`), which `style-root-shadowing.ts` does not cover.
@@ -54,8 +53,8 @@ const PINS: Readonly<Record<string, readonly [number, number]>> = {
   'mindmap-style-before': [0, 42],
   'mindmap-style-root': [0, 0],
   'mindmap-theme-only': [0, 42],
-  'sequence-mars': [2, 3],
-  'sequence-reddress': [4, 50],
+  'sequence-mars': [0, 0],
+  'sequence-reddress': [0, 0],
   'sequence-skinparam-after': [0, 0],
   'sequence-skinparam-before': [0, 0],
   'sequence-style-after': [0, 0],

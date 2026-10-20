@@ -1,0 +1,19 @@
+@startuml
+<style>
+document {
+  BackGroundColor Navy
+}
+root {
+  FontColor #?black:white
+}
+sequenceDiagram {
+  participant {
+    BackGroundColor white
+  }
+}
+</style>
+title
+my title
+endtitle
+alice->bob : hello
+@enduml

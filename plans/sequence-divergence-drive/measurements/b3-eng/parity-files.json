@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-10-20T18:00:08.772Z",
+  "fixtures": [
+    {
+      "slug": "files-directory-tree-with-note",
+      "type": "files",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "diverged",
+      "maxDelta": 45,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    }
+  ]
+}

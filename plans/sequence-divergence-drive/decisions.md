@@ -9,7 +9,7 @@ journal it, halt.
 | D2 | Capture the builder per event at its command line (replay declarations before each command), as upstream and wbs do. |
 | D3 | `parseSequence(source: UmlSource, options)`; plugin and `render-fixture-sequence.ts` change in the same commit. |
 | D4 | Reuse `src/core/style/mindmap-style-builder.ts` unchanged. **Amendment 2 (2026-10-20, user ruling):** additive ports of unported upstream `core/style` members are allowed (Java `file:line` + own test); anything else under `src/core/style/**` is still stop 8. |
-| D5 | Delete a family's `theme.colors.*` / `theme.sequence.*` reads in the commit that migrates it; delete a theme field when its last reader goes. |
+| D5 | Delete a family's `theme.colors.*` / `theme.sequence.*` reads in the commit that migrates it; delete a theme field when its last reader goes. **Amended 2026-10-20 (Amendment 1): field deletion reaches a published type — ruling pending.** |
 | D6 | Pin = zero-diff ratchet render; survey measured each close; disagreements journaled; re-pin once per close after adjudication. |
 | D7 | b0 is the reference; all-engine survey each close; every numeric change cites upstream `file:line`. |
 | D8 | No accepted divergences signed; the 13 error rows and the latex/math rows are out of scope. |
@@ -113,6 +113,22 @@ engine stay. Chrome (title/legend/header/footer/caption) keeps its
 annotations path — out of scope.
 **Consequences.** `Theme` is not re-exported from `src/index.ts` today; T3c
 still runs the stop-11 check before deleting any field.
+
+**Amendment 1 (2026-10-20, T3c, ruling pending).** The premise "`Theme` is
+not re-exported from `src/index.ts`" does not hold for the stop-11 check:
+`src/index.ts:33` exports `RenderOptions`, whose `theme?: … | Partial<Theme>`
+(`src/core/render-options.ts:27`) is shallow, so every `colors.*`,
+`colors.graph.*` and `sequence.*` field is part of a published type
+(`dist/plantuml-ts.d.ts`, `bundleTypes: true`). T3c therefore deleted no
+field. Ten fields have no reader left (`colors.lifeline`, `colors.activation`,
+`colors.frame`, `colors.participantBackground`, `sequence.participantPadding`,
+`messageSpacing`, `noteMargin`, `frameHeaderHeight`, `lifelineExtension`,
+`colors.graph.sequenceShadowing` with `src/core/sequence-shadowing.ts`).
+Ruling needed: (a) delete them (memory `plantuml-ts-has-no-consumers`: chase
+jar fidelity, never API compatibility) — a breaking change to
+`RenderOptions['theme']`, recorded with `BREAKING CHANGE:`; or (b) keep them
+as inert, documented fields → sdd2. Every reader is already gone, so either
+answer leaves rendering unchanged.
 
 ## D6 — conformance and pins
 

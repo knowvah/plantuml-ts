@@ -9,7 +9,7 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FontStyle } from '../../../src/core/klimt/shape/UText.js';
 import { HorizontalAlignment } from '../../../src/core/klimt/geom/HorizontalAlignment.js';
-import type { DelayGeo, FrameGeo, SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
+import type { DelayGeo, ElseGeo, FrameGeo, SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
 import { renderSequence } from '../../../src/diagrams/sequence/renderer.js';
 import { fmt } from '../../../src/core/svg-format.js';
 import { DEFAULT_DELAY_PAINT, layoutBody } from './frame-paint-fixtures.js';
@@ -121,8 +121,10 @@ describe('grouping frame (Grouping.java:104-113, ComponentRoseGroupingHeader)', 
 
   it('lays out a multi-line condition as one block, taller by a line', () => {
     const one = frames(layoutBody(ALT, measurer))[0]!;
-    const two = frames(layoutBody(ALT.replace('else y', 'else y\\nz'), measurer))[0]!;
-    expect(two.branchSeparators[0]!.runs.map((r) => r.text)).toEqual(['[y', 'z]']);
+    const twoGeo = layoutBody(ALT.replace('else y', 'else y\\nz'), measurer);
+    const two = frames(twoGeo)[0]!;
+    const [elseTile] = twoGeo.events.filter((e): e is ElseGeo => e.kind === 'else');
+    expect(elseTile!.runs.map((r) => r.text)).toEqual(['[y', 'z]']);
     // getTextHeight + 4 (ComponentRoseGroupingElse.java:115-121): one 11 px line more.
     expect(two.height - one.height).toBe(11);
   });
