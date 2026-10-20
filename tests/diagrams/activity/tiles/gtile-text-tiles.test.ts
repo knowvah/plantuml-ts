@@ -22,15 +22,11 @@ const stubTheme: Theme = {
   fontFamily: 'Arial',
   colors: {
     background: '#fff',
-    participantBackground: '#E2E2F0',
     border: '#000',
     text: '#000',
     arrow: '#000',
     note: '#eef',
     noteBackground: '#eef',
-    lifeline: '#ccc',
-    activation: '#eee',
-    frame: '#eee',
     divider: '#eee',
     error: 'red',
     nodeBackground: '#fff',
@@ -49,13 +45,8 @@ const stubTheme: Theme = {
     },
   },
   sequence: {
-    participantPadding: 10,
     participantGap: 20,
-    messageSpacing: 20,
     activationWidth: 10,
-    noteMargin: 5,
-    frameHeaderHeight: 20,
-    lifelineExtension: 20,
   },
 };
 

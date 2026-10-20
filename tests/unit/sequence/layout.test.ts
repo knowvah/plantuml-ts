@@ -24,6 +24,8 @@ import { DEFAULT_SEQUENCE_STYLE_BUILDER } from '../../helpers/sequence-source.js
 // ---------------------------------------------------------------------------
 
 const measurer = new FixedMeasurer(8, 16);
+/** `plantuml.skin:186-190`: `Padding 7` on the participant style group. */
+const PARTICIPANT_PADDING = 7;
 
 function makeAst(participants: string[], events: SequenceEvent[]): SequenceDiagramAST {
   return {
@@ -116,7 +118,7 @@ describe('layoutSequence — participant columns (AC 1)', () => {
     // 80px floor this port used to apply.
     const ast = makeAst(['X'], []);
     const geo = layoutSequence(ast, defaultTheme, measurer);
-    expect(geo.participants[0]?.width).toBe(8 + 2 * defaultTheme.sequence.participantPadding);
+    expect(geo.participants[0]?.width).toBe(8 + 2 * PARTICIPANT_PADDING);
   });
 
   it('centerX == x + width/2', () => {
@@ -1191,11 +1193,11 @@ describe('layoutSequence — database participant sizing', () => {
     const plain = layoutSequence(makeAst(['Alice', 'Bob'], [msg('Alice', 'Bob')]), defaultTheme, measurer);
     const alice = plain.participants.find((p) => p.id === 'Alice')!;
     // 5 glyphs at 8px under `FixedMeasurer`, plus 7 of padding either side.
-    expect(alice.width).toBe(5 * 8 + 2 * defaultTheme.sequence.participantPadding);
+    expect(alice.width).toBe(5 * 8 + 2 * PARTICIPANT_PADDING);
     // `getTextHeight` = text + padding.top + padding.bottom
     // (`AbstractTextualComponent.java:110-114`), with `Padding 7` on all four
     // sides. 16 from `FixedMeasurer(8, 16)`, plus 7 above and 7 below.
-    expect(alice.height).toBe(16 + 2 * defaultTheme.sequence.participantPadding);
+    expect(alice.height).toBe(16 + 2 * PARTICIPANT_PADDING);
   });
 });
 

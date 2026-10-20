@@ -19,16 +19,12 @@ const TEST_THEME: Theme = {
   fontSize: 12,
   colors: {
     background: '#FFFFFF',
-    participantBackground: '#E2E2F0',
     nodeBackground: '#f1f1f1',
     border: '#AAAAAA',
     text: '#000000',
     arrow: '#000000',
     note: '#000000',
     noteBackground: '#FBFB77',
-    lifeline: '#000000',
-    activation: '#f1f1f1',
-    frame: '#000000',
     divider: '#000000',
     error: '#FF0000',
     graph: {
@@ -46,13 +42,8 @@ const TEST_THEME: Theme = {
     },
   },
   sequence: {
-    participantPadding: 5,
     participantGap: 10,
-    messageSpacing: 25,
     activationWidth: 10,
-    noteMargin: 5,
-    frameHeaderHeight: 20,
-    lifelineExtension: 20,
   },
 };
 

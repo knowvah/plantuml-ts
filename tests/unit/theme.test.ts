@@ -32,9 +32,6 @@ describe('defaultTheme', () => {
     expect(typeof c.arrow).toBe('string');
     expect(typeof c.note).toBe('string');
     expect(typeof c.noteBackground).toBe('string');
-    expect(typeof c.lifeline).toBe('string');
-    expect(typeof c.activation).toBe('string');
-    expect(typeof c.frame).toBe('string');
     expect(typeof c.divider).toBe('string');
     expect(typeof c.error).toBe('string');
   });
@@ -109,13 +106,8 @@ describe('defaultTheme', () => {
 
   it('has all required sequence fields', () => {
     const s = defaultTheme.sequence;
-    expect(typeof s.participantPadding).toBe('number');
     expect(typeof s.participantGap).toBe('number');
-    expect(typeof s.messageSpacing).toBe('number');
     expect(typeof s.activationWidth).toBe('number');
-    expect(typeof s.noteMargin).toBe('number');
-    expect(typeof s.frameHeaderHeight).toBe('number');
-    expect(typeof s.lifelineExtension).toBe('number');
   });
 });
 
@@ -312,17 +304,12 @@ describe('resolveTheme', () => {
   it('merges sequence partial fields', () => {
     const partial: Partial<Theme> = {
       sequence: {
-        participantPadding: 99,
         participantGap: 10,
-        messageSpacing: 20,
-        activationWidth: 10,
-        noteMargin: 5,
-        frameHeaderHeight: 20,
-        lifelineExtension: 20,
+        activationWidth: 99,
       },
     };
     const result = resolveTheme(partial);
-    expect(result.sequence.participantPadding).toBe(99);
+    expect(result.sequence.activationWidth).toBe(99);
     expect(result.sequence.participantGap).toBe(defaultTheme.sequence.participantGap);
   });
 
@@ -375,16 +362,12 @@ describe('deepMergeTheme', () => {
     fontSize: 12,
     colors: {
       background: '#AAAAAA',
-      participantBackground: '#E2E2F0',
       nodeBackground: '#A1A1A1',
       border: '#BBBBBB',
       text: '#CCCCCC',
       arrow: '#DDDDDD',
       note: '#EEEEEE',
       noteBackground: '#111111',
-      lifeline: '#222222',
-      activation: '#333333',
-      frame: '#444444',
       divider: '#555555',
       error: '#FF0000',
       graph: {
@@ -402,13 +385,8 @@ describe('deepMergeTheme', () => {
       },
     },
     sequence: {
-      participantPadding: 5,
       participantGap: 15,
-      messageSpacing: 10,
       activationWidth: 8,
-      noteMargin: 3,
-      frameHeaderHeight: 18,
-      lifelineExtension: 12,
     },
   };
 
@@ -426,9 +404,6 @@ describe('deepMergeTheme', () => {
     expect(result.colors.arrow).toBe(customBase.colors.arrow);
     expect(result.colors.note).toBe(customBase.colors.note);
     expect(result.colors.noteBackground).toBe(customBase.colors.noteBackground);
-    expect(result.colors.lifeline).toBe(customBase.colors.lifeline);
-    expect(result.colors.activation).toBe(customBase.colors.activation);
-    expect(result.colors.frame).toBe(customBase.colors.frame);
     expect(result.colors.divider).toBe(customBase.colors.divider);
     expect(result.colors.error).toBe(customBase.colors.error);
     expect(result.colors.graph.classBackground).toBe(customBase.colors.graph.classBackground);
@@ -442,7 +417,7 @@ describe('deepMergeTheme', () => {
     expect(result.colors.graph.usecaseFill).toBe(customBase.colors.graph.usecaseFill);
     expect(result.colors.graph.businessActorFill).toBe(customBase.colors.graph.businessActorFill);
     expect(result.colors.graph.businessUsecaseFill).toBe(customBase.colors.graph.businessUsecaseFill);
-    expect(result.sequence.participantPadding).toBe(customBase.sequence.participantPadding);
+    expect(result.sequence.activationWidth).toBe(customBase.sequence.activationWidth);
     expect(result.sequence.participantGap).toBe(customBase.sequence.participantGap);
   });
 
@@ -481,17 +456,12 @@ describe('deepMergeTheme', () => {
   it('merges sequence fields from partial over custom base', () => {
     const result = deepMergeTheme(customBase, {
       sequence: {
-        participantPadding: 50,
         participantGap: 15,
-        messageSpacing: 10,
-        activationWidth: 8,
-        noteMargin: 3,
-        frameHeaderHeight: 18,
-        lifelineExtension: 12,
+        activationWidth: 50,
       },
     });
-    expect(result.sequence.participantPadding).toBe(50);
-    expect(result.sequence.participantGap).toBe(customBase.sequence.participantGap);
+    expect(result.sequence.activationWidth).toBe(50);
+    expect(result.sequence.participantGap).toBe(15);
   });
 
   it('returns a new object, not the base reference', () => {

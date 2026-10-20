@@ -920,7 +920,7 @@ describe('resolveSkinparam — base theme behaviour', () => {
     expect(theme.colors.text).toBe(defaultTheme.colors.text);
     expect(theme.colors.arrow).toBe(defaultTheme.colors.arrow);
     expect(theme.colors.graph.classBackground).toBe(defaultTheme.colors.graph.classBackground);
-    expect(theme.sequence.participantPadding).toBe(defaultTheme.sequence.participantPadding);
+    expect(theme.sequence.activationWidth).toBe(defaultTheme.sequence.activationWidth);
   });
 
   it('does not mutate the base theme', () => {

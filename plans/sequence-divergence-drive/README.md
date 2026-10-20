@@ -177,7 +177,7 @@ Measurement (sequence has NO DOT gate — it never emits `svek-N.dot`):
 
 - Pins: **419** (pin round 1: 367 at close-b2; round 2: 52 at close-b3). D10
   (≥ 250) met. Survey sequence conformant 0 → 419; Σ 150864 → 73380.
-- **Ruling pending (stop 11, D5 Amendment 1):** delete the 10 sequence
-  `Theme` fields that lost every reader (reachable via `RenderOptions`'
-  `Partial<Theme>`), or keep them inert → sdd2. Nothing else waits on it.
+- Stop 11 / D5 Amendment 1 ruled (a) by the user: the ten reader-less
+  `Theme` fields are deleted (T3g, `55f40735a`, BREAKING CHANGE on
+  `RenderOptions['theme']`), byte-neutral.
 - Next: batch 4 (T4a), then batch 5.

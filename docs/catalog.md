@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1696 modules · 6224 exported names.
+1695 modules · 6217 exported names.
 
 ## `src/`
 
@@ -91,7 +91,6 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `render-options.ts` | `RenderOptions`, `getDefaultMeasurer`, `resolveMeasurer` | `RenderOptions` and measurer resolution — extracted from `src/index.ts` (mission A5 / T4). |
 | `rose-note-dim.ts` | `RoseNoteDim`, `roseNoteDim` | The note operand `computeMergedLabelBox` (`core/edge-label-box.ts`) merges into an edge label: `EntityImageNoteLink`'s own dimension. |
 | `scale-command.ts` | `ScaleSpec`, `matchScaleCommand`, `resolveScaleFactor`, `isExportScaled` | scale-command.ts — shared `scale ...` directive parsing + factor resolution (mission G1 I-scale). |
-| `sequence-shadowing.ts` | `SequenceShadowSource`, `SequenceParticipantSName`, `SequenceNoteStyle`, `SequenceShadowing`, `resolveSequenceShadowing`, `withSequenceShadowing` | The sequence diagram's merged-style `Shadowing`, per element (unwind2-S9, S9b). |
 | `skin-command.ts` | `skinCommandError`, `SkinCut`, `skinCutOf` | The `skin <name>` command's failure path — unwind2-S8. |
 | `skin-loader.ts` | `skinRunsOf`, `applySkinRun`, `applySkinLayer` | `skin <name>` directive resolution — skin-file-loading mission, Batch 1 (decisions D1/D2/D6); unwind2-S8. |
 | `skinparam-accumulator.ts` | `SkinparamAccumulator`, `createSkinparamAccumulator` | Mutable accumulator threaded through the resolveSkinparam key-processing loop (skinparam-key-handlers.ts, skinparam-stereo-keys.ts) and consumed by the theme-partial builder (skinparam-theme-builder.ts). |
@@ -162,7 +161,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `TextBlockExporter.ts` | `DocumentDims`, `applyCucaDocumentMargin`, `scaleFragmentBody`, `formatScaledFragmentBody`, `BODY_ANCHOR`, `finalizeTitledDiagramFragment` | `TextBlockExporter#calculateFinalDimension` — the diagram's outer margin applied to whatever the inner `TextBlock` measured, plus the truncating `+1` `SvgGraphics` applies when it sizes the canvas. |
 | `theme-colors-fields.ts` | `ThemeColorFields` | `Theme.colors` field shape — split out of theme.ts (cdd-T30) to keep that file under the project's 500-line file-size cap. |
 | `theme-dark.ts` | `DARK_MODE_DEFAULTS` | `skinparam mode dark` default-color table (cdd-T33). |
-| `theme-element-resolve.ts` | `ANY_ELEMENT_BUCKET`, `stereotypePaint`, `stereotypeFontColor`, `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth`, `resolveElementMaximumWidth`, `foldRootBackgroundIntoSequence`, `resolveClusterTitleAlignment`, `resolveElementRoundCorner` | Per-element (SName) resolution helpers for {@link Theme} — the color, font-size, and shadowing cascades each element's renderer reads. |
+| `theme-element-resolve.ts` | `ANY_ELEMENT_BUCKET`, `stereotypePaint`, `stereotypeFontColor`, `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth`, `resolveElementMaximumWidth`, `resolveClusterTitleAlignment`, `resolveElementRoundCorner` | Per-element (SName) resolution helpers for {@link Theme} — the color, font-size, and shadowing cascades each element's renderer reads. |
 | `theme-graph-colors-a.ts` | `ThemeGraphColorsA` | theme-graph-colors-a.ts — first half of `ThemeGraphColors` (split further out of ./theme-graph-colors.ts to keep every file under the project's 500-line cap; combined back via intersection in that module). |
 | `theme-graph-colors-b.ts` | `ThemeGraphColorsB` | theme-graph-colors-b.ts — second half of `ThemeGraphColors` (split further out of ./theme-graph-colors.ts to keep every file under the project's 500-line cap; combined back via intersection in that module). |
 | `theme-graph-colors-c.ts` | `ThemeGraphColorsC` | theme-graph-colors-c.ts — third slice of `ThemeGraphColors`, split out because `theme-graph-colors-a.ts`/`-b.ts` are both at the project's 500-line cap (cdd2-T8) — mirrors the `-a`/`-b` split precedent exactly (combined back via intersectio |

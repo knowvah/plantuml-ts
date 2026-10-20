@@ -9,7 +9,7 @@ journal it, halt.
 | D2 | Capture the builder per event at its command line (replay declarations before each command), as upstream and wbs do. |
 | D3 | `parseSequence(source: UmlSource, options)`; plugin and `render-fixture-sequence.ts` change in the same commit. |
 | D4 | Reuse `src/core/style/mindmap-style-builder.ts` unchanged. **Amendment 2 (2026-10-20, user ruling):** additive ports of unported upstream `core/style` members are allowed (Java `file:line` + own test); anything else under `src/core/style/**` is still stop 8. |
-| D5 | Delete a family's `theme.colors.*` / `theme.sequence.*` reads in the commit that migrates it; delete a theme field when its last reader goes. **Amended 2026-10-20 (Amendment 1): field deletion reaches a published type — ruling pending.** |
+| D5 | Delete a family's `theme.colors.*` / `theme.sequence.*` reads in the commit that migrates it; delete a theme field when its last reader goes. **Amendment 1 (2026-10-20): the user ruled (a), delete the reader-less fields; a breaking change to `RenderOptions['theme']`.** |
 | D6 | Pin = zero-diff ratchet render; survey measured each close; disagreements journaled; re-pin once per close after adjudication. |
 | D7 | b0 is the reference; all-engine survey each close; every numeric change cites upstream `file:line`. |
 | D8 | No accepted divergences signed; the 13 error rows and the latex/math rows are out of scope. |
@@ -129,6 +129,15 @@ jar fidelity, never API compatibility) — a breaking change to
 `RenderOptions['theme']`, recorded with `BREAKING CHANGE:`; or (b) keep them
 as inert, documented fields → sdd2. Every reader is already gone, so either
 answer leaves rendering unchanged.
+
+**Ruling (2026-10-20, user): (a) — "delete the theme fields, option a" /
+"yes, delete them".** The orchestrator first confirmed no reader in `src/`
+for any of the ten fields, and that upstream has no counterpart object
+(`theme/Theme.java` only reads a `!theme` file). Each value lives in
+`Style` upstream and is read through the Style path since batches 2-3.
+Task T3g deletes them with a `BREAKING CHANGE:` footer and proves the
+deletion byte-neutral (svg-hashes on every sequence fixture, every
+engine's golden ratchet, and the final all-engine survey).
 
 ## D6 — conformance and pins
 
