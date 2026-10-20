@@ -11,84 +11,61 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/AbstractTextualComponent.java:100-127
  */
 
-import type { FrameGeo } from './ast.js';
+import type { FrameGeo, TextRun } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
+import type { Paint } from '../../core/paint.js';
 import { rect, path } from '../../core/svg-shapes.js';
+import { fmt } from '../../core/svg-format.js';
+import { FontStyle, type FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { sequenceText } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
 import { frameShadowDelta, sequenceShadowFilter } from './sequence-shadow.js';
-import {
-  GROUP_LINE_COLOR,
-  GROUP_LINE_THICKNESS,
-  HEADER_LINE_COLOR,
-  HEADER_LINE_THICKNESS,
-  REFERENCE_HEADER_LINE_THICKNESS,
-  HEADER_FONT_SIZE,
-  HEADER_FONT_BOLD,
-  CORNER_SIZE,
-} from './frame-style.js';
+import type { SequencePaint } from './sequence-skin-param.js';
+import { CORNER_SIZE } from './frame-style.js';
 
-/**
- * `#e` expanded: PlantUML's single-hex-digit greyscale shorthand doubles
- * each RGB channel digit (`d -> (d<<4)|d` per channel), so `#e` (nibble 14)
- * becomes `#EEEEEE`. `core/svg.ts`'s `resolvePaint` shortens it back down
- * to `#EEE` on the way out, matching the jar's own emitted fill.
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSet.java:127-133
- * @see ./frame-style.js#HEADER_BACKGROUND ('#e', plantuml.skin:125)
- */
-const HEADER_BACKGROUND_HEX = '#EEEEEE';
+/** A frame's two paints, as layout resolved them (sdd1 D1): the body
+ *  `style` and the `styleHeader` (`sequence-layout-frame.ts`,
+ *  `ref-body-geo.ts#referencePaints`). */
+export interface FramePaintPair {
+  readonly paint: SequencePaint;
+  readonly headerPaint: SequencePaint;
+}
 
-/**
- * `ComponentRoseGroupingHeader.java:79`: `style.value(PName.RoundCorner)`,
- * read from the "group" style block (`plantuml.skin:116-121`). That block
- * declares no `RoundCorner`, so it cascades from `root`'s default of `0`
- * (`plantuml.skin:12`) -- this engine has no SName style cascade for the
- * sequence family yet (decisions.md D3), so there is no override path that
- * could ever make this non-zero today. {@link frameHeaderCornerPath}'s
- * `roundCorner > 0` branch stays ported and unit-tested directly for when
- * that cascade lands.
- */
-const ROUND_CORNER = 0;
+/** The paints every frame geo carries: layout resolves them (D1). */
+export function framePaintsOf(frame: FrameGeo): FramePaintPair {
+  const { paint, headerPaint } = frame;
+  if (paint === undefined || headerPaint === undefined)
+    throw new Error(`frame "${frame.frameType}" geo has no paint: layout resolves it (sdd1 D1)`);
+  return { paint, headerPaint };
+}
 
-/**
- * `plantuml.skin:8`: root `FontColor black`. Neither `group` nor
- * `groupHeader` (`plantuml.skin:116-129`) declare their own `FontColor`, so
- * both the tab title and the comment text inherit this.
- */
-const HEADER_FONT_COLOR = 'black';
+/** `HColor#toSvg` of a fully transparent colour (`HColor.java:76`). */
+const TRANSPARENT_SVG = '#00000000';
 
-/*
- * D2: the local `textAscent(fontSize)` that used to sit here — `size -
- * size/4.5`, jar-verified against `bepipo-37-fego336`'s 13px tab title at
- * 10.111 below its block top and its 11px comment at 8.556 — is GONE. The
- * value was exact for the three production measurers and wrong for
- * `FixedMeasurer`, whose descent is `lineHeight/4.5`, so a renderer computing
- * it could disagree with the layout that sized the box. The same numbers now
- * come from `TextRun.textAscent`, measured in `sequence-layout-events.ts
- * #buildTabRuns` where a real measurer is in scope.
- *
- * The state and class copies (`state-render-colors.ts`,
- * `class-visibility-icon.ts`) are deliberately LEFT ALONE — D2 again.
- */
+/** `SvgGraphics#fixColor` (`SvgGraphics.java:539-541`): a transparent fill or
+ *  stroke is written `none`. */
+export function svgFixColor(p: Paint): Paint {
+  return p === TRANSPARENT_SVG ? 'none' : p;
+}
 
-/**
- * `FontStyle bold` -> SVG's numeric `font-weight="700"` (this project's own
- * emission convention -- confirmed for the sequence engine's own group/
- * groupHeader text against the cached oracle `test-results/dot-cache/
- * sequence/bepipo-37-fego336/in.svg`, whose tab title AND `[comment]` both
- * carry `font-weight="700"`, never the CSS keyword `"bold"`; see
- * `core/svg.ts`'s `TextStyle.fontWeight` doc comment for the class-engine
- * precedent this generalizes to sequence).
- *
- * `GROUP_FONT_BOLD`/`HEADER_FONT_BOLD` are always `true` under this engine's
- * current style surface (no cascade can flip a sequence `FontStyle` yet --
- * decisions.md D3), so the `false` arm is unreachable today; kept, not
- * inlined, so a future cascade only has to flip the constant.
- */
-function boldFontWeight(bold: boolean): 'normal' | '700' {
-  // GROUP_FONT_BOLD/HEADER_FONT_BOLD are always true today, see doc above.
-  return bold ? '700' : /* v8 ignore next */ 'normal';
+/** `Fashion#applyStroke` with its fore colour (`klimt/Fashion.java:67-88`):
+ *  colour, thickness and dashes, the lengths scaled at emission
+ *  (`SvgGraphics.java:555-561`). */
+export function strokeOf(paint: SequencePaint, k: number) {
+  const dash = paint.dash;
+  return {
+    stroke: svgFixColor(paint.stroke),
+    strokeWidth: paint.thickness * k,
+    ...(dash === undefined ? {} : { strokeDasharray: dash.map((d) => fmt(d * k)).join(',') }),
+  };
+}
+
+/** `URectangle.rounded(roundCorner)`, emitted `rx = ry = roundCorner / 2`
+ *  (`DriverRectangleSvg.java:78`). */
+function roundedOf(roundCorner: number, k: number): { readonly rx: number; readonly ry: number } {
+  const r = (roundCorner / 2) * k;
+  return { rx: r, ry: r };
 }
 
 /**
@@ -99,10 +76,10 @@ function boldFontWeight(bold: boolean): 'normal' | '700' {
  * into the `d` string directly, matching the jar's own absolute-coordinate
  * `d` output (no `transform`).
  *
- * Exported for direct coverage of the `roundCorner > 0` branch: no corpus
- * fixture reaches it (see {@link ROUND_CORNER}'s doc comment), so a caller
- * with `origin = {x: 0, y: 0}` is the only way to exercise it against the
- * literal upstream shape.
+ * Exported for direct coverage of both branches against the literal
+ * upstream shape. The radius is the BODY style's `RoundCorner` for both
+ * components (`ComponentRoseGroupingHeader.java:79`, `ComponentRoseReference
+ * .java:74`).
  */
 export function frameHeaderCornerPath(
   origin: { readonly x: number; readonly y: number },
@@ -135,16 +112,14 @@ export function frameHeaderCornerPath(
 }
 
 /**
- * `ComponentRoseGroupingHeader#drawBackgroundInternalU` (`:126-133`) --
- * the background pass, reached only via `Context2D#isBackground()`
+ * `ComponentRoseGroupingHeader#drawBackgroundInternalU` (`:126-133`) -- the
+ * background pass, reached only via `Context2D#isBackground()`
  * (`AbstractComponent.java:144-145`). Under teoz `background` is always
- * `HColors.transparent()` (`:80`), so this is `fill="none"` with a stroked
- * outline -- `symbolContext` is `style.getSymbolContext()`, i.e. the
- * "group" style block (`plantuml.skin:116-121`), not `styleHeader`.
- * `rect.setDeltaShadow(symbolContext.getDeltaShadow())` (`:131`) is that
- * style's merged `Shadowing` (`core/sequence-frame-shadow.ts`); only this
- * background rect carries it -- `drawInternalU`'s second rect (`:144-147`)
- * sets none, and neither does `groupHeader`'s corner `UPath` (`:142`).
+ * `HColors.transparent()` (`:80`), so this is `fill="none"` with an outline
+ * stroked by `style`'s symbol context (`:81,128`), rounded by `style`'s
+ * `RoundCorner` (`:79,130`) and shadowed by its `Shadowing` (`:131`). Only
+ * this background rect carries the shadow -- `drawInternalU`'s second rect
+ * (`:144-147`) sets none, and neither does the corner `UPath` (`:142`).
  * Jar-verified: `tests/fixtures/unwind2-S9/style-groupheader.svg` draws no
  * filter at all.
  *
@@ -152,82 +127,81 @@ export function frameHeaderCornerPath(
  * (`TileBuilder.java:174-176`), not a `GroupingTile`, and its component
  * `ComponentRoseReference` declares only `drawInternalU`
  * (`ComponentRoseReference.java:83`), so `AbstractComponent#drawU:143-147`
- * dispatches the EMPTY inherited `drawBackgroundInternalU` (`:139-140`) for
- * it. See {@link renderGroupingHeaderForeground} for why the two components
- * share this module today.
+ * dispatches the EMPTY inherited `drawBackgroundInternalU` (`:139-140`).
  */
 export function renderGroupingHeaderBackground(frame: FrameGeo, theme: ScaledTheme): string {
   if (frame.frameType === 'ref') return '';
   const k = theme.scaleK;
+  const { paint } = framePaintsOf(frame);
   return rect(frame.x, frame.y, frame.width, frame.height, {
     fill: 'none',
-    stroke: GROUP_LINE_COLOR,
-    strokeWidth: GROUP_LINE_THICKNESS * k,
-    rx: ROUND_CORNER * k,
-    ry: ROUND_CORNER * k,
+    ...strokeOf(paint, k),
+    ...roundedOf(paint.roundCorner, k),
     ...sequenceShadowFilter(frameShadowDelta(frame, theme)),
   });
 }
 
-/** The corner-tab `<path>`, filled with the groupHeader background and
- *  stroked with `styleHeader`'s own symbol context -- the first element
- *  `drawInternalU` emits (`:142`). Split out of
- *  {@link renderGroupingHeaderForeground} to stay under the function-length
- *  budget. */
+/**
+ * The corner-tab `<path>`, drawn with `styleHeader`'s symbol context --
+ * fill, line colour and stroke (`symbolContextCorner.apply(ug)`,
+ * `ComponentRoseGroupingHeader.java:82,142`; `symbolContextHeader.apply(ug)`,
+ * `ComponentRoseReference.java:72,121`) -- and shaped by the BODY style's
+ * `RoundCorner`. A `ref` draws its corner at `dx(xMargin)` (`:122`), which
+ * `frame.x` already carries.
+ */
 function renderHeaderCorner(frame: FrameGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
+  const { paint, headerPaint } = framePaintsOf(frame);
   const cornerD = frameHeaderCornerPath(
     { x: frame.x, y: frame.y },
     { width: frame.tabWidth, height: frame.tabHeight },
     CORNER_SIZE * k,
-    ROUND_CORNER * k,
+    paint.roundCorner * k,
   );
-  const thickness = frame.frameType === 'ref' ? REFERENCE_HEADER_LINE_THICKNESS : HEADER_LINE_THICKNESS;
-  return path(cornerD, {
-    fill: HEADER_BACKGROUND_HEX,
-    stroke: HEADER_LINE_COLOR,
-    strokeWidth: thickness * k,
-  });
+  return path(cornerD, { fill: svgFixColor(headerPaint.fill), ...strokeOf(headerPaint, k) });
 }
 
 /**
- * The tab title and its optional `[comment]`, at `getOldPaddingX1()`/
- * `getOldPaddingY()` (`:151`, `:153-158`) -- the comment uses `style`'s OWN
- * `smallFont2` (`frame-style.ts#GROUP_FONT_SIZE` 11), not `styleHeader`'s 13,
- * and is wrapped in literal brackets by upstream itself
- * (`ComponentRoseGroupingHeader.java:89`: `"[" + strings.get(1) + "]"`).
- *
- * C5: position, width and baseline come off the run (D1) and now so does its
- * STYLE. The two blocks' skin values no longer arrive here by INDEX -- a title
- * is as many runs as it has creole atoms, so index 0 stopped meaning "the
- * title" -- they arrive on the run, because `sequence-layout-events.ts
- * #buildTabRuns` seeds each block's base `FontConfiguration` from them (D5)
- * and every atom inherits it. That is `DriverTextSvg#draw` reading one
- * `FontConfiguration` per `UText` (`:104-160,177-180`), and a markup-free tab
- * emits byte-identically to the pre-C5 pair.
- *
- * The `??` fallbacks are reached only by hand-built geometry. They answer with
- * the TITLE's 13 bold: the comment's own `smallFont2` cannot be told apart at
- * this layer any more, and `HEADER_FONT_BOLD`/`GROUP_FONT_BOLD` are both
- * `true` so the weight does not depend on which block a run came from.
- *
- * `url` WRAPS rather than decorates (`SvgGraphics#openLink`/`closeLink`,
- * `:1105-1150`); `sequence-text.ts` owns that wrap, so there is no second
- * `<a>` emitter here.
+ * A block's runs as `DriverTextSvg#draw` emits them: each at its own colour,
+ * else the block font's, and a run whose colour is transparent not drawn at
+ * all (`DriverTextSvg.java:93-94`; the bridge reads a transparent font colour
+ * as `null`, `FontConfigurationBridge.ts`). Jar-verified: `group { FontColor
+ * transparent }` draws neither the tab title nor the conditions.
+ */
+export function drawnRuns(runs: readonly TextRun[], font: FontConfiguration): TextRun[] {
+  const out: TextRun[] = [];
+  for (const run of runs) {
+    const color = run.color ?? font.color;
+    if (color !== null) out.push({ ...run, color });
+  }
+  return out;
+}
+
+/**
+ * The tab title, its optional `[comment]` and a `ref`'s keyword -- each run
+ * carries the font its block was built at in layout (`sequence-layout-frame
+ * .ts#buildTabRuns`, `sequence-layout-ref.ts#headerOf`): `styleHeader`'s for
+ * the title, `style`'s `smallFont2` for the comment
+ * (`ComponentRoseGroupingHeader.java:84,90`). That is `DriverTextSvg#draw`
+ * reading one `FontConfiguration` per `UText` (`:104-160,177-180`). The
+ * fallbacks are the header font's, for a run that set none. Drawn under
+ * `UStroke.simple()` (`:149`). `url` WRAPS rather than decorates
+ * (`SvgGraphics#openLink`/`closeLink`); `sequence-text.ts` owns that wrap.
  */
 function renderHeaderText(frame: FrameGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
-  return frame.tabRuns
+  const font = framePaintsOf(frame).headerPaint.font;
+  return drawnRuns(frame.tabRuns, font)
     .map((run) =>
       sequenceText({
         leftX: drawnLeftX(run),
         baselineY: run.y,
         text: run.text,
         width: drawnWidth(run),
-        fontFamily: run.fontFamily ?? theme.fontFamily,
-        fontSize: run.fontSize ?? HEADER_FONT_SIZE * k,
-        fontWeight: boldFontWeight(run.bold ?? HEADER_FONT_BOLD),
-        fill: run.color ?? HEADER_FONT_COLOR,
+        fontFamily: run.fontFamily ?? font.family,
+        fontSize: run.fontSize ?? font.size * k,
+        ...((run.bold ?? font.styles.has(FontStyle.BOLD)) ? { fontWeight: '700' as const } : {}),
+        fill: run.color!,
         ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
         ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
         ...(run.url !== undefined ? { url: run.url } : {}),
@@ -240,22 +214,24 @@ function renderHeaderText(frame: FrameGeo, theme: ScaledTheme): string {
 }
 
 /**
- * The foreground pass's full-area rect. A grouping frame's carries no shadow
- * (`ComponentRoseGroupingHeader.java:144-147` builds it without
- * `setDeltaShadow`). A `ref`'s does: `ComponentRoseReference#drawInternalU`
- * narrows the rect by the body style's `getDeltaShadow()` and shadows it
- * (`ComponentRoseReference.java:89-96`), the width its `getPreferredWidth`
- * added back (`:155-159`, `ref-body-geo.ts#refBodyWidth`).
+ * The foreground pass's full-area rect, stroked by the BODY style's symbol
+ * context. A grouping frame's carries no fill and no shadow
+ * (`ComponentRoseGroupingHeader.java:144-147`: stroke and fore colour only,
+ * no `setDeltaShadow`). A `ref`'s is the whole symbol context -- fill
+ * included -- narrowed by the body style's `getDeltaShadow()` and shadowed by
+ * it (`ComponentRoseReference.java:89-96`), the width its
+ * `getPreferredWidth` added back (`:155-159`, `ref-body-geo.ts
+ * #refComponentWidth`).
  */
 function renderBodyRect(frame: FrameGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
-  const delta = frame.frameType === 'ref' ? frameShadowDelta(frame, theme) : 0;
+  const { paint } = framePaintsOf(frame);
+  const isRef = frame.frameType === 'ref';
+  const delta = isRef ? frameShadowDelta(frame, theme) : 0;
   return rect(frame.x, frame.y, frame.width - delta * k, frame.height, {
-    fill: 'none',
-    stroke: GROUP_LINE_COLOR,
-    strokeWidth: GROUP_LINE_THICKNESS * k,
-    rx: ROUND_CORNER * k,
-    ry: ROUND_CORNER * k,
+    fill: isRef ? svgFixColor(paint.fill) : 'none',
+    ...strokeOf(paint, k),
+    ...roundedOf(paint.roundCorner, k),
     ...sequenceShadowFilter(delta),
   });
 }
@@ -263,18 +239,16 @@ function renderBodyRect(frame: FrameGeo, theme: ScaledTheme): string {
 /**
  * `ComponentRoseGroupingHeader#drawInternalU` (`:135-159`) -- the
  * foreground pass, in upstream's exact order: corner path, then the SAME
- * full-area rect the background pass drew (`:144-147`, using `symbolContext`
- * = `style`'s own group symbol context, not `styleHeader`'s), then the tab
- * text and its optional comment.
+ * full-area rect the background pass drew (`:144-147`), then the tab text and
+ * its optional comment.
  *
  * A `ref` frame is a DIFFERENT component -- `ComponentRoseReference`
  * (`ReferenceTile.java:117-124`) -- whose `drawInternalU` (`:83-136`) emits
- * the body rect FIRST (`:99`) and the corner path SECOND (`:118`), the
+ * the body rect FIRST (`:96`) and the corner path SECOND (`:122`), the
  * reverse of this one, and no `[comment]` at all (its display is split into
- * a header at index 0 and body lines from index 1, `:67-78`). Only that
+ * a header at index 0 and body lines from index 1, `:69-78`). Only that
  * ordering differs at this level, so the two share a module rather than
- * duplicating the corner and rect; a faithful `ComponentRoseReference` port
- * with its own `xMargin`/`heightFooter` geometry is filed for T8.
+ * duplicating the corner and rect.
  */
 export function renderGroupingHeaderForeground(frame: FrameGeo, theme: ScaledTheme): string {
   const cornerEl = renderHeaderCorner(frame, theme);

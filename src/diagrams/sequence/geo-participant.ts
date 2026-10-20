@@ -46,8 +46,9 @@ export interface ParticipantGeo {
   height: number;
   centerX: number;
   /**
-   * The kind's merged-style `getDeltaShadow()` (`Participant#getUsedStyles`,
-   * `core/sequence-shadowing.ts`), UNSCALED; absent when 0. Every kind draws
+   * The kind's merged-style `getShadowing()` (`Style.java:109-115`), read
+   * off its paint (`Participant#getUsedStyles`, `Participant.java:82-91`),
+   * UNSCALED; absent when 0. Every kind draws
    * it as a filter; only `participant` and `collections` also reserve it --
    * `ComponentRoseParticipant#getPreferredWidth/Height` add it (`:129-138`),
    * so for those two `width`/`height` are the PREFERRED box and the drawn

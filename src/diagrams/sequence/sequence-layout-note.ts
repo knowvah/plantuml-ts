@@ -198,14 +198,16 @@ export function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: Even
     minX: tile.minX,
     maxX: tile.maxX,
     ...(event.color !== undefined ? { color: event.color } : {}),
-    ...(event.shape !== undefined ? { shape: event.shape } : {}),
+    // A note under a message is always a `ComponentType.NOTE`
+    // (`CommunicationTileNoteBottomTopAbstract.java:108`), whatever its keyword.
+    ...(event.shape !== undefined && !isUnderMessage(event) ? { shape: event.shape } : {}),
     ...(shadow > 0 ? { shadow } : {}),
   };
   ctx.eventGeos.push(noteGeo);
   // `NoteTile#getPreferredHeight:175-180` is the component's height and
   // nothing else -- no spacing either side -- and that is `getTextHeight +
   // 2 * getPaddingY + deltaShadow` (`ComponentRoseNote:88-91`,
-  // `...NoteBox:62-65`; the shadow only for `note`, see
-  // `sequence-layout-note-shadow.ts`).
+  // `...NoteBox:62-65`; the shadow only for `note`, see `reserve` in
+  // `resolveNote`).
   cursor.y += textHeight + NOTE_COMPONENT_PADDING_Y * 2 + reserve;
 }

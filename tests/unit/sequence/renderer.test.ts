@@ -46,7 +46,8 @@ import { atomFontSpec } from '../../../src/diagrams/sequence/sequence-creole-tex
 
 /** The default skin's builder: a source with no style declarations. */
 const DEFAULT_STYLE = currentStyleBuilder(createSequenceStyleDispatch({ lines: [], type: 'sequence' }));
-import { HEADER_PADDING, HEADER_FONT_SIZE, GROUP_FONT_SIZE } from '../../../src/diagrams/sequence/frame-style.js';
+import { HEADER_PADDING } from '../../../src/diagrams/sequence/frame-style.js';
+import { DEFAULT_GROUP_PAINTS, groupPaintsOf } from './frame-paint-fixtures.js';
 import { noGradient } from '../../../src/core/paint.js';
 import { DEFAULT_SEQUENCE_STYLE_BUILDER, sequenceSource, wholeLifelines } from '../../helpers/sequence-source.js';
 
@@ -121,6 +122,11 @@ function labelRunsFor(p: Omit<ParticipantGeo, 'labelRuns'>): TextRun[] {
 function participantGeo(base: Omit<ParticipantGeo, 'labelRuns'>): ParticipantGeo {
   return { ...base, labelRuns: labelRunsFor(base) };
 }
+
+/** `groupHeader { FontSize 13 }` (`plantuml.skin:127`). */
+const HEADER_FONT_SIZE = 13;
+/** `group { FontSize 11 }` (`plantuml.skin:119`), the comment's `smallFont2`. */
+const GROUP_FONT_SIZE = 11;
 
 /** A hand-built frame's tab runs, mirroring `sequence-layout-events.ts
  *  #buildTabRuns` — A4 moved that placement into layout. Measured, so an
@@ -910,6 +916,7 @@ describe('renderSequence — frames', () => {
     // Tab geometry (tabText/tabTextWidth/tabWidth/tabHeight) is a T5-only
     // fixture value (D9) — not exercised by this test's assertions.
     const frame: FrameGeo = {
+      ...DEFAULT_GROUP_PAINTS,
       kind: 'frame',
       frameType: 'loop',
       label: 'i < 5',
@@ -937,6 +944,7 @@ describe('renderSequence — frames', () => {
     // component) -- dashing lives on the `else` divider only (`ElseTile
     // .java:104`: "its OWN divider (dashed line + label strip)").
     const frame: FrameGeo = {
+      ...DEFAULT_GROUP_PAINTS,
       kind: 'frame',
       frameType: 'alt',
       label: 'x > 0',
@@ -964,6 +972,7 @@ describe('renderSequence — frames', () => {
     // `GroupingTile.java:126-127`. `renderGroupingHeaderForeground` draws
     // `tabComment` bracketed.
     const frame: FrameGeo = {
+      ...DEFAULT_GROUP_PAINTS,
       kind: 'frame',
       frameType: 'opt',
       label: 'condition',
@@ -1055,6 +1064,7 @@ describe('renderSequence — background pass (T6)', () => {
     // both land before pass 2 (lifelines), which is where the OLD
     // (pre-T6) inline border used to be the first frame-related output.
     const frame: FrameGeo = {
+      ...groupPaintsOf(undefined, { backColorGeneral: '#FF0000' }),
       kind: 'frame',
       frameType: 'group',
       label: '',
@@ -1082,6 +1092,7 @@ describe('renderSequence — background pass (T6)', () => {
 
   it('nested groups emit outer band, outer outline, inner band, inner outline', () => {
     const outer: FrameGeo = {
+      ...groupPaintsOf(undefined, { backColorGeneral: '#FF0000' }),
       kind: 'frame',
       frameType: 'group',
       label: '',
@@ -1100,6 +1111,7 @@ describe('renderSequence — background pass (T6)', () => {
       tabHeight: 17,
     };
     const inner: FrameGeo = {
+      ...groupPaintsOf(undefined, { backColorGeneral: '#00FF00' }),
       kind: 'frame',
       frameType: 'group',
       label: '',

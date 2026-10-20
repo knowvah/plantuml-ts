@@ -142,6 +142,15 @@ describe('divider paint, from the style path', () => {
     for (const l of lines(svg)) expect(l).toContain('stroke-width="2"');
   });
 
+  it('strokes a rule with a gradient LineColor in its first colour, the box with the gradient (DriverLineSvg.java:76-80)', () => {
+    // jar `sedule-54-falo457`: `skinparam sequenceDividerBorderColor
+    // #white|green` -> both rules `stroke:#FFF`, the label box
+    // `stroke:url(#…)`.
+    const svg = renderDivider(dividerOf(['skinparam sequenceDividerBorderColor #white|green', '== foo ==']), theme);
+    for (const l of lines(svg)) expect(l).toContain('stroke="#FFF"');
+    expect(rects(svg)[1]).toMatch(/stroke="url\(#[^)]+\)"/);
+  });
+
   it('refuses a divider layout did not paint', () => {
     const { paint: _unused, ...unpainted } = dividerOf(['== Init ==']);
     expect(() => renderDivider(unpainted, theme)).toThrow(`divider "${unpainted.text}" carries no paint`);

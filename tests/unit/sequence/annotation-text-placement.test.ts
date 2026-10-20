@@ -104,7 +104,7 @@ describe('renderer.ts emits no anchored text at all (D3)', () => {
     expect(/^import \{[^}]*\btext\b[^}]*\} from/m.test(src)).toBe(false);
     // T2e split the note and box drawing out; the rule follows them.
     const notes = readFileSync(join(ROOT, 'src/diagrams/sequence/renderer-note.ts'), 'utf8');
-    expect(notes).toContain("import { path, rect } from '../../core/svg.js';");
+    expect(notes).toContain("import { path, polygon, rect } from '../../core/svg.js';");
     expect(/^import \{[^}]*\btext\b[^}]*\} from/m.test(notes)).toBe(false);
   });
 

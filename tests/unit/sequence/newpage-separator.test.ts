@@ -18,15 +18,11 @@ import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { renderSequence, renderSequencePage } from '../../../src/diagrams/sequence/renderer.js';
 import { FixedMeasurer } from '../../../src/core/measurer.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import {
-  NEWPAGE_DASH_UNIT,
-  NEWPAGE_LINE_COLOR,
-  NEWPAGE_LINE_THICKNESS,
-  NEWPAGE_MARGIN_Y,
-} from '../../../src/diagrams/sequence/newpage-style.js';
+import { NEWPAGE_MARGIN_Y } from '../../../src/diagrams/sequence/newpage-style.js';
 import { newpageTilesOf } from '../../../src/diagrams/sequence/sequence-page.js';
 import type { SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
 import { sequenceSource } from '../../helpers/sequence-source.js';
+import { layoutBody } from './frame-paint-fixtures.js';
 
 const measurer = new FixedMeasurer(8, 16);
 
@@ -50,15 +46,46 @@ describe('newpage separator', () => {
     expect(separatorLines(body)).toHaveLength(1);
   });
 
-  /** `root { LineColor #181818 }`, `element { LineThickness 0.5 }`,
-   *  `newpage { LineStyle 2 }` — the three segments of
-   *  `ComponentType.NEWPAGE.getStyleSignature()` that set anything. */
+  /** `root { LineColor #181818 }` (`plantuml.skin:16`), `element
+   *  { LineThickness 0.5 }` (`:91-93`), `newpage { LineStyle 2 }`
+   *  (`:189-191`) — the three segments of `ComponentType.NEWPAGE
+   *  .getStyleSignature()` that set anything, read off the `newpage` style
+   *  merged in `Newpage`'s constructor (`Newpage.java:55-57`, sdd1 T3a). */
   it('carries the cascade`s stroke, thickness and dash unit', () => {
     const { body } = renderSequence(layout(SOURCE), defaultTheme, measurer);
     const [sep] = separatorLines(body);
-    expect(sep).toContain(`stroke="${NEWPAGE_LINE_COLOR}"`);
-    expect(sep).toContain(`stroke-width="${String(NEWPAGE_LINE_THICKNESS)}"`);
-    expect(sep).toContain(`stroke-dasharray="${String(NEWPAGE_DASH_UNIT)},${String(NEWPAGE_DASH_UNIT)}"`);
+    expect(sep).toContain('stroke="#181818"');
+    expect(sep).toContain('stroke-width="0.5"');
+    expect(sep).toContain('stroke-dasharray="2,2"');
+  });
+
+  it('takes stroke, thickness and dash from a <style> newpage block', () => {
+    const geo = layoutBody(
+      '<style>\nsequenceDiagram {\n newpage {\n LineColor red\n LineThickness 2\n LineStyle 5\n }\n}\n</style>\n' +
+        SOURCE.join('\n'),
+      measurer,
+    );
+    const { body } = renderSequence(geo, defaultTheme, measurer);
+    expect(body).toMatch(/<line[^>]*stroke="#F00" stroke-width="2" stroke-dasharray="5,5"\/>/);
+  });
+
+  it('reads the style current at the newpage, not a later one (D2)', () => {
+    const geo = layoutBody(
+      `${SOURCE.join('\n')}\n<style>\nsequenceDiagram {\n newpage {\n LineColor red\n }\n}\n</style>`,
+      measurer,
+    );
+    const { body } = renderSequence(geo, defaultTheme, measurer);
+    expect(separatorLines(body)[0]).toContain('stroke="#181818"');
+  });
+
+  it('refuses a separator layout did not paint', () => {
+    const geo = layout(SOURCE);
+    const events = geo.events.map((e) => {
+      if (e.kind !== 'newpage') return e;
+      const { paint: _paint, ...bare } = e;
+      return bare;
+    });
+    expect(() => renderSequence({ ...geo, events }, defaultTheme, measurer)).toThrow(/newpage geo has no paint/);
   });
 
   it('sits MARGINY below the tile top and spans the tile band', () => {

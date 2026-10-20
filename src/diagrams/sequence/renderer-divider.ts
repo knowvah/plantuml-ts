@@ -14,6 +14,7 @@
  */
 
 import type { DividerGeo } from './ast.js';
+import { noGradient } from '../../core/paint.js';
 import { fmt } from '../../core/svg-format.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
 import { rect, line } from '../../core/svg.js';
@@ -55,7 +56,9 @@ function dashOf(paint: SequencePaint, k: number): { readonly strokeDasharray?: s
  * `drawSep` (`:107-111`): the band (`drawRectLong`, `:113-119`), filled and
  * stroked with the background colour, then the double rule (`drawDoubleLine`,
  * `:121-126`) in `LineColor` at half the style's thickness, undashed
- * (`UStroke.withThickness`).
+ * (`UStroke.withThickness`). A rule is a `ULine`, which `DriverLineSvg`
+ * strokes with a gradient's FIRST colour (`DriverLineSvg.java:76-80`); the
+ * rects keep the gradient.
  */
 function renderDividerBand(divider: DividerGeo, paint: SequencePaint, theme: ScaledTheme): string {
   const k = theme.scaleK;
@@ -68,7 +71,7 @@ function renderDividerBand(divider: DividerGeo, paint: SequencePaint, theme: Sca
     ...roundedOf(paint, k),
     ...sequenceShadowFilter(paint.shadowing),
   });
-  const ruleStyle = { stroke: paint.stroke, strokeWidth: (paint.thickness / 2) * k };
+  const ruleStyle = { stroke: noGradient(paint.stroke), strokeWidth: (paint.thickness / 2) * k };
   const rule = (dy: number): string => line(x, midY + dy * k, x + w, midY + dy * k, ruleStyle);
   return band + rule(UPPER_RULE_DY) + rule(LOWER_RULE_DY);
 }

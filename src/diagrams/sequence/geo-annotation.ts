@@ -13,6 +13,7 @@
  * Re-exported by `geo.ts`, which is re-exported by `ast.ts`.
  */
 
+import type { NoteShape } from './ast.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import type { TextRun } from './text-block-geo.js';
 
@@ -30,9 +31,13 @@ export interface NoteGeo {
   height: number;
   text: string;
   color?: string;
-  shape?: 'rect';
-  /** The note style's merged `getDeltaShadow()` (`Note#getUsedStyles`,
-   *  `core/sequence-shadowing.ts`), UNSCALED; absent when 0. */
+  /** `NoteEvent.shape` of the component drawn: absent for the Opale
+   *  `NOTE`, which a note under a message always is
+   *  (`CommunicationTileNoteBottomTopAbstract.java:108`). */
+  shape?: NoteShape;
+  /** The note style's `getShadowing()` (`Style.java:109-115`), read off
+   *  its paint (`Note#getUsedStyles`, `Note.java:75-82`), UNSCALED; absent
+   *  when 0. */
   shadow?: number;
   /** The body, one placed and measured run per line of {@link text} (A5).
    *  Measured at `note { FontSize 13 }`, not the ambient font. */
@@ -198,6 +203,13 @@ export interface LifelineSegment {
    * at emission (`SvgGraphics#format`), see `scale-geo.ts` header.
    */
   readonly paint: SequencePaint;
+  /** The `<title>` a `PARTICIPANT_LINE` piece opens its group with
+   *  (`ComponentRoseLine.java:82`), from the display `MutingLine` hands the
+   *  piece's component (`MutingLine.java:107-108`); see
+   *  `sequence-layout-lifeline.ts#lifelineTitle`. Already `UGroup#fix`ed.
+   *  Layout always sets it; absent only on a hand-built geometry, which has
+   *  no stereotype, and the renderer then titles from the display alone. */
+  readonly title?: string;
   y1: number;
   y2: number;
   delay: boolean;

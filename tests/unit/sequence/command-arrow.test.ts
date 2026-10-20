@@ -25,6 +25,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
+import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
 import type { MessageEvent, SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
 import {
   ARROW_SOURCE,
@@ -302,6 +303,28 @@ describe('CommandArrow — forms upstream itself refuses', () => {
     const result = parseSequence(sequenceSource(['a -[#notacolor]> b']));
     if (!('refused' in result)) throw new Error('expected a refusal');
     expect(result.kind).toBe('execution');
+  });
+
+  // The exo commands call the SAME static (`CommandExoArrowAny.java:101`), so
+  // a non-colour token refuses there too.
+  it('refuses `execution` for a non-colour style token on an exo arrow', () => {
+    const result = parseSequence(sequenceSource(['[-[#notacolor]> a']));
+    if (!('refused' in result)) throw new Error('expected a refusal');
+    expect(result.kind).toBe('execution');
+  });
+
+  // `return #word` reaches `HColorSet.getColor` (`CommandReturn.java:121-123`).
+  it('refuses `execution` for a non-colour `return #word`', () => {
+    const result = parseSequence(sequenceSource(['a -> b ++', 'return #notacolor x']));
+    if (!('refused' in result)) throw new Error('expected a refusal');
+    expect(result.kind).toBe('execution');
+  });
+
+  it('stores the resolved colour on the configuration (withColor, CommandArrow.java:497-498)', () => {
+    const arrow = (parsed('a -[#red,dashed]> b').events[0] as MessageEvent).arrow;
+    expect(arrow.color).toEqual(HColorSet.instance().getColor('#red'));
+    expect(arrow.color).not.toEqual(HColorSet.instance().getColor('#blue'));
+    expect(arrow.dashed).toBe(true);
   });
 });
 
@@ -695,8 +718,9 @@ describe('CommandArrow — ACTIVATION (:126,444-468)', () => {
   //
   // `!!` reaches `manageActivations`' `case '!'` and becomes
   // `activate(p2, DESTROY, null)` (`CommandArrow.java:453-455`); DESTROY is
-  // one of `isDeactivateOrDestroy`'s two arms, so it DOES lower the life
-  // level and this port's `deactivates` is the right collapse.
+  // one of `isDeactivateOrDestroy`'s two arms, so it lowers the life level,
+  // but it is not a DEACTIVATE (`AbstractMessage#isDeactivate`,
+  // `AbstractMessage.java:179-181`): it is the message's `destroys`.
   //
   // `**` never reaches that switch at all: the create fires earlier, at
   // `:397-398`, and `SequenceDiagram#activate` returns straight away for
@@ -707,10 +731,11 @@ describe('CommandArrow — ACTIVATION (:126,444-468)', () => {
   it.each([
     ['A -> B ** : hi', undefined, undefined],
     ['A -> B !! : hi', undefined, 'B'],
-  ])('reads the life event of %s, and CREATE is not one', (line, act, deact) => {
+  ])('reads the life event of %s, and CREATE is not one', (line, act, destroyed) => {
     const msg = firstMessage(line);
     expect(msg.activates).toBe(act);
-    expect(msg.deactivates).toBe(deact);
+    expect(msg.deactivates).toBeUndefined();
+    expect(msg.destroys).toBe(destroyed);
   });
 });
 

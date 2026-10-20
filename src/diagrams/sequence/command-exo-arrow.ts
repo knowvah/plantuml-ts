@@ -46,6 +46,7 @@ import { activate, addMessage, exoLifeEvents } from './sequence-life-state.js';
 import type { MessageExoEvent, MessageExoType } from './ast.js';
 import { activationEventOf, autoActivationEventOf } from './command-exo-arrow-activation.js';
 import { currentStyleBuilder } from './sequence-skin-param.js';
+import { applyStyle } from './command-arrow.js';
 import type { ArrowConfiguration, ArrowPart } from './sequence-arrowhead.js';
 import { getRegexp, transform } from '../../core/url/UrlBuilder.js';
 import { eventuallyRemoveStartingAndEndingDoubleQuote } from '../../core/url/Url.js';
@@ -241,19 +242,6 @@ function withPart(config: ArrowConfiguration, part: ArrowPart): ArrowConfigurati
   return { ...config, dressing1: { ...config.dressing1, part } };
 }
 
-/**
- * `CommandArrow.applyStyle(arrowStyle, config)`. A verbatim copy of the same
- * six lines in `command-arrow.ts:251-260` — upstream shares ONE static, but
- * that file is owned by another task this batch and the helper is private to
- * it; hoisting it into `sequence-parse-helpers.ts` is a follow-on.
- * @see ~/git/plantuml/.../command/CommandArrow.java:480-505
- */
-function applyStyle(arrowStyle: string | undefined, config: ArrowConfiguration): ArrowConfiguration {
-  if (arrowStyle === undefined) return config;
-  const dotted = arrowStyle.split(',').some((s) => s.toLowerCase() === 'dashed' || s.toLowerCase() === 'dotted');
-  return dotted ? { ...config, dashed: true } : config;
-}
-
 /** The `o`/`x` run on each side of the arrow, already resolved to the
  *  MESSAGE's own orientation. */
 interface ExoDressingFacts {
@@ -325,14 +313,22 @@ function getNextMessageNumber(
  *  upstream's own build order: direction, body, ASYNC head, part, style, then
  *  the per-side circles and CROSSX heads.
  *  @see ~/git/plantuml/.../command/CommandExoArrowAny.java:79-104 */
-function exoArrowConfiguration(g: Groups, type: MessageExoType, dressing: string): ArrowConfiguration {
+function exoArrowConfiguration(
+  state: ParseState,
+  g: Groups,
+  type: MessageExoType,
+  dressing: string,
+): ArrowConfiguration {
   const body = (g['ARROW_BODYA1'] ?? g['ARROW_BODYA2'] ?? '') + (g['ARROW_BODYB1'] ?? g['ARROW_BODYB2'] ?? '');
   const spec = exoArrowSpec(g, type, {
     sync: dressing.length === 2,
     both: g['ARROW_BOTHDRESSING'] !== undefined,
     dotted: body.includes('--'),
   });
+  // `CommandArrow.applyStyle(...)` (`:101`): the one shared static, colour
+  // and refusal included.
   return applyStyle(
+    state,
     g['ARROW_STYLE1'] ?? g['ARROW_STYLE2'],
     withPart(arrowConfigurationOf(spec), getArrowPart(dressing, type)),
   );
@@ -376,7 +372,7 @@ function getOrCreateParticipant(state: ParseState, g: Groups): string {
  *  upstream sets on it immediately after (`:138-147`).
  *  @see ~/git/plantuml/.../command/CommandExoArrowAny.java:136-147 */
 function messageExoOf(state: ParseState, g: Groups, type: MessageExoType, participant: string): MessageExoEvent {
-  const arrow = exoArrowConfiguration(g, type, g['ARROW_DRESSING1'] ?? g['ARROW_DRESSING2'] ?? '');
+  const arrow = exoArrowConfiguration(state, g, type, g['ARROW_DRESSING1'] ?? g['ARROW_DRESSING2'] ?? '');
   return {
     kind: 'messageExo',
     participant,
@@ -415,6 +411,8 @@ function executeExoArrow(state: ParseState, match: RegExpExecArray, getMessageEx
   }
 
   const msg = messageExoOf(state, g, type, participant);
+  // `NoSuchColorException` out of `applyStyle` (`:101`) discards the attempt.
+  if (state.executionError !== undefined) return;
   emit(state, msg);
   const error = addMessage(state.life, msg); // `:152-154`
   if (error !== undefined) {

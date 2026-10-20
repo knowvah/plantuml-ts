@@ -23,19 +23,20 @@ import {
 import { DRESSED_ARROW_RE, UNDRESSED_ARROW_RE } from './sequence-arrow-compose.js';
 import { currentStyleBuilder } from './sequence-skin-param.js';
 
-// 3a. box — opens a named/colored participant group. T13 (mission
-//     dispatch-by-parse-attempt): widened to accept an unquoted label
-//     (`box BoxOfAlice #yellow/blue`) and a trailing `<<stereotype>>`
-//     (`box "Tier 1" <<Client>>`) between the label and color, matching
-//     `CommandBoxStart`'s NAME1/NAME2/STEREOTYPE/color order. The
-//     stereotype is matched and discarded -- `BoxGroup` has no field for
-//     it and nothing in this port's renderer draws a box's stereotype.
+// 3a. box — opens a named/colored participant group: `CommandBoxStart`'s
+//     `box`, then NAME1 (quoted) or NAME2 (`[^#]+`, which is greedy and so
+//     swallows a `<<stereotype>>` written after an UNQUOTED title -- the jar
+//     draws `box Foo <<S>>` titled `Foo «S»` with no stereotype), then
+//     `StereotypePattern.optional("STEREO")` and the BACK colour.
 // @see sequencediagram/command/CommandBoxStart.java:65-77
 export const boxStartCommand: Command = {
-  pattern: /^box(?:\s+"([^"]*)"|\s+([^#<\s][^#<]*?))?(?:\s*<<[^>]*>>)?(?:\s+(#\S+))?\s*$/i,
+  pattern: /^box(?:\s+"([^"]*)"|\s+([^#]+))?\s*(<<.+?>>)?\s*(#\S+)?\s*$/i,
   execute(state, match) {
     const label = (match[1] ?? match[2] ?? '').trim();
-    const color = match[3] ?? '';
+    // `Stereotype.build(arg.get("STEREO", 0))` (`CommandBoxStart.java:119-123`),
+    // kept as written and built where the `Doll` resolves its style.
+    const stereotype = match[3];
+    const color = match[4] ?? '';
     const id = `box-${++state.boxCounter}`;
     const style = state.style;
     // A `Doll` reads the builder at TILE time (`Doll.java:81-83`), i.e. after
@@ -45,6 +46,7 @@ export const boxStartCommand: Command = {
       label,
       color,
       participantIds: [],
+      ...(stereotype !== undefined ? { stereotype } : {}),
       get styleBuilder() {
         return currentStyleBuilder(style);
       },

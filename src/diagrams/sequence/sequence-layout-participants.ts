@@ -23,14 +23,13 @@ import { symbolPreferredHeight, symbolPreferredWidth } from './sequence-layout-p
 import { ARROW_DELTA_X } from './sequence-arrowhead.js';
 import { displayLines, MESSAGE_NUMBER_MARGIN, numberTextOf, refBodyLines, refBodyWidth } from './text-block-geo.js';
 import {
-  anyBadgeFor,
   BADGE_GAP,
   buildLabelRuns,
   headRowsOf,
   labelRows,
-  visibleStereotypeLines,
   type ParticipantLayoutCtx,
 } from './sequence-layout-participant-label.js';
+import { displayedBadgeOf, displayedStereotypeLines } from './sequence-hide-passes.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { paintOfGeo, participantPaintsOf } from './sequence-participant-paints.js';
 import { sequenceAtomContext, sequenceLabelBlockWidth, sequenceLabelLineWidth } from './sequence-creole.js';
@@ -250,14 +249,14 @@ function computeParticipantWidths(sortedParticipants: Participant[], ctx: Partic
   return sortedParticipants.map((p) => {
     const paints = participantPaintsOf(p);
     const { paint } = paints;
-    const badge = anyBadgeFor(p, ctx, paint.fill);
+    const badge = displayedBadgeOf(p, ctx, paint.fill);
     // A head is a text BLOCK: `getPureTextWidth` is its WIDEST LINE
     // (`AbstractTextualComponent.java:106-108`), never the raw display -- and
     // C4: never the raw LINE either. `SheetBlock1#initMap` maxes `sea
     // .getWidth()` per stripe (`:145-149`), and a stripe's width is its PARSED
     // atoms', so `""MySubTitle""` reserves 70.087 and not the 90.038 its four
     // quotes measure (`jozomu-87-tajo507`, jar box width 84.087).
-    const rows = headRowsOf(visibleStereotypeLines(p), p.display, { ...paints, font: paint.font });
+    const rows = headRowsOf(displayedStereotypeLines(p), p.display, { ...paints, font: paint.font });
     const textW = Math.max(...labelRows(rows, ctx).map((r) => r.width));
     // `TextBlockSprited#calculateDimension`: the badge widens the block by its
     // own width plus the 6px gap (`:57-67`).
@@ -410,8 +409,8 @@ function buildParticipantGeo(
 ): ParticipantGeo {
   const paints = participantPaintsOf(p);
   const { paint } = paints;
-  const stereoLines = visibleStereotypeLines(p);
-  const badge = anyBadgeFor(p, ctx, paint.fill);
+  const stereoLines = displayedStereotypeLines(p);
+  const badge = displayedBadgeOf(p, ctx, paint.fill);
   // A visible stereotype is a SECOND row above the name
   // (`CommandParticipant.java:174-181`; the jar draws `«APIGateway»` on its
   // own line in `birocu-87-xubi808`), and so is each line the display's own

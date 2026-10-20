@@ -145,11 +145,12 @@ describe('PARALLEL: leading `&` (FactorySequenceNoteCommand.java:78,95, D4)', ()
 });
 
 describe('STYLE: hnote/rnote combined with of-optional/PARALLEL/VMERGE', () => {
-  it('hnote left Alice: text -- no "of", style hnote, shape rect', () => {
+  it('hnote left Alice: text -- no "of", style hnote, shape hexagon', () => {
     const ast = parse(['participant Alice', 'hnote left Alice: hnote text']);
     const ev = firstNote(ast);
     expect(ev.style).toBe('hnote');
-    expect(ev.shape).toBe('rect');
+    // `NoteStyle.HEXAGONAL` -> `ComponentRoseNoteHexagonal` (NoteStyle.java:46-54).
+    expect(ev.shape).toBe('hexagon');
     expect(ev.participants).toEqual(['Alice']);
     expect(ev.text).toBe('hnote text');
   });
@@ -201,11 +202,11 @@ describe('StereotypePattern: <<stereo>> before or after the position', () => {
 });
 
 describe('noteOnArrowCommand: style and color are now stored on the event', () => {
-  it('hnote right: text -- style hnote, shape rect, attaches to last message target', () => {
+  it('hnote right: text -- style hnote, shape hexagon, attaches to last message target', () => {
     const ast = parse(['participant A', 'participant B', 'A -> B: hi', 'hnote right: hexagonal']);
     const ev = firstNote(ast);
     expect(ev.style).toBe('hnote');
-    expect(ev.shape).toBe('rect');
+    expect(ev.shape).toBe('hexagon');
     expect(ev.participants).toEqual(['B']);
     expect(ev.text).toBe('hexagonal');
   });

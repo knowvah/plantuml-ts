@@ -144,9 +144,10 @@ describe('participant declarations', () => {
   // `SequenceDiagramFactory:100` -> `CommonCommands#addCommonCommands1` ->
   // `addCommonHides` (`CommonCommands.java:103-106`). T13 recorded it as an
   // unmodelled no-op; the registration is one level down.
-  it('hide stereotype drops the stereotype', () => {
+  it('hide stereotype hides the DISPLAYED stereotype and keeps it for style (Participant.java:125-135)', () => {
     const ast = parse(['hide stereotype', 'participant Alice <<alice>>']);
-    expect(ast.participants[0]?.stereotype).toBeUndefined();
+    expect(ast.participants[0]?.stereotype).toBe('<<alice>>');
+    expect(ast.participants[0]?.stereotypeHidden).toBe(true);
     expect(ast.participants[0]?.id).toBe('Alice');
   });
 

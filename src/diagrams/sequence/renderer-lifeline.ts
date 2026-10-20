@@ -16,11 +16,12 @@
  */
 
 import type { ParticipantGeo, ActivationGeo, DestroyCross, DestroyGeo, LifelineSegment } from './ast.js';
+import { lifelineTitle } from './sequence-layout-lifeline.js';
 import { noGradient } from '../../core/paint.js';
 import { fmt } from '../../core/svg-format.js';
 import { rect, line, escapeXmlText, type LineStyle } from '../../core/svg.js';
 import type { ScaledTheme } from './scale-geo.js';
-import { sequenceShadowFilter } from './sequence-shadow.js';
+import { activationShadowFilter } from './sequence-shadow.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { ACTIVATION_HALF_WIDTH } from './sequence-layout-activation.js';
 import { DESTROY_CROSS_SIZE } from './sequence-layout-life-event.js';
@@ -33,15 +34,6 @@ const HOVER_TARGET_WIDTH = 8;
  *  area is one pixel wide, and that width is what both offsets below are
  *  computed from -- it is not an arbitrary unit. */
 const LINE_COMPONENT_WIDTH = 1;
-
-/**
- * `Display#toTooltipText` (`klimt/creole/Display.java:601-605`): the first
- * line of the display, or the empty string when there is none. NOT the
- * participant code, and NOT the lines joined.
- */
-function toTooltipText(display: string): string {
-  return display.split('\n')[0] ?? '';
-}
 
 /**
  * `<g><title>...</title>` open tag. Upstream builds this in
@@ -130,7 +122,7 @@ export function renderLifeline(p: ParticipantGeo, seg: LifelineSegment, theme: S
 
   const vline = line(p.centerX, seg.y1, p.centerX, seg.y2, lineStroke(seg.paint, theme.scaleK));
 
-  return `${openTitledGroup(toTooltipText(p.display))}${hover}${vline}</g>`;
+  return `${openTitledGroup(seg.title ?? lifelineTitle(p))}${hover}${vline}</g>`;
 }
 
 /** `ComponentRoseDelayLine#drawInternalU` (`:59-65`): one vertical line at
@@ -169,7 +161,7 @@ export function renderLifelineSegments(
   return segments
     .map((seg) => {
       if (seg.delay) return renderDelayLine(p, seg, theme);
-      if (seg.clippedOut === true) return `${openTitledGroup(toTooltipText(p.display))}</g>`;
+      if (seg.clippedOut === true) return `${openTitledGroup(seg.title ?? lifelineTitle(p))}</g>`;
       return renderLifeline(p, seg, theme);
     })
     .join('');
@@ -232,7 +224,7 @@ export function renderActivation(act: ActivationGeo, theme: ScaledTheme): string
     fill: paint.fill,
     stroke: paint.stroke,
     strokeWidth: ACTIVATION_STROKE_THICKNESS * theme.scaleK,
-    ...activationShadow(paint),
+    ...activationShadowFilter(paint),
   });
 
   return `${openTitledGroup('')}${bar}</g>`;
@@ -241,11 +233,6 @@ export function renderActivation(act: ActivationGeo, theme: ScaledTheme): string
 /** The driver's unit stroke the bar keeps (`UStroke.simple()`): see
  *  {@link renderActivation}. */
 const ACTIVATION_STROKE_THICKNESS = 1;
-
-/** `if (symbolContext.isShadowing()) rect.setDeltaShadow(1)` (`:82-83`). */
-function activationShadow(paint: SequencePaint): { readonly filter?: string } {
-  return sequenceShadowFilter(paint.shadowing > 0 ? 1 : 0);
-}
 
 /** The paint layout resolved for this bar (`sequence-layout-activation.ts`). */
 function activationPaintOf(act: ActivationGeo): SequencePaint {
@@ -266,7 +253,7 @@ function renderOpenBar(act: ActivationGeo, x: number, paint: SequencePaint, them
     fill: paint.fill,
     stroke: paint.fill,
     strokeWidth: style.strokeWidth,
-    ...activationShadow(paint),
+    ...activationShadowFilter(paint),
   });
   const sides = line(x, act.y, x, bottom, style) + line(x + width, act.y, x + width, bottom, style);
   const up = act.open!.closeUp ? line(x, act.y, x + width, act.y, style) : '';

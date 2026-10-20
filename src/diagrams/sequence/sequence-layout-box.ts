@@ -9,6 +9,7 @@ import { Colors } from '../../core/abel/Colors.js';
 import { ColorType } from '../../core/abel/ColorType.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import type { HColor } from '../../core/style/Value.js';
+import { Stereotype } from '../../core/stereo/Stereotype.js';
 import { dollStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
 import { atomFontSpec } from './sequence-creole-text-atom.js';
 import { offsetRun, sequenceCreoleRuns } from './sequence-creole.js';
@@ -30,13 +31,13 @@ function boxBackColor(raw: string): HColor | undefined {
 
 /**
  * `Doll#getUsedStyles` (`Doll.java:107-114`): `ENGLOBER` with the englober's
- * stereotype, its `BackGroundColor` replaced by the box colour, merged from
- * the builder at tile time (`Doll.java:81-83`). `BoxGroup` carries no
- * stereotype yet (`command-grouping.ts` matches and drops it), so none is
- * passed.
+ * stereotype -- `Stereotype.build(stereo)`, the one-argument form
+ * (`CommandBoxStart.java:123`) -- its `BackGroundColor` replaced by the box
+ * colour, merged from the builder at tile time (`Doll.java:81-83`).
  */
 export function boxPaint(box: BoxGroup): SequencePaint {
-  return paintOf(dollStyle(box.styleBuilder, undefined, boxBackColor(box.color)), HColorSet.instance());
+  const style = dollStyle(box.styleBuilder, Stereotype.build(box.stereotype), boxBackColor(box.color));
+  return paintOf(style, HColorSet.instance());
 }
 
 /** The box's drawn extent, as `computeBoxGeos` placed it. */

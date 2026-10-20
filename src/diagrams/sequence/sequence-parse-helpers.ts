@@ -195,22 +195,47 @@ export function setLastEventWithNoteSpan(state: ParseState, ids: readonly string
 }
 
 /**
- * `AutoNumber#getNextMessageNumber` (`AutoNumber.java:75-81`): format the
+ * `autonumber` with no quoted FORMAT formats with `<b>0</b>`
+ * (`CommandAutonumber.java:119`): the number is creole bold, which is why the
+ * jar draws it at `font-weight="700"`. `autonumber resume` keeps whatever
+ * format is current (`AutoNumber.java:59-72`), and this port's `format`
+ * field IS that state, so an absent field means this default.
+ */
+export const DEFAULT_AUTONUMBER_FORMAT = '<b>0</b>';
+
+/**
+ * `AutoNumber#getNextMessageNumber` (`AutoNumber.java:82-89`): format the
  * CURRENT value, then advance by `step` (`DottedNumber#incrementMinor`,
- * `DottedNumber.java:75-79` — the last segment only).
+ * `DottedNumber.java:75-79` — the last segment only). The formatted string is
+ * the `MessageNumber` `getLabelNumbered` puts first in the display
+ * (`AbstractMessage.java:199-207`).
  */
 export function applyAutonumber(state: ParseState, msg: MessageEvent): MessageEvent {
   const auto = state.ast.autonumber;
   if (!auto.enabled) return msg;
   const num = auto.current;
   auto.current += auto.step;
-  const dottedLabel = auto.prefix === '' ? undefined : `${auto.prefix}${String(num)}`;
-  const label = auto.format !== undefined ? formatAutonumber(auto.format, num, auto.prefix) : dottedLabel;
   return {
     ...msg,
     sequenceNumber: num,
-    ...(label !== undefined ? { sequenceLabel: label } : {}),
+    sequenceLabel: formatDottedNumber(auto.prefix, num, auto.format ?? DEFAULT_AUTONUMBER_FORMAT),
   };
+}
+
+/**
+ * `DottedNumber#format(DecimalFormat)`: a single number with no separator
+ * goes through the format; a dotted one IGNORES it and is always bold.
+ *
+ * ```java
+ * if (nums.size() == 1 && separators.size() == 0)
+ *     return format.format(nums.get(0));
+ * return "<b>" + toString() + "</b>";
+ * ```
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/DottedNumber.java:106-111
+ */
+function formatDottedNumber(prefix: string, num: number, format: string): string {
+  if (prefix === '') return formatAutonumber(format, num);
+  return `<b>${prefix}${String(num)}</b>`;
 }
 
 /**
@@ -221,11 +246,10 @@ export function applyAutonumber(state: ParseState, msg: MessageEvent): MessageEv
  * `DecimalFormat` pattern characters (`#`, `,`, `.`) are not ported: none
  * appear in the corpus bucket's format strings.
  */
-export function formatAutonumber(format: string, num: number, prefix: string): string {
-  const digits = prefix === '' ? String(num) : `${prefix}${String(num)}`;
+export function formatAutonumber(format: string, num: number): string {
   const run = /0+/.exec(format);
   if (run === null) return format;
-  const padded = prefix === '' ? digits.padStart(run[0].length, '0') : digits;
+  const padded = String(num).padStart(run[0].length, '0');
   return format.slice(0, run.index) + padded + format.slice(run.index + run[0].length);
 }
 
@@ -317,10 +341,10 @@ export { parseParticipantDeclaration, participantUrlOf } from './sequence-partic
  *
  * The two directions are NOT symmetric -- `+` activates p2, the message
  * TARGET, while `-` deactivates p1, the message SOURCE (`:447`, `:450`).
- * `*` (CREATE, at `:396`) and `!` (DESTROY, `:453`) both act on the target;
- * this port has no CREATE/DESTROY variant on `ActivationEvent`, so they
- * collapse onto activate/deactivate as the pre-existing note on the arrow
- * command records.
+ * `*` (CREATE, at `:396`) and `!` (DESTROY, `:453`) both act on the target.
+ * CREATE is handled before the message (see the `case` below); DESTROY is
+ * the message's `destroys`, a destroy bound to it
+ * (`sequence-layout-life-event.ts#messageDestroyCrosses`).
  *
  * Ordering between the two events is not expressible in this return shape and
  * does not need to be: `sequence-layout-message.ts:135-148` keys both to the
@@ -389,9 +413,13 @@ export function autoActivationFlags(
   return arrow.dashed ? { deactivates: from } : { activates: to };
 }
 
-export function activationFlags(spec: string, from: string, to: string): { activates?: string; deactivates?: string } {
+export function activationFlags(
+  spec: string,
+  from: string,
+  to: string,
+): { activates?: string; deactivates?: string; destroys?: string } {
   const trimmed = spec.trim();
-  const flags: { activates?: string; deactivates?: string } = {};
+  const flags: { activates?: string; deactivates?: string; destroys?: string } = {};
   switch (trimmed.charAt(0)) {
     case '+':
       flags.activates = to;
@@ -410,8 +438,12 @@ export function activationFlags(spec: string, from: string, to: string): { activ
     case '-':
       flags.deactivates = from;
       break;
+    // `diagram.activate(p2, LifeEventType.DESTROY, null)` (`:453-455`): a
+    // DESTROY, not a DEACTIVATE -- `AbstractMessage#isDeactivate` is false for
+    // it (`AbstractMessage.java:179-181`), which is what keeps a self `!!`'s
+    // step at its end point (`CommunicationTileSelf.java:120-125`).
     case '!':
-      flags.deactivates = to;
+      flags.destroys = to;
       break;
   }
   // `if (spec.length() == 4)` (`CommandArrow.java:457-466`) -- the second

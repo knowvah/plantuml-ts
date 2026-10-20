@@ -20,8 +20,10 @@ import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import { runDrawMetrics } from './run-draw-metrics.js';
-import { arrowFontSpecOf } from './sequence-layout-shared.js';
-import { sequenceAtomContext, sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
+import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import { defaultMessageFont } from './sequence-arrow-paint.js';
+import { atomFontSpec } from './sequence-creole-text-atom.js';
+import { sequenceAtomContext, sequenceCreoleRuns } from './sequence-creole.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import type { SequenceRunImage } from './sequence-text.js';
 
@@ -357,6 +359,11 @@ export interface MessageLabelBlock {
  * rather than the other way round. A multi-line label therefore grows UPWARD,
  * leaving the arrow where the caller put it — the same property the old
  * `baselineY` had, now expressed the way upstream expresses it.
+ *
+ * `font` is the message style's font, colour already resolved for the draw
+ * (`sequence-arrow-paint.ts#messagePaint`'s `font`): the block is measured
+ * and drawn in it (`AbstractTextualComponent.java:80-92`). It defaults to the
+ * default skin's, for a block built with no message in hand.
  */
 export function messageLabelBlock(
   label: string,
@@ -364,25 +371,27 @@ export function messageLabelBlock(
   leftX: number,
   arrowY: number,
   env: MessageLabelEnv,
+  font: FontConfiguration = defaultMessageFont(),
 ): MessageLabelBlock {
-  const { theme, measurer } = env;
+  const { measurer } = env;
   // `AbstractTextualComponent` maps an empty display to a `TextBlockEmpty`,
   // which draws nothing (`AbstractTextualComponent.java:84-85`) -- so a
   // message with neither label nor number emits no `<text>` at all.
   const lines = label === '' ? [] : displayLines(label);
   if (lines.length === 0 && numberText === undefined) return { lines: [] };
 
-  // The ARROW font, not the ambient one: `arrow { FontSize 13 }`
-  // (`plantuml.skin:306-308`), and every golden with a message label emits
-  // `font-size="13"` for it beside `font-size="14"` participant text.
-  const spec = arrowFontSpecOf(theme);
-  // C3: the base font is rebuilt per call rather than hoisted -- a pure
-  // two-flag mapping over `spec`, and hoisting costs an NLOC this has not got.
+  // The ARROW style's font (`AbstractTextualComponent.java:80`,
+  // `getFontConfiguration()` = `style.getFontConfiguration(set)`,
+  // `AbstractComponent.java:129-131`), not the ambient one: `arrow { FontSize
+  // 13 }` (`plantuml.skin:316-317`) by default, and every golden with a
+  // message label emits `font-size="13"` beside `font-size="14"` participant
+  // text. The number and the label share it (`Display.java:703-711`).
+  const spec = atomFontSpec(font);
   // unwind2-S10: the label's `<$sprite>`/`<img>` atoms draw, on no `Back`
   // (`ComponentRoseArrow.java:179`), tinted to the component font colour.
-  const atoms = sequenceAtomContext(env.sprites, theme.colors.text);
+  const atoms = sequenceAtomContext(env.sprites, font.color ?? TRANSPARENT_SVG);
   const runsAt = (text: string, x: number, y: number): readonly TextRun[] =>
-    sequenceCreoleRuns(text, sequenceCreoleFont(spec), { leftX: x, baselineY: y }, measurer, atoms);
+    sequenceCreoleRuns(text, font, { leftX: x, baselineY: y }, measurer, atoms);
   const lineHeight = measurer.measure('M', spec).height;
   // `posArrow = getTextHeight(stringBounder)` with `yText = 0`
   // (`ComponentRoseArrow.java:141-148`): the block's TOP sits one
@@ -410,8 +419,14 @@ export function messageLabelBlock(
   return first === undefined ? { lines: placed } : { lines: [...rest, ...placed], number: first };
 }
 
+/** `HColors.transparent()` as `SvgGraphics` writes it: the sprite tint a
+ *  transparent `FontColor` leaves (`font.color === null`, `UText.ts`). */
+export const TRANSPARENT_SVG = '#00000000';
+
 /** What {@link messageLabelBlock} lays a label out with -- the
- *  `EventProcessingContext` fields it reads. */
+ *  `EventProcessingContext` fields it reads. `theme` is no longer read by the
+ *  block itself (the font is the arrow style's); it stays because the context
+ *  that satisfies this interface is the layout's own. */
 export interface MessageLabelEnv {
   readonly theme: Theme;
   readonly measurer: StringMeasurer;

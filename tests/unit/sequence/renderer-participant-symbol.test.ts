@@ -220,7 +220,7 @@ describe('renderParticipantSymbol — paint and stroke resolution', () => {
   });
 
   it('draws no stroke on a glyph path whose LineColor is transparent, as DriverPathSvg.java:64-68 does', () => {
-    const none = { ...paint('actor'), stroke: '#00000000' };
+    const none = { ...paint('actor'), stroke: 'none' }; // `paintOf` of `LineColor transparent`
     const svg = renderParticipantSymbol('actor', { ...GEO, paint: none }, { head: true, display: '', theme: THEME });
     const limbs = svg.match(/<path[^>]*>/g) ?? [];
     expect(limbs).toHaveLength(1);

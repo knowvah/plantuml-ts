@@ -23,20 +23,22 @@
  *
  * Jar-verified: `tests/fixtures/unwind2-S9b/r-*.svg`.
  */
-import type { FontSpec } from '../../core/measurer.js';
-import type { FrameEvent, FrameGeo, ParticipantGeo, TextRun } from './ast.js';
-import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
+import type { FrameEvent, FrameGeo, ParticipantGeo } from './ast.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { alignedBlockRuns } from './sequence-block-align.js';
+import { offsetRun, sequenceAtomContext } from './sequence-creole.js';
+import type { SequencePaint } from './sequence-skin-param.js';
 import {
-  REF_HEADER_EXTRA_WIDTH,
   REF_HEADER_TEXT,
   REF_HEIGHT_FOOTER,
   REF_PADDING,
   REF_X_MARGIN,
-  refBodyFontSpecOf,
   refBodyHeight,
   refBodyLines,
-  refBodyWidth,
-  refHeaderFontSpecOf,
+  refComponentWidth,
+  refHeaderHeight,
+  refHeaderWidth,
+  referencePaints,
 } from './ref-body-geo.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
 
@@ -57,43 +59,56 @@ function refSpan(event: FrameEvent, ctx: EventProcessingContext): { first: numbe
   return { first: left.x, last: right.x + right.width };
 }
 
-/** One block of text at `font`, its lines placed from `(0, top)` --
- *  `TextBlockSimple#drawU` stacking stripes by their measured height. */
-function blockRuns(lines: readonly string[], spec: FontSpec, top: number, ctx: EventProcessingContext): TextRun[] {
-  const lineHeight = ctx.measurer.measure('M', spec).height;
-  const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
-  const font = sequenceCreoleFont(spec);
-  return lines.flatMap((line, i) => [
-    ...sequenceCreoleRuns(line, font, { leftX: 0, baselineY: top + ascent + i * lineHeight }, ctx.measurer),
-  ]);
+/**
+ * The body block's x inside the area, by the body style's alignment
+ * (`position = getHorizontalAlignment()`, `ComponentRoseReference.java:76,
+ * 127-136`): centred in the area; flush right less `getOldPaddingX2()` and
+ * `xMargin`; or `getOldPaddingX1() + xMargin` from the left.
+ */
+function bodyTextPos(align: HorizontalAlignment | undefined, area: number, textWidth: number): number {
+  if (align === HorizontalAlignment.CENTER) return (area - textWidth) / 2;
+  if (align === HorizontalAlignment.RIGHT) return area - textWidth - REF_PADDING - REF_X_MARGIN;
+  return REF_PADDING + REF_X_MARGIN;
 }
 
-/** The body block centred in the area, each line centred in the block
- *  (`reference { HorizontalAlignment center }`, `plantuml.skin:157`); a
- *  line's own run offsets are kept, so its atoms stay adjacent. */
-function bodyRuns(body: readonly string[], first: number, area: number, top: number, ctx: EventProcessingContext) {
-  const spec = refBodyFontSpecOf(ctx.theme);
-  const lineHeight = ctx.measurer.measure('M', spec).height;
-  return body.flatMap((line, i) => {
-    const runs = blockRuns([line], spec, top + i * lineHeight, ctx);
-    const width = runs.reduce((w, r) => Math.max(w, r.x + r.textWidth), 0);
-    const dx = first + (area - width) / 2;
-    return runs.map((r) => ({ ...r, x: r.x + dx }));
+/** The body text block (`getTextBlock()`, built at the body style's font and
+ *  alignment, `AbstractTextualComponent.java:78-91`), drawn on the `ug` the
+ *  body's symbol context was applied to (`ComponentRoseReference.java:95,
+ *  124,137`), at `getOldPaddingY() + (int) textHeaderHeight` below the top. */
+function bodyRuns(body: readonly string[], paint: SequencePaint, place: BodyPlace, ctx: EventProcessingContext) {
+  const color = paint.font.color;
+  const atoms = color === null ? undefined : sequenceAtomContext(ctx.sprites, color, paint.fill);
+  const block = alignedBlockRuns(body, paint.font, { leftX: 0, top: place.top }, paint.align, {
+    measurer: ctx.measurer,
+    atoms,
   });
+  const dx = place.first + bodyTextPos(paint.align, place.area, block.width);
+  return block.runs.map((r) => offsetRun(r, dx, 0));
+}
+
+/** Where the body block goes: the area's left edge and width, and its top. */
+interface BodyPlace {
+  readonly first: number;
+  readonly area: number;
+  readonly top: number;
 }
 
 /** `ComponentRoseReference#getHeaderWidth`/`getHeaderHeight` (`:139-148`),
- *  and the `ref` keyword's runs at `(15, 2)` from the component origin. */
-function headerOf(first: number, y: number, ctx: EventProcessingContext) {
-  const spec = refHeaderFontSpecOf(ctx.theme);
-  const dim = ctx.measurer.measure(REF_HEADER_TEXT, spec);
-  const runs = blockRuns([REF_HEADER_TEXT], spec, y + REF_HEADER_TEXT_DY, ctx);
+ *  truncated as `drawInternalU` reads them (`:86-87`), and the `ref` keyword
+ *  at `styleHeader`'s font, LEFT, at `(15, 2)` from the component origin
+ *  (`:75,78,126`). */
+function headerOf(headerPaint: SequencePaint, first: number, y: number, ctx: EventProcessingContext) {
+  const width = refHeaderWidth(headerPaint, ctx.measurer);
+  const at = { leftX: first + REF_HEADER_TEXT_DX, top: y + REF_HEADER_TEXT_DY };
+  const block = alignedBlockRuns([REF_HEADER_TEXT], headerPaint.font, at, HorizontalAlignment.LEFT, {
+    measurer: ctx.measurer,
+  });
   return {
     tabText: REF_HEADER_TEXT,
-    tabTextWidth: dim.width,
-    tabWidth: Math.trunc(dim.width + REF_HEADER_EXTRA_WIDTH),
-    tabHeight: Math.trunc(dim.height + 2),
-    tabRuns: runs.map((r) => ({ ...r, x: r.x + first + REF_HEADER_TEXT_DX })),
+    tabTextWidth: block.width,
+    tabWidth: Math.trunc(width),
+    tabHeight: Math.trunc(refHeaderHeight(headerPaint, ctx.measurer)),
+    tabRuns: block.runs,
   };
 }
 
@@ -102,13 +117,15 @@ function headerOf(first: number, y: number, ctx: EventProcessingContext) {
  *  renderer takes back off the drawn rect (`renderer-frame-header.ts
  *  #renderBodyRect`, `ComponentRoseReference.java:89`). */
 export function handleRefEvent(event: FrameEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
+  const paints = referencePaints(event);
   const body = refBodyLines(event.frameType, event.label);
   const { first, last } = refSpan(event, ctx);
-  const area = Math.max(last - first, refBodyWidth(body, ctx.theme, ctx.measurer));
-  const height = refBodyHeight(body, ctx.theme, ctx.measurer);
+  const area = Math.max(last - first, refComponentWidth(body, paints, ctx.measurer));
+  const height = refBodyHeight(body, paints, ctx.measurer);
   const y = cursor.y;
-  const header = headerOf(first, y, ctx);
+  const header = headerOf(paints.headerPaint, first, y, ctx);
   const frameGeo: FrameGeo = {
+    ...paints,
     kind: 'frame',
     frameType: event.frameType,
     label: event.label,
@@ -117,7 +134,7 @@ export function handleRefEvent(event: FrameEvent, cursor: EventCursor, ctx: Even
     width: area - 2 * REF_X_MARGIN,
     height: height - REF_HEIGHT_FOOTER,
     branchSeparators: [],
-    refBody: bodyRuns(body, first, area, y + REF_PADDING + header.tabHeight, ctx),
+    refBody: bodyRuns(body, paints.paint, { first, area, top: y + REF_PADDING + header.tabHeight }, ctx),
     ...header,
   };
   ctx.eventGeos.push(frameGeo);

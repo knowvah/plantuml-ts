@@ -99,10 +99,9 @@ describe('unwind2-S9b element shadows (jar fixtures)', () => {
   });
 
   it('shadows every head kind and note once each, as the jar (p-kinds)', () => {
-    // The jar draws `hnote` as a hexagon `<polygon>` where this port draws a
-    // `<rect>` (`NoteEvent.shape`); the count and order are what shadowing owns.
-    const shape = (tag: string): string => (tag === 'polygon' ? 'rect' : tag);
-    expect(shadowed(oursOf('p-kinds')).map(shape)).toEqual(shadowed(jarOf('p-kinds')).map(shape));
+    // `hnote` is a hexagon `<polygon>` in both (sdd1 T3e), so the tags compare
+    // as they stand.
+    expect(shadowed(oursOf('p-kinds'))).toEqual(shadowed(jarOf('p-kinds')));
   });
 
   it.each(['gepuce-64-pivu656', 'matoka-21-jisu767', 'zupora-06-pazi006'])(

@@ -3,7 +3,9 @@
  * `sequence-parse-helpers.ts` (which re-exports them) to keep that file under
  * the 500-line cap (sdd1 T1b). Bodies unchanged.
  */
-import type { SequenceDiagramAST, SequenceEvent } from './ast.js';
+import type { Participant, ParticipantBadge, SequenceDiagramAST, SequenceEvent } from './ast.js';
+import type { Paint } from '../../core/paint.js';
+import { anyBadgeFor, visibleStereotypeLines, type ParticipantLayoutCtx } from './sequence-layout-participant-label.js';
 
 // ---------------------------------------------------------------------------
 // hide unlinked (CommandHideUnlinked.java, T13)
@@ -37,14 +39,29 @@ function collectLinkedIds(event: SequenceEvent, linked: Set<string>): void {
   }
 }
 
-/** `hide stereotype` (`options.hideStereotype`): drop every participant's
- *  stereotype so neither the layout nor the renderer sees one. Applied
- *  post-parse for the same reason `applyHideUnlinked` is — the directive can
- *  appear after the declarations it affects. See `hideStereotypeCommand`
- *  (`command-arrow.ts`) for the upstream registration chain. */
+/** `hide stereotype` (`options.hideStereotype`): hide every participant's
+ *  DISPLAYED stereotype. Upstream each `Participant` holds the diagram's
+ *  `hiddenPortions` and `getDisplay` skips the stereotype when it contains
+ *  `STEREOTYPE` (`Participant.java:125-135`), while `getUsedStyles` still
+ *  merges it (`:82-91`) -- so the stereotype is kept and only flagged.
+ *  Applied post-parse for the same reason `applyHideUnlinked` is: the set is
+ *  read at draw time, so the directive reaches declarations above it. See
+ *  `hideStereotypeCommand` (`command-common.ts`) for the registration. */
 export function applyHideStereotype(ast: SequenceDiagramAST): void {
   if (ast.options.hideStereotype !== true) return;
-  for (const p of ast.participants) delete p.stereotype;
+  for (const p of ast.participants) if (p.stereotype !== undefined) p.stereotypeHidden = true;
+}
+
+/** The stereotype rows a head draws: none once `hide stereotype` has dropped
+ *  it from `Participant#getDisplay` (`Participant.java:125-135`). */
+export function displayedStereotypeLines(p: Participant): readonly string[] {
+  return p.stereotypeHidden === true ? [] : visibleStereotypeLines(p);
+}
+
+/** The badge `Display#createStereotype` draws from the DISPLAYED stereotype
+ *  (`Display.java:671-676`): none once `hide stereotype` has dropped it. */
+export function displayedBadgeOf(p: Participant, ctx: ParticipantLayoutCtx, fill: Paint): ParticipantBadge | undefined {
+  return p.stereotypeHidden === true ? undefined : anyBadgeFor(p, ctx, fill);
 }
 
 /** `hide unlinked` (`options.hideUnlinked`): drop participants no event

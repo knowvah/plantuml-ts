@@ -20,6 +20,8 @@ import {
 } from '../../../src/diagrams/sequence/sequence-skin-param.js';
 import { notePaint } from '../../../src/diagrams/sequence/sequence-layout-note.js';
 import { boxLabelRuns, boxPaint } from '../../../src/diagrams/sequence/sequence-layout-box.js';
+import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 const DEFAULT_STYLE = currentStyleBuilder(createSequenceStyleDispatch({ lines: [], type: 'sequence' }));
 
@@ -227,6 +229,52 @@ describe('box paint (Doll.java:107-114, ComponentRoseEnglober.java:64-70)', () =
     const base = { id: 'b', label: '', participantIds: [], styleBuilder: DEFAULT_STYLE };
     expect(boxPaint({ ...base, color: '#red;line:blue' }).fill).toBe('#FF0000');
     expect(boxPaint({ ...base, color: '#back:nosuchcolour' }).fill).toBe('#DDDDDD');
+  });
+
+  it('a box stereotype merges its style before the box colour (CommandBoxStart.java:111-117, Doll.java:107-114)', () => {
+    const svg = render(
+      [
+        '<style>',
+        '.S {',
+        '  BackGroundColor red',
+        '  LineColor blue',
+        '}',
+        '</style>',
+        'box "B" <<S>>',
+        'participant A',
+        'end box',
+        'box "C" <<T>> #yellow',
+        'participant D',
+        'end box',
+      ].join('\n'),
+    );
+    // jar (`box-stereo.puml`, 2026-10-20): `fill="#F00" style="stroke:#00F;…"`
+    // for B; C's unknown `.T` leaves the colour and the default line.
+    const [b, c] = tags(svg, 'rect');
+    expect([attr(b!, 'fill'), attr(b!, 'stroke')]).toEqual(['#F00', '#00F']);
+    expect([attr(c!, 'fill'), attr(c!, 'stroke')]).toEqual(['#FF0', '#181818']);
+  });
+
+  it('the box command keeps the stereotype as written, guillemets included (CommandBoxStart.java:74,111-115)', () => {
+    const ast = parseSequence(sequenceSource(['box "Tier 1"  <<Client>> #pink', 'participant A', 'end box']));
+    if ('refused' in ast) throw new Error(ast.message);
+    expect(ast.boxes[0]).toMatchObject({ label: 'Tier 1', stereotype: '<<Client>>', color: '#pink' });
+  });
+
+  it('an unquoted title swallows the stereotype: NAME2 is greedy [^#]+ (CommandBoxStart.java:74)', () => {
+    // jar (`box-unq.puml`): fill #DDD, title `Foo «S»` (textLength 49.156).
+    const svg = render(
+      ['<style>', '.S {', '  BackGroundColor red', '}', '</style>', 'box Foo <<S>>', 'participant A', 'end box'].join(
+        '\n',
+      ),
+    );
+    expect(attr(tags(svg, 'rect')[0]!, 'fill')).toBe('#DDD');
+    const title = tags(svg, 'text').find((t) => t.includes('font-weight="700"'))!;
+    expect(attr(title, 'textLength')).toBe('49.156');
+    const ast = parseSequence(sequenceSource(['box Foo <<S>> #red', 'participant A', 'end box']));
+    if ('refused' in ast) throw new Error(ast.message);
+    expect(ast.boxes[0]!.stereotype).toBeUndefined();
+    expect([ast.boxes[0]!.label, ast.boxes[0]!.color]).toEqual(['Foo <<S>>', '#red']);
   });
 
   it('an empty title places no runs', () => {

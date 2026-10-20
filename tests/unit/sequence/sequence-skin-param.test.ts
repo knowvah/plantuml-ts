@@ -177,6 +177,15 @@ describe('default-skin paint', () => {
     expect(paint).toMatchObject({ thickness: ELEMENT_THICKNESS, fill: '#FFFFFF', stroke: ROOT_LINE });
   });
 
+  it('a transparent style colour is the SVG `none` (SvgGraphics.java:538-541 fixColor)', () => {
+    // `HColor#toSvg` spells transparent `#00000000` (`HColor.java:74-76`) and
+    // `SvgGraphics#setFillColor`/`#setStrokeColor` write it as `none`; the
+    // port's klimt layer compares that spelling (`DriverPathSvg.java:64-68`).
+    const builder = builderOf('<style>\nparticipant { LineColor transparent; BackGroundColor transparent }\n</style>');
+    const paint = paintOf(componentStyle(builder, 'PARTICIPANT_HEAD'), SET);
+    expect([paint.stroke, paint.fill]).toEqual(['none', 'none']);
+  });
+
   it('arrow: plantuml.skin:316-320 over :93', () => {
     const paint = paintOf(messageStyle(DEFAULT), SET);
     expect(paint).toMatchObject({ thickness: 1, fill: '#000000', stroke: ROOT_LINE, dash: undefined });
@@ -191,7 +200,8 @@ describe('default-skin paint', () => {
 
   it('group: plantuml.skin:102-104,116-121', () => {
     const paint = paintOf(groupingStyle(DEFAULT, 'START', false), SET);
-    expect(paint).toMatchObject({ thickness: 1.5, fill: '#00000000', stroke: '#000000' }); // :118,:103,:117
+    // `BackGroundColor transparent` (:103) is `none` (SvgGraphics.java:538-541).
+    expect(paint).toMatchObject({ thickness: 1.5, fill: 'none', stroke: '#000000' }); // :118,:103,:117
     expect(paint.font.size).toBe(11); // :119
     expect(paint.font.styles.has(FontStyle.BOLD)).toBe(true); // :120
   });
@@ -233,7 +243,7 @@ describe('default-skin paint', () => {
 
   it('reference body: plantuml.skin:155-161', () => {
     const paint = paintOf(referenceStyle(DEFAULT, false), SET);
-    expect(paint).toMatchObject({ thickness: 1.5, fill: '#00000000', stroke: '#000000', align: 'CENTER' });
+    expect(paint).toMatchObject({ thickness: 1.5, fill: 'none', stroke: '#000000', align: 'CENTER' });
     expect(paint.font.size).toBe(12); // :156
   });
 

@@ -73,7 +73,21 @@ export function handleDeactivateEvent(event: ActivationEvent, cursor: EventCurso
   const deactEndY = deactStartY !== undefined && rawEndY <= deactStartY ? cursor.y : rawEndY;
   emitActivation(event.participantId, deactEndY, ctx.participantMap, ctx.activationStart, ctx.eventGeos);
   cursor.lastMessageY = undefined;
-  if (event.destroy === true) handleDestroy(event, cursor, ctx);
+  if (event.destroy === true) handleDestroy(event.participantId, cursor, ctx);
+}
+
+/** End a message's own `--`/`!!` bar at the arrow y. If that would give
+ *  zero/negative height (the activate and deactivate land at the same y),
+ *  fall back to the post-spacing cursor.y so the bar is always visible. */
+export function closeMessageActivation(
+  participantId: string,
+  arrowY: number,
+  cursor: EventCursor,
+  ctx: EventProcessingContext,
+): void {
+  const deactStartY = openActivation(ctx.activationStart, participantId)?.y;
+  const deactEndY = deactStartY !== undefined && arrowY <= deactStartY ? cursor.y : arrowY;
+  emitActivation(participantId, deactEndY, ctx.participantMap, ctx.activationStart, ctx.eventGeos);
 }
 
 /**
@@ -88,8 +102,8 @@ export function handleDeactivateEvent(event: ActivationEvent, cursor: EventCurso
  * destroy standalone. `X -> X` followed by `destroy Y` is upstream's own
  * worked example, in the comment above `:387`.
  */
-function isDestroyWithoutMessage(event: ActivationEvent, ctx: EventProcessingContext): boolean {
-  return ctx.lastMessageParticipants?.includes(event.participantId) !== true;
+function isDestroyWithoutMessage(participantId: string, ctx: EventProcessingContext): boolean {
+  return ctx.lastMessageParticipants?.includes(participantId) !== true;
 }
 
 /** `ComponentType.DESTROY`'s style, merged from the builder current at tile
@@ -104,11 +118,15 @@ export function destroyPaint(builder: StyleBuilder): SequencePaint {
  * The `LifeEventTile` of a destroy: its y stops the lifeline; an unbound one
  * reserves and draws its own cross, a bound one takes the crosses its
  * message's step resolved ({@link messageDestroyCrosses}).
+ *
+ * A `destroy p` line and an arrow's `!!` reach here alike: both are
+ * `diagram.activate(p, DESTROY)`, which adds the same `LifeEvent` to the
+ * event list (`SequenceDiagram.java:369-371`; `CommandArrow.java:453-455`).
  */
-function handleDestroy(event: ActivationEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
-  const participant = ctx.participantMap.get(event.participantId);
+export function handleDestroy(participantId: string, cursor: EventCursor, ctx: EventProcessingContext): void {
+  const participant = ctx.participantMap.get(participantId);
   if (participant === undefined) return;
-  const unbound = isDestroyWithoutMessage(event, ctx);
+  const unbound = isDestroyWithoutMessage(participantId, ctx);
   const tileCross: DestroyCross = {
     x: participant.centerX - DESTROY_CROSS_SIZE,
     y: cursor.y,
@@ -116,13 +134,13 @@ function handleDestroy(event: ActivationEvent, cursor: EventCursor, ctx: EventPr
     level: 0,
   };
   const step = ctx.lastMessageCrosses?.of === ctx.lastMessageParticipants ? ctx.lastMessageCrosses?.crosses : undefined;
-  const crosses = unbound ? [tileCross] : (step?.get(event.participantId) ?? []);
+  const crosses = unbound ? [tileCross] : (step?.get(participantId) ?? []);
   // A second destroy bound to the same message finds the step's crosses
   // already taken: the step is drawn once.
-  step?.delete(event.participantId);
+  step?.delete(participantId);
   const geo: DestroyGeo = {
     kind: 'destroy',
-    participantId: event.participantId,
+    participantId,
     y: cursor.y,
     crosses,
     paint: destroyPaint(ctx.endStyleBuilder),
@@ -132,12 +150,15 @@ function handleDestroy(event: ActivationEvent, cursor: EventCursor, ctx: EventPr
 }
 
 /** One participant's life events bound to a message, in upstream's order:
- *  the arrow's own `++`/`--` (`CommandArrow#manageActivations`, run as the
- *  arrow command executes) then the life events written after it. */
+ *  the arrow's own `++`/`--`/`!!` (`CommandArrow#manageActivations`, run as
+ *  the arrow command executes) then the life events written after it. A
+ *  destroy counts down like a deactivate (`LifeEvent#isDeactivateOrDestroy`,
+ *  `LifeEvent.java:82-84`, read at `LiveBoxes.java:171`). */
 function lifeEventsOf(event: MessageEvent, bound: readonly ActivationEvent[], p: string): ('up' | 'down')[] {
   const own: ('up' | 'down')[] = [];
   if (event.activates === p) own.push('up');
   if (event.deactivates === p) own.push('down');
+  if (event.destroys === p) own.push('down');
   const after = bound.filter((b) => b.participantId === p).map((b) => (b.kind === 'activate' ? 'up' : 'down'));
   return [...own, ...after];
 }
@@ -219,7 +240,8 @@ export function messageDestroyCrosses(
   const crosses = new Map<string, DestroyCross[]>();
   for (const p of new Set([event.from, event.to])) {
     const centerX = ctx.participantMap.get(p)?.centerX;
-    if (centerX === undefined || !bound.some((b) => b.destroy === true && b.participantId === p)) continue;
+    const destroyed = event.destroys === p || bound.some((b) => b.destroy === true && b.participantId === p);
+    if (centerX === undefined || !destroyed) continue;
     const events = lifeEventsOf(event, bound, p);
     const deactivates =
       event.deactivates !== undefined || bound.some((b) => b.kind === 'deactivate' && b.destroy !== true);

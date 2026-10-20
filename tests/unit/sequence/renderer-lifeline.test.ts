@@ -139,10 +139,16 @@ describe('renderLifeline', () => {
     expect(svg).toContain('<title></title>');
   });
 
-  it('escapes XML metacharacters in the title', () => {
+  it('writes every non-word character of the title as a dot (UGroup.java:70-74)', () => {
     const svg = renderLifeline(participant({ display: 'a<b&c' }), WHOLE_LIFELINE, theme);
 
-    expect(svg).toContain('<title>a&lt;b&amp;c</title>');
+    expect(svg).toContain('<title>a.b.c</title>');
+  });
+
+  it('takes the title layout put on the piece over the display (MutingLine.java:107-108)', () => {
+    const svg = renderLifeline(participant(), { ...WHOLE_LIFELINE, title: '..s..' }, theme);
+
+    expect(svg).toContain('<title>..s..</title>');
   });
 });
 

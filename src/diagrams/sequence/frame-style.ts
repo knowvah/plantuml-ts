@@ -1,45 +1,15 @@
 /**
- * Style constants for the sequence-diagram frame/grouping background pass
- * (`loop`, `alt`, `opt`, `par`, `break`, `critical`, `group`, `ref`).
+ * The grouping frame's header-tab constants that are NOT style: the padding
+ * and corner size `ComponentRoseGroupingHeader` hard-codes, and the tab's
+ * `Display` split `GroupingTile` makes.
  *
- * Every value here is upstream's DEFAULT skin, in the absence of a
- * `skinparam`/style-block override. This engine has no SName style cascade
- * for the sequence family yet, so these constants cannot yet be overridden
- * from source — see decisions.md D3. They exist here, not inline at each
- * call site, so a later cascade has one place to plug into.
+ * Every style-owned value -- line colour and thickness, the tab fill, fonts,
+ * `RoundCorner`, the body fill -- is read off the frame's `Style` (sdd1 T3a,
+ * `sequence-layout-frame.ts#groupingPaints`).
  *
- * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:102-129
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/rose/ComponentRoseGroupingHeader.java:64,76
  */
 
-/** The frame BODY's fill, when no `COLORS` override is given — the generic
- *  `group {}` bucket's `BackGroundColor`, which `sequenceDiagram.group` has
- *  no override for and so cascades from.
- *  @see plantuml.skin:103 */
-export const GROUP_BACKGROUND = 'transparent';
-/** @see plantuml.skin:117 */
-export const GROUP_LINE_COLOR = 'black';
-/** @see plantuml.skin:118 */
-export const GROUP_LINE_THICKNESS = 1.5;
-/** @see plantuml.skin:119 */
-export const GROUP_FONT_SIZE = 11;
-/** @see plantuml.skin:120 */
-export const GROUP_FONT_BOLD = true;
-/** @see plantuml.skin:124 */
-export const HEADER_LINE_THICKNESS = 1.5;
-/** The type tab's fill, when no `COLORS` override is given.
- *  @see plantuml.skin:125 */
-export const HEADER_BACKGROUND = '#e';
-/** @see plantuml.skin:126 */
-export const HEADER_LINE_COLOR = 'black';
-/** A `ref`'s corner tab strokes with `referenceHeader { LineThickness 2.0 }`
- *  (`ComponentRoseReference.java:72,121`), not `groupHeader`'s 1.5.
- *  @see plantuml.skin:169 */
-export const REFERENCE_HEADER_LINE_THICKNESS = 2;
-/** @see plantuml.skin:127 */
-export const HEADER_FONT_SIZE = 13;
-/** @see plantuml.skin:128 */
-export const HEADER_FONT_BOLD = true;
 /** `ClockwiseTopRightBottomLeft.topRightBottomLeft(top, right, bottom,
  *  left)`'s argument order, applied verbatim.
  *  @see ComponentRoseGroupingHeader.java:76 */
@@ -60,7 +30,7 @@ export const CORNER_SIZE = 10;
  * whose sole line renders empty. `strings.size() === 1` in that branch, so
  * upstream's own comment box (`strings.get(1)`) never exists for `group`.
  *
- * @see GroupingTile.java:126-127
+ * @see GroupingTile.java:127-128
  */
 export function groupingHeaderDisplay(
   title: string,

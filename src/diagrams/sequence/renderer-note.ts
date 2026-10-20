@@ -13,7 +13,7 @@
 import type { BoxGeo, NoteGeo } from './ast.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import type { ScaledTheme } from './scale-geo.js';
-import { path, rect } from '../../core/svg.js';
+import { path, polygon, rect } from '../../core/svg.js';
 import { arcTo, lineTo, moveTo } from '../../core/svg-path-builder.js';
 import { fmt } from '../../core/svg-format.js';
 import { OPALE_CORNERSIZE } from '../../core/svek/image/Opale.js';
@@ -102,12 +102,43 @@ function corner(f: OpaleFrame): string {
   return [moveTo(x + w - c, y), ...fold, lineTo(x + w, y + c), lineTo(x + w - c, y)].join(' ');
 }
 
+/** `ComponentRoseNoteHexagonal`'s `cornersize` (`:54`). */
+export const NOTE_HEXAGON_CORNERSIZE = 10;
+
+/**
+ * `ComponentRoseNoteHexagonal#drawInternalU`'s `UPolygon` at `(x, y)`, its
+ * seven points in the jar's order (`:99-106`). `textHeight` and `x2` are
+ * `int`s (`:89,91,97`), so `textHeight / 2` is INTEGER division. The geo is
+ * already scaled while the jar scales each point at emission
+ * (`SvgGraphics.java:466-468`): the unscaled height is recovered from the
+ * scaled one -- an integer, as layout truncates it (`sequence-layout-note.ts`)
+ * -- and halved before `k` is applied again.
+ */
+export function hexagonPoints(
+  note: Pick<NoteGeo, 'x' | 'y' | 'width' | 'height'>,
+  k: number,
+): Array<{ x: number; y: number }> {
+  const { x, y, width: x2, height: textHeight } = note;
+  const c = NOTE_HEXAGON_CORNERSIZE * k;
+  const mid = Math.trunc(Math.round(textHeight / k) / 2) * k;
+  return [
+    { x: x + c, y },
+    { x: x + x2 - c, y },
+    { x: x + x2, y: y + mid },
+    { x: x + x2 - c, y: y + textHeight },
+    { x: x + c, y: y + textHeight },
+    { x, y: y + mid },
+    { x: x + c, y },
+  ];
+}
+
 /**
  * A note's shape: `ComponentRoseNote#drawInternalU` draws the Opale polygon
  * (shadowed) then the corner (`ComponentRoseNote.java:118-124`), both under
  * `symbolContext.apply(ug)`; `ComponentRoseNoteBox#drawInternalU` one rounded
- * `URectangle` (`ComponentRoseNoteBox.java:99-102`). `rnote`/`hnote` both
- * arrive as `shape: 'rect'` (`ast.ts#NoteEvent.shape`).
+ * `URectangle` (`ComponentRoseNoteBox.java:99-102`);
+ * `ComponentRoseNoteHexagonal#drawInternalU` one shadowed `UPolygon`
+ * (`ComponentRoseNoteHexagonal.java:99-110`).
  */
 function noteShape(note: NoteGeo, paint: SequencePaint, k: number): string {
   const style = shapeStyle(paint, k);
@@ -115,6 +146,7 @@ function noteShape(note: NoteGeo, paint: SequencePaint, k: number): string {
   const shadow = note.shadow ?? 0;
   if (note.shape === 'rect')
     return withNoteShadow(rect(x, y, w, h, { ...style, ...roundedCorner(paint.roundCorner, k) }), shadow);
+  if (note.shape === 'hexagon') return withNoteShadow(polygon(hexagonPoints(note, k), style), shadow);
   const frame: OpaleFrame = { x, y, w, h, c: OPALE_CORNERSIZE * k, rc: paint.roundCorner * k };
   return withNoteShadow(path(polygonNormal(frame), style), shadow) + path(corner(frame), style);
 }

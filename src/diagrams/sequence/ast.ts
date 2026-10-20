@@ -36,8 +36,12 @@ export interface Participant {
   /** The `<<...>>` run as written, guillemets included -- `CommandParticipant`
    *  stores it on the Participant rather than in its code
    *  (`CommandParticipant.java:174-181`). Rendered above the name unless
-   *  `hide stereotype` is in force. */
+   *  {@link stereotypeHidden}; merged into the style either way. */
   stereotype?: string;
+  /** `hiddenPortions.contains(EntityPortion.STEREOTYPE)`: `hide stereotype`
+   *  drops the stereotype from `getDisplay` only (`Participant.java:125-135`);
+   *  `getUsedStyles` still merges it (`:82-91`). */
+  stereotypeHidden?: boolean;
   /**
    * The participant's own `[[url{tooltip}]]`, resolved (B3).
    *
@@ -144,6 +148,10 @@ export interface MessageExoEvent extends AbstractMessageEvent {
   shortArrow: boolean;
 }
 
+/** The non-default note components: `rect` = `NOTE_BOX`, `hexagon` =
+ *  `NOTE_HEXAGONAL` (`NoteStyle.java:57-65`). */
+export type NoteShape = 'rect' | 'hexagon';
+
 export interface NoteEvent {
   kind: 'note';
   position: 'left' | 'right' | 'over';
@@ -151,13 +159,13 @@ export interface NoteEvent {
   text: string;
   color?: string;
   /**
-   * `rnote`/`hnote` vs. plain `note` (`FactorySequenceNoteCommand.java:81`,
-   * `NoteStyle.java`). This port draws both non-default shapes as a plain
-   * rectangle (no folded corner) — the RECTANGLE/HEXAGON distinction upstream
-   * makes between them is not carried further, a documented simplification
-   * (T13, dispatch-by-parse-attempt) rather than a full hexagon-path port.
+   * The component `NoteStyle#getNoteComponentType` picks
+   * (`NoteStyle.java:57-65`): `rnote` (BOX) is `ComponentRoseNoteBox`, a
+   * rounded `URectangle`; `hnote` (HEXAGONAL) is
+   * `ComponentRoseNoteHexagonal`, a 7-point `UPolygon`. Absent for a plain
+   * `note` (NORMAL, the Opale shape).
    */
-  shape?: 'rect';
+  shape?: NoteShape;
   /** The note keyword as written. `NoteStyle.getNoteStyle` maps `hnote` to
    *  HEXAGONAL, `rnote` to BOX and anything else to NORMAL
    *  (`NoteStyle.java:46-54`); the keyword is kept rather than the resolved
@@ -337,6 +345,11 @@ export interface BoxGroup {
   label: string;
   color: string;
   participantIds: string[];
+  /** The `<<...>>` run as written, guillemets included: `CommandBoxStart`'s
+   *  STEREO group (`CommandBoxStart.java:75,119-123`), held by the
+   *  `ParticipantEnglober` and merged by `Doll#getUsedStyles`
+   *  (`Doll.java:107-114`). */
+  stereotype?: string;
   /**
    * The builder a `Doll` reads: `tileArguments.getSkinParam()
    * .getCurrentStyleBuilder()` at TILE time (`Doll.java:81-83`, built by

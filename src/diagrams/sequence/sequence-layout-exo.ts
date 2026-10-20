@@ -41,12 +41,21 @@ import type { MessageExoEvent, MessageExoType, MessageGeo } from './ast.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
 import { activationLevel } from './sequence-layout-events.js';
-import { ARROW_PADDING_X, arrowFontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+import { ARROW_PADDING_X, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+import { atomFontSpec } from './sequence-creole-text-atom.js';
+import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import type { SequencePaint } from './sequence-skin-param.js';
 import { messageTileAdvance } from './sequence-layout-message.js';
-import { MESSAGE_NUMBER_MARGIN, messageLabelBlock, messageLabelRows, numberTextOf } from './text-block-geo.js';
+import {
+  MESSAGE_NUMBER_MARGIN,
+  messageLabelBlock,
+  messageLabelRows,
+  numberTextOf,
+  TRANSPARENT_SVG,
+} from './text-block-geo.js';
 import { ARROW_DELTA_X, DIAM_CIRCLE } from './sequence-arrowhead.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
-import { sequenceAtomContext, sequenceLabelBlockWidth } from './sequence-creole.js';
+import { sequenceAtomContext, sequenceLabelBlockWidth, sequenceLabelLineWidth } from './sequence-creole.js';
 import { messagePaint } from './sequence-arrow-paint.js';
 
 // ---------------------------------------------------------------------------
@@ -115,15 +124,18 @@ function rightCircleInset(arrow: ArrowConfiguration, type: MessageExoType): numb
 
 /** The label block's own width — the number, its margin and the widest label
  *  line, exactly as `messageLabelBlock` lays them out. */
-function labelBlockWidth(event: MessageExoEvent, ctx: EventProcessingContext): number {
-  // Same font `messageLabelBlock` lays the block out with — `arrow
-  // { FontSize 13 }` (`plantuml.skin:306-308`).
-  const fontSpec = arrowFontSpecOf(ctx.theme);
+function labelBlockWidth(event: MessageExoEvent, ctx: EventProcessingContext, font: FontConfiguration): number {
+  // Same font `messageLabelBlock` lays the block out with — the arrow
+  // style's (`AbstractTextualComponent.java:80`), `FontSize 13` by default
+  // (`plantuml.skin:316-317`).
+  const fontSpec = atomFontSpec(font);
   const numberText = numberTextOf(event);
-  const numberWidth = numberText === undefined ? 0 : ctx.measurer.measure(numberText, fontSpec).width;
+  const atoms = sequenceAtomContext(ctx.sprites, font.color ?? TRANSPARENT_SVG);
+  // The number is its own creole block (`Display.java:706`), so `<b>1</b>`
+  // measures as a bold `1`, not as its markup.
+  const numberWidth = numberText === undefined ? 0 : sequenceLabelLineWidth(numberText, fontSpec, ctx.measurer, atoms);
   const gap = numberText === undefined ? 0 : MESSAGE_NUMBER_MARGIN;
   const lines = event.label === '' ? [] : event.label.split('\n');
-  const atoms = sequenceAtomContext(ctx.sprites, ctx.theme.colors.text);
   const labelWidth = sequenceLabelBlockWidth(lines, fontSpec, ctx.measurer, atoms);
   return numberWidth + gap + labelWidth;
 }
@@ -135,8 +147,8 @@ function labelBlockWidth(event: MessageExoEvent, ctx: EventProcessingContext): n
  * This is the whole width an exo message asks the diagram for
  * (`CommunicationExoTile.java:326-330`).
  */
-function exoPreferredWidth(event: MessageExoEvent, ctx: EventProcessingContext): number {
-  return labelBlockWidth(event, ctx) + 2 * ARROW_PADDING_X + ARROW_DELTA_X;
+function exoPreferredWidth(event: MessageExoEvent, ctx: EventProcessingContext, font: FontConfiguration): number {
+  return labelBlockWidth(event, ctx, font) + 2 * ARROW_PADDING_X + ARROW_DELTA_X;
 }
 
 // ---------------------------------------------------------------------------
@@ -165,8 +177,8 @@ interface ExoSpan {
  * has been maxed (`PlayingSpace.java:75-96`). `anchorExoBorder` below applies
  * it once `layout.ts` has the diagram's width.
  */
-function exoSpan(event: MessageExoEvent, posC: number, ctx: EventProcessingContext): ExoSpan {
-  const width = exoPreferredWidth(event, ctx);
+function exoSpan(event: MessageExoEvent, posC: number, ctx: EventProcessingContext, font: FontConfiguration): ExoSpan {
+  const width = exoPreferredWidth(event, ctx, font);
   const right = isRightBorder(event.exoType);
   const point1 = right ? posC : posC - width;
   const point2 = right ? point1 + width : posC;
@@ -221,18 +233,22 @@ function exoLabelLeft(event: MessageExoEvent, span: ExoSpan): number {
  *  run in the message's own direction, so the renderer's own `fromX > toX`
  *  reversal reproduces `getComponent`'s `arrowConfiguration.reverse()`
  *  (`CommunicationExoTile.java:96-98`). */
-function buildExoGeo(event: MessageExoEvent, span: ExoSpan, y: number, ctx: EventProcessingContext): MessageGeo {
+function buildExoGeo(
+  event: MessageExoEvent,
+  span: ExoSpan,
+  y: number,
+  ctx: EventProcessingContext,
+  paint: SequencePaint,
+): MessageGeo {
   const rightwards = getDirection(event.exoType) === 1;
   // A2 changed `messageLabelBlock`'s third parameter from a centre to the
   // block's LEFT edge, which is what `exoLabelLeft` already computes — the
   // `+ blockWidth / 2` here existed only to turn it back into a centre for the
   // old signature. Exo x placement is `MessageExoArrow`'s, a different upstream
   // component, and is deliberately unchanged by this task.
-  const block = messageLabelBlock(event.label, numberTextOf(event), exoLabelLeft(event, span), y, ctx);
+  const block = messageLabelBlock(event.label, numberTextOf(event), exoLabelLeft(event, span), y, ctx, paint.font);
   return {
-    // An exo arrow is `ComponentRoseArrow`, never the self component: its
-    // direction is never SELF (`CommunicationExoTile.java:96-98,107`).
-    paint: messagePaint(event.styleBuilder, event.stereotype, event.arrow, false),
+    paint,
     kind: 'message',
     fromX: rightwards ? span.x1 : span.x2,
     toX: rightwards ? span.x2 : span.x1,
@@ -277,13 +293,17 @@ export function handleMessageExoEvent(event: MessageExoEvent, cursor: EventCurso
   // same height and the same contact point -- `getPreferredHeight:155-159` is
   // the component's own dimension and `getContactPointRelative:93-95` its
   // `getYPoint`. `messageTileAdvance` is therefore shared, not duplicated.
-  // The font is the ARROW's 13 for the same reason it is there.
-  const lineHeight = ctx.measurer.measure('M', arrowFontSpecOf(ctx.theme)).height;
+  // The font is the arrow style's for the same reason it is there. An exo
+  // arrow is `ComponentRoseArrow`, never the self component: its direction is
+  // never SELF (`CommunicationExoTile.java:96-98,107`).
+  const paint = messagePaint(event.styleBuilder, event.stereotype, event.arrow, false);
+  const lineHeight = ctx.measurer.measure('M', atomFontSpec(paint.font)).height;
   const rows = messageLabelRows(event.label, numberTextOf(event));
   const advance = messageTileAdvance(rows * lineHeight, false);
 
   const geoY = cursor.y + advance.arrowY;
-  const messageGeo = buildExoGeo(event, exoSpan(event, participant.centerX, ctx), geoY, ctx);
+  const span = exoSpan(event, participant.centerX, ctx, paint.font);
+  const messageGeo = buildExoGeo(event, span, geoY, ctx, paint);
   ctx.eventGeos.push(messageGeo);
   cursor.lastMessageY = messageGeo.y;
   cursor.y += advance.tileHeight;

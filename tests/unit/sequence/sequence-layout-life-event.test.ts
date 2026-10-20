@@ -257,6 +257,51 @@ describe('a page clips a cross whole (UClip.java:128-142)', () => {
   });
 });
 
+describe('the !! destroy marker (CommandArrow.java:453-455)', () => {
+  // `!!` is `diagram.activate(p2, LifeEventType.DESTROY, null)`, which adds
+  // the same `LifeEvent` a `destroy p2` line after the message adds
+  // (`SequenceDiagram.java:369-371`). Jar values from `scripts/oracle-render.sh`
+  // (2026-10-20) on the quoted markup; x is relative to the lifeline, since
+  // the label-less spacing is not this test's subject.
+  it('parses as a destroy of the target, not a deactivate', () => {
+    const ast = astOrThrow(parseSequence(sourceOf(['A -> B !!'])), 'sequence');
+    const message = ast.events.find((e) => e.kind === 'message');
+    expect(message).toMatchObject({ destroys: 'B' });
+    expect(message).not.toHaveProperty('deactivates');
+  });
+
+  it('closes the open bar and draws the cross on the step (jar A -> B ++, A -> B !!: cross y1=58, line y2=75)', () => {
+    const geo = geoOf([...AB, 'A -> B ++', 'A -> B !!', 'A -> A']);
+    const b = geo.participants.find((p) => p.id === 'B')!;
+    expect(crossesOf(geo)).toEqual([
+      { x: Math.round((b.centerX - 9) * 1000) / 1000, y: 58, drawnBy: 'liveboxes', level: 0 },
+    ]);
+    expect(geo.lifelineSegments['B']?.map((seg) => [seg.y1, seg.y2])).toEqual([[39, 75]]);
+  });
+
+  it('lays out exactly what a destroy line after the message lays out', () => {
+    const marker = geoOf([...AB, 'A -> B ++ : one', 'A -> B !! : two', 'A -> A : three']);
+    const line = geoOf([...AB, 'A -> B ++ : one', 'A -> B : two', 'destroy B', 'A -> A : three']);
+    // Spans only: a segment's lazy paint throws on a dark-only read (`paintOf`).
+    const spans = (g: SequenceGeometry): [string, number[][]][] =>
+      Object.entries(g.lifelineSegments).map(([id, segs]) => [id, segs.map((seg) => [seg.y1, seg.y2])]);
+    expect([crossesOf(marker), spans(marker)]).toEqual([crossesOf(line), spans(line)]);
+    expect(crossesOf(marker)).toHaveLength(1);
+  });
+
+  it('steps a self !! at its END point, not as a deactivate (jar A -> A !!: cross y1=71, line y2=88)', () => {
+    const geo = geoOf([...AB, 'A -> B ++', 'A -> A !!', 'B -> A']);
+    expect(crossesOf(geo).map((c) => c.y)).toEqual([71]);
+    expect(geo.lifelineSegments['A']?.map((seg) => [seg.y1, seg.y2])).toEqual([[39, 88]]);
+  });
+
+  it('stops the line of an exo !! and draws no cross (isNextEventADestroy wants a Message; jar y2=75)', () => {
+    const geo = geoOf([...AB, 'A -> B', '[-> B !!', 'A -> A']);
+    expect(crossesOf(geo)).toEqual([]);
+    expect(geo.lifelineSegments['B']?.map((seg) => [seg.y1, seg.y2])).toEqual([[39, 75]]);
+  });
+});
+
 describe('stepIndent (LiveBoxes.java:143-210, CONSIDER_FUTURE_DEACTIVATE)', () => {
   it.each([
     [0, ['down'], 0],

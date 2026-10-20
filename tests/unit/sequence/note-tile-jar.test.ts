@@ -7,9 +7,8 @@
  * What is compared is geometry: the canvas width/height, the participant head
  * x, each note's bounding box, and every text's x/y. The note OUTLINE is
  * compared by bounding box rather than by `d` because this port emits the
- * folded-corner path with its vertices in a different order (and an `rnote`/
- * `hnote` as a `<rect>` where the jar draws a `<polygon>`): those are shape
- * differences owned elsewhere, not placement.
+ * folded-corner path with its vertices in a different order: a shape
+ * difference owned elsewhere, not placement.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';

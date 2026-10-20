@@ -248,9 +248,52 @@ describe('rendered messages — <style> arrow', () => {
 
 describe('rendered messages — per-message colour', () => {
   // `A -[#red]> B` overrides the arrow style's LineColor
-  // (`AbstractMessage.java:69-70`). The parser drops the colour token today
-  // (`command-arrow.ts#applyStyle`), which is outside T2c's write-set.
-  it.fails('strokes A -[#red]> B in red', () => {
+  // (`AbstractMessage.java:69-70`) with the colour `applyStyle` stored
+  // (`CommandArrow.java:497-498`). Every expectation below was read off the
+  // oracle jar (2026-10-20) on the same source.
+  it('strokes A -[#red]> B in red', () => {
     expect(shaftsOf('A -[#red]> B').map((s) => s.attrs['stroke'])).toEqual(['#F00']);
+  });
+
+  it('fills and strokes the head in the arrow colour', () => {
+    expect(arrowShapesOf('A -[#red]> B').map((s) => [s.tag, s.attrs['fill'], s.attrs['stroke']])).toEqual([
+      ['polygon', '#F00', '#F00'],
+      ['line', undefined, '#F00'],
+    ]);
+  });
+
+  it('keeps the dotted body beside a colour (-[#blue,dashed]->)', () => {
+    expect(shaftsOf('A -[#blue,dashed]-> B').map((s) => [s.attrs['stroke'], s.attrs['stroke-dasharray']])).toEqual([
+      ['#00F', DOTTED],
+    ]);
+  });
+
+  it('lets the last colour token win (the tokenizer loop overwrites withColor)', () => {
+    expect(shaftsOf('A -[#red,#blue]-> B').map((s) => s.attrs['stroke'])).toEqual(['#00F']);
+  });
+
+  it('colours an exo arrow from either border (CommandExoArrowAny.java:101)', () => {
+    expect(shaftsOf('[-[#green]> A\nA -[#00FF00]>]').map((s) => s.attrs['stroke'])).toEqual(['#008000', '#0F0']);
+  });
+
+  it('colours a reply with return #colour (CommandReturn.java:121-123)', () => {
+    expect(shaftsOf('A -> B ++\nreturn #orange back').map((s) => s.attrs['stroke'])).toEqual([ROOT_LINE, '#FFA500']);
+  });
+
+  it('recolours the reply to an exo message, reversed and dotted (CommandReturn.java:127-130)', () => {
+    const shafts = shaftsOf('autonumber\n[-[#blue]> A ++ : in\nreturn #red done');
+    expect(shafts.map((s) => [s.attrs['stroke'], s.attrs['stroke-dasharray']])).toEqual([
+      ['#00F', undefined],
+      ['#F00', DOTTED],
+    ]);
+  });
+
+  it("keeps the activating message's colour on a bare return (CommandReturn.java:120)", () => {
+    expect(shaftsOf('A -[#blue]-> B ++\nreturn done').map((s) => s.attrs['stroke'])).toEqual(['#00F', '#00F']);
+  });
+
+  it('beats skinparam sequenceArrowColor (eventuallyOverride after the merge)', () => {
+    const src = 'skinparam sequenceArrowColor #black\nA -> B\nA <[#green]- B';
+    expect(shaftsOf(src).map((s) => s.attrs['stroke'])).toEqual(['#000', '#008000']);
   });
 });

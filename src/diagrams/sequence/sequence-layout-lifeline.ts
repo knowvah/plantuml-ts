@@ -20,11 +20,13 @@
  */
 
 import type { EventGeo, LifelineSegment, Participant, ParticipantGeo, SequenceDiagramAST } from './ast.js';
-import { HColorSet } from '../../core/klimt/color/HColorSet.js';
+import { HColorSet, parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
+import { UGroup, UGroupType } from '../../core/klimt/shape/UGroup.js';
 import { Stereotype } from '../../core/stereo/Stereotype.js';
 import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 import { delaySpansOf, lifelineSegments, type Span } from './sequence-delay.js';
 import { componentStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
+import { displayLines } from './text-block-geo.js';
 
 /** The builder every tile reads after the parse (module head). An AST built
  *  without `parseSequence` has none, and a lifeline cannot be painted. */
@@ -36,15 +38,43 @@ export function endOfParseStyleBuilder(ast: SequenceDiagramAST): StyleBuilder {
 
 /**
  * `MutingLine#drawInternal` (`:102-108`): the piece's `ComponentType`
- * (`PARTICIPANT_LINE`, or `DELAY_LINE` inside a delay, `:84`) with the
- * participant's stereotype, merged from the end-of-parse builder.
+ * (`PARTICIPANT_LINE`, or `DELAY_LINE` inside a delay, `:84`) with
+ * `participant.getStereotype()` (`:105`), merged from the end-of-parse builder.
  * `ComponentRoseLine` reads `getColorLine()` and `getStroke()`
  * (`ComponentRoseLine.java:66-67`), `ComponentRoseDelayLine` the same
  * (`ComponentRoseDelayLine.java:56,62`).
  */
 export function mutingLinePaint(builder: StyleBuilder, participant: Participant, delay: boolean): SequencePaint {
   const type = delay ? 'DELAY_LINE' : 'PARTICIPANT_LINE';
-  return paintOf(componentStyle(builder, type, Stereotype.build(participant.stereotype)), HColorSet.instance());
+  return paintOf(componentStyle(builder, type, participantStereotype(participant.stereotype)), HColorSet.instance());
+}
+
+/** `participant.getStereotype()`: the decorated form `CommandParticipant`
+ *  builds (`CommandParticipant.java:176-181`, four-argument
+ *  `Stereotype.build`), whose labels -- hence style names and `toString` --
+ *  drop a `(C, #color)` / `($sprite, #color)` spec. */
+function participantStereotype(stereotype: string | undefined): Stereotype | undefined {
+  return stereotype === undefined ? undefined : Stereotype.build(stereotype, 0, undefined, parseSimpleColor);
+}
+
+/**
+ * The title `ComponentRoseLine` opens its group with:
+ * `UGroup.singletonMap(TITLE, stringsToDisplay.toTooltipText())`
+ * (`ComponentRoseLine.java:82`) over `participant.getDisplay(...)`
+ * (`MutingLine.java:107-108`). `getDisplay` puts a shown stereotype FIRST
+ * (`Participant.java:125-135`, `stereotypePositionTop`), so the first
+ * element (`Display.java:601-605`) is `Stereotype#toString`
+ * (`Stereotype.java:140-145`) of the participant's decorated stereotype
+ * (`CommandParticipant.java:176-181`), else the first display line;
+ * `UGroup#fix` writes every `[^-\w ]` as `.` (`UGroup.java:70-74`).
+ * Not modelled (both unported for the head too): `skinparam
+ * sequenceParticipant underline` (`Display#underlined`, `<u>` per line) and
+ * `stereotypePosition bottom`.
+ */
+export function lifelineTitle(participant: Pick<Participant, 'display' | 'stereotype' | 'stereotypeHidden'>): string {
+  const shown = participant.stereotypeHidden === true ? undefined : participant.stereotype;
+  const first = participantStereotype(shown)?.toString() ?? displayLines(participant.display)[0] ?? '';
+  return UGroup.singletonMap(UGroupType.TITLE, first).asMap().get(UGroupType.TITLE) ?? '';
 }
 
 /** Where the body's lifelines run: from the head row to `end`, past the
@@ -119,6 +149,7 @@ export function lifelinesOf(
       lifelineSegments(y1, y2, delays).map((piece) => ({
         ...piece,
         paint: mutingLinePaint(builder, participant, piece.delay),
+        title: lifelineTitle(participant),
       })),
     );
   };

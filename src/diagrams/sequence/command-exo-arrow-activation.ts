@@ -13,9 +13,11 @@ import { currentStyleBuilder } from './sequence-skin-param.js';
 /**
  * `diagram.activate(p, …)` for the trailing `+`/`-`/`!`, run AFTER the
  * message is added (`:152-166`). `CREATE` (`*`) is NOT here — it fires before
- * `addMessage` and is emitted by the caller. `DESTROY` collapses onto
- * deactivate for the same reason `activationFlags` does: `ActivationEvent`
- * has no CREATE/DESTROY variant. `styleBuilder` is the one current at this
+ * `addMessage` and is emitted by the caller. `DESTROY` is the flagged
+ * deactivate a `destroy` line emits (`command-lifeline.ts#destroyCommand`):
+ * bound to the exo message, it stops the lifeline and draws no cross, since
+ * `LiveBoxes#isNextEventADestroy` accepts only a `Message`
+ * (`LiveBoxes.java:218-219`). `styleBuilder` is the one current at this
  * command, which `SequenceDiagram#activate` hands the `LifeEvent`
  * (`SequenceDiagram.java:371-372`).
  * @see ~/git/plantuml/.../command/CommandExoArrowAny.java:148-166
@@ -30,8 +32,9 @@ export function activationEventOf(
     case '+':
       return { kind: 'activate', participantId, ...(color !== undefined ? { color } : {}), styleBuilder };
     case '-':
-    case '!':
       return { kind: 'deactivate', participantId, styleBuilder };
+    case '!':
+      return { kind: 'deactivate', participantId, destroy: true, styleBuilder };
     default:
       return undefined;
   }

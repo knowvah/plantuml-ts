@@ -76,7 +76,6 @@
  */
 
 import type { ParticipantType } from './ast.js';
-import type { Paint } from '../../core/paint.js';
 import type { Theme } from '../../core/theme.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { sequenceShadowFilter } from './sequence-shadow.js';
@@ -184,21 +183,6 @@ function driverBounderOf(measurer: StringMeasurer): DriverStringBounder {
   return { calculateDimension: (font, text) => ({ width: measurer.measure(text, font).width }) };
 }
 
-/** `toSvgPaint`'s spelling of a transparent style colour (`HColors.none()`). */
-const TRANSPARENT_SVG = '#00000000';
-
-/**
- * A style colour as this port's klimt layer spells it: transparent is
- * `'none'`, the paint `ActorStickMan` applies as its `HColors.none().bg()`
- * (`ActorStickMan.ts:28-33`). Upstream both are one `HColor`, so
- * `DriverPathSvg`'s `color.equals(back)` (`DriverPathSvg.java:64-68`) takes
- * the no-stroke branch for a transparent `LineColor`; the port's
- * `paintsEqual` compares the strings.
- */
-function klimtPaint(paint: Paint): Paint {
-  return paint === TRANSPARENT_SVG ? 'none' : paint;
-}
-
 /** `Style#getStroke()` (`Style.java:299-320`): the thickness, dashed when the
  *  style's `LineStyle` names a dash. */
 function strokeOf(paint: SequencePaint): UStroke {
@@ -222,8 +206,8 @@ function symbolContextFor(type: ParticipantType, geo: ParticipantSymbolGeo): Sym
   const paint = geo.paint;
   const cornered = type !== 'database';
   return new SymbolContext(
-    klimtPaint(paint.fill),
-    klimtPaint(paint.stroke),
+    paint.fill,
+    paint.stroke,
     strokeOf(paint),
     geo.shadow ?? 0,
     cornered ? paint.roundCorner : 0,
