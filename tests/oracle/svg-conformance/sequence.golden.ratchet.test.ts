@@ -33,6 +33,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { compareSvg } from './compare.js';
 import { renderFixtureSequence } from './render-fixture-sequence.js';
 
@@ -75,7 +76,7 @@ describe.skipIf(manifest.fixtures.length === 0)('svg-sequence conformance ratche
     it(`sequence/${f.slug}: stays zero-diff against the pinned golden`, () => {
       const golden = readGolden(f);
       const markup = readSource(f);
-      const ours = renderFixtureSequence(markup, new DeterministicMeasurer());
+      const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), { includeStore: fixtureIncludeStore() });
       const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
       expect(
         pass,
@@ -106,7 +107,7 @@ describe.skipIf(manifest.fixtures.length === 0)('svg-sequence conformance ratche
 
     const golden = readGolden(target);
     const markup = readSource(target);
-    const ours = renderFixtureSequence(markup, new DeterministicMeasurer());
+    const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), { includeStore: fixtureIncludeStore() });
 
     // Confirm the untampered pair really is zero-diff first, so the
     // tampered-case failure below is attributable to the mutation alone.
