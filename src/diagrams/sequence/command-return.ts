@@ -9,6 +9,8 @@
 import type { MessageEvent, MessageExoEvent, MessageExoType } from './ast.js';
 import { activate, addMessage, getActivatingMessage } from './sequence-life-state.js';
 import { applyAutonumber, emit, type Command, type ParseState } from './sequence-parse-helpers.js';
+import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
+import { currentStyleBuilder } from './sequence-skin-param.js';
 
 // 16. return -- `CommandReturn`. The reply runs along the latest ACTIVATING
 //     message (`getActivatingMessage()`), reversed and dotted, and then
@@ -27,7 +29,8 @@ export const returnCommand: Command = {
       state.executionError = 'Nowhere to return to.';
       return;
     }
-    const message2 = numbered(state, replyTo(message1, match[3] ?? '', match[1] !== undefined));
+    const styleBuilder = currentStyleBuilder(state.style); // `CommandReturn.java:129,132`
+    const message2 = numbered(state, replyTo(message1, match[3] ?? '', match[1] !== undefined, styleBuilder));
     emit(state, message2);
     const error = addMessage(state.life, message2) ?? deactivateAfterReturn(state, message1, activating);
     if (error !== undefined) state.executionError = error;
@@ -36,11 +39,17 @@ export const returnCommand: Command = {
 
 /** `message2` (`CommandReturn.java:120-137`): the activating message's own
  *  arrow, `withBody(DOTTED)`, run the other way. */
-function replyTo(message1: MessageEvent | MessageExoEvent, label: string, parallel: boolean): ReturnReply {
+function replyTo(
+  message1: MessageEvent | MessageExoEvent,
+  label: string,
+  parallel: boolean,
+  styleBuilder: StyleBuilder,
+): ReturnReply {
   const arrow = { ...message1.arrow, dashed: true };
   if (message1.kind === 'messageExo') {
     const exoType = REVERSE_EXO[message1.exoType];
-    return { kind: 'messageExo', participant: message1.participant, exoType, shortArrow: false, label, arrow };
+    const participant = message1.participant;
+    return { kind: 'messageExo', participant, exoType, shortArrow: false, label, arrow, styleBuilder };
   }
   return {
     kind: 'message',
@@ -48,6 +57,7 @@ function replyTo(message1: MessageEvent | MessageExoEvent, label: string, parall
     to: message1.from,
     label,
     arrow,
+    styleBuilder,
     ...(parallel ? { parallel: true } : {}),
   };
 }
@@ -59,7 +69,14 @@ type ReturnReply = MessageEvent | MessageExoEvent;
  *  does. */
 function numbered(state: ParseState, reply: ReturnReply): ReturnReply {
   if (reply.kind === 'message') return applyAutonumber(state, reply);
-  const probe = applyAutonumber(state, { kind: 'message', from: '', to: '', label: '', arrow: reply.arrow });
+  const probe = applyAutonumber(state, {
+    kind: 'message',
+    from: '',
+    to: '',
+    label: '',
+    arrow: reply.arrow,
+    styleBuilder: reply.styleBuilder,
+  });
   return {
     ...reply,
     ...(probe.sequenceNumber !== undefined ? { sequenceNumber: probe.sequenceNumber } : {}),
@@ -86,6 +103,8 @@ function deactivateAfterReturn(
   if (activating === undefined) return undefined;
   const p2 = message1.kind === 'message' ? message1.to : message1.participant;
   const error = activate(state.life, p2, 'DEACTIVATE');
-  if (error === undefined) emit(state, { kind: 'deactivate', participantId: p2 });
+  // `SequenceDiagram#activate` gives the `LifeEvent` the current builder (`:371-372`).
+  if (error === undefined)
+    emit(state, { kind: 'deactivate', participantId: p2, styleBuilder: currentStyleBuilder(state.style) });
   return error;
 }

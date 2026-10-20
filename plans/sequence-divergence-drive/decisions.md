@@ -8,7 +8,7 @@ journal it, halt.
 | D1 | Port the `StyleBuilder` seam first, then migrate component families; a migrated component reads ONLY `Style`. All families finish in sdd1. |
 | D2 | Capture the builder per event at its command line (replay declarations before each command), as upstream and wbs do. |
 | D3 | `parseSequence(source: UmlSource, options)`; plugin and `render-fixture-sequence.ts` change in the same commit. |
-| D4 | Reuse `src/core/style/mindmap-style-builder.ts` unchanged; any edit under `src/core/style/**` is stop 8. **Amended 2026-10-19 (Amendment 1): `Style#mergeNestedChildOver` is unported — ruling pending.** |
+| D4 | Reuse `src/core/style/mindmap-style-builder.ts` unchanged. **Amendment 2 (2026-10-20, user ruling):** additive ports of unported upstream `core/style` members are allowed (Java `file:line` + own test); anything else under `src/core/style/**` is still stop 8. |
 | D5 | Delete a family's `theme.colors.*` / `theme.sequence.*` reads in the commit that migrates it; delete a theme field when its last reader goes. |
 | D6 | Pin = zero-diff ratchet render; survey measured each close; disagreements journaled; re-pin once per close after adjudication. |
 | D7 | b0 is the reference; all-engine survey each close; every numeric change cites upstream `file:line`. |
@@ -82,6 +82,28 @@ narrow port of that one method into `Style.ts` (with its own test, citing
 `Stereotype#getStyles` (`Stereotype.java:185-193`, outside `core/style/`)
 inlined privately in `sequence-skin-param.ts`, as `sequence-shadowing.ts`
 already does.
+
+**Amendment 2 (2026-10-20, user ruling: "follow A for the port, but expand:
+you can port other bits if/as they are discovered").** Option (a), widened.
+- `Style#mergeNestedChildOver` (`Style.java:158-173`) is ported into
+  `src/core/style/Style.ts` by T1d (batch 1b), which also removes the two
+  throws in `sequence-skin-param.ts`. The oracle jar has the method
+  (`javap` on `oracle/dist/plantuml-oracle.jar`; upstream `8dd75d2e4d1`,
+  in v1.2026.8, an ancestor of the fork HEAD the jar is built from).
+- Any other unported upstream member under `core/style` that a task needs
+  may be ported when it is discovered, with the same rules: **additive only**
+  (a new member, or a member listed as "not ported"; no behaviour change to
+  an existing ported member), the Java `file:line` in its JSDoc `@see` and in
+  the commit, and its own unit test. The task journals the port and adds the
+  file to its write-set (push-forward). Two tasks in one batch that both need
+  `src/core/style/**` is stop 1 (collapse or serialise).
+- Still stop 8: any non-additive edit under `src/core/style/**` (changing an
+  existing member's behaviour, renaming, refactoring), and every other path
+  stop 8 names. The all-engine survey at each close (stops 4, 14) guards the
+  engines that already read `Style`.
+- Not ported now: `getSymbolContext` and `Stereotype#getStyles` stay rebuilt
+  in `sequence-skin-param.ts` (Amendment 1) unless a family task finds that
+  rebuild diverges from the Java, in which case it ports them under this rule.
 
 ## D5 — retire the theme path per family
 

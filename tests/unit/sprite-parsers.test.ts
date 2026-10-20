@@ -36,6 +36,7 @@ import { parseHcl } from '../../src/diagrams/hcl/parser.js';
 import { parseJson } from '../../src/diagrams/json/parser.js';
 import { parseDot } from '../../src/diagrams/dot/parser.js';
 import { parseChartAst } from './chart/parse-chart-ast.js';
+import { sequenceSource } from '../helpers/sequence-source.js';
 
 // T4-T11 widened every command-loop engine's parser to `AST | ParseRefusal`
 // (D1). This file drives SIX of those engines directly, so it cannot use any
@@ -45,7 +46,7 @@ import { parseChartAst } from './chart/parse-chart-ast.js';
 // that engine's command table, not in this file.
 const parseClass = (b: UmlSource) => astOrThrow(raw_parseClass(b), 'class');
 const parseState = (b: UmlSource) => astOrThrow(raw_parseState(b), 'state');
-const parseSequence = (l: readonly string[]) => astOrThrow(raw_parseSequence(l), 'sequence');
+const parseSequence = (l: readonly string[]) => astOrThrow(raw_parseSequence(sequenceSource(l)), 'sequence');
 const parseDescription = (b: UmlSource) => astOrThrow(raw_parseDescription(b), 'description');
 const parseBoard = (b: UmlSource) => astOrThrow(raw_parseBoard(b), 'board');
 const parsePacket = (b: UmlSource) => astOrThrow(raw_parsePacket(b), 'packetdiag');

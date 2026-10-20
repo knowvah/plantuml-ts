@@ -16,6 +16,7 @@
 import type { NoteEvent } from './ast.js';
 import { emit, ensureParticipant, type Command, type ParseState } from './sequence-parse-helpers.js';
 import { SEQUENCE_COLOR } from './sequence-color-grammar.js';
+import { currentStyleBuilder } from './sequence-skin-param.js';
 
 // ---------------------------------------------------------------------------
 // Shared fragments: `ColorParser`'s two grammars (sequence-color-grammar.ts)
@@ -136,17 +137,20 @@ export const noteCommand: Command = {
         participants,
         text,
         ...(color !== undefined ? { color } : {}),
+        styleBuilder: currentStyleBuilder(state.style), // `FactorySequenceNoteCommand.java:233`
       };
       emit(state, ev);
     } else {
       // Multi-line form: open a pending note; subsequent lines accumulate until
       // "end note".
+      // Captured at the opener: upstream executes the block as one command.
       state.pendingNote = {
         kind: 'note',
         position,
         participants,
         text: '',
         ...(color !== undefined ? { color } : {}),
+        styleBuilder: currentStyleBuilder(state.style),
       };
     }
   },
@@ -254,6 +258,7 @@ export const noteOnArrowCommand: Command = {
       ...shape,
       ...(color !== undefined ? { color } : {}),
       ...(stereotype !== undefined ? { stereotype } : {}),
+      styleBuilder: currentStyleBuilder(state.style), // `FactorySequenceNoteOnArrowCommand.java:226`
     };
 
     if (inlineText !== undefined) {
@@ -303,16 +308,14 @@ export const styledNoteCommand: Command = {
     const parallel = match[1] !== undefined;
     const vmerge = match[2] !== undefined;
     const style = match[3]!.toLowerCase();
-    const stereo1 = match[4];
     const rawPos = match[5]!.toLowerCase();
-    const stereo2 = match[7];
     const color = match[8];
     const inlineText = match[9];
     const position: NoteEvent['position'] = rawPos === 'left' ? 'left' : rawPos === 'right' ? 'right' : 'over';
     // T11 (ubrr): also registers each participant -- see
     // {@link registerNoteParticipants}'s doc comment.
     const participants = registerNoteParticipants(state, match[6]!);
-    const stereotype = stereo1 ?? stereo2;
+    const stereotype = match[4] ?? match[7]; // `getLazzy("STEREO", 0)`: STEREO1, else STEREO2
     const shape = style === 'note' ? {} : ({ shape: 'rect' } as const);
     const base = {
       kind: 'note' as const,
@@ -324,6 +327,7 @@ export const styledNoteCommand: Command = {
       ...(stereotype !== undefined ? { stereotype } : {}),
       ...(vmerge ? { vmerge: true } : {}),
       ...(parallel ? { parallel: true } : {}),
+      styleBuilder: currentStyleBuilder(state.style), // `FactorySequenceNoteCommand.java:233`
     };
 
     if (inlineText !== undefined) {
@@ -350,7 +354,8 @@ export const noteAcrossCommand: Command = {
     const inlineText = match[2];
     const participants = state.ast.participants.map((p) => p.id);
     const shape = style === 'note' ? {} : ({ shape: 'rect' } as const);
-    const base = { kind: 'note' as const, position: 'over' as const, participants, ...shape };
+    const styleBuilder = currentStyleBuilder(state.style); // `FactorySequenceNoteAcrossCommand.java:216-217`
+    const base = { kind: 'note' as const, position: 'over' as const, participants, ...shape, styleBuilder };
 
     if (inlineText !== undefined) {
       emit(state, { ...base, text: inlineText.replace(/\\n/g, '\n') });

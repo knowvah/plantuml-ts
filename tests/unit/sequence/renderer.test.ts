@@ -37,6 +37,7 @@ import {
 } from '../../../src/diagrams/sequence/divider-style.js';
 import { HEADER_PADDING, HEADER_FONT_SIZE, GROUP_FONT_SIZE } from '../../../src/diagrams/sequence/frame-style.js';
 import { noGradient } from '../../../src/core/paint.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 /** Decode an 8-bit RGBA PNG's pixels. `zlib` is a TEST oracle only -- the
  *  encoder itself stays browser-safe. */
@@ -401,7 +402,7 @@ describe('renderSequence — message lifecolor, url and stereotype', () => {
     // an `HColor` that only reaches `diagram.activate` on the `+` leg. The
     // bar itself is only ever emitted on close (no end-of-diagram sweep for
     // dangling activations in this port), so the fixture must close it.
-    const ast = parseSequence(['Alice -> Bob ++ #red: go', 'Bob --> Alice --: done']);
+    const ast = parseSequence(sequenceSource(['Alice -> Bob ++ #red: go', 'Bob --> Alice --: done']));
     if ('refused' in ast) throw new Error(`parseSequence refused: ${'message' in ast ? ast.message : ''}`);
     const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
     const activation = geo.events.find((e): e is ActivationGeo => e.kind === 'activation');
@@ -418,7 +419,7 @@ describe('renderSequence — message lifecolor, url and stereotype', () => {
     // `manageActivations`'s `-`/`!` legs always pass `null`
     // (`CommandArrow.java:445-450`) -- a deactivate is never colored, even
     // when the opening `++` supplied one.
-    const ast = parseSequence(['Alice -> Bob ++ #red: go', 'Bob --> Alice --: done']);
+    const ast = parseSequence(sequenceSource(['Alice -> Bob ++ #red: go', 'Bob --> Alice --: done']));
     if ('refused' in ast) throw new Error(`parseSequence refused: ${'message' in ast ? ast.message : ''}`);
     const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
     const activations = geo.events.filter((e): e is ActivationGeo => e.kind === 'activation');
@@ -463,7 +464,7 @@ describe('renderSequence — message lifecolor, url and stereotype', () => {
   });
 
   it('end-to-end: url and stereotype parse and lay out onto MessageGeo', () => {
-    const ast = parseSequence(['Alice -> Bob <<stereo>> [[http://example.com]]: hi']);
+    const ast = parseSequence(sequenceSource(['Alice -> Bob <<stereo>> [[http://example.com]]: hi']));
     if ('refused' in ast) throw new Error(`parseSequence refused: ${'message' in ast ? ast.message : ''}`);
     const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
     const msg = geo.events.find((e): e is MessageGeo => e.kind === 'message');
@@ -1680,7 +1681,9 @@ describe('renderSequence — box backgrounds', () => {
 
 describe('renderSequence — box integration', () => {
   it('box with label and color renders correctly end-to-end', () => {
-    const ast = parseSequence(['box "Frontend" #LightBlue', 'participant Alice', 'end box', 'Alice -> Alice: self']);
+    const ast = parseSequence(
+      sequenceSource(['box "Frontend" #LightBlue', 'participant Alice', 'end box', 'Alice -> Alice: self']),
+    );
     // T4: `parseSequence` now returns `SequenceDiagramAST | ParseRefusal`
     // (D1); this fixture is a complete, valid diagram, so refusal is a
     // test defect.

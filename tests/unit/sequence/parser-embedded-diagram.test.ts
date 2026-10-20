@@ -12,9 +12,10 @@
 import { describe, it, expect } from 'vitest';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import type { NoteEvent, SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 function parse(lines: string[]): SequenceDiagramAST {
-  const result = parseSequence(lines);
+  const result = parseSequence(sequenceSource(lines));
   if ('refused' in result) {
     throw new Error(`parseSequence refused (${result.kind}) at line ${String(result.line)}: ${result.message}`);
   }
@@ -111,7 +112,7 @@ describe('embedded `{{ }}` blocks inside a note body', () => {
   });
 
   it('does not open a block OUTSIDE a note body — `{{` alone still refuses', () => {
-    const result = parseSequence(['a->b', '{{', 'c->d', '}}']);
+    const result = parseSequence(sequenceSource(['a->b', '{{', 'c->d', '}}']));
 
     expect('refused' in result).toBe(true);
   });

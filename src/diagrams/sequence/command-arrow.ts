@@ -76,6 +76,7 @@ import {
   arrowConfigurationOf,
   emit,
   ensureParticipant,
+  setLastEventWithNoteSpan,
   type ArrowSpec,
   type Command,
   type ParseState,
@@ -97,13 +98,12 @@ export {
   DRESSED_ARROW_RE,
 } from './sequence-arrow-compose.js';
 import { UNDRESSED_ARROW_RE, DRESSED_ARROW_RE } from './sequence-arrow-compose.js';
+import { endpointOf, getMulticasts, type Groups } from './command-arrow-endpoints.js';
+import { currentStyleBuilder } from './sequence-skin-param.js';
 
 // ---------------------------------------------------------------------------
 // executeArg's own helpers, under upstream's names
 // ---------------------------------------------------------------------------
-
-/** A `RegExpExecArray`'s named groups. */
-type Groups = Readonly<Record<string, string | undefined>>;
 
 /** @see ~/git/plantuml/.../sequencediagram/command/CommandArrow.java:178-183 */
 function contains(value: string, ...totest: readonly string[]): boolean {
@@ -205,55 +205,6 @@ function applyStyle(state: ParseState, arrowStyle: string | undefined, config: A
 export function withPart(config: ArrowConfiguration, part: ArrowPart): ArrowConfiguration {
   if (config.dressing2.head !== 'NONE') return { ...config, dressing2: { ...config.dressing2, part } };
   return { ...config, dressing1: { ...config.dressing1, part } };
-}
-
-// ---------------------------------------------------------------------------
-// Endpoints
-// ---------------------------------------------------------------------------
-
-/** One resolved endpoint: the participant CODE and the `Display` upstream
- *  builds beside it. */
-interface Endpoint {
-  readonly code: string;
-  readonly display: string;
-}
-
-/**
- * `getOrCreateParticipant(location, system, arg, n)` — the four PART
- * alternatives in upstream's own order. `"Long" as Code` takes its code from
- * the second group and its display from the first; `Code as "Long"` the other
- * way round.
- * @see ~/git/plantuml/.../sequencediagram/command/CommandArrow.java:157-176
- */
-function endpointOf(g: Groups, n: 'PART1' | 'PART2'): Endpoint {
-  const code = g[`${n}CODE`];
-  if (code !== undefined) return { code, display: code };
-  const long = g[`${n}LONG`];
-  if (long !== undefined) return { code: long, display: long };
-  const longCode = g[`${n}LONGCODE`];
-  if (longCode !== undefined) return { code: g[`${n}LONGCODE1`]!, display: longCode };
-  const codeLong = g[`${n}CODELONG`];
-  if (codeLong !== undefined) return { code: codeLong, display: g[`${n}CODELONG1`]! };
-  // Upstream's own `throw new IllegalStateException()` (`:175`): PART1/PART2
-  // is a mandatory RegexOr, so one alternative always participated.
-  throw new Error(`CommandArrow: ${n} matched with no alternative group`);
-}
-
-/**
- * `getMulticasts` — the extra `& target` recipients, split on `&`, blanks
- * skipped, each one declared through `getOrCreateParticipant`.
- * @see ~/git/plantuml/.../sequencediagram/command/CommandArrow.java:139-155
- */
-function getMulticasts(state: ParseState, multicast: string | undefined): readonly string[] {
-  if (multicast === undefined) return [];
-  const result: string[] = [];
-  for (const raw of multicast.split('&')) {
-    const s = raw.trim();
-    if (s.length === 0) continue;
-    ensureParticipant(state, s);
-    result.push(s);
-  }
-  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -452,6 +403,7 @@ function executeArrow(state: ParseState, match: RegExpExecArray): void {
     to,
     label: g['MESSAGE'] ?? '',
     arrow,
+    styleBuilder: currentStyleBuilder(state.style), // `CommandArrow.java:401`
     ...optionalFields(state, g),
     // `manageActivations` and the `autoactivate` branch are the two arms of
     // one `if`/`else` (`CommandArrow.java:432-441`); `autoActivationFlags`
@@ -471,8 +423,7 @@ function executeArrow(state: ParseState, match: RegExpExecArray): void {
 
   state.lastMessageFrom = from;
   state.lastMessageTo = to;
-  state.lastEventWithNoteLeft = from;
-  state.lastEventWithNoteRight = to;
+  setLastEventWithNoteSpan(state, [from, to]);
   emit(state, msg);
 }
 

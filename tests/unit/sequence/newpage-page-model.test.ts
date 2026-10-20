@@ -22,11 +22,12 @@ import type {
   SequenceDiagramAST,
   SequenceGeometry,
 } from '../../../src/diagrams/sequence/ast.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 const measurer = new FixedMeasurer(8, 16);
 
 function parse(lines: string[]): SequenceDiagramAST {
-  const ast = parseSequence(lines);
+  const ast = parseSequence(sequenceSource(lines));
   if ('refused' in ast) throw new Error(`refused: ${ast.message}`);
   return ast;
 }
@@ -79,7 +80,7 @@ describe('newpage — parse', () => {
    *  `RegexLeaf.end()` fails on the leftovers, so the whole line is not a
    *  `newpage` at all. */
   it('does not match `newpage :` (an empty label)', () => {
-    const refusal = parseSequence(['Alice -> Bob : a', 'newpage :']);
+    const refusal = parseSequence(sequenceSource(['Alice -> Bob : a', 'newpage :']));
     expect('refused' in refusal).toBe(true);
   });
 

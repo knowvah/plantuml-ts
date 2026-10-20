@@ -39,13 +39,14 @@ import {
 import type { ArrowConfiguration } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
 import { SEQUENCE_COMMANDS } from '../../../src/diagrams/sequence/sequence-command-registry.js';
 import { LIFECOLOR } from '../../../src/diagrams/sequence/sequence-arrow-regex.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 function parsed(...lines: readonly string[]): SequenceDiagramAST {
-  const result = parseSequence(lines);
+  const result = parseSequence(sequenceSource(lines));
   if ('refused' in result) {
     throw new Error(`refused (${result.kind}): ${result.message}`);
   }
@@ -59,7 +60,7 @@ function firstMessage(...lines: readonly string[]): MessageEvent {
 }
 
 function refused(line: string): boolean {
-  return 'refused' in parseSequence([line]);
+  return 'refused' in parseSequence(sequenceSource([line]));
 }
 
 /** The five drawing facts `executeArg` decides, flattened for comparison. */
@@ -258,7 +259,7 @@ describe('CommandArrow — forms upstream itself refuses', () => {
   // `kind: 'execution'`, matching upstream's per-factory abandonment
   // (`PSystemBuilder.java:256-271`) instead of silently consuming the line.
   it('refuses `execution` for a body with no direction on either dressing', () => {
-    const result = parseSequence(['Alice - Bob : hi']);
+    const result = parseSequence(sequenceSource(['Alice - Bob : hi']));
     if (!('refused' in result)) throw new Error('expected a refusal');
     expect(result.kind).toBe('execution');
     expect(result.message).toBe('Illegal sequence arrow');
@@ -272,7 +273,7 @@ describe('CommandArrow — forms upstream itself refuses', () => {
   // sequence's own factory refuses every one of these lines and
   // `PSystemBuilder` falls through to the next candidate.
   it('refuses `execution` for a bare `--` body with zero head decoration', () => {
-    const result = parseSequence(['Reporter -- Queue']);
+    const result = parseSequence(sequenceSource(['Reporter -- Queue']));
     if (!('refused' in result)) throw new Error('expected a refusal');
     expect(result.kind).toBe('execution');
     expect(result.message).toBe('Illegal sequence arrow');
@@ -288,7 +289,7 @@ describe('CommandArrow — forms upstream itself refuses', () => {
   // `jamupa-36-duni483`'s `a -[thickness=5]> b`, which the real jar renders
   // as CLASS, not SEQUENCE.
   it('refuses `execution` for an unrecognised, non-colour style token', () => {
-    const result = parseSequence(['a -[thickness=5]> b']);
+    const result = parseSequence(sequenceSource(['a -[thickness=5]> b']));
     if (!('refused' in result)) throw new Error('expected a refusal');
     expect(result.kind).toBe('execution');
     expect(result.message).toBe('Illegal sequence arrow style: thickness=5');
@@ -298,7 +299,7 @@ describe('CommandArrow — forms upstream itself refuses', () => {
   // `#navy` elsewhere in this file) refuses for the SAME reason: it reaches
   // `HColorSet.getColor` and fails there too.
   it('refuses `execution` for an unrecognised `#`-prefixed style token', () => {
-    const result = parseSequence(['a -[#notacolor]> b']);
+    const result = parseSequence(sequenceSource(['a -[#notacolor]> b']));
     if (!('refused' in result)) throw new Error('expected a refusal');
     expect(result.kind).toBe('execution');
   });

@@ -11,12 +11,19 @@
  * Re-exported by `geo.ts`, which is re-exported by `ast.ts`.
  */
 
+import type { SequencePaint } from './sequence-skin-param.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import type { MessageExoType } from './ast.js';
 import type { TextRun } from './text-block-geo.js';
 import type { ParticipantGeo } from './geo-participant.js';
 
 export interface MessageGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   kind: 'message';
   /** A create message's head (`CommunicationTile#drawU:347-371`): the
    *  participant, at the x the tile draws it, and the block top it is drawn
@@ -85,6 +92,12 @@ export interface MessageGeo {
 }
 
 export interface ActivationGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   kind: 'activation';
   participantId: string;
   lifelineX: number;

@@ -26,11 +26,12 @@ import {
 } from '../../../src/diagrams/sequence/newpage-style.js';
 import { newpageTilesOf } from '../../../src/diagrams/sequence/sequence-page.js';
 import type { SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 const measurer = new FixedMeasurer(8, 16);
 
 function layout(lines: string[]): SequenceGeometry {
-  const ast = parseSequence(lines);
+  const ast = parseSequence(sequenceSource(lines));
   if ('refused' in ast) throw new Error(`refused: ${ast.message}`);
   return layoutSequence(ast, defaultTheme, measurer);
 }

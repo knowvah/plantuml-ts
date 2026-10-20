@@ -17,6 +17,7 @@ import type {
   EventGeo,
 } from '../../../src/diagrams/sequence/ast.js';
 import { HEADER_PADDING } from '../../../src/diagrams/sequence/frame-style.js';
+import { DEFAULT_SEQUENCE_STYLE_BUILDER } from '../../helpers/sequence-source.js';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -31,6 +32,7 @@ function makeAst(participants: string[], events: SequenceEvent[]): SequenceDiagr
       display: id,
       type: 'participant' as const,
       order: i,
+      styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
     })),
     events,
     autonumber: { enabled: false, start: 1, current: 1, step: 1, prefix: '' },
@@ -44,7 +46,15 @@ function makeAst(participants: string[], events: SequenceEvent[]): SequenceDiagr
 const SYNC_ARROW = arrowConfigurationOf({});
 
 function msg(from: string, to: string, label = 'hello', extras: Partial<MessageEvent> = {}): SequenceEvent {
-  return { kind: 'message', from, to, label, arrow: SYNC_ARROW, ...extras };
+  return {
+    kind: 'message',
+    styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+    from,
+    to,
+    label,
+    arrow: SYNC_ARROW,
+    ...extras,
+  };
 }
 
 function isMessage(e: EventGeo): e is MessageGeo {
@@ -158,9 +168,17 @@ describe('layoutSequence — activation (AC 4)', () => {
     const ast = makeAst(
       ['Alice'],
       [
-        { kind: 'activate', participantId: 'Alice' } satisfies SequenceEvent,
+        {
+          kind: 'activate',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          participantId: 'Alice',
+        } satisfies SequenceEvent,
         msg('Alice', 'Alice', 'work'),
-        { kind: 'deactivate', participantId: 'Alice' } satisfies SequenceEvent,
+        {
+          kind: 'deactivate',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          participantId: 'Alice',
+        } satisfies SequenceEvent,
       ],
     );
     const geo = layoutSequence(ast, defaultTheme, measurer);
@@ -187,7 +205,16 @@ describe('layoutSequence — activation (AC 4)', () => {
    *  zero-height bar, which the renderer then wrapped in a `<g>` — a surplus
    *  top-level child on every fixture that writes an unmatched deactivate. */
   it('draws nothing for a deactivate with no activation open', () => {
-    const ast = makeAst(['Alice'], [{ kind: 'deactivate', participantId: 'Alice' } satisfies SequenceEvent]);
+    const ast = makeAst(
+      ['Alice'],
+      [
+        {
+          kind: 'deactivate',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          participantId: 'Alice',
+        } satisfies SequenceEvent,
+      ],
+    );
     const geo = layoutSequence(ast, defaultTheme, measurer);
     expect(geo.events.find(isActivation)).toBeUndefined();
   });
@@ -226,7 +253,10 @@ describe('layoutSequence — activation (AC 4)', () => {
   it('offsets a forward arrow by each end`s live level', () => {
     const ast = makeAst(
       ['a', 'b'],
-      [{ kind: 'activate', participantId: 'a' } satisfies SequenceEvent, msg('a', 'b', 'x', { activates: 'b' })],
+      [
+        { kind: 'activate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'a' } satisfies SequenceEvent,
+        msg('a', 'b', 'x', { activates: 'b' }),
+      ],
     );
     const geo = layoutSequence(ast, defaultTheme, measurer);
     const [a, b] = geo.participants;
@@ -241,7 +271,10 @@ describe('layoutSequence — activation (AC 4)', () => {
   it('offsets a reverse arrow by the other branch`s rule', () => {
     const ast = makeAst(
       ['a', 'b'],
-      [{ kind: 'activate', participantId: 'a' } satisfies SequenceEvent, msg('b', 'a', 'x')],
+      [
+        { kind: 'activate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'a' } satisfies SequenceEvent,
+        msg('b', 'a', 'x'),
+      ],
     );
     const geo = layoutSequence(ast, defaultTheme, measurer);
     const [a, b] = geo.participants;
@@ -257,8 +290,8 @@ describe('layoutSequence — activation (AC 4)', () => {
     const ast = makeAst(
       ['a', 'b'],
       [
-        { kind: 'activate', participantId: 'b' } satisfies SequenceEvent,
-        { kind: 'activate', participantId: 'b' } satisfies SequenceEvent,
+        { kind: 'activate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'b' } satisfies SequenceEvent,
+        { kind: 'activate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'b' } satisfies SequenceEvent,
         msg('b', 'a', 'x'),
       ],
     );
@@ -275,7 +308,10 @@ describe('layoutSequence — activation (AC 4)', () => {
   it('counts an activate bound to the message that precedes it', () => {
     const ast = makeAst(
       ['a', 'b'],
-      [msg('a', 'b', 'x'), { kind: 'activate', participantId: 'a' } satisfies SequenceEvent],
+      [
+        msg('a', 'b', 'x'),
+        { kind: 'activate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'a' } satisfies SequenceEvent,
+      ],
     );
     const geo = layoutSequence(ast, defaultTheme, measurer);
     const a = geo.participants[0]!;
@@ -292,9 +328,19 @@ describe('layoutSequence — activation (AC 4)', () => {
         msg('a', 'b', 'x'),
         {
           kind: 'frame',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          branchStyleBuilders: [DEFAULT_SEQUENCE_STYLE_BUILDER],
           frameType: 'opt',
           label: 'test',
-          branches: [[{ kind: 'activate', participantId: 'a' } satisfies SequenceEvent]],
+          branches: [
+            [
+              {
+                kind: 'activate',
+                styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+                participantId: 'a',
+              } satisfies SequenceEvent,
+            ],
+          ],
           branchLabels: ['test'],
         } satisfies SequenceEvent,
       ],
@@ -326,7 +372,13 @@ describe('layoutSequence — activation (AC 4)', () => {
    *  its golden's segments are `34.469` and `35.469` off a lifeline at
    *  `29.469`, i.e. `cx + 5` and `cx + 6`. */
   it('shifts a self loop right by the live level', () => {
-    const ast = makeAst(['a'], [{ kind: 'activate', participantId: 'a' } satisfies SequenceEvent, msg('a', 'a', 'x')]);
+    const ast = makeAst(
+      ['a'],
+      [
+        { kind: 'activate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'a' } satisfies SequenceEvent,
+        msg('a', 'a', 'x'),
+      ],
+    );
     const geo = layoutSequence(ast, defaultTheme, measurer);
     const a = geo.participants[0]!;
     const m = geo.events.find((e): e is MessageGeo => e.kind === 'message')!;
@@ -392,6 +444,8 @@ describe('layoutSequence — frame (AC 5)', () => {
       [
         {
           kind: 'frame',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          branchStyleBuilders: [DEFAULT_SEQUENCE_STYLE_BUILDER],
           frameType: 'loop',
           label: '10 times',
           branches: [[msg('Alice', 'Bob', 'ping'), msg('Bob', 'Alice', 'pong')]],
@@ -418,6 +472,8 @@ describe('layoutSequence — frame (AC 5)', () => {
       [
         {
           kind: 'frame',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          branchStyleBuilders: [DEFAULT_SEQUENCE_STYLE_BUILDER],
           frameType: 'alt',
           label: 'condition',
           branches: [[msg('Alice', 'Bob', 'yes')], [msg('Bob', 'Alice', 'no')]],
@@ -453,6 +509,8 @@ describe('layoutSequence — frame tile order (D2, pre-order emission)', () => {
       [
         {
           kind: 'frame',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          branchStyleBuilders: [DEFAULT_SEQUENCE_STYLE_BUILDER],
           frameType: 'loop',
           label: 'n times',
           branches: [[msg('Alice', 'Bob', 'a'), msg('Bob', 'Alice', 'b')]],
@@ -470,6 +528,8 @@ describe('layoutSequence — frame tile order (D2, pre-order emission)', () => {
   it('nested frames emit depth-first pre-order: outer, inner, inner children, outer remainder', () => {
     const inner: SequenceEvent = {
       kind: 'frame',
+      styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+      branchStyleBuilders: [DEFAULT_SEQUENCE_STYLE_BUILDER],
       frameType: 'opt',
       label: 'maybe',
       branches: [[msg('Alice', 'Bob', 'inner-msg')]],
@@ -480,6 +540,8 @@ describe('layoutSequence — frame tile order (D2, pre-order emission)', () => {
       [
         {
           kind: 'frame',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          branchStyleBuilders: [DEFAULT_SEQUENCE_STYLE_BUILDER],
           frameType: 'loop',
           label: 'outer',
           branches: [[inner, msg('Bob', 'Alice', 'outer-tail')]],
@@ -504,6 +566,8 @@ describe('layoutSequence — frame header tab (D2/T5)', () => {
       [
         {
           kind: 'frame',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          branchStyleBuilders: [DEFAULT_SEQUENCE_STYLE_BUILDER],
           frameType: 'group',
           label: 'foo',
           branches: [[msg('Alice', 'Alice', 'x')]],
@@ -527,6 +591,8 @@ describe('layoutSequence — frame colour carry-through (T5)', () => {
       [
         {
           kind: 'frame',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          branchStyleBuilders: [DEFAULT_SEQUENCE_STYLE_BUILDER],
           frameType: 'group',
           label: 'g',
           branches: [[msg('Alice', 'Alice', 'x')]],
@@ -548,6 +614,8 @@ describe('layoutSequence — frame colour carry-through (T5)', () => {
       [
         {
           kind: 'frame',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          branchStyleBuilders: [DEFAULT_SEQUENCE_STYLE_BUILDER],
           frameType: 'group',
           label: 'g',
           branches: [[msg('Alice', 'Alice', 'x')]],
@@ -573,6 +641,8 @@ describe('layoutSequence — frame colour carry-through (T5)', () => {
       [
         {
           kind: 'frame',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          branchStyleBuilders: [DEFAULT_SEQUENCE_STYLE_BUILDER],
           frameType: 'alt',
           label: 'first',
           branches: [[msg('Alice', 'Bob', 'a')], [msg('Bob', 'Alice', 'b')], [msg('Alice', 'Bob', 'c')]],
@@ -596,6 +666,7 @@ describe('layoutSequence — no frames leaves other events unaffected (T5)', () 
       msg('Alice', 'Bob', 'a'),
       {
         kind: 'note',
+        styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
         position: 'over',
         participants: ['Alice'],
         text: 'n',
@@ -615,6 +686,7 @@ describe('layoutSequence — note (AC 6)', () => {
       [
         {
           kind: 'note',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
           position: 'left',
           participants: ['Alice'],
           text: 'hi',
@@ -633,6 +705,7 @@ describe('layoutSequence — note (AC 6)', () => {
       [
         {
           kind: 'note',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
           position: 'right',
           participants: ['Alice'],
           text: 'hi',
@@ -651,6 +724,7 @@ describe('layoutSequence — note (AC 6)', () => {
       [
         {
           kind: 'note',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
           position: 'over',
           participants: ['Alice'],
           text: 'note',
@@ -671,6 +745,7 @@ describe('layoutSequence — note (AC 6)', () => {
       [
         {
           kind: 'note',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
           position: 'over',
           participants: ['Alice', 'Bob'],
           text: 'shared',
@@ -723,7 +798,10 @@ describe('layoutSequence — divider', () => {
     // translates by `border1`, so it is inset by this port's own
     // LEFT_MARGIN/RIGHT_MARGIN (10 each, the jar's document margin) rather
     // than running edge to edge.
-    const ast = makeAst(['Alice', 'Bob'], [{ kind: 'divider', text: '====' } satisfies SequenceEvent]);
+    const ast = makeAst(
+      ['Alice', 'Bob'],
+      [{ kind: 'divider', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, text: '====' } satisfies SequenceEvent],
+    );
     const geo = layoutSequence(ast, defaultTheme, measurer);
     const divider = geo.events.find(isDivider)!;
     expect(divider.bandX).toBe(10);
@@ -737,7 +815,10 @@ describe('layoutSequence — divider', () => {
     // (`ComponentRoseDivider.java:52-53, 127-129`). FixedMeasurer(8, 16) makes
     // a one-line block 16 tall, so 16 + 8 + 20 = 44 -- the retired constant
     // was 30.
-    const ast = makeAst(['Alice', 'Bob'], [{ kind: 'divider', text: 'phase' } satisfies SequenceEvent]);
+    const ast = makeAst(
+      ['Alice', 'Bob'],
+      [{ kind: 'divider', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, text: 'phase' } satisfies SequenceEvent],
+    );
     const divider = layoutSequence(ast, defaultTheme, measurer).events.find(isDivider)!;
     expect(divider.height).toBe(16 + 8 + 20);
     expect(divider.textHeight).toBe(16 + 8);
@@ -746,7 +827,10 @@ describe('layoutSequence — divider', () => {
   });
 
   it('takes the widest line and the line count of a multi-line label', () => {
-    const ast = makeAst(['Alice', 'Bob'], [{ kind: 'divider', text: 'a\nbbbb' } satisfies SequenceEvent]);
+    const ast = makeAst(
+      ['Alice', 'Bob'],
+      [{ kind: 'divider', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, text: 'a\nbbbb' } satisfies SequenceEvent],
+    );
     const divider = layoutSequence(ast, defaultTheme, measurer).events.find(isDivider)!;
     expect(divider.lines).toEqual(['a', 'bbbb']);
     expect(divider.textWidth).toBe(4 * 8 + 8);
@@ -759,7 +843,10 @@ describe('layoutSequence — divider', () => {
     const wide = 'x'.repeat(60);
     const narrow = layoutSequence(makeAst(['A', 'B'], []), defaultTheme, measurer).totalWidth;
     const widened = layoutSequence(
-      makeAst(['A', 'B'], [{ kind: 'divider', text: wide } satisfies SequenceEvent]),
+      makeAst(
+        ['A', 'B'],
+        [{ kind: 'divider', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, text: wide } satisfies SequenceEvent],
+      ),
       defaultTheme,
       measurer,
     ).totalWidth;
@@ -790,7 +877,7 @@ describe('layoutSequence — delay event', () => {
       ['Alice', 'Bob'],
       [
         msg('Alice', 'Bob', 'before'),
-        { kind: 'delay', text: '...' } satisfies SequenceEvent,
+        { kind: 'delay', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, text: '...' } satisfies SequenceEvent,
         msg('Alice', 'Bob', 'after'),
       ],
     );
@@ -811,7 +898,10 @@ describe('layoutSequence — delay event', () => {
   });
 
   it('delay event without text is also handled', () => {
-    const ast = makeAst(['Alice', 'Bob'], [{ kind: 'delay' } satisfies SequenceEvent]);
+    const ast = makeAst(
+      ['Alice', 'Bob'],
+      [{ kind: 'delay', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER } satisfies SequenceEvent],
+    );
     const geo = layoutSequence(ast, defaultTheme, measurer);
     // No geometry emitted for delay — only messages/notes/etc appear in events
     expect(geo.events.filter(isMessage)).toHaveLength(0);
@@ -826,6 +916,7 @@ describe('layoutSequence — multiline note', () => {
         [
           {
             kind: 'note',
+            styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
             position: 'over',
             participants: ['Alice'],
             text: 'one line',
@@ -841,6 +932,7 @@ describe('layoutSequence — multiline note', () => {
         [
           {
             kind: 'note',
+            styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
             position: 'over',
             participants: ['Alice'],
             text: 'line one\nline two\nline three',
@@ -863,6 +955,7 @@ describe('layoutSequence — note color', () => {
       [
         {
           kind: 'note',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
           position: 'over',
           participants: ['Alice'],
           text: 'colored',
@@ -883,10 +976,15 @@ describe('layoutSequence — activation color', () => {
       [
         {
           kind: 'activate',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
           participantId: 'Alice',
           color: '#AABBCC',
         } satisfies SequenceEvent,
-        { kind: 'deactivate', participantId: 'Alice' } satisfies SequenceEvent,
+        {
+          kind: 'deactivate',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          participantId: 'Alice',
+        } satisfies SequenceEvent,
       ],
     );
     const geo = layoutSequence(ast, defaultTheme, measurer);
@@ -902,6 +1000,7 @@ describe('layoutSequence — sequence numbers', () => {
       [
         {
           kind: 'message',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
           from: 'Alice',
           to: 'Bob',
           label: 'go',
@@ -932,6 +1031,8 @@ describe('layoutSequence — frame x/width', () => {
       [
         {
           kind: 'frame',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          branchStyleBuilders: [DEFAULT_SEQUENCE_STYLE_BUILDER],
           frameType: 'loop',
           label: 'forever',
           branches: [[msg('Alice', 'Bob', 'tick')]],
@@ -952,8 +1053,19 @@ describe('layoutSequence — message from unknown participant', () => {
   it('skips message gracefully if a participant is not in the map', () => {
     // Build an AST with a message referencing a participant not declared
     const ast: SequenceDiagramAST = {
-      participants: [{ id: 'Alice', display: 'Alice', type: 'participant', order: 0 }],
-      events: [{ kind: 'message', from: 'Alice', to: 'Ghost', label: 'ping', arrow: SYNC_ARROW }],
+      participants: [
+        { id: 'Alice', display: 'Alice', type: 'participant', order: 0, styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER },
+      ],
+      events: [
+        {
+          kind: 'message',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          from: 'Alice',
+          to: 'Ghost',
+          label: 'ping',
+          arrow: SYNC_ARROW,
+        },
+      ],
       autonumber: { enabled: false, start: 1, current: 1, step: 1, prefix: '' },
       options: { hideFootbox: false, messageAlign: 'center' },
       boxes: [],
@@ -985,6 +1097,7 @@ describe('layoutSequence — auto-deactivate without prior activation record', (
 function exo(participant: string, label = 'in'): MessageExoEvent {
   return {
     kind: 'messageExo',
+    styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
     participant,
     exoType: 'FROM_LEFT',
     shortArrow: false,
@@ -1003,6 +1116,8 @@ describe('exo messages in the participant walkers', () => {
   it('links the endpoint even from inside a frame branch', () => {
     const frame: SequenceEvent = {
       kind: 'frame',
+      styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+      branchStyleBuilders: [DEFAULT_SEQUENCE_STYLE_BUILDER],
       frameType: 'loop',
       label: 'l',
       branches: [[exo('Carol')]],
@@ -1033,7 +1148,13 @@ describe('layoutSequence — database participant sizing', () => {
   /** `FixedMeasurer(8, 16)`: a label of N characters measures 8N wide, 16 tall. */
   function dbAst(display: string): SequenceDiagramAST {
     const ast = makeAst(['DB', 'Other'], [msg('DB', 'Other')]);
-    ast.participants[0] = { id: 'DB', display, type: 'database', order: 0 };
+    ast.participants[0] = {
+      id: 'DB',
+      display,
+      type: 'database',
+      order: 0,
+      styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+    };
     return ast;
   }
 
@@ -1085,7 +1206,7 @@ describe('layoutSequence — the five glyph participant kinds', () => {
 
   function kindGeo(kind: Kind, display: string) {
     const ast = makeAst(['P', 'Other'], [msg('P', 'Other')]);
-    ast.participants[0] = { id: 'P', display, type: kind, order: 0 };
+    ast.participants[0] = { id: 'P', display, type: kind, order: 0, styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER };
     return layoutSequence(ast, defaultTheme, measurer).participants.find((p) => p.id === 'P')!;
   }
 
@@ -1143,7 +1264,7 @@ describe('layoutSequence — the five glyph participant kinds', () => {
 describe('layoutSequence — actor participant sizing', () => {
   function actorGeo(display: string, actorStyle?: 'AWESOME' | 'HOLLOW') {
     const ast = makeAst(['A', 'Other'], [msg('A', 'Other')]);
-    ast.participants[0] = { id: 'A', display, type: 'actor', order: 0 };
+    ast.participants[0] = { id: 'A', display, type: 'actor', order: 0, styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER };
     const theme = actorStyle === undefined ? defaultTheme : { ...defaultTheme, actorStyle };
     return layoutSequence(ast, theme, measurer).participants.find((p) => p.id === 'A')!;
   }

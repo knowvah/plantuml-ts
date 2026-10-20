@@ -61,6 +61,20 @@
  * `scaleAtom`/`scaleRow`/`scaleNode`/`scaleEdge` make below for the json
  * family's own small geometry structs.
  *
+ * ## `paint` is NOT scaled
+ *
+ * Every geo type's optional `paint` (a `SequencePaint`: thickness, dash,
+ * roundCorner, padding, ...) is carried through unscaled by the `...x`
+ * spread in each `scale*` below, and `scaleRun`-style rebuilds never touch
+ * it. Upstream scales stroke width, dash lengths and corner radii at
+ * emission only (`SvgGraphics.java:466-468` `format` multiplies by
+ * `option.getScale()`; `:559` `setStrokeWidth` formats the width and both
+ * dash lengths), never in the `Style`/`UStroke` values the components read.
+ * The port renderer applies `theme.scaleK` at that same emission point
+ * (`renderer-lifeline.ts` strokes), so scaling `paint` here as well would
+ * scale it twice. Reading `paint` is never forced: it is a lazy-getter
+ * object (`sequence-skin-param.ts#paintOf`) and must not be walked here.
+ *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/SvgGraphics.java#format
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/SvgGraphics.java#setStrokeWidth (:559, dash-pattern scaling)
  * @see src/diagrams/json/scale-geo.ts

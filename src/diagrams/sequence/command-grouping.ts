@@ -21,6 +21,7 @@ import {
   type ParseState,
 } from './sequence-parse-helpers.js';
 import { DRESSED_ARROW_RE, UNDRESSED_ARROW_RE } from './sequence-arrow-compose.js';
+import { currentStyleBuilder } from './sequence-skin-param.js';
 
 // 3a. box — opens a named/colored participant group. T13 (mission
 //     dispatch-by-parse-attempt): widened to accept an unquoted label
@@ -36,7 +37,18 @@ export const boxStartCommand: Command = {
     const label = (match[1] ?? match[2] ?? '').trim();
     const color = match[3] ?? '';
     const id = `box-${++state.boxCounter}`;
-    const box: BoxGroup = { id, label, color, participantIds: [] };
+    const style = state.style;
+    // A `Doll` reads the builder at TILE time (`Doll.java:81-83`), i.e. after
+    // every command: a getter, read once the parse has completed.
+    const box: BoxGroup = {
+      id,
+      label,
+      color,
+      participantIds: [],
+      get styleBuilder() {
+        return currentStyleBuilder(style);
+      },
+    };
     state.ast.boxes.push(box);
     state.currentBox = box;
   },
@@ -118,6 +130,7 @@ export const groupingCommand: Command = {
     const backColorElement = match[3];
     const backColorGeneral = match[4];
     const label = resolveGroupLabel(frameType, match[5]?.trim() ?? '');
+    const styleBuilder = currentStyleBuilder(state.style); // `SequenceDiagram.java:427-428`
     const frame: FrameEvent = {
       kind: 'frame',
       frameType,
@@ -125,6 +138,8 @@ export const groupingCommand: Command = {
       branches: [[]],
       branchLabels: [label],
       branchColors: [backColorGeneral],
+      styleBuilder,
+      branchStyleBuilders: [styleBuilder],
       ...(match[1] !== undefined ? { parallel: true } : {}),
       ...(backColorElement !== undefined ? { backColorElement } : {}),
       ...(backColorGeneral !== undefined ? { backColorGeneral } : {}),
@@ -201,6 +216,8 @@ export const elseCommand: Command = {
       top.branches.push([]);
       top.branchLabels.push(match[2]?.trim() ?? '');
       top.branchColors?.push(match[1]);
+      // The `else` leaf's own builder (`SequenceDiagram.java:431-432`).
+      top.branchStyleBuilders.push(currentStyleBuilder(state.style));
     }
     markGroupingLeafNoteAnchor(state);
   },

@@ -21,6 +21,7 @@
 import type { ActivationEvent } from './ast.js';
 import { emit, ensureParticipant, type Command, type ParseState } from './sequence-parse-helpers.js';
 import { activate, getActivatingMessage, type LifeEventType } from './sequence-life-state.js';
+import { currentStyleBuilder } from './sequence-skin-param.js';
 
 /** `CommandActivate`'s shared WHO group -- `([%pLN_.@]+|[%g][^%g]+[%g])`
  *  (`CommandActivate.java:65`): a bare token or a quoted, space-carrying
@@ -54,6 +55,7 @@ export const activateCommand: Command = {
       kind: 'activate',
       participantId,
       ...(color !== undefined ? { color } : {}),
+      styleBuilder: currentStyleBuilder(state.style),
     };
     emit(state, ev);
   },
@@ -72,6 +74,7 @@ export const deactivateCommand: Command = {
     const ev: ActivationEvent = {
       kind: 'deactivate',
       participantId,
+      styleBuilder: currentStyleBuilder(state.style),
     };
     emit(state, ev);
   },
@@ -92,6 +95,7 @@ export const destroyCommand: Command = {
       kind: 'deactivate',
       participantId,
       destroy: true,
+      styleBuilder: currentStyleBuilder(state.style),
     };
     emit(state, ev);
   },
@@ -115,6 +119,7 @@ export const deactivateShortCommand: Command = {
     const ev: ActivationEvent = {
       kind: 'deactivate',
       participantId,
+      styleBuilder: currentStyleBuilder(state.style),
     };
     emit(state, ev);
   },

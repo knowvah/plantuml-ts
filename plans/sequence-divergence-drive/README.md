@@ -72,7 +72,7 @@ Measurement (sequence has NO DOT gate — it never emits `svek-N.dot`):
    fall beside a numeric rise is a reveal, not a stop).
 6. A pinned golden stops being byte-equal.
 7. Batch 1b's no-op seam is not byte-identical to b0 on every fixture.
-8. Any edit under `src/core/style/**` (D4), `src/core/klimt/**`,
+8. A non-additive edit under `src/core/style/**` (D4 Amendment 2), `src/core/klimt/**`,
    `~/git/knowvah/dot-engine`, or the plantuml fork; any push.
 9. Any change to the oracle jar or cached oracle bytes.
 10. Signing any entry in `oracle/accepted-divergences.json` (D8).
@@ -124,7 +124,7 @@ Measurement (sequence has NO DOT gate — it never emits `svek-N.dot`):
 |---|---|---|---|---|
 | [0](batch-0/overview.md) | branch, b0, classifier, ledger; pin tool | T0a, T0b | both ∥ | [x] |
 | [1](batch-1/overview.md) | style seam module (D1/D2/D4) | T1a | — | [x] |
-| [1b](batch-1b/overview.md) | parser capture + `UmlSource` (D3); geo paint fields — no-op seam | T1b, T1c | both ∥ | [ ] |
+| [1b](batch-1b/overview.md) | parser capture + `UmlSource` (D3); geo paint fields; `mergeNestedChildOver` port — no-op seam | T1b, T1c, T1d | all ∥ | [ ] |
 | [2](batch-2/overview.md) | families: participant, lifeline, arrow, divider, note+box; pin round 1 | T2a–T2e, close | all ∥ | [ ] |
 | [3](batch-3/overview.md) | groups/ref/newpage/delay; shadowing | T3a, T3b | both ∥ | [ ] |
 | [3b](batch-3b/overview.md) | retire dead theme fields (D5); pin round 2 | T3c, close | — | [ ] |
@@ -166,3 +166,9 @@ Measurement (sequence has NO DOT gate — it never emits `svek-N.dot`):
   one-method port into `src/core/style/Style.ts` (recommended), or (b) leave
   those two headers open → sdd2.
 - Resume at batch 1b (T1b, T1c); it does not depend on the ruling.
+
+## Status — resumed 2026-10-20
+
+- Ruling on the halt: option (a), widened. Additive ports of unported
+  upstream `core/style` members are allowed (D4 Amendment 2; stop 8 narrowed).
+  T1d ports `Style#mergeNestedChildOver` in batch 1b. Journal row 16.

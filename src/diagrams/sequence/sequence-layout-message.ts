@@ -321,9 +321,12 @@ function levelAfterBoundEvents(
   // This port stores them as two fields and so cannot tell `--++` from
   // `++--`; deactivate-then-activate is taken, which is `--++`, the form the
   // corpus writes. Recorded rather than silently assumed.
+  // Both life events share the message's command, hence its builder
+  // (`SequenceDiagram.java:371-372`).
+  const { styleBuilder } = event;
   const own: ActivationEvent[] = [
-    ...(event.deactivates === participantId ? [{ kind: 'deactivate' as const, participantId }] : []),
-    ...(event.activates === participantId ? [{ kind: 'activate' as const, participantId }] : []),
+    ...(event.deactivates === participantId ? [{ kind: 'deactivate' as const, participantId, styleBuilder }] : []),
+    ...(event.activates === participantId ? [{ kind: 'activate' as const, participantId, styleBuilder }] : []),
   ];
 
   let level = activationLevel(ctx.activationStart, participantId);

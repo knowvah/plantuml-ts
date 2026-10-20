@@ -25,7 +25,8 @@
  * @see ~/git/plantuml/.../sequencediagram/SequenceDiagramFactory.java:100-153
  */
 
-import type { DelayEvent, DividerEvent, SpaceEvent } from './ast.js';
+import type { DelayEvent, DividerEvent, FrameEvent, SpaceEvent } from './ast.js';
+import { currentStyleBuilder } from './sequence-skin-param.js';
 import {
   emit,
   ensureParticipant,
@@ -90,6 +91,7 @@ export const dividerCommand: Command = {
       // the divider the sole exception would be a worse divergence than the
       // shared gap. Engine-wide, filed with the other sequence text gaps.
       text: match[1]!.replace(/\\n/g, '\n'),
+      styleBuilder: currentStyleBuilder(state.style), // `SequenceDiagram.java:270`
     };
     // `SequenceDiagram#divider` (`:270-276`): a divider closes off the
     // message before it for a bare life event that follows.
@@ -124,7 +126,7 @@ export const dividerCommand: Command = {
 export const delayWithTextCommand: Command = {
   pattern: /^(?:\.{3}|…)(.*)(?:\.{3}|…)$/,
   execute(state, match) {
-    const ev: DelayEvent = { kind: 'delay', text: match[1]! };
+    const ev: DelayEvent = { kind: 'delay', text: match[1]!, styleBuilder: currentStyleBuilder(state.style) };
     state.life.lastDelay = true; // `SequenceDiagram#delay` (`:288-292`)
     emit(state, ev);
   },
@@ -141,7 +143,7 @@ export const delayWithTextCommand: Command = {
 export const bareDelayCommand: Command = {
   pattern: /^(?:\.{3}|…)$/,
   execute(state) {
-    const ev: DelayEvent = { kind: 'delay' };
+    const ev: DelayEvent = { kind: 'delay', styleBuilder: currentStyleBuilder(state.style) }; // `:289`
     state.life.lastDelay = true; // `SequenceDiagram#delay` (`:288-292`)
     emit(state, ev);
   },
@@ -217,13 +219,29 @@ function ensureRefParticipants(state: ParseState, raw: string): string[] {
   return participants;
 }
 
+/** A `Reference` (`Reference.java:104-106`) with the builder current now. */
+function refFrame(state: ParseState, label: string, participants: string[]): FrameEvent {
+  const styleBuilder = currentStyleBuilder(state.style);
+  const branchStyleBuilders = [styleBuilder];
+  return {
+    kind: 'frame',
+    frameType: 'ref',
+    label,
+    branches: [[]],
+    branchLabels: [label],
+    participants,
+    styleBuilder,
+    branchStyleBuilders,
+  };
+}
+
 export const refOverCommand: Command = {
   pattern: /^ref(#\w+)?\s+over\s+([^:[\]]+?)(?:\s*\[\[.*?\]\])?\s*:\s*(.*)$/i,
   execute(state, match) {
     const participants = ensureRefParticipants(state, match[2]!);
     setLastEventWithNoteSpan(state, participants);
     const label = match[3]!.trim();
-    emit(state, { kind: 'frame', frameType: 'ref', label, branches: [[]], branchLabels: [label], participants });
+    emit(state, refFrame(state, label, participants)); // `CommandReferenceOverSeveral.java:140-141`
   },
 };
 
@@ -249,6 +267,8 @@ export const refOverMultilineCommand: Command = {
   execute(state, match) {
     const participants = ensureRefParticipants(state, match[2]!);
     setLastEventWithNoteSpan(state, participants);
-    state.pendingRef = { kind: 'frame', frameType: 'ref', label: '', branches: [[]], branchLabels: [''], participants };
+    // Captured at the opener: upstream executes the whole block as one
+    // command (`CommandReferenceMultilinesOverSeveral.java:152-153`).
+    state.pendingRef = refFrame(state, '', participants);
   },
 };

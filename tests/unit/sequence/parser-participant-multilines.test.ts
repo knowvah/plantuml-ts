@@ -13,9 +13,10 @@
 import { describe, it, expect } from 'vitest';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import type { SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 function parse(lines: string[]): SequenceDiagramAST {
-  const result = parseSequence(lines);
+  const result = parseSequence(sequenceSource(lines));
   if ('refused' in result) {
     throw new Error(`parseSequence refused (${result.kind}) at line ${String(result.line)}: ${result.message}`);
   }
@@ -45,7 +46,7 @@ describe('participant [ ... ] blocks reach the multiline matcher', () => {
   });
 
   it('does not consume an UNCLOSED block — the matcher declines and dispatch refuses', () => {
-    const result = parseSequence(['participant Bob [', '=Title']);
+    const result = parseSequence(sequenceSource(['participant Bob [', '=Title']));
 
     expect('refused' in result).toBe(true);
   });

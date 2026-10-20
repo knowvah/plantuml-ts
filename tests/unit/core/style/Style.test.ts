@@ -113,6 +113,65 @@ describe('Style — mergeWith', () => {
   });
 });
 
+describe('Style — mergeNestedChildOver (Style.java:137-173)', () => {
+  const OVERWRITE = MergeStrategy.OVERWRITE_EXISTING_VALUE;
+  const NESTED_SIG = StyleSignatureBasic.of('root', 'element', 'group', 'header');
+
+  it('undefined nested returns this', () => {
+    const s = style({ FontSize: ['14', 5] });
+    expect(s.mergeNestedChildOver(undefined, undefined, OVERWRITE)).toBe(s);
+  });
+
+  it('a nested value equal to the parent value is dropped, so this survives', () => {
+    const own = style({ FontSize: ['13', 1], LineThickness: ['2', 1] });
+    const parent = style({ FontSize: ['11', 1], LineThickness: ['1.5', 1] });
+    const nested = style({ FontSize: ['11', 9], LineThickness: ['1.5', 9] }, NESTED_SIG);
+    const m = own.mergeNestedChildOver(nested, parent, OVERWRITE);
+    expect(m).toBe(own);
+    expect(m.value('FontSize').asString()).toBe('13');
+  });
+
+  it('a nested value differing from the parent, or absent from it, is merged on top', () => {
+    const own = style({ FontSize: ['13', 1], LineThickness: ['2', 1] });
+    const parent = style({ FontSize: ['11', 1], LineThickness: ['1.5', 1] });
+    const nested = style({ FontSize: ['20', 9], LineThickness: ['1.5', 9], FontColor: ['red', 9] }, NESTED_SIG);
+    const m = own.mergeNestedChildOver(nested, parent, OVERWRITE);
+    expect(m.value('FontSize').asString()).toBe('20');
+    expect(m.value('FontColor').asString()).toBe('red');
+    expect(m.value('LineThickness').asString()).toBe('2');
+  });
+
+  it('undefined nestedParent keeps every nested value', () => {
+    const own = style({ FontSize: ['13', 1] });
+    const nested = style({ FontSize: ['11', 9], FontColor: ['red', 9] }, NESTED_SIG);
+    const m = own.mergeNestedChildOver(nested, undefined, OVERWRITE);
+    expect(m.value('FontSize').asString()).toBe('11');
+    expect(m.value('FontColor').asString()).toBe('red');
+  });
+
+  it('every nested value filtered out returns this', () => {
+    const own = style({ FontSize: ['13', 1] });
+    const parent = style({ FontSize: ['11', 1] });
+    const nested = style({ FontSize: ['11', 1] }, NESTED_SIG);
+    expect(own.mergeNestedChildOver(nested, parent, OVERWRITE)).toBe(own);
+    expect(own.mergeNestedChildOver(style({}, NESTED_SIG), parent, OVERWRITE)).toBe(own);
+  });
+
+  it('the result signature is this.signature.mergeWith(nested.signature)', () => {
+    const own = style({ FontSize: ['13', 1] });
+    const nested = style({ FontSize: ['20', 9] }, NESTED_SIG);
+    const m = own.mergeNestedChildOver(nested, undefined, OVERWRITE);
+    expect(m.getSignature().toString()).toBe(SIG.mergeWith(NESTED_SIG).toString());
+  });
+
+  it('the strategy is passed to mergeWith', () => {
+    const own = style({ FontSize: ['13', 1001] });
+    const nested = style({ FontSize: ['20', 5000] }, NESTED_SIG);
+    const keep = own.mergeNestedChildOver(nested, undefined, MergeStrategy.KEEP_EXISTING_VALUE_OF_STEREOTYPE);
+    expect(keep.value('FontSize').asString()).toBe('13');
+  });
+});
+
 describe('Style — deltaPriority', () => {
   it('adds the delta to every value of a starred style', () => {
     const s = style({ FontColor: ['red', 326] }, SIG.addStar()).deltaPriority(1411065408);

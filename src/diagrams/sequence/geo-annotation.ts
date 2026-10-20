@@ -13,9 +13,16 @@
  * Re-exported by `geo.ts`, which is re-exported by `ast.ts`.
  */
 
+import type { SequencePaint } from './sequence-skin-param.js';
 import type { TextRun } from './text-block-geo.js';
 
 export interface NoteGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   kind: 'note';
   x: number;
   y: number;
@@ -38,6 +45,12 @@ export interface NoteGeo {
 }
 
 export interface DividerGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   kind: 'divider';
   text: string;
   /** `text` split on `\n` (`Display.getWithNewlines`). The empty `====` form
@@ -87,6 +100,12 @@ export interface SpaceGeo {
  * `GroupingTile#addNewpageTiles` (`:326-336`).
  */
 export interface NewpageGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   kind: 'newpage';
   /** The tile's TOP — `getYGauge().getMin()`, the value `yNewPages`
    *  collects. The separator itself is drawn `MARGINY` (10) below it. */
@@ -110,6 +129,12 @@ export interface NewpageGeo {
  * Spans from y=0 to totalHeight, covering all participant columns in the group.
  */
 export interface BoxGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   x: number;
   y: number;
   width: number;
@@ -135,6 +160,12 @@ export interface BoxGeo {
  * `sequence-delay.ts`.
  */
 export interface DelayGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   kind: 'delay';
   /** The tile's gauge min (`DelayTile.java:105`). */
   y: number;
@@ -160,6 +191,12 @@ export interface DelayGeo {
  * before the driver drops the shapes), so the group is emitted empty.
  */
 export interface LifelineSegment {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   y1: number;
   y2: number;
   delay: boolean;

@@ -26,6 +26,7 @@ import { sequenceCreoleFont, sequenceCreoleRuns } from '../../../src/diagrams/se
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import type { SequenceDiagramAST, TextRun } from '../../../src/diagrams/sequence/ast.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 const measurer = new DeterministicMeasurer();
 const PARTICIPANT_FONT: FontSpec = { family: 'sans-serif', size: 14 };
@@ -59,7 +60,7 @@ const SPRITE_PUML = [
 const SPRITE_BOX = (24 * 14) / 13;
 
 function astOf(body: readonly string[]): SequenceDiagramAST {
-  const ast = parseSequence(body);
+  const ast = parseSequence(sequenceSource(body));
   if (!('participants' in ast)) throw new Error('refused');
   return ast;
 }

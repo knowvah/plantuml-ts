@@ -32,6 +32,7 @@ import { renderSync } from '../../../src/index.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import { activityPlugin } from '../../../src/diagrams/activity/index.js';
 import { sequencePlugin } from '../../../src/diagrams/sequence/index.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 function textRuns(svg: string): string[] {
   return [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map((m) => (m[1] as string).trim()).filter((t) => t !== '');
@@ -91,7 +92,7 @@ describe('alt/else branch conditions survive to the SVG', () => {
     // tolerate feeding it the raw `@startuml`/`@enduml` lines by silently
     // dropping them; strict refusal does not, so strip them here to match
     // the real contract rather than weaken the refusal.
-    const ast = parseSequence(GROUPED.alt.split('\n').slice(1, -1));
+    const ast = parseSequence(sequenceSource(GROUPED.alt.split('\n').slice(1, -1)));
     if ('refused' in ast) throw new Error(`sequence refused at line ${String(ast.line)}: ${ast.message}`);
     const frame = ast.events.find((e) => e.kind === 'frame');
     expect(frame).toBeDefined();

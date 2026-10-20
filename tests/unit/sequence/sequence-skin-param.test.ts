@@ -332,9 +332,45 @@ describe('use-time overrides', () => {
     expect(paintOf(dollStyle(STYLED, Stereotype.build('<<hot>>')), SET).stroke).toBe('#FF0000');
   });
 
-  it('a group or reference header needs Style#mergeNestedChildOver, which Style.ts lacks (Style.java:158-173)', () => {
-    expect(() => groupingStyle(DEFAULT, 'START', true)).toThrow(/unported: Style#mergeNestedChildOver/);
-    expect(() => referenceStyle(DEFAULT, true)).toThrow(/unported: Style#mergeNestedChildOver/);
+  it('the default group header resolves groupHeader (plantuml.skin:123-129) through mergeNestedChildOver', () => {
+    const header = groupingStyle(DEFAULT, 'START', true);
+    expect(header.value('FontSize').asString()).toBe('13'); // :127
+    expect(header.value('LineThickness').asString()).toBe('1.5'); // :124
+    expect(paintOf(header, SET).fill).toBe('#EEEEEE'); // :125 BackGroundColor #e
+  });
+
+  it('the default reference header resolves referenceHeader (plantuml.skin:163-170)', () => {
+    const header = referenceStyle(DEFAULT, true);
+    expect(header.value('FontSize').asString()).toBe('13'); // :167
+    expect(header.value('LineThickness').asString()).toBe('2.0'); // :169
+    expect(header.value('FontColor').asString()).toBe('black'); // :166
+  });
+
+  it('a nested group { header } overrides the group header font size (Grouping.java:83-96)', () => {
+    const builder = builderOf(
+      ['<style>', 'sequenceDiagram {', 'group {', 'header {', 'FontSize 20', '}', '}', '}', '</style>'].join('\n'),
+    );
+    expect(groupingStyle(builder, 'START', true).value('FontSize').asString()).toBe('20');
+    expect(groupingStyle(builder, 'START', false).value('FontSize').asString()).toBe('11'); // :114
+  });
+
+  it('a nested reference { header } overrides the reference header font size (Reference.java:85-97)', () => {
+    const builder = builderOf(
+      ['<style>', 'sequenceDiagram {', 'reference {', 'header {', 'FontSize 20', '}', '}', '}', '</style>'].join('\n'),
+    );
+    expect(referenceStyle(builder, true).value('FontSize').asString()).toBe('20');
+  });
+
+  it('a property set only on plain group { } does not overwrite the groupHeader value (Style.java:137-157)', () => {
+    const builder = builderOf(
+      ['<style>', 'sequenceDiagram {', 'group {', 'FontSize 20', '}', '}', '</style>'].join('\n'),
+    );
+    expect(groupingStyle(builder, 'START', false).value('FontSize').asString()).toBe('20');
+    expect(groupingStyle(builder, 'START', true).value('FontSize').asString()).toBe('13');
+  });
+
+  it('a header back colour overrides BackGroundColor after the nested merge (Grouping.java:98-102)', () => {
+    expect(paintOf(groupingStyle(DEFAULT, 'START', true, RED), SET).fill).toBe('#FF0000');
   });
 });
 

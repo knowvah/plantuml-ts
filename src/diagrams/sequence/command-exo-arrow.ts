@@ -43,7 +43,9 @@
  */
 
 import { activate, addMessage, exoLifeEvents } from './sequence-life-state.js';
-import type { ActivationEvent, MessageExoEvent, MessageExoType } from './ast.js';
+import type { MessageExoEvent, MessageExoType } from './ast.js';
+import { activationEventOf, autoActivationEventOf } from './command-exo-arrow-activation.js';
+import { currentStyleBuilder } from './sequence-skin-param.js';
 import type { ArrowConfiguration, ArrowPart } from './sequence-arrowhead.js';
 import { getRegexp, transform } from '../../core/url/UrlBuilder.js';
 import { eventuallyRemoveStartingAndEndingDoubleQuote } from '../../core/url/Url.js';
@@ -59,7 +61,6 @@ import {
 import {
   applyAutonumber,
   arrowConfigurationOf,
-  autoActivationFlags,
   emit,
   ensureParticipant,
   type ArrowSpec,
@@ -290,51 +291,6 @@ function exoArrowSpec(g: Groups, type: MessageExoType, facts: ExoDressingFacts):
 }
 
 /**
- * `diagram.activate(p, …)` for the trailing `+`/`-`/`!`, run AFTER the
- * message is added (`:152-166`). `CREATE` (`*`) is NOT here — it fires before
- * `addMessage` and is emitted by the caller. `DESTROY` collapses onto
- * deactivate for the same reason `activationFlags` does: `ActivationEvent`
- * has no CREATE/DESTROY variant.
- * @see ~/git/plantuml/.../command/CommandExoArrowAny.java:148-166
- */
-function activationEventOf(
-  spec: string | undefined,
-  participantId: string,
-  color: string | undefined,
-): ActivationEvent | undefined {
-  switch (spec?.charAt(0)) {
-    case '+':
-      return { kind: 'activate', participantId, ...(color !== undefined ? { color } : {}) };
-    case '-':
-    case '!':
-      return { kind: 'deactivate', participantId };
-    default:
-      return undefined;
-  }
-}
-
-/**
- * The `autoactivate` arm of the same `if`/`else`
- * (`CommandExoArrowAny.java:174-180`): with no explicit `+`/`-`/`!` written,
- * a solid `NORMAL`/`ASYNC`-headed arrow activates the exo message's ONE
- * participant and a dotted one deactivates it. Both arms name `p` — an exo
- * message has no second participant to hand the event to, which is the only
- * way this differs from `autoActivationFlags`'s p1/p2 split.
- */
-function autoActivationEventOf(
-  state: ParseState,
-  spec: string | undefined,
-  arrow: ArrowConfiguration,
-  participant: string,
-  color: string | undefined,
-): ActivationEvent | undefined {
-  const flags = autoActivationFlags(state, spec ?? '', arrow, participant, participant);
-  if (flags.deactivates !== undefined) return { kind: 'deactivate', participantId: participant };
-  if (flags.activates === undefined) return undefined;
-  return { kind: 'activate', participantId: participant, ...(color !== undefined ? { color } : {}) };
-}
-
-/**
  * `diagram.getNextMessageNumber()` (`:137`): take the current autonumber and
  * advance the counter. `applyAutonumber` is declared over `MessageEvent`, and
  * `sequence-parse-helpers.ts` is outside this task's write-set, so the number
@@ -353,6 +309,7 @@ function getNextMessageNumber(
     to: participant,
     label: '',
     arrow,
+    styleBuilder: currentStyleBuilder(state.style),
   });
   return {
     ...(probe.sequenceNumber !== undefined ? { sequenceNumber: probe.sequenceNumber } : {}),
@@ -427,6 +384,7 @@ function messageExoOf(state: ParseState, g: Groups, type: MessageExoType, partic
     shortArrow: g['ARROW_SUPPCIRCLE2']?.includes('?') === true,
     label: g['LABEL'] ?? '',
     arrow,
+    styleBuilder: currentStyleBuilder(state.style), // `CommandExoArrowAny.java:136`
     ...getNextMessageNumber(state, participant, arrow),
     ...exoOptionalFields(g),
   };
@@ -452,7 +410,7 @@ function executeExoArrow(state: ParseState, match: RegExpExecArray, getMessageEx
   const participant = getOrCreateParticipant(state, g);
   const activation = g['ACTIVATION'];
   if (activation?.startsWith('*') === true) {
-    emit(state, { kind: 'activate', participantId: participant });
+    emit(state, { kind: 'activate', participantId: participant, styleBuilder: currentStyleBuilder(state.style) });
     activate(state.life, participant, 'CREATE'); // `CommandExoArrowAny.java:105-106`
   }
 
@@ -467,7 +425,7 @@ function executeExoArrow(state: ParseState, match: RegExpExecArray, getMessageEx
   exoLifeEvents(state.life, activation, autoFires && msg.arrow.dashed, autoFires, participant);
 
   const post =
-    activationEventOf(activation, participant, g['LIFECOLOR']) ??
+    activationEventOf(activation, participant, g['LIFECOLOR'], currentStyleBuilder(state.style)) ??
     autoActivationEventOf(state, activation, msg.arrow, participant, g['LIFECOLOR']);
   if (post !== undefined) emit(state, post);
 }

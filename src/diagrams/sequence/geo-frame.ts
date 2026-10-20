@@ -8,9 +8,19 @@
  * Re-exported by `geo.ts`, which is re-exported by `ast.ts`.
  */
 
+import type { SequencePaint } from './sequence-skin-param.js';
 import type { TextRun } from './text-block-geo.js';
 
 export interface FrameGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
+  /** The group/ref HEADER's paint (`Grouping`/`Reference` merge the nested
+   *  `header` style over the element style). Optional, not scaled. */
+  readonly headerPaint?: SequencePaint;
   kind: 'frame';
   frameType: string;
   label: string;

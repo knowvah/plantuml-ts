@@ -17,13 +17,14 @@
  * `ParticipantType.java:54-82` mapping is the identity), a note as its
  * keyword (`NoteStyle.getNoteStyle`, NoteStyle.java:46-54, maps it).
  *
- * Not ported here: `Style#mergeNestedChildOver` (Style.java:158-173), which
- * a group/reference HEADER needs (Grouping.java:83-96, Reference.java:85-97).
- * `Style.ts` lacks it and D4 forbids editing `src/core/style/**`, so
- * {@link groupingStyle}/{@link referenceStyle} throw for those headers.
+ * A group/reference HEADER layers the nested `group { header }` /
+ * `reference { header }` over the flat `groupHeader`/`referenceHeader` with
+ * `Style#mergeNestedChildOver` (Style.java:158-173; Grouping.java:83-96,
+ * Reference.java:85-97).
  */
 import type { Colors } from '../../core/abel/Colors.js';
 import type { UmlSource } from '../../core/block-extractor.js';
+import type { SkinparamAssignment } from '../../core/preprocessor.js';
 import { ColorMapper, toSvgPaint } from '../../core/klimt/color/ColorMapper.js';
 import { HColorGradient } from '../../core/klimt/color/HColorGradient.js';
 import { HColorSimple } from '../../core/klimt/color/HColorSimple.js';
@@ -38,7 +39,6 @@ import {
   createMindmapSkinParam,
   executeDeclaration,
   positionedDeclarationsOf,
-  type PositionedDeclaration,
   type SkinParam as StyleSkinParam,
 } from '../../core/style/mindmap-style-builder.js';
 import { MergeStrategy } from '../../core/style/MergeStrategy.js';
@@ -55,11 +55,23 @@ import type { Url } from '../../core/url/Url.js';
 // Dispatch (WBSDiagramFactory.ts#createStyleDispatch, D2)
 // ---------------------------------------------------------------------------
 
+const EMPTY_SKINPARAM: ReadonlyMap<string, string> = new Map<string, string>();
+
 /** A hand-built source's style sources: no skin, no skinparam, no style. */
 const EMPTY_STYLE_SOURCE: NonNullable<UmlSource['styleSource']> = {
   skinparam: new Map<string, string>(),
   styles: [],
 };
+
+/**
+ * One declaration placed in the document. A skinparam carries its OWN value:
+ * a key assigned twice executes twice, each with its value
+ * (`SkinParam#setParam`, SkinParam.java:227-252, as `CommandSkinParam.java:101`
+ * calls it).
+ */
+export type SequenceDeclaration =
+  | { readonly position: number; readonly key: string; readonly value: string }
+  | { readonly position: number; readonly style: string };
 
 /**
  * The `skinparam`/`<style>` commands the preprocessor pulled out of the
@@ -68,18 +80,58 @@ const EMPTY_STYLE_SOURCE: NonNullable<UmlSource['styleSource']> = {
  */
 export interface SequenceStyleDispatch {
   readonly style: StyleSkinParam;
-  readonly skinparam: ReadonlyMap<string, string>;
   /** Source order; the head is the next to execute. */
-  readonly pending: PositionedDeclaration[];
+  readonly pending: SequenceDeclaration[];
+}
+
+/**
+ * Every declaration at its own document line (T1e): `<style>` blocks at
+ * `stylePositions`, each skinparam assignment at `skinparamAssignments`
+ * (a `skinparam NAME {` block at its opening line, `CommandSkinParamMultilines
+ * .java:90-102`), ordered by line and then by the declaration counter. A
+ * declaration the reader never located sits where the one before it does.
+ */
+function positionedSequenceDeclarations(
+  styleSource: NonNullable<UmlSource['styleSource']>,
+  stylePositions: readonly (number | undefined)[],
+  assignments: readonly SkinparamAssignment[],
+): SequenceDeclaration[] {
+  const order = styleSource.declarationOrder;
+  const located = [
+    ...assignments.map((a) => ({
+      at: a.order,
+      position: a.position,
+      declaration: { key: a.key, value: a.value },
+    })),
+    ...styleSource.styles.map((style, i) => ({
+      at: order?.styles[i] ?? Number.MAX_SAFE_INTEGER,
+      position: stylePositions[i],
+      declaration: { style },
+    })),
+  ].sort((a, b) => a.at - b.at);
+  let position = -1;
+  return located
+    .map((entry) => {
+      position = entry.position ?? position;
+      return { position, ...entry.declaration };
+    })
+    .sort((a, b) => a.position - b.position);
 }
 
 /** The diagram's style `SkinParam` before any declaration has executed. */
 export function createSequenceStyleDispatch(source: UmlSource): SequenceStyleDispatch {
   const styleSource = source.styleSource ?? EMPTY_STYLE_SOURCE;
+  const style = createMindmapSkinParam(styleSource);
+  if (source.skinparamAssignments === undefined)
+    return {
+      style,
+      pending: positionedDeclarationsOf(styleSource, source.stylePositions ?? []).map((d) =>
+        'style' in d ? d : { position: d.position, key: d.key, value: styleSource.skinparam.get(d.key)! },
+      ),
+    };
   return {
-    style: createMindmapSkinParam(styleSource),
-    skinparam: styleSource.skinparam,
-    pending: positionedDeclarationsOf(styleSource, source.stylePositions ?? []),
+    style,
+    pending: positionedSequenceDeclarations(styleSource, source.stylePositions ?? [], source.skinparamAssignments),
   };
 }
 
@@ -93,7 +145,11 @@ export function executeDeclarationsBefore(dispatch: SequenceStyleDispatch, posit
   while (dispatch.pending.length > 0 && dispatch.pending[0]!.position < position) {
     const declaration = dispatch.pending.shift()!;
     try {
-      executeDeclaration(dispatch.style, declaration, dispatch.skinparam);
+      executeDeclaration(
+        dispatch.style,
+        declaration,
+        'style' in declaration ? EMPTY_SKINPARAM : new Map([[declaration.key, declaration.value]]),
+      );
     } catch (e) {
       if (!(e instanceof StyleParsingException)) throw e;
       return refuse('execution', 0, 0, `Error in style definition: ${e.message}`);
@@ -292,38 +348,69 @@ export function noteStyle(
   return mergedStyle(signature, builder).eventuallyOverride(colors);
 }
 
+/** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/Grouping.java:79-81 */
+function groupingNestedHeaderStyleSignature(): StyleSignatureBasic {
+  return sequenceSignature('group', 'header');
+}
+
+/** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/Reference.java:82-84 */
+function referenceNestedHeaderStyleSignature(): StyleSignatureBasic {
+  return sequenceSignature('reference', 'header');
+}
+
 /**
- * The PORT stops here: `Style#mergeNestedChildOver` (Style.java:158-173) is
- * not in `Style.ts`, and sdd1 D4 makes adding it a stop (stop 8).
+ * The flat header style with the nested one layered over it
+ * (`flat.mergeNestedChildOver(nested, style, OVERWRITE_EXISTING_VALUE)`).
+ * Java's `if (flat == null) return nested;` is dropped: {@link mergedStyle}
+ * never returns undefined (it throws where Java would later dereference).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/Grouping.java:83-96
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/Reference.java:85-97
  */
-function mergeNestedChildOver(): never {
-  throw new Error('unported: Style#mergeNestedChildOver (Style.java:158-173) is not in Style.ts (sdd1 D4, stop 8)');
+function nestedHeaderStyle(
+  flatSignature: StyleSignature,
+  nestedSignature: StyleSignatureBasic,
+  parent: Style,
+  builder: StyleBuilder,
+): Style {
+  const flat = mergedStyle(flatSignature, builder);
+  const nested = nestedSignature.getMergedStyle(builder);
+  return flat.mergeNestedChildOver(nested, parent, MergeStrategy.OVERWRITE_EXISTING_VALUE);
 }
 
 /**
  * The body (`header` false) or header style of a grouping, its
  * `BackGroundColor` replaced by `backColor` — the general back colour for
- * the body (`GroupingStart.java:63-68`), the element one for the header.
- * A group header merges `groupHeader` with the nested `group { header }`,
- * which needs the unported {@link mergeNestedChildOver}.
+ * the body (`GroupingStart.java:63-68`), the element one for the header
+ * (`Grouping.getUsedStyles`, Grouping.java:98-102, applies
+ * `backColorElement` to the header style, `backColorGeneral` to the body).
+ * A group header merges `groupHeader` with the nested `group { header }`.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/Grouping.java:83-112
  */
 export function groupingStyle(builder: StyleBuilder, type: GroupingType, header: boolean, backColor?: HColor): Style {
   if (!header)
     return mergedStyle(groupingStyleSignature(type), builder).eventuallyOverride('BackGroundColor', backColor);
-  if (type !== 'START_PARTITION') return mergeNestedChildOver();
-  return mergedStyle(groupingHeaderStyleSignature(type), builder).eventuallyOverride('BackGroundColor', backColor);
+  if (type === 'START_PARTITION')
+    return mergedStyle(groupingHeaderStyleSignature(type), builder).eventuallyOverride('BackGroundColor', backColor);
+  const parent = mergedStyle(groupingStyleSignature(type), builder);
+  return nestedHeaderStyle(
+    groupingHeaderStyleSignature(type),
+    groupingNestedHeaderStyleSignature(),
+    parent,
+    builder,
+  ).eventuallyOverride('BackGroundColor', backColor);
 }
 
 /**
  * The body (`header` false) or header style of a `ref over` frame; the
- * header's `BackGroundColor` replaced by `backColorElement`. The header
- * needs the unported {@link mergeNestedChildOver}.
+ * header merges `referenceHeader` with the nested `reference { header }`.
+ * The header's `backColorElement` override (Reference.java:99-101) is the
+ * caller's, as no sequence command carries it yet.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/Reference.java:66-112
  */
 export function referenceStyle(builder: StyleBuilder, header: boolean): Style {
-  if (header) return mergeNestedChildOver();
-  return mergedStyle(referenceStyleSignature(), builder);
+  const style = mergedStyle(referenceStyleSignature(), builder);
+  if (!header) return style;
+  return nestedHeaderStyle(referenceHeaderStyleSignature(), referenceNestedHeaderStyleSignature(), style, builder);
 }
 
 /**

@@ -27,6 +27,7 @@ import type {
   ArrowHeadKind,
   ArrowPart,
 } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -302,7 +303,7 @@ const LEGACY_TOKEN_ORACLE: readonly {
 
 describe('parsed arrow tokens carry the legacy ArrowConfiguration', () => {
   it.each(LEGACY_TOKEN_ORACLE)('$src', ({ src, from, to, style, decorations }) => {
-    const result = parseSequence([`${src} : hi`]);
+    const result = parseSequence(sequenceSource([`${src} : hi`]));
     if ('refused' in result) throw new Error(`refused: ${result.message}`);
     const msg = result.events.find((e) => e.kind === 'message');
     expect(msg).toBeDefined();
@@ -323,7 +324,7 @@ describe('parsed arrow tokens carry the legacy ArrowConfiguration', () => {
     'Alice ->\\\\ Bob',
     'Alice ->/ Bob',
   ])('still refuses %s', (src) => {
-    const result = parseSequence([`${src} : hi`]);
+    const result = parseSequence(sequenceSource([`${src} : hi`]));
     expect('refused' in result).toBe(true);
   });
 });

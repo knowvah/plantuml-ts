@@ -10,6 +10,7 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import type { SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 const SOURCE = '@startuml\ndatabase DB\nDB -> DB : x\n@enduml';
 
@@ -21,7 +22,7 @@ describe('sequence render measurer seam', () => {
   it('throws when a caller omits the measurer', () => {
     const measurer = new DeterministicMeasurer();
     const geo: SequenceGeometry = layoutSequence(
-      parseSequence(['database DB', 'DB -> DB : x']) as never,
+      parseSequence(sequenceSource(['database DB', 'DB -> DB : x'])) as never,
       defaultTheme,
       measurer,
     );

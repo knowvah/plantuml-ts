@@ -16,8 +16,30 @@ Before sdd1 the sequence engine resolved style from constants and
   `paintOf(style, colorSet): SequencePaint`.
 - Every `Participant`, `SequenceEvent` and `BoxGroup` carries the
   `styleBuilder` captured at its command line (T1b).
-- Every geo node has `readonly paint?: SequencePaint`, and `scale-geo.ts`
-  already scales it (T1c). **Do not edit `scale-geo.ts` or any `geo*.ts`.**
+- Every geo node has `readonly paint?: SequencePaint` (T1c; `FrameGeo` also
+  has `headerPaint`). **Do not edit `scale-geo.ts` or any `geo*.ts`.**
+- `paint` is NOT scaled in `scale-geo.ts` (journal row 19): the jar scales
+  every number at emission (`SvgGraphics.java:466-468` `format`, `:555-561`
+  `setStrokeWidth` for widths and dashes). The port's renderers already
+  multiply by `theme.scaleK` at emission, so YOU multiply `paint.thickness`,
+  the dash lengths and every other length you emit from `paint` by
+  `theme.scaleK` in the renderer.
+- `paintOf(style, colorSet)` returns LAZY getters: read only the fields your
+  component reads (a lifeline's dark-only `BackGroundColor` throws on read).
+  `paint.stroke`/`paint.fill` are `Paint` (a gradient survives).
+
+Real export names differ from earlier drafts (journal rows 10, 18):
+`messageStyle(b, stereotype?, arrowColor?)` (no url; `AbstractMessage.java:
+66-77`); `participantStyle(b, kind, stereotype?, url?, colors?) → {style,
+stereo}`; `groupingStyle(b, type, header, backColor?)` with `GroupingType =
+'START'|'START_PARTITION'|'ELSE'|'END'`; `referenceStyle(b, header)` (the
+header's `BackGroundColor` override from `Reference.java:99-101` is the
+caller's); `dollStyle(b, stereotype?, boxColor?)` is the box (englober)
+style. `BoxGroup.styleBuilder` is the builder at the END of the parse
+(`Doll.java:81-83`). `SpaceEvent` has no builder (`HSpace.java:42`). A
+frame's `else` branches carry `FrameEvent.branchStyleBuilders`, aligned with
+`branchLabels` (`ElseTile.java:98`). A `skinparam` takes effect from its
+own line onward (T1e).
 
 ## What a family task does
 1. Read the `ComponentRose*` class(es) for the family and the event class
@@ -50,7 +72,10 @@ Before sdd1 the sequence engine resolved style from constants and
 ## Boundaries (all families)
 - Write only your write-set. A needed file outside it is stop 1: report,
   do not edit.
-- No edit under `src/core/style/**`, `src/core/klimt/**` (stop 8).
+- No edit under `src/core/style/**`, `src/core/klimt/**` (stop 8). If you
+  need an upstream `core/style` member the port lacks, STOP and report it
+  (class, method, `Java file:line`): the orchestrator ports it under D4
+  Amendment 2 and resumes you.
 - No Serena edit tools (they write the MAIN checkout); no `git stash`.
 - No baseline or golden writes — the orchestrator re-pins and pins at close.
 - Quality bar: targeted vitest (`tests/unit/sequence/**` for your files +

@@ -25,6 +25,7 @@ import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../src/index.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/unwind2-S4');
 const RE_SHAPE = /<(rect|line|ellipse|polygon) ([^>]*)\/>/g;
@@ -82,7 +83,7 @@ function ourRefusal(name: string): string | undefined {
   const lines = source(name)
     .split('\n')
     .filter((l) => !l.startsWith('@'));
-  const result = parseSequence(lines);
+  const result = parseSequence(sequenceSource(lines));
   return 'refused' in result ? result.message : undefined;
 }
 

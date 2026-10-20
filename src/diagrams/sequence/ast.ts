@@ -16,6 +16,7 @@ import type { ParticipantUrl } from './sequence-parse-helpers.js';
 export type { ParticipantUrl };
 import type { ScaleSpec } from '../../core/scale-command.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
+import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 
 // ---------------------------------------------------------------------------
 // AST Types
@@ -46,6 +47,10 @@ export interface Participant {
    * {@link AbstractMessageEvent.url}, which the jar parses and never draws.
    */
   url?: ParticipantUrl;
+  /** The builder current at the participant's creation, explicit or implicit
+   *  (`SequenceDiagram.java:129-130,171-172`); merged at use time
+   *  (`Participant.java:82-91`). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
 /**
@@ -99,6 +104,10 @@ export interface AbstractMessageEvent {
   /** `AbstractMessage#isCreate` (`:169-171`): this message took the pending
    *  `CREATE` life event (`SequenceDiagram.java:207-214`). */
   create?: true;
+  /** The builder current at the arrow's command (`CommandArrow.java:401`,
+   *  `CommandExoArrowAny.java:136`, `CommandReturn.java:129-132`), merged in
+   *  the constructor (`AbstractMessage.java:66-77`). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
 export interface MessageEvent extends AbstractMessageEvent {
@@ -168,6 +177,13 @@ export interface NoteEvent {
    *  `STEREO` group, `note.setStereotype(...)` at
    *  `FactorySequenceNoteCommand.java:234-241`. */
   stereotype?: string;
+  /** The builder current at the note's OPENING line — a multi-line note
+   *  executes there (`FactorySequenceNoteCommand.java:233`,
+   *  `FactorySequenceNoteOverSeveralCommand.java:238`,
+   *  `FactorySequenceNoteAcrossCommand.java:216`,
+   *  `FactorySequenceNoteOnArrowCommand.java:226`); merged at use time
+   *  (`Note.java:71-79`). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
 export interface FrameEvent {
@@ -214,6 +230,18 @@ export interface FrameEvent {
    *  `CommandReferenceOverSeveral.java:67-82`): `ReferenceTile#init` spans
    *  their boxes (`teoz/ReferenceTile.java:96-115`). Absent for a group. */
   participants?: string[];
+  /** The builder current at the opener: `GroupingStart`
+   *  (`SequenceDiagram.java:427-428`) or `Reference`
+   *  (`CommandReferenceOverSeveral.java:140-141`,
+   *  `CommandReferenceMultilinesOverSeveral.java:152-153`, captured at the
+   *  multi-line opener). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
+  /** Per-branch builder, index-aligned with {@link branchLabels}: entry 0 is
+   *  {@link styleBuilder}, 1..n each `else`'s own `GroupingLeaf` builder
+   *  (`SequenceDiagram.java:431-432`), read by `ElseTile.java:98`. The `end`
+   *  leaf's builder is not kept: `GroupingTile.java:162` reads only its
+   *  type. sdd1 D2. */
+  branchStyleBuilders: StyleBuilder[];
 }
 
 export interface ActivationEvent {
@@ -231,18 +259,28 @@ export interface ActivationEvent {
    * other life event reserves 0 (`:137`). The cross itself is still not drawn.
    */
   destroy?: true;
+  /** `LifeEvent`'s builder (`SequenceDiagram.java:371-372`), read per
+   *  segment by `LifeLine.java:235-240`. sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
 export interface DividerEvent {
   kind: 'divider';
   text: string;
+  /** Merged in the constructor (`SequenceDiagram.java:270`,
+   *  `Divider.java:59-61`). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
 export interface DelayEvent {
   kind: 'delay';
   text?: string;
+  /** Merged in the constructor (`SequenceDiagram.java:289`,
+   *  `Delay.java:59-61`). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
+/** `HSpace` takes no builder (`HSpace.java:42`), so this event carries none. */
 export interface SpaceEvent {
   kind: 'space';
   pixels: number;
@@ -269,6 +307,9 @@ export interface NewpageEvent {
    *  newpage's. Absent when the command carried none, which is upstream's
    *  `Display.NULL` and draws no title at all. */
   title?: readonly string[];
+  /** `new Newpage(getCurrentStyleBuilder())` (`SequenceDiagram.java:248`,
+   *  `Newpage.java:56`). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
 export type SequenceEvent =
@@ -291,6 +332,15 @@ export interface BoxGroup {
   label: string;
   color: string;
   participantIds: string[];
+  /**
+   * The builder a `Doll` reads: `tileArguments.getSkinParam()
+   * .getCurrentStyleBuilder()` at TILE time (`Doll.java:81-83`, built by
+   * `Dolls.java:68-70`), i.e. after every command has executed — not the
+   * builder current at the `box` line (`ParticipantEnglober` holds none,
+   * `ParticipantEnglober.java:59-63`). A getter over the parse's style
+   * dispatch, read after the parse completes. sdd1 D2.
+   */
+  readonly styleBuilder: StyleBuilder;
 }
 
 export interface SequenceDiagramAST {

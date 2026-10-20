@@ -34,16 +34,13 @@
  *      `src/index.ts#applyAnnotationChrome`'s own generic (non-class)
  *      branch; an always-`undefined` field makes that branch a guaranteed
  *      no-op here too, so it is omitted rather than carried as dead code.
- *   3. NO AUGMENTED-BLOCK CONSTRUCTION FOR PARSE. `parseState`/`parseClass`/
- *      `parseForType` (json) all take a `UmlSource`-shaped `block` object
- *      that the caller widens with `rawStyles`/`stylePositions` from the
- *      preprocessor result before parsing. `parseSequence`
- *      (`src/diagrams/sequence/parser.ts:104`) takes only
- *      `readonly string[]` — confirmed by `sequencePlugin.parse` itself
- *      (`src/diagrams/sequence/index.ts:45-47`), which discards the rest of
- *      its `UmlSource` argument and passes only `source.lines` through.
- *      There is nothing for a widened block to carry into that call, so
- *      none is built; `first.source.lines` is passed directly.
+ *   3. THE PARSE TAKES THE WIDENED BLOCK (sdd1 D3). `parseSequence` takes
+ *      the block's `UmlSource`, whose `styleSource`/`stylePositions` replay
+ *      per command, so this helper widens `first.source` exactly as
+ *      production's `src/index.ts#umlSourceOfBlock` does (the same widening
+ *      `render-fixture-activity.ts` makes) — otherwise the ratchet would
+ *      measure a style-less path production does not take (memory
+ *      `conformance-harness-mirrors-index-ts`).
  *
  * `sprites` (parsed onto `SequenceDiagramAST`, `ast.ts:151`) is NOT
  * threaded through to geometry/render the way `render-fixture-class.ts`
@@ -52,7 +49,8 @@
  * inspection of `src/diagrams/sequence/renderer.ts` — no `sprite` token
  * appears in it), so there is no consumer to wire it into here.
  */
-import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
+import { buildBlockUmls, type BlockUmlOk } from '../../../src/core/BlockUmlBuilder.js';
+import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { PreprocessOptions } from '../../../src/core/preprocessor.js';
 import type { ParseOptions } from '../../../src/core/dispatcher.js';
 import { buildTheme } from '../../../src/core/build-theme.js';
@@ -70,6 +68,20 @@ import { assembleSvg } from '../../../src/index.js';
  *  `parseSequence` — D6, cdd6-T1c). Mirrors `render-fixture-class.ts`'s
  *  `FixtureClassOptions`. */
 type FixtureSequenceOptions = PreprocessOptions & ParseOptions;
+
+/** `src/index.ts#umlSourceOfBlock`'s widening of `block.source`, restricted
+ *  to the fields `parseSequence` reads (sdd1 D3). Exported so a test can
+ *  assert it hands the parser what production does. */
+export function sequenceBlockSource(block: BlockUmlOk): UmlSource {
+  const preprocessed = block.preprocessed;
+  return {
+    ...block.source,
+    rawStyles: preprocessed.styles,
+    stylePositions: preprocessed.stylePositions,
+    skinparamAssignments: preprocessed.skinparamAssignments,
+    styleSource: preprocessed,
+  };
+}
 
 /** Renders a `.puml` fixture through the SEQUENCE engine's low-level
  * pipeline with `measurer` injected at the layout stage and reused
@@ -92,7 +104,7 @@ export function renderFixtureSequence(
   // cdd4-T7b: the shipped `buildTheme`, not a copy of it -- a copy measured a
   // path no shipped code takes once theme styling moved into it.
   const { theme, styleMap } = buildTheme(preprocessed);
-  const parsed = parseSequence(first.source.lines, { assetStore: options?.assetStore });
+  const parsed = parseSequence(sequenceBlockSource(first), { assetStore: options?.assetStore });
   // T4: `parseSequence` now returns `SequenceDiagramAST | ParseRefusal`
   // (D1). This harness bypasses `src/index.ts`'s production narrowing (it
   // drives the engine directly), so a refusal surfaces the same way
