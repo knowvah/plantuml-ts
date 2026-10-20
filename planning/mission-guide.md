@@ -631,7 +631,10 @@ G-2 through G-7. Each of those is a consumer of that shared base.
 **G-1 (Sequence) is exempt** — corrected 2026-08-20. It does not consume
 `cucadiagram`/`svek` in upstream or here (see Track SI-1's own note), so SI-1
 does not gate it and it can be scheduled independently of the entity-diagram
-line. Its real prerequisite is different and is NOT yet met: **sequence has no
+line. **Update 2026-10-20:** sequence HAS jar-oracle coverage since
+2026-08-20 (`test-results/dot-cache/sequence/`, `oracle/goldens/svg-sequence/`)
+and, since sdd1, a per-event style seam and 419 pinned goldens. The text
+below records the 2026-08-20 state. Its prerequisite then was: **sequence had no
 jar-oracle coverage.** There is no `test-results/dot-cache/sequence/` and no
 `oracle/goldens/svg-sequence/`, and because sequence emits no DOT there can be
 no `svek-N.dot` parity ratchet — the gate every state/class mission has leaned
