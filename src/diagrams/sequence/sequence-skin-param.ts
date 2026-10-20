@@ -27,14 +27,16 @@ import type { UmlSource } from '../../core/block-extractor.js';
 import type { SkinparamAssignment } from '../../core/preprocessor.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 import type { Stereotype } from '../../core/stereo/Stereotype.js';
+import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import {
+  cleanForKeySlow,
   createMindmapSkinParam,
   executeDeclaration,
   positionedDeclarationsOf,
   type SkinParam as StyleSkinParam,
 } from '../../core/style/mindmap-style-builder.js';
 import { MergeStrategy } from '../../core/style/MergeStrategy.js';
-import { StyleParsingException } from '../../core/style/parser/StyleParser.js';
+import { StyleParsingException, trin } from '../../core/style/parser/StyleParser.js';
 import type { SName } from '../../core/style/SName.js';
 import type { Style } from '../../core/style/Style.js';
 import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
@@ -65,6 +67,62 @@ export type SequenceDeclaration =
   | { readonly position: number; readonly key: string; readonly value: string }
   | { readonly position: number; readonly style: string };
 
+/** A `ColorParam` the sequence engine reads through `getHtmlColor`:
+ *  `sequenceGroupBodyBackground` (`ColorParam.java:60`) at the group command
+ *  (`SequenceDiagram.java:418-419`). */
+export type SequenceColorParam = 'sequenceGroupBodyBackground';
+
+/** `HColors.WHITE` is `set.getColorOrWhite("#FFFFFF")` (HColors.java:87). */
+const WHITE_TOKEN = '#FFFFFF';
+
+/**
+ * The legacy half of upstream's `SkinParam`: the `params` map
+ * (SkinParam.java:205) `setParam` fills beside the style conversion
+ * (`:227-229`), and the reads a command makes off it at its own line.
+ * Mutable, as upstream; `getValue`'s `cacheKeyValue` (`:323-340`) is never
+ * cleared, so the FIRST read of a key fixes its answer for the rest of the
+ * diagram (jar-verified: a `sequenceGroupBodyBackgroundColor` after the first
+ * group, or a second one, reaches no later group). Precedent:
+ * `wbs-skin-param.ts:92-136`.
+ */
+export class SequenceLegacyParams {
+  /** @see SkinParam.java:205 */
+  private readonly params = new Map<string, string>();
+  /** @see SkinParam.java:323 */
+  private readonly cacheKeyValue = new Map<string, string | null>();
+
+  /** The `params` half of `setParam`. @see SkinParam.java:227-229 */
+  setParam(key: string, value: string): void {
+    for (const key2 of cleanForKeySlow(key)) this.params.set(key2, trin(value));
+  }
+
+  /** @see SkinParam.java:325-340 */
+  getValue(key: string): string | null {
+    const cached = this.cacheKeyValue.get(key);
+    if (cached !== undefined) return cached;
+    const result = cleanForKeySlow(key).find((key2) => this.params.has(key2));
+    const value = result === undefined ? null : this.params.get(result)!;
+    this.cacheKeyValue.set(key, value);
+    return value;
+  }
+
+  /**
+   * `getHtmlColor(param, null, false)` (SkinParam.java:370-396; the only
+   * sequence caller passes no stereotype and `clickable` false, and the
+   * `background`/`arrowHead` transparent arm is not this param's), as the
+   * RAW token a `FrameEvent` colour carries (`ast.ts`, resolved late by
+   * `colorSet.getColor`): the value itself where `parseColor` accepts it,
+   * else {@link WHITE_TOKEN} -- so `getColor(token)` is `getColorOrWhite(value)`
+   * (HColorSet.java:58-63). `undefined` where upstream returns `null`.
+   */
+  getHtmlColorToken(param: SequenceColorParam): string | undefined {
+    // `getParamName(param, false)`: `param.name() + "color"` (SkinParam.java:424-432).
+    const value = this.getValue(`${param}color`);
+    if (value === null) return undefined;
+    return HColorSet.instance().getColorOrNull(value) === undefined ? WHITE_TOKEN : value;
+  }
+}
+
 /**
  * The `skinparam`/`<style>` commands the preprocessor pulled out of the
  * source, still to be dispatched. Opaque to consumers: read the builder
@@ -72,6 +130,8 @@ export type SequenceDeclaration =
  */
 export interface SequenceStyleDispatch {
   readonly style: StyleSkinParam;
+  /** The legacy `params` store, filled in step with {@link style}. */
+  readonly params: SequenceLegacyParams;
   /** Source order; the head is the next to execute. */
   readonly pending: SequenceDeclaration[];
 }
@@ -114,15 +174,18 @@ function positionedSequenceDeclarations(
 export function createSequenceStyleDispatch(source: UmlSource): SequenceStyleDispatch {
   const styleSource = source.styleSource ?? EMPTY_STYLE_SOURCE;
   const style = createMindmapSkinParam(styleSource);
+  const params = new SequenceLegacyParams();
   if (source.skinparamAssignments === undefined)
     return {
       style,
+      params,
       pending: positionedDeclarationsOf(styleSource, source.stylePositions ?? []).map((d) =>
         'style' in d ? d : { position: d.position, key: d.key, value: styleSource.skinparam.get(d.key)! },
       ),
     };
   return {
     style,
+    params,
     pending: positionedSequenceDeclarations(styleSource, source.stylePositions ?? [], source.skinparamAssignments),
   };
 }
@@ -136,6 +199,8 @@ export function createSequenceStyleDispatch(source: UmlSource): SequenceStyleDis
 export function executeDeclarationsBefore(dispatch: SequenceStyleDispatch, position: number): ParseRefusal | null {
   while (dispatch.pending.length > 0 && dispatch.pending[0]!.position < position) {
     const declaration = dispatch.pending.shift()!;
+    // `setParam` puts the value in `params` before it converts it (SkinParam.java:228-229).
+    if (!('style' in declaration)) dispatch.params.setParam(declaration.key, declaration.value);
     try {
       executeDeclaration(
         dispatch.style,

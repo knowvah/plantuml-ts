@@ -18,6 +18,7 @@ Planning-time cohorts (`measurements/plan-classify.json`, ratchet path, HEAD
 | b1b | 0 | 338 | 513 | 277 | 13 | 0 | 150864 |
 | b2 | 367 | 25 | 483 | 253 | 13 | 367 | 109682 |
 | b3 | 419 | 4 | 532 | 173 | 13 | 419 | 73380 |
+| b4 | 419 | 4 | 539 | 166 | 13 | 419 | 73273 |
 
 ## Paint-only rows
 

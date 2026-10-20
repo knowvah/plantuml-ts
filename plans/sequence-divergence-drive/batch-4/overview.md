@@ -19,8 +19,8 @@ keys; confirm or drop at b3):
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T4a](T4a-legacy-skinparam-store.md) | legacy `SkinParam#params` store; `sequenceGroupBodyBackgroundColor` (T3f item 3) | typescript-pro | `sequence-skin-param.ts`, `command-grouping.ts`, `parser.ts`, `sequence-parse-helpers.ts` + tests | b3 close | [ ] |
-| close | re-pin, all-engine survey, pin round 3 | orchestrator | per close-procedure | all T4x | [ ] |
+| [T4a](T4a-legacy-skinparam-store.md) | legacy `SkinParam#params` store; `sequenceGroupBodyBackgroundColor` (T3f item 3) | typescript-pro | `sequence-skin-param.ts`, `command-grouping.ts`, `parser.ts`, `sequence-parse-helpers.ts` + tests | b3 close | [x] |
+| close | re-pin, all-engine survey, pin round 3 | orchestrator | per close-procedure | all T4x | [x] |
 
 A family whose mechanism lies outside the sequence engine (creole, klimt,
 chrome) is not a T4x task: file it in `fixtures.md` as `open -> sdd2` with the

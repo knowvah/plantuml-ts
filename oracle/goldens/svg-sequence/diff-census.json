@@ -1,12 +1,12 @@
 {
   "$comment": "Cause census for the committed SEQUENCE oracle corpus. Every count is produced MECHANICALLY by tests/oracle/svg-conformance/sequence-diff-census.ts from the path/actual/expected fields of the Diff records compare.ts emits -- never by reading an SVG (D5, plans/sequence-oracle-harness/decisions.md). The bucket set is closed at six; adding a seventh is stop 9. Fixtures come from diff-baseline.json: status \"baseline\" entries are censused, status \"error\" entries are carried in \"errors\" and contribute NOTHING to \"totals\" -- an unrenderable fixture has no bucket counts and must never read as zero diffs. Regenerate with: npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts -- the output is a pure function of the committed corpus and carries no timestamp, so re-running is byte-identical.",
   "totals": {
-    "missing-element": 157,
+    "missing-element": 150,
     "extra-element": 87,
-    "geometry": 57645,
+    "geometry": 57675,
     "text-metrics": 697,
     "format-units": 0,
-    "other": 803
+    "other": 791
   },
   "fixtures": [
     {
@@ -589,9 +589,9 @@
       "slug": "cabeve-16-raci213",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
+        "geometry": 5,
         "text-metrics": 0,
         "format-units": 0,
         "other": 0
@@ -1151,14 +1151,14 @@
     },
     {
       "slug": "darupa-17-dujo243",
-      "diffCount": 110,
+      "diffCount": 111,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 102,
+        "geometry": 107,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 7
+        "other": 4
       }
     },
     {
@@ -3359,14 +3359,14 @@
     },
     {
       "slug": "koleji-09-doni016",
-      "diffCount": 152,
+      "diffCount": 155,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 143,
+        "geometry": 149,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 8
+        "other": 6
       }
     },
     {
@@ -4931,14 +4931,14 @@
     },
     {
       "slug": "nofegi-58-kilo738",
-      "diffCount": 152,
+      "diffCount": 155,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 143,
+        "geometry": 149,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 8
+        "other": 6
       }
     },
     {
@@ -5113,9 +5113,9 @@
       "slug": "padomu-10-nati972",
       "diffCount": 5,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 4,
+        "geometry": 5,
         "text-metrics": 0,
         "format-units": 0,
         "other": 0
@@ -7715,14 +7715,14 @@
     },
     {
       "slug": "xebixi-82-duji787",
-      "diffCount": 110,
+      "diffCount": 111,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 102,
+        "geometry": 107,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 7
+        "other": 4
       }
     },
     {
@@ -7787,14 +7787,14 @@
     },
     {
       "slug": "xeneru-44-kuma826",
-      "diffCount": 152,
+      "diffCount": 155,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 143,
+        "geometry": 149,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 8
+        "other": 6
       }
     },
     {

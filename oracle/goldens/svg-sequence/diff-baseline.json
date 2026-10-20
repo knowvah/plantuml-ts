@@ -717,10 +717,10 @@
       "type": "sequence",
       "slug": "cabeve-16-raci213",
       "status": "baseline",
-      "weightedScore": 12,
+      "weightedScore": 5,
       "diffCount": 21,
       "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "2d19492c"
+      "measuredAgainstCommit": "75a340e4"
     },
     {
       "type": "sequence",
@@ -1311,10 +1311,10 @@
       "type": "sequence",
       "slug": "darupa-17-dujo243",
       "status": "baseline",
-      "weightedScore": 126,
+      "weightedScore": 111,
       "diffCount": 124,
       "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "ed7355c4"
+      "measuredAgainstCommit": "75a340e4"
     },
     {
       "type": "sequence",
@@ -4025,10 +4025,10 @@
       "type": "sequence",
       "slug": "koleji-09-doni016",
       "status": "baseline",
-      "weightedScore": 176,
+      "weightedScore": 155,
       "diffCount": 166,
       "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "ed7355c4"
+      "measuredAgainstCommit": "75a340e4"
     },
     {
       "type": "sequence",
@@ -5954,10 +5954,10 @@
       "type": "sequence",
       "slug": "nofegi-58-kilo738",
       "status": "baseline",
-      "weightedScore": 176,
+      "weightedScore": 155,
       "diffCount": 166,
       "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "ed7355c4"
+      "measuredAgainstCommit": "75a340e4"
     },
     {
       "type": "sequence",
@@ -6161,10 +6161,10 @@
       "type": "sequence",
       "slug": "padomu-10-nati972",
       "status": "baseline",
-      "weightedScore": 12,
+      "weightedScore": 5,
       "diffCount": 21,
       "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "2d19492c"
+      "measuredAgainstCommit": "75a340e4"
     },
     {
       "type": "sequence",
@@ -9196,10 +9196,10 @@
       "type": "sequence",
       "slug": "xebixi-82-duji787",
       "status": "baseline",
-      "weightedScore": 126,
+      "weightedScore": 111,
       "diffCount": 124,
       "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "ed7355c4"
+      "measuredAgainstCommit": "75a340e4"
     },
     {
       "type": "sequence",
@@ -9286,10 +9286,10 @@
       "type": "sequence",
       "slug": "xeneru-44-kuma826",
       "status": "baseline",
-      "weightedScore": 176,
+      "weightedScore": 155,
       "diffCount": 166,
       "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "ed7355c4"
+      "measuredAgainstCommit": "75a340e4"
     },
     {
       "type": "sequence",

@@ -128,7 +128,7 @@ Measurement (sequence has NO DOT gate — it never emits `svek-N.dot`):
 | [2](batch-2/overview.md) | families: participant, lifeline, arrow, divider, note+box; lifeline/destroy; pin round 1 (367) | T2a–T2c, T2e, T2f, close | all ∥ | [x] |
 | [3](batch-3/overview.md) | groups/ref/newpage/delay; shadowing; arrow colour + label font; notes/box follow-ups | T3a, T3b, T3d, T3e | all ∥ | [x] |
 | [3b](batch-3b/overview.md) | retire dead theme fields (D5; deletion pending stop-11 ruling); frame follow-ups; pin round 2 (419) | T3c, T3f, close | ∥ | [x] |
-| [4](batch-4/overview.md) | drive round on the paint residue; pin round 3 | T4x, close | all ∥ | [ ] |
+| [4](batch-4/overview.md) | drive round on the paint residue (T4a legacy params store); pin round 3 (0) | T4a, close | — | [x] |
 | [5](batch-5/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
 
 ## Documents

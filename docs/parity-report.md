@@ -32,7 +32,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | packet | packetdiag | 6 | 6 | n/a (no DOT stage (non-svek)) | 0 / 0 / 6 | n/a (no DOT stage (non-svek)) | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/6 | 6/6 |
 | regex | n/a (no engine (D11 todo)) | 46 | 46 | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) | n/a (no engine (D11 todo)) |
 | salt | salt | 51 | 51 | n/a (no DOT stage (non-svek)) | 51 / 0 / 0 (1 error) | n/a (no DOT stage (non-svek)) | n/a (no census yet) | 50 | 1 · 337 | 50/51 | 50/51 |
-| sequence | sequence | 1271 | 1143 | n/a (no DOT stage (non-svek)) | 419 / 484 / 240 | n/a (no DOT stage (non-svek)) | 0 | 419 | 709 · 73380 | 1130/1143 | 1133/1143 |
+| sequence | sequence | 1271 | 1143 | n/a (no DOT stage (non-svek)) | 419 / 484 / 240 | n/a (no DOT stage (non-svek)) | 0 | 419 | 709 · 73273 | 1130/1143 | 1133/1143 |
 | state | state | 278 | 273 | 267/268 (100%) | 78 / 11 / 184 (4 error) | 252/269 | 71 | 95 | n/a (no diff-baseline yet) | 269/273 | 273/273 |
 | timing | n/a (no engine (D1 todo)) | 126 | 126 | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) | n/a (no engine (D1 todo)) |
 | unknown | n/a (accounting bucket) | 825 | 825 | n/a (no data-diagram-type classification) | 486 / 16 / 323 (25 error) | 365/376 | n/a (no census yet) | 15 | 0 · 0 | 696/825 | 780/825 |

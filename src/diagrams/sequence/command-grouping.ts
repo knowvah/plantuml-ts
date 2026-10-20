@@ -94,6 +94,19 @@ function resolveGroupTitle(
   return bracketMatch ? { title: bracketMatch[1]!, comment: bracketMatch[2]! } : { comment };
 }
 
+/**
+ * `SequenceDiagram#grouping`'s fallback for a command with no general
+ * colour, read at the command's own line for the opener, every `else` and
+ * `end` alike: `getSkinParam().getHtmlColor(ColorParam
+ * .sequenceGroupBodyBackground, null, false)` (`SequenceDiagram.java:418-419`).
+ * The `end` leaf's colour has no reader (`teoz/GroupingTile.java:162-163,
+ * 1028` reads only its notes), but its read still fills `getValue`'s cache
+ * (SkinParam.java:323-340).
+ */
+function groupBodyBackground(state: ParseState): string | undefined {
+  return state.style.params.getHtmlColorToken('sequenceGroupBodyBackground');
+}
+
 // 10. Frame types (loop, alt, opt, par, par2, break, critical, group).
 //     T13: added `par2` (`GroupingType.getType`, a same-visual-class START
 //     alongside `par`) and a COLORS pair mirroring `CommandGrouping`'s
@@ -124,7 +137,7 @@ export const groupingCommand: Command = {
     if (UNDRESSED_ARROW_RE.test(match.input) || DRESSED_ARROW_RE.test(match.input)) throw new SequenceCommandRefusal();
     const frameType = match[2]!.toLowerCase() as FrameEvent['frameType'];
     const backColorElement = match[3];
-    const backColorGeneral = match[4];
+    const backColorGeneral = match[4] ?? groupBodyBackground(state);
     const { title, comment: label } = resolveGroupTitle(frameType, match[5]?.trim() ?? '');
     const styleBuilder = currentStyleBuilder(state.style); // `SequenceDiagram.java:427-428`
     const frame: FrameEvent = {
@@ -212,7 +225,7 @@ export const elseCommand: Command = {
     if (top !== undefined) {
       top.branches.push([]);
       top.branchLabels.push(match[2]?.trim() ?? '');
-      top.branchColors?.push(match[1]);
+      top.branchColors?.push(match[1] ?? groupBodyBackground(state));
       // The `else` leaf's own builder (`SequenceDiagram.java:431-432`).
       top.branchStyleBuilders.push(currentStyleBuilder(state.style));
     }
@@ -227,13 +240,18 @@ export const elseCommand: Command = {
 //     as an optional COMMENT that upstream's own `executeArg` never reads
 //     for the END case (`GroupingType.END` takes no branch that consults
 //     `comment`). Trailing text is matched and discarded here for the same
-//     reason.
+//     reason. The space-separated COLORS index 1 (`end #c`, `:68`) is
+//     captured only to decide whether the end reads the legacy colour.
 // @see sequencediagram/command/CommandGrouping.java:64-73,129-159
 export const endCommand: Command = {
-  pattern: /^end(?:\s+.+)?\s*$/i,
-  execute(state) {
+  pattern: /^end(?:\s+(#\w+))?(?:\s+.+)?\s*$/i,
+  execute(state, match) {
     const frame = state.frameStack.pop();
     if (frame !== undefined) {
+      // The END leaf's colour (`SequenceDiagram.java:418-419`) is never
+      // drawn, but its read fills the cache: jar-verified, an `end` before
+      // the skinparam leaves every later group uncoloured; `end #c` does not.
+      if (match[1] === undefined) groupBodyBackground(state);
       emit(state, frame);
       // `SequenceDiagram#grouping`, END (`:441-444`).
       state.life.lastEventWithDeactivate = 'notMessage';
