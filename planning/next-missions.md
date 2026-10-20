@@ -35,6 +35,100 @@ post-D7 measurements.
 
 ---
 
+## sequence-divergence-drive (sdd1) — DONE 2026-10-20 (branch `feat/sequence-divergence-drive`, unsigned, not pushed; lands via merge-commit PR after the user's `git rebase -r --force-rebase -S main`)
+
+**What changed:** the sequence engine now reads every component's style from
+upstream's per-event `StyleBuilder` (`SequenceDiagram.java:130-432`, each
+`ComponentRose*`), not from constants and `theme.colors`. The style seam is
+`src/diagrams/sequence/sequence-skin-param.ts` (signatures, dispatch,
+`paintOf`). Each command captures the builder current at its line, and a
+`skinparam` takes effect from its own line onward (T1e; the jar confirms it).
+Families moved: participants, glyphs, lifelines, the destroy cross,
+activations, dividers, messages (dash `applyStroke`, per-message colour,
+label font, autonumber `<b>`), notes (Opale, the hnote hexagon), boxes,
+groups/else (in the jar's draw order, per-else paint), refs, newpages,
+delays, shadowing, lifeline titles, the legacy `SkinParam#params` store,
+and `hide stereotype`. `Style#mergeNestedChildOver` is ported into
+`core/style` (user ruling, D4 Amendment 2). Ten reader-less `Theme` fields
+are deleted (user ruling, BREAKING on `RenderOptions['theme']`).
+
+**Counts b0 → final** (ratchet-path classify, 1141 rows): zero **0 → 419**,
+paint-only 338 → 4, geometry 513 → 539, structural 277 → 166, error 13 → 13;
+Σ weightedScore **150864 → 73273 (−51.4%)**. Survey sequence conformant
+**0 → 419**. Pins: svg-sequence ratchet **0 → 419** (pin round 1: 367,
+round 2: 52). D10 (≥ 250) met. 0 conformant losses in every engine at every
+close. Non-sequence movers were only SEQUENCE diagrams in the `unknown`
+bucket, all improvements (506 → 521 conformant).
+
+### Open -> sdd2 (by family; `final-classify.json` geometry 539 rows Σ 42472, structural 166 rows Σ 30797)
+- **Root canvas size** (`@viewBox`/`@width`/`@height`): geometry 412/332/235
+  fixtures, structural 141/125/129. Mostly downstream of the families below.
+- **Text x/y** (`text/@x` 360 + 136 fixtures, `@y` 291 + 138): label
+  placement. Known sub-mechanisms: glyph-kind labels (`ComponentRoseActor.
+  java:73-81`, queue margin 5), sprite-badge row alignment, the
+  left-border exo label reserving no space.
+- **Frame width** (`rect/@width` 192, `line/@x2` 217): `GroupingTile.java:
+  216-225` and `computeTotalWidth`. The port's label loop has no upstream
+  counterpart; port `CommunicationTileSelf#getMaxX`/`addConstraints`.
+- **Arrowhead and note geometry** (`polygon/@points` 271 + 118, `path/@d`
+  197): displaced notes (the 27 px offset of notes on messages;
+  `CommunicationTileNote*` unported) and arrowheads following displaced
+  messages.
+- **Nested activation geometry**: extra level-2 bar, zero-height step
+  fallback, missing `Math.max(createY, position)` (`LiveBoxes.java:330`),
+  self-message activation start (`CommunicationTileSelf.java:120-121`), and
+  activation after a divider binding to the previous message
+  (`SequenceDiagram.java:275,392`).
+- **childCount** (178 structural fixtures): element-set differences; triage
+  per fixture.
+- **Box geometry**: Doll's teoz layout (y, `BOX_PAD`, title height).
+- **Document scale** (javedu-98, kepuxa-88, nabesa-52, vikelu-53): scale
+  factor resolution.
+- **`stereotypePosition bottom`** (`Participant.java:130-135`): row order and
+  the lifeline title (todetu-82, xakuro-97, rising +2 since T3e).
+- **Paint, outside the sequence engine:** `%reverse_hsluv_color` rounding in
+  the TIM builtin (davipu-63, fixecu-74, losilu-30, naliba-15; the last 4
+  paint-only rows, title chrome); `core/svg-shapes.ts` emits an 8-digit fill
+  without `SvgGraphics#fillMe`'s `fill-opacity` split (`SvgGraphics.java:
+  879-887`; alpha bands and notes in every engine); `StereotypeDecoration.
+  ts:139-141` misses `StringUtils.isEmpty`'s whitespace rule (fakova-98,
+  jefoke-95, nimoxu-60); the jar's unknown-skinparam warning banner is not
+  drawn.
+- **Small, unexplored or 0-row:** `partition` (unported), exo `hidden`,
+  `note across` VMERGE/stereo/colour, `Note#withPosition` for exo-overridden
+  notes, negative `Shadowing`, `topurl`/`footbox` legacy reads, the
+  `<style> note { HorizontalAlignment }` vs `noteTextAlignment` question,
+  `sequenceParticipant underline`, the jar's `<img data:>` display rewrite,
+  the creole `]` after `</color>` under a transparent FontColor (pizupi-41).
+- **Not counted:** jetigu-21-zaje860 and nuzise-60-temi305 are in
+  dot-cache/sequence (moved from activity by aepp/T1e, 2026-10-10) but not in
+  the sequence diff-baseline, so no ratchet sees them.
+
+### Error rows -> command mission (D8)
+The 13 `error` rows are unchanged: CommandUrl, CommandLinkAnchor,
+CommandActivate2, CommandStyleImport, YAML front-matter, URL notes, `hide`
+stereotype gender, and one `!includedef` harness gap.
+
+### Flags
+- **Halt, then ruling (D4 Amendment 1 → 2):** `Style#mergeNestedChildOver`
+  was unported. The user ruled "follow A for the port, but expand" to
+  additive ports of unported `core/style` members.
+- **Stop 6 caught at integration (journal row 47):** merging T3a and T3e
+  broke a pinned golden (nifixi-65), because the blotter's transparency test
+  missed `PAINT_NONE`. It was fixed before any close commit, deviating from
+  "halt", and is flagged for review.
+- **Stop 11 / D5 Amendment 1:** `RenderOptions` exposes `Partial<Theme>`. The
+  user ruled delete (T3g, BREAKING CHANGE).
+- **Public behaviour (D5):** `Partial<Theme>` `colors.border` and
+  `fontFamily` no longer reach sequence participants or labels; the jar's
+  routes (`skinparam participantBorderColor`, `defaultFontName`) do.
+- **Harness fix (journal row 40):** `render-fixture-sequence.ts` now seeds
+  def ids as `index.ts` does.
+- **Dependabot:** `origin/main` gained two dev-only PRs (vitest 5.0.5 et
+  al.). Rebase onto the updated `main`.
+
+---
+
 ## graphviz-tracker-consume (gtc) — DONE 2026-10-19 (branch `fix/graphviz-tracker-consume`, unsigned, not pushed; lands via merge-commit PR after the user's `git rebase -S 9094705aa`)
 
 **What changed:** every in-scope TRACKER box (14, 16, 28, 29, 30, 32, 33, 34) is ticked per D2 on

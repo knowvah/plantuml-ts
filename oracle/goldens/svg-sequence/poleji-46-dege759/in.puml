@@ -1,0 +1,5 @@
+@startuml
+!define B C
+!define A B
+alice -> bob : A
+@enduml

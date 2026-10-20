@@ -55,12 +55,14 @@
 
 import type {
   ActivationGeo,
+  DestroyGeo,
   DelayGeo,
   LifelineSegment,
   NewpageEvent,
   SequenceDiagramAST,
   SequenceEvent,
   DividerGeo,
+  ElseGeo,
   EventGeo,
   FrameGeo,
   MessageGeo,
@@ -75,6 +77,7 @@ import { noneDisplayPositioned, singleDisplayPositioned } from '../../core/annot
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { VerticalAlignment } from '../../core/klimt/geom/VerticalAlignment.js';
 import { ARROW_DELTA_Y } from './sequence-arrowhead.js';
+import { DESTROY_CROSS_SIZE } from './sequence-layout-life-event.js';
 
 // ---------------------------------------------------------------------------
 // The band
@@ -244,6 +247,16 @@ function clipFrame(f: FrameGeo, band: PageBand): FrameGeo | undefined {
 }
 
 /**
+ * An `else` tile answers for itself by its own top, the y its group's
+ * `branchSeparators` entry is filtered on above, so the band split and the
+ * rule stay together. Its condition runs move with it.
+ */
+function clipElse(e: ElseGeo, band: PageBand): ElseGeo | undefined {
+  if (!inBand(band, e.y)) return undefined;
+  return { ...e, y: shift(band, e.y), runs: e.runs.map((r) => ({ ...r, y: shift(band, r.y) })) };
+}
+
+/**
  * ALL-OR-NOTHING on the separator's own y, `tile.y + MARGINY`
  * (`NewpageTile.java:88`) — a horizontal `ULine`, so `getClippedLine`
  * returns `null` the moment that y leaves the band.
@@ -256,6 +269,17 @@ function clipFrame(f: FrameGeo, band: PageBand): FrameGeo | undefined {
 function clipNewpage(n: NewpageGeo, band: PageBand): NewpageGeo | undefined {
   if (!inBand(band, n.y + NEWPAGE_MARGIN_Y)) return undefined;
   return { ...n, y: shift(band, n.y) };
+}
+
+/**
+ * A destroy: its y moves with the page; a cross survives only whole. Each
+ * stroke is diagonal, and `UClip#getClippedLine` keeps a line that is not
+ * vertical or horizontal only when BOTH ends are inside (`UClip.java:
+ * 128-142`); the two strokes span the same rows.
+ */
+function clipDestroy(d: DestroyGeo, band: PageBand): DestroyGeo {
+  const kept = d.crosses.filter((c) => inBand(band, c.y) && inBand(band, c.y + 2 * DESTROY_CROSS_SIZE));
+  return { ...d, y: shift(band, d.y), crosses: kept.map((c) => ({ ...c, y: shift(band, c.y) })) };
 }
 
 /** A `space` reserves height and emits no ink, so there is nothing for a
@@ -306,8 +330,12 @@ function clipEvent(event: EventGeo, band: PageBand): EventGeo | undefined {
       return clipNote(event, band);
     case 'activation':
       return clipActivation(event, band);
+    case 'destroy':
+      return clipDestroy(event, band);
     case 'frame':
       return clipFrame(event, band);
+    case 'else':
+      return clipElse(event, band);
     case 'divider':
       return clipDivider(event, band);
     case 'space':
@@ -379,7 +407,7 @@ export function paginateSequence(geo: SequenceGeometry, pageIndex: number): Sequ
     ...geo,
     events: geo.events.map((e) => clipEvent(e, band)).filter((e): e is EventGeo => e !== undefined),
     lifelineEndY,
-    ...(geo.lifelineSegments !== undefined ? { lifelineSegments: clipLifelines(geo.lifelineSegments, band) } : {}),
+    lifelineSegments: clipLifelines(geo.lifelineSegments, band),
     footerShapeY,
     totalHeight,
     // `dolls.drawEnglobers` is handed `body.calculateDimension().getHeight()

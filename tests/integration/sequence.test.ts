@@ -182,7 +182,9 @@ Alice -> Bob: hi
     });
     expect(results).toHaveLength(1);
     expect(results[0]).toMatch(/^<svg/);
-    expect(results[0]).toContain('Courier New, monospace');
+    // sdd1 D5: sequence labels take their font from the merged Style, so a
+    // Theme fontFamily no longer reaches them (see the defaultFontName test).
+    expect(results[0]).not.toContain('Courier New, monospace');
   });
 
   it('renders each block independently in renderAll', async () => {
@@ -254,25 +256,43 @@ describe('theme variants', () => {
     expect(svg).toBeValidSvg();
   });
 
-  it('Partial<Theme> override — custom font family appears in SVG', () => {
-    const svg = renderSync(BASIC_PUML, {
+  it('font family reaches labels through skinparam defaultFontName, not Theme (sdd1 D5)', () => {
+    // Since sdd1 T3d every sequence label font is the merged Style's
+    // (AbstractTextualComponent.java:80-92). The jar's route is
+    // `skinparam defaultFontName`; jar-verified: participant and message
+    // labels all carry font-family="Courier".
+    const viaTheme = renderSync(BASIC_PUML, {
       measurer: testMeasurer,
       theme: { fontFamily: 'Courier New, monospace' },
     });
-    expect(svg).toBeValidSvg();
-    expect(svg).toContainText('Courier New, monospace');
+    expect(viaTheme).toBeValidSvg();
+    expect(viaTheme).not.toContainText('Courier New, monospace');
+    const viaSkinparam = renderSync(BASIC_PUML.replace('@startuml', '@startuml\nskinparam defaultFontName Courier'), {
+      measurer: testMeasurer,
+    });
+    expect(viaSkinparam).toContainText('font-family="Courier"');
   });
 
-  it('Partial<Theme> override — custom border color appears in SVG', () => {
-    // colors must be the full object (not a partial) due to exactOptionalPropertyTypes
-    const svg = renderSync(BASIC_PUML, {
+  it('Partial<Theme> border override no longer reaches a participant (sdd1 D5)', () => {
+    // Participant paint is style-owned since sdd1 T2a: it comes from the
+    // merged `participant` Style, as the jar draws it, never from
+    // `theme.colors.border`. The jar's route is `skinparam
+    // participantBorderColor` (FromSkinparamToStyle).
+    const viaTheme = renderSync(BASIC_PUML, {
       measurer: testMeasurer,
       theme: {
         colors: { ...defaultTheme.colors, border: '#FF0000' },
       },
     });
-    expect(svg).toBeValidSvg();
-    expect(svg).toContainText('#F00');
+    expect(viaTheme).toBeValidSvg();
+    expect(viaTheme).not.toContainText('#F00');
+    const viaSkinparam = renderSync(
+      BASIC_PUML.replace('@startuml', '@startuml\nskinparam participantBorderColor #FF0000'),
+      {
+        measurer: testMeasurer,
+      },
+    );
+    expect(viaSkinparam).toContainText('stroke:#F00;');
   });
 
   // The `!theme` line sits INSIDE the block: `@start…@end` is split before the

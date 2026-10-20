@@ -114,6 +114,26 @@ export interface PreprocessorResult {
    * before every `<style>` block.
    */
   readonly declarationOrder?: DeclarationOrder;
+  /**
+   * sdd1 T1e: every `skinparam` assignment in document order -- a key
+   * assigned twice appears twice, which {@link skinparam} (last value wins)
+   * cannot say -- with the document line of the command that executes it,
+   * in the frame of {@link stylePositions}. A `skinparam NAME {` block is
+   * one command (`CommandSkinParamMultilines.java:90-102`), so each of its
+   * entries sits at the block's opening line. `order` is the key's place on
+   * the {@link declarationOrder} counter, which breaks ties between entries
+   * of one line. Absent on a hand-built result.
+   */
+  readonly skinparamAssignments?: readonly SkinparamAssignment[];
+}
+
+/** See {@link PreprocessorResult.skinparamAssignments}. */
+export interface SkinparamAssignment {
+  readonly key: string;
+  readonly value: string;
+  /** `undefined` for a line the reader never located (as {@link PreprocessorResult.stylePositions}). */
+  readonly position: number | undefined;
+  readonly order: number;
 }
 
 /** See {@link PreprocessorResult.declarationOrder}. */
@@ -319,6 +339,7 @@ function resultOf(context: TContext): PreprocessorResult {
     stylePositions: collector.stylePositions,
     skinparam: collector.skinparam,
     declarationOrder: { skinparam: collector.skinparamOrder, styles: collector.styleOrder },
+    skinparamAssignments: collector.skinparamAssignments,
   };
 }
 

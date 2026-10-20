@@ -7,15 +7,20 @@
  */
 
 import type { MessageEvent, MessageExoEvent, MessageExoType } from './ast.js';
+import type { ArrowConfiguration } from './sequence-arrowhead.js';
+import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import { activate, addMessage, getActivatingMessage } from './sequence-life-state.js';
 import { applyAutonumber, emit, type Command, type ParseState } from './sequence-parse-helpers.js';
+import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
+import { currentStyleBuilder } from './sequence-skin-param.js';
 
 // 16. return -- `CommandReturn`. The reply runs along the latest ACTIVATING
 //     message (`getActivatingMessage()`), reversed and dotted, and then
 //     deactivates that message's PART2; with nothing activating it reverses
 //     the last `Message` without deactivating, and with no such message it is
-//     an error. The `#color` group is matched and, like every arrow colour in
-//     this port, not carried.
+//     an error. The `#color` group recolours the reply
+//     (`arrow.withColor(HColorSet.instance().getColor(color))`, `:121-123`);
+//     without it the reply keeps the activating message's own colour.
 // @see sequencediagram/command/CommandReturn.java:66-76,103-160
 export const returnCommand: Command = {
   pattern: /^(&\s*)?return\s*(?:(#\w+)\s+)?(.*)$/i,
@@ -27,20 +32,49 @@ export const returnCommand: Command = {
       state.executionError = 'Nowhere to return to.';
       return;
     }
-    const message2 = numbered(state, replyTo(message1, match[3] ?? '', match[1] !== undefined));
+    const styleBuilder = currentStyleBuilder(state.style); // `CommandReturn.java:129,132`
+    const arrow = replyArrow(message1, match[2]);
+    if (arrow === undefined) {
+      state.executionError = `No such color: ${match[2]!}`;
+      return;
+    }
+    const message2 = numbered(state, replyTo(message1, arrow, match[3] ?? '', match[1] !== undefined, styleBuilder));
     emit(state, message2);
     const error = addMessage(state.life, message2) ?? deactivateAfterReturn(state, message1, activating);
     if (error !== undefined) state.executionError = error;
   },
 };
 
-/** `message2` (`CommandReturn.java:120-137`): the activating message's own
- *  arrow, `withBody(DOTTED)`, run the other way. */
-function replyTo(message1: MessageEvent | MessageExoEvent, label: string, parallel: boolean): ReturnReply {
+/**
+ * The reply's configuration: the activating message's own arrow,
+ * `withBody(DOTTED)`, recoloured when the line carries a `#color`
+ * (`CommandReturn.java:120-123`). `undefined` is the `NoSuchColorException`
+ * `HColorSet.getColor` throws for a word that is no colour, which discards the
+ * whole attempt (`PSystemBuilder.java:256-271`, as `command-arrow.ts#
+ * applyStyle` records); `#\w+` admits e.g. `#nocolour`.
+ */
+function replyArrow(
+  message1: MessageEvent | MessageExoEvent,
+  color: string | undefined,
+): ArrowConfiguration | undefined {
   const arrow = { ...message1.arrow, dashed: true };
+  if (color === undefined) return arrow;
+  const resolved = HColorSet.instance().getColorOrNull(color);
+  return resolved === undefined ? undefined : { ...arrow, color: resolved };
+}
+
+/** `message2` (`CommandReturn.java:124-137`): the reply, run the other way. */
+function replyTo(
+  message1: MessageEvent | MessageExoEvent,
+  arrow: ArrowConfiguration,
+  label: string,
+  parallel: boolean,
+  styleBuilder: StyleBuilder,
+): ReturnReply {
   if (message1.kind === 'messageExo') {
     const exoType = REVERSE_EXO[message1.exoType];
-    return { kind: 'messageExo', participant: message1.participant, exoType, shortArrow: false, label, arrow };
+    const participant = message1.participant;
+    return { kind: 'messageExo', participant, exoType, shortArrow: false, label, arrow, styleBuilder };
   }
   return {
     kind: 'message',
@@ -48,6 +82,7 @@ function replyTo(message1: MessageEvent | MessageExoEvent, label: string, parall
     to: message1.from,
     label,
     arrow,
+    styleBuilder,
     ...(parallel ? { parallel: true } : {}),
   };
 }
@@ -59,7 +94,14 @@ type ReturnReply = MessageEvent | MessageExoEvent;
  *  does. */
 function numbered(state: ParseState, reply: ReturnReply): ReturnReply {
   if (reply.kind === 'message') return applyAutonumber(state, reply);
-  const probe = applyAutonumber(state, { kind: 'message', from: '', to: '', label: '', arrow: reply.arrow });
+  const probe = applyAutonumber(state, {
+    kind: 'message',
+    from: '',
+    to: '',
+    label: '',
+    arrow: reply.arrow,
+    styleBuilder: reply.styleBuilder,
+  });
   return {
     ...reply,
     ...(probe.sequenceNumber !== undefined ? { sequenceNumber: probe.sequenceNumber } : {}),
@@ -86,6 +128,8 @@ function deactivateAfterReturn(
   if (activating === undefined) return undefined;
   const p2 = message1.kind === 'message' ? message1.to : message1.participant;
   const error = activate(state.life, p2, 'DEACTIVATE');
-  if (error === undefined) emit(state, { kind: 'deactivate', participantId: p2 });
+  // `SequenceDiagram#activate` gives the `LifeEvent` the current builder (`:371-372`).
+  if (error === undefined)
+    emit(state, { kind: 'deactivate', participantId: p2, styleBuilder: currentStyleBuilder(state.style) });
   return error;
 }

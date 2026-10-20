@@ -1,0 +1,8 @@
+@startuml
+'!preprocessorV2
+!function bold($text)
+!return "<b>"+ $text +"</b>"
+!endfunction
+
+Alice -> Bob : bold("foo")pour nous
+@enduml

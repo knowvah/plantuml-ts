@@ -1,0 +1,3 @@
+@startuml
+Alice -> Bob [[http://www.yahoo.com {this\nthat}]] : hello
+@enduml

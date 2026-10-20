@@ -1,0 +1,11 @@
+@startuml
+skinparam useBetaStyle true
+<style>
+  title {
+    LineColor black
+    LineThickness 1.5
+  }
+</style>
+title My Title
+Bob -> Alice : hello
+@enduml

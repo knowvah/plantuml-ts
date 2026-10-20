@@ -1,0 +1,12 @@
+@startuml
+'skinparam dpi 700
+Alice -> Bob : hello
+Alice ->o Bob : hello
+Alice ->>o Bob : hello
+Alice -\o Bob : hello
+Alice -/o Bob : hello
+Alice -\\o Bob : hello
+Alice -//o Bob : hello
+
+Alice o<-- Bob : ok
+@enduml

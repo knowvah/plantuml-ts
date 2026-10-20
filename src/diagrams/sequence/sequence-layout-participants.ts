@@ -17,22 +17,23 @@ import type {
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import { ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf, LIVE_DELTA_SIZE, TOP_MARGIN } from './sequence-layout-shared.js';
+import { ARROW_PADDING_X, LIVE_DELTA_SIZE, TOP_MARGIN } from './sequence-layout-shared.js';
+import { messagePaint } from './sequence-arrow-paint.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
 import { symbolPreferredHeight, symbolPreferredWidth } from './sequence-layout-participant-sizing.js';
 import { ARROW_DELTA_X } from './sequence-arrowhead.js';
-import { displayLines, MESSAGE_NUMBER_MARGIN, numberTextOf, refBodyLines, refBodyWidth } from './text-block-geo.js';
+import { messageLabelWidth, numberTextOf, refBodyLines } from './text-block-geo.js';
+import { refComponentWidth, referencePaints } from './ref-body-geo.js';
 import {
-  anyBadgeFor,
   BADGE_GAP,
   buildLabelRuns,
+  headRowsOf,
   labelRows,
-  resolveParticipantBackground,
-  resolveParticipantBorder,
-  visibleStereotypeLines,
   type ParticipantLayoutCtx,
 } from './sequence-layout-participant-label.js';
-import { sequenceAtomContext, sequenceLabelBlockWidth, sequenceLabelLineWidth } from './sequence-creole.js';
+import { displayedBadgeOf, displayedStereotypeLines } from './sequence-hide-passes.js';
+import type { SequencePaint } from './sequence-skin-param.js';
+import { paintOfGeo, participantPaintsOf } from './sequence-participant-paints.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 
 /**
@@ -71,7 +72,7 @@ export function computeParticipantLayout(
 ): ParticipantLayoutResult {
   const sortedParticipants = [...ast.participants].sort((a, b) => a.order - b.order);
   const constraints: SpanConstraint[] = [];
-  scanMessageLabels(ast.events, sortedParticipants, { theme, measurer, levels, sprites: ast.sprites }, constraints);
+  scanMessageLabels(ast.events, sortedParticipants, { measurer, levels, sprites: ast.sprites }, constraints);
 
   const ctx: ParticipantLayoutCtx = { theme, measurer, sprites: ast.sprites };
   const participantWidths = computeParticipantWidths(sortedParticipants, ctx);
@@ -134,7 +135,6 @@ interface SpanConstraint {
 export type MessageLevels = Map<SequenceEvent, { level1: number; level2: number }>;
 
 interface ScanContext {
-  readonly theme: Theme;
   readonly measurer: StringMeasurer;
   readonly levels: MessageLevels | undefined;
   readonly sprites: SpriteRegistry | undefined;
@@ -166,24 +166,15 @@ function scanMessageLabels(
   scan: ScanContext,
   out: SpanConstraint[],
 ): void {
-  const { theme, measurer } = scan;
-  const arrowSpec = arrowFontSpecOf(theme);
-  const atoms = sequenceAtomContext(scan.sprites, theme.colors.text);
   for (const ev of events) {
     if (ev.kind === 'message' && ev.from !== ev.to) {
       const fi = sortedParticipants.findIndex((p) => p.id === ev.from);
       const ti = sortedParticipants.findIndex((p) => p.id === ev.to);
       if (fi >= 0 && ti >= 0 && fi !== ti) {
-        const lines = ev.label === '' ? [] : displayLines(ev.label);
-        // `Display#createMessageNumber` (`Display.java:703-712`) merges the
-        // number, a 4px right margin and the label, so the component's text
-        // block -- hence `getPreferredWidth` -- is that sum.
-        const numberText = numberTextOf(ev);
-        const numberWidth =
-          numberText === undefined
-            ? 0
-            : sequenceLabelLineWidth(numberText, arrowSpec, measurer, atoms) + MESSAGE_NUMBER_MARGIN;
-        const labelWidth = numberWidth + sequenceLabelBlockWidth(lines, arrowSpec, measurer, atoms);
+        // The component is `createComponentArrow(message.getUsedStyles(), …)`
+        // (`CommunicationTile.java:153-166`): its block is in the arrow style's font.
+        const font = messagePaint(ev.styleBuilder, ev.stereotype, ev.arrow, false).font;
+        const labelWidth = messageLabelWidth(ev.label, numberTextOf(ev), font, scan);
         out.push({
           from: Math.min(fi, ti),
           to: Math.max(fi, ti),
@@ -222,7 +213,8 @@ function scanFrame(ev: FrameEvent, sorted: Participant[], scan: ScanContext, out
  * and `last.ensureBiggerThan(first.addFixed(dim.getWidth()))` pushes the
  * rightmost box until the component's preferred width fits between them.
  * A one-participant `ref` binds nothing: `last.addAtLeast(0)` (`:112-113`)
- * is a fresh variable, so only the frame widens.
+ * is a fresh variable, so only the frame widens. `dim` is the preferred
+ * width of the component the tile draws, off the reference's own styles.
  */
 function refConstraint(ev: FrameEvent, sorted: Participant[], scan: ScanContext): SpanConstraint[] {
   if (ev.frameType !== 'ref' || ev.participants === undefined) return [];
@@ -230,7 +222,7 @@ function refConstraint(ev: FrameEvent, sorted: Participant[], scan: ScanContext)
   const from = Math.min(...indices);
   const to = Math.max(...indices);
   if (indices.length === 0 || from === to) return [];
-  const span = refBodyWidth(refBodyLines(ev.frameType, ev.label), scan.theme, scan.measurer);
+  const span = refComponentWidth(refBodyLines(ev.frameType, ev.label), referencePaints(ev), scan.measurer);
   return [{ from, to, span, edge: true }];
 }
 
@@ -246,22 +238,22 @@ function refConstraint(ev: FrameEvent, sorted: Participant[], scan: ScanContext)
  * glyph and this reserves the column (`planning/sizer-renderer-parity.md`).
  */
 function computeParticipantWidths(sortedParticipants: Participant[], ctx: ParticipantLayoutCtx): number[] {
-  const { theme } = ctx;
-  const fontSpec = fontSpecOf(theme);
   return sortedParticipants.map((p) => {
-    const badge = anyBadgeFor(p, ctx, resolveParticipantBackground(p, theme));
+    const paints = participantPaintsOf(p);
+    const { paint } = paints;
+    const badge = displayedBadgeOf(p, ctx, paint.fill);
     // A head is a text BLOCK: `getPureTextWidth` is its WIDEST LINE
     // (`AbstractTextualComponent.java:106-108`), never the raw display -- and
     // C4: never the raw LINE either. `SheetBlock1#initMap` maxes `sea
     // .getWidth()` per stripe (`:145-149`), and a stripe's width is its PARSED
     // atoms', so `""MySubTitle""` reserves 70.087 and not the 90.038 its four
     // quotes measure (`jozomu-87-tajo507`, jar box width 84.087).
-    const rows = [...visibleStereotypeLines(p, theme), ...displayLines(p.display)];
-    const textW = Math.max(...labelRows(rows, fontSpec, ctx).map((r) => r.width));
+    const rows = headRowsOf(displayedStereotypeLines(p), p.display, { ...paints, font: paint.font });
+    const textW = Math.max(...labelRows(rows, ctx).map((r) => r.width));
     // `TextBlockSprited#calculateDimension`: the badge widens the block by its
     // own width plus the 6px gap (`:57-67`).
     const lw = badge === undefined ? textW : textW + badge.width + BADGE_GAP;
-    const symbolW = symbolPreferredWidth(p.type, lw, theme, participantShadowOf(p, theme), ctx.measurer);
+    const symbolW = symbolPreferredWidth(p.type, lw, paint, ctx.theme, ctx.measurer);
     if (symbolW !== undefined) return symbolW;
     // `PARTICIPANT_HEAD` / `COLLECTIONS_HEAD` both reach
     // `ComponentRoseParticipant`, differing only by `getDeltaCollection()`
@@ -273,19 +265,12 @@ function computeParticipantWidths(sortedParticipants: Participant[], ctx: Partic
     // `PName.MinimumWidth` is in no skin file and resolves to
     // `ValueNull#asDouble()` = 0 (`ValueNull.java:57-59`). Verified on 3570
     // corpus boxes to within 0.0005px (`findings/participant-width.md`).
-    const plain = lw + theme.sequence.participantPadding * 2 + reservedShadowOf(p.type, participantShadowOf(p, theme));
+    // `getPreferredWidth` then adds the margin and the shadow (`:135-137`).
+    const pad = paint.padding.getLeft() + paint.padding.getRight();
+    const margin = paint.margin.getLeft() + paint.margin.getRight();
+    const plain = lw + pad + margin + reservedShadowOf(p.type, paint.shadowing);
     return p.type === 'collections' ? plain + COLLECTIONS_DELTA : plain;
   });
-}
-
-/**
- * `Participant#getUsedStyles` (`Participant.java:86-96`): the kind's style
- * signature `withTOBECHANGED(stereotype)`, whose `getShadowing()`
- * `Style#getSymbolContext` turns into the component's delta shadow
- * (`Style.java:109-115,277-281`, `ComponentRoseParticipant.java:83`).
- */
-export function participantShadowOf(p: Participant, theme: Theme): number {
-  return theme.colors.graph.sequenceShadowing?.participant(p.type, p.stereotype) ?? 0;
 }
 
 /**
@@ -303,13 +288,19 @@ export function reservedShadowOf(type: ParticipantType, shadow: number): number 
 /**
  * The rectangle `ComponentRoseParticipant#drawInternalU` paints
  * (`:100-104`): `getTextWidth` x `getTextHeight`, the preferred box less the
- * reserved shadow. The label is laid out in it, never in the reserve -- the
- * jar's text stays put when shadowing widens the column
- * (`tests/fixtures/unwind2-S9b/p-plain.svg`).
+ * reserved shadow and the style's margin, translated by the margin's left/top
+ * (`:92`; `Rose.java:135`). The label is laid out in it, never in the
+ * reserve -- the jar's text stays put when shadowing widens the column
+ * (`tests/fixtures/unwind2-S9b/p-plain.svg`). `k` scales the margin, a style
+ * length, at render (`SvgGraphics.java:468-469`); the caller scales `shadow`.
  */
-export function participantBoxOf(g: ParticipantGeo): ParticipantGeo {
+export function participantBoxOf(g: ParticipantGeo, k = 1): ParticipantGeo {
   const r = reservedShadowOf(g.type, g.shadow ?? 0);
-  return r === 0 ? g : { ...g, width: g.width - r, height: g.height - r, centerX: g.x + (g.width - r) / 2 };
+  if (g.type !== 'participant' && g.type !== 'collections') return g;
+  const m = paintOfGeo(g).margin;
+  const [left, top] = [m.getLeft() * k, m.getTop() * k];
+  const [width, height] = [g.width - r - left - m.getRight() * k, g.height - r - top - m.getBottom() * k];
+  return { ...g, x: g.x + left, y: g.y + top, width, height, centerX: g.x + left + width / 2 };
 }
 
 /**
@@ -375,28 +366,30 @@ function positionParticipants(
   // the box is painted at the TOP of its area with the slack below it --
   // which puts `jobadi-87-jegi648`'s box at [10, 38) with its lifeline at 39.
   // C3: `TOP_MARGIN` is the row's own y, the way `originX` is its own x.
-  for (const g of participantGeos) {
+  participantGeos.forEach((g, i) => {
     g.y = TOP_MARGIN + maxParticipantHeight - areaOf(g);
     // AFTER the bottom-align, never before: the runs carry an absolute
     // baseline, and `g.y` is what it is measured from.
-    g.labelRuns = buildLabelRuns(participantBoxOf(g), ctx);
-  }
+    g.labelRuns = buildLabelRuns(participantBoxOf(g), ctx, participantPaintsOf(sortedParticipants[i]!).stereoFont);
+  });
 
   return { participantGeos, participantMap, participantIndex, maxParticipantHeight };
 }
 
 /** `getPreferredHeight`: a glyph kind's own rule, else
- *  `ComponentRoseParticipant`'s box plus `getDeltaCollection()` and the
- *  reserved shadow (`ComponentRoseParticipant.java:129-132`). */
+ *  `ComponentRoseParticipant`'s box plus the margin, the reserved shadow and
+ *  `getDeltaCollection()` (`ComponentRoseParticipant.java:129-132`). */
 function preferredHeightOf(
   type: ParticipantType,
   blockHeight: number,
-  boxHeight: number,
-  style: { readonly theme: Theme; readonly shadow: number; readonly measurer: StringMeasurer },
+  paint: SequencePaint,
+  ctx: ParticipantLayoutCtx,
 ): number {
-  const box =
-    (type === 'collections' ? boxHeight + COLLECTIONS_DELTA : boxHeight) + reservedShadowOf(type, style.shadow);
-  return symbolPreferredHeight(type, blockHeight, style.theme, style.shadow, style.measurer) ?? box;
+  const boxHeight = blockHeight + paint.padding.getTop() + paint.padding.getBottom();
+  const margin = paint.margin.getTop() + paint.margin.getBottom();
+  const box = boxHeight + margin + reservedShadowOf(type, paint.shadowing);
+  const symbol = symbolPreferredHeight(type, blockHeight, paint, ctx.theme, ctx.measurer);
+  return symbol ?? (type === 'collections' ? box + COLLECTIONS_DELTA : box);
 }
 
 /** Build the geometry for a single participant column at a given x offset. */
@@ -406,11 +399,10 @@ function buildParticipantGeo(
   currentX: number,
   ctx: ParticipantLayoutCtx,
 ): ParticipantGeo {
-  const { theme } = ctx;
-  const fontSpec = fontSpecOf(theme);
-  const stereoLines = visibleStereotypeLines(p, theme);
-  const background = resolveParticipantBackground(p, theme);
-  const badge = anyBadgeFor(p, ctx, background);
+  const paints = participantPaintsOf(p);
+  const { paint } = paints;
+  const stereoLines = displayedStereotypeLines(p);
+  const badge = displayedBadgeOf(p, ctx, paint.fill);
   // A visible stereotype is a SECOND row above the name
   // (`CommandParticipant.java:174-181`; the jar draws `«APIGateway»` on its
   // own line in `birocu-87-xubi808`), and so is each line the display's own
@@ -420,29 +412,27 @@ function buildParticipantGeo(
   // `y += height` per stripe (`:139-142`), and a `=` heading stripe is 18 tall
   // beside its 14pt neighbours (`bugabo-85-veki716`, jar baselines 31/55.889).
   // Identical arithmetic whenever every row shares the ambient font.
-  const rows = [...stereoLines, ...displayLines(p.display)];
-  const textHeight = labelRows(rows, fontSpec, ctx).reduce((h, r) => h + r.height, 0);
+  const rows = headRowsOf(stereoLines, p.display, { ...paints, font: paint.font });
+  const textHeight = labelRows(rows, ctx).reduce((h, r) => h + r.height, 0);
   // `getTextHeight = textBlock.height + padding.top + padding.bottom`
   // (`AbstractTextualComponent.java:110-114`) IS the painted rectangle
-  // (`ComponentRoseParticipant#drawInternalU:100-104`), and `Padding 7`
-  // expands to all four sides (`plantuml.skin:186-190`) -- the same 14 the
-  // width gets, on the other axis. Verified on 2304 corpus boxes, all 28 tall
-  // for a one-line label (`findings/participant-height.md`).
+  // (`ComponentRoseParticipant#drawInternalU:100-104`), with the merged
+  // style's padding (`Rose.java:134`; `Padding 7`, `plantuml.skin:200`).
   // `TextBlockSprited#calculateDimension` maxes the badge's own height against
   // the block's (`:57-63`); `blockHeight` is that max WITHOUT the plain box's
   // padding allowance, which is what a glyph kind sizes from (it replaced a
   // fitted `DB_HEIGHT = 80` floor).
   const blockHeight = Math.max(textHeight, badge?.height ?? 0);
-  const boxHeight = blockHeight + 2 * theme.sequence.participantPadding;
-  const shadow = participantShadowOf(p, theme);
-  const pHeight = preferredHeightOf(p.type, blockHeight, boxHeight, { theme, shadow, measurer: ctx.measurer });
+  const pHeight = preferredHeightOf(p.type, blockHeight, paint, ctx);
   const centerX = currentX + width / 2;
+  const shadow = paint.shadowing; // `getSymbolContext`'s delta shadow, `Style.java:277`
 
   return {
     id: p.id,
     display: p.display,
-    background,
-    border: resolveParticipantBorder(p, theme),
+    paint,
+    background: paint.fill,
+    border: paint.stroke,
     ...(stereoLines.length > 0 ? { stereotypeLines: stereoLines } : {}),
     ...(p.url !== undefined ? { url: p.url } : {}),
     ...(badge !== undefined ? { badge } : {}),

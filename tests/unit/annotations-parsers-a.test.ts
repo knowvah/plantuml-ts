@@ -25,10 +25,12 @@ import type { SequenceDiagramAST } from '../../src/diagrams/sequence/ast.js';
 
 import { isEmpty, isDisplayPositionedNull } from '../../src/core/annotations/index.js';
 import { astOrThrow } from '../helpers/parse-ast.js';
+import { sequenceSource } from '../helpers/sequence-source.js';
 
 /** The sequence engine's AST arm; throws naming the refusal. Every source
  *  below is upstream-recognised throughout and must never refuse. */
-const seq = (lines: readonly string[]): SequenceDiagramAST => astOrThrow(parseSequence(lines), 'sequence');
+const seq = (lines: readonly string[]): SequenceDiagramAST =>
+  astOrThrow(parseSequence(sequenceSource(lines)), 'sequence');
 
 // Pinned copies, not the gitignored tests/corpus tree — see
 // tests/fixtures/corpus/README.md. Reading the regenerable tree made these

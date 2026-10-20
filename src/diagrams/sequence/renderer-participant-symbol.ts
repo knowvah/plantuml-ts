@@ -75,9 +75,9 @@
  *      primitives, engine-local composition" split (SI14 ADR-1/ADR-2)
  */
 
-import type { Paint } from '../../core/paint.js';
+import type { ParticipantType } from './ast.js';
 import type { Theme } from '../../core/theme.js';
-import { resolveElementLineThickness } from '../../core/theme.js';
+import type { SequencePaint } from './sequence-skin-param.js';
 import { sequenceShadowFilter } from './sequence-shadow.js';
 import { attrs } from '../../core/svg.js';
 import type { StringMeasurer } from '../../core/measurer.js';
@@ -112,7 +112,7 @@ import { extractFlatContent, VERSION_PLACEHOLDER } from '../../core/klimt/docume
  *  because its component draws a bare box with no glyph at all. */
 export type SymbolParticipantType = 'database' | 'collections' | 'queue' | 'entity' | 'boundary' | 'control';
 
-/** Every kind this seam can draw. `actor` joins the symbol types here and only
+/** Every kind with a GLYPH. `actor` joins the symbol types here and only
  *  here: `ComponentRoseActor` is byte-for-byte the same component as
  *  `ComponentRoseDatabase` — same `topRightBottomLeft(0, 3, 0, 3)` padding,
  *  same `drawInternalU`, same `getPreferredWidth`/`Height`
@@ -123,17 +123,16 @@ export type SymbolParticipantType = 'database' | 'collections' | 'queue' | 'enti
 export type GlyphParticipantType = SymbolParticipantType | 'actor';
 
 /** The already-laid-out participant box, in RENDER (post-`scale-geo`)
- *  coordinates. `background`/`border` are optional so a caller may pass a bare
- *  rectangle, and are satisfied structurally by `ParticipantGeo`, whose
- *  `background`/`border` carry the inline-`#color`-over-style precedence
- *  `sequence-layout-participants.ts#resolveParticipantBackground` resolved. */
+ *  coordinates, and the participant's merged-style paint (`ParticipantGeo
+ *  .paint`, UNSCALED: klimt scales its lengths at emission through
+ *  `SvgOption.scale`, `SvgGraphics.java:468-469`). For `participant` and
+ *  `collections` the box is the PAINTED one (`participantBoxOf`). */
 export interface ParticipantSymbolGeo {
   readonly x: number;
   readonly y: number;
   readonly width: number;
   readonly height: number;
-  readonly background?: Paint;
-  readonly border?: Paint;
+  readonly paint: SequencePaint;
   /** The participant's resolved delta shadow (`ParticipantGeo.shadow`), in
    *  the same units as the box; 0 or absent draws none. */
   readonly shadow?: number;
@@ -148,25 +147,6 @@ export interface ParticipantSymbolOpts {
   readonly display: string;
   readonly theme: ScaledTheme;
 }
-
-/**
- * `element { LineThickness 0.5 }` — the bucket every participant kind's style
- * signature inherits (`ParticipantType#getStyleSignature`: `root, element,
- * sequenceDiagram, <kind>`), with no `sequenceDiagram` override for any of the
- * six kinds here.
- *
- * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:91-93
- */
-const PARTICIPANT_LINE_THICKNESS = 0.5;
-
-/**
- * `RoundCorner 5` is scoped to `sequenceDiagram { participant { ... } }`
- * alone (`skin/plantuml.skin:183-185`) and `COLLECTIONS`'s signature does not
- * include the `participant` bucket (`ParticipantType.java:77-78`), so the
- * collections rectangles fall through to the root default `RoundCorner 0`
- * (`skin/plantuml.skin:13`).
- */
-const COLLECTIONS_ROUND_CORNER = 0;
 
 /** `ComponentRoseParticipant#getDeltaCollection` — the offset of the second,
  *  "stacked" rectangle, and the term added to both preferred dimensions.
@@ -193,10 +173,6 @@ const EMPTY = TextBlockUtils.empty(0, 0);
  *  number the pinned dimensions in `renderer-participant-symbol.test.ts`
  *  reject rather than to a silently plausible one. */
 const NO_PAINT = new SymbolContext(null, null);
-/** Measure-only geometry: no `Actor*` reads it (their `calculateDimension`s
- *  are field arithmetic), and the seam's own glyphs that DO read geo
- *  (`queue`, `collections`) never take this path. */
-const ZERO_GEO: ParticipantSymbolGeo = { x: 0, y: 0, width: 0, height: 0 };
 
 /** `DriverTextSvg`'s own width-only seam, over the render's injected measurer
  *  (`ScaledTheme.measurer`). No glyph here draws a `UText`, so it is never
@@ -207,41 +183,62 @@ function driverBounderOf(measurer: StringMeasurer): DriverStringBounder {
   return { calculateDimension: (font, text) => ({ width: measurer.measure(text, font).width }) };
 }
 
+/** `Style#getStroke()` (`Style.java:299-320`): the thickness, dashed when the
+ *  style's `LineStyle` names a dash. */
+function strokeOf(paint: SequencePaint): UStroke {
+  const dash = paint.dash;
+  return dash === undefined ? UStroke.withThickness(paint.thickness) : new UStroke(dash[0]!, dash[1]!, paint.thickness);
+}
+
 /**
- * `ComponentRoseDatabase.java:66-69` — `new Fashion(biColor.getBackColor(),
- * biColor.getForeColor()).withStroke(getStroke()).withShadow(
- * biColor.getDeltaShadow())`, with the kind's own resolved colours standing in
- * for `getSymbolContext()`'s style lookup.
+ * Each component's `Fashion`, read off the merged style:
+ * - `ComponentRoseDatabase.java:66-69` re-builds it as `new Fashion(back,
+ *   fore).withStroke(getStroke()).withShadow(deltaShadow)` -- no corners;
+ * - `ComponentRoseActor`/`Boundary`/`Control`/`Entity`/`Queue` pass
+ *   `getSymbolContext()` itself (`ComponentRoseActor.java:63-64` and
+ *   siblings), which carries `withCorner(RoundCorner, DiagonalCorner)`
+ *   (`Style.java:270-281`);
+ * - `ComponentRoseParticipant` applies the colours and `getStroke()` and
+ *   rounds its rectangle by `getRoundCorner()`/`getDiagonalCorner()`
+ *   (`ComponentRoseParticipant.java:73-84,94-106`).
  */
-function symbolContextFor(
-  type: GlyphParticipantType,
-  geo: ParticipantSymbolGeo,
-  theme: Theme,
-  roundCorner = 0,
-): SymbolContext {
-  const thickness = resolveElementLineThickness(theme, type) ?? PARTICIPANT_LINE_THICKNESS;
+function symbolContextFor(type: ParticipantType, geo: ParticipantSymbolGeo): SymbolContext {
+  const paint = geo.paint;
+  const cornered = type !== 'database';
   return new SymbolContext(
-    geo.background ?? null,
-    geo.border ?? null,
-    UStroke.withThickness(thickness),
+    paint.fill,
+    paint.stroke,
+    strokeOf(paint),
     geo.shadow ?? 0,
-    roundCorner,
-    0,
+    cornered ? paint.roundCorner : 0,
+    cornered ? paint.diagonalCorner : 0,
   );
 }
 
-/** `ComponentRoseParticipant#drawInternalU:93-96` — the stacked rectangle
- *  drawn BEHIND the participant's own box, `getDeltaCollection()` to its
- *  right and that much shorter in both axes. */
-function collectionsGlyph(geo: ParticipantSymbolGeo, ctx: SymbolContext): TextBlock {
-  const width = geo.width - COLLECTIONS_DELTA;
-  const height = geo.height - COLLECTIONS_DELTA;
+/**
+ * `ComponentRoseParticipant#drawInternalU:101-111`: ONE rectangle,
+ * `getTextWidth` x `getTextHeight`, rounded and diagonal-cornered by the
+ * style; a `collections` head draws it twice, first `getDeltaCollection()`
+ * to the right, then that much down. `geo` is the painted box, so the
+ * rectangle is `geo` less the delta.
+ */
+function participantRectangles(geo: ParticipantSymbolGeo, ctx: SymbolContext, collections: boolean): TextBlock {
+  const delta = collections ? COLLECTIONS_DELTA : 0;
+  const width = geo.width - delta;
+  const height = geo.height - delta;
   return {
-    calculateDimension: (): XDimension2D => new XDimension2D(width, height),
+    calculateDimension: (): XDimension2D => new XDimension2D(geo.width, geo.height),
     drawU(ug: UGraphic): void {
-      const box = URectangle.build(width, height).rounded(COLLECTIONS_ROUND_CORNER);
-      box.setDeltaShadow(ctx.getDeltaShadow());
-      ctx.apply(ug).draw(box);
+      const rect = URectangle.build(width, height)
+        .rounded(ctx.getRoundCorner())
+        .diagonalCorner(ctx.getDiagonalCorner());
+      rect.setDeltaShadow(ctx.getDeltaShadow());
+      ug = ctx.apply(ug);
+      if (collections) {
+        ug.apply(UTranslate.dx(delta)).draw(rect);
+        ug = ug.apply(UTranslate.dy(delta));
+      }
+      ug.draw(rect);
     },
   };
 }
@@ -273,13 +270,11 @@ function simpleGlyph(type: 'boundary' | 'control' | 'entity', ctx: SymbolContext
   return new EntityDomain(ctx);
 }
 
-/** The `ComponentRose*` dispatch of `Rose.java:157-190`, one arm per kind. */
-function glyphFor(type: GlyphParticipantType, geo: ParticipantSymbolGeo, theme: Theme): TextBlock {
-  if (type === 'actor')
-    return actorStyleGetTextBlock(resolveActorStyle(theme.actorStyle), symbolContextFor(type, geo, theme));
-  if (type === 'collections')
-    return collectionsGlyph(geo, symbolContextFor(type, geo, theme, COLLECTIONS_ROUND_CORNER));
-  const ctx = symbolContextFor(type, geo, theme);
+/** The `ComponentRose*` dispatch of `Rose.java:137-190`, one arm per kind. */
+function glyphFor(type: ParticipantType, geo: ParticipantSymbolGeo, theme: Theme): TextBlock {
+  const ctx = symbolContextFor(type, geo);
+  if (type === 'actor') return actorStyleGetTextBlock(resolveActorStyle(theme.actorStyle), ctx);
+  if (type === 'participant' || type === 'collections') return participantRectangles(geo, ctx, type === 'collections');
   if (type === 'queue') return queueGlyph(geo, ctx);
   if (type === 'boundary' || type === 'control' || type === 'entity') return simpleGlyph(type, ctx);
   return new USymbolDatabase().asSmall(
@@ -303,16 +298,12 @@ function glyphFor(type: GlyphParticipantType, geo: ParticipantSymbolGeo, theme: 
  * comes first and the glyph is translated down by `getTextHeight()`, which is
  * `getPreferredHeight() - glyphHeight`. `queue` and `collections` have no such
  * flip — `ComponentRoseQueue#drawInternalU` applies `dx` only, and
- * `ComponentRoseParticipant` draws both rectangles at fixed offsets.
+ * `ComponentRoseParticipant` draws its rectangles at fixed offsets inside
+ * the painted box.
  */
-function glyphOffset(
-  type: GlyphParticipantType,
-  geo: ParticipantSymbolGeo,
-  glyph: XDimension2D,
-  head: boolean,
-): UTranslate {
+function glyphOffset(type: ParticipantType, geo: ParticipantSymbolGeo, glyph: XDimension2D, head: boolean): UTranslate {
   const dx = (geo.width - glyph.getWidth()) / 2;
-  if (type === 'collections') return new UTranslate(COLLECTIONS_DELTA, 0);
+  if (type === 'participant' || type === 'collections') return new UTranslate(0, 0);
   if (type === 'queue') return new UTranslate(dx, 0);
   return new UTranslate(dx, head ? 0 : geo.height - glyph.getHeight());
 }
@@ -322,23 +313,25 @@ function glyphOffset(
  * (`ComponentRoseDatabase.java:95-105`) — the glyph half only. See the module
  * header for which composition rule each kind's caller must apply; the value
  * is a pure upstream constant for five of the six kinds and the collections
- * delta for the sixth, so no `Theme` lookup reaches it.
+ * delta for the sixth.
  */
 export function measureParticipantSymbol(
   type: GlyphParticipantType,
+  paint: SequencePaint,
   theme: Theme,
   measurer: StringMeasurer,
-  shadow = 0,
 ): { width: number; height: number } {
   if (type === 'actor') {
-    // The ONE kind whose glyph dimension is theme-dependent:
+    // The ONE kind whose glyph dimension is style-dependent:
     // `ActorStickMan` 27x60 (or 26x33 hollow, 55x61 awesome) per
-    // `skinparam actorStyle` (`ActorStyle.java:60-71`) -- and
-    // shadow-dependent: the stick man and the hollow actor add the delta to
-    // their height (`ActorStickMan.java:121`, `ActorHollow.java:110`).
-    const probe = glyphFor('actor', { ...ZERO_GEO, shadow }, theme).calculateDimension(
-      new MeasurerStringBounder(measurer),
-    );
+    // `skinparam actorStyle` (`ActorStyle.java:60-71`), widened and heightened
+    // by twice the stroke and heightened by the delta shadow
+    // (`ActorStickMan.java:116-122`, `ActorHollow.java:110`).
+    const probe = glyphFor(
+      'actor',
+      { x: 0, y: 0, width: 0, height: 0, paint, shadow: paint.shadowing },
+      theme,
+    ).calculateDimension(new MeasurerStringBounder(measurer));
     return { width: probe.getWidth(), height: probe.getHeight() };
   }
   if (type === 'collections') return { width: COLLECTIONS_DELTA, height: COLLECTIONS_DELTA };
@@ -395,7 +388,7 @@ function glyphContent(svg: string, shadow: number): string {
  * module header's Scale section; that helper hard-codes scale 1).
  */
 export function renderParticipantSymbol(
-  type: GlyphParticipantType,
+  type: ParticipantType,
   geo: ParticipantSymbolGeo,
   opts: ParticipantSymbolOpts,
 ): string {

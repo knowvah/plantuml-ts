@@ -17,50 +17,31 @@ import type { Point2D } from '../../core/klimt/UTranslate.js';
 import type { Theme } from '../../core/theme.js';
 import { line, polygon, ellipse } from '../../core/svg.js';
 import type { ArrowCircle, ArrowHeadKind, ArrowSegment, HeadGeometry } from './sequence-arrowhead.js';
+import type { SequencePaint } from './sequence-skin-param.js';
 import { scaleHeadGeometry } from './scale-geo.js';
 import { noGradient } from '../../core/paint.js';
 
 /**
- * The two colours `drawDressing1`/`drawDressing2` reach for:
- * `getForegroundColor()` strokes (and, via `.bg()`, FILLS) every head, and
- * `getBackgroundColor()` fills the `o` circle only.
- * @see skin/rose/ComponentRoseArrow.java:201-204,238-241
+ * What one arrow end reads off the message's merged arrow style
+ * (`sequence-arrow-paint.ts#messagePaint`), read lazily, as the component
+ * reads only what it draws:
+ * - `stroke` — `getForegroundColor()`, the style's `LineColor`
+ *   (`AbstractComponentRoseArrow.java:65,80-82`): every head's stroke and,
+ *   via `.bg()`, the polygon's fill (`ComponentRoseArrow.java:230,267`);
+ * - `fill` — `getBackgroundColor()`, the style's `BackGroundColor`
+ *   (`:66,84-86`): the `o` circle's fill only (`:203,239`). The default skin
+ *   pins it to black (`plantuml.skin:306-310` `arrow { BackGroundColor
+ *   black }`), not the document background;
+ * - `thickness` — `arrowConfiguration.withThickness(stroke.getThickness())`
+ *   (`:67-68`), which `applyThicknessOnly` strokes the ASYNC pair with
+ *   (`ArrowConfiguration.java:262-264`; `ComponentRoseArrow.java:211-216,
+ *   248-253`).
+ *
+ * The glyph draws flat (cdd7-T1a D3): a gradient line colour paints its
+ * first stop.
  */
-interface ArrowPaint {
-  readonly color: string;
-  readonly background: string;
-}
-
-/**
- * `getBackgroundColor()` — the ARROW STYLE's own `BackGroundColor`, which the
- * default skin pins to **black**, NOT the document background:
- *
- *   `arrow { FontSize 13 / LineThickness 1.0 / BackGroundColor black }`
- *   (`~/git/plantuml/skin/plantuml.skin:306-310`)
- *
- * reached through `getColorBackGround()`
- * (`skin/rose/AbstractComponentRoseArrow.java:66,84-86`) ->
- * `getColor(PName.BackGroundColor)` (`skin/AbstractComponent.java:105-107`).
- *
- * Not fitted, and not read off one fixture: all 51 sequence corpus goldens
- * carrying an `rx="4"` decoration circle emit `fill="#000"`, including
- * `dakake-85-nemi992`/`labudu-49-fove649` (`background:#FF0000`) and
- * `sufevi-44-xipa294` (`background:#D3D3D3`) — so the fill cannot be the
- * document background. Nor is it the line colour: `TeozTimelineIssues_
- * 0007_Test` emits `<ellipse ... fill="#000" style="stroke:#F00;...">`, a red
- * arrow with a black dot, because a per-message `-[#red]->` overrides
- * `PName.LineColor` only (`sequencediagram/AbstractMessage.java:69-70`).
- *
- * A literal rather than a theme slot because the port models no `arrow`
- * style bucket for it; `resolveElementPaint(theme, 'arrow', 'background')`
- * would cascade to `nodeBackground`, a different wrong answer. Wiring a real
- * `<style> arrow { BackGroundColor }` override belongs with the style layer.
- */
-const ARROW_STYLE_BACKGROUND = '#000000';
-
-export function paintOf(theme: Theme): ArrowPaint {
-  // cdd7-T1a (D3): `colors.arrow` is a Paint; the glyph draws flat.
-  return { color: noGradient(theme.colors.arrow), background: ARROW_STYLE_BACKGROUND };
+function headColorOf(paint: SequencePaint): string {
+  return noGradient(paint.stroke);
 }
 
 /**
@@ -74,18 +55,19 @@ export function niceArrowOf(theme: Theme): boolean {
 }
 
 /**
- * Head stroke thickness. `withDirectionNormal()` seeds `thickness = 1` and
- * `AbstractComponentRoseArrow`'s constructor overwrites it with the style's
- * own stroke, which is `UStroke.simple()` — 1 — for every fixture this port
- * can produce.
- * @see skin/ArrowConfiguration.java:88-92
- * @see skin/rose/AbstractComponentRoseArrow.java:66-68
+ * The polygon head's stroke: nothing applies a stroke before
+ * `drawDressing1`/`drawDressing2` draw it (`ComponentRoseArrow.java:230,267`;
+ * `ComponentRoseSelfArrow.java:149,172`), so it is the `UGraphic`'s initial
+ * `UStroke.simple()` — 1, whatever the style's thickness. Jar-verified with
+ * `skinparam sequenceArrowThickness 2`: shaft `stroke-width:2`, polygon
+ * `stroke-width:1`.
+ * @see klimt/drawing/AbstractCommonUGraphic.java:58
  */
-export const ARROW_THICKNESS = 1;
+const POLYGON_THICKNESS = 1;
 
 /**
- * The CROSSX saltire is the ONE head kind upstream strokes at 2, on both
- * sides and in the self component. `HeadGeometry.lines` cannot carry a
+ * The CROSSX saltire is stroked at a literal 2, on both sides and in the self
+ * component, whatever the style. `HeadGeometry.lines` cannot carry a
  * thickness (T1's interface contract), so it is applied here, at the
  * emitter, from the head kind.
  * @see skin/rose/ComponentRoseArrow.java:219,256
@@ -93,8 +75,9 @@ export const ARROW_THICKNESS = 1;
  */
 const CROSSX_THICKNESS = 2;
 
-function lineThicknessOf(kind: ArrowHeadKind): number {
-  return kind === 'CROSSX' ? CROSSX_THICKNESS : ARROW_THICKNESS;
+/** CROSSX at its literal 2; the ASYNC pair at the style thickness (`applyThicknessOnly`). */
+function lineThicknessOf(kind: ArrowHeadKind, paint: SequencePaint): number {
+  return kind === 'CROSSX' ? CROSSX_THICKNESS : paint.thickness;
 }
 
 // ---------------------------------------------------------------------------
@@ -102,12 +85,13 @@ function lineThicknessOf(kind: ArrowHeadKind): number {
 // ---------------------------------------------------------------------------
 
 /** `ug.apply(getForegroundColor().bg()).draw(polygon)` — filled AND stroked. */
-function headPolygonMarkup(points: readonly Point2D[], tip: Point2D, paint: ArrowPaint, k: number): string {
+function headPolygonMarkup(points: readonly Point2D[], tip: Point2D, paint: SequencePaint, k: number): string {
   const translated = points.map((p) => ({ x: tip.x + p.x, y: tip.y + p.y }));
+  const color = headColorOf(paint);
   return polygon(translated, {
-    fill: paint.color,
-    stroke: paint.color,
-    strokeWidth: ARROW_THICKNESS * k,
+    fill: color,
+    stroke: color,
+    strokeWidth: POLYGON_THICKNESS * k,
   });
 }
 
@@ -116,14 +100,15 @@ function headLinesMarkup(
   segments: readonly ArrowSegment[],
   kind: ArrowHeadKind,
   tip: Point2D,
-  paint: ArrowPaint,
+  paint: SequencePaint,
   k: number,
 ): string {
-  const thickness = lineThicknessOf(kind) * k;
+  const thickness = lineThicknessOf(kind, paint) * k;
+  const color = headColorOf(paint);
   return segments
     .map(([a, b]) =>
       line(tip.x + a.x, tip.y + a.y, tip.x + b.x, tip.y + b.y, {
-        stroke: paint.color,
+        stroke: color,
         strokeWidth: thickness,
       }),
     )
@@ -135,11 +120,11 @@ function headLinesMarkup(
  * filled with the component's background colour.
  * @see skin/rose/ComponentRoseArrow.java:201-204,237-239
  */
-function headCircleMarkup(arrowCircle: ArrowCircle, tip: Point2D, paint: ArrowPaint): string {
+function headCircleMarkup(arrowCircle: ArrowCircle, tip: Point2D, paint: SequencePaint): string {
   const radius = arrowCircle.d / 2;
   return ellipse(tip.x + arrowCircle.cx, tip.y + arrowCircle.cy, radius, radius, {
-    fill: paint.background,
-    stroke: paint.color,
+    fill: noGradient(paint.fill),
+    stroke: headColorOf(paint),
     'stroke-width': arrowCircle.thickness,
   });
 }
@@ -154,7 +139,7 @@ export function renderArrowHead(
   head: HeadGeometry,
   kind: ArrowHeadKind,
   tip: Point2D,
-  paint: ArrowPaint,
+  paint: SequencePaint,
   k: number,
 ): string {
   // `head` is `sequence-arrowhead.ts`'s tip-local, unscaled vocabulary —

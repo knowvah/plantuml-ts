@@ -6,6 +6,7 @@ import type {
   MessageGeo,
   ActivationGeo,
   NoteGeo,
+  ElseGeo,
   FrameGeo,
   DividerGeo,
   ParticipantGeo,
@@ -27,16 +28,37 @@ import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import type { ArrowConfiguration } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
 import { inflateSync } from 'node:zlib';
-import { arrowFontSpecOf, fontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
+import { fontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
 import { participantLabelCy } from '../../../src/diagrams/sequence/sequence-layout-participant-sizing.js';
-import { noteFontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
+import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
 import {
-  dividerFontSpecOf,
-  DIVIDER_PADDING,
-  DIVIDER_LABEL_DELTA_X,
-} from '../../../src/diagrams/sequence/divider-style.js';
-import { HEADER_PADDING, HEADER_FONT_SIZE, GROUP_FONT_SIZE } from '../../../src/diagrams/sequence/frame-style.js';
+  componentStyle,
+  createSequenceStyleDispatch,
+  currentStyleBuilder,
+  dividerStyle,
+  noteStyle,
+  paintOf,
+  type SequencePaint,
+} from '../../../src/diagrams/sequence/sequence-skin-param.js';
+import { boxLabelRuns, boxPaint, type BoxFrame } from '../../../src/diagrams/sequence/sequence-layout-box.js';
+import { DIVIDER_PADDING, DIVIDER_LABEL_DELTA_X } from '../../../src/diagrams/sequence/divider-style.js';
+import { atomFontSpec } from '../../../src/diagrams/sequence/sequence-creole-text-atom.js';
+import { defaultMessageFont } from '../../../src/diagrams/sequence/sequence-arrow-paint.js';
+
+/** The default skin's builder: a source with no style declarations. */
+const DEFAULT_STYLE = currentStyleBuilder(createSequenceStyleDispatch({ lines: [], type: 'sequence' }));
+import { HEADER_PADDING } from '../../../src/diagrams/sequence/frame-style.js';
+import { DEFAULT_GROUP_PAINTS, groupPaintsOf } from './frame-paint-fixtures.js';
 import { noGradient } from '../../../src/core/paint.js';
+import { DEFAULT_SEQUENCE_STYLE_BUILDER, sequenceSource, wholeLifelines } from '../../helpers/sequence-source.js';
+
+/** What layout paints a default-skin activation bar and divider with (sdd1
+ *  T2b/T2d): the merged `activationBox` / `separator` styles. */
+const ACTIVATION_PAINT = paintOf(
+  componentStyle(DEFAULT_SEQUENCE_STYLE_BUILDER, 'ACTIVATION_BOX'),
+  HColorSet.instance(),
+);
+const DIVIDER_PAINT = paintOf(dividerStyle(DEFAULT_SEQUENCE_STYLE_BUILDER), HColorSet.instance());
 
 /** Decode an 8-bit RGBA PNG's pixels. `zlib` is a TEST oracle only -- the
  *  encoder itself stays browser-safe. */
@@ -102,6 +124,11 @@ function participantGeo(base: Omit<ParticipantGeo, 'labelRuns'>): ParticipantGeo
   return { ...base, labelRuns: labelRunsFor(base) };
 }
 
+/** `groupHeader { FontSize 13 }` (`plantuml.skin:127`). */
+const HEADER_FONT_SIZE = 13;
+/** `group { FontSize 11 }` (`plantuml.skin:119`), the comment's `smallFont2`. */
+const GROUP_FONT_SIZE = 11;
+
 /** A hand-built frame's tab runs, mirroring `sequence-layout-events.ts
  *  #buildTabRuns` — A4 moved that placement into layout. Measured, so an
  *  emitted `textLength` cannot drift from the measurer. */
@@ -131,7 +158,7 @@ function tabRunsFor(f: Pick<FrameGeo, 'x' | 'y' | 'tabText' | 'tabComment' | 'ta
  *  A5 moved that placement into layout. Measured at `note { FontSize 13 }`. */
 function noteRunsFor(n: { x: number; y: number; text: string }): TextRun[] {
   const measurer = new DeterministicMeasurer();
-  const font = noteFontSpecOf(defaultTheme);
+  const font = atomFontSpec(NOTE_PAINT.font);
   const lineHeight = measurer.measure('M', font).height;
   const ascent = lineHeight - measurer.getDescent(font, 'M');
   const NOTE_PADDING = 10;
@@ -145,25 +172,21 @@ function noteRunsFor(n: { x: number; y: number; text: string }): TextRun[] {
   }));
 }
 
-/** A box group's label run, mirroring `layout.ts#boxLabelRun`. */
-function boxRunFor(label: string, boxX: number): TextRun {
-  const measurer = new DeterministicMeasurer();
-  const BOX_LABEL_FONT_SIZE = 11;
-  const BOX_LABEL_PADDING = 4;
-  const font = { family: defaultTheme.fontFamily, size: BOX_LABEL_FONT_SIZE };
-  const lineHeight = measurer.measure('M', font).height;
-  return {
-    text: label,
-    x: boxX + BOX_LABEL_PADDING,
-    y: BOX_LABEL_FONT_SIZE + BOX_LABEL_PADDING,
-    textWidth: measurer.measure(label, font).width,
-    textAscent: lineHeight - measurer.getDescent(font, 'M'),
-    textLineHeight: lineHeight,
-  };
+/** A hand-built box's paint and title, through the layout's own seam
+ *  (`sequence-layout-box.ts`) over the default skin. */
+function boxPaintFor(color: string): SequencePaint {
+  return boxPaint({ id: 'b', label: '', color, participantIds: [], styleBuilder: DEFAULT_STYLE });
 }
 
+function boxRunsFor(label: string, frame: BoxFrame, color: string): readonly TextRun[] {
+  return boxLabelRuns(label, frame, boxPaintFor(color), new DeterministicMeasurer());
+}
+
+/** A hand-built note's paint over the default skin (`Note.java:75-82`). */
+const NOTE_PAINT = paintOf(noteStyle(DEFAULT_STYLE, 'note'), HColorSet.instance());
+
 function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
-  return {
+  const geo: Omit<SequenceGeometry, 'lifelineSegments'> = {
     totalWidth: 400,
     totalHeight: 300,
     showFootbox: true,
@@ -200,6 +223,8 @@ function makeGeo(overrides?: Partial<SequenceGeometry>): SequenceGeometry {
     boxes: [],
     ...overrides,
   };
+  const ids = geo.participants.map((p) => p.id);
+  return { lifelineSegments: wholeLifelines(ids, geo.headHeight, geo.lifelineEndY), ...geo };
 }
 
 /** The six shapes the DELETED `MessageStyle` enum named, as the
@@ -245,6 +270,24 @@ function makeSyncMessage(overrides?: Partial<MessageGeo>): MessageGeo {
 // Acceptance criterion 1: Two participants → ≥ 2 <rect elements
 // ---------------------------------------------------------------------------
 
+describe('renderSequence — document background (SvgGraphics.java:189-191)', () => {
+  const withBackground = (background: string) => ({ ...defaultTheme, colors: { ...defaultTheme.colors, background } });
+
+  it('hands the shell the HColor#toSvg form, so `white` (!theme plain) is #FFFFFF and draws no canvas rect', () => {
+    const fragment = renderSequence(makeGeo(), withBackground('white'), TEST_MEASURER);
+    expect(fragment.background).toBe('#FFFFFF');
+    const svg = assembleSvg(fragment);
+    expect(svg).toContain('background:#FFFFFF;');
+    expect(svg).not.toContain('<rect x="0" y="0"');
+  });
+
+  it("still paints a non-white background as the content group's first rect, in its #RRGGBB form", () => {
+    const svg = assembleSvg(renderSequence(makeGeo(), withBackground('lightblue'), TEST_MEASURER));
+    expect(svg).toContain('background:#ADD8E6;');
+    expect(svg).toMatch(/<rect x="0" y="0" width="\d+" height="\d+" fill="#ADD8E6"/);
+  });
+});
+
 describe('renderSequence — participant boxes', () => {
   it('emits at least 2 rects for two participants', () => {
     const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme, TEST_MEASURER));
@@ -252,9 +295,11 @@ describe('renderSequence — participant boxes', () => {
     expect(rectCount).toBeGreaterThanOrEqual(2);
   });
 
-  it('uses theme background color for participant fill', () => {
+  it('fills a participant without paint from the default skin (sdd1 T2a)', () => {
+    // A geo with no `paint` resolves the default-skin participant style:
+    // `participant { BackGroundColor }` from `plantuml.skin:4,198`.
     const svg = assembleSvg(renderSequence(makeGeo(), defaultTheme, TEST_MEASURER));
-    expect(svg).toContain(`fill="${shortenColor(defaultTheme.colors.background)}"`);
+    expect(svg).toContain('fill="#E2E2F0"');
   });
 
   it('emits participant display text', () => {
@@ -336,9 +381,9 @@ describe('renderSequence — messages', () => {
     const numberRun = msg.labelNumber;
     expect(numberRun).toBeDefined();
     // Measured at the ARROW font, which is what `messageLabelBlock` lays the
-    // block out with: `arrow { FontSize 13 }` (`plantuml.skin:306-308`), not
-    // the ambient 14 every other sequence element uses.
-    const numberWidth = new FormulaMeasurer().measure('3', arrowFontSpecOf(defaultTheme)).width;
+    // block out with: `arrow { FontSize 13 }` (`plantuml.skin:317`), not the
+    // ambient 14 every other sequence element uses.
+    const numberWidth = new FormulaMeasurer().measure('3', atomFontSpec(defaultMessageFont())).width;
     // `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` -- `Display.java:706`.
     expect(msg.labelLines[0]?.x).toBeCloseTo((numberRun?.x ?? 0) + numberWidth + 4, 6);
     // `VerticalAlignment.CENTER` against a one-line label puts both on one row.
@@ -401,7 +446,7 @@ describe('renderSequence — message lifecolor, url and stereotype', () => {
     // an `HColor` that only reaches `diagram.activate` on the `+` leg. The
     // bar itself is only ever emitted on close (no end-of-diagram sweep for
     // dangling activations in this port), so the fixture must close it.
-    const ast = parseSequence(['Alice -> Bob ++ #red: go', 'Bob --> Alice --: done']);
+    const ast = parseSequence(sequenceSource(['Alice -> Bob ++ #red: go', 'Bob --> Alice --: done']));
     if ('refused' in ast) throw new Error(`parseSequence refused: ${'message' in ast ? ast.message : ''}`);
     const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
     const activation = geo.events.find((e): e is ActivationGeo => e.kind === 'activation');
@@ -418,7 +463,7 @@ describe('renderSequence — message lifecolor, url and stereotype', () => {
     // `manageActivations`'s `-`/`!` legs always pass `null`
     // (`CommandArrow.java:445-450`) -- a deactivate is never colored, even
     // when the opening `++` supplied one.
-    const ast = parseSequence(['Alice -> Bob ++ #red: go', 'Bob --> Alice --: done']);
+    const ast = parseSequence(sequenceSource(['Alice -> Bob ++ #red: go', 'Bob --> Alice --: done']));
     if ('refused' in ast) throw new Error(`parseSequence refused: ${'message' in ast ? ast.message : ''}`);
     const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
     const activations = geo.events.filter((e): e is ActivationGeo => e.kind === 'activation');
@@ -463,7 +508,7 @@ describe('renderSequence — message lifecolor, url and stereotype', () => {
   });
 
   it('end-to-end: url and stereotype parse and lay out onto MessageGeo', () => {
-    const ast = parseSequence(['Alice -> Bob <<stereo>> [[http://example.com]]: hi']);
+    const ast = parseSequence(sequenceSource(['Alice -> Bob <<stereo>> [[http://example.com]]: hi']));
     if ('refused' in ast) throw new Error(`parseSequence refused: ${'message' in ast ? ast.message : ''}`);
     const geo = layoutSequence(ast, defaultTheme, new FixedMeasurer(50, 14));
     const msg = geo.events.find((e): e is MessageGeo => e.kind === 'message');
@@ -623,7 +668,9 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
   it('dashes a self reply loop', () => {
     const svg = assembleSvg(renderSequence(selfGeo('reply'), defaultTheme, TEST_MEASURER));
     // The dash reaches all THREE strokes, not just the first: a reply loop
-    // that dashed only its outgoing segment would look like two arrows.
+    // that dashed only its outgoing segment would look like two arrows. It is
+    // `new UStroke(2, 2, thickness)` (`ArrowConfiguration.java:256-257`, the
+    // deprecated `applyStroke(ug)` `ComponentRoseSelfArrow.java:81` calls).
     for (const seg of [
       `<line x1="${SELF_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${SELF_Y}"`,
       `<line x1="${LOOP_RIGHT_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
@@ -631,7 +678,7 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
     ]) {
       expect(svg).toContain(
         `${seg} stroke="${shortenColor(noGradient(defaultTheme.colors.arrow))}" stroke-width="1" ` +
-          'stroke-dasharray="5,5"',
+          'stroke-dasharray="2,2"',
       );
     }
   });
@@ -660,7 +707,15 @@ describe('renderSequence -- pass order (sequence-participant-g-wrapper T3)', () 
     const { body } = renderSequence(
       makeGeo({
         events: [
-          { kind: 'activation', participantId: 'Alice', lifelineX: 80, y: 60, height: 40, level: 1 },
+          {
+            kind: 'activation',
+            participantId: 'Alice',
+            lifelineX: 80,
+            y: 60,
+            height: 40,
+            level: 1,
+            paint: ACTIVATION_PAINT,
+          },
           makeSyncMessage(),
         ],
       }),
@@ -754,6 +809,7 @@ describe('renderSequence — activations', () => {
       y: 50,
       height: 60,
       level: 1,
+      paint: ACTIVATION_PAINT,
     };
     const geo = makeGeo({ events: [activation] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
@@ -770,6 +826,7 @@ describe('renderSequence — activations', () => {
       y: 50,
       height: 60,
       level: 1,
+      paint: ACTIVATION_PAINT,
     };
     const geo = makeGeo({ events: [activation] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
@@ -778,6 +835,13 @@ describe('renderSequence — activations', () => {
   });
 
   it('activation uses custom color when provided', () => {
+    // The colour reaches the bar through its paint: layout overrides the
+    // style's `BackGroundColor` with it (`LiveBoxesDrawer.java:146`).
+    const red = HColorSet.instance().getColor('#F00');
+    const style = componentStyle(DEFAULT_SEQUENCE_STYLE_BUILDER, 'ACTIVATION_BOX').eventuallyOverride(
+      'BackGroundColor',
+      red,
+    );
     const activation: ActivationGeo = {
       kind: 'activation',
       participantId: 'Alice',
@@ -785,6 +849,7 @@ describe('renderSequence — activations', () => {
       y: 50,
       height: 60,
       level: 1,
+      paint: paintOf(style, HColorSet.instance()),
       color: '#F00',
     };
     const geo = makeGeo({ events: [activation] });
@@ -798,9 +863,10 @@ describe('renderSequence — activations', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderSequence — notes', () => {
-  it('note geo produces a rect and text', () => {
+  it('note geo draws the Opale polygon and its corner, then the text', () => {
     const note: NoteGeo = {
       kind: 'note',
+      paint: NOTE_PAINT,
       x: 50,
       y: 80,
       width: 120,
@@ -812,13 +878,20 @@ describe('renderSequence — notes', () => {
     };
     const geo = makeGeo({ events: [note] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
-    expect(svg).toContain('<rect');
+    // `Opale.getPolygonNormal` / `#getCorner` (`Opale.java:134-157`), in the
+    // vertex order the jar emits (`metano-36-gevu843`); `note { LineThickness
+    // 0.5 }` and `BackGroundColor --note-background` (`plantuml.skin:3,322-326`)
+    // over `root { LineColor #181818 }` (`:16`).
+    const paint = 'fill="#FEFFDD" stroke="#181818" stroke-width="0.5"';
+    expect(svg).toContain(`<path d="M50,80 L50,120 L170,120 L170,90 L160,80 L50,80" ${paint}/>`);
+    expect(svg).toContain(`<path d="M160,80 L160,90 L170,90 L160,80" ${paint}/>`);
     expect(svg).toContain('remember this');
   });
 
-  it('note uses noteBackground color', () => {
+  it("note fills with the note style's BackGroundColor (plantuml.skin:3,324)", () => {
     const note: NoteGeo = {
       kind: 'note',
+      paint: NOTE_PAINT,
       x: 50,
       y: 80,
       width: 120,
@@ -830,12 +903,13 @@ describe('renderSequence — notes', () => {
     };
     const geo = makeGeo({ events: [note] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
-    expect(svg).toContain(defaultTheme.colors.noteBackground);
+    expect(svg).toContain('fill="#FEFFDD"');
   });
 
   it('multiline note emits multiple text elements', () => {
     const note: NoteGeo = {
       kind: 'note',
+      paint: NOTE_PAINT,
       x: 50,
       y: 80,
       width: 120,
@@ -861,6 +935,7 @@ describe('renderSequence — frames', () => {
     // Tab geometry (tabText/tabTextWidth/tabWidth/tabHeight) is a T5-only
     // fixture value (D9) — not exercised by this test's assertions.
     const frame: FrameGeo = {
+      ...DEFAULT_GROUP_PAINTS,
       kind: 'frame',
       frameType: 'loop',
       label: 'i < 5',
@@ -886,8 +961,10 @@ describe('renderSequence — frames', () => {
     // The frame's own outer border is a SOLID rect
     // (`ComponentRoseGroupingHeader#drawInternalU`, no dash anywhere in that
     // component) -- dashing lives on the `else` divider only (`ElseTile
-    // .java:104`: "its OWN divider (dashed line + label strip)").
+    // .java:104`: "its OWN divider (dashed line + label strip)"), which is
+    // its own tile in the stream.
     const frame: FrameGeo = {
+      ...DEFAULT_GROUP_PAINTS,
       kind: 'frame',
       frameType: 'alt',
       label: 'x > 0',
@@ -895,7 +972,7 @@ describe('renderSequence — frames', () => {
       y: 60,
       width: 300,
       height: 100,
-      branchSeparators: [{ y: 110, label: 'x <= 0', runs: [] }],
+      branchSeparators: [{ y: 110, label: 'x <= 0' }],
       refBody: [],
       // A4: tab text is placed in layout; these cases assert frame boxes.
       tabRuns: [],
@@ -904,9 +981,14 @@ describe('renderSequence — frames', () => {
       tabWidth: 69,
       tabHeight: 17,
     };
-    const geo = makeGeo({ events: [frame] });
+    const frameOnly = assembleSvg(renderSequence(makeGeo({ events: [frame] }), defaultTheme, TEST_MEASURER));
+    expect(frameOnly).not.toContain('stroke-dasharray="2,2"');
+    const elseGeo: ElseGeo = { paint: DEFAULT_GROUP_PAINTS.paint, kind: 'else', x: 30, width: 300, y: 110, runs: [] };
+    const geo = makeGeo({ events: [frame, elseGeo] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
-    expect(svg).toContain('stroke-dasharray');
+    expect(svg).toContain(
+      '<line x1="30" y1="111" x2="330" y2="111" stroke="#000" stroke-width="1" stroke-dasharray="2,2"/>',
+    );
   });
 
   it('frame label includes frameType + comment text', () => {
@@ -915,6 +997,7 @@ describe('renderSequence — frames', () => {
     // `GroupingTile.java:126-127`. `renderGroupingHeaderForeground` draws
     // `tabComment` bracketed.
     const frame: FrameGeo = {
+      ...DEFAULT_GROUP_PAINTS,
       kind: 'frame',
       frameType: 'opt',
       label: 'condition',
@@ -955,10 +1038,19 @@ describe('renderSequence — background pass (T6)', () => {
   it('emits nothing extra for messages, notes, activations and dividers', () => {
     const geo = makeGeo({
       events: [
-        { kind: 'activation', participantId: 'Alice', lifelineX: 80, y: 60, height: 40, level: 1 },
+        {
+          kind: 'activation',
+          participantId: 'Alice',
+          lifelineX: 80,
+          y: 60,
+          height: 40,
+          level: 1,
+          paint: ACTIVATION_PAINT,
+        },
         makeSyncMessage(),
         {
           kind: 'note',
+          paint: NOTE_PAINT,
           x: 40,
           y: 120,
           width: 80,
@@ -970,6 +1062,7 @@ describe('renderSequence — background pass (T6)', () => {
         },
         {
           kind: 'divider',
+          paint: DIVIDER_PAINT,
           labelRuns: dividerRunsFor(['step']),
           text: 'step',
           lines: ['step'],
@@ -996,6 +1089,7 @@ describe('renderSequence — background pass (T6)', () => {
     // both land before pass 2 (lifelines), which is where the OLD
     // (pre-T6) inline border used to be the first frame-related output.
     const frame: FrameGeo = {
+      ...groupPaintsOf(undefined, { backColorGeneral: '#FF0000' }),
       kind: 'frame',
       frameType: 'group',
       label: '',
@@ -1023,6 +1117,7 @@ describe('renderSequence — background pass (T6)', () => {
 
   it('nested groups emit outer band, outer outline, inner band, inner outline', () => {
     const outer: FrameGeo = {
+      ...groupPaintsOf(undefined, { backColorGeneral: '#FF0000' }),
       kind: 'frame',
       frameType: 'group',
       label: '',
@@ -1041,6 +1136,7 @@ describe('renderSequence — background pass (T6)', () => {
       tabHeight: 17,
     };
     const inner: FrameGeo = {
+      ...groupPaintsOf(undefined, { backColorGeneral: '#00FF00' }),
       kind: 'frame',
       frameType: 'group',
       label: '',
@@ -1137,7 +1233,7 @@ describe('renderSequence — [hidden] arrows', () => {
  *  adds. Measured at the divider's own 13pt bold. */
 function dividerRunsFor(lines: readonly string[]): TextRun[] {
   const measurer = new DeterministicMeasurer();
-  const font = dividerFontSpecOf(defaultTheme);
+  const font = atomFontSpec(DIVIDER_PAINT.font);
   const lineHeight = measurer.measure('M', font).height;
   const ascent = lineHeight - measurer.getDescent(font, 'M');
   return lines.map((text, i) => ({
@@ -1161,6 +1257,7 @@ describe('renderSequence — dividers', () => {
       // here from the same measurer so the emitted `textLength` is real.
       labelRuns: dividerRunsFor(lines),
       kind: 'divider',
+      paint: DIVIDER_PAINT,
       text,
       lines,
       y: 100,
@@ -1294,7 +1391,15 @@ describe('sequencePlugin layout', () => {
     });
     const sync = syncPlugin.layoutSync(ast, defaultTheme, measurer);
     const async_ = await Promise.resolve(layoutSequence(ast, defaultTheme, measurer));
-    expect(sync).toEqual(async_);
+    // A lifeline's paint is lazy and its dark-only `BackGroundColor` throws
+    // on read (`sequence-skin-param.ts#paintOf`), so a deep equality cannot
+    // walk it: compare the pieces without their paint, and the paint by what
+    // `ComponentRoseLine` reads (`:66-67`).
+    const pieces = (g: SequenceGeometry): unknown =>
+      Object.values(g.lifelineSegments).map((segs) =>
+        segs.map(({ paint, ...seg }) => ({ ...seg, stroke: paint.stroke, thickness: paint.thickness })),
+      );
+    expect({ ...sync, lifelineSegments: pieces(sync) }).toEqual({ ...async_, lifelineSegments: pieces(async_) });
   });
 });
 
@@ -1602,7 +1707,18 @@ describe('renderSequence — database participant shape', () => {
 describe('renderSequence — box backgrounds', () => {
   it('box with color renders a rect with that fill color', () => {
     const geo = makeGeo({
-      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '#LightBlue', labelRuns: [] }],
+      boxes: [
+        {
+          x: 10,
+          y: 0,
+          width: 200,
+          height: 300,
+          label: '',
+          color: '#LightBlue',
+          labelRuns: [],
+          paint: boxPaintFor('#LightBlue'),
+        },
+      ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     // G1c: named colors resolve to their canonical jar hex (LightBlue -> #ADD8E6).
@@ -1610,12 +1726,16 @@ describe('renderSequence — box backgrounds', () => {
     expect(svg).toContain('<rect');
   });
 
-  it('box with empty color falls back to #EEE', () => {
+  it('box with no colour fills with box { BackGroundColor #d } (plantuml.skin:172-173)', () => {
     const geo = makeGeo({
-      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '', labelRuns: [] }],
+      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '', labelRuns: [], paint: boxPaintFor('') }],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
-    expect(svg).toContain('#EEE');
+    // `element { LineThickness 0.5 }` and `root { LineColor #181818 }`
+    // (`plantuml.skin:16,93`); `RoundCorner 0` writes no rx (`:13`).
+    expect(svg).toContain(
+      '<rect x="10" y="0" width="200" height="300" fill="#DDD" stroke="#181818" stroke-width="0.5"/>',
+    );
   });
 
   it('box with label renders a text element', () => {
@@ -1630,7 +1750,8 @@ describe('renderSequence — box backgrounds', () => {
           height: 300,
           label: 'Services',
           color: '#pink',
-          labelRuns: [boxRunFor('Services', 10)],
+          labelRuns: boxRunsFor('Services', { x: 10, y: 0, width: 200 }, '#pink'),
+          paint: boxPaintFor('#pink'),
         },
       ],
     });
@@ -1643,7 +1764,18 @@ describe('renderSequence — box backgrounds', () => {
     // A box with no label should produce only a rect, no extra text
     const geo = makeGeo({
       participants: [],
-      boxes: [{ x: 10, y: 0, width: 200, height: 300, label: '', color: '#yellow', labelRuns: [] }],
+      boxes: [
+        {
+          x: 10,
+          y: 0,
+          width: 200,
+          height: 300,
+          label: '',
+          color: '#yellow',
+          labelRuns: [],
+          paint: boxPaintFor('#yellow'),
+        },
+      ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     expect(svg).not.toContain('<text');
@@ -1651,7 +1783,18 @@ describe('renderSequence — box backgrounds', () => {
 
   it('box background rect appears before participant header rects (z-order)', () => {
     const geo = makeGeo({
-      boxes: [{ x: 22, y: 0, width: 216, height: 300, label: '', color: '#LightBlue', labelRuns: [] }],
+      boxes: [
+        {
+          x: 22,
+          y: 0,
+          width: 216,
+          height: 300,
+          label: '',
+          color: '#LightBlue',
+          labelRuns: [],
+          paint: boxPaintFor('#LightBlue'),
+        },
+      ],
     });
     const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     // After the defs block, box background must precede participant rects.
@@ -1680,7 +1823,9 @@ describe('renderSequence — box backgrounds', () => {
 
 describe('renderSequence — box integration', () => {
   it('box with label and color renders correctly end-to-end', () => {
-    const ast = parseSequence(['box "Frontend" #LightBlue', 'participant Alice', 'end box', 'Alice -> Alice: self']);
+    const ast = parseSequence(
+      sequenceSource(['box "Frontend" #LightBlue', 'participant Alice', 'end box', 'Alice -> Alice: self']),
+    );
     // T4: `parseSequence` now returns `SequenceDiagramAST | ParseRefusal`
     // (D1); this fixture is a complete, valid diagram, so refusal is a
     // test defect.
@@ -1850,7 +1995,8 @@ describe('renderSequence — participant colours', () => {
         'participant A\nA -> B: x\n@enduml',
     );
     expect(svg).toContain('fill="#FF0"');
-    expect(svg).toContain('stroke="#F90"');
+    // The jar's rect form: the stroke rides in `style` (SvgGraphics.java).
+    expect(svg).toContain('style="stroke:#F90;');
   });
 
   it('keys the bucket by participant KIND', () => {

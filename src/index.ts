@@ -75,6 +75,7 @@ function umlSourceOfBlock(block: BlockUmlOk): UmlSource {
     ...block.source,
     rawStyles: block.preprocessed.styles,
     stylePositions: block.preprocessed.stylePositions,
+    skinparamAssignments: block.preprocessed.skinparamAssignments,
     styleSource: block.preprocessed,
     // The seed inputs -- see `UmlSource.seedSourceLines`/`rawSourceLines`.
     rawSourceLines: block.rawSource.map((s) => s.getString()),

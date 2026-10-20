@@ -14,9 +14,10 @@ import type {
   SequenceDiagramAST,
   SequenceEvent,
 } from '../../../src/diagrams/sequence/ast.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 function parse(lines: string[]): SequenceDiagramAST {
-  const result = parseSequence(lines);
+  const result = parseSequence(sequenceSource(lines));
   if ('refused' in result) {
     throw new Error(`parseSequence refused (${result.kind}) at line ${String(result.line)}: ${result.message}`);
   }
@@ -155,11 +156,36 @@ describe('autonumber', () => {
     expect(b?.sequenceNumber).toBe(110);
   });
 
+  // `DottedNumber#format` bolds a dotted number (`DottedNumber.java:110`).
   it('renders a dotted start as prefix + incrementing last segment', () => {
     const ast = parse(['autonumber 1.1', 'Alice -> Bob : a', 'Alice -> Bob : b']);
     const [a, b] = messages(ast.events);
-    expect(a?.sequenceLabel).toBe('1.1');
-    expect(b?.sequenceLabel).toBe('1.2');
+    expect(a?.sequenceLabel).toBe('<b>1.1</b>');
+    expect(b?.sequenceLabel).toBe('<b>1.2</b>');
+  });
+
+  // ... and ignores the format for it (`DottedNumber.java:107-110`).
+  it('ignores a quoted format for a dotted start', () => {
+    const ast = parse(['autonumber 1.1 1 "[000]"', 'Alice -> Bob : a']);
+    expect(messages(ast.events)[0]?.sequenceLabel).toBe('<b>1.1</b>');
+  });
+
+  // `autonumber` with no FORMAT is `<b>0</b>` (`CommandAutonumber.java:119`).
+  it('formats a plain autonumber with the default <b>0</b>', () => {
+    const ast = parse(['autonumber', 'Alice -> Bob : a', 'autonumber stop', 'autonumber resume', 'Alice -> Bob : b']);
+    expect(messages(ast.events).map((m) => m.sequenceLabel)).toEqual(['<b>1</b>', '<b>2</b>']);
+  });
+
+  // `resume` keeps the current format (`AutoNumber.java:59-64`).
+  it('keeps a quoted format across stop/resume', () => {
+    const ast = parse([
+      'autonumber 5 "[000]"',
+      'Alice -> Bob : a',
+      'autonumber stop',
+      'autonumber resume',
+      'Alice -> Bob : b',
+    ]);
+    expect(messages(ast.events).map((m) => m.sequenceLabel)).toEqual(['[005]', '[006]']);
   });
 
   it('applies a quoted zero-pad format', () => {

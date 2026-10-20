@@ -25,78 +25,74 @@
  */
 
 import type { FrameGeo } from './ast.js';
-import { rect, path } from '../../core/svg.js';
+import type { Paint } from '../../core/paint.js';
+import { PAINT_NONE, rect, path } from '../../core/svg.js';
 import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
-import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
+import { HColorSet } from '../../core/klimt/color/HColorSet.js';
+import { ColorMapper, toSvgPaint } from '../../core/klimt/color/ColorMapper.js';
+import { HColorGradient } from '../../core/klimt/color/HColorGradient.js';
+import { HColorSimple } from '../../core/klimt/color/HColorSimple.js';
+import { framePaintsOf } from './renderer-frame-header.js';
+import { TRANSPARENT_SVG } from './text-block-geo.js';
 
-/**
- * `HColors.transparent()`'s raw-source-token equivalent. `resolveColorToSvgHex`
- * recognizes the literal keyword (case-insensitively) and resolves it to
- * `#00000000` -- the same fully-alpha-0 value a real transparent hex would
- * produce -- so this sentinel round-trips through {@link isTransparentColor}
- * exactly like any other raw token.
- * @see HColors.java:125 (transparent())
- * @see HColorSet.ts:145-149 (resolveColorToSvgHex)
- */
-const TRANSPARENT = 'transparent';
+/** `HColor#toSvg` of a fully transparent colour (`HColor.java:76`) -- what
+ *  `HColorSimple#isTransparent` (`alpha == 0`) reads as transparent. */
 
-/**
- * `HColorSimple#isTransparent`: `color.getAlpha() == 0`. Ported against the
- * RAW source token rather than a resolved `HColor` object, since that is the
- * shape colours arrive in at this layer (see the interface contract note in
- * this mission's T3 brief).
- * @see HColorSimple.java:131-134
- */
-function isTransparentColor(raw: string): boolean {
-  return resolveColorToSvgHex(raw) === '#00000000';
+/** `HColor#isTransparent` on a resolved paint: a gradient never is. A
+ *  transparent simple colour resolves to `PAINT_NONE` through `svgPaint`
+ *  (`SvgGraphics.java:521-541` `fixColor`, sdd1 T3e), and to the raw
+ *  `#00000000` token where a command colour is painted directly. */
+function isTransparentPaint(p: Paint): boolean {
+  return p === TRANSPARENT_SVG || p === PAINT_NONE;
 }
 
-/** `Blotter`'s own `defaultBackcolor` field, after its constructor's
- *  null -> transparent coercion (`Blotter.java:60-67`). A `FrameGeo` with no
- *  `COLORS` override carries `backColorGeneral: undefined`, the same "no
- *  color given" case upstream's `null` represents. */
-function defaultBandColor(frame: FrameGeo): string {
-  return frame.backColorGeneral ?? TRANSPARENT;
+/** `HColor#equals`, on resolved paints: a colour by its value, a gradient
+ *  by its stops and policy. */
+function paintKey(p: Paint): string {
+  return typeof p === 'string' ? p : JSON.stringify(p);
+}
+
+/** An `else #color`'s general colour as the command resolved it
+ *  (`colorSet.getColor(color)`, `CommandGrouping.java:161-165`), painted. */
+function branchPaint(raw: string): Paint {
+  const color = HColorSet.instance().getColor(raw);
+  if (color instanceof HColorSimple || color instanceof HColorGradient) return toSvgPaint(color, ColorMapper.IDENTITY);
+  throw new Error(`else colour ${raw} is neither a simple nor a gradient colour`);
 }
 
 /** One `changes` entry: the y at which a new colour takes over, and that
  *  colour. Mirrors one `Entry<Double, HColor>` from the sorted `TreeMap`. */
 interface BlotterBand {
   readonly y: number;
-  readonly color: string;
+  readonly color: Paint;
 }
 
 /**
  * `Blotter#addChange` + `#closeChanges`, folded into one pass over
  * `frame.branchSeparators` -- the only caller (`GroupingTile
- * #drawCompBackground:315-336`) does the same: one `addChange` per
- * `ElseTile`, in ascending document order (already the order
- * `branchSeparators` was built in, `sequence-layout-events.ts`'s own
- * `event.branches.forEach`), then one final `closeChanges`.
+ * #drawCompBackground:318-347`) does the same: one `addChange` per
+ * `ElseTile`, in ascending document order, then one final `closeChanges`.
  *
- * `last` tracks INSERTION order, not sorted-by-y order (`:130-137`) -- a
- * `changes.set` is skipped, not the loop iteration, when a separator's
- * colour repeats the immediately-prior ADDED colour.
+ * `back` is the body style's `BackGroundColor` (`GroupingTile.java:309-310`),
+ * which `GroupingStart#getUsedStyles` already overrode with the general
+ * colour. An else without its own colour inherits it (`:333-339`); one with
+ * its own goes through `addChange`, which skips a colour equal to the last
+ * ADDED one -- insertion order, not y order (`Blotter.java:130-137`).
  */
-function buildBands(frame: FrameGeo): BlotterBand[] {
-  const changes = new Map<number, string>();
-  const defaultColor = defaultBandColor(frame);
-  let last = defaultColor;
+function buildBands(frame: FrameGeo, back: Paint): BlotterBand[] {
+  const changes = new Map<number, Paint>();
+  let last = back;
   for (const sep of frame.branchSeparators) {
     // `ypos = elseTile.getYGauge().getMin().getCurrentValue() - getFrameY()`
-    // (GroupingTile.java:325), then `+ 1` at the `addChange` call site
-    // (:333). `sep.y` and `frame.y` share the same absolute coordinate
-    // space (both are what `renderer.ts`'s own frame/separator drawing
-    // already uses directly), so `sep.y - frame.y` is that local `ypos`.
+    // (GroupingTile.java:332), then `+ 1` at the `addChange` call (:340).
     const ypos = sep.y - frame.y + 1;
-    const color = sep.backColorGeneral ?? defaultColor;
-    if (color === last) continue;
+    const color = sep.backColorGeneral === undefined ? back : branchPaint(sep.backColorGeneral);
+    if (paintKey(color) === paintKey(last)) continue;
     changes.set(ypos, color);
     last = color;
   }
-  // `Blotter.java:126-128` -- always set, unconditionally, never through the
-  // `last`-dedup gate `addChange` applies.
-  changes.set(frame.height, defaultColor);
+  // `Blotter.java:126-128` -- always set, never through the `last` gate.
+  changes.set(frame.height, back);
   return [...changes.entries()].sort(([a], [b]) => a - b).map(([y, color]) => ({ y, color }));
 }
 
@@ -144,6 +140,11 @@ interface BandRenderCtx {
   readonly width: number;
   readonly round: number;
   readonly bandCount: number;
+  /** The `ug`'s stroke the bands are drawn under, scaled at emission: none
+   *  is applied on the way, so `UStroke.simple()`'s 1 (`UStroke.java:75-77`,
+   *  `AbstractCommonUGraphic.java:58`); jar-verified `stroke-width:1` on a
+   *  `skinparam sequenceGroupBodyBackgroundColor` band. */
+  readonly strokeWidth: number;
 }
 
 /**
@@ -159,7 +160,7 @@ interface BandRenderCtx {
 interface BandSpan {
   readonly localTop: number;
   readonly endY: number;
-  readonly color: string;
+  readonly color: Paint;
 }
 
 /**
@@ -173,7 +174,7 @@ function renderBand(i: number, span: BandSpan, ctx: BandRenderCtx): string {
   const height = span.endY - span.localTop;
   const x = frameX;
   const y = frameY + span.localTop;
-  const style = { fill: span.color, stroke: span.color };
+  const style = { fill: span.color, stroke: span.color, strokeWidth: ctx.strokeWidth };
   if (round === 0) return rect(x, y, width, height, style);
   if (bandCount === 1) return rect(x, y, width, height, { ...style, rx: round / 2, ry: round / 2 });
   if (i === 0) return path(topArcPathD(x, y, width, height, round), style);
@@ -191,25 +192,32 @@ function renderBand(i: number, span: BandSpan, ctx: BandRenderCtx): string {
  *
  * A band is skipped entirely when `current` is transparent (`:80`) -- this
  * is why an uncoloured frame emits nothing: `group`'s own default
- * `BackGroundColor` is `transparent` (`plantuml.skin:103`,
- * `frame-style.ts#GROUP_BACKGROUND`).
+ * `BackGroundColor` is `transparent` (`plantuml.skin:103`).
+ *
+ * The `Blotter` is built from the body style: its `BackGroundColor` and its
+ * `RoundCorner` (`GroupingTile.java:308-316`). Upstream reads the corner
+ * `asDouble` there; `SequencePaint.roundCorner` is the `asInt` read
+ * (`AbstractComponent.java:109-111`), equal for every integral value.
  *
  * @see Blotter.java#drawU
  */
-export function renderFrameBlotter(frame: FrameGeo, roundCorner: number): string {
-  const bands = buildBands(frame);
+export function renderFrameBlotter(frame: FrameGeo, k: number): string {
+  const { paint } = framePaintsOf(frame);
+  const back = paint.fill;
+  const bands = buildBands(frame, back);
   const ctx: BandRenderCtx = {
     frameX: frame.x,
     frameY: frame.y,
     width: frame.width,
-    round: roundCorner,
+    round: paint.roundCorner * k,
     bandCount: bands.length,
+    strokeWidth: k,
   };
-  let current = defaultBandColor(frame);
+  let current = back;
   let localTop = 0;
   const parts: string[] = [];
   bands.forEach((band, i) => {
-    if (!isTransparentColor(current)) {
+    if (!isTransparentPaint(current)) {
       parts.push(renderBand(i, { localTop, endY: band.y, color: current }, ctx));
     }
     localTop = band.y;

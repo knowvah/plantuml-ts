@@ -61,6 +61,20 @@
  * `scaleAtom`/`scaleRow`/`scaleNode`/`scaleEdge` make below for the json
  * family's own small geometry structs.
  *
+ * ## `paint` is NOT scaled
+ *
+ * Every geo type's optional `paint` (a `SequencePaint`: thickness, dash,
+ * roundCorner, padding, ...) is carried through unscaled by the `...x`
+ * spread in each `scale*` below, and `scaleRun`-style rebuilds never touch
+ * it. Upstream scales stroke width, dash lengths and corner radii at
+ * emission only (`SvgGraphics.java:466-468` `format` multiplies by
+ * `option.getScale()`; `:559` `setStrokeWidth` formats the width and both
+ * dash lengths), never in the `Style`/`UStroke` values the components read.
+ * The port renderer applies `theme.scaleK` at that same emission point
+ * (`renderer-lifeline.ts` strokes), so scaling `paint` here as well would
+ * scale it twice. Reading `paint` is never forced: it is a lazy-getter
+ * object (`sequence-skin-param.ts#paintOf`) and must not be walked here.
+ *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/SvgGraphics.java#format
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/SvgGraphics.java#setStrokeWidth (:559, dash-pattern scaling)
  * @see src/diagrams/json/scale-geo.ts
@@ -74,6 +88,8 @@ import type {
   MessageGeo,
   NoteGeo,
   ActivationGeo,
+  DestroyGeo,
+  ElseGeo,
   FrameGeo,
   DividerGeo,
   SpaceGeo,
@@ -199,6 +215,11 @@ function scaleActivation(a: ActivationGeo, k: number): ActivationGeo {
   return { ...a, lifelineX: a.lifelineX * k, y: a.y * k, height: a.height * k };
 }
 
+/** A destroy's y and its crosses' corners; `indent` is a count. */
+function scaleDestroy(d: DestroyGeo, k: number): DestroyGeo {
+  return { ...d, y: d.y * k, crosses: d.crosses.map((c) => ({ ...c, x: c.x * k, y: c.y * k })) };
+}
+
 /**
  * A frame's geometry, scaled. `backColorElement`/`backColorGeneral` and each
  * separator's `backColorGeneral` are RAW colour tokens (`ast.ts`'s "stored
@@ -213,11 +234,7 @@ function scaleFrame(f: FrameGeo, k: number): FrameGeo {
     y: f.y * k,
     width: f.width * k,
     height: f.height * k,
-    branchSeparators: f.branchSeparators.map((s) => ({
-      ...s,
-      y: s.y * k,
-      runs: s.runs.map((r) => scaleRun(r, k)),
-    })),
+    branchSeparators: f.branchSeparators.map((s) => ({ ...s, y: s.y * k })),
     // A4: `refBody` became placed, measured runs, so its `y` and its three
     // metrics scale too — scaling only `x`, as this did while a body entry was
     // `{ text, x }`, left every scaled `ref` drawing its text at the unscaled
@@ -228,6 +245,11 @@ function scaleFrame(f: FrameGeo, k: number): FrameGeo {
     tabWidth: f.tabWidth * k,
     tabHeight: f.tabHeight * k,
   };
+}
+
+/** An `else` tile's geometry, scaled; its `paint` is scaled at emission. */
+function scaleElse(e: ElseGeo, k: number): ElseGeo {
+  return { ...e, x: e.x * k, y: e.y * k, width: e.width * k, runs: e.runs.map((r) => scaleRun(r, k)) };
 }
 
 function scaleDivider(d: DividerGeo, k: number): DividerGeo {
@@ -270,8 +292,12 @@ function scaleEvent(event: EventGeo, k: number): EventGeo {
       return scaleNote(event, k);
     case 'activation':
       return scaleActivation(event, k);
+    case 'destroy':
+      return scaleDestroy(event, k);
     case 'frame':
       return scaleFrame(event, k);
+    case 'else':
+      return scaleElse(event, k);
     case 'divider':
       return scaleDivider(event, k);
     case 'space':
@@ -319,7 +345,7 @@ export function scaleSequenceGeometry(geo: SequenceGeometry, k: number): Sequenc
     headHeight: geo.headHeight * k,
     lifelineEndY: geo.lifelineEndY * k,
     footerShapeY: geo.footerShapeY * k,
-    ...(geo.lifelineSegments !== undefined ? { lifelineSegments: scaleLifelines(geo.lifelineSegments, k) } : {}),
+    lifelineSegments: scaleLifelines(geo.lifelineSegments, k),
     participants: geo.participants.map((p) => scaleParticipant(p, k)),
     events: geo.events.map((e) => scaleEvent(e, k)),
     boxes: geo.boxes.map((b) => scaleBox(b, k)),

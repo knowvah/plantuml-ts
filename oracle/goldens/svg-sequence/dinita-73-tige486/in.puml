@@ -1,0 +1,5 @@
+@startuml
+title this title is very very long and not on several lines
+Bob -> Alice : hello
+
+@enduml

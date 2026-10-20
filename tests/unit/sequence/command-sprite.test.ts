@@ -14,6 +14,7 @@ import { matchSpriteBase64Command } from '../../../src/diagrams/sequence/command
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import { createSpriteRegistry } from '../../../src/core/sprite-commands.js';
 import type { MessageEvent, SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 /** A real 1x1 transparent PNG, so the payload exercises `+`, `/` and `=`
  *  inside `CommandSpriteBase64`'s `([A-Za-z0-9+/=]+)` DATA class (java:68). */
@@ -23,7 +24,7 @@ const ONE_PIXEL_PNG =
 const DATA_URI_PREFIX = 'data:image/png;base64,';
 
 function parse(lines: string[]): SequenceDiagramAST {
-  const result = parseSequence(lines);
+  const result = parseSequence(sequenceSource(lines));
   if ('refused' in result) {
     throw new Error(`parseSequence refused (${result.kind}) at line ${String(result.line)}: ${result.message}`);
   }
@@ -31,7 +32,7 @@ function parse(lines: string[]): SequenceDiagramAST {
 }
 
 function refusalLine(lines: string[]): number {
-  const result = parseSequence(lines);
+  const result = parseSequence(sequenceSource(lines));
   if (!('refused' in result)) throw new Error('expected a refusal');
   return result.line;
 }

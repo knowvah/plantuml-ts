@@ -1,19 +1,25 @@
 /**
- * ref-body-geo.ts — the `ref over` frame's own geometry
- * (`ComponentRoseReference`), split verbatim out of `text-block-geo.ts` when
- * that file reached the project's 500-line cap.
+ * ref-body-geo.ts — the `ref over` frame's own geometry and paint
+ * (`ComponentRoseReference`), split out of `text-block-geo.ts` when that file
+ * reached the project's 500-line cap; `text-block-geo.ts` re-exports the
+ * names it carried.
  *
- * A pure move: every constant, function and doc comment below is the one
- * `text-block-geo.ts` carried, and that module re-exports all of them, so no
- * caller's import changed. `ComponentRoseReference` is the one sequence
- * component whose label is CONTENT rather than a condition, which is what
- * makes it separable from the message-label half that stayed behind.
+ * sdd1 T3a: the component reads two styles, merged in `Reference`'s
+ * constructor from the builder current at the command (`Reference.java:
+ * 104-113`): `style` (`reference`) for the body's font, alignment, symbol
+ * context, `RoundCorner` and shadow (`ComponentRoseReference.java:69-76`),
+ * and `styleHeader` (`referenceHeader` under the nested `reference
+ * { header }`, `Reference.java:85-97`) for the header's font and symbol
+ * context (`:72,75`).
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/rose/ComponentRoseReference.java
  */
-import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
-import type { Theme } from '../../core/theme.js';
+import type { StringMeasurer } from '../../core/measurer.js';
+import { HColorSet } from '../../core/klimt/color/HColorSet.js';
+import type { FrameEvent } from './ast.js';
 import { displayLines } from './text-block-geo.js';
+import { atomFontSpec } from './sequence-creole-text-atom.js';
+import { paintOf, referenceStyle, type SequencePaint } from './sequence-skin-param.js';
 
 /** The body padding `ComponentRoseReference` hands to `super` --
  *  `topRightBottomLeft(4, 4, 4, 4)`, so the same value on all four sides
@@ -32,45 +38,25 @@ export const REF_HEADER_EXTRA_WIDTH = 45;
  *  keyword (`ComponentRoseReference.java:78`). */
 export const REF_HEADER_TEXT = 'ref';
 
-/**
- * `reference { FontSize 12 }` (`plantuml.skin:145-151`) — a `ref over` body
- * does NOT use the ambient sequence font.
- *
- * A4 found this: the body was measured at `theme.fontSize` (14), which was
- * invisible while the port emitted no `textLength` and a merely-approximate x,
- * and became a visible glyph distortion the moment it emitted one. On
- * `cekora-30-diso384` the jar writes `textLength="26.625"` for `short` and
- * this port wrote 31.063 — the same string measured at two different sizes.
- *
- * The header keyword beside it is `referenceHeader { FontSize 13, FontStyle
- * bold }` (`:153-160`), which `computeHeaderTab` already applies.
- */
-export const REFERENCE_FONT_SIZE = 12;
-
-/** The font a `ref over` BODY line is measured and drawn at. */
-export function refBodyFontSpecOf(theme: Theme): FontSpec {
-  return { family: theme.fontFamily, size: REFERENCE_FONT_SIZE };
+/** A `ref`'s two paints: `style` (the body) and `styleHeader`. */
+export interface ReferencePaints {
+  readonly paint: SequencePaint;
+  readonly headerPaint: SequencePaint;
 }
 
 /**
- * `referenceHeader { FontSize 13, FontStyle bold }` (`plantuml.skin:153-160`)
- * — the `ref` KEYWORD's own font, which `ComponentRoseReference`'s constructor
- * builds `textHeader` with (`fcHeader = styleHeader.getFontConfiguration(...)`,
- * `:75,79`) and which `getHeaderWidth`/`getHeaderHeight` therefore measure at.
- *
- * Same defect as the body's, found the same way: `refBodyWidth` takes
- * `max(body, header)`, so correcting the body font alone let the header term
- * — still measured at the ambient 14 — start dominating and win with a wrong
- * number. `sojufi-84-bexi933` is where that showed.
+ * `Reference#getUsedStyles` (`Reference.java:99-102`): the body style as
+ * merged, the header style with the `ref#color` as its `BackGroundColor` --
+ * `colorSet.getColor(s1)` (`CommandReferenceOverSeveral.java:118-119`).
  */
-export function refHeaderFontSpecOf(theme: Theme): FontSpec {
-  return { family: theme.fontFamily, size: REFERENCE_HEADER_FONT_SIZE, weight: 'bold' };
+export function referencePaints(event: Pick<FrameEvent, 'styleBuilder' | 'backColorElement'>): ReferencePaints {
+  const set = HColorSet.instance();
+  const back = event.backColorElement === undefined ? undefined : set.getColor(event.backColorElement);
+  return {
+    paint: paintOf(referenceStyle(event.styleBuilder, false), set),
+    headerPaint: paintOf(referenceStyle(event.styleBuilder, true).eventuallyOverride('BackGroundColor', back), set),
+  };
 }
-
-/** `referenceHeader { FontSize 13 }` (`plantuml.skin:153-160`). Equal to
- *  `HEADER_FONT_SIZE`, and deliberately NOT shared with it: they are two
- *  different style buckets that happen to agree today. */
-const REFERENCE_HEADER_FONT_SIZE = 13;
 
 /**
  * A `ref over` frame's BODY, one entry per source line.
@@ -95,38 +81,50 @@ export function refBodyLines(frameType: string, label: string): readonly string[
   return label.trim() === '' ? [] : displayLines(label);
 }
 
+/** The header text's dimension at `styleHeader`'s font (`fcHeader`,
+ *  `ComponentRoseReference.java:75,78`). */
+function refHeaderTextDim(headerPaint: SequencePaint, measurer: StringMeasurer): { width: number; height: number } {
+  return measurer.measure(REF_HEADER_TEXT, atomFontSpec(headerPaint.font));
+}
+
 /** `getHeaderHeight` -- the header text's height plus `2 * 1`
  *  (`ComponentRoseReference.java:140-143`). */
-function refHeaderHeight(theme: Theme, measurer: StringMeasurer): number {
-  return measurer.measure(REF_HEADER_TEXT, refHeaderFontSpecOf(theme)).height + 2;
+export function refHeaderHeight(headerPaint: SequencePaint, measurer: StringMeasurer): number {
+  return refHeaderTextDim(headerPaint, measurer).height + 2;
+}
+
+/** `getHeaderWidth` -- the header text's width plus `30 + 15`
+ *  (`ComponentRoseReference.java:145-148`). */
+export function refHeaderWidth(headerPaint: SequencePaint, measurer: StringMeasurer): number {
+  return refHeaderTextDim(headerPaint, measurer).width + REF_HEADER_EXTRA_WIDTH;
 }
 
 /**
  * `getPreferredHeight` = text height + header height + footer
  * (`ComponentRoseReference.java:150-153`), where `getTextHeight` is the text
- * block's own height plus the top and bottom padding
- * (`AbstractTextualComponent.java:110-114`).
+ * block's own height at the body style's font plus the top and bottom
+ * padding (`AbstractTextualComponent.java:110-114`).
  */
-export function refBodyHeight(body: readonly string[], theme: Theme, measurer: StringMeasurer): number {
+export function refBodyHeight(body: readonly string[], paints: ReferencePaints, measurer: StringMeasurer): number {
   // An empty body is an empty block: `getTextHeight` is its padding alone.
-  const textHeight = body.length * measurer.measure('M', refBodyFontSpecOf(theme)).height + 2 * REF_PADDING;
-  return textHeight + refHeaderHeight(theme, measurer) + REF_HEIGHT_FOOTER;
+  const lineHeight = measurer.measure('M', atomFontSpec(paints.paint.font)).height;
+  const textHeight = body.length * lineHeight + 2 * REF_PADDING;
+  return textHeight + refHeaderHeight(paints.headerPaint, measurer) + REF_HEIGHT_FOOTER;
 }
 
 /**
  * `getPreferredWidth` = max(text width, header width) + 2 * xMargin +
  * `symbolContextBody.getDeltaShadow()` (`ComponentRoseReference.java:155-159`),
  * where `getTextWidth` is the widest line plus the left and right padding
- * (`AbstractTextualComponent.java:106-108`). The delta is the `reference`
- * style's merged `Shadowing` (`core/sequence-frame-shadow.ts`), which
- * `renderer-frame-header.ts#renderBodyRect` takes back off the drawn rect
- * (`:89`). Jar-verified: `tests/fixtures/unwind2-S9/style-reference.svg`
- * against `noshadow-reference.svg` -- the canvas widens by 3, the rect does
- * not.
+ * (`AbstractTextualComponent.java:100-108`) and the delta is the body style's
+ * `Shadowing` (`Style.java:277`), which `renderer-frame-header.ts
+ * #renderBodyRect` takes back off the drawn rect (`:89`). Jar-verified:
+ * `tests/fixtures/unwind2-S9/style-reference.svg` against
+ * `noshadow-reference.svg` -- the canvas widens by 3, the rect does not.
  */
-export function refBodyWidth(body: readonly string[], theme: Theme, measurer: StringMeasurer): number {
-  const widest = Math.max(0, ...body.map((l) => measurer.measure(l, refBodyFontSpecOf(theme)).width));
-  const headerWidth = measurer.measure(REF_HEADER_TEXT, refHeaderFontSpecOf(theme)).width + REF_HEADER_EXTRA_WIDTH;
-  const deltaShadow = theme.colors.graph.sequenceShadowing?.reference ?? 0;
-  return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN + deltaShadow;
+export function refComponentWidth(body: readonly string[], paints: ReferencePaints, measurer: StringMeasurer): number {
+  const spec = atomFontSpec(paints.paint.font);
+  const widest = Math.max(0, ...body.map((l) => measurer.measure(l, spec).width));
+  const headerWidth = refHeaderWidth(paints.headerPaint, measurer);
+  return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN + paints.paint.shadowing;
 }

@@ -28,6 +28,7 @@ import { fileURLToPath } from 'node:url';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/sequence');
 const render = (slug: string): string =>
@@ -72,7 +73,7 @@ describe('participant hyperlinks', () => {
     // `CommandParticipant.java:187-192`. No cached oracle covers this pairing
     // — `boparo-11-pema294` uses the single-line form — so it is asserted
     // against the Java rather than against a golden.
-    const parsed = parseSequence(['participant Alice [[/head]] [', '  body line', ']']);
+    const parsed = parseSequence(sequenceSource(['participant Alice [[/head]] [', '  body line', ']']));
     if ('refused' in parsed) throw new Error(parsed.message);
     expect(parsed.participants[0]?.url).toEqual({ url: '/head', tooltip: '/head' });
   });
@@ -80,7 +81,7 @@ describe('participant hyperlinks', () => {
   it('keeps a written tooltip, and falls back to the url without one', () => {
     // `Url.java:54-57` — the tooltip defaults to the url itself. The jar shows
     // both arms side by side in `sefako-72-jono850`'s own anchors.
-    const parsed = parseSequence(['participant Bob [[/u{hover me}]]', 'participant Eve [[/v]]']);
+    const parsed = parseSequence(sequenceSource(['participant Bob [[/u{hover me}]]', 'participant Eve [[/v]]']));
     if ('refused' in parsed) throw new Error(parsed.message);
     expect(parsed.participants[0]?.url).toEqual({ url: '/u', tooltip: 'hover me' });
     expect(parsed.participants[1]?.url).toEqual({ url: '/v', tooltip: '/v' });

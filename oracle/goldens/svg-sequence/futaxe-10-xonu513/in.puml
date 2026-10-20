@@ -1,0 +1,5 @@
+@startuml
+!pragma teoz true
+mainframe This is a frame
+Alice->Bob : Hello
+@enduml

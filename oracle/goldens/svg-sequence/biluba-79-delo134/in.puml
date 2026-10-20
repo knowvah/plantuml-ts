@@ -1,0 +1,9 @@
+@startuml
+'!preprocessorV2
+!function bold($text)
+!return "<b>"+$text+"</b>"
+!endfunction
+
+!$ijk = "foo" + bold("bar")
+alice -> bob : $ijk
+@enduml

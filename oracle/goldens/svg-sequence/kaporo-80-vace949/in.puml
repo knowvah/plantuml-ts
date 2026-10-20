@@ -1,0 +1,11 @@
+@startuml
+title
+The Java and JDBC flow
+on several lines with a very long title which is larger than the diagram itself
+end title
+autonumber
+"Application thread" -> "DB connection": SQL query A
+"DB connection" -> "Application thread": SQL resultset A
+"Application thread" -> "DB connection": SQL query B
+"DB connection" -> "Application thread": SQL resultset B
+@enduml

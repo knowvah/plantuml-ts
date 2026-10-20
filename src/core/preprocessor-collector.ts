@@ -5,7 +5,7 @@
  * file's header for why it is not a TIM concept.
  */
 
-import type { SkinDirective } from './preprocessor.js';
+import type { SkinDirective, SkinparamAssignment } from './preprocessor.js';
 import { EmbeddedDiagram, getEmbeddedType } from './EmbeddedDiagram.js';
 import type { StringLocated } from './tim/StringLocated.js';
 
@@ -157,6 +157,13 @@ export class StyleAndSkinparamCollector {
   readonly skinparamOrder = new Map<string, number>();
   /** Parallel to {@link styles}: each block's place on the same counter. */
   readonly styleOrder: number[] = [];
+  /**
+   * T1e: EVERY skinparam assignment in document order -- unlike
+   * {@link skinparam}, which keeps a key's last value only -- each with the
+   * document line of the command that executes it. See
+   * `PreprocessorResult.skinparamAssignments`.
+   */
+  readonly skinparamAssignments: SkinparamAssignment[] = [];
 
   private sequence = 0;
   private inStyleBlock = false;
@@ -181,6 +188,13 @@ export class StyleAndSkinparamCollector {
    * rozugu-82-pera583).
    */
   private embeddedNested = 0;
+  /**
+   * The document line of the open `skinparam ... {` block's opening line:
+   * `CommandSkinParamMultilines` executes the whole block as ONE command
+   * (`CommandSkinParamMultilines.java:90-102`, `SkinLoader#execute`), so
+   * every entry of the block sits at the opening line.
+   */
+  private skinparamBlockPosition: number | undefined;
 
   /**
    * True when the line was consumed (it is not a diagram-body line).
@@ -213,7 +227,7 @@ export class StyleAndSkinparamCollector {
       this.skinDirectives.push({ name: this.skin, position });
       return true;
     }
-    return this.openSkinparam(trimmed);
+    return this.openSkinparam(trimmed, position);
   }
 
   private collectStyleLine(raw: string, trimmed: string): boolean {
@@ -266,7 +280,7 @@ export class StyleAndSkinparamCollector {
     const entry = RE_SKINPARAM_BLOCK_ENTRY.exec(trimmed);
     if (entry !== null) {
       const key = this.skinparamStack.join('') + entry[1]!.trim();
-      this.setSkinparam(cleanSkinKey(key), entry[2]!.trim());
+      this.setSkinparam(cleanSkinKey(key), entry[2]!.trim(), this.skinparamBlockPosition);
     }
     return true;
   }
@@ -283,26 +297,30 @@ export class StyleAndSkinparamCollector {
 
   /** Block-open forms are tested before the single-line form, which would
    *  otherwise capture `{` as the parameter name. */
-  private openSkinparam(trimmed: string): boolean {
+  private openSkinparam(trimmed: string, position: number | undefined): boolean {
     if (RE_SKINPARAM_BLOCK_OPEN.test(trimmed)) {
+      this.skinparamBlockPosition = position;
       this.skinparamStack.push('');
       return true;
     }
     const selectorBlock = RE_SKINPARAM_SELECTOR_BLOCK_OPEN.exec(trimmed);
     if (selectorBlock !== null) {
+      this.skinparamBlockPosition = position;
       this.skinparamStack.push((selectorBlock[1] ?? '').trim() + (selectorBlock[2] ?? ''));
       return true;
     }
     const single = RE_SKINPARAM_LINE.exec(trimmed);
     if (single !== null) {
-      this.setSkinparam(cleanSkinKey(single[1]!.trim()), single[2]!.trim());
+      this.setSkinparam(cleanSkinKey(single[1]!.trim()), single[2]!.trim(), position);
       return true;
     }
     return false;
   }
 
-  private setSkinparam(key: string, value: string): void {
+  private setSkinparam(key: string, value: string, position: number | undefined): void {
     this.skinparam.set(key, value);
-    this.skinparamOrder.set(key, this.sequence++);
+    const order = this.sequence++;
+    this.skinparamOrder.set(key, order);
+    this.skinparamAssignments.push({ key, value, position, order });
   }
 }

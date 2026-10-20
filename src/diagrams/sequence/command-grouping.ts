@@ -21,22 +21,36 @@ import {
   type ParseState,
 } from './sequence-parse-helpers.js';
 import { DRESSED_ARROW_RE, UNDRESSED_ARROW_RE } from './sequence-arrow-compose.js';
+import { currentStyleBuilder } from './sequence-skin-param.js';
 
-// 3a. box — opens a named/colored participant group. T13 (mission
-//     dispatch-by-parse-attempt): widened to accept an unquoted label
-//     (`box BoxOfAlice #yellow/blue`) and a trailing `<<stereotype>>`
-//     (`box "Tier 1" <<Client>>`) between the label and color, matching
-//     `CommandBoxStart`'s NAME1/NAME2/STEREOTYPE/color order. The
-//     stereotype is matched and discarded -- `BoxGroup` has no field for
-//     it and nothing in this port's renderer draws a box's stereotype.
+// 3a. box — opens a named/colored participant group: `CommandBoxStart`'s
+//     `box`, then NAME1 (quoted) or NAME2 (`[^#]+`, which is greedy and so
+//     swallows a `<<stereotype>>` written after an UNQUOTED title -- the jar
+//     draws `box Foo <<S>>` titled `Foo «S»` with no stereotype), then
+//     `StereotypePattern.optional("STEREO")` and the BACK colour.
 // @see sequencediagram/command/CommandBoxStart.java:65-77
 export const boxStartCommand: Command = {
-  pattern: /^box(?:\s+"([^"]*)"|\s+([^#<\s][^#<]*?))?(?:\s*<<[^>]*>>)?(?:\s+(#\S+))?\s*$/i,
+  pattern: /^box(?:\s+"([^"]*)"|\s+([^#]+))?\s*(<<.+?>>)?\s*(#\S+)?\s*$/i,
   execute(state, match) {
     const label = (match[1] ?? match[2] ?? '').trim();
-    const color = match[3] ?? '';
+    // `Stereotype.build(arg.get("STEREO", 0))` (`CommandBoxStart.java:119-123`),
+    // kept as written and built where the `Doll` resolves its style.
+    const stereotype = match[3];
+    const color = match[4] ?? '';
     const id = `box-${++state.boxCounter}`;
-    const box: BoxGroup = { id, label, color, participantIds: [] };
+    const style = state.style;
+    // A `Doll` reads the builder at TILE time (`Doll.java:81-83`), i.e. after
+    // every command: a getter, read once the parse has completed.
+    const box: BoxGroup = {
+      id,
+      label,
+      color,
+      participantIds: [],
+      ...(stereotype !== undefined ? { stereotype } : {}),
+      get styleBuilder() {
+        return currentStyleBuilder(style);
+      },
+    };
     state.ast.boxes.push(box);
     state.currentBox = box;
   },
@@ -61,29 +75,36 @@ export const boxEndCommand: Command = {
 // is the bracket's own content.
 const TRAILING_BRACKET_CONTENT_PATTERN = /^(.*\[\[.*\]\].*?|.*?)\[(.*)\]$/;
 
-// T2: `group`'s header-rewrite (`CommandGrouping.java:139-149`). `type` at
-// `:139` -- our `frameType` -- is read BEFORE this runs and this function
-// never touches it, mirroring `GroupingType.getType(type)`'s original-token
-// ordering. `:140-142`: an empty comment on `group` becomes the literal
-// `"group"`. `:143-148`: a non-empty comment matching
-// TRAILING_BRACKET_CONTENT_PATTERN reassigns upstream's local `type` to
-// group 1 (the custom header, e.g. "Alpha" from `group Alpha [beta]`) and
-// `comment` to group 2 ("beta").
-//
-// GAP (flagged in the T2 report): `FrameEvent` (`ast.ts:154-194`) has one
-// label slot, not upstream's independent title/comment pair, and T5's
-// `computeHeaderTab` (`sequence-layout-events.ts`) feeds this slot straight
-// through as `groupingHeaderDisplay`'s COMMENT argument against the FIXED
-// `frameType` -- never a rewritten title. Returning the header text here is
-// the higher-fidelity of the two lossy choices: it is what a reader
-// actually sees on the tab. The bracket body ("beta") has nowhere to go and
-// is dropped -- unlike the else-color gap this port's D10 amendment does
-// NOT cover, since there is no per-branch analogue here to widen into.
-function resolveGroupLabel(frameType: FrameEvent['frameType'], comment: string): string {
-  if (frameType !== 'group') return comment;
-  if (comment === '') return 'group';
+/**
+ * `group`'s header rewrite (`CommandGrouping.java:139-149`): an empty comment
+ * on `group` becomes the literal `"group"` (`:140-142`); a comment matching
+ * TRAILING_BRACKET_CONTENT_PATTERN reassigns upstream's local `type` -- the
+ * TITLE `SequenceDiagram#grouping` receives -- to group 1, verbatim, and the
+ * comment to group 2 (`:143-148`). `frameType` (`GroupingType.getType(type)`,
+ * `:139`) is read before the rewrite and never changes. The title is returned
+ * only when rewritten; otherwise it is the keyword, `frameType`.
+ */
+function resolveGroupTitle(
+  frameType: FrameEvent['frameType'],
+  comment: string,
+): { readonly title?: string; readonly comment: string } {
+  if (frameType !== 'group') return { comment };
+  if (comment === '') return { comment: 'group' };
   const bracketMatch = TRAILING_BRACKET_CONTENT_PATTERN.exec(comment);
-  return bracketMatch ? bracketMatch[1]!.trim() : comment;
+  return bracketMatch ? { title: bracketMatch[1]!, comment: bracketMatch[2]! } : { comment };
+}
+
+/**
+ * `SequenceDiagram#grouping`'s fallback for a command with no general
+ * colour, read at the command's own line for the opener, every `else` and
+ * `end` alike: `getSkinParam().getHtmlColor(ColorParam
+ * .sequenceGroupBodyBackground, null, false)` (`SequenceDiagram.java:418-419`).
+ * The `end` leaf's colour has no reader (`teoz/GroupingTile.java:162-163,
+ * 1028` reads only its notes), but its read still fills `getValue`'s cache
+ * (SkinParam.java:323-340).
+ */
+function groupBodyBackground(state: ParseState): string | undefined {
+  return state.style.params.getHtmlColorToken('sequenceGroupBodyBackground');
 }
 
 // 10. Frame types (loop, alt, opt, par, par2, break, critical, group).
@@ -116,15 +137,19 @@ export const groupingCommand: Command = {
     if (UNDRESSED_ARROW_RE.test(match.input) || DRESSED_ARROW_RE.test(match.input)) throw new SequenceCommandRefusal();
     const frameType = match[2]!.toLowerCase() as FrameEvent['frameType'];
     const backColorElement = match[3];
-    const backColorGeneral = match[4];
-    const label = resolveGroupLabel(frameType, match[5]?.trim() ?? '');
+    const backColorGeneral = match[4] ?? groupBodyBackground(state);
+    const { title, comment: label } = resolveGroupTitle(frameType, match[5]?.trim() ?? '');
+    const styleBuilder = currentStyleBuilder(state.style); // `SequenceDiagram.java:427-428`
     const frame: FrameEvent = {
       kind: 'frame',
       frameType,
       label,
+      ...(title !== undefined ? { title } : {}),
       branches: [[]],
       branchLabels: [label],
       branchColors: [backColorGeneral],
+      styleBuilder,
+      branchStyleBuilders: [styleBuilder],
       ...(match[1] !== undefined ? { parallel: true } : {}),
       ...(backColorElement !== undefined ? { backColorElement } : {}),
       ...(backColorGeneral !== undefined ? { backColorGeneral } : {}),
@@ -200,7 +225,9 @@ export const elseCommand: Command = {
     if (top !== undefined) {
       top.branches.push([]);
       top.branchLabels.push(match[2]?.trim() ?? '');
-      top.branchColors?.push(match[1]);
+      top.branchColors?.push(match[1] ?? groupBodyBackground(state));
+      // The `else` leaf's own builder (`SequenceDiagram.java:431-432`).
+      top.branchStyleBuilders.push(currentStyleBuilder(state.style));
     }
     markGroupingLeafNoteAnchor(state);
   },
@@ -213,13 +240,18 @@ export const elseCommand: Command = {
 //     as an optional COMMENT that upstream's own `executeArg` never reads
 //     for the END case (`GroupingType.END` takes no branch that consults
 //     `comment`). Trailing text is matched and discarded here for the same
-//     reason.
+//     reason. The space-separated COLORS index 1 (`end #c`, `:68`) is
+//     captured only to decide whether the end reads the legacy colour.
 // @see sequencediagram/command/CommandGrouping.java:64-73,129-159
 export const endCommand: Command = {
-  pattern: /^end(?:\s+.+)?\s*$/i,
-  execute(state) {
+  pattern: /^end(?:\s+(#\w+))?(?:\s+.+)?\s*$/i,
+  execute(state, match) {
     const frame = state.frameStack.pop();
     if (frame !== undefined) {
+      // The END leaf's colour (`SequenceDiagram.java:418-419`) is never
+      // drawn, but its read fills the cache: jar-verified, an `end` before
+      // the skinparam leaves every later group uncoloured; `end #c` does not.
+      if (match[1] === undefined) groupBodyBackground(state);
       emit(state, frame);
       // `SequenceDiagram#grouping`, END (`:441-444`).
       state.life.lastEventWithDeactivate = 'notMessage';

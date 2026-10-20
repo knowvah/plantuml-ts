@@ -1,0 +1,14 @@
+@startuml
+'!preprocessorV2
+!define ab "foo1"
+!define ef foo3
+!ij = "foo5"
+!$kl = "foo6"
+!$mn = "foo7"
+
+Alice -> Bob : ab
+Alice -> Bob : ef
+Alice -> Bob : ij
+Alice -> Bob : $kl
+Alice -> Bob : $mn
+@enduml

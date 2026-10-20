@@ -1,0 +1,9 @@
+@startuml
+A->B : 1
+A->B : 2
+...foo...
+A->B : 3
+A->B : 4
+create C
+A->C
+@enduml

@@ -1,0 +1,5 @@
+@startuml
+hide footbox
+caption This is a longer caption
+Bob -> Alice : hello
+@enduml

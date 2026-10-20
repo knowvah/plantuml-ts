@@ -13,7 +13,7 @@
 import { stripSpriteRegions } from './descriptive-keywords.js';
 
 import { DiagramType as UpstreamDiagramType, findStartTypes } from './diagram-type-set.js';
-import type { PreprocessorResult } from './preprocessor.js';
+import type { PreprocessorResult, SkinparamAssignment } from './preprocessor.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -78,6 +78,13 @@ export interface UmlSource {
    * {@link linePositions}.
    */
   readonly stylePositions?: readonly (number | undefined)[];
+  /**
+   * sdd1 T1e: every `skinparam` assignment with its document line -- see
+   * `preprocessor.ts#PreprocessorResult.skinparamAssignments`. Absent for a
+   * hand-built literal fixture (the engine then places skinparams by the
+   * declaration counter alone).
+   */
+  readonly skinparamAssignments?: readonly SkinparamAssignment[] | undefined;
   /**
    * The block's RAW source lines, `@start`/`@end` and every directive
    * (`skin`, `!define`, `skinparam`, ...) included -- upstream's

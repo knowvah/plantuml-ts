@@ -13,9 +13,55 @@
  * @see ~/git/plantuml/.../sequencediagram/SequenceDiagramFactory.java:116-137
  */
 
-import type { NoteEvent } from './ast.js';
+import type { NoteEvent, NoteShape } from './ast.js';
 import { emit, ensureParticipant, type Command, type ParseState } from './sequence-parse-helpers.js';
 import { SEQUENCE_COLOR } from './sequence-color-grammar.js';
+import { currentStyleBuilder } from './sequence-skin-param.js';
+import { Colors } from '../../core/abel/Colors.js';
+import { ColorType } from '../../core/abel/ColorType.js';
+import { HColorSet } from '../../core/klimt/color/HColorSet.js';
+import { NoSuchColorException } from '../../core/klimt/color/NoSuchColorException.js';
+
+/** `CommandExecutionResult.badColor()`'s error text
+ *  (`CommandExecutionResult.java:77-79`). */
+export const NO_SUCH_COLOR = 'No such color';
+
+/**
+ * Parses the note's colour where its command does, for the one failure
+ * upstream reports there: an arrow note reads the WHOLE string with
+ * `HColorSet.instance().getColor` (`FactorySequenceNoteOnArrowCommand.java:
+ * 223-225`), so a compound `#pink;line:green` throws; every other note builds
+ * `new Colors(data, set, BACK)` (`FactorySequenceNoteCommand.java:234`), whose
+ * main token throws and whose keyed tokens never do (`Colors.java:95-116`).
+ * The `NoSuchColorException` is `CommandExecutionResult.badColor()`
+ * (`SingleLineCommand2.java:174-177`, `CommandMultilines2.java:119`): the
+ * line refuses, so the sequence attempt fails. Returns whether it refused.
+ * The ParseRefusal carries no score, so badColor's 10 is not modelled.
+ */
+function refusedNoteColor(state: ParseState, color: string | undefined, onMessage: boolean): boolean {
+  if (color === undefined) return false;
+  try {
+    if (onMessage) HColorSet.instance().getColor(color);
+    else Colors.parse(color, HColorSet.instance(), ColorType.BACK);
+  } catch (e) {
+    if (!(e instanceof NoSuchColorException)) throw e;
+    state.executionError = NO_SUCH_COLOR;
+    return true;
+  }
+  return false;
+}
+
+/**
+ * The component a note keyword draws: `NoteStyle.getNoteStyle(STYLE)`
+ * (`NoteStyle.java:46-54`) then `#getNoteComponentType` (`:57-65`) --
+ * `hnote` is `NOTE_HEXAGONAL`, `rnote` `NOTE_BOX`, anything else `NOTE`
+ * (no `shape`). `style` is the lower-cased keyword.
+ */
+function noteShapeOf(style: string): { shape?: NoteShape } {
+  if (style === 'hnote') return { shape: 'hexagon' };
+  if (style === 'rnote') return { shape: 'rect' };
+  return {};
+}
 
 // ---------------------------------------------------------------------------
 // Shared fragments: `ColorParser`'s two grammars (sequence-color-grammar.ts)
@@ -125,6 +171,7 @@ export const noteCommand: Command = {
     // registers each one -- see {@link registerNoteParticipants}'s doc
     // comment.
     const participants = registerNoteParticipants(state, rawParticipants);
+    if (refusedNoteColor(state, color, false)) return;
 
     if (inlineText !== undefined) {
       // Single-line form: replace literal \n escape sequences with real newlines,
@@ -136,17 +183,20 @@ export const noteCommand: Command = {
         participants,
         text,
         ...(color !== undefined ? { color } : {}),
+        styleBuilder: currentStyleBuilder(state.style), // `FactorySequenceNoteCommand.java:233`
       };
       emit(state, ev);
     } else {
       // Multi-line form: open a pending note; subsequent lines accumulate until
       // "end note".
+      // Captured at the opener: upstream executes the block as one command.
       state.pendingNote = {
         kind: 'note',
         position,
         participants,
         text: '',
         ...(color !== undefined ? { color } : {}),
+        styleBuilder: currentStyleBuilder(state.style),
       };
     }
   },
@@ -244,7 +294,9 @@ export const noteOnArrowCommand: Command = {
     const position: NoteEvent['position'] =
       rawPosition === 'left' ? 'left' : rawPosition === 'right' ? 'right' : 'over';
     const participants = noteOnArrowParticipants(state, position);
-    const shape = style === 'note' ? {} : ({ shape: 'rect' } as const);
+    // `if (event == null) return ok()` precedes the colour (`:212-213`).
+    if (participants.length > 0 && refusedNoteColor(state, color, true)) return;
+    const shape = noteShapeOf(style);
     const base = {
       kind: 'note' as const,
       position,
@@ -254,6 +306,7 @@ export const noteOnArrowCommand: Command = {
       ...shape,
       ...(color !== undefined ? { color } : {}),
       ...(stereotype !== undefined ? { stereotype } : {}),
+      styleBuilder: currentStyleBuilder(state.style), // `FactorySequenceNoteOnArrowCommand.java:226`
     };
 
     if (inlineText !== undefined) {
@@ -303,17 +356,16 @@ export const styledNoteCommand: Command = {
     const parallel = match[1] !== undefined;
     const vmerge = match[2] !== undefined;
     const style = match[3]!.toLowerCase();
-    const stereo1 = match[4];
     const rawPos = match[5]!.toLowerCase();
-    const stereo2 = match[7];
     const color = match[8];
     const inlineText = match[9];
     const position: NoteEvent['position'] = rawPos === 'left' ? 'left' : rawPos === 'right' ? 'right' : 'over';
     // T11 (ubrr): also registers each participant -- see
     // {@link registerNoteParticipants}'s doc comment.
     const participants = registerNoteParticipants(state, match[6]!);
-    const stereotype = stereo1 ?? stereo2;
-    const shape = style === 'note' ? {} : ({ shape: 'rect' } as const);
+    const stereotype = match[4] ?? match[7]; // `getLazzy("STEREO", 0)`: STEREO1, else STEREO2
+    if (refusedNoteColor(state, color, false)) return;
+    const shape = noteShapeOf(style);
     const base = {
       kind: 'note' as const,
       position,
@@ -324,6 +376,7 @@ export const styledNoteCommand: Command = {
       ...(stereotype !== undefined ? { stereotype } : {}),
       ...(vmerge ? { vmerge: true } : {}),
       ...(parallel ? { parallel: true } : {}),
+      styleBuilder: currentStyleBuilder(state.style), // `FactorySequenceNoteCommand.java:233`
     };
 
     if (inlineText !== undefined) {
@@ -349,8 +402,18 @@ export const noteAcrossCommand: Command = {
     const style = match[1]!.toLowerCase();
     const inlineText = match[2];
     const participants = state.ast.participants.map((p) => p.id);
-    const shape = style === 'note' ? {} : ({ shape: 'rect' } as const);
-    const base = { kind: 'note' as const, position: 'over' as const, participants, ...shape };
+    const shape = noteShapeOf(style);
+    const styleBuilder = currentStyleBuilder(state.style); // `FactorySequenceNoteAcrossCommand.java:216-217`
+    const base = {
+      kind: 'note' as const,
+      position: 'over' as const,
+      participants,
+      // `note.setNoteStyle(NoteStyle.getNoteStyle(line0.get("STYLE", 0)))`
+      // (`FactorySequenceNoteAcrossCommand.java:227`).
+      style: style as 'note' | 'hnote' | 'rnote',
+      ...shape,
+      styleBuilder,
+    };
 
     if (inlineText !== undefined) {
       emit(state, { ...base, text: inlineText.replace(/\\n/g, '\n') });

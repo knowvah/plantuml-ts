@@ -55,7 +55,29 @@ families, sequence's dot-cache tree is itself committed (D4), so this is a
 convenience for a small, hand-picked promotion set, not the mechanism that
 makes the suite offline.
 
-## Current state (sequence-root-chrome / T4, 2026-08-23)
+## Current state (sequence-divergence-drive / sdd1, 2026-10-20)
+
+**419 fixtures pinned** (`ratchet.json`), each byte-for-byte zero-diff on the
+ratchet path (`renderFixtureSequence` + `DeterministicMeasurer` +
+`fixtureIncludeStore()`, with def ids seeded as `src/index.ts` seeds them).
+The `renderSync` survey agrees: 419 conformant.
+
+- **Pinning tool:** `plans/sequence-divergence-drive/tools/pin-goldens.mts`
+  (`npx jiti … <source-tag> <close-label> <slug...>`). It refuses any slug
+  that is not zero-diff, copies `golden.svg` + `in.puml`, appends to
+  `ratchet.json`, flips the diff-baseline row to `pinned`, and clones the
+  routing (`agree`) and refusal (`ok`) rows as `tree: goldens,
+  type: svg-sequence`. Each pin round therefore bumps the running counts in
+  `routing-conformance.test.ts` and `refusal-coverage.test.ts`.
+- **diff-baseline statuses:** `baseline` (ratchet: weightedScore may not
+  rise), `error`, and `pinned` (T0b; skipped by the score ratchet because
+  the golden ratchet owns it). 1141 rows: 419 pinned, 709 baseline,
+  13 error. jetigu-21 and nuzise-60 are in dot-cache but have no row yet.
+- **Re-pin:** `npx jiti scripts/sequence-ratchet-adjudicate.ts --snapshot
+  <path>` then `npx tsx scripts/repin-sequence-baselines.ts <path>`; diff the
+  JSON before and after, and every row that ROSE needs its own mechanism.
+
+## Earlier state (sequence-root-chrome / T4, 2026-08-23)
 
 **0 fixtures pinned — ZERO fixtures are conformant.** This ratchet ships
 empty on purpose, not as a placeholder. The numbers below come from

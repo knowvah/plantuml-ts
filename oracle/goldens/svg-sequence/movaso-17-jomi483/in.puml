@@ -1,0 +1,5 @@
+@startuml
+A -> B : msg
+note over A #green;line:lightblue : text1
+note over B #back:green;line:lightblue : text2
+@enduml

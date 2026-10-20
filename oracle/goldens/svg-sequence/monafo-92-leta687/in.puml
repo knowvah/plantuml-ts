@@ -1,0 +1,6 @@
+@startuml
+'!preprocessorV2
+!global ijk = "foo"
+Alice -> Bob : ijk
+Alice -> Bob : ijkl
+@enduml

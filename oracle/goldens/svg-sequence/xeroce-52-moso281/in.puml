@@ -1,0 +1,4 @@
+@startuml
+skinparam ParticipantFontColor automatic
+participant bob #green|blue
+@enduml

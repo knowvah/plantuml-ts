@@ -17,8 +17,9 @@ import { describe, it, expect } from 'vitest';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { FixedMeasurer } from '../../../src/core/measurer.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo.js';
-import { arrowFontSpecOf } from '../../../src/diagrams/sequence/sequence-layout-shared.js';
+import { messageLabelBlock, messageLabelWidth } from '../../../src/diagrams/sequence/text-block-geo.js';
+import { defaultMessageFont } from '../../../src/diagrams/sequence/sequence-arrow-paint.js';
+import { atomFontSpec } from '../../../src/diagrams/sequence/sequence-creole-text-atom.js';
 import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.js';
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import type { SequenceGeometry, TextRun } from '../../../src/diagrams/sequence/ast.js';
@@ -30,12 +31,13 @@ describe('TextRun metrics', () => {
   it("takes textWidth from the measurer at the label's own ARROW font", () => {
     const measurer = new DeterministicMeasurer();
     const block = messageLabelBlock('hello', undefined, LEFT_X, ARROW_Y, { theme: defaultTheme, measurer });
-    const expected = measurer.measure('hello', arrowFontSpecOf(defaultTheme)).width;
+    const spec = atomFontSpec(defaultMessageFont());
+    const expected = measurer.measure('hello', spec).width;
     expect(block.lines[0]!.textWidth).toBeCloseTo(expected, 10);
-    // The arrow font is 13pt where the ambient one is 14 — measuring at the
-    // wrong one is the failure this asserts against, and it is invisible in
-    // the emitted `x`.
-    expect(arrowFontSpecOf(defaultTheme).size).toBe(13);
+    // The arrow font is 13pt (`plantuml.skin:317`) where the ambient one is
+    // 14 — measuring at the wrong one is the failure this asserts against, and
+    // it is invisible in the emitted `x`.
+    expect(spec.size).toBe(13);
   });
 
   it('measures textAscent rather than deriving it from the font size', () => {
@@ -54,9 +56,18 @@ describe('TextRun metrics', () => {
   it('gives the autonumber run its own measured width, not the label’s', () => {
     const measurer = new DeterministicMeasurer();
     const block = messageLabelBlock('hello', '[1]', LEFT_X, ARROW_Y, { theme: defaultTheme, measurer });
-    const spec = arrowFontSpecOf(defaultTheme);
+    const spec = atomFontSpec(defaultMessageFont());
     expect(block.number!.textWidth).toBeCloseTo(measurer.measure('[1]', spec).width, 10);
     expect(block.number!.textWidth).not.toBeCloseTo(block.lines[0]!.textWidth, 3);
+  });
+
+  it('messageLabelWidth is the laid-out block: number, 4px margin, label (Display.java:703-712)', () => {
+    const measurer = new DeterministicMeasurer();
+    const font = defaultMessageFont();
+    const block = messageLabelBlock('hello', '[1]', LEFT_X, ARROW_Y, { theme: defaultTheme, measurer }, font);
+    const label = block.lines[0]!;
+    expect(messageLabelWidth('hello', '[1]', font, { measurer })).toBeCloseTo(label.x + label.textWidth - LEFT_X, 10);
+    expect(messageLabelWidth('', undefined, font, { measurer })).toBe(0);
   });
 
   it('advances each line of a multi-line label by exactly one textLineHeight', () => {
@@ -145,6 +156,7 @@ function geometryWithRun(run: TextRun): SequenceGeometry {
     ],
     headHeight: 30,
     lifelineEndY: 90,
+    lifelineSegments: {},
     footerShapeY: 90,
     boxes: [],
     showFootbox: true,
@@ -205,7 +217,7 @@ describe('scaleSequenceGeometry on TextRun metrics', () => {
  */
 describe('messageLabelBlock creole (C3)', () => {
   const measurer = new DeterministicMeasurer();
-  const spec = arrowFontSpecOf(defaultTheme);
+  const spec = atomFontSpec(defaultMessageFont());
 
   it('splits one line into one run per styled atom, bolding only the <b> run', () => {
     const block = messageLabelBlock('a <b>bold</b> label', undefined, LEFT_X, ARROW_Y, {

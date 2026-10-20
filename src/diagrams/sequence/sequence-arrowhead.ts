@@ -43,6 +43,7 @@
  */
 
 import type { Point2D } from '../../core/klimt/UTranslate.js';
+import type { HColor } from '../../core/style/Value.js';
 
 // ---------------------------------------------------------------------------
 // The drawing model (D2)
@@ -79,8 +80,8 @@ export interface ArrowDressing {
  * reverse-pointing; `dressing2` is the head side, drawn normal-pointing
  * (`ComponentRoseArrow.java:153-156`). `dashed` is upstream's `isDotted()`,
  * i.e. `body == ArrowBody.DOTTED` (`ArrowConfiguration.java:198-200`). Only
- * the fields the drawing layer reads are carried; `color`, `thickness` and
- * `isSelf` stay with the renderer and the caller.
+ * the fields the drawing layer and the style read are carried; `thickness`
+ * and `isSelf` stay with the renderer and the caller.
  * @see skin/ArrowConfiguration.java:45-61
  */
 export interface ArrowConfiguration {
@@ -111,6 +112,15 @@ export interface ArrowConfiguration {
    * `inclination`'s own optional shape above.
    */
   readonly hidden?: boolean;
+  /**
+   * `withColor(HColorSet.instance().getColor(s))` — the `-[#red]->` form
+   * (`CommandArrow.java:497-498`) and `return #red`
+   * (`CommandReturn.java:121-123`), read back as `getColor()` (`:228-230`).
+   * It reaches the drawing only through the style: `getUsedStyles` overrides
+   * the arrow style's `LineColor` with it (`AbstractMessage.java:69-70`).
+   * Absent where upstream carries `null`.
+   */
+  readonly color?: HColor;
 }
 
 /** A line segment: an ordered start/end pair in tip-local coordinates. */

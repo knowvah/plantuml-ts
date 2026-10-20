@@ -28,6 +28,7 @@ import { createAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
 import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
 import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
+import { currentStyleBuilder, type SequenceStyleDispatch } from './sequence-skin-param.js';
 
 // ---------------------------------------------------------------------------
 // Mutable parse state (local to each parseSequence call)
@@ -72,6 +73,10 @@ export interface ParseState {
   executionError: string | undefined;
   /** `SequenceDiagram`'s life-event bookkeeping -- `sequence-life-state.ts`. */
   life: LifeState;
+  /** The diagram's style `SkinParam`, replayed per command (sdd1 D2/D3):
+   *  every node reads `currentStyleBuilder(style)` where its Java
+   *  constructor reads `getSkinParam().getCurrentStyleBuilder()`. */
+  readonly style: SequenceStyleDispatch;
 }
 
 // ---------------------------------------------------------------------------
@@ -142,7 +147,8 @@ export function currentEvents(state: ParseState): SequenceEvent[] {
   return last ?? state.ast.events;
 }
 
-/** Ensure a participant exists; create it if it does not. */
+/** Ensure a participant exists; create it if it does not, with the builder
+ *  current now (`SequenceDiagram.java:126-131,169-172`). */
 export function ensureParticipant(
   state: ParseState,
   id: string,
@@ -165,12 +171,11 @@ export function ensureParticipant(
     ...(decl?.stereotype !== undefined ? { stereotype: decl.stereotype } : {}),
     ...(decl?.url !== undefined ? { url: decl.url } : {}),
     ...(state.currentBox !== null ? { boxId: state.currentBox.id } : {}),
+    styleBuilder: currentStyleBuilder(state.style),
   };
   state.ast.participants.push(p);
   state.participantIndex.set(id, order);
-  if (state.currentBox !== null) {
-    state.currentBox.participantIds.push(id);
-  }
+  state.currentBox?.participantIds.push(id);
 }
 
 /** Emit a SequenceEvent into the current scope. */
@@ -190,22 +195,47 @@ export function setLastEventWithNoteSpan(state: ParseState, ids: readonly string
 }
 
 /**
- * `AutoNumber#getNextMessageNumber` (`AutoNumber.java:75-81`): format the
+ * `autonumber` with no quoted FORMAT formats with `<b>0</b>`
+ * (`CommandAutonumber.java:119`): the number is creole bold, which is why the
+ * jar draws it at `font-weight="700"`. `autonumber resume` keeps whatever
+ * format is current (`AutoNumber.java:59-72`), and this port's `format`
+ * field IS that state, so an absent field means this default.
+ */
+export const DEFAULT_AUTONUMBER_FORMAT = '<b>0</b>';
+
+/**
+ * `AutoNumber#getNextMessageNumber` (`AutoNumber.java:82-89`): format the
  * CURRENT value, then advance by `step` (`DottedNumber#incrementMinor`,
- * `DottedNumber.java:75-79` — the last segment only).
+ * `DottedNumber.java:75-79` — the last segment only). The formatted string is
+ * the `MessageNumber` `getLabelNumbered` puts first in the display
+ * (`AbstractMessage.java:199-207`).
  */
 export function applyAutonumber(state: ParseState, msg: MessageEvent): MessageEvent {
   const auto = state.ast.autonumber;
   if (!auto.enabled) return msg;
   const num = auto.current;
   auto.current += auto.step;
-  const dottedLabel = auto.prefix === '' ? undefined : `${auto.prefix}${String(num)}`;
-  const label = auto.format !== undefined ? formatAutonumber(auto.format, num, auto.prefix) : dottedLabel;
   return {
     ...msg,
     sequenceNumber: num,
-    ...(label !== undefined ? { sequenceLabel: label } : {}),
+    sequenceLabel: formatDottedNumber(auto.prefix, num, auto.format ?? DEFAULT_AUTONUMBER_FORMAT),
   };
+}
+
+/**
+ * `DottedNumber#format(DecimalFormat)`: a single number with no separator
+ * goes through the format; a dotted one IGNORES it and is always bold.
+ *
+ * ```java
+ * if (nums.size() == 1 && separators.size() == 0)
+ *     return format.format(nums.get(0));
+ * return "<b>" + toString() + "</b>";
+ * ```
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/DottedNumber.java:106-111
+ */
+function formatDottedNumber(prefix: string, num: number, format: string): string {
+  if (prefix === '') return formatAutonumber(format, num);
+  return `<b>${prefix}${String(num)}</b>`;
 }
 
 /**
@@ -216,11 +246,10 @@ export function applyAutonumber(state: ParseState, msg: MessageEvent): MessageEv
  * `DecimalFormat` pattern characters (`#`, `,`, `.`) are not ported: none
  * appear in the corpus bucket's format strings.
  */
-export function formatAutonumber(format: string, num: number, prefix: string): string {
-  const digits = prefix === '' ? String(num) : `${prefix}${String(num)}`;
+export function formatAutonumber(format: string, num: number): string {
   const run = /0+/.exec(format);
   if (run === null) return format;
-  const padded = prefix === '' ? digits.padStart(run[0].length, '0') : digits;
+  const padded = String(num).padStart(run[0].length, '0');
   return format.slice(0, run.index) + padded + format.slice(run.index + run[0].length);
 }
 
@@ -312,10 +341,10 @@ export { parseParticipantDeclaration, participantUrlOf } from './sequence-partic
  *
  * The two directions are NOT symmetric -- `+` activates p2, the message
  * TARGET, while `-` deactivates p1, the message SOURCE (`:447`, `:450`).
- * `*` (CREATE, at `:396`) and `!` (DESTROY, `:453`) both act on the target;
- * this port has no CREATE/DESTROY variant on `ActivationEvent`, so they
- * collapse onto activate/deactivate as the pre-existing note on the arrow
- * command records.
+ * `*` (CREATE, at `:396`) and `!` (DESTROY, `:453`) both act on the target.
+ * CREATE is handled before the message (see the `case` below); DESTROY is
+ * the message's `destroys`, a destroy bound to it
+ * (`sequence-layout-life-event.ts#messageDestroyCrosses`).
  *
  * Ordering between the two events is not expressible in this return shape and
  * does not need to be: `sequence-layout-message.ts:135-148` keys both to the
@@ -384,9 +413,13 @@ export function autoActivationFlags(
   return arrow.dashed ? { deactivates: from } : { activates: to };
 }
 
-export function activationFlags(spec: string, from: string, to: string): { activates?: string; deactivates?: string } {
+export function activationFlags(
+  spec: string,
+  from: string,
+  to: string,
+): { activates?: string; deactivates?: string; destroys?: string } {
   const trimmed = spec.trim();
-  const flags: { activates?: string; deactivates?: string } = {};
+  const flags: { activates?: string; deactivates?: string; destroys?: string } = {};
   switch (trimmed.charAt(0)) {
     case '+':
       flags.activates = to;
@@ -405,8 +438,12 @@ export function activationFlags(spec: string, from: string, to: string): { activ
     case '-':
       flags.deactivates = from;
       break;
+    // `diagram.activate(p2, LifeEventType.DESTROY, null)` (`:453-455`): a
+    // DESTROY, not a DEACTIVATE -- `AbstractMessage#isDeactivate` is false for
+    // it (`AbstractMessage.java:179-181`), which is what keeps a self `!!`'s
+    // step at its end point (`CommunicationTileSelf.java:120-125`).
     case '!':
-      flags.deactivates = to;
+      flags.destroys = to;
       break;
   }
   // `if (spec.length() == 4)` (`CommandArrow.java:457-466`) -- the second
@@ -445,56 +482,12 @@ export function parseDottedStart(raw: string): DottedStart {
 }
 
 // ---------------------------------------------------------------------------
-// hide unlinked (CommandHideUnlinked.java, T13)
+// hide unlinked / hide stereotype
 // ---------------------------------------------------------------------------
 
-/** Every participant id referenced by an event, recursing into frame
- *  branches (an `alt` branch's messages still "link" the participant).
- *  @see sequencediagram/SequenceDiagram.java (removeHiddenParticipants) */
-export function linkedParticipantIds(events: readonly SequenceEvent[]): Set<string> {
-  const linked = new Set<string>();
-  for (const event of events) collectLinkedIds(event, linked);
-  return linked;
-}
-
-function collectLinkedIds(event: SequenceEvent, linked: Set<string>): void {
-  if (event.kind === 'message') {
-    linked.add(event.from);
-    linked.add(event.to);
-  } else if (event.kind === 'messageExo') {
-    // `isAlone` asks every event `dealWith(p)`, and `MessageExo.dealWith`
-    // answers `participant == someone` (`MessageExo.java:90-92`) — so an exo
-    // message links its ONE endpoint and nothing else.
-    // @see sequencediagram/SequenceDiagram.java:535-541
-    linked.add(event.participant);
-  } else if (event.kind === 'note') {
-    for (const p of event.participants) linked.add(p);
-  } else if (event.kind === 'activate' || event.kind === 'deactivate') {
-    linked.add(event.participantId);
-  } else if (event.kind === 'frame') {
-    for (const branch of event.branches) for (const inner of branch) collectLinkedIds(inner, linked);
-  }
-}
-
-/** `hide stereotype` (`options.hideStereotype`): drop every participant's
- *  stereotype so neither the layout nor the renderer sees one. Applied
- *  post-parse for the same reason `applyHideUnlinked` is — the directive can
- *  appear after the declarations it affects. See `hideStereotypeCommand`
- *  (`command-arrow.ts`) for the upstream registration chain. */
-export function applyHideStereotype(ast: SequenceDiagramAST): void {
-  if (ast.options.hideStereotype !== true) return;
-  for (const p of ast.participants) delete p.stereotype;
-}
-
-/** `hide unlinked` (`options.hideUnlinked`): drop participants no event
- *  references, and prune them out of any box's `participantIds` too so a
- *  box background doesn't span a column that no longer renders.
- *  @see sequencediagram/command/CommandHideUnlinked.java */
-export function applyHideUnlinked(ast: SequenceDiagramAST): void {
-  if (ast.options.hideUnlinked !== true) return;
-  const linked = linkedParticipantIds(ast.events);
-  ast.participants = ast.participants.filter((p) => linked.has(p.id));
-  for (const box of ast.boxes) {
-    box.participantIds = box.participantIds.filter((id) => linked.has(id));
-  }
-}
+/**
+ * Split into `sequence-hide-passes.ts` to stay under the 500-line file cap
+ * (sdd1 T1b); re-exported here so `parser.ts` and the tests need no import
+ * changes.
+ */
+export { applyHideStereotype, applyHideUnlinked, linkedParticipantIds } from './sequence-hide-passes.js';

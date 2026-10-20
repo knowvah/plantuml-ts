@@ -16,6 +16,7 @@ import type { ParticipantUrl } from './sequence-parse-helpers.js';
 export type { ParticipantUrl };
 import type { ScaleSpec } from '../../core/scale-command.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
+import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 
 // ---------------------------------------------------------------------------
 // AST Types
@@ -35,8 +36,12 @@ export interface Participant {
   /** The `<<...>>` run as written, guillemets included -- `CommandParticipant`
    *  stores it on the Participant rather than in its code
    *  (`CommandParticipant.java:174-181`). Rendered above the name unless
-   *  `hide stereotype` is in force. */
+   *  {@link stereotypeHidden}; merged into the style either way. */
   stereotype?: string;
+  /** `hiddenPortions.contains(EntityPortion.STEREOTYPE)`: `hide stereotype`
+   *  drops the stereotype from `getDisplay` only (`Participant.java:125-135`);
+   *  `getUsedStyles` still merges it (`:82-91`). */
+  stereotypeHidden?: boolean;
   /**
    * The participant's own `[[url{tooltip}]]`, resolved (B3).
    *
@@ -46,6 +51,10 @@ export interface Participant {
    * {@link AbstractMessageEvent.url}, which the jar parses and never draws.
    */
   url?: ParticipantUrl;
+  /** The builder current at the participant's creation, explicit or implicit
+   *  (`SequenceDiagram.java:129-130,171-172`); merged at use time
+   *  (`Participant.java:82-91`). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
 /**
@@ -99,6 +108,10 @@ export interface AbstractMessageEvent {
   /** `AbstractMessage#isCreate` (`:169-171`): this message took the pending
    *  `CREATE` life event (`SequenceDiagram.java:207-214`). */
   create?: true;
+  /** The builder current at the arrow's command (`CommandArrow.java:401`,
+   *  `CommandExoArrowAny.java:136`, `CommandReturn.java:129-132`), merged in
+   *  the constructor (`AbstractMessage.java:66-77`). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
 export interface MessageEvent extends AbstractMessageEvent {
@@ -107,6 +120,10 @@ export interface MessageEvent extends AbstractMessageEvent {
   to: string; // participant id
   activates?: string; // participant id to auto-activate (++ shorthand)
   deactivates?: string; // participant id to auto-deactivate (-- shorthand)
+  /** Participant id destroyed by the `!!` shorthand: a `LifeEventType.DESTROY`
+   *  bound to this message (`CommandArrow.java`, `SequenceDiagram.java#activate`).
+   *  sdd1: declared ahead of T3d, which sets and reads it. */
+  destroys?: string;
   /** The extra targets of `A -> B, C, D : msg` — `getMulticasts`
    *  (`CommandArrow.java:139-155`), `msg.setMulticast(...)` at `:404`. */
   multicast?: readonly string[];
@@ -131,6 +148,10 @@ export interface MessageExoEvent extends AbstractMessageEvent {
   shortArrow: boolean;
 }
 
+/** The non-default note components: `rect` = `NOTE_BOX`, `hexagon` =
+ *  `NOTE_HEXAGONAL` (`NoteStyle.java:57-65`). */
+export type NoteShape = 'rect' | 'hexagon';
+
 export interface NoteEvent {
   kind: 'note';
   position: 'left' | 'right' | 'over';
@@ -138,13 +159,13 @@ export interface NoteEvent {
   text: string;
   color?: string;
   /**
-   * `rnote`/`hnote` vs. plain `note` (`FactorySequenceNoteCommand.java:81`,
-   * `NoteStyle.java`). This port draws both non-default shapes as a plain
-   * rectangle (no folded corner) — the RECTANGLE/HEXAGON distinction upstream
-   * makes between them is not carried further, a documented simplification
-   * (T13, dispatch-by-parse-attempt) rather than a full hexagon-path port.
+   * The component `NoteStyle#getNoteComponentType` picks
+   * (`NoteStyle.java:57-65`): `rnote` (BOX) is `ComponentRoseNoteBox`, a
+   * rounded `URectangle`; `hnote` (HEXAGONAL) is
+   * `ComponentRoseNoteHexagonal`, a 7-point `UPolygon`. Absent for a plain
+   * `note` (NORMAL, the Opale shape).
    */
-  shape?: 'rect';
+  shape?: NoteShape;
   /** The note keyword as written. `NoteStyle.getNoteStyle` maps `hnote` to
    *  HEXAGONAL, `rnote` to BOX and anything else to NORMAL
    *  (`NoteStyle.java:46-54`); the keyword is kept rather than the resolved
@@ -168,6 +189,13 @@ export interface NoteEvent {
    *  `STEREO` group, `note.setStereotype(...)` at
    *  `FactorySequenceNoteCommand.java:234-241`. */
   stereotype?: string;
+  /** The builder current at the note's OPENING line — a multi-line note
+   *  executes there (`FactorySequenceNoteCommand.java:233`,
+   *  `FactorySequenceNoteOverSeveralCommand.java:238`,
+   *  `FactorySequenceNoteAcrossCommand.java:216`,
+   *  `FactorySequenceNoteOnArrowCommand.java:226`); merged at use time
+   *  (`Note.java:71-79`). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
 export interface FrameEvent {
@@ -185,6 +213,12 @@ export interface FrameEvent {
      *  as a one-branch, label-only frame; see `command-misc.ts`. */
     | 'ref';
   label: string;
+  /** The header title `CommandGrouping` rewrote a `group T [c]` line to:
+   *  `type = m.group(1)` (`CommandGrouping.java:143-148`), kept verbatim (its
+   *  space before the bracket included, possibly empty). Absent where the
+   *  title is the keyword itself -- every other line -- which `GroupingTile`
+   *  reads as `getTitle()` (`GroupingTile.java:126-127`). */
+  title?: string;
   branches: SequenceEvent[][]; // alt has multiple; others have one
   /** Condition text per branch, index-aligned with `branches`: entry 0 is
    *  the frame's own `label`, 1..n are `else <condition>` labels, drawn
@@ -214,6 +248,18 @@ export interface FrameEvent {
    *  `CommandReferenceOverSeveral.java:67-82`): `ReferenceTile#init` spans
    *  their boxes (`teoz/ReferenceTile.java:96-115`). Absent for a group. */
   participants?: string[];
+  /** The builder current at the opener: `GroupingStart`
+   *  (`SequenceDiagram.java:427-428`) or `Reference`
+   *  (`CommandReferenceOverSeveral.java:140-141`,
+   *  `CommandReferenceMultilinesOverSeveral.java:152-153`, captured at the
+   *  multi-line opener). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
+  /** Per-branch builder, index-aligned with {@link branchLabels}: entry 0 is
+   *  {@link styleBuilder}, 1..n each `else`'s own `GroupingLeaf` builder
+   *  (`SequenceDiagram.java:431-432`), read by `ElseTile.java:98`. The `end`
+   *  leaf's builder is not kept: `GroupingTile.java:162` reads only its
+   *  type. sdd1 D2. */
+  branchStyleBuilders: StyleBuilder[];
 }
 
 export interface ActivationEvent {
@@ -228,21 +274,32 @@ export interface ActivationEvent {
    * upstream could not bind to a message —
    * `LifeEventTile#isDestroyWithoutMessage:124-126` — reserves the cross's own
    * `crossSize * 2` = 18 (`:132-136`, `ComponentRoseDestroy:57,68-70`); every
-   * other life event reserves 0 (`:137`). The cross itself is still not drawn.
+   * other life event reserves 0 (`:137`). The cross, and where the lifeline
+   * stops, are `sequence-layout-life-event.ts`'s.
    */
   destroy?: true;
+  /** `LifeEvent`'s builder (`SequenceDiagram.java:371-372`), read per
+   *  segment by `LifeLine.java:235-240`. sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
 export interface DividerEvent {
   kind: 'divider';
   text: string;
+  /** Merged in the constructor (`SequenceDiagram.java:270`,
+   *  `Divider.java:59-61`). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
 export interface DelayEvent {
   kind: 'delay';
   text?: string;
+  /** Merged in the constructor (`SequenceDiagram.java:289`,
+   *  `Delay.java:59-61`). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
+/** `HSpace` takes no builder (`HSpace.java:42`), so this event carries none. */
 export interface SpaceEvent {
   kind: 'space';
   pixels: number;
@@ -269,6 +326,9 @@ export interface NewpageEvent {
    *  newpage's. Absent when the command carried none, which is upstream's
    *  `Display.NULL` and draws no title at all. */
   title?: readonly string[];
+  /** `new Newpage(getCurrentStyleBuilder())` (`SequenceDiagram.java:248`,
+   *  `Newpage.java:56`). sdd1 D2. */
+  readonly styleBuilder: StyleBuilder;
 }
 
 export type SequenceEvent =
@@ -291,11 +351,35 @@ export interface BoxGroup {
   label: string;
   color: string;
   participantIds: string[];
+  /** The `<<...>>` run as written, guillemets included: `CommandBoxStart`'s
+   *  STEREO group (`CommandBoxStart.java:75,119-123`), held by the
+   *  `ParticipantEnglober` and merged by `Doll#getUsedStyles`
+   *  (`Doll.java:107-114`). */
+  stereotype?: string;
+  /**
+   * The builder a `Doll` reads: `tileArguments.getSkinParam()
+   * .getCurrentStyleBuilder()` at TILE time (`Doll.java:81-83`, built by
+   * `Dolls.java:68-70`), i.e. after every command has executed — not the
+   * builder current at the `box` line (`ParticipantEnglober` holds none,
+   * `ParticipantEnglober.java:59-63`). A getter over the parse's style
+   * dispatch, read after the parse completes. sdd1 D2.
+   */
+  readonly styleBuilder: StyleBuilder;
 }
 
 export interface SequenceDiagramAST {
   participants: Participant[];
   events: SequenceEvent[];
+  /**
+   * `skinParam.getCurrentStyleBuilder()` read at TILE time, i.e. after every
+   * command and every trailing declaration has executed: the builder a
+   * lifeline (`MutingLine.java:70`, built by `LivingSpace.java:147`) and a
+   * destroy cross (`LiveBoxesDrawer.java:78-81`, `LifeEventTile.java:107-110`)
+   * merge from. Set by `parseSequence`; absent only on an AST built without a
+   * parse, which `layoutSequence` refuses (`sequence-layout-lifeline.ts`).
+   * sdd1 D2.
+   */
+  readonly styleBuilder?: StyleBuilder;
   /**
    * `current`/`start` are `DottedNumber.incrementMinor`'s LAST segment only
    * (`DottedNumber.java:75-79`); `prefix` carries every segment before it

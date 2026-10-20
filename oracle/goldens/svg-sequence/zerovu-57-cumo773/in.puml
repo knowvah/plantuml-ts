@@ -1,0 +1,14 @@
+@startuml
+<style>
+document {
+  BackGroundColor Navy
+}
+root {
+  FontColor #?black:white
+}
+</style>
+title
+my title
+endtitle
+alice->bob : hello
+@enduml

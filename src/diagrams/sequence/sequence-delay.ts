@@ -24,65 +24,38 @@
 
 import type { ActivationGeo, DelayGeo, EventGeo, LifelineSegment, ParticipantGeo } from './ast.js';
 import type { DelayEvent } from './ast.js';
-import type { Theme } from '../../core/theme.js';
-import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
-import type { TextRun } from './text-block-geo.js';
+import type { StringMeasurer } from '../../core/measurer.js';
+import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import { displayLines } from './text-block-geo.js';
-import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
+import { atomFontSpec } from './sequence-creole-text-atom.js';
+import { alignedBlockRuns } from './sequence-block-align.js';
+import { offsetRun } from './sequence-creole.js';
+import { delayStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
 
 /** `ComponentRoseDelayText#getPreferredHeight` (`:72-75`): text height + 20. */
 const DELAY_HEIGHT_ALLOWANCE = 20;
 /** `ComponentRoseDelayText:54` -- `topRightBottomLeft(4, 0, 4, 0)`. */
 const DELAY_PADDING_Y = 4;
-/** `delay { FontSize 11 }` (`plantuml.skin:300-305`). */
-export const DELAY_FONT_SIZE = 11;
-/** `delay { LineStyle 1-4 }` (`plantuml.skin:304`). */
-export const DELAY_LINE_DASH = 1;
-export const DELAY_LINE_GAP = 4;
 
 /** A `[y1, y2]` span on the y axis -- upstream's `Segment`. */
-interface Span {
+export interface Span {
   readonly y1: number;
   readonly y2: number;
 }
 
-function delayFontSpec(theme: Theme): FontSpec {
-  return { family: theme.fontFamily, size: DELAY_FONT_SIZE };
-}
-
-/** A creole line's advance: its last run's right edge. */
-function lineWidthOf(runs: readonly TextRun[]): number {
-  const last = runs.at(-1);
-  return last === undefined ? 0 : last.x + last.textWidth;
-}
+/** One `MutingLine#drawInternal` call's span and type, before its style is
+ *  resolved (`sequence-layout-lifeline.ts`). */
+export type LinePiece = Pick<LifelineSegment, 'y1' | 'y2' | 'delay'>;
 
 /**
- * `ComponentRoseDelayText#drawInternalU` (`:62-70`): the block is centred in
- * an area exactly its own width, at `ypos = (height - textHeight) / 2` plus
- * `getOldPaddingY()`; `delay { HorizontalAlignment center }` centres each
- * line inside the block.
+ * The delay's paint: `ComponentType.DELAY_TEXT`'s style (`root, element,
+ * sequenceDiagram, lifeLine, delay`, `ComponentType.java:101-102`), merged in
+ * the constructor from the builder current at the command (`Delay.java:
+ * 59-62`, `SequenceDiagram.java:289`). `ComponentRoseDelayText` reads only
+ * its font and alignment (`AbstractTextualComponent.java:78-91`).
  */
-function placeLabel(
-  lines: readonly string[],
-  top: number,
-  left: number,
-  blockWidth: number,
-  ctx: DelayContext,
-): TextRun[] {
-  const { spec, measurer } = ctx;
-  const font = sequenceCreoleFont(spec);
-  const lineHeight = measurer.measure('M', spec).height;
-  const ascent = lineHeight - measurer.getDescent(spec, 'M');
-  return lines.flatMap((line, i) => {
-    const width = lineWidthOf(sequenceCreoleRuns(line, font, { leftX: 0, baselineY: 0 }, measurer));
-    const origin = { leftX: left + (blockWidth - width) / 2, baselineY: top + ascent + i * lineHeight };
-    return [...sequenceCreoleRuns(line, font, origin, measurer)];
-  });
-}
-
-interface DelayContext {
-  readonly spec: FontSpec;
-  readonly measurer: StringMeasurer;
+export function delayPaint(event: DelayEvent): SequencePaint {
+  return paintOf(delayStyle(event.styleBuilder), HColorSet.instance());
 }
 
 /**
@@ -101,27 +74,31 @@ function delayLines(event: DelayEvent): readonly string[] {
  * The `DelayTile` at `y`. `participants` is in living-space order: the tile
  * is centred between the FIRST and the LAST lifeline (`DelayTile.java:79-83`,
  * `TileArguments#getFirstLivingSpace`/`#getLastLivingSpace`).
+ *
+ * `ComponentRoseDelayText#drawInternalU` (`:62-70`) centres the block in an
+ * area exactly its own width, at `ypos = (height - textHeight) / 2` plus
+ * `getOldPaddingY()`; the style's alignment places each line inside the block
+ * (`delay { HorizontalAlignment center }`, `plantuml.skin:303`).
  */
 export function layoutDelay(
   event: DelayEvent,
   y: number,
   participants: readonly ParticipantGeo[],
-  theme: Theme,
   measurer: StringMeasurer,
 ): DelayGeo {
-  const ctx: DelayContext = { spec: delayFontSpec(theme), measurer };
+  const paint = delayPaint(event);
   const lines = delayLines(event);
-  const font = sequenceCreoleFont(ctx.spec);
-  const widths = lines.map((l) => lineWidthOf(sequenceCreoleRuns(l, font, { leftX: 0, baselineY: 0 }, measurer)));
-  const textWidth = Math.max(0, ...widths);
-  const textHeight = lines.length * measurer.measure('M', ctx.spec).height + 2 * DELAY_PADDING_Y;
+  const lineHeight = measurer.measure('M', atomFontSpec(paint.font)).height;
+  const textHeight = lines.length * lineHeight + 2 * DELAY_PADDING_Y;
   const height = textHeight + DELAY_HEIGHT_ALLOWANCE;
   const first = participants[0]!;
   const last = participants[participants.length - 1]!;
   const middleX = (first.centerX + last.centerX) / 2;
   const top = y + (height - textHeight) / 2 + DELAY_PADDING_Y;
-  const labelRuns = placeLabel(lines, top, middleX - textWidth / 2, textWidth, ctx);
-  return { kind: 'delay', y, height, middleX, textWidth, labelRuns };
+  const block = alignedBlockRuns(lines, paint.font, { leftX: 0, top }, paint.align, { measurer });
+  const left = middleX - block.width / 2;
+  const labelRuns = block.runs.map((r) => offsetRun(r, left, 0));
+  return { paint, kind: 'delay', y, height, middleX, textWidth: block.width, labelRuns };
 }
 
 /** The delay spans of a finished layout, in tile order. */
@@ -135,9 +112,9 @@ export function delaySpansOf(events: readonly EventGeo[]): Span[] {
  * piece (`:96-97`), which is how two back-to-back delays leave no solid
  * line between them.
  */
-export function lifelineSegments(start: number, end: number, delays: readonly Span[]): LifelineSegment[] {
+export function lifelineSegments(start: number, end: number, delays: readonly Span[]): LinePiece[] {
   const sorted = [...delays].sort((a, b) => a.y1 - b.y1);
-  const out: LifelineSegment[] = [];
+  const out: LinePiece[] = [];
   const push = (y1: number, y2: number, delay: boolean): void => {
     if (y2 !== y1) out.push({ y1, y2, delay });
   };
@@ -150,23 +127,6 @@ export function lifelineSegments(start: number, end: number, delays: readonly Sp
   }
   push(y, end, false);
   return out;
-}
-
-/**
- * Every participant's pieces: `LivingSpace#drawLineAndLiveboxes`
- * (`teoz/LivingSpace.java:150-167`) draws the line from `aliveSince` -- the
- * create y, else 0 (this port's `headHeight`). The field is absent when no
- * participant needs more than the one plain line.
- */
-export function lifelineSegmentsByParticipant(
-  participants: readonly ParticipantGeo[],
-  headHeight: number,
-  end: number,
-  delays: readonly Span[],
-): { lifelineSegments?: Record<string, LifelineSegment[]> } {
-  if (delays.length === 0 && participants.every((p) => p.createY === undefined)) return {};
-  const pieces = participants.map((p) => [p.id, lifelineSegments(p.createY ?? headHeight, end, delays)] as const);
-  return { lifelineSegments: Object.fromEntries(pieces) };
 }
 
 /** `DelayTile#getMaxX` (`:126-129`), `middle + preferredWidth / 2`, maxed

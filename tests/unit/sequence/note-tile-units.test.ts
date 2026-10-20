@@ -11,9 +11,10 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { defaultTheme } from '../../../src/core/theme.js';
 import { HorizontalAlignment } from '../../../src/core/klimt/geom/HorizontalAlignment.js';
 import type { NoteGeo, SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 function notesOf(lines: readonly string[]): { notes: NoteGeo[]; centers: number[] } {
-  const ast = parseSequence([...lines]) as SequenceDiagramAST;
+  const ast = parseSequence(sequenceSource([...lines])) as SequenceDiagramAST;
   const geo = layoutSequence(ast, defaultTheme, new DeterministicMeasurer());
   return {
     notes: geo.events.filter((e): e is NoteGeo => e.kind === 'note'),

@@ -1,0 +1,17 @@
+@startuml
+skinparam usebetastyle true
+participant Alice
+
+<style>
+participant {
+  FontColor green
+  FontSize 26
+  FontStyle italic
+  LineColor #E00
+  BackGroundColor #000
+}
+</style>
+
+participant Bob
+Alice -> Bob : hello
+@enduml

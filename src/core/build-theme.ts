@@ -19,7 +19,6 @@ import { cleanForKeySlow } from './style/mindmap-style-builder.js';
 import { parseConditionalColor } from './klimt/color/HColorSet.js';
 import { parseClockwise } from './annotations/annotation-clockwise.js';
 import { withActivityCircleStyle } from './activity-circle-style.js';
-import { withSequenceShadowing } from './sequence-shadowing.js';
 import { ROOT_LINE_COLOR_KEY } from './skinparam-key-handlers-shared.js';
 
 /**
@@ -81,12 +80,7 @@ export function buildTheme(preprocessed: PreprocessorResult, options?: RenderOpt
   const styleMap = mergedStyleMap([...skinSegments.map(rootColourRun), ...segments]);
   // add4-T3f: the activity circles' priority-ordered merged style -- see
   // `activity-circle-style.ts`; read only by the activity renderer.
-  // unwind2-S9: the sequence elements' merged-style Shadowing -- see
-  // `sequence-shadowing.ts`; read only by the sequence engine.
-  const withStyleMap = withSequenceShadowing(
-    withActivityCircleStyle(withDocumentStyle(withDeclarations, styleMap), preprocessed),
-    preprocessed,
-  );
+  const withStyleMap = withActivityCircleStyle(withDocumentStyle(withDeclarations, styleMap), preprocessed);
 
   // G2 N39: position-scoped classifier `.tagname` cascade generations --
   // see `preprocessed.stylePositions`'s doc comment for the mechanism.

@@ -17,9 +17,13 @@
 
 import type { ActivationEvent, MessageEvent, MessageGeo, ParticipantGeo } from './ast.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
-import { activationLevel, emitActivation, openActivation, pushActivation } from './sequence-layout-events.js';
-import { arrowFontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+import { activationLevel, pushActivation } from './sequence-layout-events.js';
+import { LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+import { atomFontSpec } from './sequence-creole-text-atom.js';
+import type { SequencePaint } from './sequence-skin-param.js';
 import { markCreated, withCreateEnd } from './sequence-layout-create.js';
+import { closeMessageActivation, handleDestroy, messageDestroyCrosses } from './sequence-layout-life-event.js';
+import { messagePaint } from './sequence-arrow-paint.js';
 import {
   ARROW_LABEL_HEAD_CLEARANCE,
   ARROW_LABEL_PADDING_X1,
@@ -41,28 +45,37 @@ export function handleMessageEvent(
 
   // `addMessage` sets `lastEventWithDeactivate = m` (`SequenceDiagram.java:
   // 204`); `dealWith` is participant1-or-participant2 membership.
-  ctx.lastMessageParticipants = [event.from, event.to];
+  const participants = [event.from, event.to];
+  ctx.lastMessageParticipants = participants;
 
   const resolved = withCreateEnd(event, resolveMessageEndpoints(event, fromGeo, toGeo, ctx), toGeo);
   const endpoints = liveOffsetEndpoints(resolved, event, ctx, bound);
   ctx.lastMessageLevels = new Map(
     [event.from, event.to].map((id) => [id, liveLevelAt(id, event, ctx, bound)] as const),
   );
-  // The ARROW font (13), not the ambient 14. `messageLabelBlock` has always
-  // DRAWN at 13 (`text-block-geo.ts:357-363`); reserving at 14 was the y half
-  // of the sizer/renderer split `planning/sizer-renderer-parity.md` exists to
-  // prevent, whose x half closed in Phase A.
-  const lineHeight = ctx.measurer.measure('M', arrowFontSpecOf(ctx.theme)).height;
+  // `message.getUsedStyles()` at tile time (`CommunicationTile.java:163`,
+  // `CommunicationTileSelf.java:106`) over the builder captured at the
+  // command (`AbstractMessage.java:89-97`).
+  const paint = messagePaint(event.styleBuilder, event.stereotype, event.arrow, endpoints.arrowDirection === 'self');
+  // The ARROW style's font (13 by default), not the ambient 14 -- the font
+  // `messageLabelBlock` draws with, so reserve and draw cannot disagree
+  // (`planning/sizer-renderer-parity.md`).
+  const lineHeight = ctx.measurer.measure('M', atomFontSpec(paint.font)).height;
   const rows = messageLabelRows(event.label, numberTextOf(event));
   const advance = messageTileAdvance(rows * lineHeight, endpoints.arrowDirection === 'self');
 
-  const messageGeo = buildMessageGeo(event, endpoints, cursor.y + advance.arrowY, ctx);
+  const messageGeo = buildMessageGeo(event, endpoints, cursor.y + advance.arrowY, ctx, paint);
   const tileHeight = event.create === true ? markCreated(messageGeo, toGeo, cursor.y, advance.tileHeight) : null;
   ctx.eventGeos.push(messageGeo);
   cursor.lastMessageY = messageGeo.y;
 
   cursor.y += tileHeight ?? advance.tileHeight;
 
+  // A self arrow's end point is `getArrowOnlyHeight` below its start
+  // (`ComponentRoseSelfArrow.java:298-307`); a flat arrow's ends share its y.
+  const loop = endpoints.arrowDirection === 'self' ? SELF_ARROW_ONLY_HEIGHT : 0;
+  const arrow = { start: messageGeo.y, end: messageGeo.y + loop, self: loop > 0 };
+  ctx.lastMessageCrosses = { of: participants, crosses: messageDestroyCrosses(event, arrow, bound, ctx) };
   // Handle auto-activate/deactivate via ++ / -- shorthand on message
   applyMessageActivation(event, messageGeo, cursor, ctx);
 }
@@ -184,15 +197,20 @@ function labelLeftOf(event: MessageEvent, endpoints: MessageEndpoints): number {
   return start + ARROW_LABEL_PADDING_X1 + clearance;
 }
 
-/** Build the MessageGeo for a resolved set of endpoints at the given y. */
+/** Build the MessageGeo for a resolved set of endpoints at the given y. The
+ *  label is a text block in the arrow style's font
+ *  (`AbstractTextualComponent.java:80-92`). */
 function buildMessageGeo(
   event: MessageEvent,
   endpoints: MessageEndpoints,
   y: number,
   ctx: EventProcessingContext,
+  paint: SequencePaint,
 ): MessageGeo {
-  const block = messageLabelBlock(event.label, numberTextOf(event), labelLeftOf(event, endpoints), y, ctx);
+  const left = labelLeftOf(event, endpoints);
+  const block = messageLabelBlock(event.label, numberTextOf(event), left, y, ctx, paint.font);
   return {
+    paint,
     labelLines: block.lines,
     ...(block.number !== undefined ? { labelNumber: block.number } : {}),
     kind: 'message',
@@ -321,9 +339,12 @@ function levelAfterBoundEvents(
   // This port stores them as two fields and so cannot tell `--++` from
   // `++--`; deactivate-then-activate is taken, which is `--++`, the form the
   // corpus writes. Recorded rather than silently assumed.
+  // Both life events share the message's command, hence its builder
+  // (`SequenceDiagram.java:371-372`).
+  const { styleBuilder } = event;
   const own: ActivationEvent[] = [
-    ...(event.deactivates === participantId ? [{ kind: 'deactivate' as const, participantId }] : []),
-    ...(event.activates === participantId ? [{ kind: 'activate' as const, participantId }] : []),
+    ...(event.deactivates === participantId ? [{ kind: 'deactivate' as const, participantId, styleBuilder }] : []),
+    ...(event.activates === participantId ? [{ kind: 'activate' as const, participantId, styleBuilder }] : []),
   ];
 
   let level = activationLevel(ctx.activationStart, participantId);
@@ -462,12 +483,13 @@ function applyMessageActivation(
       ...(event.lifeColor !== undefined ? { color: event.lifeColor } : {}),
     });
   }
-  if (event.deactivates !== undefined) {
-    // End at the arrow y. If that would give zero/negative height (the
-    // activate and deactivate land at the same y), fall back to the
-    // post-spacing cursor.y so the bar is always visible.
-    const deactStartY = openActivation(ctx.activationStart, event.deactivates)?.y;
-    const deactEndY = deactStartY !== undefined && messageGeo.y <= deactStartY ? cursor.y : messageGeo.y;
-    emitActivation(event.deactivates, deactEndY, ctx.participantMap, ctx.activationStart, ctx.eventGeos);
+  if (event.deactivates !== undefined) closeMessageActivation(event.deactivates, messageGeo.y, cursor, ctx);
+  if (event.destroys !== undefined) {
+    // `!!` is a DESTROY life event after the message, exactly as a `destroy`
+    // line there would be (`SequenceDiagram.java:369-371`): it closes the
+    // level (`LifeEvent#isDeactivateOrDestroy`) and its tile stops the
+    // lifeline, bound to this message.
+    closeMessageActivation(event.destroys, messageGeo.y, cursor, ctx);
+    handleDestroy(event.destroys, cursor, ctx);
   }
 }

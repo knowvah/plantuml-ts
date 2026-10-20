@@ -1,0 +1,11 @@
+@startuml
+mainframe This is a **mainframe**
+
+legend
+The legend
+end legend
+
+participant a
+a --> bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb 
+
+@enduml

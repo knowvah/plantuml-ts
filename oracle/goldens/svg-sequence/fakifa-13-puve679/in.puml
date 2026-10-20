@@ -1,0 +1,17 @@
+@startuml
+skinparam usebetastyle true
+
+Bob -> Alice : hello
+...
+Alice -> Bob : ok
+...dummy...
+Alice -> Bob : ok2
+
+<style>
+delay {
+  FontColor red
+}
+</style>
+...dummy\non\nseveral\nlines...
+Alice -> Bob : ok3
+@enduml

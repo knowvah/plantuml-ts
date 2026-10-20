@@ -1,0 +1,5 @@
+@startuml
+Bob -> Alice : [[http://a.com]] hello
+newpage
+Bob <- Alice : [[http://b.com]] hello
+@enduml

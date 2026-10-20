@@ -42,19 +42,6 @@ describe('defaultTheme', () => {
     expect(defaultTheme.colors.noteBackground).toBe('#FEFFDD');
   });
 
-  it('has correct lifeline color', () => {
-    expect(defaultTheme.colors.lifeline).toBe('#181818');
-  });
-
-  it('has correct activation color', () => {
-    expect(defaultTheme.colors.activation).toBe('#DDDDDD');
-  });
-
-  it('has correct frame color', () => {
-    // plantuml.skin:117 -- frame default corrected to black (D3 amended)
-    expect(defaultTheme.colors.frame).toBe('#000000');
-  });
-
   it('has correct divider color', () => {
     expect(defaultTheme.colors.divider).toBe('#999999');
   });
@@ -63,29 +50,8 @@ describe('defaultTheme', () => {
     expect(defaultTheme.colors.error).toBe('#CC0000');
   });
 
-  it('has correct participantPadding', () => {
-    // `plantuml.skin:186-190` -- `Padding 7` on the participant style group.
-    expect(defaultTheme.sequence.participantPadding).toBe(7);
-  });
-
-  it('has correct messageSpacing', () => {
-    expect(defaultTheme.sequence.messageSpacing).toBe(20);
-  });
-
   it('has correct activationWidth', () => {
     expect(defaultTheme.sequence.activationWidth).toBe(10);
-  });
-
-  it('has correct noteMargin', () => {
-    expect(defaultTheme.sequence.noteMargin).toBe(5);
-  });
-
-  it('has correct frameHeaderHeight', () => {
-    expect(defaultTheme.sequence.frameHeaderHeight).toBe(20);
-  });
-
-  it('has correct lifelineExtension', () => {
-    expect(defaultTheme.sequence.lifelineExtension).toBe(20);
   });
 });
 
@@ -113,19 +79,6 @@ describe('darkTheme', () => {
 
   it('has correct noteBackground color', () => {
     expect(darkTheme.colors.noteBackground).toBe('#2D2D2D');
-  });
-
-  it('has correct lifeline color', () => {
-    expect(darkTheme.colors.lifeline).toBe('#888888');
-  });
-
-  it('has correct activation color', () => {
-    expect(darkTheme.colors.activation).toBe('#444444');
-  });
-
-  it('has correct frame color', () => {
-    // plantuml.skin:117 -- frame default corrected to black (D3 amended)
-    expect(darkTheme.colors.frame).toBe('#000000');
   });
 
   it('has correct divider color', () => {
@@ -184,9 +137,9 @@ describe('resolveTheme', () => {
   });
 
   it('merges partial sequence override into defaultTheme', () => {
-    const result = resolveTheme({ sequence: { messageSpacing: 30 } });
-    expect(result.sequence.messageSpacing).toBe(30);
-    expect(result.sequence.participantPadding).toBe(defaultTheme.sequence.participantPadding);
+    const result = resolveTheme({ sequence: { activationWidth: 30 } });
+    expect(result.sequence.activationWidth).toBe(30);
+    expect(result.sequence.participantGap).toBe(defaultTheme.sequence.participantGap);
   });
 
   it('does not mutate defaultTheme when merging overrides', () => {

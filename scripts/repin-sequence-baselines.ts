@@ -125,6 +125,9 @@ interface BaselineFile<R> extends Record<string, unknown> {
 let n = 0;
 
 // --- diff-baseline: status "error" -> "baseline" once a fixture renders -----
+// A `status: "pinned"` row (sdd1-T0b: frozen into the golden ratchet by
+// `plans/sequence-divergence-drive/tools/pin-goldens.mts`) matches neither
+// branch below and is left untouched -- the golden ratchet owns it.
 const dbPath = 'oracle/goldens/svg-sequence/diff-baseline.json';
 const dbRaw: unknown = JSON.parse(readFileSync(dbPath, 'utf8'));
 assertJsonObjectShape(dbRaw, dbPath, ['fixtures']);

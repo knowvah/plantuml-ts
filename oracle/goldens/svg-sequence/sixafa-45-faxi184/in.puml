@@ -1,0 +1,8 @@
+@startuml
+'!preprocessorV2
+!function bold($text)
+!return "<b>"+ $text +"</b>"
+!endfunction
+
+Alice -> Bob : %call_user_func("bold", "foo") pour nous
+@enduml

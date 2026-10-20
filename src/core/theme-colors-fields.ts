@@ -21,26 +21,6 @@ export interface ThemeColorFields {
   backgroundGradient?: Gradient;
   /** Default fill for action/node shapes (separate from canvas background). */
   nodeBackground: string;
-  /**
-   * Default fill of every sequence participant head — `participant,
-   * actor, boundary, control, entity, queue, database, collections`.
-   *
-   * Each kind's style signature is `root, element, sequenceDiagram,
-   * <kind>` (`sequencediagram/ParticipantType.java:55-80`), and
-   * `plantuml.skin:197-201` sets `BackgroundColor: var(--grey-blue)` for
-   * all eight, with `--grey-blue: #e2e2f0` at `plantuml.skin:4`.
-   * `skin/rose/Rose.java:138-150` builds `ComponentRoseParticipant` from
-   * those styles; the component takes `biColor.getBackColor()`
-   * (`ComponentRoseParticipant.java:82`). A flat field like
-   * {@link nodeBackground}, not a `colors.elements` bucket, because the
-   * skin rule is scoped to `sequenceDiagram { }` while the buckets are
-   * diagram-agnostic (`actor`/`database` are description kinds too). A
-   * per-kind `elements[<kind>].background` bucket (skinparam, `<style>`)
-   * and an inline `participant X #color` both still win over it; a
-   * theme's or `<style>`'s bare `root { BackgroundColor }` overrides it
-   * (declaration-order merge, `StyleStorage#computeMergedStyle:102-114`).
-   */
-  participantBackground: string;
   border: string;
   text: string;
   /** cdd7-T1a (D3): a `Paint` -- `skinparam arrowColor Red|Green` is an
@@ -67,9 +47,6 @@ export interface ThemeColorFields {
   // NOTE: upstream default is '#FBFB77' (HColors.COL_FBFB77 in ColorParam.java).
   // This value intentionally diverges. Tracked in plans/skinparam/decision-journal.md.
   noteBackground: string;
-  lifeline: string;
-  activation: string;
-  frame: string;
   divider: string;
   error: string;
   /** Per-element (SName) color buckets — decision D4. Populated by skinparam

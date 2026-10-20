@@ -1,0 +1,5 @@
+@startuml
+alice->bob:v1
+bob->chloe:v2
+note across: foo
+@enduml

@@ -1,0 +1,9 @@
+@startuml
+legend
+  This is the legend that is very very long
+  on several lines
+end legend
+
+Alice -> Bob : hello
+
+@enduml

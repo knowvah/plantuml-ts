@@ -1,0 +1,12 @@
+@startuml
+'!preprocessorV2
+!function bold($text)
+!return "<b>"+$text+"</b>"
+!endfunction
+
+!function id($text)
+!return $text
+!endfunction
+
+alice -> bob : avant id("foo" + bold("bar")) apres
+@enduml

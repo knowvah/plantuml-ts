@@ -37,14 +37,14 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { defaultTheme } from '../../../src/core/theme.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import { headSlackOf } from '../../../src/diagrams/sequence/sequence-layout-participants.js';
 
 const CACHE = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'test-results', 'dot-cache', 'sequence');
 
-/** `Padding 7`, both sides — the whole of the width correction. */
-const PADDING_BOTH_SIDES = 2 * defaultTheme.sequence.participantPadding;
+/** `Padding 7` (`plantuml.skin:200`), both sides — the whole of the width
+ *  correction. */
+const PADDING_BOTH_SIDES = 2 * 7;
 
 interface Box {
   readonly x: number;
@@ -168,7 +168,7 @@ describe('the plain participant box — width, against the jar', () => {
     const text = /<text x="17" y="27.889"/.exec(svg);
     expect(rect).not.toBeNull();
     expect(text).not.toBeNull();
-    expect(17 - 10).toBe(defaultTheme.sequence.participantPadding);
+    expect(17 - 10).toBe(PADDING_BOTH_SIDES / 2);
   });
 });
 

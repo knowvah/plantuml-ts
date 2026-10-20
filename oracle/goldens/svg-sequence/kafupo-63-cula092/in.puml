@@ -1,0 +1,24 @@
+@startuml
+participant a
+participant b
+
+create b
+a --> b : hello()
+a --> b : how_are_you()
+a --> b : goodbye()
+destroy b
+
+create b
+a --> b : hello()
+a --> b : how_are_you()
+a --> b : goodbye()
+destroy b
+
+create b
+a --> b : hello()
+a --> b : how_are_you()
+a --> b : goodbye()
+destroy b
+
+
+@enduml

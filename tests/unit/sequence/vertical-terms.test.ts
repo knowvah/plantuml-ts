@@ -39,6 +39,7 @@ import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import type { SequenceDiagramAST, SequenceEvent } from '../../../src/diagrams/sequence/ast.js';
+import { DEFAULT_SEQUENCE_STYLE_BUILDER } from '../../helpers/sequence-source.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 // Markup AND golden both come from the committed `dot-cache`, never from
@@ -153,11 +154,13 @@ function astOf(events: SequenceEvent[]): SequenceDiagramAST {
       display: id,
       type: 'participant' as const,
       order: i,
+      styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
     })),
     events,
     autonumber: { enabled: false, start: 1, current: 1, step: 1, prefix: '' },
     options: { hideFootbox: false, messageAlign: 'center' },
     boxes: [],
+    styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
   };
 }
 
@@ -174,6 +177,7 @@ function addedBy(events: SequenceEvent[]): number {
 
 const MSG: SequenceEvent = {
   kind: 'message',
+  styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
   from: 'A',
   to: 'B',
   label: 'x',
@@ -214,6 +218,7 @@ describe('one tile, one height', () => {
     // `getTextHeight + 2 * getPaddingY`, padding 5 (`:67-70`, `Rose:66`).
     const note: SequenceEvent = {
       kind: 'note',
+      styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
       position: 'over',
       participants: ['A'],
       text: 'n',
@@ -227,7 +232,15 @@ describe('one tile, one height', () => {
   it('draws that box 5 below its own tile top, not on it', () => {
     // `AbstractComponent#drawU:142-143` applies `getPaddingY()` first.
     const geo = layoutSequence(
-      astOf([{ kind: 'note', position: 'over', participants: ['A'], text: 'n' }]),
+      astOf([
+        {
+          kind: 'note',
+          styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+          position: 'over',
+          participants: ['A'],
+          text: 'n',
+        },
+      ]),
       defaultTheme,
       measurer,
     );
@@ -246,16 +259,20 @@ describe('one tile, one height', () => {
     // (`:84-88`), so both are `ComponentRoseDelayText:54,72-75`; the bare form's
     // `Display.empty()` contributes a zero-height block. Jar: `delay-bare.svg`
     // (tests/fixtures/unwind2-S4) has its dotted span 74 -> 102.
-    expect(addedBy([{ kind: 'delay' }])).toBe(28);
-    expect(addedBy([{ kind: 'delay', text: 'wait' }])).toBe(LINE + 28);
+    expect(addedBy([{ kind: 'delay', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER }])).toBe(28);
+    expect(addedBy([{ kind: 'delay', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, text: 'wait' }])).toBe(LINE + 28);
   });
 
   it('an `activate`/`deactivate` pair reserves nothing', () => {
     // `LifeEventTile#getPreferredHeight:128-138` returns 0 for everything but
     // a destroy with no message.
-    expect(addedBy([{ kind: 'activate', participantId: 'A' }, MSG, { kind: 'deactivate', participantId: 'A' }])).toBe(
-      addedBy([MSG]),
-    );
+    expect(
+      addedBy([
+        { kind: 'activate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'A' },
+        MSG,
+        { kind: 'deactivate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'A' },
+      ]),
+    ).toBe(addedBy([MSG]));
   });
 });
 
@@ -267,13 +284,23 @@ describe('a destroy with no message reserves the cross', () => {
     // Upstream's own worked example, from the comment at
     // `SequenceDiagram.java:382-387`: `X -> X` then `destroy Y`.
     const selfOnA: SequenceEvent = { ...MSG, to: 'A' };
-    expect(addedBy([selfOnA, { kind: 'deactivate', participantId: 'B', destroy: true }])).toBe(addedBy([selfOnA]) + 18);
+    expect(
+      addedBy([
+        selfOnA,
+        { kind: 'deactivate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'B', destroy: true },
+      ]),
+    ).toBe(addedBy([selfOnA]) + 18);
   });
 
   it('reserves nothing when the last message DID deal with it', () => {
     // `lastEventWithDeactivate.dealWith(p)` passes and it is an
     // `AbstractMessage`, so `setMessage` binds the life event (`:395-398`).
-    expect(addedBy([MSG, { kind: 'deactivate', participantId: 'B', destroy: true }])).toBe(addedBy([MSG]));
+    expect(
+      addedBy([
+        MSG,
+        { kind: 'deactivate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'B', destroy: true },
+      ]),
+    ).toBe(addedBy([MSG]));
   });
 
   it('reserves 18 after a group `end`, which is not a message', () => {
@@ -282,16 +309,23 @@ describe('a destroy with no message reserves the cross', () => {
     // test at `:396`.
     const group: SequenceEvent = {
       kind: 'frame',
+      styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+      branchStyleBuilders: [DEFAULT_SEQUENCE_STYLE_BUILDER],
       frameType: 'opt',
       label: 'o',
       branches: [[MSG]],
       branchLabels: [''],
     };
-    expect(addedBy([group, { kind: 'deactivate', participantId: 'B', destroy: true }])).toBe(addedBy([group]) + 18);
+    expect(
+      addedBy([
+        group,
+        { kind: 'deactivate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'B', destroy: true },
+      ]),
+    ).toBe(addedBy([group]) + 18);
   });
 
   it('reserves nothing for a plain `deactivate`, flag absent', () => {
-    expect(addedBy([{ kind: 'deactivate', participantId: 'B' }])).toBe(0);
+    expect(addedBy([{ kind: 'deactivate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'B' }])).toBe(0);
   });
 });
 

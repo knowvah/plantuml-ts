@@ -269,15 +269,11 @@ export const defaultTheme: Theme = {
   colors: {
     background: '#FFFFFF',
     nodeBackground: '#F1F1F1',
-    participantBackground: '#E2E2F0', // plantuml.skin:4 via :197-201
     border: '#181818',
     text: '#000000', // root FontColor black, plantuml.skin:9; Style.java:259-263
     arrow: '#181818',
     note: '#FEFECE',
     noteBackground: '#FEFFDD', // T3d: plantuml.skin:3,324 root note{} (light mode; not :678-680's dark-media override)
-    lifeline: '#181818',
-    activation: '#DDDDDD',
-    frame: '#000000', // plantuml.skin:117 (sequenceDiagram.group LineColor)
     divider: '#999999',
     error: '#CC0000',
     graph: {
@@ -326,13 +322,8 @@ export const defaultTheme: Theme = {
     },
   },
   sequence: {
-    participantPadding: 7,
     participantGap: 10,
-    messageSpacing: 20,
     activationWidth: 10,
-    noteMargin: 5,
-    frameHeaderHeight: 20,
-    lifelineExtension: 20,
   },
 };
 
@@ -344,18 +335,11 @@ export const darkTheme: Theme = {
   colors: {
     background: '#1E1E1E',
     nodeBackground: '#2D2D2D',
-    // No upstream counterpart (darkTheme is this port's own): keeps the
-    // heads at the canvas colour, which is what this theme drew before
-    // `participantBackground` existed.
-    participantBackground: '#1E1E1E',
     border: '#CCCCCC',
     text: '#CCCCCC',
     arrow: '#CCCCCC',
     note: '#3C3C3C',
     noteBackground: '#2D2D2D',
-    lifeline: '#888888',
-    activation: '#444444',
-    frame: '#000000', // plantuml.skin:117 (sequenceDiagram.group LineColor)
     divider: '#555555',
     error: defaultTheme.colors.error,
     graph: {
@@ -438,7 +422,6 @@ export type ThemeOverride = Partial<ThemeRootFields> & {
   colors?: {
     background?: string;
     nodeBackground?: string;
-    participantBackground?: string;
     border?: string;
     text?: string;
     /** cdd7-T1a (D3): see `ThemeColorFields.arrow`. */
@@ -448,9 +431,6 @@ export type ThemeOverride = Partial<ThemeRootFields> & {
     arrowLollipopColor?: string;
     note?: string;
     noteBackground?: string;
-    lifeline?: string;
-    activation?: string;
-    frame?: string;
     divider?: string;
     error?: string;
     elements?: Partial<Record<string, ElementColors>>;
@@ -489,18 +469,17 @@ export function resolveTheme(option?: ThemeOverride | string): Theme {
 
   if (typeof option === 'string') {
     const builtin = BUILTIN_THEMES[option];
-    if (builtin !== undefined) return foldRootBackgroundIntoSequence(deepMergeTheme(defaultTheme, builtin));
+    if (builtin !== undefined) return deepMergeTheme(defaultTheme, builtin);
     return defaultTheme;
   }
 
   // Partial<Theme> deep-merge — produce a new object, never mutate defaultTheme
-  return foldRootBackgroundIntoSequence(deepMergeTheme(defaultTheme, option));
+  return deepMergeTheme(defaultTheme, option);
 }
 
 // Per-element (SName) resolution helpers moved to `theme-element-resolve.ts`
 // (mechanical extraction to keep this file under the 500-line cap) and
 // re-exported here so existing `from './theme.js'` call sites are unaffected.
-import { foldRootBackgroundIntoSequence } from './theme-element-resolve.js';
 
 export {
   resolveElementPaint,

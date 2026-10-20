@@ -1,0 +1,6 @@
+@startuml
+Alice -> Bob : Aok
+'this is a comment
+Bob -> Alice : Aok2
+'Bob -> Alice : ok2
+@enduml

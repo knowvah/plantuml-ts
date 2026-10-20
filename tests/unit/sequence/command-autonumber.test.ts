@@ -22,6 +22,7 @@ import {
 } from '../../../src/diagrams/sequence/command-autonumber.js';
 import { makeDefaultAST, type ParseState } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import { newLifeState } from '../../../src/diagrams/sequence/sequence-life-state.js';
+import { emptySequenceStyleDispatch } from '../../helpers/sequence-source.js';
 
 function freshState(): ParseState {
   return {
@@ -38,6 +39,7 @@ function freshState(): ParseState {
     boxCounter: 0,
     executionError: undefined,
     life: newLifeState(),
+    style: emptySequenceStyleDispatch(),
   };
 }
 

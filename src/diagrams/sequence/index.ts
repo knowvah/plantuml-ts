@@ -31,9 +31,10 @@ export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequenceGeometry>
   // contract (D1) now that `parseSequence` can return a `ParseRefusal`.
   // `accepts()` above is untouched -- T12 owns dispatch/routing. D6
   // (cdd6-T1c): forwards `options.assetStore`, mirroring
-  // `class/parser.ts:317-318` / `description/index.ts:59-67`.
+  // `class/parser.ts:317-318` / `description/index.ts:59-67`. sdd1 D3: the
+  // whole `UmlSource`, whose style sources replay per command.
   parse(source: UmlSource, options?: ParseOptions): SequenceDiagramAST | ParseRefusal {
-    return parseSequence(source.lines, options);
+    return parseSequence(source, options);
   },
 
   layout(ast: SequenceDiagramAST, theme, measurer): Promise<SequenceGeometry> {

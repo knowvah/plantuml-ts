@@ -207,7 +207,7 @@ function clusterBorder(theme: Theme, symbol: USymbol, fallback: string, stereoty
 }
 
 /** The last bare `root`/`element` LineColor declared in a `<style>`, same last-wins walk as
- *  `foldRootBackgroundIntoSequence`. */
+ *  `style-map-element.ts#resolveRootElementProperty`. */
 function rootLineColor(theme: Theme): string | undefined {
   let raw: string | undefined;
   for (const selector of ROOT_SELECTORS) raw = theme.styleOverrides?.[selector]?.['linecolor'] ?? raw;

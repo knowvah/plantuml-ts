@@ -1,0 +1,11 @@
+@startuml
+    class_1 -> class_2
+    '...
+    class_2 -> class_1
+
+    newpage Second Page
+    class_1 -> class_2
+    'The following line causes swimlanes on first page to disappear
+    ...
+    class_2 -> class_1
+@enduml

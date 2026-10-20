@@ -2,7 +2,14 @@ import { describe, it, expect } from 'vitest';
 import type { FrameGeo, TextRun } from '../../../src/diagrams/sequence/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { HEADER_PADDING, HEADER_FONT_SIZE, GROUP_FONT_SIZE } from '../../../src/diagrams/sequence/frame-style.js';
+import { HEADER_PADDING } from '../../../src/diagrams/sequence/frame-style.js';
+import {
+  builderOf,
+  DEFAULT_GROUP_PAINTS,
+  DEFAULT_REF_PAINTS,
+  groupPaintsOf,
+  refPaintsOf,
+} from './frame-paint-fixtures.js';
 import { scaleSequenceTheme, type ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
 import {
   renderGroupingHeaderBackground,
@@ -11,6 +18,11 @@ import {
 } from '../../../src/diagrams/sequence/renderer-frame-header.js';
 
 const theme: ScaledTheme = scaleSequenceTheme(defaultTheme, 1, new DeterministicMeasurer());
+
+/** `groupHeader { FontSize 13 }` (`plantuml.skin:127`). */
+const HEADER_FONT_SIZE = 13;
+/** `group { FontSize 11 }` (`plantuml.skin:119`), the comment's `smallFont2`. */
+const GROUP_FONT_SIZE = 11;
 
 /**
  * The tab's runs, built the way `sequence-layout-events.ts#buildTabRuns`
@@ -50,6 +62,7 @@ function tabRunsFor(f: FrameGeo): TextRun[] {
 
 function makeFrame(overrides: Partial<FrameGeo> = {}): FrameGeo {
   const base: FrameGeo = {
+    ...DEFAULT_GROUP_PAINTS,
     kind: 'frame',
     frameType: 'group',
     label: '',
@@ -133,5 +146,105 @@ describe('frameHeaderCornerPath', () => {
   it('offsets every point by the given origin', () => {
     const d = frameHeaderCornerPath({ x: 10, y: 50 }, { width: 90, height: 20 }, 10, 0);
     expect(d).toBe('M10,50 L100,50 L100,60 L90,70 L10,70 L10,50');
+  });
+});
+
+/** A `<style>` body over the sequence diagram. */
+function styled(rules: string): ReturnType<typeof builderOf> {
+  return builderOf(`<style>\nsequenceDiagram {\n${rules}\n}\n</style>`);
+}
+
+describe('frame paint (sdd1 T3a)', () => {
+  it('draws the default skin: outline black 1.5 unrounded, tab #EEE stroked 1.5 (plantuml.skin:116-129)', () => {
+    const svg = renderGroupingHeaderForeground(makeFrame(), theme);
+    expect(svg).toContain(
+      '<path d="M10,50 L100,50 L100,60 L90,70 L10,70 L10,50" fill="#EEE" stroke="#000" stroke-width="1.5"/>',
+    );
+    expect(svg).toContain(
+      '<rect x="10" y="50" width="200" height="100" fill="none" stroke="#000" stroke-width="1.5"/>',
+    );
+  });
+
+  it('strokes both rects with the group style and the tab with groupHeader (<style>)', () => {
+    const builder = styled(
+      'group {\n LineColor red\n LineThickness 3\n LineStyle 4\n RoundCorner 10\n}\n' +
+        'groupHeader {\n BackGroundColor yellow\n LineColor green\n LineThickness 2\n}',
+    );
+    const frame = makeFrame(groupPaintsOf(builder));
+    const fg = renderGroupingHeaderForeground(frame, theme);
+    // ComponentRoseGroupingHeader.java:79,82,142: the corner is shaped by the
+    // BODY's RoundCorner and painted by the header's symbol context.
+    expect(fg).toContain(
+      '<path d="M15,50 L100,50 L100,60 L90,70 L10,70 L10,55 A5,5 0 0 1 15,50" fill="#FF0" stroke="#008000" stroke-width="2"/>',
+    );
+    const rectEl =
+      '<rect x="10" y="50" width="200" height="100" fill="none" stroke="#F00" stroke-width="3" stroke-dasharray="4,4" rx="5" ry="5"/>';
+    expect(fg).toContain(rectEl);
+    expect(renderGroupingHeaderBackground(frame, theme)).toBe(rectEl);
+  });
+
+  it('honours the old theme-path skinparams through the style (sequenceGroupBorder*)', () => {
+    const builder = builderOf('skinparam sequenceGroupBorderThickness 3\nskinparam sequenceGroupBorderColor blue');
+    const svg = renderGroupingHeaderBackground(makeFrame(groupPaintsOf(builder)), theme);
+    expect(svg).toBe('<rect x="10" y="50" width="200" height="100" fill="none" stroke="#00F" stroke-width="3"/>');
+  });
+
+  it('fills the tab with the element colour (alt #pink)', () => {
+    const frame = makeFrame(groupPaintsOf(undefined, { backColorElement: '#pink' }));
+    expect(renderGroupingHeaderForeground(frame, theme)).toContain('fill="#FFC0CB"');
+  });
+
+  it('scales the stroke and its dashes at emission', () => {
+    const k2 = scaleSequenceTheme(defaultTheme, 2, new DeterministicMeasurer());
+    const frame = makeFrame(groupPaintsOf(styled('group {\n LineStyle 4\n}')));
+    expect(renderGroupingHeaderBackground(frame, k2)).toContain('stroke-width="3" stroke-dasharray="8,8"');
+  });
+
+  it('draws no tab text when the header font is transparent (DriverTextSvg.java:93-94)', () => {
+    const frame = makeFrame(groupPaintsOf(styled('groupHeader {\n FontColor transparent\n}')));
+    expect(topLevelTags(renderGroupingHeaderForeground(frame, theme))).toEqual(['path', 'rect']);
+  });
+
+  it('refuses a frame layout did not paint', () => {
+    const { paint: _p, headerPaint: _h, ...bare } = makeFrame();
+    expect(() => renderGroupingHeaderBackground(bare, theme)).toThrow(/no paint/);
+  });
+});
+
+describe('ref paint (sdd1 T3a)', () => {
+  const ref = (paints = DEFAULT_REF_PAINTS): FrameGeo =>
+    makeFrame({ ...paints, frameType: 'ref', tabText: 'ref', tabWidth: 60, tabHeight: 15 });
+
+  it('draws the default skin: body none/black 1.5, tab #EEE stroked 2 (plantuml.skin:155-170)', () => {
+    const svg = renderGroupingHeaderForeground(ref(), theme);
+    expect(svg).toContain(
+      '<rect x="10" y="50" width="200" height="100" fill="none" stroke="#000" stroke-width="1.5"/>',
+    );
+    expect(svg).toContain('fill="#EEE" stroke="#000" stroke-width="2"/>');
+    expect(renderGroupingHeaderBackground(ref(), theme)).toBe('');
+  });
+
+  it('fills and strokes the body with reference, the tab with referenceHeader (<style>)', () => {
+    const builder = styled(
+      'reference {\n BackGroundColor lightblue\n LineColor red\n LineThickness 3\n RoundCorner 8\n}\n' +
+        'referenceHeader {\n BackGroundColor pink\n LineColor orange\n LineThickness 1\n}',
+    );
+    const svg = renderGroupingHeaderForeground(ref(refPaintsOf(builder)), theme);
+    expect(svg).toContain(
+      '<rect x="10" y="50" width="200" height="100" fill="#ADD8E6" stroke="#F00" stroke-width="3" rx="4" ry="4"/>',
+    );
+    expect(svg).toContain(
+      '<path d="M14,50 L70,50 L70,55 L60,65 L10,65 L10,54 A4,4 0 0 1 14,50" fill="#FFC0CB" stroke="#FFA500" stroke-width="1"/>',
+    );
+  });
+
+  it('honours sequenceReference* skinparams through the style', () => {
+    const builder = builderOf(
+      'skinparam sequenceReferenceBorderColor red\nskinparam sequenceReferenceBackgroundColor #AAAAAA',
+    );
+    const svg = renderGroupingHeaderForeground(ref(refPaintsOf(builder)), theme);
+    expect(svg).toContain(
+      '<rect x="10" y="50" width="200" height="100" fill="#AAA" stroke="#F00" stroke-width="1.5"/>',
+    );
   });
 });

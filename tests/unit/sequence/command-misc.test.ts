@@ -25,6 +25,7 @@ import type {
   SpaceEvent,
 } from '../../../src/diagrams/sequence/ast.js';
 import { newLifeState } from '../../../src/diagrams/sequence/sequence-life-state.js';
+import { emptySequenceStyleDispatch, sequenceSource } from '../../helpers/sequence-source.js';
 
 function freshState(): ParseState {
   return {
@@ -41,11 +42,12 @@ function freshState(): ParseState {
     boxCounter: 0,
     executionError: undefined,
     life: newLifeState(),
+    style: emptySequenceStyleDispatch(),
   };
 }
 
 function parse(lines: string[]): SequenceDiagramAST {
-  const result = parseSequence(lines);
+  const result = parseSequence(sequenceSource(lines));
   if ('refused' in result) {
     throw new Error(`parseSequence refused (${result.kind}) at line ${String(result.line)}: ${result.message}`);
   }
@@ -53,7 +55,7 @@ function parse(lines: string[]): SequenceDiagramAST {
 }
 
 function refusalLine(lines: string[]): number {
-  const result = parseSequence(lines);
+  const result = parseSequence(sequenceSource(lines));
   if (!('refused' in result)) throw new Error('expected a refusal');
   return result.line;
 }

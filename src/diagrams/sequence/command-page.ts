@@ -16,6 +16,7 @@
 
 import type { NewpageEvent } from './ast.js';
 import { emit, type Command } from './sequence-parse-helpers.js';
+import { currentStyleBuilder } from './sequence-skin-param.js';
 
 /**
  * `newpage [label]` / `@newpage` — `CommandNewpage`.
@@ -48,6 +49,7 @@ export const newpageCommand: Command = {
       // already renders it for this engine: a literal `\n` is a LINE BREAK.
       // The same `\t`/`\\`/`\r`/`\l` gap that comment records applies here.
       ...(label !== undefined ? { title: label.replace(/\\n/g, '\n').split('\n') } : {}),
+      styleBuilder: currentStyleBuilder(state.style), // `SequenceDiagram.java:248`
     };
     emit(state, event);
   },

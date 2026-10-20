@@ -1,0 +1,14 @@
+@startuml
+skinparam usebetastyle true
+
+Alice -> Bob : hello1
+
+<style>
+arrow {
+  FontColor red
+}
+</style>
+
+Alice -> Bob : hello2
+
+@enduml

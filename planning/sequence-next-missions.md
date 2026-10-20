@@ -1,5 +1,13 @@
 # Sequence engine — what to do next
 
+> **Superseded headline, 2026-10-20 (sdd1 close):** sequence now has a
+> per-event style seam and **419 pinned fixtures** (survey conformant 0 → 419;
+> ratchet-path Σ 150864 → 73273). What remains is geometry (539 rows) and
+> structure (166 rows); see the sdd1 section of `planning/next-missions.md`
+> for the open families. The 2026-09-01 decomposition below predates sdd1:
+> its distance figures are stale. Its findings on text units (centre vs
+> left edge) and the measurement instrument still hold.
+
 **Measured 2026-09-01** on a clean tree at `7fd45458`, immediately after
 `sequence-coordinate-convergence` closed. Every number here was taken this
 session via `scripts/sequence-geometry-distance.ts`, the committed

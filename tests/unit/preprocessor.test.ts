@@ -173,6 +173,37 @@ describe('preprocessor', () => {
     expect(stylePositions).toEqual([0, 5]);
   });
 
+  // ── skinparamAssignments (sdd1 T1e) ───────────────────────────────────────
+
+  it('records every skinparam assignment with its own line, a repeated key twice', () => {
+    const { skinparamAssignments, skinparam } = preprocess(
+      'A -> B\nskinparam shadowing true\nC -> D\nskinparam shadowing false',
+    );
+    expect(skinparamAssignments).toEqual([
+      { key: 'shadowing', value: 'true', position: 1, order: 0 },
+      { key: 'shadowing', value: 'false', position: 3, order: 1 },
+    ]);
+    expect(skinparam.get('shadowing')).toBe('false');
+  });
+
+  it('puts every entry of a skinparam block at the block opening line', () => {
+    const { skinparamAssignments } = preprocess(
+      'A -> B\nskinparam sequence {\n  ParticipantBorderThickness 2\n  ArrowColor red\n}\nC -> D',
+    );
+    expect(skinparamAssignments?.map((a) => [a.key, a.value, a.position])).toEqual([
+      ['sequenceparticipantborderthickness', '2', 1],
+      ['sequencearrowcolor', 'red', 1],
+    ]);
+  });
+
+  it('shares the declaration counter with <style> blocks', () => {
+    const { skinparamAssignments, declarationOrder } = preprocess(
+      '<style>\nbg: red\n</style>\nskinparam shadowing true',
+    );
+    expect(declarationOrder?.styles).toEqual([0]);
+    expect(skinparamAssignments).toEqual([{ key: 'shadowing', value: 'true', position: 3, order: 1 }]);
+  });
+
   it('empty source returns empty stylePositions', () => {
     const { stylePositions } = preprocess('');
     expect(stylePositions).toEqual([]);

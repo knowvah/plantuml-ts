@@ -19,8 +19,37 @@ import type { ParticipantGeo, ActivationGeo, LifelineSegment } from '../../../sr
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
 import { defaultTheme } from '../../../src/core/theme.js';
+import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
+import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
+import type { StyleBuilder } from '../../../src/core/style/StyleBuilder.js';
+import {
+  componentStyle,
+  createSequenceStyleDispatch,
+  currentStyleBuilder,
+  executeDeclarationsBefore,
+  paintOf,
+  type SequencePaint,
+} from '../../../src/diagrams/sequence/sequence-skin-param.js';
+import { DEFAULT_LIFELINE_PAINT, DEFAULT_SEQUENCE_STYLE_BUILDER } from '../../helpers/sequence-source.js';
 
 const theme: ScaledTheme = { ...defaultTheme, scaleK: 1, measurer: new DeterministicMeasurer() };
+
+/** The builder after every declaration of a `@startuml` body. */
+function builderOf(body: string): StyleBuilder {
+  const block = buildBlockUmls(`@startuml\n${body}\n@enduml`)[0]!;
+  if (!block.ok) throw new Error('preprocessor failure');
+  const dispatch = createSequenceStyleDispatch({
+    ...block.source,
+    stylePositions: block.preprocessed.stylePositions,
+    styleSource: block.preprocessed,
+  });
+  expect(executeDeclarationsBefore(dispatch, Number.POSITIVE_INFINITY)).toBeNull();
+  return currentStyleBuilder(dispatch);
+}
+
+function activationPaint(builder: StyleBuilder = DEFAULT_SEQUENCE_STYLE_BUILDER): SequencePaint {
+  return paintOf(componentStyle(builder, 'ACTIVATION_BOX'), HColorSet.instance());
+}
 
 /**
  * The head ROW's bottom for these fixtures: a plain participant at `y=10`
@@ -30,7 +59,7 @@ const theme: ScaledTheme = { ...defaultTheme, scaleK: 1, measurer: new Determini
  */
 const HEAD_HEIGHT = 39;
 /** The un-delayed lifeline: one `PARTICIPANT_LINE` from the head row to 178. */
-const WHOLE_LIFELINE: LifelineSegment = { y1: HEAD_HEIGHT, y2: 178, delay: false };
+const WHOLE_LIFELINE: LifelineSegment = { y1: HEAD_HEIGHT, y2: 178, delay: false, paint: DEFAULT_LIFELINE_PAINT };
 
 function participant(over: Partial<ParticipantGeo> = {}): ParticipantGeo {
   const base: ParticipantGeo = {
@@ -53,7 +82,7 @@ function participant(over: Partial<ParticipantGeo> = {}): ParticipantGeo {
 
 describe('renderLifeline', () => {
   it('emits title, hover rect and line as the group children, in that order', () => {
-    const svg = renderLifeline(participant(), HEAD_HEIGHT, 178, theme);
+    const svg = renderLifeline(participant(), WHOLE_LIFELINE, theme);
 
     // The exact child sequence the jar emits:
     // `<g><title>A</title><rect .../><line .../></g>`.
@@ -67,7 +96,7 @@ describe('renderLifeline', () => {
     // `(componentWidth - 8) / 2` with `componentWidth` = 1
     // (`getPreferredWidth`, `:96-98`) -> centre - 3.5. Participant centre is
     // 22 here, so x = 18.5; the lifeline itself stays at 22.
-    const svg = renderLifeline(participant(), HEAD_HEIGHT, 178, theme);
+    const svg = renderLifeline(participant(), WHOLE_LIFELINE, theme);
 
     expect(svg).toContain('<rect x="18.5" y="39" width="8" height="139"');
     expect(svg).toContain('<line x1="22" y1="39" x2="22" y2="178"');
@@ -77,7 +106,7 @@ describe('renderLifeline', () => {
     // `UStroke.withThickness(0)` + `HColors.transparent()` leave NO stroke,
     // and `HColors.transparent(WITH_FILL_OPACITY).bg()` serialises as
     // `fill="#000" fill-opacity="0"` -- not `fill="none"`.
-    const rect = /<rect [^>]*>/.exec(renderLifeline(participant(), HEAD_HEIGHT, 178, theme))?.[0] ?? '';
+    const rect = /<rect [^>]*>/.exec(renderLifeline(participant(), WHOLE_LIFELINE, theme))?.[0] ?? '';
 
     expect(rect).toContain('fill="#000"');
     expect(rect).toContain('fill-opacity="0"');
@@ -88,7 +117,7 @@ describe('renderLifeline', () => {
     // `drawTitleHoverTargetRect` guards its whole body on `height > 0`
     // (`:100`), and that guard sits INSIDE the already-opened group -- unlike
     // `ComponentRoseActiveLine`, whose guard precedes `startGroup`.
-    const svg = renderLifeline(participant({ y: 10, height: 28 }), HEAD_HEIGHT, HEAD_HEIGHT, theme);
+    const svg = renderLifeline(participant({ y: 10, height: 28 }), { ...WHOLE_LIFELINE, y2: HEAD_HEIGHT }, theme);
 
     expect(svg).toContain('<g><title>A</title>');
     expect(svg).not.toContain('<rect');
@@ -98,22 +127,28 @@ describe('renderLifeline', () => {
   it('titles the group with the display first line only', () => {
     // `Display#toTooltipText` (`Display.java:601-605`) returns `get(0)`, not
     // the joined lines.
-    const svg = renderLifeline(participant({ display: 'first\nsecond' }), HEAD_HEIGHT, 178, theme);
+    const svg = renderLifeline(participant({ display: 'first\nsecond' }), WHOLE_LIFELINE, theme);
 
     expect(svg).toContain('<title>first</title>');
     expect(svg).not.toContain('second');
   });
 
   it('emits an empty title element for an empty display', () => {
-    const svg = renderLifeline(participant({ display: '' }), HEAD_HEIGHT, 178, theme);
+    const svg = renderLifeline(participant({ display: '' }), WHOLE_LIFELINE, theme);
 
     expect(svg).toContain('<title></title>');
   });
 
-  it('escapes XML metacharacters in the title', () => {
-    const svg = renderLifeline(participant({ display: 'a<b&c' }), HEAD_HEIGHT, 178, theme);
+  it('writes every non-word character of the title as a dot (UGroup.java:70-74)', () => {
+    const svg = renderLifeline(participant({ display: 'a<b&c' }), WHOLE_LIFELINE, theme);
 
-    expect(svg).toContain('<title>a&lt;b&amp;c</title>');
+    expect(svg).toContain('<title>a.b.c</title>');
+  });
+
+  it('takes the title layout put on the piece over the display (MutingLine.java:107-108)', () => {
+    const svg = renderLifeline(participant(), { ...WHOLE_LIFELINE, title: '..s..' }, theme);
+
+    expect(svg).toContain('<title>..s..</title>');
   });
 });
 
@@ -125,6 +160,7 @@ describe('renderActivation', () => {
     y: 50,
     height: 34,
     level: 1,
+    paint: activationPaint(),
     ...over,
   });
 
@@ -186,6 +222,56 @@ describe('renderActivation', () => {
     // fixtures.
     expect(renderActivation(activation({ height: 0 }), theme)).toBe('');
   });
+
+  describe('paint (ComponentRoseActiveLine.java:60-105)', () => {
+    const bar = (svg: string): string => /<rect [^>]*>/.exec(svg)?.[0] ?? '';
+
+    it('fills with BackGroundColor white and strokes LineColor #181818 (plantuml.skin:16,145-147)', () => {
+      // `ug.apply(symbolContext.getForeColor())` and `.getBackColor().bg()`
+      // (`:85-87`); `#FFFFFF` is written `#FFF` (`SvgGraphics#shortenColor`).
+      expect(bar(renderActivation(activation(), theme))).toContain('fill="#FFF" stroke="#181818" stroke-width="1"');
+    });
+
+    it('never strokes at the style LineThickness: the component applies no UStroke (:85-90)', () => {
+      // Jar probe: `activationBox { LineThickness 3; BackGroundColor #FF0000;
+      // LineColor #0000FF }` draws `fill="#F00" style="stroke:#00F;stroke-width:1;"`.
+      const paint = activationPaint(
+        builderOf('<style>\nactivationBox { LineThickness 3; BackGroundColor #FF0000; LineColor #0000FF }\n</style>'),
+      );
+      expect(bar(renderActivation(activation({ paint }), theme))).toContain(
+        'fill="#F00" stroke="#00F" stroke-width="1"',
+      );
+    });
+
+    it('scales the unit stroke at emission (SvgGraphics.java:555-561)', () => {
+      const scaled = { ...theme, scaleK: 2 };
+      expect(bar(renderActivation(activation(), scaled))).toContain('stroke-width="2"');
+    });
+
+    it('shadows the bar when the style shadows (`isShadowing()` -> delta 1, :82-83)', () => {
+      const paint = activationPaint(builderOf('<style>\nactivationBox { Shadowing 2 }\n</style>'));
+      expect(bar(renderActivation(activation({ paint }), theme))).toContain('filter="url(#sequenceShadow)"');
+      expect(bar(renderActivation(activation(), theme))).not.toContain('filter');
+    });
+
+    it('paints an open bar back-on-back, then strokes its sides in LineColor (:88-101)', () => {
+      const paint = activationPaint(
+        builderOf('<style>\nactivationBox { BackGroundColor #FF0000; LineColor #0000FF }\n</style>'),
+      );
+      const svg = renderActivation(activation({ paint, open: { closeUp: true, closeDown: false } }), theme);
+      expect(bar(svg)).toContain('fill="#F00" stroke="#F00"');
+      expect(svg.match(/<line [^>]*>/g)).toEqual([
+        '<line x1="17" y1="50" x2="17" y2="84" stroke="#00F" stroke-width="1"/>',
+        '<line x1="27" y1="50" x2="27" y2="84" stroke="#00F" stroke-width="1"/>',
+        '<line x1="17" y1="50" x2="27" y2="50" stroke="#00F" stroke-width="1"/>',
+      ]);
+    });
+
+    it('refuses a bar layout did not paint', () => {
+      const { paint: _unused, ...unpainted } = activation();
+      expect(() => renderActivation(unpainted, theme)).toThrow('activation of A carries no paint');
+    });
+  });
 });
 
 describe('renderLifelinePass', () => {
@@ -197,6 +283,7 @@ describe('renderLifelinePass', () => {
     lifelineX,
     y,
     height: 20,
+    paint: activationPaint(),
   });
 
   it('interleaves per participant: each line, then that participant only', () => {

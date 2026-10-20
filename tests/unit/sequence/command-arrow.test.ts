@@ -25,6 +25,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
+import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
 import type { MessageEvent, SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
 import {
   ARROW_SOURCE,
@@ -39,13 +40,14 @@ import {
 import type { ArrowConfiguration } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
 import { SEQUENCE_COMMANDS } from '../../../src/diagrams/sequence/sequence-command-registry.js';
 import { LIFECOLOR } from '../../../src/diagrams/sequence/sequence-arrow-regex.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 function parsed(...lines: readonly string[]): SequenceDiagramAST {
-  const result = parseSequence(lines);
+  const result = parseSequence(sequenceSource(lines));
   if ('refused' in result) {
     throw new Error(`refused (${result.kind}): ${result.message}`);
   }
@@ -59,7 +61,7 @@ function firstMessage(...lines: readonly string[]): MessageEvent {
 }
 
 function refused(line: string): boolean {
-  return 'refused' in parseSequence([line]);
+  return 'refused' in parseSequence(sequenceSource([line]));
 }
 
 /** The five drawing facts `executeArg` decides, flattened for comparison. */
@@ -258,7 +260,7 @@ describe('CommandArrow — forms upstream itself refuses', () => {
   // `kind: 'execution'`, matching upstream's per-factory abandonment
   // (`PSystemBuilder.java:256-271`) instead of silently consuming the line.
   it('refuses `execution` for a body with no direction on either dressing', () => {
-    const result = parseSequence(['Alice - Bob : hi']);
+    const result = parseSequence(sequenceSource(['Alice - Bob : hi']));
     if (!('refused' in result)) throw new Error('expected a refusal');
     expect(result.kind).toBe('execution');
     expect(result.message).toBe('Illegal sequence arrow');
@@ -272,7 +274,7 @@ describe('CommandArrow — forms upstream itself refuses', () => {
   // sequence's own factory refuses every one of these lines and
   // `PSystemBuilder` falls through to the next candidate.
   it('refuses `execution` for a bare `--` body with zero head decoration', () => {
-    const result = parseSequence(['Reporter -- Queue']);
+    const result = parseSequence(sequenceSource(['Reporter -- Queue']));
     if (!('refused' in result)) throw new Error('expected a refusal');
     expect(result.kind).toBe('execution');
     expect(result.message).toBe('Illegal sequence arrow');
@@ -288,7 +290,7 @@ describe('CommandArrow — forms upstream itself refuses', () => {
   // `jamupa-36-duni483`'s `a -[thickness=5]> b`, which the real jar renders
   // as CLASS, not SEQUENCE.
   it('refuses `execution` for an unrecognised, non-colour style token', () => {
-    const result = parseSequence(['a -[thickness=5]> b']);
+    const result = parseSequence(sequenceSource(['a -[thickness=5]> b']));
     if (!('refused' in result)) throw new Error('expected a refusal');
     expect(result.kind).toBe('execution');
     expect(result.message).toBe('Illegal sequence arrow style: thickness=5');
@@ -298,9 +300,31 @@ describe('CommandArrow — forms upstream itself refuses', () => {
   // `#navy` elsewhere in this file) refuses for the SAME reason: it reaches
   // `HColorSet.getColor` and fails there too.
   it('refuses `execution` for an unrecognised `#`-prefixed style token', () => {
-    const result = parseSequence(['a -[#notacolor]> b']);
+    const result = parseSequence(sequenceSource(['a -[#notacolor]> b']));
     if (!('refused' in result)) throw new Error('expected a refusal');
     expect(result.kind).toBe('execution');
+  });
+
+  // The exo commands call the SAME static (`CommandExoArrowAny.java:101`), so
+  // a non-colour token refuses there too.
+  it('refuses `execution` for a non-colour style token on an exo arrow', () => {
+    const result = parseSequence(sequenceSource(['[-[#notacolor]> a']));
+    if (!('refused' in result)) throw new Error('expected a refusal');
+    expect(result.kind).toBe('execution');
+  });
+
+  // `return #word` reaches `HColorSet.getColor` (`CommandReturn.java:121-123`).
+  it('refuses `execution` for a non-colour `return #word`', () => {
+    const result = parseSequence(sequenceSource(['a -> b ++', 'return #notacolor x']));
+    if (!('refused' in result)) throw new Error('expected a refusal');
+    expect(result.kind).toBe('execution');
+  });
+
+  it('stores the resolved colour on the configuration (withColor, CommandArrow.java:497-498)', () => {
+    const arrow = (parsed('a -[#red,dashed]> b').events[0] as MessageEvent).arrow;
+    expect(arrow.color).toEqual(HColorSet.instance().getColor('#red'));
+    expect(arrow.color).not.toEqual(HColorSet.instance().getColor('#blue'));
+    expect(arrow.dashed).toBe(true);
   });
 });
 
@@ -694,8 +718,9 @@ describe('CommandArrow — ACTIVATION (:126,444-468)', () => {
   //
   // `!!` reaches `manageActivations`' `case '!'` and becomes
   // `activate(p2, DESTROY, null)` (`CommandArrow.java:453-455`); DESTROY is
-  // one of `isDeactivateOrDestroy`'s two arms, so it DOES lower the life
-  // level and this port's `deactivates` is the right collapse.
+  // one of `isDeactivateOrDestroy`'s two arms, so it lowers the life level,
+  // but it is not a DEACTIVATE (`AbstractMessage#isDeactivate`,
+  // `AbstractMessage.java:179-181`): it is the message's `destroys`.
   //
   // `**` never reaches that switch at all: the create fires earlier, at
   // `:397-398`, and `SequenceDiagram#activate` returns straight away for
@@ -706,10 +731,11 @@ describe('CommandArrow — ACTIVATION (:126,444-468)', () => {
   it.each([
     ['A -> B ** : hi', undefined, undefined],
     ['A -> B !! : hi', undefined, 'B'],
-  ])('reads the life event of %s, and CREATE is not one', (line, act, deact) => {
+  ])('reads the life event of %s, and CREATE is not one', (line, act, destroyed) => {
     const msg = firstMessage(line);
     expect(msg.activates).toBe(act);
-    expect(msg.deactivates).toBe(deact);
+    expect(msg.deactivates).toBeUndefined();
+    expect(msg.destroys).toBe(destroyed);
   });
 });
 

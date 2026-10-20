@@ -18,9 +18,14 @@ import type { SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
 import { makeDefaultAST, type ParseState } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import { matchParticipantMultilineCommand } from '../../../src/diagrams/sequence/command-participant.js';
 import { newLifeState } from '../../../src/diagrams/sequence/sequence-life-state.js';
+import {
+  DEFAULT_SEQUENCE_STYLE_BUILDER,
+  emptySequenceStyleDispatch,
+  sequenceSource,
+} from '../../helpers/sequence-source.js';
 
 function parse(lines: string[]): SequenceDiagramAST {
-  const result = parseSequence(lines);
+  const result = parseSequence(sequenceSource(lines));
   if ('refused' in result) {
     throw new Error(`parseSequence refused (${result.kind}) at line ${String(result.line)}: ${result.message}`);
   }
@@ -43,6 +48,7 @@ function freshState(): ParseState {
     boxCounter: 0,
     executionError: undefined,
     life: newLifeState(),
+    style: emptySequenceStyleDispatch(),
   };
 }
 
@@ -130,7 +136,13 @@ describe('matchParticipantMultilineCommand', () => {
     const state = freshState();
     const lines = ['participant Bob [', 'ignored body', ']'];
     // Pre-register Bob the way an earlier `participant Bob` line would.
-    state.ast.participants.push({ id: 'Bob', display: 'Bob', type: 'participant', order: 0 });
+    state.ast.participants.push({
+      id: 'Bob',
+      display: 'Bob',
+      type: 'participant',
+      order: 0,
+      styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+    });
     state.participantIndex.set('Bob', 0);
     matchParticipantMultilineCommand(state, lines, 0);
     expect(state.ast.participants).toHaveLength(1);
@@ -163,13 +175,13 @@ describe('participantCommand refuses a misplaced stereotype (T11, ubrr)', () => 
   // REST of `SEQUENCE_COMMANDS` (none of which match this line shape
   // either) rather than aborting immediately.
   it('refuses `syntax` for a quoted display, then <<stereotype>>, then "as CODE"', () => {
-    const result = parseSequence(['database "DB 2" <<&file>> as Db2']);
+    const result = parseSequence(sequenceSource(['database "DB 2" <<&file>> as Db2']));
     if (!('refused' in result)) throw new Error('expected a refusal');
     expect(result.kind).toBe('syntax');
   });
 
   it('still refuses for a plain-text stereotype, not just an icon glyph', () => {
-    const result = parseSequence(['database "DB 2" <<plain>> as Db2']);
+    const result = parseSequence(sequenceSource(['database "DB 2" <<plain>> as Db2']));
     expect('refused' in result && result.kind).toBe('syntax');
   });
 

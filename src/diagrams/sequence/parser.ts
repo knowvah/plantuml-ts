@@ -32,6 +32,8 @@ import { SEQUENCE_COMMANDS } from './sequence-command-registry.js';
 import { newLifeState } from './sequence-life-state.js';
 import { removeEmptyColumns } from './remove-empty-columns.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
+import type { UmlSource } from '../../core/block-extractor.js';
+import { createSequenceStyleDispatch, currentStyleBuilder, executeDeclarationsBefore } from './sequence-skin-param.js';
 
 // ---------------------------------------------------------------------------
 // Line-dispatch helpers
@@ -271,6 +273,33 @@ function dispatchOrdinaryLine(state: ParseState, line: string, origIndex: number
   return null;
 }
 
+/** `runDispatchLoop`'s three index-aligned views of `lines`: the trimmed,
+ *  blank-filtered entries, their text, and (cdd-T28) the same entries with
+ *  ONLY trailing whitespace stripped -- see `annotationLines` above for why
+ *  a chrome body needs them. */
+function dispatchViews(lines: readonly string[]): {
+  trimmedEntries: { text: string; origIndex: number }[];
+  trimmedLines: string[];
+  rawAlignedLines: string[];
+} {
+  const trimmedEntries = trimNonBlank(lines);
+  const trimmedLines = trimmedEntries.map((e) => e.text);
+  const rawAlignedLines = trimmedEntries.map((e) => (lines[e.origIndex] ?? '').replace(/\s+$/, ''));
+  return { trimmedEntries, trimmedLines, rawAlignedLines };
+}
+
+/**
+ * Interior line `origIndex`'s DOCUMENT position, the frame `stylePositions`
+ * is recorded in (`preprocessor.ts#PreprocessorResult.stylePositions`): the
+ * loop's `origIndex` indexes `source.lines`, so it is mapped through
+ * `linePositions` (`WBSDiagramFactory.ts#positionOf`). A hand-built source
+ * reads as every declaration before its first line.
+ */
+function documentPositionOf(source: UmlSource, origIndex: number): number {
+  if (source.linePositions === undefined) return Number.POSITIVE_INFINITY;
+  return source.linePositions[origIndex] ?? -1;
+}
+
 /**
  * Runs the per-line dispatch loop against `lines`, mutating `state` as
  * commands match. Returns a `syntax` {@link ParseRefusal} at the first line
@@ -282,17 +311,20 @@ function dispatchOrdinaryLine(state: ParseState, line: string, origIndex: number
  * 186` exactly as `description/parser.ts`'s own `dispatchCommand` already
  * does for THAT engine's `state.executionError`); `null` when every line was
  * consumed successfully.
+ *
+ * Before each command, every `skinparam`/`<style>` placed above it executes
+ * (sdd1 D2), as upstream dispatches them in line order (`SkinParam.java:
+ * 164-167`); a rejected `<style>` is that command's error.
  */
-function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefusal | null {
-  const trimmedEntries = trimNonBlank(lines);
-  const trimmedLines = trimmedEntries.map((e) => e.text);
-  // cdd-T28: the same entries with ONLY trailing whitespace stripped --
-  // see `annotationLines` above for why a chrome body needs them.
-  const rawAlignedLines = trimmedEntries.map((e) => (lines[e.origIndex] ?? '').replace(/\s+$/, ''));
+function runDispatchLoop(state: ParseState, source: UmlSource): ParseRefusal | null {
+  const { trimmedEntries, trimmedLines, rawAlignedLines } = dispatchViews(source.lines);
 
   for (let i = 0; i < trimmedLines.length; i++) {
+    const { origIndex } = trimmedEntries[i]!;
+    const styleRefusal = executeDeclarationsBefore(state.style, documentPositionOf(source, origIndex));
+    if (styleRefusal !== null) return styleRefusal;
     const line = trimmedLines[i]!;
-    const rawLine = lines[trimmedEntries[i]!.origIndex] ?? line;
+    const rawLine = source.lines[origIndex] ?? line;
 
     // If we are accumulating a multi-line note, any line that is not
     // "end note" gets appended to the note text. Checked FIRST, before the
@@ -335,7 +367,7 @@ function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefu
       continue;
     }
 
-    const refusal = dispatchOrdinaryLine(state, line, trimmedEntries[i]!.origIndex);
+    const refusal = dispatchOrdinaryLine(state, line, origIndex);
     if (refusal !== null) return refusal;
   }
   return null;
@@ -346,9 +378,11 @@ function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefu
 // ---------------------------------------------------------------------------
 
 /**
- * Parse an array of preprocessed PlantUML sequence diagram lines into an AST,
- * or a {@link ParseRefusal} when the source is not a (complete, valid)
- * sequence diagram.
+ * Parse a block's {@link UmlSource} into an AST, or a {@link ParseRefusal}
+ * when the source is not a (complete, valid) sequence diagram. The source,
+ * not just its lines, because the style sources it carries replay per
+ * command (sdd1 D3): a `<style>` the style parser rejects is an `execution`
+ * refusal (`CommandStyleMultilinesCSS.java:92-93`).
  *
  * Two of the four upstream refusal points apply here:
  *
@@ -386,12 +420,34 @@ function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefu
  *    `AbstractDiagram#checkFinalError` (`:161-163`), itself a hard-coded
  *    `return null`. The override never actually returns a non-null error.
  */
-export function parseSequence(lines: readonly string[], options?: ParseOptions): SequenceDiagramAST | ParseRefusal {
+export function parseSequence(source: UmlSource, options?: ParseOptions): SequenceDiagramAST | ParseRefusal {
+  const state = newParseState(source, options);
+  const refusal = runDispatchLoop(state, source);
+  if (refusal !== null) return refusal;
+  // Declarations after the last command still mute the builder a `Doll`
+  // reads at tile time (`Doll.java:81-83`); `WBSDiagramFactory.ts#parseWbs`.
+  const tailRefusal = executeDeclarationsBefore(state.style, Number.POSITIVE_INFINITY);
+  if (tailRefusal !== null) return tailRefusal;
+
+  const lines = source.lines;
+  if (state.ast.participants.length === 0) {
+    return refuse('incomplete', lines.length, lines.length, 'Sequence diagram has no participants');
+  }
+
+  applyHideStereotype(state.ast);
+  applyHideUnlinked(state.ast);
+  // The builder the tiles read after the parse (`MutingLine.java:70`,
+  // `LiveBoxesDrawer.java:78-81`), every declaration above executed.
+  return { ...state.ast, styleBuilder: currentStyleBuilder(state.style) };
+}
+
+/** A fresh {@link ParseState} over `source`'s style sources. */
+function newParseState(source: UmlSource, options: ParseOptions | undefined): ParseState {
   // D6 (cdd6-T1c): resolved ONCE, mirroring `class/parser.ts:326-327`'s own
   // pair (`internalSpriteStoreFrom`/`internalEmojiStoreFrom`).
   const internalSprites = options?.assetStore === undefined ? undefined : internalSpriteStoreFrom(options.assetStore);
   const internalEmoji = options?.assetStore === undefined ? undefined : internalEmojiStoreFrom(options.assetStore);
-  const state: ParseState = {
+  return {
     ast: makeDefaultAST(internalSprites, internalEmoji),
     frameStack: [],
     participantIndex: new Map(),
@@ -405,16 +461,6 @@ export function parseSequence(lines: readonly string[], options?: ParseOptions):
     boxCounter: 0,
     executionError: undefined,
     life: newLifeState(),
+    style: createSequenceStyleDispatch(source),
   };
-
-  const refusal = runDispatchLoop(state, lines);
-  if (refusal !== null) return refusal;
-
-  if (state.ast.participants.length === 0) {
-    return refuse('incomplete', lines.length, lines.length, 'Sequence diagram has no participants');
-  }
-
-  applyHideStereotype(state.ast);
-  applyHideUnlinked(state.ast);
-  return state.ast;
 }

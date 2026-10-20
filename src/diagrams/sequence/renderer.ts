@@ -8,8 +8,9 @@
  * layout→render boundary, mirroring `json/renderer.ts` — `scale-geo.ts`
  * scales `SequenceGeometry` and `Theme.fontSize` as pure data BEFORE this
  * module ever sees them, and every OTHER local pixel-literal constant this
- * file owns (`ACTIVATION_HALF_WIDTH`, `SELF_LOOP_WIDTH`/`HEIGHT`,
- * `BOX_LABEL_FONT_SIZE`/`PADDING`, and the small inline offsets throughout)
+ * file owns (`ACTIVATION_HALF_WIDTH`, `SELF_LOOP_WIDTH`/`HEIGHT`, and the
+ * small inline offsets throughout; a style paint's lengths in
+ * `renderer-note.ts`)
  * is scaled at its point of use via the `ScaledTheme.scaleK` this module
  * threads everywhere `theme` already flowed. See `scale-geo.ts`'s header
  * for the full rationale and the jar measurements this replaces (a
@@ -18,43 +19,42 @@
  * `SvgGraphics.java:1035-1051`, is for embedded sprites only).
  */
 
-import type {
-  BoxGeo,
-  SequenceGeometry,
-  EventGeo,
-  ActivationGeo,
-  NoteGeo,
-  FrameGeo,
-  NewpageGeo,
-  DelayGeo,
-} from './ast.js';
-import { DELAY_FONT_SIZE } from './sequence-delay.js';
+import type { SequenceGeometry, EventGeo, ElseGeo, FrameGeo, NewpageGeo, DelayGeo } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 // No `text` import: D3 -- every `<text>` this file emits goes through
 // `sequenceText`, and dropping the direct import is what makes that
 // structural rather than a convention.
-import { rect, line, noteBox } from '../../core/svg.js';
+import { line } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
-import { REFERENCE_FONT_SIZE, type TextRun } from './text-block-geo.js';
-import { NOTE_FONT_SIZE } from './sequence-layout-shared.js';
+import type { TextRun } from './text-block-geo.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { fmt } from '../../core/svg-format.js';
 import { renderMessage } from './renderer-message.js';
 import { renderParticipantBox, renderFooterBox } from './renderer-participant-shapes.js';
-import { renderLifelinePass } from './renderer-lifeline.js';
+import { lifelineOf, renderDestroyCrosses, renderLifelinePass, type LiveboxItem } from './renderer-lifeline.js';
 import { renderFrameBlotter } from './renderer-frame-blotter.js';
-import { renderGroupingHeaderBackground, renderGroupingHeaderForeground } from './renderer-frame-header.js';
-import { GROUP_FONT_SIZE, GROUP_FONT_BOLD } from './frame-style.js';
+import {
+  drawnRuns,
+  framePaintsOf,
+  renderGroupingHeaderBackground,
+  renderGroupingHeaderForeground,
+  strokeOf,
+  svgFixColor,
+} from './renderer-frame-header.js';
+import { FontStyle, type FontConfiguration } from '../../core/klimt/shape/UText.js';
+import type { SequencePaint } from './sequence-skin-param.js';
 import { renderDivider } from './renderer-divider.js';
 import type { ScaledTheme } from './scale-geo.js';
-import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
+import { scaleSequenceGeometry, scaleSequenceTheme } from './scale-geo.js';
 import { paginateSequence } from './sequence-page.js';
 import { SEQUENCE_DOCUMENT_MARGIN } from '../../core/document-margin.js';
-import { sequenceShadowDefs, withNoteShadow } from './sequence-shadow.js';
-import { NEWPAGE_DASH_UNIT, NEWPAGE_LINE_COLOR, NEWPAGE_LINE_THICKNESS, NEWPAGE_MARGIN_Y } from './newpage-style.js';
+import { sequenceShadowDefs } from './sequence-shadow.js';
+import { renderBoxBackground, renderNote } from './renderer-note.js';
+import { NEWPAGE_MARGIN_Y } from './newpage-style.js';
 
 /**
  * ONE creole run as a `<text>`, at the caller's ambient font wherever creole
@@ -66,7 +66,7 @@ import { NEWPAGE_DASH_UNIT, NEWPAGE_LINE_COLOR, NEWPAGE_LINE_THICKNESS, NEWPAGE_
  * than decorating it -- so the url reaches `sequence-text.ts`, the single `<a>`
  * emitter, and no measurer is acquired here (D1, D5). `boldFallback` is the
  * component STYLE's own weight, which a run that set its own beats -- exactly
- * as `renderBranchSeparators` resolves the group style's. */
+ * as `renderElse` resolves the leaf style's. */
 export function creoleRunText(run: TextRun, theme: ScaledTheme, fontSize: number, boldFallback = false): string {
   return sequenceText({
     leftX: drawnLeftX(run),
@@ -89,141 +89,93 @@ export function creoleRunText(run: TextRun, theme: ScaledTheme, fontSize: number
 }
 
 // ---------------------------------------------------------------------------
-// Note helpers
-// ---------------------------------------------------------------------------
-
-function renderNote(note: NoteGeo, theme: ScaledTheme): string {
-  const fill = note.color ?? theme.colors.noteBackground;
-  const { x, y, width: w, height: h } = note;
-  const strokeWidth = 1.5 * theme.scaleK;
-  // T13: `rnote`/`hnote` (`NoteEvent.shape`) draw as a plain rectangle,
-  // never the folded-corner `note` shape -- see `ast.ts`'s `NoteEvent.shape`
-  // doc comment for the hexagon-vs-rectangle scope cut.
-  const noteShape = withNoteShadow(
-    note.shape === 'rect'
-      ? rect(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth })
-      : noteBox(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth }),
-    note.shadow ?? 0,
-  );
-  // A5: placed and measured in layout (D1). The block is LEFT-aligned at the
-  // box's padding -- `ComponentRoseNoteBox#drawInternalU:105` translates it by
-  // `(getOldPaddingX1() + diffX / 2, getOldPaddingY())` -- where this used to
-  // centre it with a `text-anchor`, and its line advance is now the MEASURED
-  // line height where it used to be a `fontSize * 1.4` ratio. C6: one run per
-  // creole atom, at `note { FontSize 13 }` (`plantuml.skin:312-316`) scaled,
-  // the same spec layout measured the box with.
-  const textEls = note.textRuns.map((run) => creoleRunText(run, theme, NOTE_FONT_SIZE * theme.scaleK)).join('');
-  return noteShape + textEls;
-}
-
-// ---------------------------------------------------------------------------
 // Frame helpers
 // ---------------------------------------------------------------------------
 
-/** `ComponentRoseGroupingHeader.java:79`'s `style.value(PName.RoundCorner)`,
- *  cascading to `root`'s default of `0` (`plantuml.skin:12`) -- the SAME
- *  style read `GroupingTile#drawBackground` makes for its own `Blotter`
- *  construction (`GroupingTile.java:303-304`). */
-const FRAME_ROUND_CORNER = 0;
+/** A component text block's runs, at the font layout built them with: one
+ *  `<text>` per creole atom, each run's own style beating the block's
+ *  (`DriverTextSvg#draw` reads one `FontConfiguration` per `UText`,
+ *  `:104-160,177-180`). */
+function styledRunsText(runs: readonly TextRun[], font: FontConfiguration, theme: ScaledTheme): string {
+  const bold = font.styles.has(FontStyle.BOLD);
+  return drawnRuns(runs, font)
+    .map((run) => creoleRunText(run, theme, font.size * theme.scaleK, bold))
+    .join('');
+}
 
 /**
- * A `ref over` frame's body: one `<text>` per creole atom, centred in the box
- * below the header tab.
- *
- * `ComponentRoseReference#drawInternalU` draws the header at `(15, 2)` and
- * then the body as its own text block at `(textPos, oldPaddingY +
- * textHeaderHeight)` (`:125-136`) -- below the header, per the component's
- * alignment. The jar's two-line ref centres them: box x=70.3 w=76.775, lines
- * at x=74.3 and x=76.962, each on 108.7. This used to emit the whole body as
- * ONE `<text>` holding a literal newline, bracketed like an `alt` condition;
- * SVG collapses it, so it drew as one run where the jar spends one per line.
- *
- * The `y` is upstream's `getOldPaddingY() + textHeaderHeight` with two
- * deliberate substitutions: `+ theme.fontSize` because an SVG `<text>` y is a
- * BASELINE where upstream's translate is the block's top-left, and
- * `frame.tabHeight` for the measured `textHeaderHeight` because that is the
- * band this port draws -- both resolved in LAYOUT (T1/T5), as is the `x`.
+ * A `ref over` frame's body: one `<text>` per creole atom, placed in layout
+ * (`sequence-layout-ref.ts#bodyRuns`) at the body style's font and alignment
+ * -- `ComponentRoseReference#drawInternalU` draws the header at `(15, 2)` and
+ * the body block below it (`:126-137`).
  *
  * @see ~/git/plantuml/.../skin/rose/ComponentRoseReference.java#drawInternalU
  */
 function renderRefBody(frame: FrameGeo, theme: ScaledTheme): string {
-  // A4: x, baseline and width come off the run; C5: so does its STYLE, where
-  // creole set one -- one `FontConfiguration` per `UText` (`DriverTextSvg
-  // .java:104-160,177-180`). `cikoca-19-feji527`'s
-  // `[[http://www.google.com]] Foo2` is two runs, the first linked; a
-  // markup-free body is one run at the ambient pair, emitting what it emitted
-  // before. `url` WRAPS rather than decorates (`SvgGraphics#openLink`/
-  // `closeLink`, `:1105-1150`) and `sequence-text.ts` owns that wrap: no
-  // second `<a>` emitter, no measurer (D1, D5).
-  // C7: through `creoleRunText`, the helper this very block's shape was
-  // extracted into -- every field it built inline is the one that helper
-  // builds, at `reference { FontSize 12 }` (`plantuml.skin:145-151`), which
-  // is what the run beside it was measured at and must agree with.
-  return frame.refBody.map((run) => creoleRunText(run, theme, REFERENCE_FONT_SIZE * theme.scaleK)).join('');
+  if (frame.refBody.length === 0) return '';
+  return styledRunsText(frame.refBody, framePaintsOf(frame).paint.font, theme);
 }
 
 /**
  * `GroupingTile#drawU`'s foreground half (`:267`): `comp.drawU(...)`,
  * dispatched with `isBackground()` false, reaches `drawInternalU` --
- * `renderGroupingHeaderForeground` (T4). `drawNotes` + child tiles
- * (`:268-274`) are `renderRefBody`/`renderBranchSeparators`, same order.
+ * `renderGroupingHeaderForeground` (T4) -- then a `ref`'s body. The child
+ * tiles (`:280-281`), each `else` among them, are the events that follow
+ * the frame in the stream ({@link renderElse}).
  */
 function renderFrame(frame: FrameGeo, theme: ScaledTheme): string {
-  return (
-    renderGroupingHeaderForeground(frame, theme) + renderRefBody(frame, theme) + renderBranchSeparators(frame, theme)
-  );
+  return renderGroupingHeaderForeground(frame, theme) + renderRefBody(frame, theme);
 }
 
 /**
- * `GroupingTile#drawU`'s background half (`:262-263, :301-309`): the
- * `Blotter` bands (`renderFrameBlotter`, T3), THEN `drawBackgroundInternalU`
- * -- the plain outline (`renderGroupingHeaderBackground`, T4), upstream's
- * own order.
+ * `GroupingTile#drawU`'s background half (`:269-270, :308-347`): the
+ * `Blotter` bands (`renderFrameBlotter`), THEN `drawBackgroundInternalU` --
+ * the plain outline (`renderGroupingHeaderBackground`), upstream's own order.
+ * A `ref` is a `ReferenceTile`, which draws nothing in this pass
+ * (`ComponentRoseReference` declares only `drawInternalU`, `:83`).
  */
 function renderFrameBackground(frame: FrameGeo, theme: ScaledTheme): string {
-  return renderFrameBlotter(frame, FRAME_ROUND_CORNER * theme.scaleK) + renderGroupingHeaderBackground(frame, theme);
+  if (frame.frameType === 'ref') return '';
+  return renderFrameBlotter(frame, theme.scaleK) + renderGroupingHeaderBackground(frame, theme);
 }
 
-/** The dashed rule + bracketed condition each `else` branch opens with. */
-function renderBranchSeparators(frame: FrameGeo, theme: ScaledTheme): string {
+/** `ArrowConfiguration.stroke(ug, 2, 2, 1)`: the else rule's fixed dash and
+ *  thickness (`ComponentRoseGroupingElse.java:106`,
+ *  `ArrowConfiguration.java:240-242`). */
+const ELSE_RULE_DASH = 2;
+const ELSE_RULE_THICKNESS = 1;
+/** `ug.apply(UTranslate.dy(1)).draw(ULine.hline(…))`
+ *  (`ComponentRoseGroupingElse.java:107`): the rule sits one pixel below the
+ *  else tile's top. Jar-verified on a two-`else` `alt`: rules at 131 and 175
+ *  for tiles at 130 and 174. */
+const ELSE_RULE_DY = 1;
+
+/**
+ * The dashed rule + bracketed condition an `else` tile draws, in the
+ * foreground pass, at its place among its group's child tiles
+ * (`ElseTile#drawU:103-133`): `ComponentRoseGroupingElse#drawInternalU`
+ * (`:103-113`) strokes a `ULine.hline` the frame's width, one pixel down, in
+ * `groupBorder` (`:70`), under `stroke(2, 2, 1)`; then the text block under
+ * `UStroke.simple()`. The paint is the else's OWN leaf style, merged from the
+ * builder current at its `else` line (`ElseTile#getComponent:92-101`,
+ * `SequenceDiagram.java:431-432`), so a `skinparam`/`<style>` between the
+ * opener and the `else` reaches the rule and the condition font. The dash and
+ * thickness are fixed whatever the style says.
+ */
+function renderElse(elseGeo: ElseGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
-  const labelFontSize = GROUP_FONT_SIZE * k;
-  return frame.branchSeparators
-    .map((sep) => {
-      const rule = line(frame.x, sep.y, frame.x + frame.width, sep.y, {
-        stroke: theme.colors.frame,
-        strokeDasharray: scaledDashPattern(k),
-      });
-      // A5: the runs are empty exactly when the branch carries no condition,
-      // which is the case that draws the rule alone. C5: several runs where
-      // creole styled the condition, each its own `<text>` (D3).
-      return (
-        rule +
-        sep.runs
-          .map((run) =>
-            sequenceText({
-              leftX: drawnLeftX(run),
-              baselineY: run.y,
-              text: run.text,
-              width: drawnWidth(run),
-              fontFamily: run.fontFamily ?? theme.fontFamily,
-              fontSize: run.fontSize ?? labelFontSize,
-              // `ComponentRoseGroupingElse` reads the GROUP style, whose
-              // `FontStyle bold` the jar emits as `font-weight="700"` --
-              // confirmed on `bovugo-63-lazo401`'s `[sinon]`. A creole run
-              // that set its own weight wins over the style default.
-              fontWeight: (run.bold ?? GROUP_FONT_BOLD) ? '700' : 'normal',
-              fill: run.color ?? theme.colors.text,
-              ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
-              ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
-              ...(run.url !== undefined ? { url: run.url } : {}),
-              ...(run.image !== undefined ? { image: run.image } : {}),
-            }),
-          )
-          .join('')
-      );
-    })
-    .join('');
+  const { paint } = elseGeo;
+  const dash = fmt(ELSE_RULE_DASH * k);
+  const y = elseGeo.y + ELSE_RULE_DY * k;
+  const rule = line(elseGeo.x, y, elseGeo.x + elseGeo.width, y, {
+    stroke: svgFixColor(paint.stroke),
+    strokeWidth: ELSE_RULE_THICKNESS * k,
+    strokeDasharray: `${dash},${dash}`,
+  });
+  // A5: the runs are empty exactly when the branch carries no condition,
+  // which is the case that draws the rule alone. C5: several runs where
+  // creole styled the condition, each its own `<text>` (D3).
+  return rule + styledRunsText(elseGeo.runs, paint.font, theme);
 }
 
 // ---------------------------------------------------------------------------
@@ -257,12 +209,13 @@ function renderBranchSeparators(frame: FrameGeo, theme: ScaledTheme): string {
 function renderNewpage(newpage: NewpageGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
   const y = newpage.y + NEWPAGE_MARGIN_Y * k;
-  const unit = fmt(NEWPAGE_DASH_UNIT * k);
-  return line(newpage.bandX, y, newpage.bandX + newpage.bandWidth, y, {
-    stroke: NEWPAGE_LINE_COLOR,
-    strokeWidth: NEWPAGE_LINE_THICKNESS * k,
-    strokeDasharray: `${unit},${unit}`,
-  });
+  return line(newpage.bandX, y, newpage.bandX + newpage.bandWidth, y, strokeOf(newpagePaintOf(newpage), k));
+}
+
+/** The paint layout resolved for this separator (D1). */
+function newpagePaintOf(newpage: NewpageGeo): SequencePaint {
+  if (newpage.paint === undefined) throw new Error('newpage geo has no paint: layout resolves it (sdd1 D1)');
+  return newpage.paint;
 }
 
 // ---------------------------------------------------------------------------
@@ -290,6 +243,10 @@ function renderForeground(event: Exclude<EventGeo, FrameGeo>, theme: ScaledTheme
   switch (event.kind) {
     case 'message':
       return renderMessage(event, theme);
+    case 'destroy':
+      // Only an unbound destroy's own tile draws here (`LifeEventTile
+      // #drawU:112-122`); `LiveBoxes` draws the rest in step 2.
+      return renderDestroyCrosses(event, 'tile', theme);
     case 'activation':
     // Drawn in the lifeline pass (step 2), not here -- see the comment
     // there and `LivingSpace#drawLineAndLiveboxes`.
@@ -299,6 +256,8 @@ function renderForeground(event: Exclude<EventGeo, FrameGeo>, theme: ScaledTheme
       return '';
     case 'note':
       return renderNote(event, theme);
+    case 'else':
+      return renderElse(event, theme);
     case 'divider':
       return renderDivider(event, theme);
     case 'newpage':
@@ -308,35 +267,18 @@ function renderForeground(event: Exclude<EventGeo, FrameGeo>, theme: ScaledTheme
   }
 }
 
-/** `ComponentRoseDelayText#drawInternalU` (`:62-70`): only the text block --
- *  the dotted line is the lifeline's own `DELAY_LINE` piece. */
+/** `ComponentRoseDelayText#drawInternalU` (`:62-70`): only the text block,
+ *  at the delay style's font -- the dotted line is the lifeline's own
+ *  `DELAY_LINE` piece. */
 function renderDelayText(delay: DelayGeo, theme: ScaledTheme): string {
-  return delay.labelRuns.map((run) => creoleRunText(run, theme, DELAY_FONT_SIZE * theme.scaleK)).join('');
+  if (delay.paint === undefined) throw new Error('delay geo has no paint: layout resolves it (sdd1 D1)');
+  return styledRunsText(delay.labelRuns, delay.paint.font, theme);
 }
 
 /** One event-walk pass -- see {@link renderEvent}; mirrors the one
  *  `drawUInternal` both drawBackground/drawForeground share. */
 function renderEventPass(events: readonly EventGeo[], theme: ScaledTheme, isBackground: boolean): string[] {
   return events.map((event) => renderEvent(event, theme, isBackground));
-}
-
-// ---------------------------------------------------------------------------
-// Box background helpers
-// ---------------------------------------------------------------------------
-
-const BOX_DEFAULT_COLOR = '#EEEEEE';
-/** See `layout.ts#boxLabelRun`, which measures at this same size and owns
- *  the divergence note for it. */
-const BOX_LABEL_FONT_SIZE = 11;
-
-function renderBoxBackground(box: BoxGeo, theme: ScaledTheme): string {
-  const k = theme.scaleK;
-  const fill = box.color !== '' ? box.color : BOX_DEFAULT_COLOR;
-  const boxRect = rect(box.x, box.y, box.width, box.height, {
-    fill,
-    stroke: theme.colors.border,
-  });
-  return boxRect + box.labelRuns.map((run) => creoleRunText(run, theme, BOX_LABEL_FONT_SIZE * k)).join('');
 }
 
 // ---------------------------------------------------------------------------
@@ -459,9 +401,8 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
   children.push(
     renderLifelinePass(
       scaledGeo.participants,
-      scaledGeo.events.filter((e): e is ActivationGeo => e.kind === 'activation'),
-      (p) =>
-        scaledGeo.lifelineSegments?.[p.id] ?? [{ y1: scaledGeo.headHeight, y2: scaledGeo.lifelineEndY, delay: false }],
+      scaledGeo.events.filter((e): e is LiveboxItem => e.kind === 'activation' || e.kind === 'destroy'),
+      (p) => lifelineOf(scaledGeo.lifelineSegments, p),
       scaledTheme,
     ),
   );
@@ -499,7 +440,11 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
     width: scaledGeo.totalWidth + ENSURE_VISIBLE_DELTA,
     height: scaledGeo.totalHeight + ENSURE_VISIBLE_DELTA,
     ...preChromeDims(scaledGeo, k),
-    background: theme.colors.background,
+    // `SvgGraphics` receives the background as `HColor#toSvg` and paints the
+    // canvas rect unless that string is `#00000000`, `#000000` or `#FFFFFF`
+    // (`SvgGraphics.java:189-191`). Handing over the raw token (`white`, as
+    // `!theme plain` writes it) failed that test and drew an extra rect.
+    background: resolveColorToSvgHex(theme.colors.background),
     // T2's `finalizeSequenceBody` (`core/assemble-svg.ts`) owns the content
     // `<g>` wrap and the background rect, so the body is handed over bare.
     diagramType: DIAGRAM_TYPE_SEQUENCE,

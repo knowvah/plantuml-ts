@@ -1,0 +1,6 @@
+@startuml
+participant QACT as A
+participant DIAG as B
+participant "Target\nDIAG" as C
+A -> B : hello
+@enduml

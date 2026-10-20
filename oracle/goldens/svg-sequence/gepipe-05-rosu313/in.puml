@@ -1,0 +1,11 @@
+@startuml
+
+<style>
+  participant {
+     Padding: 2 20
+     Margin: 0 50
+ }
+</style>
+
+Bob -> Alice : hello
+@enduml

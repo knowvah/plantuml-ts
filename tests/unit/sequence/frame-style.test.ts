@@ -1,43 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import {
-  GROUP_BACKGROUND,
-  GROUP_LINE_COLOR,
-  GROUP_LINE_THICKNESS,
-  GROUP_FONT_SIZE,
-  GROUP_FONT_BOLD,
-  HEADER_LINE_THICKNESS,
-  HEADER_BACKGROUND,
-  HEADER_LINE_COLOR,
-  HEADER_FONT_SIZE,
-  HEADER_FONT_BOLD,
-  HEADER_PADDING,
-  CORNER_SIZE,
-  groupingHeaderDisplay,
-} from '../../../src/diagrams/sequence/frame-style.js';
+import { HEADER_PADDING, CORNER_SIZE, groupingHeaderDisplay } from '../../../src/diagrams/sequence/frame-style.js';
 import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.js';
 import type { FrameGeo, SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
 
 // ---------------------------------------------------------------------------
-// Constants — plantuml.skin:102-129 / ComponentRoseGroupingHeader.java:64,76
+// Constants — ComponentRoseGroupingHeader.java:64,76 (every style-owned
+// value is the frame's paint since sdd1 T3a: `frame-paint.test.ts`)
 // ---------------------------------------------------------------------------
 
 describe('frame-style constants', () => {
-  it('group bucket matches plantuml.skin:103,117-120', () => {
-    expect(GROUP_BACKGROUND).toBe('transparent');
-    expect(GROUP_LINE_COLOR).toBe('black');
-    expect(GROUP_LINE_THICKNESS).toBe(1.5);
-    expect(GROUP_FONT_SIZE).toBe(11);
-    expect(GROUP_FONT_BOLD).toBe(true);
-  });
-
-  it('groupHeader bucket matches plantuml.skin:124-128', () => {
-    expect(HEADER_LINE_THICKNESS).toBe(1.5);
-    expect(HEADER_BACKGROUND).toBe('#e');
-    expect(HEADER_LINE_COLOR).toBe('black');
-    expect(HEADER_FONT_SIZE).toBe(13);
-    expect(HEADER_FONT_BOLD).toBe(true);
-  });
-
   it('header padding matches ComponentRoseGroupingHeader.java:76 order', () => {
     expect(HEADER_PADDING).toEqual({ top: 1, right: 30, bottom: 1, left: 15 });
   });
@@ -91,7 +62,7 @@ function makeFrameGeo(overrides: Partial<FrameGeo> = {}): FrameGeo {
     height: 50,
     backColorElement: '#FF0000',
     backColorGeneral: '#00FF00',
-    branchSeparators: [{ y: 40, label: 'else', backColorGeneral: '#0000FF', runs: [] }],
+    branchSeparators: [{ y: 40, label: 'else', backColorGeneral: '#0000FF' }],
     refBody: [],
     // A4 moved tab-text placement into layout; these suites assert box
     // geometry, never the tab's own text.
@@ -113,6 +84,7 @@ function makeGeometry(frame: FrameGeo): SequenceGeometry {
     events: [frame],
     headHeight: 36,
     lifelineEndY: 200,
+    lifelineSegments: {},
     footerShapeY: 210,
     boxes: [],
     showFootbox: true,

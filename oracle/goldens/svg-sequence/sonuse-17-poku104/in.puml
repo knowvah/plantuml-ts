@@ -1,0 +1,4 @@
+@startuml
+A -> B : Call
+return
+@enduml

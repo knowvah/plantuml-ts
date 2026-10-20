@@ -10,6 +10,7 @@
  * pre-existing `from './ast.js'` import still resolves these names.
  */
 
+import type { SequencePaint } from './sequence-skin-param.js';
 import type { Paint } from '../../core/paint.js';
 import type { ParticipantType, ParticipantUrl } from './ast.js';
 import type { TextRun } from './text-block-geo.js';
@@ -30,6 +31,12 @@ export type ParticipantBadge =
   | { readonly kind: 'char'; readonly color: string | undefined; readonly width: number; readonly height: number };
 
 export interface ParticipantGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   id: string;
   display: string;
   type: ParticipantType;
@@ -39,8 +46,9 @@ export interface ParticipantGeo {
   height: number;
   centerX: number;
   /**
-   * The kind's merged-style `getDeltaShadow()` (`Participant#getUsedStyles`,
-   * `core/sequence-shadowing.ts`), UNSCALED; absent when 0. Every kind draws
+   * The kind's merged-style `getShadowing()` (`Style.java:109-115`), read
+   * off its paint (`Participant#getUsedStyles`, `Participant.java:82-91`),
+   * UNSCALED; absent when 0. Every kind draws
    * it as a filter; only `participant` and `collections` also reserve it --
    * `ComponentRoseParticipant#getPreferredWidth/Height` add it (`:129-138`),
    * so for those two `width`/`height` are the PREFERRED box and the drawn

@@ -15,6 +15,7 @@ import {
   cutSegmentIfNeed,
   delaySpansOf,
   lifelineSegments,
+  type LinePiece,
 } from '../../../src/diagrams/sequence/sequence-delay.js';
 import { paginateSequence } from '../../../src/diagrams/sequence/sequence-page.js';
 import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.js';
@@ -25,11 +26,19 @@ import type {
   ActivationGeo,
   DelayGeo,
   EventGeo,
+  LifelineSegment,
   ParticipantGeo,
   SequenceGeometry,
 } from '../../../src/diagrams/sequence/ast.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import type { ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
+import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
+import { componentStyle, paintOf } from '../../../src/diagrams/sequence/sequence-skin-param.js';
+import {
+  DEFAULT_DELAY_LINE_PAINT,
+  DEFAULT_LIFELINE_PAINT,
+  DEFAULT_SEQUENCE_STYLE_BUILDER,
+} from '../../helpers/sequence-source.js';
 
 const theme: ScaledTheme = { ...defaultTheme, scaleK: 1, measurer: new DeterministicMeasurer() };
 
@@ -39,6 +48,11 @@ function delay(y: number, height = 28): DelayGeo {
 
 function act(y: number, height: number): ActivationGeo {
   return { kind: 'activation', participantId: 'A', lifelineX: 40, y, height, level: 1 };
+}
+
+/** Each piece with its default paint, as `sequence-layout-lifeline.ts` sets it. */
+function painted(pieces: readonly LinePiece[]): LifelineSegment[] {
+  return pieces.map((p) => ({ ...p, paint: p.delay ? DEFAULT_DELAY_LINE_PAINT : DEFAULT_LIFELINE_PAINT }));
 }
 
 const PARTICIPANT: ParticipantGeo = {
@@ -154,18 +168,23 @@ describe('rendering the pieces', () => {
     const svg = renderLifelineSegments(
       PARTICIPANT,
       [
-        { y1: 39, y2: 60, delay: true },
-        { y1: 60, y2: 60, delay: false, clippedOut: true },
+        { y1: 39, y2: 60, delay: true, paint: DEFAULT_DELAY_LINE_PAINT },
+        { y1: 60, y2: 60, delay: false, clippedOut: true, paint: DEFAULT_LIFELINE_PAINT },
       ],
       theme,
     );
+    // Jar: `style="stroke:#181818;stroke-width:0.5;stroke-dasharray:1,4;"`
+    // (231 corpus delay lines), `element { LineThickness 0.5 }` +
+    // `delay { LineStyle 1-4 }` (plantuml.skin:91-93,300-305).
     expect(svg).toBe(
-      '<line x1="40" y1="39" x2="40" y2="60" stroke="#181818" stroke-dasharray="1,4"/><g><title>A</title></g>',
+      '<line x1="40" y1="39" x2="40" y2="60" stroke="#181818" stroke-width="0.5" stroke-dasharray="1,4"/>' +
+        '<g><title>A</title></g>',
     );
   });
 
   it('draws an open bar as a back-coloured rect, two sides and its closed end', () => {
-    const svg = renderActivation({ ...act(10, 20), open: { closeUp: true, closeDown: false } }, theme);
+    const paint = paintOf(componentStyle(DEFAULT_SEQUENCE_STYLE_BUILDER, 'ACTIVATION_BOX'), HColorSet.instance());
+    const svg = renderActivation({ ...act(10, 20), paint, open: { closeUp: true, closeDown: false } }, theme);
     expect((svg.match(/<line /g) ?? []).length).toBe(3);
     expect(svg).toContain('<line x1="35" y1="10" x2="45" y2="10"');
   });
@@ -183,7 +202,7 @@ function paged(events: EventGeo[]): SequenceGeometry {
     footerShapeY: 500,
     showFootbox: true,
     boxes: [],
-    lifelineSegments: { A: lifelineSegments(30, 500, delaySpansOf(events)) },
+    lifelineSegments: { A: painted(lifelineSegments(30, 500, delaySpansOf(events))) },
   };
 }
 
@@ -192,10 +211,10 @@ describe('a page clips the pieces (UClip#getClippedLine)', () => {
     const page = paginateSequence(paged([delay(221), delay(300)]), 0);
     // Each PARTICIPANT_LINE below the band still opens its group (giloko's
     // trailing `<g><title>A</title></g>`); the DELAY_LINE leaves nothing.
-    const emptied = { y1: 222, y2: 222, delay: false, clippedOut: true };
-    expect(page.lifelineSegments?.['A']).toEqual([
-      { y1: 30, y2: 221, delay: false },
-      { y1: 221, y2: 222, delay: true },
+    const emptied = { y1: 222, y2: 222, delay: false, clippedOut: true, paint: DEFAULT_LIFELINE_PAINT };
+    expect(page.lifelineSegments['A']).toEqual([
+      { y1: 30, y2: 221, delay: false, paint: DEFAULT_LIFELINE_PAINT },
+      { y1: 221, y2: 222, delay: true, paint: DEFAULT_DELAY_LINE_PAINT },
       emptied,
       emptied,
     ]);
@@ -222,6 +241,11 @@ describe('scale', () => {
     const scaled = scaleSequenceGeometry(paged([{ ...delay(100), textWidth: 10, middleX: 50 }]), 2);
     const d = scaled.events.find((e): e is DelayGeo => e.kind === 'delay');
     expect([d?.y, d?.height, d?.middleX, d?.textWidth]).toEqual([200, 56, 100, 20]);
-    expect(scaled.lifelineSegments?.['A']?.[1]).toEqual({ y1: 200, y2: 256, delay: true });
+    expect(scaled.lifelineSegments['A']?.[1]).toEqual({
+      y1: 200,
+      y2: 256,
+      delay: true,
+      paint: DEFAULT_DELAY_LINE_PAINT,
+    });
   });
 });

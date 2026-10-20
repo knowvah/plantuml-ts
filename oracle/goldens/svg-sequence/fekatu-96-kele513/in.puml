@@ -1,0 +1,9 @@
+@startuml
+!define A1
+!define BC
+
+!ifdef AA || B || BC
+title A or B
+!endif
+Bob-> Alice
+@enduml

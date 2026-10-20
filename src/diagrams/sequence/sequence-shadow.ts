@@ -1,6 +1,6 @@
 /**
- * sequence-shadow.ts -- the drop-shadow `<filter>` a shadowed sequence frame
- * references (unwind2-S9).
+ * sequence-shadow.ts -- the drop-shadow `<filter>` a shadowed sequence shape
+ * references (unwind2-S9, S9b), and which elements need it (sdd1 T3b).
  *
  * `URectangle#setDeltaShadow` (`ComponentRoseGroupingHeader.java:131`,
  * `ComponentRoseReference.java:94`) reaches `SvgGraphics#manageShadow`, which
@@ -10,6 +10,11 @@
  * shadowed. Jar-verified: `tests/fixtures/unwind2-S9/style-group.svg`
  * (`Shadowing 3`) and `style-root.svg` (`Shadowing 4`) carry the same
  * filter.
+ *
+ * Each element's delta is its OWN merged style's `getShadowing()`
+ * (`Style.java:108-115`), resolved from the builder its command captured
+ * (sdd1 D2) and carried on the geo node's `paint` -- so a `skinparam
+ * shadowing true` or `<style>` reaches only the elements after it.
  *
  * The same string as `class/class-shadow.ts` and `state/state-shadow.ts`,
  * duplicated per engine as those two already are (see `class-shadow.ts`'s
@@ -22,7 +27,8 @@
 import { attrs } from '../../core/svg.js';
 import { fmt } from '../../core/svg-format.js';
 import type { Theme } from '../../core/theme.js';
-import type { EventGeo, FrameGeo, SequenceGeometry } from './ast.js';
+import type { ActivationGeo, DividerGeo, EventGeo, FrameGeo, SequenceGeometry } from './ast.js';
+import type { SequencePaint } from './sequence-skin-param.js';
 
 /** The pre-seed id; `svg-defs-seeded.ts#applySeededDefIds` renames it. */
 const SEQUENCE_SHADOW_FILTER_ID = 'sequenceShadow';
@@ -100,21 +106,46 @@ export function sequenceShadowFilter(deltaShadow: number): { readonly filter?: s
 }
 
 /**
- * The delta a frame's shadowed rect carries: a grouping frame's background
- * rect reads the `group` style (`ComponentRoseGroupingHeader.java:131`), a
- * `ref`'s body rect the `reference` style (`ComponentRoseReference.java:94`).
+ * The delta a frame's shadowed rect carries: the BODY style's symbol context
+ * for a grouping frame's background rect (`ComponentRoseGroupingHeader
+ * .java:81,126-131`) and for a `ref`'s body rect (`ComponentRoseReference
+ * .java:73,89-94`), i.e. the frame's own `paint`. Layout paints every frame
+ * (`sequence-layout-frame.ts`, `sequence-layout-ref.ts`), so an unpainted one
+ * throws, as {@link paintOf} does for an activation or a divider.
+ *
+ * `_theme` is unread: `renderer-frame-header.ts` (sdd1 T3f's file) still
+ * passes it, and drops it when it next changes.
  */
-export function frameShadowDelta(frame: Pick<FrameGeo, 'frameType'>, theme: Theme): number {
-  const shadowing = theme.colors.graph.sequenceShadowing;
-  return (frame.frameType === 'ref' ? shadowing?.reference : shadowing?.group) ?? 0;
+export function frameShadowDelta(frame: Pick<FrameGeo, 'frameType' | 'paint'>): number {
+  if (frame.paint === undefined) throw new Error(`${frame.frameType} frame carries no paint`);
+  return frame.paint.shadowing;
 }
 
-/** Whether one event draws a shadowed shape. */
-function eventShadowed(e: EventGeo, theme: Theme): boolean {
-  if (e.kind === 'frame') return frameShadowDelta(e, theme) > 0;
-  if (e.kind === 'activation') return e.height > 0 && activationShadowFilter(theme).filter !== undefined;
-  if (e.kind === 'divider') return (theme.colors.graph.sequenceShadowing?.divider ?? 0) > 0;
-  return e.kind === 'note' && (e.shadow ?? 0) > 0;
+/** The paint layout resolved for a geo its renderer draws from paint alone
+ *  (`renderer-lifeline.ts`, `renderer-divider.ts` throw the same way). */
+function paintOf(geo: ActivationGeo | DividerGeo): SequencePaint {
+  if (geo.paint !== undefined) return geo.paint;
+  const what = geo.kind === 'divider' ? `divider "${geo.text}"` : `activation of ${geo.participantId}`;
+  throw new Error(`${what} carries no paint`);
+}
+
+/** Whether one event draws a shadowed shape, read where its renderer reads
+ *  it: the activation box (`renderer-lifeline.ts`), the divider band
+ *  (`renderer-divider.ts`, `ComponentRoseDivider.java:74,115`), the note body
+ *  (`NoteGeo.shadow`, set from the note's paint) and the frame. */
+function eventShadowed(e: EventGeo): boolean {
+  switch (e.kind) {
+    case 'frame':
+      return frameShadowDelta(e) > 0;
+    case 'activation':
+      return e.height > 0 && activationShadowFilter(paintOf(e)).filter !== undefined;
+    case 'divider':
+      return sequenceShadowFilter(paintOf(e).shadowing).filter !== undefined;
+    case 'note':
+      return (e.shadow ?? 0) > 0;
+    default:
+      return false;
+  }
 }
 
 /**
@@ -126,7 +157,7 @@ export function sequenceShadowDefs(
   geo: Pick<SequenceGeometry, 'events' | 'participants'>,
   theme: Theme & { readonly scaleK: number },
 ): string {
-  const shadowed = geo.participants.some((p) => (p.shadow ?? 0) > 0) || geo.events.some((e) => eventShadowed(e, theme));
+  const shadowed = geo.participants.some((p) => (p.shadow ?? 0) > 0) || geo.events.some(eventShadowed);
   return shadowed ? sequenceShadowFilterDef(theme.scaleK) : '';
 }
 
@@ -148,6 +179,6 @@ export function withNoteShadow(shape: string, deltaShadow: number): string {
  * activation style's shadow only gates a fixed delta, and it adds no
  * geometry. The box draws nothing at height 0 (`:76-77`).
  */
-export function activationShadowFilter(theme: Theme): { readonly filter?: string } {
-  return sequenceShadowFilter(theme.colors.graph.sequenceShadowing?.activation ?? 0);
+export function activationShadowFilter(paint: Pick<SequencePaint, 'shadowing'>): { readonly filter?: string } {
+  return sequenceShadowFilter(paint.shadowing > 0 ? 1 : 0);
 }

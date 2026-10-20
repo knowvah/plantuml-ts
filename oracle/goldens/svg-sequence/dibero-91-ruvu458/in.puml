@@ -1,0 +1,15 @@
+@startuml
+'!preprocessorV2
+!ifdef $j
+Alice -> Bob : The variable j is defined and its value is $j
+!else
+Alice -> Bob : I don't know any $j variable. ok
+!endif
+
+!if %variable_exists("$j")
+Alice -> Bob : The variable j is defined and its value is $j
+!else
+Alice -> Bob : I don't know any $j variable. ok
+!endif
+
+@enduml

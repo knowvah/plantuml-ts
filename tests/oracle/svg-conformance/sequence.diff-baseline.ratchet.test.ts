@@ -36,6 +36,15 @@
  *     eligibility ONLY. Promotion is stop 13 of this mission and belongs to
  *     the rebuild: this test never writes `ratchet.json` and never copies a
  *     file. AC4 below pins that as an assertion rather than a claim.
+ *   - **pinned** (frozen into the byte-freeze golden ratchet) ->
+ *     `status: "pinned"` (sdd1-T0b). `plans/sequence-divergence-drive/tools/
+ *     pin-goldens.mts` flips a `"baseline"` row to `"pinned"` IN PLACE (never
+ *     removed from this file) once a close freezes the fixture into
+ *     `sequence.golden.ratchet.test.ts`'s `oracle/goldens/svg-sequence/
+ *     ratchet.json`; its `weightedScore`/`diffCount` are left as last
+ *     measured and read by nothing here. A pinned row is excluded from
+ *     `baselineFixtures` and `errorFixtures` by their `=== 'baseline'` /
+ *     `=== 'error'` filters -- the golden ratchet owns it from then on.
  *   - **error** -> recorded as `status: "error"` with a `reason`, never as a
  *     numeric baseline. A fixture that stops erroring is itself a reportable
  *     change (AC3) and must never be silently read as "reached 0 diffs".
@@ -81,7 +90,7 @@ import { renderFixtureSequence } from './render-fixture-sequence.js';
 interface BaselineFixture {
   readonly type: string;
   readonly slug: string;
-  readonly status: 'baseline' | 'error';
+  readonly status: 'baseline' | 'error' | 'pinned';
   /** The GATED quantity (D5). Absent until T4 re-pins the manifest against
    * it; an entry without one fails loudly rather than falling back to
    * `diffCount`, which is a different unit. */

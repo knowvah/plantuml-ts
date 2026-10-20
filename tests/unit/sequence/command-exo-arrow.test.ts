@@ -28,13 +28,14 @@ import {
 } from '../../../src/diagrams/sequence/command-exo-arrow.js';
 import { makeDefaultAST, type ParseState } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import { newLifeState } from '../../../src/diagrams/sequence/sequence-life-state.js';
+import { emptySequenceStyleDispatch, sequenceSource } from '../../helpers/sequence-source.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 function parsed(...lines: readonly string[]): SequenceDiagramAST {
-  const result = parseSequence(lines);
+  const result = parseSequence(sequenceSource(lines));
   if ('refused' in result) throw new Error(`refused (${result.kind}): ${result.message}`);
   return result;
 }
@@ -50,7 +51,7 @@ function exo(...lines: readonly string[]): MessageExoEvent {
 }
 
 function refused(line: string): boolean {
-  return 'refused' in parseSequence([line]);
+  return 'refused' in parseSequence(sequenceSource([line]));
 }
 
 function freshState(): ParseState {
@@ -68,6 +69,7 @@ function freshState(): ParseState {
     boxCounter: 0,
     executionError: undefined,
     life: newLifeState(),
+    style: emptySequenceStyleDispatch(),
   };
 }
 
@@ -298,8 +300,11 @@ describe('the trailing modifiers', () => {
   it('carries LIFECOLOR onto the message and onto the activation it starts', () => {
     const message = exo('[-> Bob ++ #gold');
     expect(message.lifeColor).toBe('#gold');
-    const activation = events('[-> Bob ++ #gold').find((e) => e.kind === 'activate');
-    expect(activation).toEqual({ kind: 'activate', participantId: 'Bob', color: '#gold' });
+    const parsed = events('[-> Bob ++ #gold');
+    const activation = parsed.find((e) => e.kind === 'activate');
+    // One command, one builder: the life event shares the message's (sdd1 D2).
+    const styleBuilder = parsed.find((e) => e.kind === 'messageExo')?.styleBuilder;
+    expect(activation).toEqual({ kind: 'activate', participantId: 'Bob', color: '#gold', styleBuilder });
   });
 
   it('emits `*` BEFORE the message and `+`/`-`/`!` after it', () => {

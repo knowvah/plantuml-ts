@@ -12,6 +12,7 @@ import type {
   SequenceEvent,
   SequenceGeometry,
 } from '../../../src/diagrams/sequence/ast.js';
+import { DEFAULT_SEQUENCE_STYLE_BUILDER } from '../../helpers/sequence-source.js';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -51,17 +52,20 @@ function makeAst(participants: string[], events: SequenceEvent[]): SequenceDiagr
       display: id,
       type: 'participant' as const,
       order: i,
+      styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
     })),
     events,
     autonumber: { enabled: false, start: 1, current: 1, step: 1, prefix: '' },
     options: { hideFootbox: false, messageAlign: 'center' },
     boxes: [],
+    styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
   };
 }
 
 function exo(exoType: MessageExoType, overrides: Partial<MessageExoEvent> = {}): MessageExoEvent {
   return {
     kind: 'messageExo',
+    styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
     participant: 'Bob',
     exoType,
     shortArrow: false,
@@ -246,7 +250,11 @@ describe('exo layout: short arrows', () => {
 // ---------------------------------------------------------------------------
 
 describe('exo layout: activation bars', () => {
-  const activate: SequenceEvent = { kind: 'activate', participantId: 'Bob' };
+  const activate: SequenceEvent = {
+    kind: 'activate',
+    styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER,
+    participantId: 'Bob',
+  };
 
   it('ends a left-border arrow at the left edge of an open activation bar', () => {
     const geo = layoutWith([activate, exo('FROM_LEFT')]);
@@ -265,8 +273,8 @@ describe('exo layout: activation bars', () => {
   it('starts an exo-triggered activation bar at the exo arrow y', () => {
     const geo = layoutWith([
       exo('FROM_LEFT'),
-      { kind: 'activate', participantId: 'Bob' },
-      { kind: 'deactivate', participantId: 'Bob' },
+      { kind: 'activate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'Bob' },
+      { kind: 'deactivate', styleBuilder: DEFAULT_SEQUENCE_STYLE_BUILDER, participantId: 'Bob' },
     ]);
     const bar = geo.events.find((e) => e.kind === 'activation');
     expect(bar).toBeDefined();

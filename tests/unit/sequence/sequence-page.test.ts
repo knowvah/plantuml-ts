@@ -19,6 +19,7 @@ import { defaultTheme } from '../../../src/core/theme.js';
 import type {
   ActivationGeo,
   DividerGeo,
+  ElseGeo,
   EventGeo,
   FrameGeo,
   MessageGeo,
@@ -28,6 +29,8 @@ import type {
   SpaceGeo,
 } from '../../../src/diagrams/sequence/ast.js';
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
+import { wholeLifelines } from '../../helpers/sequence-source.js';
+import { DEFAULT_GROUP_PAINTS } from './frame-paint-fixtures.js';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -39,7 +42,7 @@ const LIFELINE_END = 500;
 /** A geometry with one head row of `HEAD_HEIGHT`, body ending at
  *  `LIFELINE_END`, and whatever events the case needs. */
 function geo(events: EventGeo[], overrides?: Partial<SequenceGeometry>): SequenceGeometry {
-  return {
+  const base: Omit<SequenceGeometry, 'lifelineSegments'> = {
     totalWidth: 400,
     totalHeight: 560,
     participants: [
@@ -66,6 +69,8 @@ function geo(events: EventGeo[], overrides?: Partial<SequenceGeometry>): Sequenc
     boxes: [],
     ...overrides,
   };
+  const ids = base.participants.map((p) => p.id);
+  return { lifelineSegments: wholeLifelines(ids, base.headHeight, base.lifelineEndY), ...base };
 }
 
 function newpage(y: number): NewpageGeo {
@@ -356,12 +361,30 @@ describe('frame — body CLAMPED, header tab all-or-nothing', () => {
   it('drops the else separators that left the band and translates the rest', () => {
     const f = frame(100, 300, {
       branchSeparators: [
-        { y: 150, label: 'a', runs: [] },
-        { y: 260, label: 'b', runs: [] },
+        { y: 150, label: 'a' },
+        { y: 260, label: 'b' },
       ],
     });
     const page = paginateSequence(geo([newpage(200), f]), 0);
-    expect(only<FrameGeo>(page, 'frame')[0]!.branchSeparators).toEqual([{ y: 150, label: 'a', runs: [] }]);
+    expect(only<FrameGeo>(page, 'frame')[0]!.branchSeparators).toEqual([{ y: 150, label: 'a' }]);
+  });
+
+  it('keeps an else tile on the page its top falls in, moving its condition with it', () => {
+    const run = { text: '[c]', x: 10, y: 270, textWidth: 12, textAscent: 9, textLineHeight: 11 } as const;
+    const elseAt = (y: number): ElseGeo => ({
+      paint: DEFAULT_GROUP_PAINTS.paint,
+      kind: 'else',
+      x: 5,
+      width: 300,
+      y,
+      runs: y === 260 ? [run] : [],
+    });
+    const g = geo([frame(100, 300), elseAt(150), newpage(200), elseAt(260)]);
+    expect(only<ElseGeo>(paginateSequence(g, 0), 'else').map((e) => e.y)).toEqual([150]);
+    // Page 2 starts at the tile (y 200) and is drawn from the head height (30).
+    const [moved] = only<ElseGeo>(paginateSequence(g, 1), 'else');
+    expect(moved!.y).toBe(90);
+    expect(moved!.runs.map((r) => r.y)).toEqual([100]);
   });
 
   it('drops the ref body with the header it hangs off', () => {

@@ -13,9 +13,17 @@
  * Re-exported by `geo.ts`, which is re-exported by `ast.ts`.
  */
 
+import type { NoteShape } from './ast.js';
+import type { SequencePaint } from './sequence-skin-param.js';
 import type { TextRun } from './text-block-geo.js';
 
 export interface NoteGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   kind: 'note';
   x: number;
   y: number;
@@ -23,9 +31,13 @@ export interface NoteGeo {
   height: number;
   text: string;
   color?: string;
-  shape?: 'rect';
-  /** The note style's merged `getDeltaShadow()` (`Note#getUsedStyles`,
-   *  `core/sequence-shadowing.ts`), UNSCALED; absent when 0. */
+  /** `NoteEvent.shape` of the component drawn: absent for the Opale
+   *  `NOTE`, which a note under a message always is
+   *  (`CommunicationTileNoteBottomTopAbstract.java:108`). */
+  shape?: NoteShape;
+  /** The note style's `getShadowing()` (`Style.java:109-115`), read off
+   *  its paint (`Note#getUsedStyles`, `Note.java:75-82`), UNSCALED; absent
+   *  when 0. */
   shadow?: number;
   /** The body, one placed and measured run per line of {@link text} (A5).
    *  Measured at `note { FontSize 13 }`, not the ambient font. */
@@ -38,6 +50,12 @@ export interface NoteGeo {
 }
 
 export interface DividerGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   kind: 'divider';
   text: string;
   /** `text` split on `\n` (`Display.getWithNewlines`). The empty `====` form
@@ -87,6 +105,12 @@ export interface SpaceGeo {
  * `GroupingTile#addNewpageTiles` (`:326-336`).
  */
 export interface NewpageGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   kind: 'newpage';
   /** The tile's TOP — `getYGauge().getMin()`, the value `yNewPages`
    *  collects. The separator itself is drawn `MARGINY` (10) below it. */
@@ -110,6 +134,12 @@ export interface NewpageGeo {
  * Spans from y=0 to totalHeight, covering all participant columns in the group.
  */
 export interface BoxGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   x: number;
   y: number;
   width: number;
@@ -135,6 +165,12 @@ export interface BoxGeo {
  * `sequence-delay.ts`.
  */
 export interface DelayGeo {
+  /**
+   * The element's resolved style paint (sdd1 D1/D5). Optional until its family
+   * migrates. NOT scaled by `scale-geo`: the jar scales at emission
+   * (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint?: SequencePaint;
   kind: 'delay';
   /** The tile's gauge min (`DelayTile.java:105`). */
   y: number;
@@ -160,6 +196,20 @@ export interface DelayGeo {
  * before the driver drops the shapes), so the group is emitted empty.
  */
 export interface LifelineSegment {
+  /**
+   * The piece's merged `PARTICIPANT_LINE` / `DELAY_LINE` style with the
+   * participant's stereotype (`MutingLine.java:105-106`), resolved by
+   * `sequence-layout-lifeline.ts`. NOT scaled by `scale-geo`: the jar scales
+   * at emission (`SvgGraphics#format`), see `scale-geo.ts` header.
+   */
+  readonly paint: SequencePaint;
+  /** The `<title>` a `PARTICIPANT_LINE` piece opens its group with
+   *  (`ComponentRoseLine.java:82`), from the display `MutingLine` hands the
+   *  piece's component (`MutingLine.java:107-108`); see
+   *  `sequence-layout-lifeline.ts#lifelineTitle`. Already `UGroup#fix`ed.
+   *  Layout always sets it; absent only on a hand-built geometry, which has
+   *  no stereotype, and the renderer then titles from the display alone. */
+  readonly title?: string;
   y1: number;
   y2: number;
   delay: boolean;

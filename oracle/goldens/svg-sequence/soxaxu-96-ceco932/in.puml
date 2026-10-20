@@ -1,0 +1,15 @@
+@startuml
+!function $multipleM()
+  !return "MMM"
+!endfunction
+
+
+Bob -> Alice : 1 XXX $multipleM()XXX
+
+Bob -> Alice : 2 XXX$multipleM()XXX
+
+Bob -> Alice : 3 XXX %newline()XXX
+
+Bob -> Alice : 4 XXX%newline()XXX
+
+@enduml

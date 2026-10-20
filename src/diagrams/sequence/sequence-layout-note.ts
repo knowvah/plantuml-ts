@@ -4,11 +4,15 @@
  * `sequence-layout-events.ts`.
  */
 import type { NoteEvent, NoteGeo, TextRun } from './ast.js';
-import type { FontSpec } from '../../core/measurer.js';
+import { Colors } from '../../core/abel/Colors.js';
+import { ColorType } from '../../core/abel/ColorType.js';
+import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
-import { noteShadowGeometry } from './sequence-layout-note-shadow.js';
-import { noteFontSpecOf } from './sequence-layout-shared.js';
-import { offsetRun, sequenceAtomContext, sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
+import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import { Stereotype } from '../../core/stereo/Stereotype.js';
+import { noteStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
+import { atomFontSpec } from './sequence-creole-text-atom.js';
+import { offsetRun, sequenceAtomContext, sequenceCreoleRuns } from './sequence-creole.js';
 import { activationLevel, blockWidthOf } from './sequence-layout-events.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
 import { legacyOverTile, noteTile, notePadding, NOTE_COMPONENT_PADDING_Y } from './sequence-note-tile.js';
@@ -26,21 +30,62 @@ import type { NotePadding, NoteTile, NoteTileInput } from './sequence-note-tile.
  */
 function noteBodyRuns(
   lines: readonly string[],
-  spec: FontSpec,
+  paint: SequencePaint,
   ctx: EventProcessingContext,
-  opts: { back: string; align: HorizontalAlignment },
+  align: HorizontalAlignment,
 ): TextRun[] {
-  const font = sequenceCreoleFont(spec);
+  const font = paint.font;
+  const spec = atomFontSpec(font);
   const lineHeight = ctx.measurer.measure('M', spec).height;
   const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
-  const atoms = sequenceAtomContext(ctx.sprites, ctx.theme.colors.text, opts.back);
+  const atoms = sequenceAtomContext(ctx.sprites, fontColorOf(font), paint.fill);
   const rows = lines.map((l, i) =>
     sequenceCreoleRuns(l, font, { leftX: 0, baselineY: ascent + i * lineHeight }, ctx.measurer, atoms),
   );
   const widths = rows.map((r) => (r.length === 0 ? 0 : r[r.length - 1]!.x + r[r.length - 1]!.textWidth));
   const maxWidth = Math.max(0, ...widths);
-  const coef = opts.align === HorizontalAlignment.CENTER ? 2 : opts.align === HorizontalAlignment.RIGHT ? 1 : 0;
+  const coef = align === HorizontalAlignment.CENTER ? 2 : align === HorizontalAlignment.RIGHT ? 1 : 0;
   return rows.flatMap((r, i) => (coef === 0 ? r : r.map((run) => offsetRun(run, (maxWidth - widths[i]!) / coef, 0))));
+}
+
+/** The font colour `StripeSimple#addSprite` tints a sprite with
+ *  (`StripeSimple.java:234`). Every skin sets `root { FontColor }`
+ *  (`plantuml.skin:9`; `TitledDiagram.loadSkin` refuses one without root), so
+ *  a null colour is a broken skin, not a case to draw. */
+function fontColorOf(font: FontConfiguration): string {
+  if (font.color === null) throw new Error('note style resolved no FontColor');
+  return font.color;
+}
+
+/**
+ * The note's `Colors` as its command built them: `ColorParser.simpleColor
+ * (BACK)` -> `new Colors(data, set, BACK)` (`FactorySequenceNoteCommand
+ * .java:234`, `...OverSeveralCommand.java:239`, `...AcrossCommand.java:218`);
+ * a note on an arrow takes the whole string as its BACK colour
+ * (`FactorySequenceNoteOnArrowCommand.java:223-225`).
+ */
+function noteColors(event: NoteEvent): Colors | undefined {
+  if (event.color === undefined) return undefined;
+  const set = HColorSet.instance();
+  if (event.onMessage === true) return Colors.empty().add(ColorType.BACK, set.getColor(event.color));
+  return Colors.parse(event.color, set, ColorType.BACK);
+}
+
+/**
+ * The note's paint, resolved at use time from the builder captured at its
+ * command: `Note#getUsedStyles` (`Note.java:75-82`) -- the keyword's
+ * signature (`NoteStyle.java:66-74`) merged with the stereotype's styles,
+ * then `eventuallyOverride(colors)` -- read off the HTML colour set
+ * (`AbstractComponent.java:81-83`).
+ */
+export function notePaint(event: NoteEvent): SequencePaint {
+  const style = noteStyle(
+    event.styleBuilder,
+    event.style ?? 'note',
+    Stereotype.build(event.stereotype),
+    noteColors(event),
+  );
+  return paintOf(style, HColorSet.instance());
 }
 
 /** The note's text alignment: `skinparam noteTextAlignment`, else
@@ -83,6 +128,7 @@ function textHeightOf(lineCount: number, lineHeight: number, pad: NotePadding): 
 /** A note measured and placed: everything {@link handleNoteEvent} draws and
  *  {@link noteTileExtent} reports. */
 interface ResolvedNote {
+  readonly paint: SequencePaint;
   readonly rows: TextRun[];
   readonly tile: NoteTile;
   readonly padding: NotePadding;
@@ -92,17 +138,20 @@ interface ResolvedNote {
 }
 
 function resolveNote(event: NoteEvent, ctx: EventProcessingContext): ResolvedNote {
-  // `note { FontSize 13 }` (`plantuml.skin:312-316`), NOT the ambient font --
-  // the box and its text must be sized from one measurement.
-  const fontSpec = noteFontSpecOf(ctx.theme);
+  const paint = notePaint(event);
   const { align, explicit } = noteAlignment(ctx);
-  // C6: that ONE measurement is the CREOLE block's -- `getTextWidth` reads
-  // `textBlock.calculateDimension` plus the padding (`AbstractTextualComponent
-  // .java:100-108`) over the block `create0` built (`:89-92`), so `<b>bold</b>`
-  // reserves the width of `bold` (jar: `moxope-92-roco972`).
-  const back = event.color ?? ctx.theme.colors.noteBackground;
-  const rows = noteBodyRuns(event.text.split('\n'), fontSpec, ctx, { back, align });
-  const { shadow, reserve } = noteShadowGeometry(event, ctx.theme);
+  // C6: ONE measurement, the CREOLE block's, at the note style's font --
+  // `getTextWidth` reads `textBlock.calculateDimension` plus the padding
+  // (`AbstractTextualComponent.java:100-108`) over the block `create3` built
+  // with `getFontConfiguration()` (`:80,89`), so `<b>bold</b>` reserves the
+  // width of `bold` (jar: `moxope-92-roco972`).
+  const rows = noteBodyRuns(event.text.split('\n'), paint, ctx, align);
+  // `symbolContext.getDeltaShadow()` (`Style.java:277-280`): `note` RESERVES
+  // it in its preferred size (`ComponentRoseNote.java:83-91`); `rnote` and
+  // `hnote` only draw it (`ComponentRoseNoteBox.java:101`,
+  // `ComponentRoseNoteHexagonal.java:109`).
+  const shadow = paint.shadowing;
+  const reserve = (event.style ?? 'note') === 'note' ? shadow : 0;
   // `...NoteBottomTopAbstract.java:92` always builds a `ComponentType.NOTE`.
   const padding = notePadding(isUnderMessage(event) ? 'note' : event.style, align);
   const tile = tileOf({
@@ -115,7 +164,8 @@ function resolveNote(event: NoteEvent, ctx: EventProcessingContext): ResolvedNot
     explicitAlign: explicit ? align : undefined,
     align,
   });
-  return { rows, tile, padding, shadow, reserve, lineHeight: ctx.measurer.measure('M', fontSpec).height };
+  const lineHeight = ctx.measurer.measure('M', atomFontSpec(paint.font)).height;
+  return { paint, rows, tile, padding, shadow, reserve, lineHeight };
 }
 
 /**
@@ -129,7 +179,7 @@ export function noteTileExtent(event: NoteEvent, ctx: EventProcessingContext): {
 }
 
 export function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
-  const { rows, tile, padding, shadow, reserve, lineHeight } = resolveNote(event, ctx);
+  const { paint, rows, tile, padding, shadow, reserve, lineHeight } = resolveNote(event, ctx);
   // `getTextHeight`; the box is drawn `(int)` of it (`ComponentRoseNote:104`,
   // `...NoteBox:56`, `...NoteHexagonal:56`) and `getPaddingY` BELOW the tile
   // top -- `Rose.paddingY` = 5, applied by `AbstractComponent#drawU:142-143`.
@@ -137,6 +187,7 @@ export function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: Even
   const textHeight = textHeightOf(event.text.split('\n').length, lineHeight, padding);
   const boxY = cursor.y + NOTE_COMPONENT_PADDING_Y;
   const noteGeo: NoteGeo = {
+    paint,
     kind: 'note',
     x: tile.x,
     y: boxY,
@@ -147,14 +198,16 @@ export function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: Even
     minX: tile.minX,
     maxX: tile.maxX,
     ...(event.color !== undefined ? { color: event.color } : {}),
-    ...(event.shape !== undefined ? { shape: event.shape } : {}),
+    // A note under a message is always a `ComponentType.NOTE`
+    // (`CommunicationTileNoteBottomTopAbstract.java:108`), whatever its keyword.
+    ...(event.shape !== undefined && !isUnderMessage(event) ? { shape: event.shape } : {}),
     ...(shadow > 0 ? { shadow } : {}),
   };
   ctx.eventGeos.push(noteGeo);
   // `NoteTile#getPreferredHeight:175-180` is the component's height and
   // nothing else -- no spacing either side -- and that is `getTextHeight +
   // 2 * getPaddingY + deltaShadow` (`ComponentRoseNote:88-91`,
-  // `...NoteBox:62-65`; the shadow only for `note`, see
-  // `sequence-layout-note-shadow.ts`).
+  // `...NoteBox:62-65`; the shadow only for `note`, see `reserve` in
+  // `resolveNote`).
   cursor.y += textHeight + NOTE_COMPONENT_PADDING_Y * 2 + reserve;
 }

@@ -1,0 +1,8 @@
+@startuml
+Bob -> Alice : hello
+legend right
+|= |= Type |
+|<back:red><color:red><U+3000></color></back> | Abcdef |
+|<back:blue><color:blue><U+3000></color></back> | Uvwxyz |
+endlegend
+@enduml

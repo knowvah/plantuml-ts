@@ -1,0 +1,8 @@
+@startuml
+participant Z1
+activate Z2
+Z1 -> Z2 : A
+activate Z2
+...  
+Z2 -> Z1 : C
+@enduml

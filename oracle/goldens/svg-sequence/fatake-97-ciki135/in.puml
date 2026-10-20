@@ -1,0 +1,14 @@
+@startuml
+skinparam {
+    ParticipantBackgroundColor #red
+    ParticipantBorderColor #blue
+    CollectionsBackgroundColor #yellow
+    CollectionsBorderColor #green
+}
+
+participant A
+collections C
+A -> C: messages
+C -> A: responces
+
+@enduml

@@ -115,7 +115,7 @@ function parseDash(dash: string): [number, number] | undefined {
  * - `getFontConfiguration(set)` and `(set, colors)` are one method.
  *
  * Not ported (no consumer on the mindmap path): `printMe`,
- * `mergeNestedChildOver`, `eventuallyOverride(PName, double|String)`,
+ * `eventuallyOverride(PName, double|String)`,
  * `eventuallyOverride(UStroke)`, `getSymbolContext`, `getStroke(Colors)`
  * (needs `Colors#getSpecificLineStroke`), `createTextBlockBordered`,
  * `toColors`, and the `ID_*` constants.
@@ -183,6 +183,30 @@ export class Style {
       both.set(key, asValueImpl(value).mergeWith(previous));
     }
     return new Style(this.signature.mergeWith(other.getSignature()), both);
+  }
+
+  /**
+   * Layers a nested child selector's style (e.g. `group.header`) on top of
+   * this legacy/sibling style (e.g. flat `groupHeader`) WITHOUT letting
+   * properties that `nested` only carries because they cascaded down from
+   * `nestedParent` (e.g. plain `group`) overwrite this style's own values:
+   * only a nested value absent from, or differing (by `asString()`) from,
+   * the parent's is merged on top. Returns `this` when `nested` is
+   * undefined or nothing diverges.
+   * @see Style.java:137-173
+   */
+  mergeNestedChildOver(nested: Style | undefined, nestedParent: Style | undefined, strategy: MergeStrategy): Style {
+    if (nested === undefined) return this;
+
+    const divergentOnly = new Map<PName, Value>();
+    for (const [key, value] of nested.map) {
+      const ancestorValue = nestedParent === undefined ? undefined : nestedParent.map.get(key);
+      if (ancestorValue === undefined || ancestorValue.asString() !== value.asString()) divergentOnly.set(key, value);
+    }
+
+    if (divergentOnly.size === 0) return this;
+
+    return this.mergeWith(new Style(nested.signature, divergentOnly), strategy);
   }
 
   /**

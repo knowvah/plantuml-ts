@@ -1,0 +1,60 @@
+== activity 12:52:24 { 118.05 98.22 88.05 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-activity.json — {"conformant":448,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== board 12:53:16 { 134.43 105.45 91.29 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 12:54:00 { 143.60 111.58 94.26 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-c4.json — {"conformant":2,"structural-match":0,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== chart 12:54:49 { 134.04 113.79 96.06 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+== chronology 12:55:36 { 117.36 112.69 96.60 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== class 12:56:07 { 111.81 111.51 96.71 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-class.json — {"conformant":723,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== component 12:56:58 { 116.21 112.74 98.01 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-component.json — {"conformant":214,"structural-match":12,"diverged":40,"errored":0,"timeout":0,"oracle-error":0}
+== ditaa 12:57:49 { 116.77 113.58 99.17 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 12:58:05 { 107.32 111.63 98.80 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== ebnf 12:58:50 { 125.94 115.81 101.00 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+== files 12:59:38 { 129.84 119.05 103.00 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-files.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 13:00:08 { 132.75 120.80 104.19 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-gantt.json — {"conformant":1,"structural-match":0,"diverged":264,"errored":0,"timeout":0,"oracle-error":0}
+== hcl 13:00:55 { 113.54 117.60 103.96 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== json 13:01:33 { 127.09 120.24 105.46 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-json.json — {"conformant":13,"structural-match":24,"diverged":13,"errored":0,"timeout":0,"oracle-error":0}
+== mindmap 13:02:22 { 128.84 121.48 106.74 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-mindmap.json — {"conformant":142,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== network 13:03:12 { 160.24 131.69 111.39 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-network.json — {"conformant":1,"structural-match":0,"diverged":2,"errored":0,"timeout":0,"oracle-error":0}
+== object 13:03:53 { 164.10 136.28 114.00 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-object.json — {"conformant":63,"structural-match":8,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== packet 13:04:43 { 125.94 130.04 112.96 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+== regex 13:05:31 { 119.65 127.96 113.18 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+== salt 13:06:18 { 113.73 125.29 112.96 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-salt.json — {"conformant":51,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== sequence 13:07:07 { 117.60 124.59 113.41 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-sequence.json — {"conformant":419,"structural-match":484,"diverged":240,"errored":0,"timeout":0,"oracle-error":0}
+== state 13:08:07 { 106.88 120.93 112.84 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-state.json — {"conformant":99,"structural-match":14,"diverged":160,"errored":0,"timeout":0,"oracle-error":0}
+== timing 13:08:55 { 117.21 122.00 113.67 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-timing.json — {"conformant":6,"structural-match":0,"diverged":120,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 13:09:43 { 119.62 122.78 114.48 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-unknown.json — {"conformant":521,"structural-match":36,"diverged":268,"errored":0,"timeout":0,"oracle-error":0}
+== usecase 13:10:40 { 133.92 125.60 116.01 }
+[xmldom fatalError]	comment is not well-formed at position 3151 
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-usecase.json — {"conformant":67,"structural-match":7,"diverged":19,"errored":0,"timeout":0,"oracle-error":1}
+== wbs 13:11:29 { 133.33 127.35 117.24 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-wbs.json — {"conformant":204,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== wire 13:12:18 { 124.09 125.29 117.03 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 13:13:03 { 106.07 120.42 115.66 }
+wrote plans/sequence-divergence-drive/measurements/b3-eng/parity-yaml.json — {"conformant":7,"structural-match":28,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+DONE 13:13:50

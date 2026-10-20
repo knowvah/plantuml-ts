@@ -1,0 +1,4 @@
+@startuml
+Bob->Alice : Hello!
+hnote over Alice : Answer
+@enduml

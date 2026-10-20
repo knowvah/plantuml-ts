@@ -1,0 +1,6 @@
+@startuml
+'!preprocessorV2
+
+
+alice -> bob : expected 3 for %strlen("foo")
+@enduml

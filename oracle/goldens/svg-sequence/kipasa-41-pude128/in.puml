@@ -1,0 +1,13 @@
+@startuml
+'!preprocessorV2
+
+!procedure $dummy()
+Alice -> Bob : $ijk
+!endprocedure
+
+!global $ijk = "foo"
+
+Alice -> Bob : $ijk
+$dummy()
+
+@enduml

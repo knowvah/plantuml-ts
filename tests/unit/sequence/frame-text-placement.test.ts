@@ -30,6 +30,7 @@ import { defaultTheme } from '../../../src/core/theme.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
 import type { FrameGeo } from '../../../src/diagrams/sequence/ast.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/sequence');
 
@@ -111,7 +112,7 @@ describe('frame header text', () => {
       .split('\n')
       .filter((l) => !l.startsWith('@start') && !l.startsWith('@end'));
     const frameOf = (measurer: StringMeasurer): FrameGeo => {
-      const parsed = parseSequence(lines);
+      const parsed = parseSequence(sequenceSource(lines));
       if ('refused' in parsed) throw new Error(parsed.message);
       const geo = layoutSequence(parsed, defaultTheme, measurer);
       return geo.events.find((e): e is FrameGeo => e.kind === 'frame')!;

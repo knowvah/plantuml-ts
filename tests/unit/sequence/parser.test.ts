@@ -11,6 +11,7 @@ import type {
   SequenceEvent,
   SequenceDiagramAST,
 } from '../../../src/diagrams/sequence/ast.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -22,7 +23,7 @@ import type {
 // with the refusal's own `kind`/`line`/`message` rather than silently
 // narrowing, so a wrongly-refused fixture fails loudly at the right line.
 function parse(lines: string[]): SequenceDiagramAST {
-  const result = parseSequence(lines);
+  const result = parseSequence(sequenceSource(lines));
   if ('refused' in result) {
     throw new Error(`parseSequence refused (${result.kind}) at line ${String(result.line)}: ${result.message}`);
   }
@@ -143,9 +144,10 @@ describe('participant declarations', () => {
   // `SequenceDiagramFactory:100` -> `CommonCommands#addCommonCommands1` ->
   // `addCommonHides` (`CommonCommands.java:103-106`). T13 recorded it as an
   // unmodelled no-op; the registration is one level down.
-  it('hide stereotype drops the stereotype', () => {
+  it('hide stereotype hides the DISPLAYED stereotype and keeps it for style (Participant.java:125-135)', () => {
     const ast = parse(['hide stereotype', 'participant Alice <<alice>>']);
-    expect(ast.participants[0]?.stereotype).toBeUndefined();
+    expect(ast.participants[0]?.stereotype).toBe('<<alice>>');
+    expect(ast.participants[0]?.stereotypeHidden).toBe(true);
     expect(ast.participants[0]?.id).toBe('Alice');
   });
 
@@ -206,7 +208,7 @@ describe('message arrow styles', () => {
   it.each(['Alice ->? Bob: lost', 'Alice ?-> Bob: found'])(
     'refuses %s, which is the exo family, not an arrow dressing',
     (line) => {
-      const result = parseSequence([line]);
+      const result = parseSequence(sequenceSource([line]));
       expect('refused' in result).toBe(true);
     },
   );
@@ -551,13 +553,14 @@ describe('frame events', () => {
     expect(ev?.label).toBe('group');
   });
 
-  it('`group Title [comment]` rewrites the label to the bracketed header', () => {
+  it('`group Title [comment]` rewrites the title and keeps the bracket as the comment', () => {
     const ast = parse(['group Alpha [beta]', 'Alice -> Bob: msg', 'end']);
     const ev = ast.events[0] as FrameEvent | undefined;
     // frameType stays the ORIGINAL "group" token -- never the rewritten
     // header (CommandGrouping.java:139, computed before the reassignment).
     expect(ev?.frameType).toBe('group');
-    expect(ev?.label).toBe('Alpha');
+    expect(ev?.title).toBe('Alpha ');
+    expect(ev?.label).toBe('beta');
   });
 
   it('nested frames: inner frame appears inside outer branch', () => {
@@ -714,7 +717,7 @@ describe('default AST shape', () => {
   // contract directly, using `parseSequence` (not the throwing `parse`
   // helper, which exists precisely to make an unexpected refusal loud).
   it('refuses empty input as incomplete (no participants)', () => {
-    const result = parseSequence([]);
+    const result = parseSequence(sequenceSource([]));
     if (!('refused' in result)) throw new Error('expected a refusal for empty input');
     expect(result.kind).toBe('incomplete');
     expect(result.line).toBe(0);

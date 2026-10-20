@@ -1,0 +1,10 @@
+@startuml
+!pragma teoz true
+Alice->Bob:m1
+Bob->Charlie:m2
+note across
+this default
+on several lines
+end note
+Bob->Alice
+@enduml
