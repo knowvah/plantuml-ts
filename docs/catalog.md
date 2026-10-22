@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1695 modules · 6217 exported names.
+1701 modules · 6232 exported names.
 
 ## `src/`
 
@@ -1955,7 +1955,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `ast.ts` | `ParticipantUrl`, `ParticipantType`, `Participant`, `MessageExoType`, `AbstractMessageEvent`, `MessageEvent`, `MessageExoEvent`, `NoteShape`, `NoteEvent`, `FrameEvent`, `ActivationEvent`, `DividerEvent`, `DelayEvent`, `SpaceEvent`, `NewpageEvent`, `SequenceEvent`, `BoxGroup`, `SequenceDiagramAST`, `* from ./geo.js` | AST type definitions for PlantUML sequence diagrams — the output of the parse stage. |
+| `ast-frame.ts` | `FrameEvent` | Frame (grouping / `ref`) event of the sequence AST. |
+| `ast-message.ts` | `MessageExoType`, `AbstractMessageEvent`, `MessageEvent`, `MessageExoEvent` | Message events of the sequence AST: the shared `AbstractMessage` fields and its two subclasses. |
+| `ast-note.ts` | `NoteShape`, `NoteEvent` | Note event of the sequence AST. |
+| `ast.ts` | `ParticipantUrl`, `MessageExoType`, `AbstractMessageEvent`, `MessageEvent`, `MessageExoEvent`, `NoteShape`, `NoteEvent`, `FrameEvent`, `ParticipantType`, `Participant`, `ActivationEvent`, `DividerEvent`, `DelayEvent`, `SpaceEvent`, `NewpageEvent`, `SequenceEvent`, `BoxGroup`, `SequenceDiagramAST`, `* from ./geo.js` | AST type definitions for PlantUML sequence diagrams — the output of the parse stage. |
 | `command-arrow-endpoints.ts` | `Groups`, `Endpoint`, `endpointOf`, `getMulticasts` | `CommandArrow`'s endpoint helpers (`getOrCreateParticipant` per PART, `getMulticasts`), split out of `command-arrow.ts` to keep it under the 500-line file cap (sdd1 T1b). |
 | `command-arrow.ts` | `returnCommand`, `ARROW_SOURCE`, `UNDRESSED_ARROW_SOURCE`, `DRESSED_ARROW_SOURCE`, `UNDRESSED_ARROW_RE`, `DRESSED_ARROW_RE`, `getInclination`, `applyStyle`, `withPart`, `arrowCommand`, `decoratedArrowCommand` | `CommandArrow` (`SequenceDiagramFactory.java:111`) — ONE upstream command, rebuilt here from the composed named groups of `sequence-arrow-regex.ts` rather than from an enumerated token table (`->`, `-->>`, `->>`, `-->`). |
 | `command-autonumber.ts` | `autonumberCommand`, `autonumberStopCommand`, `autonumberResumeCommand`, `autonumberIncrementCommand` | The autonumber block: `CommandAutonumber` (`SequenceDiagramFactory .java:146`), `CommandAutonumberStop` (`:147`), `CommandAutonumberResume` (`:148`) and `CommandAutonumberIncrement` (`:149`), registered as four consecutive entries. |
@@ -2017,13 +2020,16 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-layout-frame.ts` | `FramePaints`, `groupingColor`, `groupingPaints`, `handleFrameEvent` | A grouping frame's geometry and paint (sdd1 T3a): `GroupingTile` drawing `ComponentRoseGroupingHeader`, and each `ElseTile` drawing `ComponentRoseGroupingElse`. |
 | `sequence-layout-life-event.ts` | `DESTROY_CROSS_SIZE`, `handleActivateEvent`, `handleDeactivateEvent`, `closeMessageActivation`, `destroyPaint`, `handleDestroy`, `stepIndent`, `ArrowEnds`, `messageDestroyCrosses`, `clampDestroySteps` | Sequence diagram layout — the `activate` / `deactivate` / `destroy` life events (`teoz/LifeEventTile.java`), and the destroy cross (`skin/rose/ComponentRoseDestroy.java`) each destroy leaves. |
 | `sequence-layout-lifeline.ts` | `endOfParseStyleBuilder`, `mutingLinePaint`, `lifelineTitle`, `LifelineBody`, `lifelinesOf` | Sequence diagram layout — the lifelines: `LivingSpace#drawLineAndLiveboxes` (`teoz/LivingSpace.java:151-167`) handing each alive span to `MutingLine` (`teoz/MutingLine.java`), which cuts it at the delays (`sequence-delay.ts#lifelineSegments |
+| `sequence-layout-message-self.ts` | `MessageEndpoints`, `liveOffsetSelf` | Sequence diagram layout -- the self-message half of message geometry, split out of sequence-layout-message.ts the way upstream splits `CommunicationTile` from `CommunicationTileSelf`. |
 | `sequence-layout-message.ts` | `handleMessageEvent`, `messageTileAdvance` | Sequence diagram layout — message-arrow geometry, split out of sequence-layout-events.ts to keep both files under the size cap. |
 | `sequence-layout-note.ts` | `notePaint`, `noteTileExtent`, `handleNoteEvent` | The `note` event handler: measure the body, resolve the tile (`sequence-note-tile.ts`), push the `NoteGeo`. |
+| `sequence-layout-participant-constraints.ts` | `SpanConstraint`, `MessageLevels`, `scanMessageLabels` | Sequence diagram layout — the participant-row spacing-constraint scan. |
 | `sequence-layout-participant-label.ts` | `ParticipantLayoutCtx`, `visibleStereotypeLines`, `HeadRow`, `headRowsOf`, `labelRows`, `BADGE_GAP`, `anyBadgeFor`, `buildLabelRuns` | sequence-layout-participant-label.ts — a participant head's LABEL: its stereotype rows, its creole runs (sprites included, cdd7 T1f), its badge and the paints its box is filled and stroked with. |
 | `sequence-layout-participant-sizing.ts` | `symbolPreferredWidth`, `symbolPreferredHeight`, `ParticipantLabelMetrics`, `participantLabelMetricsOf`, `participantLabelCy`, `participantBadgeGeo` | sequence-layout-participant-sizing.ts — one function per participant family's own `getPreferredWidth` / `getPreferredHeight`, split out of `sequence-layout-participants.ts` when the citations pushed that file past the repo's 500-line cap (t |
-| `sequence-layout-participants.ts` | `LEFT_MARGIN`, `ParticipantLayoutResult`, `computeParticipantLayout`, `MessageLevels`, `reservedShadowOf`, `participantBoxOf`, `headSlackOf` | Sequence diagram layout — participant column geometry (Step 1 of layoutSequence). |
+| `sequence-layout-participants.ts` | `LEFT_MARGIN`, `MessageLevels`, `ParticipantLayoutResult`, `computeParticipantLayout`, `reservedShadowOf`, `participantBoxOf`, `headSlackOf` | Sequence diagram layout — participant column geometry (Step 1 of layoutSequence). |
 | `sequence-layout-ref.ts` | `handleRefEvent` | A `ref over` frame's geometry: `ReferenceTile` drawing `ComponentRoseReference` (unwind2-S9b). |
 | `sequence-layout-shared.ts` | `fontSpecOf`, `LIVE_DELTA_SIZE`, `ARROW_PADDING_X`, `TOP_MARGIN`, `PLAYING_SPACE_STARTING_Y`, `PLAYING_SPACE_TAIL_Y`, `BOTTOM_MARGIN` | Small shared leaf utilities for sequence diagram layout. |
+| `sequence-layout-width.ts` | `RIGHT_MARGIN`, `computeTotalWidth`, `messageGeosOf` | Sequence diagram document width (the right edge of the drawing space). |
 | `sequence-life-state.ts` | `AbstractMessageEvent`, `LifeEventType`, `LastEventWithDeactivate`, `LifeState`, `AFTER_DELAY_ERROR`, `newLifeState`, `addMessage`, `activate`, `getActivatingMessage`, `manageActivations`, `autoActivate`, `exoLifeEvents` | The life-event bookkeeping `SequenceDiagram` keeps while it parses: the pending `create`, the last delay, the event a bare life event binds to, and the stack of activating messages `return` and a bare `deactivate` read. |
 | `sequence-note-tile.ts` | `NOTE_COMPONENT_PADDING_X`, `NOTE_COMPONENT_PADDING_Y`, `NotePadding`, `notePadding`, `NoteTileInput`, `NoteTile`, `noteTile`, `legacyOverTile` | A sequence note's tile: `NoteTile` (teoz) over the three `ComponentRoseNote*` components -- the component's padding, the tile's x, and the extent the note contributes to the document. |
 | `sequence-page.ts` | `newpageTilesOf`, `sequencePageCount`, `paginateSequence`, `sequencePageAst` | `newpage` PAGINATION: one `SequenceGeometry` in, one page's `SequenceGeometry` out. |

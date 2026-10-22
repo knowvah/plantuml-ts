@@ -1,0 +1,387 @@
+diff --git a/src/diagrams/sequence/proto-stairs.ts b/src/diagrams/sequence/proto-stairs.ts
+new file mode 100644
+index 0000000..532771d
+--- /dev/null
++++ b/src/diagrams/sequence/proto-stairs.ts
+@@ -0,0 +1,25 @@
++// PROTOTYPE (scratch only): LiveBoxes#addStep/getStairs positions.
++interface St { msgStep?: number | undefined; parts?: readonly string[] | undefined; seen: Map<string, { a: boolean; d: boolean }>; steps: Map<string, Set<number>> }
++const ST = new WeakMap<object, St>();
++function st(ctx: object): St { let s = ST.get(ctx); if (!s) { s = { seen: new Map(), steps: new Map() }; ST.set(ctx, s); } return s; }
++const k = (y: number) => Math.round(y * 1000) / 1000;
++export function record(ctx: object, p: string, y: number): void { const s = st(ctx); let set = s.steps.get(p); if (!set) { set = new Set(); s.steps.set(p, set); } set.add(k(y)); }
++export function onMessage(ctx: object, parts: readonly string[], step: number | undefined): void {
++  const s = st(ctx); s.msgStep = step; s.parts = parts; s.seen = new Map();
++  if (step !== undefined) for (const p of parts) record(ctx, p, step);
++}
++export function resetLastMessage(ctx: object): void { const s = st(ctx); s.msgStep = undefined; s.parts = undefined; s.seen = new Map(); }
++function seen(s: St, p: string) { let v = s.seen.get(p); if (!v) { v = { a: false, d: false }; s.seen.set(p, v); } return v; }
++export function bound(ctx: object, p: string): boolean { const s = st(ctx); return s.msgStep !== undefined && s.parts?.includes(p) === true; }
++export function activatePos(ctx: object, p: string, ownY: number): number {
++  const s = st(ctx); record(ctx, p, ownY); const v = seen(s, p);
++  const pos = bound(ctx, p) && !v.d ? s.msgStep! : ownY; v.a = true; return pos;
++}
++export function deactivatePos(ctx: object, p: string, ownY: number): number {
++  const s = st(ctx); const set = s.steps.get(p);
++  const own = set?.has(k(ownY)) === true ? ownY + 5 : ownY; record(ctx, p, own);
++  const v = seen(s, p); const pos = bound(ctx, p) && !v.a ? s.msgStep! : own; v.d = true; return pos;
++}
++export function destroyPos(ctx: object, p: string, ownY: number): number {
++  const s = st(ctx); record(ctx, p, ownY); return bound(ctx, p) ? s.msgStep! : ownY;
++}
+diff --git a/src/diagrams/sequence/proto-tile.ts b/src/diagrams/sequence/proto-tile.ts
+new file mode 100644
+index 0000000..9d0b96b
+--- /dev/null
++++ b/src/diagrams/sequence/proto-tile.ts
+@@ -0,0 +1,6 @@
++// PROTOTYPE: last message tile extent for CommunicationTileNote* wrappers.
++export interface LastTile { top: number; height: number }
++const T = new WeakMap<object, LastTile>();
++export function setLastTile(ctx: object, top: number, height: number): void { T.set(ctx, { top, height }); }
++export function getLastTile(ctx: object): LastTile | undefined { return T.get(ctx); }
++export function clearLastTile(ctx: object): void { T.delete(ctx); }
+diff --git a/src/diagrams/sequence/renderer-message.ts b/src/diagrams/sequence/renderer-message.ts
+index 15778e3..c7de306 100644
+--- a/src/diagrams/sequence/renderer-message.ts
++++ b/src/diagrams/sequence/renderer-message.ts
+@@ -92,7 +92,8 @@ function renderSelfMessage(msg: MessageGeo, configuration: ArrowConfiguration, t
+   const loopHeight = SELF_LOOP_HEIGHT * k;
+   // `xRight = arrowWidth - 3` (`ComponentRoseSelfArrow.java:59-60`), which is
+   // what {@link SELF_LOOP_WIDTH} measures from the outgoing segment's start.
+-  const xRight = x1 + loopWidth;
++  const origin = msg.selfReturnX !== undefined && msg.selfReturnX - k > x1 + 1e-9 ? msg.selfReturnX - k : x1;
++  const xRight = origin + loopWidth;
+   const yBottom = y1 + loopHeight;
+   // The deprecated `applyStroke(ug)` (`ComponentRoseSelfArrow.java:81`): the
+   // style's thickness, 2,2 when dotted, and never the style's `LineStyle`
+diff --git a/src/diagrams/sequence/sequence-layout-events.ts b/src/diagrams/sequence/sequence-layout-events.ts
+index 95c59fe..38a1073 100644
+--- a/src/diagrams/sequence/sequence-layout-events.ts
++++ b/src/diagrams/sequence/sequence-layout-events.ts
+@@ -23,10 +23,10 @@ import type {
+ } from './ast.js';
+ import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
+ import { HColorSet } from '../../core/klimt/color/HColorSet.js';
+-import { handleNoteEvent } from './sequence-layout-note.js';
++import { handleNoteEvent, protoNoteHeight } from './sequence-layout-note.js';
+ import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
+ import type { MessageLabelEnv } from './text-block-geo.js';
+-import { handleMessageEvent } from './sequence-layout-message.js';
++import { handleMessageEvent, protoMessageContact } from './sequence-layout-message.js';
+ import { layoutDelay } from './sequence-delay.js';
+ import type { MessageLevels } from './sequence-layout-participants.js';
+ import { handleMessageExoEvent } from './sequence-layout-exo.js';
+@@ -107,7 +107,7 @@ export interface EventCursor {
+ export function processEvents(events: SequenceEvent[], startY: number, ctx: EventProcessingContext): number {
+   const cursor: EventCursor = { y: startY, lastMessageY: undefined };
+   for (let i = 0; i < events.length; i++) {
+-    dispatchEvent(events[i]!, cursor, ctx, boundLifeEvents(events, i));
++    dispatchWithChain(events[i]!, cursor, ctx, boundLifeEvents(events, i));
+   }
+   return cursor.y;
+ }
+@@ -141,6 +141,60 @@ function boundLifeEvents(events: readonly SequenceEvent[], index: number): Activ
+   return bound;
+ }
+ 
++interface Chain { origin: number; contact: number; max: number; geoStart: number }
++const CHAINS = new WeakMap<object, Chain | undefined>();
++function shiftY(o: unknown, d: number, depth = 0): void {
++  if (o === null || typeof o !== 'object' || depth > 4) return;
++  if (Array.isArray(o)) { for (const e of o) shiftY(e, d, depth + 1); return; }
++  const r = o as Record<string, unknown>;
++  for (const key of Object.keys(r)) {
++    if (key === 'paint' || key === 'arrow' || key === 'participant' || key === 'styleBuilder') continue;
++    const v = r[key];
++    if (key === 'y' && typeof v === 'number') r[key] = v + d;
++    else if (typeof v === 'object') shiftY(v, d, depth + 1);
++  }
++}
++function tileContact(event: SequenceEvent, ctx: EventProcessingContext): number | undefined {
++  if (event.kind === 'message') return protoMessageContact(event, ctx);
++  if (event.kind === 'note' && event.onMessage !== true) return protoNoteHeight(event, ctx) / 2;
++  return undefined;
++}
++function dispatchWithChain(event: SequenceEvent, cursor: EventCursor, ctx: EventProcessingContext, bound: readonly ActivationEvent[]): void {
++  const cr = tileContact(event, ctx);
++  const chain = CHAINS.get(ctx);
++  const parallel = (event.kind === 'message' || event.kind === 'note') && event.parallel === true;
++  if (cr === undefined) {
++    const before = cursor.y;
++    dispatchEvent(event, cursor, ctx, bound);
++    const propagating = event.kind === 'activate' || event.kind === 'deactivate' || (event.kind === 'note' && event.onMessage === true);
++    if (!propagating) CHAINS.set(ctx, undefined);
++    else if (chain !== undefined) chain.max = Math.max(chain.max, cursor.y);
++    void before;
++    return;
++  }
++  if (parallel && chain !== undefined) {
++    const newContact = Math.max(chain.contact, chain.origin + cr);
++    const delta = newContact - chain.contact;
++    if (delta > 0) {
++      for (let i = chain.geoStart; i < ctx.eventGeos.length; i++) {
++        const g = ctx.eventGeos[i]!;
++        if (g.kind === 'message' || g.kind === 'note') shiftY(g, delta);
++      }
++      chain.max += delta;
++      chain.contact = newContact;
++    }
++    cursor.y = newContact - cr;
++    dispatchEvent(event, cursor, ctx, bound);
++    chain.max = Math.max(chain.max, cursor.y);
++    cursor.y = chain.max;
++    return;
++  }
++  const origin = cursor.y;
++  const geoStart = ctx.eventGeos.length;
++  dispatchEvent(event, cursor, ctx, bound);
++  CHAINS.set(ctx, { origin, contact: origin + cr, max: cursor.y, geoStart });
++}
++
+ /** Route a single event to its kind-specific handler. */
+ function dispatchEvent(
+   event: SequenceEvent,
+diff --git a/src/diagrams/sequence/sequence-layout-exo.ts b/src/diagrams/sequence/sequence-layout-exo.ts
+index dbff748..56922cb 100644
+--- a/src/diagrams/sequence/sequence-layout-exo.ts
++++ b/src/diagrams/sequence/sequence-layout-exo.ts
+@@ -1,3 +1,4 @@
++import * as TILE from './proto-tile.js';
+ /**
+  * Sequence diagram layout — EXO message geometry (`[-> Bob`, `Bob ->]`, …).
+  *
+@@ -45,6 +46,7 @@ import { ARROW_PADDING_X, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+ import { atomFontSpec } from './sequence-creole-text-atom.js';
+ import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+ import type { SequencePaint } from './sequence-skin-param.js';
++import * as STAIRS from './proto-stairs.js';
+ import { messageTileAdvance } from './sequence-layout-message.js';
+ import {
+   MESSAGE_NUMBER_MARGIN,
+@@ -306,6 +308,8 @@ export function handleMessageExoEvent(event: MessageExoEvent, cursor: EventCurso
+   const messageGeo = buildExoGeo(event, span, geoY, ctx, paint);
+   ctx.eventGeos.push(messageGeo);
+   cursor.lastMessageY = messageGeo.y;
++  STAIRS.onMessage(ctx, [event.participant], messageGeo.y);
++  TILE.setLastTile(ctx, cursor.y, advance.tileHeight);
+   cursor.y += advance.tileHeight;
+ }
+ 
+diff --git a/src/diagrams/sequence/sequence-layout-frame.ts b/src/diagrams/sequence/sequence-layout-frame.ts
+index 892e313..ab9f9b2 100644
+--- a/src/diagrams/sequence/sequence-layout-frame.ts
++++ b/src/diagrams/sequence/sequence-layout-frame.ts
+@@ -1,3 +1,4 @@
++import * as STAIRS from './proto-stairs.js';
+ /**
+  * A grouping frame's geometry and paint (sdd1 T3a): `GroupingTile` drawing
+  * `ComponentRoseGroupingHeader`, and each `ElseTile` drawing
+@@ -398,4 +399,5 @@ export function handleFrameEvent(event: FrameEvent, cursor: EventCursor, ctx: Ev
+   // `GroupingLeaf` (`SequenceDiagram.java:438`), which is not an
+   // `AbstractMessage` -- so a `destroy` straight after `end` is standalone.
+   ctx.lastMessageParticipants = undefined;
++  STAIRS.resetLastMessage(ctx);
+ }
+diff --git a/src/diagrams/sequence/sequence-layout-life-event.ts b/src/diagrams/sequence/sequence-layout-life-event.ts
+index e602ff2..de9d77b 100644
+--- a/src/diagrams/sequence/sequence-layout-life-event.ts
++++ b/src/diagrams/sequence/sequence-layout-life-event.ts
+@@ -49,6 +49,7 @@ import { componentStyle, paintOf, type SequencePaint } from './sequence-skin-par
+  *  on both axes (`:68-70,72-74`), and `LifeEventTile:132-136` reserves that
+  *  height for a destroy with no message. */
+ export const DESTROY_CROSS_SIZE = 9;
++import * as STAIRS from './proto-stairs.js';
+ 
+ export function handleActivateEvent(event: ActivationEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
+   // Use the last message arrow y when available so the bar top aligns
+@@ -56,10 +57,12 @@ export function handleActivateEvent(event: ActivationEvent, cursor: EventCursor,
+   // Bound to that message, the bar opens at the MESSAGE's step and takes its
+   // builder (`teoz/LiveBoxes.java:146-170,325-331`); a standalone `activate`
+   // opens at its own `LifeEvent` step, with its own.
++  const wasBound = STAIRS.bound(ctx, event.participantId);
++  const pos = STAIRS.activatePos(ctx, event.participantId, cursor.y);
+   pushActivation(ctx.activationStart, event.participantId, {
+-    y: cursor.lastMessageY ?? cursor.y,
++    y: pos,
+     ...(event.color !== undefined ? { color: event.color } : {}),
+-    ...(cursor.lastMessageY === undefined ? { styleBuilder: event.styleBuilder } : {}),
++    ...(!wasBound || pos === cursor.y ? { styleBuilder: event.styleBuilder } : {}),
+   });
+   cursor.lastMessageY = undefined;
+ }
+@@ -68,9 +71,7 @@ export function handleDeactivateEvent(event: ActivationEvent, cursor: EventCurso
+   // End at the last message arrow y. If that would give zero/negative
+   // height (activate and deactivate at the same y), fall back to
+   // post-spacing cursor.y so the bar is always visible.
+-  const deactStartY = openActivation(ctx.activationStart, event.participantId)?.y;
+-  const rawEndY = cursor.lastMessageY ?? cursor.y;
+-  const deactEndY = deactStartY !== undefined && rawEndY <= deactStartY ? cursor.y : rawEndY;
++  const deactEndY = event.destroy === true ? STAIRS.destroyPos(ctx, event.participantId, cursor.y) : STAIRS.deactivatePos(ctx, event.participantId, cursor.y);
+   emitActivation(event.participantId, deactEndY, ctx.participantMap, ctx.activationStart, ctx.eventGeos);
+   cursor.lastMessageY = undefined;
+   if (event.destroy === true) handleDestroy(event.participantId, cursor, ctx);
+@@ -85,8 +86,8 @@ export function closeMessageActivation(
+   cursor: EventCursor,
+   ctx: EventProcessingContext,
+ ): void {
+-  const deactStartY = openActivation(ctx.activationStart, participantId)?.y;
+-  const deactEndY = deactStartY !== undefined && arrowY <= deactStartY ? cursor.y : arrowY;
++  void arrowY;
++  const deactEndY = STAIRS.deactivatePos(ctx, participantId, cursor.y);
+   emitActivation(participantId, deactEndY, ctx.participantMap, ctx.activationStart, ctx.eventGeos);
+ }
+ 
+diff --git a/src/diagrams/sequence/sequence-layout-message.ts b/src/diagrams/sequence/sequence-layout-message.ts
+index d9bb091..f1b6383 100644
+--- a/src/diagrams/sequence/sequence-layout-message.ts
++++ b/src/diagrams/sequence/sequence-layout-message.ts
+@@ -1,3 +1,6 @@
++import { inclination1Of, inclination2Of } from './sequence-arrowhead.js';
++import { reverseArrowConfiguration } from './renderer-arrowhead.js';
++import * as TILE from './proto-tile.js';
+ /**
+  * Sequence diagram layout — message-arrow geometry, split out of
+  * sequence-layout-events.ts to keep both files under the size cap.
+@@ -22,6 +25,7 @@ import { LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+ import { atomFontSpec } from './sequence-creole-text-atom.js';
+ import type { SequencePaint } from './sequence-skin-param.js';
+ import { markCreated, withCreateEnd } from './sequence-layout-create.js';
++import * as STAIRS from './proto-stairs.js';
+ import { closeMessageActivation, handleDestroy, messageDestroyCrosses } from './sequence-layout-life-event.js';
+ import { messagePaint } from './sequence-arrow-paint.js';
+ import {
+@@ -62,13 +66,27 @@ export function handleMessageEvent(
+   // (`planning/sizer-renderer-parity.md`).
+   const lineHeight = ctx.measurer.measure('M', atomFontSpec(paint.font)).height;
+   const rows = messageLabelRows(event.label, numberTextOf(event));
+-  const advance = messageTileAdvance(rows * lineHeight, endpoints.arrowDirection === 'self');
++  const advance0 = messageTileAdvance(rows * lineHeight, endpoints.arrowDirection === 'self');
++  const cfg = endpoints.arrowDirection === 'left' ? reverseArrowConfiguration(event.arrow) : event.arrow;
++  const incl = endpoints.arrowDirection === 'self' ? 0 : inclination1Of(cfg) + inclination2Of(cfg);
++  const advance = { arrowY: advance0.arrowY, tileHeight: advance0.tileHeight + incl };
+ 
+   const messageGeo = buildMessageGeo(event, endpoints, cursor.y + advance.arrowY, ctx, paint);
+   const tileHeight = event.create === true ? markCreated(messageGeo, toGeo, cursor.y, advance.tileHeight) : null;
+   ctx.eventGeos.push(messageGeo);
+-  cursor.lastMessageY = messageGeo.y;
++  const stepY = messageGeo.y + (endpoints.arrowDirection === 'self' ? 0 : inclination2Of(cfg));
++  cursor.lastMessageY = stepY;
++  {
++    const self = endpoints.arrowDirection === 'self';
++    const p1 = event.from;
++    const act = event.activates === p1 || bound.some((b) => b.kind === 'activate' && b.participantId === p1);
++    const deact = event.deactivates === p1 || bound.some((b) => b.kind === 'deactivate' && b.destroy !== true && b.participantId === p1);
++    const destr = event.destroys === p1 || bound.some((b) => b.destroy === true && b.participantId === p1);
++    const step = !self ? stepY : act ? messageGeo.y + SELF_ARROW_ONLY_HEIGHT : deact ? messageGeo.y : destr ? messageGeo.y + SELF_ARROW_ONLY_HEIGHT : undefined;
++    STAIRS.onMessage(ctx, participants, step);
++  }
+ 
++  TILE.setLastTile(ctx, cursor.y, tileHeight ?? advance.tileHeight);
+   cursor.y += tileHeight ?? advance.tileHeight;
+ 
+   // A self arrow's end point is `getArrowOnlyHeight` below its start
+@@ -77,7 +95,7 @@ export function handleMessageEvent(
+   const arrow = { start: messageGeo.y, end: messageGeo.y + loop, self: loop > 0 };
+   ctx.lastMessageCrosses = { of: participants, crosses: messageDestroyCrosses(event, arrow, bound, ctx) };
+   // Handle auto-activate/deactivate via ++ / -- shorthand on message
+-  applyMessageActivation(event, messageGeo, cursor, ctx);
++  applyMessageActivation(event, { ...messageGeo, y: stepY }, cursor, ctx);
+ }
+ 
+ /**
+@@ -186,7 +204,11 @@ function passthroughFields(
+  * clearance term at all.
+  */
+ function labelLeftOf(event: MessageEvent, endpoints: MessageEndpoints): number {
+-  if (endpoints.arrowDirection === 'self') return endpoints.fromX + ARROW_LABEL_PADDING_X1;
++  if (endpoints.arrowDirection === 'self') {
++    const r = endpoints.selfReturnX;
++    const origin = r !== undefined && r - 1 > endpoints.fromX + 1e-9 ? r - 1 : endpoints.fromX;
++    return origin + ARROW_LABEL_PADDING_X1;
++  }
+   // The component spans the arrow, so its origin is the LEFTMOST end whichever
+   // way the message runs. `fromX`/`toX` are that origin, not the drawn line:
+   // the renderer applies upstream's own `start += getArrowDeltaX() / 2` shift
+@@ -479,7 +501,7 @@ function applyMessageActivation(
+     // `manageActivations`'s `-`/`!` legs always pass `null`
+     // (`CommandArrow.java:439,445-450`), so a deactivate never recolors.
+     pushActivation(ctx.activationStart, event.activates, {
+-      y: messageGeo.y,
++      y: STAIRS.activatePos(ctx, event.activates, cursor.y),
+       ...(event.lifeColor !== undefined ? { color: event.lifeColor } : {}),
+     });
+   }
+@@ -493,3 +515,10 @@ function applyMessageActivation(
+     handleDestroy(event.destroys, cursor, ctx);
+   }
+ }
++
++export function protoMessageContact(event: MessageEvent, ctx: EventProcessingContext): number {
++  const paint = messagePaint(event.styleBuilder, event.stereotype, event.arrow, event.from === event.to);
++  const lineHeight = ctx.measurer.measure('M', atomFontSpec(paint.font)).height;
++  const rows = messageLabelRows(event.label, numberTextOf(event));
++  return messageTileAdvance(rows * lineHeight, event.from === event.to).arrowY;
++}
+diff --git a/src/diagrams/sequence/sequence-layout-note.ts b/src/diagrams/sequence/sequence-layout-note.ts
+index 338cf6d..2698eef 100644
+--- a/src/diagrams/sequence/sequence-layout-note.ts
++++ b/src/diagrams/sequence/sequence-layout-note.ts
+@@ -1,3 +1,5 @@
++import * as TILE from './proto-tile.js';
++const LASTNOTE = new WeakMap<object, { top: number; h: number }>();
+ /**
+  * The `note` event handler: measure the body, resolve the tile
+  * (`sequence-note-tile.ts`), push the `NoteGeo`. Split out of
+@@ -185,7 +187,12 @@ export function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: Even
+   // top -- `Rose.paddingY` = 5, applied by `AbstractComponent#drawU:142-143`.
+   // On `metano-36-gevu843` the jar's box is at y=52 against a tile top of 47.
+   const textHeight = textHeightOf(event.text.split('\n').length, lineHeight, padding);
+-  const boxY = cursor.y + NOTE_COMPONENT_PADDING_Y;
++  const lt = TILE.getLastTile(ctx);
++  const overlay = event.onMessage === true && event.position !== 'over' && lt !== undefined && Math.abs(cursor.y - (lt.top + lt.height)) < 1e-6;
++  const prev = LASTNOTE.get(ctx);
++  const merge = event.vmerge === true && event.onMessage !== true && prev !== undefined && Math.abs(prev.top + prev.h - cursor.y) < 1e-6;
++  const top = overlay ? lt!.top : merge ? prev!.top : cursor.y;
++  const boxY = top + NOTE_COMPONENT_PADDING_Y;
+   const noteGeo: NoteGeo = {
+     paint,
+     kind: 'note',
+@@ -209,5 +216,21 @@ export function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: Even
+   // 2 * getPaddingY + deltaShadow` (`ComponentRoseNote:88-91`,
+   // `...NoteBox:62-65`; the shadow only for `note`, see `reserve` in
+   // `resolveNote`).
+-  cursor.y += textHeight + NOTE_COMPONENT_PADDING_Y * 2 + reserve;
++  const noteH = textHeight + NOTE_COMPONENT_PADDING_Y * 2 + reserve;
++  if (overlay) {
++    const h = Math.max(lt!.height, noteH);
++    TILE.setLastTile(ctx, lt!.top, h);
++    cursor.y = lt!.top + h;
++    LASTNOTE.delete(ctx);
++  } else {
++    TILE.clearLastTile(ctx);
++    const h = merge ? Math.max(prev!.h, noteH) : noteH;
++    cursor.y = top + h;
++    LASTNOTE.set(ctx, { top, h });
++  }
++}
++
++export function protoNoteHeight(event: NoteEvent, ctx: EventProcessingContext): number {
++  const { padding, reserve, lineHeight } = resolveNote(event, ctx);
++  return textHeightOf(event.text.split('\n').length, lineHeight, padding) + NOTE_COMPONENT_PADDING_Y * 2 + reserve;
+ }
+diff --git a/src/diagrams/sequence/sequence-layout-ref.ts b/src/diagrams/sequence/sequence-layout-ref.ts
+index 4994696..0b6080a 100644
+--- a/src/diagrams/sequence/sequence-layout-ref.ts
++++ b/src/diagrams/sequence/sequence-layout-ref.ts
+@@ -1,3 +1,4 @@
++import * as STAIRS from './proto-stairs.js';
+ /**
+  * A `ref over` frame's geometry: `ReferenceTile` drawing `ComponentRoseReference`
+  * (unwind2-S9b). It used to borrow `GroupingTile`'s geometry -- a frame from
+@@ -140,4 +141,5 @@ export function handleRefEvent(event: FrameEvent, cursor: EventCursor, ctx: Even
+   ctx.eventGeos.push(frameGeo);
+   cursor.y = y + height;
+   ctx.lastMessageParticipants = undefined;
++  STAIRS.resetLastMessage(ctx);
+ }
