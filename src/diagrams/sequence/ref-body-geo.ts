@@ -18,6 +18,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import type { FrameEvent } from './ast.js';
 import { displayLines } from './text-block-geo.js';
+import { alignedBlockRuns } from './sequence-block-align.js';
 import { atomFontSpec } from './sequence-creole-text-atom.js';
 import { paintOf, referenceStyle, type SequencePaint } from './sequence-skin-param.js';
 
@@ -123,8 +124,12 @@ export function refBodyHeight(body: readonly string[], paints: ReferencePaints, 
  * `noshadow-reference.svg` -- the canvas widens by 3, the rect does not.
  */
 export function refComponentWidth(body: readonly string[], paints: ReferencePaints, measurer: StringMeasurer): number {
-  const spec = atomFontSpec(paints.paint.font);
-  const widest = Math.max(0, ...body.map((l) => measurer.measure(l, spec).width));
+  // `getTextWidth` is the text block's `calculateDimension` (`AbstractTextual
+  // Component.java:100-108`): the RENDERED creole stripes, so `[[url{tip}]]`
+  // counts its label, not its markup.
+  const widest = alignedBlockRuns(body, paints.paint.font, { leftX: 0, top: 0 }, paints.paint.align, {
+    measurer,
+  }).width;
   const headerWidth = refHeaderWidth(paints.headerPaint, measurer);
   return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN + paints.paint.shadowing;
 }

@@ -1,0 +1,7 @@
+@startuml
+!pragma teoz true
+box "AB"
+participant A
+collections B
+end box
+@enduml

@@ -11,7 +11,7 @@
  * owns only the top-level line loop and its dispatch priority.
  */
 
-import type { SequenceDiagramAST } from './ast.js';
+import type { NoteEvent, SequenceDiagramAST } from './ast.js';
 import type { ParseOptions } from '../../core/dispatcher.js';
 import { internalSpriteStoreFrom } from '../../core/internal-sprite-store.js';
 import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
@@ -34,6 +34,7 @@ import { newLifeState } from './sequence-life-state.js';
 import { removeEmptyColumns } from './remove-empty-columns.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 import type { UmlSource } from '../../core/block-extractor.js';
+import { applyNoteTextAlignment } from './sequence-note-text-alignment.js';
 import { applyResponseMessageBelowArrow } from './sequence-response-below.js';
 import { createSequenceStyleDispatch, currentStyleBuilder, executeDeclarationsBefore } from './sequence-skin-param.js';
 
@@ -70,25 +71,34 @@ function scanEmbeddedBlock(lines: readonly string[], i: number): { block: readon
   return { block: lines.slice(i), consumed: lines.length - i };
 }
 
+/** The notes whose first body line has been added, so a blank first line is
+ *  told apart from no line yet (`text` is `''` for both). */
+const notesWithBody = new WeakSet<NoteEvent>();
+
 /** `BlocLines#add` for the accumulating note: the first line SETS the text,
- *  every later one appends on its own display line. */
+ *  every later one appends on its own display line. Lines are the raw source
+ *  lines, blank ones included: the command reads the whole `BlocLines` and only
+ *  `removeEmptyColumns` touches it (`FactorySequenceNoteOnArrowCommand.java:
+ *  200-202`; the end note command applies it). */
 function appendNoteText(state: ParseState, newLines: readonly string[]): void {
+  const note = state.pendingNote!;
   for (const line of newLines) {
-    const note = state.pendingNote!;
-    note.text = note.text === '' ? line : note.text + '\n' + line;
+    note.text = notesWithBody.has(note) ? `${note.text}\n${line}` : line;
+    notesWithBody.add(note);
   }
 }
 
 /**
  * If a multi-line note is currently accumulating, either close it (on
  * "end note"), swallow an embedded-diagram block whole (see
- * {@link scanEmbeddedBlock}), or append line `i` to its text. Returns the
- * number of lines consumed, or `null` when there is no pending note and
+ * {@link scanEmbeddedBlock}), or append raw line `i` to its text. Returns the
+ * number of RAW lines consumed, or `null` when there is no pending note and
  * normal dispatch should run instead.
  */
 function handlePendingNote(state: ParseState, lines: readonly string[], i: number): number | null {
   if (state.pendingNote === null) return null;
-  const line = lines[i]!;
+  const raw = lines[i]!;
+  const line = raw.trim();
 
   // Check for "end note" first via the dispatch table so it is matched the
   // same way ordinary commands are, but only close the note if this really
@@ -107,8 +117,16 @@ function handlePendingNote(state: ParseState, lines: readonly string[], i: numbe
     return embedded.consumed;
   }
 
-  appendNoteText(state, [line]);
+  appendNoteText(state, [raw]);
   return 1;
+}
+
+/** Feed the pending note every raw line from `from` through `upTo` (the next
+ *  non-blank one), blank lines included. Returns the last raw index consumed. */
+function consumePendingNote(state: ParseState, raw: readonly string[], from: number, upTo: number): number {
+  let r = from;
+  while (state.pendingNote !== null && r <= upTo) r += handlePendingNote(state, raw, r)!;
+  return r - 1;
 }
 
 /**
@@ -321,8 +339,11 @@ function documentPositionOf(source: UmlSource, origIndex: number): number {
 function runDispatchLoop(state: ParseState, source: UmlSource): ParseRefusal | null {
   const { trimmedEntries, trimmedLines, rawAlignedLines } = dispatchViews(source.lines);
 
+  // The last raw source line a pending note consumed: its body starts after it.
+  let lastRaw = -1;
   for (let i = 0; i < trimmedLines.length; i++) {
     const { origIndex } = trimmedEntries[i]!;
+    if (state.pendingNote === null) lastRaw = origIndex;
     const styleRefusal = executeDeclarationsBefore(state.style, documentPositionOf(source, origIndex));
     if (styleRefusal !== null) return styleRefusal;
     const line = trimmedLines[i]!;
@@ -332,9 +353,9 @@ function runDispatchLoop(state: ParseState, source: UmlSource): ParseRefusal | n
     // "end note" gets appended to the note text. Checked FIRST, before the
     // annotation matcher, so a `title`/`legend`-shaped line inside
     // `note ... end note` stays note text (decisions.md D3).
-    const noteConsumed = handlePendingNote(state, trimmedLines, i);
-    if (noteConsumed !== null) {
-      i += noteConsumed - 1;
+    if (state.pendingNote !== null) {
+      lastRaw = consumePendingNote(state, source.lines, lastRaw + 1, origIndex);
+      while (trimmedEntries[i + 1] !== undefined && trimmedEntries[i + 1]!.origIndex <= lastRaw) i++;
       continue;
     }
     if (handlePendingRef(state, line, rawLine)) continue;
@@ -440,6 +461,7 @@ export function parseSequence(source: UmlSource, options?: ParseOptions): Sequen
   applyHideStereotype(state.ast);
   applyHideUnlinked(state.ast);
   applyResponseMessageBelowArrow(state.ast, state.style.params);
+  applyNoteTextAlignment(state.ast, state.style.params);
   // The builder the tiles read after the parse (`MutingLine.java:70`,
   // `LiveBoxesDrawer.java:78-81`), every declaration above executed.
   return { ...state.ast, styleBuilder: currentStyleBuilder(state.style) };

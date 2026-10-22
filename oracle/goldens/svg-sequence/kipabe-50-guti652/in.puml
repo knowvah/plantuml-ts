@@ -1,0 +1,20 @@
+@startuml
+skinparam usebetastyle true
+
+Bob -> Alice : ok1
+== Resource V1 ==
+Bob -> Alice : ok2
+
+<style>
+separator {
+  LineColor black
+  BackGroundColor yellow
+  LineThickness 3
+  FontSize 22
+}
+</style>
+
+
+== Resource V2 ==
+Bob -> Alice : ok3
+@enduml

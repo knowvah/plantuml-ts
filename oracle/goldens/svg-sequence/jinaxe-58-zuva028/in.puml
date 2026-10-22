@@ -1,0 +1,39 @@
+@startuml
+skinparam useBetaStyle true
+
+<style>
+sequenceDiagram
+{
+  box {
+        BackgroundColor Yellow
+        .Client
+        {
+            BackgroundColor LightYellow
+        }
+        .Cloud {
+            BackgroundColor LightRed
+        }
+  }
+  participant {
+        BackgroundColor LightBlue
+        FontColor Black
+        .Color1
+        {
+          FontColor Red
+        }
+        .Color2
+        {
+          FontColor white
+        }
+  }
+}
+</style>
+
+box "Tier 1"  <<Client>>
+    participant "Alfa" as a <<Color1>>
+end box
+box "Tier 2"  <<Cloud>>
+    participant "Beta" as b <<Color2>>
+    participant "Theta" as c
+end box
+@enduml

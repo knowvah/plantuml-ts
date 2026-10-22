@@ -22,7 +22,8 @@
  * - `GroupingTile#drawBackground` (`GroupingTile.java:308-316`): the body
  *   style's `BackGroundColor` and `RoundCorner` for the `Blotter`.
  */
-import type { ElseGeo, FrameEvent, FrameGeo, TextRun } from './ast.js';
+import type { ElseGeo, FrameEvent, FrameGeo, NoteEvent, TextRun } from './ast.js';
+import type { NoteOwner, RefOwner } from './sequence-note-folding.js';
 import { atomFontSpec } from './sequence-creole-text-atom.js';
 import { alignedBlockRuns } from './sequence-block-align.js';
 import type { SequencePaint } from './sequence-skin-param.js';
@@ -238,9 +239,14 @@ const FRAME_MARGINY_MAGIC = 20;
  * A parallel (`& group`) frame chains on the previous tile's MIN, and its
  * reserved max is pushed past the previous tile's max (`:145-154,229-236`).
  */
-export function handleFrameEvent(event: FrameEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
+export function handleFrameEvent(
+  event: FrameEvent,
+  cursor: EventCursor,
+  ctx: EventProcessingContext,
+  notesOf: ReadonlyMap<NoteOwner, readonly NoteEvent[]>,
+): void {
   // A `ref` is a `ReferenceTile`, not a `GroupingTile` (`sequence-layout-ref.ts`).
-  if (event.frameType === 'ref') return handleRefEvent(event, cursor, ctx);
+  if (event.frameType === 'ref') return handleRefEvent(event, cursor, ctx, notesOf.get(event as RefOwner) ?? []);
   // `previousMax = currentY.getMax()`; `firstY = parallel ? currentY.getMin()
   // : previousMax` (`:145-154`). `frameStartY` is the GAUGE MIN -- the
   // chaining point, NOT the drawn frame's top.

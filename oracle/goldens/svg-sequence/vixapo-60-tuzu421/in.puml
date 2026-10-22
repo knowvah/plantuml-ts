@@ -1,0 +1,12 @@
+@startuml
+Bob -> "Long Alice"
+note left "Long Alice" : hello
+activate "Long Alice"
+"Long Alice" -> Bob : ok
+note over Bob, "Long Alice" : ok
+note right of "Long Alice"
+  this
+  is
+   long
+end note
+@enduml

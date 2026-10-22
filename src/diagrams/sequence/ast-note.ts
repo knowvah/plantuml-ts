@@ -6,6 +6,7 @@
  * @see sequencediagram/NoteStyle.java:42
  */
 
+import type { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 
 /** The non-default note components: `rect` = `NOTE_BOX`, `hexagon` =
@@ -66,5 +67,10 @@ export interface NoteEvent {
    *  (`teoz/LivingSpace.java:207-209`), no note or note-tile code calls
    *  `startUrl`. */
   url?: string;
+  /** The alignment `skinparam noteTextAlignment` (else `defaulttextalignment`)
+   *  names, set after the parse; absent when neither is written. It alone
+   *  picks the text padding and the note's position (`Rose.java:110`); the
+   *  lines align by the note `Style` (`AbstractComponent.java:133-134`). */
+  legacyTextAlignment?: HorizontalAlignment;
   readonly styleBuilder: StyleBuilder;
 }

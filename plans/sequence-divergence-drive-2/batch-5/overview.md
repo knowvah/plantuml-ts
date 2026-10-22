@@ -10,10 +10,10 @@ in one sub-batch file-disjoint.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T5a](T5a-diagnose-lifeline-x.md) | first-lifeline x (160), later lifelines (104), lifeline count (37), nested boxes (7) | debugger (opus) | `diagnosis/x-offset.md` | B4 | [ ] |
-| [T5b](T5b-diagnose-note-x-delay.md) | note x (28), create / divider / ref misses (21), delay/space Y (3) | debugger (opus) | `diagnosis/note-x.md` | B4 | [ ] |
-| T5c… | fix tasks from the artifacts | per artifact | per journal row | T5a / T5b | [ ] |
-| close | standard close, pin round 5 | orchestrator | per close-procedure | all T5 | [ ] |
+| [T5a](T5a-diagnose-lifeline-x.md) | first-lifeline x (160), later lifelines (104), lifeline count (37), nested boxes (7) | debugger (opus) | `diagnosis/x-offset.md` | B4 | [x] |
+| [T5b](T5b-diagnose-note-x-delay.md) | note x (28), create / divider / ref misses (21), delay/space Y (3) | debugger (opus) | `diagnosis/note-x.md` | B4 | [x] |
+| T5c… | fix tasks from the artifacts | per artifact | per journal row | T5a / T5b | [x] |
+| close | standard close, pin round 5 | orchestrator | per close-procedure | all T5 | [x] |
 
 ## Artifact format (both tasks)
 One section per mechanism:

@@ -217,7 +217,10 @@ describe('band and totals', () => {
       boxes: [{ x: 0, y: 0, width: 100, height: 560, label: 'b', color: '#eee', labelRuns: [] }],
     });
     const page = paginateSequence(g, 0);
-    expect(page.boxes[0]!.height).toBe(page.totalHeight);
+    // The page shortens the box by exactly the page's height delta
+    // (`SequenceDiagramFileMakerTeoz.java:144-146` hands drawEnglobers the
+    // page body height).
+    expect(page.boxes[0]!.height).toBe(560 + (page.totalHeight - g.totalHeight));
   });
 
   it('leaves width, participants and showFootbox alone', () => {

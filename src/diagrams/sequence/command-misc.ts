@@ -153,20 +153,22 @@ export const bareDelayCommand: Command = {
   },
 };
 
+/** `SequenceDiagram#hspace()` -- `new HSpace(25)` (`SequenceDiagram.java:279`). */
+const BARE_HSPACE_PIXELS = 25;
+
 /**
  * `||N||` / `|||` — `CommandHSpace`. The trailing pipe run is `\|+`
  * upstream (one or more), not exactly one; this port required exactly one
  * trailing pipe, which refused `xucibo-16-zisi974`'s `||50||` (two trailing
  * pipes) and `fotiku-67-lilu728`/`telavi-12-pifu671`'s `||0||`. Widened to
- * `\|+` to match. The default-pixel value (5 here vs. upstream's documented
- * 25, `CommandHSpace.java:69`) is untouched — out of this widening's scope,
- * and none of the pinned fixtures exercise the bare-default path.
+ * `\|+` to match. A bare `|||` calls `diagram.hspace()` (`CommandHSpace.java:
+ * 82-87`), which is `new HSpace(25)` (`SequenceDiagram.java:278-280`).
  * @see sequencediagram/command/CommandHSpace.java:56-61
  */
 export const spaceCommand: Command = {
   pattern: /^\|\|(\d+)?\|+$/,
   execute(state, match) {
-    const pixels = match[1] !== undefined ? parseInt(match[1], 10) : 5;
+    const pixels = match[1] !== undefined ? parseInt(match[1], 10) : BARE_HSPACE_PIXELS;
     const ev: SpaceEvent = { kind: 'space', pixels };
     emit(state, ev);
   },

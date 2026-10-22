@@ -84,8 +84,11 @@ export function handleDividerEvent(event: DividerEvent, cursor: EventCursor, ctx
   // reserved width is that CREOLE block's, less the `deltaX` the runs already
   // carry -- `getTextWidth` reads `calculateDimension`, not the display string.
   const labelRuns = dividerLabelRuns(lines, font, ctx);
-  const blockWidth = Math.max(0, blockWidthOf(labelRuns) - DIVIDER_LABEL_DELTA_X);
-  const blockHeight = lines.length * lineHeight;
+  // An empty label measures no line: `AbstractTextualComponent.java:86-87`
+  // builds a `TextBlockEmpty` (height 0) for a single empty display line.
+  const isEmptyLabel = lines.length === 1 && lines[0] === '';
+  const blockHeight = isEmptyLabel ? 0 : lines.length * lineHeight;
+  const blockWidth = isEmptyLabel ? 0 : Math.max(0, blockWidthOf(labelRuns) - DIVIDER_LABEL_DELTA_X);
   const dividerGeo: DividerGeo = {
     kind: 'divider',
     text: event.text,

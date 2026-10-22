@@ -299,7 +299,7 @@ function dispatchTile(run: TileRun, k: number, cursor: EventCursor, ctx: EventPr
   if (event.kind === 'note' && event.onMessage === true) return placeStackedNote(event, cursor, ctx);
   if (isContactTile(event)) return placeContactTile(run, k, cursor, ctx);
   const before = cursor.gauge;
-  dispatchEvent(event, cursor, ctx);
+  dispatchEvent(event, cursor, ctx, run.notesOf);
   // Every other tile chains below the previous max: `createPropagating` for a
   // life event or a space, `YGauge.create(currentY.getMax(), ...)` for a
   // divider, delay, reference, newpage or group (`DividerTile.java:72`,
@@ -403,7 +403,12 @@ function afterOwnLifeEvents(event: ContactEvent, gauge: YGauge, ctx: EventProces
 
 /** Route a non-contact tile to its kind-specific handler. Messages, exo
  *  messages and notes are {@link placeContactTile}'s. */
-function dispatchEvent(event: SequenceEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
+function dispatchEvent(
+  event: SequenceEvent,
+  cursor: EventCursor,
+  ctx: EventProcessingContext,
+  notesOf: ReadonlyMap<NoteOwner, readonly NoteEvent[]>,
+): void {
   switch (event.kind) {
     case 'activate':
       handleActivateEvent(event, cursor, ctx);
@@ -412,7 +417,7 @@ function dispatchEvent(event: SequenceEvent, cursor: EventCursor, ctx: EventProc
       handleDeactivateEvent(event, cursor, ctx);
       return;
     case 'frame':
-      handleFrameEvent(event, cursor, ctx);
+      handleFrameEvent(event, cursor, ctx, notesOf);
       return;
     case 'divider':
       handleDividerEvent(event, cursor, ctx);

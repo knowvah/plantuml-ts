@@ -1,0 +1,14 @@
+@startuml
+actor azer
+participant Bob
+create toto
+Bob -> toto
+toto -> v1 : meesage
+'note left : titi
+note right
+rzerr
+  zerzer
+  qsd
+end note
+toto -> azer : rt
+@enduml

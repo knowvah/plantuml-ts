@@ -29,12 +29,10 @@ import {
 } from '../../core/stereotype-decoration.js';
 import {
   DB_TEXT_PADDING_X,
-  participantBadgeGeo,
   participantLabelCy,
   participantLabelMetricsOf,
 } from './sequence-layout-participant-sizing.js';
 import { displayLines, TRANSPARENT_SVG } from './text-block-geo.js';
-import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
 import { getMargin as queueMargin } from '../../core/decoration/symbol/USymbolQueue.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { getSpriteMonochrome } from '../../core/sprite-registry.js';
@@ -299,9 +297,11 @@ function nameCenterX(p: ParticipantGeo, paint: SequencePaint, blockWidth: number
     return p.x + left + badgeWidth + (blockWidth - badgeWidth) / 2;
   }
   if (p.type !== 'participant' && p.type !== 'collections') return p.centerX;
-  const delta = p.type === 'collections' ? COLLECTIONS_DELTA : 0;
-  const left = p.x + paint.padding.getLeft();
-  return (left + p.x + p.width - delta - paint.padding.getRight()) / 2;
+  // The block is drawn at `padding.getTranslate()` (`ComponentRoseParticipant
+  // .java:121`) at its OWN width, never the box's: a `MinimumWidth` box is
+  // wider than it (`:139-142`), and the text stays at the left padding.
+  // The badge, when any, takes the block's left `badgeWidth` (`TextBlockSprited.java:70-77`).
+  return p.x + paint.padding.getLeft() + badgeWidth + (blockWidth - badgeWidth) / 2;
 }
 
 /**
@@ -352,10 +352,7 @@ export function buildLabelRuns(
     rows.reduce((h, r) => h + r.height, 0),
   );
   const kindCx = nameCenterX(p, paint, rowsWidth + badgeWidth, badgeWidth);
-  const cx =
-    isStickKind(p.type) || p.type === 'queue'
-      ? kindCx
-      : (participantBadgeGeo(p.badge, p.x, p.width, paint.padding)?.nameCx ?? kindCx);
+  const cx = kindCx;
   // The block's TOP is `cy - blockHeight / 2`: the sprite draws at the block
   // origin and the parent text block at the same y (`TextBlockSprited.java:
   // 70-77`), so the rows start at the block top, not centred on it.

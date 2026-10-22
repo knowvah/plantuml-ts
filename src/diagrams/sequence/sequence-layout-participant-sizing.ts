@@ -17,12 +17,14 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/rose/Rose.java#createComponentParticipant
  */
 
-import type { ParticipantBadge, ParticipantType } from './ast.js';
+import type { Participant, ParticipantBadge, ParticipantType } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 import { measureParticipantSymbol } from './renderer-participant-symbol.js';
-import type { SequencePaint } from './sequence-skin-param.js';
+import { participantStyle, type SequencePaint } from './sequence-skin-param.js';
+import { participantStereotype } from './sequence-participant-paints.js';
+import { Url } from '../../core/url/Url.js';
 
 /**
  * `ComponentRoseDatabase`'s constructor passes
@@ -240,3 +242,18 @@ export function participantBadgeGeo(
 /** `TextBlockSprited`'s own gap between the sprite and the label block
  *  (`TextBlockSprited.java:70-77`'s `sprite.width + 6.0`). */
 const BADGE_GAP = 6;
+
+/**
+ * `Rose#getMinClassWidth` (`Rose.java:276-278`): `style.value(PName
+ * .MinimumWidth).asDouble()` off the participant's merged style
+ * (`styles[0]`, `Rose.java:139-151`) -- `skinparam minClassWidth` reaches it
+ * as `MinimumWidth` (`SkinParam.java:577-578`, `FromSkinparamToStyle`). An
+ * unset value is `ValueNull#asDouble()` = 0 (`ValueNull.java:57-59`), a floor
+ * that never binds. `ComponentRoseParticipant#getPureTextWidth` maxes the text
+ * block against it (`ComponentRoseParticipant.java:139-142`).
+ */
+export function participantMinWidth(p: Participant): number {
+  const url = p.url === undefined ? undefined : new Url(p.url.url, p.url.tooltip, null);
+  const { style } = participantStyle(p.styleBuilder, p.type, participantStereotype(p), url);
+  return style.value('MinimumWidth').asDouble();
+}

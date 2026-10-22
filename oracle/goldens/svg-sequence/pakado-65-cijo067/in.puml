@@ -1,0 +1,12 @@
+@startuml
+
+skinparam useBetaStyle true
+
+
+box
+participant Bob 
+end box
+participant Alice
+Bob->Alice: Hello! 
+
+@enduml

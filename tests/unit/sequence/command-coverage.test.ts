@@ -340,7 +340,9 @@ describe('note across', () => {
 describe('box widening', () => {
   it('accepts an unquoted label with a gradient color', () => {
     const ast = parse(['box BoxOfAlice #yellow/blue', 'participant Alice', 'end box']);
-    expect(ast.boxes[0]).toMatchObject({ label: 'BoxOfAlice', color: '#yellow/blue' });
+    // NAME2 `([^#]+)` keeps the space before `#`, untrimmed
+    // (`CommandBoxStart.java:74,127`).
+    expect(ast.boxes[0]).toMatchObject({ label: 'BoxOfAlice ', color: '#yellow/blue' });
   });
 
   it('accepts a trailing stereotype', () => {

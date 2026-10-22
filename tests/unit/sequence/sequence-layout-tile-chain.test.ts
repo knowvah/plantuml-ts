@@ -134,20 +134,29 @@ describe('NOTEMSG: a note on a message is drawn beside it (CommunicationTileNote
 });
 
 describe('exo wrappers (TileBuilder.java:122-136)', () => {
-  it('draws no note when note 0 is `top`/`bottom`', () => {
+  it('overrides `top`/`bottom` to the forced side too (AbstractMessage.java:224)', () => {
     const w = walk(['participant A', '[-> A : x', 'note top : t', 'note left : l']);
-    expect(w.notes).toHaveLength(0);
-    expect(w.end).toBe(gaugeOf(w, 0).top + gaugeOf(w, 0).height);
+    const centerX = w.ctx.participantMap.get('A')!.centerX;
+    // `MessageExo.java:62-69`: FROM_LEFT puts every note on the RIGHT.
+    expect(w.notes).toHaveLength(2);
+    for (const n of w.notes) expect(n.x).toBeGreaterThanOrEqual(centerX);
   });
 
-  it("puts every note on note 0's side, at the exo tile top", () => {
+  it('puts every note on the exo-forced side, at the exo tile top', () => {
     const w = walk(['participant A', '[-> A : x', 'note left : a', 'note right : b']);
     const tile = gaugeOf(w, 0);
     expect(w.notes.map((n) => n.y)).toEqual([tile.top + NOTE_PADDING_Y, tile.top + NOTE_PADDING_Y]);
     const centerX = w.ctx.participantMap.get('A')!.centerX;
-    // `CommunicationTileNoteLeft#getNotePosition:112-116`: `posC - width`.
-    for (const n of w.notes) expect(n.x + n.width).toBeLessThan(centerX);
+    // `MessageExo.java:62-69` (FROM_LEFT -> RIGHT), `CommunicationTileNoteRight`.
+    for (const n of w.notes) expect(n.x).toBeGreaterThanOrEqual(centerX);
     expect(tile.contactY).toBe(w.messages[0]!.y);
+  });
+
+  it('puts the notes of a right border arrow on the LEFT', () => {
+    const w = walk(['participant A', 'A ->] : x', 'note right : a']);
+    const centerX = w.ctx.participantMap.get('A')!.centerX;
+    // `MessageExo.java:66-67`: TO_RIGHT -> LEFT; `CommunicationTileNoteLeft#getNotePosition:112-116`.
+    for (const n of w.notes) expect(n.x + n.width).toBeLessThan(centerX);
   });
 });
 

@@ -15,6 +15,7 @@
 
 import type { NoteEvent, NoteShape } from './ast.js';
 import { emit, ensureParticipant, urlOf, type Command, type ParseState } from './sequence-parse-helpers.js';
+import { removeEmptyColumns } from './remove-empty-columns.js';
 import { SEQUENCE_COLOR } from './sequence-color-grammar.js';
 import { currentStyleBuilder } from './sequence-skin-param.js';
 import { Colors } from '../../core/abel/Colors.js';
@@ -237,6 +238,11 @@ export const endNoteCommand: Command = {
   pattern: /^end\s*(?:note|hnote|rnote)\s*$/i,
   execute(state) {
     if (state.pendingNote !== null) {
+      // `lines.removeEmptyColumns()` is the only normalisation the body gets
+      // (`FactorySequenceNoteCommand.java:145-147`, `...OnArrowCommand.java:
+      // 200-202`, `...OverSeveralCommand.java:219-221`, `...AcrossCommand.java:
+      // 199-201`; `BlocLines.java:234`): no per-line trim, blank lines kept.
+      state.pendingNote.text = removeEmptyColumns(state.pendingNote.text.split('\n')).join('\n');
       if (state.pendingNote.participants.length > 0) emit(state, state.pendingNote);
       state.pendingNote = null;
     }

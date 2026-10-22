@@ -91,12 +91,12 @@ export function notePaint(event: NoteEvent): SequencePaint {
   return paintOf(style, HColorSet.instance());
 }
 
-/** The note's text alignment: `skinparam noteTextAlignment`, else
- *  `defaulttextalignment`, else LEFT (`SkinParam.java:722-727`). `explicit` is
- *  whether either was written (`Rose.java:100-112`). */
-function noteAlignment(ctx: EventProcessingContext): { align: HorizontalAlignment; explicit: boolean } {
-  const set =
-    ctx.theme.colors.elements?.['note']?.horizontalAlignment ?? ctx.theme.colors.elements?.root?.horizontalAlignment;
+/** The alignment that picks the padding and the position: `skinparam
+ *  noteTextAlignment`, else `defaulttextalignment`, else LEFT
+ *  (`SkinParam.java:722-727`), from the legacy params only (`Rose.java:110`).
+ *  `explicit` is whether either was written (`Rose.java:100-112`). */
+function noteAlignment(event: NoteEvent): { align: HorizontalAlignment; explicit: boolean } {
+  const set = event.legacyTextAlignment;
   return { align: set ?? HorizontalAlignment.LEFT, explicit: set !== undefined };
 }
 
@@ -110,7 +110,14 @@ function noteLevel(event: NoteEvent, ctx: EventProcessingContext): number {
   if (anchor === undefined) return 0;
   if (event.onMessage === true)
     return ctx.lastMessageLevels?.get(anchor) ?? activationLevel(ctx.activationStart, anchor);
-  return activationLevel(ctx.activationStart, anchor);
+  // `NoteTile.getX`: `getLevelAt(this, IGNORE_FUTURE_DEACTIVATE)`
+  // (`NoteTile.java:160`), which adds the activates written after the note and
+  // bound to a message (`LiveBoxes.java:184-204`).
+  const { live } = ctx.activationStart;
+  const entry = live.list.ofSource.get(event);
+  const boxes = live.boxes.get(anchor);
+  if (entry === undefined || boxes === undefined) return activationLevel(ctx.activationStart, anchor);
+  return boxes.getLevelAt(entry, 'IGNORE_FUTURE_DEACTIVATE');
 }
 
 /** `top`/`bottom` under a message are `over` here; see `legacyOverTile`. */
@@ -157,7 +164,7 @@ function textHeightOf(lineCount: number, lineHeight: number, pad: NotePadding): 
 
 /** A note measured and placed: everything {@link emitNote} draws and
  *  {@link noteTileExtent} reports. */
-interface ResolvedNote {
+export interface ResolvedNote {
   readonly paint: SequencePaint;
   readonly rows: TextRun[];
   readonly tile: NoteTile;
@@ -169,20 +176,20 @@ interface ResolvedNote {
   readonly component: NoteComponent;
 }
 
-function resolveNote(
+export function resolveNote(
   event: NoteEvent,
   ctx: EventProcessingContext,
   placement?: NotePlacement,
   group?: NoteTileInput['group'],
 ): ResolvedNote {
   const paint = notePaint(event);
-  const { align, explicit } = noteAlignment(ctx);
+  const { align, explicit } = noteAlignment(event);
   // C6: ONE measurement, the CREOLE block's, at the note style's font --
   // `getTextWidth` reads `textBlock.calculateDimension` plus the padding
   // (`AbstractTextualComponent.java:100-108`) over the block `create3` built
   // with `getFontConfiguration()` (`:80,89`), so `<b>bold</b>` reserves the
   // width of `bold` (jar: `moxope-92-roco972`).
-  const rows = noteBodyRuns(event.text.split('\n'), paint, ctx, align);
+  const rows = noteBodyRuns(event.text.split('\n'), paint, ctx, paint.align ?? HorizontalAlignment.LEFT);
   // `symbolContext.getDeltaShadow()` (`Style.java:277-280`): `note` RESERVES
   // it in its preferred size (`ComponentRoseNote.java:83-91`); `rnote` and
   // `hnote` only draw it (`ComponentRoseNoteBox.java:101`,
@@ -250,7 +257,7 @@ export function noteTileMetrics(event: NoteEvent, ctx: EventProcessingContext): 
  *  `getPaddingY` BELOW it -- `Rose.paddingY` = 5, applied by
  *  `AbstractComponent#drawU:142-143`. On `metano-36-gevu843` the jar's box is
  *  at y=52 against a tile top of 47. */
-function emitNote(event: NoteEvent, note: ResolvedNote, top: number, ctx: EventProcessingContext): void {
+export function emitNote(event: NoteEvent, note: ResolvedNote, top: number, ctx: EventProcessingContext): void {
   const { paint, rows, tile, padding, shadow } = note;
   const boxY = top + NOTE_COMPONENT_PADDING_Y;
   const noteGeo: NoteGeo = {
@@ -434,6 +441,14 @@ function wrapSide(
   return { ...chain, ...extent, height, gauge: wrapGauge(chain.gauge, height) };
 }
 
+/** `MessageExo#overrideNotePosition`, applied by `AbstractMessage#addNote` to
+ *  every note on the arrow (`MessageExo.java:62-69`, `AbstractMessage.java:224`):
+ *  a left border arrow takes its notes on the RIGHT, a right border one on
+ *  the LEFT. */
+function exoNoteSide(type: MessageExoEvent['exoType']): 'left' | 'right' {
+  return type === 'FROM_LEFT' || type === 'TO_LEFT' ? 'right' : 'left';
+}
+
 /**
  * The note-on-message wrappers `TileBuilder.buildOne` folds around a message
  * tile, one per note in order (`TileBuilder.java:102-121`, exo `:128-136`).
@@ -445,9 +460,9 @@ function wrapSide(
  * (`CommunicationTileNoteRight.java:144-148`, `...NoteLeft:133-137`,
  * `...SelfNoteRight:128-132`) and its gauge wraps the inner one
  * ({@link wrapGauge}). `top`/`bottom` stack instead ({@link wrapTopBottom}).
- * After an exo arrow every note takes note 0's position and only LEFT/RIGHT
- * build a wrapper (`TileBuilder.java:128-136`): a `top`/`bottom` note 0 leaves
- * every note on that arrow undrawn.
+ * After an exo arrow every note takes the side the exo forces
+ * ({@link exoNoteSide}), whatever it was written with, so every note builds a
+ * LEFT/RIGHT wrapper (`TileBuilder.java:128-136`).
  */
 export function layoutNotesOnMessage(
   owner: MessageEvent | MessageExoEvent,
@@ -458,7 +473,7 @@ export function layoutNotesOnMessage(
   const extent = owner.kind === 'message' ? messageExtent(owner, ctx) : { minX: 0, maxX: 0 };
   let chain: Chain = { ...inner, ...extent };
   for (const note of notes) {
-    const position = owner.kind === 'messageExo' ? notes[0]!.position : note.position;
+    const position = owner.kind === 'messageExo' ? exoNoteSide(owner.exoType) : note.position;
     if (position !== 'over') chain = wrapSide(owner, note, position, chain, ctx);
     else if (owner.kind === 'message' && note.side !== undefined)
       chain = wrapTopBottom(owner, note, note.side, chain, inner.firstGeo, ctx);

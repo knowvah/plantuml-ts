@@ -23,7 +23,7 @@
  *
  * Jar-verified: `tests/fixtures/unwind2-S9b/r-*.svg`.
  */
-import type { FrameEvent, FrameGeo, ParticipantGeo } from './ast.js';
+import type { FrameEvent, FrameGeo, NoteEvent, ParticipantGeo } from './ast.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { alignedBlockRuns } from './sequence-block-align.js';
 import { offsetRun, sequenceAtomContext } from './sequence-creole.js';
@@ -40,6 +40,7 @@ import {
   refHeaderWidth,
   referencePaints,
 } from './ref-body-geo.js';
+import { layoutRefNotes } from './sequence-layout-ref-notes.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
 
 /** `textHeader.drawU(ug.apply(new UTranslate(15, 2)))`
@@ -116,7 +117,12 @@ function headerOf(headerPaint: SequencePaint, first: number, y: number, ctx: Eve
  *  preferred height. `area` carries the body style's delta shadow, which the
  *  renderer takes back off the drawn rect (`renderer-frame-header.ts
  *  #renderBodyRect`, `ComponentRoseReference.java:89`). */
-export function handleRefEvent(event: FrameEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
+export function handleRefEvent(
+  event: FrameEvent,
+  cursor: EventCursor,
+  ctx: EventProcessingContext,
+  notes: readonly NoteEvent[],
+): void {
   const paints = referencePaints(event);
   const body = refBodyLines(event.frameType, event.label);
   const { first, last } = refSpan(event, ctx);
@@ -138,6 +144,7 @@ export function handleRefEvent(event: FrameEvent, cursor: EventCursor, ctx: Even
     ...header,
   };
   ctx.eventGeos.push(frameGeo);
+  layoutRefNotes(notes, { first, last: first + area }, y, ctx);
   cursor.y = y + height;
   ctx.lastMessageParticipants = undefined;
 }

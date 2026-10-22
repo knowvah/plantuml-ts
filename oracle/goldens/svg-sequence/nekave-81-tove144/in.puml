@@ -1,0 +1,8 @@
+@startuml
+participant Init
+box "This is the Solar system sdfds sfsdf  sfd" #LightBlue
+actor Alice
+end box
+
+Alice -> Alice
+@enduml

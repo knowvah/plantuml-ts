@@ -158,24 +158,66 @@ export function ensureParticipant(
     color?: string | undefined;
     stereotype?: string | undefined;
     url?: ParticipantUrl | undefined;
+    order?: number | undefined;
   },
 ): void {
   if (state.participantIndex.has(id)) return;
-  const order = state.ast.participants.length;
   const p: Participant = {
     id,
     display: decl?.display ?? id,
     type,
-    order,
+    order: state.ast.participants.length,
+    ...(decl?.order !== undefined && decl.order !== 0 ? { declaredOrder: decl.order } : {}),
     ...(decl?.color !== undefined ? { color: decl.color } : {}),
     ...(decl?.stereotype !== undefined ? { stereotype: decl.stereotype } : {}),
     ...(decl?.url !== undefined ? { url: decl.url } : {}),
     ...(state.currentBox !== null ? { boxId: state.currentBox.id } : {}),
     styleBuilder: currentStyleBuilder(state.style),
   };
-  state.ast.participants.push(p);
-  state.participantIndex.set(id, order);
+  addWithOrder(state, p);
   state.currentBox?.participantIds.push(id);
+}
+
+/**
+ * `SequenceDiagram#addWithOrder` (`SequenceDiagram.java:182-190`): insert
+ * before the first participant whose order is strictly greater, else append.
+ * Then re-number `order`/`participantIndex` as the resulting list index.
+ */
+function addWithOrder(state: ParseState, p: Participant): void {
+  const list = state.ast.participants;
+  const mine = p.declaredOrder ?? 0;
+  const at = list.findIndex((q) => mine < (q.declaredOrder ?? 0));
+  if (at === -1) list.push(p);
+  else list.splice(at, 0, p);
+  list.forEach((q, i) => {
+    q.order = i;
+    state.participantIndex.set(q.id, i);
+  });
+}
+
+/**
+ * `SequenceDiagram#putParticipantInLast` (`SequenceDiagram.java:548-555`):
+ * `participantsList.remove(p); addWithOrder(p);
+ * participantEnglobers2.put(p, participantEnglober)`. `addWithOrder`
+ * (`:182-190`) re-inserts it by its own declared order. The englober is re-bound to the CURRENT one, which
+ * may be none (`put(p, null)`), so `boxId` is dropped when no box is open.
+ * `order` is re-numbered as the list index, which is what this port keeps in
+ * `order` and `participantIndex`.
+ */
+export function putParticipantInLast(state: ParseState, id: string): void {
+  const participants = state.ast.participants;
+  const at = state.participantIndex.get(id);
+  if (at === undefined) throw new Error(`putParticipantInLast: unknown participant ${id}`);
+  const [p] = participants.splice(at, 1);
+  addWithOrder(state, p!);
+  const old = state.ast.boxes.find((b) => b.id === p!.boxId);
+  if (old !== undefined) old.participantIds = old.participantIds.filter((x) => x !== id);
+  if (state.currentBox !== null) {
+    p!.boxId = state.currentBox.id;
+    state.currentBox.participantIds.push(id);
+  } else {
+    delete p!.boxId;
+  }
 }
 
 /** Emit a SequenceEvent into the current scope. */

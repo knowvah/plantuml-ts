@@ -38,6 +38,9 @@ export interface WidthEnv extends MessageLabelEnv {
    *  (`LivingSpace.java:148`) and every self message's tile are built on
    *  them. Without it neither the `posC2` nor the self-message term applies. */
   readonly events?: readonly SequenceEvent[];
+  /** The participant row's x origin (`TileArguments#getXOrigin`), which
+   *  `DividerTile#getMaxX` adds to its width. `0` when omitted. */
+  readonly originX?: number;
 }
 
 /**
@@ -60,7 +63,7 @@ export function computeTotalWidth(participantGeos: ParticipantGeo[], eventGeos: 
 
   return Math.max(
     totalWidth,
-    dividerContentRight(eventGeos),
+    dividerContentRight(eventGeos, env.originX ?? 0),
     delayContentRight(eventGeos, RIGHT_MARGIN),
     refContentRight(eventGeos) + RIGHT_MARGIN,
     groupContentRight(eventGeos) + RIGHT_MARGIN,
@@ -157,7 +160,8 @@ function groupContentRight(eventGeos: readonly EventGeo[]): number {
  * so a divider whose label is wider than the participant row widens the whole
  * diagram, exactly as an exo message does above. `PlayingSpace` maxes every
  * tile's `getMaxX` to place the right border
- * (`teoz/PlayingSpace.java:75-96`).
+ * (`teoz/PlayingSpace.java:75-96`). The `xorigin` term is the participant
+ * row's origin (`DividerTile.java:115-118`, `xorigin.addFixed(width)`).
  *
  * `geo.textWidth` IS `getTextWidth`, resolved in layout from the divider's
  * OWN font (`separator { FontSize 13, FontStyle bold }`) -- re-measuring it
@@ -165,11 +169,11 @@ function groupContentRight(eventGeos: readonly EventGeo[]): number {
  * feature was built to avoid. `0` when there is no divider, which never
  * lowers the max.
  */
-function dividerContentRight(eventGeos: EventGeo[]): number {
+function dividerContentRight(eventGeos: EventGeo[], originX: number): number {
   let right = 0;
   for (const geo of eventGeos) {
     if (geo.kind !== 'divider') continue;
-    const extent = geo.textWidth + DIVIDER_WIDTH_ALLOWANCE + RIGHT_MARGIN;
+    const extent = originX + geo.textWidth + DIVIDER_WIDTH_ALLOWANCE + RIGHT_MARGIN;
     if (extent > right) right = extent;
   }
   return right;

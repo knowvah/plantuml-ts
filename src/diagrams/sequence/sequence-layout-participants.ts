@@ -17,7 +17,11 @@ import {
   scanMessageLabels,
 } from './sequence-layout-participant-constraints.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
-import { symbolPreferredHeight, symbolPreferredWidth } from './sequence-layout-participant-sizing.js';
+import {
+  participantMinWidth,
+  symbolPreferredHeight,
+  symbolPreferredWidth,
+} from './sequence-layout-participant-sizing.js';
 import {
   BADGE_GAP,
   buildLabelRuns,
@@ -28,6 +32,8 @@ import {
 import { displayedBadgeOf, displayedStereotypeLines } from './sequence-hide-passes.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { paintOfGeo, participantPaintsOf } from './sequence-participant-paints.js';
+import { addTileMargins } from './sequence-tile-margins.js';
+import { createEngloberLayout, type EngloberLayout } from './sequence-dolls.js';
 
 /**
  * The playing space's left border — where the participant row starts, and
@@ -54,6 +60,8 @@ export interface ParticipantLayoutResult {
   participantMap: Map<string, ParticipantGeo>;
   participantIndex: Map<string, number>;
   maxParticipantHeight: number;
+  /** The row's `box` englobers, solved with it. */
+  englobers: EngloberLayout;
 }
 
 /** Compute participant column geometry: x/width/height/centerX for every
@@ -70,27 +78,22 @@ export function computeParticipantLayout(
   scanMessageLabels(
     ast.events,
     sortedParticipants,
-    { measurer, levels, sprites: ast.sprites, messageSpan: ast.options.sequenceMessageSpan },
+    { measurer, levels, sprites: ast.sprites, messageSpan: ast.options.sequenceMessageSpan, theme },
     constraints,
   );
 
   const ctx: ParticipantLayoutCtx = { theme, measurer, sprites: ast.sprites };
   const participantWidths = computeParticipantWidths(sortedParticipants, ctx);
-  const { participantGeos, participantMap, participantIndex, maxParticipantHeight } = positionParticipants(
-    sortedParticipants,
-    participantWidths,
-    constraints,
-    ctx,
-    originX,
-  );
-
-  return {
-    sortedParticipants,
-    participantGeos,
-    participantMap,
-    participantIndex,
-    maxParticipantHeight,
-  };
+  // The englobers' constraints go in BEFORE the neighbour rule, which bakes
+  // the margins they set (`SequenceDiagramFileMakerTeoz.java:102-114`).
+  const englobers = createEngloberLayout(sortedParticipants, ast.boxes, participantWidths, measurer);
+  // Tiles register after `PlayingSpace` captured the dolls: their margins reach
+  // the live checks and the drawn frame, never the baked neighbour rule.
+  const tileEnv = { measurer, levels, sprites: ast.sprites, messageSpan: ast.options.sequenceMessageSpan, theme };
+  addTileMargins(ast.events, sortedParticipants, participantWidths, englobers.margins, tileEnv);
+  const row: RowSolveEnv = { widths: participantWidths, constraints, originX, englobers };
+  const result = positionParticipants(sortedParticipants, row, ctx);
+  return { sortedParticipants, ...result, englobers };
 }
 
 /**
@@ -127,15 +130,15 @@ function computeParticipantWidths(sortedParticipants: Participant[], ctx: Partic
     // (`:114-124`). `getTextWidth = getPureTextWidth + padding.left + padding.right`
     // (`AbstractTextualComponent.java:106-108`) IS the drawn box
     // (`ComponentRoseParticipant#drawInternalU:100-104`), with no floor under
-    // it: `getPureTextWidth`'s `max(..., minWidth)` (`:140-142`) takes
-    // `minWidth` from `Rose#getMinClassWidth` (`Rose.java:275-278`), whose
-    // `PName.MinimumWidth` is in no skin file and resolves to
-    // `ValueNull#asDouble()` = 0 (`ValueNull.java:57-59`). Verified on 3570
-    // corpus boxes to within 0.0005px (`findings/participant-width.md`).
+    // it but `getPureTextWidth`'s `max(..., minWidth)` (`:139-142`), whose
+    // `minWidth` is `Rose#getMinClassWidth` (`Rose.java:276-278`), the style's
+    // `MinimumWidth`: in no skin file, so 0 unless `skinparam minClassWidth`
+    // sets it ({@link participantMinWidth}). Verified on 3570 corpus boxes to
+    // within 0.0005px (`findings/participant-width.md`).
     // `getPreferredWidth` then adds the margin and the shadow (`:135-137`).
     const pad = paint.padding.getLeft() + paint.padding.getRight();
     const margin = paint.margin.getLeft() + paint.margin.getRight();
-    const plain = lw + pad + margin + reservedShadowOf(p.type, paint.shadowing);
+    const plain = Math.max(lw, participantMinWidth(p)) + pad + margin + reservedShadowOf(p.type, paint.shadowing);
     return p.type === 'collections' ? plain + COLLECTIONS_DELTA : plain;
   });
 }
@@ -198,19 +201,26 @@ interface ParticipantColumnResult {
   maxParticipantHeight: number;
 }
 
+/** What the row solve reads: the head widths, the message spans, the origin
+ *  and the englobers' checks and baked margins. */
+interface RowSolveEnv {
+  readonly widths: readonly number[];
+  readonly constraints: readonly SpanConstraint[];
+  readonly originX: number;
+  readonly englobers: EngloberLayout;
+}
+
 /** Lay out participant boxes left-to-right, then bottom-align their headers. */
 function positionParticipants(
   sortedParticipants: Participant[],
-  participantWidths: number[],
-  constraints: readonly SpanConstraint[],
+  row: RowSolveEnv,
   ctx: ParticipantLayoutCtx,
-  originX: number,
 ): ParticipantColumnResult {
-  const { theme } = ctx;
+  const participantWidths = row.widths;
   const participantGeos: ParticipantGeo[] = [];
   const participantMap = new Map<string, ParticipantGeo>();
   const participantIndex = new Map<string, number>();
-  const xs = solveParticipantXs(participantWidths, constraints, theme, originX);
+  const xs = solveParticipantXs(row, ctx.theme.sequence.participantGap);
 
   for (let i = 0; i < sortedParticipants.length; i++) {
     const p = sortedParticipants[i]!;
@@ -232,9 +242,12 @@ function positionParticipants(
   // `TOP_MARGIN + maxParticipantHeight`, so every lifeline starts there and
   // the box is painted at the TOP of its area with the slack below it --
   // which puts `jobadi-87-jegi648`'s box at [10, 38) with its lifeline at 39.
-  // C3: `TOP_MARGIN` is the row's own y, the way `originX` is its own x.
+  // C3: `TOP_MARGIN` is the row's own y, the way `originX` is its own x --
+  // dropped by `heightEnglober1`, the `dy` the body is drawn at under its
+  // englobers (`SequenceDiagramFileMakerTeoz.java:148`).
+  const yOrigin = TOP_MARGIN + row.englobers.heightEnglober1;
   participantGeos.forEach((g, i) => {
-    g.y = TOP_MARGIN + maxParticipantHeight - areaOf(g);
+    g.y = yOrigin + maxParticipantHeight - areaOf(g);
     // AFTER the bottom-align, never before: the runs carry an absolute
     // baseline, and `g.y` is what it is measured from.
     g.labelRuns = buildLabelRuns(participantBoxOf(g), ctx, participantPaintsOf(sortedParticipants[i]!).stereoFont);
@@ -328,7 +341,8 @@ function buildParticipantGeo(
  * only two:
  *
  *   - `LivingSpaces#addConstraints:61-71`, `nextA >= prevE + 10`, always
- *     between neighbours;
+ *     between neighbours -- and, run before it, the englobers' own
+ *     neighbour checks (`Dolls#addConstraints`, {@link neighbourFloor});
  *   - `CommunicationTile#addConstraints:392-416`, one per message, between the
  *     two participants it runs between — adjacent or not. The reverse branch
  *     (`:402-409`) swaps which endpoint is bounded but demands the same
@@ -341,12 +355,8 @@ function buildParticipantGeo(
  * O(participants + messages). It replaced a pairwise pre-scan that widened
  * only ADJACENT gaps (`findings/label-widening.md`).
  */
-function solveParticipantXs(
-  widths: readonly number[],
-  constraints: readonly SpanConstraint[],
-  theme: Theme,
-  originX: number,
-): number[] {
+function solveParticipantXs(row: RowSolveEnv, participantGap: number): number[] {
+  const { widths, constraints, originX } = row;
   const xs: number[] = [];
   const centre = (i: number): number => xs[i]! + widths[i]! / 2;
   // Incoming edges, bucketed by their higher endpoint, so the sweep reads each
@@ -359,8 +369,7 @@ function solveParticipantXs(
   }
 
   for (let i = 0; i < widths.length; i++) {
-    // `nextA >= prevE + 10`, the neighbour constraint.
-    let x = i === 0 ? originX : xs[i - 1]! + widths[i - 1]! + theme.sequence.participantGap;
+    let x = neighbourFloor(i, xs, row, participantGap);
     for (const c of incoming.get(i) ?? []) {
       if (c.origin === true) {
         // `centre[i] >= xOrigin + c.span`.
@@ -379,4 +388,23 @@ function solveParticipantXs(
     xs.push(x);
   }
   return xs;
+}
+
+/**
+ * The least `posB(i)` from the row's own edges, before any message:
+ *
+ *   - `posB(0) >= xorigin` (`xorigin.addAtLeast(0)`,
+ *     `SequenceDiagramFileMakerTeoz.java:90`);
+ *   - the neighbour rule `current.getPosA() >= previous.getPosE() + 10`
+ *     (`LivingSpaces.java:61-71`), whose `posA = posB - marginBefore` and
+ *     `posE = posD + marginAfter` bake the margins `dolls.addConstraints`
+ *     had set when it ran (`LivingSpace.java:293-299`);
+ *   - every englober's live checks into `i` (`Dolls#minPosB`).
+ */
+function neighbourFloor(i: number, xs: readonly number[], row: RowSolveEnv, participantGap: number): number {
+  const { baked, dolls } = row.englobers;
+  const previousPosD = i === 0 ? undefined : xs[i - 1]! + row.widths[i - 1]!;
+  const own =
+    previousPosD === undefined ? row.originX : previousPosD + baked.after[i - 1]! + participantGap + baked.before[i]!;
+  return Math.max(own, dolls.minPosB(i, previousPosD, row.originX));
 }

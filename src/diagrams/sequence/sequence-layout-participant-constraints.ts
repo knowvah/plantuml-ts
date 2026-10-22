@@ -10,8 +10,8 @@
  * @see teoz/CommunicationTileSelf.java
  */
 
-import type { FrameEvent, MessageEvent, MessageExoEvent, Participant, SequenceEvent } from './ast.js';
-import { flattenLiveEvents, LiveBoxes, type LiveEvents } from './sequence-live-boxes.js';
+import type { FrameEvent, MessageEvent, MessageExoEvent, NoteEvent, Participant, SequenceEvent } from './ast.js';
+import { flattenLiveEvents, LiveBoxes, type LiveEvent, type LiveEvents } from './sequence-live-boxes.js';
 import { groupClearance } from './sequence-layout-group-clearance.js';
 import { parallelDisjoint } from './sequence-layout-parallel-disjoint.js';
 import { selfCompWidth } from './sequence-note-anchor.js';
@@ -22,6 +22,8 @@ import { ARROW_DELTA_X } from './sequence-arrowhead.js';
 import { messageLabelWidth, numberTextOf, refBodyLines } from './text-block-geo.js';
 import { refComponentWidth, referencePaints } from './ref-body-geo.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
+import type { Theme } from '../../core/theme.js';
+import { noteLiveEntries, notesGroupConstraints } from './sequence-note-width.js';
 
 /**
  * One message's demand on the participant row: the two participant indices it
@@ -78,6 +80,9 @@ interface ScanContext {
    *  :52-54`): a message tile registers no span constraint at all
    *  (`CommunicationTile.java:405-406`, `CommunicationTileSelf.java:167-168`). */
   readonly messageSpan?: boolean | undefined;
+  /** Carries `skinparam noteTextAlignment`, which a note's width depends on
+   *  (`Rose.java:100-112`); absent, notes measure with the LEFT default. */
+  readonly theme?: Theme | undefined;
 }
 
 /** A scan in flight: its {@link ScanContext} and each participant's
@@ -88,6 +93,8 @@ export interface Scan extends ScanContext {
   readonly live: LiveEvents;
   /** Each participant's `LiveBoxes`, for a tile's `getLevelAt`. */
   readonly boxes: ReadonlyMap<string, LiveBoxes>;
+  /** Each standalone note's entry in {@link Scan.live}, for its live level. */
+  readonly noteEntries: ReadonlyMap<NoteEvent, LiveEvent>;
 }
 
 /**
@@ -120,7 +127,7 @@ export function scanMessageLabels(
   const live = flattenLiveEvents(events);
   const boxes = new Map(sortedParticipants.map((p) => [p.id, new LiveBoxes(p.id, live.events)] as const));
   const maxPosition = new Map([...boxes].map(([id, b]) => [id, b.getMaxPosition()] as const));
-  const full: Scan = { ...scan, maxPosition, live, boxes };
+  const full: Scan = { ...scan, maxPosition, live, boxes, noteEntries: noteLiveEntries(events, live) };
   scanEvents(events, sortedParticipants, full, out);
   // `PlayingSpace#addConstraints` (`:162-167`): the top-level `&` runs.
   out.push(...parallelDisjoint(events, sortedParticipants, full));
@@ -155,6 +162,7 @@ function selfConstraint(ev: MessageEvent, sorted: Participant[], scan: Scan): Sp
 }
 
 function scanEvents(events: readonly SequenceEvent[], sorted: Participant[], scan: Scan, out: SpanConstraint[]): void {
+  out.push(...notesGroupConstraints(events, sorted, scan));
   for (const ev of events) {
     if (ev.kind === 'message') out.push(...(scan.messageSpan === true ? [] : messageConstraint(ev, sorted, scan)));
     else if (ev.kind === 'messageExo') out.push(...exoConstraint(ev, sorted, scan));

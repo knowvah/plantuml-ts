@@ -274,7 +274,8 @@ describe('box paint (Doll.java:107-114, ComponentRoseEnglober.java:64-70)', () =
     const ast = parseSequence(sequenceSource(['box Foo <<S>> #red', 'participant A', 'end box']));
     if ('refused' in ast) throw new Error(ast.message);
     expect(ast.boxes[0]!.stereotype).toBeUndefined();
-    expect([ast.boxes[0]!.label, ast.boxes[0]!.color]).toEqual(['Foo <<S>>', '#red']);
+    // Untrimmed: the space before `#` stays in the title (`CommandBoxStart.java:127`).
+    expect([ast.boxes[0]!.label, ast.boxes[0]!.color]).toEqual(['Foo <<S>> ', '#red']);
   });
 
   it('an empty title places no runs', () => {

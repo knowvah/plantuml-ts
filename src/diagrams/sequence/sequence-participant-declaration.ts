@@ -32,6 +32,9 @@ export interface ParticipantDeclaration {
    *  to the url itself when none was written (`core/url/Url.ts:35-36`) —
    *  `sefako-72-jono850` emits both forms side by side. */
   url: ParticipantUrl | undefined;
+  /** The declared `order N`, or undefined (`CommandParticipant.java:154-155`:
+   *  `orderString == null ? 0 : Integer.parseInt(orderString)`). */
+  order: number | undefined;
 }
 
 /** A resolved participant hyperlink: the href and the tooltip the jar puts in
@@ -104,11 +107,13 @@ function stripParticipantTail(rest: string): {
   color: string | undefined;
   stereotype: string | undefined;
   url: string | undefined;
+  order: number | undefined;
 } {
   let head = rest.trim();
   let color: string | undefined;
   let stereotype: string | undefined;
   let url: string | undefined;
+  let order: number | undefined;
   // `ColorParser.exp1()` (`CommandParticipantA.java:69`) is the SAME
   // `COLORS_REGEXP` the note-command family carries (T11, ubrr:
   // `sequence-color-grammar.ts`) -- a plain `#word`, a gradient
@@ -131,14 +136,17 @@ function stripParticipantTail(rest: string): {
     head = urlRun[1]!.trim();
     url = urlRun[2];
   }
-  const order = /^(.*?)\s+order\s+-?\d{1,7}$/i.exec(head);
-  if (order !== null) head = order[1]!.trim();
+  const orderRun = /^(.*?)\s+order\s+(-?\d{1,7})$/i.exec(head);
+  if (orderRun !== null) {
+    head = orderRun[1]!.trim();
+    order = Number.parseInt(orderRun[2]!, 10);
+  }
   const stereo = /^(.*?)\s*(<<.+?>>)$/.exec(head);
   if (stereo !== null) {
     head = stereo[1]!.trim();
     stereotype = stereo[2];
   }
-  return { head, color, stereotype, url };
+  return { head, color, stereotype, url, order };
 }
 
 /** `^([%pLN_.@]+)$` -- the bare-CODE form every one of `CommandParticipantA`
@@ -211,8 +219,8 @@ export function parseParticipantDeclaration(rest: string): ParticipantDeclaratio
       'participant: no CommandParticipantA/A2/A3/A4 grammar allows a <<stereotype>> between a quoted display and "as CODE"',
     );
   }
-  const { head, color, stereotype, url } = stripParticipantTail(rest);
-  return { ...parseParticipantName(head), color, stereotype, url: participantUrlOf(url) };
+  const { head, color, stereotype, url, order } = stripParticipantTail(rest);
+  return { ...parseParticipantName(head), color, stereotype, url: participantUrlOf(url), order };
 }
 
 /**

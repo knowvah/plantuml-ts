@@ -17,6 +17,7 @@ import { activate } from './sequence-life-state.js';
 import type { ParticipantType } from './ast.js';
 import {
   ensureParticipant,
+  putParticipantInLast,
   parseParticipantDeclaration,
   SequenceCommandRefusal,
   type Command,
@@ -33,10 +34,20 @@ import {
  * registered command instead. See `dispatchCommand`'s own doc comment for
  * why this refusal shape must NOT become `state.executionError`.
  */
-function declareParticipant(state: ParseState, type: ParticipantType, rest: string): string {
-  const { id, display, color, stereotype, url } = parseParticipantDeclaration(rest);
-  ensureParticipant(state, id, type, { display, color, stereotype, url });
-  return id;
+function declareParticipant(
+  state: ParseState,
+  type: ParticipantType,
+  rest: string,
+  moveExisting = true,
+): { id: string; existing: boolean } {
+  const { id, display, color, stereotype, url, order } = parseParticipantDeclaration(rest);
+  // `CommandParticipant.java:146-148`: an existing CODE only moves last.
+  if (moveExisting && state.participantIndex.has(id)) {
+    putParticipantInLast(state, id);
+    return { id, existing: true };
+  }
+  ensureParticipant(state, id, type, { display, color, stereotype, url, order });
+  return { id, existing: false };
 }
 
 // 4. Participant declarations with optional quoted name, alias, and color.
@@ -64,7 +75,11 @@ export const createCommand: Command = {
   pattern: /^create\s+(?:(participant|actor|boundary|control|entity|queue|database|collections)\s+)?(.+)$/i,
   execute(state, match) {
     const type = (match[1]?.toLowerCase() ?? 'participant') as ParticipantType;
-    const id = declareParticipant(state, type, match[2]!.trim());
+    const { id, existing } = declareParticipant(state, type, match[2]!.trim(), match[1] !== undefined);
+    // `create participant X` on an existing CODE returns before the CREATE
+    // life event (`CommandParticipant.java:146-148`). The bare `create X` is
+    // `CommandActivate` (`:63`, registered earlier), which never moves it.
+    if (existing) return;
     const error = activate(state.life, id, 'CREATE');
     if (error !== undefined) state.executionError = error;
   },
@@ -109,11 +124,8 @@ const PARTICIPANT_MULTILINE_CLOSE_RE = /^[^[\]]*\]$/;
  * gap: filed for D6's census rather than fixed here.
  *
  * If `code` already names an existing participant, upstream moves it to the
- * last position (`putParticipantInLast`, `:138-140`); this port's
- * `ensureParticipant` has no such reordering (a pre-existing gap the plain
- * single-line family above already carries, per `parser.test.ts:322`'s
- * note), so a repeat declaration is silently a no-op here too — inherited,
- * not introduced.
+ * last position (`putParticipantInLast`, `:138-140`), as the single-line
+ * family does.
  *
  * **Intercepted before the `Command` table, not registered in it.** Multi-line
  * commands in this port are handled ahead of the regular one-line-at-a-time
@@ -170,7 +182,7 @@ export function matchParticipantMultilineCommand(
     if (err instanceof SequenceCommandRefusal) return null;
     throw err;
   }
-  const { id, color, stereotype, url } = decl;
+  const { id, color, stereotype, url, order } = decl;
   const bodyLines = trimmedLines.slice(i + 1, closeIndex);
   const display = bodyLines.length > 0 ? bodyLines.join('\n') : id;
 
@@ -179,7 +191,8 @@ export function matchParticipantMultilineCommand(
   // .java:187-192`, so wiring only the single-line form would have left this
   // one silently url-less -- and no cached oracle would have said so, since
   // `boparo-11-pema294` uses the single-line form.
-  ensureParticipant(state, id, 'participant', { display, color, stereotype, url });
+  if (state.participantIndex.has(id)) putParticipantInLast(state, id);
+  else ensureParticipant(state, id, 'participant', { display, color, stereotype, url, order });
 
   return closeIndex - i + 1;
 }

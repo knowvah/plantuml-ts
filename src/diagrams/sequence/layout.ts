@@ -15,7 +15,6 @@
 
 import type {
   BoxGeo,
-  BoxGroup,
   DividerGeo,
   EventGeo,
   MessageGeo,
@@ -32,6 +31,7 @@ import {
   type MessageLevels,
   type ParticipantLayoutResult,
 } from './sequence-layout-participants.js';
+import type { EngloberLayout, ParticipantRow } from './sequence-dolls.js';
 import {
   flushOpenActivations,
   newActivationStack,
@@ -133,7 +133,7 @@ function assembleGeometry(
   measurer: StringMeasurer,
   originX: number,
 ): SequenceGeometry {
-  const { participantGeos, maxParticipantHeight } = participantLayout;
+  const { participantGeos, maxParticipantHeight, englobers } = participantLayout;
   const { dividerGeos, newpageGeos, currentY } = eventLayout;
 
   const showFootbox = isShowFootbox(ast, theme);
@@ -141,20 +141,26 @@ function assembleGeometry(
     maxParticipantHeight,
     currentY,
     showFootbox,
+    englobers.heightEnglober2,
   );
   flushOpenActivations(eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventLayout.eventGeos);
   const eventGeos = clampDestroySteps(cutActivationsAtDelays(eventLayout.eventGeos), participantGeos);
-  const headHeight = TOP_MARGIN + maxParticipantHeight;
-  const totalWidth = computeTotalWidth(participantGeos, eventGeos, {
-    theme,
-    measurer,
-    sprites: ast.sprites,
-    events: ast.events,
-  });
-  backfillDividerWidth(dividerGeos, totalWidth, originX);
-  backfillNewpageWidth(newpageGeos, totalWidth, originX);
+  const headHeight = TOP_MARGIN + englobers.heightEnglober1 + maxParticipantHeight;
+  const row = participantRowOf(participantGeos);
+  const totalWidth = Math.max(
+    computeTotalWidth(participantGeos, eventGeos, {
+      theme,
+      measurer,
+      sprites: ast.sprites,
+      events: ast.events,
+      originX,
+    }),
+    englobersRight(englobers, row),
+  );
+  backfillDividerWidth(dividerGeos, totalWidth);
+  backfillNewpageWidth(newpageGeos, totalWidth);
   anchorExoBorders(messageGeosOf(eventGeos), totalWidth - RIGHT_MARGIN);
-  const boxGeos = computeBoxGeos(ast.boxes, participantGeos, totalHeight, measurer);
+  const boxGeos = computeBoxGeos(englobers, row, totalHeight, measurer);
 
   return {
     totalWidth,
@@ -191,7 +197,13 @@ function runEventLayout(
   // `PlayingSpace:55,89` — the body's first tile sits `startingY` below the
   // head row, and NOT one `messageSpacing`: teoz has no such term at all
   // (`findings/vertical-terms.md` §1.4).
-  const startY = TOP_MARGIN + participantLayout.maxParticipantHeight + PLAYING_SPACE_STARTING_Y;
+  // `ug.apply(dy(heightEnglober1))` before `body.drawU`
+  // (`SequenceDiagramFileMakerTeoz.java:148`).
+  const startY =
+    TOP_MARGIN +
+    participantLayout.englobers.heightEnglober1 +
+    participantLayout.maxParticipantHeight +
+    PLAYING_SPACE_STARTING_Y;
   const currentY = processEvents(ast.events, startY, ctx);
 
   return {
@@ -326,10 +338,14 @@ interface VerticalTotals {
  *                                    PlayingSpace#getPreferredHeight:154-161
  * pswpHeight = pageHeight + (footbox ? 2 : 1) * headHeight
  *                        PlayingSpaceWithParticipants#calculateDimension:74-87
- * svgHeight  = pswpHeight + 10 (block inset) + 10 (exporter margins)
- *                     SequenceDiagramFileMakerTeoz#getTextBlock:132,150-158;
+ * svgHeight  = pswpHeight + heightEnglober1 + heightEnglober2
+ *              + 10 (block inset) + 10 (exporter margins)
+ *                     SequenceDiagramFileMakerTeoz#getTextBlock:132,150-163;
  *                     TextBlockExporter:199-203
  * ```
+ *
+ * `heightEnglober1` is already in `currentY` (the body starts that far down);
+ * `heightEnglober2` is added here.
  *
  * `currentY` is the last tile's gauge max, so `currentY + PLAYING_SPACE_TAIL_Y`
  * is the top of the foot row — and the foot band is the SAME `headHeight` as
@@ -344,14 +360,19 @@ interface VerticalTotals {
  * separate only per page, in `sequence-page.ts`, where upstream's clip lets
  * the lifelines run one pixel past the foot row's top.
  */
-function computeVerticalTotals(maxParticipantHeight: number, currentY: number, showFootbox: boolean): VerticalTotals {
+function computeVerticalTotals(
+  maxParticipantHeight: number,
+  currentY: number,
+  showFootbox: boolean,
+  heightEnglober2: number,
+): VerticalTotals {
   const lifelineEndY = currentY + PLAYING_SPACE_TAIL_Y;
   // `factor` in `calculateDimensionSlow:83-84` — 2 with a footbox, 1 without.
   const footBand = showFootbox ? maxParticipantHeight : 0;
   return {
     lifelineEndY,
     footerShapeY: lifelineEndY,
-    totalHeight: lifelineEndY + footBand + BOTTOM_MARGIN,
+    totalHeight: lifelineEndY + footBand + heightEnglober2 + BOTTOM_MARGIN,
   };
 }
 
@@ -384,14 +405,16 @@ function isShowFootbox(ast: SequenceDiagramAST, theme: Theme): boolean {
  * band used to run edge to edge, which is wider than the jar's on every
  * fixture.
  */
-function backfillDividerWidth(dividerGeos: DividerGeo[], totalWidth: number, originX: number): void {
+function backfillDividerWidth(dividerGeos: DividerGeo[], totalWidth: number): void {
   for (const d of dividerGeos) {
-    // `originX`, not `LEFT_MARGIN`: `border1` is the playing space's own left
-    // border, which upstream shifts along with everything else when the body
-    // is translated by `dx(-min1)`. On a diagram with nothing overhanging to
-    // the left the two are the same number.
-    d.bandX = originX;
-    d.bandWidth = Math.max(0, totalWidth - originX - RIGHT_MARGIN);
+    // `LEFT_MARGIN`, not `originX`: `border1` is `PlayingSpace#min`
+    // (`PlayingSpace.java:318-320`), the minimum over the origin and every
+    // tile's `getMinX`, and the body is translated by `dx(-min1)` with the
+    // same value (`SequenceDiagramFileMakerTeoz.java:141-142`), so the band
+    // always starts at the left margin. `originX` is pushed right by any left
+    // overhang (a left note, an exo) -- `DividerTile.java:92-95`.
+    d.bandX = LEFT_MARGIN;
+    d.bandWidth = Math.max(0, totalWidth - LEFT_MARGIN - RIGHT_MARGIN);
     // A5: the label runs were built relative to the label BOX's own top-left
     // (`sequence-layout-events.ts#dividerLabelRuns`); the box itself is
     // centred in the band, so its origin is only knowable here.
@@ -415,44 +438,50 @@ function backfillDividerWidth(dividerGeos: DividerGeo[], totalWidth: number, ori
  * `x1="44.959" x2="190.003"`, the same left edge as its own participant row
  * and the same right edge its widest message reaches.
  */
-function backfillNewpageWidth(newpageGeos: NewpageGeo[], totalWidth: number, originX: number): void {
+function backfillNewpageWidth(newpageGeos: NewpageGeo[], totalWidth: number): void {
   for (const n of newpageGeos) {
-    n.bandX = originX;
-    n.bandWidth = Math.max(0, totalWidth - originX - RIGHT_MARGIN);
+    // Same `border1` as the divider (`NewpageTile.java:97-99`).
+    n.bandX = LEFT_MARGIN;
+    n.bandWidth = Math.max(0, totalWidth - LEFT_MARGIN - RIGHT_MARGIN);
   }
 }
 
-/** Box background geometries (Step 4): from the leftmost participant edge
- *  - 8 to the rightmost + 8, y = 0, the full diagram height. The paint and
- *  the placed title are `Doll`'s (`sequence-layout-box.ts`). */
+/** `PlayingSpace` maxes `dolls.getMaxX()` into the body's width
+ *  (`PlayingSpace.java:81-84`), with the margins as baked then; the document
+ *  edge is `RIGHT_MARGIN` beyond it. 0 when there is no box. */
+function englobersRight(englobers: EngloberLayout, row: ParticipantRow): number {
+  const maxX = englobers.dolls.getMaxX(row, englobers.baked);
+  return maxX === undefined ? 0 : maxX + RIGHT_MARGIN;
+}
+
+/** The solved row as `Doll` reads it: `posB = x`, `posD = x + width`. */
+function participantRowOf(participantGeos: readonly ParticipantGeo[]): ParticipantRow {
+  return { xs: participantGeos.map((g) => g.x), widths: participantGeos.map((g) => g.width) };
+}
+
+/**
+ * Box background geometries (Step 4): `dolls.drawEnglobers(ug, body.h +
+ * heightEnglober1 + heightEnglober2 / 2, ...)` from the block origin
+ * (`SequenceDiagramFileMakerTeoz.java:138-146`). `totalHeight` is that body
+ * plus both englober heights plus the top and bottom margins, so the height
+ * handed over is `totalHeight - TOP_MARGIN - BOTTOM_MARGIN - heightEnglober2 / 2`.
+ * The paint and the placed title are `Doll`'s (`sequence-layout-box.ts`).
+ */
 function computeBoxGeos(
-  boxes: BoxGroup[],
-  participantGeos: ParticipantGeo[],
+  englobers: EngloberLayout,
+  row: ParticipantRow,
   totalHeight: number,
   measurer: StringMeasurer,
 ): BoxGeo[] {
-  const BOX_PAD = 8;
-  const boxGeos: BoxGeo[] = [];
-
-  for (const box of boxes) {
-    if (box.participantIds.length === 0) continue;
-    const contained = box.participantIds
-      .map((id) => participantGeos.find((g) => g.id === id))
-      .filter((g): g is ParticipantGeo => g !== undefined);
-    if (contained.length === 0) continue;
-    const leftEdge = Math.min(...contained.map((g) => g.x));
-    const rightEdge = Math.max(...contained.map((g) => g.x + g.width));
-    const frame = { x: leftEdge - BOX_PAD, y: 0, width: rightEdge - leftEdge + BOX_PAD * 2 };
-    const paint = boxPaint(box);
-    boxGeos.push({
+  const height = totalHeight - TOP_MARGIN - BOTTOM_MARGIN - englobers.heightEnglober2 / 2;
+  return englobers.dolls.drawEnglobers(row, height, TOP_MARGIN).map(({ englober, ...frame }) => {
+    const paint = boxPaint(englober);
+    return {
       ...frame,
       paint,
-      height: totalHeight,
-      label: box.label,
-      color: box.color,
-      labelRuns: boxLabelRuns(box.label, frame, paint, measurer),
-    });
-  }
-
-  return boxGeos;
+      label: englober.label,
+      color: englober.color,
+      labelRuns: boxLabelRuns(englober.label, frame, paint, measurer),
+    };
+  });
 }

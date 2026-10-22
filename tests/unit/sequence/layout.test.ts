@@ -854,7 +854,8 @@ describe('layoutSequence — divider', () => {
       measurer,
     ).totalWidth;
     expect(widened).toBeGreaterThan(narrow);
-    expect(widened).toBe(60 * 8 + 8 + 10 + 30);
+    // DividerTile.java:115-118: xorigin (10) + preferredWidth, plus the right margin.
+    expect(widened).toBe(10 + 60 * 8 + 8 + 10 + 30);
   });
 });
 

@@ -37,7 +37,13 @@ export interface Participant {
   type: ParticipantType;
   color?: string;
   order: number; // first-appearance order (0-based)
-  /** Box group id this participant belongs to (from `box` / `end box`). */
+  /** The declared `order N` (`Participant#getOrder`, `CommandParticipant
+   *  .java:154-155`); absent = 0. {@link order} stays the resulting list index. */
+  declaredOrder?: number;
+  /** The INNERMOST box open when this participant was created -- upstream's
+   *  `participantEnglobers2.put(p, participantEnglober)`
+   *  (`SequenceDiagram.java:132,174`). Its ancestors are reached through
+   *  {@link BoxGroup.parentId}, the way `Dolls` walks `getGenealogy()`. */
   boxId?: string;
   /** The `<<...>>` run as written, guillemets included -- `CommandParticipant`
    *  stores it on the Participant rather than in its code
@@ -152,6 +158,10 @@ export interface BoxGroup {
   label: string;
   color: string;
   participantIds: string[];
+  /** The enclosing box, when this one was opened inside another:
+   *  `ParticipantEnglober#newChild` (`SequenceDiagram.java:502-507`,
+   *  `ParticipantEnglober.java:62-64`). Absent for a root box. */
+  parentId?: string;
   /** The `<<...>>` run as written, guillemets included: `CommandBoxStart`'s
    *  STEREO group (`CommandBoxStart.java:75,119-123`), held by the
    *  `ParticipantEnglober` and merged by `Doll#getUsedStyles`
@@ -166,6 +176,16 @@ export interface BoxGroup {
    * dispatch, read after the parse completes. sdd1 D2.
    */
   readonly styleBuilder: StyleBuilder;
+  /**
+   * The raw `boxPadding` skinparam a `Doll` reads, `tileArguments
+   * .getSkinParam().getPaddingTOBEREMOVED(PaddingParam.BOX)` (`Doll.java
+   * :271-273`), i.e. `SkinParam#getValue("boxPadding")` (`SkinParam.java
+   * :1153-1164`, `PaddingParam.java:43-45`) at TILE time; `null` when never
+   * declared. A getter over the parse's legacy `params`, read after the parse
+   * completes, like {@link styleBuilder}. Optional so hand-built AST literals
+   * compile unchanged; absent reads as never declared.
+   */
+  readonly boxPadding?: string | null;
 }
 
 /**

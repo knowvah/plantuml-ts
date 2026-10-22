@@ -413,7 +413,9 @@ export function paginateSequence(geo: SequenceGeometry, pageIndex: number): Sequ
     // `dolls.drawEnglobers` is handed `body.calculateDimension().getHeight()
     // + ...` (`SequenceDiagramFileMakerTeoz.java:138-140`), i.e. the PAGE's
     // height -- englobers are drawn outside the clip and re-sized per page.
-    boxes: geo.boxes.map((b) => ({ ...b, height: totalHeight })),
+    // The box height is the body height less the englober margins
+    // (`sequence-dolls.ts`), so the page's height delta carries over as is.
+    boxes: geo.boxes.map((b) => ({ ...b, height: b.height + delta })),
   };
 }
 

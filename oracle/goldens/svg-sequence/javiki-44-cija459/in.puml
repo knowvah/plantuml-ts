@@ -1,0 +1,13 @@
+@startuml
+footer toto
+header toto
+participant Alice
+participant Bob
+box "Titre 1"
+participant Pluton
+participant Sun
+endbox
+Alice -> Bob
+Bob -> Pluton
+Pluton -> Sun
+@enduml

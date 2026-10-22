@@ -68,7 +68,7 @@ describe('pinned corpus fixtures route SEQUENCE', () => {
     expect(ast.events.filter((e) => e.kind === 'message')).toHaveLength(1);
   });
 
-  it('lafuzo-13-xura634 shape: the same block carrying an `order N` clause', () => {
+  it('lafuzo-13-xura634 shape: the same block carrying an `order N` clause (jar: Bob first, SequenceDiagram.java:182-190)', () => {
     const ast = parse([
       'participant MyParticipant order 20 [',
       '=MyTitle',
@@ -78,6 +78,6 @@ describe('pinned corpus fixtures route SEQUENCE', () => {
       'participant Bob order 10',
     ]);
 
-    expect(ast.participants.map((p) => p.id)).toEqual(['MyParticipant', 'Bob']);
+    expect(ast.participants.map((p) => p.id)).toEqual(['Bob', 'MyParticipant']);
   });
 });

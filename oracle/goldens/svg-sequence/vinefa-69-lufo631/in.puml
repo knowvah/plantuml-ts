@@ -1,0 +1,12 @@
+@startuml
+!pragma teoz true
+box "component with a long name"
+  box "sub1"
+    participant a
+  endbox
+  box "sub2"
+    participant b
+  endbox
+end box
+    participant c
+@enduml

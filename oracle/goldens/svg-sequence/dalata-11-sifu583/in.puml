@@ -1,0 +1,25 @@
+@startuml
+!pragma teoz true
+skinparam BoxPadding 40
+
+box "group 1" #lightblue
+    Participant P1
+    Participant P2
+end box
+' I would like to insert an horizontal minimu space constraint here
+box "group 2" #lightgreen
+    Participant P3
+    Participant P4
+end box
+
+loop forever
+    P1 -> P2
+    P2 --> P1
+end
+
+& loop forever
+    P3 -> P4
+    P4 --> P3
+end
+
+@enduml

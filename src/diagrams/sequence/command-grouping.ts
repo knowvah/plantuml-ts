@@ -28,17 +28,24 @@ import { currentStyleBuilder } from './sequence-skin-param.js';
 //     swallows a `<<stereotype>>` written after an UNQUOTED title -- the jar
 //     draws `box Foo <<S>>` titled `Foo «S»` with no stereotype), then
 //     `StereotypePattern.optional("STEREO")` and the BACK colour.
+//     A box opened inside another is its child (`SequenceDiagram#boxStart`,
+//     `:502-507`, `ParticipantEnglober#newChild`).
 // @see sequencediagram/command/CommandBoxStart.java:65-77
 export const boxStartCommand: Command = {
   pattern: /^box(?:\s+"([^"]*)"|\s+([^#]+))?\s*(<<.+?>>)?\s*(#\S+)?\s*$/i,
   execute(state, match) {
-    const label = (match[1] ?? match[2] ?? '').trim();
+    // Verbatim: `title = argTitle == null ? "" : argTitle`
+    // (`CommandBoxStart.java:116,127`), never trimmed -- NAME2's greedy
+    // `[^#]+` keeps the space before a `#colour`, and the title's measured
+    // width keeps it too (`Doll#addInternalConstraints`, `Doll.java:225-235`).
+    const label = match[1] ?? match[2] ?? '';
     // `Stereotype.build(arg.get("STEREO", 0))` (`CommandBoxStart.java:119-123`),
     // kept as written and built where the `Doll` resolves its style.
     const stereotype = match[3];
     const color = match[4] ?? '';
     const id = `box-${++state.boxCounter}`;
     const style = state.style;
+    const parent = state.currentBox;
     // A `Doll` reads the builder at TILE time (`Doll.java:81-83`), i.e. after
     // every command: a getter, read once the parse has completed.
     const box: BoxGroup = {
@@ -46,9 +53,13 @@ export const boxStartCommand: Command = {
       label,
       color,
       participantIds: [],
+      ...(parent !== null ? { parentId: parent.id } : {}),
       ...(stereotype !== undefined ? { stereotype } : {}),
       get styleBuilder() {
         return currentStyleBuilder(style);
+      },
+      get boxPadding() {
+        return style.params.getValue('boxPadding');
       },
     };
     state.ast.boxes.push(box);
@@ -56,7 +67,9 @@ export const boxStartCommand: Command = {
   },
 };
 
-// 3b. end box — closes the current participant group. `\s*` (not `\s+`)
+// 3b. end box — closes the current participant group, ONE level:
+//     `participantEnglober = participantEnglober.getParent()`
+//     (`SequenceDiagram#endBox`, `:510-515`). `\s*` (not `\s+`)
 //     between "end" and "box" mirrors `CommandBoxEnd`'s
 //     `RegexLeaf.spaceZeroOrMore()`, so the unspaced `endbox` form matches
 //     too (T13, mission dispatch-by-parse-attempt).
@@ -64,7 +77,8 @@ export const boxStartCommand: Command = {
 export const boxEndCommand: Command = {
   pattern: /^end\s*box\s*$/i,
   execute(state) {
-    state.currentBox = null;
+    const parentId = state.currentBox?.parentId;
+    state.currentBox = state.ast.boxes.find((b) => b.id === parentId) ?? null;
   },
 };
 

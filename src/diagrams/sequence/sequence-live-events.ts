@@ -79,7 +79,8 @@ export type LiveEvent = LiveMessage | LiveLifeEvent | LiveNote | LiveOther;
 /** The flat list, and how to find an AST event's place in it. */
 export interface LiveEvents {
   readonly events: readonly LiveEvent[];
-  /** A message, exo message or `activate`/`deactivate` AST event's own entry. */
+  /** A message, exo message, standalone note or `activate`/`deactivate` AST
+   *  event's own entry (a vmerged note shares its `Notes` entry). */
   readonly ofSource: ReadonlyMap<SequenceEvent, LiveEvent>;
   /** The life events a message's own `--`/`++`/`!!` wrote, in list order. */
   readonly ownOf: ReadonlyMap<MessageEvent, readonly LiveLifeEvent[]>;
@@ -220,10 +221,16 @@ function addNote(b: Builder, event: NoteEvent): void {
   if (event.onMessage === true) return;
   const last = b.events[b.events.length - 1];
   if (event.vmerge === true && last !== undefined && (last.kind === 'note' || (last.kind === 'other' && last.notes))) {
-    b.events[b.events.length - 1] = { kind: 'other', notes: true };
+    const merged: LiveOther = { kind: 'other', notes: true };
+    b.events[b.events.length - 1] = merged;
+    // Every note that joined the `Notes` shares its entry.
+    for (const [source, live] of b.ofSource) if (live === last) b.ofSource.set(source, merged);
+    b.ofSource.set(event, merged);
     return;
   }
-  b.events.push({ kind: 'note' });
+  const live: LiveNote = { kind: 'note' };
+  b.events.push(live);
+  b.ofSource.set(event, live);
 }
 
 /** `grouping` (`:420-446`): the start, each branch after an `else` leaf, the
