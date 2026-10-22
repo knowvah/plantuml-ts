@@ -59,3 +59,15 @@
 - **Finding**: `ColorUtils.to255` is `(int)(255 * v)` (`ColorUtils.java:169-170`); `src/core/tim/builtin/color-utils.ts:296` and `src/core/klimt/sprite/ColorResolver.ts:230` both use `Math.round`, so a channel lands one step high when its fraction is ≥ .5.
 - **Impact**: two copies of one primitive; fix both together (and consider sharing one).
 - **Confidence**: High (both files read; Java read).
+
+## Observation: Pattern2 is case-insensitive; most creole ports are not
+- **Context**: fix/sequence-harness-prereqs, dekapo-15-vama907 rose 328 -> 1051 once the harness drew real emoji.
+- **Finding**: `Pattern2.cmpile` compiles every pattern with `Pattern.CASE_INSENSITIVE` (`regex/Pattern2.java:114`). `CommandCreoleEmoji.ts` lacked `'i'`, so `<:1F607:>` stayed literal text; with the fallback glyph gone, the comparator's per-tag index alignment shifted every later `path[n]`, which is why the score ROSE on a correct harness change. Adding `'i'` took dekapo to 0. Most other creole command regexes also lack `'i'`.
+- **Impact**: audit every TS port of a `Pattern2` pattern; filed in `planning/next-missions.md` sdd2 follow-ons.
+- **Confidence**: High (Java read; dekapo measured 328 -> 0).
+
+## Observation: sequence rows newly conformant after the prereqs
+- **Context**: fix/sequence-harness-prereqs re-measure.
+- **Finding**: davipu, dekapo, fixecu, gacemo, losilu, naliba, savebe, tugonu -> 0 (pinned, source `sdd3-prereqs`); rapoto 122 -> 2. 0 rises. 101 rows Σ 3800 open.
+- **Impact**: sdd3 starts from 1042 pins.
+- **Confidence**: High.

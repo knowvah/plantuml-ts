@@ -1132,7 +1132,8 @@ describe('routing conformance — jar-error classification', () => {
     // front matter, T8a), nuvoja-46 (missing `!includedef`, T8b), bomino-39
     // (`<style src=>`, T8c). Derivation: 7606 + 629 + 86 = 8321.
     // 7606 -> 7607 at sdd2/close-exit: +1 svg-sequence golden clones.
-    expect(pinnedAgree.length).toBe(7607);
+    // 7607 -> 7615 at sdd3-prereqs: +8 svg-sequence golden clones.
+    expect(pinnedAgree.length).toBe(7615);
     expect(pinnedMisroutes.length).toBe(629);
     expect(pinnedJarErrors.length).toBe(86);
     // 7202 -> 7203 at gtc T1 (see the agree derivation above).
@@ -1162,7 +1163,8 @@ describe('routing conformance — jar-error classification', () => {
     // 8250 -> 8317 at sdd2/close-b7: +67 svg-sequence golden clones.
     // 8317 -> 8321 at sdd2/close-b8: +4 svg-sequence golden clones.
     // 8321 -> 8322 at sdd2/close-exit: +1 svg-sequence golden clones.
-    expect(manifest.fixtures.length).toBe(8322);
+    // 8322 -> 8330 at sdd3-prereqs: +8 svg-sequence golden clones.
+    expect(manifest.fixtures.length).toBe(8330);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
