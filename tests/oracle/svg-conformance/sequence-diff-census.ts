@@ -60,10 +60,9 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { compareSvg } from './compare.js';
 import type { Diff } from './compare.js';
-import { renderFixtureSequence } from './render-fixture-sequence.js';
+import { renderFixtureSequence, sequenceFixtureOptions } from './render-fixture-sequence.js';
 
 // ---------------------------------------------------------------------------
 // Buckets
@@ -256,9 +255,7 @@ function censusForFixture(ref: FixtureRef, cacheRoot: string): FixtureOutcome {
   try {
     const markup = readFileSync(join(dir, 'in.puml'), 'utf8');
     const golden = readFileSync(join(dir, 'in.svg'), 'utf8');
-    const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), {
-      includeStore: fixtureIncludeStore(),
-    });
+    const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), sequenceFixtureOptions());
     const { diffs } = compareSvg(ours, golden, 'deterministic');
     return {
       ok: true,

@@ -34,6 +34,7 @@ import type { IncludeStore } from '../src/core/tim/IncludeStore.js';
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 import { compareSvg, weightedScore } from '../tests/oracle/svg-conformance/compare.js';
 import { renderFixtureSequence } from '../tests/oracle/svg-conformance/render-fixture-sequence.js';
+import { surveyAssetStore } from '../tests/oracle/svg-conformance/render-fixture-utility.js';
 import { listFixtureSlugs, requireIncludeStore } from './sequence-geometry-distance.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -54,6 +55,10 @@ export function measureForRepin(dir: string, slug: string, store: IncludeStore):
     const golden = readFileSync(join(dir, 'in.svg'), 'utf8');
     const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), {
       includeStore: store,
+      // The survey's asset store, so an emoji or jar: sprite draws as the jar's does
+      // (sdd2 T-exit). From render-fixture-utility.ts, not sequenceFixtureOptions,
+      // because a base-ref worktree's harness predates that helper.
+      assetStore: surveyAssetStore(),
     });
     const { diffs } = compareSvg(ours, golden, 'deterministic');
     return { slug, score: weightedScore(diffs), diffCount: diffs.length };

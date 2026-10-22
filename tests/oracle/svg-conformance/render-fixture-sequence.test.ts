@@ -26,7 +26,7 @@ import { fileURLToPath } from 'node:url';
 
 import type { FontSpec, StringMeasurer } from '../../../src/core/measurer.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { renderFixtureSequence } from './render-fixture-sequence.js';
+import { renderFixtureSequence, sequenceFixtureOptions } from './render-fixture-sequence.js';
 import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
 
 const A0001_PATH = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/corpus/sequence/A0001_Test.puml');
@@ -109,6 +109,37 @@ describe('renderFixtureSequence — assetStore forwarding (D6, cdd6-T1c)', () =>
     const assetStore = buildSpriteAssetsStore();
     const svg = renderFixtureSequence(MARKUP, new DeterministicMeasurer(), { assetStore });
     expect(svg).not.toMatch(EMPTY_TITLE);
+    expect(svg).toMatch(/<g class="title"><path/);
+  });
+});
+
+// sdd2 T-exit (.agent-notes/sdd2-execution.md): the gates rendered with only
+// an includeStore, so an emoji read as the fallback glyph and four rows
+// diverged on that alone. `sequenceFixtureOptions` is the one bag every
+// sequence gate and tool renders with: the survey's own stores.
+describe('sequenceFixtureOptions', () => {
+  const EMOJI = '@startuml\nAlice -> Bob : hi <:1f600:>\n@enduml';
+
+  it('returns the same bag, store references included, on every call', () => {
+    const a = sequenceFixtureOptions();
+    const b = sequenceFixtureOptions();
+    expect(b).toBe(a);
+    expect(b.assetStore).toBe(a.assetStore);
+    expect(b.includeStore).toBe(a.includeStore);
+  });
+
+  it('draws an emoji as the jar does (vector artwork), not the fallback text glyph', () => {
+    const svg = renderFixtureSequence(EMOJI, new DeterministicMeasurer(), sequenceFixtureOptions());
+    expect(svg).not.toContain('>\u{1F600}</text>');
+    expect(svg).toContain('<ellipse cx="62.706" cy="60.75" rx="9.75" ry="9.75" fill="#FFCC4D"');
+  });
+
+  it('resolves a jar: sprite through the same bag', () => {
+    const svg = renderFixtureSequence(
+      '@startuml\nsprite Netw jar:archimate/network\ntitle <$Netw>\nBob->Alice: hi\n@enduml',
+      new DeterministicMeasurer(),
+      sequenceFixtureOptions(),
+    );
     expect(svg).toMatch(/<g class="title"><path/);
   });
 });

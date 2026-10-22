@@ -13,8 +13,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { compareSvg, weightedScore, type Diff } from '../../../tests/oracle/svg-conformance/compare.js';
-import { renderFixtureSequence } from '../../../tests/oracle/svg-conformance/render-fixture-sequence.js';
-import { fixtureIncludeStore } from '../../../tests/helpers/fixture-include-store.js';
+import { renderFixtureSequence, sequenceFixtureOptions } from '../../../tests/oracle/svg-conformance/render-fixture-sequence.js';
 
 export type Cohort = 'zero' | 'paint-only' | 'geometry' | 'structural';
 
@@ -100,9 +99,7 @@ function main(): void {
     buildRow(f, () => {
       const dir = `test-results/dot-cache/sequence/${f.slug}`;
       return {
-        svg: renderFixtureSequence(readFileSync(`${dir}/in.puml`, 'utf8'), new DeterministicMeasurer(), {
-          includeStore: fixtureIncludeStore(),
-        }),
+        svg: renderFixtureSequence(readFileSync(`${dir}/in.puml`, 'utf8'), new DeterministicMeasurer(), sequenceFixtureOptions()),
         golden: readFileSync(`${dir}/in.svg`, 'utf8'),
       };
     }),
