@@ -66,6 +66,11 @@ diff against b0. The non-sequence movers were all improvements: unknown 522 → 
 
 ### Open -> sdd3 (109 rows Σ 4355, by family; each row's mechanism is in `fixtures.md`)
 
+**Prerequisites DONE 2026-10-22** (branch `fix/sequence-harness-prereqs`): the
+rows `creole-emoji-case-insensitive`, `harness-no-emoji-store` and the small-family
+to255 entry are closed. 8 rows pinned (1042), 1 fell (rapoto 122 → 2), 0 rose:
+**101 rows Σ 3800** remain open. Re-measure before planning from this table.
+
 The six largest families are in shared code. Fix each once at its origin,
 not per call site.
 
@@ -75,8 +80,8 @@ not per call site.
 | handwritten-unported | 4 | 844 | `UGraphicHandwritten` wraps the exporter UGraphic (`TextBlockExporter.java:174-175`) | sequence's string renderers bypass it → **own mission** `sequence-handwritten` |
 | svgparser-sax-unported | 30 | 522 | `!pragma svgparser sax` → `SvgSaxParser` (`SvgSpriteParserFactory.java:97-99`): gradients, rect, polyline, polygon, line, CSS, text-decoration, data images | pragma dropped (`command-common.ts:51`); nano only (`creole-atoms-image-resolver.ts:311`). Core; class rows too |
 | par2-not-parallel | 4 | 474 | `GroupingStart.isParallel()` = `parallel ‖ isPar2GroupStart()` (`GroupingStart.java:104-114`, `GroupingLeaf.java:100-104`) | `command-grouping.ts:168` sets parallel only for `&` |
-| creole-emoji-case-insensitive | 1 | 328 | `Pattern2` CASE_INSENSITIVE (`Pattern2.java:114`), `Emoji.retrieve` lowercases | `CommandCreoleEmoji.ts:28` |
-| harness-no-emoji-store | 4 | 225 | not a port defect for gacemo; rapoto/savebe/tugonu have small engine residuals (sprite font colour `AtomSprite.java:77`; to255) | classify/diff-one/golden harness pass no asset store (`render-fixture-sequence.ts:121`) |
+| ~~creole-emoji-case-insensitive~~ DONE (`3354a4b9c`) | 1 | 328 | `Pattern2` CASE_INSENSITIVE (`Pattern2.java:114`), `Emoji.retrieve` lowercases | `CommandCreoleEmoji.ts:28` |
+| ~~harness-no-emoji-store~~ DONE (`c364f19e7`; rapoto keeps Σ 2) | 4 | 225 | not a port defect for gacemo; rapoto/savebe/tugonu have small engine residuals (sprite font colour `AtomSprite.java:77`; to255) | classify/diff-one/golden harness pass no asset store (`render-fixture-sequence.ts:121`) |
 | document-margin-style-ignored | 3 | 204 | `root { Margin }` read by `TextBlockExporter.java:510-515` | hardcoded 5 |
 | url-label-newline-split | 2 | 113 | `AtomTextUtils.java:79-91` | `CommandCreoleUrl.ts:72-73` |
 | self-note-left-anchor | 1 | 87 | `CommunicationTileSelfNoteLeft.java:107-115,136-160` | `sequence-note-anchor.ts:101` |
@@ -85,7 +90,7 @@ not per call site.
 | remote-image-io | 1 | 57 | `AtomImg` fetches http (`AtomImg.java:165-169`) | no network in `src/`; needs an asset-store seam |
 | latex-array-unmodelled | 1 | 35 | JLaTeXMath array (`TeXIconBuilder.java:52-73`) | `latex-metrics/nodes.ts:103` lacks `array` |
 | participant-topurl-ignored | 4 | 28 | `CommandParticipant.java:189-190` | `sequence-participant-declaration.ts:237` |
-| small (≤ 21 each) | 24 | 125 | filename env (`Defines.java:89-93`), group-header comment height (`ComponentRoseGroupingHeader.java:95-105`), `<text class=>` creole (`CommandCreoleSvgAttributeChange`), monochrome mapper (`TitledDiagram.java:295-297`), blotter scaled `+1` + fore==back strokeless (`GroupingTile.java:340`, `DriverPathSvg.java:65-68`), xlink title decode (`SvgGraphics.java:1147-1160`), participant underline (`Participant.java:125-126`), to255 truncation (`ColorUtils.java:169-170`; two copies: `color-utils.ts:296`, `ColorResolver.ts:230`), note-wrapper life step (`CommunicationTileNoteRight.java:96-98`), natural alignment (`Display.java:293-297`), HSL float32 (`HSLColor.java`), drawn-extent canvas (`SvgGraphics.java:129-135`) | see `fixtures.md` |
+| small (≤ 21 each) | 24 | 125 | filename env (`Defines.java:89-93`), group-header comment height (`ComponentRoseGroupingHeader.java:95-105`), `<text class=>` creole (`CommandCreoleSvgAttributeChange`), monochrome mapper (`TitledDiagram.java:295-297`), blotter scaled `+1` + fore==back strokeless (`GroupingTile.java:340`, `DriverPathSvg.java:65-68`), xlink title decode (`SvgGraphics.java:1147-1160`), participant underline (`Participant.java:125-126`), ~~to255 truncation~~ DONE (`1ed4a6f2b`, one shared `ColorUtils.ts#to255`), note-wrapper life step (`CommunicationTileNoteRight.java:96-98`), natural alignment (`Display.java:293-297`), HSL float32 (`HSLColor.java`), drawn-extent canvas (`SvgGraphics.java:129-135`) | see `fixtures.md` |
 
 ### Follow-ons (no sequence row; `.agent-notes/sdd2-execution.md`)
 - `MeasurerStringBounder` drops BOLD for weight-aware measurers
@@ -96,9 +101,14 @@ not per call site.
   `(int)(dim*scale+1)` (`SvgGraphics.java:129-143`).
 - `src/core/theme-graph-colors-a.ts` is 525 lines (over the 500 cap since before
   sdd2): split it like `-b`.
-- The sequence harness's missing asset store (above) also hides engine residuals.
-  Wire the survey's store into `render-fixture-sequence.ts` and `classify.mts`
-  before sdd3 measures anything.
+- ~~The sequence harness's missing asset store~~ DONE 2026-10-22:
+  `sequenceFixtureOptions()` (`render-fixture-sequence.ts`) feeds every gate/tool.
+- `Pattern2.cmpile` is CASE_INSENSITIVE (`Pattern2.java:114`) and only some
+  creole command regexes carry `'i'` (`CommandCreoleUrl`, `CommandCreoleQrcode`,
+  now `CommandCreoleEmoji`). Audit every TS port of a `Pattern2` pattern
+  (creole commands: Space, Style, Latex, ColorAndSizeChange, FontFamilyChange,
+  ColorChange, Monospaced, Math, ExposantChange, SizeChange; then the rest of
+  `src/`) against whether its Java uses `Pattern2` or `Pattern.compile`.
 
 ## sequence-divergence-drive (sdd1) — DONE 2026-10-20 (branch `feat/sequence-divergence-drive`, unsigned, not pushed; lands via merge-commit PR after the user's `git rebase -r --force-rebase -S main`)
 

@@ -1,12 +1,12 @@
 {
   "$comment": "Cause census for the committed SEQUENCE oracle corpus. Every count is produced MECHANICALLY by tests/oracle/svg-conformance/sequence-diff-census.ts from the path/actual/expected fields of the Diff records compare.ts emits -- never by reading an SVG (D5, plans/sequence-oracle-harness/decisions.md). The bucket set is closed at six; adding a seventh is stop 9. Fixtures come from diff-baseline.json: status \"baseline\" entries are censused, status \"error\" entries are carried in \"errors\" and contribute NOTHING to \"totals\" -- an unrenderable fixture has no bucket counts and must never read as zero diffs. Regenerate with: npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts -- the output is a pure function of the committed corpus and carries no timestamp, so re-running is byte-identical.",
   "totals": {
-    "missing-element": 36,
+    "missing-element": 32,
     "extra-element": 0,
-    "geometry": 2141,
-    "text-metrics": 198,
+    "geometry": 2031,
+    "text-metrics": 194,
     "format-units": 0,
-    "other": 286
+    "other": 278
   },
   "fixtures": [
     {
@@ -142,18 +142,6 @@
       }
     },
     {
-      "slug": "davipu-63-veta505",
-      "diffCount": 1,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 0,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 1
-      }
-    },
-    {
       "slug": "dedude-72-xuta800",
       "diffCount": 1,
       "buckets": {
@@ -163,18 +151,6 @@
         "text-metrics": 0,
         "format-units": 0,
         "other": 1
-      }
-    },
-    {
-      "slug": "dekapo-15-vama907",
-      "diffCount": 118,
-      "buckets": {
-        "missing-element": 1,
-        "extra-element": 0,
-        "geometry": 110,
-        "text-metrics": 4,
-        "format-units": 0,
-        "other": 3
       }
     },
     {
@@ -208,30 +184,6 @@
         "missing-element": 0,
         "extra-element": 0,
         "geometry": 43,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 1
-      }
-    },
-    {
-      "slug": "fixecu-74-kote876",
-      "diffCount": 1,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 0,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 1
-      }
-    },
-    {
-      "slug": "gacemo-20-lafa203",
-      "diffCount": 1,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 0,
         "text-metrics": 0,
         "format-units": 0,
         "other": 1
@@ -490,18 +442,6 @@
       }
     },
     {
-      "slug": "losilu-30-ridu614",
-      "diffCount": 1,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 0,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 1
-      }
-    },
-    {
       "slug": "lukivo-17-cose300",
       "diffCount": 6,
       "buckets": {
@@ -658,18 +598,6 @@
       }
     },
     {
-      "slug": "naliba-15-rari769",
-      "diffCount": 1,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 0,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 1
-      }
-    },
-    {
       "slug": "nemeji-70-xupi983",
       "diffCount": 2,
       "buckets": {
@@ -815,9 +743,9 @@
     },
     {
       "slug": "rapoto-38-neca900",
-      "diffCount": 3,
+      "diffCount": 2,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
         "geometry": 0,
         "text-metrics": 0,
@@ -922,18 +850,6 @@
       }
     },
     {
-      "slug": "savebe-17-xovo724",
-      "diffCount": 1,
-      "buckets": {
-        "missing-element": 1,
-        "extra-element": 0,
-        "geometry": 0,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 0
-      }
-    },
-    {
       "slug": "sebafe-48-pepu053",
       "diffCount": 2,
       "buckets": {
@@ -991,18 +907,6 @@
         "text-metrics": 1,
         "format-units": 0,
         "other": 1
-      }
-    },
-    {
-      "slug": "tugonu-44-file000",
-      "diffCount": 1,
-      "buckets": {
-        "missing-element": 1,
-        "extra-element": 0,
-        "geometry": 0,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 0
       }
     },
     {

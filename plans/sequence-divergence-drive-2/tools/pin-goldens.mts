@@ -16,7 +16,7 @@
  * 1. renders `test-results/dot-cache/sequence/<slug>/in.puml` through the
  *    EXACT seam the golden ratchet gate uses
  *    (`sequence.golden.ratchet.test.ts`'s own `renderFixtureSequence` +
- *    `DeterministicMeasurer` + `fixtureIncludeStore()`) and compares it
+ *    `DeterministicMeasurer` + `sequenceFixtureOptions()`) and compares it
  *    against the cached `in.svg` with the SAME comparator
  *    (`compareSvg(ours, golden, 'deterministic')`) — a slug whose render is
  *    not zero-diff is refused before anything is written;
@@ -52,9 +52,8 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { fixtureIncludeStore } from '../../../tests/helpers/fixture-include-store.js';
 import { compareSvg } from '../../../tests/oracle/svg-conformance/compare.js';
-import { renderFixtureSequence } from '../../../tests/oracle/svg-conformance/render-fixture-sequence.js';
+import { renderFixtureSequence, sequenceFixtureOptions } from '../../../tests/oracle/svg-conformance/render-fixture-sequence.js';
 
 const CACHE_DIR = 'test-results/dot-cache/sequence';
 const GOLDEN_DIR = 'oracle/goldens/svg-sequence';
@@ -123,7 +122,7 @@ export function renderIsZeroDiff(markup: string, golden: string): boolean {
 
 /** The first diff's path, or `undefined` when the render is zero-diff. */
 export function firstDiffPath(markup: string, golden: string): string | undefined {
-  const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), { includeStore: fixtureIncludeStore() });
+  const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), sequenceFixtureOptions());
   const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
   return pass ? undefined : (diffs[0]?.path ?? '(no path)');
 }

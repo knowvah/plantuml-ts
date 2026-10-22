@@ -86,6 +86,13 @@ describe('ColorResolver#getTrueColor', () => {
     expect(resolver.getTrueColor('#FF0000')).toEqual({ r: 96, g: 96, b: 255, a: 255 });
   });
 
+  it('truncates each tinted channel like ColorUtils.to255, matching the jar', () => {
+    // Jar: ColorUtils.grayToColor((76 - 10) / 256.0, new XColor(24, 129, 197))
+    // = (32, 162, 245); rounding would give (33, 162, 246).
+    const resolver = new ColorResolver(undefined, { r: 24, g: 129, b: 197, a: 255 }, grayLevelRange(10, 200));
+    expect(resolver.getTrueColor('#FF0000')).toEqual({ r: 32, g: 162, b: 245, a: 255 });
+  });
+
   it('ignores maxGrayLevel in the tinted branch, matching the Java signature that never reads it', () => {
     const lowMax = new ColorResolver(undefined, BLUE, grayLevelRange(10, 20));
     const highMax = new ColorResolver(undefined, BLUE, grayLevelRange(10, 250));

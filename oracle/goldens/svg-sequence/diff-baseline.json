@@ -1345,7 +1345,7 @@
     {
       "type": "sequence",
       "slug": "davipu-63-veta505",
-      "status": "baseline",
+      "status": "pinned",
       "weightedScore": 1,
       "diffCount": 15,
       "measuredAt": "2026-10-20",
@@ -1435,7 +1435,7 @@
     {
       "type": "sequence",
       "slug": "dekapo-15-vama907",
-      "status": "baseline",
+      "status": "pinned",
       "weightedScore": 328,
       "diffCount": 138,
       "measuredAt": "2026-10-21",
@@ -2218,7 +2218,7 @@
     {
       "type": "sequence",
       "slug": "fixecu-74-kote876",
-      "status": "baseline",
+      "status": "pinned",
       "weightedScore": 1,
       "diffCount": 15,
       "measuredAt": "2026-10-20",
@@ -2488,7 +2488,7 @@
     {
       "type": "sequence",
       "slug": "gacemo-20-lafa203",
-      "status": "baseline",
+      "status": "pinned",
       "weightedScore": 10,
       "diffCount": 48,
       "measuredAt": "2026-10-21",
@@ -4666,7 +4666,7 @@
     {
       "type": "sequence",
       "slug": "losilu-30-ridu614",
-      "status": "baseline",
+      "status": "pinned",
       "weightedScore": 1,
       "diffCount": 15,
       "measuredAt": "2026-10-20",
@@ -5584,7 +5584,7 @@
     {
       "type": "sequence",
       "slug": "naliba-15-rari769",
-      "status": "baseline",
+      "status": "pinned",
       "weightedScore": 1,
       "diffCount": 15,
       "measuredAt": "2026-10-20",
@@ -6773,10 +6773,10 @@
       "type": "sequence",
       "slug": "rapoto-38-neca900",
       "status": "baseline",
-      "weightedScore": 122,
-      "diffCount": 244,
-      "measuredAt": "2026-10-21",
-      "measuredAgainstCommit": "fae94fe7"
+      "weightedScore": 2,
+      "diffCount": 2,
+      "measuredAt": "2026-10-22",
+      "measuredAgainstCommit": "c364f19e"
     },
     {
       "type": "sequence",
@@ -7384,7 +7384,7 @@
     {
       "type": "sequence",
       "slug": "savebe-17-xovo724",
-      "status": "baseline",
+      "status": "pinned",
       "weightedScore": 33,
       "diffCount": 50,
       "measuredAt": "2026-10-21",
@@ -8392,7 +8392,7 @@
     {
       "type": "sequence",
       "slug": "tugonu-44-file000",
-      "status": "baseline",
+      "status": "pinned",
       "weightedScore": 60,
       "diffCount": 133,
       "measuredAt": "2026-10-21",

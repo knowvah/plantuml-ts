@@ -133,12 +133,19 @@ describe('reverseRgb', () => {
 });
 
 describe('reverseHsluv', () => {
-  it('matches the ported algorithm at the lightness extremes and mid-gray (golden values)', () => {
-    expect(colorToString(reverseHsluv({ r: 0, g: 0, b: 0, a: 255 }))).toBe('#777777');
+  // Golden values from the jar: ColorUtils.reverseHsluv run in jshell against
+  // oracle/dist/plantuml-oracle.jar. to255 truncates (ColorUtils.java:169-177),
+  // so black and mid-gray land one step below a rounding port.
+  it('matches the jar at the lightness extremes and mid-gray', () => {
+    expect(colorToString(reverseHsluv({ r: 0, g: 0, b: 0, a: 255 }))).toBe('#767676');
     expect(colorToString(reverseHsluv({ r: 255, g: 255, b: 255, a: 255 }))).toBe('#767676');
-    expect(colorToString(reverseHsluv({ r: 128, g: 128, b: 128, a: 255 }))).toBe('#262626');
+    expect(colorToString(reverseHsluv({ r: 128, g: 128, b: 128, a: 255 }))).toBe('#252525');
   });
-  it('matches the ported algorithm for a saturated hue (golden value)', () => {
+  it('matches the jar for a saturated hue', () => {
     expect(colorToString(reverseHsluv({ r: 0, g: 255, b: 0, a: 255 }))).toBe('#007000');
+  });
+  it('matches the jar where every channel has a fraction >= .5', () => {
+    expect(colorToString(reverseHsluv({ r: 24, g: 24, b: 24, a: 255 }))).toBe('#868686');
+    expect(colorToString(reverseHsluv({ r: 168, g: 48, b: 48, a: 255 }))).toBe('#EFB5B5');
   });
 });

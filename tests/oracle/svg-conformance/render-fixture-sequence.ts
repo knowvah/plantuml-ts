@@ -71,12 +71,30 @@ import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js'
 import { assembleSvg, renderSync } from '../../../src/index.js';
 import { registerNestedDiagramRenderers } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
 import { seedOfUmlSource } from '../../../src/core/assemble-svg.js';
+import type { AssetStore } from '../../../src/core/asset-store.js';
+import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
+import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
+import { surveyAssetStore } from './render-fixture-utility.js';
 
 /** `renderFixtureSequence`'s own options bag: `PreprocessOptions` (forwarded
  *  to `buildBlockUmls`) UNION `ParseOptions` (`assetStore`, forwarded to
  *  `parseSequence` — D6, cdd6-T1c). Mirrors `render-fixture-class.ts`'s
  *  `FixtureClassOptions`. */
 type FixtureSequenceOptions = PreprocessOptions & ParseOptions;
+
+let fixtureOptions: { readonly includeStore: IncludeStore; readonly assetStore: AssetStore } | undefined;
+
+/** The one options bag every sequence gate and tool renders with: the
+ *  survey's own stores (`render-fixture-utility.ts#surveyAssetStore`,
+ *  `fixtureIncludeStore`), so a ratchet verdict and the survey's agree.
+ *  Without the asset store an emoji or `jar:` sprite renders as its fallback,
+ *  which both overstates a row's diff and hides its real residual (sdd2
+ *  T-exit, `.agent-notes/sdd2-execution.md`). Memoized: one bag, one set of
+ *  store references, across calls. */
+export function sequenceFixtureOptions(): { readonly includeStore: IncludeStore; readonly assetStore: AssetStore } {
+  fixtureOptions ??= { includeStore: fixtureIncludeStore(), assetStore: surveyAssetStore() };
+  return fixtureOptions;
+}
 
 /** `src/index.ts#umlSourceOfBlock`'s widening of `block.source`, restricted
  *  to the fields `parseSequence` reads (sdd1 D3). Exported so a test can

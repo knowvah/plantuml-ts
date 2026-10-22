@@ -40,6 +40,7 @@
 import { shortenColor } from '../../svg-format.js';
 import type { RgbTriple } from './ColorTrieNode.js';
 import { rgbToHsluv, hsluvToRgb } from './HUSLColorConverter.js';
+import { to255 } from './ColorUtils.js';
 import { fromString as colorOrderFromString, getReverse } from './ColorOrder.js';
 
 export type MonochromeMode = 'true' | 'reverse';
@@ -113,15 +114,6 @@ export function applyMonochromeHex(hex: string, mode: MonochromeMode): string {
     const gray = grayscaleChannel(r, g, b, mode);
     return { r: gray, g: gray, b: gray };
   });
-}
-
-/** `ColorUtils#to255` (`ColorUtils.java:169-177`): `(int) (255 * value)`
- *  (truncation), clamped to `[0, 255]`. */
-function to255(value: number): number {
-  // `(int)` cast: truncation toward zero, and never a JS `-0` (`| 0`).
-  const result = (255 * value) | 0;
-  if (result < 0) return 0;
-  return result > 255 ? 255 : result;
 }
 
 /**

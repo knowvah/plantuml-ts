@@ -38,6 +38,7 @@
 
 import { parseColor, toSvgHex } from '../color/HColorSet.js';
 import type { ResolvedColor } from '../color/HColorSet.js';
+import { to255 } from '../color/ColorUtils.js';
 import { grayScale } from '../../tim/builtin/color-utils.js';
 
 /**
@@ -224,13 +225,6 @@ function rgbUnitToHsluv(tuple: readonly [number, number, number]): readonly [num
 
 function hsluvToRgbUnit(tuple: readonly [number, number, number]): readonly [number, number, number] {
   return xyzToRgbUnit(luvToXyz(lchToLuv(hsluvToLch(tuple))));
-}
-
-function to255(value: number): number {
-  const result = Math.round(255 * value);
-  if (result < 0) return 0;
-  if (result > 255) return 255;
-  return result;
 }
 
 /**

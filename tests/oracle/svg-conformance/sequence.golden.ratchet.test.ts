@@ -33,9 +33,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { compareSvg } from './compare.js';
-import { renderFixtureSequence } from './render-fixture-sequence.js';
+import { renderFixtureSequence, sequenceFixtureOptions } from './render-fixture-sequence.js';
 
 interface RatchetFixture {
   slug: string;
@@ -92,9 +91,7 @@ describe.skipIf(manifest.fixtures.length === 0)('svg-sequence conformance ratche
       () => {
         const golden = readGolden(f);
         const markup = readSource(f);
-        const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), {
-          includeStore: fixtureIncludeStore(),
-        });
+        const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), sequenceFixtureOptions());
         const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
         expect(
           pass,
@@ -127,7 +124,7 @@ describe.skipIf(manifest.fixtures.length === 0)('svg-sequence conformance ratche
 
     const golden = readGolden(target);
     const markup = readSource(target);
-    const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), { includeStore: fixtureIncludeStore() });
+    const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), sequenceFixtureOptions());
 
     // Confirm the untampered pair really is zero-diff first, so the
     // tampered-case failure below is attributable to the mutation alone.

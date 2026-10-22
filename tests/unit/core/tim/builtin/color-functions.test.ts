@@ -88,17 +88,19 @@ describe('ReverseColor', () => {
 });
 
 describe('ReverseHsluvColor', () => {
-  it('matches the ported HSLuv reversal algorithm (golden values)', () => {
+  // Golden values from the oracle jar (`%reverse_hsluv_color` rendered through
+  // scripts/oracle-render.sh): to255 truncates (ColorUtils.java:169-177).
+  it('matches the jar (golden values)', () => {
     expect(
       new ReverseHsluvColor()
         .executeReturnFunction(fakeContext(), undefined, LOC, [str('#FF0000')], NO_NAMED)
         .toString(),
-    ).toBe('#540000');
+    ).toBe('#530000');
     expect(
       new ReverseHsluvColor()
         .executeReturnFunction(fakeContext(), undefined, LOC, [str('#0000FF')], NO_NAMED)
         .toString(),
-    ).toBe('#AFAFFF');
+    ).toBe('#AEAEFF');
   });
   it('throws for an unresolvable color', () => {
     expect(() =>
