@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { distance } from '../../../../../src/core/klimt/color/ColorUtils.js';
+import { distance, to255 } from '../../../../../src/core/klimt/color/ColorUtils.js';
 
 const rgb = (r: number, g: number, b: number) => ({ r, g, b, a: 255 });
 
@@ -19,5 +19,23 @@ describe('ColorUtils.distance', () => {
   });
   it('identical colours are 0', () => {
     expect(distance(rgb(7, 8, 9), rgb(7, 8, 9))).toBe(0);
+  });
+});
+
+// ColorUtils.java:169-177: `(int) (255 * value)` truncates toward zero, then
+// clamps to [0, 255]. A fraction >= .5 must NOT round up.
+describe('ColorUtils.to255', () => {
+  it('truncates instead of rounding: 255 * 0.999 = 254.745 -> 254', () => {
+    expect(to255(0.999)).toBe(254);
+  });
+  it('truncates a just-below-integer product: 255 * (134.9 / 255) -> 134', () => {
+    expect(to255(134.9 / 255)).toBe(134);
+  });
+  it('clamps above 1 to 255 and below 0 to 0', () => {
+    expect(to255(1.01)).toBe(255);
+    expect(to255(-0.01)).toBe(0);
+  });
+  it('returns +0, never -0, for a small negative input', () => {
+    expect(Object.is(to255(-0.001), 0)).toBe(true);
   });
 });

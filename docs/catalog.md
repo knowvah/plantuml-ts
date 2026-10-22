@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1732 modules · 6451 exported names.
+1732 modules · 6452 exported names.
 
 ## `src/`
 
@@ -509,7 +509,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ColorOrder.ts` | `ColorOrder`, `getColor`, `getReverse`, `fromString` | ColorOrder -- a channel permutation, used by `ColorMapper.reverse(order)` (`ColorMapper.java:93-100`) for `skinparam reversecolor <order>` (`TitledDiagram.java:308-312`). |
 | `ColorParser.ts` | `COLOR_REGEXP`, `PART2`, `COLORS_REGEXP`, `ColorParser` |  |
 | `ColorTrieNode.ts` | `RgbTriple`, `getColor`, `NAMES` | ColorTrieNode — the named-color -> RGB table upstream registers into a letter-indexed trie. |
-| `ColorUtils.ts` | `getGrayScale`, `getGrayScaleColor`, `getGrayScaleColorReverse`, `distance` |  |
+| `ColorUtils.ts` | `getGrayScale`, `getGrayScaleColor`, `getGrayScaleColorReverse`, `distance`, `to255` |  |
 | `fragment-color-mapper.ts` | `MonochromeMode`, `HexColorMapper`, `applyMonochromeHex`, `getReversed`, `colorMapperOf`, `applyColorMapperToFragment`, `applyMonochromeToFragment` | fragment-color-mapper.ts -- `skinparam monochrome true\|reverse` (G2 N61). |
 | `HColorAutomagic.ts` | `HColorAutomagic` |  |
 | `HColorGradient.ts` | `GradientPolicy`, `HColorGradient` |  |

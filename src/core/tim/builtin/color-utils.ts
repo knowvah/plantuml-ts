@@ -22,6 +22,7 @@
  */
 
 import { parseSimpleColor } from '../../klimt/color/HColorSet.js';
+import { to255 } from '../../klimt/color/ColorUtils.js';
 
 /** Stand-in for `net.sourceforge.plantuml.klimt.awt.XColor`: 8-bit RGBA. */
 export interface RgbColor {
@@ -290,13 +291,6 @@ function rgbUnitToHsluv(tuple: readonly [number, number, number]): readonly [num
 /** HSLuv `[h, s, l]` -> RGB (0-1 components). @see HUSLColorConverter#hsluvToRgb */
 function hsluvToRgbUnit(tuple: readonly [number, number, number]): readonly [number, number, number] {
   return xyzToRgbUnit(luvToXyz(lchToLuv(hsluvToLch(tuple))));
-}
-
-function to255(value: number): number {
-  const result = Math.round(255 * value);
-  if (result < 0) return 0;
-  if (result > 255) return 255;
-  return result;
 }
 
 /**
