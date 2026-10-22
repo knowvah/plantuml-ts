@@ -11,6 +11,7 @@ import type { ActivationEvent, MessageEvent } from './ast.js';
 import type { EventProcessingContext } from './sequence-layout-events.js';
 import { activationLevel } from './sequence-layout-events.js';
 import { LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+import { ARROW_LABEL_PADDING_X1 } from './text-block-geo.js';
 
 /** Arrow endpoints/direction resolved for a single message. */
 export interface MessageEndpoints {
@@ -19,6 +20,22 @@ export interface MessageEndpoints {
   arrowDirection: 'right' | 'left' | 'self';
   /** Self messages only — see {@link MessageGeo.selfReturnX}. */
   selfReturnX?: number;
+  /** Self messages only: the component's origin, `x1` after
+   *  `CommunicationTileSelf#drawU`'s shift (`:140-147`) -- where the loop's
+   *  far end and the label are measured from. */
+  selfOriginX?: number;
+}
+
+/** `xRight = arrowWidth - 3` with `arrowWidth = 45`
+ *  (`ComponentRoseSelfArrow.java:59-60`): the loop's vertical stroke, from
+ *  the component origin (`:124-126`). */
+export const SELF_ARROW_X_RIGHT = 42;
+
+/** A self message's label: `getTextBlock().drawU(ug.apply(UTranslate.dx(
+ *  getOldPaddingX1())))` (`ComponentRoseSelfArrow.java:88`) on the
+ *  component origin -- never on the outgoing segment's `deltaX1` start. */
+export function selfLabelLeft(endpoints: MessageEndpoints): number {
+  return (endpoints.selfOriginX ?? endpoints.fromX) + ARROW_LABEL_PADDING_X1;
 }
 
 /**
@@ -94,14 +111,19 @@ function levelAfterBoundEvents(
  *
  * The two horizontal segments then split by `deltaX1`, and they split even
  * when nothing is live: `x2`'s `: 1` fallback puts the returning segment one
- * pixel right of the outgoing one unconditionally.
+ * pixel right of the outgoing one unconditionally. Only the outgoing segment
+ * moves by a negative `deltaX1`; the vertical stroke stays at `xRight` and the
+ * label at `getOldPaddingX1()`, both from the component origin `x1`
+ * (`ComponentRoseSelfArrow.java:88,91-93,124-126`). The port carries that
+ * origin as `selfOriginX` and the vertical stroke's x as `toX`.
  *
- * Jar-verified end to end. `jobadi-87-jegi648` (`activate Bob` then
- * `Bob -> Bob`, levels 1 and 1): base `29.469 + 5`, `deltaX1 = 0`, so
- * `34.469` and `35.469` — the golden's two segments exactly.
- * `gesiba-07-rise357` (`B -> B ++` inside `A -> B ++`, levels 1 and 2):
- * base `55.044 + 5 + 5`, `deltaX1 = -5`, so `60.044` and `66.044` — again
- * exactly the golden's, and the head tip sits on the second.
+ * `jobadi-87-jegi648` (`activate Bob` then `Bob -> Bob`, levels 1 and 1):
+ * base `29.469 + 5`, `deltaX1 = 0`, so `34.469` and `35.469` — the golden's
+ * two segments. `gesiba-07-rise357` (`B -> B ++` inside `A -> B ++`, levels 1
+ * and 2): base `55.044 + 5 + 5`, `deltaX1 = -5`, so the segments at `60.044`
+ * and `66.044` -- but the loop end and label on `65.044`, which the earlier
+ * reading of this code (both from `60.044`) did not match: the golden still
+ * diffed there (sdd2 research C, SELFX).
  *
  * NOT ported: `isReverseDefine()`, i.e. a self message written `A <- A`.
  * Upstream skips the `x1` shift entirely for it and hands the whole job to
@@ -123,11 +145,11 @@ export function liveOffsetSelf(
   if (levelIgnore < levelConsidere) base += LIVE_DELTA_SIZE * (levelConsidere - levelIgnore);
 
   const deltaX1 = (levelIgnore - levelConsidere) * LIVE_DELTA_SIZE;
-  const fromX = base + (deltaX1 < 0 ? deltaX1 : 0);
   return {
     ...endpoints,
-    fromX,
-    toX: endpoints.toX + (fromX - endpoints.fromX),
+    fromX: base + (deltaX1 < 0 ? deltaX1 : 0),
+    toX: base + SELF_ARROW_X_RIGHT,
     selfReturnX: base + (deltaX1 > 0 ? -deltaX1 : 1),
+    selfOriginX: base,
   };
 }

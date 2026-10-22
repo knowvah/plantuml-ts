@@ -37,7 +37,7 @@
  * @see ~/git/plantuml/.../sequencediagram/graphic/MessageExoArrow.java
  */
 
-import type { MessageExoEvent, MessageExoType, MessageGeo } from './ast.js';
+import type { ActivationEvent, MessageExoEvent, MessageExoType, MessageGeo } from './ast.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
 import { activationLevel } from './sequence-layout-events.js';
@@ -45,7 +45,8 @@ import { ARROW_PADDING_X, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
 import { atomFontSpec } from './sequence-creole-text-atom.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { SequencePaint } from './sequence-skin-param.js';
-import { messageTileAdvance } from './sequence-layout-message.js';
+import { messageTileAdvance, type PlacedTile } from './sequence-layout-message.js';
+import { messageTileGaugeOf, type TileMetrics } from './sequence-y-gauge.js';
 import {
   MESSAGE_NUMBER_MARGIN,
   messageLabelBlock,
@@ -195,11 +196,11 @@ function exoSpan(event: MessageExoEvent, posC: number, ctx: EventProcessingConte
   // could not count past one; the stack can, so this is now the number
   // upstream reads.
   //
-  // An exo message has ONE participant and no `activates` field of its own
-  // (the `+`/`-` suffix is emitted as a separate `ActivationEvent` AFTER
-  // this message, `command-exo-arrow.ts`), so there is no future-activate
-  // term to add: the stack already holds everything bound before it.
-  const level = activationLevel(ctx.activationStart, event.participant);
+  // `CommunicationExoTile.java:128` reads the level with
+  // IGNORE_FUTURE_DEACTIVATE, which counts the activates bound to this message
+  // (`LiveBoxes.java:164-170`): `ctx.lastMessageLevels`, set just above.
+  const level =
+    ctx.lastMessageLevels?.get(event.participant) ?? activationLevel(ctx.activationStart, event.participant);
   if (level > 0) {
     if (right) x1 += LIVE_DELTA_SIZE * level;
     else x2 += LIVE_DELTA_SIZE * (level - 2);
@@ -269,44 +270,69 @@ function buildExoGeo(
 }
 
 /**
- * Lay one exo message out and advance the cursor, on the same vertical
- * rhythm as a between-lifelines message: a multi-line label grows UPWARD from
- * its arrow, so its extra rows are reserved before the arrow is placed.
+ * The arrow component's `getYPoint` and `getPreferredHeight` an exo tile feeds
+ * its gauge (`CommunicationExoTile.java:81-84,93-95,155-159`).
  *
- * `cursor.lastMessageY` is set for the same reason `handleMessageEvent` sets
- * it — the parser emits an exo message's `+`/`-` activation as separate
- * `ActivationEvent`s around it, and `handleActivateEvent` starts the bar at
- * `lastMessageY`. Leaving it unset would start every exo-triggered bar one
- * message-spacing BELOW its own arrow.
+ * `CommunicationExoTile#getComponent:97-104` builds a `ComponentRoseArrow`, the
+ * same component a between-lifelines message uses, so its tile has the same
+ * height and the same contact point and `messageTileAdvance` is shared, not
+ * duplicated. The font is the arrow style's for the same reason it is there.
+ * An exo arrow is `ComponentRoseArrow`, never the self component: its
+ * direction is never SELF (`CommunicationExoTile.java:96-98,107`).
+ * `undefined` when the participant is unknown: the port builds no tile.
  */
-export function handleMessageExoEvent(event: MessageExoEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
+export function exoTileMetrics(event: MessageExoEvent, ctx: EventProcessingContext): TileMetrics | undefined {
+  if (!ctx.participantMap.has(event.participant)) return undefined;
+  const advance = exoAdvanceOf(event, exoPaintOf(event), ctx);
+  return { contactRelative: advance.arrowY, height: advance.tileHeight };
+}
+
+function exoPaintOf(event: MessageExoEvent): SequencePaint {
+  return messagePaint(event.styleBuilder, event.stereotype, event.arrow, false);
+}
+
+function exoAdvanceOf(event: MessageExoEvent, paint: SequencePaint, ctx: EventProcessingContext) {
+  const lineHeight = ctx.measurer.measure('M', atomFontSpec(paint.font)).height;
+  return messageTileAdvance(messageLabelRows(event.label, numberTextOf(event)) * lineHeight, false);
+}
+
+/**
+ * Lay one exo message out on the tile `TileBuilder` placed
+ * (`TileBuilder.java:123-127`): the arrow `contactRelative` below the gauge's
+ * min, the cursor on its max.
+ *
+ * `ctx.lastMessageLevels` is the level a note wrapper reads:
+ * `livingSpace.getLevelAt(this, IGNORE_FUTURE_DEACTIVATE)`
+ * (`CommunicationTileNoteRight.java:125`), the stack plus every `activate`
+ * bound to this message (`LiveBoxes.java:130-135`).
+ */
+export function handleMessageExoEvent(
+  event: MessageExoEvent,
+  tile: PlacedTile,
+  cursor: EventCursor,
+  ctx: EventProcessingContext,
+  bound: readonly ActivationEvent[] = [],
+): void {
   const participant = ctx.participantMap.get(event.participant);
-  // Skip gracefully if the participant is unknown, as `handleMessageEvent` does.
+  // `exoTileMetrics` built no tile for an unknown participant.
   if (participant === undefined) return;
 
   // An exo message is an `AbstractMessage` too, so it is a `destroy`'s binding
   // target on the same terms (`SequenceDiagram.java:204`).
   ctx.lastMessageParticipants = [event.participant];
+  const futureActivates = bound.filter((b) => b.kind === 'activate' && b.participantId === event.participant);
+  ctx.lastMessageLevels = new Map([
+    [event.participant, activationLevel(ctx.activationStart, event.participant) + futureActivates.length],
+  ]);
 
-  // `CommunicationExoTile#getComponent:97-104` builds a `ComponentRoseArrow`,
-  // the same component a between-lifelines message uses, so its tile has the
-  // same height and the same contact point -- `getPreferredHeight:155-159` is
-  // the component's own dimension and `getContactPointRelative:93-95` its
-  // `getYPoint`. `messageTileAdvance` is therefore shared, not duplicated.
-  // The font is the arrow style's for the same reason it is there. An exo
-  // arrow is `ComponentRoseArrow`, never the self component: its direction is
-  // never SELF (`CommunicationExoTile.java:96-98,107`).
-  const paint = messagePaint(event.styleBuilder, event.stereotype, event.arrow, false);
-  const lineHeight = ctx.measurer.measure('M', atomFontSpec(paint.font)).height;
-  const rows = messageLabelRows(event.label, numberTextOf(event));
-  const advance = messageTileAdvance(rows * lineHeight, false);
-
-  const geoY = cursor.y + advance.arrowY;
+  const paint = exoPaintOf(event);
+  const advance = exoAdvanceOf(event, paint, ctx);
+  const top = tile.gauge.min;
   const span = exoSpan(event, participant.centerX, ctx, paint.font);
-  const messageGeo = buildExoGeo(event, span, geoY, ctx, paint);
+  const messageGeo = buildExoGeo(event, span, top + advance.arrowY, ctx, paint);
   ctx.eventGeos.push(messageGeo);
-  cursor.lastMessageY = messageGeo.y;
-  cursor.y += advance.tileHeight;
+  ctx.messageTileGauges?.set(event, messageTileGaugeOf(tile.gauge, tile.metrics));
+  cursor.y = tile.gauge.max;
 }
 
 // ---------------------------------------------------------------------------

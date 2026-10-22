@@ -17,6 +17,7 @@ import { describe, expect, it } from 'vitest';
 import { SEQUENCE_COMMANDS, type SequenceCommand } from '../../../src/diagrams/sequence/sequence-command-registry.js';
 import { arrowCommand, decoratedArrowCommand, returnCommand } from '../../../src/diagrams/sequence/command-arrow.js';
 import { exoArrowLeftCommand, exoArrowRightCommand } from '../../../src/diagrams/sequence/command-exo-arrow.js';
+import { linkAnchorCommand } from '../../../src/diagrams/sequence/command-link-anchor.js';
 import {
   autonumberCommand,
   autonumberIncrementCommand,
@@ -133,6 +134,7 @@ const EXPECTED: readonly RegistryEntry[] = [
   { name: 'decoratedArrowCommand', command: decoratedArrowCommand, upstreamLine: 111 },
   { name: 'exoArrowLeftCommand', command: exoArrowLeftCommand, upstreamLine: 113 },
   { name: 'exoArrowRightCommand', command: exoArrowRightCommand, upstreamLine: 114 },
+  { name: 'linkAnchorCommand', command: linkAnchorCommand, upstreamLine: 155 },
 ];
 
 /**
@@ -189,14 +191,14 @@ describe('sequence command registry — frozen registration order', () => {
     );
   });
 
-  it('holds 46 commands — one array, not two tiers', () => {
-    expect(SEQUENCE_COMMANDS).toHaveLength(46);
-    expect(new Set(SEQUENCE_COMMANDS).size).toBe(46);
+  it('holds 47 commands — one array, not two tiers', () => {
+    expect(SEQUENCE_COMMANDS).toHaveLength(47);
+    expect(new Set(SEQUENCE_COMMANDS).size).toBe(47);
   });
 
   it('cites only lines inside initCommandsList (99-155) upstream', () => {
     const cited = EXPECTED.map((e) => e.upstreamLine).filter((l): l is number => l !== null);
-    expect(cited).toHaveLength(45);
+    expect(cited).toHaveLength(46);
     expect(cited.filter((l) => l < 99 || l > 155)).toEqual([]);
   });
 

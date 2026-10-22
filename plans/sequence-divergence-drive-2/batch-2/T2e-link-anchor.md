@@ -33,3 +33,6 @@ only), `renderer.ts` (call the draw pass where `PlayingSpace` does),
 - Given the 3 targets, then 0 structural sites; residual numbers journaled.
 - Given the draw order, then the anchor is emitted where
   `PlayingSpace.java:129-134` emits it.
+
+## Added at T2a hand-back (journal row 24)
+Write-set + `src/diagrams/sequence/layout.ts`: `layoutSequence` must carry T2a's gauge map (`messageTileGauge(source, event)` over `EventProcessingContext.messageTileGauges`, module `sequence-y-gauge.ts`) out to the renderer. A self message's `contactY` is the loop middle.

@@ -1,0 +1,15 @@
+@startuml
+!pragma teoz true
+participant Customer_P2Y
+participant DAW_P2Y
+participant Customer_RMN
+participant DAW_RMN
+
+activate Customer_P2Y #red
+activate Customer_RMN #FFBBBB
+Customer_P2Y -> DAW_P2Y: Besoin_P2Y
+& Customer_RMN -> DAW_RMN: Besoin_RMN
+
+deactivate Customer_P2Y
+deactivate Customer_RMN
+@enduml

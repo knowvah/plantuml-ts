@@ -41,9 +41,14 @@ export interface NoteEvent {
    *  `CommunicationTileNote*` wrappers (`teoz/TileBuilder.java:121-137`) rather
    *  than by `NoteTile`. */
   onMessage?: true;
+  /** Which of `note top` / `note bottom` a note on a message was written
+   *  with -- both are `position: 'over'` here; upstream's `NotePosition.TOP`
+   *  / `BOTTOM` pick `CommunicationTileNoteTop` / `...Bottom`
+   *  (`teoz/TileBuilder.java:117-120`). Absent on every other note. */
+  side?: 'top' | 'bottom';
   /** The `&` PARALLEL marker (`FactorySequenceNoteCommand.java:231,249-251`,
-   *  `note.goParallel()`). Stored, not drawn — see
-   *  {@link AbstractMessageEvent}'s doc comment and D4. */
+   *  `note.goParallel()`): the `NoteTile` centres on the previous tile's
+   *  arrow line (`NoteTile.java:72-74,94-97`). */
   parallel?: boolean;
   /** The `<<...>>` run as written, guillemets included — upstream's
    *  `STEREO` group, `note.setStereotype(...)` at

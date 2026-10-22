@@ -147,7 +147,7 @@ function withDashAndFont(
  * message's own builder. Jar-verified on `duzico-51-misi485` (`#?black:
  * white` over darkblue draws the label `#FFF`).
  */
-function labelFont(style: Style, builder: StyleBuilder): FontConfiguration {
+export function labelFont(style: Style, builder: StyleBuilder): FontConfiguration {
   const back = (): HColor =>
     StyleSignatureBasic.of('root', 'document', 'sequenceDiagram')
       .getMergedStyle(builder)!

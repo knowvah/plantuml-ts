@@ -11,12 +11,12 @@ each sub-batch, run the golden ratchet + classify, then start the next.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T2a](T2a-notemsg-parallel.md) | 2a · notes beside their message + `&` parallel via YGauge | typescript-pro (opus) | `sequence-layout-events.ts`, `sequence-layout-note.ts`, `sequence-layout-message.ts`, `sequence-layout-exo.ts`, new `sequence-y-gauge.ts`, `ast*.ts` + tests | B1 | [ ] |
-| [T2b](T2b-livebox-stairs.md) | 2b · activation stairs via LiveBoxes + self-message x | typescript-pro (opus) | new `sequence-live-boxes.ts`, `sequence-layout-life-event.ts`, `sequence-layout-activation.ts`, `sequence-layout-message-self.ts`, `renderer-message.ts`, `sequence-layout-message.ts` (activation hand-off only) + tests | T2a | [ ] |
-| [T2c](T2c-note-tiles.md) | 2b · `/ note` merge, top/bottom note line, note order | typescript-pro (sonnet) | `sequence-note-tile.ts`, `renderer-note.ts`, vmerge section of `sequence-layout-note.ts` + tests | T2a | [ ] |
-| [T2d](T2d-inclination-response.md) | 2c · `->(N)` inclination, response-below | typescript-pro (sonnet) | `sequence-layout-message.ts` + tests | T2b | [ ] |
-| [T2e](T2e-link-anchor.md) | 2c · `{a} <-> {b}` LinkAnchor | typescript-pro (sonnet) | new `command-link-anchor.ts`, new `renderer-link-anchor.ts`, `sequence-command-registry.ts`, `renderer.ts`, `ast.ts` + tests | T2a | [ ] |
-| close | standard close **with the all-engine survey**, pin round 2 | orchestrator | per close-procedure | T2a–T2e | [ ] |
+| [T2a](T2a-notemsg-parallel.md) | 2a · notes beside their message + `&` parallel via YGauge | typescript-pro (opus) | `sequence-layout-events.ts`, `sequence-layout-note.ts`, `sequence-layout-message.ts`, `sequence-layout-exo.ts`, new `sequence-y-gauge.ts`, `ast*.ts` + tests | B1 | [x] |
+| [T2b](T2b-livebox-stairs.md) | 2b · activation stairs via LiveBoxes + self-message x | typescript-pro (opus) | new `sequence-live-boxes.ts`, `sequence-layout-life-event.ts`, `sequence-layout-activation.ts`, `sequence-layout-message-self.ts`, `renderer-message.ts`, `sequence-layout-message.ts` (activation hand-off only) + tests | T2a | [x] |
+| [T2c](T2c-note-tiles.md) | 2b · `/ note` merge, top/bottom note line, note order | typescript-pro (sonnet) | `sequence-note-tile.ts`, `renderer-note.ts`, vmerge section of `sequence-layout-note.ts` + tests | T2a | [x] |
+| [T2d](T2d-inclination-response.md) | 2c · `->(N)` inclination, response-below | typescript-pro (sonnet) | `sequence-layout-message.ts` + tests | T2b | [x] |
+| [T2e](T2e-link-anchor.md) | 2c · `{a} <-> {b}` LinkAnchor | typescript-pro (sonnet) | new `command-link-anchor.ts`, new `renderer-link-anchor.ts`, `sequence-command-registry.ts`, `renderer.ts`, `ast.ts` + tests | T2a | [x] |
+| close | standard close **with the all-engine survey**, pin round 2 | orchestrator | per close-procedure | T2a–T2e | [x] |
 
 Paths under `src/diagrams/sequence/`. T2b and T2c share no file; T2c edits
 only the vmerge section of `sequence-layout-note.ts`, which T2a owned and

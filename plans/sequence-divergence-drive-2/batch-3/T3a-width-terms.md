@@ -47,3 +47,13 @@ predictor.mts`; both write-set files (whole); `sequence-live-boxes.ts`
 - Given the label loop deleted, then fuliko's width is 152 (test).
 - Given the targets, then each is zero-diff or journaled; the 7 pinned
   self-message rows do not change.
+
+## Added at T2a hand-back (journal row 24)
+`&` sibling x-disjointness (`PlayingSpace.java:167-260`, participant constraints) — verify and port if a fixture shows it.
+
+## Added at T2c hand-back (journal row 28)
+Write-set + `src/diagrams/sequence/sequence-note-anchor.ts`: `selfMaxX` must add the LiveBoxes posC2 term (`CommunicationTileSelf.getMaxX` = posC2 + compWidth, posC2 = posC + `LiveBoxes.getMaxPosition`, `LiveBoxes.java:347-372`). masibi: every right note after a self message on Bob is 5 short.
+
+## Added at T2e hand-back (journal row 38)
+- Exo left-border constraint: `CommunicationExoTile.java:176-181` `posC.ensureBiggerThan(xOrigin + preferredWidth)` for every non-right-border exo; skipped at `sequence-layout-participant-constraints.ts:111-120`. fojomu-60: Bob at 29 vs jar 223 (193.681 shift). Check other exo rows with long labels.
+- Link anchor self `getMiddleX` lacks posC2 (`sequence-layout-link-anchor.ts`; `CommunicationTileSelf.java:259-277`).

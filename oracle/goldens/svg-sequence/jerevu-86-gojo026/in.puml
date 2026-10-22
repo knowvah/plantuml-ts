@@ -1,0 +1,9 @@
+@startuml 
+participant C
+participant S
+autonumber
+C ->x S : GET()
+rnote left: Un-Auth Resource REQ
+S -> C : 4.01
+rnote right: Un-auth REQ + SAI
+@enduml

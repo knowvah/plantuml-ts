@@ -1,0 +1,9 @@
+@startuml
+participant myclass
+activate myclass
+myclass -> class2: test()
+myclass -> myclass: call1()
+activate myclass
+myclass -> class2: test()
+deactivate myclass
+@enduml

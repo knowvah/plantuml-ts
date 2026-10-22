@@ -634,9 +634,13 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
    *  absolutely on `jobadi-87-jegi648`, whose loop runs 34.469 to 76.469. */
   const LOOP_RIGHT_X = SELF_X + 42;
 
+  /** A self message's `toX` is that vertical stroke's x, measured by layout
+   *  from the component origin (`sequence-layout-message-self.ts`). */
   function selfGeo(style: RenderStyle): SequenceGeometry {
     return makeGeo({
-      events: [makeSyncMessage({ arrow: arrowOf(style), arrowDirection: 'self', fromX: SELF_X, toX: 110, y: SELF_Y })],
+      events: [
+        makeSyncMessage({ arrow: arrowOf(style), arrowDirection: 'self', fromX: SELF_X, toX: LOOP_RIGHT_X, y: SELF_Y }),
+      ],
     });
   }
 

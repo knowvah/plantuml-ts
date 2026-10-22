@@ -1,0 +1,9 @@
+@startuml
+activate A
+activate B
+A -> B: right arrow
+note right: hello, world
+B -> A: left arrow
+deactivate A
+deactivate B
+@enduml

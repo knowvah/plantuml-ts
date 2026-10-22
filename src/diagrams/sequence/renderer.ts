@@ -34,6 +34,7 @@ import { resolveScaleFactor } from '../../core/scale-command.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { fmt } from '../../core/svg-format.js';
 import { renderMessage } from './renderer-message.js';
+import { renderLinkAnchors } from './renderer-link-anchor.js';
 import { renderParticipantBox, renderFooterBox } from './renderer-participant-shapes.js';
 import { lifelineOf, renderDestroyCrosses, renderLifelinePass, type LiveboxItem } from './renderer-lifeline.js';
 import { renderFrameBlotter } from './renderer-frame-blotter.js';
@@ -53,7 +54,7 @@ import { scaleSequenceGeometry, scaleSequenceTheme } from './scale-geo.js';
 import { paginateSequence } from './sequence-page.js';
 import { SEQUENCE_DOCUMENT_MARGIN } from '../../core/document-margin.js';
 import { sequenceShadowDefs } from './sequence-shadow.js';
-import { renderBoxBackground, renderNote } from './renderer-note.js';
+import { renderBoxBackground, renderNote, renderNoteBackground } from './renderer-note.js';
 import { NEWPAGE_MARGIN_Y } from './newpage-style.js';
 
 /**
@@ -235,7 +236,8 @@ function renderEvent(event: EventGeo, theme: ScaledTheme, isBackground: boolean)
   if (event.kind === 'frame') {
     return isBackground ? renderFrameBackground(event, theme) : renderFrame(event, theme);
   }
-  return isBackground ? '' : renderForeground(event, theme);
+  if (isBackground) return event.kind === 'note' ? renderNoteBackground(event, theme) : '';
+  return renderForeground(event, theme);
 }
 
 /** The foreground pass for every kind but `frame` (handled above). */
@@ -391,6 +393,9 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
   //    109-117`), differing only in the `isBackground` flag `renderEvent`
   //    now takes. Everything but a frame's own band+outline is silent here.
   children.push(...renderEventPass(scaledGeo.events, scaledTheme, true));
+  //    The link anchors close `drawUInternal` after its tile loop
+  //    (`PlayingSpace.java:129-134`), in this pass as in step 5.
+  children.push(renderLinkAnchors(scaledGeo.linkAnchors, scaledTheme));
 
   // 2. Lifelines AND liveboxes -- one pass, per participant.
   //    `PlayingSpaceWithParticipants#drawU:221` calls
@@ -433,6 +438,7 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
   //    `playingSpace.drawForeground(ugBody)` (`:227`), the LAST of the five
   //    passes. Activations are absent here by design; see step 2.
   children.push(...renderEventPass(scaledGeo.events, scaledTheme, false));
+  children.push(renderLinkAnchors(scaledGeo.linkAnchors, scaledTheme));
 
   const shadowDefs = sequenceShadowDefs(scaledGeo, scaledTheme);
   return {

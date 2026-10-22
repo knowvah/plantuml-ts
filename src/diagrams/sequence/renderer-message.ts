@@ -24,20 +24,6 @@ import { messagePaintOf } from './sequence-arrow-paint.js';
 // ---------------------------------------------------------------------------
 
 /**
- * The self-message loop's horizontal reach: where the vertical stroke goes.
- *
- * `xRight = arrowWidth - 3` with `arrowWidth = 45`
- * (`ComponentRoseSelfArrow.java:59-60`), and `drawRightSide:124-126` draws the
- * three strokes as `hline(xRight - x1)`, `vline(arrowHeight)` at `xRight`, and
- * `hline(xRight - x2)` — so the drawn extent is **42**, not `arrowWidth`.
- *
- * Gap SQ-5 recorded this as "40 vs 45". Measured absolutely against the jar in
- * Batch 8 of `plans/sequence-coordinate-convergence`, the gap was 40 vs 42:
- * `jobadi-87-jegi648`'s loop runs `x1="34.469"` to `x2="76.469"`, and 42 puts
- * this port's on it exactly.
- */
-const SELF_LOOP_WIDTH = 42;
-/**
  * The loop's vertical drop. Upstream's is `getArrowOnlyHeight()` = **13**
  * (`ComponentRoseSelfArrow.java:321-323`), drawn as `vline(arrowHeight)`
  * (`:125`), and `jobadi-87-jegi648`'s golden drops `y1="53"` to `y2="66"`.
@@ -88,11 +74,12 @@ function renderSelfMessage(msg: MessageGeo, configuration: ArrowConfiguration, t
   // fallback covers a hand-authored geometry that predates the field.
   const xBack = msg.selfReturnX ?? x1;
   const y1 = msg.y;
-  const loopWidth = SELF_LOOP_WIDTH * k;
   const loopHeight = SELF_LOOP_HEIGHT * k;
-  // `xRight = arrowWidth - 3` (`ComponentRoseSelfArrow.java:59-60`), which is
-  // what {@link SELF_LOOP_WIDTH} measures from the outgoing segment's start.
-  const xRight = x1 + loopWidth;
+  // `xRight = arrowWidth - 3` (`ComponentRoseSelfArrow.java:59-60`) from the
+  // COMPONENT origin, not from the outgoing segment's start, which a
+  // negative `deltaX1` moves left (`:91-93,124-126`): the layout carries it
+  // as `toX` (`sequence-layout-message-self.ts#liveOffsetSelf`).
+  const xRight = msg.toX;
   const yBottom = y1 + loopHeight;
   // The deprecated `applyStroke(ug)` (`ComponentRoseSelfArrow.java:81`): the
   // style's thickness, 2,2 when dotted, and never the style's `LineStyle`

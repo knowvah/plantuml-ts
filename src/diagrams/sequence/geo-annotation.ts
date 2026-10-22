@@ -16,6 +16,23 @@
 import type { NoteShape } from './ast.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import type { TextRun } from './text-block-geo.js';
+import type { Paint } from '../../core/paint.js';
+import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+
+/**
+ * The dashed line `CommunicationTileNoteTop`/`...Bottom` draw from the
+ * message to its note (`CommunicationTileNoteBottomTopAbstract.drawLine`,
+ * `:70-79`): `UStroke(2, 2, 1)` in the sequence root's `LineColor`, drawn
+ * right after the note.
+ */
+export interface NoteConnector {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  /** The root/element/sequenceDiagram style's paint (`:72-74`). */
+  readonly paint: SequencePaint;
+}
 
 export interface NoteGeo {
   /**
@@ -47,6 +64,8 @@ export interface NoteGeo {
    *  the component's whole preferred width -- not the drawn polygon's. */
   minX: number;
   maxX: number;
+  /** A `note top`/`note bottom` on a message: the line to the message. */
+  connector?: NoteConnector;
 }
 
 export interface DividerGeo {
@@ -214,4 +233,23 @@ export interface LifelineSegment {
   y2: number;
   delay: boolean;
   clippedOut?: boolean;
+}
+
+/** One drawn link, in unscaled layout coordinates. */
+export interface LinkAnchorGeo {
+  /** The worm's x (`LinkAnchor.java:98`). */
+  readonly x: number;
+  /** Its first point's y, `ymin + 2` -- where the START (up) head sits. */
+  readonly yStart: number;
+  /** Its last point's y, `ymax - 2` -- where the END (down) head sits. */
+  readonly yEnd: number;
+  readonly stroke: Paint;
+  /** `Worm.java:128-129`: the `activityDiagram arrow` style's stroke. */
+  readonly thickness: number;
+  readonly dash: readonly [number, number] | undefined;
+  /** The label, centred lines placed against the worm; empty when it has none. */
+  readonly labelRuns: readonly TextRun[];
+  /** The label's font, which the renderer's fallbacks for a run that sets
+   *  none (`renderer-divider.ts` precedent). */
+  readonly font: FontConfiguration;
 }

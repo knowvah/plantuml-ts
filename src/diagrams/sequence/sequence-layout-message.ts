@@ -17,13 +17,17 @@
 
 import type { ActivationEvent, MessageEvent, MessageGeo, ParticipantGeo } from './ast.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
-import { activationLevel, pushActivation } from './sequence-layout-events.js';
+import { activationLevel } from './sequence-layout-events.js';
+import { popActivation, pushActivation, recordMessageStep, type ArrowEnds } from './sequence-layout-activation.js';
 import { LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
-import { liveOffsetSelf, type MessageEndpoints } from './sequence-layout-message-self.js';
+import { liveOffsetSelf, selfLabelLeft, type MessageEndpoints } from './sequence-layout-message-self.js';
 import { atomFontSpec } from './sequence-creole-text-atom.js';
 import type { SequencePaint } from './sequence-skin-param.js';
-import { markCreated, withCreateEnd } from './sequence-layout-create.js';
-import { closeMessageActivation, handleDestroy, messageDestroyCrosses } from './sequence-layout-life-event.js';
+import { inclination1Of, inclination2Of } from './sequence-arrowhead.js';
+import { reverseArrowConfiguration } from './renderer-arrowhead.js';
+import { createTileHeight, markCreated, withCreateEnd } from './sequence-layout-create.js';
+import { messageTileGaugeOf, type TileMetrics, type YGauge } from './sequence-y-gauge.js';
+import { handleDestroy, messageDestroyCrosses } from './sequence-layout-life-event.js';
 import { messagePaint } from './sequence-arrow-paint.js';
 import {
   ARROW_LABEL_HEAD_CLEARANCE,
@@ -33,15 +37,78 @@ import {
   numberTextOf,
 } from './text-block-geo.js';
 
+/** A message tile as `TileBuilder.buildOne` hands it on: its gauge in the
+ *  chain and the metrics that gauge was built from. */
+export interface PlacedTile {
+  readonly gauge: YGauge;
+  readonly metrics: TileMetrics;
+}
+
+/**
+ * The two numbers a `CommunicationTile`/`CommunicationTileSelf` feeds its
+ * gauge (`CommunicationTile.java:97-117`, `CommunicationTileSelf.java:87-90`):
+ * the arrow component's `getYPoint` and the tile's `getPreferredHeight`, which
+ * for a `create` message is at least the created head's height (`:395-402`).
+ * `undefined` for a message this port skips (an unknown participant), which
+ * builds no tile.
+ */
+export function messageTileMetrics(event: MessageEvent, ctx: EventProcessingContext): TileMetrics | undefined {
+  const toGeo = ctx.participantMap.get(event.to);
+  if (!ctx.participantMap.has(event.from) || toGeo === undefined) return undefined;
+  const isSelf = event.from === event.to;
+  const blockH = labelBlockHeightOf(
+    event,
+    messagePaint(event.styleBuilder, event.stereotype, event.arrow, isSelf),
+    ctx,
+  );
+  const incl = inclinationsOf(event, ctx);
+  const advance = messageTileAdvance(blockH, isSelf, incl.incl1 + incl.incl2);
+  const height = event.create === true ? createTileHeight(advance.tileHeight, toGeo) : advance.tileHeight;
+  return { contactRelative: isSelf ? selfArrowYPoint(blockH) : advance.arrowY, height };
+}
+
+/**
+ * `ComponentRoseSelfArrow#getYPoint` (`:309-313`): `(textHeight +
+ * textAndArrowHeight) / 2 + getPaddingX()`, the middle of the loop's drop --
+ * NOT where its first stroke is drawn (`getTextHeight + getPaddingY`,
+ * `getStartPoint:298-301`). `getPaddingX()` is `AbstractComponent`'s 0
+ * (`AbstractComponent.java:151-153`; the arrow overrides only `getPaddingY`).
+ * It is the self tile's contact point (`CommunicationTileSelf.java:74-77`),
+ * which a `&` group aligns.
+ */
+export function selfArrowYPoint(blockH: number): number {
+  const textHeight = blockH + 2 * ARROW_TEXT_PADDING_Y;
+  return (textHeight + (textHeight + SELF_ARROW_ONLY_HEIGHT)) / 2 + SELF_ARROW_PADDING_X;
+}
+
+/** `AbstractComponent#getPaddingX` (`:151-153`), which no arrow component
+ *  overrides. */
+const SELF_ARROW_PADDING_X = 0;
+
+/** The label block's height measured in the arrow style's font (13 by
+ *  default, not the ambient 14) -- the font `messageLabelBlock` draws with, so
+ *  reserve and draw cannot disagree (`planning/sizer-renderer-parity.md`). */
+function labelBlockHeightOf(event: MessageEvent, paint: SequencePaint, ctx: EventProcessingContext): number {
+  const lineHeight = ctx.measurer.measure('M', atomFontSpec(paint.font)).height;
+  return messageLabelRows(event.label, numberTextOf(event)) * lineHeight;
+}
+
+/**
+ * Lay one message out on the tile `TileBuilder` placed: the arrow sits
+ * `contactRelative` below the gauge's `min` (`CommunicationTile#drawU`
+ * translates by the gauge min, `AbstractComponent#drawU:142-143` by
+ * `getPaddingY`), and the cursor stands on the gauge's `max`.
+ */
 export function handleMessageEvent(
   event: MessageEvent,
+  tile: PlacedTile,
   cursor: EventCursor,
   ctx: EventProcessingContext,
   bound: readonly ActivationEvent[] = [],
 ): void {
   const fromGeo = ctx.participantMap.get(event.from);
   const toGeo = ctx.participantMap.get(event.to);
-  // Skip gracefully if either participant is unknown
+  // `messageTileMetrics` built no tile for an unknown participant.
   if (fromGeo === undefined || toGeo === undefined) return;
 
   // `addMessage` sets `lastEventWithDeactivate = m` (`SequenceDiagram.java:
@@ -49,36 +116,50 @@ export function handleMessageEvent(
   const participants = [event.from, event.to];
   ctx.lastMessageParticipants = participants;
 
-  const resolved = withCreateEnd(event, resolveMessageEndpoints(event, fromGeo, toGeo, ctx), toGeo);
-  const endpoints = liveOffsetEndpoints(resolved, event, ctx, bound);
-  ctx.lastMessageLevels = new Map(
-    [event.from, event.to].map((id) => [id, liveLevelAt(id, event, ctx, bound)] as const),
-  );
+  const endpoints = messageEndpointsOf(event, fromGeo, toGeo, ctx, bound);
   // `message.getUsedStyles()` at tile time (`CommunicationTile.java:163`,
   // `CommunicationTileSelf.java:106`) over the builder captured at the
   // command (`AbstractMessage.java:89-97`).
   const paint = messagePaint(event.styleBuilder, event.stereotype, event.arrow, endpoints.arrowDirection === 'self');
-  // The ARROW style's font (13 by default), not the ambient 14 -- the font
-  // `messageLabelBlock` draws with, so reserve and draw cannot disagree
-  // (`planning/sizer-renderer-parity.md`).
-  const lineHeight = ctx.measurer.measure('M', atomFontSpec(paint.font)).height;
-  const rows = messageLabelRows(event.label, numberTextOf(event));
-  const advance = messageTileAdvance(rows * lineHeight, endpoints.arrowDirection === 'self');
-
-  const messageGeo = buildMessageGeo(event, endpoints, cursor.y + advance.arrowY, ctx, paint);
-  const tileHeight = event.create === true ? markCreated(messageGeo, toGeo, cursor.y, advance.tileHeight) : null;
+  const top = tile.gauge.min;
+  const incl = inclinationsOf(event, ctx);
+  const advance = messageTileAdvance(
+    labelBlockHeightOf(event, paint, ctx),
+    event.from === event.to,
+    incl.incl1 + incl.incl2,
+  );
+  const messageGeo = buildMessageGeo(event, endpoints, top + advance.arrowY, ctx, paint);
+  if (event.create === true) markCreated(messageGeo, toGeo, top, advance.tileHeight);
   ctx.eventGeos.push(messageGeo);
-  cursor.lastMessageY = messageGeo.y;
-
-  cursor.y += tileHeight ?? advance.tileHeight;
+  ctx.messageTileGauges?.set(event, messageTileGaugeOf(tile.gauge, tile.metrics));
+  cursor.y = tile.gauge.max;
 
   // A self arrow's end point is `getArrowOnlyHeight` below its start
   // (`ComponentRoseSelfArrow.java:298-307`); a flat arrow's ends share its y.
   const loop = endpoints.arrowDirection === 'self' ? SELF_ARROW_ONLY_HEIGHT : 0;
-  const arrow = { start: messageGeo.y, end: messageGeo.y + loop, self: loop > 0 };
+  // A flat arrow's step is `getStartPoint().getY()` = `getYPoint + inclination2`
+  // (`CommunicationTile.java:194-198`, `ComponentRoseArrow.java:313-318`).
+  const stepY = messageGeo.y + (loop > 0 ? 0 : incl.incl2);
+  const arrow: ArrowEnds = { start: stepY, end: stepY + loop, self: loop > 0 };
   ctx.lastMessageCrosses = { of: participants, crosses: messageDestroyCrosses(event, arrow, bound, ctx) };
-  // Handle auto-activate/deactivate via ++ / -- shorthand on message
-  applyMessageActivation(event, messageGeo, cursor, ctx);
+  applyMessageActivation(event, arrow, cursor, ctx);
+}
+
+/** The arrow's two ends after the create edge and the live-box offsets, and
+ *  the two live levels a note wrapper written after it reads
+ *  (`ctx.lastMessageLevels`). */
+function messageEndpointsOf(
+  event: MessageEvent,
+  fromGeo: ParticipantGeo,
+  toGeo: ParticipantGeo,
+  ctx: EventProcessingContext,
+  bound: readonly ActivationEvent[],
+): MessageEndpoints {
+  const resolved = withCreateEnd(event, resolveMessageEndpoints(event, fromGeo, toGeo, ctx), toGeo);
+  ctx.lastMessageLevels = new Map(
+    [event.from, event.to].map((id) => [id, liveLevelAt(id, event, ctx, bound)] as const),
+  );
+  return liveOffsetEndpoints(resolved, event, ctx, bound);
 }
 
 /**
@@ -110,14 +191,36 @@ export function handleMessageEvent(
  * empty `Display`) — `jobadi-87-jegi648`'s bare `Bob -> Bob` puts its loop at
  * `y1="53"`, six below its tile top of 47.
  *
- * `inclination1`/`inclination2` are the `A ->(30) B` slanted forms, which this
- * port does not model; both are 0 for every other message.
+ * `inclination` is `inclination1 + inclination2` of the configuration the
+ * tile builds (`ComponentRoseArrow.getPreferredHeight:342-343`), the `A ->(30)
+ * B` slanted forms; 0 for every other message and for a self arrow, whose
+ * component reads none (`ComponentRoseSelfArrow:316-323`).
  */
-export function messageTileAdvance(blockH: number, isSelf: boolean): { arrowY: number; tileHeight: number } {
+export function messageTileAdvance(
+  blockH: number,
+  isSelf: boolean,
+  inclination = 0,
+): { arrowY: number; tileHeight: number } {
   const textHeight = blockH + 2 * ARROW_TEXT_PADDING_Y;
   const arrowY = textHeight + ARROW_PADDING_Y;
   const loop = isSelf ? SELF_ARROW_ONLY_HEIGHT : 0;
-  return { arrowY, tileHeight: textHeight + ARROW_DELTA_Y + loop + 2 * ARROW_PADDING_Y };
+  return { arrowY, tileHeight: textHeight + ARROW_DELTA_Y + loop + 2 * ARROW_PADDING_Y + inclination };
+}
+
+/**
+ * The two inclinations of the configuration the tile's component is built
+ * from: `message.getArrowConfiguration()`, `.reverse()`d when the tile is
+ * reverse (`CommunicationTile.getComponent:158-159`), read through
+ * `getInclination1/2` (`ComponentRoseArrow.java:68-69`). Reverse is
+ * `point1 > point2` (`CommunicationTile.isReverse:125-132`) -- the port's
+ * `'left'` direction. A self message has no inclination.
+ */
+function inclinationsOf(event: MessageEvent, ctx: EventProcessingContext): { incl1: number; incl2: number } {
+  if (event.arrow.inclination === undefined || event.from === event.to) return { incl1: 0, incl2: 0 };
+  const fromIdx = ctx.participantIndex.get(event.from) ?? 0;
+  const toIdx = ctx.participantIndex.get(event.to) ?? 0;
+  const config = fromIdx > toIdx ? reverseArrowConfiguration(event.arrow) : event.arrow;
+  return { incl1: inclination1Of(config), incl2: inclination2Of(config) };
 }
 
 /** `AbstractComponentRoseArrow:62` — `topRightBottomLeft(1, 7, 1, 7)`, the
@@ -187,7 +290,7 @@ function passthroughFields(
  * clearance term at all.
  */
 function labelLeftOf(event: MessageEvent, endpoints: MessageEndpoints): number {
-  if (endpoints.arrowDirection === 'self') return endpoints.fromX + ARROW_LABEL_PADDING_X1;
+  if (endpoints.arrowDirection === 'self') return selfLabelLeft(endpoints);
   // The component spans the arrow, so its origin is the LEFTMOST end whichever
   // way the message runs. `fromX`/`toX` are that origin, not the drawn line:
   // the renderer applies upstream's own `start += getArrowDeltaX() / 2` shift
@@ -347,30 +450,29 @@ function resolveMessageEndpoints(
   return { fromX, toX, arrowDirection };
 }
 
-/** Apply the `++`/`--` auto-activate/deactivate shorthand on a message. */
+/**
+ * The message tile's `onGaugeResolved` (`CommunicationTile.java:187-199`,
+ * `CommunicationTileSelf.java:113-126`) records its `LiveBoxes` step; its own
+ * `++`/`--`/`!!` are life events right after it (`CommandArrow
+ * #manageActivations`, `:444-466`), which move the walk's level once the
+ * arrow's geometry has read it. Where the bars start and end is `LiveBoxes`'
+ * (`sequence-layout-activation.ts`).
+ *
+ * `!!` is a DESTROY life event after the message, exactly as a `destroy` line
+ * there would be (`SequenceDiagram.java:369-371`): it closes the level
+ * (`LifeEvent#isDeactivateOrDestroy`) and its tile stops the lifeline.
+ */
 function applyMessageActivation(
   event: MessageEvent,
-  messageGeo: MessageGeo,
+  arrow: ArrowEnds,
   cursor: EventCursor,
   ctx: EventProcessingContext,
 ): void {
-  if (event.activates !== undefined) {
-    // Activation starts at the arrow y, not after the post-arrow spacing
-    // advance. LIFECOLOR rides along on the `+`/`*` activate leg only --
-    // `manageActivations`'s `-`/`!` legs always pass `null`
-    // (`CommandArrow.java:439,445-450`), so a deactivate never recolors.
-    pushActivation(ctx.activationStart, event.activates, {
-      y: messageGeo.y,
-      ...(event.lifeColor !== undefined ? { color: event.lifeColor } : {}),
-    });
-  }
-  if (event.deactivates !== undefined) closeMessageActivation(event.deactivates, messageGeo.y, cursor, ctx);
+  recordMessageStep(ctx, event, arrow, cursor.y);
+  if (event.deactivates !== undefined) popActivation(ctx.activationStart, event.deactivates);
+  if (event.activates !== undefined) pushActivation(ctx.activationStart, event.activates);
   if (event.destroys !== undefined) {
-    // `!!` is a DESTROY life event after the message, exactly as a `destroy`
-    // line there would be (`SequenceDiagram.java:369-371`): it closes the
-    // level (`LifeEvent#isDeactivateOrDestroy`) and its tile stops the
-    // lifeline, bound to this message.
-    closeMessageActivation(event.destroys, messageGeo.y, cursor, ctx);
+    popActivation(ctx.activationStart, event.destroys);
     handleDestroy(event.destroys, cursor, ctx);
   }
 }

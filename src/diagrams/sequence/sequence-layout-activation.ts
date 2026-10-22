@@ -1,135 +1,263 @@
 /**
- * Sequence diagram layout — activation (livebox) bars: the open-bar stack the
- * event walk keeps, and the {@link ActivationGeo} each closed bar becomes,
- * painted from its merged `activationBox` style.
+ * Sequence diagram layout — activation (livebox) bars: each participant's
+ * `LiveBoxes` (`sequence-live-boxes.ts`), the steps the event walk records
+ * into them as its tiles land, and the {@link ActivationGeo} every bar
+ * `LiveBoxes#drawBoxes` draws becomes, painted from its merged
+ * `activationBox` style.
  *
- * Split out of `sequence-layout-events.ts` (500-line file cap, sdd1 T2b);
- * that module re-exports every name here, so its importers are unchanged.
+ * Upstream builds a participant's bars AFTER every gauge is resolved: each
+ * tile's `onGaugeResolved` records its event's y (`LivingSpace
+ * #addStepForLivebox`, `LivingSpace.java:94-96`), and the lifeline pass turns
+ * those steps into `Stairs` (`LiveBoxes#getStairs`) and draws a bar per run
+ * of steps at one indent (`drawOneLevel`). This module mirrors that order:
+ * the walk records steps, {@link flushOpenActivations} draws.
  *
  * ## Which builder paints a bar
  *
- * `LiveBoxes#getStairs` records one `Step` per event, carrying that event's
- * builder (`teoz/LiveBoxes.java:323-331`: an `AbstractMessage`'s or a
- * `LifeEvent`'s `getStyleBuilder()`), and `LiveBoxesDrawer#addStart` keeps the
- * builder of the step that OPENS the level (`teoz/LiveBoxes.java:405-407`,
- * `LiveBoxesDrawer.java:99-103`). `drawInternal` then merges the bar's style
- * from it (`LiveBoxesDrawer.java:137-140`). A message that activates — by its
- * own `++` or by an `activate` bound to it — reaches the new level at its own
- * step, because `getLevelAtInternal` counts the bound life events forward
- * from the message (`teoz/LiveBoxes.java:146-170`); so the message's builder
- * paints that bar. A standalone `activate` opens at its own step, with its own
- * builder.
+ * A bar is painted from the builder of the step that OPENS it
+ * (`LiveBoxes.java:405-407`, `LiveBoxesDrawer.java:99-103,137-140`): a
+ * message's when the message's own lookahead level opens it (a `++`, or an
+ * `activate` bound to it), a standalone `activate`'s otherwise.
+ *
+ * Split out of `sequence-layout-events.ts` (500-line file cap, sdd1 T2b);
+ * that module re-exports every name here.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/teoz/LiveBoxes.java
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/teoz/LiveBoxesDrawer.java
  */
 
-import type { ActivationGeo, EventGeo, Participant, ParticipantGeo } from './ast.js';
+import type {
+  AbstractMessageEvent,
+  ActivationEvent,
+  ActivationGeo,
+  EventGeo,
+  MessageEvent,
+  Participant,
+  ParticipantGeo,
+  SequenceEvent,
+} from './ast.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import type { Stereotype } from '../../core/stereo/Stereotype.js';
-import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 import { componentStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
 import { participantStereotype } from './sequence-participant-paints.js';
+import {
+  ACTIVATION_HALF_WIDTH,
+  LiveBoxes,
+  flattenLiveEvents,
+  type LiveBox,
+  type LiveEvent,
+  type LiveEvents,
+  type LiveLifeEvent,
+  type LiveMessage,
+} from './sequence-live-boxes.js';
+import type { MessageTileGauge } from './sequence-y-gauge.js';
 
-/** `ComponentRoseActiveLine#getPreferredWidth` (`:114-116`) returns 10, and
- *  `LiveBoxesDrawer#getWidth` is that width (`LiveBoxesDrawer.java:95-97`):
- *  this is it halved, the bar's offset from its lifeline and the step
- *  `drawOneLevel` moves each nested level by (`LiveBoxes.java:400`). */
-export const ACTIVATION_HALF_WIDTH = 5;
+export { ACTIVATION_HALF_WIDTH };
 
-/** Pending activation-bar start record. `level` is 1-based and fixed when
- *  the bar OPENS — upstream's `Step#getIndent` for this bar's steps.
- *  `styleBuilder` is that opening step's (`LiveBoxes.java:325-331`). */
-type ActivationRecord = { y: number; level: number; color?: string; styleBuilder: StyleBuilder };
+/** A message's own life events waiting for their `LifeEventTile`'s y. */
+interface PendingOwn {
+  readonly events: readonly LiveLifeEvent[];
+  /** Flat index of the last of them. */
+  readonly last: number;
+  /** The message tile's max: their tiles' top when no note widens it. */
+  readonly tileMax: number;
+  readonly geoIndex: number;
+}
 
 /**
- * The open activation bars for one participant, innermost LAST.
- *
- * A STACK, not a single record, because upstream's activation state is a
- * nesting LEVEL: `LiveBoxes#getLevelAtInternal` replays the event list
- * counting `level++` on every activate and `level = Math.max(0, level - 1)`
- * on every deactivate (`:100-108`), and `getStairs` emits one step per level
- * change. `A -> B++` four deep is four boxes, each with its own extent, which
- * one record per participant cannot hold: the inner activate would overwrite
- * the outer one's start.
- *
- * `Math.max(0, ...)` is the other half, and it is why {@link emitActivation}
- * returns on an empty stack instead of inventing a start: a deactivate that
- * arrives at level 0 leaves the level at 0 and draws nothing at all.
- *
- * `lastMessageStyleBuilder` is the builder of the last message the walk laid
- * out — the step builder of every bar a message opens (module head). The
- * event walk sets it before it hands a message to its handler; a bar pushed
- * without its own builder takes it. One walk owns one stack, single-threaded.
+ * The walk's side of every `LiveBoxes`: the flat list they share, and where
+ * each recorded step sits in `eventGeos` -- the slot the bar it closes is
+ * emitted at, so a closing bar still precedes the destroy cross drawn after
+ * it (`renderer-lifeline.ts#renderLiveboxes`). Single-threaded, one walk.
  */
-export type ActivationStack = Map<string, ActivationRecord[]> & {
-  lastMessageStyleBuilder?: StyleBuilder;
+interface LiveWalk {
+  readonly list: LiveEvents;
+  readonly flatIndex: ReadonlyMap<LiveEvent, number>;
+  readonly boxes: ReadonlyMap<string, LiveBoxes>;
+  readonly geoIndex: Map<LiveEvent, number>;
+  /** The exo messages in list order, recorded from their published gauge
+   *  (`CommunicationExoTile.java:197-203`) before any later step. */
+  readonly exos: readonly LiveMessage[];
+  exoNext: number;
+  pendingOwn: PendingOwn | undefined;
+  gauges: ReadonlyMap<AbstractMessageEvent, MessageTileGauge> | undefined;
+}
+
+/**
+ * The walk's activation state.
+ *
+ * `levels` is each participant's level as the walk passes its events --
+ * `LiveBoxes#getLevelAt`'s prefix count (`level++` on an activate,
+ * `Math.max(0, level - 1)` on a deactivate or destroy, `:115-125`), which
+ * every x offset reads before a message's own life events apply.
+ */
+export interface ActivationStack {
+  readonly levels: Map<string, number>;
   /** Each participant's stereotype, merged into every one of its bars
    *  (`LiveBoxes.java:391,399` hand `p.getStereotype()` to the drawer). */
   readonly stereotypes: ReadonlyMap<string, Stereotype>;
-};
+  readonly live: LiveWalk;
+}
 
-/** An empty stack over `participants`, keeping each one's stereotype. */
-export function newActivationStack(participants: readonly Participant[]): ActivationStack {
+/** The stack for `participants` over the diagram's top-level `events`
+ *  (`LivingSpace.java:148`: one `LiveBoxes` per participant, all on
+ *  `SequenceDiagram#events`). */
+export function newActivationStack(
+  participants: readonly Participant[],
+  events: readonly SequenceEvent[] = [],
+): ActivationStack {
   const stereotypes = new Map<string, Stereotype>();
   for (const p of participants) {
     // `participant.getStereotype()`: the decorated build (`CommandParticipant.java:176-181`).
     const stereotype = participantStereotype(p);
     if (stereotype !== undefined) stereotypes.set(p.id, stereotype);
   }
-  return Object.assign(new Map<string, ActivationRecord[]>(), { stereotypes });
+  const list = flattenLiveEvents(events);
+  const live: LiveWalk = {
+    list,
+    flatIndex: new Map(list.events.map((e, i) => [e, i])),
+    boxes: new Map(participants.map((p) => [p.id, new LiveBoxes(p.id, list.events)])),
+    geoIndex: new Map(),
+    exos: list.events.filter((e): e is LiveMessage => e.kind === 'message' && e.exo),
+    exoNext: 0,
+    pendingOwn: undefined,
+    gauges: undefined,
+  };
+  return { levels: new Map(), stereotypes, live };
 }
 
-/** What a caller supplies to open a bar; a bar a message opens omits
- *  `styleBuilder` and takes {@link ActivationStack.lastMessageStyleBuilder}. */
-export type ActivationStart = Omit<ActivationRecord, 'level' | 'styleBuilder'> & {
-  readonly styleBuilder?: StyleBuilder;
-};
-
-/** Open one activation bar for `participantId`, nested inside any already
- *  open — `level++` in `LiveBoxes#getLevelAtInternal` (`:102-103`). */
-export function pushActivation(activationStart: ActivationStack, participantId: string, start: ActivationStart): void {
-  const styleBuilder = start.styleBuilder ?? activationStart.lastMessageStyleBuilder;
-  // A bar without its own builder is opened only while a message is laid out
-  // (`sequence-layout-message.ts#applyMessageActivation`), after the walk set
-  // the message's builder.
-  if (styleBuilder === undefined) throw new Error(`activation of ${participantId} opened outside any message`);
-  const stack = activationStart.get(participantId);
-  const record = { y: start.y, ...(start.color !== undefined ? { color: start.color } : {}), styleBuilder };
-  if (stack === undefined) activationStart.set(participantId, [{ ...record, level: 1 }]);
-  else stack.push({ ...record, level: stack.length + 1 });
-}
-
-/** The INNERMOST open activation for `participantId`, or `undefined` at
- *  level 0. */
-export function openActivation(activationStart: ActivationStack, participantId: string): ActivationRecord | undefined {
-  const stack = activationStart.get(participantId);
-  return stack === undefined ? undefined : stack[stack.length - 1];
-}
-
-/** How deep `participantId` is currently activated — upstream's own `level`
- *  (`LiveBoxes#getLevelAt`). 0 when nothing is open. */
+/** How deep `participantId` is at this point of the walk; 0 when nothing
+ *  is open. */
 export function activationLevel(activationStart: ActivationStack, participantId: string): number {
-  return activationStart.get(participantId)?.length ?? 0;
+  return activationStart.levels.get(participantId) ?? 0;
+}
+
+/** An activate: `level++` (`LiveBoxes.java:120-121`). */
+export function pushActivation(activationStart: ActivationStack, participantId: string): void {
+  activationStart.levels.set(participantId, activationLevel(activationStart, participantId) + 1);
+}
+
+/** A deactivate or destroy: `Math.max(0, level - 1)` (`LiveBoxes.java:123-124`)
+ *  -- one at level 0 leaves it there. */
+export function popActivation(activationStart: ActivationStack, participantId: string): void {
+  activationStart.levels.set(participantId, Math.max(0, activationLevel(activationStart, participantId) - 1));
+}
+
+/** The innermost open level, or `undefined` at level 0. */
+export function openActivation(activationStart: ActivationStack, participantId: string): number | undefined {
+  const level = activationLevel(activationStart, participantId);
+  return level > 0 ? level : undefined;
+}
+
+/** {@link popActivation}, under the name `sequence-layout-events.ts`
+ *  re-exports; bars are emitted by {@link flushOpenActivations} alone. */
+export const emitActivation = popActivation;
+
+/** What a step recorder reads from the walk's context. */
+export interface StepContext {
+  readonly activationStart: ActivationStack;
+  readonly eventGeos: readonly EventGeo[];
+  readonly messageTileGauges?: ReadonlyMap<AbstractMessageEvent, MessageTileGauge>;
+}
+
+/** A message arrow's two ends on the y axis (`getStartPoint`/`getEndPoint`). */
+export interface ArrowEnds {
+  readonly start: number;
+  readonly end: number;
+  readonly self: boolean;
 }
 
 /**
- * Close every activation still open when the diagram ends, at the body's
- * bottom.
+ * A message tile's `onGaugeResolved`: a `CommunicationTile` steps both
+ * participants at its arrow y (`CommunicationTile.java:197-198`); a
+ * `CommunicationTileSelf` steps its one only when the message activates (end
+ * point), else deactivates (start point), else destroys (end point)
+ * (`CommunicationTileSelf.java:113-126`). The message's own `++`/`--`/`!!`
+ * life events wait for their own tiles' y (`LifeEventTile.java:65-69`).
+ */
+export function recordMessageStep(ctx: StepContext, event: MessageEvent, arrow: ArrowEnds, tileMax: number): void {
+  const walk = ctx.activationStart.live;
+  const message = walk.list.ofSource.get(event);
+  if (message?.kind !== 'message') return;
+  settle(ctx, walk.flatIndex.get(message), undefined);
+  const y = arrow.self ? selfStepY(message, arrow) : arrow.start;
+  if (y !== undefined) for (const p of message.participants) walk.boxes.get(p)?.addStep(message, y);
+  walk.geoIndex.set(message, ctx.eventGeos.length);
+  const own = walk.list.ownOf.get(event) ?? [];
+  const last = own[own.length - 1];
+  if (last !== undefined)
+    walk.pendingOwn = { events: own, last: walk.flatIndex.get(last)!, tileMax, geoIndex: ctx.eventGeos.length };
+}
+
+function selfStepY(message: LiveMessage, arrow: ArrowEnds): number | undefined {
+  if (message.lifeEventsType.has('ACTIVATE')) return arrow.end;
+  if (message.lifeEventsType.has('DEACTIVATE')) return arrow.start;
+  if (message.lifeEventsType.has('DESTROY')) return arrow.end;
+  return undefined;
+}
+
+/** A `LifeEventTile`'s `onGaugeResolved` (`LifeEventTile.java:65-69`): the
+ *  step at the tile's top, which is where the walk stands. */
+export function recordLifeStep(ctx: StepContext, event: ActivationEvent, y: number): void {
+  const walk = ctx.activationStart.live;
+  const life = walk.list.ofSource.get(event);
+  if (life?.kind !== 'life') return;
+  settle(ctx, walk.flatIndex.get(life), y);
+  walk.boxes.get(life.participant)?.addStep(life, y);
+  walk.geoIndex.set(life, ctx.eventGeos.length);
+}
+
+/**
+ * Record every step upstream resolves before list index `at` (all of them
+ * when `undefined`, at the flush): the previous message's own life events,
+ * then the exo messages laid out since.
  *
- * Upstream has nothing to close: the level simply never returns to 0, so
- * `getStairs` (`LiveBoxes.java:245-300`) records its last step at that level
- * and `LiveBoxesDrawer` draws the bar on to the end of the lifeline. This
- * port materialises each bar at its deactivate, so an activation with no
- * deactivate needs the equivalent flush -- without it the bar vanishes.
+ * Own life events' tiles sit right under their message's tile and its note
+ * wrappers. When the event at `at` is a life event the walk lays out flush
+ * below them, `lifeY`, its top, is theirs; otherwise their y is the message
+ * tile's max -- exact without notes, and with them still below every later
+ * step, so it can neither cause nor miss a `+5` (`LiveBoxes.java:81-82`).
+ */
+function settle(ctx: StepContext, at: number | undefined, lifeY: number | undefined): void {
+  const walk = ctx.activationStart.live;
+  walk.gauges = ctx.messageTileGauges ?? walk.gauges;
+  const pending = walk.pendingOwn;
+  if (pending !== undefined)
+    recordOwn(walk, pending, lifeY !== undefined && at === pending.last + 1 ? lifeY : pending.tileMax);
+  catchUpExos(walk, ctx.eventGeos.length, at);
+}
+
+function recordOwn(walk: LiveWalk, pending: PendingOwn, y: number): void {
+  for (const own of pending.events) {
+    walk.boxes.get(own.participant)?.addStep(own, y);
+    walk.geoIndex.set(own, pending.geoIndex);
+  }
+  walk.pendingOwn = undefined;
+}
+
+/** The exo messages before list index `upTo` (all of them when undefined). */
+function catchUpExos(walk: LiveWalk, geoIndex: number, upTo: number | undefined): void {
+  for (; walk.exoNext < walk.exos.length; walk.exoNext++) {
+    const exo = walk.exos[walk.exoNext]!;
+    if (upTo !== undefined && walk.flatIndex.get(exo)! >= upTo) return;
+    const gauge = walk.gauges?.get(exo.source);
+    if (gauge === undefined) continue;
+    walk.boxes.get(exo.participants[0]!)?.addStep(exo, gauge.contactY);
+    walk.geoIndex.set(exo, geoIndex);
+  }
+}
+
+/**
+ * `LivingSpace#drawLineAndLiveboxes`' `liveboxes.drawBoxes(ug, context,
+ * getFirstCreateY(), height)` (`LivingSpace.java:150-176`) for every
+ * participant, once the walk is done: the steps still waiting are recorded,
+ * each participant's bars drawn from its stairs between its first create and
+ * `endY`, and each bar emitted into `eventGeos` at the slot of the step that
+ * closes it -- after the end, for one the closing `totalHeight` step closes.
  *
- * Jar-verified on `micaki-01-rexa741`, whose third `alt` branch opens an
- * activation that is never closed: the golden's second bar ends at `y=190`,
- * exactly where its lifelines do.
- *
- * Innermost first, then outward, then participant by participant in
- * declaration order -- deterministic, and the reverse of the order the walk
- * opened them in.
+ * Nothing is "left open" upstream: a level that never returns to 0 is closed
+ * by that last step (`LiveBoxes.java:335,409`), which is why a bar with no
+ * deactivate runs to the end of the lifeline (`micaki-01-rexa741`).
  */
 export function flushOpenActivations(
   activationStart: ActivationStack,
@@ -137,9 +265,53 @@ export function flushOpenActivations(
   participantMap: Map<string, ParticipantGeo>,
   eventGeos: EventGeo[],
 ): void {
-  for (const participantId of [...activationStart.keys()])
-    while (activationLevel(activationStart, participantId) > 0)
-      emitActivation(participantId, endY, participantMap, activationStart, eventGeos);
+  settle({ activationStart, eventGeos }, undefined, undefined);
+  const inserts: Insert[] = [];
+  for (const [participantId, boxes] of activationStart.live.boxes) {
+    const participant = participantMap.get(participantId);
+    if (participant === undefined) continue;
+    // `getFirstCreateY` (`:170-176`): 0 when the participant was never created.
+    for (const box of boxes.drawBoxes(participant.createY ?? 0, endY))
+      inserts.push(insertOf(activationStart, participant, box, eventGeos.length));
+  }
+  mergeAt(eventGeos, inserts);
+}
+
+/** A bar and the `eventGeos` slot it is emitted at. */
+interface Insert {
+  readonly at: number;
+  readonly geo: ActivationGeo;
+}
+
+function insertOf(activationStart: ActivationStack, participant: ParticipantGeo, box: LiveBox, end: number): Insert {
+  const at = box.closing === undefined ? undefined : activationStart.live.geoIndex.get(box.closing);
+  return { at: at ?? end, geo: activationGeo(participant, box, activationStart) };
+}
+
+/** Each insert placed before the geo at its slot, in place; a stable sort
+ *  keeps one participant's bars in level, then step, order. */
+function mergeAt(eventGeos: EventGeo[], inserts: Insert[]): void {
+  inserts.sort((a, b) => a.at - b.at);
+  const merged: EventGeo[] = [];
+  let next = 0;
+  for (let i = 0; i <= eventGeos.length; i++) {
+    for (; next < inserts.length && inserts[next]!.at === i; next++) merged.push(inserts[next]!.geo);
+    if (i < eventGeos.length) merged.push(eventGeos[i]!);
+  }
+  eventGeos.splice(0, eventGeos.length, ...merged);
+}
+
+function activationGeo(participant: ParticipantGeo, box: LiveBox, activationStart: ActivationStack): ActivationGeo {
+  return {
+    kind: 'activation',
+    participantId: participant.id,
+    lifelineX: participant.centerX,
+    y: box.y1,
+    height: box.y2 - box.y1,
+    level: box.level,
+    ...(box.color !== undefined ? { color: box.color } : {}),
+    paint: activationPaint(box, activationStart.stereotypes.get(participant.id)),
+  };
 }
 
 /**
@@ -150,52 +322,17 @@ export function flushOpenActivations(
  * from the opening step's builder, and lets the step's colour override its
  * `BackGroundColor` (`style.eventuallyOverride(symbolContext)`,
  * `LiveBoxesDrawer.java:140-146`; `Style.java:214-223`). The colour is the
- * activating event's `getSpecificColors()` (`LiveBoxes.java:236-240,249-256`).
+ * activating event's `getSpecificColors()` (`LiveBoxes.java:236-260`).
+ *
+ * A bar always opens at an event's step -- the builder-less `totalHeight`
+ * step is the last and can open nothing `drawOneLevel` then closes.
  */
-function activationPaint(record: ActivationRecord, stereotype: Stereotype | undefined): SequencePaint {
+function activationPaint(box: LiveBox, stereotype: Stereotype | undefined): SequencePaint {
+  if (box.styleBuilder === undefined) throw new Error('activation bar opened at the closing totalHeight step');
   const set = HColorSet.instance();
-  const back = record.color === undefined ? undefined : set.getColorOrNull(record.color);
+  const back = box.color === undefined ? undefined : set.getColorOrNull(box.color);
   return paintOf(
-    componentStyle(record.styleBuilder, 'ACTIVATION_BOX', stereotype).eventuallyOverride('BackGroundColor', back),
+    componentStyle(box.styleBuilder, 'ACTIVATION_BOX', stereotype).eventuallyOverride('BackGroundColor', back),
     set,
   );
-}
-
-export function emitActivation(
-  participantId: string,
-  currentY: number,
-  participantMap: Map<string, ParticipantGeo>,
-  activationStart: ActivationStack,
-  eventGeos: EventGeo[],
-): void {
-  const record = activationStart.get(participantId)?.pop();
-  // A deactivate with nothing open draws NOTHING -- not a zero-height box.
-  //
-  // Upstream never tracks "the open activation": it recomputes a nesting
-  // LEVEL per participant by replaying the event list, and every deactivate
-  // is clamped -- `level = Math.max(0, level - 1)`
-  // (`LiveBoxes#getLevelAtInternal:104-108`, and again at `:136-141` for the
-  // future-deactivate lookahead). A deactivate that arrives at level 0 leaves
-  // it at 0, so `getStairs` records no step and `LiveBoxesDrawer` draws no
-  // box. This port models that level as one open record per participant, and
-  // "no record" IS level 0.
-  //
-  // Without this, `rugeco-70-muro754` emitted a fourth activation -- `a`
-  // deactivated twice, once by `a ->> b --++`'s own `--` and once by the
-  // standalone `deactivate a` after the group -- as a `height: 0` bar that
-  // the renderer then wrapped in a `<g>`, one surplus top-level child
-  // against a golden this port otherwise matched element for element.
-  if (record === undefined) return;
-  const startY = record.y;
-  const activationGeo: ActivationGeo = {
-    kind: 'activation',
-    participantId,
-    lifelineX: participantMap.get(participantId)?.centerX ?? 0,
-    y: startY,
-    height: currentY - startY,
-    level: record.level,
-    ...(record.color !== undefined ? { color: record.color } : {}),
-    paint: activationPaint(record, activationStart.stereotypes.get(participantId)),
-  };
-  eventGeos.push(activationGeo);
 }

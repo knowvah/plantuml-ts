@@ -1,0 +1,8 @@
+@startuml
+autoactivate on
+
+Alice -> Bob : msg1
+deactivate
+Alice -> Bob : msg2
+deactivate
+@enduml

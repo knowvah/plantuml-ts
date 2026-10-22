@@ -25,10 +25,12 @@ export type MessageExoType = 'FROM_LEFT' | 'TO_LEFT' | 'FROM_RIGHT' | 'TO_RIGHT'
  * What `AbstractMessage` holds for every message kind, exo or not — upstream's
  * own split, with `Message` and `MessageExo` as its two subclasses.
  *
- * `parallel` and `anchor` are parsed, stored and NOT drawn (D4): every
- * upstream consumer of `isParallel()`/`getAnchor()` lives under
- * `sequencediagram/teoz/`, and the classic `sequencediagram/graphic/`
- * renderer reads neither. That is upstream's behavior, not a divergence.
+ * The jar's sequence engine is always teoz (`SequenceDiagram.java:311-312`,
+ * `GlobalConfig.java:47` `FORCE_TEOZ`), so both `teoz/` readers apply:
+ * `parallel` builds the tile with `YGauge.createParallel`
+ * (`CommunicationTile.java:114-117`; `sequence-layout-events.ts`), and
+ * `anchor` is what a `LinkAnchor` finds the tile by (`PlayingSpace.java:
+ * 129-134`).
  *
  * @see sequencediagram/AbstractMessage.java:81-121
  */
@@ -55,10 +57,12 @@ export interface AbstractMessageEvent {
    *  activation bar this message starts, NOT to the arrow (`:427-430`). */
   lifeColor?: string;
   /** The leading `&` PARALLEL marker (`CommandArrow.java:90`,
-   *  `msg.goParallel()` at `:143-145`). Stored, not drawn — see this
-   *  interface's doc comment. */
+   *  `msg.goParallel()` at `:143-145`): the tile shares the previous one's
+   *  arrow line (`YGauge.java:124-145`). */
   parallel?: boolean;
-  /** `{name}` (`CommandArrow.java:417`). Stored, not drawn. */
+  /** `{name}` (`CommandArrow.java:417`): how a `LinkAnchor` finds this
+   *  message's tile (`AbstractTile#matchAnchor:68-74`, read by
+   *  `PlayingSpace#getFromAnchor:146-152`). */
   anchor?: string;
   /** `AbstractMessage#isCreate` (`:169-171`): this message took the pending
    *  `CREATE` life event (`SequenceDiagram.java:207-214`). */

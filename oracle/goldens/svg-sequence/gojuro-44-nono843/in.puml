@@ -1,0 +1,12 @@
+@startuml
+A -> B : Async Request
+
+B -> C : Async Request
+activate C
+deactivate C
+
+create D
+C -> D : Create module
+activate C
+deactivate C
+@enduml

@@ -134,7 +134,7 @@ const IDENTITY = 1;
  * (`SvgGraphics.java:693`). `href` is the image DOCUMENT, whose own intrinsic
  * size the `width`/`height` attributes override, so it is carried untouched.
  */
-const scaleRun = (r: TextRun, k: number): TextRun => ({
+export const scaleRun = (r: TextRun, k: number): TextRun => ({
   ...r,
   x: r.x * k,
   y: r.y * k,
@@ -208,6 +208,17 @@ function scaleNote(n: NoteGeo, k: number): NoteGeo {
     minX: n.minX * k,
     maxX: n.maxX * k,
     textRuns: n.textRuns.map((r) => scaleRun(r, k)),
+    ...(n.connector === undefined
+      ? {}
+      : {
+          connector: {
+            ...n.connector,
+            x1: n.connector.x1 * k,
+            y1: n.connector.y1 * k,
+            x2: n.connector.x2 * k,
+            y2: n.connector.y2 * k,
+          },
+        }),
   };
 }
 

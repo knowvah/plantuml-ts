@@ -38,9 +38,10 @@ import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 import {
   ACTIVATION_HALF_WIDTH,
   activationLevel,
-  emitActivation,
-  openActivation,
+  popActivation,
   pushActivation,
+  recordLifeStep,
+  type ArrowEnds,
 } from './sequence-layout-activation.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
 import { componentStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
@@ -50,44 +51,24 @@ import { componentStyle, paintOf, type SequencePaint } from './sequence-skin-par
  *  height for a destroy with no message. */
 export const DESTROY_CROSS_SIZE = 9;
 
+/**
+ * A `LifeEventTile` for an `activate`: its step at the tile's top
+ * (`LifeEventTile.java:65-69`) -- the bar's ends are `LiveBoxes`', which
+ * binds the event to the last message (`SequenceDiagram.java:367-404`) -- and
+ * the walk's level one up.
+ */
 export function handleActivateEvent(event: ActivationEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
-  // Use the last message arrow y when available so the bar top aligns
-  // with its triggering arrow, not with the post-arrow spacing position.
-  // Bound to that message, the bar opens at the MESSAGE's step and takes its
-  // builder (`teoz/LiveBoxes.java:146-170,325-331`); a standalone `activate`
-  // opens at its own `LifeEvent` step, with its own.
-  pushActivation(ctx.activationStart, event.participantId, {
-    y: cursor.lastMessageY ?? cursor.y,
-    ...(event.color !== undefined ? { color: event.color } : {}),
-    ...(cursor.lastMessageY === undefined ? { styleBuilder: event.styleBuilder } : {}),
-  });
-  cursor.lastMessageY = undefined;
+  recordLifeStep(ctx, event, cursor.y);
+  pushActivation(ctx.activationStart, event.participantId);
 }
 
+/** A `LifeEventTile` for a `deactivate` or `destroy`: its step, the level one
+ *  down (`LifeEvent#isDeactivateOrDestroy`), and a destroy's lifeline stop
+ *  and cross (`:70-71`). */
 export function handleDeactivateEvent(event: ActivationEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
-  // End at the last message arrow y. If that would give zero/negative
-  // height (activate and deactivate at the same y), fall back to
-  // post-spacing cursor.y so the bar is always visible.
-  const deactStartY = openActivation(ctx.activationStart, event.participantId)?.y;
-  const rawEndY = cursor.lastMessageY ?? cursor.y;
-  const deactEndY = deactStartY !== undefined && rawEndY <= deactStartY ? cursor.y : rawEndY;
-  emitActivation(event.participantId, deactEndY, ctx.participantMap, ctx.activationStart, ctx.eventGeos);
-  cursor.lastMessageY = undefined;
+  recordLifeStep(ctx, event, cursor.y);
+  popActivation(ctx.activationStart, event.participantId);
   if (event.destroy === true) handleDestroy(event.participantId, cursor, ctx);
-}
-
-/** End a message's own `--`/`!!` bar at the arrow y. If that would give
- *  zero/negative height (the activate and deactivate land at the same y),
- *  fall back to the post-spacing cursor.y so the bar is always visible. */
-export function closeMessageActivation(
-  participantId: string,
-  arrowY: number,
-  cursor: EventCursor,
-  ctx: EventProcessingContext,
-): void {
-  const deactStartY = openActivation(ctx.activationStart, participantId)?.y;
-  const deactEndY = deactStartY !== undefined && arrowY <= deactStartY ? cursor.y : arrowY;
-  emitActivation(participantId, deactEndY, ctx.participantMap, ctx.activationStart, ctx.eventGeos);
 }
 
 /**
@@ -185,13 +166,6 @@ export function stepIndent(levelBefore: number, events: readonly ('up' | 'down')
     }
   }
   return level;
-}
-
-/** A message arrow's two ends on the y axis (`getStartPoint`/`getEndPoint`). */
-export interface ArrowEnds {
-  readonly start: number;
-  readonly end: number;
-  readonly self: boolean;
 }
 
 /**

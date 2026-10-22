@@ -267,9 +267,9 @@ describe('exo layout: activation bars', () => {
   });
 
   // The T13 contract: an exo message's `+`/`-` becomes a separate
-  // `ActivationEvent` AFTER it, and `handleActivateEvent` reads
-  // `cursor.lastMessageY`. Without it the bar would start one message spacing
-  // below its own arrow.
+  // `ActivationEvent` AFTER it; LiveBoxes binds it to the exo (the last
+  // message, `SequenceDiagram.java:367-404`). Without the binding the bar
+  // would start one message spacing below its own arrow.
   it('starts an exo-triggered activation bar at the exo arrow y', () => {
     const geo = layoutWith([
       exo('FROM_LEFT'),

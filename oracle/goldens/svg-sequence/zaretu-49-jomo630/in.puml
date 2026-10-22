@@ -1,0 +1,20 @@
+@startuml
+'!preprocessorV2
+
+!unquoted procedure Z($code)
+%invoke_procedure($code)
+!endprocedure
+
+!procedure myXtraCode()
+a->b:hello
+activate b
+b->a:hello too
+deactivate b
+note right
+test
+end note
+!endprocedure
+ 
+Z(myXtraCode)
+
+@enduml

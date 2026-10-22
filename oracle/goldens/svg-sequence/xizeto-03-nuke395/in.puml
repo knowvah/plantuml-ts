@@ -1,0 +1,9 @@
+@startuml
+!pragma teoz true
+
+... above ...
+a -> b: 3
+& b -> c: 4
+... below ...
+
+@enduml

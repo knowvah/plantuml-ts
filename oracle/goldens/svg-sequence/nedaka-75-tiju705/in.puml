@@ -1,0 +1,7 @@
+@startuml
+!pragma teoz true
+Bob -> Alice : hello3
+& Alice -> Ken : hi2
+& Ken -> David
+note right : This is better but not perfect
+@enduml

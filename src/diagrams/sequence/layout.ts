@@ -46,6 +46,8 @@ import { endOfParseStyleBuilder, lifelinesOf } from './sequence-layout-lifeline.
 import { clampDestroySteps } from './sequence-layout-life-event.js';
 import { anchorExoBorders } from './sequence-layout-exo.js';
 import { boxLabelRuns, boxPaint } from './sequence-layout-box.js';
+import { layoutLinkAnchors } from './sequence-layout-link-anchor.js';
+import type { LinkAnchorGeo } from './geo.js';
 import { computeTotalWidth, messageGeosOf, RIGHT_MARGIN } from './sequence-layout-width.js';
 
 // ---------------------------------------------------------------------------
@@ -104,6 +106,8 @@ interface EventLayoutResult {
   /** The participant geometry that flush needs to place those bars. */
   participantMap: Map<string, ParticipantGeo>;
   currentY: number;
+  /** The `{a} <-> {b}` links, resolved against the finished tiles. */
+  linkAnchors: readonly LinkAnchorGeo[];
 }
 
 /**
@@ -153,6 +157,7 @@ function assembleGeometry(
     footerShapeY,
     showFootbox,
     boxes: boxGeos,
+    ...(eventLayout.linkAnchors.length > 0 ? { linkAnchors: eventLayout.linkAnchors } : {}),
     ...(ast.scale !== undefined ? { scale: ast.scale } : {}),
   };
 }
@@ -174,7 +179,7 @@ function runEventLayout(
     sprites: ast.sprites,
     participantMap: participantLayout.participantMap,
     participantIndex: participantLayout.participantIndex,
-    activationStart: newActivationStack(ast.participants),
+    activationStart: newActivationStack(ast.participants, ast.events),
     endStyleBuilder: endOfParseStyleBuilder(ast),
     eventGeos: [],
     dividerGeos: [],
@@ -194,6 +199,7 @@ function runEventLayout(
     openActivations: ctx.activationStart,
     participantMap: participantLayout.participantMap,
     currentY,
+    linkAnchors: layoutLinkAnchors(ast, ctx),
   };
 }
 

@@ -10,16 +10,23 @@
  * corner. Lengths are scaled here, at emission, as `SvgGraphics#format` and
  * `#setStrokeWidth` scale them (`SvgGraphics.java:466-468,555-561`).
  */
-import type { BoxGeo, NoteGeo } from './ast.js';
+import type { BoxGeo, NoteConnector, NoteGeo } from './ast.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import type { ScaledTheme } from './scale-geo.js';
-import { path, polygon, rect } from '../../core/svg.js';
+import { line, path, polygon, rect } from '../../core/svg.js';
+import { noGradient } from '../../core/paint.js';
 import { arcTo, lineTo, moveTo } from '../../core/svg-path-builder.js';
 import { fmt } from '../../core/svg-format.js';
 import { OPALE_CORNERSIZE } from '../../core/svek/image/Opale.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
 import { withNoteShadow } from './sequence-shadow.js';
 import { creoleRunText } from './renderer.js';
+
+/** `new UStroke(2, 2, 1)` (`CommunicationTileNoteBottomTopAbstract.java:78`):
+ *  dash, gap, thickness. */
+const CONNECTOR_DASH = 2;
+const CONNECTOR_GAP = 2;
+const CONNECTOR_THICKNESS = 1;
 
 /** The paint every migrated geo carries: layout resolves it (D1). */
 function paintOf(geo: { readonly paint?: SequencePaint }, what: string): SequencePaint {
@@ -158,8 +165,30 @@ export function renderNote(note: NoteGeo, theme: ScaledTheme): string {
   const bold = paint.font.styles.has(FontStyle.BOLD);
   return (
     noteShape(note, paint, k) +
-    note.textRuns.map((run) => creoleRunText(run, theme, paint.font.size * k, bold)).join('')
+    note.textRuns.map((run) => creoleRunText(run, theme, paint.font.size * k, bold)).join('') +
+    (note.connector === undefined ? '' : renderConnector(note.connector, k))
   );
+}
+
+/**
+ * The background pass of a note: nothing, but for a `top`/`bottom` note's
+ * connector. `drawLine` draws straight on the `UGraphic`, not through a
+ * component, so it ignores `Context2D#isBackground` and lands in BOTH passes
+ * (`CommunicationTileNoteBottomTopAbstract.java:70-79`; the jar's goldens
+ * carry each line twice, ahead of the lifelines and again after the note).
+ */
+export function renderNoteBackground(note: NoteGeo, theme: ScaledTheme): string {
+  return note.connector === undefined ? '' : renderConnector(note.connector, theme.scaleK);
+}
+
+/** `CommunicationTileNoteBottomTopAbstract#drawLine` (`:70-79`): a
+ *  `ULine(dx, dy)` under `UStroke(2, 2, 1)` in the root `LineColor`. */
+function renderConnector(c: NoteConnector, k: number): string {
+  return line(c.x1, c.y1, c.x2, c.y2, {
+    stroke: noGradient(c.paint.stroke),
+    strokeWidth: CONNECTOR_THICKNESS * k,
+    strokeDasharray: [CONNECTOR_DASH, CONNECTOR_GAP].map((d) => fmt(d * k)).join(','),
+  });
 }
 
 /**

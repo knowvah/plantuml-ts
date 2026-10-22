@@ -1,0 +1,7 @@
+@startuml
+!pragma teoz true
+Jane -> John: Hi1
+note left: (2) Should be same level as first Hi
+return Hi2
+note right: (2) Should be same level as second Hi
+@enduml

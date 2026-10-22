@@ -1,0 +1,8 @@
+@startuml
+
+skinparam style strictuml
+
+Alice -> Bob : hello
+note right : foo
+
+@enduml

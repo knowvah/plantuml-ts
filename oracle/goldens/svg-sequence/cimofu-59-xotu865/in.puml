@@ -1,0 +1,11 @@
+@startuml
+participant "First Participant" as First
+participant "Second Participant" as Second
+activate First
+create Second
+' without the newline the arrow is correct, with the newline the arrow stops too early
+First->Second: new\nObject
+note right : You can also put notes!
+First->Second: Call 1
+First<-Second: Result
+@enduml

@@ -42,3 +42,6 @@ note.ts`; `sequence-layout-note.ts` after T2a; the Java above.
   as the jar draws them (test against a golden's elements).
 - Given the targets, then each is zero-diff or its residual is journaled to
   another family; no pinned row changes.
+
+## Added at T2a hand-back (journal row 24)
+Write-set + `src/diagrams/sequence/sequence-layout-events.ts` (fold top/bottom notes in `foldsInto`). Also: self-note x (`CommunicationTileSelfNoteRight/Left.java:108-112`; fozeva), create-message right note at posD (`CommunicationTileNoteRight.java:122-124`), reversed-message note anchor (`TileBuilder.java:108-115`).

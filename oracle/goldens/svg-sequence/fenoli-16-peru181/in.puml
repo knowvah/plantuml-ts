@@ -1,0 +1,11 @@
+@startuml
+participant A
+participant B
+
+A ->(1) B: text 1
+A ->(5) B: text 5
+A ->(10) B: text 10
+A ->(40) B: text 40
+
+A -> B
+@enduml

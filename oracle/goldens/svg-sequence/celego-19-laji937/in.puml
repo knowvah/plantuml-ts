@@ -1,0 +1,7 @@
+@startuml
+participant A
+participant B
+
+A ->(40) B++: text 1
+B -->(20) A--
+@enduml

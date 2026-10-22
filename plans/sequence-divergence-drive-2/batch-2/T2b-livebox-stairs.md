@@ -62,3 +62,6 @@ reshape); their tests.
   (`SequenceDiagram.java:367-404`, test).
 - Given classify, then the 17 rows are zero-diff (or journaled), no pinned
   row changes, and the B2 close's all-engine survey shows no loss.
+
+## Added at T2a hand-back (journal row 24)
+Exo arrow x level: `CommunicationExoTile.java:122` IGNORE_FUTURE_DEACTIVATE vs `exoSpan` bare stack level.

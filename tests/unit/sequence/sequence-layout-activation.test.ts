@@ -14,11 +14,30 @@ import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import type { ActivationGeo } from '../../../src/diagrams/sequence/ast.js';
+import type {
+  ActivationGeo,
+  EventGeo,
+  MessageEvent,
+  MessageExoEvent,
+  MessageGeo,
+} from '../../../src/diagrams/sequence/ast.js';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
-import { newActivationStack, pushActivation } from '../../../src/diagrams/sequence/sequence-layout-activation.js';
+import {
+  activationLevel,
+  emitActivation,
+  flushOpenActivations,
+  newActivationStack,
+  openActivation,
+  popActivation,
+  pushActivation,
+} from '../../../src/diagrams/sequence/sequence-layout-activation.js';
+import { processEvents, type EventProcessingContext } from '../../../src/diagrams/sequence/sequence-layout-events.js';
+import { endOfParseStyleBuilder } from '../../../src/diagrams/sequence/sequence-layout-lifeline.js';
+import { computeParticipantLayout } from '../../../src/diagrams/sequence/sequence-layout-participants.js';
+import { messageTileGauge, type MessageTileGauge } from '../../../src/diagrams/sequence/sequence-y-gauge.js';
 import { astOrThrow } from '../../helpers/parse-ast.js';
+import { sequenceSource } from '../../helpers/sequence-source.js';
 
 /** `plantuml.skin:146` `activationBox { BackGroundColor white }`. */
 const ACTIVATION_WHITE = '#FFFFFF';
@@ -133,9 +152,156 @@ describe('activation paint (LiveBoxesDrawer.java:137-146)', () => {
   });
 });
 
-describe('pushActivation', () => {
-  it('refuses a bar with no builder of its own outside any message', () => {
+describe('the walk level — LiveBoxes#getLevelAt prefix count (LiveBoxes.java:115-125)', () => {
+  it('counts up and clamps down at 0', () => {
     const stack = newActivationStack([]);
-    expect(() => pushActivation(stack, 'A', { y: 0 })).toThrow('activation of A opened outside any message');
+    pushActivation(stack, 'A');
+    pushActivation(stack, 'A');
+    popActivation(stack, 'A');
+    expect([activationLevel(stack, 'A'), openActivation(stack, 'A')]).toEqual([1, 1]);
+    emitActivation(stack, 'A');
+    emitActivation(stack, 'A');
+    expect([activationLevel(stack, 'A'), openActivation(stack, 'A')]).toEqual([0, undefined]);
+  });
+});
+
+interface Walked {
+  readonly bars: ActivationGeo[];
+  readonly messages: MessageGeo[];
+  readonly gauges: readonly MessageTileGauge[];
+  readonly geos: readonly EventGeo[];
+}
+
+/** `processEvents` then the flush, over `newActivationStack(participants,
+ *  events)` -- the layout's own sequence, at an arbitrary start. */
+function walk(body: readonly string[]): Walked {
+  const ast = astOrThrow(parseSequence(sequenceSource(body)), 'sequence');
+  const measurer = new DeterministicMeasurer();
+  const layout = computeParticipantLayout(ast, defaultTheme, measurer);
+  const ctx: EventProcessingContext = {
+    theme: defaultTheme,
+    measurer,
+    sprites: ast.sprites,
+    participantMap: layout.participantMap,
+    participantIndex: layout.participantIndex,
+    activationStart: newActivationStack(ast.participants, ast.events),
+    endStyleBuilder: endOfParseStyleBuilder(ast),
+    eventGeos: [],
+    dividerGeos: [],
+    newpageGeos: [],
+  };
+  const end = processEvents(ast.events, START, ctx);
+  flushOpenActivations(ctx.activationStart, end + TAIL, ctx.participantMap, ctx.eventGeos);
+  const messages = ast.events.filter(
+    (e): e is MessageEvent | MessageExoEvent => e.kind === 'message' || e.kind === 'messageExo',
+  );
+  return {
+    bars: ctx.eventGeos.filter((g): g is ActivationGeo => g.kind === 'activation'),
+    messages: ctx.eventGeos.filter((g): g is MessageGeo => g.kind === 'message'),
+    gauges: messages.map((m) => messageTileGauge(ctx, m)!),
+    geos: ctx.eventGeos,
+  };
+}
+
+const START = 47;
+const TAIL = 10;
+/** `ComponentRoseSelfArrow#getArrowOnlyHeight` (`:321-323`). */
+const SELF_DROP = 13;
+/** `LiveBoxes.java:81-82`. */
+const NUDGE = 5;
+
+const extent = (b: ActivationGeo): [number, number, number] => [b.level, b.y, b.height];
+
+describe('activation steps (sdd2 T2b: LiveBoxes replaces the consume-once cursor)', () => {
+  it('nanedo: a bound deactivate on the activate tile y is nudged 5 (jar rect y=66 height=13)', () => {
+    const w = walk(['participant b', 'participant a', 'b -> a : hello', 'activate a', 'deactivate a']);
+    const g = w.gauges[0]!;
+    // Both life tiles sit at the message tile's max; the second is moved.
+    expect(w.bars.map(extent)).toEqual([[1, g.contactY, g.top + g.height + NUDGE - g.contactY]]);
+    expect(w.bars[0]!.height).toBe(13);
+  });
+
+  it("TeozTimelineIssues_0003: a message's own ++ steps at its life tile, so the next deactivate is nudged (jar heights 13)", () => {
+    const w = walk([
+      'activate b',
+      'b -> a --++ #red : hello',
+      'deactivate a',
+      'b -> a : hello2',
+      'activate a #green',
+      'deactivate a',
+    ]);
+    expect(w.bars.filter((b) => b.participantId === 'a').map((b) => b.height)).toEqual([13, 13]);
+  });
+
+  it('a note on the message lowers the own ++ tile: no nudge when the deactivate lands below it', () => {
+    const w = walk(['A -> B ++ : hi', 'note right : n', 'deactivate B']);
+    const [g] = w.gauges;
+    const bar = w.bars[0]!;
+    expect(bar.y).toBe(g!.contactY);
+    // The note wrapper is taller than the message tile, so the deactivate
+    // steps at its bottom with nothing recorded there.
+    expect(bar.y + bar.height).toBeGreaterThan(g!.top + g!.height + NUDGE);
+  });
+
+  it('nocilo: every life event after one message binds to it (jar rects both y=66 height=27)', () => {
+    const w = walk([
+      'First -> Second : message',
+      'activate First',
+      'activate Second',
+      'Second -> First: response',
+      'deactivate First',
+      'deactivate Second',
+    ]);
+    const [m1, m2] = w.gauges;
+    expect(w.bars.map((b) => [b.participantId, b.y, b.y + b.height])).toEqual([
+      ['First', m1!.contactY, m2!.contactY],
+      ['Second', m1!.contactY, m2!.contactY],
+    ]);
+    expect(w.bars.map((b) => b.height)).toEqual([27, 27]);
+  });
+
+  it('kilili: a self message that activates steps at its end point (CommunicationTileSelf.java:120-121; jar y=106)', () => {
+    const w = walk([
+      'participant myclass',
+      'activate myclass',
+      'myclass -> class2: test()',
+      'myclass -> myclass: call1()',
+      'activate myclass',
+      'myclass -> class2: test()',
+      'deactivate myclass',
+    ]);
+    const self = w.messages[1]!;
+    const inner = w.bars.find((b) => b.level === 2)!;
+    expect([inner.y, inner.height]).toEqual([self.y + SELF_DROP, 27]);
+  });
+
+  it('a self message with no life event records no step', () => {
+    const w = walk(['A -> B ++ : x', 'B -> B : self', 'B -> A -- : y']);
+    const [m1, , m3] = w.gauges;
+    expect(w.bars.map((b) => [b.y, b.y + b.height])).toEqual([[m1!.contactY, m3!.contactY]]);
+  });
+
+  it('a self message that deactivates steps at its start point (:122-123)', () => {
+    const w = walk(['A -> B ++ : x', 'B -> B -- : self']);
+    expect(w.bars.map((b) => b.y + b.height)).toEqual([w.messages[1]!.y]);
+  });
+
+  it('exo: the bar a bound + opens starts on the exo arrow (CommunicationExoTile.java:197-203)', () => {
+    const w = walk(['participant A', 'activate A', '[-> A ++ : in', '[-> A : two', 'A -->] -- : back']);
+    const [e1, , e3] = w.messages;
+    expect(w.bars.map((b) => [b.level, b.y, b.y + b.height])).toEqual([
+      [1, START, w.bars[0]!.y + w.bars[0]!.height],
+      [2, e1!.y, e3!.y],
+    ]);
+  });
+
+  it('emits a closing bar before the destroy drawn after it, and an open one at the end', () => {
+    // `B -> A`'s lookahead counts the bound destroy (`LiveBoxes.java:172-178`),
+    // so its step closes level 2 only; level 1 runs to the last step.
+    const w = walk(['A -> B ++ : x', 'A -> B ++ : y', 'B -> A : z', 'destroy B', 'A -> C ++ : open']);
+    const order = w.geos.flatMap((g) =>
+      g.kind === 'activation' ? [`${g.participantId}${g.level}`] : g.kind === 'destroy' ? ['destroy'] : [],
+    );
+    expect(order).toEqual(['B2', 'destroy', 'B1', 'C1']);
   });
 });

@@ -43,6 +43,7 @@
 import type { Command } from './sequence-parse-helpers.js';
 import { arrowCommand, decoratedArrowCommand, returnCommand } from './command-arrow.js';
 import { exoArrowLeftCommand, exoArrowRightCommand } from './command-exo-arrow.js';
+import { linkAnchorCommand } from './command-link-anchor.js';
 import {
   autonumberCommand,
   autonumberIncrementCommand,
@@ -151,4 +152,5 @@ export const SEQUENCE_COMMANDS: readonly SequenceCommand[] = [
   decoratedArrowCommand, //        :111 CommandArrow (reverse/decorated forms)
   exoArrowLeftCommand, //          :113 CommandExoArrowLeft
   exoArrowRightCommand, //         :114 CommandExoArrowRight
+  linkAnchorCommand, //            :155 CommandLinkAnchor
 ];

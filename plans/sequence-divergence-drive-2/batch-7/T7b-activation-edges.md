@@ -32,3 +32,6 @@ activation.ts`, tests.
 - Given `deactivate C` before `activate C`, then no extra group, or the
   mechanism is journaled if the jar's behaviour differs from research D.
 - Given the targets, then structural sites are gone; no pinned change.
+
+## Added at T2b hand-back (journal row 34)
+Destroy crosses: port Stairs `isNextEventADestroy` (`teoz/Stairs.java`, `LiveBoxes.java`) in place of `messageDestroyCrosses`, if a fixture shows a difference.

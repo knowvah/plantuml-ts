@@ -168,9 +168,26 @@ export interface BoxGroup {
   readonly styleBuilder: StyleBuilder;
 }
 
+/**
+ * `{a1} <-> {a2} : label` (`CommandLinkAnchor.java:55-63,85-90`): not an
+ * event but an entry of `SequenceDiagram#linkAnchors`
+ * (`SequenceDiagram.java:617-626`), drawn after every tile by
+ * `PlayingSpace#drawUInternal:129-134`. `message` is the optional `:` text
+ * as written (`RegexLeaf(1, "MESSAGE", "(?::[%s]*(.*))?")`), `undefined` when
+ * the line carries no colon.
+ */
+export interface LinkAnchor {
+  readonly anchor1: string;
+  readonly anchor2: string;
+  readonly message: string | undefined;
+}
+
 export interface SequenceDiagramAST {
   participants: Participant[];
   events: SequenceEvent[];
+  /** Every `{a} <-> {b}` line, in source order -- see {@link LinkAnchor}.
+   *  Optional so hand-authored AST literals compile unchanged. */
+  linkAnchors?: LinkAnchor[];
   /**
    * `skinParam.getCurrentStyleBuilder()` read at TILE time, i.e. after every
    * command and every trailing declaration has executed: the builder a

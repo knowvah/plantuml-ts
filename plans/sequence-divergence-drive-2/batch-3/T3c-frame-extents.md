@@ -44,3 +44,6 @@ width.ts`, their tests.
   188; test).
 - Given the targets, then each is zero-diff or journaled; the one pinned
   row with a group frame does not change.
+
+## Added at T2a hand-back (journal row 24)
+Parallel groups (`& group`): `GroupingTile.java:145-154,229-239`. Rows: caciga, carose, codeti, dalata, koneju, lekopo, rugeco, vajoke, zoculi, zuravu.
