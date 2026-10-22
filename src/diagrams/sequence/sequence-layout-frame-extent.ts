@@ -51,20 +51,23 @@ export interface FrameSpanInput {
   readonly headerWidth: number;
   /** `tileArgumentsOriginal.getXOrigin()`, the empty group's min (`:217-218`). */
   readonly xOrigin: number;
+  /** `getNotesWidth(LEFT)` (`:1015-1021`): the width of the notes written
+   *  after the group's `end` on its left. */
+  readonly notesLeft: number;
 }
 
 /**
  * The frame's `min`/`max` (`GroupingTile.java:211-225`). Each else tile's
  * `getMaxX` is `parent.getMinX() + width` (`ElseTile.java:153-161`), and the
- * parent's `getMinX` is `min - EXTERNAL_MARGINX1` (`GroupingTile.java:984-986`;
- * the group-end notes it also subtracts are not modelled, see the hand-back).
+ * parent's `getMinX` is `min - EXTERNAL_MARGINX1 - getNotesWidth(LEFT)`
+ * (`GroupingTile.java:984-986`).
  */
 export function resolveFrameSpan(input: FrameSpanInput): XSpan {
-  const { children, elseWidths, headerWidth, xOrigin } = input;
+  const { children, elseWidths, headerWidth, xOrigin, notesLeft } = input;
   const min = children.length === 0 ? xOrigin : Math.min(...children.map((c) => c.min - FRAME_MARGIN_X));
   const max = Math.max(
     ...children.map((c) => c.max + FRAME_MARGIN_X),
-    ...elseWidths.map((w) => min - FRAME_EXTERNAL_MARGIN_X1 + w),
+    ...elseWidths.map((w) => min - FRAME_EXTERNAL_MARGIN_X1 - notesLeft + w),
     min + headerWidth + HEADER_MARGIN,
   );
   return { min, max };
@@ -79,9 +82,22 @@ export function resolveFrameSpan(input: FrameSpanInput): XSpan {
  */
 const groupTiles = new WeakMap<FrameGeo, { readonly end: number; readonly tile: XSpan }>();
 
-/** Record `geo`, a resolved group frame whose descendants end at `end`. */
-export function registerGroupTile(geo: FrameGeo, end: number): void {
-  const tile = { min: geo.x - FRAME_EXTERNAL_MARGIN_X1, max: geo.x + geo.width + FRAME_EXTERNAL_MARGIN_X2 };
+/** The widths of the notes written after a group's `end`, per side
+ *  (`GroupingTile#getNotesWidth`, `:1015-1021`). */
+export interface EndNotesWidth {
+  readonly left: number;
+  readonly right: number;
+}
+
+/** Record `geo`, a resolved group frame whose descendants end at `end`:
+ *  `getMinX`/`getMaxX` (`GroupingTile.java:984-990`) add the end notes' widths
+ *  past the margins. */
+export function registerGroupTile(geo: FrameGeo, end: number, notes: EndNotesWidth): void {
+  geo.endNotesWidth = notes;
+  const tile = {
+    min: geo.x - FRAME_EXTERNAL_MARGIN_X1 - notes.left,
+    max: geo.x + geo.width + FRAME_EXTERNAL_MARGIN_X2 + notes.right,
+  };
   groupTiles.set(geo, { end, tile });
 }
 
@@ -146,9 +162,12 @@ function spanOf(extent: { readonly minX: number; readonly maxX: number }): XSpan
 /** `ComponentRoseSelfArrow#getDrawnWidth` (`:348-352`): `max(xRight (42),
  *  labelReach)`, `labelReach = getOldPaddingX1() (7) + pureTextWidth`, or 0
  *  when the label is empty. */
-export function selfDrawnWidth(event: MessageEvent, env: Pick<EventProcessingContext, 'measurer' | 'sprites'>): number {
-  const font = messagePaint(event.styleBuilder, event.stereotype, event.arrow, true).font;
-  const pure = messageLabelWidth(event.label, numberTextOf(event), font, env);
+export function selfDrawnWidth(
+  event: MessageEvent,
+  env: Pick<EventProcessingContext, 'measurer' | 'sprites' | 'padder'>,
+): number {
+  const paint = messagePaint(event.styleBuilder, event.stereotype, event.arrow, true);
+  const pure = messageLabelWidth(event.label, numberTextOf(event), paint.font, env, paint.wrapWidth);
   const labelReach = pure === 0 ? 0 : ARROW_PADDING_X + pure;
   return Math.max(SELF_ARROW_X_RIGHT, labelReach);
 }
@@ -162,7 +181,7 @@ export function selfDrawnWidth(event: MessageEvent, env: Pick<EventProcessingCon
  * (`A <- A`) loop is `posC - getDrawnWidth - adjustment` to `getMaxX`,
  * `posC2` (`:293-307`).
  */
-function selfDrawnSpan(event: MessageEvent, centerX: number, ctx: EventProcessingContext): XSpan {
+export function selfDrawnSpan(event: MessageEvent, centerX: number, ctx: EventProcessingContext): XSpan {
   const maxPosition = ctx.activationStart.live.boxes.get(event.from)?.getMaxPosition() ?? 0;
   const drawnWidth = selfDrawnWidth(event, ctx);
   const reverse = event.arrow.reverseDefine === true;
@@ -182,8 +201,11 @@ function selfDrawnSpan(event: MessageEvent, centerX: number, ctx: EventProcessin
 function exoSpans(event: MessageExoEvent, ctx: EventProcessingContext): XSpan[] {
   const geo = ctx.participantMap.get(event.participant);
   if (geo === undefined) return [];
-  const font = messagePaint(event.styleBuilder, event.stereotype, event.arrow, false).font;
-  const width = messageLabelWidth(event.label, numberTextOf(event), font, ctx) + 2 * ARROW_PADDING_X + ARROW_DELTA_X;
+  const paint = messagePaint(event.styleBuilder, event.stereotype, event.arrow, false);
+  const width =
+    messageLabelWidth(event.label, numberTextOf(event), paint.font, ctx, paint.wrapWidth) +
+    2 * ARROW_PADDING_X +
+    ARROW_DELTA_X;
   const right = event.exoType === 'FROM_RIGHT' || event.exoType === 'TO_RIGHT';
   return [right ? { min: geo.centerX, max: geo.centerX + width } : { min: geo.centerX - width, max: geo.centerX }];
 }
@@ -232,7 +254,9 @@ function geoSpans(geos: readonly EventGeo[], start: number, xOrigin: number): XS
  * child tile of its own (a message's, an activation bar, a destroy cross, an
  * else, a `|||`).
  *
- * - note: `NoteTile#getMinX`/`#getMaxX` (`:279-296`), which the geo carries;
+ * - note: `NoteTile#getMinX`/`#getMaxX` (`:279-296`), which the geo carries
+ *   (`drawnMaxX` instead of `maxX` for a self message's right note,
+ *   `CommunicationTileSelfNoteRight#getDrawnMaxX:154-178`);
  *   a note on a message widens its wrapper by exactly its own extent
  *   (`CommunicationTileNoteRight.java:242-250`, `...NoteLeft:219-225`,
  *   `...NoteBottomTopAbstract:144-155`).
@@ -245,7 +269,7 @@ function geoSpans(geos: readonly EventGeo[], start: number, xOrigin: number): XS
 function geoSpan(geo: EventGeo, xOrigin: number): XSpan | undefined {
   switch (geo.kind) {
     case 'note':
-      return { min: geo.minX, max: geo.maxX };
+      return { min: geo.minX, max: geo.drawnMaxX ?? geo.maxX };
     case 'delay':
       return { min: geo.middleX - geo.textWidth / 2, max: geo.middleX + geo.textWidth / 2 };
     case 'divider':

@@ -134,6 +134,9 @@ function withDashAndFont(
     get align() {
       return paint.align;
     },
+    get wrapWidth() {
+      return paint.wrapWidth;
+    },
   };
 }
 

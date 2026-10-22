@@ -37,6 +37,7 @@ import type { UmlSource } from '../../core/block-extractor.js';
 import { applyNoteTextAlignment } from './sequence-note-text-alignment.js';
 import { applyResponseMessageBelowArrow } from './sequence-response-below.js';
 import { createSequenceStyleDispatch, currentStyleBuilder, executeDeclarationsBefore } from './sequence-skin-param.js';
+import { sequenceDiagramPadder } from './sequence-message-padder.js';
 
 // ---------------------------------------------------------------------------
 // Line-dispatch helpers
@@ -464,7 +465,12 @@ export function parseSequence(source: UmlSource, options?: ParseOptions): Sequen
   applyNoteTextAlignment(state.ast, state.style.params);
   // The builder the tiles read after the parse (`MutingLine.java:70`,
   // `LiveBoxesDrawer.java:78-81`), every declaration above executed.
-  return { ...state.ast, styleBuilder: currentStyleBuilder(state.style) };
+  const messagePadder = sequenceDiagramPadder(state.style.params);
+  return {
+    ...state.ast,
+    styleBuilder: currentStyleBuilder(state.style),
+    ...(messagePadder !== undefined ? { messagePadder } : {}),
+  };
 }
 
 /** A fresh {@link ParseState} over `source`'s style sources. */

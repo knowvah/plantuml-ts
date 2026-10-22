@@ -19,6 +19,7 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/teoz/LivingSpace.java
  */
 
+import { patchBase64Line } from '../../core/uml-source-lines.js';
 import type { EventGeo, LifelineSegment, Participant, ParticipantGeo, SequenceDiagramAST } from './ast.js';
 import { HColorSet, parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
 import { UGroup, UGroupType } from '../../core/klimt/shape/UGroup.js';
@@ -67,13 +68,16 @@ function participantStereotype(stereotype: string | undefined): Stereotype | und
  * (`Stereotype.java:140-145`) of the participant's decorated stereotype
  * (`CommandParticipant.java:176-181`), else the first display line;
  * `UGroup#fix` writes every `[^-\w ]` as `.` (`UGroup.java:70-74`).
- * Not modelled (both unported for the head too): `skinparam
- * sequenceParticipant underline` (`Display#underlined`, `<u>` per line) and
- * `stereotypePosition bottom`.
+ * `stereotypePosition bottom` appends the stereotype, so element 0 is the
+ * first display line. Not modelled (unported for the head too): `skinparam
+ * sequenceParticipant underline` (`Display#underlined`, `<u>` per line).
  */
-export function lifelineTitle(participant: Pick<Participant, 'display' | 'stereotype' | 'stereotypeHidden'>): string {
-  const shown = participant.stereotypeHidden === true ? undefined : participant.stereotype;
-  const first = participantStereotype(shown)?.toString() ?? displayLines(participant.display)[0] ?? '';
+export function lifelineTitle(
+  participant: Pick<Participant, 'display' | 'stereotype' | 'stereotypeHidden' | 'stereotypeBottom'>,
+): string {
+  const hidden = participant.stereotypeHidden === true || participant.stereotypeBottom === true;
+  const shown = hidden ? undefined : participant.stereotype;
+  const first = patchBase64Line(participantStereotype(shown)?.toString() ?? displayLines(participant.display)[0] ?? '');
   return UGroup.singletonMap(UGroupType.TITLE, first).asMap().get(UGroupType.TITLE) ?? '';
 }
 

@@ -42,7 +42,6 @@ import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
 import { activationLevel } from './sequence-layout-events.js';
 import { ARROW_PADDING_X, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
-import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { messageTileAdvance, type PlacedTile } from './sequence-layout-message.js';
 import { messageTileGaugeOf, type TileMetrics } from './sequence-y-gauge.js';
@@ -125,8 +124,8 @@ function rightCircleInset(arrow: ArrowConfiguration, type: MessageExoType): numb
  *  text block (`AbstractTextualComponent.java:94-98`): the number, its 4 px
  *  margin and the label (`Display.java:703-712`), at the arrow style's font
  *  (`plantuml.skin:316-317`). */
-function labelBlockWidth(event: MessageExoEvent, ctx: EventProcessingContext, font: FontConfiguration): number {
-  return messageLabelWidth(event.label, numberTextOf(event), font, ctx);
+function labelBlockWidth(event: MessageExoEvent, ctx: EventProcessingContext, paint: SequencePaint): number {
+  return messageLabelWidth(event.label, numberTextOf(event), paint.font, ctx, paint.wrapWidth);
 }
 
 /**
@@ -136,8 +135,8 @@ function labelBlockWidth(event: MessageExoEvent, ctx: EventProcessingContext, fo
  * This is the whole width an exo message asks the diagram for
  * (`CommunicationExoTile.java:326-330`).
  */
-function exoPreferredWidth(event: MessageExoEvent, ctx: EventProcessingContext, font: FontConfiguration): number {
-  return labelBlockWidth(event, ctx, font) + 2 * ARROW_PADDING_X + ARROW_DELTA_X;
+function exoPreferredWidth(event: MessageExoEvent, ctx: EventProcessingContext, paint: SequencePaint): number {
+  return labelBlockWidth(event, ctx, paint) + 2 * ARROW_PADDING_X + ARROW_DELTA_X;
 }
 
 // ---------------------------------------------------------------------------
@@ -170,8 +169,8 @@ interface ExoSpan {
  * has been maxed (`PlayingSpace.java:75-96`). `anchorExoBorder` below applies
  * it once `layout.ts` has the diagram's width.
  */
-function exoSpan(event: MessageExoEvent, posC: number, ctx: EventProcessingContext, font: FontConfiguration): ExoSpan {
-  const width = exoPreferredWidth(event, ctx, font);
+function exoSpan(event: MessageExoEvent, posC: number, ctx: EventProcessingContext, paint: SequencePaint): ExoSpan {
+  const width = exoPreferredWidth(event, ctx, paint);
   const right = isRightBorder(event.exoType);
   const point1 = right ? posC : posC - width;
   const point2 = right ? point1 + width : posC;
@@ -227,7 +226,7 @@ function exoLabelLeft(
   event: MessageExoEvent,
   span: ExoSpan,
   ctx: EventProcessingContext,
-  font: FontConfiguration,
+  paint: SequencePaint,
 ): number {
   const dir = arrowDirectionOf(event.arrow, getDirection(event.exoType) === -1);
   const widthKnown = event.shortArrow || !isRightBorder(event.exoType);
@@ -239,7 +238,7 @@ function exoLabelLeft(
     dir,
     width: span.x2 - span.x1,
     textDeltaX: span.textDeltaX,
-    textWidth: labelBlockWidth(event, ctx, font),
+    textWidth: labelBlockWidth(event, ctx, paint),
     padX1: ARROW_PADDING_X,
     padX2: ARROW_PADDING_X,
   });
@@ -271,7 +270,7 @@ function buildExoGeo(
     {
       label: event.label,
       numberText: numberTextOf(event),
-      leftX: exoLabelLeft(event, span, ctx, paint.font),
+      leftX: exoLabelLeft(event, span, ctx, paint),
       arrowY: y,
       ...labelDrawOf(paint),
     },
@@ -290,6 +289,7 @@ function buildExoGeo(
     exoType: event.exoType,
     shortArrow: event.shortArrow,
     ...(block.number !== undefined ? { labelNumber: block.number } : {}),
+    ...(block.padder !== undefined ? { labelPadder: block.padder } : {}),
     ...(event.sequenceNumber !== undefined ? { sequenceNumber: event.sequenceNumber } : {}),
     ...(event.sequenceLabel !== undefined ? { sequenceLabel: event.sequenceLabel } : {}),
     ...(event.url !== undefined ? { url: event.url } : {}),
@@ -321,7 +321,10 @@ function exoPaintOf(event: MessageExoEvent): SequencePaint {
 }
 
 function exoAdvanceOf(event: MessageExoEvent, paint: SequencePaint, ctx: EventProcessingContext) {
-  return messageTileAdvance(messageLabelHeight(event.label, numberTextOf(event), paint.font, ctx), false);
+  return messageTileAdvance(
+    messageLabelHeight(event.label, numberTextOf(event), paint.font, ctx, paint.wrapWidth),
+    false,
+  );
 }
 
 /**
@@ -356,7 +359,7 @@ export function handleMessageExoEvent(
   const paint = exoPaintOf(event);
   const advance = exoAdvanceOf(event, paint, ctx);
   const top = tile.gauge.min;
-  const span = exoSpan(event, participant.centerX, ctx, paint.font);
+  const span = exoSpan(event, participant.centerX, ctx, paint);
   const messageGeo = buildExoGeo(event, span, top + advance.arrowY, ctx, paint);
   ctx.eventGeos.push(messageGeo);
   ctx.messageTileGauges?.set(event, messageTileGaugeOf(tile.gauge, tile.metrics));

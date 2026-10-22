@@ -86,6 +86,12 @@ export interface MessageEvent extends AbstractMessageEvent {
   /** The extra targets of `A -> B, C, D : msg` — `getMulticasts`
    *  (`CommandArrow.java:139-155`), `msg.setMulticast(...)` at `:404`. */
   multicast?: readonly string[];
+  /** `PART1ANCHOR` / `PART2ANCHOR` (`CommandArrow.java:421-422`): the `{name}`
+   *  written after the first or second participant. A message carrying either
+   *  is not drawn (`CommunicationTile.java:328-331`) -- its tile only reserves
+   *  height -- so layout copies the fact onto {@link MessageGeo.partAnchored}. */
+  part1Anchor?: string;
+  part2Anchor?: string;
   /** `skinparam ResponseMessageBelowArrow true` (`Rose.java:340`,
    *  `param.responseMessageBelowArrow()`), the `belowForResponse` argument
    *  of `ComponentRoseArrow`. It takes effect only on a reverse-defined

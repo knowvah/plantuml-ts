@@ -158,10 +158,16 @@ function clampSpan(band: PageBand, y: number, height: number): { y: number; heig
  */
 function clipMessage(m: MessageGeo, band: PageBand): MessageGeo | undefined {
   if (!inBand(band, m.y - ARROW_DELTA_Y) || !inBand(band, m.y + ARROW_DELTA_Y)) return undefined;
-  const { labelNumber, ...rest } = m;
+  const { labelNumber, labelPadder, ...rest } = m;
   const keepNumber = labelNumber !== undefined && inBand(band, labelNumber.y);
+  // The padder box is a `URectangle` (`Padder.java:128-133`): clamped to the
+  // band like every rectangle here (see `clipActivation`), dropped when empty.
+  const padderSpan = labelPadder !== undefined ? clampSpan(band, labelPadder.y, labelPadder.height) : undefined;
   return {
     ...rest,
+    ...(labelPadder !== undefined && padderSpan !== undefined
+      ? { labelPadder: { ...labelPadder, ...padderSpan } }
+      : {}),
     y: shift(band, m.y),
     labelLines: m.labelLines.filter((r) => inBand(band, r.y)).map((r) => ({ ...r, y: shift(band, r.y) })),
     // The created head goes with its arrow; its block top moves with the page.
@@ -194,7 +200,7 @@ function clipNote(n: NoteGeo, band: PageBand): NoteGeo | undefined {
  *  the band; its rect and sides clamp with the rest. */
 function clipActivation(a: ActivationGeo, band: PageBand): ActivationGeo | undefined {
   const span = clampSpan(band, a.y, a.height);
-  if (span === undefined) return undefined;
+  if (span === undefined) return { ...a, clippedOut: true };
   if (a.open === undefined) return { ...a, y: span.y, height: span.height };
   const open = {
     closeUp: a.open.closeUp && inBand(band, a.y),

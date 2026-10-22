@@ -23,8 +23,10 @@ import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { LineBreakStrategy } from '../../core/klimt/LineBreakStrategy.js';
 import type { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import type { ExtraLine } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
+import { applyPadder, padderGeoAt, type MessagePadder, type PaddedLabelBlock } from './sequence-message-padder.js';
+import type { LabelPadderGeo } from './geo-message.js';
 import { defaultMessageFont } from './sequence-arrow-paint.js';
-import { componentLabelBlock, offsetRun, type LabelBlock, type SequenceRunShape } from './sequence-creole-sheet.js';
+import { componentLabelBlock, offsetRun, type SequenceRunShape } from './sequence-creole-sheet.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import type { Paint } from '../../core/paint.js';
 import type { SequenceRunImage } from './sequence-text.js';
@@ -284,6 +286,8 @@ export const ARROW_LABEL_HEAD_CLEARANCE = 10;
 export interface MessageLabelBlock {
   readonly lines: readonly TextRun[];
   readonly number?: TextRun;
+  /** The padder's box behind the label (`Padder.java:113-131`). */
+  readonly padder?: LabelPadderGeo;
 }
 
 /** What {@link messageLabelBlock} lays a label out with -- the
@@ -294,6 +298,8 @@ export interface MessageLabelEnv {
   readonly theme: Theme;
   readonly measurer: StringMeasurer;
   readonly sprites?: SpriteRegistry | undefined;
+  /** `SkinParam#sequenceDiagramPadder`, `undefined` for `Padder.NONE`. */
+  readonly padder?: MessagePadder | undefined;
 }
 
 /**
@@ -316,7 +322,7 @@ export function messageLabelLayout(
     readonly fore?: Paint | undefined;
     readonly styleWidth?: LineBreakStrategy | undefined;
   } = {},
-): LabelBlock {
+): PaddedLabelBlock {
   const opts = {
     sprites: env.sprites,
     align: draw.align,
@@ -326,13 +332,13 @@ export function messageLabelLayout(
     marginX2: ARROW_LABEL_PADDING_X2,
     maxWidth: arrowMaxWidth(draw.styleWidth, env.theme?.maxMessageSize),
   };
-  return componentLabelBlock(displayLines(label), font, opts, env.measurer);
+  return applyPadder(componentLabelBlock(displayLines(label), font, opts, env.measurer), env.padder);
 }
 
 /** What a label is measured with: the measurer and sprites, plus -- when the
  *  caller passes the layout's own context, as every layout caller does -- the
  *  theme `skinparam maxMessageSize` is read from. */
-export type MessageLabelMeasureEnv = Pick<MessageLabelEnv, 'measurer' | 'sprites'> & {
+export type MessageLabelMeasureEnv = Pick<MessageLabelEnv, 'measurer' | 'sprites' | 'padder'> & {
   readonly theme?: Pick<Theme, 'maxMessageSize'> | undefined;
 };
 
@@ -408,8 +414,9 @@ export function labelDrawOf(paint: {
   readonly font: FontConfiguration;
   readonly align: HorizontalAlignment | undefined;
   readonly stroke: Paint;
-}): Pick<MessageLabelSpec, 'font' | 'rowAlign' | 'fore'> {
-  return { font: paint.font, rowAlign: paint.align, fore: paint.stroke };
+  readonly wrapWidth?: LineBreakStrategy | undefined;
+}): Pick<MessageLabelSpec, 'font' | 'rowAlign' | 'fore' | 'styleWidth'> {
+  return { font: paint.font, rowAlign: paint.align, fore: paint.stroke, styleWidth: paint.wrapWidth };
 }
 
 /** {@link messageLabelBlock} with the label's row alignment. The block's TOP
@@ -418,12 +425,16 @@ export function labelDrawOf(paint: {
 export function placeMessageLabel(request: MessageLabelSpec, env: MessageLabelEnv): MessageLabelBlock {
   const { label, numberText, leftX, arrowY, font, rowAlign, fore, styleWidth } = request;
   const block = messageLabelLayout(label, numberText, font, env, { align: rowAlign, fore, styleWidth });
-  if (block.primitives.length === 0) return { lines: [] };
   const top = arrowY - (block.height + 2 * ARROW_LABEL_PADDING_Y);
+  const padder =
+    env.padder !== undefined && block.padderBox !== undefined
+      ? { padder: padderGeoAt(env.padder, block.padderBox, { x: leftX, y: top }) }
+      : {};
+  if (block.primitives.length === 0) return { lines: [], ...padder };
   const placed = block.primitives.map((r) => offsetRun(r, leftX, top));
-  if (numberText === undefined) return { lines: placed };
+  if (numberText === undefined) return { lines: placed, ...padder };
   const [first, ...rest] = placed;
-  return first === undefined ? { lines: [] } : { lines: rest, number: first };
+  return first === undefined ? { lines: [], ...padder } : { lines: rest, number: first, ...padder };
 }
 
 /** `HColors.transparent()` as `SvgGraphics` writes it: the sprite tint a
@@ -439,8 +450,9 @@ export function messageLabelHeight(
   numberText: string | undefined,
   font: FontConfiguration,
   env: MessageLabelMeasureEnv,
+  styleWidth?: LineBreakStrategy,
 ): number {
-  return messageLabelLayout(label, numberText, font, env).height;
+  return messageLabelLayout(label, numberText, font, env, { styleWidth }).height;
 }
 
 /**
@@ -454,6 +466,7 @@ export function messageLabelWidth(
   numberText: string | undefined,
   font: FontConfiguration,
   env: MessageLabelMeasureEnv,
+  styleWidth?: LineBreakStrategy,
 ): number {
-  return messageLabelLayout(label, numberText, font, env).width;
+  return messageLabelLayout(label, numberText, font, env, { styleWidth }).width;
 }

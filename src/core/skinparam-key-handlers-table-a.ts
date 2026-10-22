@@ -172,6 +172,22 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
     },
   ],
   [
+    // `SkinParam#getThickness(LineParam.diagramBorder)` (`SkinParam.java:921-967`):
+    // `diagramBorderthickness` counts only when `isDigitsOrDot` (`[0-9.]+`).
+    ['diagramborderthickness'],
+    (acc, value) => {
+      if (/^[0-9.]+$/.test(value.trim())) acc.diagramBorderThickness = parseFiniteNumber(value.trim());
+    },
+  ],
+  [
+    // `SkinParam#getRoundCorner(CornerParam.diagramBorder)` (`SkinParam.java:891-916`):
+    // `diagramBorderroundcorner` counts only when `isDigits` (`\d+`).
+    ['diagramborderroundcorner'],
+    (acc, value) => {
+      if (/^[0-9]+$/.test(value.trim())) acc.diagramBorderRoundCorner = parseFiniteInt(value);
+    },
+  ],
+  [
     ['iconprivatecolor'],
     (acc, _v, _color, paint) => {
       acc.iconPrivateColor = paint;

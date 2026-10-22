@@ -15,6 +15,7 @@
 
 import type { NoteEvent, NoteShape } from './ast.js';
 import { emit, ensureParticipant, urlOf, type Command, type ParseState } from './sequence-parse-helpers.js';
+import { emitOnArrowNote, manageVariable } from './sequence-note-placement.js';
 import { removeEmptyColumns } from './remove-empty-columns.js';
 import { SEQUENCE_COLOR } from './sequence-color-grammar.js';
 import { currentStyleBuilder } from './sequence-skin-param.js';
@@ -197,7 +198,7 @@ export const noteCommand: Command = {
     if (inlineText !== undefined) {
       // Single-line form: replace literal \n escape sequences with real newlines,
       // then emit the note immediately.
-      const text = inlineText.replace(/\\n/g, '\n');
+      const text = manageVariable(state, inlineText.replace(/\\n/g, '\n'));
       const ev: NoteEvent = {
         kind: 'note',
         position,
@@ -234,6 +235,13 @@ export const noteCommand: Command = {
 //    is dropped without emitting, matching upstream's silent no-op rather
 //    than handing the renderer an empty `NoteEvent.participants`.
 // @see command/note/sequence/FactorySequenceNoteCommand.java:117
+/** An arrow note (`onMessage`) joins the list of the event it is on; every
+ *  other note is appended where it is written. */
+function emitNote(state: ParseState, note: NoteEvent): void {
+  if (note.onMessage === true) emitOnArrowNote(state, note);
+  else emit(state, note);
+}
+
 export const endNoteCommand: Command = {
   pattern: /^end\s*(?:note|hnote|rnote)\s*$/i,
   execute(state) {
@@ -242,8 +250,8 @@ export const endNoteCommand: Command = {
       // (`FactorySequenceNoteCommand.java:145-147`, `...OnArrowCommand.java:
       // 200-202`, `...OverSeveralCommand.java:219-221`, `...AcrossCommand.java:
       // 199-201`; `BlocLines.java:234`): no per-line trim, blank lines kept.
-      state.pendingNote.text = removeEmptyColumns(state.pendingNote.text.split('\n')).join('\n');
-      if (state.pendingNote.participants.length > 0) emit(state, state.pendingNote);
+      state.pendingNote.text = manageVariable(state, removeEmptyColumns(state.pendingNote.text.split('\n')).join('\n'));
+      if (state.pendingNote.participants.length > 0) emitNote(state, state.pendingNote);
       state.pendingNote = null;
     }
   },
@@ -344,7 +352,8 @@ export const noteOnArrowCommand: Command = {
     };
 
     if (inlineText !== undefined) {
-      if (participants.length > 0) emit(state, { ...base, text: inlineText.replace(/\\n/g, '\n') });
+      if (participants.length > 0)
+        emitOnArrowNote(state, { ...base, text: manageVariable(state, inlineText.replace(/\\n/g, '\n')) });
     } else {
       state.pendingNote = { ...base, text: '' };
     }
@@ -415,7 +424,7 @@ export const styledNoteCommand: Command = {
     };
 
     if (inlineText !== undefined) {
-      emit(state, { ...base, text: inlineText.replace(/\\n/g, '\n') });
+      emit(state, { ...base, text: manageVariable(state, inlineText.replace(/\\n/g, '\n')) });
     } else {
       state.pendingNote = { ...base, text: '' };
     }
@@ -452,7 +461,7 @@ export const noteAcrossCommand: Command = {
     };
 
     if (inlineText !== undefined) {
-      emit(state, { ...base, text: inlineText.replace(/\\n/g, '\n') });
+      emit(state, { ...base, text: manageVariable(state, inlineText.replace(/\\n/g, '\n')) });
     } else {
       state.pendingNote = { ...base, text: '' };
     }

@@ -134,6 +134,10 @@ export function symbolInk(paint: Pick<SequencePaint, 'dash' | 'thickness' | 'fil
 export interface LabelStereotype {
   readonly labels: readonly string[];
   readonly font: FontConfiguration;
+  /** `Participant#getDisplay` appends the stereotype (`Participant.java:
+   *  125-135`); `Display#create0` finds it at `size() - 1` (`Display.java:
+   *  651-653`). */
+  readonly bottom?: boolean | undefined;
 }
 
 /** Everything `create0` reads besides the display and the font. */
@@ -223,13 +227,13 @@ export function sequenceSkinSimple(font: FontConfiguration, sprites: SpriteRegis
  *  the stereotype element duck-typed as the `StereotypeLike` `CreoleParser`
  *  reads (`SheetBuilder.ts`), its labels already computed and guillemet-
  *  wrapped by the head layout. */
-function headDisplay(labels: readonly string[], lines: readonly string[]): DisplayLike {
+function headDisplay(labels: readonly string[], lines: readonly string[], bottom = false): DisplayLike {
   const stereo = { getLabels: () => labels, toString: () => labels.join('') };
-  const items: readonly DisplayLine[] = [stereo, ...lines];
+  const items: readonly DisplayLine[] = bottom ? [...lines, stereo] : [stereo, ...lines];
   return {
     isNull: false,
     showStereotype: true,
-    cacheKey: () => JSON.stringify([labels, lines]),
+    cacheKey: () => JSON.stringify([labels, lines, bottom]),
     [Symbol.iterator]: () => items[Symbol.iterator](),
   };
 }
@@ -247,7 +251,7 @@ function stereotypedCreole(
   const skin = ctx.spriteContainer as ISkinSimple;
   const sheet = skin
     .sheet(ctx.fontConfiguration, align, CreoleMode.FULL, stereotype.font)
-    .createSheet(headDisplay(stereotype.labels, lines)) as unknown as Sheet<CreoleAtom>;
+    .createSheet(headDisplay(stereotype.labels, lines, stereotype.bottom)) as unknown as Sheet<CreoleAtom>;
   const block1 = new SheetBlock1(sheet, maxWidth, ctx.atomOps, skin.getPadding(), margins.marginX1, margins.marginX2);
   return new SheetBlock2(block1, block1, UStroke.withThickness(SHEET_BLOCK2_THICKNESS));
 }

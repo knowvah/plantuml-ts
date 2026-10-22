@@ -24,6 +24,7 @@ import { refComponentWidth, referencePaints } from './ref-body-geo.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import type { Theme } from '../../core/theme.js';
 import { noteLiveEntries, notesGroupConstraints } from './sequence-note-width.js';
+import type { MessagePadder } from './sequence-message-padder.js';
 
 /**
  * One message's demand on the participant row: the two participant indices it
@@ -76,6 +77,8 @@ interface ScanContext {
   readonly measurer: StringMeasurer;
   readonly levels: MessageLevels | undefined;
   readonly sprites: SpriteRegistry | undefined;
+  /** `SkinParam#sequenceDiagramPadder`; absent is `Padder.NONE`. */
+  readonly padder?: MessagePadder | undefined;
   /** `!pragma sequenceMessageSpan true` (`AbstractCommunicationTile.java
    *  :52-54`): a message tile registers no span constraint at all
    *  (`CommunicationTile.java:405-406`, `CommunicationTileSelf.java:167-168`). */
@@ -178,8 +181,8 @@ function messageConstraint(ev: MessageEvent, sorted: Participant[], scan: Scan):
   if (fi < 0 || ti < 0) return [];
   // The component is `createComponentArrow(message.getUsedStyles(), …)`
   // (`CommunicationTile.java:153-166`): its block is in the arrow style's font.
-  const font = messagePaint(ev.styleBuilder, ev.stereotype, ev.arrow, false).font;
-  const labelWidth = messageLabelWidth(ev.label, numberTextOf(ev), font, scan);
+  const paint = messagePaint(ev.styleBuilder, ev.stereotype, ev.arrow, false);
+  const labelWidth = messageLabelWidth(ev.label, numberTextOf(ev), paint.font, scan, paint.wrapWidth);
   return [
     {
       from: Math.min(fi, ti),
@@ -208,8 +211,11 @@ function exoConstraint(ev: MessageExoEvent, sorted: Participant[], scan: Scan): 
   if (ev.exoType === 'FROM_RIGHT' || ev.exoType === 'TO_RIGHT') return [];
   const index = sorted.findIndex((p) => p.id === ev.participant);
   if (index < 0) return [];
-  const font = messagePaint(ev.styleBuilder, ev.stereotype, ev.arrow, false).font;
-  const width = messageLabelWidth(ev.label, numberTextOf(ev), font, scan) + 2 * ARROW_PADDING_X + ARROW_DELTA_X;
+  const paint = messagePaint(ev.styleBuilder, ev.stereotype, ev.arrow, false);
+  const width =
+    messageLabelWidth(ev.label, numberTextOf(ev), paint.font, scan, paint.wrapWidth) +
+    2 * ARROW_PADDING_X +
+    ARROW_DELTA_X;
   return [{ from: index, to: index, span: width, origin: true }];
 }
 

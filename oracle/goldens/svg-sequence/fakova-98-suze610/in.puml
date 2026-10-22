@@ -1,0 +1,11 @@
+@startuml
+
+skinparam CircledCharacterFontSize 10
+participant Bob << (C,#FFFF00) toto >>
+participant Alice << Personnage >>
+participant Chat << (C,#00FFFF) >>
+
+Bob->Alice: test
+Alice -> Chat: test
+
+@enduml

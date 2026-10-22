@@ -15,10 +15,12 @@ import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ParticipantUrl } from './sequence-parse-helpers.js';
 export type { ParticipantUrl };
 import type { ScaleSpec } from '../../core/scale-command.js';
+import type { Warning } from '../../core/warning/Warning.js';
 import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 import type { MessageEvent, MessageExoEvent } from './ast-message.js';
 import type { NoteEvent } from './ast-note.js';
 import type { FrameEvent } from './ast-frame.js';
+import type { MessagePadder } from './sequence-message-padder.js';
 
 export type { MessageExoType, AbstractMessageEvent, MessageEvent, MessageExoEvent } from './ast-message.js';
 export type { NoteShape, NoteEvent } from './ast-note.js';
@@ -50,6 +52,11 @@ export interface Participant {
    *  (`CommandParticipant.java:174-181`). Rendered above the name unless
    *  {@link stereotypeHidden}; merged into the style either way. */
   stereotype?: string;
+  /** `!skinParam.stereotypePositionTop()` read when the stereotype was set
+   *  (`CommandParticipant.java:178-181` -> `Participant.setStereotype`,
+   *  `Participant.java:141-146`): `getDisplay` appends it after the name lines
+   *  (`:125-135`). Absent = top. */
+  stereotypeBottom?: boolean;
   /** `hiddenPortions.contains(EntityPortion.STEREOTYPE)`: `hide stereotype`
    *  drops the stereotype from `getDisplay` only (`Participant.java:125-135`);
    *  `getUsedStyles` still merges it (`:82-91`). */
@@ -218,6 +225,11 @@ export interface SequenceDiagramAST {
    * sdd1 D2.
    */
   readonly styleBuilder?: StyleBuilder;
+  /** `CommandSkinParam#executeArg`'s deprecation warnings (java:92-99),
+   *  rebuilt from the collected skinparam map by the plugin's `parse`
+   *  (`sequence-warnings.ts`, sdd2-T7e). Parse-time command warnings join
+   *  them in {@link sequenceWarnings}. */
+  readonly warnings?: readonly Warning[];
   /**
    * `current`/`start` are `DottedNumber.incrementMinor`'s LAST segment only
    * (`DottedNumber.java:75-79`); `prefix` carries every segment before it
@@ -303,6 +315,12 @@ export interface SequenceDiagramAST {
    * `createSpriteRegistry()`.
    */
   sprites?: SpriteRegistry;
+  /**
+   * `SkinParam#sequenceDiagramPadder` (`SkinParam.java:1216-1229`), read once
+   * at parse end like `applyNoteTextAlignment`: every message component asks
+   * it after the parse, so the final `params` answer. Absent is `Padder.NONE`.
+   */
+  messagePadder?: MessagePadder;
 }
 
 // ---------------------------------------------------------------------------

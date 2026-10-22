@@ -409,3 +409,132 @@ describe('note after an exo arrow (AbstractMessage.java:58, TileBuilder.java:122
     expect(ev.text).toBe('body');
   });
 });
+
+describe('%autonumber% in a note (SequenceDiagram.java:613-615, AutoNumber.java:91-96)', () => {
+  const texts = (ast: SequenceDiagramAST): string[] =>
+    ast.events.filter((e): e is NoteEvent => e.kind === 'note').map((e) => e.text);
+
+  it('single-line forms read the LAST number handed out, bold tags stripped', () => {
+    const ast = parse([
+      'autonumber',
+      'A -> B : one',
+      'A -> B : two',
+      'note over A : n=%autonumber%',
+      'note left of A : l=%autonumber% %autonumber%',
+      'note across : x=%autonumber%',
+    ]);
+    expect(texts(ast)).toEqual(['n=2', 'l=2 2', 'x=2']);
+  });
+
+  it('note on arrow and multi-line bodies are replaced too', () => {
+    const ast = parse([
+      'autonumber 10',
+      'A -> B : one',
+      'note right : r=%autonumber%',
+      'note over A',
+      'body %autonumber%',
+      'end note',
+    ]);
+    expect(texts(ast)).toEqual(['r=10', 'body 10']);
+  });
+
+  it('is empty before any message is numbered (`last` starts as "")', () => {
+    expect(texts(parse(['autonumber', 'note over A : [%autonumber%]']))).toEqual(['[]']);
+  });
+
+  it('keeps the previous number across `autonumber stop` and a frame', () => {
+    const ast = parse([
+      'autonumber',
+      'alt x',
+      'A -> B : one',
+      'else y',
+      'A -> B : two',
+      'end',
+      'autonumber stop',
+      'note over A : s=%autonumber%',
+    ]);
+    expect(texts(ast)).toEqual(['s=2']);
+  });
+
+  it('uses the formatted number minus its <b> tags', () => {
+    const ast = parse(['autonumber "<b>[00]"', 'A -> B : one', 'note over A : f=%autonumber%']);
+    expect(texts(ast)).toEqual(['f=[01]']);
+  });
+});
+
+describe('a note right after a group opener (GroupingStart.java:48, SequenceDiagram.java:154-158)', () => {
+  const messageNotes = (ast: SequenceDiagramAST): NoteEvent[] =>
+    ast.events.filter((e): e is NoteEvent => e.kind === 'note');
+
+  it('`alt x` / `note right : n` joins the message BEFORE the frame, not branch 0', () => {
+    const ast = parse([
+      'participant A',
+      'participant B',
+      'A -> B : hi',
+      'alt x',
+      'note right : n',
+      'A -> B : in',
+      'end',
+    ]);
+    expect(ast.events.map((e) => e.kind)).toEqual(['message', 'note', 'frame']);
+    expect(messageNotes(ast)[0]!.participants).toEqual(['B']);
+    const frame = ast.events[2];
+    expect(frame?.kind === 'frame' ? frame.branches[0]!.map((e) => e.kind) : []).toEqual(['message']);
+  });
+
+  it('climbs out of nested openers to the owner and keeps a multi-line body', () => {
+    const ast = parse(['A -> B : hi', 'alt a', 'alt b', 'note left', 'body', 'end note', 'A -> B : in', 'end', 'end']);
+    expect(ast.events.map((e) => e.kind)).toEqual(['message', 'note', 'frame']);
+    expect(messageNotes(ast)[0]!.text).toBe('body');
+  });
+
+  it('stops at an owner inside the enclosing frame', () => {
+    const ast = parse(['alt a', 'A -> B : in', 'alt b', 'note right : n', 'A -> B : x', 'end', 'end']);
+    const outer = ast.events[0];
+    const kinds = outer?.kind === 'frame' ? outer.branches[0]!.map((e) => e.kind) : [];
+    expect(kinds).toEqual(['message', 'note', 'frame']);
+  });
+
+  it('stays in the branch after `else` (the else leaf owns it)', () => {
+    const ast = parse(['A -> B : hi', 'alt a', 'else b', 'note right : n', 'A -> B : x', 'end']);
+    const frame = ast.events[1];
+    expect(frame?.kind === 'frame' ? frame.branches[1]!.map((e) => e.kind) : []).toEqual(['note', 'message']);
+  });
+
+  it('is dropped when nothing precedes the frame (`event == null`, :212-213)', () => {
+    const ast = parse(['alt a', 'note right : n', 'A -> B : in', 'end']);
+    expect(messageNotes(ast)).toEqual([]);
+    const frame = ast.events[0];
+    expect(frame?.kind === 'frame' ? frame.branches[0]!.map((e) => e.kind) : []).toEqual(['message']);
+  });
+});
+
+describe('%autonumber% inside an open frame', () => {
+  it('reads the last number handed out inside the still-open branches', () => {
+    const ast = parse(['autonumber', 'A -> B : one', 'alt x', 'A -> B : two', 'note over A : o=%autonumber%', 'end']);
+    const frame = ast.events[1];
+    const notes = frame?.kind === 'frame' ? frame.branches[0]!.filter((e): e is NoteEvent => e.kind === 'note') : [];
+    expect(notes.map((n) => n.text)).toEqual(['o=2']);
+  });
+});
+
+describe('%autonumber% in a message label (CommandArrow.java:400-402)', () => {
+  const labels = (ast: SequenceDiagramAST): string[] =>
+    ast.events.flatMap((e) => (e.kind === 'message' ? [e.label] : []));
+
+  it('a numbered message reads its OWN number (manageVariable runs after getNextMessageNumber)', () => {
+    const ast = parse(['autonumber 5', 'A -> B : Hello {%autonumber%}', 'B --> A : back %autonumber%']);
+    expect(labels(ast)).toEqual(['Hello {5}', 'back 6']);
+  });
+
+  it('an unnumbered message reads the previous last, empty before any', () => {
+    const ast = parse([
+      'A -> B : [%autonumber%]',
+      'autonumber',
+      'A -> B : x',
+      'autonumber stop',
+      'A -> B : [%autonumber%]',
+    ]);
+    expect(labels(ast)).toEqual(['[]', 'x', '[1]']);
+  });
+});

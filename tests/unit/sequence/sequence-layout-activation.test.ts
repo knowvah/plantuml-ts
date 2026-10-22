@@ -306,3 +306,21 @@ describe('activation steps (sdd2 T2b: LiveBoxes replaces the consume-once cursor
     expect(order).toEqual(['B2', 'destroy', 'B1', 'C1']);
   });
 });
+
+/**
+ * `LiveBoxes#addStep` runs once per layout pass over the SAME `LiveBoxes`:
+ * `PlayingSpace#drawUInternal` (`:119-123`) re-runs `fillPositionelTiles` from
+ * `getPreferredHeight` (`:154-157`, reached by `calculateDimensionSlow` and by
+ * `PlayingSpaceWithParticipants#drawU:205`) and from `drawBackground`
+ * (`:109-111`) before `drawLifeLines` (`:221`) -- three passes.
+ */
+describe('activation steps replayed over the layout passes (sdd2 T7b)', () => {
+  it('jasixo: `deactivate C` then `activate C` at one y draws no bar (jar golden has no livebox group)', () => {
+    expect(activations(['A -> B', 'deactivate C', 'activate C'])).toEqual([]);
+  });
+
+  it('zujuge: the later activate is swallowed by the nudged deactivate (jar rect y=47 height=19)', () => {
+    const bars = activations(['activate C', 'A -> B', 'deactivate C', 'activate C', 'A -> B', 'deactivate C']);
+    expect(bars.map((b) => [b.y, b.height])).toEqual([[47, 19]]);
+  });
+});

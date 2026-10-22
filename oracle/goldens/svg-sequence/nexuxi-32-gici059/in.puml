@@ -1,0 +1,13 @@
+@startuml
+<style>
+arrow {
+  fontcolor red
+  MaximumWidth 150
+}
+</style>
+
+Alice -> Bob : sends a request with authentication credentials and session context
+Bob -> Charlie : forwards the validated request to the downstream processing service
+Charlie -> Alice : returns the aggregated response with pagination metadata
+Alice -> Alice : logs the complete request-response cycle for audit trail
+@enduml

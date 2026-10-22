@@ -22,6 +22,7 @@ import { popActivation, pushActivation, recordMessageStep, type ArrowEnds } from
 import { LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
 import { isBelowForResponse, belowLabelAnchorY } from './sequence-response-below.js';
 import { liveOffsetSelf, type MessageEndpoints } from './sequence-layout-message-self.js';
+import type { MulticastGeo } from './geo-message.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { inclination1Of, inclination2Of } from './sequence-arrowhead.js';
 import { reverseArrowConfiguration } from './renderer-arrowhead.js';
@@ -84,7 +85,7 @@ const SELF_ARROW_PADDING_X = 0;
  *  the ambient 14) -- the ONE block `placeMessageLabel` draws, so reserve and
  *  draw cannot disagree (`planning/sizer-renderer-parity.md`). */
 function labelBlockHeightOf(event: MessageEvent, paint: SequencePaint, ctx: EventProcessingContext): number {
-  return messageLabelHeight(event.label, numberTextOf(event), paint.font, ctx);
+  return messageLabelHeight(event.label, numberTextOf(event), paint.font, ctx, paint.wrapWidth);
 }
 
 /**
@@ -253,6 +254,38 @@ function passthroughFields(
   };
 }
 
+/**
+ * `CommunicationTile#drawMulticast` (`:373-390`): each extra target's arrow
+ * runs between the two LIFELINE centres (`getPosC`, no live-box shift), drawn
+ * `dy = 2, 4, 6, ...` below the main arrow. The whole group is translated by
+ * the MAIN component's `getPosArrow` (`:338`) and each arrow component then
+ * adds its own `posArrow = getTextHeight`, which for `Display.NULL` is the
+ * bare padding, `2 * ARROW_TEXT_PADDING_Y` (`AbstractTextualComponent.java:
+ * 110-114`). The main arrow's own y is `textHeight` past the same origin, and
+ * `getPosArrow = textHeight - 2 * getOldPaddingY` (`ComponentRoseArrow.java:
+ * 188-193`) cancels that padding -- except when below-for-response, where
+ * `getPosArrow` is 0 and the main arrow sits at the origin itself, so the
+ * extra arrows land the padding lower (`:189-190`).
+ * @see skin/rose/ComponentRoseArrow.java:188-197
+ */
+function multicastGeosOf(
+  event: MessageEvent,
+  fromX: number,
+  y: number,
+  ctx: EventProcessingContext,
+): Pick<MessageGeo, 'multicast'> {
+  const targets = event.from === event.to ? undefined : event.multicast;
+  if (targets === undefined) return {};
+  const below = isBelowForResponse(event) ? 2 * ARROW_TEXT_PADDING_Y : 0;
+  const geos: MulticastGeo[] = [];
+  for (const id of targets) {
+    const geo = ctx.participantMap.get(id);
+    if (geo === undefined) continue;
+    geos.push({ fromX, toX: geo.centerX, y: y + 2 * (geos.length + 1) + below });
+  }
+  return geos.length === 0 ? {} : { multicast: geos };
+}
+
 /** Build the MessageGeo for a resolved set of endpoints at the given y. The
  *  label is a text block in the arrow style's font
  *  (`AbstractTextualComponent.java:80-92`). */
@@ -277,6 +310,7 @@ function buildMessageGeo(
     paint,
     labelLines: block.lines,
     ...(block.number !== undefined ? { labelNumber: block.number } : {}),
+    ...(block.padder !== undefined ? { labelPadder: block.padder } : {}),
     kind: 'message',
     fromX: endpoints.fromX,
     toX: endpoints.toX,
@@ -286,6 +320,8 @@ function buildMessageGeo(
     label: event.label,
     arrow: event.arrow,
     arrowDirection: endpoints.arrowDirection,
+    ...multicastGeosOf(event, ctx.participantMap.get(event.from)?.centerX ?? endpoints.fromX, y, ctx),
+    ...(event.part1Anchor !== undefined || event.part2Anchor !== undefined ? { partAnchored: true as const } : {}),
     ...passthroughFields(event),
   };
 }

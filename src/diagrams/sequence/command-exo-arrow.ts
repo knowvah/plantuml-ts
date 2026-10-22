@@ -343,8 +343,11 @@ function exoArrowConfiguration(
  * there IS no classic renderer (`SequenceDiagram.java:306-309` builds Teoz
  * unconditionally), so those consumers are live. See D4 as amended
  * 2026-08-26 and follow-on `sequence-parallel-anchor-draw`.
- * `PART1ANCHOR`/`PART2ANCHOR` (`:146-147`) have no AST field, so they are
- * matched and dropped as they are for `CommandArrow`.
+ * `PART1ANCHOR`/`PART2ANCHOR` (`:149-150`) are intentionally absent: neither
+ * `CommandExoArrowLeft` nor `CommandExoArrowRight` declares a `RegexLeaf` of
+ * either name (only `ANCHOR`, `:59`), so `arg.get(...)` is always null upstream,
+ * and `CommunicationExoTile#drawU` never reads a part anchor (only
+ * `CommunicationTile.java:328-331` does). There is nothing to carry or draw.
  * @see ~/git/plantuml/.../command/CommandExoArrowAny.java:138-147
  */
 function exoOptionalFields(g: Groups): Pick<MessageExoEvent, 'url' | 'lifeColor' | 'parallel' | 'anchor'> {

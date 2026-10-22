@@ -11,12 +11,12 @@ import {
   SPACE_CROSS_X,
   headGeometryNormalSide,
   headGeometryReverseSide,
-  headGeometrySelf,
   inclination1Of,
   inclination2Of,
   inclinationAngle1,
   inclinationAngle2,
 } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
+import { headGeometrySelf } from '../../../src/diagrams/sequence/sequence-arrowhead-self.js';
 import { reverseArrowConfiguration } from '../../../src/diagrams/sequence/renderer-arrowhead.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';

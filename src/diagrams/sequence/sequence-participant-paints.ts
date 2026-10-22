@@ -60,6 +60,9 @@ export interface ParticipantPaints {
   readonly paint: SequencePaint;
   readonly stereoFont: FontConfiguration;
   readonly showStereotype: boolean;
+  /** `Rose#getMinClassWidth` (`Rose.java:276-278`): `styles[0]`'s `MinimumWidth`;
+   *  an unset value is `ValueNull#asDouble()` = 0 (`ValueNull.java:57-59`). */
+  readonly minimumWidth: number;
 }
 
 /** The style layer's colour set (`ISkinParam#getIHtmlColorSet`). */
@@ -172,6 +175,7 @@ export function participantPaintsOf(p: Participant): ParticipantPaints {
     paint: paintOf(withTextColorFor(style, back), COLOR_SET),
     stereoFont: paintOf(withTextColorFor(stereo, back), COLOR_SET).font,
     showStereotype: show instanceof ValueNull || show.asBoolean(),
+    minimumWidth: style.value('MinimumWidth').asDouble(),
   };
   PAINTS.set(p, paints);
   return paints;

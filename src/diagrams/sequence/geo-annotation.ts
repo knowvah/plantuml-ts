@@ -64,6 +64,10 @@ export interface NoteGeo {
    *  the component's whole preferred width -- not the drawn polygon's. */
   minX: number;
   maxX: number;
+  /** A self message's right note only: `CommunicationTileSelfNoteRight
+   *  #getDrawnMaxX` (`:154-178`), the loop's DRAWN max plus the note width,
+   *  which a group frame folds instead of {@link maxX}. */
+  drawnMaxX?: number;
   /** A `note top`/`note bottom` on a message: the line to the message. */
   connector?: NoteConnector;
 }

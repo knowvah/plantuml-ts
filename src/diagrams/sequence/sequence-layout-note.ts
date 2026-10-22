@@ -13,6 +13,7 @@ import { activationLevel } from './sequence-layout-events.js';
 import type { EventProcessingContext } from './sequence-layout-events.js';
 import { wrapGauge, type TileMetrics, type YGauge } from './sequence-y-gauge.js';
 import { messageExtent, noteAnchor } from './sequence-note-anchor.js';
+import { selfDrawnSpan } from './sequence-layout-frame-extent.js';
 import { StyleSignatureBasic } from '../../core/style/StyleSignatureBasic.js';
 import { legacyOverTile, noteTile, notePadding, NOTE_COMPONENT_PADDING_Y } from './sequence-note-tile.js';
 import type { NotePadding, NoteTile, NoteTileInput } from './sequence-note-tile.js';
@@ -282,13 +283,14 @@ const CONNECTOR_PADDING_Y = 5;
 /** Move what a tile drew from `start` on down by `dy`: `CommunicationTileNoteTop
  *  #drawU` draws the wrapped tile under `UTranslate.dy(note height + spacey)`
  *  (`:60`). Messages and the notes of earlier wrappers are all it draws. */
-function shiftDrawn(geos: EventGeo[], start: number, dy: number): void {
+export function shiftDrawn(geos: EventGeo[], start: number, dy: number): void {
   for (let i = start; i < geos.length; i++) {
     const geo = geos[i]!;
     if (geo.kind === 'message') {
       geo.y += dy;
       geo.labelLines = geo.labelLines.map((r) => offsetRun(r, 0, dy));
       if (geo.labelNumber !== undefined) geo.labelNumber = offsetRun(geo.labelNumber, 0, dy);
+      if (geo.labelPadder !== undefined) geo.labelPadder = { ...geo.labelPadder, y: geo.labelPadder.y + dy };
       if (geo.createdHead !== undefined) geo.createdHead = { ...geo.createdHead, y: geo.createdHead.y + dy };
     } else if (geo.kind === 'note') {
       geo.y += dy;
@@ -349,6 +351,15 @@ function connectorPaint(ctx: EventProcessingContext): SequencePaint {
   return paintOf(style, HColorSet.instance());
 }
 
+/** `CommunicationTileSelfNoteRight#getDrawnMaxX` (`:154-178`): the inner
+ *  loop's `getDrawnMaxX` plus the note component's preferred width. */
+function setSelfNoteDrawnMaxX(owner: MessageEvent, resolved: ResolvedNote, ctx: EventProcessingContext): void {
+  const from = ctx.participantMap.get(owner.from);
+  if (from === undefined) return;
+  const geo = ctx.eventGeos.at(-1) as NoteGeo;
+  geo.drawnMaxX = selfDrawnSpan(owner, from.centerX, ctx).max + (resolved.tile.maxX - resolved.tile.minX);
+}
+
 /** `CommunicationTileNoteLeft`/`...Right` (and the self variants) around the
  *  chain: the same top, `max(tile, note)` tall, the extent they move. */
 function wrapSide(
@@ -363,6 +374,7 @@ function wrapSide(
   const anchored: NoteEvent = participant === undefined ? note : { ...note, participants: [participant] };
   const resolved = resolveNote(anchored, ctx, { position, forceNote, ...(rightX !== undefined ? { rightX } : {}) });
   emitNote(anchored, resolved, chain.gauge.min, ctx);
+  if (forceNote && position === 'right') setSelfNoteDrawnMaxX(owner, resolved, ctx);
   const height = Math.max(chain.height, notePreferredHeight(resolved));
   const extent = position === 'left' ? { minX: resolved.tile.minX } : { maxX: resolved.tile.maxX };
   return { ...chain, ...extent, height, gauge: wrapGauge(chain.gauge, height) };

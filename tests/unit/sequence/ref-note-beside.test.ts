@@ -32,7 +32,7 @@ describe('top/bottom note after ref', () => {
   // Oracle probe (scripts/oracle-render.sh, 2026-10-21): `A -> B : hi`,
   // `ref over A, B : r`, `note bottom : n`, `A -> B : after` draws NO note
   // (no FEFFDD fill) and the later message sits right under the ref (jar
-  // y=148.111 = ours 128.111 + the 20px banner); the jar adds the banner "This position is ignored: BOTTOM" (T7e, not built here).
+  // y=148.111 = ours 128.111 + the 20px banner); the jar adds the banner "This position is ignored: BOTTOM" (built by T7e).
   // `Reference#addNote` returns that Warning instead of storing the note
   // (`Reference.java:166-168`).
   const probe = (position: string): string =>
@@ -41,9 +41,10 @@ describe('top/bottom note after ref', () => {
       new DeterministicMeasurer(),
     );
 
-  it.each(['bottom', 'top'])('draws no %s note and adds no height (jar 211 less the 20px banner)', (position) => {
+  it.each(['bottom', 'top'])('draws no %s note: canvas is the jar 211 (191 body + the 20px banner)', (position) => {
     const svg = probe(position);
     expect(svg).not.toContain('#FEFFDD');
-    expect(svg).toContain('height="191px"');
+    expect(svg).toContain('height="211px"');
+    expect(svg).toContain(`This\u00a0position\u00a0is\u00a0ignored:\u00a0${position.toUpperCase()}`);
   });
 });

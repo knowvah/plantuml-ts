@@ -1,0 +1,5 @@
+@startuml
+skinparam stereotypePosition bottom
+participant "Famous Bob" as Bob << Generated >>
+participant Alice << (C,#ADD1B2) Testable >>
+@enduml

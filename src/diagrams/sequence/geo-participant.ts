@@ -25,10 +25,19 @@ import type { TextRun } from './text-block-geo.js';
  */
 export type ParticipantBadge =
   | { readonly kind: 'sprite'; readonly dataUri: string; readonly width: number; readonly height: number }
-  /** The jar draws the circle and NOT the character: across
-   *  `nimoxu-60-xale291`, `fakova-98-suze610` and `xakuro-97-tado489` no
-   *  `<text>` carries the declared letter, only a filled `<ellipse>`. */
-  | { readonly kind: 'char'; readonly color: string | undefined; readonly width: number; readonly height: number };
+  /** The filled circle plus the declared letter's outline `<path>`
+   *  (`CircledCharacter.java:63-70`, `DriverCenteredCharacterSvg.java:56-81`):
+   *  `nimoxu-60-xale291`, `fakova-98-suze610` and `xakuro-97-tado489` each
+   *  draw an `<ellipse>` then a `<path fill="#000">`. `character` and
+   *  `fontSize` key the captured outline (`core/spot-glyph-data.ts`). */
+  | {
+      readonly kind: 'char';
+      readonly color: string | undefined;
+      readonly width: number;
+      readonly height: number;
+      readonly character: string;
+      readonly fontSize: number;
+    };
 
 export interface ParticipantGeo {
   /**
@@ -68,6 +77,8 @@ export interface ParticipantGeo {
    *  (`core/stereotype-decoration.ts`). Absent when there is none, when every
    *  chunk is invisible, or when the style hides it. */
   stereotypeLines?: readonly string[];
+  /** {@link Participant.stereotypeBottom}: the rows follow the name lines. */
+  stereotypeBottom?: boolean;
   /**
    * The box's resolved fill and stroke.
    *

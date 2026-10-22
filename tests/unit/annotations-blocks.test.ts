@@ -385,3 +385,22 @@ describe('buildAnnotationBlock — AnnotationBoxStyle.hyperlinkColor forwarding 
     expect(block.body).toContain('fill="#00F"');
   });
 });
+
+describe('buildAnnotationBlock — gradient backgroundColor (sdd2-T7l)', () => {
+  const measurer = new FixedMeasurer(10, 14);
+
+  it('paints a gradient title backcolor as url(#id) with a linearGradient def (SvgGraphics.java:367-409)', () => {
+    const style = makeStyle({ backgroundColor: 'AliceBlue-Bisque' });
+    const block = buildAnnotationBlock('title', ['T'], style, measurer);
+    expect(block.body).toMatch(/<linearGradient id="g[a-z0-9]+" x1="50%" y1="0%" x2="50%" y2="100%">/); // SvgGraphics.java:382-386, policy "-"
+    expect(block.body).toMatch(/<rect[^>]*fill="url\(#g[a-z0-9]+\)"/);
+    expect(block.body).not.toContain('fill="AliceBlue-Bisque"');
+  });
+
+  it('a plain colour backcolor is unchanged', () => {
+    const style = makeStyle({ backgroundColor: '#DDDDDD' });
+    const block = buildAnnotationBlock('title', ['T'], style, measurer);
+    expect(block.body).toMatch(/fill="#DDD"/);
+    expect(block.body).not.toContain('linearGradient');
+  });
+});

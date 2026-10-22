@@ -96,6 +96,7 @@ export {
 import { UNDRESSED_ARROW_RE, DRESSED_ARROW_RE } from './sequence-arrow-compose.js';
 import { endpointOf, getMulticasts, type Groups } from './command-arrow-endpoints.js';
 import { currentStyleBuilder } from './sequence-skin-param.js';
+import { manageMessageLabel } from './sequence-note-placement.js';
 
 // ---------------------------------------------------------------------------
 // executeArg's own helpers, under upstream's names
@@ -327,8 +328,8 @@ function arrowOf(state: ParseState, g: Groups, facts: DressingFacts): ArrowConfi
  * `createWithContact` (`teoz/CommunicationTile.java:113-116`) and an anchor
  * returns early from `drawU` (`:316-319`). See D4 as amended 2026-08-26 and
  * follow-on `sequence-parallel-anchor-draw`. `PART1ANCHOR`/`PART2ANCHOR`
- * likewise have no AST field, which is why a part-anchored message still
- * draws where upstream suppresses it.
+ * are stored too (`:421-422`) and DO suppress the drawing, as upstream's
+ * `drawU` returns early for them (`teoz/CommunicationTile.java:328-331`).
  *
  * LIFECOLOR (`:126`), STEREOTYPE (`:129`) and the URL (`:130`) are each
  * stored exactly as `arg.get(KEY, 0)` yields them: the raw `#colour` token,
@@ -340,17 +341,21 @@ function arrowOf(state: ParseState, g: Groups, facts: DressingFacts): ArrowConfi
  */
 type OptionalMessageFields = Pick<
   MessageEvent,
-  'multicast' | 'parallel' | 'anchor' | 'url' | 'stereotype' | 'lifeColor'
+  'multicast' | 'parallel' | 'anchor' | 'part1Anchor' | 'part2Anchor' | 'url' | 'stereotype' | 'lifeColor'
 >;
 
 function optionalFields(state: ParseState, g: Groups): OptionalMessageFields {
   const multicast = getMulticasts(state, g['MULTICAST']);
   const anchor = g['ANCHOR1'];
+  const part1Anchor = g['PART1ANCHOR1'];
+  const part2Anchor = g['PART2ANCHOR1'];
   const url = urlOf(g['URL']);
   return {
     ...(multicast.length > 0 ? { multicast } : {}),
     ...(g['PARALLEL'] !== undefined ? { parallel: true } : {}),
     ...(anchor !== undefined ? { anchor } : {}),
+    ...(part1Anchor !== undefined ? { part1Anchor } : {}),
+    ...(part2Anchor !== undefined ? { part2Anchor } : {}),
     ...(url !== undefined ? { url } : {}),
     ...(g['STEREOTYPE'] !== undefined ? { stereotype: g['STEREOTYPE'] } : {}),
     ...(g['LIFECOLOR'] !== undefined ? { lifeColor: g['LIFECOLOR'] } : {}),
@@ -395,7 +400,7 @@ function executeArrow(state: ParseState, match: RegExpExecArray): void {
   // (`CommandArrow.java:396-398`) -- so after a delay `**` creates nothing.
   if (activation.startsWith('*')) activate(state.life, to, 'CREATE');
   const auto = autoActivationFlags(state, activation, arrow, from, to);
-  const msg: MessageEvent = applyAutonumber(state, {
+  const numbered: MessageEvent = applyAutonumber(state, {
     kind: 'message',
     from,
     to,
@@ -410,6 +415,7 @@ function executeArrow(state: ParseState, match: RegExpExecArray): void {
     ...activationFlags(activation, from, to),
     ...auto,
   });
+  const msg = manageMessageLabel(state, numbered);
   const error = addMessage(state.life, msg);
   if (error !== undefined) {
     state.executionError = error;

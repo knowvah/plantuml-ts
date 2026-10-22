@@ -16,6 +16,7 @@ import type {
   ElseGeo,
   FrameEvent,
   FrameGeo,
+  NoteGeo,
   ParticipantGeo,
   SequenceGeometry,
 } from '../../../src/diagrams/sequence/ast.js';
@@ -61,12 +62,24 @@ function svgWidth(geo: SequenceGeometry): number {
 describe('resolveFrameSpan (GroupingTile.java:211-225)', () => {
   it('reaches MARGINX (16) beyond its child tiles on each side', () => {
     // min2.add(tile.getDrawnMinX().addFixed(-MARGINX)); max2.add(m.addFixed(MARGINX)) (:211-214).
-    const span = resolveFrameSpan({ children: [{ min: 100, max: 200 }], elseWidths: [], headerWidth: 10, xOrigin: 0 });
+    const span = resolveFrameSpan({
+      children: [{ min: 100, max: 200 }],
+      elseWidths: [],
+      headerWidth: 10,
+      xOrigin: 0,
+      notesLeft: 0,
+    });
     expect(span).toEqual({ min: 100 - FRAME_MARGIN_X, max: 200 + FRAME_MARGIN_X });
   });
 
   it('is at least as wide as its header plus 16 (:224)', () => {
-    const span = resolveFrameSpan({ children: [{ min: 100, max: 110 }], elseWidths: [], headerWidth: 90, xOrigin: 0 });
+    const span = resolveFrameSpan({
+      children: [{ min: 100, max: 110 }],
+      elseWidths: [],
+      headerWidth: 90,
+      xOrigin: 0,
+      notesLeft: 0,
+    });
     expect(span).toEqual({ min: 84, max: 84 + 90 + 16 });
   });
 
@@ -77,12 +90,24 @@ describe('resolveFrameSpan (GroupingTile.java:211-225)', () => {
       elseWidths: [300],
       headerWidth: 10,
       xOrigin: 0,
+      notesLeft: 0,
     });
     expect(span).toEqual({ min: 84, max: 84 - FRAME_EXTERNAL_MARGIN_X1 + 300 });
   });
 
+  it("subtracts the end notes' left width from the parent getMinX an else reaches (GroupingTile.java:984-986)", () => {
+    const span = resolveFrameSpan({
+      children: [{ min: 100, max: 110 }],
+      elseWidths: [300],
+      headerWidth: 10,
+      xOrigin: 0,
+      notesLeft: 40,
+    });
+    expect(span).toEqual({ min: 84, max: 84 - FRAME_EXTERNAL_MARGIN_X1 - 40 + 300 });
+  });
+
   it('starts at the x origin when no child tile counts (:217-218)', () => {
-    const span = resolveFrameSpan({ children: [], elseWidths: [], headerWidth: 40, xOrigin: 10 });
+    const span = resolveFrameSpan({ children: [], elseWidths: [], headerWidth: 40, xOrigin: 10, notesLeft: 0 });
     expect(span).toEqual({ min: 10, max: 10 + 40 + 16 });
   });
 });
@@ -382,5 +407,46 @@ describe('T3c2: x origin and parallel chains', () => {
     const geo = layout(['a <- a : reverse loop label', 'a -> b : hi']);
     const scaled = scaleSequenceGeometry(geo, 2).events.find((e) => e.kind === 'message');
     expect(scaled?.kind === 'message' && scaled.tileMinX).toBeCloseTo(20, 6);
+  });
+});
+
+describe('a note after a group end (GroupingTile.java:995-1013)', () => {
+  const noteGeos = (geo: SequenceGeometry): NoteGeo[] => geo.events.filter((e): e is NoteGeo => e.kind === 'note');
+
+  it('is drawn right of the frame at its top, before the children, taking no height (susati-64: note x 135.512, frame x 13.469 w 111.044, y 51)', () => {
+    const geo = layout([
+      'participant Bob',
+      'participant Alice',
+      'alt foo',
+      'Bob->Alice : hello',
+      'end',
+      'note right: Some explication on the large unused space beside the alt block.',
+      'Alice->Bob : hello',
+    ]);
+    const [frame] = groups(geo);
+    const [note] = noteGeos(geo);
+    // jar: the note's box starts `getPaddingX` (5) past `max` (124.513) at x 129.512.
+    expect(note!.x).toBeCloseTo(frame!.x + frame!.width + 5, 6);
+    expect(note!.y).toBe(frame!.y + 5);
+    const order = geo.events.map((e) => e.kind);
+    expect(order.indexOf('note')).toBe(order.indexOf('frame') + 1);
+    expect(order.indexOf('note')).toBeLessThan(order.indexOf('message'));
+  });
+
+  it('stacks right notes outward and left notes leftward from the frame edges', () => {
+    const geo = layout([
+      'participant A',
+      'participant B',
+      'group g',
+      'A->B : hi',
+      'end',
+      'note right: r1',
+      'note right: r2',
+      'note left: l1',
+    ]);
+    const [frame] = groups(geo);
+    const [r1, r2, l1] = noteGeos(geo);
+    expect(r2!.x).toBeCloseTo(r1!.x + (r1!.maxX - r1!.minX), 6);
+    expect(l1!.maxX).toBeCloseTo(frame!.x, 6);
   });
 });

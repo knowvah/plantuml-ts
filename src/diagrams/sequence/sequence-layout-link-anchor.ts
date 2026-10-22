@@ -60,8 +60,12 @@ function tileFromAnchor(events: readonly SequenceEvent[], anchor: string): Ancho
 /** `ComponentRoseArrow#getPreferredWidth` (`:347-349`) for an exo tile
  *  (`CommunicationExoTile.java:166-170`). */
 function exoPreferredWidth(event: MessageExoEvent, ctx: EventProcessingContext): number {
-  const font = messagePaint(event.styleBuilder, event.stereotype, event.arrow, false).font;
-  return messageLabelWidth(event.label, numberTextOf(event), font, ctx) + 2 * ARROW_PADDING_X + ARROW_DELTA_X;
+  const paint = messagePaint(event.styleBuilder, event.stereotype, event.arrow, false);
+  return (
+    messageLabelWidth(event.label, numberTextOf(event), paint.font, ctx, paint.wrapWidth) +
+    2 * ARROW_PADDING_X +
+    ARROW_DELTA_X
+  );
 }
 
 /**

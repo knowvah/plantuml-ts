@@ -43,9 +43,13 @@ function isReverse(owner: MessageEvent, ctx: EventProcessingContext): boolean {
  *  preferred width, `max(getTextWidth, 50)` -- the text block and both
  *  `AbstractComponentRoseArrow` paddings of 7 (`:66`,
  *  `ComponentRoseSelfArrow.java:326-328`). */
-export function selfCompWidth(owner: MessageEvent, env: Pick<MessageLabelEnv, 'measurer' | 'sprites'>): number {
-  const font = messagePaint(owner.styleBuilder, owner.stereotype, owner.arrow, true).font;
-  const text = messageLabelWidth(owner.label, numberTextOf(owner), font, env) + 2 * ARROW_PADDING_X;
+export function selfCompWidth(
+  owner: MessageEvent,
+  env: Pick<MessageLabelEnv, 'measurer' | 'sprites' | 'padder'>,
+): number {
+  const paint = messagePaint(owner.styleBuilder, owner.stereotype, owner.arrow, true);
+  const text =
+    messageLabelWidth(owner.label, numberTextOf(owner), paint.font, env, paint.wrapWidth) + 2 * ARROW_PADDING_X;
   return Math.max(text, SELF_ARROW_MIN_WIDTH);
 }
 
@@ -118,7 +122,10 @@ export function messageExtent(owner: MessageEvent, ctx: EventProcessingContext):
   const reverse = isReverse(owner, ctx);
   const point2 = owner.create === true ? (reverse ? to.x + to.width : to.x) : to.centerX;
   const [left, right] = reverse ? [point2, from.centerX] : [from.centerX, point2];
-  const font = messagePaint(owner.styleBuilder, owner.stereotype, owner.arrow, false).font;
-  const width = messageLabelWidth(owner.label, numberTextOf(owner), font, ctx) + 2 * ARROW_PADDING_X + ARROW_DELTA_X;
+  const paint = messagePaint(owner.styleBuilder, owner.stereotype, owner.arrow, false);
+  const width =
+    messageLabelWidth(owner.label, numberTextOf(owner), paint.font, ctx, paint.wrapWidth) +
+    2 * ARROW_PADDING_X +
+    ARROW_DELTA_X;
   return { minX: left, maxX: Math.max(right, left + width) };
 }

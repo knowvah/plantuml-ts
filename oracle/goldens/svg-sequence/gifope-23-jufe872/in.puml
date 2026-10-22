@@ -1,0 +1,11 @@
+@startuml
+skinparam backgroundcolor AntiqueWhite/Gold
+
+participant Alice #red\blue
+
+Alice -> Bob : hello
+
+note left #green-white : ok
+
+
+@enduml

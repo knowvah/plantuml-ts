@@ -22,9 +22,8 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 import { measureParticipantSymbol } from './renderer-participant-symbol.js';
-import { participantStyle, type SequencePaint } from './sequence-skin-param.js';
-import { participantStereotype } from './sequence-participant-paints.js';
-import { Url } from '../../core/url/Url.js';
+import type { SequencePaint } from './sequence-skin-param.js';
+import { participantPaintsOf } from './sequence-participant-paints.js';
 
 /**
  * `ComponentRoseDatabase`'s constructor passes
@@ -230,18 +229,12 @@ function paddedCentreY(top: number, height: number, metrics: ParticipantLabelMet
 export function participantBadgeGeo(
   badge: ParticipantBadge | undefined,
   x: number,
-  width: number,
-  padding: Pick<ClockwiseTopRightBottomLeft, 'getLeft' | 'getRight'>,
+  padding: Pick<ClockwiseTopRightBottomLeft, 'getLeft'>,
   k = 1,
-): { readonly x: number; readonly nameCx: number } | undefined {
+): { readonly x: number } | undefined {
   if (badge === undefined) return undefined;
-  const badgeX = x + padding.getLeft() * k;
-  return { x: badgeX, nameCx: (badgeX + badge.width + BADGE_GAP + (x + width - padding.getRight() * k)) / 2 };
+  return { x: x + padding.getLeft() * k };
 }
-
-/** `TextBlockSprited`'s own gap between the sprite and the label block
- *  (`TextBlockSprited.java:70-77`'s `sprite.width + 6.0`). */
-const BADGE_GAP = 6;
 
 /**
  * `Rose#getMinClassWidth` (`Rose.java:276-278`): `style.value(PName
@@ -253,7 +246,5 @@ const BADGE_GAP = 6;
  * block against it (`ComponentRoseParticipant.java:139-142`).
  */
 export function participantMinWidth(p: Participant): number {
-  const url = p.url === undefined ? undefined : new Url(p.url.url, p.url.tooltip, null);
-  const { style } = participantStyle(p.styleBuilder, p.type, participantStereotype(p), url);
-  return style.value('MinimumWidth').asDouble();
+  return participantPaintsOf(p).minimumWidth;
 }

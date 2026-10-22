@@ -199,8 +199,22 @@ function scaleMessage(m: MessageGeo, k: number): MessageGeo {
     y: m.y * k,
     ...(m.selfReturnX !== undefined ? { selfReturnX: m.selfReturnX * k } : {}),
     ...(m.tileMinX !== undefined ? { tileMinX: m.tileMinX * k } : {}),
+    ...(m.multicast !== undefined
+      ? { multicast: m.multicast.map((t) => ({ fromX: t.fromX * k, toX: t.toX * k, y: t.y * k })) }
+      : {}),
     labelLines: m.labelLines.map((r) => scaleRun(r, k)),
     ...(m.labelNumber !== undefined ? { labelNumber: scaleRun(m.labelNumber, k) } : {}),
+    ...(m.labelPadder !== undefined
+      ? {
+          labelPadder: {
+            ...m.labelPadder,
+            x: m.labelPadder.x * k,
+            y: m.labelPadder.y * k,
+            width: m.labelPadder.width * k,
+            height: m.labelPadder.height * k,
+          },
+        }
+      : {}),
     ...(m.createdHead !== undefined
       ? { createdHead: { participant: scaleParticipant(m.createdHead.participant, k), y: m.createdHead.y * k } }
       : {}),

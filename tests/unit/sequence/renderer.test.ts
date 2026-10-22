@@ -145,6 +145,8 @@ function tabRunsFor(f: Pick<FrameGeo, 'x' | 'y' | 'tabText' | 'tabComment' | 'ta
       textWidth: measurer.measure(text, spec).width,
       textAscent: ascent,
       textLineHeight: lineHeight,
+      // The creole seam stamps a run's own fill (`sequence-label-primitives.ts:157`).
+      color: '#000000',
     };
   };
   const left = f.x + HEADER_PADDING.left;
@@ -1962,14 +1964,21 @@ describe('renderSequence — participant stereotype', () => {
   });
 
   // The other arm of that same `if`: a circled CHARACTER. The jar draws the
-  // filled circle and NOT the letter -- no `<text>` in nimoxu-60-xale291,
-  // fakova-98-suze610 or xakuro-97-tado489 carries the declared char.
-  it('draws a circled-character badge as a filled circle, without the character', () => {
+  // filled circle and then the letter's OUTLINE as a `<path fill="#000">`
+  // (`CircledCharacter.java:63-70`, `DriverCenteredCharacterSvg.java:56-81`):
+  // no `<text>` carries the declared char in nimoxu-60-xale291,
+  // fakova-98-suze610 or xakuro-97-tado489, each has the ellipse then a path.
+  it('draws a circled-character badge as a filled circle followed by the letter outline path', () => {
     const svg = render('@startuml\nparticipant P << (U,#ADD1B2) Lbl >>\nP -> Q: hi\n@enduml');
-    expect(svg).toContain('<ellipse');
-    expect(svg).toContain('#ADD1B2');
+    expect(svg).toMatch(/<ellipse [^>]*fill="#ADD1B2"[^>]*\/><path d="M[^"]+" fill="#000"\/>/);
     expect(svg).toContain('>«Lbl»</text>');
     expect(svg).not.toContain('>U</text>');
+  });
+
+  it('draws no outline for a letter that was never captured, rather than another letter', () => {
+    const svg = render('@startuml\nparticipant P << (Z,#ADD1B2) Lbl >>\nP -> Q: hi\n@enduml');
+    expect(svg).toContain('<ellipse');
+    expect(svg).not.toMatch(/<path d="M[^"]+" fill="#000"\/>/);
   });
 
   it('hide stereotype removes it regardless of any style', () => {

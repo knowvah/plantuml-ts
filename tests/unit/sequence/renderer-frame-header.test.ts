@@ -48,6 +48,8 @@ function tabRunsFor(f: FrameGeo): TextRun[] {
       textWidth: measurer.measure(text, spec).width,
       textAscent: ascent,
       textLineHeight: lineHeight,
+      // The creole seam stamps a run's own fill (`sequence-label-primitives.ts:157`).
+      color: '#000000',
       fontFamily: spec.family,
       fontSize: spec.size,
       bold: true,
@@ -201,8 +203,27 @@ describe('frame paint (sdd1 T3a)', () => {
   });
 
   it('draws no tab text when the header font is transparent (DriverTextSvg.java:93-94)', () => {
-    const frame = makeFrame(groupPaintsOf(styled('groupHeader {\n FontColor transparent\n}')));
+    const painted = makeFrame(groupPaintsOf(styled('groupHeader {\n FontColor transparent\n}')));
+    // Layout stamps no colour on a transparent run (`sequence-label-primitives.ts:157`).
+    const frame = { ...painted, tabRuns: painted.tabRuns.map(({ color: _c, ...run }) => run) };
     expect(topLevelTags(renderGroupingHeaderForeground(frame, theme))).toEqual(['path', 'rect']);
+  });
+
+  it('omits a comment run whose font colour is transparent, keeping the title (DriverTextSvg.java:93-94)', () => {
+    // pizupi: `group { FontColor transparent }` -- the title is `groupHeader`'s
+    // (black), the `[` and `]` are `group`'s, transparent, so carry no colour
+    // (`sequence-label-primitives.ts:157`); the `<color:#0>` run keeps its own.
+    const frame = makeFrame({ frameType: 'alt', tabText: 'alt', tabComment: 'x' });
+    const [title, bracket] = tabRunsFor(frame);
+    const inner: TextRun = { ...bracket!, text: 'x' };
+    const { color: _c, ...open } = { ...bracket!, text: '[' };
+    const { color: _d, ...close } = { ...bracket!, text: ']' };
+    const svg = renderGroupingHeaderForeground({ ...frame, tabRuns: [title!, open, inner, close] }, theme);
+    expect(topLevelTags(svg)).toEqual(['path', 'rect', 'text', 'text']);
+    expect(svg).not.toContain('>[<');
+    expect(svg).not.toContain('>]<');
+    expect(svg).toContain('>alt<');
+    expect(svg).toContain('>x<');
   });
 
   it('refuses a frame layout did not paint', () => {

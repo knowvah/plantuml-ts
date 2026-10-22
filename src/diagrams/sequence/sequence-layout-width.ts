@@ -138,15 +138,16 @@ function refContentRight(eventGeos: readonly EventGeo[]): number {
 }
 
 /** The rightmost `GroupingTile#getMaxX` -- `max + EXTERNAL_MARGINX2` (9)
- *  past the frame's right border (`teoz/GroupingTile.java:988-990`; the
- *  group-end notes it also adds are drawn by the port as notes of their own,
- *  which {@link noteContentRight} reads). `PlayingSpace` maxes it in
+ *  past the frame's right border plus `getNotesWidth(RIGHT)`
+ *  (`teoz/GroupingTile.java:988-990,1015-1021`; `FrameGeo#endNotesWidth`).
+ *  `PlayingSpace` maxes it in
  *  (`:93-96`), so a frame reaching past the last lifeline widens the
  *  document. */
 function groupContentRight(eventGeos: readonly EventGeo[]): number {
   let right = Number.NEGATIVE_INFINITY;
   for (const e of eventGeos) {
-    if (e.kind === 'frame' && e.frameType !== 'ref') right = Math.max(right, e.x + e.width + FRAME_EXTERNAL_MARGIN_X2);
+    if (e.kind === 'frame' && e.frameType !== 'ref')
+      right = Math.max(right, e.x + e.width + FRAME_EXTERNAL_MARGIN_X2 + (e.endNotesWidth?.right ?? 0));
   }
   return right;
 }

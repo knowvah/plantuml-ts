@@ -112,10 +112,10 @@ describe('NOTEMSG: a note on a message is drawn beside it (CommunicationTileNote
     expect(right.y).toBe(gaugeOf(w, 0).top + NOTE_PADDING_Y);
   });
 
-  it('is not folded past a group end: a GroupingLeaf owns it', () => {
+  it('is not folded past a group end: the GroupingLeaf owns it and its tile draws it at the frame top (GroupingTile.java:275,995-1013)', () => {
     const w = walk(['group g', 'A -> B : m', 'end', 'note right : r']);
     const frame = w.ctx.eventGeos.find((g): g is FrameGeo => g.kind === 'frame')!;
-    expect(w.notes[0]!.y).toBeGreaterThan(frame.y + frame.height);
+    expect(w.notes[0]!.y).toBe(frame.y + NOTE_PADDING_Y);
   });
 
   it('beside a self message always builds a ComponentType.NOTE (CommunicationTileSelfNoteRight.java:102)', () => {

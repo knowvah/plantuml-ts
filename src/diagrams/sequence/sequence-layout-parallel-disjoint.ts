@@ -71,8 +71,12 @@ function shift(anchors: readonly Anchor[] | undefined, by: number): Anchor[] | u
 /** The arrow component's preferred width, `getTextWidth + getArrowDeltaX`
  *  (`ComponentRoseArrow.java:347-349`). */
 function arrowWidth(ev: MessageEvent | MessageExoEvent, scan: Scan): number {
-  const font = messagePaint(ev.styleBuilder, ev.stereotype, ev.arrow, false).font;
-  return messageLabelWidth(ev.label, numberTextOf(ev), font, scan) + 2 * ARROW_PADDING_X + ARROW_DELTA_X;
+  const paint = messagePaint(ev.styleBuilder, ev.stereotype, ev.arrow, false);
+  return (
+    messageLabelWidth(ev.label, numberTextOf(ev), paint.font, scan, paint.wrapWidth) +
+    2 * ARROW_PADDING_X +
+    ARROW_DELTA_X
+  );
 }
 
 /**

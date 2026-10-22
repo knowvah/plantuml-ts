@@ -112,12 +112,23 @@ export function renderLifeline(p: ParticipantGeo, seg: LifelineSegment, theme: S
   // open by then, so a zero-height lifeline still emits `<g><title>` --
   // only the rect is skipped. (Contrast `renderActivation`, whose guard
   // sits ABOVE its own `startGroup`.)
+  //
+  // Both literals are unscaled pixel constants -- `centerX`, `y1` and `height`
+  // arrive already multiplied -- so they take `scaleK` here, where upstream's
+  // `SvgGraphics#format` (`:466-473`) multiplies the emitted x and width.
+  const k = theme.scaleK;
   const hover =
     height > 0
-      ? rect(p.centerX + (LINE_COMPONENT_WIDTH - HOVER_TARGET_WIDTH) / 2, seg.y1, HOVER_TARGET_WIDTH, height, {
-          fill: '#000',
-          fillOpacity: 0,
-        })
+      ? rect(
+          p.centerX + ((LINE_COMPONENT_WIDTH - HOVER_TARGET_WIDTH) / 2) * k,
+          seg.y1,
+          HOVER_TARGET_WIDTH * k,
+          height,
+          {
+            fill: '#000',
+            fillOpacity: 0,
+          },
+        )
       : '';
 
   const vline = line(p.centerX, seg.y1, p.centerX, seg.y2, lineStroke(seg.paint, theme.scaleK));
@@ -206,6 +217,7 @@ export function renderActivation(act: ActivationGeo, theme: ScaledTheme): string
   // hand-authored `activate X` / `deactivate X` pair at one y can still
   // reach it.
   if (act.height === 0) return '';
+  if (act.clippedOut === true) return `${openTitledGroup('')}</g>`;
   const paint = activationPaintOf(act);
   const half = ACTIVATION_HALF_WIDTH * theme.scaleK;
   // `LiveBoxes#drawOneLevel` draws every bar from the same origin and moves

@@ -60,6 +60,11 @@ import type { StringMeasurer } from '../../../src/core/measurer.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { renderSequence } from '../../../src/diagrams/sequence/renderer.js';
+import {
+  sequenceWarnings,
+  withSequenceWarningBanner,
+  withSkinParamWarnings,
+} from '../../../src/diagrams/sequence/sequence-warnings.js';
 import { isEmpty } from '../../../src/core/annotations/index.js';
 import { applyExportedChrome } from '../../../src/core/annotations/chrome-export.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
@@ -122,9 +127,11 @@ export function renderFixtureSequence(
   if ('refused' in parsed) {
     throw new Error(`sequence refused this source at line ${String(parsed.line)} (${parsed.kind}): ${parsed.message}`);
   }
-  const ast = parsed;
+  // sdd2-T7e: mirrors `sequence/index.ts#sequencePlugin` (skinparam warnings
+  // at parse, the banner at render; `sequence-warnings.ts`).
+  const ast = withSkinParamWarnings(parsed, preprocessed.skinparam);
   const geo = layoutSequence(ast, theme, measurer);
-  const fragment = renderSequence(geo, theme, measurer);
+  const fragment = withSequenceWarningBanner(renderSequence(geo, theme, measurer), sequenceWarnings(ast), measurer);
 
   // sdd1 close-b2 (journal row 40): seed every `<linearGradient>`/`<filter>`
   // id as production does -- `src/index.ts` passes `seedOfUmlSource(

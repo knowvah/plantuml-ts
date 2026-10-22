@@ -211,6 +211,8 @@ export interface SkinparamAccumulator {
   circledCharacterFontItalic: boolean | undefined;
   pathHoverColor: string | undefined;
   diagramBorderColor: string | undefined;
+  diagramBorderThickness: number | undefined;
+  diagramBorderRoundCorner: number | undefined;
   iconPrivateColor: Paint | undefined;
   iconPrivateBackgroundColor: string | undefined;
   iconPackageColor: Paint | undefined;
@@ -384,6 +386,8 @@ const SCALAR_FIELD_NAMES = [
   'circledCharacterFontItalic',
   'pathHoverColor',
   'diagramBorderColor',
+  'diagramBorderThickness',
+  'diagramBorderRoundCorner',
   'iconPrivateColor',
   'iconPrivateBackgroundColor',
   'iconPackageColor',

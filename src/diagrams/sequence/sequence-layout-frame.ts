@@ -22,8 +22,9 @@
  * - `GroupingTile#drawBackground` (`GroupingTile.java:308-316`): the body
  *   style's `BackGroundColor` and `RoundCorner` for the `Blotter`.
  */
-import type { ElseGeo, FrameEvent, FrameGeo, NoteEvent, TextRun } from './ast.js';
-import type { NoteOwner, RefOwner } from './sequence-note-folding.js';
+import type { ElseGeo, FrameEvent, FrameGeo, NoteEvent, NoteGeo, TextRun } from './ast.js';
+import { elseLeafNotes, type NoteOwner } from './sequence-note-folding.js';
+import { emitNote, resolveNote } from './sequence-layout-note.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { alignedBlockRuns } from './sequence-block-align.js';
 import type { SequencePaint } from './sequence-skin-param.js';
@@ -47,6 +48,7 @@ import {
   frameXOrigin,
   registerGroupTile,
   resolveFrameSpan,
+  type EndNotesWidth,
   type XSpan,
 } from './sequence-layout-frame-extent.js';
 
@@ -106,6 +108,62 @@ function branchConditionRuns(
   return alignedBlockRuns(conditionLines(label), paint.font, at, paint.align, elseContext(paint, ctx)).runs;
 }
 
+/** A note written after a group's `end`, its slot in `eventGeos` reserved
+ *  ahead of the frame's children. */
+interface EndNote {
+  readonly note: NoteEvent;
+  readonly side: 'left' | 'right';
+  readonly geo: NoteGeo;
+  /** The note component's preferred width (`getPreferredDimension`). */
+  readonly width: number;
+  readonly top: number;
+}
+
+/**
+ * The notes `GroupingTile#getNoteComponents` builds from the `end` leaf
+ * (`:1023-1041`): `note left` on the left, everything else -- `right`, and a
+ * `top`/`bottom` that `GroupingLeaf#addNote` keeps with a warning
+ * (`GroupingLeaf.java:122-128`) -- on the right. `drawNotes` (`:995-1013`)
+ * draws every right note, then every left one, each at the frame's drawn top.
+ * The geo is reserved at x 0 (width is position-independent) and moved by
+ * {@link placeEndNotes} once the frame's span is known.
+ */
+function reserveEndNotes(notes: readonly NoteEvent[], top: number, ctx: EventProcessingContext): EndNote[] {
+  const side = (n: NoteEvent): 'left' | 'right' => (n.position === 'left' ? 'left' : 'right');
+  const ordered = [...notes.filter((n) => side(n) === 'right'), ...notes.filter((n) => side(n) === 'left')];
+  return ordered.map((event) => {
+    const note: NoteEvent = { ...event, participants: [] };
+    const probe = resolveNote(note, ctx, { position: side(event), forceNote: false, originX: 0 });
+    emitNote(note, probe, top, ctx);
+    const geo = ctx.eventGeos[ctx.eventGeos.length - 1] as NoteGeo;
+    return { note, side: side(event), geo, width: probe.tile.maxX - probe.tile.minX, top };
+  });
+}
+
+/** `getNotesWidth(LEFT/RIGHT)` (`GroupingTile.java:1015-1021`). */
+function endNotesWidth(endNotes: readonly EndNote[]): EndNotesWidth {
+  const sum = (side: 'left' | 'right'): number =>
+    endNotes.filter((n) => n.side === side).reduce((acc, n) => acc + n.width, 0);
+  return { left: sum('left'), right: sum('right') };
+}
+
+/** `drawNotes` (`GroupingTile.java:995-1013`): right notes from `max` outward,
+ *  left notes from `min` outward, each beside the last. */
+function placeEndNotes(endNotes: readonly EndNote[], span: XSpan, ctx: EventProcessingContext): void {
+  let xRight = span.max;
+  let xLeft = span.min;
+  for (const { note, side, geo, width, top } of endNotes) {
+    let originX = xRight;
+    if (side === 'right') xRight += width;
+    else {
+      xLeft -= width;
+      originX = xLeft;
+    }
+    emitNote(note, resolveNote(note, ctx, { position: side, forceNote: false, originX }), top, ctx);
+    Object.assign(geo, ctx.eventGeos.pop());
+  }
+}
+
 /** An else tile pushed during the walk, its x extent still to be filled. */
 interface PendingElse {
   readonly geo: ElseGeo;
@@ -158,8 +216,11 @@ function walkBranches(
 ): PendingElse[] {
   const elses: PendingElse[] = [];
   event.branches.forEach((branch, i) => {
+    const leaf = new Set(i === 0 ? [] : elseLeafNotes(branch));
     if (i > 0) elses.push(pushElseTile(event, i, frameGeo, cursor, ctx));
-    cursor.y = processEvents(branch, cursor.y, ctx);
+    // The `else` leaf's own notes are stored, never drawn (`elseLeafNotes`).
+    const drawn = i === 0 ? branch : branch.filter((e) => !leaf.has(e as NoteEvent));
+    cursor.y = processEvents(drawn, cursor.y, ctx);
   });
   return elses;
 }
@@ -171,18 +232,24 @@ function walkBranches(
  * `getFrameMaxX` (`ElseTile.java:117-131`) -- then recorded for a parent group.
  */
 function resolveFrame(
-  pending: { readonly event: FrameEvent; readonly frameGeo: FrameGeo; readonly start: number },
+  pending: {
+    readonly event: FrameEvent;
+    readonly frameGeo: FrameGeo;
+    readonly start: number;
+    readonly endNotes: readonly EndNote[];
+  },
   elses: readonly PendingElse[],
   paints: FramePaints,
   ctx: EventProcessingContext,
 ): void {
-  const { event, frameGeo, start } = pending;
+  const { event, frameGeo, start, endNotes } = pending;
   const tab: HeaderTab = frameGeo;
   const span: XSpan = resolveFrameSpan({
     children: childTileSpans(event, start, ctx),
     elseWidths: elses.map((e) => e.width),
     headerWidth: headerWidth(tab, paints.paint, ctx),
     xOrigin: frameXOrigin(ctx),
+    notesLeft: endNotesWidth(endNotes).left,
   });
   frameGeo.x = span.min;
   frameGeo.width = span.max - span.min;
@@ -192,7 +259,8 @@ function resolveFrame(
     geo.width = frameGeo.width;
     geo.runs = branchConditionRuns(label, geo.paint, { frameX: span.min, separatorY: geo.y }, ctx);
   }
-  registerGroupTile(frameGeo, ctx.eventGeos.length);
+  placeEndNotes(endNotes, span, ctx);
+  registerGroupTile(frameGeo, ctx.eventGeos.length, endNotesWidth(endNotes));
 }
 
 /** The frame's geo as `handleFrameEvent` reserves its slot: everything the
@@ -256,7 +324,7 @@ export function handleFrameEvent(
   notesOf: ReadonlyMap<NoteOwner, readonly NoteEvent[]>,
 ): void {
   // A `ref` is a `ReferenceTile`, not a `GroupingTile` (`sequence-layout-ref.ts`).
-  if (event.frameType === 'ref') return handleRefEvent(event, cursor, ctx, notesOf.get(event as RefOwner) ?? []);
+  if (event.frameType === 'ref') return handleRefEvent(event, cursor, ctx, notesOf.get(event) ?? []);
   // `previousMax = currentY.getMax()`; `firstY = parallel ? currentY.getMin()
   // : previousMax` (`:145-154`). `frameStartY` is the GAUGE MIN -- the
   // chaining point, NOT the drawn frame's top.
@@ -270,9 +338,12 @@ export function handleFrameEvent(
   const frameDrawnY = frameStartY + FRAME_EXTERNAL_MARGINY;
   const frameGeo = openFrameGeo(event, paints, tab, frameDrawnY);
   ctx.eventGeos.push(frameGeo);
+  // Drawn right after the frame component, before the children
+  // (`GroupingTile#drawU`, `:275-276`): their slots are reserved here.
+  const endNotes = reserveEndNotes(notesOf.get(event) ?? [], frameDrawnY, ctx);
   const start = ctx.eventGeos.length;
   const elses = walkBranches(event, frameGeo, cursor, ctx);
-  resolveFrame({ event, frameGeo, start }, elses, paints, ctx);
+  resolveFrame({ event, frameGeo, start, endNotes }, elses, paints, ctx);
   // `getTotalHeight = bodyHeight + dimIfEmpty.getHeight() + MARGINY_MAGIC / 2`
   // (`:349-352`), which `cursor.y - frameDrawnY` is exactly.
   frameGeo.height = cursor.y - frameDrawnY;

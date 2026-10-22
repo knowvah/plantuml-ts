@@ -64,6 +64,46 @@ interface PendingOwn {
   readonly geoIndex: number;
 }
 
+/** One `LivingSpace#addStepForLivebox` call (`LivingSpace.java:94-96`). */
+interface LoggedStep {
+  readonly participantId: string;
+  readonly event: LiveEvent;
+  readonly y: number;
+}
+
+/**
+ * How many times the jar runs every tile's `onGaugeResolved` over the same
+ * `LiveBoxes` before `drawBoxes`: `calculateDimension` (memoized,
+ * `PlayingSpaceWithParticipants.java:62,74-87`, so once) reaches
+ * `PlayingSpace#getPreferredHeight` (`:154-157`); `drawU` calls it again
+ * (`:205`); `drawBackground` (`:109-111`) runs a third
+ * `drawUInternal` -> `fillPositionelTiles` (`:119-123`) -- all before
+ * `drawLifeLines` (`:221`). Later pages add two more, an odd count
+ * either way, which `LiveBoxes#addStep`'s `containsValue` nudge (`:79-87`)
+ * settles identically.
+ */
+const LAYOUT_PASSES = 3;
+
+/** Record `event`'s step on `participantId`'s `LiveBoxes` and log it for the
+ *  later passes. */
+function recordStep(walk: LiveWalk, participantId: string, event: LiveEvent, y: number): void {
+  walk.stepLog.push({ participantId, event, y });
+  walk.boxes.get(participantId)?.addStep(event, y);
+}
+
+/**
+ * Passes 2..{@link LAYOUT_PASSES}: the same `addStep` calls, in the same
+ * order, on the `LiveBoxes` that already hold pass 1's values. A deactivate
+ * sees its own earlier value (`eventsStep.containsValue(y)`), so it is
+ * nudged 5 on the second pass and back on the third -- unless another
+ * event's step still sits at its y, which keeps it nudged (and lets
+ * `Stairs#addStep:48-54` drop a later, higher-listed, lower step).
+ */
+function replayLayoutPasses(walk: LiveWalk): void {
+  for (let pass = 1; pass < LAYOUT_PASSES; pass++)
+    for (const { participantId, event, y } of walk.stepLog) walk.boxes.get(participantId)?.addStep(event, y);
+}
+
 /**
  * The walk's side of every `LiveBoxes`: the flat list they share, and where
  * each recorded step sits in `eventGeos` -- the slot the bar it closes is
@@ -75,6 +115,9 @@ interface LiveWalk {
   readonly flatIndex: ReadonlyMap<LiveEvent, number>;
   readonly boxes: ReadonlyMap<string, LiveBoxes>;
   readonly geoIndex: Map<LiveEvent, number>;
+  /** Every `addStep` of the first pass, in call order -- replayed by
+   *  {@link replayLayoutPasses}. */
+  readonly stepLog: LoggedStep[];
   /** The exo messages in list order, recorded from their published gauge
    *  (`CommunicationExoTile.java:197-203`) before any later step. */
   readonly exos: readonly LiveMessage[];
@@ -118,6 +161,7 @@ export function newActivationStack(
     flatIndex: new Map(list.events.map((e, i) => [e, i])),
     boxes: new Map(participants.map((p) => [p.id, new LiveBoxes(p.id, list.events)])),
     geoIndex: new Map(),
+    stepLog: [],
     exos: list.events.filter((e): e is LiveMessage => e.kind === 'message' && e.exo),
     exoNext: 0,
     pendingOwn: undefined,
@@ -181,7 +225,7 @@ export function recordMessageStep(ctx: StepContext, event: MessageEvent, arrow: 
   if (message?.kind !== 'message') return;
   settle(ctx, walk.flatIndex.get(message), undefined);
   const y = arrow.self ? selfStepY(message, arrow) : arrow.start;
-  if (y !== undefined) for (const p of message.participants) walk.boxes.get(p)?.addStep(message, y);
+  if (y !== undefined) for (const p of message.participants) recordStep(walk, p, message, y);
   walk.geoIndex.set(message, ctx.eventGeos.length);
   const own = walk.list.ownOf.get(event) ?? [];
   const last = own[own.length - 1];
@@ -203,7 +247,7 @@ export function recordLifeStep(ctx: StepContext, event: ActivationEvent, y: numb
   const life = walk.list.ofSource.get(event);
   if (life?.kind !== 'life') return;
   settle(ctx, walk.flatIndex.get(life), y);
-  walk.boxes.get(life.participant)?.addStep(life, y);
+  recordStep(walk, life.participant, life, y);
   walk.geoIndex.set(life, ctx.eventGeos.length);
 }
 
@@ -229,7 +273,7 @@ function settle(ctx: StepContext, at: number | undefined, lifeY: number | undefi
 
 function recordOwn(walk: LiveWalk, pending: PendingOwn, y: number): void {
   for (const own of pending.events) {
-    walk.boxes.get(own.participant)?.addStep(own, y);
+    recordStep(walk, own.participant, own, y);
     walk.geoIndex.set(own, pending.geoIndex);
   }
   walk.pendingOwn = undefined;
@@ -242,7 +286,7 @@ function catchUpExos(walk: LiveWalk, geoIndex: number, upTo: number | undefined)
     if (upTo !== undefined && walk.flatIndex.get(exo)! >= upTo) return;
     const gauge = walk.gauges?.get(exo.source);
     if (gauge === undefined) continue;
-    walk.boxes.get(exo.participants[0]!)?.addStep(exo, gauge.contactY);
+    recordStep(walk, exo.participants[0]!, exo, gauge.contactY);
     walk.geoIndex.set(exo, geoIndex);
   }
 }
@@ -266,6 +310,7 @@ export function flushOpenActivations(
   eventGeos: EventGeo[],
 ): void {
   settle({ activationStart, eventGeos }, undefined, undefined);
+  replayLayoutPasses(activationStart.live);
   const inserts: Insert[] = [];
   for (const [participantId, boxes] of activationStart.live.boxes) {
     const participant = participantMap.get(participantId);

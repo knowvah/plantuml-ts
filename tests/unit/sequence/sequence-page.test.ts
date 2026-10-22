@@ -307,8 +307,23 @@ describe('activation — URectangle, so CLAMP', () => {
     expect(a!.height).toBe(100);
   });
 
-  it('drops an activation the clamp reduces to nothing', () => {
-    expect(inkKinds(paginateSequence(geo([newpage(200), activation(300, 50)]), 0))).toEqual([]);
+  it('keeps a clipped-out activation as an empty titled group', () => {
+    // `ComponentRoseActiveLine.java:75-79` guards only height 0 before
+    // `startGroup`; a bar the page clip removes still has its height, so the
+    // jar opens the group and the clip drops the rect (fululo, lifene, covuco).
+    const page = paginateSequence(geo([newpage(200), activation(300, 50)]), 0);
+    expect(inkKinds(page)).toEqual(['activation']);
+    expect(page.events.find((e) => e.kind === 'activation')).toMatchObject({ clippedOut: true });
+  });
+});
+
+describe('message label padder box — URectangle, so CLAMP', () => {
+  const padder = { x: 40, y: 0, width: 50, height: 23, fill: 'none', stroke: 'none', roundCorner: 0 };
+  // Page 2's band starts at the newpage tile (y 200): dy = headHeight - 200.
+  it('moves the box with the page', () => {
+    const g = geo([newpage(200), { ...message(300), labelPadder: { ...padder, y: 290 } }]);
+    const m = paginateSequence(g, 1).events.find((e) => e.kind === 'message');
+    expect(m).toMatchObject({ labelPadder: { y: 290 + (g.headHeight - 200), height: 23 } });
   });
 });
 

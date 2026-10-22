@@ -66,7 +66,7 @@ export function labelLeftOf(
     dir,
     width: Math.abs(endpoints.toX - endpoints.fromX),
     textDeltaX: 0,
-    textWidth: messageLabelWidth(event.label, numberTextOf(event), paint.font, ctx),
+    textWidth: messageLabelWidth(event.label, numberTextOf(event), paint.font, ctx, paint.wrapWidth),
     padX1: ARROW_LABEL_PADDING_X1,
     padX2: ARROW_PADDING_X,
   });

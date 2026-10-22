@@ -135,9 +135,17 @@ function parseScaleOrDefault(text: string | undefined, def: number): number {
   return m !== null ? Number.parseFloat(m[1]!) : def;
 }
 
-/** `StringUtils.isNotEmpty` (java, common utility). */
+/**
+ * `StringUtils.isNotEmpty(CharSequence)` (`StringUtils.java:164-166`) is
+ * `!isEmpty(s)`, and `isEmpty` (`:172-183`) holds for a string made only of
+ * space, tab, CR, LF or NUL (`isSpaceOrTabOrNull`, `:570-572`) -- not merely
+ * the zero-length one. So the `" "` that `<< ($sprite, #c) >>` leaves in its
+ * `LABEL` group (`[),](.*?)` after the `)`) is "empty", and the decorated
+ * label collapses to `''` (`StereotypeDecoration.java:157-160,169-172`).
+ */
+const BLANK_RE = /^[ \t\r\n\0]*$/;
 function isNotEmpty(s: string | undefined): s is string {
-  return s !== undefined && s.length > 0;
+  return s !== undefined && !BLANK_RE.test(s);
 }
 
 // ---------------------------------------------------------------------------

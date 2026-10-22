@@ -41,6 +41,7 @@ import {
 } from './sequence-layout-participant-sizing.js';
 import { displayLines } from './text-block-geo.js';
 import { getMargin as queueMargin } from '../../core/decoration/symbol/USymbolQueue.js';
+import { DEFAULT_SPOT_FONT_SIZE } from '../../core/spot-glyph-data.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { getSpriteMonochrome } from '../../core/sprite-registry.js';
 import { spriteToPngDataUri, spriteMonochromeAsLike } from '../../core/klimt/sprite/sprite-raster.js';
@@ -106,6 +107,8 @@ export interface HeadDisplay {
   readonly lines: readonly string[];
   readonly font: FontConfiguration;
   readonly stereoFont: FontConfiguration;
+  /** `Participant.stereotypePositionTop` false (`Participant.java:128-131`). */
+  readonly stereotypeBottom?: boolean | undefined;
 }
 
 /**
@@ -116,7 +119,11 @@ export interface HeadDisplay {
 export function headRowsOf(
   stereotypeLines: readonly string[],
   display: string,
-  fonts: { readonly font: FontConfiguration; readonly stereoFont: FontConfiguration },
+  fonts: {
+    readonly font: FontConfiguration;
+    readonly stereoFont: FontConfiguration;
+    readonly stereotypeBottom?: boolean | undefined;
+  },
 ): HeadDisplay {
   return { stereotypeLines, lines: displayLines(display), ...fonts };
 }
@@ -137,7 +144,7 @@ interface HeadDraw {
 /** The head's ONE text block (module doc of `sequence-creole-sheet.ts`, "The
  *  participant head"). */
 function headBlock(head: HeadDisplay, ctx: ParticipantLayoutCtx, draw: HeadDraw = {}): LabelBlock {
-  const stereotype = { labels: head.stereotypeLines, font: head.stereoFont };
+  const stereotype = { labels: head.stereotypeLines, font: head.stereoFont, bottom: head.stereotypeBottom };
   return componentLabelBlock(head.lines, head.font, { sprites: ctx.sprites, stereotype, ...draw }, ctx.measurer);
 }
 
@@ -215,8 +222,9 @@ function charBadgeFor(p: Participant, theme: Theme): ParticipantBadge | undefine
   if (p.stereotype === undefined) return undefined;
   const deco = parseCircledCharDecoration(stereotypeInner(p.stereotype));
   if (deco === undefined) return undefined;
-  const r = resolveBadgeRadius(theme.colors.graph.circledCharacterFontSize, theme.colors.graph.circledCharacterRadius);
-  return { kind: 'char', color: deco.color, width: r * 2, height: r * 2 };
+  const fontSize = theme.colors.graph.circledCharacterFontSize ?? DEFAULT_SPOT_FONT_SIZE;
+  const r = resolveBadgeRadius(fontSize, theme.colors.graph.circledCharacterRadius);
+  return { kind: 'char', color: deco.color, width: r * 2, height: r * 2, character: deco.char, fontSize };
 }
 
 /** Either badge form, sprite first -- `createStereotype` tries the sprite
@@ -314,7 +322,11 @@ export function buildLabelRuns(
   stereoFont: FontConfiguration,
 ): readonly TextRun[] {
   const paint = paintOfGeo(p);
-  const head = headRowsOf(p.stereotypeLines ?? [], p.display, { font: paint.font, stereoFont });
+  const head = headRowsOf(p.stereotypeLines ?? [], p.display, {
+    font: paint.font,
+    stereoFont,
+    stereotypeBottom: p.stereotypeBottom,
+  });
   const block = headBlock(head, ctx, {
     align: paint.align ?? HorizontalAlignment.CENTER,
     ink: labelInk(p, paint),

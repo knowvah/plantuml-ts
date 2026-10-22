@@ -30,7 +30,8 @@
 import type { Theme } from '../../core/theme.js';
 import type { ScaledTheme } from './scale-geo.js';
 import type { ParticipantGeo, TextRun } from './ast.js';
-import { ellipse, image, linkWrap } from '../../core/svg.js';
+import { attrs, ellipse, image, linkWrap } from '../../core/svg.js';
+import { spotGlyphPath } from '../../core/spot-glyph-data.js';
 import { primitiveFields, sequenceText, weightOf } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import {
@@ -145,11 +146,12 @@ function renderLabelRun(run: TextRun, dy: number, theme: Theme): string {
  */
 
 /**
- * The badge itself: a rasterised `<image>` for a sprite, or the plain filled
- * circle the jar draws for a circled character -- WITHOUT the character
- * (`ast.ts#ParticipantBadge` carries the three goldens that show this).
- * Drawn at the block ORIGIN, as is the text beside it
- * (`TextBlockSprited.java:70-77`), so `top` is the block's top.
+ * The badge itself: a rasterised `<image>` for a sprite, or for a circled
+ * character the filled circle followed by the letter's outline `<path>`
+ * (`CircledCharacter#drawU`, `CircledCharacter.java:63-70`: the ellipse, then
+ * `UCenteredCharacter` -> `DriverCenteredCharacterSvg#draw:56-81`). Drawn at
+ * the block ORIGIN, as is the text beside it (`TextBlockSprited.java:70-77`),
+ * so `top` is the block's top.
  */
 function renderBadge(p: ParticipantGeo, at: { readonly x: number; readonly top: number }, theme: ScaledTheme): string {
   const { x, top } = at;
@@ -160,11 +162,23 @@ function renderBadge(p: ParticipantGeo, at: { readonly x: number; readonly top: 
   // and draws in the head's current colour: the style's `LineColor`, at the
   // `UStroke.simple()` the component reset to before its text
   // (`ComponentRoseParticipant.java:94-95,112`).
-  return ellipse(x + r, top + r, r, r, {
+  const disc = ellipse(x + r, top + r, r, r, {
     fill: badge.color ?? theme.colors.background,
     stroke: p.border,
     'stroke-width': 1 * theme.scaleK,
   });
+  // The glyph fills with the label font's colour (`ug.apply(fontColor)`, `:66`;
+  // `fontColor` is `fontConfiguration.getColor()`, `Display.java:677-678`),
+  // centred on the circle's centre (`UTranslate(radius, radius)`, `:67`).
+  const d = spotGlyphPath(badge.character, badge.fontSize, x + r, top + r, theme.scaleK);
+  if (d === undefined) return disc;
+  return (
+    disc +
+    `<path${attrs([
+      ['d', d],
+      ['fill', paintOfGeo(p).font.color ?? undefined],
+    ])}/>`
+  );
 }
 
 /**
@@ -198,7 +212,7 @@ function badgeOriginOf(p: ParticipantGeo, k: number, dy: number): { readonly x: 
   const rowsTop = Math.min(...p.labelRuns.map((r) => r.y - r.textAscent)) + dy;
   const top = p.labelRuns.length === 0 ? p.y + (p.height - badge.height) / 2 : rowsTop;
   if (p.type === 'participant' || p.type === 'collections' || p.labelRuns.length === 0) {
-    return { x: participantBadgeGeo(p.badge, p.x, p.width, paintOfGeo(p).padding, k)!.x, top };
+    return { x: participantBadgeGeo(p.badge, p.x, paintOfGeo(p).padding, k)!.x, top };
   }
   return { x: Math.min(...p.labelRuns.map((r) => r.x)) - BADGE_GAP * k - badge.width, top };
 }

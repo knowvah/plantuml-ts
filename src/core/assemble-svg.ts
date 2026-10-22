@@ -41,6 +41,8 @@
 import { formatShiftedCoordinates } from './annotations/coord-shift.js';
 import type { AssembledSvg, RenderFragment } from './dispatcher.js';
 import { svgRoot, group, rect } from './svg.js';
+import { spliceAsFirstChild, spliceIntoContentGroup } from './assemble-svg-splice.js';
+import { finalizeSequenceBody } from './assemble-svg-sequence.js';
 import { finalizeActivityFragment, scaleActivityBody } from './assemble-svg-activity.js';
 import { resolveScaleFactor } from './scale-command.js';
 import { applySeededDefIds } from './svg-defs-seeded.js';
@@ -81,32 +83,6 @@ const DIAGRAM_TYPE_WBS = 'WBS';
  *  has no explicit override, which is every corpus fixture found so far
  *  (`theme.ts#diagramBorderColor`'s own doc comment). */
 const DIAGRAM_BORDER_THICKNESS = 1;
-
-/** The outer `<g>`'s open tag, bare (`<g>`) or attributed
- *  (`core/svg.ts#ROOT_GROUP_OPEN`, which `document-shell.ts
- *  #withRootGroupAttributes` upgrades it to further down the pipeline).
- *  Matched structurally rather than against a literal so a splice cannot
- *  start silently no-op'ing the day the root attribute list changes again.
- *  Built from a string, not a regex literal (the complexity hook miscounts
- *  `<`/`>`). Shared by class's `spliceAsFirstChild` and json's
- *  `spliceIntoContentGroup` below -- both need "find the content `<g>`'s
- *  own open tag", just with a different fallback when it is absent. */
-const CONTENT_G_OPEN_RE = new RegExp('^<g(?:\\s[^>]*)?>');
-
-/** Splices `child` in as the FIRST child of `body`'s outer `<g>` --
- *  equivalent to, but avoiding re-parsing/re-serializing, a full XML
- *  insert. THROWS rather than returning `body` unchanged when there is no
- *  outer `<g>`: every caller here has already guaranteed one (class's own
- *  wrap-if-needed below, or `chrome.ts#applyChrome`'s), so a miss means the
- *  guarantee broke, and a silently-dropped background/border rect is far
- *  harder to notice than a thrown error. */
-function spliceAsFirstChild(body: string, child: string): string {
-  const openTag = CONTENT_G_OPEN_RE.exec(body)?.[0];
-  if (openTag === undefined) {
-    throw new Error('finalizeClassBody: fragment body is not wrapped in an outer <g> element');
-  }
-  return openTag + child + body.slice(openTag.length);
-}
 
 /** `CucaDiagram`-family margined dims minus the border stroke thickness --
  *  jar's `TextBlockExporter#maybeDrawBorder` draws the border rect at the
@@ -256,23 +232,6 @@ function maybeJsonBackgroundRect(fragment: RenderFragment): string {
 }
 
 /**
- * Put `markup` immediately after the already-wrapped body's opening `<g>`.
- * An ANNOTATED diagram arrives here pre-wrapped by `applyChrome`; unlike
- * state (above), json still draws the background rect for this case
- * (`yaml/tadari-70-nare798`, `!theme amiga` + `title foo`, jar draws the
- * rect as the FIRST child of the content group, ahead of the title's own
- * `<g class="title">`). Falls back to prefixing if the body is not a `<g>`
- * at all, which keeps the rect in the document rather than silently
- * dropping it.
- */
-function spliceIntoContentGroup(body: string, markup: string): string {
-  if (markup === '') return body;
-  const openTag = CONTENT_G_OPEN_RE.exec(body)?.[0];
-  if (openTag === undefined) return markup + body;
-  return openTag + markup + body.slice(openTag.length);
-}
-
-/**
  * json/yaml/hcl's per-diagram body finalization -- also canonicalizes
  * `fragment.background` itself (not just the body), since
  * `assembleDocumentShell` writes it verbatim into the root `style` and a
@@ -295,81 +254,9 @@ function finalizeJsonFragment(fragment: RenderFragment): RenderFragment {
 }
 
 // ---------------------------------------------------------------------------
-// sequence finalize (decisions.md D1)
+// sequence finalize -- moved to `assemble-svg-sequence.ts` (sdd2-T7f, 500-line
+// hook cap).
 // ---------------------------------------------------------------------------
-
-/** The default (unset) diagram background -- jar's own `TextBlockExporter
- *  .Builder` field initializer, `HColors.WHITE.withDark(HColors.BLACK)`
- *  (`core/TextBlockExporter.java:413`), which reaches `SvgGraphics` as
- *  `#FFFFFF` and so takes the no-rect branch of
- *  {@link SEQUENCE_UNPAINTED_BACKGROUNDS}. Same value as state's and json's
- *  sibling constants above, declared separately so a per-engine correction
- *  to one cannot silently move the other four. */
-const SEQUENCE_DEFAULT_BACKGROUND = '#FFFFFF';
-
-/**
- * Every resolved background for which the jar draws NO content-level rect.
- * `SvgGraphics`'s constructor guards its `paintBackcolor(color)` call with
- * `color.equals("#00000000") == false && color.equals("#000000") == false
- * && color.equals("#FFFFFF") == false` (`klimt/drawing/svg/SvgGraphics.java:
- * 189-191`) -- note BLACK is excluded alongside white and transparent, which
- * neither {@link maybeStateBackgroundRect} nor {@link isSolidNonDefault}
- * models. Jar-verified across the whole cached sequence corpus: of the 19
- * goldens whose root style carries a non-`#FFFFFF` `background:`, the 18
- * non-black ones all open their content `<g>` with the rect, and the single
- * black one (`sequence/zuravu-52-mike252`, `background:#000000;`) does not.
- * `transparent`/`none` are this port's un-resolved spellings of jar's
- * `#00000000` -- the same pair `document-shell.ts#assembleDocumentShell`'s
- * own `isSolid` test already accepts.
- */
-const SEQUENCE_UNPAINTED_BACKGROUNDS: ReadonlySet<string> = new Set([
-  SEQUENCE_DEFAULT_BACKGROUND,
-  '#000000',
-  '#00000000',
-  'transparent',
-  'none',
-]);
-
-/**
- * The whole-canvas rect `SvgGraphics#paintBackcolor` appends to the root
- * `<g>` (`:207-212`), later resized to the FINAL `maxX`/`maxY` (`:817-819`)
- * -- hence `fragment.width`/`height`, post-chrome, truncated the way
- * `assembleDocumentShell` truncates the root's own `width`/`height` (every
- * one of the 17 painted goldens carries integral dims, so the two agree).
- */
-function maybeSequenceBackgroundRect(fragment: RenderFragment): string {
-  const background = fragment.background ?? SEQUENCE_DEFAULT_BACKGROUND;
-  if (SEQUENCE_UNPAINTED_BACKGROUNDS.has(background)) return '';
-  return rect(0, 0, Math.trunc(fragment.width), Math.trunc(fragment.height), {
-    fill: background,
-    stroke: 'none',
-    strokeWidth: 1,
-  });
-}
-
-/**
- * sequence's per-diagram body finalization. Sequence reaches this module
- * with `bodyWrapped` unset in the common case -- unlike description it has
- * no `CompleteSvg` escape hatch and unlike class no wrap of its own -- so
- * this is the ONE place that guarantees the single content `<g>`
- * `document-shell.ts#withRootGroupAttributes` then upgrades to
- * `ROOT_GROUP_OPEN`.
- *
- * Follows json's shape rather than state's for the chrome-present case:
- * `paintBackcolor` runs in `SvgGraphics`'s CONSTRUCTOR, before any diagram
- * or chrome draw, so the rect is the content group's first child whether or
- * not chrome wrapped the body. State's `bodyWrapped ? '' : ...` carve-out
- * records that state's corpus had no such combination; sequence's has six
- * (`fazaba-22-nusi829`, `ganefo-61-leka777`, `jogeto-89-zaco078`,
- * `solivu-37-vika919`, `taxude-25-lamo370`, `zerovu-57-cumo773` -- all
- * `<g class="header">`/`<g class="title">` behind a 0,0 background rect).
- */
-function finalizeSequenceBody(fragment: RenderFragment): string {
-  const backgroundRect = maybeSequenceBackgroundRect(fragment);
-  return fragment.bodyWrapped === true
-    ? spliceIntoContentGroup(fragment.body, backgroundRect)
-    : group(backgroundRect + fragment.body);
-}
 
 // ---------------------------------------------------------------------------
 // activity finalize -- moved to `assemble-svg-activity.ts` (T2d-a pass 2,

@@ -102,6 +102,16 @@ describe('renderLifeline', () => {
     expect(svg).toContain('<line x1="22" y1="39" x2="22" y2="178"');
   });
 
+  it('scales the hover rect width and offset with scaleK', () => {
+    // `SvgGraphics#format` (`SvgGraphics.java:466-473`) multiplies the emitted
+    // x and width: x = 22 + 2 * (1 - 8) / 2 = 15, width = 8 * 2 = 16. Golden
+    // `kofuti-29-goti188` (`scale 2`) carries `width="16"` for this rect.
+    const scaled = { ...theme, scaleK: 2 };
+    const svg = renderLifeline(participant(), WHOLE_LIFELINE, scaled);
+
+    expect(svg).toContain('<rect x="15" y="39" width="16" height="139"');
+  });
+
   it('marks the hover rect as a transparent hit target, not ink', () => {
     // `UStroke.withThickness(0)` + `HColors.transparent()` leave NO stroke,
     // and `HColors.transparent(WITH_FILL_OPACITY).bg()` serialises as

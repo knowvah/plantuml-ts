@@ -78,7 +78,14 @@ export function computeParticipantLayout(
   scanMessageLabels(
     ast.events,
     sortedParticipants,
-    { measurer, levels, sprites: ast.sprites, messageSpan: ast.options.sequenceMessageSpan, theme },
+    {
+      measurer,
+      levels,
+      sprites: ast.sprites,
+      padder: ast.messagePadder,
+      messageSpan: ast.options.sequenceMessageSpan,
+      theme,
+    },
     constraints,
   );
 
@@ -89,7 +96,14 @@ export function computeParticipantLayout(
   const englobers = createEngloberLayout(sortedParticipants, ast.boxes, participantWidths, measurer, ast.sprites);
   // Tiles register after `PlayingSpace` captured the dolls: their margins reach
   // the live checks and the drawn frame, never the baked neighbour rule.
-  const tileEnv = { measurer, levels, sprites: ast.sprites, messageSpan: ast.options.sequenceMessageSpan, theme };
+  const tileEnv = {
+    measurer,
+    levels,
+    sprites: ast.sprites,
+    padder: ast.messagePadder,
+    messageSpan: ast.options.sequenceMessageSpan,
+    theme,
+  };
   addTileMargins(ast.events, sortedParticipants, participantWidths, englobers.margins, tileEnv);
   const row: RowSolveEnv = { widths: participantWidths, constraints, originX, englobers };
   const result = positionParticipants(sortedParticipants, row, ctx);
@@ -118,7 +132,11 @@ function computeParticipantWidths(sortedParticipants: Participant[], ctx: Partic
     // .getWidth()` per stripe (`:145-149`), and a stripe's width is its PARSED
     // atoms', so `""MySubTitle""` reserves 70.087 and not the 90.038 its four
     // quotes measure (`jozomu-87-tajo507`, jar box width 84.087).
-    const rows = headRowsOf(displayedStereotypeLines(p), p.display, { ...paints, font: paint.font });
+    const rows = headRowsOf(displayedStereotypeLines(p), p.display, {
+      ...paints,
+      font: paint.font,
+      stereotypeBottom: p.stereotypeBottom,
+    });
     const textW = Math.max(...labelRows(rows, ctx).map((r) => r.width));
     // `TextBlockSprited#calculateDimension`: the badge widens the block by its
     // own width plus the 6px gap (`:57-67`).
@@ -292,7 +310,11 @@ function buildParticipantGeo(
   // `y += height` per stripe (`:139-142`), and a `=` heading stripe is 18 tall
   // beside its 14pt neighbours (`bugabo-85-veki716`, jar baselines 31/55.889).
   // Identical arithmetic whenever every row shares the ambient font.
-  const rows = headRowsOf(stereoLines, p.display, { ...paints, font: paint.font });
+  const rows = headRowsOf(stereoLines, p.display, {
+    ...paints,
+    font: paint.font,
+    stereotypeBottom: p.stereotypeBottom,
+  });
   const textHeight = labelRows(rows, ctx).reduce((h, r) => h + r.height, 0);
   // `getTextHeight = textBlock.height + padding.top + padding.bottom`
   // (`AbstractTextualComponent.java:110-114`) IS the painted rectangle
@@ -314,6 +336,7 @@ function buildParticipantGeo(
     background: paint.fill,
     border: paint.stroke,
     ...(stereoLines.length > 0 ? { stereotypeLines: stereoLines } : {}),
+    ...(p.stereotypeBottom === true ? { stereotypeBottom: true } : {}),
     ...(p.url !== undefined ? { url: p.url } : {}),
     ...(badge !== undefined ? { badge } : {}),
     type: p.type,

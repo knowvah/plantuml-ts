@@ -18,6 +18,7 @@ import { rect, path } from '../../core/svg-shapes.js';
 import { fmt } from '../../core/svg-format.js';
 import { FontStyle, type FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { primitiveFields, sequenceText, weightOf } from './sequence-text.js';
+import { primitiveKind } from './sequence-label-primitives.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
 import { frameShadowDelta, sequenceShadowFilter } from './sequence-shadow.js';
@@ -163,16 +164,25 @@ function renderHeaderCorner(frame: FrameGeo, theme: ScaledTheme): string {
 
 /**
  * A block's runs as `DriverTextSvg#draw` emits them: each at its own colour,
- * else the block font's, and a run whose colour is transparent not drawn at
- * all (`DriverTextSvg.java:93-94`; the bridge reads a transparent font colour
- * as `null`, `FontConfigurationBridge.ts`). Jar-verified: `group { FontColor
- * transparent }` draws neither the tab title nor the conditions.
+ * and a run whose colour is transparent not drawn at all
+ * (`DriverTextSvg.java:93-94`). The creole seam stamps a run's resolved fill
+ * only when its font colour is not transparent
+ * (`sequence-label-primitives.ts:157`), so an absent colour IS transparent --
+ * falling back to the header font's would paint the comment's `[` and `]`
+ * (the `group` style's font) in the title's (`groupHeader`'s) colour.
+ * Jar-verified: `group { FontColor transparent }` draws neither the
+ * conditions' brackets nor (`groupHeader { FontColor transparent }`) the tab
+ * title. `font` (the block font) colours only a non-text primitive.
+ *
+ * The rule is about TEXT: `DriverTextSvg` is the only driver that skips a
+ * transparent colour. An image or shape primitive (a `<$sprite>` atom) never
+ * carries a run colour and is drawn by its own driver, so it is always kept.
  */
 export function drawnRuns(runs: readonly TextRun[], font: FontConfiguration): TextRun[] {
   const out: TextRun[] = [];
   for (const run of runs) {
-    const color = run.color ?? font.color;
-    if (color !== null) out.push({ ...run, color });
+    if (run.color !== undefined) out.push(run);
+    else if (primitiveKind(run) !== 'text' && font.color !== null) out.push({ ...run, color: font.color });
   }
   return out;
 }
