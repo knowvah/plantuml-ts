@@ -1,0 +1,11 @@
+@startuml
+a->b: test
+note right
+{{
+c->d
+note right
+test
+end note
+}}
+end note
+@enduml

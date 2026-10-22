@@ -1,0 +1,6 @@
+@startuml
+a -> b
+note left : this <back:red>foo</back> and <b><back:green>XXXX</back></b>
+a -> b
+note left : this <w><back:red>foo</back><b><back:green>XXXX</back></b></w>
+@enduml

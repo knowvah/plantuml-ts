@@ -22,7 +22,6 @@ import { popActivation, pushActivation, recordMessageStep, type ArrowEnds } from
 import { LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
 import { isBelowForResponse, belowLabelAnchorY } from './sequence-response-below.js';
 import { liveOffsetSelf, type MessageEndpoints } from './sequence-layout-message-self.js';
-import { atomFontSpec } from './sequence-creole-text-atom.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { inclination1Of, inclination2Of } from './sequence-arrowhead.js';
 import { reverseArrowConfiguration } from './renderer-arrowhead.js';
@@ -31,7 +30,7 @@ import { messageTileGaugeOf, type TileMetrics, type YGauge } from './sequence-y-
 import { handleDestroy, messageDestroyCrosses } from './sequence-layout-life-event.js';
 import { messagePaint } from './sequence-arrow-paint.js';
 import { labelLeftOf } from './sequence-layout-message-label.js';
-import { messageLabelRows, numberTextOf, placeMessageLabel } from './text-block-geo.js';
+import { labelDrawOf, messageLabelHeight, numberTextOf, placeMessageLabel } from './text-block-geo.js';
 
 /** A message tile as `TileBuilder.buildOne` hands it on: its gauge in the
  *  chain and the metrics that gauge was built from. */
@@ -81,12 +80,11 @@ export function selfArrowYPoint(blockH: number): number {
  *  overrides. */
 const SELF_ARROW_PADDING_X = 0;
 
-/** The label block's height measured in the arrow style's font (13 by
- *  default, not the ambient 14) -- the font `messageLabelBlock` draws with, so
- *  reserve and draw cannot disagree (`planning/sizer-renderer-parity.md`). */
+/** The label block's height in the arrow style's font (13 by default, not
+ *  the ambient 14) -- the ONE block `placeMessageLabel` draws, so reserve and
+ *  draw cannot disagree (`planning/sizer-renderer-parity.md`). */
 function labelBlockHeightOf(event: MessageEvent, paint: SequencePaint, ctx: EventProcessingContext): number {
-  const lineHeight = ctx.measurer.measure('M', atomFontSpec(paint.font)).height;
-  return messageLabelRows(event.label, numberTextOf(event)) * lineHeight;
+  return messageLabelHeight(event.label, numberTextOf(event), paint.font, ctx);
 }
 
 /**
@@ -271,8 +269,7 @@ function buildMessageGeo(
       numberText: numberTextOf(event),
       leftX: labelLeftOf(event, endpoints, paint, ctx),
       arrowY: belowLabelAnchorY(event, y, labelBlockHeightOf(event, paint, ctx), ARROW_TEXT_PADDING_Y),
-      font: paint.font,
-      rowAlign: paint.align,
+      ...labelDrawOf(paint),
     },
     ctx,
   );

@@ -15,7 +15,7 @@
 import { describe, expect, it } from 'vitest';
 import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { atomFontSpec } from '../../../src/diagrams/sequence/sequence-creole-text-atom.js';
+import { atomFontSpec } from '../../../src/diagrams/sequence/sequence-creole-sheet.js';
 import { defaultMessageFont, messagePaint } from '../../../src/diagrams/sequence/sequence-arrow-paint.js';
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import { messageLabelBlock } from '../../../src/diagrams/sequence/text-block-geo.js';

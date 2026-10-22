@@ -147,6 +147,14 @@ export const scaleRun = (r: TextRun, k: number): TextRun => ({
   ...(r.image !== undefined
     ? { image: { ...r.image, width: r.image.width * k, height: r.image.height * k, y: r.image.y * k } }
     : {}),
+  // An extended-colour line's offset from the baseline is a length
+  // (`fontSize / 14`, `DriverTextSvg.java:135-148`).
+  ...(r.extraLines !== undefined ? { extraLines: r.extraLines.map((l) => ({ ...l, deltaY: l.deltaY * k })) } : {}),
+  // A shape primitive is drawn by `UGraphicSvg`, whose `SvgOption.scale`
+  // multiplies its coordinates AND stroke widths at emission
+  // (`SvgGraphics.java:466-468,559`) -- so the shape is not rebuilt, its
+  // scale is recorded.
+  ...(r.shape !== undefined ? { shape: { ...r.shape, scale: r.shape.scale * k } } : {}),
 });
 
 function scaleParticipant(p: ParticipantGeo, k: number): ParticipantGeo {

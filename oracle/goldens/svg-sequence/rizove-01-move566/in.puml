@@ -1,0 +1,23 @@
+@startuml
+!pragma teoz true
+
+!unquoted procedure OBJ()
+{{
+   class Object {
+        name : token
+        name : flag
+    }
+}}
+!endprocedure
+
+
+Alice -> Bob : hello1
+note bottom : my note
+Alice -> Bob : hello2
+note bottom
+  my note
+  is on several line
+  OBJ()
+end note
+
+@enduml

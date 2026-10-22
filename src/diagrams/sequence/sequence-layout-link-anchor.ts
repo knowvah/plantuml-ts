@@ -23,19 +23,14 @@ import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import { StyleSignatureBasic } from '../../core/style/StyleSignatureBasic.js';
 import { labelFont, messagePaint } from './sequence-arrow-paint.js';
 import { ARROW_DELTA_X } from './sequence-arrowhead.js';
-import {
-  sequenceAtomContext,
-  sequenceCreoleRuns,
-  sequenceLabelBlockWidth,
-  sequenceLabelLineWidth,
-} from './sequence-creole.js';
-import { atomFontSpec } from './sequence-creole-text-atom.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { componentLabelBlock, offsetRun } from './sequence-creole-sheet.js';
 import type { EventProcessingContext } from './sequence-layout-events.js';
 import { messageExtent } from './sequence-note-anchor.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
 import { ARROW_PADDING_X } from './sequence-layout-shared.js';
 import { messageStyle, paintOf } from './sequence-skin-param.js';
-import { displayLines, messageLabelWidth, numberTextOf, TRANSPARENT_SVG } from './text-block-geo.js';
+import { displayLines, messageLabelWidth, numberTextOf } from './text-block-geo.js';
 import { messageTileGauge } from './sequence-y-gauge.js';
 
 /** `snake.addPoint(x, ymin + 2)` / `(x, ymax - 2)` (`LinkAnchor.java:114-115`). */
@@ -98,8 +93,9 @@ function tileMiddleX(event: AnchoredTile, ctx: EventProcessingContext): number |
  * `Display.getWithNewlines(pragma, message).create(fc, CENTER, skinParam)`
  * placed by `Snake#getTextBlockPosition` (`Snake.java:244-247`): the block's
  * top is the worm's vertical middle less half the block height, its left edge
- * `x + 4`, and each line is centred in the block's width
- * (`TextBlockSimple#drawU`).
+ * `x + 4`, and each line is centred in the block's width by the sheet's
+ * CENTER alignment (`SheetBlock1#initMap`). `create` passes no margins
+ * (`Display.java:620-634`).
  */
 function labelRunsOf(
   message: string | undefined,
@@ -108,18 +104,10 @@ function labelRunsOf(
   ctx: EventProcessingContext,
 ): readonly TextRun[] {
   const lines = message === undefined || message === '' ? [] : displayLines(message);
-  if (lines.length === 0) return [];
-  const spec = atomFontSpec(font);
-  const atoms = sequenceAtomContext(ctx.sprites, font.color ?? TRANSPARENT_SVG);
-  const lineHeight = ctx.measurer.measure('M', spec).height;
-  const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
-  const blockWidth = sequenceLabelBlockWidth(lines, spec, ctx.measurer, atoms);
-  const top = at.yMiddle - (lines.length * lineHeight) / 2;
-  return lines.flatMap((line, i) => {
-    const lineWidth = sequenceLabelLineWidth(line, spec, ctx.measurer, atoms);
-    const leftX = at.x + LABEL_GAP_X + (blockWidth - lineWidth) / 2;
-    return sequenceCreoleRuns(line, font, { leftX, baselineY: top + ascent + i * lineHeight }, ctx.measurer, atoms);
-  });
+  const opts = { sprites: ctx.sprites, align: HorizontalAlignment.CENTER };
+  const block = componentLabelBlock(lines, font, opts, ctx.measurer);
+  const top = at.yMiddle - block.height / 2;
+  return block.primitives.map((r) => offsetRun(r, at.x + LABEL_GAP_X, top));
 }
 
 /** One link between two resolved tiles: `LinkAnchor#drawAnchor` (`:82-123`). */

@@ -43,7 +43,16 @@
  * feature can reintroduce the divergence by accident.
  */
 
-import { image, linkWrap, text } from '../../core/svg.js';
+import { decorationLines, image, linkWrap, text } from '../../core/svg.js';
+import type { ExtraLine } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
+import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
+import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
+import { extractFlatContent } from '../../core/klimt/document-shell-fragment.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { Fore } from '../../core/klimt/Fore.js';
+import { Back } from '../../core/klimt/Back.js';
+import { NO_TEXT_BOUNDER, type SequenceRunShape } from './sequence-label-primitives.js';
+import type { TextRun } from './text-block-geo.js';
 
 /**
  * The drawable form of a creole `<math>`/`<latex>` atom on a sequence label:
@@ -98,15 +107,11 @@ export interface SequenceTextSpec {
    * `'700'` is the form this port emits for a bold sequence label — the jar's
    * deterministic-text SVG writes the numeric CSS weight, never the keyword
    * (`renderer-frame-header.ts#boldFontWeight`, jar-verified on
-   * `bepipo-37-fego336`, and `core/svg.ts#TextStyle.fontWeight` for the
-   * class-engine precedent). `'bold'` is accepted because the interface
-   * contract this module was specified against names it, and because
-   * `TextStyle` still allows it. `'normal'` completes the set so a caller
-   * holding a resolved skin weight — `renderer-frame-header.ts
-   * #boldFontWeight` returns `'normal' | '700'` — can pass it straight
-   * through rather than narrowing at every call site.
+   * `bepipo-37-fego336`). A face weight (`900` inside a sprite) is whatever
+   * `DriverTextSvg` computed (`DriverTextSvg.java:97-103`, carried on
+   * `TextRun.fontWeight`).
    */
-  readonly fontWeight?: 'normal' | 'bold' | '700';
+  readonly fontWeight?: string;
   /**
    * `DriverTextSvg`'s own `fontStyle` local, which is the literal string
    * `"italic"` or nothing at all:
@@ -138,6 +143,62 @@ export interface SequenceTextSpec {
    *  else (`AtomMath.java:78-97`). When present, {@link sequenceText} emits
    *  the `<image>` in place of the `<text>`. */
   readonly image?: SequenceRunImage;
+  /** `SvgGraphics#text`'s `textBackColor` (`DriverTextSvg.java:159-173`). */
+  readonly textBackColor?: string;
+  /** `ExtraLines#drawAll` after the text (`DriverTextSvg.java:68-75,180`). */
+  readonly extraLines?: readonly ExtraLine[];
+  /** A non-text primitive: drawn by core's `UGraphicSvg` at
+   *  ({@link leftX}, {@link baselineY}) -- here the shape's own origin. */
+  readonly shape?: SequenceRunShape;
+}
+
+/** The fields an emitter copies verbatim off a primitive: everything
+ *  `DriverTextSvg`/the shape drivers read that has no ambient fallback. */
+export function primitiveFields(
+  run: TextRun,
+): Pick<SequenceTextSpec, 'url' | 'image' | 'shape' | 'textBackColor' | 'extraLines'> {
+  return {
+    ...(run.url !== undefined ? { url: run.url } : {}),
+    ...(run.image !== undefined ? { image: run.image } : {}),
+    ...(run.shape !== undefined ? { shape: run.shape } : {}),
+    ...(run.textBackColor !== undefined ? { textBackColor: run.textBackColor } : {}),
+    ...(run.extraLines !== undefined ? { extraLines: run.extraLines } : {}),
+  };
+}
+
+/** The run's `font-weight`: its own face weight, else `700` when it -- or,
+ *  for a run that set none, the block's style (`fallbackBold`) -- is bold. */
+export function runFontWeight(run: TextRun, fallbackBold = false): string | undefined {
+  if (run.fontWeight !== undefined) return run.fontWeight;
+  return (run.bold ?? fallbackBold) ? '700' : undefined;
+}
+
+/** `{ fontWeight }` when the run has one ({@link runFontWeight}), for an
+ *  emitter's spec spread. */
+export function weightOf(run: TextRun, fallbackBold = false): { fontWeight?: string } {
+  const weight = runFontWeight(run, fallbackBold);
+  return weight === undefined ? {} : { fontWeight: weight };
+}
+
+/** `THROWAWAY_VERSION` of the one-shape `UGraphicSvg` documents below. */
+const THROWAWAY_VERSION = '$version$';
+
+/**
+ * One shape primitive through core's drivers: `ug.apply(translate).apply(
+ * fore).apply(back).apply(stroke).draw(shape)` on a one-shape `UGraphicSvg`
+ * at the diagram scale (`SvgGraphics#format`, `SvgGraphics.java:466-468`),
+ * its inline defs (a gradient) left for `svgRoot` to lift
+ * (`svg-defs.ts#collectDocumentDefs`).
+ */
+function shapeSvg(x: number, y: number, s: SequenceRunShape): string {
+  const ug = UGraphicSvg.build(0, basicSvgOption({ scale: s.scale }), THROWAWAY_VERSION, NO_TEXT_BOUNDER);
+  ug.apply(new UTranslate(x / s.scale, y / s.scale))
+    .apply(new Fore(s.fore))
+    .apply(new Back(s.back))
+    .apply(s.stroke)
+    .draw(s.shape);
+  const flat = extractFlatContent(ug.getSvgString());
+  return flat.extraDefs + flat.body;
 }
 
 /**
@@ -147,6 +208,10 @@ export interface SequenceTextSpec {
  * assertion, but because {@link SequenceTextSpec} cannot express them.
  */
 export function sequenceText(spec: SequenceTextSpec): string {
+  if (spec.shape !== undefined) {
+    const drawnShape = shapeSvg(spec.leftX, spec.baselineY, spec.shape);
+    return spec.url === undefined ? drawnShape : linkWrap(drawnShape, spec.url);
+  }
   // `AtomMath#drawU` draws an image INSTEAD of text, never beside it
   // (`AtomMath.java:78-97`). `svg-shapes.ts#image` is the repo's one `<image>`
   // emitter and already writes `SvgGraphics#svgImageDataUri`'s attribute
@@ -163,14 +228,19 @@ export function sequenceText(spec: SequenceTextSpec): string {
     fontFamily: spec.fontFamily,
     fontSize: spec.fontSize,
     fill: spec.fill,
-    ...(spec.fontWeight !== undefined ? { fontWeight: spec.fontWeight } : {}),
+    ...(spec.fontWeight !== undefined ? { fontWeight: spec.fontWeight as '700' } : {}),
     ...(spec.fontStyle !== undefined ? { fontStyle: spec.fontStyle } : {}),
     ...(spec.textDecoration !== undefined ? { textDecoration: spec.textDecoration } : {}),
+    ...(spec.textBackColor !== undefined ? { textBackColor: spec.textBackColor } : {}),
     textLength: spec.width,
   });
   // `linkWrap` is `core/svg.ts`'s existing emitter, whose eight attributes and
   // their order are jar-verified; the same one `renderer-participant-shapes
   // .ts` already wraps a participant head with. There is deliberately no
   // second `<a>` builder in this engine.
-  return spec.url === undefined ? drawn : linkWrap(drawn, spec.url);
+  const linked = spec.url === undefined ? drawn : linkWrap(drawn, spec.url);
+  // `extraLines.drawAll(x, y, width, font, mapper, svg)` AFTER the `<text>`
+  // (`DriverTextSvg.java:180`).
+  if (spec.extraLines === undefined) return linked;
+  return linked + decorationLines(spec.extraLines, spec.leftX, spec.baselineY, spec.width, spec.fontSize);
 }

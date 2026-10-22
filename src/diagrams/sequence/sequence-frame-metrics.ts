@@ -5,16 +5,15 @@
  * event walk: `GroupingTile`'s margins, the frame's paints and its header
  * component (`ComponentRoseGroupingHeader`).
  */
-import type { FrameEvent, TextRun } from './ast.js';
+import type { FrameEvent } from './ast.js';
 import type { HColor } from '../../core/style/Value.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
-import { displayLines, TRANSPARENT_SVG } from './text-block-geo.js';
-import { sequenceAtomContext, sequenceCreoleRuns, type SequenceAtomContext } from './sequence-creole.js';
-import { atomFontSpec } from './sequence-creole-text-atom.js';
-import { alignedBlockRuns } from './sequence-block-align.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
+import { displayLines } from './text-block-geo.js';
+import { alignedBlockRuns, type BlockContext } from './sequence-block-align.js';
 import { groupingHeaderDisplay, HEADER_PADDING } from './frame-style.js';
 import { groupingStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
 
@@ -64,26 +63,23 @@ export function groupingPaints(event: FrameEvent): FramePaints {
   };
 }
 
-/** `HColor#toSvg` of a transparent colour (`HColor.java:76`): the bridge
- *  reads a transparent font colour as `null` (`FontConfigurationBridge.ts`). */
-
 /**
- * What a frame text block's creole needs to draw a `<$sprite>` (unwind2-S9b):
- * the sprites and the text's own `FontColor`, which `AtomSprite` tints a
- * monochrome sprite by (`StripeSimple.java:228-235`). `ComponentRoseGroupingHeader
- * #drawInternalU` fills the corner through a DERIVED `ug` (`:142`) and draws
- * the text on one that never had a back applied (`:144,151`), so there is
- * none -- jar-verified white on `tests/fixtures/unwind2-S7/s-group.svg`.
+ * What a group header's text blocks are built and drawn with: the sprites,
+ * and the ink `ComponentRoseGroupingHeader#drawInternalU` leaves before
+ * `getTextBlock().drawU` -- the body style's line colour, then
+ * `UStroke.simple()` (`:144-151`); the corner's fill is applied to a DERIVED
+ * `ug` (`:142`), so the text has no `Back` (jar-verified white on
+ * `tests/fixtures/unwind2-S7/s-group.svg`). `margins` are the component
+ * padding's sides for the title (`AbstractTextualComponent.java:91`); the
+ * `[comment]` is `display.create(...)`, which passes none (`:89-90`).
  */
-export function atomsOf(paint: SequencePaint, ctx: TextEnv): SequenceAtomContext | undefined {
-  return sequenceAtomContext(ctx.sprites, paint.font.color ?? TRANSPARENT_SVG);
-}
-
-/** A creole line's total advance: its LAST run's right edge, never a sum of
- *  widths -- a non-text atom advances x without producing a run. */
-function creoleLineWidth(runs: readonly TextRun[]): number {
-  const last = runs.at(-1);
-  return last === undefined ? 0 : last.x + last.textWidth;
+function headerBlockContext(paint: SequencePaint, ctx: TextEnv, margins: boolean): BlockContext {
+  return {
+    measurer: ctx.measurer,
+    sprites: ctx.sprites,
+    ink: { fore: paint.stroke, stroke: UStroke.simple() },
+    ...(margins ? { marginX1: HEADER_PADDING.left, marginX2: HEADER_PADDING.right } : {}),
+  };
 }
 
 /** The header tab's fields `FrameGeo` carries. */
@@ -104,6 +100,15 @@ function titleLinesOf(tabText: string): readonly string[] {
   return tabText === '' ? [] : displayLines(tabText);
 }
 
+/** The title's text block at `styleHeader`'s font and alignment
+ *  (`ComponentRoseGroupingHeader.java:76-77`), at the origin. The ink is
+ *  the frame body's, which `computeHeaderTab` does not hold: it changes no
+ *  dimension. */
+function titleBlock(tabText: string, headerPaint: SequencePaint, ctx: TextEnv) {
+  const env = { measurer: ctx.measurer, sprites: ctx.sprites };
+  return alignedBlockRuns(titleLinesOf(tabText), headerPaint.font, { leftX: 0, top: 0 }, headerPaint.align, env);
+}
+
 /**
  * The header tab's `Display`, split by `groupingHeaderDisplay`
  * (`GroupingTile.java:127-128`), then measured at `styleHeader`'s font --
@@ -117,23 +122,15 @@ export function computeHeaderTab(event: FrameEvent, headerPaint: SequencePaint, 
   const comment = rawComment === undefined || rawComment === '' ? undefined : rawComment;
   // `start.getTitle()`: the rewritten `group T [c]` title, else the keyword.
   const { tabText, tabComment } = groupingHeaderDisplay(event.title ?? event.frameType, comment);
-  const font = headerPaint.font;
   // `getPureTextWidth`/`getTextHeight` over the title's own text BLOCK; the
   // corner is drawn at exactly those (`ComponentRoseGroupingHeader.java:
   // 138-142`), so the tab grows with the TITLE's escaped newlines, never with
   // the comment beside it. C5: at the title's own CREOLE width --
   // `groupingHeaderDisplay` makes a `group`'s comment its TITLE.
-  const titleLines = titleLinesOf(tabText);
-  const measured = ctx.measurer.measure(tabText, atomFontSpec(font));
-  const atoms = atomsOf(headerPaint, ctx);
-  const tabTextWidth = Math.max(
-    0,
-    ...titleLines.map((l) =>
-      creoleLineWidth(sequenceCreoleRuns(l, font, { leftX: 0, baselineY: 0 }, ctx.measurer, atoms)),
-    ),
-  );
+  const title = titleBlock(tabText, headerPaint, ctx);
+  const tabTextWidth = title.width;
   const tabWidth = HEADER_PADDING.left + tabTextWidth + HEADER_PADDING.right;
-  const tabHeight = titleLines.length * measured.height + HEADER_PADDING.top + HEADER_PADDING.bottom;
+  const tabHeight = title.height + HEADER_PADDING.top + HEADER_PADDING.bottom;
   return { tabText, ...(tabComment !== undefined ? { tabComment } : {}), tabTextWidth, tabWidth, tabHeight };
 }
 
@@ -152,9 +149,10 @@ export function buildTabRuns(tab: HeaderTab, paints: FramePaints, x: number, y: 
   const left = x + HEADER_PADDING.left;
   const top = y + HEADER_PADDING.top;
   const { headerPaint, paint } = paints;
-  const title = alignedBlockRuns(titleLinesOf(tab.tabText), headerPaint.font, { leftX: left, top }, headerPaint.align, {
-    measurer: ctx.measurer,
-    atoms: atomsOf(headerPaint, ctx),
+  const titleAt = { leftX: left, top };
+  const titleLines = titleLinesOf(tab.tabText);
+  const title = alignedBlockRuns(titleLines, headerPaint.font, titleAt, headerPaint.align, {
+    ...headerBlockContext(paint, ctx, true),
   }).runs;
   if (tab.tabComment === undefined) return title;
   const commentAt = { leftX: left + tab.tabWidth, top: top + 1 };
@@ -163,7 +161,7 @@ export function buildTabRuns(tab: HeaderTab, paints: FramePaints, x: number, y: 
     paint.font,
     commentAt,
     HorizontalAlignment.LEFT,
-    { measurer: ctx.measurer, atoms: atomsOf(paint, ctx) },
+    headerBlockContext(paint, ctx, false),
   ).runs;
   return [...title, ...comment];
 }
@@ -181,7 +179,7 @@ export function headerWidth(tab: HeaderTab, paint: SequencePaint, ctx: TextEnv):
     paint.font,
     { leftX: 0, top: 0 },
     HorizontalAlignment.LEFT,
-    { measurer: ctx.measurer, atoms: atomsOf(paint, ctx) },
+    headerBlockContext(paint, ctx, false),
   );
   return tab.tabWidth + HEADER_PADDING.left + comment.width;
 }
@@ -222,7 +220,7 @@ export function conditionLines(label: string): readonly string[] {
 
 /** `ComponentRoseGroupingElse`'s right padding, the `5` of
  *  `topRightBottomLeft(1, 5, 1, 5)` (`:65-67`). */
-const ELSE_PADDING_X2 = 5;
+export const ELSE_PADDING_X2 = 5;
 
 /**
  * The else component's preferred width, `getTextWidth` (`ComponentRoseGroupingElse
@@ -234,7 +232,7 @@ const ELSE_PADDING_X2 = 5;
 export function elseComponentWidth(label: string, paint: SequencePaint, ctx: TextEnv): number {
   const block = alignedBlockRuns(conditionLines(label), paint.font, { leftX: 0, top: 0 }, paint.align, {
     measurer: ctx.measurer,
-    atoms: atomsOf(paint, ctx),
+    sprites: ctx.sprites,
   });
   return block.width + ELSE_PADDING_X1 + ELSE_PADDING_X2;
 }

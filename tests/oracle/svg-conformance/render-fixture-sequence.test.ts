@@ -14,7 +14,8 @@
  *      its own measurer, this test's second `it` would observe the SAME
  *      call count with and without a title, instead of a strictly higher
  *      one — see the instrumented `countingMeasurer` helper below.
- *   2. It never reaches `renderSync` — proven indirectly: a markup with no
+ *   2. Its own diagram never reaches `renderSync` (only a nested `{{ }}`
+ *      diagram does, through the nested-renderer seam) — proven indirectly: a markup with no
  *      diagram block throws (`renderSync` never throws; T0's note records
  *      that it swallows every failure into an error-diagram SVG instead).
  */
@@ -109,5 +110,24 @@ describe('renderFixtureSequence — assetStore forwarding (D6, cdd6-T1c)', () =>
     const svg = renderFixtureSequence(MARKUP, new DeterministicMeasurer(), { assetStore });
     expect(svg).not.toMatch(EMPTY_TITLE);
     expect(svg).toMatch(/<g class="title"><path/);
+  });
+});
+
+describe('renderFixtureSequence nested-diagram registration (sdd2-T6d)', () => {
+  it('draws a note body {{ }} as exactly one embedded svg image (CreoleParser.java:152-154)', () => {
+    const svg = renderFixtureSequence(
+      '@startuml\nparticipant A\nnote over A\n{{\nA -> B\n}}\nend note\n@enduml',
+      new DeterministicMeasurer(),
+    );
+    expect(svg.match(/<image /g)).toHaveLength(1);
+    expect(svg).toContain('data:image/svg+xml');
+  });
+
+  it('keeps the trailing " " atom after </size> in a multi-line note (StripeSimple.java:124-126)', () => {
+    const svg = renderFixtureSequence(
+      '@startuml\nparticipant A\nnote over A\n<size:18>x</size> \nz\nend note\n@enduml',
+      new DeterministicMeasurer(),
+    );
+    expect(svg).toMatch(/<text x="30" y="72\.111" font-size="13" fill="#000">\u00a0<\/text>/);
   });
 });

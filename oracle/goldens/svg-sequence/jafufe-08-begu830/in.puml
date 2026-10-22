@@ -1,0 +1,18 @@
+@startuml
+skinparam wrapWidth 50
+
+
+legend top
+This is a very very very very very very very very very very very very very very long legend description
+end legend
+
+
+Alice->Bob: hello
+Bob-->Alice: hello
+
+note right
+This is a very very very very very very very long note
+
+WrapWidth doesn't work on sequence diagrams
+end note
+@enduml

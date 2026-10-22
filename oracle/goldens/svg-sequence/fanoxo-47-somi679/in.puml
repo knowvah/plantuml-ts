@@ -1,0 +1,5 @@
+@startuml
+Alice -> Bob : hello there <&yen> for me!
+return <size:30>have you a <&compass> ?
+Alice -> Bob : <&wifi>
+@enduml

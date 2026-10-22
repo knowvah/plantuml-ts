@@ -42,22 +42,19 @@ import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
 import { activationLevel } from './sequence-layout-events.js';
 import { ARROW_PADDING_X, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
-import { atomFontSpec } from './sequence-creole-text-atom.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { messageTileAdvance, type PlacedTile } from './sequence-layout-message.js';
 import { messageTileGaugeOf, type TileMetrics } from './sequence-y-gauge.js';
 import {
-  displayLines,
-  MESSAGE_NUMBER_MARGIN,
+  labelDrawOf,
   placeMessageLabel,
-  messageLabelRows,
+  messageLabelHeight,
+  messageLabelWidth,
   numberTextOf,
-  TRANSPARENT_SVG,
 } from './text-block-geo.js';
 import { ARROW_DELTA_X, DIAM_CIRCLE } from './sequence-arrowhead.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
-import { sequenceAtomContext, sequenceLabelBlockWidth, sequenceLabelLineWidth } from './sequence-creole.js';
 import { arrowDirectionOf, labelTextPos, messagePaint, messagePosition } from './sequence-arrow-paint.js';
 
 // ---------------------------------------------------------------------------
@@ -124,24 +121,12 @@ function rightCircleInset(arrow: ArrowConfiguration, type: MessageExoType): numb
 // Widths
 // ---------------------------------------------------------------------------
 
-/** The label block's own width — the number, its margin and the widest label
- *  line, exactly as `messageLabelBlock` lays them out. */
+/** The label block's own width -- `getPureTextWidth`, the arrow component's
+ *  text block (`AbstractTextualComponent.java:94-98`): the number, its 4 px
+ *  margin and the label (`Display.java:703-712`), at the arrow style's font
+ *  (`plantuml.skin:316-317`). */
 function labelBlockWidth(event: MessageExoEvent, ctx: EventProcessingContext, font: FontConfiguration): number {
-  // Same font `messageLabelBlock` lays the block out with — the arrow
-  // style's (`AbstractTextualComponent.java:80`), `FontSize 13` by default
-  // (`plantuml.skin:316-317`).
-  const fontSpec = atomFontSpec(font);
-  const numberText = numberTextOf(event);
-  const atoms = sequenceAtomContext(ctx.sprites, font.color ?? TRANSPARENT_SVG);
-  // The number is its own creole block (`Display.java:706`), so `<b>1</b>`
-  // measures as a bold `1`, not as its markup.
-  const numberWidth = numberText === undefined ? 0 : sequenceLabelLineWidth(numberText, fontSpec, ctx.measurer, atoms);
-  const gap = numberText === undefined ? 0 : MESSAGE_NUMBER_MARGIN;
-  // `Display.getWithNewlines` collapses `\\` to `\` before any block measures
-  // it (`Display.java:308-310`); `displayLines` is the drawn side's own split.
-  const lines = event.label === '' ? [] : displayLines(event.label);
-  const labelWidth = sequenceLabelBlockWidth(lines, fontSpec, ctx.measurer, atoms);
-  return numberWidth + gap + labelWidth;
+  return messageLabelWidth(event.label, numberTextOf(event), font, ctx);
 }
 
 /**
@@ -288,8 +273,7 @@ function buildExoGeo(
       numberText: numberTextOf(event),
       leftX: exoLabelLeft(event, span, ctx, paint.font),
       arrowY: y,
-      font: paint.font,
-      rowAlign: paint.align,
+      ...labelDrawOf(paint),
     },
     ctx,
   );
@@ -337,8 +321,7 @@ function exoPaintOf(event: MessageExoEvent): SequencePaint {
 }
 
 function exoAdvanceOf(event: MessageExoEvent, paint: SequencePaint, ctx: EventProcessingContext) {
-  const lineHeight = ctx.measurer.measure('M', atomFontSpec(paint.font)).height;
-  return messageTileAdvance(messageLabelRows(event.label, numberTextOf(event)) * lineHeight, false);
+  return messageTileAdvance(messageLabelHeight(event.label, numberTextOf(event), paint.font, ctx), false);
 }
 
 /**

@@ -27,7 +27,7 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 // `sequenceText`, and dropping the direct import is what makes that
 // structural rather than a convention.
 import { line } from '../../core/svg.js';
-import { sequenceText } from './sequence-text.js';
+import { primitiveFields, sequenceText, weightOf } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import type { TextRun } from './text-block-geo.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
@@ -77,15 +77,14 @@ export function creoleRunText(run: TextRun, theme: ScaledTheme, fontSize: number
     fontFamily: run.fontFamily ?? theme.fontFamily,
     fontSize: run.fontSize ?? fontSize,
     fill: run.color ?? theme.colors.text,
-    // `'700'`, not `'bold'` -- the jar emits the numeric form, and
-    // `renderer-frame-header.ts#boldFontWeight` already set that convention.
-    ...((run.bold ?? boldFallback) ? { fontWeight: '700' as const } : {}),
+    // The numeric weight, not `'bold'` -- the jar emits the numeric form
+    // (`sequence-text.ts#runFontWeight`).
+    ...weightOf(run, boldFallback),
     ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
     ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
-    ...(run.url !== undefined ? { url: run.url } : {}),
-    // A `<math>`/`<latex>` run draws its image instead of a `<text>`
-    // (`sequence-text.ts#SequenceRunImage`, `AtomMath.java:78-97`).
-    ...(run.image !== undefined ? { image: run.image } : {}),
+    // url, image, shape, back colour, extended-colour lines
+    // (`sequence-text.ts#primitiveFields`).
+    ...primitiveFields(run),
   });
 }
 

@@ -1,0 +1,5 @@
+@startuml
+skinparam maxMessageSize 10
+A->B:very long long long message name
+
+@enduml

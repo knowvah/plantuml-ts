@@ -26,6 +26,7 @@ import type {
 import type { Theme } from '../../core/theme.js';
 import { REF_X_MARGIN } from './ref-body-geo.js';
 import type { StringMeasurer } from '../../core/measurer.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import {
   computeParticipantLayout,
   type MessageLevels,
@@ -160,7 +161,7 @@ function assembleGeometry(
   backfillDividerWidth(dividerGeos, totalWidth);
   backfillNewpageWidth(newpageGeos, totalWidth);
   anchorExoBorders(messageGeosOf(eventGeos), totalWidth - RIGHT_MARGIN);
-  const boxGeos = computeBoxGeos(englobers, row, totalHeight, measurer);
+  const boxGeos = computeBoxGeos(englobers, row, totalHeight, measurer, ast.sprites);
 
   return {
     totalWidth,
@@ -472,6 +473,7 @@ function computeBoxGeos(
   row: ParticipantRow,
   totalHeight: number,
   measurer: StringMeasurer,
+  sprites: SpriteRegistry | undefined,
 ): BoxGeo[] {
   const height = totalHeight - TOP_MARGIN - BOTTOM_MARGIN - englobers.heightEnglober2 / 2;
   return englobers.dolls.drawEnglobers(row, height, TOP_MARGIN).map(({ englober, ...frame }) => {
@@ -481,7 +483,7 @@ function computeBoxGeos(
       paint,
       label: englober.label,
       color: englober.color,
-      labelRuns: boxLabelRuns(englober.label, frame, paint, measurer),
+      labelRuns: boxLabelRuns(englober.label, frame, paint, measurer, sprites),
     };
   });
 }

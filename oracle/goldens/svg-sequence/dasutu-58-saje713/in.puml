@@ -1,0 +1,13 @@
+@startuml
+Bob -> Alice : hello
+note left
+  this is a note
+  {{
+    object o1 {
+      foo
+    }
+    o1 --> o2
+  }}
+  On the end
+end note
+@enduml

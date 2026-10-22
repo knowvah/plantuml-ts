@@ -86,7 +86,7 @@ export function computeParticipantLayout(
   const participantWidths = computeParticipantWidths(sortedParticipants, ctx);
   // The englobers' constraints go in BEFORE the neighbour rule, which bakes
   // the margins they set (`SequenceDiagramFileMakerTeoz.java:102-114`).
-  const englobers = createEngloberLayout(sortedParticipants, ast.boxes, participantWidths, measurer);
+  const englobers = createEngloberLayout(sortedParticipants, ast.boxes, participantWidths, measurer, ast.sprites);
   // Tiles register after `PlayingSpace` captured the dolls: their margins reach
   // the live checks and the drawn frame, never the baked neighbour rule.
   const tileEnv = { measurer, levels, sprites: ast.sprites, messageSpan: ast.options.sequenceMessageSpan, theme };

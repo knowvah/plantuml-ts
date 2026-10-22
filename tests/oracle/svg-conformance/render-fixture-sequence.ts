@@ -6,7 +6,9 @@
  * comment for the rationale common to every one of these helpers (one
  * measurer instance injected into BOTH the layout and render stages; the
  * low-level pipeline rather than `renderSync`, so production's own measurer
- * default cannot leak into a conformance measurement).
+ * default cannot leak into a conformance measurement). The one exception is
+ * a nested `{{ }}` diagram: the nested-renderer seam renders it through
+ * `renderSync` with the SAME measurer, as production's prepareBlock does.
  *
  * Sequence routes through its OWN dedicated engine
  * (`parseSequence` -> `layoutSequence` -> `renderSequence`,
@@ -61,7 +63,8 @@ import { renderSequence } from '../../../src/diagrams/sequence/renderer.js';
 import { isEmpty } from '../../../src/core/annotations/index.js';
 import { applyExportedChrome } from '../../../src/core/annotations/chrome-export.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
-import { assembleSvg } from '../../../src/index.js';
+import { assembleSvg, renderSync } from '../../../src/index.js';
+import { registerNestedDiagramRenderers } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
 import { seedOfUmlSource } from '../../../src/core/assemble-svg.js';
 
 /** `renderFixtureSequence`'s own options bag: `PreprocessOptions` (forwarded
@@ -96,6 +99,11 @@ export function renderFixtureSequence(
   measurer: StringMeasurer,
   options?: FixtureSequenceOptions,
 ): string {
+  // sdd2-T6d: registers the nested-diagram renderer as production does
+  // (`src/index.ts` prepareBlock) and the activity harness does
+  // (`render-fixture-activity.ts:121`); without it a note's `{{ }}`
+  // `EmbeddedDiagram.drawU` hits its "no renderer registered" path.
+  registerNestedDiagramRenderers((source) => renderSync(source, { measurer }));
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0];
   if (first === undefined) throw new Error('no diagram block found');

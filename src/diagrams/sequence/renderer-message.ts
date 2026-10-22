@@ -11,7 +11,7 @@ import { renderCreatedHead } from './renderer-participant-shapes.js';
 import type { MessageGeo, TextRun } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { line } from '../../core/svg.js';
-import { sequenceText } from './sequence-text.js';
+import { primitiveFields, sequenceText, weightOf } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { TRANSPARENT_SVG } from './text-block-geo.js';
@@ -123,15 +123,11 @@ function messageLabelRun(run: TextRun, font: FontConfiguration, k: number): stri
     fontFamily: run.fontFamily ?? font.family,
     fontSize: run.fontSize ?? font.size * k,
     fill: run.color ?? font.color ?? TRANSPARENT_SVG,
-    // `'700'`, not `'bold'`: the deterministic-text jar writes the numeric CSS
-    // weight (`sequence-text.ts#SequenceTextSpec.fontWeight`).
-    ...(run.bold === true ? { fontWeight: '700' as const } : {}),
+    // The numeric CSS weight (`sequence-text.ts#runFontWeight`).
+    ...weightOf(run),
     ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
     ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
-    ...(run.url !== undefined ? { url: run.url } : {}),
-    // A `<math>`/`<latex>` run draws its image instead of a `<text>`
-    // (`sequence-text.ts#SequenceRunImage`, `AtomMath.java:78-97`).
-    ...(run.image !== undefined ? { image: run.image } : {}),
+    ...primitiveFields(run),
   });
 }
 

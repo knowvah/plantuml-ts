@@ -13,25 +13,28 @@ import type { Participant } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
+import { Colors } from '../../core/abel/Colors.js';
+import { ColorType } from '../../core/abel/ColorType.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
 import { Stereotype } from '../../core/stereo/Stereotype.js';
 import type { LiveEvent, LiveEvents } from './sequence-live-events.js';
 import type { Scan, SpanConstraint } from './sequence-layout-participant-constraints.js';
-import { sequenceAtomContext, sequenceCreoleRuns } from './sequence-creole.js';
+import { componentLabelBlock, type LabelBlock } from './sequence-creole-sheet.js';
 import { LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
-import { noteStyle, paintOf } from './sequence-skin-param.js';
-import { NOTE_COMPONENT_PADDING_X, notePadding } from './sequence-note-tile.js';
+import { noteStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
+import { NOTE_COMPONENT_PADDING_X, notePadding, type NotePadding } from './sequence-note-tile.js';
 
 /** What a note's width is measured with. `theme` carries `skinparam
  *  noteTextAlignment` (`Rose.java:100-112`); absent, the LEFT default. */
 export interface NoteWidthEnv {
   readonly measurer: StringMeasurer;
-  readonly sprites: SpriteRegistry | undefined;
+  readonly sprites?: SpriteRegistry | undefined;
   readonly theme?: Theme | undefined;
 }
 
-type NoteComponent = NonNullable<NoteEvent['style']>;
+export type NoteComponent = NonNullable<NoteEvent['style']>;
 
 /** `AlignmentParam.noteTextAlignment`, else `defaulttextalignment`, else LEFT
  *  (`SkinParam.java:722-727`), as `sequence-layout-note.ts` resolves it. */
@@ -41,7 +44,83 @@ function noteAlignment(theme: Theme | undefined): HorizontalAlignment {
 }
 
 /**
- * The note component's preferred width: the creole block plus the text
+ * The note's `Colors` as its command built them: `ColorParser.simpleColor
+ * (BACK)` -> `new Colors(data, set, BACK)` (`FactorySequenceNoteCommand
+ * .java:234`, `...OverSeveralCommand.java:239`, `...AcrossCommand.java:218`);
+ * a note on an arrow takes the whole string as its BACK colour
+ * (`FactorySequenceNoteOnArrowCommand.java:223-225`).
+ */
+function noteColors(event: NoteEvent): Colors | undefined {
+  if (event.color === undefined) return undefined;
+  const set = HColorSet.instance();
+  if (event.onMessage === true) return Colors.empty().add(ColorType.BACK, set.getColor(event.color));
+  return Colors.parse(event.color, set, ColorType.BACK);
+}
+
+/** The note's merged style: `Note#getUsedStyles` (`Note.java:75-82`) -- the
+ *  keyword's signature (`NoteStyle.java:66-74`) merged with the stereotype's
+ *  styles, then `eventuallyOverride(colors)`. */
+function noteStyleOf(event: NoteEvent): ReturnType<typeof noteStyle> {
+  return noteStyle(event.styleBuilder, event.style ?? 'note', Stereotype.build(event.stereotype), noteColors(event));
+}
+
+/** The note's paint, resolved at use time from the builder captured at its
+ *  command, read off the HTML colour set (`AbstractComponent.java:81-83`). */
+export function notePaint(event: NoteEvent): SequencePaint {
+  return paintOf(noteStyleOf(event), HColorSet.instance());
+}
+
+/**
+ * The note component's text block and the ink it is drawn under -- the ONE
+ * measurement both the participant row (`noteComponentWidth`) and the note
+ * tile (`sequence-layout-note.ts#resolveNote`) read.
+ *
+ * - `note` is `enhanced` (`ComponentRoseNote.java:66-71`): `BodyFactory.create3`
+ *   (`AbstractTextualComponent.java:88-89`), drawn after `symbolContext.apply(ug)`
+ *   (`ComponentRoseNote.java:121`: the fill, the border colour, the style's
+ *   stroke -- what a creole table's grid inherits).
+ * - `rnote`/`hnote` are `create0` with the padding as margins
+ *   (`ComponentRoseNoteBox.java:58`, `ComponentRoseNoteHexagonal.java:58`),
+ *   drawn after `symbolContext.apply(ug)` then `UStroke.simple()` (`:99-105`,
+ *   `:108-111`).
+ *
+ * The body's lines are the source lines (`FactorySequenceNoteCommand.java:146`
+ * keeps them as written), at the note style's font and alignment. `margins`
+ * is the component padding (`sequence-note-tile.ts#notePadding`).
+ */
+export function noteBodyBlock(
+  note: NoteEvent,
+  component: NoteComponent,
+  env: NoteWidthEnv,
+  margins: NotePadding,
+): LabelBlock {
+  const style = noteStyleOf(note);
+  const paint = paintOf(style, HColorSet.instance());
+  if (paint.font.color === null) throw new Error('note style resolved no FontColor');
+  const enhanced = component === 'note';
+  const opts = {
+    align: paint.align ?? HorizontalAlignment.LEFT,
+    sprites: env.sprites,
+    // `super(style, style.wrapWidth(), ...)` (`ComponentRoseNote.java:67`,
+    // `ComponentRoseNoteBox.java:58`, `ComponentRoseNoteHexagonal.java:58`).
+    maxWidth: style.wrapWidth(),
+    ink: { back: paint.fill, fore: paint.stroke, stroke: enhanced ? style.getStroke() : UStroke.simple() },
+    // `create9` passes no margins (`Display.java:630-634`, BodyEnhanced2's
+    // `getTextBlock`); `create0` takes the component padding's sides.
+    ...(enhanced ? {} : { marginX1: margins.left, marginX2: margins.right }),
+    ...(enhanced
+      ? { enhanced: { defaultThickness: paint.thickness, minimumWidth: style.value('MinimumWidth').asDouble() } }
+      : {}),
+    // `ComponentRoseNote`'s own stencil, 0..getTextWidth with the text at
+    // `getOldPaddingX1()` (`:124-130,140-146`) -- the LEFT, `diffX = 0`
+    // placement; a wider area's `diffX / 2` shift is not carried.
+    ...(enhanced ? { componentStencil: { before: margins.left, after: margins.right } } : {}),
+  };
+  return componentLabelBlock(note.text.split('\n'), paint.font, opts, env.measurer);
+}
+
+/**
+ * The note component's preferred width: the text block plus the text
  * padding, `2 * getPaddingX` and, for `note` alone, the delta shadow
  * (`ComponentRoseNote.java:83-91`, `AbstractTextualComponent.java:100-108`).
  * `component` is the one the tile builds -- the keyword's, unless a wrapper
@@ -49,17 +128,9 @@ function noteAlignment(theme: Theme | undefined): HorizontalAlignment {
  */
 export function noteComponentWidth(note: NoteEvent, env: NoteWidthEnv, component?: NoteComponent): number {
   const kind = component ?? note.style ?? 'note';
-  const style = noteStyle(note.styleBuilder, note.style ?? 'note', Stereotype.build(note.stereotype));
-  const paint = paintOf(style, HColorSet.instance());
-  const fontColor = paint.font.color;
-  if (fontColor === null) throw new Error('note style resolved no FontColor');
-  const atoms = sequenceAtomContext(env.sprites, fontColor, paint.fill);
-  const runs = note.text
-    .split('\n')
-    .flatMap((line) => sequenceCreoleRuns(line, paint.font, { leftX: 0, baselineY: 0 }, env.measurer, atoms));
-  const block = Math.max(0, ...runs.map((r) => r.x + r.textWidth));
   const pad = notePadding(kind, noteAlignment(env.theme));
-  const reserve = kind === 'note' ? paint.shadowing : 0;
+  const block = noteBodyBlock(note, kind, env, pad).width;
+  const reserve = kind === 'note' ? notePaint(note).shadowing : 0;
   return block + pad.left + pad.right + 2 * NOTE_COMPONENT_PADDING_X + reserve;
 }
 

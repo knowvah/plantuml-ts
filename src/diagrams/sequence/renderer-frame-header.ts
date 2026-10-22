@@ -17,7 +17,7 @@ import type { Paint } from '../../core/paint.js';
 import { rect, path } from '../../core/svg-shapes.js';
 import { fmt } from '../../core/svg-format.js';
 import { FontStyle, type FontConfiguration } from '../../core/klimt/shape/UText.js';
-import { sequenceText } from './sequence-text.js';
+import { primitiveFields, sequenceText, weightOf } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
 import { frameShadowDelta, sequenceShadowFilter } from './sequence-shadow.js';
@@ -200,14 +200,11 @@ function renderHeaderText(frame: FrameGeo, theme: ScaledTheme): string {
         width: drawnWidth(run),
         fontFamily: run.fontFamily ?? font.family,
         fontSize: run.fontSize ?? font.size * k,
-        ...((run.bold ?? font.styles.has(FontStyle.BOLD)) ? { fontWeight: '700' as const } : {}),
+        ...weightOf(run, font.styles.has(FontStyle.BOLD)),
         fill: run.color!,
         ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
         ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
-        ...(run.url !== undefined ? { url: run.url } : {}),
-        // A `<math>`/`<latex>` run draws its image instead of a `<text>`
-        // (`sequence-text.ts#SequenceRunImage`, `AtomMath.java:78-97`).
-        ...(run.image !== undefined ? { image: run.image } : {}),
+        ...primitiveFields(run),
       }),
     )
     .join('');

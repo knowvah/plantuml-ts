@@ -42,3 +42,6 @@ Group-end notes in the frame extent: `GroupingTile.getMinX/getMaxX` add `getNote
 
 ## Added at T5b hand-back (journal row 73)
 N6: note after a group `end` is drawn at the frame top (`GroupingTile.java:275,984-1012`); susati, lirasa.
+
+## Added at T7e hand-back (journal row 95)
+`GroupingLeaf#addNote` (`GroupingLeaf.java:122-128`) warns for a non-LEFT/RIGHT note after a group `end` but still stores it: probe the jar and mirror (warning home: `sequenceWarnings(ast)` in `sequence-warnings.ts`).

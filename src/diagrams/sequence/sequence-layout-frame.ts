@@ -24,15 +24,15 @@
  */
 import type { ElseGeo, FrameEvent, FrameGeo, NoteEvent, TextRun } from './ast.js';
 import type { NoteOwner, RefOwner } from './sequence-note-folding.js';
-import { atomFontSpec } from './sequence-creole-text-atom.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
 import { alignedBlockRuns } from './sequence-block-align.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import {
-  atomsOf,
   buildTabRuns,
   computeHeaderTab,
   conditionLines,
   ELSE_PADDING_X1,
+  ELSE_PADDING_X2,
   elseComponentWidth,
   elsePaint,
   groupingPaints,
@@ -70,9 +70,22 @@ const ELSE_TEOZ_DELTA_H = 4;
  * The block is at the leaf style's font (`AbstractTextualComponent.java:78`).
  */
 function separatorHeight(label: string, paint: SequencePaint, ctx: EventProcessingContext): number {
-  const lines = conditionLines(label);
-  const blockH = lines.length * ctx.measurer.measure('M', atomFontSpec(paint.font)).height;
+  const at = { leftX: 0, top: 0 };
+  const blockH = alignedBlockRuns(conditionLines(label), paint.font, at, paint.align, elseContext(paint, ctx)).height;
   return blockH + 2 * ELSE_PADDING_Y + ELSE_TEOZ_DELTA_H;
+}
+
+/** The else component's block context: its padding's sides as margins
+ *  (`ComponentRoseGroupingElse.java:65-67`), drawn after the dashed rule's
+ *  `groupBorder` then `UStroke.simple()` (`:104-107`). */
+function elseContext(paint: SequencePaint, ctx: EventProcessingContext) {
+  return {
+    measurer: ctx.measurer,
+    sprites: ctx.sprites,
+    ink: { fore: paint.stroke, stroke: UStroke.simple() },
+    marginX1: ELSE_PADDING_X1,
+    marginX2: ELSE_PADDING_X2,
+  };
 }
 
 /**
@@ -90,10 +103,7 @@ function branchConditionRuns(
   ctx: EventProcessingContext,
 ): readonly TextRun[] {
   const at = { leftX: origin.frameX + ELSE_PADDING_X1, top: origin.separatorY + ELSE_PADDING_Y + ELSE_TEOZ_DY };
-  return alignedBlockRuns(conditionLines(label), paint.font, at, paint.align, {
-    measurer: ctx.measurer,
-    atoms: atomsOf(paint, ctx),
-  }).runs;
+  return alignedBlockRuns(conditionLines(label), paint.font, at, paint.align, elseContext(paint, ctx)).runs;
 }
 
 /** An else tile pushed during the walk, its x extent still to be filled. */

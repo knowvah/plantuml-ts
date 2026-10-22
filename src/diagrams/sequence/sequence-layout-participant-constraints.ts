@@ -235,6 +235,11 @@ function refConstraint(ev: FrameEvent, sorted: Participant[], scan: ScanContext)
   const from = Math.min(...indices);
   const to = Math.max(...indices);
   if (indices.length === 0 || from === to) return [];
-  const span = refComponentWidth(refBodyLines(ev.frameType, ev.label), referencePaints(ev), scan.measurer);
+  const span = refComponentWidth(
+    refBodyLines(ev.frameType, ev.label),
+    referencePaints(ev),
+    scan.measurer,
+    scan.sprites,
+  );
   return [{ from, to, span, edge: true }];
 }

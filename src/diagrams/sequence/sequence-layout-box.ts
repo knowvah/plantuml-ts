@@ -11,9 +11,9 @@ import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import type { HColor } from '../../core/style/Value.js';
 import { Stereotype } from '../../core/stereo/Stereotype.js';
 import { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { dollStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
-import { atomFontSpec } from './sequence-creole-text-atom.js';
-import { offsetRun, sequenceCreoleRuns } from './sequence-creole.js';
+import { componentLabelBlock, offsetRun, symbolInk, type LabelBlock } from './sequence-creole-sheet.js';
 
 /** A colour the style layer can hold (`Value.ts#HColor`); `Colors` keeps
  *  them opaque (`abel/Colors.ts#HColor`). */
@@ -65,15 +65,35 @@ export interface EngloberDimension {
  * so a bare `box` still reserves 1 + 1 + 3 = 5; a `" "` title is a real line.
  * One line: the label is never split (see {@link boxLabelRuns}).
  */
-export function engloberDimension(label: string, paint: SequencePaint, measurer: StringMeasurer): EngloberDimension {
-  const runs = label === '' ? [] : sequenceCreoleRuns(label, paint.font, { leftX: 0, baselineY: 0 }, measurer);
-  const last = runs.at(-1);
-  const textWidth = last === undefined ? 0 : last.x + last.textWidth;
-  const textHeight = Math.max(0, ...runs.map((r) => r.textLineHeight));
+export function engloberDimension(
+  label: string,
+  paint: SequencePaint,
+  measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
+): EngloberDimension {
+  const block = engloberBlock(label, paint, measurer, sprites);
   return {
-    width: textWidth + ENGLOBER_PADDING.getLeft() + ENGLOBER_PADDING.getRight(),
-    height: textHeight + ENGLOBER_PADDING.getTop() + ENGLOBER_PADDING.getBottom() + ENGLOBER_EXTRA_HEIGHT,
+    width: block.width + ENGLOBER_PADDING.getLeft() + ENGLOBER_PADDING.getRight(),
+    height: block.height + ENGLOBER_PADDING.getTop() + ENGLOBER_PADDING.getBottom() + ENGLOBER_EXTRA_HEIGHT,
   };
+}
+
+/** The englober's text block: `create0` at the box style's font, its
+ *  padding's sides as margins (`ComponentRoseEnglober.java:58`), drawn after
+ *  `symbolContext.apply(ug)` (`:65-71`). One line: the label is never split. */
+function engloberBlock(
+  label: string,
+  paint: SequencePaint,
+  measurer: StringMeasurer,
+  sprites: SpriteRegistry | undefined,
+): LabelBlock {
+  const opts = {
+    sprites,
+    ink: symbolInk(paint),
+    marginX1: ENGLOBER_PADDING.getLeft(),
+    marginX2: ENGLOBER_PADDING.getRight(),
+  };
+  return componentLabelBlock([label], paint.font, opts, measurer);
 }
 
 /** The box's drawn extent, as `Doll#drawMe` placed it. */
@@ -97,12 +117,8 @@ export function boxLabelRuns(
   frame: BoxFrame,
   paint: SequencePaint,
   measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
 ): readonly TextRun[] {
-  if (label === '') return [];
-  const spec = atomFontSpec(paint.font);
-  const ascent = measurer.measure('M', spec).height - measurer.getDescent(spec, 'M');
-  const runs = sequenceCreoleRuns(label, paint.font, { leftX: 0, baselineY: frame.y + ascent }, measurer);
-  const last = runs.at(-1);
-  const width = last === undefined ? 0 : last.x + last.textWidth;
-  return runs.map((run) => offsetRun(run, frame.x + (frame.width - width) / 2, 0));
+  const block = engloberBlock(label, paint, measurer, sprites);
+  return block.primitives.map((run) => offsetRun(run, frame.x + (frame.width - block.width) / 2, frame.y));
 }

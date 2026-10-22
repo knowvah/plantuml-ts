@@ -26,14 +26,17 @@
 import type { FrameEvent, FrameGeo, NoteEvent, ParticipantGeo } from './ast.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { alignedBlockRuns } from './sequence-block-align.js';
-import { offsetRun, sequenceAtomContext } from './sequence-creole.js';
+import { offsetRun } from './sequence-creole-sheet.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import {
   REF_HEADER_TEXT,
   REF_HEIGHT_FOOTER,
   REF_PADDING,
   REF_X_MARGIN,
+  refBodyBlock,
   refBodyHeight,
+  refTextInk,
+  type ReferencePaints,
   refBodyLines,
   refComponentWidth,
   refHeaderHeight,
@@ -76,14 +79,10 @@ function bodyTextPos(align: HorizontalAlignment | undefined, area: number, textW
  *  alignment, `AbstractTextualComponent.java:78-91`), drawn on the `ug` the
  *  body's symbol context was applied to (`ComponentRoseReference.java:95,
  *  124,137`), at `getOldPaddingY() + (int) textHeaderHeight` below the top. */
-function bodyRuns(body: readonly string[], paint: SequencePaint, place: BodyPlace, ctx: EventProcessingContext) {
-  const color = paint.font.color;
-  const atoms = color === null ? undefined : sequenceAtomContext(ctx.sprites, color, paint.fill);
-  const block = alignedBlockRuns(body, paint.font, { leftX: 0, top: place.top }, paint.align, {
-    measurer: ctx.measurer,
-    atoms,
-  });
-  const dx = place.first + bodyTextPos(paint.align, place.area, block.width);
+function bodyRuns(body: readonly string[], paints: ReferencePaints, place: BodyPlace, ctx: EventProcessingContext) {
+  const env = { measurer: ctx.measurer, sprites: ctx.sprites };
+  const block = refBodyBlock(body, paints, { leftX: 0, top: place.top }, env);
+  const dx = place.first + bodyTextPos(paints.paint.align, place.area, block.width);
   return block.runs.map((r) => offsetRun(r, dx, 0));
 }
 
@@ -101,8 +100,11 @@ interface BodyPlace {
 function headerOf(headerPaint: SequencePaint, first: number, y: number, ctx: EventProcessingContext) {
   const width = refHeaderWidth(headerPaint, ctx.measurer);
   const at = { leftX: first + REF_HEADER_TEXT_DX, top: y + REF_HEADER_TEXT_DY };
+  const ink = refTextInk(headerPaint);
   const block = alignedBlockRuns([REF_HEADER_TEXT], headerPaint.font, at, HorizontalAlignment.LEFT, {
     measurer: ctx.measurer,
+    sprites: ctx.sprites,
+    ink,
   });
   return {
     tabText: REF_HEADER_TEXT,
@@ -126,8 +128,8 @@ export function handleRefEvent(
   const paints = referencePaints(event);
   const body = refBodyLines(event.frameType, event.label);
   const { first, last } = refSpan(event, ctx);
-  const area = Math.max(last - first, refComponentWidth(body, paints, ctx.measurer));
-  const height = refBodyHeight(body, paints, ctx.measurer);
+  const area = Math.max(last - first, refComponentWidth(body, paints, ctx.measurer, ctx.sprites));
+  const height = refBodyHeight(body, paints, ctx.measurer, ctx.sprites);
   const y = cursor.y;
   const header = headerOf(paints.headerPaint, first, y, ctx);
   const frameGeo: FrameGeo = {
@@ -140,7 +142,7 @@ export function handleRefEvent(
     width: area - 2 * REF_X_MARGIN,
     height: height - REF_HEIGHT_FOOTER,
     branchSeparators: [],
-    refBody: bodyRuns(body, paints.paint, { first, area, top: y + REF_PADDING + header.tabHeight }, ctx),
+    refBody: bodyRuns(body, paints, { first, area, top: y + REF_PADDING + header.tabHeight }, ctx),
     ...header,
   };
   ctx.eventGeos.push(frameGeo);

@@ -19,7 +19,7 @@ import { FixedMeasurer } from '../../../src/core/measurer.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { messageLabelBlock, messageLabelWidth } from '../../../src/diagrams/sequence/text-block-geo.js';
 import { defaultMessageFont } from '../../../src/diagrams/sequence/sequence-arrow-paint.js';
-import { atomFontSpec } from '../../../src/diagrams/sequence/sequence-creole-text-atom.js';
+import { atomFontSpec } from '../../../src/diagrams/sequence/sequence-creole-sheet.js';
 import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.js';
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import type { SequenceGeometry, TextRun } from '../../../src/diagrams/sequence/ast.js';
@@ -119,9 +119,12 @@ describe('messageLabelBlock placement (A2)', () => {
     expect(block.number!.y).toBeCloseTo(block.lines[1]!.y, 10);
   });
 
-  it('reserves one row for a number-only label', () => {
+  it('reserves one row for a number-only label, whose empty line is a " " atom', () => {
+    // `getLabelNumbered` keeps the label's one empty line beside the number
+    // (`AbstractMessage.java:200-206`, `Display.java:703-712`), and an empty
+    // stripe draws a " " atom (`StripeSimple.java:123-125`).
     const block = messageLabelBlock('', '[1]', LEFT_X, ARROW_Y, { theme: defaultTheme, measurer });
-    expect(block.lines).toEqual([]);
+    expect(block.lines.map((r) => r.text)).toEqual([' ']);
     const n = block.number!;
     expect(n.y).toBeCloseTo(ARROW_Y - (n.textLineHeight + 2) + n.textAscent, 10);
   });

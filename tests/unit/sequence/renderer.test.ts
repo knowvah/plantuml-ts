@@ -42,7 +42,7 @@ import {
 } from '../../../src/diagrams/sequence/sequence-skin-param.js';
 import { boxLabelRuns, boxPaint, type BoxFrame } from '../../../src/diagrams/sequence/sequence-layout-box.js';
 import { DIVIDER_PADDING, DIVIDER_LABEL_DELTA_X } from '../../../src/diagrams/sequence/divider-style.js';
-import { atomFontSpec } from '../../../src/diagrams/sequence/sequence-creole-text-atom.js';
+import { atomFontSpec } from '../../../src/diagrams/sequence/sequence-creole-sheet.js';
 import { defaultMessageFont } from '../../../src/diagrams/sequence/sequence-arrow-paint.js';
 
 /** The default skin's builder: a source with no style declarations. */

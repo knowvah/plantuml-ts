@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
-import { sequenceCreoleFont, sequenceCreoleRuns } from '../../../src/diagrams/sequence/sequence-creole.js';
+import { labelBlockOf, labelFont } from '../../helpers/sequence-label.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 const CACHE = join(ROOT, 'test-results/dot-cache/sequence');
@@ -232,20 +232,14 @@ describe('box group labels', () => {
    */
   it('leaves a plain box label byte-identical, one run at the raw width', () => {
     const measurer = new DeterministicMeasurer();
-    const font = { family: 'sans-serif', size: 11 };
-    const runs = sequenceCreoleRuns('Services', sequenceCreoleFont(font), { leftX: 14, baselineY: 15 }, measurer);
+    const runs = labelBlockOf(['Services'], labelFont(11)).primitives;
     expect(runs).toHaveLength(1);
     expect(runs[0]?.text).toBe('Services');
-    expect(runs[0]?.textWidth).toBeCloseTo(measurer.measure('Services', font).width, 10);
+    expect(runs[0]?.textWidth).toBeCloseTo(measurer.measure('Services', { family: 'sans-serif', size: 11 }).width, 10);
   });
 
   it('splits a marked-up box label into styled sibling runs', () => {
-    const runs = sequenceCreoleRuns(
-      'a <b>bold</b> group',
-      sequenceCreoleFont({ family: 'sans-serif', size: 11 }),
-      { leftX: 14, baselineY: 15 },
-      new DeterministicMeasurer(),
-    );
+    const runs = labelBlockOf(['a <b>bold</b> group'], labelFont(11)).primitives;
     expect(runs.map((r) => r.text)).toEqual(['a ', 'bold', ' group']);
     expect(runs.map((r) => r.bold)).toEqual([undefined, true, undefined]);
   });

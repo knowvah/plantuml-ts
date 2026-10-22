@@ -14,12 +14,12 @@ CreoleHorizontalLine, `core/EmbeddedDiagram.ts`); activity consumes it via
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T6a](T6a-parity-probe.md) | 6a · parity probe: plain labels via core | typescript-pro (opus) | scratch + `$M/b6a-probe.md` | B5 | [ ] |
-| [T6b](T6b-creole-seam.md) | 6b · seam + migrate every label; delete `sequence-creole.ts` | typescript-pro (opus) | new `sequence-creole-sheet.ts`, `text-block-geo.ts`, `sequence-text.ts`, `sequence-creole*.ts`, every label call site + tests | T6a | [ ] |
-| [T6c](T6c-fission-wrap.md) | 6c · Fission wrap (`maxMessageSize`, `MaximumWidth`, `wrapWidth`) | typescript-pro (sonnet) | `sequence-creole-sheet.ts`, `geo-message.ts`, `geo-annotation.ts`, `sequence-skin-param.ts` + tests | T6b | [ ] |
-| [T6d](T6d-note-body-capture.md) | 6c · empty-stripe `" "` atom; embedded `{{ }}` | typescript-pro (sonnet) | `parser.ts`, `sequence-layout-box.ts`, `text-block-geo.ts` + tests | T6b | [ ] |
-| [T6e](T6e-svg-data-images.md) | 6c · `data:image/svg+xml` images | typescript-pro (sonnet) | `src/core/creole-atoms*.ts` (split first) + tests | T6b | [ ] |
-| close | standard close **with the all-engine survey** + wall-clock check (stop 17), pin round 6 | orchestrator | per close-procedure | T6a–T6e | [ ] |
+| [T6a](T6a-parity-probe.md) | 6a · parity probe: plain labels via core | typescript-pro (opus) | scratch + `$M/b6a-probe.md` | B5 | [x] |
+| [T6b](T6b-creole-seam.md) | 6b · seam + migrate every label; delete `sequence-creole.ts` | typescript-pro (opus) | new `sequence-creole-sheet.ts`, `text-block-geo.ts`, `sequence-text.ts`, `sequence-creole*.ts`, every label call site + tests | T6a | [x] |
+| [T6c](T6c-fission-wrap.md) | 6c · Fission wrap (`maxMessageSize`, `MaximumWidth`, `wrapWidth`) | typescript-pro (sonnet) | `sequence-creole-sheet.ts`, `geo-message.ts`, `geo-annotation.ts`, `sequence-skin-param.ts` + tests | T6b | [x] |
+| [T6d](T6d-note-body-capture.md) | 6c · empty-stripe `" "` atom; embedded `{{ }}` | typescript-pro (sonnet) | `parser.ts`, `sequence-layout-box.ts`, `text-block-geo.ts` + tests | T6b | [x] |
+| [T6e](T6e-svg-data-images.md) | 6c · `data:image/svg+xml` images | typescript-pro (sonnet) | `src/core/creole-atoms*.ts` (split first) + tests | T6b | [x] |
+| close | standard close **with the all-engine survey** + wall-clock check (stop 17), pin round 6 | orchestrator | per close-procedure | T6a–T6e | [x] |
 
 ## Interface contract (T6b → T6c, T6d, T7a, T7g)
 ```ts

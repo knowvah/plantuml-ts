@@ -451,7 +451,7 @@ export function blockWidthOf(runs: readonly TextRun[]): number {
  * lifelines and activation bars by `sequence-delay.ts`.
  */
 function handleDelayEvent(event: DelayEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
-  const geo = layoutDelay(event, cursor.y, [...ctx.participantMap.values()], ctx.measurer);
+  const geo = layoutDelay(event, cursor.y, [...ctx.participantMap.values()], ctx.measurer, ctx.sprites);
   ctx.eventGeos.push(geo);
   cursor.y += geo.height;
 }

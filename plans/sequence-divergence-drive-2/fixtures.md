@@ -18,6 +18,7 @@ Planning-time cohorts (sdd1 `final-classify.json`, main `b34120ea9`): zero
 | b3 | 687 | 7 | 294 | 150 | 3 | 688 | 41920 |
 | b4 | 800 | 7 | 181 | 150 | 3 | 801 | 40745 |
 | b5 | 909 | 14 | 76 | 139 | 3 | 910 | 18033 |
+| b6 | 962 | 19 | 76 | 81 | 3 | 963 | 8851 |
 
 ## Open rows
 
@@ -36,10 +37,10 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | bakire-18-peku988 | structural | 40 | T7g | message padder (`SkinParam.java:1216-1229`) | |
 | bakuba-09-fica741 | structural | 153 | T7a | self dressing1 + circles, multicast, part-anchor (`ComponentRoseSelfArrow.java:91-149`, `CommunicationTile.java:328-395`) | |
 | balixa-47-mudo983 | geometry | 4 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
-| bapifu-18-bazi719 | structural | 46 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| bapifu-18-bazi719 | structural | 46 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | baxopu-48-fezi101 | geometry | 13 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
 | baxuxa-14-puvo950 | structural | 42 | T7e | skinparam warning banner (`CommandSkinParam.java:92-99`) | |
-| bejate-92-fubo102 | structural | 56 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| bejate-92-fubo102 | structural | 56 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | benugo-73-kezi734 | geometry | 125 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | bepipo-37-fego336 | geometry | 30 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | bexoce-95-vibe195 | geometry | 76 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
@@ -57,8 +58,8 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | bovugo-63-lazo401 | geometry | 5 | T3c | group frame extents (`GroupingTile.java:207-225,988-990`) | pinned (sdd2-b3 close) |
 | bozuru-10-rajo382 | geometry | 2 | T4b | exo label textDeltaX (`CommunicationExoTile.java:122-124`, `ComponentRoseArrow.java:174-177`) | pinned (sdd2-b4 close) |
 | bucebo-91-xavo442 | structural | 109 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
-| budevu-23-popi845 | structural | 56 | T6e | data:image/svg+xml (`AtomImg.java:153-161`) | |
-| bugabo-85-veki716 | structural | 52 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| budevu-23-popi845 | structural | 56 | T6e | data:image/svg+xml (`AtomImg.java:153-161`) | pinned (sdd2-b6 close) |
+| bugabo-85-veki716 | structural | 52 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | bugafa-93-duzi514 | structural | 140 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
 | bugalu-47-ludi530 | geometry | 6 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | bujuma-55-rupu730 | geometry | 4 | T3c | group frame extents (`GroupingTile.java:207-225,988-990`) | pinned (sdd2-b3 close) |
@@ -74,7 +75,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | calido-79-kovi606 | geometry | 23 | T2a | note beside message / `&` parallel (`TileBuilder.java:102-119`, `YGauge.java:124-145`) | pinned (sdd2-b2 close) |
 | caluni-22-noci624 | structural | 456 | T7a | self dressing1 + circles, multicast, part-anchor (`ComponentRoseSelfArrow.java:91-149`, `CommunicationTile.java:328-395`) | |
 | camebe-75-mujo573 | geometry | 373 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b2 close) |
-| camuxi-33-nopo108 | geometry | 25 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
+| camuxi-33-nopo108 | geometry | 25 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b6 close) |
 | carose-61-seko055 | geometry | 217 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | caxali-40-cotu420 | geometry | 63 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | caxuke-64-femu351 | geometry | 8 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
@@ -106,7 +107,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | covuco-47-sotu151 | structural | 34 | T7b | activation group edges (`ComponentRoseActiveLine.java:75-79`) | |
 | coxefo-18-gopo887 | geometry | 46 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | cujoci-19-taxe939 | geometry | 2 | T3c | group frame extents (`GroupingTile.java:207-225,988-990`) | pinned (sdd2-b3 close) |
-| cusete-01-vusi466 | structural | 79 | T6d | empty-stripe atom / embedded diagram (`StripeSimple.java:124-126`, `CreoleParser.java:152-154`) | |
+| cusete-01-vusi466 | structural | 79 | T6d | empty-stripe atom / embedded diagram (`StripeSimple.java:124-126`, `CreoleParser.java:152-154`) | pinned (sdd2-b6 close) |
 | cusiro-03-mebe823 | geometry | 93 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | cusiru-97-buco277 | geometry | 4 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
 | dabozi-63-zuco354 | structural | 10 | T7f | document chrome: gradient bg, border, handwritten (`SvgGraphics.java:178-180`, `TextBlockExporter.java:175,214-231`) | |
@@ -115,7 +116,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | dakeve-06-cici445 | geometry | 32 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | dalata-11-sifu583 | geometry | 168 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | darupa-17-dujo243 | geometry | 111 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
-| dasutu-58-saje713 | structural | 69 | T6d | empty-stripe atom / embedded diagram (`StripeSimple.java:124-126`, `CreoleParser.java:152-154`) | |
+| dasutu-58-saje713 | structural | 69 | T6d | empty-stripe atom / embedded diagram (`StripeSimple.java:124-126`, `CreoleParser.java:152-154`) | pinned (sdd2-b6 close) |
 | databu-25-mivu307 | geometry | 51 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b2 close) |
 | datetu-47-vunu236 | geometry | 80 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | davipu-63-veta505 | paint-only | 1 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
@@ -157,16 +158,16 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | duniti-51-pole084 | geometry | 33 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | durapi-97-jupo864 | geometry | 75 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | dutopa-62-jalu659 | geometry | 45 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
-| duzico-51-misi485 | structural | 131 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| duzico-51-misi485 | structural | 131 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | fadibu-99-pufu496 | geometry | 89 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | fakova-98-suze610 | structural | 17 | T7d | spot glyph, stereotype title, base64 sprite (`DriverCenteredCharacterSvg.java:56-81`, `Stereotype.java:140-145`, `CommandSpriteBase64.java:84-91`) | |
-| fanoxo-47-somi679 | structural | 80 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| fanoxo-47-somi679 | structural | 80 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | fasafe-10-fepe885 | geometry | 4 | T3c | group frame extents (`GroupingTile.java:207-225,988-990`) | pinned (sdd2-b3 close) |
 | favale-68-luzo896 | geometry | 8 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
-| felasa-37-jovu259 | structural | 68 | T6c | Fission wrap (`SheetBlock1.java:123`, `Fission.java:63-101`) | |
+| felasa-37-jovu259 | structural | 68 | T6c | Fission wrap (`SheetBlock1.java:123`, `Fission.java:63-101`) | pinned (sdd2-b6 close) |
 | fenino-82-nusu462 | geometry | 20 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
 | fenoli-16-peru181 | geometry | 37 | T2d | inclination in tile height (`ComponentRoseArrow.java:342-343`); response-below | pinned (sdd2-b2 close) |
-| fetazo-39-xocu662 | structural | 68 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
+| fetazo-39-xocu662 | structural | 68 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b6 close) |
 | fexoko-32-feso446 | structural | 10 | T7f | document chrome: gradient bg, border, handwritten (`SvgGraphics.java:178-180`, `TextBlockExporter.java:175,214-231`) | |
 | ficiru-65-geda551 | geometry | 66 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | fifasu-62-pipo979 | structural | 57 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
@@ -181,12 +182,12 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | fozeva-08-tife475 | geometry | 110 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
 | fugilu-74-jivu585 | geometry | 42 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | fujodi-29-safe898 | geometry | 2 | T3c | group frame extents (`GroupingTile.java:207-225,988-990`) | pinned (sdd2-b3 close) |
-| fukaro-40-riru664 | structural | 61 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| fukaro-40-riru664 | structural | 61 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | fuliko-66-mulo559 | geometry | 2 | T3a | document width terms (`PlayingSpace.java:75-104`, `CommunicationTileSelf.java:166-184,272-277`) | pinned (sdd2-b3 close) |
 | fululo-61-zuro165 | structural | 60 | T7b | activation group edges (`ComponentRoseActiveLine.java:75-79`) | |
 | funoti-95-bisa592 | geometry | 146 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | furara-28-sode432 | geometry | 60 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
-| fuvumu-26-fovo330 | structural | 46 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| fuvumu-26-fovo330 | structural | 46 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | gabisi-10-male675 | structural | 43 | T7e | skinparam warning banner (`CommandSkinParam.java:92-99`) | |
 | gacemo-20-lafa203 | structural | 36 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
 | gacujo-48-leto751 | geometry | 189 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
@@ -203,21 +204,21 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | gepiju-13-negu183 | geometry | 6 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | gepuce-64-pivu656 | structural | 267 | T7f | document chrome: gradient bg, border, handwritten (`SvgGraphics.java:178-180`, `TextBlockExporter.java:175,214-231`) | |
 | gesiba-07-rise357 | geometry | 8 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
-| gibaro-25-sibu619 | structural | 20 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| gibaro-25-sibu619 | structural | 20 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | gibuxa-28-kale997 | geometry | 36 | T2a | note beside message / `&` parallel (`TileBuilder.java:102-119`, `YGauge.java:124-145`) | pinned (sdd2-b2 close) |
 | gidibo-31-cugi403 | geometry | 17 | T2a | note beside message / `&` parallel (`TileBuilder.java:102-119`, `YGauge.java:124-145`) | pinned (sdd2-b2 close) |
 | gifope-23-jufe872 | structural | 42 | T7f | document chrome: gradient bg, border, handwritten (`SvgGraphics.java:178-180`, `TextBlockExporter.java:175,214-231`) | |
 | gijamu-35-vale058 | structural | 882 | T7g | message padder (`SkinParam.java:1216-1229`) | |
 | gijubi-81-rube024 | geometry | 56 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | giloko-85-gapa789 | geometry | 5 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
-| giroko-51-gobi443 | structural | 79 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| giroko-51-gobi443 | structural | 79 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | gixaxu-80-salo926 | structural | 45 | T8c | `<style src=>` / `</?style>` close (`CommandStyleImport.java:67-79`, `CommandStyleMultilinesCSS.java:58`) | |
 | gizinu-51-rexo332 | structural | 60 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
 | goceku-21-rizu768 | geometry | 80 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | gocote-26-bolo737 | geometry | 4 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
-| gofixe-24-jani946 | structural | 65 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| gofixe-24-jani946 | structural | 65 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | gogise-40-juro428 | geometry | 1 | T4b | exo label textDeltaX (`CommunicationExoTile.java:122-124`, `ComponentRoseArrow.java:174-177`) | pinned (sdd2-b4 close) |
-| gogivi-77-safe144 | geometry | 68 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
+| gogivi-77-safe144 | geometry | 68 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b6 close) |
 | gojuro-44-nono843 | geometry | 2 | T2b | LiveBoxes stairs (`LiveBoxes.java:79-86,284-336`) | pinned (sdd2-b2 close) |
 | gozaru-36-gejo982 | geometry | 5 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
 | gozobo-83-zuci344 | geometry | 114 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
@@ -232,8 +233,8 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | guzoco-99-ginu686 | geometry | 54 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
 | jabise-46-luge773 | geometry | 45 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | jacide-26-pumi543 | geometry | 6 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
-| jafufe-08-begu830 | structural | 197 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
-| jagoni-38-koti364 | structural | 56 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| jafufe-08-begu830 | structural | 197 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b6 close) |
+| jagoni-38-koti364 | structural | 56 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | jajobi-60-ralo350 | geometry | 17 | T2d | inclination in tile height (`ComponentRoseArrow.java:342-343`); response-below | pinned (sdd2-b2 close) |
 | jalodi-19-mibi961 | geometry | 123 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | jasixo-44-jide821 | structural | 43 | T7b | activation group edges (`ComponentRoseActiveLine.java:75-79`) | |
@@ -252,13 +253,13 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | jigigi-69-bege021 | geometry | 5 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | jiliba-03-lapi286 | error | undefined | T1b | unported command (`CommandActivate2.java:58-66`, `CommandUrl.java:60-70`, `CommandHideShowByGender.java:72-83`) | pinned (sdd2-b3 close) |
 | jinaxe-58-zuva028 | geometry | 66 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
-| jivati-56-pome307 | structural | 43 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| jivati-56-pome307 | structural | 43 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | jiveji-28-butu482 | geometry | 114 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | jobadi-87-jegi648 | geometry | 2 | T3a | document width terms (`PlayingSpace.java:75-104`, `CommunicationTileSelf.java:166-184,272-277`) | pinned (sdd2-b3 close) |
 | jomemi-46-zazi815 | geometry | 83 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | jonoja-01-zani191 | geometry | 8 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
 | jotase-88-kiki473 | geometry | 2 | T4b | exo label textDeltaX (`CommunicationExoTile.java:122-124`, `ComponentRoseArrow.java:174-177`) | pinned (sdd2-b4 close) |
-| jozomu-87-tajo507 | structural | 52 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| jozomu-87-tajo507 | structural | 52 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | jufila-56-kegu669 | geometry | 5 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | jugami-52-timi786 | geometry | 100 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | jujigi-41-zodo151 | geometry | 68 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
@@ -282,7 +283,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | kevavu-57-kifi084 | geometry | 1 | T4b | exo label textDeltaX (`CommunicationExoTile.java:122-124`, `ComponentRoseArrow.java:174-177`) | pinned (sdd2-b4 close) |
 | kibave-01-tafo463 | geometry | 20 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
 | kibope-73-jezu646 | geometry | 50 | T2c+T2a | note tiles: vmerge, top/bottom line (`NotesTile.java:124-137`, `CommunicationTileNoteBottomTopAbstract.java:121-130`) | pinned (sdd2-b2 close) |
-| kijeka-69-dugi195 | structural | 43 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| kijeka-69-dugi195 | structural | 43 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | kikaso-48-karu319 | geometry | 32 | T2a | note beside message / `&` parallel (`TileBuilder.java:102-119`, `YGauge.java:124-145`) | pinned (sdd2-b2 close) |
 | kikuba-19-varo358 | geometry | 23 | T2a | note beside message / `&` parallel (`TileBuilder.java:102-119`, `YGauge.java:124-145`) | pinned (sdd2-b2 close) |
 | kiledu-77-reto787 | geometry | 16 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
@@ -302,7 +303,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | kogoce-55-goge576 | geometry | 35 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | kogozi-22-davu372 | geometry | 86 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | kojigi-18-jexu940 | geometry | 4 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
-| kojoma-79-luna992 | structural | 349 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| kojoma-79-luna992 | structural | 349 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | koleji-09-doni016 | geometry | 155 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | komafa-88-zutu920 | structural | 52 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
 | komibe-79-cola079 | geometry | 2 | T3a | document width terms (`PlayingSpace.java:75-104`, `CommunicationTileSelf.java:166-184,272-277`) | pinned (sdd2-b3 close) |
@@ -324,7 +325,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | labite-99-lufe939 | structural | 58 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
 | lacoje-26-lubu678 | geometry | 58 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
 | ladiro-50-gume805 | error | undefined | T1a | note `[[url]]` group missing (`FactorySequenceNoteCommand.java:89,106`); exo note dropped (`TileBuilder.java:122-134`) | pinned (sdd2-b1 close) |
-| lafuzo-13-xura634 | structural | 126 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| lafuzo-13-xura634 | structural | 126 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | lagexo-50-sibo018 | geometry | 4 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
 | ledura-21-bavo866 | geometry | 134 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
 | legole-00-givu934 | geometry | 34 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
@@ -333,7 +334,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | lenamo-57-fano574 | geometry | 2 | T3c | group frame extents (`GroupingTile.java:207-225,988-990`) | pinned (sdd2-b3 close) |
 | lenoki-81-nofo984 | geometry | 83 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
 | letagi-90-kome968 | geometry | 17 | T2d | inclination in tile height (`ComponentRoseArrow.java:342-343`); response-below | pinned (sdd2-b2 close) |
-| lezonu-15-cege608 | structural | 77 | T6d | empty-stripe atom / embedded diagram (`StripeSimple.java:124-126`, `CreoleParser.java:152-154`) | |
+| lezonu-15-cege608 | structural | 77 | T6d | empty-stripe atom / embedded diagram (`StripeSimple.java:124-126`, `CreoleParser.java:152-154`) | pinned (sdd2-b6 close) |
 | libele-29-gagu210 | geometry | 20 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | libipu-23-femo315 | geometry | 4 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | liculu-86-goge853 | geometry | 66 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
@@ -348,7 +349,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | lokavu-60-peku948 | structural | 720 | T7e | skinparam warning banner (`CommandSkinParam.java:92-99`) | |
 | lokole-97-moji784 | structural | 74 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | lokonu-29-zafi019 | structural | 67 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
-| loloke-56-cape461 | structural | 48 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| loloke-56-cape461 | structural | 48 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | losefo-71-dovi176 | geometry | 82 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | losilu-30-ridu614 | paint-only | 1 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | loteba-26-konu854 | geometry | 136 | T2a | note beside message / `&` parallel (`TileBuilder.java:102-119`, `YGauge.java:124-145`) | pinned (sdd2-b2 close) |
@@ -363,7 +364,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | luzapi-49-rati107 | geometry | 107 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | macuca-31-lare733 | structural | 97 | T2c | note tiles: vmerge, top/bottom line (`NotesTile.java:124-137`, `CommunicationTileNoteBottomTopAbstract.java:121-130`) | pinned (sdd2-b2 close) |
 | makatu-16-guvi187 | geometry | 2 | T3c | group frame extents (`GroupingTile.java:207-225,988-990`) | pinned (sdd2-b3 close) |
-| makigi-01-zeni607 | structural | 36 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| makigi-01-zeni607 | structural | 36 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | makuzo-19-tine034 | geometry | 97 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | mapeji-83-sebu002 | geometry | 76 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | masibi-28-tidi862 | structural | 237 | T2c | note tiles: vmerge, top/bottom line (`NotesTile.java:124-137`, `CommunicationTileNoteBottomTopAbstract.java:121-130`) | pinned (sdd2-b5 close) |
@@ -383,9 +384,9 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | mezaxa-44-siju322 | geometry | 44 | T2a | note beside message / `&` parallel (`TileBuilder.java:102-119`, `YGauge.java:124-145`) | pinned (sdd2-b2 close) |
 | micaki-01-rexa741 | geometry | 46 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | midipu-78-meva271 | geometry | 68 | T2a | note beside message / `&` parallel (`TileBuilder.java:102-119`, `YGauge.java:124-145`) | pinned (sdd2-b2 close) |
-| mifafi-02-dofi536 | structural | 47 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| mifafi-02-dofi536 | structural | 47 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | mifeve-32-bone848 | geometry | 4 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
-| migodo-28-fodi331 | structural | 16 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| migodo-28-fodi331 | structural | 16 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | mipope-41-daxa497 | geometry | 36 | T2a | note beside message / `&` parallel (`TileBuilder.java:102-119`, `YGauge.java:124-145`) | pinned (sdd2-b2 close) |
 | mituru-91-pato523 | geometry | 8 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
 | mizeli-59-delu630 | geometry | 73 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
@@ -398,11 +399,11 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | momuxe-95-bugu296 | geometry | 1 | T4b | exo label textDeltaX (`CommunicationExoTile.java:122-124`, `ComponentRoseArrow.java:174-177`) | pinned (sdd2-b4 close) |
 | mopidi-45-pudu787 | geometry | 76 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | moxazi-74-bosi297 | geometry | 32 | T3a | document width terms (`PlayingSpace.java:75-104`, `CommunicationTileSelf.java:166-184,272-277`) | pinned (sdd2-b3 close) |
-| mozege-45-jatu623 | structural | 366 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| mozege-45-jatu623 | structural | 366 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | mozofa-80-puru273 | geometry | 21 | T2c | note tiles: vmerge, top/bottom line (`NotesTile.java:124-137`, `CommunicationTileNoteBottomTopAbstract.java:121-130`) | pinned (sdd2-b2 close) |
 | mozoza-90-biru865 | geometry | 33 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | mucoji-36-bape235 | geometry | 32 | T2a | note beside message / `&` parallel (`TileBuilder.java:102-119`, `YGauge.java:124-145`) | pinned (sdd2-b2 close) |
-| mudiga-14-sage351 | geometry | 45 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
+| mudiga-14-sage351 | geometry | 45 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b6 close) |
 | mugidu-43-jizu986 | geometry | 8 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | mukebo-35-xoju095 | structural | 634 | T7c | group-end note (`GroupingTile.java:995-1013`) | |
 | mupugi-53-xuna043 | geometry | 116 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
@@ -424,7 +425,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | netanu-37-vovi884 | geometry | 10 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | nexuni-53-xevi406 | geometry | 6 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
 | nexuxi-32-gici059 | structural | 387 | T6c | Fission wrap (`SheetBlock1.java:123`, `Fission.java:63-101`) | |
-| nibiju-55-kavu710 | structural | 113 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| nibiju-55-kavu710 | structural | 113 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | nidozi-08-daxa280 | error | undefined | T1a | note `[[url]]` group missing (`FactorySequenceNoteCommand.java:89,106`); exo note dropped (`TileBuilder.java:122-134`) | open -> T2a: NOTEMSG; + T4a header label y |
 | nijilu-37-zofe547 | structural | 64 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
 | nimoxu-60-xale291 | structural | 11 | T7d | spot glyph, stereotype title, base64 sprite (`DriverCenteredCharacterSvg.java:56-81`, `Stereotype.java:140-145`, `CommandSpriteBase64.java:84-91`) | |
@@ -439,7 +440,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | nocilo-91-xeza348 | geometry | 1 | T2b | LiveBoxes stairs (`LiveBoxes.java:79-86,284-336`) | pinned (sdd2-b2 close) |
 | nofegi-58-kilo738 | geometry | 155 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | nofola-68-nobe068 | geometry | 7 | T2b | LiveBoxes stairs (`LiveBoxes.java:79-86,284-336`) | pinned (sdd2-b2 close) |
-| nojata-23-ropa545 | structural | 55 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| nojata-23-ropa545 | structural | 55 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | noneda-45-tutu738 | geometry | 2 | T3a | document width terms (`PlayingSpace.java:75-104`, `CommunicationTileSelf.java:166-184,272-277`) | pinned (sdd2-b3 close) |
 | nosebu-15-fasu691 | structural | 2902 | T1c | unclosed group dropped at EOF (`GroupingTile.java:160-163`) | pinned (sdd2-b4 close) |
 | nosuti-71-mida920 | geometry | 4 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
@@ -447,7 +448,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | nubute-95-pese616 | geometry | 2 | T3c | group frame extents (`GroupingTile.java:207-225,988-990`) | pinned (sdd2-b3 close) |
 | nufuse-45-monu242 | geometry | 16 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | numezi-28-fuzu813 | structural | 44 | T7a | self dressing1 + circles, multicast, part-anchor (`ComponentRoseSelfArrow.java:91-149`, `CommunicationTile.java:328-395`) | |
-| nunozo-09-zoce623 | structural | 99 | T6d | empty-stripe atom / embedded diagram (`StripeSimple.java:124-126`, `CreoleParser.java:152-154`) | |
+| nunozo-09-zoce623 | structural | 99 | T6d | empty-stripe atom / embedded diagram (`StripeSimple.java:124-126`, `CreoleParser.java:152-154`) | pinned (sdd2-b6 close) |
 | nunuji-27-mosa042 | structural | 51 | T1a | note `[[url]]` group missing (`FactorySequenceNoteCommand.java:89,106`); exo note dropped (`TileBuilder.java:122-134`) | pinned (sdd2-b3 close) |
 | nutuxo-22-fiza911 | geometry | 17 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b2 close) |
 | nuvoja-46-dezu541 | error | undefined | T8b | missing `!includedef` is a no-op (`TContext.java:687-705`) | |
@@ -466,7 +467,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | pidici-36-jicu872 | geometry | 2 | T3a | document width terms (`PlayingSpace.java:75-104`, `CommunicationTileSelf.java:166-184,272-277`) | pinned (sdd2-b3 close) |
 | pigifu-13-kele137 | geometry | 10 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | pijixu-96-bago359 | structural | 58 | T7a | self dressing1 + circles, multicast, part-anchor (`ComponentRoseSelfArrow.java:91-149`, `CommunicationTile.java:328-395`) | |
-| pimoci-15-jite516 | structural | 29 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| pimoci-15-jite516 | structural | 29 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | pixifi-75-gulu822 | geometry | 8 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | pixima-27-nita000 | geometry | 8 | T2b | LiveBoxes stairs (`LiveBoxes.java:79-86,284-336`) | pinned (sdd2-b2 close) |
 | pixopo-04-zitu732 | geometry | 2 | T3c | group frame extents (`GroupingTile.java:207-225,988-990`) | pinned (sdd2-b3 close) |
@@ -478,7 +479,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | pokici-03-lafi659 | geometry | 117 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | pomoxu-05-luco302 | geometry | 963 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | ponugi-73-xuzo000 | geometry | 32 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
-| popoda-09-xavi089 | structural | 44 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| popoda-09-xavi089 | structural | 44 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | porepe-36-nebi243 | geometry | 30 | T2b+T2a | LiveBoxes stairs (`LiveBoxes.java:79-86,284-336`) | pinned (sdd2-b2 close) |
 | posura-78-koji601 | structural | 44 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
 | povuju-50-pido564 | geometry | 2 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
@@ -488,19 +489,19 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | pugera-36-jeza279 | geometry | 41 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b2 close) |
 | pukebe-27-xadi418 | geometry | 8 | T2d | inclination in tile height (`ComponentRoseArrow.java:342-343`); response-below | pinned (sdd2-b3 close) |
 | pumula-71-gigi389 | geometry | 4 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
-| puneli-74-recu314 | structural | 27 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| puneli-74-recu314 | structural | 27 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | punove-48-zugu202 | structural | 72 | T7a | self dressing1 + circles, multicast, part-anchor (`ComponentRoseSelfArrow.java:91-149`, `CommunicationTile.java:328-395`) | |
 | pupini-69-doko713 | geometry | 120 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | putici-74-zenu027 | geometry | 304 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | putuku-29-ziga148 | structural | 374 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | puxoko-57-pifa349 | geometry | 16 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
 | rajogu-04-suru681 | geometry | 71 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
-| ralegi-94-fure352 | structural | 42 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| ralegi-94-fure352 | structural | 42 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | ralucu-86-voxa492 | structural | 57 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
 | ramica-82-loku620 | geometry | 20 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | rapoto-38-neca900 | structural | 365 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
 | rasedo-44-liti558 | geometry | 6 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
-| ravire-24-jaju542 | structural | 73 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| ravire-24-jaju542 | structural | 73 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | raxeca-83-rotu897 | geometry | 10 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | recani-60-licu962 | structural | 143 | T1a | note `[[url]]` group missing (`FactorySequenceNoteCommand.java:89,106`); exo note dropped (`TileBuilder.java:122-134`) | pinned (sdd2-b2 close) |
 | refiju-27-nupe082 | geometry | 34 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
@@ -516,7 +517,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | rifazu-14-fede536 | geometry | 49 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b2 close) |
 | ripura-92-vacu541 | structural | 62 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | ritesi-65-gujo913 | geometry | 26 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
-| rizove-01-move566 | structural | 144 | T6d | empty-stripe atom / embedded diagram (`StripeSimple.java:124-126`, `CreoleParser.java:152-154`) | |
+| rizove-01-move566 | structural | 144 | T6d | empty-stripe atom / embedded diagram (`StripeSimple.java:124-126`, `CreoleParser.java:152-154`) | pinned (sdd2-b6 close) |
 | rodori-30-fipi183 | geometry | 4 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
 | rofate-27-nuvu751 | geometry | 2 | T3a | document width terms (`PlayingSpace.java:75-104`, `CommunicationTileSelf.java:166-184,272-277`) | pinned (sdd2-b3 close) |
 | rolota-48-cedi081 | structural | 59 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
@@ -558,7 +559,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | sijuso-90-zaje372 | geometry | 90 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | sirabe-54-sibe468 | geometry | 56 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | sireta-85-reja792 | geometry | 4 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
-| sisege-95-labu547 | structural | 36 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| sisege-95-labu547 | structural | 36 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | sisele-83-gebe678 | geometry | 78 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | sixifa-33-bibu140 | geometry | 2 | T3a | document width terms (`PlayingSpace.java:75-104`, `CommunicationTileSelf.java:166-184,272-277`) | pinned (sdd2-b3 close) |
 | sizumo-60-ziba310 | geometry | 2 | T4c | `SequenceMessageAlign` (`Rose.java:299-336`, `ComponentRoseArrow.java:166-172`) | pinned (sdd2-b4 close) |
@@ -566,7 +567,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | sodovo-72-kudu756 | structural | 57 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
 | sofavo-23-xuxi628 | geometry | 19 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | sojufi-84-bexi933 | geometry | 16 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
-| soxafo-18-vuzo068 | structural | 46 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| soxafo-18-vuzo068 | structural | 46 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | sozifu-13-zufu979 | geometry | 227 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
 | subaku-04-xuvi971 | geometry | 134 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | sudugu-16-gapi622 | geometry | 6 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
@@ -574,20 +575,20 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | sukuno-50-kiru529 | geometry | 56 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | suleta-28-lejo742 | geometry | 31 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | sulipe-44-jeta861 | geometry | 10 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
-| suneke-72-kexi504 | structural | 83 | T6c | Fission wrap (`SheetBlock1.java:123`, `Fission.java:63-101`) | |
+| suneke-72-kexi504 | structural | 83 | T6c | Fission wrap (`SheetBlock1.java:123`, `Fission.java:63-101`) | pinned (sdd2-b6 close) |
 | suredo-76-kaxo606 | structural | 65 | T7a | self dressing1 + circles, multicast, part-anchor (`ComponentRoseSelfArrow.java:91-149`, `CommunicationTile.java:328-395`) | |
 | susati-64-lako047 | structural | 130 | T7c | group-end note (`GroupingTile.java:995-1013`) | |
 | suvepo-62-kedo015 | geometry | 8 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
 | suvodo-70-rogi494 | structural | 92 | T7g | message padder (`SkinParam.java:1216-1229`) | |
 | suzumi-85-nuzo693 | geometry | 56 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
-| taboza-78-vali232 | structural | 110 | T6c | Fission wrap (`SheetBlock1.java:123`, `Fission.java:63-101`) | |
+| taboza-78-vali232 | structural | 110 | T6c | Fission wrap (`SheetBlock1.java:123`, `Fission.java:63-101`) | pinned (sdd2-b6 close) |
 | taduka-03-kosu047 | geometry | 2 | T2b | LiveBoxes stairs (`LiveBoxes.java:79-86,284-336`) | pinned (sdd2-b2 close) |
 | tapije-66-runu046 | geometry | 26 | T3b | reverse self (`CommunicationTileSelf.java:263-277`) | pinned (sdd2-b3 close) |
 | taraxa-93-reno112 | geometry | 437 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | tatesu-03-zozo948 | structural | 3367 | T6d | empty-stripe atom / embedded diagram (`StripeSimple.java:124-126`, `CreoleParser.java:152-154`) | |
 | taxale-13-fire914 | geometry | 82 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | tefixi-07-xacu656 | geometry | 32 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
-| tefunu-89-zece967 | structural | 83 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
+| tefunu-89-zece967 | structural | 83 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b6 close) |
 | tegasu-93-fima016 | error | undefined | T1b | unported command (`CommandActivate2.java:58-66`, `CommandUrl.java:60-70`, `CommandHideShowByGender.java:72-83`) | pinned (sdd2-b4 close) |
 | tejuzi-96-fano922 | geometry | 67 | T2b+T2a | LiveBoxes stairs (`LiveBoxes.java:79-86,284-336`) | pinned (sdd2-b2 close) |
 | tekice-03-cupa947 | geometry | 119 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
@@ -608,16 +609,16 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | tifexe-26-caza420 | geometry | 26 | T3b | reverse self (`CommunicationTileSelf.java:263-277`) | pinned (sdd2-b3 close) |
 | tifube-59-tezo313 | geometry | 21 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
 | tijeba-12-zeta132 | geometry | 45 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b4 close) |
-| tijeta-70-ziru418 | structural | 65 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| tijeta-70-ziru418 | structural | 65 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | tijide-41-togo659 | geometry | 12 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
 | tipido-16-xide828 | geometry | 63 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | titufa-76-tisa795 | geometry | 21 | T2a | note beside message / `&` parallel (`TileBuilder.java:102-119`, `YGauge.java:124-145`) | pinned (sdd2-b2 close) |
 | todetu-82-rupo943 | geometry | 113 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
-| togopo-38-tuza899 | structural | 118 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| togopo-38-tuza899 | structural | 118 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | tolozi-77-gere619 | geometry | 65 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | totebu-75-jata404 | structural | 153 | T6d | empty-stripe atom / embedded diagram (`StripeSimple.java:124-126`, `CreoleParser.java:152-154`) | |
 | tovese-18-xira071 | structural | 225 | T3b+T7a | reverse self (`CommunicationTileSelf.java:263-277`) | open -> T7a: forward dressing (o, x, <->) |
-| tugaju-41-dovi584 | structural | 83 | T6c | Fission wrap (`SheetBlock1.java:123`, `Fission.java:63-101`) | |
+| tugaju-41-dovi584 | structural | 83 | T6c | Fission wrap (`SheetBlock1.java:123`, `Fission.java:63-101`) | pinned (sdd2-b6 close) |
 | tugonu-44-file000 | structural | 186 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
 | tukivo-05-vuvi835 | geometry | 1 | T2b | LiveBoxes stairs (`LiveBoxes.java:79-86,284-336`) | pinned (sdd2-b2 close) |
 | tukobo-89-zebi935 | geometry | 217 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
@@ -639,10 +640,10 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | vataru-17-guso065 | geometry | 2 | T3a | document width terms (`PlayingSpace.java:75-104`, `CommunicationTileSelf.java:166-184,272-277`) | pinned (sdd2-b3 close) |
 | vativa-83-bisa518 | geometry | 10 | T2d | inclination in tile height (`ComponentRoseArrow.java:342-343`); response-below | pinned (sdd2-b2 close) |
 | vaxipu-62-dodo661 | geometry | 90 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
-| vegizu-18-zubu834 | geometry | 61 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
+| vegizu-18-zubu834 | geometry | 61 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b6 close) |
 | vekami-41-sane093 | structural | 42 | T7e | skinparam warning banner (`CommandSkinParam.java:92-99`) | |
 | vekivu-99-pijo983 | structural | 100 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
-| vekuno-87-ponu028 | structural | 47 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
+| vekuno-87-ponu028 | structural | 47 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | pinned (sdd2-b6 close) |
 | vekuxo-98-rugu851 | geometry | 2 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | vemako-00-lecu427 | geometry | 66 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b2 close) |
 | vesaze-51-ceji187 | geometry | 56 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
@@ -693,7 +694,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | xezipe-17-tima059 | structural | 579 | T1c | unclosed group dropped at EOF (`GroupingTile.java:160-163`) | open -> T6b: 3 px per `<sub>` message label height; + T3c x/width |
 | xiceso-64-pelu456 | geometry | 8 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
 | xidako-83-lidu532 | geometry | 65 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b2 close) |
-| xinope-25-kupa775 | geometry | 17 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
+| xinope-25-kupa775 | geometry | 17 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b6 close) |
 | xisopa-79-zano248 | geometry | 21 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | xivoxi-68-meva932 | geometry | 47 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b2 close) |
 | xizeto-03-nuke395 | geometry | 37 | T2a | note beside message / `&` parallel (`TileBuilder.java:102-119`, `YGauge.java:124-145`) | pinned (sdd2-b2 close) |
@@ -706,7 +707,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | xorifu-24-tuba802 | geometry | 6 | T4a | stick/queue/badge participant label (`ComponentRoseActor.java:60-91`, `USymbolQueue.java:130-147`, `TextBlockSprited.java:62-76`) | pinned (sdd2-b4 close) |
 | xovuse-55-xape574 | geometry | 5 | T3c | group frame extents (`GroupingTile.java:207-225,988-990`) | pinned (sdd2-b3 close) |
 | xucibo-16-zisi974 | geometry | 38 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
-| xujavu-00-xodi798 | structural | 1105 | T6c | Fission wrap (`SheetBlock1.java:123`, `Fission.java:63-101`) | |
+| xujavu-00-xodi798 | structural | 1105 | T6c | Fission wrap (`SheetBlock1.java:123`, `Fission.java:63-101`) | pinned (sdd2-b6 close) |
 | xujesa-13-dane303 | geometry | 98 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | xujoga-62-lacu610 | geometry | 36 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |
 | xunoci-60-dezu033 | geometry | 7 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | |
@@ -728,7 +729,7 @@ unexplained at planning) · `mechanism` (Java `file:line`) · `final`
 | zetenu-41-rece091 | geometry | 85 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | zexaja-95-zofi201 | structural | 49 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
 | zexili-92-fifa666 | geometry | 6 | T3c | group frame extents (`GroupingTile.java:207-225,988-990`) | pinned (sdd2-b3 close) |
-| zicadi-21-koje636 | structural | 885 | T6c | Fission wrap (`SheetBlock1.java:123`, `Fission.java:63-101`) | |
+| zicadi-21-koje636 | structural | 885 | T6c | Fission wrap (`SheetBlock1.java:123`, `Fission.java:63-101`) | pinned (sdd2-b6 close) |
 | zimoci-54-sedi066 | structural | 58 | T6b | creole through core `DisplayCreole` (`Display.java:644-669`) | |
 | zizeca-16-cavi659 | geometry | 30 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b5 close) |
 | zoculi-89-nodo007 | geometry | 105 | T5? | unexplained at planning (D7: lifeline x / count, note x, delay) | pinned (sdd2-b3 close) |

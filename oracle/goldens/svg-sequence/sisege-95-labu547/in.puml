@@ -1,0 +1,11 @@
+@startuml
+
+alice->bob:ok
+note right
+    title
+    ----
+    content
+end note
+
+
+@enduml

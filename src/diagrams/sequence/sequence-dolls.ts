@@ -31,6 +31,7 @@
  */
 import type { BoxGroup, Participant } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 import { boxPaint, engloberDimension, type EngloberDimension } from './sequence-layout-box.js';
 
@@ -231,6 +232,7 @@ export class Doll {
 export interface DollsEnv {
   readonly measurer: StringMeasurer;
   readonly margins: LivingSpaceMargins;
+  readonly sprites?: SpriteRegistry | undefined;
 }
 
 /** `Dolls.java`: every `Doll`, in `LinkedHashMap` insertion order. */
@@ -252,7 +254,7 @@ export class Dolls {
       for (const englober of genealogyOf(p.boxId, byId)) {
         let already = this.alls.get(englober.id);
         if (already === undefined) {
-          const title = engloberDimension(englober.label, boxPaint(englober), env.measurer);
+          const title = engloberDimension(englober.label, boxPaint(englober), env.measurer, env.sprites);
           already = new Doll(englober, title, this.alls, args);
           this.alls.set(englober.id, already);
         }
@@ -360,9 +362,10 @@ export function createEngloberLayout(
   boxes: readonly BoxGroup[],
   widths: readonly number[],
   measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
 ): EngloberLayout {
   const margins = new LivingSpaceMargins(participants.length);
-  const dolls = new Dolls(participants, boxes, { measurer, margins });
+  const dolls = new Dolls(participants, boxes, { measurer, margins, sprites });
   dolls.addConstraints(widths);
   const heightEnglober1 = dolls.getOffsetForEnglobers();
   return {

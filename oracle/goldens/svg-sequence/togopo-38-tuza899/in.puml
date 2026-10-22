@@ -1,0 +1,9 @@
+@startuml
+participant A
+participant B
+
+note across
+| Item1 | 1 | 3 |
+| Item2 | 2 | 4 |
+end note
+@enduml
