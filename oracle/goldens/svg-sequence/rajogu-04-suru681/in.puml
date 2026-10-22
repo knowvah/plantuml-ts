@@ -1,0 +1,13 @@
+@startuml
+alt Normal termination
+  loop
+    Server -> ProcessN: stop
+    destroy ProcessN
+  end loop
+else Cancellation
+  loop
+    Server -> ProcessN: kill
+    destroy ProcessN
+  end loop
+end alt
+@enduml

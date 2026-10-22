@@ -10,7 +10,11 @@
  * @see teoz/CommunicationTileSelf.java
  */
 
-import type { FrameEvent, Participant, SequenceEvent } from './ast.js';
+import type { FrameEvent, MessageEvent, MessageExoEvent, Participant, SequenceEvent } from './ast.js';
+import { flattenLiveEvents, LiveBoxes, type LiveEvents } from './sequence-live-boxes.js';
+import { groupClearance } from './sequence-layout-group-clearance.js';
+import { parallelDisjoint } from './sequence-layout-parallel-disjoint.js';
+import { selfCompWidth } from './sequence-note-anchor.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { ARROW_PADDING_X, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
 import { messagePaint } from './sequence-arrow-paint.js';
@@ -49,6 +53,12 @@ export interface SpanConstraint {
    * (`teoz/ReferenceTile.java:96-115`).
    */
   readonly edge?: true;
+  /**
+   * An exo message's demand against the left edge of the drawing space, not
+   * against another lifeline: `from === to === ` the participant, and `span`
+   * is required of `centre - xOrigin` (`CommunicationExoTile.java:176-181`).
+   */
+  readonly origin?: true;
 }
 
 /**
@@ -64,6 +74,20 @@ interface ScanContext {
   readonly measurer: StringMeasurer;
   readonly levels: MessageLevels | undefined;
   readonly sprites: SpriteRegistry | undefined;
+  /** `!pragma sequenceMessageSpan true` (`AbstractCommunicationTile.java
+   *  :52-54`): a message tile registers no span constraint at all
+   *  (`CommunicationTile.java:405-406`, `CommunicationTileSelf.java:167-168`). */
+  readonly messageSpan?: boolean | undefined;
+}
+
+/** A scan in flight: its {@link ScanContext} and each participant's
+ *  `LiveBoxes#getMaxPosition` over the whole diagram. */
+export interface Scan extends ScanContext {
+  readonly maxPosition: ReadonlyMap<string, number>;
+  /** The flat event list every `LiveBoxes` is built on (`LivingSpace.java:148`). */
+  readonly live: LiveEvents;
+  /** Each participant's `LiveBoxes`, for a tile's `getLevelAt`. */
+  readonly boxes: ReadonlyMap<string, LiveBoxes>;
 }
 
 /**
@@ -79,7 +103,8 @@ function liveDelta(levels: { level1: number; level2: number } | undefined, rever
 }
 
 /**
- * Collect every message's span constraint. Recurses into frame branches.
+ * Collect every message's span constraint over the diagram's top-level
+ * `events`, recursing into frame branches.
  *
  * Constraints are stored `from < to` regardless of the arrow's direction: the
  * reverse branch of `addConstraints` (`:402-409`) swaps which endpoint is
@@ -92,45 +117,99 @@ export function scanMessageLabels(
   scan: ScanContext,
   out: SpanConstraint[],
 ): void {
-  for (const ev of events) {
-    if (ev.kind === 'message' && ev.from !== ev.to) {
-      const fi = sortedParticipants.findIndex((p) => p.id === ev.from);
-      const ti = sortedParticipants.findIndex((p) => p.id === ev.to);
-      if (fi >= 0 && ti >= 0 && fi !== ti) {
-        // The component is `createComponentArrow(message.getUsedStyles(), …)`
-        // (`CommunicationTile.java:153-166`): its block is in the arrow style's font.
-        const font = messagePaint(ev.styleBuilder, ev.stereotype, ev.arrow, false).font;
-        const labelWidth = messageLabelWidth(ev.label, numberTextOf(ev), font, scan);
-        out.push({
-          from: Math.min(fi, ti),
-          to: Math.max(fi, ti),
-          // `ComponentRoseArrow#getPreferredWidth:347-349` —
-          // `getTextWidth + getArrowDeltaX`, and `getTextWidth` is the block
-          // plus both paddings. The same formula `sequence-layout-exo.ts`
-          // already uses for an exo message's demand.
-          span: labelWidth + 2 * ARROW_PADDING_X + ARROW_DELTA_X + liveDelta(scan.levels?.get(ev), fi > ti),
-          ...(ev.create === true ? { createdIndex: ti } : {}),
-        });
-      }
-    } else if (ev.kind === 'messageExo') {
-      // Deliberately skipped, not overlooked (D3). This scan widens the gap
-      // between a PAIR of lifelines; an exo message has one endpoint and the
-      // diagram border for the other, so there is no pair to widen. Its extent
-      // reaches the diagram through `MessageExoArrow#getRightEndInternal`'s
-      // `Math.max(maxX, ...)`, i.e. total width -- a different quantity.
-      // @see sequencediagram/graphic/MessageExoArrow.java
-      continue;
-    } else if (ev.kind === 'frame') {
-      scanFrame(ev, sortedParticipants, scan, out);
-    }
+  const live = flattenLiveEvents(events);
+  const boxes = new Map(sortedParticipants.map((p) => [p.id, new LiveBoxes(p.id, live.events)] as const));
+  const maxPosition = new Map([...boxes].map(([id, b]) => [id, b.getMaxPosition()] as const));
+  const full: Scan = { ...scan, maxPosition, live, boxes };
+  scanEvents(events, sortedParticipants, full, out);
+  // `PlayingSpace#addConstraints` (`:162-167`): the top-level `&` runs.
+  out.push(...parallelDisjoint(events, sortedParticipants, full));
+}
+
+/**
+ * A self message's demand on a neighbour. Forward: the NEXT participant,
+ * `next.getPosC().ensureBiggerThan(getMaxX())`
+ * (`CommunicationTileSelf.java:178-181`), with `getMaxX = livingSpace1
+ * .getPosC2() + getCompWidth()` (`:272-277`) and `posC2 = posC +
+ * LiveBoxes#getMaxPosition` (`LivingSpace.java:235-238`). Stated on the
+ * centre-to-centre span, that is `maxPosition + compWidth`. The last
+ * participant has no next (`getNext`, `:250-256`) and binds nothing.
+ *
+ * Reverse (`A <- A`, `isReverseDefine()`): the PREVIOUS participant instead,
+ * `livingSpace1.getPosC().ensureBiggerThan(previous.getPosC2()
+ * .addFixed(getCompWidth()))` (`:170-176`) -- the previous one's
+ * `maxPosition` plus the loop's width. The first participant has no
+ * previous (`getPrevious`, `:236-248`) and binds nothing.
+ */
+function selfConstraint(ev: MessageEvent, sorted: Participant[], scan: Scan): SpanConstraint[] {
+  const index = sorted.findIndex((p) => p.id === ev.from);
+  if (index < 0) return [];
+  const width = selfCompWidth(ev, scan);
+  if (ev.arrow.reverseDefine === true) {
+    if (index === 0) return [];
+    const previous = sorted[index - 1]!;
+    return [{ from: index - 1, to: index, span: (scan.maxPosition.get(previous.id) ?? 0) + width }];
   }
+  if (index === sorted.length - 1) return [];
+  return [{ from: index, to: index + 1, span: (scan.maxPosition.get(ev.from) ?? 0) + width }];
+}
+
+function scanEvents(events: readonly SequenceEvent[], sorted: Participant[], scan: Scan, out: SpanConstraint[]): void {
+  for (const ev of events) {
+    if (ev.kind === 'message') out.push(...(scan.messageSpan === true ? [] : messageConstraint(ev, sorted, scan)));
+    else if (ev.kind === 'messageExo') out.push(...exoConstraint(ev, sorted, scan));
+    else if (ev.kind === 'frame') scanFrame(ev, sorted, scan, out);
+  }
+}
+
+/** One ordinary or self message's demand, if any. */
+function messageConstraint(ev: MessageEvent, sorted: Participant[], scan: Scan): SpanConstraint[] {
+  if (ev.from === ev.to) return selfConstraint(ev, sorted, scan);
+  const fi = sorted.findIndex((p) => p.id === ev.from);
+  const ti = sorted.findIndex((p) => p.id === ev.to);
+  if (fi < 0 || ti < 0) return [];
+  // The component is `createComponentArrow(message.getUsedStyles(), …)`
+  // (`CommunicationTile.java:153-166`): its block is in the arrow style's font.
+  const font = messagePaint(ev.styleBuilder, ev.stereotype, ev.arrow, false).font;
+  const labelWidth = messageLabelWidth(ev.label, numberTextOf(ev), font, scan);
+  return [
+    {
+      from: Math.min(fi, ti),
+      to: Math.max(fi, ti),
+      // `ComponentRoseArrow#getPreferredWidth:347-349` --
+      // `getTextWidth + getArrowDeltaX`, and `getTextWidth` is the block
+      // plus both paddings. The same formula `sequence-layout-exo.ts`
+      // already uses for an exo message's demand.
+      span: labelWidth + 2 * ARROW_PADDING_X + ARROW_DELTA_X + liveDelta(scan.levels?.get(ev), fi > ti),
+      ...(ev.create === true ? { createdIndex: ti } : {}),
+    },
+  ];
+}
+
+/**
+ * An exo message's demand. It binds no PAIR of lifelines (D3: one endpoint,
+ * the diagram border for the other), except that a message NOT on the right
+ * border keeps its lifeline clear of the left edge:
+ * `livingSpace.getPosC().ensureBiggerThan(xOrigin.addFixed(width))`
+ * (`CommunicationExoTile.java:176-181`), `width` the component's preferred
+ * width (`ComponentRoseArrow#getPreferredWidth:347-349`). A right-border
+ * message adds nothing here (`:178`); its extent reaches the diagram through
+ * the total width instead.
+ */
+function exoConstraint(ev: MessageExoEvent, sorted: Participant[], scan: Scan): SpanConstraint[] {
+  if (ev.exoType === 'FROM_RIGHT' || ev.exoType === 'TO_RIGHT') return [];
+  const index = sorted.findIndex((p) => p.id === ev.participant);
+  if (index < 0) return [];
+  const font = messagePaint(ev.styleBuilder, ev.stereotype, ev.arrow, false).font;
+  const width = messageLabelWidth(ev.label, numberTextOf(ev), font, scan) + 2 * ARROW_PADDING_X + ARROW_DELTA_X;
+  return [{ from: index, to: index, span: width, origin: true }];
 }
 
 /** A frame's own demand (a `ref`'s, {@link refConstraint}) and its
  *  branches' messages. */
-function scanFrame(ev: FrameEvent, sorted: Participant[], scan: ScanContext, out: SpanConstraint[]): void {
-  out.push(...refConstraint(ev, sorted, scan));
-  for (const branch of ev.branches) scanMessageLabels(branch, sorted, scan, out);
+function scanFrame(ev: FrameEvent, sorted: Participant[], scan: Scan, out: SpanConstraint[]): void {
+  out.push(...refConstraint(ev, sorted, scan), ...groupClearance(ev, sorted, scan));
+  for (const branch of ev.branches) scanEvents(branch, sorted, scan, out);
 }
 
 /**

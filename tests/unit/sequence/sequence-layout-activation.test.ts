@@ -34,7 +34,7 @@ import {
 } from '../../../src/diagrams/sequence/sequence-layout-activation.js';
 import { processEvents, type EventProcessingContext } from '../../../src/diagrams/sequence/sequence-layout-events.js';
 import { endOfParseStyleBuilder } from '../../../src/diagrams/sequence/sequence-layout-lifeline.js';
-import { computeParticipantLayout } from '../../../src/diagrams/sequence/sequence-layout-participants.js';
+import { computeParticipantLayout, LEFT_MARGIN } from '../../../src/diagrams/sequence/sequence-layout-participants.js';
 import { messageTileGauge, type MessageTileGauge } from '../../../src/diagrams/sequence/sequence-y-gauge.js';
 import { astOrThrow } from '../../helpers/parse-ast.js';
 import { sequenceSource } from '../../helpers/sequence-source.js';
@@ -182,6 +182,7 @@ function walk(body: readonly string[]): Walked {
     theme: defaultTheme,
     measurer,
     sprites: ast.sprites,
+    originX: LEFT_MARGIN,
     participantMap: layout.participantMap,
     participantIndex: layout.participantIndex,
     activationStart: newActivationStack(ast.participants, ast.events),

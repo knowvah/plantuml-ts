@@ -1,0 +1,30 @@
+@startuml
+	participant "A" as A
+	participant "B" as B
+	participant "C" as C
+	
+	group I1
+		group J1
+			A->B
+		end
+		group J2
+			B->C
+		end
+	end
+	group I2
+		group J1
+			A->B
+		end
+		group J2
+			B->C
+		end
+	end
+	group I3
+		group J1
+			A->B
+		end
+		group J2
+			B->C
+		end
+	end
+@enduml

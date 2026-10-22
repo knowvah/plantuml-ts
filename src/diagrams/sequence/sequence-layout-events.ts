@@ -19,6 +19,7 @@ import type {
   DividerGeo,
   EventGeo,
   MessageEvent,
+  MessageGeo,
   MessageExoEvent,
   NewpageEvent,
   NoteEvent,
@@ -31,6 +32,8 @@ import type {
 } from './ast.js';
 import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
+import { selfMinX } from './sequence-note-anchor.js';
+import { notesOnMessages, type NoteOwner } from './sequence-note-folding.js';
 import {
   handleNoteEvent,
   handleNotesGroup,
@@ -76,6 +79,11 @@ export {
  * pending-activation records.
  */
 export interface EventProcessingContext extends MessageLabelEnv {
+  /** `TileArguments#getXOrigin` (`SequenceDiagramFileMakerTeoz.java:89-100`):
+   *  the root the participant row is solved from, which a divider, a newpage
+   *  and an empty group reach (`DividerTile.java:111-119`, `NewpageTile.java
+   *  :110-116`, `GroupingTile.java:217-218`). */
+  readonly originX: number;
   participantMap: Map<string, ParticipantGeo>;
   participantIndex: Map<string, number>;
   activationStart: ActivationStack;
@@ -129,10 +137,6 @@ export interface EventCursor {
    *  Between two tiles `y === gauge.max`. */
   gauge: YGauge;
 }
-
-/** A message or exo message: the two `AbstractMessage` kinds that carry
- *  notes (`AbstractMessage.java:58` implements `EventWithNote`). */
-type NoteOwner = MessageEvent | MessageExoEvent;
 
 /**
  * One event list as `TileBuilder` walks it: the tiles in order, every note on
@@ -189,38 +193,6 @@ function mergeNotes(events: readonly SequenceEvent[]): {
     }
   }
   return { tiles, groups };
-}
-
-/**
- * `msg.getNoteOnMessages()`, per owner. `FactorySequenceNoteOnArrowCommand`
- * adds the note to `diagram.getLastEventWithNote()` (`:211`), the latest
- * event that is an `EventWithNote` (`SequenceDiagram.java:154-158`): an
- * `AbstractMessage`, a `Reference` or a `GroupingLeaf`. Life events, dividers
- * and standalone notes in between do not change the owner; a frame (its `end`
- * leaf, or a `ref`) does, and a note it owns is not a message's.
- *
- * A message's `top`/`bottom` note is folded too (`NoteTop`/`NoteBottom`,
- * `TileBuilder.java:117-120`); after an exo arrow every note is folded,
- * because there the position comes from note 0 (`TileBuilder.java:128-136`).
- * Only a note whose owner is a frame (`ref`, group `end`) stays stacked, drawn
- * by `legacyOverTile` (see `sequence-note-tile.ts`).
- */
-function notesOnMessages(events: readonly SequenceEvent[]): Map<NoteOwner, NoteEvent[]> {
-  const notesOf = new Map<NoteOwner, NoteEvent[]>();
-  let owner: NoteOwner | undefined;
-  for (const event of events) {
-    if (event.kind === 'message' || event.kind === 'messageExo') owner = event;
-    else if (event.kind === 'frame') owner = undefined;
-    else if (owner !== undefined && foldsInto(owner, event)) notesOf.set(owner, [...(notesOf.get(owner) ?? []), event]);
-  }
-  return notesOf;
-}
-
-/** Whether `event` is a note on `owner` that a wrapper draws (see
- *  {@link notesOnMessages}). */
-function foldsInto(owner: NoteOwner, event: SequenceEvent): event is NoteEvent {
-  if (event.kind !== 'note' || event.onMessage !== true) return false;
-  return owner.kind === 'messageExo' || event.position !== 'over' || event.side !== undefined;
 }
 
 /**
@@ -332,9 +304,21 @@ function dispatchTile(run: TileRun, k: number, cursor: EventCursor, ctx: EventPr
   // life event or a space, `YGauge.create(currentY.getMax(), ...)` for a
   // divider, delay, reference, newpage or group (`DividerTile.java:72`,
   // `DelayTile.java:68`, `ReferenceTile.java:74`, `NewpageTile.java:74`,
-  // `GroupingTile.java:154,238`).
-  const height = cursor.y - before.max;
-  cursor.gauge = isPropagating(event) ? createPropagating(before, height) : createGauge(before.max, height);
+  // `GroupingTile.java:154,238`) -- except a `&` group, whose gauge is
+  // `new YGauge(firstY, parallelMax)` with `firstY = currentY.getMin()`
+  // (`GroupingTile.java:154,229-236`), so a third `&` member chains on it too.
+  if (isPropagating(event)) {
+    cursor.gauge = createPropagating(before, cursor.y - before.max);
+    return;
+  }
+  const min = isParallelGroup(event) ? before.min : before.max;
+  cursor.gauge = createGauge(min, cursor.y - min);
+}
+
+/** A `&` grouping (`GroupingStart#isParallel`); a `ref` is a `ReferenceTile`,
+ *  which never reads it. */
+function isParallelGroup(event: SequenceEvent): boolean {
+  return event.kind === 'frame' && event.frameType !== 'ref' && event.parallel === true;
 }
 
 /** A note on a message this port does not fold into a wrapper (see
@@ -369,7 +353,7 @@ function placeContactTile(run: TileRun, k: number, cursor: EventCursor, ctx: Eve
     else handleNotesGroup(group, gauge, ctx);
   } else {
     const firstGeo = ctx.eventGeos.length;
-    if (event.kind === 'message') handleMessageEvent(event, tile, cursor, ctx, bound);
+    if (event.kind === 'message') placeMessage(event, tile, cursor, ctx, bound);
     else handleMessageExoEvent(event, tile, cursor, ctx, bound);
     const notes = run.notesOf.get(event) ?? [];
     outer = layoutNotesOnMessage(
@@ -379,8 +363,42 @@ function placeContactTile(run: TileRun, k: number, cursor: EventCursor, ctx: Eve
       ctx,
     );
   }
-  cursor.gauge = outer;
-  cursor.y = outer.max;
+  cursor.gauge = afterOwnLifeEvents(event, outer, ctx);
+  cursor.y = cursor.gauge.max;
+}
+
+/**
+ * `handleMessageEvent`, then -- for a reverse self loop (`A <- A`) -- the
+ * tile's `getMinX` on its geo (`CommunicationTileSelf.java:263-270`, the
+ * port's `selfMinX`), read at the level before the message as the loop
+ * itself is laid out.
+ */
+function placeMessage(
+  event: MessageEvent,
+  tile: Parameters<typeof handleMessageEvent>[1],
+  cursor: EventCursor,
+  ctx: EventProcessingContext,
+  bound: readonly ActivationEvent[],
+): void {
+  const owner =
+    event.from === event.to && event.arrow.reverseDefine === true ? ctx.participantMap.get(event.from) : undefined;
+  const tileMinX = owner === undefined ? undefined : selfMinX(event, owner.centerX, ctx);
+  const first = ctx.eventGeos.length;
+  handleMessageEvent(event, tile, cursor, ctx, bound);
+  const geo = ctx.eventGeos.slice(first).find((g): g is MessageGeo => g.kind === 'message');
+  if (tileMinX !== undefined && geo !== undefined) geo.tileMinX = tileMinX;
+}
+
+/**
+ * A message's own `++`/`--`/`!!` are `LifeEventTile`s of their own right after
+ * it (`SequenceDiagram.java:367-373`), each `createPropagating` with height 0
+ * (`LifeEventTile.java:95,128-138`, bound to the message): the next tile's
+ * `currentY.getMin()` is theirs, the message's max (`GroupingTile.java:154`).
+ */
+function afterOwnLifeEvents(event: ContactEvent, gauge: YGauge, ctx: EventProcessingContext): YGauge {
+  if (event.kind !== 'message') return gauge;
+  const own = ctx.activationStart.live.list.ownOf.get(event) ?? [];
+  return own.length > 0 ? createPropagating(gauge, 0) : gauge;
 }
 
 /** Route a non-contact tile to its kind-specific handler. Messages, exo

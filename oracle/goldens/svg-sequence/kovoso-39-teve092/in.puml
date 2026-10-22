@@ -1,0 +1,8 @@
+@startuml
+x -> y
+alt 
+y -> y
+  alt
+  end group
+end group
+@enduml

@@ -1120,7 +1120,9 @@ describe('routing conformance — jar-error classification', () => {
     // 6988 -> 7080 agree at sdd2 close-b2: +3 sequence rows render (fojomu-60,
     // nizuzi-32, zoturo-25: CommandLinkAnchor, T2e) and +89 svg-sequence golden
     // clones (pin round 2). Derivation: 7080 + 632 + 86 = 7798.
-    expect(pinnedAgree.length).toBe(7080);
+    // 7080 -> 7257 agree at sdd2 close-b3: +177 svg-sequence golden clones
+    // (pin round 3). Derivation: 7257 + 632 + 86 = 7975.
+    expect(pinnedAgree.length).toBe(7257);
     expect(pinnedMisroutes.length).toBe(632);
     expect(pinnedJarErrors.length).toBe(86);
     // 7202 -> 7203 at gtc T1 (see the agree derivation above).
@@ -1143,7 +1145,8 @@ describe('routing conformance — jar-error classification', () => {
     // 7655 -> 7707 at sdd1 close-b3 (see the agree derivation above).
     // 7707 -> 7709 at sdd2 close-b1 (+2 golden clones, see agree above).
     // 7709 -> 7798 at sdd2 close-b2 (+89 golden clones, see agree above).
-    expect(manifest.fixtures.length).toBe(7798);
+    // 7798 -> 7975 at sdd2 close-b3 (+177 golden clones, see agree above).
+    expect(manifest.fixtures.length).toBe(7975);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

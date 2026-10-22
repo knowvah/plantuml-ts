@@ -20,11 +20,7 @@
  * the same `executeArrow`, so the split is a dispatch-position artefact, not
  * two behaviours.
  *
- * **What this module still does NOT carry.** `config.reverseDefine()`
- * (`:389-390`) is MATCHED — so a line carrying it is recognised rather than
- * refused — and then discarded: this port's `ArrowConfiguration`
- * (`sequence-arrowhead.ts`) has no field for it.
- * `PART1ANCHOR`/`PART2ANCHOR` (`:418-419`) are matched and dropped because
+ * **What this module still does NOT carry.** `PART1ANCHOR`/`PART2ANCHOR` (`:418-419`) are matched and dropped because
  * `MessageEvent` declares one `anchor`, which carries the leading `ANCHOR`
  * group. `**` (CREATE, `:396`) is the create the caller fires before the
  * message; `!!` (DESTROY, `:453`) is the message's `destroys`, a destroy
@@ -306,6 +302,9 @@ function arrowOf(state: ParseState, g: Groups, facts: DressingFacts): ArrowConfi
     g['ARROW_STYLE1'] ?? g['ARROW_STYLE2'],
     arrowConfigurationOf(arrowSpecOf(facts, getLength(g) > 1)),
   );
+  if (facts.reverseDefine) config = { ...config, reverseDefine: true };
+  // `if (reverseDefine) config = config.reverseDefine()` (`CommandArrow.java:388-389`).
+  if (facts.reverseDefine) config = { ...config, reverseDefine: true };
   if (facts.dressing2.includes('\\') || facts.dressing1.includes('/')) config = withPart(config, 'TOP_PART');
   if (facts.dressing2.includes('/') || facts.dressing1.includes('\\')) config = withPart(config, 'BOTTOM_PART');
   const sum = getInclination(g['ARROW_DRESSING1']) + getInclination(g['ARROW_DRESSING2']);

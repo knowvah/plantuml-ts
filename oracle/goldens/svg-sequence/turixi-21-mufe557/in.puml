@@ -1,0 +1,29 @@
+@startuml
+!pragma teoz true
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+Bob -> Alice ++:
+
+[-> Bob
+[-> Bob
+[-> Bob
+[-> Bob
+[-> Bob
+[-> Bob
+Bob ->]
+Bob ->]
+Bob ->]
+Bob ->]
+Bob ->]
+Bob ->]
+@enduml

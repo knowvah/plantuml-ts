@@ -1,0 +1,26 @@
+@startuml
+group group1
+A->B: msg1
+
+note left
+line 1
+line 2
+end note
+
+note right
+line 1
+line 2
+end note
+
+A<-B: msg2
+end
+
+group group2
+A->B: msg3
+note over A, B
+line 1
+line 2
+end note
+A<-B: msg4
+end
+@enduml

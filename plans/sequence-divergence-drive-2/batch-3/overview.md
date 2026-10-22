@@ -12,10 +12,10 @@ and the constraint modules).
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T3a](T3a-width-terms.md) | self reservation, delete label loop, posC2, self spacing | typescript-pro (sonnet) | `sequence-layout-width.ts`, `sequence-layout-participant-constraints.ts` + tests | B2 | [ ] |
-| [T3c](T3c-frame-extents.md) | frame extent from own children/header/else, +9 | typescript-pro (opus) | `sequence-layout-frame.ts`, `sequence-layout-width.ts` + tests | T3a | [ ] |
-| [T3b](T3b-reverse-self.md) | reverse self `A <- A` | typescript-pro (sonnet) | `command-arrow.ts`, `ast*.ts`, `sequence-layout-message-self.ts`, `renderer-message.ts`, `sequence-layout-participant-constraints.ts`, `sequence-layout-width.ts`, `DIVERGENCES.md` + tests | T3c | [ ] |
-| close | standard close, pin round 3 | orchestrator | per close-procedure | T3a–T3c | [ ] |
+| [T3a](T3a-width-terms.md) | self reservation, delete label loop, posC2, self spacing | typescript-pro (sonnet) | `sequence-layout-width.ts`, `sequence-layout-participant-constraints.ts` + tests | B2 | [x] |
+| [T3c](T3c-frame-extents.md) | frame extent from own children/header/else, +9 | typescript-pro (opus) | `sequence-layout-frame.ts`, `sequence-layout-width.ts` + tests | T3a | [x] |
+| [T3b](T3b-reverse-self.md) | reverse self `A <- A` | typescript-pro (sonnet) | `command-arrow.ts`, `ast*.ts`, `sequence-layout-message-self.ts`, `renderer-message.ts`, `sequence-layout-participant-constraints.ts`, `sequence-layout-width.ts`, `DIVERGENCES.md` + tests | T3c | [x] |
+| close | standard close, pin round 3 | orchestrator | per close-procedure | T3a–T3c | [x] |
 
 Risk note (research B): 7 pinned rows contain a self message and 1 a group
 frame; none of them is width-setting today. M6 must be non-binding on

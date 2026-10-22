@@ -1,0 +1,12 @@
+@startuml
+'skin BlueModern
+
+Alice -> Bob: ok
+alt
+Alice -> Bob: ok
+end
+
+ref over Alice,Bob
+  some text
+end
+@enduml

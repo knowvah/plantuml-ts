@@ -9,7 +9,7 @@ import { describe, it, expect } from 'vitest';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { computeParticipantLayout } from '../../../src/diagrams/sequence/sequence-layout-participants.js';
+import { computeParticipantLayout, LEFT_MARGIN } from '../../../src/diagrams/sequence/sequence-layout-participants.js';
 import {
   newActivationStack,
   processEvents,
@@ -54,6 +54,7 @@ function walk(lines: readonly string[]): Walk {
     theme: defaultTheme,
     measurer,
     sprites: ast.sprites,
+    originX: LEFT_MARGIN,
     participantMap: layout.participantMap,
     participantIndex: layout.participantIndex,
     activationStart: newActivationStack(ast.participants),

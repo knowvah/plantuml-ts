@@ -8,13 +8,14 @@
  * @see teoz/PlayingSpace.java:75-104
  */
 
-import type { EventGeo, MessageGeo, ParticipantGeo } from './ast.js';
+import type { EventGeo, MessageEvent, MessageGeo, ParticipantGeo, SequenceEvent } from './ast.js';
 import { REF_X_MARGIN } from './ref-body-geo.js';
-import { fontSpecOf } from './sequence-layout-shared.js';
 import { DIVIDER_WIDTH_ALLOWANCE } from './divider-style.js';
 import { delayContentRight } from './sequence-delay.js';
 import { exoRightExtent } from './sequence-layout-exo.js';
-import { sequenceAtomContext, sequenceLabelLineWidth } from './sequence-creole.js';
+import { FRAME_EXTERNAL_MARGIN_X2 } from './sequence-frame-metrics.js';
+import { flattenLiveEvents, LiveBoxes } from './sequence-live-boxes.js';
+import { selfCompWidth } from './sequence-note-anchor.js';
 import type { MessageLabelEnv } from './text-block-geo.js';
 
 /**
@@ -31,41 +32,84 @@ import type { MessageLabelEnv } from './text-block-geo.js';
  */
 export const RIGHT_MARGIN = 10;
 
-/** Total diagram width: the rightmost participant edge, expanded if any
- *  message label, centred at midX, overflows it (midX + labelWidth/2). */
-export function computeTotalWidth(
-  participantGeos: ParticipantGeo[],
-  eventGeos: EventGeo[],
-  env: MessageLabelEnv,
-): number {
-  const { theme, measurer } = env;
-  const fontSpec = fontSpecOf(theme);
-  const atoms = sequenceAtomContext(env.sprites, theme.colors.text);
+/** What {@link computeTotalWidth} reads beyond the label environment. */
+export interface WidthEnv extends MessageLabelEnv {
+  /** The diagram's top-level events: the `LiveBoxes` of every living space
+   *  (`LivingSpace.java:148`) and every self message's tile are built on
+   *  them. Without it neither the `posC2` nor the self-message term applies. */
+  readonly events?: readonly SequenceEvent[];
+}
+
+/**
+ * Total diagram width: the rightmost `PlayingSpace` bound, `max` over every
+ * tile's `getMaxX` and each living space's `getPosD` and `getPosC2`
+ * (`teoz/PlayingSpace.java:93-101`), plus the right margin.
+ *
+ * There is no label term: a normal message's `CommunicationTile#getMaxX`
+ * (`:453-460`) is `max(rightPoint, leftPoint + compWidth)`, which
+ * `addConstraints` (`:404-427`) has already made `rightPoint`.
+ */
+export function computeTotalWidth(participantGeos: ParticipantGeo[], eventGeos: EventGeo[], env: WidthEnv): number {
   // Safe: participantGeos is non-empty (guarded by the early return above)
   const lastParticipant = participantGeos[participantGeos.length - 1]!;
-  let totalWidth = Math.max(
+  const totalWidth = Math.max(
     lastParticipant.x + lastParticipant.width + RIGHT_MARGIN,
     exoContentRight(eventGeos) + RIGHT_MARGIN,
+    liveContentRight(participantGeos, env) + RIGHT_MARGIN,
   );
-
-  for (const geo of eventGeos) {
-    if (geo.kind !== 'message') continue;
-    const labelText = geo.sequenceNumber !== undefined ? `${geo.sequenceNumber}: ${geo.label}` : geo.label;
-    const labelWidth = sequenceLabelLineWidth(labelText, fontSpec, measurer, atoms);
-    const midX = geo.arrowDirection === 'self' ? geo.fromX + 20 : (geo.fromX + geo.toX) / 2;
-    const labelRightEdge = midX + labelWidth / 2 + RIGHT_MARGIN;
-    if (labelRightEdge > totalWidth) {
-      totalWidth = labelRightEdge;
-    }
-  }
 
   return Math.max(
     totalWidth,
     dividerContentRight(eventGeos),
     delayContentRight(eventGeos, RIGHT_MARGIN),
     refContentRight(eventGeos) + RIGHT_MARGIN,
+    groupContentRight(eventGeos) + RIGHT_MARGIN,
     noteContentRight(eventGeos) + RIGHT_MARGIN,
   );
+}
+
+/** The message events of `events`, frame branches flattened in place. */
+function messageEventsOf(events: readonly SequenceEvent[]): MessageEvent[] {
+  return events.flatMap((e) => {
+    if (e.kind === 'message') return [e];
+    return e.kind === 'frame' ? e.branches.flatMap(messageEventsOf) : [];
+  });
+}
+
+/** Each living space's `LiveBoxes#getMaxPosition` (`LiveBoxes.java:367-372`),
+ *  all built on the one flat event list (`LivingSpace.java:148`). */
+function maxPositions(participantGeos: readonly ParticipantGeo[], env: WidthEnv): ReadonlyMap<string, number> {
+  const list = flattenLiveEvents(env.events ?? []).events;
+  return new Map(participantGeos.map((g) => [g.id, new LiveBoxes(g.id, list).getMaxPosition()] as const));
+}
+
+/** The rightmost `CommunicationTileSelf#getMaxX` (`:272-277`) over every
+ *  self message: `posC2 + getCompWidth()`, a loop on the last participant
+ *  reaching past its `posD` and so widening the document (`:93-96`). A
+ *  reverse loop's (`A <- A`) is `posC2` itself (`:273-275`), which
+ *  {@link liveContentRight} has already maxed in. */
+function selfContentRight(
+  participantGeos: readonly ParticipantGeo[],
+  position: ReadonlyMap<string, number>,
+  env: WidthEnv,
+): number {
+  const byId = new Map(participantGeos.map((g) => [g.id, g]));
+  let right = Number.NEGATIVE_INFINITY;
+  for (const m of messageEventsOf(env.events ?? [])) {
+    const geo = m.from === m.to && m.arrow.reverseDefine !== true ? byId.get(m.from) : undefined;
+    if (geo !== undefined) right = Math.max(right, geo.centerX + (position.get(geo.id) ?? 0) + selfCompWidth(m, env));
+  }
+  return right;
+}
+
+/** The rightmost `LivingSpace#getPosC2` (`LivingSpace.java:235-238`), `posC`
+ *  plus the max position, which `PlayingSpace` maxes in (`:98-101`), and the
+ *  rightmost self-message tile ({@link selfContentRight}). */
+function liveContentRight(participantGeos: readonly ParticipantGeo[], env: WidthEnv): number {
+  const position = maxPositions(participantGeos, env);
+  let right = selfContentRight(participantGeos, position, env);
+  for (const g of participantGeos) right = Math.max(right, g.centerX + (position.get(g.id) ?? 0));
+  return right;
 }
 
 /** The rightmost `NoteTile#getMaxX` (`teoz/NoteTile.java:288-296`), which
@@ -86,6 +130,20 @@ function refContentRight(eventGeos: readonly EventGeo[]): number {
   let right = Number.NEGATIVE_INFINITY;
   for (const e of eventGeos) {
     if (e.kind === 'frame' && e.frameType === 'ref') right = Math.max(right, e.x + e.width + REF_X_MARGIN);
+  }
+  return right;
+}
+
+/** The rightmost `GroupingTile#getMaxX` -- `max + EXTERNAL_MARGINX2` (9)
+ *  past the frame's right border (`teoz/GroupingTile.java:988-990`; the
+ *  group-end notes it also adds are drawn by the port as notes of their own,
+ *  which {@link noteContentRight} reads). `PlayingSpace` maxes it in
+ *  (`:93-96`), so a frame reaching past the last lifeline widens the
+ *  document. */
+function groupContentRight(eventGeos: readonly EventGeo[]): number {
+  let right = Number.NEGATIVE_INFINITY;
+  for (const e of eventGeos) {
+    if (e.kind === 'frame' && e.frameType !== 'ref') right = Math.max(right, e.x + e.width + FRAME_EXTERNAL_MARGIN_X2);
   }
   return right;
 }

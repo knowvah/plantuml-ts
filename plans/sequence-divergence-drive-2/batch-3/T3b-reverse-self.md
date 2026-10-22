@@ -46,3 +46,7 @@ constraints.ts`, `sequence-layout-width.ts`, `DIVERGENCES.md`, tests.
 
 ## Added at T2d hand-back (journal row 36)
 pukebe-27 (RESPONSE-BELOW): `ComponentRoseArrow.java:259-266` `isBelowForResponse = belowForResponse && getArrowConfiguration().isReverseDefine()`; `:330-332` getYPoint = paddingY; `:142-148` posArrow 0 / yText oldPaddingY; `Rose.java:340` reads `responseMessageBelowArrow()`. Needs the same `reverseDefine` flag (`CommandArrow.java:306-310,388-389`) plus the skinparam read; `messageTileMetrics.contactRelative` in `sequence-layout-message.ts`. Jar: arrow 78 vs ours 93, bar 12 vs 27, label 89.111 vs 88.111.
+
+## Added at T3c hand-back (journal row 55)
+- `ast-frame.ts` `parallel?` JSDoc says parallel groups are "not yet laid out here" — stale since T3c; correct it.
+- `sequence-layout-width.ts#liveContentRight` (T3a) is CCN 11, over the hook limit 10: split it without behaviour change.

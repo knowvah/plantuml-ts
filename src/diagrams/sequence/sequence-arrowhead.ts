@@ -121,6 +121,16 @@ export interface ArrowConfiguration {
    * Absent where upstream carries `null`.
    */
   readonly color?: HColor;
+  /**
+   * `ArrowConfiguration#isReverseDefine` -- the arrow was WRITTEN
+   * right-to-left (`A <- B`): `executeArg` ends with `config = config
+   * .reverseDefine()` (`CommandArrow.java:388-389`), and the skin reads it
+   * back for a self loop's side (`ComponentRoseSelfArrow.java:83`), a
+   * below-the-arrow response label (`ComponentRoseArrow.java:196`) and the
+   * message alignment (`Rose.java:307`). Absent where upstream carries false.
+   * @see skin/ArrowConfiguration.java:271-277
+   */
+  readonly reverseDefine?: boolean;
 }
 
 /** A line segment: an ordered start/end pair in tip-local coordinates. */

@@ -67,7 +67,12 @@ export function computeParticipantLayout(
 ): ParticipantLayoutResult {
   const sortedParticipants = [...ast.participants].sort((a, b) => a.order - b.order);
   const constraints: SpanConstraint[] = [];
-  scanMessageLabels(ast.events, sortedParticipants, { measurer, levels, sprites: ast.sprites }, constraints);
+  scanMessageLabels(
+    ast.events,
+    sortedParticipants,
+    { measurer, levels, sprites: ast.sprites, messageSpan: ast.options.sequenceMessageSpan },
+    constraints,
+  );
 
   const ctx: ParticipantLayoutCtx = { theme, measurer, sprites: ast.sprites };
   const participantWidths = computeParticipantWidths(sortedParticipants, ctx);
@@ -357,6 +362,11 @@ function solveParticipantXs(
     // `nextA >= prevE + 10`, the neighbour constraint.
     let x = i === 0 ? originX : xs[i - 1]! + widths[i - 1]! + theme.sequence.participantGap;
     for (const c of incoming.get(i) ?? []) {
+      if (c.origin === true) {
+        // `centre[i] >= xOrigin + c.span`.
+        x = Math.max(x, originX + c.span - widths[i]! / 2);
+        continue;
+      }
       if (c.edge === true) {
         // `posD[i] >= posB[c.from] + c.span`.
         x = Math.max(x, xs[c.from]! + c.span - widths[i]!);

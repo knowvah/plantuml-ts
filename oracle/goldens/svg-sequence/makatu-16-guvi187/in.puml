@@ -1,0 +1,9 @@
+@startuml
+
+alt successful case1
+    Bob->Alice: Authentication Accepted
+else some kind of failure
+    Bob->Alice: Authentication
+end
+
+@enduml

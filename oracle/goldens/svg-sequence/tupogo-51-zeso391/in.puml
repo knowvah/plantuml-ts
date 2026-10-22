@@ -1,0 +1,10 @@
+@startuml
+participant "FlexPro" as fp
+participant "EP" as ep
+participant "TGB" as tgb
+
+loop 3 times
+ep->tgb: Binding
+tgb-->ep: ACK
+end
+@enduml

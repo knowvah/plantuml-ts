@@ -18,6 +18,7 @@ import type {
   BoxGroup,
   DividerGeo,
   EventGeo,
+  MessageGeo,
   NewpageGeo,
   ParticipantGeo,
   SequenceDiagramAST,
@@ -49,6 +50,7 @@ import { boxLabelRuns, boxPaint } from './sequence-layout-box.js';
 import { layoutLinkAnchors } from './sequence-layout-link-anchor.js';
 import type { LinkAnchorGeo } from './geo.js';
 import { computeTotalWidth, messageGeosOf, RIGHT_MARGIN } from './sequence-layout-width.js';
+import { FRAME_EXTERNAL_MARGIN_X1 } from './sequence-frame-metrics.js';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -91,8 +93,16 @@ function layoutFrom(
   levels: { record?: MessageLevels; use?: MessageLevels },
 ): SequenceGeometry {
   const participantLayout = computeParticipantLayout(ast, theme, measurer, originX, levels.use);
-  const eventLayout = runEventLayout(ast, theme, measurer, participantLayout, levels.record);
+  const eventLayout = runEventLayout(ast, { theme, measurer, originX }, participantLayout, levels.record);
   return assembleGeometry(ast, participantLayout, eventLayout, theme, measurer, originX);
+}
+
+/** What one layout pass hands the event walk beyond the AST. */
+interface EventEnv {
+  readonly theme: Theme;
+  readonly measurer: StringMeasurer;
+  /** The participant row's x origin, `TileArguments#getXOrigin`. */
+  readonly originX: number;
 }
 
 interface EventLayoutResult {
@@ -135,7 +145,12 @@ function assembleGeometry(
   flushOpenActivations(eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventLayout.eventGeos);
   const eventGeos = clampDestroySteps(cutActivationsAtDelays(eventLayout.eventGeos), participantGeos);
   const headHeight = TOP_MARGIN + maxParticipantHeight;
-  const totalWidth = computeTotalWidth(participantGeos, eventGeos, { theme, measurer, sprites: ast.sprites });
+  const totalWidth = computeTotalWidth(participantGeos, eventGeos, {
+    theme,
+    measurer,
+    sprites: ast.sprites,
+    events: ast.events,
+  });
   backfillDividerWidth(dividerGeos, totalWidth, originX);
   backfillNewpageWidth(newpageGeos, totalWidth, originX);
   anchorExoBorders(messageGeosOf(eventGeos), totalWidth - RIGHT_MARGIN);
@@ -168,24 +183,11 @@ function assembleGeometry(
  */
 function runEventLayout(
   ast: SequenceDiagramAST,
-  theme: Theme,
-  measurer: StringMeasurer,
+  env: EventEnv,
   participantLayout: ParticipantLayoutResult,
   messageLevels?: MessageLevels,
 ): EventLayoutResult {
-  const ctx: EventProcessingContext = {
-    theme,
-    measurer,
-    sprites: ast.sprites,
-    participantMap: participantLayout.participantMap,
-    participantIndex: participantLayout.participantIndex,
-    activationStart: newActivationStack(ast.participants, ast.events),
-    endStyleBuilder: endOfParseStyleBuilder(ast),
-    eventGeos: [],
-    dividerGeos: [],
-    newpageGeos: [],
-    ...(messageLevels !== undefined ? { messageLevels } : {}),
-  };
+  const ctx = eventContext(ast, env, participantLayout, messageLevels);
   // `PlayingSpace:55,89` — the body's first tile sits `startingY` below the
   // head row, and NOT one `messageSpacing`: teoz has no such term at all
   // (`findings/vertical-terms.md` §1.4).
@@ -203,13 +205,32 @@ function runEventLayout(
   };
 }
 
+/** The shared processing context the event walk threads. */
+function eventContext(
+  ast: SequenceDiagramAST,
+  env: EventEnv,
+  participantLayout: ParticipantLayoutResult,
+  messageLevels: MessageLevels | undefined,
+): EventProcessingContext {
+  return {
+    theme: env.theme,
+    measurer: env.measurer,
+    originX: env.originX,
+    sprites: ast.sprites,
+    participantMap: participantLayout.participantMap,
+    participantIndex: participantLayout.participantIndex,
+    activationStart: newActivationStack(ast.participants, ast.events),
+    endStyleBuilder: endOfParseStyleBuilder(ast),
+    eventGeos: [],
+    dividerGeos: [],
+    newpageGeos: [],
+    ...(messageLevels !== undefined ? { messageLevels } : {}),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
-/** `GroupingTile.EXTERNAL_MARGINX1` (`teoz/GroupingTile.java:82`) — the slack
- *  a group's footprint keeps outside its own drawn frame, on the left. */
-const FRAME_EXTERNAL_MARGIN_X1 = 3;
 
 /**
  * The leftmost x any content in a finished layout reaches — this port's
@@ -237,7 +258,7 @@ function minContentX(geo: SequenceGeometry): number {
 function minEventX(event: EventGeo): number {
   switch (event.kind) {
     case 'message':
-      return Math.min(event.fromX, event.toX);
+      return messageMinX(event);
     case 'note':
       // `NoteTile#getMinX` (`teoz/NoteTile.java:278-286`): the tile, which
       // starts `getPaddingX()` left of the drawn box.
@@ -248,9 +269,9 @@ function minEventX(event: EventGeo): number {
       // (`teoz/ReferenceTile.java:163-171`, `sequence-layout-ref.ts`).
       if (event.frameType === 'ref') return event.x - REF_X_MARGIN;
       // A group reserves `EXTERNAL_MARGINX1` beyond its own frame:
-      // `GroupingTile#getMinX:697-698` is
+      // `GroupingTile#getMinX:984-986` is
       // `min.addFixed(-EXTERNAL_MARGINX1 - notesWidth(LEFT))` with
-      // `EXTERNAL_MARGINX1 = 3` (`:82`). The frame's `x` is the border it
+      // `EXTERNAL_MARGINX1 = 3` (`:83`). The frame's `x` is the border it
       // draws; the tile's footprint starts 3 further left. (The left-note term
       // is not modelled here -- see `findings/document-margins.md`.)
       return event.x - FRAME_EXTERNAL_MARGIN_X1;
@@ -265,6 +286,14 @@ function minEventX(event: EventGeo): number {
     default:
       return Number.POSITIVE_INFINITY;
   }
+}
+
+/** A message tile's leftmost x: its two ends, or -- a reverse self loop --
+ *  its tile's `getMinX`, left of the stroke (`CommunicationTileSelf.java
+ *  :263-270`, carried as `tileMinX`). */
+function messageMinX(event: MessageGeo): number {
+  const ends = Math.min(event.fromX, event.toX);
+  return event.tileMinX === undefined ? ends : Math.min(ends, event.tileMinX);
 }
 
 function emptyGeometry(): SequenceGeometry {

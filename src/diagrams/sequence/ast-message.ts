@@ -86,6 +86,13 @@ export interface MessageEvent extends AbstractMessageEvent {
   /** The extra targets of `A -> B, C, D : msg` — `getMulticasts`
    *  (`CommandArrow.java:139-155`), `msg.setMulticast(...)` at `:404`. */
   multicast?: readonly string[];
+  /** `skinparam ResponseMessageBelowArrow true` (`Rose.java:340`,
+   *  `param.responseMessageBelowArrow()`), the `belowForResponse` argument
+   *  of `ComponentRoseArrow`. It takes effect only on a reverse-defined
+   *  (`A <- B`) flat arrow (`ComponentRoseArrow.java:195-197`); set by the
+   *  post-parse pass `sequence-response-below.ts`, because the skin parameter
+   *  is read at tile time, after every declaration has executed. */
+  belowForResponse?: true;
 }
 
 /**

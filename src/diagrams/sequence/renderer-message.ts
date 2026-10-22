@@ -18,6 +18,7 @@ import { TRANSPARENT_SVG } from './text-block-geo.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import { renderFlatMessageArrow, renderSelfMessageHead, shaftStyleOf } from './renderer-arrowhead.js';
 import { messagePaintOf } from './sequence-arrow-paint.js';
+import { renderSelfMessageLeft } from './renderer-message-self.js';
 
 // ---------------------------------------------------------------------------
 // Message helpers
@@ -65,6 +66,8 @@ const SELF_LOOP_HEIGHT = 13;
  * `x1="35.469" x2="76.469"` on `jobadi-87-jegi648`.
  */
 function renderSelfMessage(msg: MessageGeo, configuration: ArrowConfiguration, theme: ScaledTheme): string {
+  // `isReverseDefine()` picks the side (`ComponentRoseSelfArrow.java:83-86`).
+  if (configuration.reverseDefine === true) return renderSelfMessageLeft(msg, configuration, theme);
   const k = theme.scaleK;
   const x1 = msg.fromX;
   // The RETURNING segment does not start where the outgoing one does:

@@ -36,3 +36,6 @@ lirasa, susati, mukebo (G2); pizupi (AC).
 - Given pizupi, then the bracket runs are omitted, or AC's mechanism is
   journaled.
 - Given the targets, then structural sites are gone; no pinned change.
+
+## Added at T3c hand-back (journal row 55)
+Group-end notes in the frame extent: `GroupingTile.getMinX/getMaxX` add `getNotesWidth(LEFT/RIGHT)`; the port draws a note after `end` as a standalone tile.

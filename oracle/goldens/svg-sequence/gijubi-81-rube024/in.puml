@@ -1,0 +1,9 @@
+@startuml
+!startsub FOO1
+A->A : stuffA2
+!endsub
+B->B : stuffB2
+C->C : stuffC2
+D->D : stuffD2
+!includesub FOO1
+@enduml

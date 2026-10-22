@@ -298,7 +298,9 @@ describe('corpus wiring', () => {
   });
 
   it('measures a real fixture through the deterministic pipeline', () => {
-    const slug = 'jobadi-87-jegi648';
+    // A row that stays non-zero: its image needs an http fetch a sync render
+    // cannot make (sdd2 README push-forward). jobadi-87 reached zero in sdd2 T3a.
+    const slug = 'fifasu-62-pipo979';
     const measured = measureFixture(join(CACHE, slug), slug, requireIncludeStore(fixtureIncludeStore));
     expect(measured.error).toBeUndefined();
     expect(measured.distance).toBeGreaterThan(0);

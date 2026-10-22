@@ -1,0 +1,9 @@
+@startuml
+!pragma teoz true
+participant A
+alt case 1
+    note over A: Foo
+else case 2
+    note over A: Bar
+end opt
+@enduml

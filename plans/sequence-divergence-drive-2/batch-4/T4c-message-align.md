@@ -40,3 +40,6 @@ the Java above.
   57.444, b1 = 67.444 (test).
 - Given the 8 targets, then all are zero-diff or journaled; sevicu-84 is
   unchanged.
+
+## Added at T3b hand-back (journal row 57)
+The reverse flag (`ArrowConfiguration.isReverseDefine`, now `ArrowConfiguration.reverseDefine` in `sequence-arrowhead.ts`) feeds message alignment at `Rose.java:307` (reverseDirection).

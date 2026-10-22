@@ -1,0 +1,10 @@
+@startuml
+IT++
+
+IT->IT1 : coucou1 
+IT1++
+IT1->IT1 : ok
+IT1->IT : fin
+IT1--
+
+@enduml

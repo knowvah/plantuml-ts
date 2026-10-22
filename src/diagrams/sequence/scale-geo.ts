@@ -190,6 +190,7 @@ function scaleMessage(m: MessageGeo, k: number): MessageGeo {
     toX: m.toX * k,
     y: m.y * k,
     ...(m.selfReturnX !== undefined ? { selfReturnX: m.selfReturnX * k } : {}),
+    ...(m.tileMinX !== undefined ? { tileMinX: m.tileMinX * k } : {}),
     labelLines: m.labelLines.map((r) => scaleRun(r, k)),
     ...(m.labelNumber !== undefined ? { labelNumber: scaleRun(m.labelNumber, k) } : {}),
     ...(m.createdHead !== undefined

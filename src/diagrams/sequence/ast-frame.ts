@@ -39,10 +39,9 @@ export interface FrameEvent {
   branchLabels: string[];
   /** The `&` PARALLEL marker on a grouping line
    *  (`CommandGrouping.java`, `GroupingTile.java:145,864` under `teoz/`).
-   *  Read by teoz -- the group starts at the previous tile's min and its max
-   *  dominates the previous one's (`GroupingTile.java:145-154,229-236`) --
-   *  but not yet laid out here: `sequence-layout-frame.ts` chains every group
-   *  below the previous tile. */
+   *  Laid out: `sequence-layout-frame.ts` starts a parallel group at the
+   *  previous tile's gauge MIN rather than its max, `firstY = parallel ?
+   *  currentY.getMin() : previousMax` (`GroupingTile.java:145-154`). */
   parallel?: boolean;
   /** `COLORS` 0/1, raw, resolved late — see `frame-style.ts`.
    *  @see CommandGrouping.java:134-135 */

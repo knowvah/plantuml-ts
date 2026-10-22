@@ -15,6 +15,7 @@
  * @see ~/git/plantuml/.../command/CommonCommands.java:54-106
  */
 
+import { PragmaKey, pragmaKeyLazyFrom } from '../../core/skin/PragmaKey.js';
 import type { Command } from './sequence-parse-helpers.js';
 import { matchScaleCommand } from '../../core/scale-command.js';
 import { RE_ASSUME_TRANSPARENT } from '../../core/assume-transparent.js';
@@ -36,15 +37,20 @@ export const skinParamMessageAlignCommand: Command = {
  * `layout`), none is reachable from this port's sequence corpus bucket
  * (183 `teoz true`, 31 `svgparser sax`, 1 `showDeprecation true` — none of
  * `svgsize`/`graphviz_dot`/`layout`), so every instance falls through to the
- * plain `system.getPragma().define(name, value)` branch, which has no
- * representable effect on `SequenceDiagramAST`. Same "recognised, no
+ * plain `system.getPragma().define(name, value)` branch, whose only
+ * representable effect on `SequenceDiagramAST` is `sequenceMessageSpan`
+ * (`AbstractCommunicationTile.java:52-54`), stored as an option. Same "recognised, no
  * observable effect" precedent as `state/state-commands.ts`'s rule 3a.
  * @see command/CommandPragma.java:101-134
  */
 export const pragmaCommand: Command = {
-  pattern: /^!pragma\s+[A-Za-z_][A-Za-z_0-9]*(?:\s+.*)?$/,
-  execute() {
-    /* ignored — see doc comment above */
+  pattern: /^!pragma\s+([A-Za-z_][A-Za-z_0-9]*)(?:\s+(.*))?$/,
+  execute(state, match) {
+    // The one pragma with a representable effect: `Pragma#isTrue` is
+    // "true" or "on", case-insensitively (`Pragma.java:85-88`).
+    if (pragmaKeyLazyFrom(match[1]!) !== PragmaKey.SEQUENCE_MESSAGE_SPAN) return;
+    const value = match[2]?.toLowerCase();
+    state.ast.options.sequenceMessageSpan = value === 'true' || value === 'on';
   },
 };
 

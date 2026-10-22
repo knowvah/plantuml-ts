@@ -41,3 +41,7 @@ bakuba. J: punove, pijixu, numezi, birefi. Z: nivaje.
 - Given `A -> B & C`, then C gets its polygon + line (test).
 - Given a part-anchored message, then nothing is drawn for it (test).
 - Given the targets, then structural sites are gone; no pinned change.
+
+## Added at T3b hand-back (journal row 57)
+- `renderer-arrowhead.ts:324-331` `SELF_REVERSE_DEFINE = false` comment ("drawLeftSide stays unreachable") is stale since T3b.
+- Multicast below-arrow offset: `getPosArrow` (0 when below) read by `drawMulticast` (`CommunicationTile.java:338`).

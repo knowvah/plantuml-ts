@@ -6,9 +6,11 @@
  */
 import type { MessageEvent, MessageExoEvent, NoteEvent } from './ast.js';
 import type { EventProcessingContext } from './sequence-layout-events.js';
+import { activationLevel } from './sequence-layout-activation.js';
 import { messagePaint } from './sequence-arrow-paint.js';
 import { messageLabelWidth, numberTextOf } from './text-block-geo.js';
-import { ARROW_PADDING_X } from './sequence-layout-shared.js';
+import type { MessageLabelEnv } from './text-block-geo.js';
+import { ARROW_PADDING_X, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
 import { ARROW_DELTA_X } from './sequence-arrowhead.js';
 
 /** `ComponentRoseSelfArrow#arrowWidth` (`:59`) plus 5: the floor of
@@ -37,15 +39,41 @@ function isReverse(owner: MessageEvent, ctx: EventProcessingContext): boolean {
   return from !== undefined && to !== undefined && from > to;
 }
 
-/** `CommunicationTileSelf#getMaxX` without the live-box term (`:272-277`):
- *  the lifeline's centre plus the loop component's preferred width,
- *  `max(getTextWidth, 50)` -- the text block and both `AbstractComponentRoseArrow`
- *  paddings of 7 (`:66`, `ComponentRoseSelfArrow.java:326-328`). The live-box
- *  term, `posC2 - posC`, is `LiveBoxes#getMaxPosition` (`:367-372`). */
-export function selfMaxX(owner: MessageEvent, centerX: number, ctx: EventProcessingContext): number {
+/** `CommunicationTileSelf#getCompWidth` (`:279-282`): the loop component's
+ *  preferred width, `max(getTextWidth, 50)` -- the text block and both
+ *  `AbstractComponentRoseArrow` paddings of 7 (`:66`,
+ *  `ComponentRoseSelfArrow.java:326-328`). */
+export function selfCompWidth(owner: MessageEvent, env: Pick<MessageLabelEnv, 'measurer' | 'sprites'>): number {
   const font = messagePaint(owner.styleBuilder, owner.stereotype, owner.arrow, true).font;
-  const text = messageLabelWidth(owner.label, numberTextOf(owner), font, ctx) + 2 * ARROW_PADDING_X;
-  return centerX + Math.max(text, SELF_ARROW_MIN_WIDTH);
+  const text = messageLabelWidth(owner.label, numberTextOf(owner), font, env) + 2 * ARROW_PADDING_X;
+  return Math.max(text, SELF_ARROW_MIN_WIDTH);
+}
+
+/** `CommunicationTileSelf#getMaxX` (`:272-277`): `livingSpace1.getPosC2()`
+ *  plus {@link selfCompWidth}, or for a reverse loop (`A <- A`) `getPosC2()`
+ *  alone (`:273-275`). `posC2 - posC` is `LiveBoxes#getMaxPosition`
+ *  (`LivingSpace.java:235-238`, `LiveBoxes.java:367-372`), the participant's
+ *  deepest activation over the whole diagram -- read off the walk's own
+ *  `LiveBoxes` for that participant. */
+export function selfMaxX(owner: MessageEvent, centerX: number, ctx: EventProcessingContext): number {
+  const maxPosition = ctx.activationStart.live.boxes.get(owner.from)?.getMaxPosition() ?? 0;
+  if (owner.arrow.reverseDefine === true) return centerX + maxPosition;
+  return centerX + maxPosition + selfCompWidth(owner, ctx);
+}
+
+/** `CommunicationTileSelf#getMinX` (`:263-270`): `posC` for a forward loop;
+ *  for a reverse one `posC - getCompWidth() - liveDeltaWidthAdjustment`,
+ *  the adjustment `LIVE_DELTA_SIZE` when `getLevelAt(this,
+ *  IGNORE_FUTURE_ACTIVATE) > 0`. `width` is the component's width
+ *  (`getCompWidth`) or, for the drawn extent, its `getDrawnWidth`. */
+export function selfMinX(
+  owner: MessageEvent,
+  centerX: number,
+  ctx: EventProcessingContext,
+  width: number = selfCompWidth(owner, ctx),
+): number {
+  if (owner.arrow.reverseDefine !== true) return centerX;
+  return centerX - width - (activationLevel(ctx.activationStart, owner.from) > 0 ? LIVE_DELTA_SIZE : 0);
 }
 
 /**
@@ -84,7 +112,9 @@ export function messageExtent(owner: MessageEvent, ctx: EventProcessingContext):
   const from = ctx.participantMap.get(owner.from);
   const to = ctx.participantMap.get(owner.to);
   if (from === undefined || to === undefined) return { minX: 0, maxX: 0 };
-  if (owner.from === owner.to) return { minX: from.centerX, maxX: selfMaxX(owner, from.centerX, ctx) };
+  if (owner.from === owner.to) {
+    return { minX: selfMinX(owner, from.centerX, ctx), maxX: selfMaxX(owner, from.centerX, ctx) };
+  }
   const reverse = isReverse(owner, ctx);
   const point2 = owner.create === true ? (reverse ? to.x + to.width : to.x) : to.centerX;
   const [left, right] = reverse ? [point2, from.centerX] : [from.centerX, point2];

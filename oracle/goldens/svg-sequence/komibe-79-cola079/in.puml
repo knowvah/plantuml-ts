@@ -1,0 +1,8 @@
+@startuml
+'skin BlueModern
+Bob->Alice : coucou\nit\nme
+activate Alice
+Alice->Alice: well
+Alice-->Bob: ok
+deactivate Alice
+@enduml

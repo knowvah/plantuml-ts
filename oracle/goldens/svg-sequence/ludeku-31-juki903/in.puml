@@ -1,0 +1,13 @@
+@startuml
+activate bob
+bob -> alice
+activate alice
+deactivate alice
+
+bob -> alice
+activate alice
+deactivate alice
+
+bob -> bob : last
+
+@enduml

@@ -1,0 +1,15 @@
+@startuml
+!pragma teoz true
+a -> b: 1
+& b -> c: 2
+group test
+... above ...
+a -> b: 3
+& b -> c: 4
+... below ...
+end
+a -> b
+& b -> c
+a -> b
+& b -> c
+@enduml

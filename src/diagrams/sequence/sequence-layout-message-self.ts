@@ -9,9 +9,10 @@
 
 import type { ActivationEvent, MessageEvent } from './ast.js';
 import type { EventProcessingContext } from './sequence-layout-events.js';
-import { activationLevel } from './sequence-layout-events.js';
+import { activationLevel } from './sequence-layout-activation.js';
 import { LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
 import { ARROW_LABEL_PADDING_X1 } from './text-block-geo.js';
+import { selfCompWidth } from './sequence-note-anchor.js';
 
 /** Arrow endpoints/direction resolved for a single message. */
 export interface MessageEndpoints {
@@ -24,6 +25,8 @@ export interface MessageEndpoints {
    *  `CommunicationTileSelf#drawU`'s shift (`:140-147`) -- where the loop's
    *  far end and the label are measured from. */
   selfOriginX?: number;
+  /** Reverse self messages only: {@link MessageGeo.selfLevel}. */
+  selfLevel?: number;
 }
 
 /** `xRight = arrowWidth - 3` with `arrowWidth = 45`
@@ -125,12 +128,8 @@ function levelAfterBoundEvents(
  * reading of this code (both from `60.044`) did not match: the golden still
  * diffed there (sdd2 research C, SELFX).
  *
- * NOT ported: `isReverseDefine()`, i.e. a self message written `A <- A`.
- * Upstream skips the `x1` shift entirely for it and hands the whole job to
- * `drawLeftSide`, whose own three-branch `dx`/`level` arithmetic (`:177-190`)
- * mirrors the loop rather than offsetting it. This port does not record
- * `reverseDefine` on a self message at all, so the case cannot be
- * distinguished here yet; see DIVERGENCES.md.
+ * A REVERSE self message (`A <- A`, `isReverseDefine()`) skips the shift and is
+ * {@link liveOffsetSelfReverse}'s.
  */
 export function liveOffsetSelf(
   endpoints: MessageEndpoints,
@@ -140,6 +139,8 @@ export function liveOffsetSelf(
 ): MessageEndpoints {
   const levelIgnore = activationLevel(ctx.activationStart, event.from);
   const levelConsidere = levelAfterBoundEvents(event.from, event, ctx, bound);
+  if (event.arrow.reverseDefine === true)
+    return liveOffsetSelfReverse(endpoints, event, ctx, levelIgnore, levelConsidere);
 
   let base = endpoints.fromX + LIVE_DELTA_SIZE * levelIgnore;
   if (levelIgnore < levelConsidere) base += LIVE_DELTA_SIZE * (levelConsidere - levelIgnore);
@@ -151,5 +152,72 @@ export function liveOffsetSelf(
     toX: base + SELF_ARROW_X_RIGHT,
     selfReturnX: base + (deltaX1 > 0 ? -deltaX1 : 1),
     selfOriginX: base,
+  };
+}
+
+/**
+ * `ComponentRoseSelfArrow#drawLeftSide:177-190`'s `x1`/`x2` before any
+ * decoration touches them: how far in from the component's right edge
+ * (`prefTextWidth`) the upper and lower segments end.
+ *
+ * ```java
+ * double x1 = 0, x2 = 1;  extraLiveDeltaIndent = level * deltaSize;
+ * if (dx < 0)      { x2 += (level > 0 ? -extraLiveDeltaIndent : deltaSize); }
+ * else if (dx > 0) { x1 += (level > 1) ? deltaSize - extra : 0;
+ *                    x2 += (level == 1 ? -deltaSize : 0); }
+ * else if (level > 1) { x1 -= extra - deltaSize;  x2 -= extra - deltaSize; }
+ * ```
+ * `dx` is `area.getDeltaX1()`, `level` `area.getLevel()` and `deltaSize`
+ * `area.getLiveDeltaSize()` (`CommunicationTileSelf.java:150-156`).
+ */
+export function leftSideInsets(levelIgnore: number, levelConsidere: number): { x1: number; x2: number } {
+  const dx = (levelIgnore - levelConsidere) * LIVE_DELTA_SIZE;
+  const extra = levelIgnore * LIVE_DELTA_SIZE;
+  let x1 = 0;
+  let x2 = 1;
+  if (dx < 0) {
+    x2 += levelIgnore > 0 ? -extra : LIVE_DELTA_SIZE;
+  } else if (dx > 0) {
+    x1 += levelIgnore > 1 ? LIVE_DELTA_SIZE - extra : 0;
+    x2 += levelIgnore === 1 ? -LIVE_DELTA_SIZE : 0;
+  } else if (levelIgnore > 1) {
+    x1 -= extra - LIVE_DELTA_SIZE;
+    x2 -= extra - LIVE_DELTA_SIZE;
+  }
+  return { x1, x2 };
+}
+
+/**
+ * `CommunicationTileSelf#drawU` for `isReverseDefine()`: no `x1` shift; the
+ * origin is `getMinX()` (`:263-270`), `posC - getCompWidth() - (levelIgnore >
+ * 0 ? LIVE_DELTA_SIZE : 0)`, and the component draws its loop against its
+ * RIGHT edge, `origin + prefTextWidth = posC - liveDeltaWidthAdjustment`
+ * (`ComponentRoseSelfArrow#drawLeftSide:195-200` translates by
+ * `prefTextWidth - xRight`, `prefTextWidth - x1`, `prefTextWidth - x2`).
+ *
+ * The geo carries the loop in the three absolute numbers the right-hand side
+ * already uses, re-read for the mirror image (the renderer inverts them,
+ * `renderer-message-self.ts`): `toX` is the vertical stroke (`origin +
+ * prefTextWidth - xRight`), `fromX` the upper anchor `edge - x1` and
+ * `selfReturnX` the lower anchor `edge - x2`, `edge` being the component's
+ * right edge. The label stays at `origin + getOldPaddingX1()`.
+ */
+function liveOffsetSelfReverse(
+  endpoints: MessageEndpoints,
+  event: MessageEvent,
+  ctx: EventProcessingContext,
+  levelIgnore: number,
+  levelConsidere: number,
+): MessageEndpoints {
+  const adjust = levelIgnore > 0 ? LIVE_DELTA_SIZE : 0;
+  const edge = endpoints.fromX - adjust;
+  const { x1, x2 } = leftSideInsets(levelIgnore, levelConsidere);
+  return {
+    ...endpoints,
+    fromX: edge - x1,
+    toX: edge - SELF_ARROW_X_RIGHT,
+    selfReturnX: edge - x2,
+    selfOriginX: edge - selfCompWidth(event, ctx),
+    selfLevel: levelIgnore,
   };
 }

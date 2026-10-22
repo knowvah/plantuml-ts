@@ -1,0 +1,13 @@
+@startuml
+!pragma teoz true
+
+group #ffa Group 1
+    Particpant_A -> Particpant_B
+    Particpant_A <- Particpant_B
+end
+
+group #ffa Group 2
+    Particpant_A -> Particpant_B++
+    Particpant_A <- Particpant_B--
+end
+@enduml

@@ -1,0 +1,10 @@
+@startuml
+
+opt
+  opt
+    Axxx ->Bxxx : message1
+    note left : this is a note
+  end
+end
+
+@enduml

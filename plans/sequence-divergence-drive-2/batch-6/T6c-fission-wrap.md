@@ -35,3 +35,6 @@ tests.
   emitted as per-neutron `<text>` elements like the jar (test).
 - Given `maxMessageSize -50`, then it still splits (`Math.abs`; suneke).
 - Given cluster B, then structural sites are gone; no pinned row changes.
+
+## Added at T3c hand-back (journal row 55)
+putuku: self message + right note — drawn max = self.drawnMax + noteWidth (`CommunicationTileSelfNoteRight.java:154-178`); dominated by unported Maxmessagesize.

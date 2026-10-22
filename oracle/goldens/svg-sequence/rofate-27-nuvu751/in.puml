@@ -1,0 +1,5 @@
+@startuml
+activate A
+A->A: Test
+deactivate A
+@enduml

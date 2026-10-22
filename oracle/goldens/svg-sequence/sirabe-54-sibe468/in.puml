@@ -1,0 +1,18 @@
+@startuml
+'skin BlueModern
+[-> A: DoWork
+activate A
+A -> A: Internal call
+deactivate A
+
+A ->] : << createRequest >>
+activate A
+
+A<--] : RequestCreated
+[<- A: Done
+
+A->] : a1
+[-> A : a2
+
+deactivate A
+@enduml

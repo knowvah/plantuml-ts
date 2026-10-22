@@ -89,6 +89,22 @@ export interface MessageGeo {
    * Absent on every non-self message.
    */
   selfReturnX?: number;
+  /**
+   * REVERSE self messages (`A <- A`) only: `Area#getLevel`, the live level
+   * before the message (`CommunicationTileSelf.java:152`), which
+   * `ComponentRoseSelfArrow#drawLeftSide` reads for the saltire's indent
+   * (`:218-226`) and which cannot be recovered from the geometry. A count,
+   * not a length: never scaled.
+   */
+  selfLevel?: number;
+  /**
+   * REVERSE self messages (`A <- A`) only: the tile's `getMinX`,
+   * `posC - getCompWidth() - liveDeltaWidthAdjustment`
+   * (`CommunicationTileSelf.java:263-270`) -- left of the drawn loop, and
+   * what `PlayingSpace` folds into the drawing's min (`PlayingSpace.java
+   * :91-94`), so a reverse loop on the first participant shifts the drawing.
+   */
+  tileMinX?: number;
 }
 
 export interface ActivationGeo {

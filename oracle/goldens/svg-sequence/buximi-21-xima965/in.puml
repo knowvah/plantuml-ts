@@ -1,0 +1,7 @@
+@startuml
+participant Client
+participant User
+User -> User : goo
+create Client
+User -> Client : Start
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+!pragma teoz true
+participant a
+participant b
+participant c
+b ->> c ++: Outside Group
+&opt test
+  activate a
+  a ->> b --++ : Inside Group
+end
+deactivate a
+deactivate c
+deactivate b
+@enduml

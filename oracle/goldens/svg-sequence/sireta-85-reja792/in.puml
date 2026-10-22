@@ -1,0 +1,12 @@
+@startuml
+activate Z1
+ 
+Z1 --> Z2 : A1
+activate Z1
+loop
+    Z1 -> Z2 : A2
+end
+deactivate Z1
+Z1 -> Z2 : A3
+
+@enduml

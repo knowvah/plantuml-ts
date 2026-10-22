@@ -1,0 +1,6 @@
+@startuml
+Alice -> Bob : Hello1
+group blah blah that is very very long
+Alice -> Bob : Hello2
+end
+@enduml

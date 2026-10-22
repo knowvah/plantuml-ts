@@ -10,7 +10,7 @@ import type { StyleBuilder } from '../../../src/core/style/StyleBuilder.js';
 import type { SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
-import { groupingPaints, type FramePaints } from '../../../src/diagrams/sequence/sequence-layout-frame.js';
+import { groupingPaints, type FramePaints } from '../../../src/diagrams/sequence/sequence-frame-metrics.js';
 import { referencePaints } from '../../../src/diagrams/sequence/ref-body-geo.js';
 import {
   createSequenceStyleDispatch,

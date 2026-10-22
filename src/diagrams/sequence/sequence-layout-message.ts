@@ -20,6 +20,7 @@ import type { EventCursor, EventProcessingContext } from './sequence-layout-even
 import { activationLevel } from './sequence-layout-events.js';
 import { popActivation, pushActivation, recordMessageStep, type ArrowEnds } from './sequence-layout-activation.js';
 import { LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+import { isBelowForResponse, belowLabelAnchorY } from './sequence-response-below.js';
 import { liveOffsetSelf, selfLabelLeft, type MessageEndpoints } from './sequence-layout-message-self.js';
 import { atomFontSpec } from './sequence-creole-text-atom.js';
 import type { SequencePaint } from './sequence-skin-param.js';
@@ -62,7 +63,7 @@ export function messageTileMetrics(event: MessageEvent, ctx: EventProcessingCont
     ctx,
   );
   const incl = inclinationsOf(event, ctx);
-  const advance = messageTileAdvance(blockH, isSelf, incl.incl1 + incl.incl2);
+  const advance = messageTileAdvance(blockH, isSelf, incl.incl1 + incl.incl2, isBelowForResponse(event));
   const height = event.create === true ? createTileHeight(advance.tileHeight, toGeo) : advance.tileHeight;
   return { contactRelative: isSelf ? selfArrowYPoint(blockH) : advance.arrowY, height };
 }
@@ -123,10 +124,12 @@ export function handleMessageEvent(
   const paint = messagePaint(event.styleBuilder, event.stereotype, event.arrow, endpoints.arrowDirection === 'self');
   const top = tile.gauge.min;
   const incl = inclinationsOf(event, ctx);
+  const blockH = labelBlockHeightOf(event, paint, ctx);
   const advance = messageTileAdvance(
-    labelBlockHeightOf(event, paint, ctx),
+    blockH,
     event.from === event.to,
     incl.incl1 + incl.incl2,
+    isBelowForResponse(event),
   );
   const messageGeo = buildMessageGeo(event, endpoints, top + advance.arrowY, ctx, paint);
   if (event.create === true) markCreated(messageGeo, toGeo, top, advance.tileHeight);
@@ -200,9 +203,12 @@ export function messageTileAdvance(
   blockH: number,
   isSelf: boolean,
   inclination = 0,
+  below = false,
 ): { arrowY: number; tileHeight: number } {
   const textHeight = blockH + 2 * ARROW_TEXT_PADDING_Y;
-  const arrowY = textHeight + ARROW_PADDING_Y;
+  // `isBelowForResponse`: `getYPoint` is `getPaddingY()` alone and
+  // `getPreferredHeight` is unguarded (`ComponentRoseArrow.java:330-332,341-344`).
+  const arrowY = below ? ARROW_PADDING_Y : textHeight + ARROW_PADDING_Y;
   const loop = isSelf ? SELF_ARROW_ONLY_HEIGHT : 0;
   return { arrowY, tileHeight: textHeight + ARROW_DELTA_Y + loop + 2 * ARROW_PADDING_Y + inclination };
 }
@@ -312,7 +318,14 @@ function buildMessageGeo(
   paint: SequencePaint,
 ): MessageGeo {
   const left = labelLeftOf(event, endpoints);
-  const block = messageLabelBlock(event.label, numberTextOf(event), left, y, ctx, paint.font);
+  const block = messageLabelBlock(
+    event.label,
+    numberTextOf(event),
+    left,
+    belowLabelAnchorY(event, y, labelBlockHeightOf(event, paint, ctx), ARROW_TEXT_PADDING_Y),
+    ctx,
+    paint.font,
+  );
   return {
     paint,
     labelLines: block.lines,
@@ -321,6 +334,7 @@ function buildMessageGeo(
     fromX: endpoints.fromX,
     toX: endpoints.toX,
     ...(endpoints.selfReturnX !== undefined ? { selfReturnX: endpoints.selfReturnX } : {}),
+    ...(endpoints.selfLevel !== undefined ? { selfLevel: endpoints.selfLevel } : {}),
     y,
     label: event.label,
     arrow: event.arrow,

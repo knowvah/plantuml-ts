@@ -226,6 +226,9 @@ export interface SequenceDiagramAST {
      *  participants not referenced by any event are dropped post-parse
      *  (`applyHideUnlinked`, `parser.ts`). */
     hideUnlinked?: boolean;
+    /** `!pragma sequenceMessageSpan true` (`AbstractCommunicationTile.java:52-54`):
+     *  message tiles register no participant-span constraint. */
+    sequenceMessageSpan?: boolean;
     /** `autoactivate on|off` (`CommandAutoactivate`, `SequenceDiagram
      *  #setAutoactivate:556-563`). While on, an arrow that carries NO
      *  explicit `++`/`--`/`!` suffix gets one implicitly: a solid arrow

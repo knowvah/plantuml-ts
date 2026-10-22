@@ -1,0 +1,12 @@
+@startuml
+!pragma teoz true
+
+group group1
+actor1 -> actor2
+end
+
+destroy actor2
+
+actor1 -> actor2
+
+@enduml

@@ -1,0 +1,29 @@
+@startuml
+!pragma teoz true
+participant Alice as a
+participant Bob   as b
+b <-     b : ""<-""
+b <-     a
+b <<-    b : ""<<-""
+b <<- a
+b /-     b : ""/-""
+b /- a
+b //-    b : ""//""
+b //- a
+b \-     b : ""\-""
+b \- a
+b \\-    b : ""\\\\-""
+b \\- a
+b o<-     b : ""o<-""
+b o<- a
+b o<<-   b : ""o<<-""
+b o<<- a
+b o/-    b : ""o/-""
+b o/- a
+b o//-   b : ""o//-""
+b o//- a
+b o\-    b : ""o\\-""
+b o\- a
+b o\\-   b : ""o\\\\-""
+b o\\- a
+@enduml

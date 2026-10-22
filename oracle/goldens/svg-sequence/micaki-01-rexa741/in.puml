@@ -1,0 +1,11 @@
+@startuml
+a <- b ++
+alt a
+a -> b --
+else b
+a -> b --
+else c
+a <- b ++
+end
+
+@enduml
