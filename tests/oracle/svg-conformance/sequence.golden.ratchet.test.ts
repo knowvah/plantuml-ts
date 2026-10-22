@@ -29,6 +29,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, statSync } from 'node:fs';
+import { LARGE_GOLDEN_BUDGET_MS, LARGE_GOLDEN_BYTES } from '../../helpers/ci-test-budgets.js';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -59,15 +60,12 @@ function readGolden(f: RatchetFixture): string {
 }
 
 /**
- * Per-fixture budget, the same rule and value as
- * `sequence.diff-baseline.ratchet.test.ts`'s `LARGE_GOLDEN_BUDGET_MS` (see its
- * derivation): only a golden above 1 MB buys headroom. The one such golden,
- * zudize-61 (8.2 MB), was pinned at sdd2 close-b5; a zero-diff comparison
- * walks the whole tree (no child-count short-circuit), ~5.4 s on a quiet box.
+ * Per-fixture budget, the same rule as
+ * `sequence.diff-baseline.ratchet.test.ts`'s `budgetFor`: only a golden above
+ * `LARGE_GOLDEN_BYTES` buys headroom. The one such golden, zudize-61 (8.2 MB),
+ * was pinned at sdd2 close-b5; the value is derived from its CI timings in
+ * `tests/helpers/ci-test-budgets.ts`.
  */
-const LARGE_GOLDEN_BYTES = 1_000_000;
-const LARGE_GOLDEN_BUDGET_MS = 30_000;
-
 function budgetFor(f: RatchetFixture): number | undefined {
   return statSync(join(fixtureDir(f), 'golden.svg')).size > LARGE_GOLDEN_BYTES ? LARGE_GOLDEN_BUDGET_MS : undefined;
 }

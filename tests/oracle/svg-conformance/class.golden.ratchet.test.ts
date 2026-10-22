@@ -34,7 +34,7 @@
  * on every axis (ratchet AND parity survey) where description started with
  * ratchet already seeded.
  */
-import { beforeAll, describe, it, expect } from 'vitest';
+import { beforeAll, describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -52,6 +52,12 @@ import { prepareElkOnce, renderClassFixture } from './render-fixture-class.js';
 // doc comment for why a duplicated measurement seam defeats the cross-check
 // between the ratchet, the census and the survey.
 import { censusClassFixtureOptions } from '../../../scripts/svg-conformance-census.js';
+import { CI_RENDER_BUDGET_MS } from '../../helpers/ci-test-budgets.js';
+
+// Renders past half of vitest's 5s default on the CI runner (worst observed:
+// unknown/xuloxo-85-vibu502, 5,046ms (timed out));
+// derivation in tests/helpers/ci-test-budgets.ts.
+vi.setConfig({ testTimeout: CI_RENDER_BUDGET_MS });
 
 interface RatchetFixture {
   slug: string;

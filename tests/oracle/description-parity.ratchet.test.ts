@@ -15,7 +15,7 @@
  * copying a qualifying fixture out of the warm `test-results/dot-cache/`
  * oracle cache — see `oracle/README.md`.
  */
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -39,6 +39,12 @@ import { buildStdlibAssetsStore } from '../helpers/stdlib-assets-store.js';
 import { buildSpriteAssetsStore } from '../helpers/sprite-assets-store.js';
 import { buildEmojiAssetsStore } from '../helpers/emoji-assets-store.js';
 import { combineAssetStores } from '../../src/core/asset-store.js';
+import { CI_RENDER_BUDGET_MS } from '../helpers/ci-test-budgets.js';
+
+// Renders past half of vitest's 5s default on the CI runner (worst observed:
+// bootstrap-0, 2,838ms);
+// derivation in tests/helpers/ci-test-budgets.ts.
+vi.setConfig({ testTimeout: CI_RENDER_BUDGET_MS });
 
 const GOLDENS = join(dirname(fileURLToPath(import.meta.url)), '../../oracle/goldens/description');
 

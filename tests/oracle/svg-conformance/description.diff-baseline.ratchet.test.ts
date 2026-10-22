@@ -45,6 +45,7 @@ import { fileURLToPath } from 'node:url';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { compareSvg } from './compare.js';
 import { renderFixture } from './render-fixture.js';
+import { CI_RENDER_BUDGET_MS } from '../../helpers/ci-test-budgets.js';
 
 // The sprite-heavy `usecase/bootstrap-*` fixtures in this file render in about
 // 1.6s each in isolation -- comfortably inside vitest's 5s default -- but they
@@ -54,7 +55,7 @@ import { renderFixture } from './render-fixture.js';
 // could not have affected rendering (a docs-only change once). Raised here
 // rather than in vitest.config.ts so the rest of the suite keeps the tight
 // default and a genuinely hung test still fails quickly.
-vi.setConfig({ testTimeout: 30_000 });
+vi.setConfig({ testTimeout: CI_RENDER_BUDGET_MS });
 
 interface BaselineFixture {
   readonly type: string;

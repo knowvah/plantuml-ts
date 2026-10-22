@@ -5,7 +5,7 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/emoji/PSystemListEmoji.java
  */
 import { existsSync, readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { parseRefusalOf } from '../../../src/core/parse-refusal.js';
@@ -17,6 +17,12 @@ import { executeLine, listEmojiPlugin } from '../../../src/diagrams/emoji/PSyste
 import { PSystemListEmoji } from '../../../src/diagrams/emoji/PSystemListEmoji.js';
 import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 import { buildEmojiAssetsStore } from '../../helpers/emoji-assets-store.js';
+import { CI_RENDER_BUDGET_MS } from '../../helpers/ci-test-budgets.js';
+
+// Renders past half of vitest's 5s default on the CI runner (worst observed:
+// rubeku-92-vefi942 rendered three times, 2,760ms);
+// derivation in tests/helpers/ci-test-budgets.ts.
+vi.setConfig({ testTimeout: CI_RENDER_BUDGET_MS });
 
 const measurer = new DeterministicMeasurer();
 const CORPUS_DIR = 'test-results/dot-cache/unknown';

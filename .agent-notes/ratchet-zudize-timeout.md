@@ -167,3 +167,9 @@ accommodation I suspected it might be.
 
 Never reproduced on CI: checked the 5 most recent `ubuntu-latest` runs, zero
 occurrences. It only ever failed under two concurrent local suites.
+
+## Update 2026-10-22: the CI runner sets the tail, not the dev box
+- **Context**: `main` push run 39788016398 failed with zudize timing out at the 30,000 ms budget; PR #87's run timed out `class.golden.ratchet` xuloxo-85 at 5,000 ms. Neither had a diff.
+- **Finding**: per-test durations from the `vitest-blob-*` artifacts of three CI runs (merged locally with `vitest --merge-reports --reporter=json`): zudize 21,932 / 41,398 / 29,446 ms (~5.4 s locally); xuloxo 3,348 / 2,346 / 5,046 ms (~2.6 s locally). The same test varies up to 2.2x between runs, and seven default-budget files peaked past 2,500 ms.
+- **Impact**: budgets now live in `tests/helpers/ci-test-budgets.ts` (`LARGE_GOLDEN_BUDGET_MS` 120,000; `CI_RENDER_BUDGET_MS` 30,000 applied per file). Derive future budgets from CI blobs, not from dev-box timings.
+- **Confidence**: High (measured on the runner).

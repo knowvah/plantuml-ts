@@ -33,13 +33,14 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { compareSvg } from './compare.js';
 import { renderFixture } from './render-fixture.js';
 import { dotEligibility, type Eligibility, type SurveyRow } from './description-eligibility.js';
+import { CI_RENDER_BUDGET_MS } from '../../helpers/ci-test-budgets.js';
 
 // See the matching note in description.diff-baseline.ratchet.test.ts:
 // `usecase/sprite-svg-bootstrap-0` renders in ~1.6s alone but is the slowest
 // case in the suite, and full-suite worker contention pushed it past the 5s
 // default twice, always as a timeout rather than a diff. Scoped to this file
 // so the rest of the suite keeps the tight default.
-vi.setConfig({ testTimeout: 30_000 });
+vi.setConfig({ testTimeout: CI_RENDER_BUDGET_MS });
 
 interface RatchetFixture {
   slug: string;
