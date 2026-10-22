@@ -79,6 +79,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync, statSync } from 'node:fs';
+import { LARGE_GOLDEN_BUDGET_MS, LARGE_GOLDEN_BYTES } from '../../helpers/ci-test-budgets.js';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -148,15 +149,18 @@ function hasCachedFixture(f: FixtureRef): boolean {
  * and value used for `tests/architecture/catalog.test.ts`. A hang still
  * surfaces in 30 s, well inside CI's 12-minute job cap.
  *
+ * SUPERSEDED 2026-10-22: the CI runner, not the dev box, sets the tail. The
+ * same fixture took 21.9-41.4 s in the golden ratchet on `ubuntu-latest`
+ * (one timeout); the budget is now `LARGE_GOLDEN_BUDGET_MS` in
+ * `tests/helpers/ci-test-budgets.ts`, derived there, and shared by both
+ * sequence ratchets.
+ *
  * Keyed on golden SIZE, not on the slug: the 47x gap between this fixture and
  * the next makes the threshold unambiguous, a fixture would have to grow 5.7x
  * to newly qualify, and a future giant capture gets headroom automatically
  * instead of reproducing this bug. Keying on the name would rot silently the
  * first time the corpus is regenerated.
  */
-const LARGE_GOLDEN_BYTES = 1_000_000;
-const LARGE_GOLDEN_BUDGET_MS = 30_000;
-
 /** `undefined` leaves vitest's default in place -- the 1,140 small fixtures
  * keep their tight guard; only an outlier golden buys headroom. */
 function budgetFor(f: FixtureRef): number | undefined {

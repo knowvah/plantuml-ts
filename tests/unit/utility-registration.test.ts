@@ -8,7 +8,7 @@
  * states the Java, not a copy of the registration list.
  */
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { renderSync } from '../../src/index.js';
 import { registerPlugins } from '../../src/registered-plugins.js';
@@ -51,6 +51,12 @@ import { buildEmojiAssetsStore } from '../helpers/emoji-assets-store.js';
 import { buildSpriteAssetsStore } from '../helpers/sprite-assets-store.js';
 import { buildUtilityAssetsStore } from '../helpers/utility-assets-store.js';
 import { sourceOf } from '../helpers/utility-single-line.js';
+import { CI_RENDER_BUDGET_MS } from '../helpers/ci-test-budgets.js';
+
+// Renders past half of vitest's 5s default on the CI runner (worst observed:
+// rubeku-92-vefi942 rendered three times, 2,723ms);
+// derivation in tests/helpers/ci-test-budgets.ts.
+vi.setConfig({ testTimeout: CI_RENDER_BUDGET_MS });
 
 /**
  * `PSystemBuilder.java` line of each registered plugin's factory. Chronology's

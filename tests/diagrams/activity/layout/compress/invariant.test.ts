@@ -33,7 +33,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { buildBlockUmls } from '../../../../../src/core/BlockUmlBuilder.js';
 import type { PreprocessorResult } from '../../../../../src/core/preprocessor.js';
@@ -60,6 +60,12 @@ import { shapesOf, type CompressShape } from '../../../../../src/diagrams/activi
 import { occupiesOn, overlaps } from '../../../../../src/diagrams/activity/layout/compress/slot-finder.js';
 import type { Reservation } from '../../../../../src/diagrams/activity/layout/hexagon-reservations.js';
 import { measured } from '../../../../unit/activity/measured-theme.js';
+import { CI_RENDER_BUDGET_MS } from '../../../../helpers/ci-test-budgets.js';
+
+// Renders past half of vitest's 5s default on the CI runner (worst observed:
+// the every-rendering-fixture layout case, 2,840ms);
+// derivation in tests/helpers/ci-test-budgets.ts.
+vi.setConfig({ testTimeout: CI_RENDER_BUDGET_MS });
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const MANIFEST_PATH = join(HERE, '../../../../../oracle/goldens/svg-activity/diff-baseline.json');

@@ -9,7 +9,7 @@
  * add the integrity checks D5 cannot get from synthetic records alone
  * (1-to-1 with T2's baseline, errors excluded, re-run stability).
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 
 import {
@@ -27,6 +27,12 @@ import {
 } from './sequence-diff-census.js';
 import type { Bucket, Census } from './sequence-diff-census.js';
 import type { Diff } from './compare.js';
+import { CI_RENDER_BUDGET_MS } from '../../helpers/ci-test-budgets.js';
+
+// Renders past half of vitest's 5s default on the CI runner (worst observed:
+// two census passes over a corpus slice, 2,549ms);
+// derivation in tests/helpers/ci-test-budgets.ts.
+vi.setConfig({ testTimeout: CI_RENDER_BUDGET_MS });
 
 /** Builds a synthetic `Diff`. Nothing here is read from a fixture. */
 function synthetic(path: string, actual: string, expected: string, delta?: number): Diff {
