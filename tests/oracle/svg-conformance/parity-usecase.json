@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-16T16:11:23.068Z",
+  "generatedAt": "2026-10-22T14:17:50.329Z",
   "fixtures": [
     {
       "slug": "baxodi-80-doto381",
@@ -15,9 +15,8 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "diverged",
+      "verdict": "structural-match",
       "maxDelta": 51.269,
-      "firstDiff": "svg/g[1]/g[4]/rect[1]/@fill",
       "maxDeltaPath": "svg/g[1]/g[36]/text[3]/@x"
     },
     {
@@ -45,9 +44,8 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "diverged",
+      "verdict": "structural-match",
       "maxDelta": 51.269000000000005,
-      "firstDiff": "svg/g[1]/g[4]/rect[1]/@fill",
       "maxDeltaPath": "svg/g[1]/g[36]/text[3]/@x"
     },
     {
@@ -125,9 +123,7 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 1,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "exposant-02-usecase",
@@ -141,10 +137,7 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 281,
-      "firstDiff": "svg/g[1]/g[1]/text[1]",
-      "maxDeltaPath": "svg/@height"
+      "verdict": "conformant"
     },
     {
       "slug": "fariba-82-xolu802",
@@ -247,9 +240,8 @@
       "dotEqual": true,
       "layoutEqual": true,
       "verdict": "diverged",
-      "maxDelta": 269.44,
-      "firstDiff": "svg/@height",
-      "maxDeltaPath": "svg/g[1]/g[10]/polygon[1]/@points[1]"
+      "maxDelta": 0,
+      "firstDiff": "svg/@height"
     },
     {
       "slug": "kafexo-72-xupa679",
@@ -257,7 +249,7 @@
       "dotEqual": true,
       "layoutEqual": true,
       "verdict": "diverged",
-      "maxDelta": 161,
+      "maxDelta": 162,
       "firstDiff": "svg/g[1]/g[3]/text[1]/@textLength",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -499,9 +491,8 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "diverged",
+      "verdict": "structural-match",
       "maxDelta": 51.269,
-      "firstDiff": "svg/g[1]/g[4]/rect[1]/@fill",
       "maxDeltaPath": "svg/g[1]/g[36]/text[3]/@x"
     },
     {
@@ -555,7 +546,7 @@
       "dotEqual": true,
       "layoutEqual": true,
       "verdict": "diverged",
-      "maxDelta": 17,
+      "maxDelta": 16,
       "firstDiff": "svg/g[1]/g[4][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -571,9 +562,7 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[3]/path[1]/@stroke"
+      "verdict": "conformant"
     },
     {
       "slug": "sumata-59-zavu229",
@@ -598,7 +587,7 @@
       "dotEqual": true,
       "layoutEqual": true,
       "verdict": "diverged",
-      "maxDelta": 17,
+      "maxDelta": 16,
       "firstDiff": "svg/g[1]/g[4][childCount]",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -641,10 +630,7 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 429.96000000000004,
-      "firstDiff": "svg/g[1]/g[8]/@id",
-      "maxDeltaPath": "svg/g[1]/g[8]/text[1]/@x"
+      "verdict": "conformant"
     },
     {
       "slug": "xegapu-80-damu730",
@@ -675,9 +661,8 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "diverged",
+      "verdict": "structural-match",
       "maxDelta": 51.269000000000005,
-      "firstDiff": "svg/g[1]/g[4]/rect[1]/@fill",
       "maxDeltaPath": "svg/g[1]/g[36]/text[3]/@x"
     },
     {
@@ -692,10 +677,7 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 1,
-      "firstDiff": "svg/g[1]/g[2]/text[1]/@fill",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "zacute-55-zece399",
@@ -726,9 +708,7 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 1,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "zoriso-46-vata931",
@@ -742,9 +722,8 @@
       "type": "usecase",
       "dotEqual": true,
       "layoutEqual": true,
-      "verdict": "diverged",
+      "verdict": "structural-match",
       "maxDelta": 218.787,
-      "firstDiff": "svg/g[1]/g[6]/path[1]/@id",
       "maxDeltaPath": "svg/g[1]/g[3]/path[1]/@d[2]"
     }
   ]

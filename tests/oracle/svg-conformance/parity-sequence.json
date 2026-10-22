@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-22T00:34:13.733Z",
+  "generatedAt": "2026-10-22T14:16:27.571Z",
   "fixtures": [
     {
       "slug": "bacupi-77-fuke586",
@@ -1004,9 +1004,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@fill"
+      "verdict": "conformant"
     },
     {
       "slug": "dazuzi-04-zexu620",
@@ -1078,10 +1076,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 163,
-      "firstDiff": "svg/g[1]/text[5]/@textLength",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "deluve-26-kaxa424",
@@ -1698,9 +1693,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@fill"
+      "verdict": "conformant"
     },
     {
       "slug": "fobapo-56-moko401",
@@ -3653,9 +3646,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@fill"
+      "verdict": "conformant"
     },
     {
       "slug": "loteba-26-konu854",
@@ -4398,9 +4389,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@fill"
+      "verdict": "conformant"
     },
     {
       "slug": "nanedo-96-foso005",
@@ -5845,9 +5834,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/path[2]/@fill"
+      "verdict": "conformant"
     },
     {
       "slug": "sazaxe-79-beka218",
@@ -6715,9 +6702,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/path[8]/@fill"
+      "verdict": "conformant"
     },
     {
       "slug": "tukivo-05-vuvi835",

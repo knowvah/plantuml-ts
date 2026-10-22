@@ -1,10 +1,11 @@
 {
-  "generatedAt": "2026-10-10T12:15:10.430Z",
+  "generatedAt": "2026-10-22T14:18:46.437Z",
   "fixtures": [
     {
       "slug": "bafemu-96-luji978",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "diverged",
       "maxDelta": 2161.053,
       "firstDiff": "svg/g[1]/path[1]/@d",
@@ -14,24 +15,28 @@
       "slug": "bedega-54-romu926",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "conformant"
     },
     {
       "slug": "coxima-79-gano159",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "conformant"
     },
     {
       "slug": "finofu-94-daso450",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "conformant"
     },
     {
       "slug": "gabalo-23-tefe408",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 160.623,
       "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
@@ -40,6 +45,7 @@
       "slug": "gatuva-87-futo104",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 1.9860000000000042,
       "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
@@ -48,12 +54,14 @@
       "slug": "gipoxa-19-bico146",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "conformant"
     },
     {
       "slug": "gobavi-45-guna544",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 1.0109999999999957,
       "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
@@ -62,6 +70,7 @@
       "slug": "jozapu-14-datu953",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "diverged",
       "maxDelta": 1924,
       "firstDiff": "svg/g[1]/path[9]/@d",
@@ -71,6 +80,7 @@
       "slug": "jukejo-54-pope427",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 160.623,
       "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
@@ -79,6 +89,7 @@
       "slug": "ketunu-15-poli031",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 1.282999999999987,
       "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
@@ -87,6 +98,7 @@
       "slug": "kotize-70-nuze855",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 1.9299999999999926,
       "maxDeltaPath": "svg/g[1]/path[2]/@d[4]"
@@ -95,6 +107,7 @@
       "slug": "lelofi-17-cafo004",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 1.9299999999999926,
       "maxDeltaPath": "svg/g[1]/path[2]/@d[4]"
@@ -103,12 +116,14 @@
       "slug": "lifuxe-66-maxu442",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "conformant"
     },
     {
       "slug": "lipoka-75-rigo326",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 1.9860000000000042,
       "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
@@ -117,6 +132,7 @@
       "slug": "litife-43-novo083",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 1.4100000000000108,
       "maxDeltaPath": "svg/g[1]/path[8]/@d[26]"
@@ -125,6 +141,7 @@
       "slug": "medosa-24-jugi124",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 1.3019999999999925,
       "maxDeltaPath": "svg/g[1]/path[2]/@d[4]"
@@ -133,6 +150,7 @@
       "slug": "mudeno-46-rado553",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 847.837,
       "maxDeltaPath": "svg/g[1]/path[8]/@d[6]"
@@ -141,6 +159,7 @@
       "slug": "najoba-05-nino350",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 1.4089999999999918,
       "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
@@ -149,6 +168,7 @@
       "slug": "nuzaje-74-kenu009",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 133.62999999999997,
       "maxDeltaPath": "svg/g[1]/path[2]/@d[6]"
@@ -157,6 +177,7 @@
       "slug": "polela-38-mopu631",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 1.9299999999999926,
       "maxDeltaPath": "svg/g[1]/path[2]/@d[4]"
@@ -165,6 +186,7 @@
       "slug": "poxedu-72-bite327",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "diverged",
       "maxDelta": 159.762,
       "firstDiff": "svg/g[1]/path[7]/@d",
@@ -174,6 +196,7 @@
       "slug": "sozafu-05-xeka661",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 128.63799999999998,
       "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
@@ -182,6 +205,7 @@
       "slug": "sudabi-56-dedu341",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 1.4089999999999918,
       "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
@@ -190,6 +214,7 @@
       "slug": "tadari-70-nare798",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 4.9999999999999964,
       "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
@@ -198,6 +223,7 @@
       "slug": "vaceci-80-lezo436",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 211.24100000000004,
       "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
@@ -206,6 +232,7 @@
       "slug": "vapoda-87-piku740",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 1.9860000000000042,
       "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
@@ -214,6 +241,7 @@
       "slug": "vugalo-43-mose807",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 0.8289999999999935,
       "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
@@ -222,12 +250,14 @@
       "slug": "vuzosu-08-pake421",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "conformant"
     },
     {
       "slug": "xacali-26-mazu431",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 213.64200000000002,
       "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
@@ -236,12 +266,14 @@
       "slug": "xatato-75-mora801",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "conformant"
     },
     {
       "slug": "xofilu-53-tazi162",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 61.49499999999999,
       "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
@@ -250,6 +282,7 @@
       "slug": "xubife-72-runi076",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "diverged",
       "maxDelta": 979.907,
       "firstDiff": "svg/g[1]/path[5]/@d",
@@ -259,6 +292,7 @@
       "slug": "YAML-attribute-hierarchy",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 165.048,
       "maxDeltaPath": "svg/g[1]/path[1]/@d[4]"
@@ -267,6 +301,7 @@
       "slug": "YAML-list-key-value-pair",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 1.0109999999999957,
       "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
@@ -275,6 +310,7 @@
       "slug": "YAML-space-indent",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 61.49499999999999,
       "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
@@ -283,6 +319,7 @@
       "slug": "zebapi-77-zasu051",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 0.9099999999999966,
       "maxDeltaPath": "svg/g[1]/path[2]/@d[4]"
@@ -291,6 +328,7 @@
       "slug": "zeduse-06-fidi174",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 165.048,
       "maxDeltaPath": "svg/g[1]/path[1]/@d[4]"
@@ -299,6 +337,7 @@
       "slug": "zomime-61-sase339",
       "type": "yaml",
       "dotEqual": false,
+      "layoutEqual": "n/a",
       "verdict": "structural-match",
       "maxDelta": 142.789,
       "maxDeltaPath": "svg/g[1]/path[2]/@d[0]"
