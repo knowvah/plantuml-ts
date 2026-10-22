@@ -28,6 +28,11 @@ tile model before writing code; it is the shape later tasks build on.
    Not covered by the prototype: parallel *groups* and
    `LiveBoxes.isParallelWith` (`LiveBoxes.java:298,311`) — port them if a
    fixture needs them (the latter belongs to T2b's module: journal it).
+4. **Exo wrappers (added at B1 close, journal row 16).** After an exo
+   arrow `TileBuilder.java:122-134` builds only LEFT/RIGHT note wrappers,
+   and every note reads `exo.getNoteOnMessages().get(0).getPosition()`;
+   a `top`/`bottom` note after an exo arrow is not drawn. T1a made such a
+   note reachable; mirror the Java exactly (unit test; no corpus row).
 3. **Stale premise (D10).** Rewrite the comment at `ast.ts` (now
    `ast-message.ts` after T0d) that says `parallel`/`anchor` are not drawn
    because "the classic renderer reads neither": the jar is always teoz.

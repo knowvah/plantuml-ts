@@ -259,3 +259,19 @@ export const endCommand: Command = {
     markGroupingLeafNoteAnchor(state);
   },
 };
+
+/**
+ * End-of-input drain: a frame still open at EOF keeps its events. Upstream's
+ * `events` list is flat (`SequenceDiagram.java:411-446`, `grouping` only
+ * appends) and `GroupingTile`'s constructor consumes events "until END or the
+ * end of the iterator" (`teoz/GroupingTile.java:158-166`, `while (it.hasNext())`
+ * with `this.end` left null), so an unclosed `alt`/`group` still draws. The
+ * innermost frame closes first, into its parent's current branch. No END leaf
+ * exists, so unlike {@link endCommand} nothing else is touched (no colour read,
+ * no `lastEventWithDeactivate`, no note anchor).
+ */
+export function drainOpenFrames(state: ParseState): void {
+  for (let frame = state.frameStack.pop(); frame !== undefined; frame = state.frameStack.pop()) {
+    emit(state, frame);
+  }
+}

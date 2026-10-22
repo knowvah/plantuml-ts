@@ -977,7 +977,8 @@ describe('refusal coverage — baseline shape', () => {
     // Derivation: 7288 + 367 = 7655.
     // 7655 -> 7707 at sdd1 close-b3: 52 svg-sequence golden clone row(s)
     // (pin round 2). Derivation: 7655 + 52 = 7707.
-    expect(manifest.fixtures.length).toBe(7707);
+    // 7707 -> 7709 at sdd2/close-b1: +2 svg-sequence golden clones (ladiro-50, pucini-86).
+    expect(manifest.fixtures.length).toBe(7709);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -1015,7 +1016,10 @@ describe('refusal coverage — baseline shape', () => {
     // gazale-13 (sudoku, out by D13, MIT edition) and kavama-92 (dedication,
     // no asset store in this gate) still error, and kavama's svg-utility
     // golden twin errors with it. Derivation: 238 - 14 + 1 = 225.
-    expect(pinnedErroring.length).toBe(225);
+    // 225 -> 219 at sdd2/close-b1: sequence dolice-60, jiliba-03, junide-55,
+    // nidozi-08, tegasu-93, vubato-50 render (sdd2 T1a note URL group, T1b
+    // CommandActivate2 / CommandUrl / CommandHideShowByGender).
+    expect(pinnedErroring.length).toBe(219);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -1149,7 +1153,9 @@ describe('refusal coverage — baseline shape', () => {
     // golden clone row(s). Derivation: 7063 + 367 = 7430.
     // 7430 -> 7482 at sdd1 close-b3: +52 rendering svg-sequence golden
     // clone row(s). Derivation: 7430 + 52 = 7482.
-    expect(pinnedRendering.length).toBe(7482);
+    // 7482 -> 7490 at sdd2/close-b1: 6 sequence known-gaps render (dolice-60,
+    // jiliba-03, junide-55, nidozi-08, tegasu-93, vubato-50) + 2 golden clones.
+    expect(pinnedRendering.length).toBe(7490);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -1220,7 +1226,8 @@ describe('refusal coverage — baseline shape', () => {
     // 200 -> 187 at ufp/close-b2: 14 utility known-gaps -> ok; kavama-92 stays
     // known-gap (asset-store seam) and its svg-utility twin is cloned known-gap.
     // Derivation: 200 - 14 + 1 = 187.
-    expect(gaps.length).toBe(187);
+    // 187 -> 181 at sdd2/close-b1: the same six sequence known-gaps -> ok.
+    expect(gaps.length).toBe(181);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //

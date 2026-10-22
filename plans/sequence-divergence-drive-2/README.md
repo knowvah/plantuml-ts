@@ -129,7 +129,7 @@ Collected (JSON reporter) must equal on-disk. Check `uptime` first; above
 | Batch | Scope | Tasks | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | branch, tools, b0; pure-move splits | T0a–T0e | [x] |
-| [1](batch-1/overview.md) | note gaps, unported commands, unclosed group | T1a–T1c, close | [ ] |
+| [1](batch-1/overview.md) | note gaps, unported commands, unclosed group | T1a–T1c, close | [x] |
 | [2](batch-2/overview.md) | vertical tile model; LinkAnchor | T2a–T2e, close | [ ] |
 | [3](batch-3/overview.md) | horizontal extents; reverse self | T3a–T3c, close | [ ] |
 | [4](batch-4/overview.md) | text placement | T4a–T4c, close | [ ] |

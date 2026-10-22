@@ -1,0 +1,12 @@
+@startuml
+caller -> server : conReq
+hnote over caller : idle
+caller <- server : conConf
+hnote over caller [[http://www.yahoo.com {"request":"hyperlink",\n"status":200} note]] : test
+note over server [[http://www.yahoo.com {"request":"hyperlink",\n"status":200} note]] : test
+rnote over server
+ this is
+ on several
+ lines
+endrnote
+@enduml

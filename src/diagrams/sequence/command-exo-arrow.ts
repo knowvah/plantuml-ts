@@ -64,6 +64,7 @@ import {
   arrowConfigurationOf,
   emit,
   ensureParticipant,
+  setLastEventWithNoteSpan,
   type ArrowSpec,
   type Command,
   type ParseState,
@@ -414,6 +415,11 @@ function executeExoArrow(state: ParseState, match: RegExpExecArray, getMessageEx
   // `NoSuchColorException` out of `applyStyle` (`:101`) discards the attempt.
   if (state.executionError !== undefined) return;
   emit(state, msg);
+  // `MessageExo` is an `EventWithNote` (`AbstractMessage.java:58`), so it is
+  // what `SequenceDiagram#getLastEventWithNote` (`SequenceDiagram.java:154-158`)
+  // hands the next `note left|right`; both ends are its one participant
+  // (`teoz/TileBuilder.java:122-134` places the note against `getParticipant()`).
+  setLastEventWithNoteSpan(state, [participant, participant]);
   const error = addMessage(state.life, msg); // `:152-154`
   if (error !== undefined) {
     state.executionError = error;

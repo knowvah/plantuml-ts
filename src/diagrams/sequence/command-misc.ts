@@ -11,9 +11,8 @@
  * unlinked` (T13). Grouped here rather than in `command-common.ts` because
  * that module is outside this task's write-set (T10, misc-commands).
  *
- * `CommandFootboxOld` (`:153`), `CommandUrl` (`:154`) and
- * `CommandLinkAnchor` (`:155`) close that run upstream and have no rule here
- * yet. `setSeparatorCommand` has no counterpart anywhere in the sequence
+ * `CommandFootboxOld` (`:153`) and `CommandLinkAnchor` (`:155`) close that run
+ * upstream and have no rule here yet; `CommandUrl` (`:154`) is `urlCommand`. `setSeparatorCommand` has no counterpart anywhere in the sequence
  * registration list — see its own doc comment.
  *
  * `dividerCommand`, `delayWithTextCommand`/`bareDelayCommand` and
@@ -29,10 +28,12 @@ import type { DelayEvent, DividerEvent, FrameEvent, SpaceEvent } from './ast.js'
 import { currentStyleBuilder } from './sequence-skin-param.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import { NoSuchColorException } from '../../core/klimt/color/NoSuchColorException.js';
+import { getRegexp as urlRegexp, transform as urlTransform } from '../../core/url/UrlBuilder.js';
 import { NO_SUCH_COLOR } from './command-note-factory.js';
 import {
   emit,
   ensureParticipant,
+  participantUrlOf,
   setLastEventWithNoteSpan,
   type Command,
   type ParseState,
@@ -302,5 +303,28 @@ export const refOverMultilineCommand: Command = {
     // Captured at the opener: upstream executes the whole block as one
     // command (`CommandReferenceMultilinesOverSeveral.java:152-153`).
     state.pendingRef = refFrame(state, '', participants, back.color);
+  },
+};
+
+/** `url of CODE is [[url]]` -- `CommandUrl`: attaches a link to a participant
+ *  (declaring it when absent, `getOrCreateParticipant` `:94`) by
+ *  `p.setUrl(...)` (`:97`), so it replaces any url the declaration gave. The
+ *  head is then wrapped in `<a>` by the path a `participant X [[url]]` already
+ *  takes (`Participant#url`). CODE is NOT unquoted (`:93`, `explainArg`).
+ *  The URL leaf is `UrlBuilder.MANDATORY` -- `(` + `getRegexp()` + `)`
+ *  (`UrlBuilder.java:48`). `topurl` is not modelled, as for participants.
+ *  @see sequencediagram/command/CommandUrl.java:60-70,88-100 */
+export const urlCommand: Command = {
+  pattern: new RegExp(
+    urlTransform(String.raw`^url\s*(?:of|for)?\s+([\p{L}\p{N}_.@]+|[%g][^%g]+[%g])\s+(?:is)?\s*(${urlRegexp()})$`),
+    'iu',
+  ),
+  execute(state, match) {
+    const code = match[1]!;
+    ensureParticipant(state, code);
+    const p = state.ast.participants[state.participantIndex.get(code)!]!;
+    const url = participantUrlOf(match[2]);
+    if (url === undefined) delete p.url;
+    else p.url = url;
   },
 };

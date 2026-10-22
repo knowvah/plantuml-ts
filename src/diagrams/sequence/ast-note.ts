@@ -55,5 +55,11 @@ export interface NoteEvent {
    *  `FactorySequenceNoteAcrossCommand.java:216`,
    *  `FactorySequenceNoteOnArrowCommand.java:226`); merged at use time
    *  (`Note.java:71-79`). sdd1 D2. */
+  /** The header's `[[url]]`, resolved (`Note#setUrl`,
+   *  `FactorySequenceNoteCommand.java:244-247`; `Note.java:149`). Parsed and
+   *  stored, never drawn: teoz reads only `Participant#getUrl`
+   *  (`teoz/LivingSpace.java:207-209`), no note or note-tile code calls
+   *  `startUrl`. */
+  url?: string;
   readonly styleBuilder: StyleBuilder;
 }

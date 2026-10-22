@@ -1,12 +1,12 @@
 {
   "$comment": "Cause census for the committed SEQUENCE oracle corpus. Every count is produced MECHANICALLY by tests/oracle/svg-conformance/sequence-diff-census.ts from the path/actual/expected fields of the Diff records compare.ts emits -- never by reading an SVG (D5, plans/sequence-oracle-harness/decisions.md). The bucket set is closed at six; adding a seventh is stop 9. Fixtures come from diff-baseline.json: status \"baseline\" entries are censused, status \"error\" entries are carried in \"errors\" and contribute NOTHING to \"totals\" -- an unrenderable fixture has no bucket counts and must never read as zero diffs. Regenerate with: npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts -- the output is a pure function of the committed corpus and carries no timestamp, so re-running is byte-identical.",
   "totals": {
-    "missing-element": 150,
-    "extra-element": 87,
-    "geometry": 57675,
-    "text-metrics": 697,
+    "missing-element": 141,
+    "extra-element": 82,
+    "geometry": 58307,
+    "text-metrics": 521,
     "format-units": 0,
-    "other": 791
+    "other": 613
   },
   "fixtures": [
     {
@@ -731,14 +731,14 @@
     },
     {
       "slug": "cazusa-73-masi168",
-      "diffCount": 249,
+      "diffCount": 236,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 196,
-        "text-metrics": 24,
+        "geometry": 236,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 28
+        "other": 0
       }
     },
     {
@@ -1223,14 +1223,14 @@
     },
     {
       "slug": "debufa-67-poma789",
-      "diffCount": 132,
+      "diffCount": 182,
       "buckets": {
-        "missing-element": 1,
-        "extra-element": 4,
-        "geometry": 89,
-        "text-metrics": 13,
+        "missing-element": 0,
+        "extra-element": 0,
+        "geometry": 182,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 25
+        "other": 0
       }
     },
     {
@@ -1403,14 +1403,14 @@
     },
     {
       "slug": "diruxe-35-xujo142",
-      "diffCount": 156,
+      "diffCount": 179,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 113,
-        "text-metrics": 28,
+        "geometry": 179,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 14
+        "other": 0
       }
     },
     {
@@ -1468,6 +1468,18 @@
         "missing-element": 0,
         "extra-element": 0,
         "geometry": 8,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "dolice-60-copi767",
+      "diffCount": 39,
+      "buckets": {
+        "missing-element": 0,
+        "extra-element": 0,
+        "geometry": 39,
         "text-metrics": 0,
         "format-units": 0,
         "other": 0
@@ -2663,14 +2675,14 @@
     },
     {
       "slug": "jedado-35-lobi482",
-      "diffCount": 43,
+      "diffCount": 5,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 32,
-        "text-metrics": 3,
+        "geometry": 5,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 7
+        "other": 0
       }
     },
     {
@@ -2740,6 +2752,18 @@
         "missing-element": 0,
         "extra-element": 0,
         "geometry": 5,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "jiliba-03-lapi286",
+      "diffCount": 2,
+      "buckets": {
+        "missing-element": 0,
+        "extra-element": 0,
+        "geometry": 2,
         "text-metrics": 0,
         "format-units": 0,
         "other": 0
@@ -2896,6 +2920,18 @@
         "missing-element": 0,
         "extra-element": 0,
         "geometry": 8,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
+      "slug": "junide-55-soka558",
+      "diffCount": 6,
+      "buckets": {
+        "missing-element": 0,
+        "extra-element": 0,
+        "geometry": 6,
         "text-metrics": 0,
         "format-units": 0,
         "other": 0
@@ -4810,6 +4846,18 @@
       }
     },
     {
+      "slug": "nidozi-08-daxa280",
+      "diffCount": 85,
+      "buckets": {
+        "missing-element": 0,
+        "extra-element": 0,
+        "geometry": 83,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 2
+      }
+    },
+    {
       "slug": "nijilu-37-zofe547",
       "diffCount": 35,
       "buckets": {
@@ -4979,14 +5027,14 @@
     },
     {
       "slug": "nosebu-15-fasu691",
-      "diffCount": 1161,
+      "diffCount": 946,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 1023,
-        "text-metrics": 66,
+        "geometry": 946,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 71
+        "other": 0
       }
     },
     {
@@ -5003,14 +5051,14 @@
     },
     {
       "slug": "notube-22-jera587",
-      "diffCount": 275,
+      "diffCount": 313,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 205,
-        "text-metrics": 33,
+        "geometry": 313,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 36
+        "other": 0
       }
     },
     {
@@ -5063,14 +5111,14 @@
     },
     {
       "slug": "nunuji-27-mosa042",
-      "diffCount": 35,
+      "diffCount": 53,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 32,
-        "text-metrics": 1,
+        "geometry": 53,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 1
+        "other": 0
       }
     },
     {
@@ -5470,18 +5518,6 @@
       }
     },
     {
-      "slug": "pucini-86-goti091",
-      "diffCount": 96,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 1,
-        "geometry": 91,
-        "text-metrics": 2,
-        "format-units": 0,
-        "other": 2
-      }
-    },
-    {
       "slug": "pufube-73-kase811",
       "diffCount": 134,
       "buckets": {
@@ -5699,11 +5735,11 @@
     },
     {
       "slug": "recani-60-licu962",
-      "diffCount": 115,
+      "diffCount": 64,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 114,
+        "geometry": 64,
         "text-metrics": 0,
         "format-units": 0,
         "other": 0
@@ -6694,6 +6730,18 @@
       }
     },
     {
+      "slug": "tegasu-93-fima016",
+      "diffCount": 4,
+      "buckets": {
+        "missing-element": 0,
+        "extra-element": 0,
+        "geometry": 4,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "tejuzi-96-fano922",
       "diffCount": 67,
       "buckets": {
@@ -7510,6 +7558,18 @@
       }
     },
     {
+      "slug": "vubato-50-gebu534",
+      "diffCount": 78,
+      "buckets": {
+        "missing-element": 0,
+        "extra-element": 0,
+        "geometry": 78,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
+      }
+    },
+    {
       "slug": "vubibu-30-rufa077",
       "diffCount": 46,
       "buckets": {
@@ -7823,14 +7883,14 @@
     },
     {
       "slug": "xezipe-17-tima059",
-      "diffCount": 41,
+      "diffCount": 386,
       "buckets": {
-        "missing-element": 1,
+        "missing-element": 0,
         "extra-element": 0,
-        "geometry": 26,
-        "text-metrics": 6,
+        "geometry": 374,
+        "text-metrics": 0,
         "format-units": 0,
-        "other": 8
+        "other": 12
       }
     },
     {
@@ -7907,11 +7967,11 @@
     },
     {
       "slug": "xogota-37-pele078",
-      "diffCount": 108,
+      "diffCount": 97,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
-        "geometry": 108,
+        "geometry": 97,
         "text-metrics": 0,
         "format-units": 0,
         "other": 0
@@ -8524,10 +8584,6 @@
       "reason": "refuses to parse -- source line 3: `<style src=strictuml.skin>`. Unported: CommandStyleImport (style/CommandStyleImport.java:68-77), registered by CommonCommands.addCommonCommands1 (CommonCommands.java:90). Line 2's lowercase `skinparam` IS stripped before dispatch, which is why the refusal lands on line 3. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
-      "slug": "dolice-60-copi767",
-      "reason": "refuses to parse -- source line 8: `  test`, the BODY of the multi-line opener `note left [[http://www.google.es]]` on line 7. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136). This port registers only the single-line form (:132) and it carries no UrlBuilder.OPTIONAL, so the opener never matches and its body is orphaned. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
       "slug": "fojomu-60-cuda302",
       "reason": "refuses to parse -- source line 9: `{start} <-> {end} : some time`. Unported: CommandLinkAnchor, the anchor-to-anchor duration link (CommandLinkAnchor.java:55-64; SequenceDiagramFactory.java:155). The exo arrows on lines 4 and 7 now parse; only the anchor link does not. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
@@ -8536,36 +8592,12 @@
       "reason": "refuses to parse -- source line 2: `---`. Unported: ReadLineWithYamlHeader's `---` front-matter block, stripped in the PREPROCESSOR before any command runs (preproc/ReadLineWithYamlHeader.java:91). A preprocessor gap, not a sequence command gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
-      "slug": "jiliba-03-lapi286",
-      "reason": "refuses to parse -- source line 2: `IT++`. Unported: CommandActivate2, the bare `NAME++` / `NAME--` life-line shorthand (CommandActivate2.java:29-37; SequenceDiagramFactory.java:128). NOT a CommandArrow gap: CommandArrow's ACTIVATION group needs an arrow, and this line has none. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "junide-55-soka558",
-      "reason": "refuses to parse -- source line 5: `url of APP is [[http://tomcat.apache.org/]]`. Unported: CommandUrl (sequencediagram/command/CommandUrl.java:61-72; SequenceDiagramFactory.java:154). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "ladiro-50-gume805",
-      "reason": "refuses to parse -- source line 5: `  Note`, the BODY of the multi-line opener `note left of Alice [[http://www.google.fr]]` on line 4. Unported: the UrlBuilder.OPTIONAL tail of factorySequenceNoteCommand.createMultiLine (FactorySequenceNoteCommand.java:76-90, the OPTIONAL at :89; SequenceDiagramFactory.java:134). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "nidozi-08-daxa280",
-      "reason": "refuses to parse -- source line 6: `  a note with a link`, the BODY of the multi-line opener `note left [[http://plantuml.com/start]]` on line 5. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136). The `[[url]]` on the ARROW at line 4 now parses. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
       "slug": "nizuzi-32-babe798",
       "reason": "refuses to parse -- source line 10: `{start} <-> {end} : This is not plotted`. Unported: CommandLinkAnchor (CommandLinkAnchor.java:55-64; SequenceDiagramFactory.java:155). The `{anchor}` PREFIX on lines 5 and 8 now parses; the anchor-to-anchor link does not. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "nuvoja-46-dezu541",
       "reason": "NOT a command gap and NOT pinned known-gap. `!includedef macro` is absent from tests/helpers/fixture-include-store.ts, so the PREPROCESSOR stops before any engine sees a line (IncludeExecutor.ts:127). A harness item; it is the single non-gapped defect refusal SLI 2 reports."
-    },
-    {
-      "slug": "tegasu-93-fima016",
-      "reason": "refuses to parse -- source line 3: `hide << new >> stereotype`. Unported: the GENDER group of CommandHideShowByGender (classdiagram/command/CommandHideShowByGender.java:72-83, the `\\<\\<.*\\>\\>` alternative at :76), registered by CommonCommands.addCommonHides (CommonCommands.java:106). This port's hideStereotypeCommand is `^hide\\s+stereotype\\s*$` (command-common.ts:71). NOT a CommandArrow STEREOTYPE gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "vubato-50-gebu534",
-      "reason": "refuses to parse -- source line 3: `url of RepoxServer is [[http://www.google.com]]`. Unported: CommandUrl (sequencediagram/command/CommandUrl.java:61-72; SequenceDiagramFactory.java:154). The exo arrows on lines 4 and 11 now parse. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "zoturo-25-jima978",

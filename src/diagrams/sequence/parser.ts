@@ -19,6 +19,7 @@ import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import { matchSpriteBase64Command } from './command-sprite.js';
 import { matchParticipantMultilineCommand } from './command-participant.js';
+import { drainOpenFrames } from './command-grouping.js';
 import { EmbeddedDiagram, getEmbeddedType } from '../../core/EmbeddedDiagram.js';
 import {
   applyHideStereotype,
@@ -370,6 +371,7 @@ function runDispatchLoop(state: ParseState, source: UmlSource): ParseRefusal | n
     const refusal = dispatchOrdinaryLine(state, line, origIndex);
     if (refusal !== null) return refusal;
   }
+  drainOpenFrames(state);
   return null;
 }
 

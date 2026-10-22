@@ -1113,8 +1113,12 @@ describe('routing conformance — jar-error classification', () => {
     // Derivation: 6927 + 642 + 86 = 7655.
     // 6927 -> 6979 agree at sdd1 close-b3: +52 svg-sequence golden clones
     // (pin round 2). Derivation: 6979 + 642 + 86 = 7707.
-    expect(pinnedAgree.length).toBe(6979);
-    expect(pinnedMisroutes.length).toBe(642);
+    // 6979 -> 6988 agree at sdd2 close-b1: +7 sequence rows that rendered
+    // (known-misroute -> agree: dolice-60, jiliba-03, junide-55, ladiro-50,
+    // nidozi-08, tegasu-93, vubato-50) and +2 svg-sequence golden clones
+    // (ladiro-50, pucini-86). Derivation: 6988 + 635 + 86 = 7709.
+    expect(pinnedAgree.length).toBe(6988);
+    expect(pinnedMisroutes.length).toBe(635);
     expect(pinnedJarErrors.length).toBe(86);
     // 7202 -> 7203 at gtc T1 (see the agree derivation above).
     // 7203 -> 7214 at gtc T2 (see the agree derivation above).
@@ -1134,7 +1138,8 @@ describe('routing conformance — jar-error classification', () => {
     // 7287 -> 7288 at gtc T6j (see the agree derivation above).
     // 7288 -> 7655 at sdd1 close-b2 (see the agree derivation above).
     // 7655 -> 7707 at sdd1 close-b3 (see the agree derivation above).
-    expect(manifest.fixtures.length).toBe(7707);
+    // 7707 -> 7709 at sdd2 close-b1 (+2 golden clones, see agree above).
+    expect(manifest.fixtures.length).toBe(7709);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -1199,7 +1204,8 @@ describe('routing conformance — jar-error classification', () => {
     // re-pinned agree once the salt plugin registered (sep T4a).
     // 817 -> 641 at wep/close-b4: the 176 wbs "no engine (D3 todo)" misroutes
     // re-pinned agree once the wbs plugin registered (wep T4a).
-    expect(censused.length).toBe(641);
+    // 641 -> 634 at sdd2/close-b1: the 7 sequence rows above now agree.
+    expect(censused.length).toBe(634);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

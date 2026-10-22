@@ -340,3 +340,72 @@ describe('noteOnArrowCommand anchors to Reference and GroupingLeaf, not just mes
     expect(ast.events.some((e) => e.kind === 'note')).toBe(false);
   });
 });
+
+describe('UrlBuilder.OPTIONAL on the note commands (sdd2 T1a)', () => {
+  // FactorySequenceNoteCommand.java:89,106,244-247; FactorySequenceNoteOnArrowCommand.java:86,99,216-219
+  const URL = 'http://www.google.fr';
+
+  it('multi-line `note left of Alice [[url]]` parses, url stored, body kept', () => {
+    const ast = parse(['participant Alice', `note left of Alice [[${URL}]]`, 'Note', 'end note']);
+    const ev = firstNote(ast);
+    expect(ev.participants).toEqual(['Alice']);
+    expect(ev.url).toBe(URL);
+    expect(ev.text).toBe('Note');
+  });
+
+  it('single-line `note over x [[url tooltip label]] : text` keeps only the text', () => {
+    const ast = parse(['participant server', `note over server [[${URL} {"status":200} note]] : test`]);
+    const ev = firstNote(ast);
+    expect(ev.participants).toEqual(['server']);
+    expect(ev.url).toBe(URL);
+    expect(ev.text).toBe('test');
+    expect(ast.participants.map((p) => p.id)).toEqual(['server']);
+  });
+
+  it('`hnote over x [[url]] : text` keeps the hexagon shape', () => {
+    const ev = firstNote(parse(['participant caller', `hnote over caller [[${URL}]] : t`]));
+    expect(ev.shape).toBe('hexagon');
+    expect(ev.url).toBe(URL);
+    expect(ev.text).toBe('t');
+  });
+
+  it('on-arrow `note left [[url]]` attaches to the last message and stores the url', () => {
+    const ev = firstNote(parse(['A -> B : hi', `note left [[${URL}]]`, 'body', 'end note']));
+    expect(ev.onMessage).toBe(true);
+    expect(ev.participants).toEqual(['A']);
+    expect(ev.url).toBe(URL);
+  });
+
+  it('on-arrow single line `note right [[url]] : another` splits url from text', () => {
+    const ev = firstNote(parse(['A -> B : hi', `note right [[${URL}]] : another note`]));
+    expect(ev.participants).toEqual(['B']);
+    expect(ev.url).toBe(URL);
+    expect(ev.text).toBe('another note');
+  });
+
+  it('`note across [[url]] : t` stores the url', () => {
+    const ev = firstNote(parse(['participant A', 'participant B', `note across [[${URL}]] : t`]));
+    expect(ev.participants).toEqual(['A', 'B']);
+    expect(ev.url).toBe(URL);
+  });
+
+  it('a note with no url carries no url field', () => {
+    expect('url' in firstNote(parse(['participant A', 'note left of A : x']))).toBe(false);
+  });
+});
+
+describe('note after an exo arrow (AbstractMessage.java:58, TileBuilder.java:122-134)', () => {
+  it('`[-> A : hi` then `note right : n` emits the note against A', () => {
+    const ev = firstNote(parse(['[-> A : hi', 'note right : n']));
+    expect(ev.onMessage).toBe(true);
+    expect(ev.position).toBe('right');
+    expect(ev.participants).toEqual(['A']);
+    expect(ev.text).toBe('n');
+  });
+
+  it('multi-line `note left` after `A ->] : x` anchors to A', () => {
+    const ev = firstNote(parse(['A ->] : x', 'note left', 'body', 'end note']));
+    expect(ev.participants).toEqual(['A']);
+    expect(ev.text).toBe('body');
+  });
+});

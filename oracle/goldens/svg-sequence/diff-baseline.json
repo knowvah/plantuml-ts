@@ -852,10 +852,10 @@
       "type": "sequence",
       "slug": "cazusa-73-masi168",
       "status": "baseline",
-      "weightedScore": 701,
+      "weightedScore": 236,
       "diffCount": 264,
-      "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "ed7355c4"
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -1365,10 +1365,10 @@
       "type": "sequence",
       "slug": "debufa-67-poma789",
       "status": "baseline",
-      "weightedScore": 669,
+      "weightedScore": 182,
       "diffCount": 136,
-      "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "ed7355c4"
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -1599,10 +1599,10 @@
       "type": "sequence",
       "slug": "diruxe-35-xujo142",
       "status": "baseline",
-      "weightedScore": 439,
+      "weightedScore": 179,
       "diffCount": 199,
-      "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "2d19492c"
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -1670,12 +1670,11 @@
     {
       "type": "sequence",
       "slug": "dolice-60-copi767",
-      "status": "error",
-      "weightedScore": null,
+      "status": "baseline",
+      "weightedScore": 39,
       "diffCount": null,
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 8: `  test`, the BODY of the multi-line opener `note left [[http://www.google.es]]` on line 7. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136). This port registers only the single-line form (:132) and it carries no UrlBuilder.OPTIONAL, so the opener never matches and its body is orphaned. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -3258,10 +3257,10 @@
       "type": "sequence",
       "slug": "jedado-35-lobi482",
       "status": "baseline",
-      "weightedScore": 108,
+      "weightedScore": 5,
       "diffCount": 52,
-      "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "ed7355c4"
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -3329,12 +3328,11 @@
     {
       "type": "sequence",
       "slug": "jiliba-03-lapi286",
-      "status": "error",
-      "weightedScore": null,
+      "status": "baseline",
+      "weightedScore": 2,
       "diffCount": null,
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 2: `IT++`. Unported: CommandActivate2, the bare `NAME++` / `NAME--` life-line shorthand (CommandActivate2.java:29-37; SequenceDiagramFactory.java:128). NOT a CommandArrow gap: CommandArrow's ACTIVATION group needs an arrow, and this line has none. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -3537,12 +3535,11 @@
     {
       "type": "sequence",
       "slug": "junide-55-soka558",
-      "status": "error",
-      "weightedScore": null,
+      "status": "baseline",
+      "weightedScore": 6,
       "diffCount": null,
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 5: `url of APP is [[http://tomcat.apache.org/]]`. Unported: CommandUrl (sequencediagram/command/CommandUrl.java:61-72; SequenceDiagramFactory.java:154). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -4285,12 +4282,11 @@
     {
       "type": "sequence",
       "slug": "ladiro-50-gume805",
-      "status": "error",
-      "weightedScore": null,
+      "status": "pinned",
+      "weightedScore": 0,
       "diffCount": null,
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 5: `  Note`, the BODY of the multi-line opener `note left of Alice [[http://www.google.fr]]` on line 4. Unported: the UrlBuilder.OPTIONAL tail of factorySequenceNoteCommand.createMultiLine (FactorySequenceNoteCommand.java:76-90, the OPTIONAL at :89; SequenceDiagramFactory.java:134). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -5816,12 +5812,11 @@
     {
       "type": "sequence",
       "slug": "nidozi-08-daxa280",
-      "status": "error",
-      "weightedScore": null,
+      "status": "baseline",
+      "weightedScore": 85,
       "diffCount": null,
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 6: `  a note with a link`, the BODY of the multi-line opener `note left [[http://plantuml.com/start]]` on line 5. Unported: factorySequenceNoteOnArrowCommand.createMultiLine (FactorySequenceNoteOnArrowCommand.java:77-88; SequenceDiagramFactory.java:136). The `[[url]]` on the ARROW at line 4 now parses. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -5990,10 +5985,10 @@
       "type": "sequence",
       "slug": "nosebu-15-fasu691",
       "status": "baseline",
-      "weightedScore": 2902,
+      "weightedScore": 946,
       "diffCount": 1323,
-      "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "2d19492c"
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -6026,10 +6021,10 @@
       "type": "sequence",
       "slug": "notube-22-jera587",
       "status": "baseline",
-      "weightedScore": 970,
+      "weightedScore": 313,
       "diffCount": 280,
-      "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "ed7355c4"
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -6107,10 +6102,10 @@
       "type": "sequence",
       "slug": "nunuji-27-mosa042",
       "status": "baseline",
-      "weightedScore": 51,
+      "weightedScore": 53,
       "diffCount": 43,
-      "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "ed7355c4"
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -6583,11 +6578,11 @@
     {
       "type": "sequence",
       "slug": "pucini-86-goti091",
-      "status": "baseline",
-      "weightedScore": 109,
+      "status": "pinned",
+      "weightedScore": 0,
       "diffCount": 94,
-      "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "2d19492c"
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -6809,10 +6804,10 @@
       "type": "sequence",
       "slug": "recani-60-licu962",
       "status": "baseline",
-      "weightedScore": 143,
+      "weightedScore": 64,
       "diffCount": 128,
-      "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "2d19492c"
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -8050,12 +8045,11 @@
     {
       "type": "sequence",
       "slug": "tegasu-93-fima016",
-      "status": "error",
-      "weightedScore": null,
+      "status": "baseline",
+      "weightedScore": 4,
       "diffCount": null,
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 3: `hide << new >> stereotype`. Unported: the GENDER group of CommandHideShowByGender (classdiagram/command/CommandHideShowByGender.java:72-83, the `\\<\\<.*\\>\\>` alternative at :76), registered by CommonCommands.addCommonHides (CommonCommands.java:106). This port's hideStereotypeCommand is `^hide\\s+stereotype\\s*$` (command-common.ts:71). NOT a CommandArrow STEREOTYPE gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -8951,12 +8945,11 @@
     {
       "type": "sequence",
       "slug": "vubato-50-gebu534",
-      "status": "error",
-      "weightedScore": null,
+      "status": "baseline",
+      "weightedScore": 78,
       "diffCount": null,
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 3: `url of RepoxServer is [[http://www.google.com]]`. Unported: CommandUrl (sequencediagram/command/CommandUrl.java:61-72; SequenceDiagramFactory.java:154). The exo arrows on lines 4 and 11 now parse. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -9340,10 +9333,10 @@
       "type": "sequence",
       "slug": "xezipe-17-tima059",
       "status": "baseline",
-      "weightedScore": 579,
+      "weightedScore": 386,
       "diffCount": 45,
-      "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "ed7355c4"
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",
@@ -9475,10 +9468,10 @@
       "type": "sequence",
       "slug": "xogota-37-pele078",
       "status": "baseline",
-      "weightedScore": 108,
+      "weightedScore": 97,
       "diffCount": 166,
-      "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "ed7355c4"
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "4f43f3ed"
     },
     {
       "type": "sequence",

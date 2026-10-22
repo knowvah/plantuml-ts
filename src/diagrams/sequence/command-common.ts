@@ -69,20 +69,33 @@ export const rotateCommand: Command = {
   },
 };
 
-/** `hide stereotype` — reached in sequence diagrams through
+/** `GENDER` -- `CommandHideShowByGender.java:75-77`, `%pLN_.` widened to its
+ *  `\p{L}\p{N}_.` JS spelling. */
+const GENDER = String.raw`(?:(?:class|object|interface|enum|annotation|dataclass|record|abstract|[\p{L}\p{N}_.]+|"[^"]+"|<<.*>>)\s+)*?`;
+
+/** `hide|show [GENDER] stereotype(s)` — reached in sequence diagrams through
  *  `SequenceDiagramFactory:100` -> `CommonCommands#addCommonCommands1` ->
  *  `addCommonHides` (`CommonCommands.java:103-106`) ->
- *  `CommandHideShowByGender`, whose `stereotype` arm is `:195`. T13 recorded
- *  this as an unmodelled no-op after grepping only `sequencediagram/command/`
- *  and the CommonCommands ADD list, and flagged it for re-checking: the
- *  registration is one level down, in `addCommonHides`. Now honoured —
- *  suppresses the participant stereotype run, which the jar's own goldens
- *  confirm both ways (`secida-27-jaco323` carries `hide stereotype` and shows
- *  bare names; `birocu-87-xubi808` has none and shows `«APIGateway»`). */
+ *  `CommandHideShowByGender`. The regex's GENDER run
+ *  (`CommandHideShowByGender.java:75-77`) is a lazy repeat of a type keyword,
+ *  a name, a quoted name or `<<...>>`; the sequence arm IGNORES it and only
+ *  applies the PORTION (`executeSequenceDiagram` `:163-166`: `diagram
+ *  .hideOrShow(portion.asSet(), show)`). Sequence-scoped: the class engine
+ *  carries its own `hide`/`show` directive (`class-command-directives.ts`);
+ *  this module is imported by no other engine's dispatch.
+ *
+ *  Of the portions (`:79-81`, `getEntityPortion :286-304`) only `stereotype`
+ *  is observable in a sequence diagram (`Participant.java:125-135`); the
+ *  others are accepted and have no effect. T13 confirmed the jar's goldens
+ *  both ways (`secida-27-jaco323` hides, `birocu-87-xubi808` shows). */
 export const hideStereotypeCommand: Command = {
-  pattern: /^hide\s+stereotype\s*$/i,
-  execute(state) {
-    state.ast.options.hideStereotype = true;
+  pattern: new RegExp(
+    String.raw`^(hide|show)\s+${GENDER}(?:empty\s+)?(members?|attributes?|fields?|methods?|circles?|circled?|(stereotypes?))$`,
+    'iu',
+  ),
+  execute(state, match) {
+    if (match[3] === undefined) return;
+    state.ast.options.hideStereotype = match[1]!.toLowerCase() === 'hide';
   },
 };
 
