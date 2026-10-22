@@ -3297,6 +3297,15 @@
     },
     {
       "type": "sequence",
+      "slug": "jetigu-21-zaje860",
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": null,
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "941e6359"
+    },
+    {
+      "type": "sequence",
       "slug": "jeviru-31-gasi159",
       "status": "baseline",
       "weightedScore": 6,
@@ -6147,6 +6156,15 @@
       "diffCount": 41,
       "measuredAt": "2026-10-21",
       "measuredAgainstCommit": "d563719c"
+    },
+    {
+      "type": "sequence",
+      "slug": "nuzise-60-temi305",
+      "status": "baseline",
+      "weightedScore": 87,
+      "diffCount": null,
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "941e6359"
     },
     {
       "type": "sequence",

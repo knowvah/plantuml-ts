@@ -3,7 +3,7 @@
   "totals": {
     "missing-element": 36,
     "extra-element": 0,
-    "geometry": 2054,
+    "geometry": 2141,
     "text-metrics": 198,
     "format-units": 0,
     "other": 286
@@ -727,6 +727,18 @@
         "text-metrics": 0,
         "format-units": 0,
         "other": 6
+      }
+    },
+    {
+      "slug": "nuzise-60-temi305",
+      "diffCount": 87,
+      "buckets": {
+        "missing-element": 0,
+        "extra-element": 0,
+        "geometry": 87,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 0
       }
     },
     {

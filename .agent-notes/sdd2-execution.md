@@ -47,3 +47,15 @@
 - **Finding**: `src/core/theme-graph-colors-a.ts` is 525 lines (already 525 at main `b34120ea9`, before sdd2); the PostToolUse cap is 500. sdd2 did not touch it. `sequence-parse-helpers.ts` (540) and `theme-graph-colors-b.ts` (508) were split during sdd2 because the drive grew them.
 - **Impact**: a dedicated cleanup PR should split `-a` the same way (type-only move into a new slice).
 - **Confidence**: High.
+
+## Observation: the ratchet harness's missing asset store hides engine residuals
+- **Context**: sdd2 T-exit diagnosis of the 109 open rows.
+- **Finding**: `render-fixture-sequence.ts:121` and `classify.mts`/`diff-one.mts` pass no emoji/sprite/utility asset store. Four rows (gacemo, rapoto, savebe, tugonu) read diverged on the fallback glyph alone. With the survey's store wired in, gacemo is zero, and the other three show small real residuals (`AtomSprite.java:77` sprite font colour; to255 rounding).
+- **Impact**: classify both over-counts these rows and hides their real mechanisms. Wire the store in before the next drive measures.
+- **Confidence**: High (agent re-render with the survey store, verified against the cited code).
+
+## Observation: `to255` rounds in two places where Java truncates
+- **Context**: sdd2 T-exit, rows davipu, fixecu, losilu, naliba, dekapo, rapoto, savebe, tugonu.
+- **Finding**: `ColorUtils.to255` is `(int)(255 * v)` (`ColorUtils.java:169-170`); `src/core/tim/builtin/color-utils.ts:296` and `src/core/klimt/sprite/ColorResolver.ts:230` both use `Math.round`, so a channel lands one step high when its fraction is ≥ .5.
+- **Impact**: two copies of one primitive; fix both together (and consider sharing one).
+- **Confidence**: High (both files read; Java read).

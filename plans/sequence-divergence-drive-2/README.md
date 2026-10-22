@@ -5,6 +5,37 @@
 `decisions.md`, then the current batch's `overview.md`. Tail
 `decision-journal.md` for where you stopped.
 
+## Status — DONE 2026-10-21
+
+Every batch has closed, and D9 is met. The ratchet-path classify (1143 rows)
+went from b0 to final as follows:
+
+| cohort | b0 | final |
+|---|---:|---:|
+| zero | 419 | **1034** |
+| paint-only | 4 | 20 |
+| geometry | 539 | 52 |
+| structural | 166 | 37 |
+| error | 13 | **0** |
+
+- Σ weightedScore fell from 73273 to **4355** (−94.1%).
+- Pins went from 419 to **1034**, every zero-diff row (floor 560).
+- The sequence survey went from 419 to **1035** conformant (gacemo is
+  survey-conformant; classify has no emoji store).
+- There were 0 conformant losses in any engine at any close, and none in
+  `final-eng` against `b0-eng`. Non-sequence movers were all improvements:
+  unknown 522 → 554, usecase 67 → 68.
+- The survey wall-clock is 37 s at load 3.0, against b0's 34.6 s.
+- The final gates passed: 1509 = 1509 collected, 31717 passed, and
+  typecheck, lint and build all exit 0.
+
+The 109 open rows each carry a mechanism and an owner in
+[fixtures.md](fixtures.md). They are filed by family in
+`planning/next-missions.md`: 27 families, the largest being the
+scale/chrome order, handwritten, the SAX sprite parser and par2. The
+handwritten rows are owned by their own mission. The working history is
+tagged `sdd2/pre-squash`.
+
 ## Objective
 
 Take sequence from 419 to every reachable fixture conformant with the jar.
@@ -137,8 +168,8 @@ Collected (JSON reporter) must equal on-disk. Check `uptime` first; above
 | [6](batch-6/overview.md) | creole through core | T6a–T6e, close | [x] |
 | [7](batch-7/overview.md) | remaining structural families | T7a–T7g, close | [x] |
 | [8](batch-8/overview.md) | core preprocessor errors | T8a–T8c, close | [x] |
-| [exit](batch-exit/overview.md) | final re-pin, survey, ledger, PR prep | T-exit | [ ] |
-| [squash](batch-squash/overview.md) | one commit per batch from the close trees; tag the working history | T-squash | [ ] |
+| [exit](batch-exit/overview.md) | final re-pin, survey, ledger, PR prep | T-exit | [x] |
+| [squash](batch-squash/overview.md) | one commit per batch from the close trees; tag the working history | T-squash | [x] |
 
 ## Documents
 
