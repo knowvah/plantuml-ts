@@ -1,0 +1,36 @@
+@startuml
+title Long title to see cropped arrow
+participant Alice as a
+participant Bob   as b
+== <color:red> KO ==
+ [o<-x b : "" [o<-x""
+ [o//- b : "" [o//-""
+  [o/- b : ""  [o/-""
+ [o\\- b : "" [o\\-""
+  [o\- b : ""  [o\-""
+ [o<<- b : "" [o<<-""
+[x<->x b : ""[x<->x""
+  [o<- b : ""  [o<-""
+  [<-o b : ""  [<-o""
+  [<-x b : ""  [<-x""
+...
+  [x<-o b : ""  [x<-o""
+  [//-o b : ""  [//-o""
+   [/-o b : ""   [/-o""
+  [\\-o b : ""  [\\-o""
+   [\-o b : ""   [\-o""
+  [<<-o b : ""  [<<-o""
+   [<-o b : ""   [<-o""
+== <color:green> OK ==
+[o<->o b : ""[o<->o""
+  [<-> b : ""  [<->""
+ [o<-o b : "" [o<-o""
+...
+  [x<- b : ""  [x<-""
+  [//- b : ""  [//-""
+   [/- b : ""   [/-""
+  [\\- b : ""  [\\-""
+   [\- b : ""   [\-""
+  [<<- b : ""  [<<-""
+   [<- b : ""   [<-""
+@enduml

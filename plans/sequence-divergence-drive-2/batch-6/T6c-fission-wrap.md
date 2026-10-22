@@ -38,3 +38,6 @@ tests.
 
 ## Added at T3c hand-back (journal row 55)
 putuku: self message + right note — drawn max = self.drawnMax + noteWidth (`CommunicationTileSelfNoteRight.java:154-178`); dominated by unported Maxmessagesize.
+
+## Added at T5b hand-back (journal row 73)
+N7: note text ignores `wrapWidth` (`ComponentRoseNote.java:67`): jafufe, xujavu, zajova.

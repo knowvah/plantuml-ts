@@ -44,3 +44,7 @@ as you see fit), `src/diagrams/sequence/command-sprite.ts`,
 - Given `<< ($sprite,#c) >>`, then the lifeline title is empty (test) —
   every engine's pins unchanged.
 - Given liguma, then an `<image>` is emitted.
+
+## Added at T5i hand-back (journal row 86)
+- `participantBadgeGeo(...).nameCx` (`sequence-layout-participant-sizing.ts`) is unused since T5i except the call at `renderer-participant-shapes.ts:203`: remove both.
+- `participantMinWidth` rebuilds the merged participant style; fold `minimumWidth` into `ParticipantPaints` (`sequence-participant-paints.ts`).

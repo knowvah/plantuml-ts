@@ -21,6 +21,7 @@ import type { Theme } from '../../core/theme.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import { runDrawMetrics } from './run-draw-metrics.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { defaultMessageFont } from './sequence-arrow-paint.js';
 import { atomFontSpec } from './sequence-creole-text-atom.js';
 import {
@@ -371,6 +372,33 @@ export function messageLabelBlock(
   env: MessageLabelEnv,
   font: FontConfiguration = defaultMessageFont(),
 ): MessageLabelBlock {
+  return placeMessageLabel({ label, numberText, leftX, arrowY, font }, env);
+}
+
+/** What {@link placeMessageLabel} places: {@link messageLabelBlock}'s
+ *  parameters, plus how the label's ROWS sit inside the block. */
+export interface MessageLabelSpec {
+  readonly label: string;
+  readonly numberText: string | undefined;
+  readonly leftX: number;
+  readonly arrowY: number;
+  readonly font: FontConfiguration;
+  /** The arrow style's `HorizontalAlignment`: each row's shift inside the
+   *  block, `SheetBlock1#initMap`'s `(maxWidth - width) / coef`
+   *  (`SheetBlock1.java:155-193`); `undefined` and LEFT do not shift
+   *  (`AbstractTextualComponent.java:81,89-92`). */
+  readonly rowAlign?: HorizontalAlignment | undefined;
+}
+
+/** `SheetBlock1#getCoef`: CENTER halves the slack, RIGHT takes all of it. */
+function rowSlackShare(align: HorizontalAlignment | undefined): number {
+  if (align === HorizontalAlignment.CENTER) return 0.5;
+  return align === HorizontalAlignment.RIGHT ? 1 : 0;
+}
+
+/** {@link messageLabelBlock} with the label's row alignment. */
+export function placeMessageLabel(request: MessageLabelSpec, env: MessageLabelEnv): MessageLabelBlock {
+  const { label, numberText, leftX, arrowY, font, rowAlign } = request;
   const { measurer } = env;
   // `AbstractTextualComponent` maps an empty display to a `TextBlockEmpty`,
   // which draws nothing (`AbstractTextualComponent.java:84-85`) -- so a
@@ -412,7 +440,12 @@ export function messageLabelBlock(
   // -- a non-text atom advances x without producing a run (`sequence-creole.ts`).
   const end = numberRuns.at(-1);
   const labelLeft = end === undefined ? leftX : end.x + end.textWidth + MESSAGE_NUMBER_MARGIN;
-  const placed = lines.flatMap((text, i) => runsAt(text, labelLeft, baselineOfRow(i)));
+  const rowWidths = lines.map((text) => sequenceLabelLineWidth(text, spec, measurer, atoms));
+  const blockWidth = Math.max(0, ...rowWidths);
+  const share = rowSlackShare(rowAlign);
+  const placed = lines.flatMap((text, i) =>
+    runsAt(text, labelLeft + (blockWidth - rowWidths[i]!) * share, baselineOfRow(i)),
+  );
   const [first, ...rest] = numberRuns;
   return first === undefined ? { lines: placed } : { lines: [...rest, ...placed], number: first };
 }

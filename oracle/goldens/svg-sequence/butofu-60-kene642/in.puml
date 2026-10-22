@@ -1,0 +1,8 @@
+@startuml
+participant foo as f
+queue bar as q
+participant baz as b
+f -> q: Enqueue
+q <- b: Dequeue
+q --> b: data
+@enduml

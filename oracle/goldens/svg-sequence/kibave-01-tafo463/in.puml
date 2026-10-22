@@ -1,0 +1,20 @@
+@startuml
+skinparam {
+    ActorBackgroundColor red
+    ActorBorderColor blue
+    BoundaryBackgroundColor #de935f
+    BoundaryBorderColor #f5871f
+    ControlBackgroundColor #b5bd68
+    ControlBorderColor #718c00
+    DatabaseBackgroundColor #8abeb7
+    DatabaseBorderColor #3e999f
+    EntityBackgroundColor #81a2be
+    EntityBorderColor #4271ae
+}
+boundary boundary
+control control
+database database
+entity entity
+actor actor
+collections collections
+@enduml

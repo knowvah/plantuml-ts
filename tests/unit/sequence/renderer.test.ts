@@ -105,7 +105,7 @@ function labelRunsFor(p: Omit<ParticipantGeo, 'labelRuns'>): TextRun[] {
   const spec = fontSpecOf(defaultTheme);
   const lineHeight = measurer.measure('M', spec).height;
   const ascent = lineHeight - measurer.getDescent(spec, 'M');
-  const cy = participantLabelCy(p.type, p.height, p.y, true, defaultTheme);
+  const cy = participantLabelCy(p.type, p.height, p.y, true, { scaleK: 1 });
   const textWidth = measurer.measure(p.display, spec).width;
   return [
     {

@@ -48,8 +48,9 @@ import type { SequencePaint } from './sequence-skin-param.js';
 import { messageTileAdvance, type PlacedTile } from './sequence-layout-message.js';
 import { messageTileGaugeOf, type TileMetrics } from './sequence-y-gauge.js';
 import {
+  displayLines,
   MESSAGE_NUMBER_MARGIN,
-  messageLabelBlock,
+  placeMessageLabel,
   messageLabelRows,
   numberTextOf,
   TRANSPARENT_SVG,
@@ -57,7 +58,7 @@ import {
 import { ARROW_DELTA_X, DIAM_CIRCLE } from './sequence-arrowhead.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
 import { sequenceAtomContext, sequenceLabelBlockWidth, sequenceLabelLineWidth } from './sequence-creole.js';
-import { messagePaint } from './sequence-arrow-paint.js';
+import { arrowDirectionOf, labelTextPos, messagePaint, messagePosition } from './sequence-arrow-paint.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -136,7 +137,9 @@ function labelBlockWidth(event: MessageExoEvent, ctx: EventProcessingContext, fo
   // measures as a bold `1`, not as its markup.
   const numberWidth = numberText === undefined ? 0 : sequenceLabelLineWidth(numberText, fontSpec, ctx.measurer, atoms);
   const gap = numberText === undefined ? 0 : MESSAGE_NUMBER_MARGIN;
-  const lines = event.label === '' ? [] : event.label.split('\n');
+  // `Display.getWithNewlines` collapses `\\` to `\` before any block measures
+  // it (`Display.java:308-310`); `displayLines` is the drawn side's own split.
+  const lines = event.label === '' ? [] : displayLines(event.label);
   const labelWidth = sequenceLabelBlockWidth(lines, fontSpec, ctx.measurer, atoms);
   return numberWidth + gap + labelWidth;
 }
@@ -166,6 +169,10 @@ interface ExoSpan {
   point1: number;
   /** `getPoint2` (`:207-212`). */
   point2: number;
+  /** `Area#textDeltaX`, taken from `getPoint1/2` and `getPoint1/2Value`
+   *  BEFORE the livebox shift and the circle insets
+   *  (`CommunicationExoTile.java:122-124`). */
+  textDeltaX: number;
 }
 
 /**
@@ -189,6 +196,9 @@ function exoSpan(event: MessageExoEvent, posC: number, ctx: EventProcessingConte
   let x1 = right || event.shortArrow ? point1 : BORDER1;
   let x2 = point2;
 
+  // `CommunicationExoTile.java:122-124`: read before `:128-135` and `:137-147`.
+  const textDeltaX = event.shortArrow ? 0 : right ? point2 - x2 : point1 - x1;
+
   // `livingSpace.getLevelAt(this, IGNORE_FUTURE_DEACTIVATE)`
   // (`CommunicationExoTile.java:122`) -- the participant's real nesting
   // depth, which is what the two lines below were always written to
@@ -208,22 +218,47 @@ function exoSpan(event: MessageExoEvent, posC: number, ctx: EventProcessingConte
 
   x1 += leftCircleInset(event.arrow, event.exoType);
   x2 -= rightCircleInset(event.arrow, event.exoType);
-  return { x1, x2, point1, point2 };
+  return { x1, x2, point1, point2, textDeltaX };
 }
 
 /**
- * Where the label block's left edge lands: `getOldPaddingX1()`, plus
- * `getArrowDeltaX()` when the drawn head points right-to-left, plus the
- * positive part of `Area#textDeltaX` — which is how upstream keeps a
- * border-stretched arrow's label beside its PARTICIPANT instead of dragging
- * it to the middle of the stretch.
- * @see skin/rose/ComponentRoseArrow.java:173-179; teoz/CommunicationExoTile.java:112-117
+ * Where the label block's left edge lands: `ComponentRoseArrow#drawInternalU`'s
+ * `textPos` -- LEFT is `getOldPaddingX1()` plus `getArrowDeltaX()` when the
+ * drawn head points right-to-left; CENTER and RIGHT measure against the
+ * component's width (`Rose.java:299-342` picks which) -- plus the positive
+ * part of `Area#textDeltaX`, which is how upstream keeps a border-stretched
+ * arrow's label beside its PARTICIPANT instead of dragging it to the middle
+ * of the stretch.
+ *
+ * The component is built on the message's config, `reverse()`d for direction
+ * -1, so the dressings swap then (`CommunicationExoTile.java:96-98`).
+ *
+ * A non-short RIGHT-border arrow's `x2` is provisional until the diagram's
+ * width is known (see {@link exoSpan}), so CENTER and RIGHT there cannot be
+ * measured yet and fall back to LEFT -- an open item, not upstream's rule.
+ * @see skin/rose/ComponentRoseArrow.java:164-179; teoz/CommunicationExoTile.java:112-117
  */
-function exoLabelLeft(event: MessageExoEvent, span: ExoSpan): number {
-  const right = isRightBorder(event.exoType);
-  const textDeltaX = event.shortArrow ? 0 : right ? span.point2 - span.x2 : span.point1 - span.x1;
-  const reverseHead = getDirection(event.exoType) === -1 ? ARROW_DELTA_X : 0;
-  return span.x1 + ARROW_PADDING_X + reverseHead + Math.max(0, textDeltaX);
+function exoLabelLeft(
+  event: MessageExoEvent,
+  span: ExoSpan,
+  ctx: EventProcessingContext,
+  font: FontConfiguration,
+): number {
+  const dir = arrowDirectionOf(event.arrow, getDirection(event.exoType) === -1);
+  const widthKnown = event.shortArrow || !isRightBorder(event.exoType);
+  const position = widthKnown
+    ? messagePosition(event.styleBuilder, dir, event.arrow.reverseDefine === true)
+    : undefined;
+  const textPos = labelTextPos({
+    position,
+    dir,
+    width: span.x2 - span.x1,
+    textDeltaX: span.textDeltaX,
+    textWidth: labelBlockWidth(event, ctx, font),
+    padX1: ARROW_PADDING_X,
+    padX2: ARROW_PADDING_X,
+  });
+  return span.x1 + textPos + Math.max(0, span.textDeltaX);
 }
 
 // ---------------------------------------------------------------------------
@@ -247,7 +282,17 @@ function buildExoGeo(
   // `+ blockWidth / 2` here existed only to turn it back into a centre for the
   // old signature. Exo x placement is `MessageExoArrow`'s, a different upstream
   // component, and is deliberately unchanged by this task.
-  const block = messageLabelBlock(event.label, numberTextOf(event), exoLabelLeft(event, span), y, ctx, paint.font);
+  const block = placeMessageLabel(
+    {
+      label: event.label,
+      numberText: numberTextOf(event),
+      leftX: exoLabelLeft(event, span, ctx, paint.font),
+      arrowY: y,
+      font: paint.font,
+      rowAlign: paint.align,
+    },
+    ctx,
+  );
   return {
     paint,
     kind: 'message',

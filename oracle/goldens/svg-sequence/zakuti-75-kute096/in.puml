@@ -1,0 +1,4 @@
+@startuml
+actor User
+note left of User : A first note
+@enduml

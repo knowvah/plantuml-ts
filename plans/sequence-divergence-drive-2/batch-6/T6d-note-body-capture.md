@@ -40,3 +40,6 @@ site of `EmbeddedDiagram` for the pattern.
 - Given `note over A` with `{{ … }}`, then one embedded `<image>` is
   emitted (test).
 - Given H and K targets, then structural sites are gone; no pinned change.
+
+## Added at T6a hand-back (journal row 76)
+The ratchet harness `tests/oracle/svg-conformance/render-fixture-sequence.ts` never calls `registerNestedDiagramRenderers` (activity harness `render-fixture-activity.ts:121`, production `src/index.ts:317`): cusete, dasutu, lezonu disagree classify vs survey. Add it (harness mirrors index.ts — memory conformance-harness-mirrors-index-ts); write-set + that file.

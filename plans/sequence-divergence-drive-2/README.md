@@ -132,7 +132,7 @@ Collected (JSON reporter) must equal on-disk. Check `uptime` first; above
 | [1](batch-1/overview.md) | note gaps, unported commands, unclosed group | T1a–T1c, close | [x] |
 | [2](batch-2/overview.md) | vertical tile model; LinkAnchor | T2a–T2e, close | [x] |
 | [3](batch-3/overview.md) | horizontal extents; reverse self | T3a–T3c, close | [x] |
-| [4](batch-4/overview.md) | text placement | T4a–T4c, close | [ ] |
+| [4](batch-4/overview.md) | text placement | T4a–T4c, close | [x] |
 | [5](batch-5/overview.md) | remainder: diagnose, then fix | T5a, T5b, T5c…, close | [ ] |
 | [6](batch-6/overview.md) | creole through core | T6a–T6e, close | [ ] |
 | [7](batch-7/overview.md) | remaining structural families | T7a–T7g, close | [ ] |

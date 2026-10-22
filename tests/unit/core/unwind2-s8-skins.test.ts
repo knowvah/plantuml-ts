@@ -18,7 +18,7 @@
  * `skin-class-after-reddress` is the page width following the shorter
  * banner. The `sonyxperiadev` residuals reproduce with the same
  * declarations in an inline `<style>` and no `skin` line at all (sequence
- * ignores `participant`/`lifeLine`/`arrow` styles and emits `document
+ * ignores `participant`/`lifeLine` styles and emits `document
  * BackGroundColor white` raw; state/usecase text ignores `root FontColor`;
  * no engine reads `root FontStyle`) -- engine style-reading gaps, not the
  * skin.
@@ -45,7 +45,9 @@ const PINS: Readonly<Record<string, number>> = {
   'skin-object-reddress': 5,
   'skin-object-sonyxperiadev': 2,
   'skin-sequence-reddress': 5,
-  'skin-sequence-sonyxperiadev': 1,
+  // 1 -> 0 at sdd2 close-b4: sequence now reads the arrow style's
+  // HorizontalAlignment (sdd2 T4c, `Rose.java:299-342`).
+  'skin-sequence-sonyxperiadev': 0,
   'skin-state-reddress': 5,
   'skin-state-sonyxperiadev': 2,
   'skin-strictuml': 5,

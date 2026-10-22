@@ -39,3 +39,6 @@ lirasa, susati, mukebo (G2); pizupi (AC).
 
 ## Added at T3c hand-back (journal row 55)
 Group-end notes in the frame extent: `GroupingTile.getMinX/getMaxX` add `getNotesWidth(LEFT/RIGHT)`; the port draws a note after `end` as a standalone tile.
+
+## Added at T5b hand-back (journal row 73)
+N6: note after a group `end` is drawn at the frame top (`GroupingTile.java:275,984-1012`); susati, lirasa.

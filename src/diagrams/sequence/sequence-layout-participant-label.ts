@@ -28,12 +28,14 @@ import {
   wrapGuillemet,
 } from '../../core/stereotype-decoration.js';
 import {
+  DB_TEXT_PADDING_X,
   participantBadgeGeo,
   participantLabelCy,
   participantLabelMetricsOf,
 } from './sequence-layout-participant-sizing.js';
 import { displayLines, TRANSPARENT_SVG } from './text-block-geo.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
+import { getMargin as queueMargin } from '../../core/decoration/symbol/USymbolQueue.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { getSpriteMonochrome } from '../../core/sprite-registry.js';
 import { spriteToPngDataUri, spriteMonochromeAsLike } from '../../core/klimt/sprite/sprite-raster.js';
@@ -265,15 +267,37 @@ function translateRun(run: TextRun, dx: number, baselineY: number): TextRun {
   return { ...moved, image: { ...run.image, y: run.image.y + baselineY - run.y } };
 }
 
+/** The kinds whose component is `ComponentRoseActor`'s shape: a glyph with
+ *  the text block stacked against it, padding `(0, 3, 0, 3)`. */
+function isStickKind(type: ParticipantGeo['type']): boolean {
+  return type === 'actor' || type === 'boundary' || type === 'control' || type === 'entity' || type === 'database';
+}
+
 /**
  * The name block's horizontal centre. `ComponentRoseParticipant` draws the
  * text block at `padding.getTranslate()` inside the FRONT rectangle, which is
  * `getTextWidth` wide (`ComponentRoseParticipant.java:101-111,118`), so
  * the block spans `[x + left, x + width - delta - right]` -- `delta` being
- * `getDeltaCollection()` (`:121-126`). Every other kind keeps its column
- * centre.
+ * `getDeltaCollection()` (`:121-126`).
+ *
+ * The stick kinds draw it at `getTextMiddlePostion` = `(getPreferredWidth -
+ * getTextWidth) / 2` with `getTextWidth` = block + 3 + 3
+ * (`ComponentRoseActor.java:75,85`, `AbstractTextualComponent.java:106-108`),
+ * so the block's LEFT edge is that offset and the padding is never added to
+ * it: the centre sits 3 left of the column's. `queue` draws it inside
+ * `USymbolQueue#asSmall` at `margin.getX1()` (`USymbolQueue.java:147`),
+ * `delta` being 0 because the glyph is the component's width
+ * (`ComponentRoseQueue.java:67,77`).
+ *
+ * `blockWidth` is the whole text block's, badge included (`TextBlockSprited
+ * .java:62`), `badgeWidth` the part of it left of the rows.
  */
-function nameCenterX(p: ParticipantGeo, paint: SequencePaint): number {
+function nameCenterX(p: ParticipantGeo, paint: SequencePaint, blockWidth: number, badgeWidth: number): number {
+  if (p.type === 'queue') return p.x + queueMargin().getX1() + badgeWidth + (blockWidth - badgeWidth) / 2;
+  if (isStickKind(p.type)) {
+    const left = (p.width - (blockWidth + DB_TEXT_PADDING_X * 2)) / 2;
+    return p.x + left + badgeWidth + (blockWidth - badgeWidth) / 2;
+  }
   if (p.type !== 'participant' && p.type !== 'collections') return p.centerX;
   const delta = p.type === 'collections' ? COLLECTIONS_DELTA : 0;
   const left = p.x + paint.padding.getLeft();
@@ -319,11 +343,25 @@ export function buildLabelRuns(
   const paint = paintOfGeo(p);
   const fonts = { font: paint.font, stereoFont };
   const rows = labelRows(headRowsOf(p.stereotypeLines ?? [], p.display, fonts), ctx, labelBackColor(p));
-  const cx = participantBadgeGeo(p.badge, p.x, p.width, paint.padding)?.nameCx ?? nameCenterX(p, paint);
-  // The block is centred on `cy`, and the rows stack from its top downward.
-  const cy = participantLabelCy(p.type, p.height, p.y, true, participantLabelMetricsOf(paint));
-  const blockWidth = Math.max(0, ...rows.map((r) => r.width));
-  let top = cy - rows.reduce((h, r) => h + r.height, 0) / 2;
+  const rowsWidth = Math.max(0, ...rows.map((r) => r.width));
+  const badgeWidth = p.badge === undefined ? 0 : p.badge.width + BADGE_GAP;
+  // `TextBlockSprited#calculateDimension`: width = rows + sprite + 6, height =
+  // max(sprite, rows) (`TextBlockSprited.java:55-62`).
+  const blockHeight = Math.max(
+    p.badge?.height ?? 0,
+    rows.reduce((h, r) => h + r.height, 0),
+  );
+  const kindCx = nameCenterX(p, paint, rowsWidth + badgeWidth, badgeWidth);
+  const cx =
+    isStickKind(p.type) || p.type === 'queue'
+      ? kindCx
+      : (participantBadgeGeo(p.badge, p.x, p.width, paint.padding)?.nameCx ?? kindCx);
+  // The block's TOP is `cy - blockHeight / 2`: the sprite draws at the block
+  // origin and the parent text block at the same y (`TextBlockSprited.java:
+  // 70-77`), so the rows start at the block top, not centred on it.
+  const cy = participantLabelCy(p.type, p.height, p.y, true, participantLabelMetricsOf(paint, 1, blockHeight));
+  const blockWidth = rowsWidth;
+  let top = cy - blockHeight / 2;
   const placed: TextRun[] = [];
   for (const row of rows) {
     // D4, over the ROW: every run of a row shifts by ONE dx, so the row moves

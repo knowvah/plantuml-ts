@@ -980,7 +980,8 @@ describe('refusal coverage — baseline shape', () => {
     // 7707 -> 7709 at sdd2/close-b1: +2 svg-sequence golden clones (ladiro-50, pucini-86).
     // 7709 -> 7798 at sdd2/close-b2: +89 svg-sequence golden clones (pin round 2).
     // 7798 -> 7975 at sdd2/close-b3: +177 svg-sequence golden clones (pin round 3).
-    expect(manifest.fixtures.length).toBe(7975);
+    // 7975 -> 8088 at sdd2/close-b4: +113 svg-sequence golden clones.
+    expect(manifest.fixtures.length).toBe(8088);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -1160,7 +1161,8 @@ describe('refusal coverage — baseline shape', () => {
     // jiliba-03, junide-55, nidozi-08, tegasu-93, vubato-50) + 2 golden clones.
     // 7490 -> 7582 at sdd2/close-b2: 3 link-anchor rows render + 89 golden clones.
     // 7582 -> 7759 at sdd2/close-b3: +177 golden clones.
-    expect(pinnedRendering.length).toBe(7759);
+    // 7759 -> 7872 at sdd2/close-b4: +113 svg-sequence golden clones.
+    expect(pinnedRendering.length).toBe(7872);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

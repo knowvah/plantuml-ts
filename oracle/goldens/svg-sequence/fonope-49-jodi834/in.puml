@@ -1,0 +1,8 @@
+@startuml
+title Long title to see cropped arrow
+participant Alice 
+participant Bob   
+
+Alice x->] : hop2
+
+@enduml

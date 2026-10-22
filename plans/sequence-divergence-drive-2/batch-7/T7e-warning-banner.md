@@ -34,3 +34,9 @@ warnings.ts`, `src/diagrams/sequence/index.ts`,
   (test).
 - Given activity's pins, then none changes after the lift.
 - Given the targets, then structural sites are gone.
+
+## Added at T5b hand-back (journal row 73)
+W1 rows confirmed by probe: baxuxa, vekami, gabisi (+ lokavu, lugika with the divider fix); kumovo, zajova, zogane fall. Origin `src/diagrams/sequence/index.ts:36-48`, harness `render-fixture-sequence.ts:118`.
+
+## Added at T5h hand-back (journal row 88)
+A top/bottom note after a `ref` makes the jar print a warning banner `This position is ignored: BOTTOM` (`Reference.java:166-171` returns a Warning; canvas +20). The ignored note is currently known only inside `notesOnMessages` (`sequence-note-folding.ts`); give warnings a home the banner can read.

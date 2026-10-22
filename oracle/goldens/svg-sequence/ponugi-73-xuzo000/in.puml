@@ -1,0 +1,5 @@
+@startuml
+actor 春 
+春 -> 春燕 : 燕燕燕 
+note left : 燕燕燕
+@enduml

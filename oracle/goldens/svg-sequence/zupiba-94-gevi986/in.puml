@@ -1,0 +1,9 @@
+@startuml
+actor Bob
+participant Alice
+participant ThisIsTheLongNameOfAnInstance as T
+Bob -> Alice : hello
+create T
+Alice -> T
+'create ThisIsTheLongNameOfAnInstance as T
+@enduml

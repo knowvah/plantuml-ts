@@ -1,0 +1,12 @@
+@startuml
+participant Foo0 #Pink
+actor Foo1 #Pink
+boundary Foo2 #Pink
+control Foo3 #Pink
+entity Foo4 #Pink
+database Foo5 #Pink
+Foo1 -> Foo2 : To boundary
+Foo1 -> Foo3 : To control
+Foo1 -> Foo4 : To entity
+Foo1 -> Foo5 : To database
+@enduml

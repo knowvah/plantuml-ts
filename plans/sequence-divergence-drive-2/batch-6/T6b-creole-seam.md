@@ -51,3 +51,9 @@ cross-cutting note; `activity-creole-sheet.ts` (whole);
 - Given clusters A, M, R, S, T, V, W, X, then their structural sites are
   gone (each row zero-diff or its remainder journaled to a family).
 - Given the sequence survey wall-clock, then ≤ 1.5× b0 (stop 17).
+
+## Added at T6a hand-back (journal row 76)
+Seam shape and call sites: `measurements/b6a-probe.md` §6. Use a FontSpec-aware `sequenceStringBounder` — core `MeasurerStringBounder` drops BOLD for weight-aware measurers (`src/core/measurer-bounder.ts:27-30`); do not change the core one. Probe patches (reference, never apply — D2 spirit): `/private/tmp/claude-501/-Users-scottseely-git-knowvah-plantuml-ts/303eb6e3-f3cf-4737-80a1-e4f9d9cbec55/scratchpad/t6a/seam-src.patch`.
+
+## Added at T5d hand-back (journal row 77)
+`sequence-note-width.ts` duplicates `sequence-layout-note.ts#noteBodyRuns` block-width computation; when notes move to the creole seam, make both read one measurement.
