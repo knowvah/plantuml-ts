@@ -1,0 +1,8 @@
+@startuml
+Bob -> Alice : hello
+alt [[https://www.plantuml.com]]
+note over Bob: [[https://www.google.com]]
+else [[https://www.plantuml.com]]
+note over Bob: [[https://www.google.com]]
+end
+@enduml

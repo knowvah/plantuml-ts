@@ -25,11 +25,11 @@
 import type { ActivationGeo, DelayGeo, EventGeo, LifelineSegment, ParticipantGeo } from './ast.js';
 import type { DelayEvent } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import { displayLines } from './text-block-geo.js';
-import { atomFontSpec } from './sequence-creole-text-atom.js';
 import { alignedBlockRuns } from './sequence-block-align.js';
-import { offsetRun } from './sequence-creole.js';
+import { offsetRun } from './sequence-creole-sheet.js';
 import { delayStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
 
 /** `ComponentRoseDelayText#getPreferredHeight` (`:72-75`): text height + 20. */
@@ -78,24 +78,28 @@ function delayLines(event: DelayEvent): readonly string[] {
  * `ComponentRoseDelayText#drawInternalU` (`:62-70`) centres the block in an
  * area exactly its own width, at `ypos = (height - textHeight) / 2` plus
  * `getOldPaddingY()`; the style's alignment places each line inside the block
- * (`delay { HorizontalAlignment center }`, `plantuml.skin:303`).
+ * (`delay { HorizontalAlignment center }`, `plantuml.skin:303`). The block is
+ * drawn on the `ug` the tile was handed (`:62-70`, no ink); its padding has
+ * no sides (`topRightBottomLeft(4, 0, 4, 0)`, `:54`).
  */
 export function layoutDelay(
   event: DelayEvent,
   y: number,
   participants: readonly ParticipantGeo[],
   measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
 ): DelayGeo {
   const paint = delayPaint(event);
   const lines = delayLines(event);
-  const lineHeight = measurer.measure('M', atomFontSpec(paint.font)).height;
-  const textHeight = lines.length * lineHeight + 2 * DELAY_PADDING_Y;
+  const context = { measurer, sprites };
+  const blockHeight = alignedBlockRuns(lines, paint.font, { leftX: 0, top: 0 }, paint.align, context).height;
+  const textHeight = blockHeight + 2 * DELAY_PADDING_Y;
   const height = textHeight + DELAY_HEIGHT_ALLOWANCE;
   const first = participants[0]!;
   const last = participants[participants.length - 1]!;
   const middleX = (first.centerX + last.centerX) / 2;
   const top = y + (height - textHeight) / 2 + DELAY_PADDING_Y;
-  const block = alignedBlockRuns(lines, paint.font, { leftX: 0, top }, paint.align, { measurer });
+  const block = alignedBlockRuns(lines, paint.font, { leftX: 0, top }, paint.align, context);
   const left = middleX - block.width / 2;
   const labelRuns = block.runs.map((r) => offsetRun(r, left, 0));
   return { paint, kind: 'delay', y, height, middleX, textWidth: block.width, labelRuns };

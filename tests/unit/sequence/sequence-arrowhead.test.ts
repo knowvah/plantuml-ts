@@ -11,12 +11,12 @@ import {
   SPACE_CROSS_X,
   headGeometryNormalSide,
   headGeometryReverseSide,
-  headGeometrySelf,
   inclination1Of,
   inclination2Of,
   inclinationAngle1,
   inclinationAngle2,
 } from '../../../src/diagrams/sequence/sequence-arrowhead.js';
+import { headGeometrySelf } from '../../../src/diagrams/sequence/sequence-arrowhead-self.js';
 import { reverseArrowConfiguration } from '../../../src/diagrams/sequence/renderer-arrowhead.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
@@ -309,7 +309,11 @@ describe('parsed arrow tokens carry the legacy ArrowConfiguration', () => {
     expect(msg).toBeDefined();
     expect(msg?.from).toBe(from);
     expect(msg?.to).toBe(to);
-    expect(msg?.arrow).toEqual(legacyArrowConfiguration(style, decorations ?? {}));
+    // `reverseDefine` is set exactly when the left dressing carries a `<` and
+    // the right one no `>` (`CommandArrow.java:302-310,388-389`).
+    const token = src.split(' ')[1]!;
+    const reverseDefine = token.includes('<') && !token.includes('>') ? { reverseDefine: true } : {};
+    expect(msg?.arrow).toEqual({ ...legacyArrowConfiguration(style, decorations ?? {}), ...reverseDefine });
   });
 
   // The two forms the pre-T6 parser refused, plus the four T7's composed

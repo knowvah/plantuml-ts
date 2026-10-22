@@ -27,13 +27,13 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 // `sequenceText`, and dropping the direct import is what makes that
 // structural rather than a convention.
 import { line } from '../../core/svg.js';
-import { sequenceText } from './sequence-text.js';
+import { primitiveFields, sequenceText, weightOf } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import type { TextRun } from './text-block-geo.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
-import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { fmt } from '../../core/svg-format.js';
 import { renderMessage } from './renderer-message.js';
+import { renderLinkAnchors } from './renderer-link-anchor.js';
 import { renderParticipantBox, renderFooterBox } from './renderer-participant-shapes.js';
 import { lifelineOf, renderDestroyCrosses, renderLifelinePass, type LiveboxItem } from './renderer-lifeline.js';
 import { renderFrameBlotter } from './renderer-frame-blotter.js';
@@ -51,9 +51,9 @@ import { renderDivider } from './renderer-divider.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme } from './scale-geo.js';
 import { paginateSequence } from './sequence-page.js';
-import { SEQUENCE_DOCUMENT_MARGIN } from '../../core/document-margin.js';
+import { canvasOf, documentChromeOf, preChromeDims } from './renderer-document.js';
 import { sequenceShadowDefs } from './sequence-shadow.js';
-import { renderBoxBackground, renderNote } from './renderer-note.js';
+import { renderBoxBackground, renderNote, renderNoteBackground } from './renderer-note.js';
 import { NEWPAGE_MARGIN_Y } from './newpage-style.js';
 
 /**
@@ -76,15 +76,14 @@ export function creoleRunText(run: TextRun, theme: ScaledTheme, fontSize: number
     fontFamily: run.fontFamily ?? theme.fontFamily,
     fontSize: run.fontSize ?? fontSize,
     fill: run.color ?? theme.colors.text,
-    // `'700'`, not `'bold'` -- the jar emits the numeric form, and
-    // `renderer-frame-header.ts#boldFontWeight` already set that convention.
-    ...((run.bold ?? boldFallback) ? { fontWeight: '700' as const } : {}),
+    // The numeric weight, not `'bold'` -- the jar emits the numeric form
+    // (`sequence-text.ts#runFontWeight`).
+    ...weightOf(run, boldFallback),
     ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
     ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
-    ...(run.url !== undefined ? { url: run.url } : {}),
-    // A `<math>`/`<latex>` run draws its image instead of a `<text>`
-    // (`sequence-text.ts#SequenceRunImage`, `AtomMath.java:78-97`).
-    ...(run.image !== undefined ? { image: run.image } : {}),
+    // url, image, shape, back colour, extended-colour lines
+    // (`sequence-text.ts#primitiveFields`).
+    ...primitiveFields(run),
   });
 }
 
@@ -235,7 +234,8 @@ function renderEvent(event: EventGeo, theme: ScaledTheme, isBackground: boolean)
   if (event.kind === 'frame') {
     return isBackground ? renderFrameBackground(event, theme) : renderFrame(event, theme);
   }
-  return isBackground ? '' : renderForeground(event, theme);
+  if (isBackground) return event.kind === 'note' ? renderNoteBackground(event, theme) : '';
+  return renderForeground(event, theme);
 }
 
 /** The foreground pass for every kind but `frame` (handled above). */
@@ -312,51 +312,6 @@ export function renderSequencePage(
 }
 
 /**
- * `SvgGraphics#ensureVisible:128-135`, called from the constructor with the
- * computed dimension (`:138-143`):
- *
- * ```java
- * if (x > maxX)  maxX = (int) (x + 1);
- * if (y > maxY)  maxY = (int) (y + 1);
- * ```
- *
- * The emitted `width`/`height`/`viewBox` are therefore `(int)(dim + 1)`, not
- * `trunc(dim)`. `assembleDocumentShell` truncates, so the `+ 1` is added here
- * and the two compose into upstream's own expression.
- *
- * IT IS APPLIED ON THE SEQUENCE PATH ONLY, deliberately. Taken in the shared
- * shell (`core/klimt/document-shell.ts`) it helps sequence by 830 and hurts
- * class by 2 362, state by 936, object by 260 and description by 26 — measured
- * per fixture across all five families before the ruling in
- * `findings/vertical-terms.md`. Those four are already correct at `trunc`:
- * their extent is a graphviz bounding box plus explicit margins, which already
- * carries the rounding applied during drawing. Sequence's is a raw max
- * coordinate, so sequence alone is short. `bidopa-30-jafi560` is the witness —
- * its width was 115 against the jar's 116.
- *
- * `maxX`/`maxY` also start at 10, a floor no sequence document reaches; it is
- * not modelled.
- */
-const ENSURE_VISIBLE_DELTA = 1;
-
-/**
- * lgm-T1a: the margin-less block `DiagramChromeFactory.create` receives --
- * `SequenceDiagramFileMakerTeoz#getTextBlock` reports `body + 10` and draws
- * at `translate(5, 5)` (`teoz/SequenceDiagramFileMakerTeoz.java:134-168`),
- * and `TextBlockExporter` adds `SequenceDiagram#getDefaultMargins()` on top
- * (`core/document-margin.ts`). `totalWidth`/`totalHeight` here are that sum,
- * so the block is `total - margin`; `core/annotations/chrome-export.ts`
- * composes chrome around it and puts the margin back. Left unset under a
- * `scale` (the margin is scaled with the body there, so it cannot be
- * subtracted as a constant) -- chrome then sees the final canvas as before.
- */
-function preChromeDims(geo: SequenceGeometry, k: number): Pick<RenderFragment, 'preChromeWidth' | 'preChromeHeight'> {
-  if (k !== 1) return {};
-  const m = SEQUENCE_DOCUMENT_MARGIN;
-  return { preChromeWidth: geo.totalWidth - m.left - m.right, preChromeHeight: geo.totalHeight - m.top - m.bottom };
-}
-
-/**
  * Render a sequence diagram geometry into an SVG string — PAGE 1 of it.
  *
  * The jar writes `f.svg`, `f_001.svg`, … for a multi-page document; this
@@ -379,9 +334,7 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
   const children: string[] = [];
 
   // 0. Box backgrounds (lowest z-order — behind lifelines and participants)
-  for (const box of scaledGeo.boxes) {
-    children.push(renderBoxBackground(box, scaledTheme));
-  }
+  children.push(...scaledGeo.boxes.map((box) => renderBoxBackground(box, scaledTheme)));
 
   // 1. Background pass -- `playingSpace.drawBackground(ugBody)`
   //    (`PlayingSpaceWithParticipants.java:218`), the FIRST of the five
@@ -391,6 +344,9 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
   //    109-117`), differing only in the `isBackground` flag `renderEvent`
   //    now takes. Everything but a frame's own band+outline is silent here.
   children.push(...renderEventPass(scaledGeo.events, scaledTheme, true));
+  //    The link anchors close `drawUInternal` after its tile loop
+  //    (`PlayingSpace.java:129-134`), in this pass as in step 5.
+  children.push(renderLinkAnchors(scaledGeo.linkAnchors, scaledTheme));
 
   // 2. Lifelines AND liveboxes -- one pass, per participant.
   //    `PlayingSpaceWithParticipants#drawU:221` calls
@@ -433,18 +389,14 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
   //    `playingSpace.drawForeground(ugBody)` (`:227`), the LAST of the five
   //    passes. Activations are absent here by design; see step 2.
   children.push(...renderEventPass(scaledGeo.events, scaledTheme, false));
+  children.push(renderLinkAnchors(scaledGeo.linkAnchors, scaledTheme));
 
   const shadowDefs = sequenceShadowDefs(scaledGeo, scaledTheme);
   return {
     body: children.join(''),
-    width: scaledGeo.totalWidth + ENSURE_VISIBLE_DELTA,
-    height: scaledGeo.totalHeight + ENSURE_VISIBLE_DELTA,
+    ...canvasOf(geo, k),
     ...preChromeDims(scaledGeo, k),
-    // `SvgGraphics` receives the background as `HColor#toSvg` and paints the
-    // canvas rect unless that string is `#00000000`, `#000000` or `#FFFFFF`
-    // (`SvgGraphics.java:189-191`). Handing over the raw token (`white`, as
-    // `!theme plain` writes it) failed that test and drew an extra rect.
-    background: resolveColorToSvgHex(theme.colors.background),
+    ...documentChromeOf(theme),
     // T2's `finalizeSequenceBody` (`core/assemble-svg.ts`) owns the content
     // `<g>` wrap and the background rect, so the body is handed over bare.
     diagramType: DIAGRAM_TYPE_SEQUENCE,

@@ -43,6 +43,7 @@
 import type { Command } from './sequence-parse-helpers.js';
 import { arrowCommand, decoratedArrowCommand, returnCommand } from './command-arrow.js';
 import { exoArrowLeftCommand, exoArrowRightCommand } from './command-exo-arrow.js';
+import { linkAnchorCommand } from './command-link-anchor.js';
 import {
   autonumberCommand,
   autonumberIncrementCommand,
@@ -59,7 +60,13 @@ import {
   skinParamMessageAlignCommand,
 } from './command-common.js';
 import { boxEndCommand, boxStartCommand, elseCommand, endCommand, groupingCommand } from './command-grouping.js';
-import { activateCommand, deactivateCommand, deactivateShortCommand, destroyCommand } from './command-lifeline.js';
+import {
+  activate2Command,
+  activateCommand,
+  deactivateCommand,
+  deactivateShortCommand,
+  destroyCommand,
+} from './command-lifeline.js';
 import {
   autoactivateCommand,
   bareDelayCommand,
@@ -71,6 +78,7 @@ import {
   refOverMultilineCommand,
   setSeparatorCommand,
   spaceCommand,
+  urlCommand,
 } from './command-misc.js';
 import {
   endNoteCommand,
@@ -119,6 +127,7 @@ export const SEQUENCE_COMMANDS: readonly SequenceCommand[] = [
   spaceCommand, //                 :143 CommandHSpace
   returnCommand, //                :129 CommandReturn
   arrowCommand, //                 :111 CommandArrow
+  activate2Command, //             :128 CommandActivate2
   pragmaCommand, //                :100 CommandPragma (addCommonCommands2)
   assumeTransparentCommand, //     :100 CommandAssumeTransparent (addCommonCommands2)
   rotateCommand, //                :100 CommandRotate (addCommonCommands2)
@@ -139,7 +148,9 @@ export const SEQUENCE_COMMANDS: readonly SequenceCommand[] = [
   noteOnArrowCommand, //           :132 FactorySequenceNoteOnArrowCommand
   styledNoteCommand, //            :117 FactorySequenceNoteCommand.createSingleLine
   noteAcrossCommand, //            :122 FactorySequenceNoteAcrossCommand
+  urlCommand, //                   :154 CommandUrl
   decoratedArrowCommand, //        :111 CommandArrow (reverse/decorated forms)
   exoArrowLeftCommand, //          :113 CommandExoArrowLeft
   exoArrowRightCommand, //         :114 CommandExoArrowRight
+  linkAnchorCommand, //            :155 CommandLinkAnchor
 ];

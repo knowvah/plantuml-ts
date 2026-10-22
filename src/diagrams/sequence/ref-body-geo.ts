@@ -15,10 +15,14 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/rose/ComponentRoseReference.java
  */
 import type { StringMeasurer } from '../../core/measurer.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import type { FrameEvent } from './ast.js';
 import { displayLines } from './text-block-geo.js';
-import { atomFontSpec } from './sequence-creole-text-atom.js';
+import { alignedBlockRuns, type BlockContext, type PlacedBlock } from './sequence-block-align.js';
+import { componentLabelBlock, symbolInk, type LabelInk } from './sequence-creole-sheet.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
 import { paintOf, referenceStyle, type SequencePaint } from './sequence-skin-param.js';
 
 /** The body padding `ComponentRoseReference` hands to `super` --
@@ -81,10 +85,36 @@ export function refBodyLines(frameType: string, label: string): readonly string[
   return label.trim() === '' ? [] : displayLines(label);
 }
 
-/** The header text's dimension at `styleHeader`'s font (`fcHeader`,
- *  `ComponentRoseReference.java:75,78`). */
+/** The header text block's dimension: `stringsToDisplay.subList(0, 1)
+ *  .create(fcHeader, LEFT, skinParam)` at `styleHeader`'s font
+ *  (`ComponentRoseReference.java:75,78`). */
 function refHeaderTextDim(headerPaint: SequencePaint, measurer: StringMeasurer): { width: number; height: number } {
-  return measurer.measure(REF_HEADER_TEXT, atomFontSpec(headerPaint.font));
+  const align = { align: HorizontalAlignment.LEFT };
+  return componentLabelBlock([REF_HEADER_TEXT], headerPaint.font, align, measurer);
+}
+
+/** The ink both ref text blocks are drawn under: `symbolContextHeader.apply
+ *  (ug)` then `UStroke.simple()` (`ComponentRoseReference.java:121-124`),
+ *  which `textHeader` and the body block (`:126,137`) both inherit. */
+export function refTextInk(headerPaint: SequencePaint): LabelInk {
+  return { ...symbolInk(headerPaint), stroke: UStroke.simple() };
+}
+
+/**
+ * The body's text block (`getTextBlock()`, `AbstractTextualComponent.java:84-92`)
+ * at the body style's font and alignment, with the padding's sides as its
+ * margins (`topRightBottomLeft(4, 4, 4, 4)`, `ComponentRoseReference.java:69-70`),
+ * drawn under {@link refTextInk}, placed at `origin`.
+ */
+export function refBodyBlock(
+  body: readonly string[],
+  paints: ReferencePaints,
+  origin: { readonly leftX: number; readonly top: number },
+  env: Omit<BlockContext, 'ink' | 'marginX1' | 'marginX2'>,
+): PlacedBlock {
+  const ink = refTextInk(paints.headerPaint);
+  const context = { ...env, ink, marginX1: REF_PADDING, marginX2: REF_PADDING };
+  return alignedBlockRuns(body, paints.paint.font, origin, paints.paint.align, context);
 }
 
 /** `getHeaderHeight` -- the header text's height plus `2 * 1`
@@ -105,10 +135,15 @@ export function refHeaderWidth(headerPaint: SequencePaint, measurer: StringMeasu
  * block's own height at the body style's font plus the top and bottom
  * padding (`AbstractTextualComponent.java:110-114`).
  */
-export function refBodyHeight(body: readonly string[], paints: ReferencePaints, measurer: StringMeasurer): number {
+export function refBodyHeight(
+  body: readonly string[],
+  paints: ReferencePaints,
+  measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
+): number {
   // An empty body is an empty block: `getTextHeight` is its padding alone.
-  const lineHeight = measurer.measure('M', atomFontSpec(paints.paint.font)).height;
-  const textHeight = body.length * lineHeight + 2 * REF_PADDING;
+  const block = refBodyBlock(body, paints, { leftX: 0, top: 0 }, { measurer, sprites });
+  const textHeight = block.height + 2 * REF_PADDING;
   return textHeight + refHeaderHeight(paints.headerPaint, measurer) + REF_HEIGHT_FOOTER;
 }
 
@@ -122,9 +157,16 @@ export function refBodyHeight(body: readonly string[], paints: ReferencePaints, 
  * `tests/fixtures/unwind2-S9/style-reference.svg` against
  * `noshadow-reference.svg` -- the canvas widens by 3, the rect does not.
  */
-export function refComponentWidth(body: readonly string[], paints: ReferencePaints, measurer: StringMeasurer): number {
-  const spec = atomFontSpec(paints.paint.font);
-  const widest = Math.max(0, ...body.map((l) => measurer.measure(l, spec).width));
+export function refComponentWidth(
+  body: readonly string[],
+  paints: ReferencePaints,
+  measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
+): number {
+  // `getTextWidth` is the text block's `calculateDimension` (`AbstractTextual
+  // Component.java:100-108`): the RENDERED creole stripes, so `[[url{tip}]]`
+  // counts its label, not its markup.
+  const widest = refBodyBlock(body, paints, { leftX: 0, top: 0 }, { measurer, sprites }).width;
   const headerWidth = refHeaderWidth(paints.headerPaint, measurer);
   return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN + paints.paint.shadowing;
 }

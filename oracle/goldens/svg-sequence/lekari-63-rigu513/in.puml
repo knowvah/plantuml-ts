@@ -1,0 +1,5 @@
+@startuml
+[-> Bob : message1
+Bob -> Alice : message2
+[<- Alice : dummy1 quite long
+@enduml

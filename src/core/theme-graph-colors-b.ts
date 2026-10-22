@@ -311,6 +311,10 @@ export interface ThemeGraphColorsB {
    *  for either, jar's own default (`UStroke.simple()`, thickness 1,
    *  square corners) is what `renderer-shell.ts` hardcodes instead. */
   diagramBorderColor?: string;
+  /** `diagramBorderThickness N` (`SkinParam.java:921-967`; `maybeDrawBorder`). */
+  diagramBorderThickness?: number;
+  /** `diagramBorderRoundCorner N` (`SkinParam.java:891-916`); falls back to `roundCorner`. */
+  diagramBorderRoundCorner?: number;
   /** CDD T6FU: `skinparam classHeaderBackgroundColor <color>` / the
    *  nested-block `skinparam class { HeaderBackgroundColor <color> }` --
    *  `FromSkinparamToStyle.java:196` maps BOTH onto `{element, class_,
@@ -419,86 +423,4 @@ export interface ThemeGraphColorsB {
     // `FromSkinparamToStyle.java:159`.
     swimlaneTitleFontSize?: number;
   };
-  json?: {
-    keyText?: string;
-    stringValue?: string;
-    numberValue?: string;
-    booleanValue?: string;
-    nullValue?: string;
-    background?: string;
-    border?: string;
-    headerBackground?: string;
-    highlightBackground?: string;
-    arrowColor?: string;
-    /** True when element.header { FontStyle: bold } is set. */
-    headerFontBold?: boolean;
-    // jsonDiagram { node { … } } style block properties
-    /** Border rx (rounded corners) from jsonDiagram.node.RoundCorner */
-    roundCorner?: number;
-    /** Maximum value-column pixel width before word-wrap kicks in */
-    maximumWidth?: number;
-    /** Text alignment within cells: left (default), center, or right */
-    textAlign?: 'left' | 'center' | 'right';
-    /** Border stroke width from jsonDiagram.node.LineThickness */
-    nodeLineThickness?: number;
-    /** Value-cell font color from jsonDiagram.node.FontColor */
-    nodeFontColor?: string;
-    /** Value-cell font size from jsonDiagram.node.FontSize */
-    nodeFontSize?: number;
-    /** Value-cell font family from jsonDiagram.node.FontName */
-    nodeFontFamily?: string;
-    /** Bold override from jsonDiagram.node.FontStyle/FontWeight */
-    nodeFontBold?: boolean;
-    /** Italic override from jsonDiagram.node.FontStyle */
-    nodeFontItalic?: boolean;
-    /** Dash pattern for the outer node border (from jsonDiagram.node.LineStyle) */
-    nodeLineDasharray?: string;
-    // jsonDiagram { arrow { … } }
-    /** Arrow/edge stroke width from jsonDiagram.arrow.LineThickness */
-    arrowThickness?: number;
-    /** Arrow/edge dash pattern from jsonDiagram.arrow.LineStyle */
-    arrowDasharray?: string;
-    // jsonDiagram { node { separator { … } } }
-    /** Separator line color (overrides border for row dividers) */
-    separatorColor?: string;
-    /** Separator line thickness */
-    separatorThickness?: number;
-    /** Separator line dash pattern */
-    separatorDasharray?: string;
-    // jsonDiagram { node { highlight { … } } }
-    /** Highlighted row font color */
-    highlightFontColor?: string;
-    /** Highlighted row font bold */
-    highlightFontBold?: boolean;
-    /** Highlighted row font italic */
-    highlightFontItalic?: boolean;
-    /** Per-class highlight overrides keyed by style class name (e.g. "h1") */
-    highlightClasses?: Record<
-      string,
-      {
-        background?: string;
-        fontColor?: string;
-        fontBold?: boolean;
-        fontItalic?: boolean;
-      }
-    >;
-  };
-  /** cdd2-T8 (S-7): `<style> visibilityIcon { <kind> { LineColor/
-   *  BackgroundColor } } }` -- `VisibilityModifier.java:336-350`'s
-   *  `{root,element,visibilityIcon,<kind>}` StyleSignature (kind in
-   *  `public_`/`private_`/`protected_`/`package_`/`IEMandatory`, cleaned
-   *  to `public`/`private`/`protected`/`package`/`iemandatory` selector
-   *  tokens). Pre-resolved hex, keyed by the SAME cleaned kind token,
-   *  read by `class-visibility-icon.ts#colorsFor` ABOVE the legacy
-   *  `icon<Kind>Color`/`icon<Kind>BackgroundColor` skinparam-override
-   *  tier (an explicit `<style>` block outranks the FromSkinparamToStyle
-   *  bridge, the SAME precedent `classCascadeHeaderFontColor` establishes
-   *  -- `skinparam-theme-builder.ts:102-110`). `undefined` for every
-   *  fixture with no such `<style>` block -- zero behavior change.
-   *  Jar-verified `tuguku-78-zega630`.
-   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/MethodsOrFieldsArea.java:360-364 */
-  visibilityIconLineCascade?: Readonly<Record<string, string>>;
-  /** cdd2-T8 (S-7): the BackgroundColor sibling of {@link
-   *  visibilityIconLineCascade}. */
-  visibilityIconBackgroundCascade?: Readonly<Record<string, string>>;
 }

@@ -37,7 +37,16 @@ import type { TextRun } from './text-block-geo.js';
 import type { ParticipantGeo } from './geo-participant.js';
 import type { MessageGeo, ActivationGeo, DestroyGeo } from './geo-message.js';
 import type { ElseGeo, FrameGeo } from './geo-frame.js';
-import type { NoteGeo, DividerGeo, SpaceGeo, NewpageGeo, BoxGeo, DelayGeo, LifelineSegment } from './geo-annotation.js';
+import type {
+  NoteGeo,
+  DividerGeo,
+  SpaceGeo,
+  NewpageGeo,
+  BoxGeo,
+  DelayGeo,
+  LifelineSegment,
+  LinkAnchorGeo,
+} from './geo-annotation.js';
 
 export type { TextRun };
 export type * from './geo-participant.js';
@@ -62,6 +71,9 @@ export interface SequenceGeometry {
   totalHeight: number;
   participants: ParticipantGeo[];
   events: EventGeo[];
+  /** `SequenceDiagram#getLinkAnchors`, resolved against the finished tiles
+   *  (`sequence-layout-link-anchor.ts`). */
+  linkAnchors?: readonly LinkAnchorGeo[];
   /**
    * `LivingSpaces#getHeadHeight(stringBounder)` — the height of the
    * participant head row, which is where this port's body geometry starts

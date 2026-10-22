@@ -15,44 +15,23 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/teoz/DividerTile.java
  */
 
-import type { DividerEvent, DividerGeo, TextRun } from './ast.js';
+import type { DividerEvent, DividerGeo } from './ast.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
-import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { DIVIDER_LABEL_DELTA_X, DIVIDER_PADDING, dividerPreferredHeight } from './divider-style.js';
-import { sequenceCreoleRuns } from './sequence-creole.js';
-import { atomFontSpec } from './sequence-creole-text-atom.js';
-import { blockWidthOf, type EventCursor, type EventProcessingContext } from './sequence-layout-events.js';
-import { dividerStyle, paintOf } from './sequence-skin-param.js';
+import { componentLabelBlock, offsetRun, symbolInk, type LabelBlock } from './sequence-creole-sheet.js';
+import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
+import { dividerStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
 
 /**
- * A divider label's runs, positioned RELATIVE to the label box's own top-left.
- *
- * `ComponentRoseDivider#drawInternalU` draws the block at
- * `(xpos + deltaX, ypos + getOldPaddingY())` (`:91-93,103`), where `deltaX` is
- * 6 and the padding is `topRightBottomLeft(4, 4, 4, 4)`. Both terms are known
- * here; `xpos`/`ypos` are not, because they are centred within a band whose
- * width `backfillDividerWidth` resolves in Step 3 — so these carry the inner
- * offset and that function adds the outer one.
+ * The divider's text block: `create0` at the separator style's font
+ * (`ComponentRoseDivider.java:66-68`), its padding's sides as margins
+ * (`topRightBottomLeft(4, 4, 4, 4)`, `:67`), drawn after `background.bg()`,
+ * `borderColor` and the style's stroke (`:84,97-98`) -- what a `----` rule or a
+ * table grid in the label inherits.
  */
-function dividerLabelRuns(
-  lines: readonly string[],
-  font: FontConfiguration,
-  ctx: EventProcessingContext,
-): readonly TextRun[] {
-  const spec = atomFontSpec(font);
-  const lineHeight = ctx.measurer.measure('M', spec).height;
-  const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
-  // C6: one run per creole atom -- a divider's label is an
-  // `AbstractTextualComponent` `Display` like every other sequence label
-  // (`ComponentRoseDivider.java:66-68`); `bakuba-09-fica741` is the last one.
-  return lines.flatMap((line, i) =>
-    sequenceCreoleRuns(
-      line,
-      font,
-      { leftX: DIVIDER_LABEL_DELTA_X, baselineY: DIVIDER_PADDING + ascent + i * lineHeight },
-      ctx.measurer,
-    ),
-  );
+function dividerLabelBlock(lines: readonly string[], paint: SequencePaint, ctx: EventProcessingContext): LabelBlock {
+  const opts = { sprites: ctx.sprites, ink: symbolInk(paint), marginX1: DIVIDER_PADDING, marginX2: DIVIDER_PADDING };
+  return componentLabelBlock(lines, paint.font, opts, ctx.measurer);
 }
 
 /**
@@ -70,22 +49,22 @@ function dividerLabelRuns(
  */
 export function handleDividerEvent(event: DividerEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
   const paint = paintOf(dividerStyle(event.styleBuilder), HColorSet.instance());
-  const font = paint.font;
   // `\n` splits the label into a multi-line text block, exactly as it does for
   // a `ref` body (`text-block-geo.ts#refBodyLines`): the widest line drives the
   // width and the line COUNT drives the height. Jar-verified on
   // `pigifu-13-kele137`, whose `== divi\ndummy ==` golden carries a 34-tall
   // label box (two 13px lines plus the 4+4 padding), not a 21-tall one.
   const lines = event.text.split('\n');
-  const lineHeight = ctx.measurer.measure('M', atomFontSpec(font)).height;
-  // Relative to the label BOX's own top-left; `backfillDividerWidth` drops
-  // them onto the band once `bandX`/`bandWidth` are known (Step 3), the same
-  // construct-then-resolve split `y`/`branchSeparators` use above. C6: the
-  // reserved width is that CREOLE block's, less the `deltaX` the runs already
-  // carry -- `getTextWidth` reads `calculateDimension`, not the display string.
-  const labelRuns = dividerLabelRuns(lines, font, ctx);
-  const blockWidth = Math.max(0, blockWidthOf(labelRuns) - DIVIDER_LABEL_DELTA_X);
-  const blockHeight = lines.length * lineHeight;
+  // An empty label is a `TextBlockEmpty` (height 0,
+  // `AbstractTextualComponent.java:86-87`). The runs are relative to the label
+  // BOX's own top-left -- the block sits at `(deltaX, getOldPaddingY())` in it
+  // (`ComponentRoseDivider.java:91-93,103`); `backfillDividerWidth` drops them
+  // onto the band once `bandX`/`bandWidth` are known (Step 3), the same
+  // construct-then-resolve split `y`/`branchSeparators` use above.
+  const block = dividerLabelBlock(lines, paint, ctx);
+  const labelRuns = block.primitives.map((r) => offsetRun(r, DIVIDER_LABEL_DELTA_X, DIVIDER_PADDING));
+  const blockHeight = block.height;
+  const blockWidth = block.width;
   const dividerGeo: DividerGeo = {
     kind: 'divider',
     text: event.text,

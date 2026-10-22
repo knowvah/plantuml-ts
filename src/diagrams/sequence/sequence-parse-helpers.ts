@@ -13,7 +13,6 @@ import { UrlMode } from '../../core/url/UrlMode.js';
 import type {
   BoxGroup,
   FrameEvent,
-  MessageEvent,
   NoteEvent,
   Participant,
   ParticipantType,
@@ -158,24 +157,71 @@ export function ensureParticipant(
     color?: string | undefined;
     stereotype?: string | undefined;
     url?: ParticipantUrl | undefined;
+    order?: number | undefined;
   },
 ): void {
   if (state.participantIndex.has(id)) return;
-  const order = state.ast.participants.length;
   const p: Participant = {
     id,
     display: decl?.display ?? id,
     type,
-    order,
+    order: state.ast.participants.length,
+    ...(decl?.order !== undefined && decl.order !== 0 ? { declaredOrder: decl.order } : {}),
     ...(decl?.color !== undefined ? { color: decl.color } : {}),
     ...(decl?.stereotype !== undefined ? { stereotype: decl.stereotype } : {}),
+    // `skinParam.stereotypePositionTop()` is read only when a STEREO exists
+    // (`CommandParticipant.java:176-178`); `SkinParam.java:845-846`.
+    ...(decl?.stereotype !== undefined && state.style.params.valueIs('stereotypePosition', 'bottom')
+      ? { stereotypeBottom: true }
+      : {}),
     ...(decl?.url !== undefined ? { url: decl.url } : {}),
     ...(state.currentBox !== null ? { boxId: state.currentBox.id } : {}),
     styleBuilder: currentStyleBuilder(state.style),
   };
-  state.ast.participants.push(p);
-  state.participantIndex.set(id, order);
+  addWithOrder(state, p);
   state.currentBox?.participantIds.push(id);
+}
+
+/**
+ * `SequenceDiagram#addWithOrder` (`SequenceDiagram.java:182-190`): insert
+ * before the first participant whose order is strictly greater, else append.
+ * Then re-number `order`/`participantIndex` as the resulting list index.
+ */
+function addWithOrder(state: ParseState, p: Participant): void {
+  const list = state.ast.participants;
+  const mine = p.declaredOrder ?? 0;
+  const at = list.findIndex((q) => mine < (q.declaredOrder ?? 0));
+  if (at === -1) list.push(p);
+  else list.splice(at, 0, p);
+  list.forEach((q, i) => {
+    q.order = i;
+    state.participantIndex.set(q.id, i);
+  });
+}
+
+/**
+ * `SequenceDiagram#putParticipantInLast` (`SequenceDiagram.java:548-555`):
+ * `participantsList.remove(p); addWithOrder(p);
+ * participantEnglobers2.put(p, participantEnglober)`. `addWithOrder`
+ * (`:182-190`) re-inserts it by its own declared order. The englober is re-bound to the CURRENT one, which
+ * may be none (`put(p, null)`), so `boxId` is dropped when no box is open.
+ * `order` is re-numbered as the list index, which is what this port keeps in
+ * `order` and `participantIndex`.
+ */
+export function putParticipantInLast(state: ParseState, id: string): void {
+  const participants = state.ast.participants;
+  const at = state.participantIndex.get(id);
+  if (at === undefined) throw new Error(`putParticipantInLast: unknown participant ${id}`);
+  const [p] = participants.splice(at, 1);
+  addWithOrder(state, p!);
+  const old = state.ast.boxes.find((b) => b.id === p!.boxId);
+  if (old !== undefined) old.participantIds = old.participantIds.filter((x) => x !== id);
+  if (state.currentBox !== null) {
+    p!.boxId = state.currentBox.id;
+    state.currentBox.participantIds.push(id);
+  } else {
+    delete p!.boxId;
+  }
 }
 
 /** Emit a SequenceEvent into the current scope. */
@@ -194,65 +240,13 @@ export function setLastEventWithNoteSpan(state: ParseState, ids: readonly string
   state.lastEventWithNoteRight = ids[ids.length - 1]!;
 }
 
-/**
- * `autonumber` with no quoted FORMAT formats with `<b>0</b>`
- * (`CommandAutonumber.java:119`): the number is creole bold, which is why the
- * jar draws it at `font-weight="700"`. `autonumber resume` keeps whatever
- * format is current (`AutoNumber.java:59-72`), and this port's `format`
- * field IS that state, so an absent field means this default.
- */
-export const DEFAULT_AUTONUMBER_FORMAT = '<b>0</b>';
-
-/**
- * `AutoNumber#getNextMessageNumber` (`AutoNumber.java:82-89`): format the
- * CURRENT value, then advance by `step` (`DottedNumber#incrementMinor`,
- * `DottedNumber.java:75-79` — the last segment only). The formatted string is
- * the `MessageNumber` `getLabelNumbered` puts first in the display
- * (`AbstractMessage.java:199-207`).
- */
-export function applyAutonumber(state: ParseState, msg: MessageEvent): MessageEvent {
-  const auto = state.ast.autonumber;
-  if (!auto.enabled) return msg;
-  const num = auto.current;
-  auto.current += auto.step;
-  return {
-    ...msg,
-    sequenceNumber: num,
-    sequenceLabel: formatDottedNumber(auto.prefix, num, auto.format ?? DEFAULT_AUTONUMBER_FORMAT),
-  };
-}
-
-/**
- * `DottedNumber#format(DecimalFormat)`: a single number with no separator
- * goes through the format; a dotted one IGNORES it and is always bold.
- *
- * ```java
- * if (nums.size() == 1 && separators.size() == 0)
- *     return format.format(nums.get(0));
- * return "<b>" + toString() + "</b>";
- * ```
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/DottedNumber.java:106-111
- */
-function formatDottedNumber(prefix: string, num: number, format: string): string {
-  if (prefix === '') return formatAutonumber(format, num);
-  return `<b>${prefix}${String(num)}</b>`;
-}
-
-/**
- * `java.text.DecimalFormat` subset: a run of one-or-more `0` characters is
- * the zero-pad placeholder (`new DecimalFormat(df).format(n)`,
- * `CommandAutonumber.java:119-123`); every other character — including
- * creole markup like `<b>`/`<font ...>` — is copied through verbatim. Other
- * `DecimalFormat` pattern characters (`#`, `,`, `.`) are not ported: none
- * appear in the corpus bucket's format strings.
- */
-export function formatAutonumber(format: string, num: number): string {
-  const run = /0+/.exec(format);
-  if (run === null) return format;
-  const padded = String(num).padStart(run[0].length, '0');
-  return format.slice(0, run.index) + padded + format.slice(run.index + run[0].length);
-}
-
+export {
+  DEFAULT_AUTONUMBER_FORMAT,
+  applyAutonumber,
+  formatAutonumber,
+  parseDottedStart,
+  type DottedStart,
+} from './sequence-autonumber.js';
 // ---------------------------------------------------------------------------
 // Arrow dressings → ArrowConfiguration (D1)
 // ---------------------------------------------------------------------------
@@ -459,26 +453,6 @@ export function activationFlags(
     }
   }
   return flags;
-}
-
-// ---------------------------------------------------------------------------
-// autonumber START — dotted numbers (DottedNumber.java, T13)
-// ---------------------------------------------------------------------------
-
-/** A parsed `autonumber START` value: everything before the last `\d+` run
- *  (verbatim, including separators like `.`/`-`/`:`) as `prefix`, and the
- *  last run itself as `value` — the only segment `incrementMinor` ever
- *  changes (`DottedNumber.java:75-79`). A plain `"5"` yields `prefix: ''`. */
-export interface DottedStart {
-  readonly prefix: string;
-  readonly value: number;
-}
-
-/** @see sequencediagram/DottedNumber.java:53-58 (`create`) */
-export function parseDottedStart(raw: string): DottedStart {
-  const lastRun = /(\d+)(?!.*\d)/.exec(raw);
-  if (lastRun === null || lastRun.index === undefined) return { prefix: '', value: 1 };
-  return { prefix: raw.slice(0, lastRun.index), value: Number(lastRun[1]) };
 }
 
 // ---------------------------------------------------------------------------

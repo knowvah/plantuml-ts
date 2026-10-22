@@ -1,0 +1,30 @@
+@startuml
+skinparam backgroundColor lightGrey
+!pragma teoz true
+Bob ->x Alice ++:
+Bob -> Alice ++:
+Bob ->> Alice ++:
+Bob -\ Alice ++:
+Bob \\- Alice ++:
+Bob //-- Alice ++:
+Bob ->o Alice ++:
+Bob o\\-- Alice ++:
+Bob <-> Alice ++:
+Bob <->o Alice ++:
+Bob <-> Alice ++:
+Bob <-> Alice ++:
+Bob <-> Alice ++:
+
+[-> Bob
+[o-> Bob
+[o->o Bob
+[x-> Bob
+[<- Bob
+[x<- Bob
+Bob ->]
+Bob ->o]
+Bob o->o]
+Bob ->x]
+Bob <-]
+Bob x<-]
+@enduml

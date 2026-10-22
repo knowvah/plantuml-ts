@@ -1,0 +1,20 @@
+@startuml
+!pragma teoz true
+
+'!theme crt-amber
+'skinparam backgroundColor #000000
+
+participant "Random Name" as foo
+
+hide footbox
+
+foo -> foo : test
+
+& opt message received
+    alt REQUEST
+        bossrpcp -> bossrpcp : request
+    else RESPONSE
+        bossrpcp -> bossrpcp : respond
+    end
+end
+@enduml

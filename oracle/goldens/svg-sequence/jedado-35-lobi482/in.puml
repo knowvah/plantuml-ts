@@ -1,0 +1,6 @@
+@startuml
+    alt
+    A2->A1
+    else
+    A2->A1
+@enduml

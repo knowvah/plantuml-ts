@@ -15,8 +15,16 @@ import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ParticipantUrl } from './sequence-parse-helpers.js';
 export type { ParticipantUrl };
 import type { ScaleSpec } from '../../core/scale-command.js';
-import type { ArrowConfiguration } from './sequence-arrowhead.js';
+import type { Warning } from '../../core/warning/Warning.js';
 import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
+import type { MessageEvent, MessageExoEvent } from './ast-message.js';
+import type { NoteEvent } from './ast-note.js';
+import type { FrameEvent } from './ast-frame.js';
+import type { MessagePadder } from './sequence-message-padder.js';
+
+export type { MessageExoType, AbstractMessageEvent, MessageEvent, MessageExoEvent } from './ast-message.js';
+export type { NoteShape, NoteEvent } from './ast-note.js';
+export type { FrameEvent } from './ast-frame.js';
 
 // ---------------------------------------------------------------------------
 // AST Types
@@ -31,13 +39,24 @@ export interface Participant {
   type: ParticipantType;
   color?: string;
   order: number; // first-appearance order (0-based)
-  /** Box group id this participant belongs to (from `box` / `end box`). */
+  /** The declared `order N` (`Participant#getOrder`, `CommandParticipant
+   *  .java:154-155`); absent = 0. {@link order} stays the resulting list index. */
+  declaredOrder?: number;
+  /** The INNERMOST box open when this participant was created -- upstream's
+   *  `participantEnglobers2.put(p, participantEnglober)`
+   *  (`SequenceDiagram.java:132,174`). Its ancestors are reached through
+   *  {@link BoxGroup.parentId}, the way `Dolls` walks `getGenealogy()`. */
   boxId?: string;
   /** The `<<...>>` run as written, guillemets included -- `CommandParticipant`
    *  stores it on the Participant rather than in its code
    *  (`CommandParticipant.java:174-181`). Rendered above the name unless
    *  {@link stereotypeHidden}; merged into the style either way. */
   stereotype?: string;
+  /** `!skinParam.stereotypePositionTop()` read when the stereotype was set
+   *  (`CommandParticipant.java:178-181` -> `Participant.setStereotype`,
+   *  `Participant.java:141-146`): `getDisplay` appends it after the name lines
+   *  (`:125-135`). Absent = top. */
+  stereotypeBottom?: boolean;
   /** `hiddenPortions.contains(EntityPortion.STEREOTYPE)`: `hide stereotype`
    *  drops the stereotype from `getDisplay` only (`Participant.java:125-135`);
    *  `getUsedStyles` still merges it (`:82-91`). */
@@ -55,211 +74,6 @@ export interface Participant {
    *  (`SequenceDiagram.java:129-130,171-172`); merged at use time
    *  (`Participant.java:82-91`). sdd1 D2. */
   readonly styleBuilder: StyleBuilder;
-}
-
-/**
- * Which border an exo message crosses, and which way it points.
- * `isLeftBorder()` is `FROM_LEFT || TO_LEFT`, `isRightBorder()` is
- * `FROM_RIGHT || TO_RIGHT`, and `getDirection()` is `+1` for
- * `FROM_LEFT`/`TO_RIGHT`, `-1` for the other two.
- * @see sequencediagram/MessageExoType.java:38-64
- */
-export type MessageExoType = 'FROM_LEFT' | 'TO_LEFT' | 'FROM_RIGHT' | 'TO_RIGHT';
-
-/**
- * What `AbstractMessage` holds for every message kind, exo or not — upstream's
- * own split, with `Message` and `MessageExo` as its two subclasses.
- *
- * `parallel` and `anchor` are parsed, stored and NOT drawn (D4): every
- * upstream consumer of `isParallel()`/`getAnchor()` lives under
- * `sequencediagram/teoz/`, and the classic `sequencediagram/graphic/`
- * renderer reads neither. That is upstream's behavior, not a divergence.
- *
- * @see sequencediagram/AbstractMessage.java:81-121
- */
-export interface AbstractMessageEvent {
-  label: string;
-  /** The whole arrow, as `CommandArrow.executeArg` builds it: a pair of
-   *  `ArrowDressing`s plus a per-side `ArrowDecoration`, a dashed body and an
-   *  inclination. Replaces the spike's flat six-value style enum, which
-   *  could not carry the dressing grammar (D1). */
-  arrow: ArrowConfiguration;
-  sequenceNumber?: number;
-  /** See `MessageGeo.sequenceLabel`'s doc comment — populated by
-   *  `applyAutonumber` from `SequenceDiagramAST.autonumber`'s `prefix`/
-   *  `format`. */
-  sequenceLabel?: string;
-  /** `[[http://example.com]]` — `UrlBuilder.OPTIONAL` at
-   *  `CommandArrow.java:130`, applied at `:133-135`. */
-  url?: string;
-  /** The `<<...>>` run as written, guillemets included
-   *  (`StereotypePattern.optional("STEREOTYPE")`, `CommandArrow.java:129`,
-   *  applied at `:137-140`). */
-  stereotype?: string;
-  /** `LIFECOLOR` (`CommandArrow.java:128`) — the colour applied to the
-   *  activation bar this message starts, NOT to the arrow (`:427-430`). */
-  lifeColor?: string;
-  /** The leading `&` PARALLEL marker (`CommandArrow.java:90`,
-   *  `msg.goParallel()` at `:143-145`). Stored, not drawn — see this
-   *  interface's doc comment. */
-  parallel?: boolean;
-  /** `{name}` (`CommandArrow.java:417`). Stored, not drawn. */
-  anchor?: string;
-  /** `AbstractMessage#isCreate` (`:169-171`): this message took the pending
-   *  `CREATE` life event (`SequenceDiagram.java:207-214`). */
-  create?: true;
-  /** The builder current at the arrow's command (`CommandArrow.java:401`,
-   *  `CommandExoArrowAny.java:136`, `CommandReturn.java:129-132`), merged in
-   *  the constructor (`AbstractMessage.java:66-77`). sdd1 D2. */
-  readonly styleBuilder: StyleBuilder;
-}
-
-export interface MessageEvent extends AbstractMessageEvent {
-  kind: 'message';
-  from: string; // participant id
-  to: string; // participant id
-  activates?: string; // participant id to auto-activate (++ shorthand)
-  deactivates?: string; // participant id to auto-deactivate (-- shorthand)
-  /** Participant id destroyed by the `!!` shorthand: a `LifeEventType.DESTROY`
-   *  bound to this message (`CommandArrow.java`, `SequenceDiagram.java#activate`).
-   *  sdd1: declared ahead of T3d, which sets and reads it. */
-  destroys?: string;
-  /** The extra targets of `A -> B, C, D : msg` — `getMulticasts`
-   *  (`CommandArrow.java:139-155`), `msg.setMulticast(...)` at `:404`. */
-  multicast?: readonly string[];
-}
-
-/**
- * `MessageExo` — a message with ONE participant, whose other end is the
- * diagram border (`[-> Bob`, `Bob ->]`, …). Its own `SequenceEvent` member
- * rather than a `MessageEvent` with `from === to`, because `isSelfMessage()`
- * returns FALSE despite `getParticipant1() == getParticipant2()`
- * (`:72-86,99-101`) — every "not a self message" guard would otherwise skip
- * it silently (D3).
- * @see sequencediagram/MessageExo.java:43-101
- */
-export interface MessageExoEvent extends AbstractMessageEvent {
-  kind: 'messageExo';
-  /** `MessageExo.getParticipant()` (`:82-84`) — the single endpoint. */
-  participant: string;
-  exoType: MessageExoType;
-  /** `MessageExo.isShortArrow()` (`:57-59`) — the short forms, which size
-   *  themselves from `getPreferredWidth` instead of reaching the border. */
-  shortArrow: boolean;
-}
-
-/** The non-default note components: `rect` = `NOTE_BOX`, `hexagon` =
- *  `NOTE_HEXAGONAL` (`NoteStyle.java:57-65`). */
-export type NoteShape = 'rect' | 'hexagon';
-
-export interface NoteEvent {
-  kind: 'note';
-  position: 'left' | 'right' | 'over';
-  participants: string[];
-  text: string;
-  color?: string;
-  /**
-   * The component `NoteStyle#getNoteComponentType` picks
-   * (`NoteStyle.java:57-65`): `rnote` (BOX) is `ComponentRoseNoteBox`, a
-   * rounded `URectangle`; `hnote` (HEXAGONAL) is
-   * `ComponentRoseNoteHexagonal`, a 7-point `UPolygon`. Absent for a plain
-   * `note` (NORMAL, the Opale shape).
-   */
-  shape?: NoteShape;
-  /** The note keyword as written. `NoteStyle.getNoteStyle` maps `hnote` to
-   *  HEXAGONAL, `rnote` to BOX and anything else to NORMAL
-   *  (`NoteStyle.java:46-54`); the keyword is kept rather than the resolved
-   *  enum so the style-signature lookup (`:70-78`) can be driven from it.
-   *  Distinct from {@link NoteEvent.shape}, which is what this port DRAWS. */
-  style?: 'note' | 'hnote' | 'rnote';
-  /** The leading `/` VMERGE marker (`FactorySequenceNoteCommand.java:79,96`)
-   *  — upstream's `tryMerge` argument to `diagram.addNote(note, tryMerge)`
-   *  (`:230,252`): merge this note vertically with the previous one. */
-  vmerge?: boolean;
-  /** The note was written straight after a message (`note left|right|top|
-   *  bottom`, no `of X`): upstream's `Message#getNoteOnMessages`, drawn by the
-   *  `CommunicationTileNote*` wrappers (`teoz/TileBuilder.java:121-137`) rather
-   *  than by `NoteTile`. */
-  onMessage?: true;
-  /** The `&` PARALLEL marker (`FactorySequenceNoteCommand.java:231,249-251`,
-   *  `note.goParallel()`). Stored, not drawn — see
-   *  {@link AbstractMessageEvent}'s doc comment and D4. */
-  parallel?: boolean;
-  /** The `<<...>>` run as written, guillemets included — upstream's
-   *  `STEREO` group, `note.setStereotype(...)` at
-   *  `FactorySequenceNoteCommand.java:234-241`. */
-  stereotype?: string;
-  /** The builder current at the note's OPENING line — a multi-line note
-   *  executes there (`FactorySequenceNoteCommand.java:233`,
-   *  `FactorySequenceNoteOverSeveralCommand.java:238`,
-   *  `FactorySequenceNoteAcrossCommand.java:216`,
-   *  `FactorySequenceNoteOnArrowCommand.java:226`); merged at use time
-   *  (`Note.java:71-79`). sdd1 D2. */
-  readonly styleBuilder: StyleBuilder;
-}
-
-export interface FrameEvent {
-  kind: 'frame';
-  frameType:
-    | 'loop'
-    | 'alt'
-    | 'opt'
-    | 'par'
-    | 'par2'
-    | 'break'
-    | 'critical'
-    | 'group'
-    /** `ref over A, B : text` (`CommandReferenceOverSeveral.java`) — modelled
-     *  as a one-branch, label-only frame; see `command-misc.ts`. */
-    | 'ref';
-  label: string;
-  /** The header title `CommandGrouping` rewrote a `group T [c]` line to:
-   *  `type = m.group(1)` (`CommandGrouping.java:143-148`), kept verbatim (its
-   *  space before the bracket included, possibly empty). Absent where the
-   *  title is the keyword itself -- every other line -- which `GroupingTile`
-   *  reads as `getTitle()` (`GroupingTile.java:126-127`). */
-  title?: string;
-  branches: SequenceEvent[][]; // alt has multiple; others have one
-  /** Condition text per branch, index-aligned with `branches`: entry 0 is
-   *  the frame's own `label`, 1..n are `else <condition>` labels, drawn
-   *  bracketed beside the tab (0) or a dashed separator (1..n,
-   *  `Displayable`/`GroupingTile`) — why they survive parsing separately. */
-  branchLabels: string[];
-  /** The `&` PARALLEL marker on a grouping line
-   *  (`CommandGrouping.java`, `GroupingTile.java:145,864` under `teoz/`).
-   *  Stored, not drawn — see {@link AbstractMessageEvent} and D4. */
-  parallel?: boolean;
-  /** `COLORS` 0/1, raw, resolved late — see `frame-style.ts`.
-   *  @see CommandGrouping.java:134-135 */
-  backColorElement?: string;
-  backColorGeneral?: string;
-  /** Per-branch `else #color` background, raw and resolved late (same rule
-   *  as {@link backColorGeneral} above) — index-aligned with
-   *  {@link branchLabels}: entry 0 is the frame's own COLORS-index-1 value
-   *  (mirrors `backColorGeneral`, kept separately since a bare `group`/`alt`
-   *  line and its first branch are the same COLORS capture), 1..n are each
-   *  `else`'s own captured color, or `undefined` where none was given.
-   *  `Blotter#getBackColorGeneral` falls back to the group color when a
-   *  band has none (`GroupingTile.java:326-332`) — `sequence-layout-events
-   *  .ts#handleFrameEvent` carries this array onto `FrameGeo
-   *  .branchSeparators` for `renderer-frame-blotter.ts` to read (D10). */
-  branchColors?: (string | undefined)[];
-  /** A `ref`'s own participants, as written (`Reference.java:104-106`,
-   *  `CommandReferenceOverSeveral.java:67-82`): `ReferenceTile#init` spans
-   *  their boxes (`teoz/ReferenceTile.java:96-115`). Absent for a group. */
-  participants?: string[];
-  /** The builder current at the opener: `GroupingStart`
-   *  (`SequenceDiagram.java:427-428`) or `Reference`
-   *  (`CommandReferenceOverSeveral.java:140-141`,
-   *  `CommandReferenceMultilinesOverSeveral.java:152-153`, captured at the
-   *  multi-line opener). sdd1 D2. */
-  readonly styleBuilder: StyleBuilder;
-  /** Per-branch builder, index-aligned with {@link branchLabels}: entry 0 is
-   *  {@link styleBuilder}, 1..n each `else`'s own `GroupingLeaf` builder
-   *  (`SequenceDiagram.java:431-432`), read by `ElseTile.java:98`. The `end`
-   *  leaf's builder is not kept: `GroupingTile.java:162` reads only its
-   *  type. sdd1 D2. */
-  branchStyleBuilders: StyleBuilder[];
 }
 
 export interface ActivationEvent {
@@ -351,6 +165,10 @@ export interface BoxGroup {
   label: string;
   color: string;
   participantIds: string[];
+  /** The enclosing box, when this one was opened inside another:
+   *  `ParticipantEnglober#newChild` (`SequenceDiagram.java:502-507`,
+   *  `ParticipantEnglober.java:62-64`). Absent for a root box. */
+  parentId?: string;
   /** The `<<...>>` run as written, guillemets included: `CommandBoxStart`'s
    *  STEREO group (`CommandBoxStart.java:75,119-123`), held by the
    *  `ParticipantEnglober` and merged by `Doll#getUsedStyles`
@@ -365,11 +183,38 @@ export interface BoxGroup {
    * dispatch, read after the parse completes. sdd1 D2.
    */
   readonly styleBuilder: StyleBuilder;
+  /**
+   * The raw `boxPadding` skinparam a `Doll` reads, `tileArguments
+   * .getSkinParam().getPaddingTOBEREMOVED(PaddingParam.BOX)` (`Doll.java
+   * :271-273`), i.e. `SkinParam#getValue("boxPadding")` (`SkinParam.java
+   * :1153-1164`, `PaddingParam.java:43-45`) at TILE time; `null` when never
+   * declared. A getter over the parse's legacy `params`, read after the parse
+   * completes, like {@link styleBuilder}. Optional so hand-built AST literals
+   * compile unchanged; absent reads as never declared.
+   */
+  readonly boxPadding?: string | null;
+}
+
+/**
+ * `{a1} <-> {a2} : label` (`CommandLinkAnchor.java:55-63,85-90`): not an
+ * event but an entry of `SequenceDiagram#linkAnchors`
+ * (`SequenceDiagram.java:617-626`), drawn after every tile by
+ * `PlayingSpace#drawUInternal:129-134`. `message` is the optional `:` text
+ * as written (`RegexLeaf(1, "MESSAGE", "(?::[%s]*(.*))?")`), `undefined` when
+ * the line carries no colon.
+ */
+export interface LinkAnchor {
+  readonly anchor1: string;
+  readonly anchor2: string;
+  readonly message: string | undefined;
 }
 
 export interface SequenceDiagramAST {
   participants: Participant[];
   events: SequenceEvent[];
+  /** Every `{a} <-> {b}` line, in source order -- see {@link LinkAnchor}.
+   *  Optional so hand-authored AST literals compile unchanged. */
+  linkAnchors?: LinkAnchor[];
   /**
    * `skinParam.getCurrentStyleBuilder()` read at TILE time, i.e. after every
    * command and every trailing declaration has executed: the builder a
@@ -380,6 +225,11 @@ export interface SequenceDiagramAST {
    * sdd1 D2.
    */
   readonly styleBuilder?: StyleBuilder;
+  /** `CommandSkinParam#executeArg`'s deprecation warnings (java:92-99),
+   *  rebuilt from the collected skinparam map by the plugin's `parse`
+   *  (`sequence-warnings.ts`, sdd2-T7e). Parse-time command warnings join
+   *  them in {@link sequenceWarnings}. */
+  readonly warnings?: readonly Warning[];
   /**
    * `current`/`start` are `DottedNumber.incrementMinor`'s LAST segment only
    * (`DottedNumber.java:75-79`); `prefix` carries every segment before it
@@ -408,6 +258,9 @@ export interface SequenceDiagramAST {
      *  participants not referenced by any event are dropped post-parse
      *  (`applyHideUnlinked`, `parser.ts`). */
     hideUnlinked?: boolean;
+    /** `!pragma sequenceMessageSpan true` (`AbstractCommunicationTile.java:52-54`):
+     *  message tiles register no participant-span constraint. */
+    sequenceMessageSpan?: boolean;
     /** `autoactivate on|off` (`CommandAutoactivate`, `SequenceDiagram
      *  #setAutoactivate:556-563`). While on, an arrow that carries NO
      *  explicit `++`/`--`/`!` suffix gets one implicitly: a solid arrow
@@ -462,6 +315,12 @@ export interface SequenceDiagramAST {
    * `createSpriteRegistry()`.
    */
   sprites?: SpriteRegistry;
+  /**
+   * `SkinParam#sequenceDiagramPadder` (`SkinParam.java:1216-1229`), read once
+   * at parse end like `applyNoteTextAlignment`: every message component asks
+   * it after the parse, so the final `params` answer. Absent is `Padder.NONE`.
+   */
+  messagePadder?: MessagePadder;
 }
 
 // ---------------------------------------------------------------------------

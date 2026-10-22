@@ -1,0 +1,19 @@
+@startuml 
+autoactivate on
+' See http://plantuml.sourceforge.net/sequence.html
+
+Title LifeLine Activation
+
+A -> B : message
+
+B ->> C :Fire&Forget 
+Note right: should be active for a little while
+
+B -> B : self
+
+B->C : message
+C--> B: response
+
+B --> A : response
+
+@enduml

@@ -1,0 +1,6 @@
+@startuml
+participant A30 as P30 order 30
+participant A20 order 20
+participant A21 order 20
+participant A10
+@enduml

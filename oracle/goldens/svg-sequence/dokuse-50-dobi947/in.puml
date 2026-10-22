@@ -1,0 +1,5 @@
+@startuml
+skinparam SequenceMessageAlign right
+Bob -> Alice : right\non two different lines
+Bob -> Alice : very very long message
+@enduml

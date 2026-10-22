@@ -28,7 +28,7 @@
  * one exists.
  */
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -59,6 +59,20 @@ function readGolden(f: RatchetFixture): string {
   return readFileSync(join(fixtureDir(f), 'golden.svg'), 'utf8');
 }
 
+/**
+ * Per-fixture budget, the same rule and value as
+ * `sequence.diff-baseline.ratchet.test.ts`'s `LARGE_GOLDEN_BUDGET_MS` (see its
+ * derivation): only a golden above 1 MB buys headroom. The one such golden,
+ * zudize-61 (8.2 MB), was pinned at sdd2 close-b5; a zero-diff comparison
+ * walks the whole tree (no child-count short-circuit), ~5.4 s on a quiet box.
+ */
+const LARGE_GOLDEN_BYTES = 1_000_000;
+const LARGE_GOLDEN_BUDGET_MS = 30_000;
+
+function budgetFor(f: RatchetFixture): number | undefined {
+  return statSync(join(fixtureDir(f), 'golden.svg')).size > LARGE_GOLDEN_BYTES ? LARGE_GOLDEN_BUDGET_MS : undefined;
+}
+
 function readSource(f: RatchetFixture): string {
   return readFileSync(join(fixtureDir(f), 'in.puml'), 'utf8');
 }
@@ -73,18 +87,24 @@ function firstDiffPath(diffs: readonly { path: string }[]): string {
 
 describe.skipIf(manifest.fixtures.length === 0)('svg-sequence conformance ratchet (AC1)', () => {
   for (const f of manifest.fixtures) {
-    it(`sequence/${f.slug}: stays zero-diff against the pinned golden`, () => {
-      const golden = readGolden(f);
-      const markup = readSource(f);
-      const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), { includeStore: fixtureIncludeStore() });
-      const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
-      expect(
-        pass,
-        `sequence/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
-          ` — ${JSON.stringify(diffs[0])}`,
-      ).toBe(true);
-      expect(diffs).toEqual([]);
-    });
+    it(
+      `sequence/${f.slug}: stays zero-diff against the pinned golden`,
+      () => {
+        const golden = readGolden(f);
+        const markup = readSource(f);
+        const ours = renderFixtureSequence(markup, new DeterministicMeasurer(), {
+          includeStore: fixtureIncludeStore(),
+        });
+        const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
+        expect(
+          pass,
+          `sequence/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
+            ` — ${JSON.stringify(diffs[0])}`,
+        ).toBe(true);
+        expect(diffs).toEqual([]);
+      },
+      budgetFor(f),
+    );
   }
 });
 

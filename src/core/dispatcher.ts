@@ -184,6 +184,10 @@ export interface RenderFragment {
    * diagrams with no such skinparam.
    */
   diagramBorderColor?: string;
+  /** Sequence: `maybeDrawBorder`'s stroke thickness (`TextBlockExporter.java:221-223`; unset = 1). */
+  diagramBorderThickness?: number;
+  /** Sequence: `maybeDrawBorder`'s `CornerParam.diagramBorder` round corner (unset/0 = square). */
+  diagramBorderRoundCorner?: number;
   /**
    * T6d (mission mindmap-engine-port, batch 6): the diagram's OWN `scale
    * ...` directive (`ScaleSpec`, unresolved) and `skinparam dpi`, for a

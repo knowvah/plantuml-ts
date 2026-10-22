@@ -1,0 +1,19 @@
+@startuml
+
+
+actor Bob #00EEEE
+participant Alice #Red
+
+activate Bob
+Bob -> Alice: hello
+Alice --> Bob : ok
+
+activate Bob #Green #Blue
+Bob -> Tom: hello
+Tom --> Bob : ok
+
+deactivate Bob
+
+Bob ->Alice : yes
+
+@enduml

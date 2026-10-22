@@ -1,0 +1,34 @@
+@startuml
+skinparam usebetastyle true
+actor Bob
+
+alt successful case1
+    Bob->Alice: Authentication Accepted
+else some kind of failure
+    Bob->Alice: Authentication
+end
+
+<style>
+group {
+  LineThickness 0.5
+  LineColor Red
+  BackGroundColor white
+}
+
+groupHeader {
+  FontSize 16
+  FontStyle plain
+  FontColor white
+  
+  LineThickness 3.5
+  LineColor blue
+  BackGroundColor black
+}
+</style>
+
+alt successful case2
+    Bob->Alice: Authentication Accepted
+else some kind of failure
+    Bob->Alice: Authentication
+end
+@enduml

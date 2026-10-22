@@ -1,0 +1,8 @@
+@startuml
+group foo\ndummy
+Alice->Bob : hello
+end group
+== divi\nlines ==
+Alice->Bob : hello2
+
+@enduml

@@ -30,8 +30,9 @@
 import type { Theme } from '../../core/theme.js';
 import type { ScaledTheme } from './scale-geo.js';
 import type { ParticipantGeo, TextRun } from './ast.js';
-import { ellipse, image, linkWrap } from '../../core/svg.js';
-import { sequenceText } from './sequence-text.js';
+import { attrs, ellipse, image, linkWrap } from '../../core/svg.js';
+import { spotGlyphPath } from '../../core/spot-glyph-data.js';
+import { primitiveFields, sequenceText, weightOf } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import {
   participantBadgeGeo,
@@ -41,7 +42,8 @@ import {
 } from './sequence-layout-participant-sizing.js';
 import { participantBoxOf } from './sequence-layout-participants.js';
 import { paintOfGeo } from './sequence-participant-paints.js';
-import { renderParticipantSymbol } from './renderer-participant-symbol.js';
+import { measureParticipantSymbol, renderParticipantSymbol } from './renderer-participant-symbol.js';
+import { BADGE_GAP } from './sequence-layout-participant-label.js';
 
 /**
  * A participant's glyph -- or, for `participant`/`collections`, its
@@ -108,15 +110,13 @@ function renderLabelRun(run: TextRun, dy: number, theme: Theme): string {
     fontFamily: run.fontFamily ?? theme.fontFamily,
     fontSize: run.fontSize ?? theme.fontSize,
     fill: run.color ?? theme.colors.text,
-    // `'700'`, not `'bold'`: the deterministic-text jar writes the numeric CSS
-    // weight (`sequence-text.ts#SequenceTextSpec.fontWeight`).
-    ...(run.bold === true ? { fontWeight: '700' as const } : {}),
+    // The numeric CSS weight (`sequence-text.ts#runFontWeight`).
+    ...weightOf(run),
     ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
     ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
-    ...(run.url !== undefined ? { url: run.url } : {}),
-    // A `<math>`/`<latex>` run draws its image instead of a `<text>`
-    // (`sequence-text.ts#SequenceRunImage`, `AtomMath.java:78-97`); `dy`
-    // shifts its top exactly as it shifts the baseline beside it.
+    ...primitiveFields(run),
+    // An image's top is absolute: `dy` shifts it exactly as it shifts the
+    // baseline beside it.
     ...(run.image !== undefined ? { image: { ...run.image, y: run.image.y + dy } } : {}),
   });
 }
@@ -146,26 +146,39 @@ function renderLabelRun(run: TextRun, dy: number, theme: Theme): string {
  */
 
 /**
- * The badge itself: a rasterised `<image>` for a sprite, or the plain filled
- * circle the jar draws for a circled character -- WITHOUT the character
- * (`ast.ts#ParticipantBadge` carries the three goldens that show this).
- * Vertically centred on the name block's own centre, which is what
- * `TextBlockSprited`'s `max(spriteHeight, textHeight)` box amounts to.
+ * The badge itself: a rasterised `<image>` for a sprite, or for a circled
+ * character the filled circle followed by the letter's outline `<path>`
+ * (`CircledCharacter#drawU`, `CircledCharacter.java:63-70`: the ellipse, then
+ * `UCenteredCharacter` -> `DriverCenteredCharacterSvg#draw:56-81`). Drawn at
+ * the block ORIGIN, as is the text beside it (`TextBlockSprited.java:70-77`),
+ * so `top` is the block's top.
  */
-function renderBadge(p: ParticipantGeo, x: number, cy: number, theme: ScaledTheme): string {
+function renderBadge(p: ParticipantGeo, at: { readonly x: number; readonly top: number }, theme: ScaledTheme): string {
+  const { x, top } = at;
   const badge = p.badge!;
-  const top = cy - badge.height / 2;
   if (badge.kind === 'sprite') return image(x, top, badge.width, badge.height, badge.dataUri);
   const r = badge.width / 2;
   // `CircledCharacter` is built with a null border (`Display.java:677-678`)
   // and draws in the head's current colour: the style's `LineColor`, at the
   // `UStroke.simple()` the component reset to before its text
   // (`ComponentRoseParticipant.java:94-95,112`).
-  return ellipse(x + r, cy, r, r, {
+  const disc = ellipse(x + r, top + r, r, r, {
     fill: badge.color ?? theme.colors.background,
     stroke: p.border,
     'stroke-width': 1 * theme.scaleK,
   });
+  // The glyph fills with the label font's colour (`ug.apply(fontColor)`, `:66`;
+  // `fontColor` is `fontConfiguration.getColor()`, `Display.java:677-678`),
+  // centred on the circle's centre (`UTranslate(radius, radius)`, `:67`).
+  const d = spotGlyphPath(badge.character, badge.fontSize, x + r, top + r, theme.scaleK);
+  if (d === undefined) return disc;
+  return (
+    disc +
+    `<path${attrs([
+      ['d', d],
+      ['fill', paintOfGeo(p).font.color ?? undefined],
+    ])}/>`
+  );
 }
 
 /**
@@ -173,8 +186,6 @@ function renderBadge(p: ParticipantGeo, x: number, cy: number, theme: ScaledThem
  * row's painted box (the runs were placed against it in layout).
  */
 function renderNameBlock(p: ParticipantGeo, cy: number, metrics: ParticipantLabelMetrics, theme: ScaledTheme): string {
-  const badge = participantBadgeGeo(p.badge, p.x, p.width, paintOfGeo(p).padding, theme.scaleK);
-  const badgeEl = badge === undefined ? '' : renderBadge(p, badge.x, cy, theme);
   // The runs were placed against the HEAD's own centre; every other row of the
   // diagram draws the same text translated. `dy` is a difference of two
   // `participantLabelCy` values rather than of two block tops, because a
@@ -183,7 +194,47 @@ function renderNameBlock(p: ParticipantGeo, cy: number, metrics: ParticipantLabe
   // same on both rows, so a block-top delta would be wrong for exactly those
   // kinds.
   const dy = cy - participantLabelCy(p.type, p.height, p.y, true, metrics);
+  const badgeEl = p.badge === undefined ? '' : renderBadge(p, badgeOriginOf(p, theme.scaleK, dy), theme);
   return badgeEl + p.labelRuns.map((run) => renderLabelRun(run, dy, theme)).join('');
+}
+
+/**
+ * Where the badge draws: the text block's origin, whose rows were placed beside
+ * it in layout (`TextBlockSprited.java:70-77`: sprite at `(0, 0)`, rows at
+ * `dx = sprite.width + 6`, both from the block top). The rows' left edge is the
+ * widest row's, i.e. the leftmost run, which is `badge.width + 6` right of the
+ * origin for the glyph kinds, whose block is the rows' own width. A
+ * `participant` is sized by its box, which can be wider than the block, so it
+ * keeps the padding-based origin `participantBadgeGeo` derives.
+ */
+function badgeOriginOf(p: ParticipantGeo, k: number, dy: number): { readonly x: number; readonly top: number } {
+  const badge = p.badge!;
+  const rowsTop = Math.min(...p.labelRuns.map((r) => r.y - r.textAscent)) + dy;
+  const top = p.labelRuns.length === 0 ? p.y + (p.height - badge.height) / 2 : rowsTop;
+  if (p.type === 'participant' || p.type === 'collections' || p.labelRuns.length === 0) {
+    return { x: participantBadgeGeo(p.badge, p.x, paintOfGeo(p).padding, k)!.x, top };
+  }
+  return { x: Math.min(...p.labelRuns.map((r) => r.x)) - BADGE_GAP * k - badge.width, top };
+}
+
+/**
+ * The stick kinds' text-block height: the component's height less the glyph's
+ * (`getPreferredHeight` = `dimStickman.getHeight() + getTextHeight()`,
+ * `ComponentRoseActor.java:92-95`), in the caller's scaled units. `undefined`
+ * for the kinds that place their label some other way.
+ */
+function stickLabelHeight(p: ParticipantGeo, theme: ScaledTheme): number | undefined {
+  if (
+    p.type !== 'actor' &&
+    p.type !== 'boundary' &&
+    p.type !== 'control' &&
+    p.type !== 'entity' &&
+    p.type !== 'database'
+  ) {
+    return undefined;
+  }
+  const glyph = measureParticipantSymbol(p.type, paintOfGeo(p), theme, theme.measurer);
+  return p.height - glyph.height * theme.scaleK;
 }
 
 /**
@@ -199,7 +250,7 @@ function renderParticipantBlock(geo: ParticipantGeo, blockTopY: number, head: bo
   // head reserves its shadow and margin outside the rectangle it draws.
   const p = participantBoxOf({ ...geo, shadow: (geo.shadow ?? 0) * k }, k);
   const rowTop = p.y + (blockTopY - geo.y);
-  const metrics = participantLabelMetricsOf(paintOfGeo(geo), k);
+  const metrics = participantLabelMetricsOf(paintOfGeo(geo), k, stickLabelHeight(p, theme));
   const label = renderNameBlock(p, participantLabelCy(p.type, p.height, rowTop, head, metrics), metrics, theme);
   const shape = renderSymbolShape(p, rowTop, head, theme);
   // DRAW ORDER, and it is not the obvious one. Every stacked

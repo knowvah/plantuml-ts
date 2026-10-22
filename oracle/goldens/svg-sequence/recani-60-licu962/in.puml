@@ -1,0 +1,28 @@
+@startuml
+-> A
+rnote right
+Wrong note shape (r)
+end note
+-> A
+hnote right
+Wrong note shape (h)
+end note
+
+A -> B
+rnote right
+Correct note shape (r)
+end note
+A -> B
+hnote right
+Correct note shape (h)
+end note
+
+B ->
+rnote left
+Wrong note shape (r)
+end note
+B ->
+rnote left
+Wrong note shape (h)
+end note
+@enduml

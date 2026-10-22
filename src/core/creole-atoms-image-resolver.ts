@@ -252,6 +252,10 @@ export class SpritePrimitiveCollector implements UGraphic {
 
 function resolveImgAtom(atom: Extract<InlineAtomToken, { kind: 'img' }>): ResolvedAtomImage {
   const dims = measureInlineAtom(atom);
+  // `AtomImgSvg` draws a `UImageSvg`, not a raster `UImage` (AtomImg.java:
+  // 153-161): no `rasterWidth`/`rasterHeight`, so the emitted `<image>` keeps
+  // its declared (unrounded) dims (`DriverImageSvg`).
+  if (atom.svg === true) return { kind: 'image', href: atom.dataUri, width: dims.width, height: dims.height };
   // SI15 T6: raster = `Math.round(declared)`, not the raw IHDR pixel dims
   // (`atom.width`/`atom.height`) -- `dims.width`/`dims.height` are already
   // IHDR x scale (T1's formula rounded the wrong operand; see the doc

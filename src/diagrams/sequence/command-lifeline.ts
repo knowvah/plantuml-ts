@@ -125,6 +125,30 @@ export const deactivateShortCommand: Command = {
   },
 };
 
+// 9. `IT++` / `IT1--` -- `CommandActivate2` (`SequenceDiagramFactory.java:128`):
+//    NAME TYPE COLOR? with TYPE `++` (ACTIVATE) or `--` (DEACTIVATE), spaces
+//    allowed around TYPE (`spaceZeroOrMore`). Like `CommandActivate` it calls
+//    `getOrCreateParticipant` before `diagram.activate` (`:93`), so it
+//    reuses the same event shape and `refusedLifeEvent` as `activateCommand`.
+// @see sequencediagram/command/CommandActivate2.java:58-66,91-100
+export const activate2Command: Command = {
+  pattern: /^([\p{L}\p{N}_.@]+)\s*(\+\+|--)\s*(#\w+)?$/u,
+  execute(state, match) {
+    const participantId = match[1]!;
+    const activating = match[2] === '++';
+    const color = match[3];
+    ensureParticipant(state, participantId);
+    if (refusedLifeEvent(state, participantId, activating ? 'ACTIVATE' : 'DEACTIVATE')) return;
+    const ev: ActivationEvent = {
+      kind: activating ? 'activate' : 'deactivate',
+      participantId,
+      ...(color !== undefined ? { color } : {}),
+      styleBuilder: currentStyleBuilder(state.style),
+    };
+    emit(state, ev);
+  },
+};
+
 /**
  * `diagram.activate(p, type, ...)` as `CommandActivate#executeArg` calls it
  * (`CommandActivate.java:115-119`): an error string becomes

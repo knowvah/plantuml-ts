@@ -1,0 +1,12 @@
+@startuml
+autonumber 10
+Alice -> Bob: [[/messages.html#%autonumber% write(a)]]
+note left
+  the autonumber works everywhere.
+  Here, its value is %autonumber%
+end note
+Bob --> Alice: Response %autonumber%
+
+
+
+@enduml

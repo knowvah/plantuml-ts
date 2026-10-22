@@ -14,13 +14,16 @@
  */
 
 import type { NoteEvent, NoteShape } from './ast.js';
-import { emit, ensureParticipant, type Command, type ParseState } from './sequence-parse-helpers.js';
+import { emit, ensureParticipant, urlOf, type Command, type ParseState } from './sequence-parse-helpers.js';
+import { emitOnArrowNote, manageVariable } from './sequence-note-placement.js';
+import { removeEmptyColumns } from './remove-empty-columns.js';
 import { SEQUENCE_COLOR } from './sequence-color-grammar.js';
 import { currentStyleBuilder } from './sequence-skin-param.js';
 import { Colors } from '../../core/abel/Colors.js';
 import { ColorType } from '../../core/abel/ColorType.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import { NoSuchColorException } from '../../core/klimt/color/NoSuchColorException.js';
+import { getRegexp, transform } from '../../core/url/UrlBuilder.js';
 
 /** `CommandExecutionResult.badColor()`'s error text
  *  (`CommandExecutionResult.java:77-79`). */
@@ -71,6 +74,25 @@ function noteShapeOf(style: string): { shape?: NoteShape } {
 /** `ColorParser.COLORS_REGEXP` under this file's pre-existing local name —
  *  see `sequence-color-grammar.ts` for the grammar itself. */
 const NOTE_COLOR = SEQUENCE_COLOR;
+
+/**
+ * `UrlBuilder.OPTIONAL` = `RegexOptional(RegexLeaf(12, URL_KEY, getRegexp()))`
+ * (`UrlBuilder.java:48-49`), spliced into every note regex upstream gives it:
+ * `FactorySequenceNoteCommand.java:89,106`,
+ * `FactorySequenceNoteOnArrowCommand.java:86,99`,
+ * `FactorySequenceNoteAcrossCommand.java:84,99`,
+ * `FactorySequenceNoteOverSeveralCommand.java:91,113`. It carries eleven inner
+ * capturing groups, so the text group that follows is read BY NAME (`TEXT`).
+ */
+const NOTE_URL = `(?:(?<URL>${transform(getRegexp())}))?`;
+
+/** The `url` field of a note event from its `URL` group: `Note#setUrl` of
+ *  `new UrlBuilder(topurl, STRICT).getUrl(...)`
+ *  (`FactorySequenceNoteCommand.java:244-247`). Spread into the event. */
+function noteUrlField(match: RegExpExecArray): { url?: string } {
+  const url = urlOf(match.groups?.['URL']);
+  return url === undefined ? {} : { url };
+}
 
 /** `StereotypePattern.mandatory` — `<<...>>`, non-greedy so two
  *  stereotype-shaped runs on one line don't merge into one match.
@@ -155,7 +177,7 @@ function registerNoteParticipants(state: ParseState, raw: string): string[] {
 // the `<<red>>` run into the participant id.
 export const noteCommand: Command = {
   pattern: new RegExp(
-    String.raw`^note\s+(left of|right of|over)\s+([^:#<\n]+?)(?:\s*(${NOTE_COLOR}))?(?:\s*:\s*(.+))?\s*$`,
+    String.raw`^note\s+(left of|right of|over)\s+([^:#<\n]+?)(?:\s*(${NOTE_COLOR}))?\s*${NOTE_URL}(?:\s*:\s*(?<TEXT>.+))?\s*$`,
     'i',
   ),
   execute(state, match) {
@@ -163,7 +185,7 @@ export const noteCommand: Command = {
     const position: NoteEvent['position'] = rawPos === 'left of' ? 'left' : rawPos === 'right of' ? 'right' : 'over';
     const rawParticipants = match[2]!;
     const color = match[3];
-    const inlineText = match[4];
+    const inlineText = match.groups?.['TEXT'];
 
     // T8: unquote each entry so a quoted participant (`note over Bob,
     // "Long Alice"`) resolves to the SAME id `"Long Alice" -> Bob` created,
@@ -176,13 +198,14 @@ export const noteCommand: Command = {
     if (inlineText !== undefined) {
       // Single-line form: replace literal \n escape sequences with real newlines,
       // then emit the note immediately.
-      const text = inlineText.replace(/\\n/g, '\n');
+      const text = manageVariable(state, inlineText.replace(/\\n/g, '\n'));
       const ev: NoteEvent = {
         kind: 'note',
         position,
         participants,
         text,
         ...(color !== undefined ? { color } : {}),
+        ...noteUrlField(match),
         styleBuilder: currentStyleBuilder(state.style), // `FactorySequenceNoteCommand.java:233`
       };
       emit(state, ev);
@@ -196,6 +219,7 @@ export const noteCommand: Command = {
         participants,
         text: '',
         ...(color !== undefined ? { color } : {}),
+        ...noteUrlField(match),
         styleBuilder: currentStyleBuilder(state.style),
       };
     }
@@ -211,11 +235,23 @@ export const noteCommand: Command = {
 //    is dropped without emitting, matching upstream's silent no-op rather
 //    than handing the renderer an empty `NoteEvent.participants`.
 // @see command/note/sequence/FactorySequenceNoteCommand.java:117
+/** An arrow note (`onMessage`) joins the list of the event it is on; every
+ *  other note is appended where it is written. */
+function emitNote(state: ParseState, note: NoteEvent): void {
+  if (note.onMessage === true) emitOnArrowNote(state, note);
+  else emit(state, note);
+}
+
 export const endNoteCommand: Command = {
   pattern: /^end\s*(?:note|hnote|rnote)\s*$/i,
   execute(state) {
     if (state.pendingNote !== null) {
-      if (state.pendingNote.participants.length > 0) emit(state, state.pendingNote);
+      // `lines.removeEmptyColumns()` is the only normalisation the body gets
+      // (`FactorySequenceNoteCommand.java:145-147`, `...OnArrowCommand.java:
+      // 200-202`, `...OverSeveralCommand.java:219-221`, `...AcrossCommand.java:
+      // 199-201`; `BlocLines.java:234`): no per-line trim, blank lines kept.
+      state.pendingNote.text = manageVariable(state, removeEmptyColumns(state.pendingNote.text.split('\n')).join('\n'));
+      if (state.pendingNote.participants.length > 0) emitNote(state, state.pendingNote);
       state.pendingNote = null;
     }
   },
@@ -280,7 +316,7 @@ function noteOnArrowParticipants(state: ParseState, position: NoteEvent['positio
 
 export const noteOnArrowCommand: Command = {
   pattern: new RegExp(
-    String.raw`^(note|hnote|rnote)\s*(${NOTE_STEREO})?\s*(left|right|top|bottom)\s*(${NOTE_STEREO})?(?:\s*(${NOTE_COLOR}))?\s*(?::\s*(.*))?\s*$`,
+    String.raw`^(note|hnote|rnote)\s*(${NOTE_STEREO})?\s*(left|right|top|bottom)\s*(${NOTE_STEREO})?(?:\s*(${NOTE_COLOR}))?\s*${NOTE_URL}\s*(?::\s*(?<TEXT>.*))?\s*$`,
     'i',
   ),
   execute(state, match) {
@@ -289,7 +325,7 @@ export const noteOnArrowCommand: Command = {
     const rawPosition = match[3]!.toLowerCase();
     const stereo2 = match[4];
     const color = match[5];
-    const inlineText = match[6];
+    const inlineText = match.groups?.['TEXT'];
     const stereotype = stereo1 ?? stereo2;
     const position: NoteEvent['position'] =
       rawPosition === 'left' ? 'left' : rawPosition === 'right' ? 'right' : 'over';
@@ -303,14 +339,21 @@ export const noteOnArrowCommand: Command = {
       participants,
       style: style as 'note' | 'hnote' | 'rnote',
       onMessage: true as const,
+      ...(rawPosition === 'top'
+        ? { side: 'top' as const }
+        : rawPosition === 'bottom'
+          ? { side: 'bottom' as const }
+          : {}),
       ...shape,
       ...(color !== undefined ? { color } : {}),
       ...(stereotype !== undefined ? { stereotype } : {}),
+      ...noteUrlField(match), // `FactorySequenceNoteOnArrowCommand.java:216-219,229`
       styleBuilder: currentStyleBuilder(state.style), // `FactorySequenceNoteOnArrowCommand.java:226`
     };
 
     if (inlineText !== undefined) {
-      if (participants.length > 0) emit(state, { ...base, text: inlineText.replace(/\\n/g, '\n') });
+      if (participants.length > 0)
+        emitOnArrowNote(state, { ...base, text: manageVariable(state, inlineText.replace(/\\n/g, '\n')) });
     } else {
       state.pendingNote = { ...base, text: '' };
     }
@@ -349,7 +392,7 @@ export const noteOnArrowCommand: Command = {
  */
 export const styledNoteCommand: Command = {
   pattern: new RegExp(
-    String.raw`^(?:(&)\s*)?(?:(/)\s*)?(note|hnote|rnote)\s*(${NOTE_STEREO})?\s*(left|right|over)\s+(?:of\s+)?([^:#<\n]+?)\s*(${NOTE_STEREO})?(?:\s*(${NOTE_COLOR}))?\s*(?::\s*(.+))?\s*$`,
+    String.raw`^(?:(&)\s*)?(?:(/)\s*)?(note|hnote|rnote)\s*(${NOTE_STEREO})?\s*(left|right|over)\s+(?:of\s+)?([^:#<\n]+?)\s*(${NOTE_STEREO})?(?:\s*(${NOTE_COLOR}))?\s*${NOTE_URL}\s*(?::\s*(?<TEXT>.+))?\s*$`,
     'i',
   ),
   execute(state, match) {
@@ -358,7 +401,7 @@ export const styledNoteCommand: Command = {
     const style = match[3]!.toLowerCase();
     const rawPos = match[5]!.toLowerCase();
     const color = match[8];
-    const inlineText = match[9];
+    const inlineText = match.groups?.['TEXT'];
     const position: NoteEvent['position'] = rawPos === 'left' ? 'left' : rawPos === 'right' ? 'right' : 'over';
     // T11 (ubrr): also registers each participant -- see
     // {@link registerNoteParticipants}'s doc comment.
@@ -376,11 +419,12 @@ export const styledNoteCommand: Command = {
       ...(stereotype !== undefined ? { stereotype } : {}),
       ...(vmerge ? { vmerge: true } : {}),
       ...(parallel ? { parallel: true } : {}),
+      ...noteUrlField(match),
       styleBuilder: currentStyleBuilder(state.style), // `FactorySequenceNoteCommand.java:233`
     };
 
     if (inlineText !== undefined) {
-      emit(state, { ...base, text: inlineText.replace(/\\n/g, '\n') });
+      emit(state, { ...base, text: manageVariable(state, inlineText.replace(/\\n/g, '\n')) });
     } else {
       state.pendingNote = { ...base, text: '' };
     }
@@ -397,10 +441,10 @@ export const styledNoteCommand: Command = {
  * @see command/note/sequence/FactorySequenceNoteAcrossCommand.java:78-88
  */
 export const noteAcrossCommand: Command = {
-  pattern: /^(note|hnote|rnote)\s+a(?:c)?cross\s*(?::\s*(.*))?\s*$/i,
+  pattern: new RegExp(String.raw`^(note|hnote|rnote)\s+a(?:c)?cross\s*${NOTE_URL}\s*(?::\s*(?<TEXT>.*))?\s*$`, 'i'),
   execute(state, match) {
     const style = match[1]!.toLowerCase();
-    const inlineText = match[2];
+    const inlineText = match.groups?.['TEXT'];
     const participants = state.ast.participants.map((p) => p.id);
     const shape = noteShapeOf(style);
     const styleBuilder = currentStyleBuilder(state.style); // `FactorySequenceNoteAcrossCommand.java:216-217`
@@ -412,11 +456,12 @@ export const noteAcrossCommand: Command = {
       // (`FactorySequenceNoteAcrossCommand.java:227`).
       style: style as 'note' | 'hnote' | 'rnote',
       ...shape,
+      ...noteUrlField(match), // `FactorySequenceNoteAcrossCommand.java:228-231`
       styleBuilder,
     };
 
     if (inlineText !== undefined) {
-      emit(state, { ...base, text: inlineText.replace(/\\n/g, '\n') });
+      emit(state, { ...base, text: manageVariable(state, inlineText.replace(/\\n/g, '\n')) });
     } else {
       state.pendingNote = { ...base, text: '' };
     }

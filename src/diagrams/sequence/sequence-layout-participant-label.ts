@@ -19,7 +19,14 @@ import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { paintOfGeo, participantPaintsOf } from './sequence-participant-paints.js';
-import { sequenceAtomContext, sequenceCreoleRuns, type SequenceAtomContext } from './sequence-creole.js';
+import {
+  componentLabelBlock,
+  offsetRun,
+  strokeOfPaint,
+  type LabelBlock,
+  type LabelInk,
+} from './sequence-creole-sheet.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
 import {
   parseCircledCharDecoration,
   parseCircledSpriteDecoration,
@@ -28,12 +35,13 @@ import {
   wrapGuillemet,
 } from '../../core/stereotype-decoration.js';
 import {
-  participantBadgeGeo,
+  DB_TEXT_PADDING_X,
   participantLabelCy,
   participantLabelMetricsOf,
 } from './sequence-layout-participant-sizing.js';
-import { displayLines, TRANSPARENT_SVG } from './text-block-geo.js';
-import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
+import { displayLines } from './text-block-geo.js';
+import { getMargin as queueMargin } from '../../core/decoration/symbol/USymbolQueue.js';
+import { DEFAULT_SPOT_FONT_SIZE } from '../../core/spot-glyph-data.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { getSpriteMonochrome } from '../../core/sprite-registry.js';
 import { spriteToPngDataUri, spriteMonochromeAsLike } from '../../core/klimt/sprite/sprite-raster.js';
@@ -79,70 +87,72 @@ export function visibleStereotypeLines(p: Participant): readonly string[] {
 }
 
 /**
- * ONE head row, measured: its creole runs and the box they occupy.
- *
- * C4: a row is no longer one string at one width. `AbstractTextualComponent`
- * builds every label through `display.create0(fc, ..., CreoleMode.FULL, ...)`
- * (`java:80-92`) -- `Display` -> `Creole` -> `Stripe` -> `Atom` -- and
- * `DriverTextSvg#draw` emits one `<text>` per atom, so the jar draws
- * `The <b>Famous</b> Bob` as three (`kofuti-29-goti188`).
- *
- * `width` is the LAST run's RIGHT EDGE, never a sum. `height`/`ascent` are
- * the tallest run and the deepest ascent -- `Sea#doAlign` baseline-aligning
- * one stripe's atoms (`SheetBlock1.java:130-137`); an image run (a sprite,
- * cdd7 T1f) reports its box above the baseline as its ascent, so a sprite
- * taller than the text pushes the baseline down and both share the row's
- * bottom (`sequence-creole.ts#imageAtomRun`). All three equal the old
- * `measure('M')` pair for a row whose runs share the ambient font, which is
- * what keeps a markup-free head byte-identical. Runs are placed at `(0, 0)`:
- * a row's width is not known until its runs are, so the caller translates the
- * whole row by one dx (D4's centring, over the ROW's width, not each run's).
+ * A head's text block, as the participant row reads it: `labelRows` hands
+ * back the ONE block `Display#createStereotype` builds over the whole display
+ * (`Display.java:671-690`) as its only entry, so a caller maxing the widths
+ * and summing the heights reads `getPureTextWidth`/the block height
+ * (`AbstractTextualComponent.java:94-114`).
  */
 interface LabelRow {
   readonly runs: readonly TextRun[];
   readonly width: number;
   readonly height: number;
-  readonly ascent: number;
 }
 
-/** One head row before measurement: its text and the font it is set in. */
-export interface HeadRow {
-  readonly text: string;
+/** A head's display before measurement (`Participant#getDisplay`,
+ *  `Participant.java:124-135`): its visible stereotype labels, in the
+ *  stereotype font, then its own lines in the name font. */
+export interface HeadDisplay {
+  readonly stereotypeLines: readonly string[];
+  readonly lines: readonly string[];
   readonly font: FontConfiguration;
+  readonly stereoFont: FontConfiguration;
+  /** `Participant.stereotypePositionTop` false (`Participant.java:128-131`). */
+  readonly stereotypeBottom?: boolean | undefined;
 }
 
 /**
- * A head's rows in DRAW order: the visible stereotype labels in the
- * stereotype font, then the display's own lines in the name font
- * (`Display#createStereotype` -> `getCreole(fc, ..., stereotypeConfiguration)`,
- * `Display.java:671-689`).
+ * A head's display: the visible stereotype labels, then the display's own
+ * lines (`Display#createStereotype` -> `getCreole(fc, ..., stereotypeConfiguration)`,
+ * `Display.java:671-689`; the stereotype rides first, `Participant.java:127-128`).
  */
 export function headRowsOf(
   stereotypeLines: readonly string[],
   display: string,
-  fonts: { readonly font: FontConfiguration; readonly stereoFont: FontConfiguration },
-): readonly HeadRow[] {
-  return [
-    ...stereotypeLines.map((text) => ({ text, font: fonts.stereoFont })),
-    ...displayLines(display).map((text) => ({ text, font: fonts.font })),
-  ];
+  fonts: {
+    readonly font: FontConfiguration;
+    readonly stereoFont: FontConfiguration;
+    readonly stereotypeBottom?: boolean | undefined;
+  },
+): HeadDisplay {
+  return { stereotypeLines, lines: displayLines(display), ...fonts };
 }
 
-/** A head's rows, measured. The box's width, its height and its placed runs
- *  all come from this ONE list: a disagreement between any two is text
- *  overhanging its own box. */
-export function labelRows(rows: readonly HeadRow[], ctx: ParticipantLayoutCtx, backColor?: Paint): readonly LabelRow[] {
-  return rows.map((row) => {
-    const atomContext = labelAtomContext(ctx, row.font, backColor);
-    const runs = sequenceCreoleRuns(row.text, row.font, { leftX: 0, baselineY: 0 }, ctx.measurer, atomContext);
-    const last = runs.at(-1);
-    return {
-      runs,
-      width: last === undefined ? 0 : last.x + last.textWidth,
-      height: Math.max(0, ...runs.map((r) => r.textLineHeight)),
-      ascent: Math.max(0, ...runs.map((r) => r.textAscent)),
-    };
-  });
+/** How a head's block is drawn: its `Back` (the sprite tint start), its ink
+ *  and its margins (`style.getPadding()`, `ComponentRoseParticipant.java:71`
+ *  -> `AbstractTextualComponent.java:91`). */
+interface HeadDraw {
+  /** `getHorizontalAlignment()` (`AbstractTextualComponent.java:81`), the
+   *  sheet's: `participant { HorizontalAlignment center }` by default
+   *  (`plantuml.skin:199`). */
+  readonly align?: HorizontalAlignment;
+  readonly ink?: LabelInk | undefined;
+  readonly marginX1?: number;
+  readonly marginX2?: number;
+}
+
+/** The head's ONE text block (module doc of `sequence-creole-sheet.ts`, "The
+ *  participant head"). */
+function headBlock(head: HeadDisplay, ctx: ParticipantLayoutCtx, draw: HeadDraw = {}): LabelBlock {
+  const stereotype = { labels: head.stereotypeLines, font: head.stereoFont, bottom: head.stereotypeBottom };
+  return componentLabelBlock(head.lines, head.font, { sprites: ctx.sprites, stereotype, ...draw }, ctx.measurer);
+}
+
+/** A head's block as the participant row reads it -- see {@link LabelRow}.
+ *  `backColor` is the `Back` the label is drawn on. */
+export function labelRows(head: HeadDisplay, ctx: ParticipantLayoutCtx, backColor?: Paint): readonly LabelRow[] {
+  const block = headBlock(head, ctx, { ink: { back: backColor } });
+  return [{ runs: block.primitives, width: block.width, height: block.height }];
 }
 
 /**
@@ -212,8 +222,9 @@ function charBadgeFor(p: Participant, theme: Theme): ParticipantBadge | undefine
   if (p.stereotype === undefined) return undefined;
   const deco = parseCircledCharDecoration(stereotypeInner(p.stereotype));
   if (deco === undefined) return undefined;
-  const r = resolveBadgeRadius(theme.colors.graph.circledCharacterFontSize, theme.colors.graph.circledCharacterRadius);
-  return { kind: 'char', color: deco.color, width: r * 2, height: r * 2 };
+  const fontSize = theme.colors.graph.circledCharacterFontSize ?? DEFAULT_SPOT_FONT_SIZE;
+  const r = resolveBadgeRadius(fontSize, theme.colors.graph.circledCharacterRadius);
+  return { kind: 'char', color: deco.color, width: r * 2, height: r * 2, character: deco.char, fontSize };
 }
 
 /** Either badge form, sprite first -- `createStereotype` tries the sprite
@@ -227,42 +238,29 @@ export function anyBadgeFor(
 }
 
 /**
- * What a head's creole needs to draw `<$sprite>`/`<img>` atoms (cdd7 T1f):
- * the diagram's sprites and the row's font colour, which `AtomSprite` tints
- * a monochrome sprite with (`StripeSimple.java:228-235`). `undefined` with no
- * registry -- the pre-T1f whole-line literal, unchanged.
+ * The ink a head's label is drawn under (unwind2-S7: its `Back`, a sprite's
+ * tint start). `participant` and `collections` are `ComponentRoseParticipant`,
+ * which applies the line colour and the box fill, strokes the box, then
+ * resets to `UStroke.simple()` before `textBlock.drawU`
+ * (`ComponentRoseParticipant.java:93-118`; `Rose.java:136-150`) -- the ink a
+ * `----` rule in the head is drawn with. `queue` draws its label inside
+ * `USymbolQueue#asSmall` after `symbolContext.apply(ug)` (`USymbolQueue.java:
+ * 141,147`), the style's stroke. The stickman kinds (`ComponentRoseActor.java
+ * :75,78`, `Boundary`, `Control`, `Entity`, `Database`) draw the label on the
+ * head's own `ug`, which carries no back -- jar-verified white
+ * (`tests/fixtures/unwind2-S7/s-actor`).
  */
-function labelAtomContext(
-  ctx: ParticipantLayoutCtx,
-  font: FontConfiguration,
-  backColor: Paint | undefined,
-): SequenceAtomContext | undefined {
-  return sequenceAtomContext(ctx.sprites, font.color ?? TRANSPARENT_SVG, backColor);
+function labelInk(p: ParticipantGeo, paint: SequencePaint): LabelInk | undefined {
+  if (p.type === 'participant' || p.type === 'collections')
+    return { fore: paint.stroke, back: p.background, stroke: UStroke.simple() };
+  if (p.type !== 'queue') return undefined;
+  return { fore: paint.stroke, back: p.background, stroke: strokeOfPaint(paint) };
 }
 
-/**
- * The `Back` a head's label is drawn on (unwind2-S7). `participant` and
- * `collections` are `ComponentRoseParticipant`, which applies the box fill
- * before `textBlock.drawU` (`ComponentRoseParticipant.java:96-97,118`;
- * `Rose.java:136-150`); `queue` draws its label inside `USymbolQueue#asSmall`
- * after `symbolContext.apply(ug)` (`USymbolQueue.java:141,147`). The
- * stickman kinds (`ComponentRoseActor.java:75,78`, `Boundary`, `Control`,
- * `Entity`, `Database`) draw the label on the head's own `ug`, which carries
- * no back -- jar-verified white (`tests/fixtures/unwind2-S7/s-actor`).
- */
-function labelBackColor(p: ParticipantGeo): Paint | undefined {
-  return p.type === 'participant' || p.type === 'collections' || p.type === 'queue' ? p.background : undefined;
-}
-
-/**
- * One run moved from its row's `(0, 0)` origin to `(dx, baseline)`. An image
- * run's top is ABSOLUTE (`SequenceRunImage.y`), so it moves by the same
- * vertical delta as the baseline it was placed against.
- */
-function translateRun(run: TextRun, dx: number, baselineY: number): TextRun {
-  const moved = { ...run, x: run.x + dx, y: baselineY };
-  if (run.image === undefined) return moved;
-  return { ...moved, image: { ...run.image, y: run.image.y + baselineY - run.y } };
+/** The kinds whose component is `ComponentRoseActor`'s shape: a glyph with
+ *  the text block stacked against it, padding `(0, 3, 0, 3)`. */
+function isStickKind(type: ParticipantGeo['type']): boolean {
+  return type === 'actor' || type === 'boundary' || type === 'control' || type === 'entity' || type === 'database';
 }
 
 /**
@@ -270,25 +268,32 @@ function translateRun(run: TextRun, dx: number, baselineY: number): TextRun {
  * text block at `padding.getTranslate()` inside the FRONT rectangle, which is
  * `getTextWidth` wide (`ComponentRoseParticipant.java:101-111,118`), so
  * the block spans `[x + left, x + width - delta - right]` -- `delta` being
- * `getDeltaCollection()` (`:121-126`). Every other kind keeps its column
- * centre.
+ * `getDeltaCollection()` (`:121-126`).
+ *
+ * The stick kinds draw it at `getTextMiddlePostion` = `(getPreferredWidth -
+ * getTextWidth) / 2` with `getTextWidth` = block + 3 + 3
+ * (`ComponentRoseActor.java:75,85`, `AbstractTextualComponent.java:106-108`),
+ * so the block's LEFT edge is that offset and the padding is never added to
+ * it: the centre sits 3 left of the column's. `queue` draws it inside
+ * `USymbolQueue#asSmall` at `margin.getX1()` (`USymbolQueue.java:147`),
+ * `delta` being 0 because the glyph is the component's width
+ * (`ComponentRoseQueue.java:67,77`).
+ *
+ * `blockWidth` is the whole text block's, badge included (`TextBlockSprited
+ * .java:62`), `badgeWidth` the part of it left of the rows.
  */
-function nameCenterX(p: ParticipantGeo, paint: SequencePaint): number {
+function nameCenterX(p: ParticipantGeo, paint: SequencePaint, blockWidth: number, badgeWidth: number): number {
+  if (p.type === 'queue') return p.x + queueMargin().getX1() + badgeWidth + (blockWidth - badgeWidth) / 2;
+  if (isStickKind(p.type)) {
+    const left = (p.width - (blockWidth + DB_TEXT_PADDING_X * 2)) / 2;
+    return p.x + left + badgeWidth + (blockWidth - badgeWidth) / 2;
+  }
   if (p.type !== 'participant' && p.type !== 'collections') return p.centerX;
-  const delta = p.type === 'collections' ? COLLECTIONS_DELTA : 0;
-  const left = p.x + paint.padding.getLeft();
-  return (left + p.x + p.width - delta - paint.padding.getRight()) / 2;
-}
-
-/**
- * A row's left edge in a block centred on `cx`, by the style's
- * `HorizontalAlignment` (`AbstractTextualComponent.java:81,89-92`): the
- * sheet aligns each stripe inside the block's widest one.
- */
-function rowLeft(rowWidth: number, cx: number, blockWidth: number, align: HorizontalAlignment | undefined): number {
-  if (align === HorizontalAlignment.LEFT) return cx - blockWidth / 2;
-  if (align === HorizontalAlignment.RIGHT) return cx + blockWidth / 2 - rowWidth;
-  return cx - rowWidth / 2;
+  // The block is drawn at `padding.getTranslate()` (`ComponentRoseParticipant
+  // .java:121`) at its OWN width, never the box's: a `MinimumWidth` box is
+  // wider than it (`:139-142`), and the text stays at the left padding.
+  // The badge, when any, takes the block's left `badgeWidth` (`TextBlockSprited.java:70-77`).
+  return p.x + paint.padding.getLeft() + badgeWidth + (blockWidth - badgeWidth) / 2;
 }
 
 /**
@@ -317,21 +322,27 @@ export function buildLabelRuns(
   stereoFont: FontConfiguration,
 ): readonly TextRun[] {
   const paint = paintOfGeo(p);
-  const fonts = { font: paint.font, stereoFont };
-  const rows = labelRows(headRowsOf(p.stereotypeLines ?? [], p.display, fonts), ctx, labelBackColor(p));
-  const cx = participantBadgeGeo(p.badge, p.x, p.width, paint.padding)?.nameCx ?? nameCenterX(p, paint);
-  // The block is centred on `cy`, and the rows stack from its top downward.
-  const cy = participantLabelCy(p.type, p.height, p.y, true, participantLabelMetricsOf(paint));
-  const blockWidth = Math.max(0, ...rows.map((r) => r.width));
-  let top = cy - rows.reduce((h, r) => h + r.height, 0) / 2;
-  const placed: TextRun[] = [];
-  for (const row of rows) {
-    // D4, over the ROW: every run of a row shifts by ONE dx, so the row moves
-    // as a block and the runs keep the spacing the seam gave them.
-    const dx = rowLeft(row.width, cx, blockWidth, paint.align);
-    const y = top + row.ascent;
-    for (const run of row.runs) placed.push(translateRun(run, dx, y));
-    top += row.height;
-  }
-  return placed;
+  const head = headRowsOf(p.stereotypeLines ?? [], p.display, {
+    font: paint.font,
+    stereoFont,
+    stereotypeBottom: p.stereotypeBottom,
+  });
+  const block = headBlock(head, ctx, {
+    align: paint.align ?? HorizontalAlignment.CENTER,
+    ink: labelInk(p, paint),
+    marginX1: paint.padding.getLeft(),
+    marginX2: paint.padding.getRight(),
+  });
+  const badgeWidth = p.badge === undefined ? 0 : p.badge.width + BADGE_GAP;
+  // `TextBlockSprited#calculateDimension`: width = rows + sprite + 6, height =
+  // max(sprite, rows) (`TextBlockSprited.java:55-62`).
+  const blockHeight = Math.max(p.badge?.height ?? 0, block.height);
+  const cx = nameCenterX(p, paint, block.width + badgeWidth, badgeWidth);
+  // The block's TOP is `cy - blockHeight / 2`: the sprite draws at the block
+  // origin and the parent text block at the same y (`TextBlockSprited.java:
+  // 70-77`), so the rows start at the block top, not centred on it. The sheet
+  // aligns each stripe inside the block (`SheetBlock1#initMap`), so the
+  // block moves as one.
+  const cy = participantLabelCy(p.type, p.height, p.y, true, participantLabelMetricsOf(paint, 1, blockHeight));
+  return block.primitives.map((run) => offsetRun(run, cx - block.width / 2, cy - blockHeight / 2));
 }

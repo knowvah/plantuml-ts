@@ -64,6 +64,7 @@ import {
   arrowConfigurationOf,
   emit,
   ensureParticipant,
+  setLastEventWithNoteSpan,
   type ArrowSpec,
   type Command,
   type ParseState,
@@ -342,8 +343,11 @@ function exoArrowConfiguration(
  * there IS no classic renderer (`SequenceDiagram.java:306-309` builds Teoz
  * unconditionally), so those consumers are live. See D4 as amended
  * 2026-08-26 and follow-on `sequence-parallel-anchor-draw`.
- * `PART1ANCHOR`/`PART2ANCHOR` (`:146-147`) have no AST field, so they are
- * matched and dropped as they are for `CommandArrow`.
+ * `PART1ANCHOR`/`PART2ANCHOR` (`:149-150`) are intentionally absent: neither
+ * `CommandExoArrowLeft` nor `CommandExoArrowRight` declares a `RegexLeaf` of
+ * either name (only `ANCHOR`, `:59`), so `arg.get(...)` is always null upstream,
+ * and `CommunicationExoTile#drawU` never reads a part anchor (only
+ * `CommunicationTile.java:328-331` does). There is nothing to carry or draw.
  * @see ~/git/plantuml/.../command/CommandExoArrowAny.java:138-147
  */
 function exoOptionalFields(g: Groups): Pick<MessageExoEvent, 'url' | 'lifeColor' | 'parallel' | 'anchor'> {
@@ -414,6 +418,11 @@ function executeExoArrow(state: ParseState, match: RegExpExecArray, getMessageEx
   // `NoSuchColorException` out of `applyStyle` (`:101`) discards the attempt.
   if (state.executionError !== undefined) return;
   emit(state, msg);
+  // `MessageExo` is an `EventWithNote` (`AbstractMessage.java:58`), so it is
+  // what `SequenceDiagram#getLastEventWithNote` (`SequenceDiagram.java:154-158`)
+  // hands the next `note left|right`; both ends are its one participant
+  // (`teoz/TileBuilder.java:122-134` places the note against `getParticipant()`).
+  setLastEventWithNoteSpan(state, [participant, participant]);
   const error = addMessage(state.life, msg); // `:152-154`
   if (error !== undefined) {
     state.executionError = error;

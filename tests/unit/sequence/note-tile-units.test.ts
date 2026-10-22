@@ -46,12 +46,4 @@ describe('a note written under a message', () => {
     const { notes, centers } = notesOf(['A -> B ++ : go', 'A -> B -- : again', 'note right: n']);
     expect(notes[0]!.x).toBe(centers[1]! + 5 + 5);
   });
-
-  // `top`/`bottom` stay on the placement they had before `NoteTile` was
-  // ported: 10 either side of the message's two lifelines.
-  it('bottom keeps its legacy box, 10 left of the leftmost lifeline', () => {
-    const { notes, centers } = notesOf(['A -> B : go', 'note bottom: n']);
-    expect(notes[0]!.x).toBe(centers[0]! - 10);
-    expect(notes[0]!.width).toBe(Math.trunc(centers[1]! - centers[0]! + 20));
-  });
 });

@@ -1,0 +1,11 @@
+@startuml
+participant Alice
+participant Bob
+box "Titre 2"
+participant Pluton
+participant Sun
+endbox
+Alice -> Bob
+Bob -> Pluton
+Pluton -> Sun
+@enduml

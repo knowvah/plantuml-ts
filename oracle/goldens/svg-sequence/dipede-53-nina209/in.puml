@@ -1,0 +1,13 @@
+@startuml
+!pragma teoz true
+
+a->b: test1
+activate b
+&b->c: test2
+
+
+c-->b: test3
+&b-->a: test4
+deactivate b
+
+@enduml

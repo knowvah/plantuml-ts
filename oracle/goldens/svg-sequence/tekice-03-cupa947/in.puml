@@ -1,0 +1,15 @@
+@startuml
+actor Smith
+box "A box" #LightBlue
+participant foo
+participant bar
+end box
+participant baz
+
+Smith -> foo: call foo
+alt #green if something
+foo -> bar: do something
+else something else
+foo -> baz: do something else
+end
+@enduml

@@ -69,6 +69,85 @@ describe('participantCommand', () => {
   });
 });
 
+// SequenceDiagram.java:548-555 putParticipantInLast; CommandParticipant.java:146-148
+describe('re-declaring a participant moves it last', () => {
+  const ids = (ast: SequenceDiagramAST): string[] => ast.participants.map((p) => p.id);
+
+  it('single-line form moves the participant last and keeps its first display', () => {
+    const ast = parse(['participant A', 'participant B', 'participant C', 'participant "Other" as A', 'A -> B : x']);
+    expect(ids(ast)).toEqual(['B', 'C', 'A']);
+    expect(ast.participants.map((p) => p.order)).toEqual([0, 1, 2]);
+    expect(ast.participants[2]).toMatchObject({ id: 'A', display: 'A' });
+  });
+
+  it('multi-line form moves the participant last', () => {
+    const ast = parse(['participant A', 'participant B', 'participant A [', 'body', ']', 'A -> B : x']);
+    expect(ids(ast)).toEqual(['B', 'A']);
+  });
+
+  it('create participant of an existing one only moves it', () => {
+    const ast = parse(['participant A', 'participant B', 'create participant A', 'B -> A : x']);
+    expect(ids(ast)).toEqual(['B', 'A']);
+  });
+
+  it('bare create of an existing one (CommandActivate:63) does not move it', () => {
+    // oracle: `participant A, participant B, create A` keeps titles A, B
+    const ast = parse(['participant A', 'participant B', 'create A', 'B -> A : x']);
+    expect(ids(ast)).toEqual(['A', 'B']);
+  });
+
+  it('re-binds the englober to the current box (or none)', () => {
+    const ast = parse([
+      'box "One"',
+      'participant A',
+      'end box',
+      'participant B',
+      'box "Two"',
+      'participant A',
+      'end box',
+      'participant B',
+      'A -> B : x',
+    ]);
+    expect(ids(ast)).toEqual(['A', 'B']);
+    const [a, b] = ast.participants;
+    expect(a?.boxId).toBe('box-2');
+    expect(b?.boxId).toBeUndefined();
+    expect(ast.boxes.map((x) => x.participantIds)).toEqual([[], ['A']]);
+  });
+});
+
+// SequenceDiagram.java:182-190 addWithOrder; CommandParticipant.java:154-155.
+// gepiju-13-negu183 / bugalu-47-ludi530 / lafuzo-13-xura634 sources.
+describe('explicit participant order', () => {
+  const ids = (ast: SequenceDiagramAST): string[] => ast.participants.map((p) => p.id);
+
+  it('inserts before the first strictly greater order (ties append)', () => {
+    const ast = parse(['participant A30 as P30 order 30', 'participant A20 order 20', 'participant A21 order 20']);
+    expect(ids(ast)).toEqual(['A20', 'A21', 'P30']);
+    expect(ast.participants.map((p) => p.order)).toEqual([0, 1, 2]);
+    expect(ast.participants.map((p) => p.declaredOrder)).toEqual([20, 20, 30]);
+  });
+
+  it('sorts negative orders first', () => {
+    const ast = parse([
+      'participant A30 as P30 order -30',
+      'participant A20 order -20',
+      'participant A21 order 2123459',
+    ]);
+    expect(ids(ast)).toEqual(['P30', 'A20', 'A21']);
+  });
+
+  it('multi-line form carries its order (lafuzo-13)', () => {
+    const ast = parse(['participant MyParticipant order 20 [', 'T', ']', 'participant Bob order 10']);
+    expect(ids(ast)).toEqual(['Bob', 'MyParticipant']);
+  });
+
+  it('a re-declared participant is re-inserted by its own order', () => {
+    const ast = parse(['participant A order 5', 'participant B', 'participant A']);
+    expect(ids(ast)).toEqual(['B', 'A']);
+  });
+});
+
 describe('createCommand', () => {
   it('declares a plain participant', () => {
     const ast = parse(['create Dog', 'Cat -> Dog : bark']);

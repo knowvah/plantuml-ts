@@ -1,0 +1,31 @@
+diff --git a/src/diagrams/sequence/sequence-layout-note.ts b/src/diagrams/sequence/sequence-layout-note.ts
+index 338cf6d..3e81256 100644
+--- a/src/diagrams/sequence/sequence-layout-note.ts
++++ b/src/diagrams/sequence/sequence-layout-note.ts
+@@ -1,3 +1,4 @@
++const LASTNOTE = new WeakMap<object, { top: number; h: number }>();
+ /**
+  * The `note` event handler: measure the body, resolve the tile
+  * (`sequence-note-tile.ts`), push the `NoteGeo`. Split out of
+@@ -185,7 +186,10 @@ export function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: Even
+   // top -- `Rose.paddingY` = 5, applied by `AbstractComponent#drawU:142-143`.
+   // On `metano-36-gevu843` the jar's box is at y=52 against a tile top of 47.
+   const textHeight = textHeightOf(event.text.split('\n').length, lineHeight, padding);
+-  const boxY = cursor.y + NOTE_COMPONENT_PADDING_Y;
++  const prev = LASTNOTE.get(ctx);
++  const merge = event.vmerge === true && event.onMessage !== true && prev !== undefined && Math.abs(prev.top + prev.h - cursor.y) < 1e-6;
++  const top = merge ? prev!.top : cursor.y;
++  const boxY = top + NOTE_COMPONENT_PADDING_Y;
+   const noteGeo: NoteGeo = {
+     paint,
+     kind: 'note',
+@@ -209,5 +213,8 @@ export function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: Even
+   // 2 * getPaddingY + deltaShadow` (`ComponentRoseNote:88-91`,
+   // `...NoteBox:62-65`; the shadow only for `note`, see `reserve` in
+   // `resolveNote`).
+-  cursor.y += textHeight + NOTE_COMPONENT_PADDING_Y * 2 + reserve;
++  const noteH = textHeight + NOTE_COMPONENT_PADDING_Y * 2 + reserve;
++  const h = merge ? Math.max(prev!.h, noteH) : noteH;
++  cursor.y = top + h;
++  if (event.onMessage !== true) LASTNOTE.set(ctx, { top, h }); else LASTNOTE.delete(ctx);
+ }

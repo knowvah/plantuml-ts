@@ -7,104 +7,22 @@
  * scaling rationale this module inherits (`ScaledTheme.scaleK`).
  */
 
+import { rect } from '../../core/svg.js';
 import { renderCreatedHead } from './renderer-participant-shapes.js';
 import type { MessageGeo, TextRun } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
-import { line } from '../../core/svg.js';
-import { sequenceText } from './sequence-text.js';
+import { primitiveFields, sequenceText, weightOf } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { TRANSPARENT_SVG } from './text-block-geo.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
-import { renderFlatMessageArrow, renderSelfMessageHead, shaftStyleOf } from './renderer-arrowhead.js';
+import { renderFlatMessageArrow } from './renderer-arrowhead.js';
 import { messagePaintOf } from './sequence-arrow-paint.js';
+import { renderSelfMessageLeft, renderSelfMessageRight } from './renderer-message-self.js';
 
 // ---------------------------------------------------------------------------
 // Message helpers
 // ---------------------------------------------------------------------------
-
-/**
- * The self-message loop's horizontal reach: where the vertical stroke goes.
- *
- * `xRight = arrowWidth - 3` with `arrowWidth = 45`
- * (`ComponentRoseSelfArrow.java:59-60`), and `drawRightSide:124-126` draws the
- * three strokes as `hline(xRight - x1)`, `vline(arrowHeight)` at `xRight`, and
- * `hline(xRight - x2)` — so the drawn extent is **42**, not `arrowWidth`.
- *
- * Gap SQ-5 recorded this as "40 vs 45". Measured absolutely against the jar in
- * Batch 8 of `plans/sequence-coordinate-convergence`, the gap was 40 vs 42:
- * `jobadi-87-jegi648`'s loop runs `x1="34.469"` to `x2="76.469"`, and 42 puts
- * this port's on it exactly.
- */
-const SELF_LOOP_WIDTH = 42;
-/**
- * The loop's vertical drop. Upstream's is `getArrowOnlyHeight()` = **13**
- * (`ComponentRoseSelfArrow.java:321-323`), drawn as `vline(arrowHeight)`
- * (`:125`), and `jobadi-87-jegi648`'s golden drops `y1="53"` to `y2="66"`.
- *
- * This was 20 until C3 — 7 too tall, left that way deliberately because
- * y-coordinate convergence was an explicit non-goal of the mission that
- * measured it (`plans/sequence-coordinate-convergence`) and changing it moves
- * every following event. It lands here with the term that moves those events:
- * `sequence-layout-message.ts#SELF_ARROW_ONLY_HEIGHT` is the same 13 on the
- * sizing side, and the two must agree or the loop overhangs its own tile.
- */
-const SELF_LOOP_HEIGHT = 13;
-
-/**
- * The self branch: three strokes clockwise off the lifeline and back, then
- * the head at the foot. Upstream draws the strokes FIRST and the head after
- * (`ComponentRoseSelfArrow.java:124-126` then `:131-173`) -- the reverse of
- * the flat component's order, and the order `botoku-28-cupe920` shows.
- *
- * B2: three `<line>`s, matching upstream's own three `ULine` draws --
- *
- * ```java
- * ug2.apply(new UTranslate(x1, textHeight)).draw(ULine.hline(xRight - x1));
- * ug2.apply(new UTranslate(xRight, textHeight)).draw(ULine.vline(arrowHeight));
- * ug2.apply(new UTranslate(x2, textHeight + arrowHeight)).draw(ULine.hline(xRight - x2));
- * ```
- * @see ~/git/plantuml/.../skin/rose/ComponentRoseSelfArrow.java:124-126
- *
- * This was ONE `<path>` until B2, and the difference was not cosmetic:
- * `compareSvg` short-circuits on a tag mismatch (`compare.ts:229`) and never
- * descends into a `d` attribute's numbers, so every self-message geometry in
- * the corpus was invisible to the comparator. Batch 8 of
- * `plans/sequence-coordinate-convergence` corrected this loop's width from 40
- * to the jar's 42 -- jar-verified, exact -- and total distance moved by
- * exactly zero. B1 measured 495 loops across 125 fixtures in that state.
- *
- * The third stroke runs `x2 -> xRight`, left to right, not back from the
- * corner: `hline(xRight - x2)` translated to `x2`, which the jar emits as
- * `x1="35.469" x2="76.469"` on `jobadi-87-jegi648`.
- */
-function renderSelfMessage(msg: MessageGeo, configuration: ArrowConfiguration, theme: ScaledTheme): string {
-  const k = theme.scaleK;
-  const x1 = msg.fromX;
-  // The RETURNING segment does not start where the outgoing one does:
-  // `ComponentRoseSelfArrow#drawRightSide:92-93` splits them by `deltaX1`,
-  // and by one pixel even when nothing is live. Resolved in layout, which is
-  // where the activation level lives -- see `MessageGeo.selfReturnX`. The
-  // fallback covers a hand-authored geometry that predates the field.
-  const xBack = msg.selfReturnX ?? x1;
-  const y1 = msg.y;
-  const loopWidth = SELF_LOOP_WIDTH * k;
-  const loopHeight = SELF_LOOP_HEIGHT * k;
-  // `xRight = arrowWidth - 3` (`ComponentRoseSelfArrow.java:59-60`), which is
-  // what {@link SELF_LOOP_WIDTH} measures from the outgoing segment's start.
-  const xRight = x1 + loopWidth;
-  const yBottom = y1 + loopHeight;
-  // The deprecated `applyStroke(ug)` (`ComponentRoseSelfArrow.java:81`): the
-  // style's thickness, 2,2 when dotted, and never the style's `LineStyle`
-  // (`sequence-arrow-paint.ts#applyStrokeDeprecated`).
-  const stroke = shaftStyleOf(messagePaintOf(msg), k);
-  const loop =
-    line(x1, y1, xRight, y1, stroke) +
-    line(xRight, y1, xRight, yBottom, stroke) +
-    line(xBack, yBottom, xRight, yBottom, stroke);
-  // The head sits at the foot of the RETURNING segment, so it moves with it.
-  return loop + renderSelfMessageHead(msg, configuration, theme, yBottom);
-}
 
 /**
  * ONE label run as its `<text>`.
@@ -133,15 +51,11 @@ function messageLabelRun(run: TextRun, font: FontConfiguration, k: number): stri
     fontFamily: run.fontFamily ?? font.family,
     fontSize: run.fontSize ?? font.size * k,
     fill: run.color ?? font.color ?? TRANSPARENT_SVG,
-    // `'700'`, not `'bold'`: the deterministic-text jar writes the numeric CSS
-    // weight (`sequence-text.ts#SequenceTextSpec.fontWeight`).
-    ...(run.bold === true ? { fontWeight: '700' as const } : {}),
+    // The numeric CSS weight (`sequence-text.ts#runFontWeight`).
+    ...weightOf(run),
     ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
     ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
-    ...(run.url !== undefined ? { url: run.url } : {}),
-    // A `<math>`/`<latex>` run draws its image instead of a `<text>`
-    // (`sequence-text.ts#SequenceRunImage`, `AtomMath.java:78-97`).
-    ...(run.image !== undefined ? { image: run.image } : {}),
+    ...primitiveFields(run),
   });
 }
 
@@ -151,6 +65,27 @@ function messageLabelRun(run: TextRun, font: FontConfiguration, k: number): stri
  *  The autonumber leads, which is `createMessageNumber` merging `tb1` LEFT of
  *  `tb2` (`Display.java:703-712`) read left to right. */
 function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
+  return renderLabelPadder(msg, theme) + renderLabelRuns(msg, theme);
+}
+
+/** `Padder#drawU`'s one `URectangle`, drawn before the label it wraps
+ *  (`Padder.java:128-131`); `rounded(roundCorner)` reaches the SVG as
+ *  `rx = ry = roundCorner / 2`, written when positive (`SvgGraphics.java:
+ *  582-584`). Stroke is the default `UStroke` (thickness 1), none when the
+ *  border colour is unset. */
+function renderLabelPadder(msg: MessageGeo, theme: ScaledTheme): string {
+  const box = msg.labelPadder;
+  if (box === undefined) return '';
+  const r = (box.roundCorner / 2) * theme.scaleK;
+  return rect(box.x, box.y, box.width, box.height, {
+    fill: box.fill,
+    stroke: box.stroke,
+    strokeWidth: theme.scaleK,
+    ...(r > 0 ? { rx: r, ry: r } : {}),
+  });
+}
+
+function renderLabelRuns(msg: MessageGeo, theme: ScaledTheme): string {
   const runs = msg.labelNumber === undefined ? msg.labelLines : [msg.labelNumber, ...msg.labelLines];
   const font = messagePaintOf(msg).font;
   return runs.map((run) => messageLabelRun(run, font, theme.scaleK)).join('');
@@ -196,11 +131,33 @@ function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
  * sdd1 T2c), never as text.
  */
 export function renderMessage(msg: MessageGeo, theme: ScaledTheme): string {
+  // A part-anchored message returns from `drawU` before drawing anything
+  // (`CommunicationTile.java:328-331`); its tile kept its height in layout.
+  if (msg.partAnchored === true) return '';
   // A create message draws the created head FIRST, then the arrow
   // (`CommunicationTile#drawU:351-371`) -- and draws it even when the arrow
   // is hidden, since only the arrow component checks `isHidden()`.
   const head = msg.createdHead === undefined ? '' : renderCreatedHead(msg.createdHead, theme);
-  return head + renderMessageArrowAndLabel(msg, theme);
+  return renderMulticast(msg, theme) + head + renderMessageArrowAndLabel(msg, theme);
+}
+
+/**
+ * `drawMulticast` (`CommunicationTile.java:373-390`) runs FIRST in `drawU`
+ * (`:338`): each extra target gets the message's own configuration (reversed
+ * when `x2 < x1`, `getComponentMulticast:169-177`) and no label
+ * (`Display.NULL`), over the span between the two lifelines. A hidden arrow
+ * draws nothing (`ComponentRoseArrow.java:85-87`).
+ */
+function renderMulticast(msg: MessageGeo, theme: ScaledTheme): string {
+  if (msg.multicast === undefined || msg.arrow.hidden === true) return '';
+  return msg.multicast.map((target) => renderFlatMessageArrow({ ...msg, ...target }, msg.arrow, theme)).join('');
+}
+
+/** `isReverseDefine()` picks the side (`ComponentRoseSelfArrow.java:83-86`). */
+function renderSelfMessage(msg: MessageGeo, configuration: ArrowConfiguration, theme: ScaledTheme): string {
+  return configuration.reverseDefine === true
+    ? renderSelfMessageLeft(msg, configuration, theme)
+    : renderSelfMessageRight(msg, configuration, theme);
 }
 
 function renderMessageArrowAndLabel(msg: MessageGeo, theme: ScaledTheme): string {

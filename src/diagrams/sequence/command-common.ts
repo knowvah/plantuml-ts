@@ -15,6 +15,7 @@
  * @see ~/git/plantuml/.../command/CommonCommands.java:54-106
  */
 
+import { PragmaKey, pragmaKeyLazyFrom } from '../../core/skin/PragmaKey.js';
 import type { Command } from './sequence-parse-helpers.js';
 import { matchScaleCommand } from '../../core/scale-command.js';
 import { RE_ASSUME_TRANSPARENT } from '../../core/assume-transparent.js';
@@ -36,15 +37,20 @@ export const skinParamMessageAlignCommand: Command = {
  * `layout`), none is reachable from this port's sequence corpus bucket
  * (183 `teoz true`, 31 `svgparser sax`, 1 `showDeprecation true` — none of
  * `svgsize`/`graphviz_dot`/`layout`), so every instance falls through to the
- * plain `system.getPragma().define(name, value)` branch, which has no
- * representable effect on `SequenceDiagramAST`. Same "recognised, no
+ * plain `system.getPragma().define(name, value)` branch, whose only
+ * representable effect on `SequenceDiagramAST` is `sequenceMessageSpan`
+ * (`AbstractCommunicationTile.java:52-54`), stored as an option. Same "recognised, no
  * observable effect" precedent as `state/state-commands.ts`'s rule 3a.
  * @see command/CommandPragma.java:101-134
  */
 export const pragmaCommand: Command = {
-  pattern: /^!pragma\s+[A-Za-z_][A-Za-z_0-9]*(?:\s+.*)?$/,
-  execute() {
-    /* ignored — see doc comment above */
+  pattern: /^!pragma\s+([A-Za-z_][A-Za-z_0-9]*)(?:\s+(.*))?$/,
+  execute(state, match) {
+    // The one pragma with a representable effect: `Pragma#isTrue` is
+    // "true" or "on", case-insensitively (`Pragma.java:85-88`).
+    if (pragmaKeyLazyFrom(match[1]!) !== PragmaKey.SEQUENCE_MESSAGE_SPAN) return;
+    const value = match[2]?.toLowerCase();
+    state.ast.options.sequenceMessageSpan = value === 'true' || value === 'on';
   },
 };
 
@@ -69,20 +75,33 @@ export const rotateCommand: Command = {
   },
 };
 
-/** `hide stereotype` — reached in sequence diagrams through
+/** `GENDER` -- `CommandHideShowByGender.java:75-77`, `%pLN_.` widened to its
+ *  `\p{L}\p{N}_.` JS spelling. */
+const GENDER = String.raw`(?:(?:class|object|interface|enum|annotation|dataclass|record|abstract|[\p{L}\p{N}_.]+|"[^"]+"|<<.*>>)\s+)*?`;
+
+/** `hide|show [GENDER] stereotype(s)` — reached in sequence diagrams through
  *  `SequenceDiagramFactory:100` -> `CommonCommands#addCommonCommands1` ->
  *  `addCommonHides` (`CommonCommands.java:103-106`) ->
- *  `CommandHideShowByGender`, whose `stereotype` arm is `:195`. T13 recorded
- *  this as an unmodelled no-op after grepping only `sequencediagram/command/`
- *  and the CommonCommands ADD list, and flagged it for re-checking: the
- *  registration is one level down, in `addCommonHides`. Now honoured —
- *  suppresses the participant stereotype run, which the jar's own goldens
- *  confirm both ways (`secida-27-jaco323` carries `hide stereotype` and shows
- *  bare names; `birocu-87-xubi808` has none and shows `«APIGateway»`). */
+ *  `CommandHideShowByGender`. The regex's GENDER run
+ *  (`CommandHideShowByGender.java:75-77`) is a lazy repeat of a type keyword,
+ *  a name, a quoted name or `<<...>>`; the sequence arm IGNORES it and only
+ *  applies the PORTION (`executeSequenceDiagram` `:163-166`: `diagram
+ *  .hideOrShow(portion.asSet(), show)`). Sequence-scoped: the class engine
+ *  carries its own `hide`/`show` directive (`class-command-directives.ts`);
+ *  this module is imported by no other engine's dispatch.
+ *
+ *  Of the portions (`:79-81`, `getEntityPortion :286-304`) only `stereotype`
+ *  is observable in a sequence diagram (`Participant.java:125-135`); the
+ *  others are accepted and have no effect. T13 confirmed the jar's goldens
+ *  both ways (`secida-27-jaco323` hides, `birocu-87-xubi808` shows). */
 export const hideStereotypeCommand: Command = {
-  pattern: /^hide\s+stereotype\s*$/i,
-  execute(state) {
-    state.ast.options.hideStereotype = true;
+  pattern: new RegExp(
+    String.raw`^(hide|show)\s+${GENDER}(?:empty\s+)?(members?|attributes?|fields?|methods?|circles?|circled?|(stereotypes?))$`,
+    'iu',
+  ),
+  execute(state, match) {
+    if (match[3] === undefined) return;
+    state.ast.options.hideStereotype = match[1]!.toLowerCase() === 'hide';
   },
 };
 

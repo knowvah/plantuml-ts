@@ -1,0 +1,17 @@
+@startuml
+skinparam {
+    Participant {
+        FontColor Black
+        FontColor<<Color1>> Black
+        FontColor<<Color2>> White
+    }
+}
+
+box "Group 1"
+    participant "Alfa" as One <<Color1>>
+end box
+box "Group 2"
+    participant "Beta" as Two <<Color2>>
+    participant "<font color = white>Omega" as Three <<Color2>>
+end box
+@enduml

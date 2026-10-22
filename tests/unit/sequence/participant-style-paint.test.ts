@@ -266,11 +266,11 @@ describe('participantBoxOf / participantLabelCy', () => {
   });
 
   it('centres a participant label between its paddings', () => {
-    expect(participantLabelCy('participant', 40, 0, true, { fontSize: 14, padTop: 2, padBottom: 6 })).toBe(18);
-    expect(participantLabelCy('participant', 40, 0, true, { fontSize: 14 })).toBe(20);
+    expect(participantLabelCy('participant', 40, 0, true, { padTop: 2, padBottom: 6 })).toBe(18);
+    expect(participantLabelCy('participant', 40, 0, true, {})).toBe(20);
   });
 
   it('scales the collections delta with the render', () => {
-    expect(participantLabelCy('collections', 44, 0, true, { fontSize: 14, scaleK: 2 })).toBe(26);
+    expect(participantLabelCy('collections', 44, 0, true, { scaleK: 2 })).toBe(26);
   });
 });

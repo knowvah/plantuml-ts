@@ -49,6 +49,14 @@ export interface DebtEntry extends ImportEdge {
  */
 export const ALLOWLIST: readonly AllowlistEntry[] = [
   {
+    from: 'src/diagrams/sequence/renderer-link-anchor.ts',
+    to: 'src/diagrams/activity/arrows-regular.ts',
+    why:
+      'sdd2 T2e — upstream draws a sequence link anchor through the activity ' +
+      'worm: LinkAnchor.java:38 imports net.sourceforge.plantuml.activitydiagram3.ftile.Snake, ' +
+      'whose heads are ArrowsRegular (activitydiagram3/ftile/ArrowsRegular.java:41-86).',
+  },
+  {
     from: 'src/index.ts',
     to: 'src/diagrams/',
     why:

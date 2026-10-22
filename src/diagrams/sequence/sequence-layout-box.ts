@@ -1,7 +1,7 @@
 /**
  * A `box`/`end box` englober's style paint and its placed title (sdd1 T2e).
- * Split out of `layout.ts`, which is past the 500-line cap; `layout.ts
- * #computeBoxGeos` places the box itself.
+ * Split out of `layout.ts`, which is past the 500-line cap;
+ * `sequence-dolls.ts` places the box itself.
  */
 import type { BoxGroup, TextRun } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
@@ -10,9 +10,10 @@ import { ColorType } from '../../core/abel/ColorType.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import type { HColor } from '../../core/style/Value.js';
 import { Stereotype } from '../../core/stereo/Stereotype.js';
+import { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { dollStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
-import { atomFontSpec } from './sequence-creole-text-atom.js';
-import { offsetRun, sequenceCreoleRuns } from './sequence-creole.js';
+import { componentLabelBlock, offsetRun, symbolInk, type LabelBlock } from './sequence-creole-sheet.js';
 
 /** A colour the style layer can hold (`Value.ts#HColor`); `Colors` keeps
  *  them opaque (`abel/Colors.ts#HColor`). */
@@ -40,7 +41,62 @@ export function boxPaint(box: BoxGroup): SequencePaint {
   return paintOf(style, HColorSet.instance());
 }
 
-/** The box's drawn extent, as `computeBoxGeos` placed it. */
+/**
+ * `ComponentRoseEnglober`'s padding, `topRightBottomLeft(1, 3, 1, 3)`
+ * (`ComponentRoseEnglober.java:58`), read back by `getTextWidth`/
+ * `getTextHeight` (`AbstractTextualComponent.java:106-114`).
+ */
+const ENGLOBER_PADDING = ClockwiseTopRightBottomLeft.topRightBottomLeft(1, 3, 1, 3);
+
+/** `getPreferredHeight = getTextHeight + 3` (`ComponentRoseEnglober.java:83`). */
+const ENGLOBER_EXTRA_HEIGHT = 3;
+
+/** The englober component's preferred size, `Doll#getTitleWidth` and
+ *  `Doll#getTitlePreferredHeight` (`Doll.java:128-132,199-201`). */
+export interface EngloberDimension {
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * `ComponentRoseEnglober#getPreferredWidth`/`#getPreferredHeight` (`:81-89`):
+ * the title's text block plus the padding, plus 3 below. An empty one-line
+ * title is a `TextBlockEmpty` (`AbstractTextualComponent.java:84-85`), 0 x 0,
+ * so a bare `box` still reserves 1 + 1 + 3 = 5; a `" "` title is a real line.
+ * One line: the label is never split (see {@link boxLabelRuns}).
+ */
+export function engloberDimension(
+  label: string,
+  paint: SequencePaint,
+  measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
+): EngloberDimension {
+  const block = engloberBlock(label, paint, measurer, sprites);
+  return {
+    width: block.width + ENGLOBER_PADDING.getLeft() + ENGLOBER_PADDING.getRight(),
+    height: block.height + ENGLOBER_PADDING.getTop() + ENGLOBER_PADDING.getBottom() + ENGLOBER_EXTRA_HEIGHT,
+  };
+}
+
+/** The englober's text block: `create0` at the box style's font, its
+ *  padding's sides as margins (`ComponentRoseEnglober.java:58`), drawn after
+ *  `symbolContext.apply(ug)` (`:65-71`). One line: the label is never split. */
+function engloberBlock(
+  label: string,
+  paint: SequencePaint,
+  measurer: StringMeasurer,
+  sprites: SpriteRegistry | undefined,
+): LabelBlock {
+  const opts = {
+    sprites,
+    ink: symbolInk(paint),
+    marginX1: ENGLOBER_PADDING.getLeft(),
+    marginX2: ENGLOBER_PADDING.getRight(),
+  };
+  return componentLabelBlock([label], paint.font, opts, measurer);
+}
+
+/** The box's drawn extent, as `Doll#drawMe` placed it. */
 export interface BoxFrame {
   readonly x: number;
   readonly y: number;
@@ -61,12 +117,8 @@ export function boxLabelRuns(
   frame: BoxFrame,
   paint: SequencePaint,
   measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
 ): readonly TextRun[] {
-  if (label === '') return [];
-  const spec = atomFontSpec(paint.font);
-  const ascent = measurer.measure('M', spec).height - measurer.getDescent(spec, 'M');
-  const runs = sequenceCreoleRuns(label, paint.font, { leftX: 0, baselineY: frame.y + ascent }, measurer);
-  const last = runs.at(-1);
-  const width = last === undefined ? 0 : last.x + last.textWidth;
-  return runs.map((run) => offsetRun(run, frame.x + (frame.width - width) / 2, 0));
+  const block = engloberBlock(label, paint, measurer, sprites);
+  return block.primitives.map((run) => offsetRun(run, frame.x + (frame.width - block.width) / 2, frame.y));
 }

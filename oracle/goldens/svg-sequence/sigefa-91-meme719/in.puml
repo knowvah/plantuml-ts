@@ -1,0 +1,14 @@
+@startuml
+<style>
+    sequenceDiagram {
+      actor {
+        BackgroundColor Blue
+      }
+     .myStyle {
+        BackgroundColor Red
+     }
+}
+</style>
+actor Bob
+actor Sally <<myStyle>>
+@enduml

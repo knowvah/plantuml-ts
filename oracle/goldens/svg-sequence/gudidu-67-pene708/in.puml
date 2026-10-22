@@ -1,0 +1,8 @@
+@startuml
+skinparam shadowing false
+B->C
+activate C
+C-->B
+note right : long
+deactivate C
+@enduml

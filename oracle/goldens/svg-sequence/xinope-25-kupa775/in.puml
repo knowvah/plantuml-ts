@@ -1,0 +1,3 @@
+@startuml
+A -> B : <img /dev/stdout>
+@enduml

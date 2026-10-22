@@ -1,0 +1,7 @@
+@startuml
+Bob -> Alice : hello
+create Dog
+Alice -> Dog : create
+note left : X
+Alice -> Toto : hello
+@enduml

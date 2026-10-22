@@ -1,0 +1,115 @@
+diff --git a/src/diagrams/sequence/sequence-layout-events.ts b/src/diagrams/sequence/sequence-layout-events.ts
+index 95c59fe..38a1073 100644
+--- a/src/diagrams/sequence/sequence-layout-events.ts
++++ b/src/diagrams/sequence/sequence-layout-events.ts
+@@ -23,10 +23,10 @@ import type {
+ } from './ast.js';
+ import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
+ import { HColorSet } from '../../core/klimt/color/HColorSet.js';
+-import { handleNoteEvent } from './sequence-layout-note.js';
++import { handleNoteEvent, protoNoteHeight } from './sequence-layout-note.js';
+ import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
+ import type { MessageLabelEnv } from './text-block-geo.js';
+-import { handleMessageEvent } from './sequence-layout-message.js';
++import { handleMessageEvent, protoMessageContact } from './sequence-layout-message.js';
+ import { layoutDelay } from './sequence-delay.js';
+ import type { MessageLevels } from './sequence-layout-participants.js';
+ import { handleMessageExoEvent } from './sequence-layout-exo.js';
+@@ -107,7 +107,7 @@ export interface EventCursor {
+ export function processEvents(events: SequenceEvent[], startY: number, ctx: EventProcessingContext): number {
+   const cursor: EventCursor = { y: startY, lastMessageY: undefined };
+   for (let i = 0; i < events.length; i++) {
+-    dispatchEvent(events[i]!, cursor, ctx, boundLifeEvents(events, i));
++    dispatchWithChain(events[i]!, cursor, ctx, boundLifeEvents(events, i));
+   }
+   return cursor.y;
+ }
+@@ -141,6 +141,60 @@ function boundLifeEvents(events: readonly SequenceEvent[], index: number): Activ
+   return bound;
+ }
+ 
++interface Chain { origin: number; contact: number; max: number; geoStart: number }
++const CHAINS = new WeakMap<object, Chain | undefined>();
++function shiftY(o: unknown, d: number, depth = 0): void {
++  if (o === null || typeof o !== 'object' || depth > 4) return;
++  if (Array.isArray(o)) { for (const e of o) shiftY(e, d, depth + 1); return; }
++  const r = o as Record<string, unknown>;
++  for (const key of Object.keys(r)) {
++    if (key === 'paint' || key === 'arrow' || key === 'participant' || key === 'styleBuilder') continue;
++    const v = r[key];
++    if (key === 'y' && typeof v === 'number') r[key] = v + d;
++    else if (typeof v === 'object') shiftY(v, d, depth + 1);
++  }
++}
++function tileContact(event: SequenceEvent, ctx: EventProcessingContext): number | undefined {
++  if (event.kind === 'message') return protoMessageContact(event, ctx);
++  if (event.kind === 'note' && event.onMessage !== true) return protoNoteHeight(event, ctx) / 2;
++  return undefined;
++}
++function dispatchWithChain(event: SequenceEvent, cursor: EventCursor, ctx: EventProcessingContext, bound: readonly ActivationEvent[]): void {
++  const cr = tileContact(event, ctx);
++  const chain = CHAINS.get(ctx);
++  const parallel = (event.kind === 'message' || event.kind === 'note') && event.parallel === true;
++  if (cr === undefined) {
++    const before = cursor.y;
++    dispatchEvent(event, cursor, ctx, bound);
++    const propagating = event.kind === 'activate' || event.kind === 'deactivate' || (event.kind === 'note' && event.onMessage === true);
++    if (!propagating) CHAINS.set(ctx, undefined);
++    else if (chain !== undefined) chain.max = Math.max(chain.max, cursor.y);
++    void before;
++    return;
++  }
++  if (parallel && chain !== undefined) {
++    const newContact = Math.max(chain.contact, chain.origin + cr);
++    const delta = newContact - chain.contact;
++    if (delta > 0) {
++      for (let i = chain.geoStart; i < ctx.eventGeos.length; i++) {
++        const g = ctx.eventGeos[i]!;
++        if (g.kind === 'message' || g.kind === 'note') shiftY(g, delta);
++      }
++      chain.max += delta;
++      chain.contact = newContact;
++    }
++    cursor.y = newContact - cr;
++    dispatchEvent(event, cursor, ctx, bound);
++    chain.max = Math.max(chain.max, cursor.y);
++    cursor.y = chain.max;
++    return;
++  }
++  const origin = cursor.y;
++  const geoStart = ctx.eventGeos.length;
++  dispatchEvent(event, cursor, ctx, bound);
++  CHAINS.set(ctx, { origin, contact: origin + cr, max: cursor.y, geoStart });
++}
++
+ /** Route a single event to its kind-specific handler. */
+ function dispatchEvent(
+   event: SequenceEvent,
+diff --git a/src/diagrams/sequence/sequence-layout-message.ts b/src/diagrams/sequence/sequence-layout-message.ts
+index d9bb091..b86408a 100644
+--- a/src/diagrams/sequence/sequence-layout-message.ts
++++ b/src/diagrams/sequence/sequence-layout-message.ts
+@@ -493,3 +493,10 @@ function applyMessageActivation(
+     handleDestroy(event.destroys, cursor, ctx);
+   }
+ }
++
++export function protoMessageContact(event: MessageEvent, ctx: EventProcessingContext): number {
++  const paint = messagePaint(event.styleBuilder, event.stereotype, event.arrow, event.from === event.to);
++  const lineHeight = ctx.measurer.measure('M', atomFontSpec(paint.font)).height;
++  const rows = messageLabelRows(event.label, numberTextOf(event));
++  return messageTileAdvance(rows * lineHeight, event.from === event.to).arrowY;
++}
+diff --git a/src/diagrams/sequence/sequence-layout-note.ts b/src/diagrams/sequence/sequence-layout-note.ts
+index 338cf6d..54fe930 100644
+--- a/src/diagrams/sequence/sequence-layout-note.ts
++++ b/src/diagrams/sequence/sequence-layout-note.ts
+@@ -211,3 +211,8 @@ export function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: Even
+   // `resolveNote`).
+   cursor.y += textHeight + NOTE_COMPONENT_PADDING_Y * 2 + reserve;
+ }
++
++export function protoNoteHeight(event: NoteEvent, ctx: EventProcessingContext): number {
++  const { padding, reserve, lineHeight } = resolveNote(event, ctx);
++  return textHeightOf(event.text.split('\n').length, lineHeight, padding) + NOTE_COMPONENT_PADDING_Y * 2 + reserve;
++}

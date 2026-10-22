@@ -1,0 +1,6 @@
+@startuml
+loop
+X -> Y: z();
+end
+destroy X
+@enduml

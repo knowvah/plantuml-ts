@@ -1,0 +1,7 @@
+@startuml
+skinparam sequenceMessageAlign direction
+Bob->Alice: This is a long message to increase the distance between Alice and Bob
+Bob->Alice: should be left aligned
+Alice->Bob: should be right aligned
+Alice<->Bob: should be centered
+@enduml

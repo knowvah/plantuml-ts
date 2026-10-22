@@ -245,7 +245,10 @@ describe('sequence diff census — the committed census against T2s baseline', (
   it('reports those errors separately, with a reason, never as zero diffs', () => {
     expect(census.errors.map((e) => e.slug).sort()).toEqual(baseline.errored.map((f) => f.slug).sort());
     for (const e of census.errors) expect(e.reason).toBeTruthy();
-    expect(census.errors.length).toBeGreaterThan(0);
+    // > 0 until sdd2/close-b8, when the last three error rows (fonudu-70,
+    // nuvoja-46, bomino-39; T8a-T8c) began to render. Pinned at 0 so a new
+    // error row has to be explained here rather than slipping into the list.
+    expect(census.errors).toHaveLength(0);
   });
 
   it('totals are the sum of the per-fixture bucket counts', () => {

@@ -1,0 +1,4 @@
+@startuml
+title any_string_with_underscore
+actor foo << Foo >>
+@enduml

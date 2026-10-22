@@ -1,0 +1,19 @@
+@startuml
+hide footbox
+url of RepoxServer is [[http://www.google.com]]
+[-> RepoxServer : OAI verb
+RepoxServer -> OAIDataProvider : invoke handler
+OAIDataProvider -> Solr : query by timeline/collection 
+OAIDataProvider <- Solr : object IDs
+OAIDataProvider -> MongoDB : get by object ID
+OAIDataProvider <- MongoDB : full objects
+RepoxServer <- OAIDataProvider : objects as EDM
+[<- RepoxServer: OAI response
+
+legend
+  Look around <u>[[https://github.com/europeana/corelib]]</u>:
+  solr.bean.impl.FullBeanImpl
+  solr.server.EdmMongoServer
+  definitions.solr.beans.FullBean
+endlegend
+@enduml

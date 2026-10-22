@@ -1,0 +1,13 @@
+@startuml
+'skinparam dpi 700
+A -> B
+note right : this is right of the user B
+
+A ->] : this goes to the very right of the diagram
+note right : How can this note be right of the arrow ?
+
+A -x B : hello
+A x-- B : hello ?
+A ->x B : hello
+A x<-- B : hello ?
+@enduml

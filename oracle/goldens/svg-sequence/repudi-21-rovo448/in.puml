@@ -1,0 +1,11 @@
+@startuml
+[-> Node: Start TC
+Node -> SUT : RAR
+activate Node
+Node <- SUT : RAA
+[<[#blue]-Node: Succ
+[<[#red]-Node: Fail
+[<-[#red]-Node: Fail
+[<[#red]--Node: Fail
+deactivate Node
+@enduml

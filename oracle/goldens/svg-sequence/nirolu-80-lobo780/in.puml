@@ -1,0 +1,11 @@
+@startuml
+!pragma teoz true
+participant Bob
+participant Alice
+participant Ken
+participant David
+Bob -> Alice : hello1
+& Alice -> Ken : hi1
+& note right of David : Should be same level as "1"
+
+@enduml

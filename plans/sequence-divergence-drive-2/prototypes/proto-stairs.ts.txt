@@ -1,0 +1,25 @@
+// PROTOTYPE (scratch only): LiveBoxes#addStep/getStairs positions.
+interface St { msgStep?: number | undefined; parts?: readonly string[] | undefined; seen: Map<string, { a: boolean; d: boolean }>; steps: Map<string, Set<number>> }
+const ST = new WeakMap<object, St>();
+function st(ctx: object): St { let s = ST.get(ctx); if (!s) { s = { seen: new Map(), steps: new Map() }; ST.set(ctx, s); } return s; }
+const k = (y: number) => Math.round(y * 1000) / 1000;
+export function record(ctx: object, p: string, y: number): void { const s = st(ctx); let set = s.steps.get(p); if (!set) { set = new Set(); s.steps.set(p, set); } set.add(k(y)); }
+export function onMessage(ctx: object, parts: readonly string[], step: number | undefined): void {
+  const s = st(ctx); s.msgStep = step; s.parts = parts; s.seen = new Map();
+  if (step !== undefined) for (const p of parts) record(ctx, p, step);
+}
+export function resetLastMessage(ctx: object): void { const s = st(ctx); s.msgStep = undefined; s.parts = undefined; s.seen = new Map(); }
+function seen(s: St, p: string) { let v = s.seen.get(p); if (!v) { v = { a: false, d: false }; s.seen.set(p, v); } return v; }
+export function bound(ctx: object, p: string): boolean { const s = st(ctx); return s.msgStep !== undefined && s.parts?.includes(p) === true; }
+export function activatePos(ctx: object, p: string, ownY: number): number {
+  const s = st(ctx); record(ctx, p, ownY); const v = seen(s, p);
+  const pos = bound(ctx, p) && !v.d ? s.msgStep! : ownY; v.a = true; return pos;
+}
+export function deactivatePos(ctx: object, p: string, ownY: number): number {
+  const s = st(ctx); const set = s.steps.get(p);
+  const own = set?.has(k(ownY)) === true ? ownY + 5 : ownY; record(ctx, p, own);
+  const v = seen(s, p); const pos = bound(ctx, p) && !v.a ? s.msgStep! : own; v.d = true; return pos;
+}
+export function destroyPos(ctx: object, p: string, ownY: number): number {
+  const s = st(ctx); record(ctx, p, ownY); return bound(ctx, p) ? s.msgStep! : ownY;
+}

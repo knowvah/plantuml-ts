@@ -24,41 +24,32 @@
  * `,` of a `data:image/png;base64,` prefix; the SVG forms require `<svg`; and
  * the `jar:` form requires that literal prefix.
  *
- * ## Registration is deliberately withheld — the payload has no `Sprite` kind
+ * ## Registration
  *
  * Upstream's `executeArg` (`CommandSpriteBase64.java:84-91`) decodes the
  * Base64 to bytes, hands them to `SImageIO.read`, and registers a
- * `SpriteImage` — whose `asTextBlock` (`klimt/sprite/SpriteImage.java:70-99`)
- * draws the decoded raster through `UImage#muteColor`/`#monochrome`, i.e. a
- * per-pixel recolour of real image data.
+ * `SpriteImage` (`system.addSprite(NAME, new SpriteImage(...))`, `:88`),
+ * whose `asTextBlock` (`klimt/sprite/SpriteImage.java:70-99`) draws the
+ * decoded raster. This port has that sprite kind (`SpriteImage`, ufp-T3a,
+ * resolved by `core/creole-atoms-image-resolver.ts#resolveImageSpriteAtom`)
+ * and a PNG reader (`core/internal-sprite-store.ts#readPng`, which covers the
+ * 8-bit RGBA and indexed encodings), so a decodable payload registers.
  *
- * This port has no such sprite kind. `SpriteRegistry` entries are consumed by
- * `core/creole-atoms-image-resolver.ts#resolveSpriteAtom:274-296`, which
- * resolves a name to either a `SpriteSvg` (verbatim SVG re-emitted) or, via
- * `getSpriteMonochrome`'s UNCHECKED cast (`core/sprite-registry.ts:184-190`),
- * a `SpriteMonochrome` whose `getGray(x, y)` grid `spriteMonochromeAsLike`
- * (`klimt/sprite/sprite-raster.ts:74-81`) then reads. Registering a
- * `{ width, height }`-only entry under a name therefore does not degrade — it
- * throws `TypeError: sprite.getGray is not a function` the moment the name is
- * referenced. Building a real entry needs a PNG *decoder* (this port has only
- * the *encoder* at `klimt/sprite/png-encoder.ts`) plus a third
- * branch in that resolver: both under `src/core/`, both outside this
- * task's boundary.
- *
- * So the line is fully consumed — which is the parse-level defect it was
- * pinned for — and the name is recorded on the registry's existing
- * "definition consumed, registration skipped" shelf, the same shelf
- * `sprite-commands.ts#registerSvg:274-283` uses for an SVG whose dimensions
- * cannot be derived. `resolveSpriteAtom` then takes its unknown-name branch
- * (`:282`, `StripeSimple.addSprite`'s own skip), so `<$name>` contributes
- * nothing rather than crashing.
+ * An undecodable one is `CommandExecutionResult.error("Cannot decode Base64
+ * PNG sprite.")` (`:90`); the line is still consumed, and the name goes on
+ * the registry's "definition consumed, registration skipped" shelf -- the same
+ * shelf `sprite-commands.ts#registerSvg` uses -- so `<$name>` then takes
+ * `resolveSpriteAtom`'s unknown-name branch rather than crashing.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandSpriteBase64.java:59-92
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommonCommands.java:79
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/sprite/SpriteImage.java:61-99
  */
 
+import { SpriteImage } from '../../core/klimt/sprite/SpriteImage.js';
+import { readPng } from '../../core/internal-sprite-store.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import { addSprite } from '../../core/sprite-registry.js';
 
 /** `data:image/png;base64,` — the literal `RegexLeaf` between `NAME` and
  *  `DATA` (`CommandSpriteBase64.java:67`). */
@@ -78,17 +69,23 @@ const BASE64_DATA = '([A-Za-z0-9+/=]+)';
  *  sprite patterns. */
 const BASE64_SPRITE_RE = new RegExp('^sprite\\s+' + NAME + '\\s+' + PNG_DATA_URI_PREFIX + BASE64_DATA + '$', 'i');
 
+/** `Base64Coder.decode` (`CommandSpriteBase64.java:85`) over the grammar's own
+ *  `[A-Za-z0-9+/=]+` payload; `undefined` for a payload `atob` rejects. */
+function decodeBase64(data: string): Uint8Array | undefined {
+  try {
+    return Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * Tries `CommandSpriteBase64`'s grammar at line `i`, mutating `registry` in
  * place on a match. Returns `null` (no mutation) when line `i` is not an
  * inline Base64 PNG sprite definition.
  *
- * Both of upstream's outcomes consume the line: a decodable payload is
- * `CommandExecutionResult.ok()` (`:88`) and an undecodable one is
- * `CommandExecutionResult.error("Cannot decode Base64 PNG sprite.")` (`:90`).
- * They are NOT distinguished here, and deliberately so: this port registers
- * nothing on either path (see the file doc), so decoding the payload to pick
- * between two identical outcomes would be a check with no observable effect.
+ * Both of upstream's outcomes consume the line (`:88`, `:90`); only a payload
+ * that decodes to an image registers (`:87-88`).
  */
 export function matchSpriteBase64Command(
   lines: readonly string[],
@@ -97,6 +94,9 @@ export function matchSpriteBase64Command(
 ): { consumed: number } | null {
   const match = BASE64_SPRITE_RE.exec((lines[i] ?? '').trim());
   if (match === null) return null;
-  registry.skippedColorSprites.push(match[1]!);
+  const bytes = decodeBase64(match[2]!);
+  const image = bytes === undefined ? undefined : readPng(bytes);
+  if (image === undefined) registry.skippedColorSprites.push(match[1]!);
+  else addSprite(registry, match[1]!, new SpriteImage(image));
   return { consumed: 1 };
 }

@@ -1,0 +1,9 @@
+@startuml
+
+skinparam useBetaStyle true
+
+
+participant Bob <<foo1>> 
+actor Alice <<foo2>>
+
+@enduml

@@ -125,7 +125,16 @@ export class IncludeExecutor {
     const include = new EaterIncludeDef(s.getTrimmed());
     include.analyze(context, memory);
     const definitionName = include.getLocation();
-    const body = readLines(this.load(definitionName, '!includedef', s), definitionName, s.getLocation());
+    // `TContext.java:687-705` + `BlockUmlBuilder.java:150-156`: an unknown name
+    // yields `Collections.emptyList()` -- an empty body, never an error.
+    let text: string;
+    try {
+      text = this.load(definitionName, '!includedef', s);
+    } catch (e) {
+      if (e instanceof IncludeNotFoundError || e instanceof StdlibNotBundledError) return;
+      throw e;
+    }
+    const body = readLines(text, definitionName, s.getLocation());
     context.executeLines(memory, body, undefined, false);
   }
 

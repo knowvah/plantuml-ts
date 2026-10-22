@@ -17,6 +17,7 @@ import { describe, expect, it } from 'vitest';
 import { SEQUENCE_COMMANDS, type SequenceCommand } from '../../../src/diagrams/sequence/sequence-command-registry.js';
 import { arrowCommand, decoratedArrowCommand, returnCommand } from '../../../src/diagrams/sequence/command-arrow.js';
 import { exoArrowLeftCommand, exoArrowRightCommand } from '../../../src/diagrams/sequence/command-exo-arrow.js';
+import { linkAnchorCommand } from '../../../src/diagrams/sequence/command-link-anchor.js';
 import {
   autonumberCommand,
   autonumberIncrementCommand,
@@ -40,6 +41,7 @@ import {
   groupingCommand,
 } from '../../../src/diagrams/sequence/command-grouping.js';
 import {
+  activate2Command,
   activateCommand,
   deactivateCommand,
   deactivateShortCommand,
@@ -56,6 +58,7 @@ import {
   refOverMultilineCommand,
   setSeparatorCommand,
   spaceCommand,
+  urlCommand,
 } from '../../../src/diagrams/sequence/command-misc.js';
 import {
   endNoteCommand,
@@ -105,6 +108,7 @@ const EXPECTED: readonly RegistryEntry[] = [
   { name: 'spaceCommand', command: spaceCommand, upstreamLine: 143 },
   { name: 'returnCommand', command: returnCommand, upstreamLine: 129 },
   { name: 'arrowCommand', command: arrowCommand, upstreamLine: 111 },
+  { name: 'activate2Command', command: activate2Command, upstreamLine: 128 },
   { name: 'pragmaCommand', command: pragmaCommand, upstreamLine: 100 },
   { name: 'assumeTransparentCommand', command: assumeTransparentCommand, upstreamLine: 100 },
   { name: 'rotateCommand', command: rotateCommand, upstreamLine: 100 },
@@ -126,9 +130,11 @@ const EXPECTED: readonly RegistryEntry[] = [
   { name: 'noteOnArrowCommand', command: noteOnArrowCommand, upstreamLine: 132 },
   { name: 'styledNoteCommand', command: styledNoteCommand, upstreamLine: 117 },
   { name: 'noteAcrossCommand', command: noteAcrossCommand, upstreamLine: 122 },
+  { name: 'urlCommand', command: urlCommand, upstreamLine: 154 },
   { name: 'decoratedArrowCommand', command: decoratedArrowCommand, upstreamLine: 111 },
   { name: 'exoArrowLeftCommand', command: exoArrowLeftCommand, upstreamLine: 113 },
   { name: 'exoArrowRightCommand', command: exoArrowRightCommand, upstreamLine: 114 },
+  { name: 'linkAnchorCommand', command: linkAnchorCommand, upstreamLine: 155 },
 ];
 
 /**
@@ -157,12 +163,12 @@ const KNOWN_DESCENTS: readonly (readonly [string, string])[] = [
   ['bareDelayCommand', 'spaceCommand'],
   ['spaceCommand', 'returnCommand'],
   ['returnCommand', 'arrowCommand'],
-  ['arrowCommand', 'pragmaCommand'],
+  ['activate2Command', 'pragmaCommand'],
   ['autoactivateCommand', 'scaleCommand'],
   ['minwidthOrPagingCommand', 'createCommand'],
   ['refOverMultilineCommand', 'noteOnArrowCommand'],
   ['noteOnArrowCommand', 'styledNoteCommand'],
-  ['noteAcrossCommand', 'decoratedArrowCommand'],
+  ['urlCommand', 'decoratedArrowCommand'],
 ];
 
 /** Adjacent pairs whose upstream registration line goes DOWN, skipping the
@@ -185,14 +191,14 @@ describe('sequence command registry — frozen registration order', () => {
     );
   });
 
-  it('holds 44 commands — one array, not two tiers', () => {
-    expect(SEQUENCE_COMMANDS).toHaveLength(44);
-    expect(new Set(SEQUENCE_COMMANDS).size).toBe(44);
+  it('holds 47 commands — one array, not two tiers', () => {
+    expect(SEQUENCE_COMMANDS).toHaveLength(47);
+    expect(new Set(SEQUENCE_COMMANDS).size).toBe(47);
   });
 
   it('cites only lines inside initCommandsList (99-155) upstream', () => {
     const cited = EXPECTED.map((e) => e.upstreamLine).filter((l): l is number => l !== null);
-    expect(cited).toHaveLength(43);
+    expect(cited).toHaveLength(46);
     expect(cited.filter((l) => l < 99 || l > 155)).toEqual([]);
   });
 

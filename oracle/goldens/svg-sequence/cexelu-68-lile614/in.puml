@@ -1,0 +1,10 @@
+@startuml
+skinparam useBetaStyle true
+<style>
+arrow {
+  HorizontalAlignment right
+}
+</style>
+Bob -> Alice : right\non two different lines
+Bob -> Alice : very very long message
+@enduml

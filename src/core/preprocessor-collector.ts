@@ -8,9 +8,17 @@
 import type { SkinDirective, SkinparamAssignment } from './preprocessor.js';
 import { EmbeddedDiagram, getEmbeddedType } from './EmbeddedDiagram.js';
 import type { StringLocated } from './tim/StringLocated.js';
+import { getInputStreamForStyle } from './style/StyleLoader.js';
 
 const RE_STYLE_OPEN = /^<style>$/i;
-const RE_STYLE_CLOSE = /^<\/style>$/i;
+/** `CommandStyleMultilinesCSS.END`, `^[%s]*\<\/?style\>[%s]*$` (java:58): a
+ *  second `<style>` closes the open block exactly as `</style>` does. The
+ *  caller tests the trimmed line, which absorbs `[%s]*`. */
+const RE_STYLE_CLOSE = /^<\/?style>$/i;
+/** `CommandStyleImport.getRegexConcat` (java:67-79): `<style` `\w+` `=` an
+ *  optional quote (`[%q%g]?`), PATH `[^%q%g]*`, an optional quote, `>`. The
+ *  attribute name is not checked (java explainArg comment). */
+const RE_STYLE_IMPORT = /^<style\s*\w+\s*=\s*["'`]?([^"'`]*)["'`]?>$/i;
 // G2 N51: the key group additionally accepts an optional, directly-
 // appended `<<stereotype>>` guillemet suffix with NO space before it
 // (`skinparam classBorderThickness<<stereo>> 5`) -- `SkinParam#getThickness
@@ -221,6 +229,7 @@ export class StyleAndSkinparamCollector {
       this.styleOrder.push(this.sequence++);
       return true;
     }
+    if (this.importStyle(trimmed, position)) return true;
     const skinMatch = RE_SKIN_LINE.exec(trimmed);
     if (skinMatch !== null) {
       this.skin = skinMatch[1]!;
@@ -228,6 +237,25 @@ export class StyleAndSkinparamCollector {
       return true;
     }
     return this.openSkinparam(trimmed, position);
+  }
+
+  /**
+   * `CommandStyleImport#executeArg` (java:99-125): load the sheet `PATH` names
+   * and merge it into the styles at this line. Only the internal `/skin/`
+   * resource answers here (`getInputStreamForStyle`): a browser-safe library
+   * has no file system or fetch for the file and URL forms. An unreadable path
+   * is the jar's `Cannot read: <path>` command error (java:116-117); the line
+   * is left in the body, where the engine refuses it as an unknown command.
+   */
+  private importStyle(trimmed: string, position: number | undefined): boolean {
+    const match = RE_STYLE_IMPORT.exec(trimmed);
+    if (match === null) return false;
+    const sheet = getInputStreamForStyle(match[1]!);
+    if (sheet === undefined || sheet.length === 0) return false;
+    this.styles.push(sheet);
+    this.stylePositions.push(position);
+    this.styleOrder.push(this.sequence++);
+    return true;
   }
 
   private collectStyleLine(raw: string, trimmed: string): boolean {

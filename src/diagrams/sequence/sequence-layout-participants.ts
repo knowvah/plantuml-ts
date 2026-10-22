@@ -7,23 +7,21 @@
  * participants left-to-right by first-appearance order)
  */
 
-import type {
-  FrameEvent,
-  Participant,
-  ParticipantGeo,
-  ParticipantType,
-  SequenceDiagramAST,
-  SequenceEvent,
-} from './ast.js';
+import type { Participant, ParticipantGeo, ParticipantType, SequenceDiagramAST } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import { ARROW_PADDING_X, LIVE_DELTA_SIZE, TOP_MARGIN } from './sequence-layout-shared.js';
-import { messagePaint } from './sequence-arrow-paint.js';
+import { TOP_MARGIN } from './sequence-layout-shared.js';
+import {
+  type MessageLevels,
+  type SpanConstraint,
+  scanMessageLabels,
+} from './sequence-layout-participant-constraints.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
-import { symbolPreferredHeight, symbolPreferredWidth } from './sequence-layout-participant-sizing.js';
-import { ARROW_DELTA_X } from './sequence-arrowhead.js';
-import { messageLabelWidth, numberTextOf, refBodyLines } from './text-block-geo.js';
-import { refComponentWidth, referencePaints } from './ref-body-geo.js';
+import {
+  participantMinWidth,
+  symbolPreferredHeight,
+  symbolPreferredWidth,
+} from './sequence-layout-participant-sizing.js';
 import {
   BADGE_GAP,
   buildLabelRuns,
@@ -34,7 +32,8 @@ import {
 import { displayedBadgeOf, displayedStereotypeLines } from './sequence-hide-passes.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { paintOfGeo, participantPaintsOf } from './sequence-participant-paints.js';
-import type { SpriteRegistry } from '../../core/sprite-registry.js';
+import { addTileMargins } from './sequence-tile-margins.js';
+import { createEngloberLayout, type EngloberLayout } from './sequence-dolls.js';
 
 /**
  * The playing space's left border — where the participant row starts, and
@@ -53,12 +52,16 @@ import type { SpriteRegistry } from '../../core/sprite-registry.js';
  */
 export const LEFT_MARGIN = 10;
 
+export type { MessageLevels };
+
 export interface ParticipantLayoutResult {
   sortedParticipants: Participant[];
   participantGeos: ParticipantGeo[];
   participantMap: Map<string, ParticipantGeo>;
   participantIndex: Map<string, number>;
   maxParticipantHeight: number;
+  /** The row's `box` englobers, solved with it. */
+  englobers: EngloberLayout;
 }
 
 /** Compute participant column geometry: x/width/height/centerX for every
@@ -72,158 +75,39 @@ export function computeParticipantLayout(
 ): ParticipantLayoutResult {
   const sortedParticipants = [...ast.participants].sort((a, b) => a.order - b.order);
   const constraints: SpanConstraint[] = [];
-  scanMessageLabels(ast.events, sortedParticipants, { measurer, levels, sprites: ast.sprites }, constraints);
+  scanMessageLabels(
+    ast.events,
+    sortedParticipants,
+    {
+      measurer,
+      levels,
+      sprites: ast.sprites,
+      padder: ast.messagePadder,
+      messageSpan: ast.options.sequenceMessageSpan,
+      theme,
+    },
+    constraints,
+  );
 
   const ctx: ParticipantLayoutCtx = { theme, measurer, sprites: ast.sprites };
   const participantWidths = computeParticipantWidths(sortedParticipants, ctx);
-  const { participantGeos, participantMap, participantIndex, maxParticipantHeight } = positionParticipants(
-    sortedParticipants,
-    participantWidths,
-    constraints,
-    ctx,
-    originX,
-  );
-
-  return {
-    sortedParticipants,
-    participantGeos,
-    participantMap,
-    participantIndex,
-    maxParticipantHeight,
+  // The englobers' constraints go in BEFORE the neighbour rule, which bakes
+  // the margins they set (`SequenceDiagramFileMakerTeoz.java:102-114`).
+  const englobers = createEngloberLayout(sortedParticipants, ast.boxes, participantWidths, measurer, ast.sprites);
+  // Tiles register after `PlayingSpace` captured the dolls: their margins reach
+  // the live checks and the drawn frame, never the baked neighbour rule.
+  const tileEnv = {
+    measurer,
+    levels,
+    sprites: ast.sprites,
+    padder: ast.messagePadder,
+    messageSpan: ast.options.sequenceMessageSpan,
+    theme,
   };
-}
-
-/**
- * One message's demand on the participant row: the two participant indices it
- * runs between, and the centre-to-centre distance it needs.
- *
- * This IS `CommunicationTile#addConstraints:392-416`, reduced to the part that
- * bears on x. There, `point2.ensureBiggerThan(point1.addFixed(width))` with
- * `width = comp.getPreferredDimension(...).getWidth()` and `point1`/`point2`
- * the two lifeline positions — a constraint between ANY two participants, not
- * only neighbours (D6).
- */
-interface SpanConstraint {
-  /** Lower participant index. */
-  readonly from: number;
-  /** Higher participant index. Always `> from`. */
-  readonly to: number;
-  /** Required `centre[to] - centre[from]`. */
-  readonly span: number;
-  /**
-   * A create message's created participant (its index): `getPoint2` is that
-   * head's near EDGE, `posB`/`posD`, not its centre (`CommunicationTile
-   * .java:418-426`), so the demand grows by half that head's width.
-   */
-  readonly createdIndex?: number;
-  /**
-   * A `ref`'s demand: `span` is required of `posD[to] - posB[from]`, the
-   * EDGES of the two boxes, not their centres --
-   * `last.ensureBiggerThan(first.addFixed(dim.getWidth()))`
-   * (`teoz/ReferenceTile.java:96-115`).
-   */
-  readonly edge?: true;
-}
-
-/**
- * Each message's two live levels, `livingSpace1/2.getLevelAt(this,
- * IGNORE_FUTURE_DEACTIVATE)`, as the event walk measured them. The row is
- * solved before the walk, so these come from a previous pass -- the "third
- * layout pass" `plans/sequence-coordinate-convergence/findings/
- * label-widening.md` names for upstream's deferred `Real` arithmetic.
- */
-export type MessageLevels = Map<SequenceEvent, { level1: number; level2: number }>;
-
-interface ScanContext {
-  readonly measurer: StringMeasurer;
-  readonly levels: MessageLevels | undefined;
-  readonly sprites: SpriteRegistry | undefined;
-}
-
-/**
- * The `LIVE_DELTA_SIZE` terms of `CommunicationTile#addConstraints:404-416`,
- * moved onto the centre-to-centre span: left-to-right only `point2` moves,
- * by `-5` when PART2 is live; right-to-left `point1` moves by `-5` when PART1
- * is live and `point2` by `+5 * level2`.
- */
-function liveDelta(levels: { level1: number; level2: number } | undefined, reverse: boolean): number {
-  if (levels === undefined) return 0;
-  if (!reverse) return levels.level2 > 0 ? LIVE_DELTA_SIZE : 0;
-  return (levels.level1 > 0 ? LIVE_DELTA_SIZE : 0) + LIVE_DELTA_SIZE * levels.level2;
-}
-
-/**
- * Collect every message's span constraint. Recurses into frame branches.
- *
- * Constraints are stored `from < to` regardless of the arrow's direction: the
- * reverse branch of `addConstraints` (`:402-409`) swaps which endpoint is
- * bounded, but demands the same distance. The `LIVE_DELTA_SIZE` adjustments in
- * both branches are {@link liveDelta}'s, from the previous pass's levels.
- */
-function scanMessageLabels(
-  events: readonly SequenceEvent[],
-  sortedParticipants: Participant[],
-  scan: ScanContext,
-  out: SpanConstraint[],
-): void {
-  for (const ev of events) {
-    if (ev.kind === 'message' && ev.from !== ev.to) {
-      const fi = sortedParticipants.findIndex((p) => p.id === ev.from);
-      const ti = sortedParticipants.findIndex((p) => p.id === ev.to);
-      if (fi >= 0 && ti >= 0 && fi !== ti) {
-        // The component is `createComponentArrow(message.getUsedStyles(), …)`
-        // (`CommunicationTile.java:153-166`): its block is in the arrow style's font.
-        const font = messagePaint(ev.styleBuilder, ev.stereotype, ev.arrow, false).font;
-        const labelWidth = messageLabelWidth(ev.label, numberTextOf(ev), font, scan);
-        out.push({
-          from: Math.min(fi, ti),
-          to: Math.max(fi, ti),
-          // `ComponentRoseArrow#getPreferredWidth:347-349` —
-          // `getTextWidth + getArrowDeltaX`, and `getTextWidth` is the block
-          // plus both paddings. The same formula `sequence-layout-exo.ts`
-          // already uses for an exo message's demand.
-          span: labelWidth + 2 * ARROW_PADDING_X + ARROW_DELTA_X + liveDelta(scan.levels?.get(ev), fi > ti),
-          ...(ev.create === true ? { createdIndex: ti } : {}),
-        });
-      }
-    } else if (ev.kind === 'messageExo') {
-      // Deliberately skipped, not overlooked (D3). This scan widens the gap
-      // between a PAIR of lifelines; an exo message has one endpoint and the
-      // diagram border for the other, so there is no pair to widen. Its extent
-      // reaches the diagram through `MessageExoArrow#getRightEndInternal`'s
-      // `Math.max(maxX, ...)`, i.e. total width -- a different quantity.
-      // @see sequencediagram/graphic/MessageExoArrow.java
-      continue;
-    } else if (ev.kind === 'frame') {
-      scanFrame(ev, sortedParticipants, scan, out);
-    }
-  }
-}
-
-/** A frame's own demand (a `ref`'s, {@link refConstraint}) and its
- *  branches' messages. */
-function scanFrame(ev: FrameEvent, sorted: Participant[], scan: ScanContext, out: SpanConstraint[]): void {
-  out.push(...refConstraint(ev, sorted, scan));
-  for (const branch of ev.branches) scanMessageLabels(branch, sorted, scan, out);
-}
-
-/**
- * `ReferenceTile#init` (`teoz/ReferenceTile.java:96-115`): `first` is the
- * leftmost referenced participant's `posB`, `last` the rightmost's `posD`,
- * and `last.ensureBiggerThan(first.addFixed(dim.getWidth()))` pushes the
- * rightmost box until the component's preferred width fits between them.
- * A one-participant `ref` binds nothing: `last.addAtLeast(0)` (`:112-113`)
- * is a fresh variable, so only the frame widens. `dim` is the preferred
- * width of the component the tile draws, off the reference's own styles.
- */
-function refConstraint(ev: FrameEvent, sorted: Participant[], scan: ScanContext): SpanConstraint[] {
-  if (ev.frameType !== 'ref' || ev.participants === undefined) return [];
-  const indices = ev.participants.map((id) => sorted.findIndex((p) => p.id === id)).filter((i) => i >= 0);
-  const from = Math.min(...indices);
-  const to = Math.max(...indices);
-  if (indices.length === 0 || from === to) return [];
-  const span = refComponentWidth(refBodyLines(ev.frameType, ev.label), referencePaints(ev), scan.measurer);
-  return [{ from, to, span, edge: true }];
+  addTileMargins(ast.events, sortedParticipants, participantWidths, englobers.margins, tileEnv);
+  const row: RowSolveEnv = { widths: participantWidths, constraints, originX, englobers };
+  const result = positionParticipants(sortedParticipants, row, ctx);
+  return { sortedParticipants, ...result, englobers };
 }
 
 /**
@@ -248,7 +132,11 @@ function computeParticipantWidths(sortedParticipants: Participant[], ctx: Partic
     // .getWidth()` per stripe (`:145-149`), and a stripe's width is its PARSED
     // atoms', so `""MySubTitle""` reserves 70.087 and not the 90.038 its four
     // quotes measure (`jozomu-87-tajo507`, jar box width 84.087).
-    const rows = headRowsOf(displayedStereotypeLines(p), p.display, { ...paints, font: paint.font });
+    const rows = headRowsOf(displayedStereotypeLines(p), p.display, {
+      ...paints,
+      font: paint.font,
+      stereotypeBottom: p.stereotypeBottom,
+    });
     const textW = Math.max(...labelRows(rows, ctx).map((r) => r.width));
     // `TextBlockSprited#calculateDimension`: the badge widens the block by its
     // own width plus the 6px gap (`:57-67`).
@@ -260,15 +148,15 @@ function computeParticipantWidths(sortedParticipants: Participant[], ctx: Partic
     // (`:114-124`). `getTextWidth = getPureTextWidth + padding.left + padding.right`
     // (`AbstractTextualComponent.java:106-108`) IS the drawn box
     // (`ComponentRoseParticipant#drawInternalU:100-104`), with no floor under
-    // it: `getPureTextWidth`'s `max(..., minWidth)` (`:140-142`) takes
-    // `minWidth` from `Rose#getMinClassWidth` (`Rose.java:275-278`), whose
-    // `PName.MinimumWidth` is in no skin file and resolves to
-    // `ValueNull#asDouble()` = 0 (`ValueNull.java:57-59`). Verified on 3570
-    // corpus boxes to within 0.0005px (`findings/participant-width.md`).
+    // it but `getPureTextWidth`'s `max(..., minWidth)` (`:139-142`), whose
+    // `minWidth` is `Rose#getMinClassWidth` (`Rose.java:276-278`), the style's
+    // `MinimumWidth`: in no skin file, so 0 unless `skinparam minClassWidth`
+    // sets it ({@link participantMinWidth}). Verified on 3570 corpus boxes to
+    // within 0.0005px (`findings/participant-width.md`).
     // `getPreferredWidth` then adds the margin and the shadow (`:135-137`).
     const pad = paint.padding.getLeft() + paint.padding.getRight();
     const margin = paint.margin.getLeft() + paint.margin.getRight();
-    const plain = lw + pad + margin + reservedShadowOf(p.type, paint.shadowing);
+    const plain = Math.max(lw, participantMinWidth(p)) + pad + margin + reservedShadowOf(p.type, paint.shadowing);
     return p.type === 'collections' ? plain + COLLECTIONS_DELTA : plain;
   });
 }
@@ -331,19 +219,26 @@ interface ParticipantColumnResult {
   maxParticipantHeight: number;
 }
 
+/** What the row solve reads: the head widths, the message spans, the origin
+ *  and the englobers' checks and baked margins. */
+interface RowSolveEnv {
+  readonly widths: readonly number[];
+  readonly constraints: readonly SpanConstraint[];
+  readonly originX: number;
+  readonly englobers: EngloberLayout;
+}
+
 /** Lay out participant boxes left-to-right, then bottom-align their headers. */
 function positionParticipants(
   sortedParticipants: Participant[],
-  participantWidths: number[],
-  constraints: readonly SpanConstraint[],
+  row: RowSolveEnv,
   ctx: ParticipantLayoutCtx,
-  originX: number,
 ): ParticipantColumnResult {
-  const { theme } = ctx;
+  const participantWidths = row.widths;
   const participantGeos: ParticipantGeo[] = [];
   const participantMap = new Map<string, ParticipantGeo>();
   const participantIndex = new Map<string, number>();
-  const xs = solveParticipantXs(participantWidths, constraints, theme, originX);
+  const xs = solveParticipantXs(row, ctx.theme.sequence.participantGap);
 
   for (let i = 0; i < sortedParticipants.length; i++) {
     const p = sortedParticipants[i]!;
@@ -365,9 +260,12 @@ function positionParticipants(
   // `TOP_MARGIN + maxParticipantHeight`, so every lifeline starts there and
   // the box is painted at the TOP of its area with the slack below it --
   // which puts `jobadi-87-jegi648`'s box at [10, 38) with its lifeline at 39.
-  // C3: `TOP_MARGIN` is the row's own y, the way `originX` is its own x.
+  // C3: `TOP_MARGIN` is the row's own y, the way `originX` is its own x --
+  // dropped by `heightEnglober1`, the `dy` the body is drawn at under its
+  // englobers (`SequenceDiagramFileMakerTeoz.java:148`).
+  const yOrigin = TOP_MARGIN + row.englobers.heightEnglober1;
   participantGeos.forEach((g, i) => {
-    g.y = TOP_MARGIN + maxParticipantHeight - areaOf(g);
+    g.y = yOrigin + maxParticipantHeight - areaOf(g);
     // AFTER the bottom-align, never before: the runs carry an absolute
     // baseline, and `g.y` is what it is measured from.
     g.labelRuns = buildLabelRuns(participantBoxOf(g), ctx, participantPaintsOf(sortedParticipants[i]!).stereoFont);
@@ -412,7 +310,11 @@ function buildParticipantGeo(
   // `y += height` per stripe (`:139-142`), and a `=` heading stripe is 18 tall
   // beside its 14pt neighbours (`bugabo-85-veki716`, jar baselines 31/55.889).
   // Identical arithmetic whenever every row shares the ambient font.
-  const rows = headRowsOf(stereoLines, p.display, { ...paints, font: paint.font });
+  const rows = headRowsOf(stereoLines, p.display, {
+    ...paints,
+    font: paint.font,
+    stereotypeBottom: p.stereotypeBottom,
+  });
   const textHeight = labelRows(rows, ctx).reduce((h, r) => h + r.height, 0);
   // `getTextHeight = textBlock.height + padding.top + padding.bottom`
   // (`AbstractTextualComponent.java:110-114`) IS the painted rectangle
@@ -434,6 +336,7 @@ function buildParticipantGeo(
     background: paint.fill,
     border: paint.stroke,
     ...(stereoLines.length > 0 ? { stereotypeLines: stereoLines } : {}),
+    ...(p.stereotypeBottom === true ? { stereotypeBottom: true } : {}),
     ...(p.url !== undefined ? { url: p.url } : {}),
     ...(badge !== undefined ? { badge } : {}),
     type: p.type,
@@ -461,7 +364,8 @@ function buildParticipantGeo(
  * only two:
  *
  *   - `LivingSpaces#addConstraints:61-71`, `nextA >= prevE + 10`, always
- *     between neighbours;
+ *     between neighbours -- and, run before it, the englobers' own
+ *     neighbour checks (`Dolls#addConstraints`, {@link neighbourFloor});
  *   - `CommunicationTile#addConstraints:392-416`, one per message, between the
  *     two participants it runs between — adjacent or not. The reverse branch
  *     (`:402-409`) swaps which endpoint is bounded but demands the same
@@ -474,12 +378,8 @@ function buildParticipantGeo(
  * O(participants + messages). It replaced a pairwise pre-scan that widened
  * only ADJACENT gaps (`findings/label-widening.md`).
  */
-function solveParticipantXs(
-  widths: readonly number[],
-  constraints: readonly SpanConstraint[],
-  theme: Theme,
-  originX: number,
-): number[] {
+function solveParticipantXs(row: RowSolveEnv, participantGap: number): number[] {
+  const { widths, constraints, originX } = row;
   const xs: number[] = [];
   const centre = (i: number): number => xs[i]! + widths[i]! / 2;
   // Incoming edges, bucketed by their higher endpoint, so the sweep reads each
@@ -492,9 +392,13 @@ function solveParticipantXs(
   }
 
   for (let i = 0; i < widths.length; i++) {
-    // `nextA >= prevE + 10`, the neighbour constraint.
-    let x = i === 0 ? originX : xs[i - 1]! + widths[i - 1]! + theme.sequence.participantGap;
+    let x = neighbourFloor(i, xs, row, participantGap);
     for (const c of incoming.get(i) ?? []) {
+      if (c.origin === true) {
+        // `centre[i] >= xOrigin + c.span`.
+        x = Math.max(x, originX + c.span - widths[i]! / 2);
+        continue;
+      }
       if (c.edge === true) {
         // `posD[i] >= posB[c.from] + c.span`.
         x = Math.max(x, xs[c.from]! + c.span - widths[i]!);
@@ -507,4 +411,23 @@ function solveParticipantXs(
     xs.push(x);
   }
   return xs;
+}
+
+/**
+ * The least `posB(i)` from the row's own edges, before any message:
+ *
+ *   - `posB(0) >= xorigin` (`xorigin.addAtLeast(0)`,
+ *     `SequenceDiagramFileMakerTeoz.java:90`);
+ *   - the neighbour rule `current.getPosA() >= previous.getPosE() + 10`
+ *     (`LivingSpaces.java:61-71`), whose `posA = posB - marginBefore` and
+ *     `posE = posD + marginAfter` bake the margins `dolls.addConstraints`
+ *     had set when it ran (`LivingSpace.java:293-299`);
+ *   - every englober's live checks into `i` (`Dolls#minPosB`).
+ */
+function neighbourFloor(i: number, xs: readonly number[], row: RowSolveEnv, participantGap: number): number {
+  const { baked, dolls } = row.englobers;
+  const previousPosD = i === 0 ? undefined : xs[i - 1]! + row.widths[i - 1]!;
+  const own =
+    previousPosD === undefined ? row.originX : previousPosD + baked.after[i - 1]! + participantGap + baked.before[i]!;
+  return Math.max(own, dolls.minPosB(i, previousPosD, row.originX));
 }

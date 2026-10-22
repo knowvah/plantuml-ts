@@ -16,6 +16,23 @@ import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import type { MessageExoType } from './ast.js';
 import type { TextRun } from './text-block-geo.js';
 import type { ParticipantGeo } from './geo-participant.js';
+import type { Paint } from '../../core/paint.js';
+
+/**
+ * The box `Padder#drawU` draws behind a message label (`Padder.java:113-131`),
+ * absent when the diagram's padder is `Padder.NONE`. The box is geometry
+ * (scaled by `scale-geo`); the paint and corner are unscaled, as
+ * {@link SequencePaint}'s are, and scaled at emission.
+ */
+export interface LabelPadderGeo {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+  readonly fill: Paint;
+  readonly stroke: Paint;
+  readonly roundCorner: number;
+}
 
 export interface MessageGeo {
   /**
@@ -25,6 +42,8 @@ export interface MessageGeo {
    */
   readonly paint?: SequencePaint;
   kind: 'message';
+  /** The padder's box behind the label (`AbstractComponentRoseArrow.java:72-75`). */
+  labelPadder?: LabelPadderGeo;
   /** A create message's head (`CommunicationTile#drawU:347-371`): the
    *  participant, at the x the tile draws it, and the block top it is drawn
    *  from -- see `sequence-layout-create.ts`. */
@@ -70,6 +89,13 @@ export interface MessageGeo {
   exoType?: MessageExoType;
   /** {@link MessageExoEvent.shortArrow}, likewise exo-only. */
   shortArrow?: boolean;
+  /** `A -> B & C`: one entry per extra target, drawn BEFORE the main arrow
+   *  (`CommunicationTile#drawU:338`). `fromX`/`toX` are the two lifeline
+   *  centres (`getPosC`, no live-box shift), `y` the arrow line. */
+  multicast?: readonly MulticastGeo[];
+  /** `part1Anchor`/`part2Anchor` set: the jar draws nothing for the message
+   *  (`CommunicationTile.java:328-331`) but its tile keeps its height. */
+  partAnchored?: true;
   /**
    * SELF messages only: the x the RETURNING (lower) horizontal segment
    * starts at, where {@link fromX} is the OUTGOING (upper) one's.
@@ -89,6 +115,30 @@ export interface MessageGeo {
    * Absent on every non-self message.
    */
   selfReturnX?: number;
+  /**
+   * REVERSE self messages (`A <- A`) only: `Area#getLevel`, the live level
+   * before the message (`CommunicationTileSelf.java:152`), which
+   * `ComponentRoseSelfArrow#drawLeftSide` reads for the saltire's indent
+   * (`:218-226`) and which cannot be recovered from the geometry. A count,
+   * not a length: never scaled.
+   */
+  selfLevel?: number;
+  /**
+   * REVERSE self messages (`A <- A`) only: the tile's `getMinX`,
+   * `posC - getCompWidth() - liveDeltaWidthAdjustment`
+   * (`CommunicationTileSelf.java:263-270`) -- left of the drawn loop, and
+   * what `PlayingSpace` folds into the drawing's min (`PlayingSpace.java
+   * :91-94`), so a reverse loop on the first participant shifts the drawing.
+   */
+  tileMinX?: number;
+}
+
+/** One `& target` of a multicast message
+ *  (`CommunicationTile#drawMulticast:373-390`). */
+export interface MulticastGeo {
+  fromX: number;
+  toX: number;
+  y: number;
 }
 
 export interface ActivationGeo {
@@ -115,6 +165,8 @@ export interface ActivationGeo {
    * `ACTIVATION_HALF_WIDTH` rather than from a separate 5.
    */
   level: number;
+  /** A page's clip removed the whole bar: only the empty titled group remains. */
+  clippedOut?: boolean;
   color?: string;
   /**
    * Set only on a bar a delay cut into pieces (`LiveBoxesDrawer#doDrawing`,

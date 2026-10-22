@@ -10,6 +10,7 @@ import { HColorSimple } from '../../core/klimt/color/HColorSimple.js';
 import { bridgeFontConfiguration } from '../../core/klimt/font/FontConfigurationBridge.js';
 import type { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 import type { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import type { LineBreakStrategy } from '../../core/klimt/LineBreakStrategy.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { Paint } from '../../core/paint.js';
 import type { Style } from '../../core/style/Style.js';
@@ -33,6 +34,9 @@ export interface SequencePaint {
   readonly font: FontConfiguration;
   readonly shadowing: number;
   readonly align: HorizontalAlignment | undefined;
+  /** `style.wrapWidth()` (`Style.java`): the style's `MaximumWidth`, read by
+   *  `Rose#createComponentArrow` (`Rose.java:289-292`). */
+  readonly wrapWidth: LineBreakStrategy;
 }
 
 /**
@@ -107,6 +111,9 @@ export function paintOf(style: Style, colorSet: HColorSet): SequencePaint {
     },
     get align() {
       return style.getHorizontalAlignment();
+    },
+    get wrapWidth() {
+      return style.wrapWidth();
     },
   };
 }

@@ -1,0 +1,7 @@
+@startuml
+participant "Widget" as 1
+loop Until operation is successful
+[<--1: SomeOutgoingOperation
+note right:This note causes a failure
+end
+@enduml

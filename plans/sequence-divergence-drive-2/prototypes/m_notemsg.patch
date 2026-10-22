@@ -1,0 +1,81 @@
+diff --git a/src/diagrams/sequence/proto-tile.ts b/src/diagrams/sequence/proto-tile.ts
+new file mode 100644
+index 0000000..9d0b96b
+--- /dev/null
++++ b/src/diagrams/sequence/proto-tile.ts
+@@ -0,0 +1,6 @@
++// PROTOTYPE: last message tile extent for CommunicationTileNote* wrappers.
++export interface LastTile { top: number; height: number }
++const T = new WeakMap<object, LastTile>();
++export function setLastTile(ctx: object, top: number, height: number): void { T.set(ctx, { top, height }); }
++export function getLastTile(ctx: object): LastTile | undefined { return T.get(ctx); }
++export function clearLastTile(ctx: object): void { T.delete(ctx); }
+diff --git a/src/diagrams/sequence/sequence-layout-exo.ts b/src/diagrams/sequence/sequence-layout-exo.ts
+index dbff748..a11e24b 100644
+--- a/src/diagrams/sequence/sequence-layout-exo.ts
++++ b/src/diagrams/sequence/sequence-layout-exo.ts
+@@ -1,3 +1,4 @@
++import * as TILE from './proto-tile.js';
+ /**
+  * Sequence diagram layout — EXO message geometry (`[-> Bob`, `Bob ->]`, …).
+  *
+@@ -306,6 +307,7 @@ export function handleMessageExoEvent(event: MessageExoEvent, cursor: EventCurso
+   const messageGeo = buildExoGeo(event, span, geoY, ctx, paint);
+   ctx.eventGeos.push(messageGeo);
+   cursor.lastMessageY = messageGeo.y;
++  TILE.setLastTile(ctx, cursor.y, advance.tileHeight);
+   cursor.y += advance.tileHeight;
+ }
+ 
+diff --git a/src/diagrams/sequence/sequence-layout-message.ts b/src/diagrams/sequence/sequence-layout-message.ts
+index d9bb091..6bfe1b2 100644
+--- a/src/diagrams/sequence/sequence-layout-message.ts
++++ b/src/diagrams/sequence/sequence-layout-message.ts
+@@ -1,3 +1,4 @@
++import * as TILE from './proto-tile.js';
+ /**
+  * Sequence diagram layout — message-arrow geometry, split out of
+  * sequence-layout-events.ts to keep both files under the size cap.
+@@ -69,6 +70,7 @@ export function handleMessageEvent(
+   ctx.eventGeos.push(messageGeo);
+   cursor.lastMessageY = messageGeo.y;
+ 
++  TILE.setLastTile(ctx, cursor.y, tileHeight ?? advance.tileHeight);
+   cursor.y += tileHeight ?? advance.tileHeight;
+ 
+   // A self arrow's end point is `getArrowOnlyHeight` below its start
+diff --git a/src/diagrams/sequence/sequence-layout-note.ts b/src/diagrams/sequence/sequence-layout-note.ts
+index 338cf6d..e26378e 100644
+--- a/src/diagrams/sequence/sequence-layout-note.ts
++++ b/src/diagrams/sequence/sequence-layout-note.ts
+@@ -1,3 +1,4 @@
++import * as TILE from './proto-tile.js';
+ /**
+  * The `note` event handler: measure the body, resolve the tile
+  * (`sequence-note-tile.ts`), push the `NoteGeo`. Split out of
+@@ -185,7 +186,9 @@ export function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: Even
+   // top -- `Rose.paddingY` = 5, applied by `AbstractComponent#drawU:142-143`.
+   // On `metano-36-gevu843` the jar's box is at y=52 against a tile top of 47.
+   const textHeight = textHeightOf(event.text.split('\n').length, lineHeight, padding);
+-  const boxY = cursor.y + NOTE_COMPONENT_PADDING_Y;
++  const lt = TILE.getLastTile(ctx);
++  const overlay = event.onMessage === true && event.position !== 'over' && lt !== undefined && Math.abs(cursor.y - (lt.top + lt.height)) < 1e-6;
++  const boxY = (overlay ? lt!.top : cursor.y) + NOTE_COMPONENT_PADDING_Y;
+   const noteGeo: NoteGeo = {
+     paint,
+     kind: 'note',
+@@ -209,5 +212,13 @@ export function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: Even
+   // 2 * getPaddingY + deltaShadow` (`ComponentRoseNote:88-91`,
+   // `...NoteBox:62-65`; the shadow only for `note`, see `reserve` in
+   // `resolveNote`).
+-  cursor.y += textHeight + NOTE_COMPONENT_PADDING_Y * 2 + reserve;
++  const noteH = textHeight + NOTE_COMPONENT_PADDING_Y * 2 + reserve;
++  if (overlay) {
++    const h = Math.max(lt!.height, noteH);
++    TILE.setLastTile(ctx, lt!.top, h);
++    cursor.y = lt!.top + h;
++  } else {
++    TILE.clearLastTile(ctx);
++    cursor.y += noteH;
++  }
+ }

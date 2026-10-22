@@ -1,0 +1,16 @@
+@startuml
+!pragma teoz true
+
+participant Alice
+actor Bob
+
+Alice -> Bob : hello
+
+ref over Bob
+  This can be on
+  several lines
+end ref
+
+note right: This is on right
+note left: This is on left
+@enduml

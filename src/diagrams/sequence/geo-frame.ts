@@ -36,6 +36,11 @@ export interface FrameGeo {
    *  general colour, which MAY carry its own BODY-band fill. Empty for
    *  single-branch frames. The rule and condition each else draws are its
    *  own {@link ElseGeo}, in the event stream. */
+  /** `GroupingTile#getNotesWidth(LEFT/RIGHT)` (`GroupingTile.java:1015-1021`):
+   *  the widths of the notes written after the group's `end`, which its
+   *  `getMinX`/`getMaxX` add past the margins (`:984-990`). Set once the
+   *  group is resolved; read by the document width. */
+  endNotesWidth?: { readonly left: number; readonly right: number };
   branchSeparators: {
     y: number;
     label: string;

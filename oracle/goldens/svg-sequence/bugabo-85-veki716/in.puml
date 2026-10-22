@@ -1,0 +1,6 @@
+@startuml
+participant "=MyTitle\n----\nMySubTitle" as MyParticipant
+participant Bob
+
+MyParticipant -> Bob
+@enduml

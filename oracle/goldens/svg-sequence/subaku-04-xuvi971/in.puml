@@ -1,0 +1,13 @@
+@startuml
+box "This is the Solar system" #LightBlue
+actor Alice
+end box
+participant Bob
+participant P
+
+participant Sun
+
+Alice -> Bob
+Bob -> P
+P -> Sun
+@enduml

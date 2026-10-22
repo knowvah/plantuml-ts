@@ -1,0 +1,17 @@
+@startuml
+!pragma teoz true
+
+loop creating ssl connection
+
+activate ssl_server.exe
+group SSL Application data
+browser -> ssl_server.exe
+end /' SSL Application data '/
+
+deactivate ssl_server.exe
+
+end /' endloop '/
+
+destroy browser
+
+@enduml

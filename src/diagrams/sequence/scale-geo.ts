@@ -134,7 +134,7 @@ const IDENTITY = 1;
  * (`SvgGraphics.java:693`). `href` is the image DOCUMENT, whose own intrinsic
  * size the `width`/`height` attributes override, so it is carried untouched.
  */
-const scaleRun = (r: TextRun, k: number): TextRun => ({
+export const scaleRun = (r: TextRun, k: number): TextRun => ({
   ...r,
   x: r.x * k,
   y: r.y * k,
@@ -147,6 +147,14 @@ const scaleRun = (r: TextRun, k: number): TextRun => ({
   ...(r.image !== undefined
     ? { image: { ...r.image, width: r.image.width * k, height: r.image.height * k, y: r.image.y * k } }
     : {}),
+  // An extended-colour line's offset from the baseline is a length
+  // (`fontSize / 14`, `DriverTextSvg.java:135-148`).
+  ...(r.extraLines !== undefined ? { extraLines: r.extraLines.map((l) => ({ ...l, deltaY: l.deltaY * k })) } : {}),
+  // A shape primitive is drawn by `UGraphicSvg`, whose `SvgOption.scale`
+  // multiplies its coordinates AND stroke widths at emission
+  // (`SvgGraphics.java:466-468,559`) -- so the shape is not rebuilt, its
+  // scale is recorded.
+  ...(r.shape !== undefined ? { shape: { ...r.shape, scale: r.shape.scale * k } } : {}),
 });
 
 function scaleParticipant(p: ParticipantGeo, k: number): ParticipantGeo {
@@ -190,8 +198,23 @@ function scaleMessage(m: MessageGeo, k: number): MessageGeo {
     toX: m.toX * k,
     y: m.y * k,
     ...(m.selfReturnX !== undefined ? { selfReturnX: m.selfReturnX * k } : {}),
+    ...(m.tileMinX !== undefined ? { tileMinX: m.tileMinX * k } : {}),
+    ...(m.multicast !== undefined
+      ? { multicast: m.multicast.map((t) => ({ fromX: t.fromX * k, toX: t.toX * k, y: t.y * k })) }
+      : {}),
     labelLines: m.labelLines.map((r) => scaleRun(r, k)),
     ...(m.labelNumber !== undefined ? { labelNumber: scaleRun(m.labelNumber, k) } : {}),
+    ...(m.labelPadder !== undefined
+      ? {
+          labelPadder: {
+            ...m.labelPadder,
+            x: m.labelPadder.x * k,
+            y: m.labelPadder.y * k,
+            width: m.labelPadder.width * k,
+            height: m.labelPadder.height * k,
+          },
+        }
+      : {}),
     ...(m.createdHead !== undefined
       ? { createdHead: { participant: scaleParticipant(m.createdHead.participant, k), y: m.createdHead.y * k } }
       : {}),
@@ -208,6 +231,17 @@ function scaleNote(n: NoteGeo, k: number): NoteGeo {
     minX: n.minX * k,
     maxX: n.maxX * k,
     textRuns: n.textRuns.map((r) => scaleRun(r, k)),
+    ...(n.connector === undefined
+      ? {}
+      : {
+          connector: {
+            ...n.connector,
+            x1: n.connector.x1 * k,
+            y1: n.connector.y1 * k,
+            x2: n.connector.x2 * k,
+            y2: n.connector.y2 * k,
+          },
+        }),
   };
 }
 

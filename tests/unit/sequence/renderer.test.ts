@@ -42,7 +42,7 @@ import {
 } from '../../../src/diagrams/sequence/sequence-skin-param.js';
 import { boxLabelRuns, boxPaint, type BoxFrame } from '../../../src/diagrams/sequence/sequence-layout-box.js';
 import { DIVIDER_PADDING, DIVIDER_LABEL_DELTA_X } from '../../../src/diagrams/sequence/divider-style.js';
-import { atomFontSpec } from '../../../src/diagrams/sequence/sequence-creole-text-atom.js';
+import { atomFontSpec } from '../../../src/diagrams/sequence/sequence-creole-sheet.js';
 import { defaultMessageFont } from '../../../src/diagrams/sequence/sequence-arrow-paint.js';
 
 /** The default skin's builder: a source with no style declarations. */
@@ -105,7 +105,7 @@ function labelRunsFor(p: Omit<ParticipantGeo, 'labelRuns'>): TextRun[] {
   const spec = fontSpecOf(defaultTheme);
   const lineHeight = measurer.measure('M', spec).height;
   const ascent = lineHeight - measurer.getDescent(spec, 'M');
-  const cy = participantLabelCy(p.type, p.height, p.y, true, defaultTheme);
+  const cy = participantLabelCy(p.type, p.height, p.y, true, { scaleK: 1 });
   const textWidth = measurer.measure(p.display, spec).width;
   return [
     {
@@ -145,6 +145,8 @@ function tabRunsFor(f: Pick<FrameGeo, 'x' | 'y' | 'tabText' | 'tabComment' | 'ta
       textWidth: measurer.measure(text, spec).width,
       textAscent: ascent,
       textLineHeight: lineHeight,
+      // The creole seam stamps a run's own fill (`sequence-label-primitives.ts:157`).
+      color: '#000000',
     };
   };
   const left = f.x + HEADER_PADDING.left;
@@ -634,9 +636,13 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
    *  absolutely on `jobadi-87-jegi648`, whose loop runs 34.469 to 76.469. */
   const LOOP_RIGHT_X = SELF_X + 42;
 
+  /** A self message's `toX` is that vertical stroke's x, measured by layout
+   *  from the component origin (`sequence-layout-message-self.ts`). */
   function selfGeo(style: RenderStyle): SequenceGeometry {
     return makeGeo({
-      events: [makeSyncMessage({ arrow: arrowOf(style), arrowDirection: 'self', fromX: SELF_X, toX: 110, y: SELF_Y })],
+      events: [
+        makeSyncMessage({ arrow: arrowOf(style), arrowDirection: 'self', fromX: SELF_X, toX: LOOP_RIGHT_X, y: SELF_Y }),
+      ],
     });
   }
 
@@ -1958,14 +1964,21 @@ describe('renderSequence — participant stereotype', () => {
   });
 
   // The other arm of that same `if`: a circled CHARACTER. The jar draws the
-  // filled circle and NOT the letter -- no `<text>` in nimoxu-60-xale291,
-  // fakova-98-suze610 or xakuro-97-tado489 carries the declared char.
-  it('draws a circled-character badge as a filled circle, without the character', () => {
+  // filled circle and then the letter's OUTLINE as a `<path fill="#000">`
+  // (`CircledCharacter.java:63-70`, `DriverCenteredCharacterSvg.java:56-81`):
+  // no `<text>` carries the declared char in nimoxu-60-xale291,
+  // fakova-98-suze610 or xakuro-97-tado489, each has the ellipse then a path.
+  it('draws a circled-character badge as a filled circle followed by the letter outline path', () => {
     const svg = render('@startuml\nparticipant P << (U,#ADD1B2) Lbl >>\nP -> Q: hi\n@enduml');
-    expect(svg).toContain('<ellipse');
-    expect(svg).toContain('#ADD1B2');
+    expect(svg).toMatch(/<ellipse [^>]*fill="#ADD1B2"[^>]*\/><path d="M[^"]+" fill="#000"\/>/);
     expect(svg).toContain('>«Lbl»</text>');
     expect(svg).not.toContain('>U</text>');
+  });
+
+  it('draws no outline for a letter that was never captured, rather than another letter', () => {
+    const svg = render('@startuml\nparticipant P << (Z,#ADD1B2) Lbl >>\nP -> Q: hi\n@enduml');
+    expect(svg).toContain('<ellipse');
+    expect(svg).not.toMatch(/<path d="M[^"]+" fill="#000"\/>/);
   });
 
   it('hide stereotype removes it regardless of any style', () => {
@@ -2163,9 +2176,10 @@ describe('renderSequence — exogenous arrows', () => {
     const saltire = svg.match(/<line[^>]*stroke-width="2"[^>]*>/g) ?? [];
     expect(saltire).toHaveLength(2);
     // Two crossing diagonals, `spaceCrossX` right of the border end.
-    // x2 is the lifeline, which moved from 70 to 49.469 when the box lost
-    // its 80px floor; the arrow is still `spaceCrossX` = 12 off the border.
-    expect(messageBodies(svg)[0]).toEqual([22, 23.469]);
+    // x2 is the lifeline, held at `xOrigin + preferredWidth` by
+    // `CommunicationExoTile.java:176-181`; the arrow is still `spaceCrossX`
+    // = 12 off the border.
+    expect(messageBodies(svg)[0]).toEqual([22, 55.544]);
     expect(saltire.map((t) => Number(/x1="([-\d.]+)"/.exec(t)?.[1]))).toEqual([17, 17]);
   });
 
@@ -2179,10 +2193,10 @@ describe('renderSequence — exogenous arrows', () => {
     // 11 -- the jar's own number, quoted in this test's comment above. It was
     // 1 while `border1` was pinned to the image edge instead of the margin.
     expect(headTips(svg)).toEqual([11]);
-    // Same 20.531px leftward shift of the lifeline as every other row here.
-    // x1 = 15 is the jar's own number for this source: `border1` at 10 plus
-    // the head's `pos1 = 1` and its own width.
-    expect(body).toEqual([15, 28.469]);
+    // x2 = 60.544 is the jar's own number (quoted above), the lifeline held
+    // clear of the left edge by `CommunicationExoTile.java:176-181`. x1 = 15
+    // is `border1` at 10 plus the head's `pos1 = 1` and its own width.
+    expect(body).toEqual([15, 60.544]);
   });
 
   // `isFromLeftBorderMessage()` is "this border AND not a short arrow"
@@ -2191,7 +2205,7 @@ describe('renderSequence — exogenous arrows', () => {
   it('starts a short FROM_LEFT arrow at its own width, not at the border', () => {
     const long = render('@startuml\nparticipant Bob\n[-> Bob : hello\n@enduml');
     const short = render('@startuml\nparticipant Bob\n?-> Bob : hello\n@enduml');
-    expect(messageBodies(long)[0]).toEqual([10, 23.469]);
+    expect(messageBodies(long)[0]).toEqual([10, 55.544]);
     // NEGATIVE, and correctly so for this port as it stands: `getPoint1()` is
     // `posC - preferredWidth` = 49.469 - 53.663, and nothing clamps it. The
     // arrow's own width did not change; the lifeline moved left by 20.531

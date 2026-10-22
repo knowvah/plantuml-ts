@@ -1,0 +1,6 @@
+@startuml
+actor "Accentué 1" as A1
+participant "Bobé" as Bob
+A1 -> Bob : j'ai des aç&à§
+note left: àéè
+@enduml

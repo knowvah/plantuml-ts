@@ -16,20 +16,19 @@
  * `EventProcessingContext`, which also keeps the module graph a DAG.
  */
 
-import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
-import { runDrawMetrics } from './run-draw-metrics.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import { LineBreakStrategy } from '../../core/klimt/LineBreakStrategy.js';
+import type { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import type { ExtraLine } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
+import { applyPadder, padderGeoAt, type MessagePadder, type PaddedLabelBlock } from './sequence-message-padder.js';
+import type { LabelPadderGeo } from './geo-message.js';
 import { defaultMessageFont } from './sequence-arrow-paint.js';
-import { atomFontSpec } from './sequence-creole-text-atom.js';
-import {
-  sequenceAtomContext,
-  sequenceCreoleRuns,
-  sequenceLabelBlockWidth,
-  sequenceLabelLineWidth,
-} from './sequence-creole.js';
+import { componentLabelBlock, offsetRun, type SequenceRunShape } from './sequence-creole-sheet.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
+import type { Paint } from '../../core/paint.js';
 import type { SequenceRunImage } from './sequence-text.js';
 
 // ---------------------------------------------------------------------------
@@ -105,37 +104,6 @@ export function displayLines(text: string): readonly string[] {
 }
 
 /**
- * One `Display`, one font, one run per line — `TextBlockSimple#drawU`'s own
- * loop, which advances by the line's height and draws each `Atom` at the
- * running `y` (`klimt/shape/TextBlockSimple.java:78-89`).
- *
- * `top` is the BLOCK's top-left, i.e. upstream's `UTranslate` argument; every
- * run's own `y` is a baseline, so the first drops one ascent below it and
- * each later one a further line height. Shared rather than re-derived because
- * three call sites now need exactly this and a fourth reserves space from the
- * line COUNT — see {@link messageLabelRows} on why the two must not diverge.
- */
-export function textBlockRuns(
-  text: string,
-  spec: FontSpec,
-  leftX: number,
-  top: number,
-  measurer: StringMeasurer,
-): readonly TextRun[] {
-  const lineHeight = measurer.measure('M', spec).height;
-  const ascent = lineHeight - measurer.getDescent(spec, 'M');
-  return displayLines(text).map((line, i) => ({
-    text: line,
-    x: leftX,
-    y: top + ascent + i * lineHeight,
-    textWidth: measurer.measure(line, spec).width,
-    ...runDrawMetrics(line, spec, measurer),
-    textAscent: ascent,
-    textLineHeight: lineHeight,
-  }));
-}
-
-/**
  * One `<text>` the renderer will emit, already placed AND already measured.
  *
  * The three metric fields exist because the sequence renderers have no
@@ -183,26 +151,14 @@ export interface TextRun {
   readonly textLineHeight: number;
 
   // -------------------------------------------------------------------------
-  // Per-run creole style (mission `sequence-creole`, D3)
+  // Per-run style (mission `sequence-creole` D3; sdd2 T6b)
   //
-  // Every field below is OPTIONAL and absent for every run this port built
-  // before creole reached sequence — the fields exist so that ONE display line
-  // can become SEVERAL runs with different fonts, which is all creole is at
-  // the emission layer. `sequence-creole.ts#sequenceCreoleRuns` is their only
-  // producer; a run with none of them set is exactly the plain run
-  // `messageLabelBlock` and friends have always emitted.
-  //
-  // They are flat scalars rather than the creole engine's own
-  // `FontConfiguration` because a run is GEOMETRY: `scale-geo.ts` multiplies
-  // its numerics, and a `ReadonlySet<FontStyle>` travelling through that pass
-  // would be a style object pretending to be a length. The set is resolved
-  // into these scalars once, in layout, per D5.
-  //
-  // Upstream reads exactly these off one `FontConfiguration` before emitting a
-  // `<text>`: `face.isBold()`/`containsStyle(BOLD)` -> `font-weight`,
-  // `containsStyle(ITALIC)` -> `font-style`, `getColor()` -> `fill`, and the
-  // UNDERLINE/STRIKE/WAVE trio concatenated into one `text-decoration`
-  // (`DriverTextSvg.java:104-160,177-180`).
+  // Every field below is OPTIONAL and absent on a plain run. They are what
+  // `DriverTextSvg#draw` reads off one `FontConfiguration` before emitting a
+  // `<text>` (`DriverTextSvg.java:93-180`), resolved once in layout by
+  // `sequence-label-primitives.ts#textRunOf` from the `UText` core's creole
+  // drew. They are flat scalars rather than the `FontConfiguration` because a
+  // run is GEOMETRY: `scale-geo.ts` multiplies its numerics.
   // -------------------------------------------------------------------------
 
   /** `fontConfiguration.containsStyle(FontStyle.BOLD)` — absent, never
@@ -244,8 +200,22 @@ export interface TextRun {
    *  at all — `AtomMath#drawU` paints one image and nothing else
    *  (`AtomMath.java:78-97`). `textWidth` is then the IMAGE's own width, so a
    *  following run still advances off it; `image.y` is the image's own top
-   *  edge, since an image has no baseline to hang off. */
+   *  edge, since an image has no baseline to hang off. An `<img>`, a raster
+   *  sprite and a `{{ }}` embed take the same field (`DriverImageSvg`). */
   readonly image?: SequenceRunImage;
+  /** `DriverTextSvg`'s numeric `font-weight` where {@link bold} alone does
+   *  not say it: a face weight (`java:97-103`), e.g. `900` inside a sprite. */
+  readonly fontWeight?: string;
+  /** A `<back:color>` run's `SvgGraphics#text` `textBackColor`, the
+   *  `feFlood` filter (`DriverTextSvg.java:159-173`). */
+  readonly textBackColor?: string;
+  /** An extended-colour underline/strike (`<u:red>`), drawn as `<line>`s
+   *  after the text (`DriverTextSvg.java:129-157,180`, `ExtraLines`). */
+  readonly extraLines?: readonly ExtraLine[];
+  /** Set ONLY on a non-text, non-image primitive -- a `----` rule's `ULine`,
+   *  a table grid, a vector sprite's paths -- drawn through core's
+   *  `UGraphicSvg` (`sequence-text.ts`). */
+  readonly shape?: SequenceRunShape;
 }
 
 // ---------------------------------------------------------------------------
@@ -261,11 +231,6 @@ export { refBodyLines, refBodyHeight } from './ref-body-geo.js';
 // ---------------------------------------------------------------------------
 // Message label — ComponentRoseArrow + Display#createMessageNumber
 // ---------------------------------------------------------------------------
-
-/** `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` -- the right margin between a
- *  leading `MessageNumber` and the label beside it
- *  (`Display.java:706`). */
-export const MESSAGE_NUMBER_MARGIN = 4;
 
 /** The autonumber run's text, when a message carries one.
  *  `getLabelNumbered` prepends it as a `MessageNumber`
@@ -284,13 +249,16 @@ export function numberTextOf(event: {
  * `ClockwiseTopRightBottomLeft.topRightBottomLeft(1, 7, 1, 7)`
  * (`AbstractComponentRoseArrow.java:62`), read back as `getOldPaddingX1()` =
  * `padding.getLeft()` and `getOldPaddingY()` = `padding.getTop()`
- * (`AbstractTextualComponent.java:116-126`).
+ * (`AbstractTextualComponent.java:116-126`), and handed to `create0` as the
+ * block's `marginX1`/`marginX2` (`:91`).
  *
  * Jar-verified on `TeozTimelineIssues_0003_Test`: all three of its arrows put
  * the label exactly 7 right of the arrow line's own start —
  * `25.894 -> 32.894`, `20.894 -> 27.894` twice.
  */
 export const ARROW_LABEL_PADDING_X1 = 7;
+/** The same padding's right side (`AbstractComponentRoseArrow.java:62`). */
+const ARROW_LABEL_PADDING_X2 = 7;
 /** The same padding's top/bottom, which `getTextHeight` adds twice
  *  (`AbstractTextualComponent.java:110-114`). */
 const ARROW_LABEL_PADDING_Y = 1;
@@ -310,57 +278,103 @@ const ARROW_LABEL_PADDING_Y = 1;
  */
 export const ARROW_LABEL_HEAD_CLEARANCE = 10;
 
-/** A message's label as placed text: its CREOLE runs, plus the autonumber run
- *  beside them. One source line becomes one entry per styled atom (C3), so
- *  `lines` is flat left-to-right, NOT one per line -- count lines with
- *  {@link messageLabelRows}. `number` is the FIRST of the autonumber's own
- *  runs and any remainder rides at the FRONT of `lines`, upstream's own draw
- *  order: `createMessageNumber` merges `tb1` LEFT of `tb2` into ONE block
- *  (`Display.java:703-712`), read back as `[number, ...lines]`. */
+/** A message's label as placed primitives. `number` is the FIRST primitive
+ *  the autonumber's own block drew and any remainder rides at the FRONT of
+ *  `lines`, upstream's own draw order: `createMessageNumber` merges `tb1`
+ *  LEFT of `tb2` into ONE block (`Display.java:703-712`), read back as
+ *  `[number, ...lines]`. `lines` is flat, one entry per primitive. */
 export interface MessageLabelBlock {
   readonly lines: readonly TextRun[];
   readonly number?: TextRun;
+  /** The padder's box behind the label (`Padder.java:113-131`). */
+  readonly padder?: LabelPadderGeo;
+}
+
+/** What {@link messageLabelBlock} lays a label out with -- the
+ *  `EventProcessingContext` fields it reads. `theme` is no longer read by the
+ *  block itself (the font is the arrow style's); it stays because the context
+ *  that satisfies this interface is the layout's own. */
+export interface MessageLabelEnv {
+  readonly theme: Theme;
+  readonly measurer: StringMeasurer;
+  readonly sprites?: SpriteRegistry | undefined;
+  /** `SkinParam#sequenceDiagramPadder`, `undefined` for `Padder.NONE`. */
+  readonly padder?: MessagePadder | undefined;
+}
+
+/**
+ * The arrow component's text block (`AbstractTextualComponent.java:84-92`):
+ * `getLabelNumbered` prepends the number to `Display.getWithNewlines(label)`
+ * (`AbstractMessage.java:200-206`), so an empty label with a number keeps its
+ * one empty line; an empty label with none is a `TextBlockEmpty`. The block
+ * is built at the ARROW style's font and alignment (`arrow { FontSize 13 }`,
+ * `plantuml.skin:316-317`), drawn after `ug.apply(getForegroundColor())`
+ * (`ComponentRoseArrow.java:91,179`, `ComponentRoseSelfArrow.java:80,88`; no
+ * `Back`) -- the ink a `--title--` rule in the label is stroked with.
+ */
+export function messageLabelLayout(
+  label: string,
+  numberText: string | undefined,
+  font: FontConfiguration,
+  env: MessageLabelMeasureEnv,
+  draw: {
+    readonly align?: HorizontalAlignment | undefined;
+    readonly fore?: Paint | undefined;
+    readonly styleWidth?: LineBreakStrategy | undefined;
+  } = {},
+): PaddedLabelBlock {
+  const opts = {
+    sprites: env.sprites,
+    align: draw.align,
+    ink: draw.fore === undefined ? undefined : { fore: draw.fore },
+    numberText,
+    marginX1: ARROW_LABEL_PADDING_X1,
+    marginX2: ARROW_LABEL_PADDING_X2,
+    maxWidth: arrowMaxWidth(draw.styleWidth, env.theme?.maxMessageSize),
+  };
+  return applyPadder(componentLabelBlock(displayLines(label), font, opts, env.measurer), env.padder);
+}
+
+/** What a label is measured with: the measurer and sprites, plus -- when the
+ *  caller passes the layout's own context, as every layout caller does -- the
+ *  theme `skinparam maxMessageSize` is read from. */
+export type MessageLabelMeasureEnv = Pick<MessageLabelEnv, 'measurer' | 'sprites' | 'padder'> & {
+  readonly theme?: Pick<Theme, 'maxMessageSize'> | undefined;
+};
+
+/**
+ * The arrow component's `LineBreakStrategy`: the style's own `MaximumWidth`
+ * when it is positive, else `skinparam maxMessageSize`.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/rose/Rose.java:289-292
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/SkinParam.java:971-978
+ *
+ * The theme holds `maxMessageSize` as its resolved `getMaxWidth()` pixel
+ * width (`skinparam-theme-builder.ts#resolveMaxMessageSize`), a negative one
+ * kept: `Fission` splits at its `Math.abs` (`Fission.java:63-101`).
+ */
+export function arrowMaxWidth(
+  styleWidth: LineBreakStrategy | undefined,
+  maxMessageSize: number | undefined,
+): LineBreakStrategy {
+  if (styleWidth !== undefined && styleWidth.getMaxWidth() > 0) return styleWidth;
+  return maxMessageSize === undefined ? LineBreakStrategy.NONE : new LineBreakStrategy(String(maxMessageSize));
 }
 
 /**
  * Place a message's label, and its autonumber when it has one.
  *
- * `getLabelNumbered` puts the number FIRST in the display as a
- * `MessageNumber` (`AbstractMessage.java:200-206`), and `Display#createSheet`
- * routes a display whose element 0 is one to `createMessageNumber`
- * (`Display.java:662-664`). That builds the number as its OWN text block,
- * gives it a 4px right margin, and merges it left-to-right with the remaining
- * lines at `VerticalAlignment.CENTER` (`Display.java:703-712`) -- so the
- * number is a separate `<text>`, vertically centred against however many
- * lines the label has, and there is NO `": "` joining them.
- *
- * C3 closed the creole divergence this doc used to record: the lines AND the
- * number now go through `sequence-creole.ts`, which is `create0`'s own two
- * arms -- `getCreole(display.subList(0, 1))` for the number, the rest for the
- * label (`Display.java:703-707`).
- *
- * A2 closed the other one. The block used to be CENTRED on the arrow's
- * midpoint; upstream's default `messagePosition` is LEFT
- * (`ComponentRoseArrow.java:163-178`), so `leftX` is now the block's left edge
- * and the caller derives it from the arrow's own start. Lines were always
- * left-aligned WITHIN the block, which is why they still share one `x`.
- *
- * ## The two parameters that changed meaning in A2
- *
  * `leftX` is the BLOCK's left edge — where the autonumber starts when there is
- * one, and where the label starts when there is not.
+ * one, and where the label starts when there is not; upstream's default
+ * `messagePosition` is LEFT (`ComponentRoseArrow.java:163-178`).
  *
  * `arrowY` is the ARROW's own y, not a text y. Upstream places the component's
  * origin at the block top and puts the arrow `getTextHeight` below it
  * (`posArrow = getTextHeight(stringBounder)`, `yText = 0`,
- * `ComponentRoseArrow.java:141-148`), so the block is derived from the arrow
- * rather than the other way round. A multi-line label therefore grows UPWARD,
- * leaving the arrow where the caller put it — the same property the old
- * `baselineY` had, now expressed the way upstream expresses it.
+ * `ComponentRoseArrow.java:141-148`), so a multi-line label grows UPWARD,
+ * leaving the arrow where the caller put it.
  *
  * `font` is the message style's font, colour already resolved for the draw
- * (`sequence-arrow-paint.ts#messagePaint`'s `font`): the block is measured
- * and drawn in it (`AbstractTextualComponent.java:80-92`). It defaults to the
+ * (`sequence-arrow-paint.ts#messagePaint`'s `font`); it defaults to the
  * default skin's, for a block built with no message in hand.
  */
 export function messageLabelBlock(
@@ -371,96 +385,88 @@ export function messageLabelBlock(
   env: MessageLabelEnv,
   font: FontConfiguration = defaultMessageFont(),
 ): MessageLabelBlock {
-  const { measurer } = env;
-  // `AbstractTextualComponent` maps an empty display to a `TextBlockEmpty`,
-  // which draws nothing (`AbstractTextualComponent.java:84-85`) -- so a
-  // message with neither label nor number emits no `<text>` at all.
-  const lines = label === '' ? [] : displayLines(label);
-  if (lines.length === 0 && numberText === undefined) return { lines: [] };
+  return placeMessageLabel({ label, numberText, leftX, arrowY, font }, env);
+}
 
-  // The ARROW style's font (`AbstractTextualComponent.java:80`,
-  // `getFontConfiguration()` = `style.getFontConfiguration(set)`,
-  // `AbstractComponent.java:129-131`), not the ambient one: `arrow { FontSize
-  // 13 }` (`plantuml.skin:316-317`) by default, and every golden with a
-  // message label emits `font-size="13"` beside `font-size="14"` participant
-  // text. The number and the label share it (`Display.java:703-711`).
-  const spec = atomFontSpec(font);
-  // unwind2-S10: the label's `<$sprite>`/`<img>` atoms draw, on no `Back`
-  // (`ComponentRoseArrow.java:179`), tinted to the component font colour.
-  const atoms = sequenceAtomContext(env.sprites, font.color ?? TRANSPARENT_SVG);
-  const runsAt = (text: string, x: number, y: number): readonly TextRun[] =>
-    sequenceCreoleRuns(text, font, { leftX: x, baselineY: y }, measurer, atoms);
-  const lineHeight = measurer.measure('M', spec).height;
-  // `posArrow = getTextHeight(stringBounder)` with `yText = 0`
-  // (`ComponentRoseArrow.java:141-148`): the block's TOP sits one
-  // `getTextHeight` above the arrow, where `getTextHeight` is the text block
-  // plus the padding on both sides (`AbstractTextualComponent.java:110-114`).
-  const rows = Math.max(1, lines.length);
-  const top = arrowY - (rows * lineHeight + 2 * ARROW_LABEL_PADDING_Y);
-  // D1: the metrics are resolved HERE, where the measurer is, and travel on
-  // the run. `ascent` is measured rather than derived from the font size --
-  // see `TextRun.textAscent`.
-  const ascent = lineHeight - measurer.getDescent(spec, 'M');
-  // A2: `TextRun.y` is a BASELINE. The block's top is a line-box top, so every
-  // run drops one ascent from wherever its line box begins.
-  const baselineOfRow = (i: number): number => top + ascent + i * lineHeight;
-  // VerticalAlignment.CENTER against the label block (`Display.java:711`).
-  const numberY = baselineOfRow(0) + ((rows - 1) * lineHeight) / 2;
-  const numberRuns = numberText === undefined ? [] : runsAt(numberText, leftX, numberY);
-  // `TextBlockUtils.withMargin(tb1, 0, 4, 0, 0)` (`Display.java:706`), off the
-  // number's RENDERED width: its LAST run's right edge, never a sum of widths
-  // -- a non-text atom advances x without producing a run (`sequence-creole.ts`).
-  const end = numberRuns.at(-1);
-  const labelLeft = end === undefined ? leftX : end.x + end.textWidth + MESSAGE_NUMBER_MARGIN;
-  const placed = lines.flatMap((text, i) => runsAt(text, labelLeft, baselineOfRow(i)));
-  const [first, ...rest] = numberRuns;
-  return first === undefined ? { lines: placed } : { lines: [...rest, ...placed], number: first };
+/** What {@link placeMessageLabel} places: {@link messageLabelBlock}'s
+ *  parameters, plus the arrow style's alignment. */
+export interface MessageLabelSpec {
+  readonly label: string;
+  readonly numberText: string | undefined;
+  readonly leftX: number;
+  readonly arrowY: number;
+  readonly font: FontConfiguration;
+  /** The arrow style's `HorizontalAlignment`, the sheet's: each stripe's
+   *  shift inside the block is `SheetBlock1#initMap`'s `(maxWidth - width) /
+   *  coef` (`SheetBlock1.java:155-193`). */
+  readonly rowAlign?: HorizontalAlignment | undefined;
+  /** The arrow's `getForegroundColor()` (its `LineColor`, the arrow colour
+   *  over it), applied before the block draws. */
+  readonly fore?: Paint | undefined;
+  /** The arrow style's `wrapWidth()` (`Rose.java:289`). */
+  readonly styleWidth?: LineBreakStrategy | undefined;
+}
+
+/** The arrow style's three reads a label is placed with: its font, its
+ *  alignment and its `getForegroundColor()` (`AbstractTextualComponent.java:
+ *  80-81`, `ComponentRoseArrow.java:91`). */
+export function labelDrawOf(paint: {
+  readonly font: FontConfiguration;
+  readonly align: HorizontalAlignment | undefined;
+  readonly stroke: Paint;
+  readonly wrapWidth?: LineBreakStrategy | undefined;
+}): Pick<MessageLabelSpec, 'font' | 'rowAlign' | 'fore' | 'styleWidth'> {
+  return { font: paint.font, rowAlign: paint.align, fore: paint.stroke, styleWidth: paint.wrapWidth };
+}
+
+/** {@link messageLabelBlock} with the label's row alignment. The block's TOP
+ *  sits one `getTextHeight` -- the block plus the padding on both sides
+ *  (`AbstractTextualComponent.java:110-114`) -- above the arrow. */
+export function placeMessageLabel(request: MessageLabelSpec, env: MessageLabelEnv): MessageLabelBlock {
+  const { label, numberText, leftX, arrowY, font, rowAlign, fore, styleWidth } = request;
+  const block = messageLabelLayout(label, numberText, font, env, { align: rowAlign, fore, styleWidth });
+  const top = arrowY - (block.height + 2 * ARROW_LABEL_PADDING_Y);
+  const padder =
+    env.padder !== undefined && block.padderBox !== undefined
+      ? { padder: padderGeoAt(env.padder, block.padderBox, { x: leftX, y: top }) }
+      : {};
+  if (block.primitives.length === 0) return { lines: [], ...padder };
+  const placed = block.primitives.map((r) => offsetRun(r, leftX, top));
+  if (numberText === undefined) return { lines: placed, ...padder };
+  const [first, ...rest] = placed;
+  return first === undefined ? { lines: [], ...padder } : { lines: rest, number: first, ...padder };
 }
 
 /** `HColors.transparent()` as `SvgGraphics` writes it: the sprite tint a
  *  transparent `FontColor` leaves (`font.color === null`, `UText.ts`). */
 export const TRANSPARENT_SVG = '#00000000';
 
-/** What {@link messageLabelBlock} lays a label out with -- the
- *  `EventProcessingContext` fields it reads. `theme` is no longer read by the
- *  block itself (the font is the arrow style's); it stays because the context
- *  that satisfies this interface is the layout's own. */
-export interface MessageLabelEnv {
-  readonly theme: Theme;
-  readonly measurer: StringMeasurer;
-  readonly sprites?: SpriteRegistry | undefined;
-}
-
-/** Rows a label block occupies, for the caller's vertical reservation. A
- *  number-only label still occupies one.
- *
- *  Splits by {@link displayLines}, the SAME function `messageLabelBlock` uses:
- *  a caller reserves vertical space with this and places runs with that, so a
- *  disagreement between the two is a label overhanging its own reservation. */
-export function messageLabelRows(label: string, numberText: string | undefined): number {
-  if (label === '') return numberText === undefined ? 0 : 1;
-  return displayLines(label).length;
+/** The label block's height, `textBlock.calculateDimension(...).getHeight()`
+ *  -- what `getTextHeight` adds the padding to (`AbstractTextualComponent
+ *  .java:110-114`), so a caller reserving with this and one placing with
+ *  {@link placeMessageLabel} read ONE block. */
+export function messageLabelHeight(
+  label: string,
+  numberText: string | undefined,
+  font: FontConfiguration,
+  env: MessageLabelMeasureEnv,
+  styleWidth?: LineBreakStrategy,
+): number {
+  return messageLabelLayout(label, numberText, font, env, { styleWidth }).height;
 }
 
 /**
  * The width of the label block {@link messageLabelBlock} lays out, for the
  * participant row: `Display#createMessageNumber` merges the number, a 4px
  * right margin and the label (`Display.java:703-712`), measured in `font`,
- * the message's ARROW-style font (`AbstractTextualComponent.java:80-92`),
- * with sprites tinted to its colour as the block draws them.
+ * the message's ARROW-style font (`AbstractTextualComponent.java:80-92`).
  */
 export function messageLabelWidth(
   label: string,
   numberText: string | undefined,
   font: FontConfiguration,
-  env: Pick<MessageLabelEnv, 'measurer' | 'sprites'>,
+  env: MessageLabelMeasureEnv,
+  styleWidth?: LineBreakStrategy,
 ): number {
-  const spec = atomFontSpec(font);
-  const atoms = sequenceAtomContext(env.sprites, font.color ?? TRANSPARENT_SVG);
-  const numberWidth =
-    numberText === undefined
-      ? 0
-      : sequenceLabelLineWidth(numberText, spec, env.measurer, atoms) + MESSAGE_NUMBER_MARGIN;
-  const lines = label === '' ? [] : displayLines(label);
-  return numberWidth + sequenceLabelBlockWidth(lines, spec, env.measurer, atoms);
+  return messageLabelLayout(label, numberText, font, env, { styleWidth }).width;
 }

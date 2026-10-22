@@ -54,13 +54,12 @@ import {
   THIN_CIRCLE,
   headGeometryNormalSide,
   headGeometryReverseSide,
-  headGeometrySelf,
   inclination1Of,
   inclination2Of,
   inclinationAngle1,
   inclinationAngle2,
 } from './sequence-arrowhead.js';
-import type { ArrowConfiguration, ArrowDressing, HeadGeometry } from './sequence-arrowhead.js';
+import type { ArrowConfiguration, ArrowDressing } from './sequence-arrowhead.js';
 import type { ScaledTheme } from './scale-geo.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { fmt } from '../../core/svg-format.js';
@@ -295,68 +294,4 @@ function flatArrowHeads(
     k,
   );
   return head1 + head2;
-}
-
-/**
- * A self message's head geometry. `drawRightSide` dispatches on `dressing2`'s
- * head exactly like the flat component does — saltire at `:152-160`, the open
- * stroke pair at `:161-169`, the polygon at `:170-173` — and only the last of
- * those three goes through `getPolygon()`. Reading `getPart()` where upstream
- * does (`:162,166`) is the same value as `dressing2.part` here, because
- * `ArrowConfiguration#getPart` returns dressing2's whenever its head is not
- * NONE (`ArrowConfiguration.java:221-223`) and this branch has already
- * established that.
- *
- * The decoration is passed as NONE rather than threaded: a self `o` is drawn
- * by `:104-112` from `textHeight`/`arrowHeight`, geometry this port's self
- * loop does not carry (Gap SQ-5 keeps the spike's own 40 px loop).
- * @see skin/rose/ComponentRoseSelfArrow.java:152-173
- */
-function selfHeadGeometry(configuration: ArrowConfiguration, reverseDefine: boolean, niceArrow: boolean): HeadGeometry {
-  const dressing = configuration.dressing2;
-  if (dressing.head === 'NORMAL') return headGeometrySelf(configuration, reverseDefine, niceArrow);
-  // 0, not `slope.theta*`: no self component reads an inclination — the
-  // token appears nowhere under `net/` outside `ArrowConfiguration` and
-  // `ComponentRoseArrow` (verified by grep), so a self `(n)` draws square.
-  return headGeometryReverseSide(dressing, 'NONE', niceArrow, 0);
-}
-
-/**
- * `isReverseDefine()` is set by an arrow whose LEFT dressing carries the
- * `<`/`\`/`/` (`CommandArrow.java:306-314`, `hasDressing1butx`).
- * `ArrowConfiguration` does not carry the flag in this port (only the fields
- * the drawing layer reads are modelled, `sequence-arrowhead.ts:74-94`), so
- * `drawLeftSide` (`ComponentRoseSelfArrow.java:84,176-273`) stays unreachable
- * and `getPolygon`'s `direction` is always +1.
- * @see sequencediagram/command/CommandArrow.java:306-314
- */
-const SELF_REVERSE_DEFINE = false;
-
-/**
- * The head at the foot of a self loop. Upstream puts the tip at `x2`, the
- * same x its returning bottom line starts from (`:126` draws the hline from
- * `x2`, `:172` translates the polygon by `dx(x2)`) — verified on
- * `botoku-28-cupe920`, whose bottom line reads `x1="79.863"` and whose
- * polygon reads `89.863,75,79.863,79,89.863,83,85.863,79`. This port keeps
- * that invariant against ITS own loop, whose returning segment ends at the
- * lifeline (Gap SQ-5), rather than transplanting upstream's `x2 = 1`
- * (`:93`) onto a loop 5 px narrower than the one it was measured for.
- * @see skin/rose/ComponentRoseSelfArrow.java:91-93,126,170-173
- */
-export function renderSelfMessageHead(
-  msg: MessageGeo,
-  configuration: ArrowConfiguration,
-  theme: ScaledTheme,
-  tipY: number,
-): string {
-  const niceArrow = niceArrowOf(theme);
-  return renderArrowHead(
-    selfHeadGeometry(configuration, SELF_REVERSE_DEFINE, niceArrow),
-    configuration.dressing2.head,
-    // The returning segment's left end, not the outgoing one's -- they
-    // differ by at least a pixel (`MessageGeo.selfReturnX`).
-    { x: msg.selfReturnX ?? msg.fromX, y: tipY },
-    messagePaintOf(msg),
-    theme.scaleK,
-  );
 }

@@ -60,4 +60,17 @@ describe('lifeline title (ComponentRoseLine.java:82, MutingLine.java:107-108)', 
   it('keeps an undecoratable spot raw: `#red` is no circleChar COLOR (jar tt-spot with #red)', () => {
     expect(titles('participant A << (C,#red) T >>\nparticipant B\nA -> B')).toEqual(['.. .C..red. T ..', 'B']);
   });
+
+  // `StringUtils.isNotEmpty` is false for a blank-only string (`StringUtils.java
+  // :164-183`), so the `" "` left in `LABEL` after `)` drops the label
+  // (`StereotypeDecoration.java:157-160,169-172`). Jar: kobibu-84-bode360
+  // `<title></title>` for `<< ($APIGateway, #CC2264) >>`, fakova-98-suze610
+  // `<title>C </title>` for `<< (C,#00FFFF) >>`.
+  it('a spot or sprite with no label text leaves the title bare', () => {
+    const svg = renderFixtureSequence(
+      '@startuml\nparticipant A << ($APIGateway, #CC2264) >>\nparticipant B << (C,#00FFFF) >>\nA -> B\n@enduml\n',
+      new DeterministicMeasurer(),
+    );
+    expect([...svg.matchAll(/<title>([^<]*)<\/title>/g)].map((m) => m[1])).toEqual(['', 'C ']);
+  });
 });

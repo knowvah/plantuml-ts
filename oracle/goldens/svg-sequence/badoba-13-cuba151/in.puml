@@ -1,0 +1,10 @@
+@startuml
+skinparam backgroundcolor transparent
+
+alt successful
+Server -> Client: OK
+else failure
+Server -> Client : ERROR
+end
+
+@enduml

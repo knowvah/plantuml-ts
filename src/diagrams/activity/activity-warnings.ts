@@ -32,52 +32,31 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/DiagramChromeFactory.java:124-135,176-200
  */
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { WarningBannerBlock } from '../../core/annotations/WarningBannerBlock.js';
-import { shiftFragmentBody } from '../../core/annotations/coord-shift.js';
-import { ColorMapper } from '../../core/klimt/color/ColorMapper.js';
-import { renderDrawableToFragment } from '../../core/klimt/document-shell-fragment.js';
-import type { UGraphic } from '../../core/klimt/UGraphic.js';
-import { UTranslate } from '../../core/klimt/UTranslate.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import { Warning } from '../../core/warning/Warning.js';
+import {
+  skinParamWarnings,
+  uniqueWarnings,
+  withWarningBanner as withSharedWarningBanner,
+} from '../../core/skinparam-warnings.js';
+import type { Warning } from '../../core/warning/Warning.js';
 import type { ActivityDiagramAST } from './ast.js';
-import { SVG_CANVAS_CEIL, type DocumentMargin } from './activity-layout-constants.js';
-import { withDeferredFormat } from '../../core/svg-format.js';
-
-/** The `new Warning(...)` texts `CommandSkinParam#executeArg` adds, keyed by
- *  the lower-cased skin parameter name (`equalsIgnoreCase`).
- *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandSkinParam.java:92-99 */
-const SKINPARAM_WARNINGS: ReadonlyMap<string, string> = new Map([
-  ['handwritten', "Please use '!option handwritten true' to enable handwritten "],
-  ['participantpadding', 'Please use CSS style instead of skinparam ParticipantPadding'],
-  ['padding', 'Please use CSS style instead of skinparam padding'],
-]);
+import type { DocumentMargin } from './activity-layout-constants.js';
 
 /** Fixed id namespace for the banner's own klimt document
  *  (`renderDrawableToFragment`'s `uid`); the banner emits no defs. */
 const BANNER_UID = 'activity-warning-banner';
 
-/** `LinkedHashSet<Warning>#add`: append unless an equal warning is present. */
-function addUnique(into: Warning[], warning: Warning): void {
-  if (!into.some((w) => w.equals(warning))) into.push(warning);
-}
-
 /**
  * `ast` with `warnings` set to `CommandSkinParam#executeArg`'s warnings for
- * the collected `skinparam` map, in the map's (first-assignment) order. The
- * collector keeps no line form, so a `skinparam { ... }` block entry warns
- * too, where upstream's `CommandSkinParamMultilines` does not.
+ * the collected `skinparam` map ({@link skinParamWarnings}, the shared core
+ * module since sdd2-T7e).
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandSkinParam.java:88-99
  */
 export function withSkinParamWarnings(
   ast: ActivityDiagramAST,
   skinparam: ReadonlyMap<string, string> | undefined,
 ): ActivityDiagramAST {
-  const warnings: Warning[] = [];
-  for (const name of skinparam?.keys() ?? []) {
-    const message = SKINPARAM_WARNINGS.get(name.toLowerCase());
-    if (message !== undefined) addUnique(warnings, new Warning(message));
-  }
+  const warnings = skinParamWarnings(skinparam);
   return warnings.length === 0 ? ast : { ...ast, warnings };
 }
 
@@ -87,27 +66,12 @@ export function withSkinParamWarnings(
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:326-334
  */
 export function activityWarnings(ast: ActivityDiagramAST): readonly Warning[] {
-  const result: Warning[] = [];
-  for (const w of ast.warnings ?? []) addUnique(result, w);
-  for (const w of ast.pragma?.getWarnings() ?? []) addUnique(result, w);
-  return result;
-}
-
-/** `Math.floor(raw + near + far + SVG_CANVAS_CEIL)`: a canvas side for a raw
- *  span (`TextBlockExporter.java:199-202` + `SvgGraphics#ensureVisible`). */
-function canvasSide(raw: number, near: number, far: number): number {
-  return Math.floor(raw + (near + far + SVG_CANVAS_CEIL));
+  return uniqueWarnings(ast.warnings ?? [], ast.pragma?.getWarnings() ?? []);
 }
 
 /**
- * `DiagramChromeFactory#addWarnings` over the activity fragment: the banner
- * at the raw block's origin (the document margin's `(margin, margin)` in
- * this fragment's margin-baked coordinates, `TextBlockExporter.java:172`),
- * drawn at the stacked block's
- * full width, the diagram body moved down by the banner height. The new
- * raw dims (`preChromeWidth`/`preChromeHeight`) are the stack's, so a
- * chrome pass composes title/legend/... around banner + body, as upstream's
- * decoration order does. `fragment` unchanged when there is no warning.
+ * `DiagramChromeFactory#addWarnings` over the activity fragment: the shared
+ * {@link withSharedWarningBanner} under the activity's banner namespace.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/DiagramChromeFactory.java:176-200
  */
 export function withWarningBanner(
@@ -116,33 +80,5 @@ export function withWarningBanner(
   measurer: StringMeasurer,
   margin: DocumentMargin,
 ): RenderFragment {
-  if (warnings.length === 0) return fragment;
-  const rawW = fragment.preChromeWidth ?? fragment.width - (margin.left + margin.right + SVG_CANVAS_CEIL);
-  const rawH = fragment.preChromeHeight ?? fragment.height - (margin.top + margin.bottom + SVG_CANVAS_CEIL);
-  const banner = new WarningBannerBlock(warnings, ColorMapper.IDENTITY);
-  let bannerW = 0;
-  let bannerH = 0;
-  const drawable = {
-    drawU(ug: UGraphic): void {
-      const dim = banner.calculateDimension(ug.getStringBounder());
-      bannerW = dim.getWidth();
-      bannerH = dim.getHeight();
-      banner.drawU(ug.apply(new UTranslate(margin.left, margin.top)), Math.max(bannerW, rawW));
-    },
-  };
-  // isw-T2c-scale: drawn into a scaled document, formatted by its scale pass.
-  const drawn = withDeferredFormat(fragment.numbersDeferred === true, () =>
-    renderDrawableToFragment(drawable, { width: 0, height: 0, measurer, uid: BANNER_UID }),
-  );
-  const stackW = Math.max(bannerW, rawW);
-  const stackH = bannerH + rawH;
-  return {
-    ...fragment,
-    body: drawn.body + shiftFragmentBody(fragment.body, 0, bannerH),
-    width: fragment.width - canvasSide(rawW, margin.left, margin.right) + canvasSide(stackW, margin.left, margin.right),
-    height:
-      fragment.height - canvasSide(rawH, margin.top, margin.bottom) + canvasSide(stackH, margin.top, margin.bottom),
-    preChromeWidth: stackW,
-    preChromeHeight: stackH,
-  };
+  return withSharedWarningBanner(fragment, warnings, measurer, margin, BANNER_UID);
 }

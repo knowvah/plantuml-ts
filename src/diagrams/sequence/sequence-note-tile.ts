@@ -67,6 +67,20 @@ export interface NoteTileInput {
   readonly explicitAlign: HorizontalAlignment | undefined;
   /** The alignment with its LEFT default applied. */
   readonly align: HorizontalAlignment;
+  /** The x a `right` wrapper puts its note at when that is not the
+   *  participant's `posC + level * LIVE_DELTA_SIZE`: a `create` message's
+   *  `posD` (`CommunicationTileNoteRight.java:122-124`) or a self message's
+   *  `getMaxX` (`CommunicationTileSelfNoteRight.java:108-110`). */
+  readonly rightX?: number;
+  /** The tile x outright, whatever the position: a `top`/`bottom` wrapper
+   *  places its note at the wrapped tile's `getMinX()`
+   *  (`CommunicationTileNoteBottomTopAbstract.java:99-102`). */
+  readonly originX?: number;
+  /** Present when the note is a member of a `Notes` group (`/ note`) and so
+   *  placed by `NotesTile`, not `NoteTile`: `stacking` is the summed width of
+   *  the earlier members on the same participant and side
+   *  (`NotesTile#getStackingOffset:180-190`). */
+  readonly group?: { readonly stacking: number };
 }
 
 /** The horizontal facts of one note tile. */
@@ -117,12 +131,12 @@ function initialSpan(map: ReadonlyMap<string, ParticipantGeo>, first: string | u
 }
 
 /** `NoteTile#getX` (`:155-173`). */
-function tileX(event: NoteEvent, used: number, level: number, c1: number, c2: number): number {
+function tileX(event: NoteEvent, used: number, level: number, c1: number, c2: number, stacking = 0): number {
   switch (event.position) {
     case 'left':
-      return c1 - used;
+      return c1 - used - stacking;
     case 'right':
-      return c1 + level * LIVE_DELTA_SIZE;
+      return c1 + level * LIVE_DELTA_SIZE + stacking;
     case 'over':
       return event.participants.length > 1 ? (c1 + c2) / 2 - used / 2 : c1 - used / 2;
   }
@@ -174,17 +188,27 @@ function textOffset(i: NoteTileInput, used: number, preferred: number, textWidth
   return centred;
 }
 
-/** Port of `NoteTile` + the component's draw arithmetic. */
+/**
+ * Port of `NoteTile` + the component's draw arithmetic -- or, for a member of
+ * a `Notes` group, of `NotesTile`: the used width is the component's
+ * preferred width even over several participants (`NotesTile#getUsedWidth
+ * :140-145`), `getX` adds the stacking offset (`:152-165`), and `getMinX`/
+ * `getMaxX` are the plain `x` / `x + width` (`:228-250`), with no stale span.
+ */
 export function noteTile(input: NoteTileInput): NoteTile {
-  const { event, blockWidth, padding, reserve, level, participantMap } = input;
+  const { event, blockWidth, padding, reserve, level, participantMap, group } = input;
   const textWidth = blockWidth + padding.left + padding.right;
   const preferred = textWidth + 2 * NOTE_COMPONENT_PADDING_X + reserve;
   const several = isSeveral(event);
   const [b1, c1] = posOf(participantMap, event.participants[0]);
   const [, c2, d2] = posOf(participantMap, several ? event.participants.at(-1) : undefined);
   // `NoteTile#getUsedWidth` (`:140-153`).
-  const used = several ? Math.max(preferred, d2 - b1) : preferred;
-  const x = tileX(event, used, level, c1, c2);
+  const used = several && group === undefined ? Math.max(preferred, d2 - b1) : preferred;
+  const x =
+    input.originX ??
+    (input.rightX !== undefined && event.position === 'right'
+      ? input.rightX
+      : tileX(event, used, level, c1, c2, group?.stacking));
   // `...Note.java:105-108,112-115`: `(int) getTextWidth`, or `(int) (area -
   // 2 * getPaddingX())` once the area is wider than preferred.
   const width = Math.trunc(used > preferred ? used - 2 * NOTE_COMPONENT_PADDING_X : textWidth);
@@ -192,7 +216,9 @@ export function noteTile(input: NoteTileInput): NoteTile {
     x: x + NOTE_COMPONENT_PADDING_X,
     width,
     textDx: textOffset(input, used, preferred, textWidth),
-    ...noteExtent(event, { preferred, x, used, c1, c2, b1, d2 }, participantMap),
+    ...(group === undefined
+      ? noteExtent(event, { preferred, x, used, c1, c2, b1, d2 }, participantMap)
+      : { minX: x, maxX: x + used }),
   };
 }
 

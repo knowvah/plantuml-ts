@@ -776,14 +776,6 @@ Both are exact against the jar. `jobadi-87-jegi648` (`activate Bob` then
 `gesiba-07-rise357` (`B -> B ++` inside `A -> B ++`) at `cx + 5` and
 `cx + 11`, the loop straddling the bar it opens.
 
-**Still NOT ported: a REVERSE self message, `A <- A`.** Upstream skips the
-`x1` shift entirely for it (`if (!isReverseDefine())`) and hands the job to
-`ComponentRoseSelfArrow#drawLeftSide`, whose three-branch `dx`/`level`
-arithmetic (`:177-190`) mirrors the loop rather than offsetting it. This port
-does not record `reverseDefine` on a self message at all — `arrowConfigurationOf`
-drops it — so the case cannot even be detected in layout yet. Every self loop
-here draws rightward.
-
 ## ~~Grouping-frame background shadow is not ported~~ — RETIRED (unwind2-S9, 2026-10-08)
 
 group/ref frames read the faithful StyleBuilder's `group`/`reference` Shadowing and draw `ComponentRoseGroupingHeader.java:131` / `ComponentRoseReference.java:89-96`'s shadow; jar fixtures in `tests/fixtures/unwind2-S9/`.

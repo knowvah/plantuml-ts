@@ -7,11 +7,17 @@ import type { DiagramPlugin, ParseOptions, RenderFragment } from '../../core/dis
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { UmlSource } from '../../core/block-extractor.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
-import type { SequenceDiagramAST, SequenceGeometry } from './ast.js';
+import type { SequenceDiagramAST } from './ast.js';
 import { parseSequence } from './parser.js';
 import { layoutSequence } from './layout.js';
 import { renderSequence, renderSequencePage } from './renderer.js';
 import { sequencePageAst, sequencePageCount } from './sequence-page.js';
+import {
+  withGeometryWarnings,
+  withSequenceWarningBanner,
+  withSkinParamWarnings,
+  type SequencePluginGeometry,
+} from './sequence-warnings.js';
 
 /** The pipeline always hands `render` the measurer layout used
  *  (`src/index.ts#assemblePagesUnscoped`); its absence is a caller bug. */
@@ -24,7 +30,7 @@ function requireMeasurer(measurer: StringMeasurer | undefined): StringMeasurer {
 // Plugin
 // ---------------------------------------------------------------------------
 
-export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequenceGeometry> = {
+export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequencePluginGeometry> = {
   type: 'sequence',
 
   // T4: widened to match `DiagramPlugin.parse`'s `AST | ParseRefusal`
@@ -34,19 +40,26 @@ export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequenceGeometry>
   // `class/parser.ts:317-318` / `description/index.ts:59-67`. sdd1 D3: the
   // whole `UmlSource`, whose style sources replay per command.
   parse(source: UmlSource, options?: ParseOptions): SequenceDiagramAST | ParseRefusal {
-    return parseSequence(source, options);
+    const ast = parseSequence(source, options);
+    // `refused` is `ParseRefusal`'s discriminant (`dispatcher.ts#parseRefusalOf`).
+    if ('refused' in ast) return ast;
+    // sdd2-T7e: `CommandSkinParam.java:92-99` -> `ast.warnings`.
+    return withSkinParamWarnings(ast, source.styleSource?.skinparam);
   },
 
-  layout(ast: SequenceDiagramAST, theme, measurer): Promise<SequenceGeometry> {
-    return Promise.resolve(layoutSequence(ast, theme, measurer));
+  layout(ast: SequenceDiagramAST, theme, measurer): Promise<SequencePluginGeometry> {
+    return Promise.resolve(withGeometryWarnings(layoutSequence(ast, theme, measurer), ast));
   },
 
-  layoutSync(ast: SequenceDiagramAST, theme, measurer): SequenceGeometry {
-    return layoutSequence(ast, theme, measurer);
+  layoutSync(ast: SequenceDiagramAST, theme, measurer): SequencePluginGeometry {
+    return withGeometryWarnings(layoutSequence(ast, theme, measurer), ast);
   },
 
-  render(geo: SequenceGeometry, theme, measurer): RenderFragment {
-    return renderSequence(geo, theme, requireMeasurer(measurer));
+  // sdd2-T7e: the warning banner (`DiagramChromeFactory#addWarnings`) is
+  // stacked above the page before chrome (`sequence-warnings.ts`).
+  render(geo: SequencePluginGeometry, theme, measurer): RenderFragment {
+    const m = requireMeasurer(measurer);
+    return withSequenceWarningBanner(renderSequence(geo, theme, m), geo.warnings, m);
   },
 
   // The `PaginatedPlugin` trio (`core/dispatcher.ts`). Sequence is the only
@@ -54,12 +67,13 @@ export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequenceGeometry>
   // in the corpus that makes one source produce more than one image, and
   // upstream's own `getNbPages()` is `countNewpage + 1` on
   // `SequenceDiagram` alone (`:517-519`).
-  getNbPages(geo: SequenceGeometry): number {
+  getNbPages(geo: SequencePluginGeometry): number {
     return sequencePageCount(geo);
   },
 
-  renderPage(geo: SequenceGeometry, theme, pageIndex: number, measurer): RenderFragment {
-    return renderSequencePage(geo, theme, pageIndex, requireMeasurer(measurer));
+  renderPage(geo: SequencePluginGeometry, theme, pageIndex: number, measurer): RenderFragment {
+    const m = requireMeasurer(measurer);
+    return withSequenceWarningBanner(renderSequencePage(geo, theme, pageIndex, m), geo.warnings, m);
   },
 
   pageAst(ast: SequenceDiagramAST, pageIndex: number): SequenceDiagramAST {

@@ -560,7 +560,8 @@ describe('routing conformance — jar-error classification', () => {
     // could not reach: component/kokebo-27-vafi688 (no line-text
     // discriminator between ClassDiagramFactory and DescriptionDiagramFactory)
     // and sequence/nuvoja-46-dezu541 (!includedef preprocessor stop,
-    // IncludeExecutor.ts:127).
+    // IncludeExecutor.ts:127). Both now agree: kokebo at T19, nuvoja at
+    // sdd2 T8b (a missing `!includedef` file is an empty body).
     // 3148/2 until batch 4's sequence residual was censused. The 194 that
     // moved are ALL sequence sources the sequence engine cannot yet parse:
     // 163 where nothing claimed them (it refused and so did everything else)
@@ -1113,8 +1114,26 @@ describe('routing conformance — jar-error classification', () => {
     // Derivation: 6927 + 642 + 86 = 7655.
     // 6927 -> 6979 agree at sdd1 close-b3: +52 svg-sequence golden clones
     // (pin round 2). Derivation: 6979 + 642 + 86 = 7707.
-    expect(pinnedAgree.length).toBe(6979);
-    expect(pinnedMisroutes.length).toBe(642);
+    // 6979 -> 6988 agree at sdd2 close-b1: +7 sequence rows that rendered
+    // (known-misroute -> agree: dolice-60, jiliba-03, junide-55, ladiro-50,
+    // nidozi-08, tegasu-93, vubato-50) and +2 svg-sequence golden clones
+    // (ladiro-50, pucini-86). Derivation: 6988 + 635 + 86 = 7709.
+    // 6988 -> 7080 agree at sdd2 close-b2: +3 sequence rows render (fojomu-60,
+    // nizuzi-32, zoturo-25: CommandLinkAnchor, T2e) and +89 svg-sequence golden
+    // clones (pin round 2). Derivation: 7080 + 632 + 86 = 7798.
+    // 7080 -> 7257 agree at sdd2 close-b3: +177 svg-sequence golden clones
+    // (pin round 3). Derivation: 7257 + 632 + 86 = 7975.
+    // 7257 -> 7370 at sdd2/close-b4: +113 svg-sequence golden clones.
+    // 7370 -> 7479 at sdd2/close-b5: +109 svg-sequence golden clones.
+    // 7479 -> 7532 at sdd2/close-b6: +53 svg-sequence golden clones.
+    // 7532 -> 7599 at sdd2/close-b7: +67 svg-sequence golden clones.
+    // 7599 -> 7606 at sdd2/close-b8: +4 svg-sequence golden clones and +3
+    // sequence rows that render (known-misroute -> agree): fonudu-70 (YAML
+    // front matter, T8a), nuvoja-46 (missing `!includedef`, T8b), bomino-39
+    // (`<style src=>`, T8c). Derivation: 7606 + 629 + 86 = 8321.
+    // 7606 -> 7607 at sdd2/close-exit: +1 svg-sequence golden clones.
+    expect(pinnedAgree.length).toBe(7607);
+    expect(pinnedMisroutes.length).toBe(629);
     expect(pinnedJarErrors.length).toBe(86);
     // 7202 -> 7203 at gtc T1 (see the agree derivation above).
     // 7203 -> 7214 at gtc T2 (see the agree derivation above).
@@ -1134,7 +1153,16 @@ describe('routing conformance — jar-error classification', () => {
     // 7287 -> 7288 at gtc T6j (see the agree derivation above).
     // 7288 -> 7655 at sdd1 close-b2 (see the agree derivation above).
     // 7655 -> 7707 at sdd1 close-b3 (see the agree derivation above).
-    expect(manifest.fixtures.length).toBe(7707);
+    // 7707 -> 7709 at sdd2 close-b1 (+2 golden clones, see agree above).
+    // 7709 -> 7798 at sdd2 close-b2 (+89 golden clones, see agree above).
+    // 7798 -> 7975 at sdd2 close-b3 (+177 golden clones, see agree above).
+    // 7975 -> 8088 at sdd2/close-b4: +113 svg-sequence golden clones.
+    // 8088 -> 8197 at sdd2/close-b5: +109 svg-sequence golden clones.
+    // 8197 -> 8250 at sdd2/close-b6: +53 svg-sequence golden clones.
+    // 8250 -> 8317 at sdd2/close-b7: +67 svg-sequence golden clones.
+    // 8317 -> 8321 at sdd2/close-b8: +4 svg-sequence golden clones.
+    // 8321 -> 8322 at sdd2/close-exit: +1 svg-sequence golden clones.
+    expect(manifest.fixtures.length).toBe(8322);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -1199,7 +1227,13 @@ describe('routing conformance — jar-error classification', () => {
     // re-pinned agree once the salt plugin registered (sep T4a).
     // 817 -> 641 at wep/close-b4: the 176 wbs "no engine (D3 todo)" misroutes
     // re-pinned agree once the wbs plugin registered (wep T4a).
-    expect(censused.length).toBe(641);
+    // 641 -> 634 at sdd2/close-b1: the 7 sequence rows above now agree.
+    // 634 -> 631 at sdd2/close-b2: fojomu-60, nizuzi-32, zoturo-25 now agree.
+    // 631 -> 629 at sdd2/close-b8: fonudu-70 and bomino-39 now agree. The
+    // uncensused nuvoja-46 also agrees (T8b), so the uncensused remainder is
+    // now EMPTY: censused === pinnedMisroutes.
+    expect(censused.length).toBe(629);
+    expect(censused.length).toBe(pinnedMisroutes.length);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

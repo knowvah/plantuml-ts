@@ -1,0 +1,11 @@
+@startuml
+participant Bob
+participant Alice
+
+Bob->Alice: coucou4
+
+note left: toto5
+activate Bob
+deactivate Bob
+
+@enduml

@@ -1480,3 +1480,30 @@ describe('resolveSkinparam — diagramBorderColor (G2 N66)', () => {
     expect(defaultTheme.colors.graph.diagramBorderColor).toBeUndefined();
   });
 });
+
+describe('resolveSkinparam — diagramBorderThickness / diagramBorderRoundCorner (sdd2-T7l)', () => {
+  it('stores digit-or-dot thickness and digit corner (SkinParam.java:891-967)', () => {
+    const { theme, unknown } = resolveSkinparam(
+      new Map([
+        ['diagramBorderThickness', '1.5'],
+        ['diagramBorderRoundCorner', '15'],
+      ]),
+      defaultTheme,
+    );
+    expect(theme.colors.graph.diagramBorderThickness).toBe(1.5);
+    expect(theme.colors.graph.diagramBorderRoundCorner).toBe(15);
+    expect(unknown).toEqual([]);
+  });
+
+  it('rejects non-numeric thickness and a decimal corner', () => {
+    const { theme } = resolveSkinparam(
+      new Map([
+        ['diagramBorderThickness', 'thick'],
+        ['diagramBorderRoundCorner', '1.5'],
+      ]),
+      defaultTheme,
+    );
+    expect(theme.colors.graph.diagramBorderThickness).toBeUndefined();
+    expect(theme.colors.graph.diagramBorderRoundCorner).toBeUndefined();
+  });
+});

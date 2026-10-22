@@ -1,0 +1,15 @@
+@startuml
+
+opt
+  opt
+    Axxx ->Axxx : message1 which is long
+  else
+	  Axxx ->Bxxx : message2
+  end
+
+  Bxxx->Cxxx : message3
+end
+
+Cxxx -> Dxxx : message4
+note left of Dxxx : this is to note
+@enduml

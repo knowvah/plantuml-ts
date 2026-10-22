@@ -37,7 +37,8 @@ import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 import { StyleSignatureBasic } from '../../core/style/StyleSignatureBasic.js';
 import type { HColor } from '../../core/style/Value.js';
 import type { MessageGeo } from './geo-message.js';
-import type { ArrowConfiguration } from './sequence-arrowhead.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { ARROW_DELTA_X, type ArrowConfiguration, type ArrowDressing } from './sequence-arrowhead.js';
 import {
   createSequenceStyleDispatch,
   currentStyleBuilder,
@@ -133,6 +134,9 @@ function withDashAndFont(
     get align() {
       return paint.align;
     },
+    get wrapWidth() {
+      return paint.wrapWidth;
+    },
   };
 }
 
@@ -147,7 +151,7 @@ function withDashAndFont(
  * message's own builder. Jar-verified on `duzico-51-misi485` (`#?black:
  * white` over darkblue draws the label `#FFF`).
  */
-function labelFont(style: Style, builder: StyleBuilder): FontConfiguration {
+export function labelFont(style: Style, builder: StyleBuilder): FontConfiguration {
   const back = (): HColor =>
     StyleSignatureBasic.of('root', 'document', 'sequenceDiagram')
       .getMergedStyle(builder)!
@@ -209,4 +213,95 @@ export function messagePaintOf(msg: MessageGeo): SequencePaint {
  */
 export function defaultMessageFont(): FontConfiguration {
   return labelFont(messageStyle(defaultStyleBuilder()), defaultStyleBuilder());
+}
+
+/** `ArrowDirection` for a non-self arrow. @see skin/ArrowDirection.java */
+export type ArrowDirectionKind = 'LEFT_TO_RIGHT_NORMAL' | 'RIGHT_TO_LEFT_REVERSE' | 'BOTH_DIRECTION';
+
+/**
+ * `ArrowConfiguration#getArrowDirection` (non-self branch), read off the
+ * dressings at the arrow's geometric LEFT and RIGHT ends.
+ *
+ * Upstream keeps `dressing1` at the left end of the component (the tile
+ * `reverse()`s the configuration for a right-to-left message,
+ * `CommunicationTile.java:157-159`). This port keeps the message's own
+ * order -- `dressing1` is the SENDER's -- so the geometric left end is
+ * `dressing2` for a leftward message (see `labelLeftOf`'s history).
+ * @see skin/ArrowConfiguration.java:181-192
+ */
+export function arrowDirectionOf(arrow: ArrowConfiguration, leftward: boolean): ArrowDirectionKind {
+  const [left, right]: [ArrowDressing, ArrowDressing] = leftward
+    ? [arrow.dressing2, arrow.dressing1]
+    : [arrow.dressing1, arrow.dressing2];
+  if (left.head === 'NONE' && right.head !== 'NONE') return 'LEFT_TO_RIGHT_NORMAL';
+  if (left.head !== 'NONE' && right.head === 'NONE') return 'RIGHT_TO_LEFT_REVERSE';
+  return 'BOTH_DIRECTION';
+}
+
+/** `Rose.java:299-342`'s `first` branch. */
+function firstPosition(dir: ArrowDirectionKind, reverseDefine: boolean): HorizontalAlignment {
+  const flip = dir === 'RIGHT_TO_LEFT_REVERSE' ? !reverseDefine : reverseDefine;
+  return flip ? HorizontalAlignment.RIGHT : HorizontalAlignment.LEFT;
+}
+
+/** `Rose.java:315-341`'s `direction` / `reversedirection` branches. */
+function directional(dir: ArrowDirectionKind, reversed: boolean): HorizontalAlignment {
+  if (dir === 'BOTH_DIRECTION') return HorizontalAlignment.CENTER;
+  const rightwards = (dir === 'LEFT_TO_RIGHT_NORMAL') !== reversed;
+  return rightwards ? HorizontalAlignment.LEFT : HorizontalAlignment.RIGHT;
+}
+
+/**
+ * `messageHorizontalAlignment` of `Rose#createComponentArrow`: the merged
+ * `root/element/sequenceDiagram/arrow` style's `HorizontalAlignment`, where
+ * the strings `first`, `direction` and `reversedirection` resolve against the
+ * arrow's direction and `reverseDefine`. `undefined` is upstream's `null`
+ * (an unset alignment), which `ComponentRoseArrow` draws as LEFT.
+ * @see skin/rose/Rose.java:299-342
+ */
+export function messagePosition(
+  builder: StyleBuilder,
+  dir: ArrowDirectionKind,
+  reverseDefine: boolean,
+): HorizontalAlignment | undefined {
+  const style = StyleSignatureBasic.of('root', 'element', 'sequenceDiagram', 'arrow').getMergedStyle(builder);
+  const value = style?.value('HorizontalAlignment');
+  switch (value?.asString()?.toLowerCase()) {
+    case 'first':
+      return firstPosition(dir, reverseDefine);
+    case 'direction':
+      return directional(dir, false);
+    case 'reversedirection':
+      return directional(dir, true);
+    default:
+      return value?.asHorizontalAlignment();
+  }
+}
+
+/** What {@link labelTextPos} places a label block against. */
+export interface LabelPlacement {
+  readonly position: HorizontalAlignment | undefined;
+  readonly dir: ArrowDirectionKind;
+  /** `area.getDimensionToUse().getWidth()`. */
+  readonly width: number;
+  /** `area.getTextDeltaX()`; 0 off an exo border. */
+  readonly textDeltaX: number;
+  /** `getTextBlock().calculateDimension().getWidth()`. */
+  readonly textWidth: number;
+  /** `getOldPaddingX1()` and `getOldPaddingX2()`. */
+  readonly padX1: number;
+  readonly padX2: number;
+}
+
+/**
+ * `textPos` of `ComponentRoseArrow#drawInternalU`, WITHOUT the final
+ * `Math.max(0, area.getTextDeltaX())` the caller adds.
+ * @see skin/rose/ComponentRoseArrow.java:164-179
+ */
+export function labelTextPos(p: LabelPlacement): number {
+  const delta = Math.abs(p.textDeltaX);
+  if (p.position === HorizontalAlignment.CENTER) return (p.width - delta - p.textWidth) / 2;
+  const arrowDeltaX = p.dir === 'LEFT_TO_RIGHT_NORMAL' ? ARROW_DELTA_X : 0;
+  if (p.position === HorizontalAlignment.RIGHT) return p.width - delta - p.textWidth - p.padX2 - arrowDeltaX;
+  return p.padX1 + (p.dir === 'LEFT_TO_RIGHT_NORMAL' ? 0 : ARROW_DELTA_X);
 }

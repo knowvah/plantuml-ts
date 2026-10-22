@@ -1,0 +1,6 @@
+@startuml
+!pragma teoz true
+Bob -> Alice : hello
+Alice <- Alice : hello I have a lot to say so let me start... \nBla Bla Bla Bla
+Bob -> Bob : hi
+@enduml

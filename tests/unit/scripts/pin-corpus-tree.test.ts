@@ -17,11 +17,12 @@
  *   - `misroute-sequence`: a real SEQUENCE render (`Alice -> Bob`, verified
  *     to produce `data-diagram-type="SEQUENCE"`) against a golden pinned
  *     `CLASS` -- a genuine type mismatch, not a fabricated status.
- *   - `refusal-includedef`: `!includedef macro` with no macro ever defined
- *     is this port's one real, reproducible parse-time refusal (verified to
- *     emit our `PSystemError` banner) -- the same mechanism
- *     `refusal-coverage.test.ts`'s header names as dot-cache
- *     `sequence/nuvoja-46-dezu541`'s pin. Its golden carries neither a
+ *   - `refusal-include`: `!include missing.puml` with no include store is a
+ *     real, reproducible preprocessor refusal (verified to emit our
+ *     `PSystemError` banner; `src/index.ts` errors on any unresolved
+ *     `!include`). It was `!includedef macro` until sdd2 T8b, which made a
+ *     missing `!includedef` an empty body as upstream does, so that source
+ *     now renders. Its golden carries neither a
  *     `data-diagram-type` attribute nor the jar's error banner (`NONE`,
  *     `jarRendered: true`), and our own error page likewise stamps no root
  *     attribute, so `jarType === ourType === "NONE"`: routing agrees and
@@ -69,7 +70,7 @@ function findRow(rows: readonly RowLike[], slug: string): RowLike {
 
 const CLASS_PUML = '@startuml\nclass A\n@enduml\n';
 const SEQ_PUML = '@startuml\nAlice -> Bob : hi\n@enduml\n';
-const REFUSE_PUML = '@startuml\n!includedef macro\nAlice -> Bob : hello2\n@enduml\n';
+const REFUSE_PUML = '@startuml\n!include missing.puml\nAlice -> Bob : hello2\n@enduml\n';
 
 const GOLDEN_CLASS = '<svg data-diagram-type="CLASS"></svg>';
 const GOLDEN_JAR_ERROR = '<svg><text>PlantUML version 1.2026.0 / abcdef [Sun Jan 01 2026]</text></svg>';
@@ -154,7 +155,7 @@ beforeAll(() => {
   writeFixture(treeDir, 'agree-class', CLASS_PUML, GOLDEN_CLASS);
   writeFixture(treeDir, 'jar-error-page', CLASS_PUML, GOLDEN_JAR_ERROR);
   writeFixture(treeDir, 'misroute-sequence', SEQ_PUML, GOLDEN_CLASS);
-  writeFixture(treeDir, 'refusal-includedef', REFUSE_PUML, GOLDEN_NONE);
+  writeFixture(treeDir, 'refusal-include', REFUSE_PUML, GOLDEN_NONE);
 
   writeLedgerFragment(ledgerDir, [
     {
@@ -165,8 +166,8 @@ beforeAll(() => {
       task: 'T0',
     },
     {
-      slug: 'refusal-includedef',
-      cohort: 'includedef-gap',
+      slug: 'refusal-include',
+      cohort: 'include-gap',
       disposition: 'known-gap',
       reason: 'CommandIncludeDef.java:99 fake reason for the refusal fixture',
       task: 'T0',
@@ -483,7 +484,7 @@ describe('runPinCorpusTree', () => {
         { cohort: '(no ledger row)', routing: 'agree', refusal: 'ok', count: 1 },
         { cohort: '(no ledger row)', routing: 'jar-error', refusal: 'jar-error', count: 1 },
         { cohort: 'seq-misroute', routing: 'known-misroute', refusal: 'ok', count: 1 },
-        { cohort: 'includedef-gap', routing: 'agree', refusal: 'known-gap', count: 1 },
+        { cohort: 'include-gap', routing: 'agree', refusal: 'known-gap', count: 1 },
       ]),
     );
     expect(readFileSync(routingBaselinePath, 'utf8')).toBe(beforeRouting);
@@ -495,8 +496,8 @@ describe('runPinCorpusTree', () => {
     writeLedgerFragment(noReasonLedgerDir, [
       { slug: 'misroute-sequence', cohort: 'seq-misroute', disposition: 'known-misroute', task: 'T0' },
       {
-        slug: 'refusal-includedef',
-        cohort: 'includedef-gap',
+        slug: 'refusal-include',
+        cohort: 'include-gap',
         disposition: 'known-gap',
         reason: 'CommandIncludeDef.java:99 x',
         task: 'T0',
@@ -521,8 +522,8 @@ describe('runPinCorpusTree', () => {
     writeLedgerFragment(fixCandidateLedgerDir, [
       { slug: 'misroute-sequence', cohort: 'seq-misroute', disposition: 'fix-candidate', task: 'T0' },
       {
-        slug: 'refusal-includedef',
-        cohort: 'includedef-gap',
+        slug: 'refusal-include',
+        cohort: 'include-gap',
         disposition: 'known-gap',
         reason: 'CommandIncludeDef.java:99 x',
         task: 'T0',
@@ -554,7 +555,7 @@ describe('runPinCorpusTree', () => {
     expect(refusal.fixtures[0]).toEqual(EXISTING_REFUSAL.fixtures[0]);
 
     const newSlugs = routing.fixtures.slice(EXISTING_ROUTING.fixtures.length).map((r) => r.slug);
-    expect(newSlugs).toEqual(['agree-class', 'jar-error-page', 'misroute-sequence', 'refusal-includedef']);
+    expect(newSlugs).toEqual(['agree-class', 'jar-error-page', 'misroute-sequence', 'refusal-include']);
 
     const agree = findRow(routing.fixtures, 'agree-class');
     expect(agree.status).toBe('agree');
@@ -570,7 +571,7 @@ describe('runPinCorpusTree', () => {
     expect(misroute.ourType).toBe('SEQUENCE');
     expect(misroute.reason).toBe('CommandFoo.java:12 fake reason for the misroute fixture');
 
-    const refusalRow = findRow(refusal.fixtures, 'refusal-includedef');
+    const refusalRow = findRow(refusal.fixtures, 'refusal-include');
     expect(refusalRow.status).toBe('known-gap');
     expect(refusalRow.weErrored).toBe(true);
     expect(refusalRow.jarRendered).toBe(true);
@@ -592,7 +593,7 @@ describe('runPinCorpusTree', () => {
         task: 'T0',
       },
       {
-        slug: 'refusal-includedef',
+        slug: 'refusal-include',
         cohort: 'c',
         disposition: 'known-gap',
         reason: 'CommandIncludeDef.java:99 x',
@@ -615,7 +616,7 @@ describe('runPinCorpusTree', () => {
       baseOpts({ dry: true, ledgerDir: emptyLedgerDir, routingBaselinePath, refusalBaselinePath }),
     );
 
-    // misroute-sequence (routing) and refusal-includedef (refusal) each need
+    // misroute-sequence (routing) and refusal-include (refusal) each need
     // a reason and have none once the ledger is empty.
     expect(result.tally.unpinned).toBe(2);
     expect(result.wrote).toBe(false);

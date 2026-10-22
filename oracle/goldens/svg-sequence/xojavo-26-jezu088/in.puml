@@ -1,0 +1,14 @@
+@startuml
+participant Alice
+actor Bob
+
+Alice -> Bob : hello
+note right: This is a note1
+
+ref over Bob
+  This can be on
+  several lines
+end ref
+
+note left: This is a left note2
+@enduml

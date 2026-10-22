@@ -1,0 +1,7 @@
+@startuml
+!pragma teoz true
+group friends
+Bob -> Alice : Secret
+& Alice -> Stacy : Rumors
+end
+@enduml

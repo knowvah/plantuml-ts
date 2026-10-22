@@ -35,6 +35,71 @@ post-D7 measurements.
 
 ---
 
+## sequence-divergence-drive-2 (sdd2) — DONE 2026-10-21 (branch `feat/sequence-divergence-drive-2`, squashed to one commit per batch, unsigned, not pushed; lands via PR after the user's `git rebase -S b34120ea9`)
+
+**What changed:** teoz's tile model is ported. Vertical: `YGauge`,
+`LiveBoxes` (all three `addStep` passes), `NotesTile`, `Dolls`/`Doll`.
+Horizontal: `PlayingSpace` width terms, `GroupingTile` extents and clearance,
+and parallel sibling disjointness. Sequence labels now go through core
+`DisplayCreole`/`SheetBlock`, with `Fission` wrapping. Also ported: the message
+padder, `LinkAnchor`, the warning banners, the scaled canvas, and three core
+preprocessor gaps (YAML front matter, a missing `!includedef`, `<style src=>`).
+Plan: `plans/sequence-divergence-drive-2/`; the per-row ledger is in its
+`fixtures.md`.
+
+**Counts b0 → final** (ratchet-path classify, 1143 rows; jetigu-21 and nuzise-60
+got diff-baseline rows at T-exit):
+
+| | b0 | final |
+|---|---:|---:|
+| zero | 419 | **1034** |
+| paint-only | 4 | 20 |
+| geometry | 539 | 52 |
+| structural | 166 | 37 |
+| error | 13 | **0** |
+| Σ weightedScore | 73273 | **4355** (−94.1%) |
+
+Pins: 419 → **1034** (D9 floor 560). Survey sequence conformant 419 → **1035**.
+There were 0 conformant losses in every engine at every close, and in the final
+diff against b0. The non-sequence movers were all improvements: unknown 522 → 554
+(sequence diagrams in that bucket) and usecase 67 → 68 (fajira-11).
+
+### Open -> sdd3 (109 rows Σ 4355, by family; each row's mechanism is in `fixtures.md`)
+
+The six largest families are in shared code. Fix each once at its origin,
+not per call site.
+
+| family | rows | Σ ws | origin (upstream) | ours |
+|---|---:|---:|---|---|
+| scale-excludes-chrome | 15 | 1162 | chrome is composed before the export scale, and the factor comes from the chromed dimension (`UgDiagram.java:128-134`, `TextBlockExporter.java:160-177,205-208`) | `renderer.ts:331` scales the body; `chrome-export.ts:36-48` adds chrome at 1x |
+| handwritten-unported | 4 | 844 | `UGraphicHandwritten` wraps the exporter UGraphic (`TextBlockExporter.java:174-175`) | sequence's string renderers bypass it → **own mission** `sequence-handwritten` |
+| svgparser-sax-unported | 30 | 522 | `!pragma svgparser sax` → `SvgSaxParser` (`SvgSpriteParserFactory.java:97-99`): gradients, rect, polyline, polygon, line, CSS, text-decoration, data images | pragma dropped (`command-common.ts:51`); nano only (`creole-atoms-image-resolver.ts:311`). Core; class rows too |
+| par2-not-parallel | 4 | 474 | `GroupingStart.isParallel()` = `parallel ‖ isPar2GroupStart()` (`GroupingStart.java:104-114`, `GroupingLeaf.java:100-104`) | `command-grouping.ts:168` sets parallel only for `&` |
+| creole-emoji-case-insensitive | 1 | 328 | `Pattern2` CASE_INSENSITIVE (`Pattern2.java:114`), `Emoji.retrieve` lowercases | `CommandCreoleEmoji.ts:28` |
+| harness-no-emoji-store | 4 | 225 | not a port defect for gacemo; rapoto/savebe/tugonu have small engine residuals (sprite font colour `AtomSprite.java:77`; to255) | classify/diff-one/golden harness pass no asset store (`render-fixture-sequence.ts:121`) |
+| document-margin-style-ignored | 3 | 204 | `root { Margin }` read by `TextBlockExporter.java:510-515` | hardcoded 5 |
+| url-label-newline-split | 2 | 113 | `AtomTextUtils.java:79-91` | `CommandCreoleUrl.ts:72-73` |
+| self-note-left-anchor | 1 | 87 | `CommunicationTileSelfNoteLeft.java:107-115,136-160` | `sequence-note-anchor.ts:101` |
+| skinparam-lengthadjust-unported | 3 | 80 | `SkinParam.java:1258-1270`, `SvgGraphics.java:155-158` | `svg.ts:277,290` constant |
+| alpha-hex-fill-unsplit | 12 | 71 | `SvgGraphics#fillMe` splits `#RRGGBBAA` (`SvgGraphics.java:880-888`) | core string `rect()`/`path()` (`svg-shapes.ts:61`) |
+| remote-image-io | 1 | 57 | `AtomImg` fetches http (`AtomImg.java:165-169`) | no network in `src/`; needs an asset-store seam |
+| latex-array-unmodelled | 1 | 35 | JLaTeXMath array (`TeXIconBuilder.java:52-73`) | `latex-metrics/nodes.ts:103` lacks `array` |
+| participant-topurl-ignored | 4 | 28 | `CommandParticipant.java:189-190` | `sequence-participant-declaration.ts:237` |
+| small (≤ 21 each) | 24 | 125 | filename env (`Defines.java:89-93`), group-header comment height (`ComponentRoseGroupingHeader.java:95-105`), `<text class=>` creole (`CommandCreoleSvgAttributeChange`), monochrome mapper (`TitledDiagram.java:295-297`), blotter scaled `+1` + fore==back strokeless (`GroupingTile.java:340`, `DriverPathSvg.java:65-68`), xlink title decode (`SvgGraphics.java:1147-1160`), participant underline (`Participant.java:125-126`), to255 truncation (`ColorUtils.java:169-170`; two copies: `color-utils.ts:296`, `ColorResolver.ts:230`), note-wrapper life step (`CommunicationTileNoteRight.java:96-98`), natural alignment (`Display.java:293-297`), HSL float32 (`HSLColor.java`), drawn-extent canvas (`SvgGraphics.java:129-135`) | see `fixtures.md` |
+
+### Follow-ons (no sequence row; `.agent-notes/sdd2-execution.md`)
+- `MeasurerStringBounder` drops BOLD for weight-aware measurers
+  (`measurer-bounder.ts:27-30`); invisible to every gate (DeterministicMeasurer).
+- `theme-merge.ts` drops Theme scalars outside `OPTIONAL_SCALAR_KEYS`
+  (`skinparam footbox` silently ignored).
+- Other engines' scaled canvases: check `(int)(dim+1)*scale` vs
+  `(int)(dim*scale+1)` (`SvgGraphics.java:129-143`).
+- `src/core/theme-graph-colors-a.ts` is 525 lines (over the 500 cap since before
+  sdd2): split it like `-b`.
+- The sequence harness's missing asset store (above) also hides engine residuals.
+  Wire the survey's store into `render-fixture-sequence.ts` and `classify.mts`
+  before sdd3 measures anything.
+
 ## sequence-divergence-drive (sdd1) — DONE 2026-10-20 (branch `feat/sequence-divergence-drive`, unsigned, not pushed; lands via merge-commit PR after the user's `git rebase -r --force-rebase -S main`)
 
 **What changed:** the sequence engine now reads every component's style from
@@ -60,7 +125,7 @@ round 2: 52). D10 (≥ 250) met. 0 conformant losses in every engine at every
 close. Non-sequence movers were only SEQUENCE diagrams in the `unknown`
 bucket, all improvements (506 → 521 conformant).
 
-### Open -> sdd2 (by family; `final-classify.json` geometry 539 rows Σ 42472, structural 166 rows Σ 30797)
+### ~~Open -> sdd2~~ — RESOLVED by sdd2 (2026-10-21; survivors in the sdd2 section above) (by family; `final-classify.json` geometry 539 rows Σ 42472, structural 166 rows Σ 30797)
 - **Root canvas size** (`@viewBox`/`@width`/`@height`): geometry 412/332/235
   fixtures, structural 141/125/129. Mostly downstream of the families below.
 - **Text x/y** (`text/@x` 360 + 136 fixtures, `@y` 291 + 138): label

@@ -1,0 +1,19 @@
+@startuml
+
+actor Bob
+participant Alice
+
+activate Bob
+Bob -> Alice: hello
+
+opt#red #blue this is a test
+  Alice --> Bob : ok
+else #olive sinon
+  Alice --> Bob : ok else
+else #green
+  Alice --> Bob : ok else
+end
+
+Alice --> Bob : finish
+
+@enduml

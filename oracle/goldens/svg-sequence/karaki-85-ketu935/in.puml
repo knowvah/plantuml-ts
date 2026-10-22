@@ -1,0 +1,9 @@
+@startuml
+
+skin debug
+skinparam useBetaStyle true
+
+Alice -> Bob : ok
+note left : foo
+
+@enduml

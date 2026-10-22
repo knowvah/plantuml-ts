@@ -1,0 +1,15 @@
+@startuml
+Bob -> Alice : hello
+
+par
+Alice --> Bob : ok
+end
+
+break
+Alice --> Bob : ok
+end
+
+critical
+Alice --> Bob : ok
+end
+@enduml

@@ -31,9 +31,10 @@ import { defaultTheme } from '../../../src/core/theme.js';
 import {
   displayLines,
   messageLabelBlock,
-  messageLabelRows,
+  messageLabelHeight,
   refBodyLines,
 } from '../../../src/diagrams/sequence/text-block-geo.js';
+import { defaultMessageFont } from '../../../src/diagrams/sequence/sequence-arrow-paint.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 
@@ -103,7 +104,11 @@ describe('displayLines — the shared splitter', () => {
 
 describe('message labels split on the escape', () => {
   it('counts the escaped lines in the vertical reservation', () => {
-    expect(messageLabelRows(`one${ESC}two`, undefined)).toBe(2);
+    // Two stripes of the arrow font's line: `SheetBlock1#initMap` sums the
+    // stripe heights (`SheetBlock1.java:139-142`).
+    const env = { measurer: measurer() };
+    const one = messageLabelHeight('one', undefined, defaultMessageFont(), env);
+    expect(messageLabelHeight(`one${ESC}two`, undefined, defaultMessageFont(), env)).toBe(2 * one);
   });
 
   it('emits one run per escaped line, each with its own width', () => {
@@ -199,6 +204,8 @@ describe('SAFETY — a display with no escape is untouched', () => {
     const block = messageLabelBlock('hello', undefined, LEFT_X, ARROW_Y, { theme: defaultTheme, measurer: measurer() });
     expect(block.lines).toHaveLength(1);
     expect(block.lines[0]!.text).toBe('hello');
-    expect(messageLabelRows('hello', undefined)).toBe(1);
+    expect(messageLabelHeight('hello', undefined, defaultMessageFont(), { measurer: measurer() })).toBe(
+      measurer().measure('M', { family: 'sans-serif', size: 13 }).height,
+    );
   });
 });

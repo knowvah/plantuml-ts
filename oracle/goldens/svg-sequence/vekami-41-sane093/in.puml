@@ -1,0 +1,9 @@
+@startuml
+skinparam ParticipantPadding 80
+
+participant aaa
+participant bbbbbbb
+
+create aaa
+bbbbbbb->aaa
+@enduml

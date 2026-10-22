@@ -1,0 +1,8 @@
+@startuml
+Alice -> Bob
+alt successful case
+    Bob -> Alice
+else Another type of failure and more to do for Alice and Bob and the logging system
+   Bob -> Alice
+end
+@enduml

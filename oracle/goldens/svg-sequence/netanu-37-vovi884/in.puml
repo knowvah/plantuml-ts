@@ -1,0 +1,9 @@
+@startuml
+
+scale 1.5
+actor Bob #00EEEE
+participant Alice #Red
+
+Bob -> Alice: v_act >  1.00
+
+@enduml

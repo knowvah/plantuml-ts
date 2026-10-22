@@ -1,0 +1,13 @@
+@startuml
+skinparam BoxPadding 200
+
+Actor toto
+box  #transparent
+ Actor Alice
+ Actor Bob
+end box
+Actor Charlie
+
+Alice -> Bob: so close
+Bob -> Charlie: so distant
+@enduml

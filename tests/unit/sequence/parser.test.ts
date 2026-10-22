@@ -633,11 +633,11 @@ describe('delay events', () => {
 // T4: prefixed with `participant Alice` -- same rationale as the divider
 // block above.
 describe('space events', () => {
-  it('|||  produces SpaceEvent with default 5 pixels', () => {
+  it('|||  produces SpaceEvent with default 25 pixels (SequenceDiagram.java:279)', () => {
     const ast = parse(['participant Alice', '|||']);
     const ev = ast.events[0] as SpaceEvent | undefined;
     expect(ev?.kind).toBe('space');
-    expect(ev?.pixels).toBe(5);
+    expect(ev?.pixels).toBe(25);
   });
 
   it('||25| produces SpaceEvent with 25 pixels', () => {

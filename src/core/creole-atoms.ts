@@ -38,6 +38,7 @@
  */
 
 import { parsePngIhdrFromDataUri } from './klimt/sprite/png-ihdr.js';
+import { cannotDecodeText, decodeSvgDataImage, isSvgDataImage, stripImgSrc } from './creole-atoms-img.js';
 import { scanOpenIconSpans, matchOpenIconAt } from './creole-atoms-openicon.js';
 import type { UShape } from './klimt/UShape.js';
 import type { UTranslate } from './klimt/UTranslate.js';
@@ -58,6 +59,10 @@ export interface ImgAtomToken {
   scale: number;
   width: number;
   height: number;
+  /** `data:image/svg+xml` source (`AtomImgSvg`, `AtomImg.java:153-161`):
+   *  `dataUri` is already the re-rooted, scaled `<image>` href, and no raster
+   *  backs it (no `rasterWidth`/`rasterHeight`). */
+  svg?: true;
 }
 
 /** `name` resolves against a per-diagram sprite registry (T4/D8) at
@@ -265,46 +270,6 @@ const SCALE_BLOCK_SOURCE = '(?:scale=|\\*)([0-9.]+)';
 /** Parser.getColor's COLOR pattern, java Parser.java:80. */
 const COLOR_BLOCK_SOURCE = 'color[= :](#[0-9a-fA-F]{1,6}|[A-Za-z0-9_]+)';
 
-/** StringUtils.isDoubleQuote: straight, curly, and guillemet double-quote
- *  glyphs. `\x22` is the straight double-quote hex escape -- this file
- *  avoids the raw `"` glyph per the lizard quote-desync workaround. */
-const DOUBLE_QUOTE_CHARS: ReadonlySet<string> = new Set(['\x22', '“', '”', '«', '»']);
-
-const SRC_PREFIX = 'src=';
-
-/** Short cannot-decode text — used for the `<img>` src forms where upstream
- *  ALSO emits no source string: a file src that doesn't resolve under a
- *  non-INSECURE security profile (`AtomImg.java:176,190`), and — as a
- *  DELIBERATE, retained divergence — a data-URI whose bytes fail to decode.
- *  Upstream's `buildRasterFromData` embeds the FULL source there
- *  (`'(Cannot decode: ' + source + ')'`, `AtomImg.java:206`), but that source
- *  is the entire, potentially megabyte-long data URI (e.g. `fajira-11`'s
- *  inline data-SVG), which is not useful rendered text; this browser-safe
- *  port keeps the short form for the data-URI/file cases only. The URL cases
- *  are ported faithfully — see `cannotDecodeText` (creole-lexer-unification:
- *  the URL branch is what closed `nobiza-91`/`pebace-74`/`togeke-15`). */
-const CANNOT_DECODE_TEXT = '(Cannot decode)';
-
-/** Faithful port of `AtomImg.create`'s cannot-decode text for a `<img>` src
- *  this synchronous, browser-safe renderer cannot fetch or decode. Upstream
- *  routes an `http:`/`https:` src (which this port never fetches, so it
- *  ALWAYS lands on the fetch-failed branch) through `buildRasterFromUrl` /
- *  `buildSvgFromUrl`, both of which embed the FULL url in the fallback text:
- *  `(Cannot decode: <url>)` for a raster URL (`AtomImg.java:214,218`) and
- *  `(Cannot decode SVG: <url>)` for a `.svg` URL (`AtomImg.java:226,230`).
- *  A URL is bounded (unlike a data URI), so embedding it verbatim reproduces
- *  the jar's measured node width exactly (verified: `nobiza-91`'s image node
- *  = 9.66in, the long-form URL text — NOT the tiny short-form box). Scheme /
- *  `.svg` checks are case-sensitive, mirroring upstream's own `src.startsWith
- *  ("http:")` / `src.endsWith(".svg")`. Every other src form (data URI, file
- *  path) keeps the short `CANNOT_DECODE_TEXT`. */
-function cannotDecodeText(src: string): string {
-  if (src.startsWith('http:') || src.startsWith('https:')) {
-    return src.endsWith('.svg') ? `(Cannot decode SVG: ${src})` : `(Cannot decode: ${src})`;
-  }
-  return CANNOT_DECODE_TEXT;
-}
-
 // ---------------------------------------------------------------------------
 // Scale / color extraction (Parser.java ports)
 // ---------------------------------------------------------------------------
@@ -319,22 +284,6 @@ export function parseColorFromBlock(block: string | undefined): string | undefin
   if (block === undefined) return undefined;
   const m = new RegExp(COLOR_BLOCK_SOURCE).exec(block);
   return m === null ? undefined : m[1];
-}
-
-function stripDoubleQuotes(s: string): string {
-  const first = s.charAt(0);
-  const last = s.charAt(s.length - 1);
-  const isWrapped = s.length > 1 && DOUBLE_QUOTE_CHARS.has(first) && DOUBLE_QUOTE_CHARS.has(last);
-  return isWrapped ? s.slice(1, -1) : s;
-}
-
-/** CommandCreoleImg.executeAndAdvance, java :79-84: strip a leading
- *  (case-insensitive) `src=`, then strip surrounding double quotes. */
-function stripImgSrc(raw: string): string {
-  const trimmed = raw.trim();
-  const hasSrcPrefix = trimmed.slice(0, SRC_PREFIX.length).toLowerCase() === SRC_PREFIX;
-  const withoutPrefix = hasSrcPrefix ? trimmed.slice(SRC_PREFIX.length) : trimmed;
-  return stripDoubleQuotes(withoutPrefix);
 }
 
 // ---------------------------------------------------------------------------
@@ -357,11 +306,18 @@ export interface AtomSpan {
  *  `cannotDecodeText`: an `http:`/`https:` URL embeds the full url
  *  (`(Cannot decode[ SVG]: <url>)`), while data-URI/file forms keep the short
  *  `(Cannot decode)` — see each function's own doc comment. */
+function buildSvgImgSpan(start: number, end: number, src: string, scale: number): AtomSpan {
+  const decoded = decodeSvgDataImage(src, scale);
+  if (typeof decoded === 'string') return { start, end, fallbackText: decoded };
+  return { start, end, atom: { kind: 'img', ...decoded, scale, svg: true } };
+}
+
 function buildImgSpan(m: RegExpExecArray): AtomSpan {
   const start = m.index;
   const end = m.index + m[0].length;
   const src = stripImgSrc(m[1]!);
   const scale = parseScale(m[2], 1);
+  if (isSvgDataImage(src)) return buildSvgImgSpan(start, end, src, scale);
   const ihdr = parsePngIhdrFromDataUri(src);
   if (ihdr === undefined) return { start, end, fallbackText: cannotDecodeText(src) };
   return { start, end, atom: { kind: 'img', dataUri: src, scale, width: ihdr.width, height: ihdr.height } };

@@ -267,9 +267,9 @@ describe('exo layout: activation bars', () => {
   });
 
   // The T13 contract: an exo message's `+`/`-` becomes a separate
-  // `ActivationEvent` AFTER it, and `handleActivateEvent` reads
-  // `cursor.lastMessageY`. Without it the bar would start one message spacing
-  // below its own arrow.
+  // `ActivationEvent` AFTER it; LiveBoxes binds it to the exo (the last
+  // message, `SequenceDiagram.java:367-404`). Without the binding the bar
+  // would start one message spacing below its own arrow.
   it('starts an exo-triggered activation bar at the exo arrow y', () => {
     const geo = layoutWith([
       exo('FROM_LEFT'),
@@ -339,5 +339,42 @@ describe('exo layout: label and carried data', () => {
 
   it('emits no label runs for an unlabelled exo message', () => {
     expect(onlyMessage(layoutWith([exo('FROM_LEFT', { label: '' })])).labelLines).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T4b — label deltas (E1 textDeltaX, E2 head clearance, E3 `\\` collapse)
+// ---------------------------------------------------------------------------
+
+describe('exo layout: label x (sdd2 T4b)', () => {
+  const labelX = (msg: MessageGeo): number => msg.labelLines[0]!.x;
+
+  it('E1: textDeltaX is read before the circle inset, so the label sits 6 right of a plain one', () => {
+    // CommunicationExoTile.java:122-124 (textDeltaX) precede :137-147 (inset);
+    // drawU translates by the inset x1 then adds max(0, textDeltaX).
+    const plain = onlyMessage(layoutWith([exo('FROM_LEFT')]));
+    const circled = onlyMessage(layoutWith([exo('FROM_LEFT', { arrow: CIRCLE_1 })]));
+    expect(labelX(circled) - labelX(plain)).toBe(CIRCLE_INSET);
+  });
+
+  it('E2: a both-headed arrow clears the head like a reversed one', () => {
+    // ArrowConfiguration.java:181-192 -> BOTH_DIRECTION; ComponentRoseArrow.java:174-177.
+    const both = arrowConfigurationOf({ both: true });
+    const single = onlyMessage(layoutWith([exo('TO_RIGHT')]));
+    const dual = onlyMessage(layoutWith([exo('TO_RIGHT', { arrow: both })]));
+    expect(labelX(dual) - labelX(single)).toBe(10);
+  });
+
+  it('E2: a reversed single head still clears and a forward one does not', () => {
+    const fwd = onlyMessage(layoutWith([exo('TO_RIGHT')]));
+    const rev = onlyMessage(layoutWith([exo('TO_LEFT')]));
+    expect(labelX(rev) - rev.toX).toBe(7 + 10);
+    expect(labelX(fwd) - Math.min(fwd.fromX, fwd.toX)).toBe(7);
+  });
+
+  it('E3: `\\\\` is measured as one backslash (Display.java:308-310)', () => {
+    const collapsed = layoutWith([exo('TO_RIGHT', { label: 'a\\b' })]);
+    const doubled = layoutWith([exo('TO_RIGHT', { label: 'a\\\\b' })]);
+    expect(doubled.totalWidth).toBe(collapsed.totalWidth);
   });
 });

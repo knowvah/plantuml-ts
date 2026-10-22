@@ -1,0 +1,32 @@
+@startuml
+ 
+actor User
+participant "Mobile" as A
+participant "Server" as B
+ 
+User -> A: login
+ 
+A -> A : showLoader
+ 
+== Connection ==
+ 
+A -> B: GET /config.json
+B --> A: 200 OK
+ 
+== Get data ==
+ 
+A -> B: GET /data.json
+B --> A: 200 OK
+ 
+newpage
+ 
+== Get more data ==
+ 
+A -> B: GET /more-data.json
+B --> A: 200 OK
+ 
+== Datas received ==
+ 
+A --> User: showHome
+ 
+@enduml

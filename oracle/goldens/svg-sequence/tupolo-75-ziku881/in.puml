@@ -1,0 +1,19 @@
+@startuml
+
+skinparam useBetaStyle true
+
+<style>
+title {
+  FontColor green
+}
+participant {
+  FontColor green
+}
+</style>
+
+
+Title This is my title
+participant Bob
+actor Alice
+
+@enduml

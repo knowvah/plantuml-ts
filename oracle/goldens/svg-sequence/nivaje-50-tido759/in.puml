@@ -1,0 +1,7 @@
+@startuml
+!pragma teoz true
+{start} Alice -> Bob : start
+Bob -> Max{start} : this arrow is slanted
+Max{end} -> Bob : this arrow is also slanted
+{end} Bob -> Alice : finish
+@enduml

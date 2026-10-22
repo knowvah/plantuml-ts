@@ -1,0 +1,8 @@
+@startuml
+skinparam QueueBorderColor #f00
+skinparam QueueBackgroundColor #0f0
+skinparam EntityBorderColor #00f
+queue Bob
+queue Alice
+Bob -> Alice : hello
+@enduml

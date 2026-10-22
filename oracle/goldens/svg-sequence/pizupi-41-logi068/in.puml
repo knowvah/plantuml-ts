@@ -1,0 +1,19 @@
+@startuml
+!theme plain
+<style>
+sequenceDiagram  {
+  group {
+    FontColor transparent
+  }
+}
+</STYLE>
+
+participant "⡏⠱⠀⡏⠁⠞⠊⠑⠝⠞⡊⠝⠋⠕" as pi
+participant "⡙⠱⠀⡍⠑⠝⠞⠉⠁⠗⠑⠤⡙⡃" as db
+
+group ⠁⠇⠞ [<color:#0>⠁⠥⠞⠓⠕⠗⠊⠵⠁⠞⠊⠕⠝⠀⡕⡅</color>]
+  db --> pi: ⡏⠁⠞⠊⠑⠝⠞⠀⠊⠝⠋⠕
+else <color:#0>⠁⠥⠞⠓⠕⠗⠊⠵⠁⠞⠊⠕⠝⠀⠋⠁⠊⠇</color>
+  db --> pi: ⡑⠗⠗⠕⠗⠀⠷⠝⠕⠀⠁⠉⠉⠑⠎⠎⠾
+end
+@enduml

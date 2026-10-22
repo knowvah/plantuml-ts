@@ -17,12 +17,13 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/rose/Rose.java#createComponentParticipant
  */
 
-import type { ParticipantBadge, ParticipantType } from './ast.js';
+import type { Participant, ParticipantBadge, ParticipantType } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 import { measureParticipantSymbol } from './renderer-participant-symbol.js';
 import type { SequencePaint } from './sequence-skin-param.js';
+import { participantPaintsOf } from './sequence-participant-paints.js';
 
 /**
  * `ComponentRoseDatabase`'s constructor passes
@@ -37,7 +38,7 @@ import type { SequencePaint } from './sequence-skin-param.js';
  * that (`Rose.java:134`); the glyph components pass their own constant, which
  * no skinparam feeds.
  */
-const DB_TEXT_PADDING_X = 3;
+export const DB_TEXT_PADDING_X = 3;
 
 /**
  * Each glyph-bearing kind's own `getPreferredWidth`, or `undefined` when the
@@ -135,18 +136,28 @@ const COLLECTIONS_LABEL_DELTA = 4;
  * scales at emission, `SvgGraphics.java:468-469`). `Theme` satisfies it.
  */
 export interface ParticipantLabelMetrics {
-  /** The name font's size (`AbstractComponent#getFontConfiguration`, `AbstractComponent.java:129-131`). */
-  readonly fontSize: number;
   readonly scaleK?: number;
+  /**
+   * The label TEXT BLOCK's height: `getTextHeight()` = block + padding 0+0
+   * (`AbstractTextualComponent.java:110-114`). A stick-kind block stacks it
+   * against the glyph -- below it at the head (`ComponentRoseActor.java:75`),
+   * from the block top at the tail (`:78`) -- so its centre follows from this
+   * and the box's edge, nothing else. Unread by the other kinds.
+   */
+  readonly labelBlockHeight?: number;
   /** `ComponentRoseParticipant`'s padding top/bottom (`Rose.java:134`); 0 when absent. */
   readonly padTop?: number;
   readonly padBottom?: number;
 }
 
 /** A participant paint's {@link ParticipantLabelMetrics}, scaled by `k`. */
-export function participantLabelMetricsOf(paint: SequencePaint, k = 1): ParticipantLabelMetrics {
+export function participantLabelMetricsOf(
+  paint: SequencePaint,
+  k = 1,
+  labelBlockHeight?: number,
+): ParticipantLabelMetrics {
   return {
-    fontSize: paint.font.size * k,
+    ...(labelBlockHeight === undefined ? {} : { labelBlockHeight }),
     scaleK: k,
     padTop: paint.padding.getTop() * k,
     padBottom: paint.padding.getBottom() * k,
@@ -181,15 +192,18 @@ export function participantLabelCy(
   head: boolean,
   metrics: ParticipantLabelMetrics,
 ): number {
-  const k = metrics.scaleK ?? 1;
   if (kind === 'participant') return paddedCentreY(blockTopY, height, metrics);
   if (kind === 'queue') return blockTopY + height / 2;
   if (kind === 'collections') {
-    const delta = COLLECTIONS_LABEL_DELTA * k;
+    const delta = COLLECTIONS_LABEL_DELTA * (metrics.scaleK ?? 1);
     return paddedCentreY(blockTopY + delta, height - delta, metrics);
   }
-  const labelYOffset = metrics.fontSize / 2 + 4 * k;
-  return head ? blockTopY + height - labelYOffset : blockTopY + labelYOffset;
+  // Stick kinds. Head: the block is drawn at `dimStickman.getHeight()`, so it
+  // ends at the component's bottom and spans `[bottom - T, bottom]`; tail: at
+  // dy 0, `[top, top + T]` (`ComponentRoseActor.java:75,78`; the same bodies in
+  // Boundary `:76,79`, Control `:77,80`, Entity `:77,80`, Database `:82,85`).
+  const half = (metrics.labelBlockHeight ?? 0) / 2;
+  return head ? blockTopY + height - half : blockTopY + half;
 }
 
 /** The centre of `[top + padTop, top + height - padBottom]`. */
@@ -215,15 +229,22 @@ function paddedCentreY(top: number, height: number, metrics: ParticipantLabelMet
 export function participantBadgeGeo(
   badge: ParticipantBadge | undefined,
   x: number,
-  width: number,
-  padding: Pick<ClockwiseTopRightBottomLeft, 'getLeft' | 'getRight'>,
+  padding: Pick<ClockwiseTopRightBottomLeft, 'getLeft'>,
   k = 1,
-): { readonly x: number; readonly nameCx: number } | undefined {
+): { readonly x: number } | undefined {
   if (badge === undefined) return undefined;
-  const badgeX = x + padding.getLeft() * k;
-  return { x: badgeX, nameCx: (badgeX + badge.width + BADGE_GAP + (x + width - padding.getRight() * k)) / 2 };
+  return { x: x + padding.getLeft() * k };
 }
 
-/** `TextBlockSprited`'s own gap between the sprite and the label block
- *  (`TextBlockSprited.java:70-77`'s `sprite.width + 6.0`). */
-const BADGE_GAP = 6;
+/**
+ * `Rose#getMinClassWidth` (`Rose.java:276-278`): `style.value(PName
+ * .MinimumWidth).asDouble()` off the participant's merged style
+ * (`styles[0]`, `Rose.java:139-151`) -- `skinparam minClassWidth` reaches it
+ * as `MinimumWidth` (`SkinParam.java:577-578`, `FromSkinparamToStyle`). An
+ * unset value is `ValueNull#asDouble()` = 0 (`ValueNull.java:57-59`), a floor
+ * that never binds. `ComponentRoseParticipant#getPureTextWidth` maxes the text
+ * block against it (`ComponentRoseParticipant.java:139-142`).
+ */
+export function participantMinWidth(p: Participant): number {
+  return participantPaintsOf(p).minimumWidth;
+}

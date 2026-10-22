@@ -1,0 +1,9 @@
+@startuml
+participant "BillingController" as bc
+participant "JourneySelector" as js
+
+break RechargeList[].size == 0
+end
+
+
+@enduml

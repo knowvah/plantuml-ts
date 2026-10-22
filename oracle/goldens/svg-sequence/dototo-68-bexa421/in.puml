@@ -1,0 +1,14 @@
+@startuml
+!pragma teoz true
+
+hide footbox
+
+participant c
+participant d
+
+group
+create d
+c->d: 1
+
+end group
+@enduml

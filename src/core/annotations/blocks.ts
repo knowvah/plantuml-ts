@@ -48,6 +48,8 @@ import type { StringMeasurer } from '../measurer.js';
 import { buildChromeTextBlock } from './blocks-creole.js';
 import type { SpriteRegistry } from '../sprite-commands.js';
 import { rect } from '../svg.js';
+import { parseColor } from '../paint.js';
+import type { Paint } from '../paint.js';
 import { shiftFragmentBody } from './coord-shift.js';
 import type { BoxStyle } from '../svg.js';
 import { resolveColorToSvgHex } from '../klimt/color/HColorSet.js';
@@ -118,7 +120,7 @@ function borderBoxStyle(style: AnnotationBoxStyle): BoxStyle {
   const box: BoxStyle = {
     stroke: style.lineColor ?? 'none',
     strokeWidth: style.lineThickness,
-    fill: resolveBoxFill(style),
+    fill: resolveBoxPaint(style),
   };
   if (style.roundCorner !== 0) {
     const corner = style.roundCorner / SVG_ROUND_CORNER_DIVISOR;
@@ -151,6 +153,22 @@ function resolveBoxFill(style: AnnotationBoxStyle): string {
   if (style.backgroundColor === null) return 'none';
   if (resolveColorToSvgHex(style.backgroundColor) === style.documentBackground) return 'none';
   return style.backgroundColor;
+}
+
+/**
+ * {@link resolveBoxFill} as a {@link Paint}: a gradient backcolor
+ * (`titleBackgroundColor AliceBlue-Bisque`) stays a gradient so `rect` mints
+ * its `<linearGradient>` def and writes `fill="url(#...)"`. `TextBlockBordered
+ * #drawU` (`klimt/shape/TextBlockBordered.java:122-127`) applies `back`
+ * (an `HColorGradient` from `HColorSet#getColorOrWhite`) to `ug`, and
+ * `SvgGraphics#setFillColor` (`SvgGraphics.java:367-409`
+ * `createSvgGradient`) turns it into `url(#id)`; same path as the document
+ * backcolor in `assemble-svg-sequence.ts#sequenceBackgroundRect`. A plain
+ * colour is returned verbatim, as before.
+ */
+function resolveBoxPaint(style: AnnotationBoxStyle): Paint {
+  const fill = resolveBoxFill(style);
+  return fill === 'none' ? fill : parseColor(fill);
 }
 
 /** Border/background rect at the un-plus-oned padded size (see

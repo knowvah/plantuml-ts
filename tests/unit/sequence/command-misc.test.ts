@@ -163,6 +163,8 @@ describe('hspace', () => {
     const ast = parse(['Bob -> Alice : ok', '|||', 'Bob -> Alice : ok2']);
     const spaces = only<SpaceEvent>(ast.events, 'space');
     expect(spaces).toHaveLength(1);
+    // SequenceDiagram.java:278-280 `hspace()` -> `new HSpace(25)`
+    expect(spaces[0]?.pixels).toBe(25);
   });
 
   it('parses "||50||" -- two trailing pipes', () => {

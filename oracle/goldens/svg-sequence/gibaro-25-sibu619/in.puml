@@ -1,0 +1,5 @@
+@startuml
+Alice -> Bob : --stricken-out--
+Alice -> Bob : --strickenout--
+Alice -> Bob : --strickenout-- text
+@enduml

@@ -1,11 +1,10 @@
 /**
  * T9: the grouping `&` PARALLEL marker (`CommandGrouping.java:66`, the
- * `(&[%s]*)?` group ahead of TYPE). Per D4 it is parsed and stored on
- * `FrameEvent.parallel` but never drawn -- every consumer of
- * `GroupingStart.isParallel()` lives under `sequencediagram/teoz/`
- * (`teoz/GroupingTile.java:145,864`), and upstream's classic renderer
- * ignores it too, so a `&`-prefixed group must render IDENTICALLY to the
- * same group without the `&`.
+ * `(&[%s]*)?` group ahead of TYPE), stored on `FrameEvent.parallel`. The jar
+ * is always teoz (`SequenceDiagram.java:311-312`), whose `GroupingTile` starts
+ * a parallel group at the previous tile's gauge MIN (`teoz/GroupingTile.java
+ * :145-154`) -- sdd2 T3c retired T9's D4 ("drawn as without the `&`"), which
+ * rested on the dead classic renderer.
  *
  * @see ~/git/plantuml/.../sequencediagram/command/CommandGrouping.java:55-90
  */
@@ -64,17 +63,25 @@ describe('grouping PARALLEL (`&`)', () => {
     expect(frame.branchLabels).toEqual(['this is the condition']);
   });
 
-  it('draws a `&`-prefixed group EXACTLY as it would without the `&` (D4)', () => {
-    const withParallel = [
-      '@startuml',
-      'Alice -> Bob: hello',
-      '& opt message received',
-      'Bob -> Alice: ok',
-      'end',
-      '@enduml',
-    ].join('\n');
-    const without = withParallel.replace('& opt message received', 'opt message received');
-    expect(renderSync(withParallel)).toBe(renderSync(without));
+  it("starts a `&`-prefixed group at the previous tile's min, beside it (GroupingTile.java:145-154)", () => {
+    // `firstY = parallel ? currentY.getMin() : previousMax`: beside the message,
+    // the frame starts where the message's own tile does -- where it would as
+    // the diagram's first tile.
+    const frameY = (lines: string[]): number =>
+      layoutSequence(
+        parse(['participant Alice', 'participant Bob', ...lines]),
+        defaultTheme,
+        new FixedMeasurer(7, 14),
+      ).events.find((e): e is FrameGeo => e.kind === 'frame')!.y;
+    const beside = frameY(['Alice -> Bob: hello', '& opt message received', 'Bob -> Alice: ok', 'end']);
+    const first = frameY(['opt message received', 'Bob -> Alice: ok', 'end']);
+    const below = frameY(['Alice -> Bob: hello', 'opt message received', 'Bob -> Alice: ok', 'end']);
+    expect(beside).toBe(first);
+    expect(below).toBeGreaterThan(beside);
+    // `renderSync` still draws it: the `&` changes placement, not content.
+    expect(
+      renderSync(['@startuml', 'Alice -> Bob: hello', '& opt m', 'Bob -> Alice: ok', 'end', '@enduml'].join('\n')),
+    ).toContain('opt');
   });
 });
 

@@ -1,0 +1,11 @@
+@startuml
+!pragma teoz true
+Bob->Alice: coucou2
+opt
+Alice->Bob: ok0
+newpage
+Alice->Bob: ok1
+else toto
+Alice->Bob: ok2
+end
+@enduml

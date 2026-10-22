@@ -1,0 +1,20 @@
+@startuml
+!pragma teoz true
+Bob -> Alice : Sec\nret10
+& Alice -> Stacy : Rumors10
+
+Bob -> Alice : Secret11
+& Alice -> Stacy : Rum\nors11
+
+
+group friends20
+Bob -> Alice : Sec\nret20
+& Alice -> Stacy : Rum\nors20
+
+Bob -> Alice : Sec\nret21
+& Alice -> Stacy : Rum\nors22
+
+end
+
+
+@enduml

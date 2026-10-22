@@ -1,0 +1,22 @@
+@startuml
+hide footbox
+'hide << new >> stereotype
+
+skinparam database {
+    BorderColor<< new >> red
+    BorderColor black
+    BackgroundColor white
+}
+
+skinparam participant {
+    BorderColor black
+    BackgroundColor white
+    BorderColor<< new >> red
+}
+
+participant SystemNameChanged<<new>>
+database DBName
+database DBNameChanged<<new>>
+
+SystemName -> DBName
+@enduml

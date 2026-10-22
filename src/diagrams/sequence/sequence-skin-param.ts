@@ -96,6 +96,12 @@ export class SequenceLegacyParams {
     for (const key2 of cleanForKeySlow(key)) this.params.set(key2, trin(value));
   }
 
+  /** `valueIs(key, expected)`: `expected.equalsIgnoreCase(getValue(key))`.
+   *  @see SkinParam.java:347-349 */
+  valueIs(key: string, expected: string): boolean {
+    return this.getValue(key)?.toLowerCase() === expected.toLowerCase();
+  }
+
   /** @see SkinParam.java:325-340 */
   getValue(key: string): string | null {
     const cached = this.cacheKeyValue.get(key);

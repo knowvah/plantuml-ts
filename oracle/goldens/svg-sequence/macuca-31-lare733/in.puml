@@ -1,0 +1,11 @@
+@startuml
+!pragma teoz true
+Alice -> Bob : hello1
+note bottom : my note
+Alice -> Bob : hello2
+note top
+  my note
+  is on several line
+end note
+
+@enduml

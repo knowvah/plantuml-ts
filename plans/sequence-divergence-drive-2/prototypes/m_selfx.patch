@@ -1,0 +1,31 @@
+diff --git a/src/diagrams/sequence/renderer-message.ts b/src/diagrams/sequence/renderer-message.ts
+index 15778e3..c7de306 100644
+--- a/src/diagrams/sequence/renderer-message.ts
++++ b/src/diagrams/sequence/renderer-message.ts
+@@ -92,7 +92,8 @@ function renderSelfMessage(msg: MessageGeo, configuration: ArrowConfiguration, t
+   const loopHeight = SELF_LOOP_HEIGHT * k;
+   // `xRight = arrowWidth - 3` (`ComponentRoseSelfArrow.java:59-60`), which is
+   // what {@link SELF_LOOP_WIDTH} measures from the outgoing segment's start.
+-  const xRight = x1 + loopWidth;
++  const origin = msg.selfReturnX !== undefined && msg.selfReturnX - k > x1 + 1e-9 ? msg.selfReturnX - k : x1;
++  const xRight = origin + loopWidth;
+   const yBottom = y1 + loopHeight;
+   // The deprecated `applyStroke(ug)` (`ComponentRoseSelfArrow.java:81`): the
+   // style's thickness, 2,2 when dotted, and never the style's `LineStyle`
+diff --git a/src/diagrams/sequence/sequence-layout-message.ts b/src/diagrams/sequence/sequence-layout-message.ts
+index d9bb091..8cecc63 100644
+--- a/src/diagrams/sequence/sequence-layout-message.ts
++++ b/src/diagrams/sequence/sequence-layout-message.ts
+@@ -186,7 +186,11 @@ function passthroughFields(
+  * clearance term at all.
+  */
+ function labelLeftOf(event: MessageEvent, endpoints: MessageEndpoints): number {
+-  if (endpoints.arrowDirection === 'self') return endpoints.fromX + ARROW_LABEL_PADDING_X1;
++  if (endpoints.arrowDirection === 'self') {
++    const r = endpoints.selfReturnX;
++    const origin = r !== undefined && r - 1 > endpoints.fromX + 1e-9 ? r - 1 : endpoints.fromX;
++    return origin + ARROW_LABEL_PADDING_X1;
++  }
+   // The component spans the arrow, so its origin is the LEFTMOST end whichever
+   // way the message runs. `fromX`/`toX` are that origin, not the drawn line:
+   // the renderer applies upstream's own `start += getArrowDeltaX() / 2` shift

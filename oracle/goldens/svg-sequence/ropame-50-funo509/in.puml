@@ -1,0 +1,9 @@
+@startuml
+!pragma teoz true
+title really long title
+box
+participant A
+end box
+activate A
+note over A: Hello
+@enduml
