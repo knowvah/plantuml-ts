@@ -1,0 +1,32 @@
+@startuml
+
+<style>
+element {
+  BackGroundColor #AAA
+}
+</style>
+
+participant Alice
+
+<style>
+participant {
+  FontColor green
+  FontSize 26
+  FontStyle italic
+  LineColor #E00
+  BackGroundColor #000
+}
+<style>
+
+participant Bob
+Alice -> Bob : hello1
+
+<style>
+arrow {
+  FontColor red
+}
+</style>
+
+Alice -> Bob : hello2
+
+@enduml

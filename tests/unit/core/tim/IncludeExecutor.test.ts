@@ -155,8 +155,15 @@ describe('!includedef', () => {
     // (the skinparam line is consumed by the collector, not emitted)
   });
 
-  it('throws IncludeNotFoundError for an unknown definition', () => {
-    expect(() => run(['!includedef NOPE'])).toThrow(IncludeNotFoundError);
+  // TContext.java:687-705 + BlockUmlBuilder.java:150-156: getDefinition
+  // returns Collections.emptyList() for an unknown name, so the directive
+  // contributes no lines and never fails.
+  it('adds no lines for an unknown definition and keeps preprocessing', () => {
+    expect(run(['!includedef NOPE', 'Alice -> Bob'])).toEqual(['Alice -> Bob']);
+  });
+
+  it('adds no lines for a <stdlib/form> name the store cannot serve', () => {
+    expect(run(['!includedef <aws/common>', 'Alice -> Bob'])).toEqual(['Alice -> Bob']);
   });
 });
 

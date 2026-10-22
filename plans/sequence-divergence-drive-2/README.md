@@ -136,7 +136,7 @@ Collected (JSON reporter) must equal on-disk. Check `uptime` first; above
 | [5](batch-5/overview.md) | remainder: diagnose, then fix | T5a, T5b, T5c…, close | [x] |
 | [6](batch-6/overview.md) | creole through core | T6a–T6e, close | [x] |
 | [7](batch-7/overview.md) | remaining structural families | T7a–T7g, close | [x] |
-| [8](batch-8/overview.md) | core preprocessor errors | T8a–T8c, close | [ ] |
+| [8](batch-8/overview.md) | core preprocessor errors | T8a–T8c, close | [x] |
 | [exit](batch-exit/overview.md) | final re-pin, survey, ledger, PR prep | T-exit | [ ] |
 | [squash](batch-squash/overview.md) | one commit per batch from the close trees; tag the working history | T-squash | [ ] |
 

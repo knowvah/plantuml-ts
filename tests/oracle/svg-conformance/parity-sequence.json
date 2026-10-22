@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-21T22:45:40.008Z",
+  "generatedAt": "2026-10-21T23:52:30.464Z",
   "fixtures": [
     {
       "slug": "bacupi-77-fuke586",
@@ -301,10 +301,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 189,
-      "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "boparo-11-pema294",
@@ -1778,12 +1775,9 @@
     {
       "slug": "fonudu-70-coma124",
       "type": "sequence",
-      "dotEqual": false,
+      "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 233.823,
-      "firstDiff": "svg/g[1]/g[1]/@class",
-      "maxDeltaPath": "svg/g[1]/g[1]/line[1]/@x2"
+      "verdict": "conformant"
     },
     {
       "slug": "foporo-86-nego484",
@@ -2177,10 +2171,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 50.11099999999999,
-      "firstDiff": "svg/g[1]/text[4]/@fill",
-      "maxDeltaPath": "svg/g[1]/text[4]/@y"
+      "verdict": "conformant"
     },
     {
       "slug": "gizinu-51-rexo332",
@@ -4846,10 +4837,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 1436.69,
-      "firstDiff": "svg/g[1]/rect[1]/@fill",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@width"
+      "verdict": "conformant"
     },
     {
       "slug": "nuxalo-31-mabe377",

@@ -1,12 +1,12 @@
 {
   "$comment": "Cause census for the committed SEQUENCE oracle corpus. Every count is produced MECHANICALLY by tests/oracle/svg-conformance/sequence-diff-census.ts from the path/actual/expected fields of the Diff records compare.ts emits -- never by reading an SVG (D5, plans/sequence-oracle-harness/decisions.md). The bucket set is closed at six; adding a seventh is stop 9. Fixtures come from diff-baseline.json: status \"baseline\" entries are censused, status \"error\" entries are carried in \"errors\" and contribute NOTHING to \"totals\" -- an unrenderable fixture has no bucket counts and must never read as zero diffs. Regenerate with: npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts -- the output is a pure function of the committed corpus and carries no timestamp, so re-running is byte-identical.",
   "totals": {
-    "missing-element": 37,
+    "missing-element": 36,
     "extra-element": 0,
-    "geometry": 2072,
-    "text-metrics": 201,
+    "geometry": 2054,
+    "text-metrics": 198,
     "format-units": 0,
-    "other": 288
+    "other": 286
   },
   "fixtures": [
     {
@@ -283,18 +283,6 @@
         "text-metrics": 0,
         "format-units": 0,
         "other": 17
-      }
-    },
-    {
-      "slug": "gixaxu-80-salo926",
-      "diffCount": 24,
-      "buckets": {
-        "missing-element": 1,
-        "extra-element": 0,
-        "geometry": 18,
-        "text-metrics": 3,
-        "format-units": 0,
-        "other": 2
       }
     },
     {
@@ -1318,18 +1306,5 @@
       }
     }
   ],
-  "errors": [
-    {
-      "slug": "bomino-39-tipo216",
-      "reason": "refuses to parse -- source line 3: `<style src=strictuml.skin>`. Unported: CommandStyleImport (style/CommandStyleImport.java:68-77), registered by CommonCommands.addCommonCommands1 (CommonCommands.java:90). Line 2's lowercase `skinparam` IS stripped before dispatch, which is why the refusal lands on line 3. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "fonudu-70-coma124",
-      "reason": "refuses to parse -- source line 2: `---`. Unported: ReadLineWithYamlHeader's `---` front-matter block, stripped in the PREPROCESSOR before any command runs (preproc/ReadLineWithYamlHeader.java:91). A preprocessor gap, not a sequence command gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "nuvoja-46-dezu541",
-      "reason": "NOT a command gap and NOT pinned known-gap. `!includedef macro` is absent from tests/helpers/fixture-include-store.ts, so the PREPROCESSOR stops before any engine sees a line (IncludeExecutor.ts:127). A harness item; it is the single non-gapped defect refusal SLI 2 reports."
-    }
-  ]
+  "errors": []
 }

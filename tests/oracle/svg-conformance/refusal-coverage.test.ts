@@ -73,6 +73,8 @@
  * It is pinned `weErrored: true, status: "ok"` — an honest record of today's
  * behaviour, NOT a `known-gap` excuse, because nothing has gapped yet: no
  * engine can refuse anything at the moment this baseline was taken.
+ * It renders since sdd2 T8b: upstream treats a missing `!includedef` file as
+ * an empty body, and so does this port now.
  *
  * Re-measure by hand:
  *   npx vitest run tests/oracle/svg-conformance/refusal-coverage.test.ts
@@ -984,7 +986,8 @@ describe('refusal coverage — baseline shape', () => {
     // 8088 -> 8197 at sdd2/close-b5: +109 svg-sequence golden clones.
     // 8197 -> 8250 at sdd2/close-b6: +53 svg-sequence golden clones.
     // 8250 -> 8317 at sdd2/close-b7: +67 svg-sequence golden clones.
-    expect(manifest.fixtures.length).toBe(8317);
+    // 8317 -> 8321 at sdd2/close-b8: +4 svg-sequence golden clones.
+    expect(manifest.fixtures.length).toBe(8321);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -1026,7 +1029,9 @@ describe('refusal coverage — baseline shape', () => {
     // nidozi-08, tegasu-93, vubato-50 render (sdd2 T1a note URL group, T1b
     // CommandActivate2 / CommandUrl / CommandHideShowByGender).
     // 219 -> 216 at sdd2/close-b2: fojomu-60, nizuzi-32, zoturo-25 render (T2e).
-    expect(pinnedErroring.length).toBe(216);
+    // 216 -> 214 at sdd2/close-b8: bomino-39 (`<style src=>`, T8c; known-gap)
+    // and nuvoja-46 (missing `!includedef`, T8b; honest record) render.
+    expect(pinnedErroring.length).toBe(214);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -1168,7 +1173,10 @@ describe('refusal coverage — baseline shape', () => {
     // 7872 -> 7981 at sdd2/close-b5: +109 svg-sequence golden clones.
     // 7981 -> 8034 at sdd2/close-b6: +53 svg-sequence golden clones.
     // 8034 -> 8101 at sdd2/close-b7: +67 svg-sequence golden clones.
-    expect(pinnedRendering.length).toBe(8101);
+    // 8101 -> 8107 at sdd2/close-b8: +4 svg-sequence golden clones and +2
+    // rows that render (bomino-39, nuvoja-46; see the erroring derivation).
+    // Derivation: 8107 + 214 = 8321.
+    expect(pinnedRendering.length).toBe(8107);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -1196,9 +1204,9 @@ describe('refusal coverage — baseline shape', () => {
     //    silently produced is worse than an honest refusal -- but it is only
     //    visible as a known-gap once the routing is right.
     //
-    // `nuvoja-46-dezu541` deliberately stays OUT of this set: its defect is a
-    // fixture-include-store gap (`!includedef macro`), not an unported
-    // Command, so it remains the single non-gapped defect SLI 2 reports.
+    // `nuvoja-46-dezu541` deliberately stayed OUT of this set: its defect was
+    // a missing `!includedef` file, not an unported Command. It renders since
+    // sdd2 T8b, so SLI 2 now reports no non-gapped defect at all.
     //
     // 98 -> 16 at batch 4 (the exogenous arrow family), then 16 -> 9 at T19.
     // The last step closed NOTHING: seven of those sixteen were mis-measured
@@ -1242,7 +1250,8 @@ describe('refusal coverage — baseline shape', () => {
     // 187 -> 181 at sdd2/close-b1: the same six sequence known-gaps -> ok.
     // 181 -> 178 at sdd2/close-b2: fojomu-60, nizuzi-32, zoturo-25 render
     // (sdd2 T2e, CommandLinkAnchor).
-    expect(gaps.length).toBe(178);
+    // 178 -> 177 at sdd2/close-b8: bomino-39's `<style src=>` gap is fixed (T8c).
+    expect(gaps.length).toBe(177);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //
@@ -1260,7 +1269,7 @@ describe('refusal coverage — baseline shape', () => {
     }
   });
 
-  it('the only non-gapped defect outside the activity queue is nuvoja', () => {
+  it('no non-gapped defect remains, in or outside the activity queue', () => {
     // Deliberately NOT flattened into a list of 83. `activity-oracle-harness`
     // T0b (D11) added 82 activity fixtures that error here on a source the
     // jar rendered -- that mission's D8 declares them a tracked queue for a
@@ -1269,8 +1278,9 @@ describe('refusal coverage — baseline shape', () => {
     // that is expected to be large. Splitting keeps the original invariant
     // exactly as strong as it was: outside activity, nuvoja is still the only
     // one.
+    // ['nuvoja'] -> [] at sdd2/close-b8: nuvoja-46 renders (T8b).
     const defects = manifest.fixtures.filter((f) => f.weErrored && f.jarRendered && f.status === 'ok');
-    expect(defects.filter((f) => f.type !== 'activity').map(keyOf)).toEqual(['dot-cache:sequence/nuvoja-46-dezu541']);
+    expect(defects.filter((f) => f.type !== 'activity').map(keyOf)).toEqual([]);
     // The activity queue's size is pinned so it can only shrink deliberately.
     // 82 -> 39 at unknown-bucket-routing-repair/T10 (2026-09-20): 43 of the
     // queue render now that their activity3 constructs parse (see the

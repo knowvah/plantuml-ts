@@ -463,12 +463,11 @@
     {
       "type": "sequence",
       "slug": "bomino-39-tipo216",
-      "status": "error",
-      "weightedScore": null,
+      "status": "pinned",
+      "weightedScore": 0,
       "diffCount": null,
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 3: `<style src=strictuml.skin>`. Unported: CommandStyleImport (style/CommandStyleImport.java:68-77), registered by CommonCommands.addCommonCommands1 (CommonCommands.java:90). Line 2's lowercase `skinparam` IS stripped before dispatch, which is why the refusal lands on line 3. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "b1174d2b"
     },
     {
       "type": "sequence",
@@ -2318,12 +2317,11 @@
     {
       "type": "sequence",
       "slug": "fonudu-70-coma124",
-      "status": "error",
-      "weightedScore": null,
+      "status": "pinned",
+      "weightedScore": 0,
       "diffCount": null,
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 2: `---`. Unported: ReadLineWithYamlHeader's `---` front-matter block, stripped in the PREPROCESSOR before any command runs (preproc/ReadLineWithYamlHeader.java:91). A preprocessor gap, not a sequence command gap. Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "b1174d2b"
     },
     {
       "type": "sequence",
@@ -2814,11 +2812,11 @@
     {
       "type": "sequence",
       "slug": "gixaxu-80-salo926",
-      "status": "baseline",
-      "weightedScore": 45,
+      "status": "pinned",
+      "weightedScore": 0,
       "diffCount": 69,
-      "measuredAt": "2026-10-20",
-      "measuredAgainstCommit": "2d19492c"
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "b1174d2b"
     },
     {
       "type": "sequence",
@@ -6126,11 +6124,11 @@
     {
       "type": "sequence",
       "slug": "nuvoja-46-dezu541",
-      "status": "error",
+      "status": "pinned",
       "diffCount": null,
-      "reason": "NOT a command gap and NOT pinned known-gap. `!includedef macro` is absent from tests/helpers/fixture-include-store.ts, so the PREPROCESSOR stops before any engine sees a line (IncludeExecutor.ts:127). A harness item; it is the single non-gapped defect refusal SLI 2 reports.",
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d"
+      "measuredAt": "2026-10-21",
+      "measuredAgainstCommit": "b1174d2b",
+      "weightedScore": 0
     },
     {
       "type": "sequence",

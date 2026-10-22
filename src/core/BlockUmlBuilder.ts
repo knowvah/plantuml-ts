@@ -195,12 +195,31 @@ function splitRawBlocks(lines: readonly StringLocated[]): RawBlock[] {
 
     if (isEndDirective(line) && current !== undefined) {
       if (paused) current.push(s);
-      blocks.push({ suffix, lines: current });
+      blocks.push({ suffix, lines: removeYamlHeader(current) });
       current = undefined;
       paused = false;
     }
   }
   return blocks;
+}
+
+/** `---`, exactly (no trim). @see ReadLineWithYamlHeader.java:92-94 */
+const YAML_SEPARATOR = '---';
+
+/**
+ * A `---` ... `---` header on the lines right after `@start` is dropped; the
+ * first line is kept. No closing separator (or no `---` at index 1) leaves the
+ * block untouched. `BlockUml`'s constructor applies this to its `rawSource`
+ * (`BlockUml.java:142`), i.e. before TIM sees the block.
+ * @see ~/git/plantuml/.../preproc/ReadLineWithYamlHeader.java:98-109
+ */
+function removeYamlHeader(input: StringLocated[]): StringLocated[] {
+  if (input.length > 1 && input[1]!.getString() === YAML_SEPARATOR) {
+    for (let i = 2; i < input.length; i++) {
+      if (input[i]!.getString() === YAML_SEPARATOR) return [input[0]!, ...input.slice(i + 1)];
+    }
+  }
+  return input;
 }
 
 /**
