@@ -24,7 +24,9 @@ import { getColor, getScale } from '../Parser.js';
 // hook's lizard parser doesn't mis-tokenize it (memory: complexity-hook
 // workarounds).
 const SCALE_OR_COLOR = String.raw`([\{,]?(?:(?:scale=|\*)[0-9.]+)?(?:,?color[= :](?:#[0-9a-fA-F]{1,8}|\w+))?\}?)?`;
-const EMOJI_RE = new RegExp(String.raw`^(<(#\w+)?:([0-9a-z][0-9_a-z]*):` + SCALE_OR_COLOR + '>)');
+// `Pattern2.cmpile` compiles CASE_INSENSITIVE (`regex/Pattern2.java:114`):
+// `<:1F607:>` matches, and `Emoji.retrieve` lowercases the name.
+const EMOJI_RE = new RegExp(String.raw`^(<(#\w+)?:([0-9a-z][0-9_a-z]*):` + SCALE_OR_COLOR + '>)', 'i');
 
 /** Upstream: `CommandCreoleEmoji.create()`. */
 export function createEmojiCommand(): Command {
