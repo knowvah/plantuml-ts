@@ -39,8 +39,11 @@ export const skinParamMessageAlignCommand: Command = {
  * `svgsize`/`graphviz_dot`/`layout`), so every instance falls through to the
  * plain `system.getPragma().define(name, value)` branch, whose only
  * representable effect on `SequenceDiagramAST` is `sequenceMessageSpan`
- * (`AbstractCommunicationTile.java:52-54`), stored as an option. Same "recognised, no
- * observable effect" precedent as `state/state-commands.ts`'s rule 3a.
+ * (`AbstractCommunicationTile.java:52-54`), stored as an option. `svgparser`
+ * is consumed in `core/sprite-commands.ts#svgParserSelectorAt`, which replays
+ * the `!pragma` lines before each sprite definition (upstream reads the
+ * pragma at definition time, `CommandSpriteSvg.java:81-82`). Same "recognised,
+ * no observable effect" precedent as `state/state-commands.ts`'s rule 3a.
  * @see command/CommandPragma.java:101-134
  */
 export const pragmaCommand: Command = {

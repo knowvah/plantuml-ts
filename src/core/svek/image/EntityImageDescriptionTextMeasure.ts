@@ -220,7 +220,7 @@ export function measureAtomsWidthHeight(
       grow(box.height);
       continue;
     }
-    const resolved = resolveAtomImage?.(atom.atom);
+    const resolved = resolveAtomImage?.(atom.atom, () => stringBounder);
     if (resolved === undefined) continue;
     width += resolved.width;
     grow(resolved.height);
@@ -260,7 +260,7 @@ export function measureSingleAtomWidth(
   if (atom.kind === 'emoji') return emojiBoxDim(atom.factor).width;
   if (atom.kind === 'space') return atom.width;
   if (atom.kind === 'vertical') return measureAtomsWidthHeight(stringBounder, [atom], resolveAtomImage).width;
-  const resolved = resolveAtomImage?.(atom.atom);
+  const resolved = resolveAtomImage?.(atom.atom, () => stringBounder);
   return resolved === undefined ? 0 : resolved.width;
 }
 

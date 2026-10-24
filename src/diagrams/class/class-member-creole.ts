@@ -72,6 +72,7 @@ import {
 import { type SpriteDimsLookup } from '../../core/creole-atoms.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 import type { StringMeasurer } from '../../core/measurer.js';
+import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
 import { getSplitted } from '../../core/klimt/creole/Fission.js';
 import { manageGuillemet } from '../../core/text/Guillemet.js';
 import { textRenderFields, resolveTabbedTextRuns } from './class-member-creole-render-text.js';
@@ -365,7 +366,13 @@ export function resolveOneAtom(
     // set (`resolveSvgSpriteAtom`'s doc comment), so the wrapper's color is
     // lost unless the ambient font reaches it here, mirroring the
     // 'openiconic' branch above (`atom.ambientFont` already threaded there).
-    const resolved = resolveInlineAtom(atom.atom, atom.ambientFont ?? baseFont, sprites, spriteDims);
+    const resolved = resolveInlineAtom(
+      atom.atom,
+      atom.ambientFont ?? baseFont,
+      sprites,
+      spriteDims,
+      () => new MeasurerStringBounder(measurer),
+    );
     return resolved === undefined ? undefined : { atom: resolved, width: resolved.width, lineHeight: resolved.height };
   }
   // 'latex': `AtomMath`, a measured+drawn image at altitude 0 -- see

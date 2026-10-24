@@ -162,6 +162,7 @@ export function spriteDimsLookupFor(registry: SpriteRegistry): SpriteDimsLookup 
           inkX: sprite.inkX,
           inkY: sprite.inkY,
           svg: sprite.svg,
+          parser: sprite.parser,
           inkWidth: sprite.inkWidth,
           inkHeight: sprite.inkHeight,
         };

@@ -122,7 +122,7 @@ function titleAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps 
       const dim = verticalTextsDimension(atom.lines, ops, stringBounder);
       return { width: dim.getWidth(), height: dim.getHeight() };
     }
-    const resolved = resolveAtomImage?.(atom.atom);
+    const resolved = resolveAtomImage?.(atom.atom, () => stringBounder);
     return resolved === undefined ? { width: 0, height: 0 } : resolved;
   }
   const ops: AtomOps = {

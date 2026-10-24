@@ -19,7 +19,7 @@ import { renderLatexAsImage } from '../latex.js';
 import { emojiSquareDim } from '../klimt/creole/atom/AtomEmoji.js';
 import { drawEmojiAtom } from '../svek/image/EntityImageDescriptionEmoji.js';
 import { atomTextWidth, layoutTabbedText } from '../klimt/creole/legacy/AtomText.js';
-import type { AtomImageResolver } from '../creole-atoms.js';
+import type { AtomImageResolver, StringBounderSupplier } from '../creole-atoms.js';
 import type { CreoleAtom, CreoleAtomUrl } from '../klimt/creole/atom/Atom.js';
 import { SPACE_ATOM_HEIGHT } from '../klimt/creole/atom/AtomSpace.js';
 import type { Atom } from '../klimt/creole/SheetBlock1.js';
@@ -70,8 +70,9 @@ function textDim(atom: CreoleAtom & { kind: 'text' }, stringBounder: StringBound
 function atomImageOf(
   atom: CreoleAtom,
   resolveAtomImage: AtomImageResolver | undefined,
+  stringBounder: StringBounderSupplier,
 ): ResolvedAtomImageWithRaster | undefined {
-  return atom.kind === 'inline' ? resolveAtomImage?.(atom.atom) : undefined;
+  return atom.kind === 'inline' ? resolveAtomImage?.(atom.atom, stringBounder) : undefined;
 }
 
 /** SI15 T1's local widening of `AtomImageResolver`'s `image` variant with
@@ -113,7 +114,7 @@ export function atomDim(
     const { width, height } = emojiSquareDim(atom.factor);
     return new XDimension2D(width, height);
   }
-  const resolved = atomImageOf(atom, resolveAtomImage);
+  const resolved = atomImageOf(atom, resolveAtomImage, () => stringBounder);
   return resolved === undefined ? new XDimension2D(0, 0) : new XDimension2D(resolved.width, resolved.height);
 }
 
@@ -199,7 +200,10 @@ export function drawAtom(atom: CreoleAtom, ug: UGraphic, resolveAtomImage: AtomI
   }
   if (atom.kind === 'space') return;
   if (atom.kind === 'emoji') return drawEmojiAtom(ug, atom, undefined);
-  drawAtomImage(atomImageOf(atom, resolveAtomImage), ug);
+  drawAtomImage(
+    atomImageOf(atom, resolveAtomImage, () => ug.getStringBounder()),
+    ug,
+  );
 }
 
 /** The font a non-text atom is resolved under. `StripeSimple#addSprite`

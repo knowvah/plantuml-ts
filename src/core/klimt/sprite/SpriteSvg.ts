@@ -23,6 +23,7 @@
  */
 
 import type { Sprite } from './Sprite.js';
+import { SvgParserSelector } from './sax/svg-sprite-parser-factory.js';
 import { pathBBox } from './svg-path-bbox.js';
 
 /** `viewBox[= "']+(n)[\s,]+(n)[\s,]+(n)[\s,]+(n)` (UImageSvg.java:114-115). */
@@ -106,13 +107,23 @@ export class SpriteSvg implements Sprite {
   readonly inkY: number;
   readonly inkWidth: number;
   readonly inkHeight: number;
+  /** Which parser draws this sprite, fixed at DEFINITION time from the
+   *  `!pragma svgparser` in force then: upstream's `CommandSpriteSvg` /
+   *  `CommandSpriteSvgMultiline` hand `system.getPragma()` to
+   *  `SvgSpriteParserFactory.create` when the sprite is defined, so a sprite
+   *  defined before the pragma stays nano. Sprites built without a pragma
+   *  (stdlib, emoji, `jar:`) are nano (`Stdlib.java:397`, `Emoji.java:172`).
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svg/parser/SvgSpriteParserFactory.java:79-121 */
+  readonly parser: SvgParserSelector;
 
   constructor(
     readonly svg: string,
     width: number,
     height: number,
     ink?: { x: number; y: number; width: number; height: number },
+    parser: SvgParserSelector = SvgParserSelector.NANO,
   ) {
+    this.parser = parser;
     this.width = width;
     this.height = height;
     this.inkX = ink?.x ?? 0;
@@ -123,11 +134,11 @@ export class SpriteSvg implements Sprite {
 
   /** Builds one from raw SVG source, or `undefined` when neither a viewBox
    *  nor width/height attributes give dimensions. */
-  static from(svg: string): SpriteSvg | undefined {
+  static from(svg: string, parser: SvgParserSelector = SvgParserSelector.NANO): SpriteSvg | undefined {
     const width = svgDimension(svg, 'width');
     const height = svgDimension(svg, 'height');
     if (width === undefined || height === undefined) return undefined;
-    return new SpriteSvg(svg, width, height, svgInkBox(svg));
+    return new SpriteSvg(svg, width, height, svgInkBox(svg), parser);
   }
 }
 

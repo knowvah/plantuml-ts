@@ -20,13 +20,14 @@
  * NOT through `paint.ts#paintToSvg`'s content-hash id scheme — the two
  * id schemes are deliberately kept separate; only `SvgGraphics`'s is
  * used at this driver seam, matching upstream's `svg.createSvgGradient
- * (...)` call exactly. Our `Paint`'s `Gradient` variant models exactly
- * one gradient shape (2-stop, `color1`/`color2`/`policy`), corresponding
- * to upstream's `HColorGradient` only — there is no port-side equivalent
- * of `HColorLinearGradient` (multi-stop), so that upstream branch (which
- * calls the `createSvgGradient(HColorLinearGradient, ColorMapper)`
- * overload — itself NOT ported, see `svg-graphics-core.ts`'s doc
- * comment) has nothing to dispatch to here and is dropped.
+ * (...)` call exactly. Our `Paint`'s `Gradient` variant models upstream's
+ * `HColorGradient` (2-stop, `color1`/`color2`/`policy`); upstream's
+ * `HColorLinearGradient` (multi-stop) is a `LinearGradientPaint`
+ * (`paint.ts`, `isLinearGradientPaint`), checked FIRST as upstream does
+ * (`DriverRectangleSvg.java:83,99`) and registered through
+ * `SvgGraphics#createSvgLinearGradient` -- the `createSvgGradient(
+ * HColorLinearGradient, ColorMapper)` overload -- with the RAW paint, since
+ * the mapper is applied per stop inside it.
  *
  * Deferred (out of scope, reported): `background.transparentFillBehavior
  * ()` — upstream's second `setFillColor` arg, an `HColor`-only property
@@ -45,6 +46,7 @@
 
 import type { UDriver } from '../../AbstractCommonUGraphic.js';
 import type { UParam } from '../../UParam.js';
+import { isLinearGradientPaint } from '../../../paint.js';
 import { toSvgPaint, type ColorMapper } from '../../color/ColorMapper.js';
 import type { URectangle } from '../../shape/URectangle.js';
 import type { SvgGraphics } from './svg-graphics.js';
@@ -56,7 +58,12 @@ export class DriverRectangleSvg implements UDriver<URectangle> {
 
   /** Upstream: `DriverRectangleSvg.applyFillColor(SvgGraphics, ColorMapper, UParam)`. */
   static applyFillColor(svg: SvgGraphics, mapper: ColorMapper, param: UParam): void {
-    const background = toSvgPaint(param.getBackcolor(), mapper);
+    const raw = param.getBackcolor();
+    if (isLinearGradientPaint(raw)) {
+      svg.setFillColor(`url(#${svg.createSvgLinearGradient(raw, mapper)})`); // DriverRectangleSvg.java:83-86
+      return;
+    }
+    const background = toSvgPaint(raw, mapper);
     if (typeof background === 'string') {
       svg.setFillColor(background);
     } else {
@@ -67,7 +74,12 @@ export class DriverRectangleSvg implements UDriver<URectangle> {
 
   /** Upstream: `DriverRectangleSvg.applyStrokeColor(SvgGraphics, ColorMapper, UParam)`. */
   static applyStrokeColor(svg: SvgGraphics, mapper: ColorMapper, param: UParam): void {
-    const color = toSvgPaint(param.getColor(), mapper);
+    const raw = param.getColor();
+    if (isLinearGradientPaint(raw)) {
+      svg.setStrokeColor(`url(#${svg.createSvgLinearGradient(raw, mapper)})`); // DriverRectangleSvg.java:99-102
+      return;
+    }
+    const color = toSvgPaint(raw, mapper);
     if (typeof color === 'string') {
       svg.setStrokeColor(color);
     } else {

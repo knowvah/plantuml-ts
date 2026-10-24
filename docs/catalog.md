@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1743 modules · 6507 exported names.
+1756 modules · 6558 exported names.
 
 ## `src/`
 
@@ -39,7 +39,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `creole-atoms-img.ts` | `cannotDecodeText`, `stripImgSrc`, `SvgImgDecoded`, `isSvgDataImage`, `decodeSvgDataImage` | `<img>` source handling split out of `creole-atoms.ts` (500-line cap): the src-string clean-up (`CommandCreoleImg.executeAndAdvance`), the cannot-decode fallback texts (`AtomImg.create`), and the `data:image/svg+xml;base64,` branch (`AtomIm |
 | `creole-atoms-measure.ts` | `measureInlineAtom`, `spriteScale`, `spriteAtomScale`, `measureLineWithAtoms`, `lineAtomHeightExcess` | Measurement (D9) for Creole `<img>` / `<$sprite>` / `<&openiconic>` inline atoms — the scaled pixel dims each atom contributes to label measurement, and the per-line width/height composition built on top of them. |
 | `creole-atoms-openicon.ts` | `scanOpenIconSpans`, `matchOpenIconAt` | OpenIconic `<&glyph>` span recognizer -- split out of `creole-atoms.ts` purely to keep that file under this project's 500-line cap (G2 N41; mirrors the existing `class-layout-helpers.ts`/`class-member-rows.ts` split precedent). |
-| `creole-atoms.ts` | `ImgAtomToken`, `SpriteAtomToken`, `OpenIconicAtomToken`, `InlineAtomToken`, `RenderSegment`, `LineAtomScan`, `DrawablePrimitive`, `AtomImageResolver`, `SpriteDims`, `SpriteDimsLookup`, `SPRITE_NAME_PATTERN_SOURCE`, `SPRITE_PATTERN_SOURCE`, `parseScale`, `parseColorFromBlock`, `AtomSpan`, `scanLineForAtoms`, `AtomMatchAt`, `spanToMatch`, `matchAtomAt` | Creole `<img>` / `<$sprite>` / `<&openiconic>` inline atoms. |
+| `creole-atoms.ts` | `ImgAtomToken`, `SpriteAtomToken`, `OpenIconicAtomToken`, `InlineAtomToken`, `RenderSegment`, `LineAtomScan`, `DrawablePrimitive`, `StringBounderSupplier`, `AtomImageResolver`, `SpriteDims`, `SpriteDimsLookup`, `SPRITE_NAME_PATTERN_SOURCE`, `SPRITE_PATTERN_SOURCE`, `parseScale`, `parseColorFromBlock`, `AtomSpan`, `scanLineForAtoms`, `AtomMatchAt`, `spanToMatch`, `matchAtomAt` | Creole `<img>` / `<$sprite>` / `<&openiconic>` inline atoms. |
 | `creole-lexer.ts` | `CreoleSpan`, `EMPTY_STATE`, `tokenise`, `mergeSpans`, `parseTokens` | Creole markup lexer + inline-style parser. |
 | `creole-svg.ts` | `spansToTspan` | Creole span → SVG `<tspan>` serialisation. |
 | `creole-table.ts` | `TableCell`, `TableToken`, `parseTableRow`, `isTableLine`, `DEFAULT_LINE_HEIGHT`, `measureTable`, `tableTokenToSvg` | Creole table parsing, measurement, and SVG rendering. |
@@ -87,7 +87,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `nested-diagram-registry.ts` | `registerNestedDiagramRenderer`, `getNestedDiagramRenderer` | nested-diagram-registry.ts — CDD B7FU-R2 (coordinator design correction, journal row 160): the chrome `{{ }}`-embed registration slot, moved here FROM `src/diagrams/class/class-nested-diagram-renderer.ts` so that `src/core/annotations/block |
 | `openiconic-glyphs-data.ts` | `RawGlyph`, `RAW_GLYPHS` | `RAW_GLYPHS` -- the OpenIconic glyph data table, split out of `openiconic-glyphs.ts` purely to keep that file under this project's 500-line cap (F1-c, S1L tail-fix G11; mirrors the existing `svg.ts`->`svg-markers.ts` / `style-map-theme.ts`- |
 | `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `parsedOpsFor`, `openIconicFactor`, `openIconicDims`, `openIconicStartingAltitude`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
-| `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg`, `noGradient` | Paint — the color/gradient value model for the rendering layer. |
+| `paint.ts` | `Gradient`, `LinearGradientStopPaint`, `LinearGradientPaint`, `isLinearGradientPaint`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg`, `noGradient` | Paint — the color/gradient value model for the rendering layer. |
 | `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals`, `parseRefusalOf` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
 | `PlainStringsDiagram.ts` | `PlainStringsDiagram` | `PlainStringsDiagram` — a {@link UgDiagram} whose page is its `strings` drawn black on white, optionally with an `image` at `imagePosition` (`version`, the eggs). |
 | `preprocessor-collector.ts` | `StyleAndSkinparamCollector` | preprocessor-collector.ts -- the `<style>` / `skinparam` / `skin` line collector `preprocessor.ts#resultOf` runs over the interpreter's finished result list. |
@@ -154,7 +154,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svek-dot-wrappers.ts` | `WrapperLevels`, `wrapperLevels`, `subgraphNoLabel`, `outerWrapperLines`, `innerWrapperLines`, `closeCount` | ClusterDotString's protection-wrapper nesting, shared by the two consumers of one `DotInputGraph`: the LAYOUT builder (`graph-layout-build.ts` #addClusters, which already built this nesting) and the DOT-TEXT emitter (`svek-dot-emit.ts`, whi |
 | `svg-defs-scale.ts` | `scaleShadowFilterDefs` | svg-defs-scale.ts -- the document scale applied to the shadow `<filter>` def. |
 | `svg-defs-seeded.ts` | `getSeed`, `seededDefIdRenames`, `applySeededDefIds` | svg-defs-seeded.ts — the seeded def-id pass over an assembled document. |
-| `svg-defs.ts` | `nextDef`, `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `ANY_ID_RE`, `idOfElement`, `collapseDuplicateFilterDefs`, `DQUOTE`, `collapseDuplicateGradientDefs`, `collectDocumentDefs`, `INLINE_DEF_OPENS`, `mapOutsideInlineDefs` | svg-defs.ts — `<defs>` collection for the pure-string SVG assembler. |
+| `svg-defs.ts` | `nextDef`, `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `ANY_ID_RE`, `idOfElement`, `collapseDuplicateFilterDefs`, `DQUOTE`, `collapseDuplicateGradientDefs`, `withContentGradientIds`, `collectDocumentDefs`, `INLINE_DEF_OPENS`, `mapOutsideInlineDefs` | svg-defs.ts — `<defs>` collection for the pure-string SVG assembler. |
 | `svg-format.ts` | `DEFAULT_SVG_DECIMALS`, `trimZeros`, `formatDecimal`, `withDeferredFormat`, `fmt`, `shortenColor`, `formatOpacity`, `formatPercent`, `escapeAttribute`, `escapeText`, `escapeComment` | Shared SVG formatting rules — decimal precision, color shortening, and opacity/percent formatting. |
 | `svg-link-title.ts` | `linkTitle` | Matches `<U+XXXX>` escapes in a link tooltip. |
 | `svg-markers.ts` | `ArrowType`, `ALL_ARROW_TYPES`, `arrowHeadRef`, `arrowHead`, `openArrowHeadDef` | SVG arrow-marker builders — the `<marker>` `<defs>` for every edge arrowhead. |
@@ -638,19 +638,21 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `driver-dot-path-svg.ts` | `DriverDotPathSvg` | driver-dot-path-svg.ts — the `DotPath` → SVG `<path>` driver (svek edge splines). |
 | `driver-ellipse-svg.ts` | `DriverEllipseSvg` | driver-ellipse-svg.ts — the `UEllipse` → SVG `<ellipse>` (full ellipse) or `<path>` (elliptical arc) driver. |
+| `driver-image-svg-svg.ts` | `DriverImageSvgSvg` | driver-image-svg-svg.ts — `UImageSvg` → SVG `<image>` with an inlined, base64-encoded SVG document (`DriverImageSvgSvg`). |
 | `driver-image-svg.ts` | `DriverImageSvg` | driver-image-svg.ts — the `UImage` → SVG `<image>` driver (SI5b+E2r T7, D7). |
 | `driver-line-svg.ts` | `DriverLineSvg` | driver-line-svg.ts — the `ULine` → SVG `<line>` driver. |
 | `driver-path-svg.ts` | `DriverPathSvg` | driver-path-svg.ts — the `UPath` → SVG `<path>` driver. |
 | `driver-pixel-svg.ts` | `DriverPixelSvg` | driver-pixel-svg.ts — the `UPixel` → SVG `<rect>` driver. |
 | `driver-polygon-svg.ts` | `DriverPolygonSvg` | driver-polygon-svg.ts — the `UPolygon` → SVG `<polygon>` driver. |
 | `driver-rectangle-svg.ts` | `DriverRectangleSvg` | driver-rectangle-svg.ts — the `URectangle` → SVG `<rect>` driver. |
-| `driver-svg-stubs.ts` | `DriverImagePng`, `DriverImageSvgSvg`, `DriverTextAsPathSvg`, `DriverCenteredCharacterSvg` | driver-svg-stubs.ts — D3′ throwing stubs for the SVG driver family members this task defers. |
+| `driver-svg-stubs.ts` | `DriverImagePng`, `DriverTextAsPathSvg`, `DriverCenteredCharacterSvg` | driver-svg-stubs.ts — D3′ throwing stubs for the SVG driver family members this task defers. |
 | `driver-text-svg-decorations.ts` | `ExtraLine`, `TextRenderDecorations`, `fontWeightOf`, `fontStyleOf`, `extraLineStrokeWidth`, `textRenderDecorations` | driver-text-svg-decorations.ts — the pure, emitter-independent half of `DriverTextSvg#draw`: every decision that method makes about a text run's `font-weight`, `font-style`, `text-decoration`, extended-colour decoration LINES and BACKCOLOR |
 | `driver-text-svg.ts` | `StringBounder`, `DriverTextSvg` | driver-text-svg.ts — the `UText` → SVG `<text>` driver. |
 | `svg-graphics-core.ts` | `LengthAdjust`, `TransparentFillBehavior`, `basicSvgOption`, `SvgOption`, `seedOf`, `SvgGraphicsCore` | svg-graphics-core.ts — SvgGraphics's document-lifecycle layer: the options shape, low-level number formatting, fill/stroke state, and gradient-def registration needed by the constructor itself. |
 | `svg-graphics-elements.ts` | `TextOptions`, `RectangleGeometry`, `SvgGraphicsElements` | svg-graphics-elements.ts — the shape-drawing methods: every `svg*`-prefixed element-creation call plus the legacy `newpath`/`moveto`/…/`fill` path-builder API. |
 | `svg-graphics-shadow.ts` | `SvgGraphicsShadow` | svg-graphics-shadow.ts — the `<filter>` def machinery for drop shadows and text-backcolor filters. |
 | `svg-graphics.ts` | `SvgOption`, `basicSvgOption`, `LengthAdjust`, `TransparentFillBehavior`, `TextOptions`, `RectangleGeometry`, `META_HEADER`, `getMetadataHex`, `SvgGraphics`, `UGroupType`, `XmlNode` | svg-graphics.ts — the single upstream-named `SvgGraphics` entry point. |
+| `svg-linear-gradient.ts` | `NumberFormat`, `buildLinearGradientKey`, `createLinearGradientElement`, `appendLinearGradientStops` | svg-linear-gradient.ts -- the multi-stop half of `SvgGraphics#createSvgGradient`. |
 | `svg-option.ts` | `LengthAdjust`, `TransparentFillBehavior`, `SvgOption`, `basicSvgOption` | svg-option.ts -- the `SvgOption` shape and the two small enums it carries. |
 | `svg-seed.ts` | `getSeed`, `seedOf`, `gradientVector` | UmlSource seed hashing (seedOf/getSeed) + gradient-vector policy for the SVG emitter. |
 | `u-graphic-svg.ts` | `UGraphicSvg` | u-graphic-svg.ts — `UGraphicSvg`, the concrete SVG backend that wires every `Driver*Svg` from this task into `AbstractCommonUGraphic`'s driver registry and owns the shared `SvgGraphics` document. |
@@ -764,6 +766,22 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svg-path-bbox.ts` | `PathBox`, `pathBBox` | Bounding box of an SVG path `d`, computed the way `UPath` does. |
 | `SvgNanoParser.ts` | `SvgNanoParser` |  |
 | `SvgPath.ts` | `parseSvgPath` |  |
+
+## `src/core/klimt/sprite/sax/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `sax-context.ts` | `RenderContext` |  |
+| `sax-defs.ts` | `GradientStop`, `BufferedElement`, `DefsCollector` |  |
+| `sax-events.ts` | `SaxAttributes`, `SaxHandler`, `SaxParseError`, `parseSaxEvents` |  |
+| `sax-gradient.ts` | `SpreadMethod`, `LinearGradientStop`, `parseJavaDouble`, `GradientVector`, `HColorLinearGradient`, `determineGradientPolicy`, `extractGradientPaint` |  |
+| `sax-render-handler.ts` | `GroupState`, `RenderHandler` |  |
+| `sax-shapes.ts` | `handleRect`, `handleCircle`, `handleEllipse`, `handleLine`, `handlePolyline`, `handlePolygon`, `handlePath` |  |
+| `sax-style.ts` | `applyTransform`, `getAttrOrStyle`, `extractGradientColor`, `applyStyleAndTransform`, `getDoubleAttr`, `parseFontSize`, `parseFontFace`, `applyTextDecoration` |  |
+| `sax-text-image-use-decode.ts` | `ImageSize`, `decodeDataImage` |  |
+| `sax-text-image-use.ts` | `handleText`, `handleImage`, `handleUse` |  |
+| `svg-sprite-parser-factory.ts` | `SvgParserSelector`, `SvgSpriteParser`, `getParserSelector`, `createSvgSpriteParser` |  |
+| `SvgSaxParser.ts` | `SvgSaxParser` |  |
 
 ## `src/core/latex-metrics/`
 

@@ -37,7 +37,7 @@ import type { TextBlock } from '../../klimt/shape/TextBlock.js';
 import { TextBlockUtils } from '../../klimt/shape/TextBlockUtils.js';
 import type { AtomImageResolver, SpriteDimsLookup } from '../../creole-atoms.js';
 import type { ResolvedColor } from '../../klimt/color/HColorSet.js';
-import { SvgNanoParser } from '../../klimt/sprite/SvgNanoParser.js';
+import { SvgParserSelector, createSvgSpriteParser } from '../../klimt/sprite/sax/svg-sprite-parser-factory.js';
 import type { USymbol } from '../../decoration/symbol/USymbol.js';
 import { buildTextBlock, measureLine } from './EntityImageDescriptionSupport.js';
 import { drawWithAtomUrl } from './EntityImageDescriptionTextBlock.js';
@@ -226,7 +226,7 @@ export function descAtomOps(
       const dim = verticalTextsDimension(atom.lines, ops, stringBounder);
       return { width: dim.getWidth(), height: dim.getHeight() };
     }
-    const resolved = resolveAtomImage?.(atom.atom);
+    const resolved = resolveAtomImage?.(atom.atom, () => stringBounder);
     return resolved === undefined ? { width: 0, height: 0 } : resolved;
   }
   const ops: AtomOps = {
@@ -285,7 +285,9 @@ export function descAtomOps(
       }
       // `AtomSpace#drawU` is empty.
       if (atom.kind === 'space') return;
-      const resolved: ResolvedAtomImageWithRaster | undefined = resolveAtomImage?.(atom.atom);
+      const resolved: ResolvedAtomImageWithRaster | undefined = resolveAtomImage?.(atom.atom, () =>
+        ug.getStringBounder(),
+      );
       if (resolved === undefined) return;
       // `AtomSprite.java:73-80`, `AtomImg.java:246-254`: one `<a>` per atom.
       drawWithAtomUrl(ug, atom.url, () => drawResolvedInline(ug, resolved));
@@ -404,6 +406,7 @@ export function resolveStereotypeSprite(
     height: dims.height,
     scale: ref.scale,
     ...(dims.svg === undefined ? {} : { svg: dims.svg }),
+    ...(dims.parser === undefined ? {} : { parser: dims.parser }),
     ...(ref.color === undefined ? {} : { color: ref.color }),
   };
 }
@@ -429,7 +432,12 @@ class StereotypeSpriteBlock implements TextBlock {
     // A PNG-backed internal sprite has no draw path in this port (see
     // `EntityImageDescriptionStereotypeSprite.svg`) -- it still measures.
     if (this.sprite.svg === undefined) return;
-    new SvgNanoParser(this.sprite.svg).drawU(ug, this.sprite.scale, this.sprite.color, undefined);
+    createSvgSpriteParser(this.sprite.svg, this.sprite.parser ?? SvgParserSelector.NANO).drawU(
+      ug,
+      this.sprite.scale,
+      this.sprite.color,
+      undefined,
+    );
   }
 }
 

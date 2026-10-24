@@ -317,6 +317,59 @@ export function collapseDuplicateGradientDefs(defs: string, body: string): { def
   return collapseDefsBy(defs, body, GRADIENT_OPEN_TAG, GRADIENT_CLOSE, (element) => canonicalGradientKey(element));
 }
 
+/** A `url(#id)` reference; the id stops at `)` or `(` (no minted id contains either). */
+const URL_REF_RE = /url\(#([^()]*)\)/g;
+
+/** The `id="…"` attribute of a klimt-minted def, with its leading space. */
+const OWN_ID_ATTR_RE = / id="[^"]*"/;
+
+/** `element` with its `id` moved to the front and set to `id`, the shape
+ *  {@link GRADIENT_OPEN} lifts. */
+function withLeadingId(element: string, id: string): string {
+  return element.replace(OWN_ID_ATTR_RE, '').replace(GRADIENT_OPEN_TAG, GRADIENT_OPEN_TAG + ' id="' + id + '"');
+}
+
+/**
+ * Make the `<linearGradient>`s of ONE shape's own klimt document liftable
+ * into the host document's `<defs>`.
+ *
+ * A host that draws each primitive through its OWN one-shape `UGraphicSvg`
+ * (`sequence-text.ts#shapeSvg`) gets every gradient minted as `g<seed>0` by
+ * that document's private counter (`SvgGraphics.java:393,431`), so three
+ * different gradients from three shapes all read `g00`, and `createSvgGradient`
+ * writes `id` AFTER the vector (java:371-395,417-432) where
+ * {@link extractGradientDefs} looks for it first. Upstream has no such seam:
+ * one `SvgGraphics` numbers them 0, 1, 2 and shares equal ones through its
+ * `gradients` map (java:367-371,411-415).
+ *
+ * Each gradient is re-keyed to a content hash of everything but its id
+ * ({@link canonicalGradientKey}), id first, and every `url(#old)` in `body`
+ * follows in one pass. Equal gradients from different shapes therefore
+ * collapse to one def (the map-hit branch) and `collectDocumentDefs` lifts
+ * them; the seeded pass then numbers them in first-use order, as the single
+ * jar counter would.
+ */
+export function withContentGradientIds(defs: string, body: string): { defs: string; body: string } {
+  const renames = new Map<string, string>();
+  let out = '';
+  let cursor = 0;
+  for (let span = nextDef(defs, cursor, GRADIENT_OPEN_TAG, GRADIENT_CLOSE, ANY_ID_RE); span !== undefined;) {
+    const element = defs.substring(span.at, span.end);
+    const id = 'g' + hashString(canonicalGradientKey(element));
+    const own = idOfElement(element);
+    if (own !== undefined) renames.set(own, id);
+    out += defs.substring(cursor, span.at) + withLeadingId(element, id);
+    cursor = span.end;
+    span = nextDef(defs, cursor, GRADIENT_OPEN_TAG, GRADIENT_CLOSE, ANY_ID_RE);
+  }
+  if (renames.size === 0) return { defs, body };
+  const rewritten = body.replace(URL_REF_RE, (match, ref: string) => {
+    const next = renames.get(ref);
+    return next === undefined ? match : 'url(#' + next + ')';
+  });
+  return { defs: out + defs.substring(cursor), body: rewritten };
+}
+
 /**
  * The whole document-level `<defs>` pass, in the order upstream's single
  * `SvgGraphics` produces it: caller-supplied defs first (markers, klimt

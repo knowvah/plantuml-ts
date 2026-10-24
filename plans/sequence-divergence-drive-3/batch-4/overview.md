@@ -18,13 +18,14 @@ all-engine survey (stop 4); non-sequence movers expected only at T4f
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T4a](T4a-xml-event-adapter.md) | xmldom event adapter; `@xmldom/xmldom` to dependencies | typescript-pro (sonnet) | `sax/sax-events.ts`, `package.json`, `package-lock.json` + tests | B3 | [ ] |
-| [T4b](T4b-defs-and-dispatcher.md) | pass 1 `DefsCollector`, `RenderHandler` dispatcher, `SvgSaxParser` class, handler stubs | typescript-pro (sonnet) | `sax/sax-defs.ts`, `sax/sax-render-handler.ts`, `sax/SvgSaxParser.ts`, `sax/sax-context.ts`, stubs of `sax-shapes.ts`, `sax-text-image-use.ts`, `sax-style.ts` + tests | T4a | [ ] |
-| [T4c](T4c-shapes.md) | rect/circle/ellipse/line/polyline/polygon/path | typescript-pro (sonnet) | `sax/sax-shapes.ts` + tests | T4b | [ ] |
-| [T4d](T4d-text-image-use.md) | text, image, `<use>` | typescript-pro (sonnet) | `sax/sax-text-image-use.ts` + tests | T4b | [ ] |
-| [T4e](T4e-gradients-style-transform.md) | gradients, style, transforms, fonts | typescript-pro (sonnet) | `sax/sax-style.ts` + tests | T4b | [ ] |
-| [T4f](T4f-wiring.md) | factory, keep the pragma, select the parser at sprite draw | typescript-pro (sonnet) | `sax/svg-sprite-parser-factory.ts`, `sprite-commands.ts`, `SpriteSvg.ts`, `creole-atoms-image-resolver.ts`, `command-common.ts` + tests | T4c, T4d, T4e | [ ] |
-| close | standard close as `b4`; pin the rows that reach zero | orchestrator | per close-procedure | T4a–T4f | [ ] |
+| [T4a](T4a-xml-event-adapter.md) | xmldom event adapter; `@xmldom/xmldom` to dependencies | typescript-pro (sonnet) | `sax/sax-events.ts`, `package.json`, `package-lock.json` + tests | B3 | [x] |
+| [T4b](T4b-defs-and-dispatcher.md) | pass 1 `DefsCollector`, `RenderHandler` dispatcher, `SvgSaxParser` class, handler stubs | typescript-pro (sonnet) | `sax/sax-defs.ts`, `sax/sax-render-handler.ts`, `sax/SvgSaxParser.ts`, `sax/sax-context.ts`, stubs of `sax-shapes.ts`, `sax-text-image-use.ts`, `sax-style.ts` + tests | T4a | [x] |
+| [T4c](T4c-shapes.md) | rect/circle/ellipse/line/polyline/polygon/path | typescript-pro (sonnet) | `sax/sax-shapes.ts` + tests | T4b | [x] |
+| [T4d](T4d-text-image-use.md) | text, image, `<use>` | typescript-pro (sonnet) | `sax/sax-text-image-use.ts` + tests | T4b | [x] |
+| [T4e](T4e-gradients-style-transform.md) | gradients, style, transforms, fonts | typescript-pro (sonnet) | `sax/sax-style.ts` + tests | T4b | [x] |
+| [T4f](T4f-wiring.md) | factory, keep the pragma, select the parser at sprite draw | typescript-pro (sonnet) | `sax/svg-sprite-parser-factory.ts`, `sprite-commands.ts`, `SpriteSvg.ts`, `creole-atoms-image-resolver.ts`, `command-common.ts` + tests | T4c, T4d, T4e | [x] |
+| T4g | multi-stop `<linearGradient>` emitter in the root defs + `withContentGradientIds` lifting on the sequence atom path (push-forward from T4e/T4f artifacts, journal rows 63/65/66) | typescript-pro (sonnet) | `paint.ts`, `svg-defs.ts`, `sequence-text.ts`, `sax-gradient.ts`, `klimt/drawing/svg/{svg-graphics-core.ts, svg-linear-gradient.ts (new), driver-rectangle-svg.ts}` + tests | T4f | [x] |
+| close | standard close as `b4`; pin the rows that reach zero | orchestrator | per close-procedure | T4a–T4g | [x] |
 
 Paths under `src/core/klimt/sprite/` unless stated. T4b/T4f are not
 parallel with the others; T4c, T4d, T4e run in parallel worktrees.

@@ -198,7 +198,7 @@ function drawAtoms(
       continue;
     }
     // ADR-2: cursor advances by DECLARED width, never ink.
-    const resolved: ResolvedAtomImageWithRaster | undefined = resolveAtomImage?.(atom.atom);
+    const resolved: ResolvedAtomImageWithRaster | undefined = resolveAtomImage?.(atom.atom, () => stringBounder);
     if (resolved === undefined) continue;
     const drawX = x;
     drawWithAtomUrl(ug, atom.url, () => drawResolvedInline(ug, resolved, drawX, origin.y));

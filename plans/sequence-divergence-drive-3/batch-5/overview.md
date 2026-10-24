@@ -9,7 +9,7 @@ work starts, and keeps one sub-batch file-disjoint (push-forward).
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T5a](T5a-diagnose-drawn-extent.md) | diagnose then fix the drawn-extent canvas (kaluna) | debugger (sonnet) | `diagnosis/drawn-extent.md`, then per artifact | B3 | [ ] |
+| [T5a](T5a-diagnose-drawn-extent.md) | diagnose then fix the drawn-extent canvas (kaluna) | debugger (sonnet) | `diagnosis/drawn-extent.md`, then per artifact | B3 | [x] (artifact; fix re-slotted to T8g, row 69) |
 | [T5b](T5b-diagnose-leftovers.md) | diagnosis of every row still open after B1-B4 | debugger (sonnet) | `diagnosis/leftovers.md` | B4 | [ ] |
 | T5c… | fix tasks from the artifacts | per artifact | per journal row | T5a / T5b | [ ] |
 | close | standard close | orchestrator | per close-procedure | all T5 | [ ] |

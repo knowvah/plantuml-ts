@@ -40,6 +40,8 @@
 import { matchJarSpriteLine } from './internal-sprite-store.js';
 import { SpriteGrayLevel } from './klimt/sprite/SpriteGrayLevel.js';
 import { SpriteSvg } from './klimt/sprite/SpriteSvg.js';
+import { getParserSelector, type SvgParserSelector } from './klimt/sprite/sax/svg-sprite-parser-factory.js';
+import { Pragma } from './skin/Pragma.js';
 import { buildSpriteColor4096 } from './klimt/sprite/SpriteColorBuilder4096.js';
 import { addSprite, type SpriteRegistry } from './sprite-registry.js';
 
@@ -264,11 +266,39 @@ function scanSpriteBlock(lines: readonly string[], i: number): SpriteBlock | nul
   return null;
 }
 
+/** `CommandPragma`'s pattern (`CommandPragma.java:60-70`): `!pragma NAME
+ *  [VALUE]`, case-insensitive like every upstream regex (`Pattern2.java:114`). */
+const PRAGMA_LINE_RE = /^!pragma\s+([A-Za-z_][A-Za-z_0-9]*)(?:\s+(.*))?$/i;
+
+/**
+ * The SVG parser a sprite defined at `lines[at]` gets: `SvgSpriteParserFactory
+ * #getParserSelector` over the pragma table as it stands when the definition
+ * runs. Upstream reads `system.getPragma()` inside the sprite command
+ * (`CommandSpriteSvg.java:81-82`, `CommandSpriteSvgMultiline.java:103`), and
+ * the table is filled by `CommandPragma#executeArg` (`:101-134`,
+ * `system.getPragma().define(name, value)`) as the lines are executed in
+ * order -- so replaying the `!pragma` lines BEFORE `at` through the same
+ * `Pragma` table reproduces it: a sprite defined before the pragma stays
+ * nano, and the last pragma before the definition wins.
+ *
+ * Replayed here, not in each diagram's own `!pragma` command, because every
+ * engine's definition reaches `matchSpriteCommand` with the preceding lines
+ * and the sequence `pragmaCommand` is a no-op for this key.
+ */
+function svgParserSelectorAt(lines: readonly string[], at: number): SvgParserSelector {
+  const pragma = Pragma.createEmpty();
+  for (let j = 0; j < at; j++) {
+    const m = PRAGMA_LINE_RE.exec((lines[j] ?? '').trim());
+    if (m !== null) pragma.define(m[1]!.toLowerCase(), m[2] ?? null);
+  }
+  return getParserSelector(pragma);
+}
+
 /** Registers an SVG sprite, or records it as unsupported when neither a
  *  viewBox nor width/height attributes yield dimensions (upstream throws;
  *  this port declines, so the name simply "contributes nothing"). */
-function registerSvg(registry: SpriteRegistry, name: string, svg: string): void {
-  const sprite = SpriteSvg.from(svg);
+function registerSvg(registry: SpriteRegistry, name: string, svg: string, parser: SvgParserSelector): void {
+  const sprite = SpriteSvg.from(svg, parser);
   if (sprite === undefined) {
     // Same shelf the 4096-color form uses: the definition is fully consumed
     // (never leaks into diagram content), only registration is skipped.
@@ -301,14 +331,14 @@ export function matchSpriteCommand(
   // order upstream's own command list uses (CommonCommands.java:82/85).
   const svgSingle = SVG_SINGLE_LINE_RE.exec(trimmed);
   if (svgSingle !== null) {
-    registerSvg(registry, svgSingle[1]!, svgSingle[2]!);
+    registerSvg(registry, svgSingle[1]!, svgSingle[2]!, svgParserSelectorAt(lines, i));
     return { consumed: 1 };
   }
   const svgMulti = SVG_MULTILINE_START_RE.exec(trimmed);
   if (svgMulti !== null) {
     const block = scanSvgSpriteBlock(lines, i, svgMulti[2]!);
     if (block === null) return null;
-    registerSvg(registry, svgMulti[1]!, block.svg);
+    registerSvg(registry, svgMulti[1]!, block.svg, svgParserSelectorAt(lines, i));
     return { consumed: block.consumed };
   }
 

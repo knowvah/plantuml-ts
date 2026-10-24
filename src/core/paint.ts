@@ -42,6 +42,50 @@ export interface Gradient {
 }
 
 /**
+ * One colour stop of a {@link LinearGradientPaint}: a position `offset`
+ * (0..1), the stop colour and the stop's own `opacity` (0..1), which
+ * multiplies the colour's alpha at emission.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorLinearGradient.java:87-140
+ */
+export interface LinearGradientStopPaint {
+  readonly offset: number;
+  readonly color: Paint;
+  readonly opacity: number;
+}
+
+/**
+ * A multi-stop SVG-style linear gradient (upstream's `HColorLinearGradient`):
+ * a vector `(x1, y1) -> (x2, y2)` in `objectBoundingBox` fractions (or user
+ * space when `userSpaceOnUse`), a spread method and N normalised stops. It
+ * is also a {@link Gradient} -- `color1`/`color2`/`policy` are the
+ * two-colour approximation every consumer that cannot draw N stops reads
+ * (`HColorLinearGradient#getColor1`, `HColors#noGradient`) -- so only the
+ * driver that registers an SVG `<linearGradient>` needs to tell the two
+ * apart, with {@link isLinearGradientPaint}.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorLinearGradient.java:60-300
+ */
+export interface LinearGradientPaint extends Gradient {
+  readonly x1: number;
+  readonly y1: number;
+  readonly x2: number;
+  readonly y2: number;
+  readonly userSpaceOnUse: boolean;
+  /** `HColorLinearGradient.SpreadMethod#name()` (`PAD` is the SVG default). */
+  readonly spreadMethod: 'PAD' | 'REFLECT' | 'REPEAT';
+  readonly stops: readonly LinearGradientStopPaint[];
+}
+
+/**
+ * `background instanceof HColorLinearGradient`
+ * (`DriverRectangleSvg.java:83,99`; `DriverPathSvg.java:65-66`).
+ */
+export function isLinearGradientPaint(value: unknown): value is LinearGradientPaint {
+  return typeof value === 'object' && value !== null && 'stops' in value && Array.isArray(value.stops);
+}
+
+/**
  * A paint value: a plain solid color string, or a {@link Gradient}. A bare
  * string is always a valid solid paint (D1).
  */

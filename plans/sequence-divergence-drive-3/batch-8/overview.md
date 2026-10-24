@@ -23,4 +23,5 @@ not batch them or "fix while moving".
 | [T8d](T8d-move-messages.md) | messages, arrowheads, self messages through UGraphic | refactoring-specialist | `renderer-message*.ts`, `renderer-arrowhead*.ts` | T8c | [ ] |
 | [T8e](T8e-move-notes-frames.md) | notes, frames, divider, link anchor, document through UGraphic | refactoring-specialist | `renderer-{note,frame-header,frame-blotter,divider,link-anchor,document}.ts` | T8d | [ ] |
 | [T8f](T8f-enable-handwritten.md) | wrap sequence in `UGraphicHandwritten` when `handwritten true` | typescript-pro | per T8a plan | T8e | [ ] |
-| close | merge, gates, hash check vs pre-move, classify | orchestrator | per close-procedure | T8a–T8f | [ ] |
+| T8g | canvas = the shared `SvgGraphics` `ensureVisible` fold after the moves (kaluna, gebeki; `diagnosis/drawn-extent.md`, journal row 69; fallback: the artifact's body-walk) | typescript-pro (sonnet) | per the artifact after T8e (`assemble-svg-sequence.ts#finalizeSequenceFragment`, the sequence UGraphic seam) + tests | T8e | [ ] |
+| close | merge, gates, hash check vs pre-move, classify | orchestrator | per close-procedure | T8a–T8g | [ ] |

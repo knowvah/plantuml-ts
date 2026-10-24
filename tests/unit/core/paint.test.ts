@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { parseColor, paintToSvg, isTransparentColor, type Gradient, type Paint } from '../../../src/core/paint.js';
+import {
+  parseColor,
+  paintToSvg,
+  isTransparentColor,
+  isLinearGradientPaint,
+  type Gradient,
+  type Paint,
+} from '../../../src/core/paint.js';
 
 describe('parseColor', () => {
   it('parses a hex gradient with a backslash policy (AC1)', () => {
@@ -248,5 +255,36 @@ describe('isTransparentColor', () => {
     expect(isTransparentColor('red')).toBe(false);
     expect(isTransparentColor('#181818')).toBe(false);
     expect(isTransparentColor('none')).toBe(false);
+  });
+});
+
+describe('isLinearGradientPaint (DriverRectangleSvg.java:83,99 `instanceof HColorLinearGradient`)', () => {
+  const MULTI_STOP = {
+    color1: '#F00',
+    color2: '#00F',
+    policy: '|' as const,
+    x1: 0,
+    y1: 0,
+    x2: 1,
+    y2: 0,
+    userSpaceOnUse: false,
+    spreadMethod: 'PAD' as const,
+    stops: [
+      { offset: 0, color: '#F00', opacity: 1 },
+      { offset: 1, color: '#00F', opacity: 1 },
+    ],
+  };
+
+  it('is true for a multi-stop gradient and false for a plain colour, a two-colour Gradient, or nothing', () => {
+    expect(isLinearGradientPaint(MULTI_STOP)).toBe(true);
+    expect(isLinearGradientPaint('#FF0000')).toBe(false);
+    expect(isLinearGradientPaint({ color1: '#F00', color2: '#00F', policy: '|' })).toBe(false);
+    expect(isLinearGradientPaint(null)).toBe(false);
+  });
+
+  it('leaves paintToSvg on the two-colour path: first/last colour, one inline <linearGradient>', () => {
+    const { fill, def } = paintToSvg(MULTI_STOP);
+    expect(fill).toMatch(/^url\(#g[0-9a-z]+\)$/);
+    expect(def).toContain('<stop offset="0%" stop-color="#F00"/><stop offset="100%" stop-color="#00F"/>');
   });
 });

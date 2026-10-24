@@ -19,7 +19,8 @@ import {
 import { drawEmojiAtom } from '../../core/svek/image/EntityImageDescriptionEmoji.js';
 import { emojiArtworkResolverFor, type InternalEmojiStore } from '../../core/internal-emoji-store.js';
 import { SpritePrimitiveCollector } from '../../core/creole-atoms-image-resolver.js';
-import { type SpriteDimsLookup, type InlineAtomToken } from '../../core/creole-atoms.js';
+import type { SvgParserSelector } from '../../core/klimt/sprite/sax/svg-sprite-parser-factory.js';
+import { type SpriteDimsLookup, type InlineAtomToken, type StringBounderSupplier } from '../../core/creole-atoms.js';
 import { measureInlineAtom, spriteScale } from '../../core/creole-atoms-measure.js';
 import { isKnownOpenIconicGlyph, openIconicDims, openIconicFactor } from '../../core/openiconic-glyphs.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
@@ -89,11 +90,13 @@ export interface ResolvedMemberAtom {
 function resolveSvgSpriteAtomForRow(
   atom: Extract<InlineAtomToken, { kind: 'sprite' }>,
   svg: string,
+  parser: SvgParserSelector,
   spriteDims: SpriteDimsLookup | undefined,
   baseFont: FontConfiguration,
+  stringBounder: StringBounderSupplier | undefined,
 ): Extract<MemberRenderAtom, { kind: 'drawable' }> | undefined {
   if (spriteDims === undefined) return undefined; // should not occur: paired 1:1 with `sprites` by the caller.
-  return resolveSvgSpriteAtom(atom, svg, spriteDims, baseFont);
+  return resolveSvgSpriteAtom(atom, svg, spriteDims, baseFont, undefined, parser, stringBounder);
 }
 
 function resolveSpriteAtom(
@@ -101,9 +104,11 @@ function resolveSpriteAtom(
   baseFont: FontConfiguration,
   sprites: SpriteRegistry,
   spriteDims: SpriteDimsLookup | undefined,
+  stringBounder: StringBounderSupplier | undefined,
 ): Extract<MemberRenderAtom, { kind: 'image' } | { kind: 'drawable' }> | undefined {
   const svgSprite = getSpriteSvg(sprites, atom.name);
-  if (svgSprite !== undefined) return resolveSvgSpriteAtomForRow(atom, svgSprite.svg, spriteDims, baseFont);
+  if (svgSprite !== undefined)
+    return resolveSvgSpriteAtomForRow(atom, svgSprite.svg, svgSprite.parser, spriteDims, baseFont, stringBounder);
   // `baseFont.size` threads CommandCreoleSprite's `fc.getSize2D() / 13.0`
   // factor -- same call the sizer makes (S1L-f).
   const dims = measureInlineAtom(atom, spriteDims, baseFont.size);
@@ -132,6 +137,7 @@ export function resolveInlineAtom(
   baseFont: FontConfiguration,
   sprites: SpriteRegistry | undefined,
   spriteDims: SpriteDimsLookup | undefined,
+  stringBounder?: StringBounderSupplier,
 ): Extract<MemberRenderAtom, { kind: 'image' } | { kind: 'drawable' }> | undefined {
   if (atom.kind === 'img') {
     const dims = measureInlineAtom(atom);
@@ -144,7 +150,7 @@ export function resolveInlineAtom(
   // (matching `resolveOpenIconicAtom`'s own "should not occur" precedent)
   // rather than assuming that external invariant holds forever.
   if (atom.kind !== 'sprite') return undefined;
-  return resolveSpriteAtom(atom, baseFont, sprites, spriteDims);
+  return resolveSpriteAtom(atom, baseFont, sprites, spriteDims, stringBounder);
 }
 
 /**

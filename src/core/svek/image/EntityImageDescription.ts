@@ -107,6 +107,7 @@ import { SymbolContext } from '../../decoration/symbol/SymbolContext.js';
 import { USymbols } from '../../decoration/symbol/USymbols.js';
 import type { ComponentStyle } from '../../decoration/symbol/USymbols.js';
 import type { ActorStyle } from '../../skin/ActorStyle.js';
+import type { SvgParserSelector } from '../../klimt/sprite/sax/svg-sprite-parser-factory.js';
 import { decorateEntityDrawing, type EntityDecorationInfo } from '../DecorateEntityImage.js';
 import { buildEntityName } from './EntityImageDescriptionName.js';
 import {
@@ -202,6 +203,8 @@ export interface EntityImageDescriptionStereotypeSprite {
   readonly height: number;
   readonly scale: number;
   readonly svg?: string | undefined;
+  /** The sprite's definition-time parser (`SpriteSvg.parser`); absent = nano. */
+  readonly parser?: SvgParserSelector | undefined;
   readonly color?: ResolvedColor | undefined;
 }
 

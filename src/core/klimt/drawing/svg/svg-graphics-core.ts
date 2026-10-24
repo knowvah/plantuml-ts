@@ -52,7 +52,7 @@
 
 import { XmlDocument } from './xml-writer.js';
 import type { XmlNode } from './xml-writer.js';
-import { isTransparentColor } from '../../../paint.js';
+import { isTransparentColor, type LinearGradientPaint } from '../../../paint.js';
 import { ColorMapper, toSvgPaint } from '../../color/ColorMapper.js';
 import { resolveColorToSvgHex } from '../../color/HColorSet.js';
 import { formatDecimal, formatOpacity, shortenColor } from '../../../svg-format.js';
@@ -61,18 +61,22 @@ import { LengthAdjust, TransparentFillBehavior, type SvgOption } from './svg-opt
 export { LengthAdjust, TransparentFillBehavior, basicSvgOption } from './svg-option.js';
 export type { SvgOption } from './svg-option.js';
 import { getSeed, gradientVector } from './svg-seed.js';
+import {
+  appendLinearGradientStops,
+  buildLinearGradientKey,
+  createLinearGradientElement,
+} from './svg-linear-gradient.js';
 export { seedOf } from './svg-seed.js';
 
 /**
  * SvgGraphicsCore — see the module doc comment above.
  *
- * NOT ported (whole class, reported once): the second
- * `createSvgGradient(HColorLinearGradient, ColorMapper)` overload,
- * `buildLinearGradientKey` — both support multi-stop gradients off
- * `HColorLinearGradient`, unrepresented in this port's 2-stop-only `Paint`
- * `Gradient`. Upstream's local `formatPercent`/`formatOpacity` live in
- * `svg-format.ts` (T1, ADR-3) and are imported here; `fillMe`'s opacity now
- * routes through `formatOpacity` instead of the old literal `toFixed(5)`.
+ * The second `createSvgGradient(HColorLinearGradient, ColorMapper)` overload
+ * is {@link createSvgLinearGradient} (builders in `svg-linear-gradient.ts`),
+ * over the port's `LinearGradientPaint`. Upstream's local
+ * `formatPercent`/`formatOpacity` live in `svg-format.ts` (T1, ADR-3) and
+ * are imported there; `fillMe`'s opacity now routes through `formatOpacity`
+ * instead of the old literal `toFixed(5)`.
  */
 export class SvgGraphicsCore {
   protected readonly document: XmlDocument;
@@ -375,6 +379,29 @@ export class SvgGraphicsCore {
 
     elt.appendChild(stop1);
     elt.appendChild(stop2);
+    this.defs.appendChild(elt);
+    return id;
+  }
+
+  /**
+   * `createSvgGradient(HColorLinearGradient, ColorMapper)`: register a
+   * multi-stop gradient, or answer the id of the equal one already
+   * registered. The id is minted exactly as the two-colour overload mints it
+   * -- `gradientId + gradients.size()` over the ONE shared map -- and the
+   * element is appended to `defs`, not to the shape's `<g>`.
+   *
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/SvgGraphics.java:411-448
+   */
+  createSvgLinearGradient(gr: LinearGradientPaint, mapper: ColorMapper): string {
+    const key = buildLinearGradientKey(gr, mapper);
+    const existing = this.gradients.get(key);
+    if (existing !== undefined) return existing;
+
+    const elt = createLinearGradientElement(this.document, gr, (value) => this.format(value), this.option.decimal);
+    const id = this.gradientId + this.gradients.size;
+    this.gradients.set(key, id);
+    elt.setAttribute('id', id);
+    appendLinearGradientStops(this.document, elt, gr, mapper, this.option.decimal);
     this.defs.appendChild(elt);
     return id;
   }

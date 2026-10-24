@@ -83,11 +83,12 @@ const SIZING_PLACEHOLDER_COLOR = '#000000';
 export function sizingAtomImageResolverFor(
   sprites: SpriteDimsLookup | undefined,
 ): (font: FontConfiguration) => AtomImageResolver {
-  return (font) => (atom) => {
+  return (font) => (atom, stringBounder) => {
     const dims = measureInlineAtom(atom, sprites, font.size);
     if (atom.kind === 'sprite') {
       const reg = sprites?.get(atom.name);
-      if (reg?.svg !== undefined) return resolveSvgSpriteAtom(atom, reg.svg, sprites!, font);
+      if (reg?.svg !== undefined)
+        return resolveSvgSpriteAtom(atom, reg.svg, sprites!, font, undefined, reg.parser, stringBounder);
     }
     // SI15 T6: raster dims now reach the sizing path too -- a monochrome
     // sprite's `Footprint`-driven ellipse fit needs `rasterWidth`/

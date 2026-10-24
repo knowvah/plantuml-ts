@@ -43,6 +43,7 @@
  * feature can reintroduce the divergence by accident.
  */
 
+import { withContentGradientIds } from '../../core/svg-defs.js';
 import { decorationLines, image, linkWrap, text } from '../../core/svg.js';
 import type { ExtraLine } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
@@ -202,7 +203,8 @@ function shapeSvg(x: number, y: number, s: SequenceRunShape): string {
     .apply(s.stroke)
     .draw(s.shape);
   const flat = extractFlatContent(ug.getSvgString());
-  return flat.extraDefs + flat.body;
+  const lifted = withContentGradientIds(flat.extraDefs, flat.body);
+  return lifted.defs + lifted.body;
 }
 
 /**
