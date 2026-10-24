@@ -32,6 +32,7 @@ import { strutBox } from './latex-metrics/box.js';
 import type { Context } from './latex-metrics/convert.js';
 import { fencedBox, fractionBox, nthRootBox } from './latex-metrics/fraction.js';
 import { parseLatex } from './latex-metrics/katex-glyphs.js';
+import { matrixBox } from './latex-metrics/matrix.js';
 import { formulaRoot } from './latex-metrics/nodes.js';
 import { charAtomBox, rowBox, spaceBox } from './latex-metrics/row.js';
 import { bigOperatorBox, scriptsBox } from './latex-metrics/scripts.js';
@@ -75,6 +76,7 @@ const BUILDERS: Builders = {
   frac: (atom, style) => fractionBox(atom, style, createBox),
   sqrt: (atom, style) => nthRootBox(atom, style, createBox, SQRT_DELIMITER),
   fenced: (atom, style) => fencedBox(atom, style, createBox),
+  matrix: (atom, style) => matrixBox(atom, style, createBox),
   typed: (atom, style) => createBox(atom.body, style),
   wrap: (atom, style) => createBox(atom.body, atom.style ?? style),
   break: () => strutBox(0, 0, 0),

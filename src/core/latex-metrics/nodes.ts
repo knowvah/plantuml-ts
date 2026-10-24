@@ -3,7 +3,9 @@
  * (`PredefMacros`, `PredefinedTeXFormulas`, `TeXParser`; JLaTeXMath 1.0.7,
  * `~/git/plantuml/gradle/libs.versions.toml:12`).
  */
-import type { Atom } from './atoms.js';
+import type { Atom, MatrixAtom } from './atoms.js';
+import type { Align } from './box.js';
+import { ALIGN_CENTER, ALIGN_LEFT, ALIGN_RIGHT } from './box.js';
 import type { Context } from './convert.js';
 import {
   AtomConverter,
@@ -18,7 +20,7 @@ import {
   text,
 } from './convert.js';
 import type { KNode } from './katex-glyphs.js';
-import { nodeField, nodeList, stringField } from './katex-glyphs.js';
+import { nodeField, nodeList, stringField, toKNode } from './katex-glyphs.js';
 import { TYPE_BIG_OPERATOR, TYPE_INNER, TYPE_ORDINARY, unitFactor } from './tex-font.js';
 
 type NodeHandler = (n: KNode, ctx: Context) => Atom | undefined;
@@ -100,6 +102,61 @@ function convertKern(n: KNode, ctx: Context): Atom | undefined {
   return { kind: 'space', space: { em: (style) => number * (unitFactor(unit, style) ?? 0) } };
 }
 
+/** KaTeX wraps every `array` cell in a `styling` node (`dCellStyle`) around
+ *  an `ordgroup`; JLaTeXMath's cell is the formula between the `&`s, set in
+ *  the environment's style (`MatrixAtom#createBox` calls `Atom#createBox`
+ *  with the matrix's own `env`), so both wrappers are peeled off. */
+function cellNodes(cell: KNode): KNode[] {
+  const inner = cell.type === 'styling' ? nodeList(cell, 'body') : [cell];
+  const [only] = inner;
+  return inner.length === 1 && only?.type === 'ordgroup' ? nodeList(only, 'body') : inner;
+}
+
+/** `MatrixAtom#parsePositions`: `l`, `r`, `c` are `position[]` 0, 1, 2. */
+const COLUMN_ALIGN: Readonly<Record<string, Align>> = { l: ALIGN_LEFT, r: ALIGN_RIGHT, c: ALIGN_CENTER };
+
+/** KaTeX `cols` entries: `{type: 'align', align}` or `{type: 'separator'}`. */
+function columns(n: KNode): KNode[] {
+  return nodeList(n, 'cols');
+}
+
+/** The rules and environments `matrix.ts` does not size, by the name
+ *  `unsupported` reports; `undefined` when the node is fully modelled. */
+function unmodelled(n: KNode): string | undefined {
+  const cols = columns(n);
+  // `align`/`alignat`/`gather`/`smallmatrix`/`cases` set a column
+  // separation type or per-column gaps; JLaTeXMath builds them as other
+  // `MatrixAtom` types (ALIGN, SMALLMATRIX, ...).
+  if (n.raw['colSeparationType'] !== undefined || cols.some((c) => c.raw['pregap'] !== undefined)) return 'array';
+  if (cols.some((c) => c.type === 'separator')) return 'array vline';
+  const hlines = n.raw['hLinesBeforeRow'];
+  if (Array.isArray(hlines) && hlines.some((l) => Array.isArray(l) && l.length > 0)) return 'array hline';
+  return undefined;
+}
+
+/** `\begin{array}{cc}…` (`PredefMacros#arrayATATenv_macro`, ARRAY with
+ *  `spaceAround`) and `\begin{matrix}` (`#matrixATATenv_macro`, MATRIX):
+ *  KaTeX's `hskipBeforeAndAfter` is true only for `array`. A rule is noted
+ *  and the grid sized without it; an environment `MatrixAtom` builds as
+ *  another type is noted and, as before, contributes nothing. */
+function convertArray(n: KNode, ctx: Context): Atom | undefined {
+  const flaw = unmodelled(n);
+  if (flaw !== undefined) ctx.unsupported.add(flaw);
+  if (flaw === 'array') return undefined;
+  const body = n.raw['body'];
+  const rows = (Array.isArray(body) ? body : []).map((row: unknown) =>
+    (Array.isArray(row) ? row : []).flatMap((c: unknown) => {
+      const cell = toKNode(c);
+      return cell === undefined ? [] : [converter.formula(cellNodes(cell), ctx)];
+    }),
+  );
+  const align = columns(n)
+    .filter((c) => c.type === 'align')
+    .map((c) => COLUMN_ALIGN[stringField(c, 'align') ?? ''] ?? ALIGN_CENTER);
+  const env: MatrixAtom['env'] = n.raw['hskipBeforeAndAfter'] === true ? 'array' : 'matrix';
+  return { kind: 'matrix', type: TYPE_ORDINARY, env, rows, align };
+}
+
 const HANDLERS: Readonly<Record<string, NodeHandler>> = {
   mathord: (n, ctx) => leafAtom(text(n), TYPE_ORDINARY, ctx),
   textord: (n, ctx) => leafAtom(text(n), TYPE_ORDINARY, ctx),
@@ -119,6 +176,7 @@ const HANDLERS: Readonly<Record<string, NodeHandler>> = {
     body: converter.formula(nodeList(n, 'body'), ctx) ?? { kind: 'row', elements: [] },
     right: delimiter(stringField(n, 'right')),
   }),
+  array: convertArray,
   text: convertText,
   font: convertFont,
   spacing: () => ({ kind: 'space', space: { blank: true } }),

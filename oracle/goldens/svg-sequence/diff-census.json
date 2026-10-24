@@ -3,7 +3,7 @@
   "totals": {
     "missing-element": 0,
     "extra-element": 0,
-    "geometry": 48,
+    "geometry": 13,
     "text-metrics": 0,
     "format-units": 0,
     "other": 58
@@ -52,18 +52,6 @@
         "missing-element": 0,
         "extra-element": 0,
         "geometry": 2,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 0
-      }
-    },
-    {
-      "slug": "mefeke-43-xotu192",
-      "diffCount": 35,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 35,
         "text-metrics": 0,
         "format-units": 0,
         "other": 0

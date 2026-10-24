@@ -9,7 +9,7 @@
  * font when the atom is built (`convert.ts`), so an atom carries its glyph
  * rather than a font id.
  */
-import type { Box } from './box.js';
+import type { Align, Box } from './box.js';
 import type { Glyph } from './katex-glyphs.js';
 import { TYPE_BIG_OPERATOR, TYPE_INNER, TYPE_ORDINARY } from './tex-font.js';
 
@@ -120,6 +120,22 @@ export interface PhantomAtom {
   body: Atom;
 }
 
+/** `MatrixAtom`'s environment (`MatrixAtom.ARRAY`/`MatrixAtom.MATRIX`, the
+ *  private `type` field the `array` and `matrix` environments pass its
+ *  constructor, `PredefMacros#arrayATATenv_macro`/`#matrixATATenv_macro`). */
+export type MatrixEnv = 'array' | 'matrix';
+
+/** `MatrixAtom`: a grid of cells (`ArrayOfAtoms`; an empty cell is `null`
+ *  upstream, `undefined` here). `type` is the `Atom` default ORDINARY, not
+ *  the environment; `align` is one entry per column (`position[]`). */
+export interface MatrixAtom {
+  kind: 'matrix';
+  type: number;
+  env: MatrixEnv;
+  rows: (Atom | undefined)[][];
+  align: Align[];
+}
+
 /** `BreakMarkAtom`: `TeXFormula#add` (java:431-436) appends one after a
  *  `TypedAtom` whose right type is BINARY_OPERATOR or RELATION. It is the
  *  `Atom` default ORDINARY and boxes as nothing. */
@@ -136,6 +152,7 @@ export type Atom =
   | FractionAtom
   | NthRootAtom
   | FencedAtom
+  | MatrixAtom
   | TypedAtom
   | WrapAtom
   | PhantomAtom

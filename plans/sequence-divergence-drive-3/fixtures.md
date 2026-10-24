@@ -17,6 +17,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | b4 | 1133 | 0 | 5 | 5 | 0 | 1082 | 1133 |
 | b5 | 1134 | 0 | 4 | 5 | 0 | 961 | 1134 |
 | b6 | 1136 | 0 | 3 | 4 | 0 | 883 | 1136 |
+| b7 | 1137 | 0 | 2 | 4 | 0 | 848 | 1137 |
 
 ## Open rows (101)
 
@@ -48,7 +49,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | suzumi-85-nuzo693 | geometry | 54 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
 | vopixi-04-lako436 | structural | 51 | url-label-newline-split | T2e | pinned (7ca69af29) at b2 |
 | bugafa-93-duzi514 | structural | 36 | svgparser-sax-unported | T4f | pinned (e336a9a67) at b4 |
-| mefeke-43-xotu192 | geometry | 35 | latex-array-unmodelled | T7a | |
+| mefeke-43-xotu192 | geometry | 35 | latex-array-unmodelled | T7a | pinned (merge of T7a, journal row 90) at b7 |
 | vivava-25-vuba802 | structural | 33 | svgparser-sax-unported | T4f | pinned (e336a9a67) at b4 |
 | bocudo-94-jode371 | geometry | 31 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
 | jesari-34-mudu065 | geometry | 31 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |

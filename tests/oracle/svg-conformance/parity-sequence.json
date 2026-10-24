@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-23T17:42:22.430Z",
+  "generatedAt": "2026-10-23T18:31:09.431Z",
   "fixtures": [
     {
       "slug": "bacupi-77-fuke586",
@@ -3822,9 +3822,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "structural-match",
-      "maxDelta": 112,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "mefone-86-soca963",

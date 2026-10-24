@@ -4990,11 +4990,11 @@
     {
       "type": "sequence",
       "slug": "mefeke-43-xotu192",
-      "status": "baseline",
-      "weightedScore": 35,
-      "diffCount": 50,
-      "measuredAt": "2026-10-21",
-      "measuredAgainstCommit": "fae94fe7"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-23",
+      "measuredAgainstCommit": "ce6d9558"
     },
     {
       "type": "sequence",
