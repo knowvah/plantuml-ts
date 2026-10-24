@@ -44,7 +44,7 @@ export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequencePluginGeo
     // `refused` is `ParseRefusal`'s discriminant (`dispatcher.ts#parseRefusalOf`).
     if ('refused' in ast) return ast;
     // sdd2-T7e: `CommandSkinParam.java:92-99` -> `ast.warnings`.
-    return withSkinParamWarnings(ast, source.styleSource?.skinparam);
+    return withSkinParamWarnings(ast, source.styleSource);
   },
 
   layout(ast: SequenceDiagramAST, theme, measurer): Promise<SequencePluginGeometry> {
@@ -59,7 +59,7 @@ export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequencePluginGeo
   // stacked above the page before chrome (`sequence-warnings.ts`).
   render(geo: SequencePluginGeometry, theme, measurer): RenderFragment {
     const m = requireMeasurer(measurer);
-    return withSequenceWarningBanner(renderSequence(geo, theme, m), geo.warnings, m);
+    return withSequenceWarningBanner(renderSequence(geo, theme, m), geo.warnings, m, theme.handwritten === true);
   },
 
   // The `PaginatedPlugin` trio (`core/dispatcher.ts`). Sequence is the only
@@ -73,7 +73,12 @@ export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequencePluginGeo
 
   renderPage(geo: SequencePluginGeometry, theme, pageIndex: number, measurer): RenderFragment {
     const m = requireMeasurer(measurer);
-    return withSequenceWarningBanner(renderSequencePage(geo, theme, pageIndex, m), geo.warnings, m);
+    return withSequenceWarningBanner(
+      renderSequencePage(geo, theme, pageIndex, m),
+      geo.warnings,
+      m,
+      theme.handwritten === true,
+    );
   },
 
   pageAst(ast: SequenceDiagramAST, pageIndex: number): SequenceDiagramAST {

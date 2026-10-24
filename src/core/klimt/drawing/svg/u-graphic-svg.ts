@@ -79,9 +79,12 @@
  *
  * Deferred D3′ drivers (see `driver-svg-stubs.ts` for the classes and
  * why none of them can be registered here): `DriverImagePng`,
- * `DriverImageSvgSvg`, `DriverTextAsPathSvg`,
- * `DriverCenteredCharacterSvg`. `DriverPixelSvg` is ported
- * (`driver-pixel-svg.ts`) and registered for `UPixel`, as
+ * `DriverTextAsPathSvg`. `DriverCenteredCharacterSvg`
+ * is ported (sdd3-T8p, `driver-centered-character-svg.ts`) and registered for
+ * `UCenteredCharacter` (`UGraphicSvg.java:134`), as is `DriverImageSvgSvg`
+ * (`driver-image-svg-svg.ts`) for `UImageSvg`
+ * (`UGraphicSvg.java:127`), as is `DriverPixelSvg`
+ * (`driver-pixel-svg.ts`) for `UPixel`, as
  * `UGraphicSvg.java:122` does. `ignoreShape(UImageTikz.class)` — not
  * ported; upstream's own behavior for it is a no-op, and no `UImageTikz`
  * shape class exists in this port either.
@@ -99,9 +102,11 @@ import { UPath } from '../../shape/UPath.js';
 import { DotPath } from '../../shape/DotPath.js';
 import { UText } from '../../shape/UText.js';
 import { UImage } from '../../shape/UImage.js';
+import { UImageSvg } from '../../shape/UImageSvg.js';
 import { UComment } from '../../shape/UComment.js';
 import { UEmpty } from '../../shape/UEmpty.js';
 import { UPixel } from '../../shape/UPixel.js';
+import { UCenteredCharacter } from '../../shape/UCenteredCharacter.js';
 import type { UGroup } from '../../shape/UGroup.js';
 import { SvgGraphics } from './svg-graphics.js';
 import type { SvgOption } from './svg-graphics.js';
@@ -114,6 +119,8 @@ import { DriverPathSvg } from './driver-path-svg.js';
 import { DriverDotPathSvg } from './driver-dot-path-svg.js';
 import { DriverTextSvg } from './driver-text-svg.js';
 import { DriverImageSvg } from './driver-image-svg.js';
+import { DriverImageSvgSvg } from './driver-image-svg-svg.js';
+import { DriverCenteredCharacterSvg } from './driver-centered-character-svg.js';
 import type { StringBounder as DriverStringBounder } from './driver-text-svg.js';
 import { XDimension2D } from '../../geom/XDimension2D.js';
 import type { StringBounder } from '../../font/StringBounder.js';
@@ -187,6 +194,8 @@ export class UGraphicSvg extends AbstractCommonUGraphic {
     // driver set (T1-T7 of the earlier klimt-SVG mission) never provisioned --
     // see UImage.ts's doc comment for why this is a scoped sibling, not a port.
     this.registerDriver(asShapeCtor<UImage>(UImage), new DriverImageSvg(this.svg));
+    this.registerDriver(asShapeCtor<UImageSvg>(UImageSvg), new DriverImageSvgSvg(this.svg, this.option)); // UGraphicSvg.java:127
+    this.registerDriver(UCenteredCharacter, new DriverCenteredCharacterSvg(this.svg)); // UGraphicSvg.java:134
     this.registerDriver(UComment, this.commentDriver());
     this.registerDriver(UEmpty, UGraphicSvg.emptyDriver());
   }

@@ -15,18 +15,20 @@
  * `CommandSkinParam#executeArg`'s deprecation warnings (CommandSkinParam
  * .java:92-99) are rebuilt from the collected skinparam map
  * ({@link skinParamWarnings}) because the preprocessor hoists `skinparam`
- * lines out of the block before the parser sees it; they come ahead of the
+ * lines out of the block before the parser sees it (line form only); they come ahead of the
  * command warnings (upstream's order is source order, so a `skinparam`
  * written AFTER a warning command is the one case this reorders).
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:321-334
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/DiagramChromeFactory.java:124-135,176-200
  */
+import type { PreprocessorResult } from './preprocessor.js';
 import type { RenderFragment } from './dispatcher.js';
 import type { DocumentMargin } from './document-margin.js';
 import { WarningBannerBlock } from './annotations/WarningBannerBlock.js';
-import { shiftFragmentBody } from './annotations/coord-shift.js';
+import { shiftedFold, shiftFragmentBody } from './annotations/coord-shift.js';
 import { ColorMapper } from './klimt/color/ColorMapper.js';
+import { UGraphicHandwritten } from './klimt/drawing/hand/UGraphicHandwritten.js';
 import { renderDrawableToFragment } from './klimt/document-shell-fragment.js';
 import type { UGraphic } from './klimt/UGraphic.js';
 import { UTranslate } from './klimt/UTranslate.js';
@@ -52,16 +54,34 @@ export function addUniqueWarning(into: Warning[], warning: Warning): void {
   if (!into.some((w) => w.equals(warning))) into.push(warning);
 }
 
+/** What {@link skinParamWarnings} reads: the collected map and, when the
+ *  collector located each form, its assignments. */
+export type SkinparamWarningSource = Pick<PreprocessorResult, 'skinparam' | 'skinparamAssignments'>;
+
+/** The skin parameter names whose LINE-form assignment upstream warns on, in
+ *  first-assignment order. A hand-built source without `skinparamAssignments`
+ *  (or a bare map) has no recorded form: every map key counts, as before. */
+function lineFormNames(source: SkinparamWarningSource | ReadonlyMap<string, string> | undefined): Iterable<string> {
+  if (source === undefined) return [];
+  if (source instanceof Map) return source.keys();
+  const { skinparam, skinparamAssignments } = source as SkinparamWarningSource;
+  if (skinparamAssignments === undefined) return skinparam?.keys() ?? [];
+  return skinparamAssignments.filter((a) => a.form !== 'block').map((a) => a.key);
+}
+
 /**
- * `CommandSkinParam#executeArg`'s warnings for the collected `skinparam`
- * map, in the map's (first-assignment) order. The collector keeps no line
- * form, so a `skinparam { ... }` block entry warns too, where upstream's
- * `CommandSkinParamMultilines` does not.
+ * `CommandSkinParam#executeArg`'s warnings, for the LINE-form assignments
+ * only (`skinparam handwritten true`), first-assignment order, de-duplicated.
+ * An entry of `skinparam [name] {` is `CommandSkinParamMultilines`, which
+ * delegates to `SkinLoader` and never warns
+ * (CommandSkinParamMultilines.java:90-102); the parameter still applies, via
+ * the merged map.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandSkinParam.java:88-99
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandSkinParamMultilines.java:90-102
  */
-export function skinParamWarnings(skinparam: ReadonlyMap<string, string> | undefined): Warning[] {
+export function skinParamWarnings(source: SkinparamWarningSource | ReadonlyMap<string, string> | undefined): Warning[] {
   const warnings: Warning[] = [];
-  for (const name of skinparam?.keys() ?? []) {
+  for (const name of lineFormNames(source)) {
     const message = SKINPARAM_WARNINGS.get(name.toLowerCase());
     if (message !== undefined) addUniqueWarning(warnings, new Warning(message));
   }
@@ -91,6 +111,16 @@ function canvasSide(raw: number, near: number, far: number): number {
  * composes title/legend/... around banner + body, as upstream's decoration
  * order does. `fragment` unchanged when there is no warning. `uid` is the id
  * namespace of the banner's own klimt document (it emits no defs).
+ *
+ * `handwritten` (sdd3-T8f): the banner is part of the decorated block the
+ * exporter draws, so a handwritten diagram's banner passes through
+ * `UGraphicHandwritten` too: `TextBlockExporter.java:172-175` translates by the
+ * margin and THEN wraps (`ug = new UGraphicHandwritten(ug)`), and the banner
+ * is drawn inside that wrap (`DiagramChromeFactory.java:128`), so its rect is
+ * a jiggled polygon (the golden's `rect[1]` of the four `handwritten true`
+ * sequence rows). A caller whose diagram is not drawn through the decorator
+ * leaves it `false`.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/TextBlockExporter.java:172-175
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/DiagramChromeFactory.java:176-200
  */
 export function withWarningBanner(
@@ -99,6 +129,7 @@ export function withWarningBanner(
   measurer: StringMeasurer,
   margin: DocumentMargin,
   uid: string,
+  handwritten = false,
 ): RenderFragment {
   if (warnings.length === 0) return fragment;
   const rawW = fragment.preChromeWidth ?? fragment.width - (margin.left + margin.right + SVG_CANVAS_CEIL);
@@ -111,7 +142,8 @@ export function withWarningBanner(
       const dim = banner.calculateDimension(ug.getStringBounder());
       bannerW = dim.getWidth();
       bannerH = dim.getHeight();
-      banner.drawU(ug.apply(new UTranslate(margin.left, margin.top)), Math.max(bannerW, rawW));
+      const translated = ug.apply(new UTranslate(margin.left, margin.top));
+      banner.drawU(handwritten ? new UGraphicHandwritten(translated) : translated, Math.max(bannerW, rawW));
     },
   };
   // isw-T2c-scale: drawn into a scaled document, formatted by its scale pass.
@@ -123,6 +155,7 @@ export function withWarningBanner(
   return {
     ...fragment,
     body: drawn.body + shiftFragmentBody(fragment.body, 0, bannerH),
+    ...shiftedFold(fragment, 0, bannerH),
     width: fragment.width - canvasSide(rawW, margin.left, margin.right) + canvasSide(stackW, margin.left, margin.right),
     height:
       fragment.height - canvasSide(rawH, margin.top, margin.bottom) + canvasSide(stackH, margin.top, margin.bottom),

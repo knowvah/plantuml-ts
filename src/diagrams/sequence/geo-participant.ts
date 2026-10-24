@@ -79,6 +79,8 @@ export interface ParticipantGeo {
   stereotypeLines?: readonly string[];
   /** {@link Participant.stereotypeBottom}: the rows follow the name lines. */
   stereotypeBottom?: boolean;
+  /** {@link Participant.underlined}: every display line carries `<u>`. */
+  underlined?: boolean;
   /**
    * The box's resolved fill and stroke.
    *

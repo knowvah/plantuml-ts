@@ -21,6 +21,7 @@ import type {
   MessageExoEvent,
   MessageGeo,
 } from '../../../src/diagrams/sequence/ast.js';
+import type { NoteGeo } from '../../../src/diagrams/sequence/geo-annotation.js';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import {
@@ -242,6 +243,28 @@ describe('activation steps (sdd2 T2b: LiveBoxes replaces the consume-once cursor
     // The note wrapper is taller than the message tile, so the deactivate
     // steps at its bottom with nothing recorded there.
     expect(bar.y + bar.height).toBeGreaterThan(g!.top + g!.height + NUDGE);
+  });
+
+  it("TeozTimelineIssues_0002: a note-wrapped message's own life steps sit at the WRAPPER max, so the -- is nudged 5 (jar FFF rect y=126 height=14)", () => {
+    // `CommunicationTileNoteRight.java:96-99` gauges the wrapper to
+    // `min.addAtLeast(max(tile, note))` and `LifeEventTile.java:65-69` steps
+    // at that min; `LiveBoxes.java:81-82` nudges a deactivate landing on a
+    // recorded y by 5. The wrapper here is the note on `& F -> G`; F's own
+    // `++--` (from `D -> F ++--`) land on its bottom, where the first
+    // recorded step is the ++ itself.
+    const w = walk(['D -> F ++-- : m3', '& F -> G -- : m4', 'note right : n']);
+    const note = w.geos.find((g): g is NoteGeo => g.kind === 'note');
+    const [bar] = w.bars.filter((b) => b.participantId === 'F');
+    const wrapperMax = note!.y + note!.height;
+    expect(bar!.y + bar!.height).toBe(wrapperMax + NUDGE);
+    expect(bar!.height).toBe(14);
+  });
+
+  it('a message without a note wrapper records its own steps where it did (jar-equal bare max)', () => {
+    const w = walk(['D -> F ++-- : m3', '& F -> G -- : m4']);
+    const [g3] = w.gauges;
+    const [bar] = w.bars.filter((b) => b.participantId === 'F');
+    expect(bar!.y + bar!.height).toBe(g3!.top + g3!.height + NUDGE);
   });
 
   it('nocilo: every life event after one message binds to it (jar rects both y=66 height=27)', () => {

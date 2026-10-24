@@ -1,7 +1,7 @@
 /**
  * `sequence-label-primitives.ts` — what the recording graphic turns each
  * shape a core `TextBlock` draws into — plus the emitter and scale halves of
- * the shape/image/text primitive kinds (`sequence-text.ts`, `scale-geo.ts`).
+ * the shape/image/text primitive kinds (`sequence-text.ts`).
  */
 import { describe, it, expect } from 'vitest';
 
@@ -21,11 +21,8 @@ import {
   sequenceStringBounder,
 } from '../../../src/diagrams/sequence/sequence-label-primitives.js';
 import { sequenceSkinSimple } from '../../../src/diagrams/sequence/sequence-creole-sheet.js';
-import { primitiveFields, runFontWeight, sequenceText } from '../../../src/diagrams/sequence/sequence-text.js';
-import { scaleRun } from '../../../src/diagrams/sequence/scale-geo.js';
 import { refBodyLines } from '../../../src/diagrams/sequence/ref-body-geo.js';
-import type { TextRun } from '../../../src/diagrams/sequence/ast.js';
-import { labelFont } from '../../helpers/sequence-label.js';
+import { labelBlockOf, labelFont } from '../../helpers/sequence-label.js';
 
 const measurer = new DeterministicMeasurer();
 const ENV = { measurer, bounder: sequenceStringBounder(measurer) };
@@ -108,61 +105,30 @@ describe('sequenceSkinSimple — the SkinParam defaults CreoleParser reads', () 
   });
 });
 
-describe('the emitter and scale halves', () => {
-  const RUN: TextRun = {
-    text: 'x',
-    x: 4,
-    y: 8,
-    textWidth: 10,
-    textAscent: 6,
-    textLineHeight: 8,
-    url: URL,
-    textBackColor: '#FF0000',
-    extraLines: [{ color: '#00FF00', deltaY: 2 }],
-  };
-
-  it('copies every no-fallback field, and nothing absent', () => {
-    expect(primitiveFields(RUN)).toEqual({ url: URL, textBackColor: '#FF0000', extraLines: RUN.extraLines });
-    const { url: _url, textBackColor: _back, extraLines: _lines, ...plain } = RUN;
-    expect(primitiveFields(plain)).toEqual({});
-  });
-
-  it('lets a face weight beat the bold fallback, and the run beat the block', () => {
-    expect(runFontWeight({ ...RUN, fontWeight: '900' }, true)).toBe('900');
-    expect(runFontWeight(RUN, true)).toBe('700');
-    expect(runFontWeight(RUN)).toBeUndefined();
-  });
-
-  it('wraps a shape primitive in its url', () => {
-    const recorded = recordDrawing(state(), ENV, (ug) => ug.draw(ULine.hline(5)))[0]!;
-    const svg = sequenceText({
-      leftX: 0,
-      baselineY: 0,
-      text: '',
-      width: 0,
-      fontFamily: 'sans-serif',
-      fontSize: 13,
-      fill: '#000',
-      shape: recorded.shape!,
-      url: URL,
-    });
-    expect(svg.startsWith('<a ')).toBe(true);
-    expect(svg).toContain('<line');
-  });
-
-  it('scales an extra line offset and records the scale on a shape (`SvgGraphics.java:466-468`)', () => {
-    const shape = recordDrawing(state(), ENV, (ug) => ug.draw(ULine.hline(5)))[0]!.shape!;
-    const out = scaleRun({ ...RUN, shape }, 3);
-    expect(out.extraLines).toEqual([{ color: '#00FF00', deltaY: 6 }]);
-    expect(out.shape!.scale).toBe(3);
-    expect(out.shape!.shape).toBe(shape.shape);
-  });
-});
-
 describe('refBodyLines', () => {
   it('has a body only for a ref, and none for a blank one (`CommandReferenceOverSeveral.java:125,132`)', () => {
     expect(refBodyLines('group', 'x')).toEqual([]);
     expect(refBodyLines('ref', '   ')).toEqual([]);
     expect(refBodyLines('ref', 'a')).toEqual(['a']);
+  });
+});
+
+describe('svg attributes reach the recorded run (DriverTextSvg.java:178-180)', () => {
+  const SOURCE = '<text class=foo id=dummy>message</text>';
+
+  it('a <text …> label is one run of its inner text carrying the sorted attributes', () => {
+    const { primitives } = labelBlockOf([SOURCE], labelFont(13));
+    expect(primitives.map((p) => p.text)).toEqual(['message']);
+    expect([...(primitives[0]!.svgAttributes ?? [])]).toEqual([
+      ['class', 'foo'],
+      ['id', 'dummy'],
+    ]);
+  });
+
+  it('records no field on a plain run, and the attributes key the label cache', () => {
+    expect('svgAttributes' in labelBlockOf(['message'], labelFont(13)).primitives[0]!).toBe(false);
+    const tagged = labelBlockOf(['<text class=a>message</text>'], labelFont(13)).primitives[0]!;
+    const other = labelBlockOf(['<text class=b>message</text>'], labelFont(13)).primitives[0]!;
+    expect([tagged.svgAttributes?.get('class'), other.svgAttributes?.get('class')]).toEqual(['a', 'b']);
   });
 });

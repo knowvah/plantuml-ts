@@ -92,6 +92,7 @@ export default defineConfig({
         items: [
           { text: 'Getting started', link: '/guide/getting-started' },
           { text: 'API reference', link: '/guide/api' },
+          { text: 'Remote images', link: '/guide/image-providers' },
         ],
       },
       {

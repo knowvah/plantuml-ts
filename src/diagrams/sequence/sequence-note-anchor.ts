@@ -23,6 +23,8 @@ export interface NoteAnchor {
   readonly participant: string | undefined;
   /** See `NoteTileInput.rightX`. */
   readonly rightX?: number;
+  /** See `NoteTileInput.leftX`. */
+  readonly leftX?: number;
 }
 
 /**
@@ -86,7 +88,9 @@ export function selfMinX(
  * an exo arrow the one lifeline (`:128-136`). A `right` note on a `create`
  * message starts at that lifeline's `posD` (`CommunicationTileNoteRight
  * .java:122-124`), on a self message at the loop's `getMaxX`
- * (`CommunicationTileSelfNoteRight.java:108-110`).
+ * (`CommunicationTileSelfNoteRight.java:108-110`). A `left` note on a self
+ * message ends at the loop's `getMinX` (`CommunicationTileSelfNoteLeft.java
+ * :108-114`, `tile.getMinX().addFixed(-dim.getWidth())`).
  */
 export function noteAnchor(
   owner: MessageEvent | MessageExoEvent,
@@ -98,7 +102,10 @@ export function noteAnchor(
   const reverse = isReverse(owner, ctx);
   const participant = (position === 'left') === reverse ? owner.to : owner.from;
   const geo = ctx.participantMap.get(participant);
-  if (geo === undefined || position === 'left') return { participant };
+  if (geo === undefined) return { participant };
+  if (position === 'left') {
+    return owner.from === owner.to ? { participant, leftX: selfMinX(owner, geo.centerX, ctx) } : { participant };
+  }
   if (owner.from === owner.to) return { participant, rightX: selfMaxX(owner, geo.centerX, ctx) };
   if (owner.create === true) return { participant, rightX: geo.x + geo.width };
   return { participant };

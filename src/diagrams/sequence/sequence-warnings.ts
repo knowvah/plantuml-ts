@@ -22,6 +22,7 @@
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { documentMarginOf } from '../../core/document-margin.js';
 import type { StringMeasurer } from '../../core/measurer.js';
+import type { SkinparamWarningSource } from '../../core/skinparam-warnings.js';
 import { skinParamWarnings, uniqueWarnings, withWarningBanner } from '../../core/skinparam-warnings.js';
 import type { Warning } from '../../core/warning/Warning.js';
 import type { SequenceDiagramAST, SequenceGeometry } from './ast.js';
@@ -37,7 +38,7 @@ const BANNER_UID = 'sequence-warning-banner';
  *  warnings (`CommandSkinParam.java:88-99`). */
 export function withSkinParamWarnings(
   ast: SequenceDiagramAST,
-  skinparam: ReadonlyMap<string, string> | undefined,
+  skinparam: SkinparamWarningSource | ReadonlyMap<string, string> | undefined,
 ): SequenceDiagramAST {
   const warnings = skinParamWarnings(skinparam);
   return warnings.length === 0 ? ast : { ...ast, warnings };
@@ -56,16 +57,24 @@ export function withGeometryWarnings(geo: SequenceGeometry, ast: SequenceDiagram
 }
 
 /**
- * The banner over a rendered page. A fragment without a declared margin-less
- * block (a `scale`d page, `renderer.ts#preChromeDims`) is returned as is:
- * the banner is not scaled in there.
+ * The banner over a rendered page -- `DiagramChromeFactory#addWarnings`, the
+ * first chrome step (`DiagramChromeFactory.java:128`), drawn deferred into a
+ * scaled page and formatted by the one export scale pass
+ * (`core/skinparam-warnings.ts#withWarningBanner`, sdd3-T3b). Every page
+ * `renderer-document.ts#preChromeDims` builds declares its margin-less block,
+ * so `documentMarginOf` resolves for it; the `undefined` arm is the type's
+ * (a hand-built fragment without a block), not a scaled-page skip.
+ * `handwritten` is `theme.handwritten`: the banner is drawn inside the
+ * exporter's `UGraphicHandwritten` wrap (sdd3-T8f,
+ * `TextBlockExporter.java:172-175`).
  */
 export function withSequenceWarningBanner(
   fragment: RenderFragment,
   warnings: readonly Warning[] | undefined,
   measurer: StringMeasurer,
+  handwritten = false,
 ): RenderFragment {
   const margin = documentMarginOf(fragment);
   if (warnings === undefined || margin === undefined) return fragment;
-  return withWarningBanner(fragment, warnings, measurer, margin, BANNER_UID);
+  return withWarningBanner(fragment, warnings, measurer, margin, BANNER_UID, handwritten);
 }

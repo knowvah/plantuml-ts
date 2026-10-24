@@ -3,6 +3,7 @@ import type { UShape } from '../UShape.js';
 import type { UGraphic } from '../UGraphic.js';
 import type { UParam } from '../UParam.js';
 import type { UTranslate } from '../UTranslate.js';
+import type { UGroup } from '../shape/UGroup.js';
 import type { StringBounder } from '../font/StringBounder.js';
 import { ColorMapper } from '../color/ColorMapper.js';
 
@@ -23,8 +24,8 @@ import { ColorMapper } from '../color/ColorMapper.js';
  * (`apply`, `draw`, `getParam`, `getTranslate`, `getStringBounder`).
  * Delegated here: `getStringBounder`, `getParam`, `draw`, `getTranslate`
  * (T2's own addition, delegated the same way), and `getColorMapper`
- * (sep-T5c, java:79-81). `matchesProperty`/`startGroup`/`closeGroup`/
- * `flushUg`/`getDefaultBackground`/`writeToStream` are dropped — none is
+ * (sep-T5c, java:79-81). `matchesProperty`/`flushUg`/`getDefaultBackground`/
+ * `writeToStream` are dropped — none is
  * part of this port's `UGraphic` surface, matching every prior scope
  * reduction in this file family.
  *
@@ -38,6 +39,13 @@ import { ColorMapper } from '../color/ColorMapper.js';
  * graphic in `UGraphicStencil` (a subclass of this class), so without
  * these two methods no creole `[[url label]]` inside a `Sheet` could ever
  * reach `UGraphicSvg#startUrl`.
+ *
+ * sdd3-T8p: `startGroup`/`closeGroup` (java:88-94) ARE delegated now, the
+ * same duck-typed way: `ComponentRoseLine.java:80` /
+ * `ComponentRoseActiveLine.java:78` open a titled group on the graphic they
+ * are handed, which under handwritten mode is a `UGraphicHandwritten` (a
+ * subclass of this class), so a decorator that dropped the pair would lose
+ * the lifeline's `<g><title>`. Pure addition: no engine reaches it today.
  */
 export abstract class UGraphicDelegator implements UGraphic {
   private readonly ug: UGraphic;
@@ -84,6 +92,19 @@ export abstract class UGraphicDelegator implements UGraphic {
   closeUrl(): void {
     const target = this.ug as Partial<{ closeUrl(): void }>;
     target.closeUrl?.();
+  }
+
+  /** java:88-90 — forwarded only when the wrapped graphic can open a group
+   *  (`UGraphicSvg`); the same duck-typing as {@link startUrl}. */
+  startGroup(group: UGroup): void {
+    const target = this.ug as Partial<{ startGroup(g: UGroup): void }>;
+    target.startGroup?.(group);
+  }
+
+  /** java:92-94. */
+  closeGroup(): void {
+    const target = this.ug as Partial<{ closeGroup(): void }>;
+    target.closeGroup?.();
   }
 
   protected getUg(): UGraphic {

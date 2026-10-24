@@ -22,7 +22,6 @@ import type {
 } from '../../../src/diagrams/sequence/ast.js';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
-import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.js';
 import {
   FRAME_EXTERNAL_MARGIN_X1,
   FRAME_EXTERNAL_MARGIN_X2,
@@ -401,12 +400,6 @@ describe('T3c2: x origin and parallel chains', () => {
     expect(participant(geo, 'a').centerX).toBeCloseTo(126.619, 3);
     const loop = geo.events.find((e) => e.kind === 'message');
     expect(loop?.kind === 'message' && loop.tileMinX).toBeCloseTo(10, 6);
-  });
-
-  it('scales the reverse loop tile min with the geometry (scale-geo.ts)', () => {
-    const geo = layout(['a <- a : reverse loop label', 'a -> b : hi']);
-    const scaled = scaleSequenceGeometry(geo, 2).events.find((e) => e.kind === 'message');
-    expect(scaled?.kind === 'message' && scaled.tileMinX).toBeCloseTo(20, 6);
   });
 });
 

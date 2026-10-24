@@ -17,7 +17,6 @@ import type { FontSpec, StringMeasurer } from '../../../src/core/measurer.js';
 import { MONOSPACED } from '../../../src/core/klimt/creole/Parser.js';
 import { FontStyle } from '../../../src/core/klimt/shape/UText.js';
 import { ULine } from '../../../src/core/klimt/shape/ULine.js';
-import { linkWrap } from '../../../src/core/svg.js';
 import {
   componentLabelBlock,
   EMPTY_LABEL_BLOCK,
@@ -25,7 +24,6 @@ import {
   sequenceLabelBlock,
   sequenceStringBounder,
 } from '../../../src/diagrams/sequence/sequence-creole-sheet.js';
-import { sequenceText } from '../../../src/diagrams/sequence/sequence-text.js';
 import type { TextRun } from '../../../src/diagrams/sequence/ast.js';
 import { labelBlockOf, labelFont, SANS } from '../../helpers/sequence-label.js';
 
@@ -267,39 +265,5 @@ describe('the factory', () => {
     expect(seen[0]).toEqual({ family: SANS, size: 13, weight: 'bold' });
     sequenceStringBounder(recording).calculateDimension({ family: SANS, size: 9 }, 'x');
     expect(seen[1]).toEqual({ family: SANS, size: 9 });
-  });
-});
-
-describe('sequenceText — the primitive kinds', () => {
-  const SPEC = { leftX: 10, baselineY: 20, text: 'label', width: 30, fontFamily: SANS, fontSize: 13, fill: '#000' };
-
-  it('wraps a url run in exactly the <a> linkWrap emits', () => {
-    const URL = { url: 'https://example.com', tooltip: 'tip' };
-    expect(sequenceText({ ...SPEC, url: URL })).toBe(linkWrap(sequenceText(SPEC), URL));
-  });
-
-  it('emits a back colour as the feFlood filter `SvgGraphics#text` registers', () => {
-    expect(sequenceText({ ...SPEC, textBackColor: '#FF0000' })).toMatch(/<text[^>]* filter="url\(#[^)]+\)"/);
-  });
-
-  it('draws extended-colour lines AFTER the text, across its width (`DriverTextSvg.java:180`)', () => {
-    const svg = sequenceText({ ...SPEC, extraLines: [{ color: '#00FF00', deltaY: 1 }] });
-    expect(svg.indexOf('<text')).toBeLessThan(svg.indexOf('<line'));
-    expect(svg).toContain('x1="10" y1="21" x2="40" y2="21"');
-  });
-
-  it('draws a shape primitive through core drivers at the recorded scale', () => {
-    const rule = labelBlockOf(['----'], FONT, { ink: { fore: '#123456' } }).primitives[0]!;
-    const shape = { ...rule.shape!, scale: 2 };
-    const svg = sequenceText({ ...SPEC, leftX: 20, baselineY: 40, shape });
-    expect(svg).toMatch(/^<line x1="20" y1="40" x2="[\d.]+" y2="40"/);
-    expect(svg).toContain('stroke:#123456');
-    expect(svg).not.toContain('<text');
-  });
-
-  it('emits font-style="italic" and a face weight when the run asks for them', () => {
-    const svg = sequenceText({ ...SPEC, fontStyle: 'italic', fontWeight: '900' });
-    expect(svg).toContain('font-style="italic"');
-    expect(svg).toContain('font-weight="900"');
   });
 });

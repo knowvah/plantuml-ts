@@ -72,7 +72,7 @@ import { group } from '../svg.js';
 import { buildAnnotationBlock, type AnnotationBlock } from './blocks.js';
 import { mergeFragmentDefs } from '../klimt/document-shell.js';
 import type { SpriteRegistry } from '../sprite-commands.js';
-import { shiftFragmentBody } from './coord-shift.js';
+import { shiftedFold, shiftFragmentBody } from './coord-shift.js';
 import { addMainframe, nonNullDisplay, type ChromeTextContext, type FramedOriginal } from './chrome-mainframe.js';
 import { inkOfBody, type InkBox } from './body-ink.js';
 import { withDeferredFormat } from '../svg-format.js';
@@ -172,7 +172,12 @@ function decorateEntityImage(
   // document (e.g. the same colour in header and footer) can emit the same
   // def twice.
   const extraDefs = mergeFragmentDefs([original, text1?.block ?? {}, text2?.block ?? {}]);
-  const composed = { body: parts.join(''), width: dimTotal.width, height: dimTotal.height };
+  const composed = {
+    body: parts.join(''),
+    width: dimTotal.width,
+    height: dimTotal.height,
+    ...shiftedFold(original, xImage, yImage),
+  };
   return extraDefs === undefined ? composed : { ...composed, extraDefs };
 }
 
@@ -377,6 +382,7 @@ function composeChrome(
     body: fragment.body,
     width: fragment.preChromeWidth ?? fragment.width,
     height: fragment.preChromeHeight ?? fragment.height,
+    ...shiftedFold(fragment, 0, 0),
     ...frameInkOf(fragment, annotations, measurer),
   };
   // cdd-T34: mainframe applies FIRST (`DiagramChromeFactory.create`'s own
@@ -408,6 +414,7 @@ function composeChrome(
     body: group(block.body),
     width: block.width,
     height: block.height,
+    ...shiftedFold(block, 0, 0),
     bodyWrapped: true,
     ...(extraDefs === undefined ? {} : { extraDefs }),
   };

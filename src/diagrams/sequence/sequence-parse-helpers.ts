@@ -174,6 +174,14 @@ export function ensureParticipant(
     ...(decl?.stereotype !== undefined && state.style.params.valueIs('stereotypePosition', 'bottom')
       ? { stereotypeBottom: true }
       : {}),
+    // A getter over the parse's legacy `params`, read after the parse: upstream
+    // asks `forceSequenceParticipantUnderlined()` at draw time
+    // (`LivingSpace.java:198,219`, `MutingLine.java:107-108`), so a skinparam
+    // written below the declaration still applies. Same shape as the box's
+    // `boxPadding` (`command-grouping.ts`).
+    get underlined() {
+      return state.style.params.valueIs('sequenceParticipant', 'underline') ? true : undefined;
+    },
     ...(decl?.url !== undefined ? { url: decl.url } : {}),
     ...(state.currentBox !== null ? { boxId: state.currentBox.id } : {}),
     styleBuilder: currentStyleBuilder(state.style),

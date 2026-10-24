@@ -1,30 +1,41 @@
 /**
  * A grouping frame's type tab -- background pass (the plain outline) and
- * foreground pass (the clipped-corner tab + its text). Both halves draw the
- * SAME full-area `URectangle`; that duplication is not a bug here, it is
+ * foreground pass (the clipped-corner tab + its text), drawn through the
+ * page's `UGraphic` (sdd3 T8e). Both halves draw the SAME full-area
+ * `URectangle`; that duplication is not a bug here, it is
  * `AbstractComponent#drawU`'s per-component two-half dispatch
  * (`drawBackgroundInternalU` vs `drawInternalU`, never both in one call) --
  * see this component's own two methods below.
  *
+ * Each `draw<X>` takes the graphic at the PAGE origin and translates to the
+ * frame's top-left itself, as the tile does (`GroupingTile#drawU`); every
+ * shape is then drawn in the component's local frame, on the instance its
+ * last `apply` produced (`symbolContext.applyStroke(ug).apply(fore)`).
+ *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/AbstractComponent.java:137-149
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/rose/ComponentRoseGroupingHeader.java
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/rose/ComponentRoseReference.java
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/AbstractTextualComponent.java:100-127
  */
 
 import type { FrameGeo, TextRun } from './ast.js';
-import type { ScaledTheme } from './scale-geo.js';
 import type { Paint } from '../../core/paint.js';
-import { rect, path } from '../../core/svg-shapes.js';
-import { fmt } from '../../core/svg-format.js';
+import { PAINT_NONE } from '../../core/svg.js';
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import { Back } from '../../core/klimt/Back.js';
+import { Fore } from '../../core/klimt/Fore.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { UPath } from '../../core/klimt/shape/UPath.js';
+import { URectangle } from '../../core/klimt/shape/URectangle.js';
 import { FontStyle, type FontConfiguration } from '../../core/klimt/shape/UText.js';
-import { primitiveFields, sequenceText, weightOf } from './sequence-text.js';
+import { drawRun, type RunAmbient } from './renderer-text.js';
 import { primitiveKind } from './sequence-label-primitives.js';
-import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
-import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
-import { frameShadowDelta, sequenceShadowFilter } from './sequence-shadow.js';
+import { frameShadowDelta } from './sequence-shadow.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 import { CORNER_SIZE } from './frame-style.js';
 import { TRANSPARENT_SVG } from './text-block-geo.js';
+import { strokeOf } from './renderer-line-component.js';
 
 /** A frame's two paints, as layout resolved them (sdd1 D1): the body
  *  `style` and the `styleHeader` (`sequence-layout-frame.ts`,
@@ -42,87 +53,94 @@ export function framePaintsOf(frame: FrameGeo): FramePaintPair {
   return { paint, headerPaint };
 }
 
-/** `HColor#toSvg` of a fully transparent colour (`HColor.java:76`). */
-
 /** `SvgGraphics#fixColor` (`SvgGraphics.java:539-541`): a transparent fill or
  *  stroke is written `none`. */
 export function svgFixColor(p: Paint): Paint {
-  return p === TRANSPARENT_SVG ? 'none' : p;
+  return p === TRANSPARENT_SVG ? PAINT_NONE : p;
 }
 
-/** `Fashion#applyStroke` with its fore colour (`klimt/Fashion.java:67-88`):
- *  colour, thickness and dashes, the lengths scaled at emission
- *  (`SvgGraphics.java:555-561`). */
-export function strokeOf(paint: SequencePaint, k: number) {
-  const dash = paint.dash;
-  return {
-    stroke: svgFixColor(paint.stroke),
-    strokeWidth: paint.thickness * k,
-    ...(dash === undefined ? {} : { strokeDasharray: dash.map((d) => fmt(d * k)).join(',') }),
-  };
+/** `symbolContext.getForeColor()` as a frame applies it. */
+function foreOf(paint: SequencePaint): Fore {
+  return new Fore(svgFixColor(paint.stroke));
 }
 
-/** `URectangle.rounded(roundCorner)`, emitted `rx = ry = roundCorner / 2`
- *  (`DriverRectangleSvg.java:78`). */
-function roundedOf(roundCorner: number, k: number): { readonly rx: number; readonly ry: number } {
-  const r = (roundCorner / 2) * k;
-  return { rx: r, ry: r };
+/** `Fashion#apply` (`klimt/Fashion.java:76-92`): fore, back `.bg()`, stroke --
+ *  `symbolContextCorner.apply(ug)`, `symbolContextBody.apply(ug)`. */
+function fashion(ug: UGraphic, paint: SequencePaint): UGraphic {
+  return ug
+    .apply(foreOf(paint))
+    .apply(new Back(svgFixColor(paint.fill)))
+    .apply(strokeOf(paint));
+}
+
+/** `Fashion#applyStroke(ug).apply(getForeColor())`
+ *  (`ComponentRoseGroupingHeader.java:128,144`): the outline's stroke, then
+ *  its colour, and NO back colour. */
+function outline(ug: UGraphic, paint: SequencePaint): UGraphic {
+  return ug.apply(strokeOf(paint)).apply(foreOf(paint));
+}
+
+/** The graphic at the frame's top-left: the tile's own translate
+ *  (`GroupingTile#drawU`, `ReferenceTile#drawU`). A `ref`'s `dx(xMargin)`
+ *  (`ComponentRoseReference.java:96,122`) is already in `frame.x`. */
+function atFrame(ug: UGraphic, frame: FrameGeo): UGraphic {
+  return ug.apply(new UTranslate(frame.x, frame.y));
 }
 
 /**
  * `ComponentRoseGroupingHeader#getCorner` (`:161-186`) -- the type tab's
- * clipped top-right corner, as a `<path>` `d` string. `origin` is the
- * frame's own drawn top-left (`frame.x`/`frame.y`); upstream draws this in
- * the component's LOCAL coordinate system and this port bakes the offset
- * into the `d` string directly, matching the jar's own absolute-coordinate
- * `d` output (no `transform`).
+ * clipped top-right corner, as a `UPath` at the component's origin.
  *
  * Exported for direct coverage of both branches against the literal
  * upstream shape. The radius is the BODY style's `RoundCorner` for both
  * components (`ComponentRoseGroupingHeader.java:79`, `ComponentRoseReference
- * .java:74`).
+ * .java:74`). `UPath#closePath` records nothing, so `d` stays unclosed.
  */
-export function frameHeaderCornerPath(
-  origin: { readonly x: number; readonly y: number },
+export function frameHeaderCorner(
   size: { readonly width: number; readonly height: number },
   cornerSize: number,
   roundCorner: number,
-): string {
-  const { x, y } = origin;
-  const { width: w, height: h } = size;
+): UPath {
+  const { width, height } = size;
+  const polygon = UPath.none();
   if (roundCorner === 0) {
-    return [
-      moveTo(x, y),
-      lineTo(x + w, y),
-      lineTo(x + w, y + h - cornerSize),
-      lineTo(x + w - cornerSize, y + h),
-      lineTo(x, y + h),
-      lineTo(x, y),
-    ].join(' ');
+    polygon.moveTo(0, 0);
+    polygon.lineTo(width, 0);
+    polygon.lineTo(width, height - cornerSize);
+    polygon.lineTo(width - cornerSize, height);
+    polygon.lineTo(0, height);
+    polygon.lineTo(0, 0);
+    return polygon;
   }
   const half = roundCorner / 2;
-  return [
-    moveTo(x + half, y),
-    lineTo(x + w, y),
-    lineTo(x + w, y + h - cornerSize),
-    lineTo(x + w - cornerSize, y + h),
-    lineTo(x, y + h),
-    lineTo(x, y + half),
-    arcTo(x + half, y, half, 0, 1),
-  ].join(' ');
+  polygon.moveTo(half, 0);
+  polygon.lineTo(width, 0);
+  polygon.lineTo(width, height - cornerSize);
+  polygon.lineTo(width - cornerSize, height);
+  polygon.lineTo(0, height);
+  polygon.lineTo(0, half);
+  polygon.arcTo(half, half, 0, 0, 1, half, 0);
+  return polygon;
 }
 
 /**
  * `ComponentRoseGroupingHeader#drawBackgroundInternalU` (`:126-133`) -- the
  * background pass, reached only via `Context2D#isBackground()`
- * (`AbstractComponent.java:144-145`). Under teoz `background` is always
- * `HColors.transparent()` (`:80`), so this is `fill="none"` with an outline
- * stroked by `style`'s symbol context (`:81,128`), rounded by `style`'s
- * `RoundCorner` (`:79,130`) and shadowed by its `Shadowing` (`:131`). Only
- * this background rect carries the shadow -- `drawInternalU`'s second rect
- * (`:144-147`) sets none, and neither does the corner `UPath` (`:142`).
- * Jar-verified: `tests/fixtures/unwind2-S9/style-groupheader.svg` draws no
- * filter at all.
+ * (`AbstractComponent.java:144-145`):
+ *
+ * ```java
+ * ug = symbolContext.applyStroke(ug).apply(symbolContext.getForeColor());
+ * final URectangle rect = URectangle.build(w, h).rounded(roundCorner);
+ * rect.setDeltaShadow(symbolContext.getDeltaShadow());
+ * ug.apply(background.bg()).draw(rect);
+ * ```
+ * Under teoz `background` is always `HColors.transparent()` (`:80`), so this
+ * is `fill="none"` with an outline stroked by `style`'s symbol context
+ * (`:81,128`), rounded by `style`'s `RoundCorner` (`:79,130`) and shadowed by
+ * its `Shadowing` (`:131`). Only this background rect carries the shadow --
+ * `drawInternalU`'s second rect (`:144-147`) sets none, and neither does the
+ * corner `UPath` (`:142`). Jar-verified:
+ * `tests/fixtures/unwind2-S9/style-groupheader.svg` draws no filter at all.
  *
  * A `ref` frame draws NOTHING here. Upstream builds it as a `ReferenceTile`
  * (`TileBuilder.java:174-176`), not a `GroupingTile`, and its component
@@ -130,36 +148,25 @@ export function frameHeaderCornerPath(
  * (`ComponentRoseReference.java:83`), so `AbstractComponent#drawU:143-147`
  * dispatches the EMPTY inherited `drawBackgroundInternalU` (`:139-140`).
  */
-export function renderGroupingHeaderBackground(frame: FrameGeo, theme: ScaledTheme): string {
-  if (frame.frameType === 'ref') return '';
-  const k = theme.scaleK;
+export function drawGroupingHeaderBackground(ug: UGraphic, frame: FrameGeo): void {
+  if (frame.frameType === 'ref') return;
   const { paint } = framePaintsOf(frame);
-  return rect(frame.x, frame.y, frame.width, frame.height, {
-    fill: 'none',
-    ...strokeOf(paint, k),
-    ...roundedOf(paint.roundCorner, k),
-    ...sequenceShadowFilter(frameShadowDelta(frame)),
-  });
+  const rect = URectangle.build(frame.width, frame.height).rounded(paint.roundCorner);
+  rect.setDeltaShadow(frameShadowDelta(frame));
+  outline(atFrame(ug, frame), paint).apply(new Back(PAINT_NONE)).draw(rect);
 }
 
 /**
- * The corner-tab `<path>`, drawn with `styleHeader`'s symbol context --
+ * The corner-tab `UPath`, drawn with `styleHeader`'s symbol context --
  * fill, line colour and stroke (`symbolContextCorner.apply(ug)`,
  * `ComponentRoseGroupingHeader.java:82,142`; `symbolContextHeader.apply(ug)`,
  * `ComponentRoseReference.java:72,121`) -- and shaped by the BODY style's
- * `RoundCorner`. A `ref` draws its corner at `dx(xMargin)` (`:122`), which
- * `frame.x` already carries.
+ * `RoundCorner`.
  */
-function renderHeaderCorner(frame: FrameGeo, theme: ScaledTheme): string {
-  const k = theme.scaleK;
+function drawHeaderCorner(ug: UGraphic, frame: FrameGeo): void {
   const { paint, headerPaint } = framePaintsOf(frame);
-  const cornerD = frameHeaderCornerPath(
-    { x: frame.x, y: frame.y },
-    { width: frame.tabWidth, height: frame.tabHeight },
-    CORNER_SIZE * k,
-    paint.roundCorner * k,
-  );
-  return path(cornerD, { fill: svgFixColor(headerPaint.fill), ...strokeOf(headerPaint, k) });
+  const corner = frameHeaderCorner({ width: frame.tabWidth, height: frame.tabHeight }, CORNER_SIZE, paint.roundCorner);
+  fashion(atFrame(ug, frame), headerPaint).draw(corner);
 }
 
 /**
@@ -187,37 +194,32 @@ export function drawnRuns(runs: readonly TextRun[], font: FontConfiguration): Te
   return out;
 }
 
+/** What a frame's runs fall back to where creole set none: the block font's
+ *  family, (scaled) size and weight. The colour is never read --
+ *  {@link drawnRuns} stamps every drawn run with its own. */
+function frameAmbientOf(font: FontConfiguration): RunAmbient {
+  return {
+    fontFamily: font.family,
+    fontSize: font.size,
+    color: font.color ?? TRANSPARENT_SVG,
+    bold: font.styles.has(FontStyle.BOLD),
+  };
+}
+
 /**
  * The tab title, its optional `[comment]` and a `ref`'s keyword -- each run
  * carries the font its block was built at in layout (`sequence-layout-frame
  * .ts#buildTabRuns`, `sequence-layout-ref.ts#headerOf`): `styleHeader`'s for
  * the title, `style`'s `smallFont2` for the comment
  * (`ComponentRoseGroupingHeader.java:84,90`). That is `DriverTextSvg#draw`
- * reading one `FontConfiguration` per `UText` (`:104-160,177-180`). The
- * fallbacks are the header font's, for a run that set none. Drawn under
- * `UStroke.simple()` (`:149`). `url` WRAPS rather than decorates
- * (`SvgGraphics#openLink`/`closeLink`); `sequence-text.ts` owns that wrap.
+ * reading one `FontConfiguration` per `UText` (`:104-160,177-180`), via
+ * {@link drawRun}. Drawn under `UStroke.simple()` (`:149`).
  */
-function renderHeaderText(frame: FrameGeo, theme: ScaledTheme): string {
-  const k = theme.scaleK;
+function drawHeaderText(ug: UGraphic, frame: FrameGeo): void {
   const font = framePaintsOf(frame).headerPaint.font;
-  return drawnRuns(frame.tabRuns, font)
-    .map((run) =>
-      sequenceText({
-        leftX: drawnLeftX(run),
-        baselineY: run.y,
-        text: run.text,
-        width: drawnWidth(run),
-        fontFamily: run.fontFamily ?? font.family,
-        fontSize: run.fontSize ?? font.size * k,
-        ...weightOf(run, font.styles.has(FontStyle.BOLD)),
-        fill: run.color!,
-        ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
-        ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
-        ...primitiveFields(run),
-      }),
-    )
-    .join('');
+  const ambient = frameAmbientOf(font);
+  const simple = ug.apply(UStroke.simple());
+  for (const run of drawnRuns(frame.tabRuns, font)) drawRun(simple, run, ambient);
 }
 
 /**
@@ -230,17 +232,25 @@ function renderHeaderText(frame: FrameGeo, theme: ScaledTheme): string {
  * `getPreferredWidth` added back (`:155-159`, `ref-body-geo.ts
  * #refComponentWidth`).
  */
-function renderBodyRect(frame: FrameGeo, theme: ScaledTheme): string {
-  const k = theme.scaleK;
+function bodyRectOf(frame: FrameGeo, paint: SequencePaint): URectangle {
+  const delta = frame.frameType === 'ref' ? frameShadowDelta(frame) : 0;
+  const rect = URectangle.build(frame.width - delta, frame.height).rounded(paint.roundCorner);
+  rect.setDeltaShadow(delta);
+  return rect;
+}
+
+/** A grouping frame's body outline: `symbolContext.applyStroke(ug)
+ *  .apply(fore)` then `draw(rect)` (`ComponentRoseGroupingHeader.java:144-147`). */
+function drawGroupingBodyRect(ug: UGraphic, frame: FrameGeo): void {
   const { paint } = framePaintsOf(frame);
-  const isRef = frame.frameType === 'ref';
-  const delta = isRef ? frameShadowDelta(frame) : 0;
-  return rect(frame.x, frame.y, frame.width - delta * k, frame.height, {
-    fill: isRef ? svgFixColor(paint.fill) : 'none',
-    ...strokeOf(paint, k),
-    ...roundedOf(paint.roundCorner, k),
-    ...sequenceShadowFilter(delta),
-  });
+  outline(atFrame(ug, frame), paint).draw(bodyRectOf(frame, paint));
+}
+
+/** A `ref`'s body: `symbolContextBody.apply(ug)` then `draw(rect)`
+ *  (`ComponentRoseReference.java:93-96`). */
+function drawReferenceBodyRect(ug: UGraphic, frame: FrameGeo): void {
+  const { paint } = framePaintsOf(frame);
+  fashion(atFrame(ug, frame), paint).draw(bodyRectOf(frame, paint));
 }
 
 /**
@@ -257,15 +267,19 @@ function renderBodyRect(frame: FrameGeo, theme: ScaledTheme): string {
  * ordering differs at this level, so the two share a module rather than
  * duplicating the corner and rect.
  */
-export function renderGroupingHeaderForeground(frame: FrameGeo, theme: ScaledTheme): string {
-  const cornerEl = renderHeaderCorner(frame, theme);
-  const bodyRectEl = renderBodyRect(frame, theme);
+export function drawGroupingHeaderForeground(ug: UGraphic, frame: FrameGeo): void {
   // The page clip took the tab: its `UPath` failed `DriverPathSvg`'s
   // min/max-corner test and its label `UText` failed `DriverTextSvg`'s
   // anchor test, so the body outline is all that is left of the header.
   // See `FrameGeo.headerClipped`.
-  if (frame.headerClipped === true) return bodyRectEl;
-  const textEl = renderHeaderText(frame, theme);
-  if (frame.frameType === 'ref') return bodyRectEl + cornerEl + textEl;
-  return cornerEl + bodyRectEl + textEl;
+  const isRef = frame.frameType === 'ref';
+  if (frame.headerClipped === true) {
+    if (isRef) drawReferenceBodyRect(ug, frame);
+    else drawGroupingBodyRect(ug, frame);
+    return;
+  }
+  if (isRef) drawReferenceBodyRect(ug, frame);
+  drawHeaderCorner(ug, frame);
+  if (!isRef) drawGroupingBodyRect(ug, frame);
+  drawHeaderText(ug, frame);
 }

@@ -1,0 +1,3 @@
+@startuml
+Bob -> Alice : <text class=foo id=dummy>message</text>
+@enduml

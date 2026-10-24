@@ -3,6 +3,7 @@ import type { HColor } from '../../style/Value.js';
 import type { ColorMapper } from './ColorMapper.js';
 import { distance, getGrayScaleColor } from './ColorUtils.js';
 import { toSvgHex, type ResolvedColor } from './HColorSet.js';
+import { TransparentFillBehavior } from '../drawing/svg/svg-option.js';
 
 /** `String.format("%02X")` / `"%02x"` of one 8-bit channel. */
 function hex2(n: number): string {
@@ -21,12 +22,12 @@ function xColorToString(c: ResolvedColor): string {
  * Ported slice (what the style engine and the klimt substrate reach):
  * `create`, `withDark`, `darkSchemeTheme`, `isTransparent`, `getAwtColor`,
  * `toString`, `asString`, `equals`, `toColor`, the inherited `HColor#toSvg`,
+ * `transparentFillBehavior`/`withTransparentFillBehavior` (sdd3-T8p: the
+ * `ComponentRoseLine` hover rect's `HColors.transparent(WITH_FILL_OPACITY)`;
+ * `create` stays upstream's default `WITH_FILL_NONE`, so `toString`'s
+ * behaviour suffix, java:62-63, prints only for an instance that asked),
  * plus the port-only {@link asPaint}.
- * Not ported: `transparentFillBehavior` (set only by
- * `withTransparentFillBehavior`/`HColors.transparent(behavior)`, neither
- * reached; every instance here is upstream's default `WITH_FILL_NONE`, so
- * `toString`'s behaviour suffix, java:62-63, never prints), the
- * HSL/monochrome/`unlinear` arithmetic, `isDark`.
+ * Not ported: the HSL/monochrome/`unlinear` arithmetic, `isDark`.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSimple.java:43-242
  */
@@ -37,6 +38,8 @@ export class HColorSimple implements HColor {
     private readonly color: ResolvedColor,
     /** @see HColorSimple.java:46 */
     private readonly dark: HColor | undefined,
+    /** @see HColorSimple.java:47 */
+    private readonly fillBehavior: TransparentFillBehavior,
   ) {}
 
   /** @see HColorSimple.java:217-219 */
@@ -54,7 +57,7 @@ export class HColorSimple implements HColor {
 
   /** @see HColorSimple.java:141-143 */
   static create(c: ResolvedColor): HColorSimple {
-    return new HColorSimple(c, undefined);
+    return new HColorSimple(c, undefined, TransparentFillBehavior.WITH_FILL_NONE);
   }
 
   /** `[WITHDARK ]<XColor> α=<alpha>[ transparent]`. @see HColorSimple.java:49-65 */
@@ -62,6 +65,7 @@ export class HColorSimple implements HColor {
     let sb = this.dark === undefined ? '' : 'WITHDARK ';
     sb += `${xColorToString(this.color)} α=${String(this.color.a)}`;
     if (this.isTransparent()) sb += ' transparent';
+    if (this.fillBehavior !== TransparentFillBehavior.WITH_FILL_NONE) sb += ` ${this.fillBehavior}`;
     return sb;
   }
 
@@ -108,7 +112,21 @@ export class HColorSimple implements HColor {
 
   /** @see HColorSimple.java:225-228 */
   withDark(dark: HColor): HColor {
-    return new HColorSimple(this.color, dark);
+    return new HColorSimple(this.color, dark, this.fillBehavior);
+  }
+
+  /** What `SvgGraphics#setFillColor` does with a transparent fill:
+   *  `WITH_FILL_NONE` (the default) writes `fill="none"`, `WITH_FILL_OPACITY`
+   *  keeps the colour's own `#rrggbbaa` (`fill="#000" fill-opacity="0"`).
+   *  @see HColorSimple.java:136-139, SvgGraphics.java:521-530 */
+  transparentFillBehavior(): TransparentFillBehavior {
+    return this.fillBehavior;
+  }
+
+  /** A copy with the given behaviour; colour and dark partner are kept.
+   *  @see HColorSimple.java:230-233 */
+  withTransparentFillBehavior(transparentFillBehavior: TransparentFillBehavior): HColorSimple {
+    return new HColorSimple(this.color, this.dark, transparentFillBehavior);
   }
 
   /** The dark partner, else this. @see HColorSimple.java:235-240 */

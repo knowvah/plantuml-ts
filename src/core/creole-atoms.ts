@@ -45,6 +45,8 @@ import type { UTranslate } from './klimt/UTranslate.js';
 import type { UStroke } from './klimt/UStroke.js';
 import type { Paint } from './paint.js';
 import type { SpriteTint } from './klimt/sprite/sprite-tint.js';
+import type { StringBounder } from './klimt/font/StringBounder.js';
+import type { SvgParserSelector } from './klimt/sprite/sax/svg-sprite-parser-factory.js';
 
 // ---------------------------------------------------------------------------
 // Token model
@@ -190,7 +192,20 @@ export interface DrawablePrimitive {
  * time too, producing REAL `kind: 'drawable'` primitives instead of a
  * synthesized ink box -- see that function's doc comment.
  */
-export type AtomImageResolver = (atom: InlineAtomToken) =>
+/**
+ * Where a sprite's draw reads its `StringBounder`: upstream's `SvgSaxParser`
+ * asks `ug.getStringBounder()` while drawing a `<text text-anchor>`
+ * (`SvgSaxParser.java:666-675`), so the caller of an {@link AtomImageResolver}
+ * hands over the bounder it measures/draws with. A supplier, not a value:
+ * the call is made only when a sprite really draws an anchored text, as
+ * upstream's is, and not every `UGraphic` can answer it.
+ */
+export type StringBounderSupplier = () => StringBounder;
+
+export type AtomImageResolver = (
+  atom: InlineAtomToken,
+  stringBounder?: StringBounderSupplier,
+) =>
   | {
       readonly kind: 'image';
       readonly href: string;
@@ -232,6 +247,9 @@ export interface SpriteDims {
    *  decompose real geometry via `resolveSvgSpriteAtom`, the SAME function
    *  the renderer calls, rather than approximating from ink numbers alone. */
   svg?: string;
+  /** Which parser draws `svg`, fixed when the sprite was defined
+   *  (`SpriteSvg.parser`, `CommandSpriteSvg.java:81-82`); absent = nano. */
+  parser?: SvgParserSelector;
 }
 
 export interface SpriteDimsLookup {
@@ -248,7 +266,7 @@ export interface SpriteDimsLookup {
 /** Splitter.imgPatternNoSrcColon, java Splitter.java:58. Group 1: raw src
  *  content (may carry a `src=` prefix and/or quotes -- stripped by
  *  `stripImgSrc`). Group 2: the optional `{scale=N}` block. */
-const IMG_PATTERN_SOURCE = '<img[\\s:]+([^>{}]+)(\\{scale=[0-9.]+\\})?>';
+export const IMG_PATTERN_SOURCE = '<img[\\s:]+([^>{}]+)(\\{scale=[0-9.]+\\})?>';
 
 /** `SpriteUtils.SPRITE_NAME` (java :45) -- THE sprite-name char class
  *  (`[-\p{L}0-9_/]+`), single source of truth under src/ (si11b ADR-4 /

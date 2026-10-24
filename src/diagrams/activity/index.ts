@@ -50,7 +50,7 @@ export const activityPlugin: SyncPlugin<ActivityDiagramAST, ActivityPluginGeomet
     const ast = parseActivity(block, options);
     // `refused` is `ParseRefusal`'s discriminant (`dispatcher.ts#parseRefusalOf`).
     if ('refused' in ast) return ast;
-    return withSkinParamWarnings(ast, block.styleSource?.skinparam);
+    return withSkinParamWarnings(ast, block.styleSource);
   },
 
   // add4-T2e THEME-MARGIN: `documentMarginTheme`'s own doc (chrome keeps

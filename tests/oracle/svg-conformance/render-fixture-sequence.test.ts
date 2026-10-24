@@ -19,6 +19,7 @@
  *      diagram block throws (`renderSync` never throws; T0's note records
  *      that it swallows every failure into an error-diagram SVG instead).
  */
+import { attrsOf } from '../../helpers/svg-tags.js';
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -159,6 +160,9 @@ describe('renderFixtureSequence nested-diagram registration (sdd2-T6d)', () => {
       '@startuml\nparticipant A\nnote over A\n<size:18>x</size> \nz\nend note\n@enduml',
       new DeterministicMeasurer(),
     );
-    expect(svg).toMatch(/<text x="30" y="72\.111" font-size="13" fill="#000">\u00a0<\/text>/);
+    // The page draws through klimt's `DriverTextSvg` (sdd3 T8e), whose attribute
+    // order is the jar's; read the tag through `attrsOf`, not as a spelling.
+    const tag = /<text x="30" y="72\.111"[^>]*>\u00a0<\/text>/.exec(svg)?.[0] ?? '';
+    expect(attrsOf(tag)).toMatchObject({ x: '30', y: '72.111', 'font-size': '13', fill: '#000' });
   });
 });

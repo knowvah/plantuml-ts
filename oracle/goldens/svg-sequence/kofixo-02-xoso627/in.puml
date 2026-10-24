@@ -1,0 +1,5 @@
+@startuml
+participant Alice as "Alice Smith" [[http://www.yahoo.com {"request":"hyperlink",\n'status':&200}]]
+Alice -> Bob: Ping
+Bob -> Alice: Pong
+@enduml

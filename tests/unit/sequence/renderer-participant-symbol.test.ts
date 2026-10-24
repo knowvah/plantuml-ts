@@ -26,20 +26,33 @@
  */
 import { describe, it, expect } from 'vitest';
 import {
-  renderParticipantSymbol,
+  drawParticipantSymbol,
   measureParticipantSymbol,
-  type SymbolParticipantType,
   type ParticipantSymbolGeo,
+  type ParticipantSymbolOpts,
+  type SymbolParticipantType,
 } from '../../../src/diagrams/sequence/renderer-participant-symbol.js';
+import { pageThemeOf } from '../../../src/diagrams/sequence/renderer-ug.js';
+import { drawMarkup } from './draw-markup.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import { scaleSequenceTheme } from '../../../src/diagrams/sequence/scale-geo.js';
 import { paintOfGeo } from '../../../src/diagrams/sequence/sequence-participant-paints.js';
 import type { SequencePaint } from '../../../src/diagrams/sequence/sequence-skin-param.js';
 import type { ParticipantType } from '../../../src/diagrams/sequence/ast.js';
 
 const MEASURER = new DeterministicMeasurer();
-const THEME = scaleSequenceTheme(defaultTheme, 1, MEASURER);
+const THEME = pageThemeOf(defaultTheme, MEASURER);
+
+/** One glyph drawn on the page's graphic and serialised: the glyph module
+ *  draws into the page's `UGraphic` (sdd3-T8c), so the markup is read back
+ *  through `draw-markup.ts`. */
+function renderParticipantSymbol(
+  type: ParticipantType,
+  geo: ParticipantSymbolGeo,
+  opts: ParticipantSymbolOpts,
+): string {
+  return drawMarkup((ug) => drawParticipantSymbol(ug, type, geo, opts), opts.theme);
+}
 
 /** The default skin's merged-style paint for `type` (`plantuml.skin`). */
 function paint(type: ParticipantType): SequencePaint {
@@ -99,15 +112,6 @@ describe('renderParticipantSymbol — database', () => {
     expect(dAttrs(draw('database', true))[0]).toContain('M150,69 ');
     // tail: text first, glyph pushed down by getTextHeight = 66 - 46 = 20.
     expect(dAttrs(draw('database', false))[0]).toContain('M150,89 ');
-  });
-
-  it('multiplies every coordinate by the render scale', () => {
-    const scaled = scaleSequenceTheme(defaultTheme, 2, MEASURER);
-    const svg = draw('database', true, { ...GEO, x: 200, y: 118, width: 272, height: 132 }, scaled);
-    expect(dAttrs(svg)[0]).toBe(
-      'M300,138 C300,118 336,118 336,118 C336,118 372,118 372,138 L372,190' +
-        ' C372,210 336,210 336,210 C336,210 300,210 300,190 L300,138',
-    );
   });
 });
 
@@ -187,26 +191,28 @@ describe('measureParticipantSymbol', () => {
   it('is independent of the theme', () => {
     for (const type of ALL_TYPES) {
       expect(
-        measureParticipantSymbol(type, paint(type), scaleSequenceTheme(defaultTheme, 3, MEASURER), MEASURER),
+        measureParticipantSymbol(
+          type,
+          paint(type),
+          pageThemeOf({ ...defaultTheme, fontSize: defaultTheme.fontSize * 3 }, MEASURER),
+          MEASURER,
+        ),
       ).toEqual(measureParticipantSymbol(type, paint(type), THEME, MEASURER));
     }
   });
 });
 
 describe('renderParticipantSymbol — paint and stroke resolution', () => {
-  it('strokes at the paint thickness, which klimt scales at emission', () => {
-    // SvgGraphics.java:468-469 (`format` multiplies by the scale), :556-561.
+  it('strokes at the paint thickness (SvgGraphics.java:556-561); the page is drawn at scale 1', () => {
+    // The export scale is the exporter's single `SvgGraphics#format` pass over
+    // the finished body, not a per-glyph one: the glyph never multiplies.
     const thick = { ...paint('database'), thickness: 3 };
-    expect(
-      renderParticipantSymbol('database', { ...GEO, paint: thick }, { head: true, display: '', theme: THEME }),
-    ).toContain('stroke-width:3;');
-    const scaled = scaleSequenceTheme(defaultTheme, 2, MEASURER);
     const svg = renderParticipantSymbol(
       'database',
       { ...GEO, paint: thick },
-      { head: true, display: '', theme: scaled },
+      { head: true, display: '', theme: THEME },
     );
-    expect(svg).toContain('stroke-width:6;');
+    expect(svg).toContain('stroke-width:3;');
   });
 
   it('dashes the stroke when the style names a LineStyle (Style.java:299-320)', () => {

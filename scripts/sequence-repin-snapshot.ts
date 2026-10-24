@@ -59,6 +59,9 @@ export function measureForRepin(dir: string, slug: string, store: IncludeStore):
       // (sdd2 T-exit). From render-fixture-utility.ts, not sequenceFixtureOptions,
       // because a base-ref worktree's harness predates that helper.
       assetStore: surveyAssetStore(),
+      // sdd3-b6: the jar rendered every cached fixture from `in.puml`
+      // (Defines.java:89-94); the survey passes the same (`SURVEY_FILENAME`).
+      filename: 'in.puml',
     });
     const { diffs } = compareSvg(ours, golden, 'deterministic');
     return { slug, score: weightedScore(diffs), diffCount: diffs.length };

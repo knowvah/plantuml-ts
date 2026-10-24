@@ -196,3 +196,51 @@ describe('group header rewrite', () => {
     expect(frame.label).toBe('Alpha [beta]');
   });
 });
+
+/**
+ * A `par2` group opener is parallel to the previous tile with no `&`:
+ * `GroupingStart#isParallel` is `parallel || isPar2GroupStart()`
+ * (`sequencediagram/GroupingStart.java:104-107`), and `isPar2GroupStart()` is
+ * `getTitle().equals("par2")` (`:112-114`). The title is the lower-cased TYPE
+ * keyword (`CommandGrouping.java:136,152`, `SequenceDiagram.java:427`) unless a
+ * `group` header rewrite replaces it with the text before the final `[...]`
+ * run, verbatim (`CommandGrouping.java:143-146`) -- trailing space included.
+ */
+describe('par2 group opener is parallel (GroupingStart.java:104-114)', () => {
+  it('marks a `par2` opener after a message parallel', () => {
+    const frame = firstFrame(['Alice -> Bob: hi', 'par2 both', 'end']);
+    expect(frame.frameType).toBe('par2');
+    expect(frame.parallel).toBe(true);
+  });
+
+  it('lower-cases the TYPE before comparing (`goLowerCase`, CommandGrouping.java:136)', () => {
+    expect(firstFrame(['Alice -> Bob: hi', 'PAR2 both', 'end']).parallel).toBe(true);
+  });
+
+  it('marks a `group` rewritten to the exact title `par2` parallel', () => {
+    // `group par2[x]`: group 1 of TRAILING_BRACKET_CONTENT_PATTERN is `par2`
+    // (CommandGrouping.java:143-146), so `title.equals("par2")`.
+    const frame = firstFrame(['Alice -> Bob: hi', 'group par2[x]', 'end']);
+    expect(frame.frameType).toBe('group');
+    expect(frame.title).toBe('par2');
+    expect(frame.parallel).toBe(true);
+  });
+
+  it('does not match a rewritten title that keeps its trailing space or case', () => {
+    // `group par2 [x]` rewrites the title to `par2 ` (group 1 is verbatim,
+    // `.*?` before `\[`), which is not `equals("par2")`; likewise `PAR2`.
+    expect(firstFrame(['Alice -> Bob: hi', 'group par2 [x]', 'end']).parallel).toBeUndefined();
+    expect(firstFrame(['Alice -> Bob: hi', 'group PAR2[x]', 'end']).parallel).toBeUndefined();
+  });
+
+  it('keeps `par`, `alt`, `loop` and a plain `group par2` non-parallel', () => {
+    for (const opener of ['par', 'alt c', 'loop c', 'group par2']) {
+      expect(firstFrame(['Alice -> Bob: hi', opener, 'end']).parallel).toBeUndefined();
+    }
+  });
+
+  it('keeps `parallel` true for `& par2` and still honours `&` on `par`', () => {
+    expect(firstFrame(['Alice -> Bob: hi', '& par2', 'end']).parallel).toBe(true);
+    expect(firstFrame(['Alice -> Bob: hi', '& par', 'end']).parallel).toBe(true);
+  });
+});

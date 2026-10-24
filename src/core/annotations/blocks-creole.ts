@@ -80,6 +80,11 @@ import { renderDrawableToFragment } from '../klimt/document-shell.js';
 import type { AtomOps } from '../klimt/creole/Sea.js';
 import type { CreoleAtom } from '../klimt/creole/atom/Atom.js';
 import type { Atom } from '../klimt/creole/SheetBlock1.js';
+import {
+  drawVerticalTexts,
+  verticalTextsDimension,
+  verticalTextsStartingAltitude,
+} from '../klimt/creole/atom/AtomVerticalTexts.js';
 import { asAtomOpenIconic } from '../klimt/creole/atom/AtomOpenIconic.js';
 import type { StringBounder } from '../klimt/font/StringBounder.js';
 import type { UGraphic } from '../klimt/UGraphic.js';
@@ -161,15 +166,17 @@ export function chromeAtomOps(sprites: SpriteRegistry | undefined, baseFont: Fon
   const emojiArtwork: EmojiArtworkResolver | undefined =
     emojiStore === undefined ? undefined : (unicode) => emojiStore.get(unicode);
   const polymorphic = (a: CreoleAtom): CreoleAtom | Atom => asAtomOpenIconic(a, baseFont) ?? a;
-  return {
+  const ops: AtomOps = {
     calculateDimension(creoleAtom: CreoleAtom, stringBounder: StringBounder): XDimension2D {
       const atom = polymorphic(creoleAtom);
       if (!isCreoleAtomData(atom)) return atom.calculateDimension(stringBounder);
+      if (atom.kind === 'vertical') return verticalTextsDimension(atom.lines, ops, stringBounder);
       return atomDim(atom, stringBounder, resolverFor(fontOfAtom(atom, baseFont)));
     },
     getStartingAltitude(creoleAtom: CreoleAtom, stringBounder: StringBounder): number {
       const atom = polymorphic(creoleAtom);
       if (!isCreoleAtomData(atom)) return atom.getStartingAltitude(stringBounder);
+      if (atom.kind === 'vertical') return verticalTextsStartingAltitude(atom.lines, ops, stringBounder);
       if (atom.kind === 'emoji') return emojiStartingAltitude(atom.factor);
       return atom.kind === 'text' ? atomTextStartingAltitude(atom.font) : 0;
     },
@@ -179,10 +186,12 @@ export function chromeAtomOps(sprites: SpriteRegistry | undefined, baseFont: Fon
         atom.drawU(ug);
         return;
       }
+      if (atom.kind === 'vertical') return drawVerticalTexts(atom.lines, ops, ug);
       if (atom.kind === 'emoji' && emojiArtwork !== undefined) return drawEmojiAtom(ug, atom, emojiArtwork);
       drawAtom(atom, ug, resolverFor(fontOfAtom(atom, baseFont)));
     },
   };
+  return ops;
 }
 
 /** Upstream `SkinParam`'s own defaults for every member `CreoleParser`

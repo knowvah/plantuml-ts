@@ -18,12 +18,12 @@
 
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
-import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { LineBreakStrategy } from '../../core/klimt/LineBreakStrategy.js';
 import type { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import type { ExtraLine } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
 import { applyPadder, padderGeoAt, type MessagePadder, type PaddedLabelBlock } from './sequence-message-padder.js';
+import { displayLinesAligned } from './display-lines.js';
 import type { LabelPadderGeo } from './geo-message.js';
 import { defaultMessageFont } from './sequence-arrow-paint.js';
 import { componentLabelBlock, offsetRun, type SequenceRunShape } from './sequence-creole-sheet.js';
@@ -32,76 +32,10 @@ import type { Paint } from '../../core/paint.js';
 import type { SequenceRunImage } from './sequence-text.js';
 
 // ---------------------------------------------------------------------------
-// Display -> lines — Display#getWithNewlines
+// Display -> lines — Display#getWithNewlines (moved to `display-lines.ts`)
 // ---------------------------------------------------------------------------
 
-/**
- * A sequence display's LINES.
- *
- * `Display#getWithNewlines(Pragma, String)` (`Display.java:262-346`) is what
- * every sequence display passes through before it can become a text block,
- * and this is the one place this engine calls it. Upstream's own call sites,
- * all of them:
- *
- *   - `CommandArrow.java:348` — a message label; `:161-170` — a participant
- *     auto-created by an arrow line;
- *   - `CommandParticipant.java:153` — a declared participant's `FULL` display,
- *     and `SequenceDiagram.java:123,168` for one created from its code alone;
- *   - `CommandReferenceOverSeveral.java:132` — a `ref over` body;
- *   - `CommandDivider.java:84`, `CommandDelay.java:83`,
- *     `CommandExoArrowAny.java:86`, `CommandReturn.java:125`,
- *     `CommandBoxStart.java:128`, `CommandNewpage.java:92`;
- *   - `AbstractTextualComponent.java:64` — the base every sequence component
- *     built from a raw `CharSequence` label reaches, and
- *     `ComponentRoseGroupingHeader.java:89` for a group's `[comment]`.
- *
- * A participant's STEREOTYPE is deliberately not on that list:
- * `CommandParticipant.java:174-180` hands the raw `<<...>>` run to
- * `Stereotype.build`, which never constructs a `Display` at all, so its rows
- * do not split however many escapes they carry.
- *
- * The escape it splits on is the two-character sequence backslash-n in the
- * SOURCE, never a real newline: `parseWithNewlines` has no real-newline
- * branch, because upstream's `Display` is a `List<CharSequence>` long before
- * anything reads it.
- *
- * ## Why a real newline is split here as well
- *
- * This port has no `Display` type, so a display arrives at layout as one
- * string — and its parser already lowers the escape to a REAL newline for the
- * two surfaces that needed it first (`command-note-factory.ts:119`,
- * `command-misc.ts:89`), then joins the multi-line `ref`/`note` block forms
- * with one (`parser.ts:122`). A real newline in a display therefore means
- * exactly what a second `displayData` entry means upstream, and the outer
- * split is this port's stand-in for "the display is already several entries"
- * — NOT a second escape scanner. Removing it would drop the multi-line `ref`
- * body and the multi-line note back to a single line.
- *
- * `splitDisplayLines` returns an `align` alongside the lines, resolved from a
- * `\l`/`\r` escape (`Display.java:290-295`). It is discarded: no sequence
- * component in this port consumes a block alignment yet, exactly as
- * `state-sizing.ts:64-74` discards it for the same reason. The BREAK those
- * two escapes also cause is honoured, which is upstream's behaviour.
- *
- * ## The JAWS deprecation warning: sequence does NOT surface it
- *
- * `Display#addWarning` (`Display.java:348-353`) raises a `JawsWarning` for
- * every escape consumed, and upstream's sequence commands thread the real
- * `diagram.getPragma()` in, so upstream WOULD raise one here. This port does
- * not, for two reasons that hold together: the split happens at LAYOUT time
- * where no `Pragma` is reachable — precisely why `splitDisplayLines` passes
- * `Pragma.createEmpty()` (`DisplayNewlines.ts:336-359`) — and the emission is
- * gated on `PragmaKey.SHOW_DEPRECATION`, off unless the source opts in, with
- * nothing in this port reading `Pragma#getWarnings()` back out. So a live
- * `Pragma` would render identically today. Recorded rather than left
- * implicit: an engine that DOES hold a `Pragma` should call
- * `parseWithNewlines` with it rather than inherit this decision by accident.
- *
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/Display.java#getWithNewlines
- */
-export function displayLines(text: string): readonly string[] {
-  return text.split('\n').flatMap((entry) => splitDisplayLines(entry).lines);
-}
+export { displayLines, displayLinesAligned, type AlignedDisplayLines } from './display-lines.js';
 
 /**
  * One `<text>` the renderer will emit, already placed AND already measured.
@@ -212,6 +146,10 @@ export interface TextRun {
   /** An extended-colour underline/strike (`<u:red>`), drawn as `<line>`s
    *  after the text (`DriverTextSvg.java:129-157,180`, `ExtraLines`). */
   readonly extraLines?: readonly ExtraLine[];
+  /** `fontConfiguration.getAttributes()` (`DriverTextSvg.java:178-180`): the
+   *  `<text name=value>` creole tag's pairs, in key order (`SvgAttributes`'
+   *  `TreeMap`); `SvgGraphics#text` writes them last (`java:737-738`). */
+  readonly svgAttributes?: ReadonlyMap<string, string>;
   /** Set ONLY on a non-text, non-image primitive -- a `----` rule's `ULine`,
    *  a table grid, a vector sprite's paths -- drawn through core's
    *  `UGraphicSvg` (`sequence-text.ts`). */
@@ -259,8 +197,7 @@ export function numberTextOf(event: {
 export const ARROW_LABEL_PADDING_X1 = 7;
 /** The same padding's right side (`AbstractComponentRoseArrow.java:62`). */
 const ARROW_LABEL_PADDING_X2 = 7;
-/** The same padding's top/bottom, which `getTextHeight` adds twice
- *  (`AbstractTextualComponent.java:110-114`). */
+/** The same padding's top/bottom, added twice by `getTextHeight` (`AbstractTextualComponent.java:110-114`). */
 const ARROW_LABEL_PADDING_Y = 1;
 
 /**
@@ -323,16 +260,17 @@ export function messageLabelLayout(
     readonly styleWidth?: LineBreakStrategy | undefined;
   } = {},
 ): PaddedLabelBlock {
+  const { lines, align: natural } = displayLinesAligned(label);
   const opts = {
     sprites: env.sprites,
-    align: draw.align,
+    align: natural ?? draw.align, // `Display.java:648-649`
     ink: draw.fore === undefined ? undefined : { fore: draw.fore },
     numberText,
     marginX1: ARROW_LABEL_PADDING_X1,
     marginX2: ARROW_LABEL_PADDING_X2,
     maxWidth: arrowMaxWidth(draw.styleWidth, env.theme?.maxMessageSize),
   };
-  return applyPadder(componentLabelBlock(displayLines(label), font, opts, env.measurer), env.padder);
+  return applyPadder(componentLabelBlock(lines, font, opts, env.measurer), env.padder);
 }
 
 /** What a label is measured with: the measurer and sprites, plus -- when the

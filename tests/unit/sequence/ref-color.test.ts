@@ -6,6 +6,7 @@
  * header style's `BackGroundColor`). Expected fills are the jar's
  * (`scripts/oracle-render.sh`): `#FFC0CB` for pink, `#ADD8E6` for lightblue.
  */
+import { tagsOf } from '../../helpers/svg-tags.js';
 import { describe, expect, it } from 'vitest';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
@@ -44,8 +45,15 @@ describe('ref#color (CommandReferenceOverSeveral.java:118-119)', () => {
     expect(two!.headerPaint!.fill).toBe('#ADD8E6');
     const body = renderSequence(geo, defaultTheme, measurer).body;
     // Jar: `<path d="M12,74 L72,74 …" style="stroke:#000;stroke-width:2;" fill="#FFC0CB"/>`.
-    expect(body).toMatch(/<path d="M[^"]*" fill="#FFC0CB" stroke="#000" stroke-width="2"\/>/);
-    expect(body).toMatch(/<path d="M[^"]*" fill="#ADD8E6" stroke="#000" stroke-width="2"\/>/);
+    const corners = tagsOf(body, 'path');
+    for (const fill of ['#FFC0CB', '#ADD8E6']) {
+      expect(
+        corners.some(
+          (c) => c.d?.startsWith('M') === true && c.fill === fill && c.stroke === '#000' && c['stroke-width'] === '2',
+        ),
+        fill,
+      ).toBe(true);
+    }
   });
 
   it('refuses an unknown colour at the command (CommandExecutionResult.badColor)', () => {

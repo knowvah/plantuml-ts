@@ -8,55 +8,37 @@ import type { SequenceGeometry } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { SEQUENCE_DOCUMENT_MARGIN } from '../../core/document-margin.js';
+import { SEQUENCE_DOCUMENT_MARGIN, calculateMargin, type DocumentMargin } from '../../core/document-margin.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+
+/** The two document extents {@link drawnExtentSeed} and {@link preChromeDims} read. */
+type SequenceExtent = Pick<SequenceGeometry, 'totalWidth' | 'totalHeight'>;
 
 /**
- * `SvgGraphics#ensureVisible:128-135`, called from the constructor with the
- * computed dimension (`:138-143`):
+ * The floor the page's one `UGraphicSvg` is opened with: the page's own
+ * extent, `option.withMinDim(dim)` (`TextBlockExporter.java:284`).
+ * `SvgGraphics#ensureVisible` (`:128-143`) runs
  *
  * ```java
  * if (x > maxX)  maxX = (int) (x + 1);
  * if (y > maxY)  maxY = (int) (y + 1);
  * ```
  *
- * The emitted `width`/`height`/`viewBox` are therefore `(int)(dim + 1)`, not
- * `trunc(dim)`. `assembleDocumentShell` truncates, so the `+ 1` is added here
- * and the two compose into upstream's own expression.
+ * on it, and then on every primitive drawn, so the canvas is the graphic's own
+ * `maxX`/`maxY` (`renderer-ug.ts#SequenceFinish`): `(int)(dim + 1)` when the
+ * ink stays inside the box, more when a primitive reaches past it (an arc
+ * counts its end point plus its radius, `:854`; sdd3-T8g). The `+ 1` is
+ * `ensureVisible`'s own, never added by hand: taken in the shared shell
+ * (`core/klimt/document-shell.ts`) it hurts class, state, object and
+ * description, whose extent is a graphviz box that already carries the
+ * rounding (`findings/vertical-terms.md`), so only this engine draws through
+ * the fold.
  *
- * IT IS APPLIED ON THE SEQUENCE PATH ONLY, deliberately. Taken in the shared
- * shell (`core/klimt/document-shell.ts`) it helps sequence by 830 and hurts
- * class by 2 362, state by 936, object by 260 and description by 26 — measured
- * per fixture across all five families before the ruling in
- * `findings/vertical-terms.md`. Those four are already correct at `trunc`:
- * their extent is a graphviz bounding box plus explicit margins, which already
- * carries the rounding applied during drawing. Sequence's is a raw max
- * coordinate, so sequence alone is short. `bidopa-30-jafi560` is the witness —
- * its width was 115 against the jar's 116.
- *
- * `maxX`/`maxY` also start at 10, a floor no sequence document reaches; it is
- * not modelled.
+ * `maxX`/`maxY` also start at 10, a floor no sequence document reaches; the
+ * graphic models it.
  */
-const ENSURE_VISIBLE_DELTA = 1;
-
-/**
- * sdd2-T7f: the canvas, from the UNSCALED geometry. `SvgGraphics` runs
- * `ensureVisible` on unscaled coordinates (`option.withMinDim(dim)`,
- * `TextBlockExporter.java:284`; `SvgGraphics.java:142-143`) and applies the
- * scale only when it writes them out: `finalizeRootAttributes` truncates
- * `maxX * option.getScale()` for `style`/`viewBox` and prints `width`/`height`
- * as `format(maxX)` -- `maxX` scaled, 3 decimals (`SvgGraphics.java:800-811`,
- * `format` at `:468-475`). So a scaled canvas is `(int)(dim + 1) * scale`,
- * not `(int)(dim * scale + 1)` (`kitevo-12-guvo789`, `scale 2`: 228, not
- * 227), and carries `scaledCanvas` for the decimal attributes
- * (`jujigi-41-zodo151`, `scale 1.2`: `width="247.2px"`).
- */
-export function canvasOf(geo: SequenceGeometry, k: number): Pick<RenderFragment, 'width' | 'height' | 'scaledCanvas'> {
-  if (k === 1) return { width: geo.totalWidth + ENSURE_VISIBLE_DELTA, height: geo.totalHeight + ENSURE_VISIBLE_DELTA };
-  return {
-    width: Math.trunc(geo.totalWidth + ENSURE_VISIBLE_DELTA) * k,
-    height: Math.trunc(geo.totalHeight + ENSURE_VISIBLE_DELTA) * k,
-    scaledCanvas: true,
-  };
+export function drawnExtentSeed(extent: SequenceExtent): { readonly width: number; readonly height: number } {
+  return { width: extent.totalWidth, height: extent.totalHeight };
 }
 
 /**
@@ -66,17 +48,78 @@ export function canvasOf(geo: SequenceGeometry, k: number): Pick<RenderFragment,
  * and `TextBlockExporter` adds `SequenceDiagram#getDefaultMargins()` on top
  * (`core/document-margin.ts`). `totalWidth`/`totalHeight` here are that sum,
  * so the block is `total - margin`; `core/annotations/chrome-export.ts`
- * composes chrome around it and puts the margin back. Left unset under a
- * `scale` (the margin is scaled with the body there, so it cannot be
- * subtracted as a constant) -- chrome then sees the final canvas as before.
+ * composes chrome around it and puts the margin back. sdd3-T3b: declared
+ * under a `scale` too -- the page is drawn at scale 1, so the margin is a
+ * constant and chrome sees the true block (`UgDiagram.java:128`); the
+ * exporter scales the composed whole (`TextBlockExporter.java:165-177`).
  */
 export function preChromeDims(
-  geo: SequenceGeometry,
-  k: number,
+  geo: SequenceExtent,
+  m: DocumentMargin = SEQUENCE_DOCUMENT_MARGIN,
 ): Pick<RenderFragment, 'preChromeWidth' | 'preChromeHeight'> {
-  if (k !== 1) return {};
-  const m = SEQUENCE_DOCUMENT_MARGIN;
   return { preChromeWidth: geo.totalWidth - m.left - m.right, preChromeHeight: geo.totalHeight - m.top - m.bottom };
+}
+
+/** Both margins agree on all four sides. */
+function sameMargin(a: DocumentMargin, b: DocumentMargin): boolean {
+  return a.top === b.top && a.right === b.right && a.bottom === b.bottom && a.left === b.left;
+}
+
+/** Where the exporter puts the page: its margin, the extent that margin gives
+ *  the baked layout, and the translate from the baked placement to it. */
+export interface ExporterPlacement {
+  readonly margin: DocumentMargin;
+  /** The page's extent under {@link margin}: the dimension the exporter reports (`:199-203`). */
+  readonly extent: SequenceExtent;
+  /** `(margin.left - 5, margin.top - 5)`: the page is drawn under it, so the canvas fold sees final coordinates. */
+  readonly translate: UTranslate;
+}
+
+/**
+ * sdd3-T2d: `TextBlockExporter.Builder#calculateMargin` for sequence -- the
+ * merged `{root, document}` style's `Margin`, else `getDefaultMargins()`
+ * (`core/TextBlockExporter.java:510-516`). The layout bakes the DEFAULT
+ * exporter margin, `same(5)` (`SequenceDiagram.java:629-633`), under the
+ * teoz block's own (5, 5) translate (`teoz/SequenceDiagramFileMakerTeoz.java
+ * :134-168`) into the body and `totalWidth`/`totalHeight`. The exporter
+ * translates the block by `(left, top)` and adds both sides to the dimension
+ * (`TextBlockExporter.java:159-176,199-203`), so a style margin M moves the
+ * page by `M.left - 5`, `M.top - 5` (sdd3-T8g: the page is DRAWN under that
+ * translate, `renderer-ug.ts#openSequenceGraphic`) and grows the dimension by
+ * the summed side difference; the page is drawn at scale 1, so a `scale`
+ * multiplies the whole drawing, margin included, in the exporter afterwards.
+ * Identity when the style margin is the default.
+ *
+ * @param geo the UNSCALED page geometry, baked at the default margin
+ */
+export function exporterPlacement(geo: SequenceExtent, theme: Theme): ExporterPlacement {
+  const m = calculateMargin(theme, SEQUENCE_DOCUMENT_MARGIN);
+  const baked = SEQUENCE_DOCUMENT_MARGIN;
+  return {
+    margin: m,
+    extent: {
+      totalWidth: geo.totalWidth + (m.left - baked.left) + (m.right - baked.right),
+      totalHeight: geo.totalHeight + (m.top - baked.top) + (m.bottom - baked.bottom),
+    },
+    translate: new UTranslate(m.left - baked.left, m.top - baked.top),
+  };
+}
+
+/**
+ * The fragment's declaration of the margin it is exported with: the
+ * margin-less block chrome and the warning banner compose around
+ * ({@link preChromeDims}) and, when not the default, the margin itself
+ * (`RenderFragment.documentMargin`, read by `document-margin.ts#documentMarginOf`).
+ * Unstyled output declares no margin, so it is byte-identical.
+ */
+export function exporterMarginFields(
+  placement: ExporterPlacement,
+): Pick<RenderFragment, 'preChromeWidth' | 'preChromeHeight' | 'documentMargin'> {
+  const { margin, extent } = placement;
+  return {
+    ...preChromeDims(extent, margin),
+    ...(sameMargin(margin, SEQUENCE_DOCUMENT_MARGIN) ? {} : { documentMargin: margin }),
+  };
 }
 
 /**

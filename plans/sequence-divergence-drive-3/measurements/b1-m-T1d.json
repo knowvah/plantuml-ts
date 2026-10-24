@@ -1,0 +1,9964 @@
+[
+ {
+  "slug": "Sequence-delay-destroy-newpage-style",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "SequenceArrows_0001_Test",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "SequenceArrows_0002_Test",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "TeozTimelineIssues_0002_Test",
+  "ws": 1,
+  "n": 1,
+  "cohort": "geometry",
+  "nonPaint": 1,
+  "keys": {
+   "svg/g/g/rect/@height": 1
+  }
+ },
+ {
+  "slug": "TeozTimelineIssues_0003_Test",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "TeozTimelineIssues_0004_Test",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "TeozTimelineIssues_0005_Test",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "TeozTimelineIssues_0006_Test",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "TeozTimelineIssues_0007_Test",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "TeozTimelineIssues_0008_Test",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bacupi-77-fuke586",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "badoba-13-cuba151",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "badolo-34-lesi912",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bafego-76-loru892",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bagexe-03-bozo133",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bajapi-70-tevi384",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bajocu-67-ciki049",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "baketu-62-cumu838",
+  "ws": 168,
+  "n": 168,
+  "cohort": "geometry",
+  "nonPaint": 165,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/g/text/@font-size": 3,
+   "svg/g/g/text/@textLength": 1,
+   "svg/g/g/text/@x": 3,
+   "svg/g/g/text/@y": 3,
+   "svg/g/g/image/@height": 3,
+   "svg/g/g/image/@width": 3,
+   "svg/g/g/image/@x": 3,
+   "svg/g/g/image/@y": 3,
+   "svg/g/g/rect/@x": 2,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@x1": 2,
+   "svg/g/g/line/@x2": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@x": 4,
+   "svg/g/rect/@y": 4,
+   "svg/g/text/@x": 12,
+   "svg/g/text/@y": 12,
+   "svg/g/polygon/@points": 32,
+   "svg/g/line/@x1": 4,
+   "svg/g/line/@x2": 4,
+   "svg/g/line/@y1": 4,
+   "svg/g/line/@y2": 4,
+   "svg/g/image/@x": 5,
+   "svg/g/image/@y": 5,
+   "svg/g/path/@d": 40
+  }
+ },
+ {
+  "slug": "bakire-18-peku988",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bakuba-09-fica741",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "balixa-47-mudo983",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bapifu-18-bazi719",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "baxafe-32-gaka532",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "baxopu-48-fezi101",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "baxude-35-gete020",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "baxuxa-14-puvo950",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bedaja-09-gezu912",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bejate-92-fubo102",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "benuba-40-puxa935",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "benugo-73-kezi734",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bepipo-37-fego336",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bepopi-29-dobu802",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bexoce-95-vibe195",
+  "ws": 1,
+  "n": 1,
+  "cohort": "geometry",
+  "nonPaint": 1,
+  "keys": {
+   "svg/g/g/rect/@height": 1
+  }
+ },
+ {
+  "slug": "bidopa-30-jafi560",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bifuzu-54-gefo004",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "biluba-79-delo134",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "binegi-05-xere209",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "binupo-93-begi656",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bipoce-87-cuki505",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "birefi-44-bata482",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "birike-24-lete111",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "birocu-87-xubi808",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "biruge-35-vaxu680",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bitutu-89-luju788",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bobofu-53-coje821",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bocudo-94-jode371",
+  "ws": 31,
+  "n": 31,
+  "cohort": "geometry",
+  "nonPaint": 29,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 1,
+   "svg/g/g/text/@font-size": 2,
+   "svg/g/g/text/@textLength": 2,
+   "svg/g/g/text/@x": 2,
+   "svg/g/g/text/@y": 2,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@y": 4,
+   "svg/g/text/@y": 5,
+   "svg/g/polygon/@points": 4,
+   "svg/g/line/@y1": 1,
+   "svg/g/line/@y2": 1
+  }
+ },
+ {
+  "slug": "bocusa-16-ciju126",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bodobu-73-noli773",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bofovo-45-figi573",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "boguvi-37-ralo631",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bokazo-24-tefu124",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bomino-39-tipo216",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "boparo-11-pema294",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bopizu-70-rese737",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bosedo-77-loge384",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "botoku-28-cupe920",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bovuda-87-dale466",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bovugo-63-lazo401",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "boxibe-39-luco835",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bozama-65-pexo274",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bozuru-10-rajo382",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bucebo-91-xavo442",
+  "ws": 59,
+  "n": 10,
+  "cohort": "structural",
+  "nonPaint": 1,
+  "keys": {
+   "svg/defs[childCount]": 1,
+   "svg/g/path/@fill": 3,
+   "svg/g/path/@stroke": 3,
+   "svg/g/path/@stroke-width": 3
+  }
+ },
+ {
+  "slug": "budevu-23-popi845",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bugabo-85-veki716",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bugafa-93-duzi514",
+  "ws": 36,
+  "n": 1,
+  "cohort": "structural",
+  "nonPaint": 1,
+  "keys": {
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "bugaju-81-ciko758",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bugalu-47-ludi530",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bujuma-55-rupu730",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bulixe-06-boge494",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "bumoda-17-giza778",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "buniji-73-pama777",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "burujo-63-puti396",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "busexe-78-ruzu110",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "butali-53-kige134",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "butofu-60-kene642",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "butosi-00-mali446",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "buximi-21-xima965",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "buxuba-45-tela497",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cabedu-56-lasa287",
+  "ws": 7,
+  "n": 7,
+  "cohort": "geometry",
+  "nonPaint": 3,
+  "keys": {
+   "svg/g/path/@d": 2,
+   "svg/g/path/@stroke": 2,
+   "svg/g/path/@stroke-width": 2,
+   "svg/g/rect/@y": 1
+  }
+ },
+ {
+  "slug": "cabeve-16-raci213",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "caciga-47-jigu709",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cajuga-45-taxu278",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cakelu-69-muza643",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "calaja-69-tusu214",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "calido-79-kovi606",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "caluni-22-noci624",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "camebe-75-mujo573",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "camuxi-33-nopo108",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "carose-61-seko055",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "caveje-67-mexo618",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cavoke-34-feno396",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "caxali-40-cotu420",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "caxuke-64-femu351",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cazipo-94-zubu963",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cazusa-73-masi168",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cebeje-70-bada975",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cecuku-78-kezo359",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cedeti-10-bufu072",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ceduvo-98-page798",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cejoxe-28-zeba572",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cekoda-52-vutu666",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cekora-30-diso384",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "celego-19-laji937",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cepase-93-cane941",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cesipe-96-luze402",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cetale-74-regu633",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cexasu-11-fuja087",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cexeco-21-piga007",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cexeju-49-dumu881",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cexelu-68-lile614",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cijaru-11-fele146",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cijozi-08-mavu547",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cikoca-19-feji527",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cilore-76-sedu666",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cimofu-59-xotu865",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cinilo-67-macu207",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cinula-56-dipu972",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cituda-50-mema409",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cizeja-06-zedi526",
+  "ws": 18,
+  "n": 18,
+  "cohort": "geometry",
+  "nonPaint": 18,
+  "keys": {
+   "svg/@viewBox": 1,
+   "svg/@width": 1,
+   "svg/g/g/rect/@x": 1,
+   "svg/g/g/line/@x1": 1,
+   "svg/g/g/line/@x2": 1,
+   "svg/g/rect/@x": 2,
+   "svg/g/text/@x": 2,
+   "svg/g/polygon/@points": 4,
+   "svg/g/line/@x2": 1,
+   "svg/g/text/@class": 1,
+   "svg/g/text/@id": 1,
+   "svg/g/text/@textLength": 1,
+   "svg/g/text/text()": 1
+  }
+ },
+ {
+  "slug": "cizifu-56-giku099",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cocosu-02-vusu863",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "codeti-52-lafa397",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cofuse-78-keri294",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cokaci-31-gera999",
+  "ws": 7,
+  "n": 3,
+  "cohort": "structural",
+  "nonPaint": 3,
+  "keys": {
+   "svg/g/text/@x": 2,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "cokoxe-37-lelo243",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "colexo-68-luko506",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "comelo-49-lefi793",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "covuco-47-sotu151",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "coxefo-18-gopo887",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cubezi-77-supa567",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cujoci-19-taxe939",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cukexe-08-gana131",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "culegi-37-paji732",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cusete-01-vusi466",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cusiro-03-mebe823",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cusiru-97-buco277",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "cusuto-16-vila182",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dabozi-63-zuco354",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dadase-07-jalu534",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "daduxi-21-duse542",
+  "ws": 172,
+  "n": 172,
+  "cohort": "geometry",
+  "nonPaint": 172,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 1,
+   "svg/g/rect/@height": 8,
+   "svg/g/rect/@y": 15,
+   "svg/g/g/rect/@height": 9,
+   "svg/g/g/line/@y2": 9,
+   "svg/g/text/@y": 23,
+   "svg/g/path/@d": 28,
+   "svg/g/polygon/@points": 44,
+   "svg/g/line/@y1": 17,
+   "svg/g/line/@y2": 17
+  }
+ },
+ {
+  "slug": "dafoke-98-reci967",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dakake-85-nemi992",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dakeve-06-cici445",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dalata-11-sifu583",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "damoge-62-riso387",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "darupa-17-dujo243",
+  "ws": 4,
+  "n": 4,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/rect/@fill": 2,
+   "svg/g/rect/@fill-opacity": 2
+  }
+ },
+ {
+  "slug": "dasutu-58-saje713",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "databu-25-mivu307",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "datetu-47-vunu236",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "davipu-63-veta505",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dazuzi-04-zexu620",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "debufa-67-poma789",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "decace-28-majo724",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dedefa-06-muge830",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dedigi-45-zusi003",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dedude-72-xuta800",
+  "ws": 13,
+  "n": 1,
+  "cohort": "structural",
+  "nonPaint": 1,
+  "keys": {
+   "svg/g/ellipse": 1
+  }
+ },
+ {
+  "slug": "defega-58-zepa649",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "degire-21-dujo330",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "degoju-21-curu200",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dekapo-15-vama907",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "deluve-26-kaxa424",
+  "ws": 20,
+  "n": 2,
+  "cohort": "structural",
+  "nonPaint": 2,
+  "keys": {
+   "svg/defs[childCount]": 1,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "demeli-77-cozo712",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "deteku-57-peba055",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "devaca-60-jipu284",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "devamo-31-coji129",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dexigo-61-soge505",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dibero-91-ruvu458",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dicega-90-zubu260",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dicizi-85-muvu530",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dicuva-14-lini551",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "digula-66-dipe776",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dilesi-25-lali486",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dimili-48-vaka933",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dinaze-10-xedi714",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dinita-73-tige486",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dipazo-97-namu310",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dipede-53-nina209",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "diruxe-35-xujo142",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dofefe-55-kejo043",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dofuru-22-zuga032",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dojapu-42-sali914",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dokuse-50-dobi947",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dolacu-72-rona074",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dolefo-13-kovu702",
+  "ws": 164,
+  "n": 164,
+  "cohort": "geometry",
+  "nonPaint": 163,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 1,
+   "svg/g/g/text/@font-size": 1,
+   "svg/g/g/text/@textLength": 1,
+   "svg/g/g/text/@x": 1,
+   "svg/g/g/text/@y": 1,
+   "svg/g/g/rect/@y": 8,
+   "svg/g/g/line/@y1": 8,
+   "svg/g/g/line/@y2": 8,
+   "svg/g/line/@y1": 43,
+   "svg/g/line/@y2": 43,
+   "svg/g/rect/@y": 2,
+   "svg/g/text/@y": 24,
+   "svg/g/polygon/@points": 16,
+   "svg/g/image/@y": 4,
+   "svg/g/ellipse/@cy": 2
+  }
+ },
+ {
+  "slug": "doleso-00-deme832",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dolice-60-copi767",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "domaji-70-zini725",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "domutu-66-zobe043",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "doniti-46-nuxo457",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "donuli-07-peje262",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dopisa-88-pazo292",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dopove-28-kaza697",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dopuko-30-lugi781",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dototo-68-bexa421",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dozugi-77-tuce071",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "duboco-13-gaja984",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ducaba-11-xogo576",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ducodo-45-duge821",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dudeku-78-naju581",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dudure-98-cote516",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dufupa-80-kavi440",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dugata-50-koxo354",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dugeki-47-celo546",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dugipi-79-kuge638",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dukisa-19-zepa576",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dulaca-47-neta380",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "duniti-51-pole084",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "durapi-97-jupo864",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dutopa-62-jalu659",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "dutova-31-coci211",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "duzico-51-misi485",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fadage-04-xoxe727",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fadibu-99-pufu496",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fajixi-56-dete708",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fakifa-13-puve679",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fakova-98-suze610",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fakune-74-geba235",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "falolu-20-sepu020",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fanoxo-47-somi679",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fareko-61-fige194",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fasafe-10-fepe885",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fatake-97-ciki135",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "favale-68-luzo896",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "faviki-72-kete653",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fazaba-22-nusi829",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fazubu-21-roxo367",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fazuzo-56-xoge438",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fekatu-96-kele513",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "felasa-37-jovu259",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "femixi-54-maja138",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fenino-82-nusu462",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fenoli-16-peru181",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fepuso-73-xoca358",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ferate-49-tusa503",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fetazo-39-xocu662",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fevipu-45-xela421",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fexoko-32-feso446",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ficiru-65-geda551",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fidalo-14-sefo615",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fidoba-93-nonu806",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fidobi-24-cugi165",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fidube-59-sacu518",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fifasu-62-pipo979",
+  "ws": 57,
+  "n": 44,
+  "cohort": "structural",
+  "nonPaint": 44,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/g/rect/@height": 2,
+   "svg/g/g/rect/@x": 2,
+   "svg/g/g/line/@x1": 2,
+   "svg/g/g/line/@x2": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@x": 4,
+   "svg/g/text/@x": 5,
+   "svg/g/rect/@y": 2,
+   "svg/g/text/@y": 3,
+   "svg/g/polygon/@points": 4,
+   "svg/g/line/@x1": 1,
+   "svg/g/line/@x2": 1,
+   "svg/g/path/@d": 9,
+   "svg/g/text": 1
+  }
+ },
+ {
+  "slug": "figezi-68-zefe216",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fijeco-97-zozu841",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "finalo-84-toxa600",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fixecu-74-kote876",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fobapo-56-moko401",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fobube-11-nifo424",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fobuke-12-dopi544",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "focaso-89-zaxu091",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fojagu-59-rife557",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fojake-71-veka215",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fojomu-60-cuda302",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fonatu-29-texo854",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fonipa-05-lobe529",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fonope-49-jodi834",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fonudu-70-coma124",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "foporo-86-nego484",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fotiku-67-lilu728",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fozeva-08-tife475",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fugilu-74-jivu585",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fujodi-29-safe898",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fukaro-40-riru664",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fuliko-66-mulo559",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fululo-61-zuro165",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "funado-58-dene546",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "funoti-95-bisa592",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "furami-83-pome543",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "furara-28-sode432",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fusavi-61-disa620",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "futaxe-10-xonu513",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fuvumu-26-fovo330",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "fuzove-69-bulo834",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gabisi-10-male675",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gacavi-49-zeki744",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gacemo-20-lafa203",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gacujo-48-leto751",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gadasu-04-kada675",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gadiva-05-pogi376",
+  "ws": 2,
+  "n": 2,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/rect/@fill": 1,
+   "svg/g/rect/@fill-opacity": 1
+  }
+ },
+ {
+  "slug": "gamefa-47-gelu047",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ganefo-61-leka777",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gapozi-46-zula498",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gaxera-69-muma363",
+  "ws": 2,
+  "n": 2,
+  "cohort": "geometry",
+  "nonPaint": 2,
+  "keys": {
+   "svg/g/g/text/text()": 2
+  }
+ },
+ {
+  "slug": "gazave-48-zapu688",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gebeki-18-muci858",
+  "ws": 8,
+  "n": 8,
+  "cohort": "geometry",
+  "nonPaint": 4,
+  "keys": {
+   "svg/@viewBox": 1,
+   "svg/@width": 1,
+   "svg/g/path/@d": 2,
+   "svg/g/path/@stroke": 2,
+   "svg/g/path/@stroke-width": 2
+  }
+ },
+ {
+  "slug": "gecopo-99-pude139",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gefobi-11-jena493",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gejeji-12-zofa866",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gejoko-46-pogi886",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gekapu-59-pala336",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gekifa-76-fisi424",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gekuko-59-muta575",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "genago-36-sanu340",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gepiju-13-negu183",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gepipe-05-rosu313",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gepuce-64-pivu656",
+  "ws": 241,
+  "n": 21,
+  "cohort": "structural",
+  "nonPaint": 21,
+  "keys": {
+   "svg/g/g/rect": 5,
+   "svg/g/g/line": 2,
+   "svg/g/rect": 2,
+   "svg/g/line": 8,
+   "svg/g/polygon/@points": 4
+  }
+ },
+ {
+  "slug": "geraku-93-roka956",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gesiba-07-rise357",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gevere-74-caba556",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gibaro-25-sibu619",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gibola-54-cave865",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gibuxa-28-kale997",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gidibo-31-cugi403",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gifope-23-jufe872",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gifosu-53-fodu296",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gigune-69-xaze480",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gijamu-35-vale058",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gijubi-81-rube024",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "giloko-85-gapa789",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ginifi-74-faso689",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "giroko-51-gobi443",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gixaxu-80-salo926",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gizinu-51-rexo332",
+  "ws": 2,
+  "n": 2,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/text/@font-weight": 2
+  }
+ },
+ {
+  "slug": "goceku-21-rizu768",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gocote-26-bolo737",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gofixe-24-jani946",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gogava-89-taga809",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gogise-40-juro428",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gogivi-77-safe144",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gojozu-97-xeki128",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gojuro-44-nono843",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gorido-98-taje926",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gosigu-85-raku124",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gozaru-36-gejo982",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gozobo-83-zuci344",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gozoxo-34-nuju154",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gucare-93-petu502",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gudidu-67-pene708",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "guduje-81-mucu193",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gugena-56-fazu871",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gujaje-38-zoce253",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gukaki-49-boko579",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gunabi-18-gumo131",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gunecu-53-jebu067",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gupaki-93-vupa807",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gupuze-37-xelo563",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gurofe-24-seza094",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "guroti-56-konu524",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "gutate-63-kane985",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "guvisi-28-voju934",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "guzoco-99-ginu686",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "h-rnote-style",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jabise-46-luge773",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jacefu-29-didu005",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jaceso-80-fozu696",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jacide-26-pumi543",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jafufe-08-begu830",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jagoni-38-koti364",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jagusu-12-turu662",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jajobi-60-ralo350",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jakido-43-zuzu758",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jalodi-19-mibi961",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "janodo-62-pave893",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jasixo-44-jide821",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jatali-99-bajo946",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jatase-07-moda044",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "javedu-98-pibi325",
+  "ws": 94,
+  "n": 94,
+  "cohort": "geometry",
+  "nonPaint": 69,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/g/text/@font-size": 2,
+   "svg/g/g/text/@textLength": 2,
+   "svg/g/g/text/@x": 2,
+   "svg/g/g/text/@y": 2,
+   "svg/g/g/rect/@height": 2,
+   "svg/g/g/rect/@width": 2,
+   "svg/g/g/rect/@x": 2,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@stroke-dasharray": 2,
+   "svg/g/g/line/@stroke-width": 2,
+   "svg/g/g/line/@x1": 2,
+   "svg/g/g/line/@x2": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@height": 4,
+   "svg/g/rect/@rx": 4,
+   "svg/g/rect/@ry": 4,
+   "svg/g/rect/@stroke-width": 4,
+   "svg/g/rect/@width": 4,
+   "svg/g/rect/@x": 4,
+   "svg/g/rect/@y": 4,
+   "svg/g/text/@font-size": 5,
+   "svg/g/text/@textLength": 5,
+   "svg/g/text/@x": 5,
+   "svg/g/text/@y": 5,
+   "svg/g/polygon/@points": 8,
+   "svg/g/polygon/@stroke-width": 1,
+   "svg/g/line/@stroke-width": 1,
+   "svg/g/line/@x1": 1,
+   "svg/g/line/@x2": 1,
+   "svg/g/line/@y1": 1,
+   "svg/g/line/@y2": 1
+  }
+ },
+ {
+  "slug": "javiki-44-cija459",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jaxige-32-naja526",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jebole-52-cuvo164",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jedado-35-lobi482",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jefoke-95-jara779",
+  "ws": 280,
+  "n": 21,
+  "cohort": "structural",
+  "nonPaint": 21,
+  "keys": {
+   "svg/g/rect": 7,
+   "svg/g/g/rect": 3,
+   "svg/g/g/line": 3,
+   "svg/g/ellipse": 4,
+   "svg/g/polygon/@points": 2,
+   "svg/g/line": 2
+  }
+ },
+ {
+  "slug": "jerevu-86-gojo026",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jerika-28-senu049",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jesari-34-mudu065",
+  "ws": 31,
+  "n": 31,
+  "cohort": "geometry",
+  "nonPaint": 29,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 1,
+   "svg/g/g/text/@font-size": 2,
+   "svg/g/g/text/@textLength": 2,
+   "svg/g/g/text/@x": 2,
+   "svg/g/g/text/@y": 2,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@y": 4,
+   "svg/g/text/@y": 5,
+   "svg/g/polygon/@points": 4,
+   "svg/g/line/@y1": 1,
+   "svg/g/line/@y2": 1
+  }
+ },
+ {
+  "slug": "jetigu-21-zaje860",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jeviru-31-gasi159",
+  "ws": 6,
+  "n": 6,
+  "cohort": "geometry",
+  "nonPaint": 6,
+  "keys": {
+   "svg/g/g/title/text()": 2,
+   "svg/g/text/@text-decoration": 4
+  }
+ },
+ {
+  "slug": "jexavi-40-degi377",
+  "ws": 213,
+  "n": 213,
+  "cohort": "geometry",
+  "nonPaint": 213,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/rect/@height": 2,
+   "svg/g/rect/@x": 8,
+   "svg/g/rect/@y": 5,
+   "svg/g/g/rect/@height": 4,
+   "svg/g/g/rect/@x": 4,
+   "svg/g/g/line/@x1": 4,
+   "svg/g/g/line/@x2": 4,
+   "svg/g/g/line/@y2": 4,
+   "svg/g/text/@x": 15,
+   "svg/g/ellipse/@cx": 2,
+   "svg/g/path/@d": 36,
+   "svg/g/text/@y": 10,
+   "svg/g/ellipse/@cy": 1,
+   "svg/g/polygon/@points": 44,
+   "svg/g/line/@x1": 17,
+   "svg/g/line/@x2": 17,
+   "svg/g/line/@y1": 16,
+   "svg/g/line/@y2": 16
+  }
+ },
+ {
+  "slug": "jigigi-69-bege021",
+  "ws": 3,
+  "n": 3,
+  "cohort": "geometry",
+  "nonPaint": 3,
+  "keys": {
+   "svg/g/text/@x": 3
+  }
+ },
+ {
+  "slug": "jiliba-03-lapi286",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jinaxe-58-zuva028",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jitesa-41-cara967",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jivati-56-pome307",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jiveji-28-butu482",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jobadi-87-jegi648",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jogati-80-xeme991",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jogeto-89-zaco078",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jokeje-35-xubi431",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jomemi-46-zazi815",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jonasa-65-teci533",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jonoja-01-zani191",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jorari-47-buje011",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "joroli-85-vace726",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jotase-88-kiki473",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jotege-53-vira701",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jozete-34-kete358",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jozomu-87-tajo507",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jufila-56-kegu669",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jugami-52-timi786",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jujigi-41-zodo151",
+  "ws": 58,
+  "n": 58,
+  "cohort": "geometry",
+  "nonPaint": 53,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 1,
+   "svg/g/g/text/@font-size": 5,
+   "svg/g/g/text/@textLength": 3,
+   "svg/g/g/text/@x": 5,
+   "svg/g/g/text/@y": 5,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@y": 2,
+   "svg/g/text/@y": 8,
+   "svg/g/polygon/@points": 12,
+   "svg/g/line/@y1": 5,
+   "svg/g/line/@y2": 5
+  }
+ },
+ {
+  "slug": "jujimu-79-mugu916",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "junaxa-14-biko373",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "junide-55-soka558",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "juputo-08-febo295",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jutexi-93-zeta646",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "jutomu-49-kemi074",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "juzagu-24-voxe728",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kafobi-95-risi292",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kafupo-63-cula092",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kajube-48-vejo214",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kakune-11-vusu073",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kaluna-08-rubu301",
+  "ws": 2,
+  "n": 2,
+  "cohort": "geometry",
+  "nonPaint": 2,
+  "keys": {
+   "svg/@viewBox": 1,
+   "svg/@width": 1
+  }
+ },
+ {
+  "slug": "kaporo-80-vace949",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kapuva-33-nomi771",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "karaki-85-ketu935",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kedipo-05-zici527",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kefila-88-kage602",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kejoke-76-curu931",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "keloje-58-ladu877",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "keluvo-88-kosi498",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kemaba-15-xiso434",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kemira-27-jaxe643",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kenilu-88-javu563",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kepuxa-88-juxu405",
+  "ws": 94,
+  "n": 94,
+  "cohort": "geometry",
+  "nonPaint": 69,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/g/text/@font-size": 2,
+   "svg/g/g/text/@textLength": 2,
+   "svg/g/g/text/@x": 2,
+   "svg/g/g/text/@y": 2,
+   "svg/g/g/rect/@height": 2,
+   "svg/g/g/rect/@width": 2,
+   "svg/g/g/rect/@x": 2,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@stroke-dasharray": 2,
+   "svg/g/g/line/@stroke-width": 2,
+   "svg/g/g/line/@x1": 2,
+   "svg/g/g/line/@x2": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@height": 4,
+   "svg/g/rect/@rx": 4,
+   "svg/g/rect/@ry": 4,
+   "svg/g/rect/@stroke-width": 4,
+   "svg/g/rect/@width": 4,
+   "svg/g/rect/@x": 4,
+   "svg/g/rect/@y": 4,
+   "svg/g/text/@font-size": 5,
+   "svg/g/text/@textLength": 5,
+   "svg/g/text/@x": 5,
+   "svg/g/text/@y": 5,
+   "svg/g/polygon/@points": 8,
+   "svg/g/polygon/@stroke-width": 1,
+   "svg/g/line/@stroke-width": 1,
+   "svg/g/line/@x1": 1,
+   "svg/g/line/@x2": 1,
+   "svg/g/line/@y1": 1,
+   "svg/g/line/@y2": 1
+  }
+ },
+ {
+  "slug": "kerezi-79-cepe665",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kevaru-04-faka914",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kevavu-57-kifi084",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kibave-01-tafo463",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kibijo-61-vijo950",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kibope-73-jezu646",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kigari-13-kupa671",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kijeka-69-dugi195",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kikaso-48-karu319",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kikuba-19-varo358",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kiledu-77-reto787",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kilepu-67-seji640",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kilili-04-jode451",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kipabe-50-guti652",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kipasa-41-pude128",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kirupe-14-pani191",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kitevo-12-guvo789",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kituzo-58-vari147",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kivavu-72-goju233",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kixani-97-giji283",
+  "ws": 19,
+  "n": 19,
+  "cohort": "geometry",
+  "nonPaint": 5,
+  "keys": {
+   "svg/g/path/@d": 2,
+   "svg/g/path/@fill": 2,
+   "svg/g/path/@fill-opacity": 2,
+   "svg/g/path/@stroke": 2,
+   "svg/g/path/@stroke-width": 2,
+   "svg/g/rect/@fill": 3,
+   "svg/g/rect/@fill-opacity": 3,
+   "svg/g/rect/@y": 3
+  }
+ },
+ {
+  "slug": "kixebi-20-debo481",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kizuga-51-vugi916",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kobibu-84-bode360",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kocuso-22-ciri203",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kodapi-60-zizu676",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kodifo-43-teci570",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kofixo-02-xoso627",
+  "ws": 4,
+  "n": 4,
+  "cohort": "geometry",
+  "nonPaint": 4,
+  "keys": {
+   "svg/g/a/@title": 2,
+   "svg/g/a/@xlink:title": 2
+  }
+ },
+ {
+  "slug": "kofuti-29-goti188",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kogoce-55-goge576",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kogozi-22-davu372",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kojigi-18-jexu940",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kojoma-79-luna992",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "koleji-09-doni016",
+  "ws": 6,
+  "n": 6,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/rect/@fill": 3,
+   "svg/g/rect/@fill-opacity": 3
+  }
+ },
+ {
+  "slug": "komafa-88-zutu920",
+  "ws": 2,
+  "n": 2,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/text/@font-weight": 1,
+   "svg/g/text/@font-style": 1
+  }
+ },
+ {
+  "slug": "komeni-40-toxa101",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "komibe-79-cola079",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "koneju-77-vode355",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kopaxi-36-dedo317",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "koresa-77-jasi418",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kotixe-11-cufa733",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kotoze-77-kipu253",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kotozo-70-suso472",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kovito-91-jonu992",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kovoso-39-teve092",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kozova-44-lore387",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kubini-17-jemo957",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kugati-67-nuzu852",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kugete-25-poba470",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kukeja-88-zida141",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kumogu-10-rigi101",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kumovo-90-zira054",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kumoxa-10-puca304",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kuniko-53-rilu801",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kuputa-52-caxa434",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kurugu-61-cexi774",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kuzoba-85-fabe034",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "kuzuco-40-xara309",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "labima-56-kone976",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "labite-99-lufe939",
+  "ws": 25,
+  "n": 2,
+  "cohort": "structural",
+  "nonPaint": 2,
+  "keys": {
+   "svg/defs[childCount]": 1,
+   "svg/g/ellipse": 1
+  }
+ },
+ {
+  "slug": "labudu-49-fove649",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lacoje-26-lubu678",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ladiro-50-gume805",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lafuzo-13-xura634",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lagexo-50-sibo018",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lakoze-10-cuza667",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lalite-31-joxu896",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lavaba-76-lepi228",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "laveli-73-zuse406",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "leceju-60-doxa170",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ledura-21-bavo866",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "legeme-58-daxi851",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "legole-00-givu934",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lejafe-21-niga299",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lekari-63-rigu513",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lekopo-04-sefo189",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lemevu-44-gupu133",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lenamo-57-fano574",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lenoki-81-nofo984",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lesaga-07-cili644",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "letagi-90-kome968",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lezonu-15-cege608",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "libele-29-gagu210",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "libica-30-seve575",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "libipu-23-femo315",
+  "ws": 4,
+  "n": 4,
+  "cohort": "geometry",
+  "nonPaint": 4,
+  "keys": {
+   "svg/g/a/@href": 2,
+   "svg/g/a/@xlink:href": 2
+  }
+ },
+ {
+  "slug": "licole-34-vejo527",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "liculu-86-goge853",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lidupe-72-cexa425",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lifene-24-xaca574",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "liguma-77-mume567",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lilivo-81-jaja352",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "liluca-64-muva178",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "limajo-73-kife020",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lipuci-81-vovi162",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lirasa-26-tazo607",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "loboke-95-roje401",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "loguci-83-mobe896",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lojami-06-ligu429",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lojore-28-mano308",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lokavu-60-peku948",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lokole-97-moji784",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lokonu-29-zafi019",
+  "ws": 30,
+  "n": 7,
+  "cohort": "structural",
+  "nonPaint": 4,
+  "keys": {
+   "svg/g/path/@d": 1,
+   "svg/g/path/@fill": 1,
+   "svg/g/path/@stroke": 1,
+   "svg/g/path/@stroke-width": 1,
+   "svg/g/text/@x": 1,
+   "svg/g/text/@y": 1,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "loloke-56-cape461",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "losefo-71-dovi176",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "losilu-30-ridu614",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "loteba-26-konu854",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "loxaco-79-zugi221",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lozuru-10-poba814",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lubuxu-38-jomi891",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ludeku-31-juki903",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ludize-84-fopa558",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lufuba-99-lefa805",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lugika-07-rozo911",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lugobo-72-tuna023",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lukivo-17-cose300",
+  "ws": 16,
+  "n": 6,
+  "cohort": "structural",
+  "nonPaint": 6,
+  "keys": {
+   "svg/g/ellipse": 1,
+   "svg/g/text/@x": 2,
+   "svg/g/text/@y": 2,
+   "svg/g/path/@d": 1
+  }
+ },
+ {
+  "slug": "lukomo-68-kuxo704",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "luleji-91-jera958",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lumogu-95-givi829",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lunasu-43-reno078",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "lupomi-26-vigu795",
+  "ws": 20,
+  "n": 2,
+  "cohort": "structural",
+  "nonPaint": 2,
+  "keys": {
+   "svg/defs[childCount]": 1,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "lusigu-71-nipe759",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "luvudi-06-cire238",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "luxiti-51-jare370",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "luxiti-90-beca090",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "luzapi-49-rati107",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "maboju-34-soxi895",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "macuca-31-lare733",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "makatu-16-guvi187",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "makigi-01-zeni607",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "makuzo-19-tine034",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mapeji-83-sebu002",
+  "ws": 1,
+  "n": 1,
+  "cohort": "geometry",
+  "nonPaint": 1,
+  "keys": {
+   "svg/g/g/rect/@height": 1
+  }
+ },
+ {
+  "slug": "masibi-28-tidi862",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mataga-73-xape348",
+  "ws": 20,
+  "n": 2,
+  "cohort": "structural",
+  "nonPaint": 2,
+  "keys": {
+   "svg/defs[childCount]": 1,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "matoka-21-jisu767",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "matoke-25-kidu719",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "maxabo-82-soto406",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "maxubu-98-roca477",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "maxuzu-48-vopa106",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mebici-98-foji026",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mebidu-16-ruve297",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mefeke-43-xotu192",
+  "ws": 35,
+  "n": 35,
+  "cohort": "geometry",
+  "nonPaint": 35,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/g/rect/@height": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/g/rect/@x": 1,
+   "svg/g/g/line/@x1": 1,
+   "svg/g/g/line/@x2": 1,
+   "svg/g/rect/@x": 2,
+   "svg/g/text/@x": 3,
+   "svg/g/rect/@y": 2,
+   "svg/g/text/@y": 4,
+   "svg/g/polygon/@points": 8,
+   "svg/g/line/@x2": 1,
+   "svg/g/line/@y1": 1,
+   "svg/g/line/@y2": 1,
+   "svg/g/image/@height": 1,
+   "svg/g/image/@width": 1
+  }
+ },
+ {
+  "slug": "mefone-86-soca963",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "meguzu-44-luri459",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mejupo-12-vano433",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "meleno-54-zume276",
+  "ws": 4,
+  "n": 4,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/rect/@fill": 2,
+   "svg/g/rect/@fill-opacity": 2
+  }
+ },
+ {
+  "slug": "memipo-14-vule994",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "menire-56-rase375",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "menoke-22-luxo044",
+  "ws": 150,
+  "n": 13,
+  "cohort": "structural",
+  "nonPaint": 13,
+  "keys": {
+   "svg/g/rect": 5,
+   "svg/g/g/rect": 2,
+   "svg/g/g/line": 2,
+   "svg/g/polygon/@points": 1,
+   "svg/g/line": 1,
+   "svg/g/path/@d": 2
+  }
+ },
+ {
+  "slug": "menugo-30-cuxa317",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mepaxe-79-lima141",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "merosa-99-nico816",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "metano-36-gevu843",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "metaro-33-tivu315",
+  "ws": 5,
+  "n": 1,
+  "cohort": "structural",
+  "nonPaint": 1,
+  "keys": {
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "metuso-48-siti946",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mezaxa-44-siju322",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "micaki-01-rexa741",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "midipu-78-meva271",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mifafi-02-dofi536",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mifeve-32-bone848",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "migodo-28-fodi331",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mipezo-08-mura594",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mipope-41-daxa497",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "misove-15-cosu149",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mitedi-05-riso357",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mitefi-27-cubo687",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mitire-01-voga923",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mituru-91-pato523",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mivuke-79-fujo526",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mizeli-59-delu630",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mizugi-66-desi413",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mobava-88-teja491",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mobeji-49-faki497",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mobobu-53-vita034",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mocuna-66-bica785",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "modamu-43-juci519",
+  "ws": 8,
+  "n": 8,
+  "cohort": "geometry",
+  "nonPaint": 8,
+  "keys": {
+   "svg/g/a/@href": 2,
+   "svg/g/a/@title": 2,
+   "svg/g/a/@xlink:href": 2,
+   "svg/g/a/@xlink:title": 2
+  }
+ },
+ {
+  "slug": "mokige-56-disi349",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "momivo-11-pulo230",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "momuxe-95-bugu296",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "monafo-92-leta687",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mopidi-45-pudu787",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "movaso-17-jomi483",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "moxazi-74-bosi297",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "moxope-92-roco972",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mozege-45-jatu623",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mozofa-80-puru273",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mozoza-90-biru865",
+  "ws": 27,
+  "n": 27,
+  "cohort": "geometry",
+  "nonPaint": 26,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 1,
+   "svg/g/g/text/@font-size": 1,
+   "svg/g/g/text/@textLength": 1,
+   "svg/g/g/text/@x": 1,
+   "svg/g/g/text/@y": 1,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@y": 4,
+   "svg/g/text/@y": 5,
+   "svg/g/polygon/@points": 4,
+   "svg/g/line/@y1": 1,
+   "svg/g/line/@y2": 1
+  }
+ },
+ {
+  "slug": "mucoji-36-bape235",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mudiga-14-sage351",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mufomi-43-vaso140",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mufote-89-buka575",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mugidu-43-jizu986",
+  "ws": 8,
+  "n": 8,
+  "cohort": "geometry",
+  "nonPaint": 8,
+  "keys": {
+   "svg/g/a/@href": 2,
+   "svg/g/a/@title": 2,
+   "svg/g/a/@xlink:href": 2,
+   "svg/g/a/@xlink:title": 2
+  }
+ },
+ {
+  "slug": "mukebo-35-xoju095",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mulofu-90-voka382",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mumagu-62-jicu083",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "munuje-51-pejo542",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "mupugi-53-xuna043",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "murori-42-pabo946",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "musegi-69-lovi039",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "musive-74-reva838",
+  "ws": 1,
+  "n": 1,
+  "cohort": "geometry",
+  "nonPaint": 1,
+  "keys": {
+   "svg/g/path/@d": 1
+  }
+ },
+ {
+  "slug": "mutuve-86-sevi489",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "muvaxa-46-teze620",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "muzolo-11-cenu320",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nabesa-52-nufu501",
+  "ws": 94,
+  "n": 94,
+  "cohort": "geometry",
+  "nonPaint": 69,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/g/text/@font-size": 2,
+   "svg/g/g/text/@textLength": 2,
+   "svg/g/g/text/@x": 2,
+   "svg/g/g/text/@y": 2,
+   "svg/g/g/rect/@height": 2,
+   "svg/g/g/rect/@width": 2,
+   "svg/g/g/rect/@x": 2,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@stroke-dasharray": 2,
+   "svg/g/g/line/@stroke-width": 2,
+   "svg/g/g/line/@x1": 2,
+   "svg/g/g/line/@x2": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@height": 4,
+   "svg/g/rect/@rx": 4,
+   "svg/g/rect/@ry": 4,
+   "svg/g/rect/@stroke-width": 4,
+   "svg/g/rect/@width": 4,
+   "svg/g/rect/@x": 4,
+   "svg/g/rect/@y": 4,
+   "svg/g/text/@font-size": 5,
+   "svg/g/text/@textLength": 5,
+   "svg/g/text/@x": 5,
+   "svg/g/text/@y": 5,
+   "svg/g/polygon/@points": 8,
+   "svg/g/polygon/@stroke-width": 1,
+   "svg/g/line/@stroke-width": 1,
+   "svg/g/line/@x1": 1,
+   "svg/g/line/@x2": 1,
+   "svg/g/line/@y1": 1,
+   "svg/g/line/@y2": 1
+  }
+ },
+ {
+  "slug": "nadode-16-budi136",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "najuro-83-tuze073",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nakovi-91-kadu912",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "naliba-15-rari769",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nanedo-96-foso005",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nanoza-23-fija616",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "naruxe-19-copi353",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "natidi-64-kuzo035",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nazolo-84-jako346",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nazuki-76-dave810",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "necofe-81-toja736",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "necujo-58-gadi983",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nedaka-75-tiju705",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nekave-81-tove144",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nekeso-74-tebe680",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nemeji-70-xupi983",
+  "ws": 2,
+  "n": 2,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/text/@font-style": 2
+  }
+ },
+ {
+  "slug": "nenika-09-domu220",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nepica-26-pali815",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nereka-67-deco609",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nerujo-69-xovi052",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nesuva-86-fuki568",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "netanu-37-vovi884",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "netiro-87-foca868",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "netuvi-29-jiti924",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nevidi-69-todu292",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nexuni-53-xevi406",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nexuxi-32-gici059",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nezipa-74-kigi270",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nibiju-55-kavu710",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nidozi-08-daxa280",
+  "ws": 2,
+  "n": 2,
+  "cohort": "geometry",
+  "nonPaint": 2,
+  "keys": {
+   "svg/g/a/@title": 1,
+   "svg/g/a/@xlink:title": 1
+  }
+ },
+ {
+  "slug": "nifixi-65-cebi612",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nijilu-37-zofe547",
+  "ws": 2,
+  "n": 2,
+  "cohort": "geometry",
+  "nonPaint": 2,
+  "keys": {
+   "svg/g/text/@text-decoration": 2
+  }
+ },
+ {
+  "slug": "nimoxu-60-xale291",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nirolu-80-lobo780",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nisogu-21-zixe139",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nitadu-00-laca973",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nitubo-28-pugo834",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nivaje-50-tido759",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nivelo-54-caze822",
+  "ws": 2,
+  "n": 2,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/rect/@fill": 1,
+   "svg/g/rect/@fill-opacity": 1
+  }
+ },
+ {
+  "slug": "nizime-73-xuti179",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nizoxo-38-core298",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nizuzi-32-babe798",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nobase-02-zuvu172",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nocilo-91-xeza348",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nofegi-58-kilo738",
+  "ws": 6,
+  "n": 6,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/rect/@fill": 3,
+   "svg/g/rect/@fill-opacity": 3
+  }
+ },
+ {
+  "slug": "nofola-68-nobe068",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nojata-23-ropa545",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "noneda-45-tutu738",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nosebu-15-fasu691",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nosixi-41-rizu505",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nosuti-71-mida920",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "note-color",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "notube-22-jera587",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "novica-69-romi760",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nubute-95-pese616",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nucumi-51-posa953",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nufuse-45-monu242",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nukona-00-jaro456",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "numezi-28-fuzu813",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "numugo-16-luca722",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nunozo-09-zoce623",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nunuji-27-mosa042",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nutomi-11-bapo777",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nutuxo-22-fiza911",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nuvoja-46-dezu541",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nuxalo-31-mabe377",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nuxure-61-nida877",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "nuzise-60-temi305",
+  "ws": 87,
+  "n": 87,
+  "cohort": "geometry",
+  "nonPaint": 87,
+  "keys": {
+   "svg/@viewBox": 1,
+   "svg/@width": 1,
+   "svg/g/rect/@width": 2,
+   "svg/g/g/rect/@x": 1,
+   "svg/g/g/line/@x1": 1,
+   "svg/g/g/line/@x2": 1,
+   "svg/g/rect/@x": 2,
+   "svg/g/text/@x": 58,
+   "svg/g/line/@x1": 3,
+   "svg/g/line/@x2": 3,
+   "svg/g/polygon/@points": 4,
+   "svg/g/path/@d": 10
+  }
+ },
+ {
+  "slug": "padomu-10-nati972",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pafene-01-tedi758",
+  "ws": 173,
+  "n": 12,
+  "cohort": "structural",
+  "nonPaint": 12,
+  "keys": {
+   "svg/g/rect": 5,
+   "svg/g/g/rect": 2,
+   "svg/g/g/line": 2,
+   "svg/g/line": 3
+  }
+ },
+ {
+  "slug": "pagare-38-rebo342",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pagujo-10-pafe397",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pakado-65-cijo067",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "palizu-70-dora362",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pamuli-34-suxu083",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "panopa-36-muti317",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "panuvo-43-mifu020",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "papade-25-cera948",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "parimu-89-nemi931",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "paruvi-41-jano091",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "patute-88-dena554",
+  "ws": 6,
+  "n": 1,
+  "cohort": "structural",
+  "nonPaint": 1,
+  "keys": {
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "pebezu-05-dufi104",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "peciku-06-zuvo123",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "peduzi-80-giki495",
+  "ws": 1,
+  "n": 1,
+  "cohort": "geometry",
+  "nonPaint": 1,
+  "keys": {
+   "svg/g/@lengthAdjust": 1
+  }
+ },
+ {
+  "slug": "pekavu-30-toti112",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pexona-78-kede899",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pexube-19-kanu994",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pibefe-94-cibu835",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pidadu-86-cuda807",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pidici-36-jicu872",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pigifu-13-kele137",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pijixu-96-bago359",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pimoci-15-jite516",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pixifi-75-gulu822",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pixima-27-nita000",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pixopo-04-zitu732",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pizupi-41-logi068",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pobasa-34-neza994",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "poceko-81-dofe354",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "podata-90-rike047",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "podije-21-guxe276",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pojofa-31-mimo042",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pokici-03-lafi659",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "poleji-46-dege759",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pomoxu-05-luco302",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ponalu-70-nusa123",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ponugi-73-xuzo000",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "popoda-09-xavi089",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "popule-82-faxa443",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "porepe-36-nebi243",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "porulu-24-ciga586",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "posura-78-koji601",
+  "ws": 11,
+  "n": 1,
+  "cohort": "structural",
+  "nonPaint": 1,
+  "keys": {
+   "svg/g/ellipse": 1
+  }
+ },
+ {
+  "slug": "povuju-50-pido564",
+  "ws": 2,
+  "n": 2,
+  "cohort": "geometry",
+  "nonPaint": 2,
+  "keys": {
+   "svg/g/a/@title": 1,
+   "svg/g/a/@xlink:title": 1
+  }
+ },
+ {
+  "slug": "poxugi-46-feba577",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pucama-53-sugi082",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pucini-86-goti091",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pufube-73-kase811",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pugale-88-zuta854",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pugera-36-jeza279",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pukebe-27-xadi418",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pumula-71-gigi389",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "puneli-74-recu314",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "punove-48-zugu202",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "pupini-69-doko713",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "putici-74-zenu027",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "putuku-29-ziga148",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "puxoko-57-pifa349",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rabulu-15-mesu419",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rafibi-29-gevo619",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rajogu-04-suru681",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ralegi-94-fure352",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ralucu-86-voxa492",
+  "ws": 20,
+  "n": 2,
+  "cohort": "structural",
+  "nonPaint": 2,
+  "keys": {
+   "svg/defs[childCount]": 1,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "ramica-82-loku620",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ramive-48-vabu271",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ranalo-31-mite541",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rapoto-38-neca900",
+  "ws": 2,
+  "n": 2,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/ellipse/@fill": 1,
+   "svg/g/ellipse/@stroke": 1
+  }
+ },
+ {
+  "slug": "rasedo-44-liti558",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ratufa-96-xagu210",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ravire-24-jaju542",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "raxeca-83-rotu897",
+  "ws": 2,
+  "n": 2,
+  "cohort": "geometry",
+  "nonPaint": 2,
+  "keys": {
+   "svg/g/a/@title": 1,
+   "svg/g/a/@xlink:title": 1
+  }
+ },
+ {
+  "slug": "recani-60-licu962",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "refiju-27-nupe082",
+  "ws": 31,
+  "n": 31,
+  "cohort": "geometry",
+  "nonPaint": 31,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 1,
+   "svg/g/rect/@height": 2,
+   "svg/g/g/rect/@height": 5,
+   "svg/g/g/line/@y2": 5,
+   "svg/g/rect/@y": 5,
+   "svg/g/text/@y": 6,
+   "svg/g/polygon/@points": 4,
+   "svg/g/line/@y1": 1,
+   "svg/g/line/@y2": 1
+  }
+ },
+ {
+  "slug": "refire-51-cuka840",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "refoxa-14-rusi158",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "regate-07-rore899",
+  "ws": 31,
+  "n": 31,
+  "cohort": "geometry",
+  "nonPaint": 29,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 1,
+   "svg/g/g/text/@font-size": 2,
+   "svg/g/g/text/@textLength": 2,
+   "svg/g/g/text/@x": 2,
+   "svg/g/g/text/@y": 2,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@y": 4,
+   "svg/g/text/@y": 5,
+   "svg/g/polygon/@points": 4,
+   "svg/g/line/@y1": 1,
+   "svg/g/line/@y2": 1
+  }
+ },
+ {
+  "slug": "remoso-59-bese968",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "renilo-96-zugo789",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "repeka-62-lizi792",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "repudi-21-rovo448",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rexine-04-regi170",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rezoma-09-vixi307",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rezuve-35-javi726",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ridiro-95-moro174",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rifazu-14-fede536",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rilefo-62-jedi773",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rilube-65-disa539",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ripura-92-vacu541",
+  "ws": 62,
+  "n": 29,
+  "cohort": "structural",
+  "nonPaint": 29,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/g/rect/@x": 1,
+   "svg/g/g/line/@x1": 1,
+   "svg/g/g/line/@x2": 1,
+   "svg/g/rect/@y": 3,
+   "svg/g/a/text/@y": 4,
+   "svg/g/rect/@height": 2,
+   "svg/g/rect/@width": 2,
+   "svg/g/a/text/@textLength": 2,
+   "svg/g/a/text/text()": 2,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "ritesi-65-gujo913",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rititi-64-vene814",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rizove-01-move566",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "robopi-12-jaxe349",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rocipu-63-zafu641",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rodori-30-fipi183",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rofate-27-nuvu751",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rogube-67-sova611",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rojicu-57-rize312",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rokava-82-kavo091",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rolefi-55-vabe043",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rolota-48-cedi081",
+  "ws": 18,
+  "n": 2,
+  "cohort": "structural",
+  "nonPaint": 2,
+  "keys": {
+   "svg/defs[childCount]": 1,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "romane-05-nika037",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ropame-50-funo509",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rosazu-66-secu992",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rotila-89-juri637",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rozavo-21-cavi374",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rozove-84-tagu456",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ruboxu-79-joxa034",
+  "ws": 20,
+  "n": 2,
+  "cohort": "structural",
+  "nonPaint": 2,
+  "keys": {
+   "svg/defs[childCount]": 1,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "rudoci-99-zaju916",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rudola-01-bibi608",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rufama-75-paku115",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rufoko-60-jori485",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rugeco-70-muro754",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rugoro-74-mepi153",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rujapu-71-bidi404",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rujetu-45-laxe003",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rujimo-45-dato973",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rulepa-49-pisa733",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rumima-16-tevo172",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rupasa-72-neco694",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rusada-38-sopi026",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "rutipe-17-jonu882",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ruxasu-79-puxa956",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ruxazu-24-nagu486",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ruxiga-63-nide445",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ruxocu-12-tepa317",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ruxuju-55-jitu721",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ruxuxu-75-jilu612",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ruzapi-75-pone297",
+  "ws": 5,
+  "n": 1,
+  "cohort": "structural",
+  "nonPaint": 1,
+  "keys": {
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "sameli-92-dape565",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sanigu-59-puro802",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sapice-55-zono098",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sarevu-71-nona699",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sarico-38-foxo520",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "saroli-53-vafu511",
+  "ws": 27,
+  "n": 7,
+  "cohort": "structural",
+  "nonPaint": 7,
+  "keys": {
+   "svg/g/ellipse": 2,
+   "svg/g/text/@x": 2,
+   "svg/g/text/@y": 2,
+   "svg/g/path/@d": 1
+  }
+ },
+ {
+  "slug": "savebe-17-xovo724",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sazaxe-79-beka218",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sebafe-48-pepu053",
+  "ws": 30,
+  "n": 2,
+  "cohort": "structural",
+  "nonPaint": 2,
+  "keys": {
+   "svg/defs[childCount]": 1,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "secida-27-jaco323",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sedajo-92-docu424",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sedule-54-falo457",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sefako-72-jono850",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sefosu-56-mode325",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "selasi-04-leto875",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "selave-46-vidi646",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "seloli-77-rixi778",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "semepi-87-tiza126",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "semika-67-covi892",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "senogo-33-nuva054",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sepeti-78-zido700",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sesezo-58-joce104",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sevaze-62-pufa040",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sevicu-84-veve186",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sigefa-91-meme719",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sijuso-90-zaje372",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sirabe-54-sibe468",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sireta-85-reja792",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "siroza-17-cuko381",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sisege-95-labu547",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sisele-83-gebe678",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sisena-47-nivo837",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sixafa-45-faxi184",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sixifa-33-bibu140",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sizumo-60-ziba310",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sobiga-51-damo304",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sobobe-86-zebo638",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "socode-71-sige450",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sodovo-72-kudu756",
+  "ws": 20,
+  "n": 2,
+  "cohort": "structural",
+  "nonPaint": 2,
+  "keys": {
+   "svg/defs[childCount]": 1,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "sofavo-23-xuxi628",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sogafu-39-fone585",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sojufi-84-bexi933",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "solivu-37-vika919",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "somana-58-lili386",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sonuse-17-poku104",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sopapu-09-riza536",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "soxafo-18-vuzo068",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "soxata-16-kafi688",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "soxaxu-96-ceco932",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sozifu-13-zufu979",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "subaku-04-xuvi971",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sudugu-16-gapi622",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sufevi-44-xipa294",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sufire-57-dari792",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sukugi-55-kagi800",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sukuno-50-kiru529",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "suleta-28-lejo742",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "sulipe-44-jeta861",
+  "ws": 2,
+  "n": 2,
+  "cohort": "geometry",
+  "nonPaint": 2,
+  "keys": {
+   "svg/g/a/@title": 1,
+   "svg/g/a/@xlink:title": 1
+  }
+ },
+ {
+  "slug": "suneke-72-kexi504",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "supezo-15-dasi526",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "suredo-76-kaxo606",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "susati-64-lako047",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "suvepi-46-gozi893",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "suvepo-62-kedo015",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "suvodo-70-rogi494",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "suxefa-30-keda058",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "suxelu-07-toga142",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "suzexi-09-ruta299",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "suzumi-85-nuzo693",
+  "ws": 54,
+  "n": 54,
+  "cohort": "geometry",
+  "nonPaint": 52,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/g/text/@font-size": 2,
+   "svg/g/g/text/@textLength": 2,
+   "svg/g/g/text/@x": 2,
+   "svg/g/g/text/@y": 2,
+   "svg/g/g/rect/@x": 2,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@x1": 2,
+   "svg/g/g/line/@x2": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@x": 4,
+   "svg/g/rect/@y": 4,
+   "svg/g/text/@x": 5,
+   "svg/g/text/@y": 5,
+   "svg/g/polygon/@points": 8,
+   "svg/g/line/@x1": 1,
+   "svg/g/line/@x2": 1,
+   "svg/g/line/@y1": 1,
+   "svg/g/line/@y2": 1
+  }
+ },
+ {
+  "slug": "taboza-78-vali232",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "taduka-03-kosu047",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tajali-86-lisu875",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tapanu-22-libe792",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tapije-66-runu046",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "taraxa-93-reno112",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tatesu-03-zozo948",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "taxale-13-fire914",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "taxoza-93-sugi547",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "taxude-25-lamo370",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tefixi-07-xacu656",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tefunu-89-zece967",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tegasu-93-fima016",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tejuzi-96-fano922",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tekice-03-cupa947",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "telavi-12-pifu671",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "telizo-11-pilo439",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tenifo-99-roxi031",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "teoz-ng-001",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "terapo-81-puzi168",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tetemo-66-paku531",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tetoxu-24-mupo410",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "texopo-01-dibi658",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "texoze-85-meli189",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tifexe-26-caza420",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tifube-59-tezo313",
+  "ws": 21,
+  "n": 21,
+  "cohort": "geometry",
+  "nonPaint": 21,
+  "keys": {
+   "svg/@viewBox": 1,
+   "svg/@width": 1,
+   "svg/g/g/rect/@x": 1,
+   "svg/g/g/line/@x1": 1,
+   "svg/g/g/line/@x2": 1,
+   "svg/g/rect/@x": 2,
+   "svg/g/text/@x": 2,
+   "svg/g/polygon/@points": 8,
+   "svg/g/line/@x2": 2,
+   "svg/g/text/@textLength": 1,
+   "svg/g/text/text()": 1
+  }
+ },
+ {
+  "slug": "tijeba-12-zeta132",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tijeta-70-ziru418",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tijide-41-togo659",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tinaxe-52-nago637",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tiniva-46-fozu745",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tipido-16-xide828",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tipoke-58-cofi920",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tirige-97-ruvi637",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "titufa-76-tisa795",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tixefu-75-vono728",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tixune-73-xoca786",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tixuze-43-pano940",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "todetu-82-rupo943",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "todozi-34-jire490",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "togopo-38-tuza899",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tojabu-38-lima321",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tolake-96-duve519",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tolozi-77-gere619",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "totebu-75-jata404",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tovese-18-xira071",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "toxoto-19-gigi007",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tubagi-46-nata941",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tugaju-41-dovi584",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tugonu-44-file000",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tukivo-05-vuvi835",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tukobo-89-zebi935",
+  "ws": 58,
+  "n": 58,
+  "cohort": "geometry",
+  "nonPaint": 58,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 1,
+   "svg/g/rect/@height": 4,
+   "svg/g/rect/@y": 2,
+   "svg/g/g/rect/@height": 5,
+   "svg/g/g/line/@y2": 5,
+   "svg/g/path/@d": 7,
+   "svg/g/text/@y": 5,
+   "svg/g/polygon/@points": 16,
+   "svg/g/line/@y1": 6,
+   "svg/g/line/@y2": 6
+  }
+ },
+ {
+  "slug": "tulece-76-vexo816",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tumega-91-dadu356",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tumuke-16-xomo243",
+  "ws": 168,
+  "n": 168,
+  "cohort": "geometry",
+  "nonPaint": 165,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/g/text/@font-size": 3,
+   "svg/g/g/text/@textLength": 1,
+   "svg/g/g/text/@x": 3,
+   "svg/g/g/text/@y": 3,
+   "svg/g/g/image/@height": 3,
+   "svg/g/g/image/@width": 3,
+   "svg/g/g/image/@x": 3,
+   "svg/g/g/image/@y": 3,
+   "svg/g/g/rect/@x": 2,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@x1": 2,
+   "svg/g/g/line/@x2": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@x": 4,
+   "svg/g/rect/@y": 4,
+   "svg/g/text/@x": 12,
+   "svg/g/text/@y": 12,
+   "svg/g/polygon/@points": 32,
+   "svg/g/line/@x1": 4,
+   "svg/g/line/@x2": 4,
+   "svg/g/line/@y1": 4,
+   "svg/g/line/@y2": 4,
+   "svg/g/image/@x": 5,
+   "svg/g/image/@y": 5,
+   "svg/g/path/@d": 40
+  }
+ },
+ {
+  "slug": "tupogo-51-zeso391",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tupolo-75-ziku881",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "turixi-21-mufe557",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tusoga-11-gabe405",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tuxido-23-xide677",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tuzaga-87-gene496",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tuzeli-17-cuko941",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "tuzufi-65-xafe699",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vacigu-68-jize640",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vafedo-17-xuke155",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vajoke-72-gizu927",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "valiva-41-fabo221",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vamuge-84-degu929",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vanaci-52-gimi082",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vasibu-26-lece790",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vasuvo-82-boxu402",
+  "ws": 14,
+  "n": 14,
+  "cohort": "geometry",
+  "nonPaint": 2,
+  "keys": {
+   "svg/g/path/@d": 2,
+   "svg/g/path/@fill": 2,
+   "svg/g/path/@fill-opacity": 2,
+   "svg/g/path/@stroke": 2,
+   "svg/g/path/@stroke-width": 2,
+   "svg/g/rect/@fill": 2,
+   "svg/g/rect/@fill-opacity": 2
+  }
+ },
+ {
+  "slug": "vataru-17-guso065",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vatero-29-bice360",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vativa-83-bisa518",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vaxipu-62-dodo661",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vegizu-18-zubu834",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vekami-41-sane093",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vekivu-99-pijo983",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vekuno-87-ponu028",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vekuxo-98-rugu851",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vemako-00-lecu427",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vemuja-48-deku981",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vepesa-08-toju745",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vesaze-51-ceji187",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vetuvo-45-gaku910",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vezozi-51-kese404",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vibaru-39-gebo741",
+  "ws": 21,
+  "n": 2,
+  "cohort": "structural",
+  "nonPaint": 2,
+  "keys": {
+   "svg/defs[childCount]": 1,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "vibazo-85-safi630",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vicevi-92-zeda652",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vidabo-48-nugi476",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vidibe-48-pole993",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vifobo-88-gona211",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vigoga-79-pita532",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vijito-33-mora824",
+  "ws": 68,
+  "n": 68,
+  "cohort": "geometry",
+  "nonPaint": 68,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/rect/@x": 8,
+   "svg/g/rect/@y": 8,
+   "svg/g/text/@x": 8,
+   "svg/g/text/@y": 8,
+   "svg/g/g/rect/@x": 2,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@x1": 2,
+   "svg/g/g/line/@x2": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/line/@x1": 3,
+   "svg/g/line/@x2": 3,
+   "svg/g/line/@y1": 3,
+   "svg/g/line/@y2": 3,
+   "svg/g/polygon/@points": 8
+  }
+ },
+ {
+  "slug": "vikelu-53-faga789",
+  "ws": 94,
+  "n": 94,
+  "cohort": "geometry",
+  "nonPaint": 69,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/g/text/@font-size": 2,
+   "svg/g/g/text/@textLength": 2,
+   "svg/g/g/text/@x": 2,
+   "svg/g/g/text/@y": 2,
+   "svg/g/g/rect/@height": 2,
+   "svg/g/g/rect/@width": 2,
+   "svg/g/g/rect/@x": 2,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@stroke-dasharray": 2,
+   "svg/g/g/line/@stroke-width": 2,
+   "svg/g/g/line/@x1": 2,
+   "svg/g/g/line/@x2": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@height": 4,
+   "svg/g/rect/@rx": 4,
+   "svg/g/rect/@ry": 4,
+   "svg/g/rect/@stroke-width": 4,
+   "svg/g/rect/@width": 4,
+   "svg/g/rect/@x": 4,
+   "svg/g/rect/@y": 4,
+   "svg/g/text/@font-size": 5,
+   "svg/g/text/@textLength": 5,
+   "svg/g/text/@x": 5,
+   "svg/g/text/@y": 5,
+   "svg/g/polygon/@points": 8,
+   "svg/g/polygon/@stroke-width": 1,
+   "svg/g/line/@stroke-width": 1,
+   "svg/g/line/@x1": 1,
+   "svg/g/line/@x2": 1,
+   "svg/g/line/@y1": 1,
+   "svg/g/line/@y2": 1
+  }
+ },
+ {
+  "slug": "vikupa-77-sazi937",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vinefa-69-lufo631",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vitevu-99-rali549",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vitusu-66-boxa381",
+  "ws": 68,
+  "n": 68,
+  "cohort": "geometry",
+  "nonPaint": 68,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/rect/@x": 8,
+   "svg/g/rect/@y": 8,
+   "svg/g/text/@x": 8,
+   "svg/g/text/@y": 8,
+   "svg/g/g/rect/@x": 2,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@x1": 2,
+   "svg/g/g/line/@x2": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/line/@x1": 3,
+   "svg/g/line/@x2": 3,
+   "svg/g/line/@y1": 3,
+   "svg/g/line/@y2": 3,
+   "svg/g/polygon/@points": 8
+  }
+ },
+ {
+  "slug": "vivava-25-vuba802",
+  "ws": 33,
+  "n": 13,
+  "cohort": "structural",
+  "nonPaint": 9,
+  "keys": {
+   "svg/g/ellipse": 2,
+   "svg/g/text/@fill": 2,
+   "svg/g/text/@font-size": 2,
+   "svg/g/text/@textLength": 2,
+   "svg/g/text/@x": 2,
+   "svg/g/text/@y": 2,
+   "svg/g/path/@d": 1
+  }
+ },
+ {
+  "slug": "vixacu-92-faru631",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vixapo-60-tuzu421",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vobusa-71-sina142",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vodiba-42-fegu984",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vofefi-14-rine141",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vofupo-09-gafe466",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vogegu-91-mave762",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vopixi-04-lako436",
+  "ws": 51,
+  "n": 35,
+  "cohort": "structural",
+  "nonPaint": 35,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/g/rect/@height": 1,
+   "svg/g/g/line/@y2": 1,
+   "svg/g/rect/@y": 1,
+   "svg/g/text/@y": 3,
+   "svg/g/line/@y1": 6,
+   "svg/g/line/@y2": 6,
+   "svg/g/polygon/@points": 8,
+   "svg/g/a/text/@textLength": 1,
+   "svg/g/a/text/@y": 2,
+   "svg/g/a/text/text()": 1,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "voruto-32-rona048",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vosaco-34-luku168",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vosoni-09-tedo226",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vosupo-49-zide683",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vubato-50-gebu534",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vubexi-90-tonu836",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vubibu-30-rufa077",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vucomo-53-gicu658",
+  "ws": 63,
+  "n": 63,
+  "cohort": "geometry",
+  "nonPaint": 63,
+  "keys": {
+   "svg/g/@lengthAdjust": 1,
+   "svg/g/text/@textLength": 62
+  }
+ },
+ {
+  "slug": "vudenu-74-xeri322",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vuduri-54-joso537",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vujezi-18-pute031",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vujiba-78-foga414",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vuniba-19-repo187",
+  "ws": 16,
+  "n": 16,
+  "cohort": "geometry",
+  "nonPaint": 16,
+  "keys": {
+   "svg/g/@lengthAdjust": 1,
+   "svg/g/text/@textLength": 15
+  }
+ },
+ {
+  "slug": "vuniko-49-fige634",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vutazu-28-xogu304",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vuvage-72-meru492",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vuvoxe-24-bapa117",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vuvuge-45-tina859",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vuxaci-12-minu312",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "vuzolo-46-daki571",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xacete-63-neke615",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xaduru-73-jani181",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xakuro-97-tado489",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xalafa-49-xere690",
+  "ws": 68,
+  "n": 68,
+  "cohort": "geometry",
+  "nonPaint": 68,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 2,
+   "svg/@width": 1,
+   "svg/g/rect/@x": 8,
+   "svg/g/rect/@y": 8,
+   "svg/g/text/@x": 8,
+   "svg/g/text/@y": 8,
+   "svg/g/g/rect/@x": 2,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@x1": 2,
+   "svg/g/g/line/@x2": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/line/@x1": 3,
+   "svg/g/line/@x2": 3,
+   "svg/g/line/@y1": 3,
+   "svg/g/line/@y2": 3,
+   "svg/g/polygon/@points": 8
+  }
+ },
+ {
+  "slug": "xalaxi-16-laru928",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xalofe-61-vala300",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xamaga-47-mabi226",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xamanu-74-june638",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xarifa-42-kiku597",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xatotu-85-tusi683",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xaxile-75-soro580",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xebixi-82-duji787",
+  "ws": 4,
+  "n": 4,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/rect/@fill": 2,
+   "svg/g/rect/@fill-opacity": 2
+  }
+ },
+ {
+  "slug": "xecame-98-cuma671",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xecopi-26-mego518",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xecujo-78-sofu160",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xediki-78-dexu094",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xedomi-77-libu804",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xegufe-25-paji965",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xejeda-63-dobe217",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xejeta-41-boje080",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xejojo-44-besu904",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xeneru-44-kuma826",
+  "ws": 6,
+  "n": 6,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/rect/@fill": 3,
+   "svg/g/rect/@fill-opacity": 3
+  }
+ },
+ {
+  "slug": "xepoda-56-xema668",
+  "ws": 8,
+  "n": 8,
+  "cohort": "geometry",
+  "nonPaint": 8,
+  "keys": {
+   "svg/g/a/@href": 2,
+   "svg/g/a/@title": 2,
+   "svg/g/a/@xlink:href": 2,
+   "svg/g/a/@xlink:title": 2
+  }
+ },
+ {
+  "slug": "xeroce-52-moso281",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xerugu-77-tapu134",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xesame-35-puka061",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xevovo-09-jeja818",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xezipe-17-tima059",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xiceso-64-pelu456",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xidako-83-lidu532",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xigoxi-25-paro589",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xikuro-71-cadu306",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ximemi-09-rabo019",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ximeto-04-nati532",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ximuku-67-lupe952",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xinope-25-kupa775",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xinote-88-dace690",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xisopa-79-zano248",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xivoxi-68-meva932",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xixoce-70-vanu584",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xizeto-03-nuke395",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xizisu-76-buta484",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xogota-37-pele078",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xojavo-26-jezu088",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xokike-22-sige844",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xolebu-95-cage107",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xonedu-05-mubu593",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xonili-01-pure946",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xonimo-63-fure722",
+  "ws": 2,
+  "n": 2,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/rect/@fill": 1,
+   "svg/g/rect/@fill-opacity": 1
+  }
+ },
+ {
+  "slug": "xorifu-24-tuba802",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xorixe-91-vaci569",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xovuse-55-xape574",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xucibo-16-zisi974",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xujavu-00-xodi798",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xujesa-13-dane303",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xujoga-62-lacu610",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xunoci-60-dezu033",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xunolu-07-kuxo189",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xupote-49-reta446",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xupozu-13-numi050",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xupufa-46-romu811",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xurenu-86-nezu467",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xutiri-59-jace312",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xutovo-34-bisa687",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xutuvu-44-zoko423",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xuxugi-47-vuzu867",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xuzedu-97-femo595",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xuzoxu-26-kafe830",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "xuzusu-30-tixu002",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zabiri-38-zace998",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zacoco-81-robo032",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zajova-30-sagu653",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zajovi-78-nupe067",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zakuti-75-kute096",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zalegi-22-nepi686",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zanore-53-tike308",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zaretu-49-jomo630",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zarexe-65-xoki430",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zariro-57-fogu131",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zateki-65-foxi765",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zavacu-31-dola792",
+  "ws": 27,
+  "n": 27,
+  "cohort": "geometry",
+  "nonPaint": 26,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 1,
+   "svg/g/g/text/@font-size": 1,
+   "svg/g/g/text/@textLength": 1,
+   "svg/g/g/text/@x": 1,
+   "svg/g/g/text/@y": 1,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@y": 4,
+   "svg/g/text/@y": 5,
+   "svg/g/polygon/@points": 4,
+   "svg/g/line/@y1": 1,
+   "svg/g/line/@y2": 1
+  }
+ },
+ {
+  "slug": "zaviru-83-xixa466",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zazaje-27-roga410",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zedama-25-riru948",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zedepi-36-come743",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zeduvi-34-zevo210",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zejabi-24-xoja824",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zekidi-24-lafu756",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zelako-07-fibi746",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zelexo-73-movu971",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zelojo-99-pucu548",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zerovu-57-cumo773",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zetele-98-tafo132",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zetenu-41-rece091",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zexaja-95-zofi201",
+  "ws": 14,
+  "n": 8,
+  "cohort": "structural",
+  "nonPaint": 5,
+  "keys": {
+   "svg/g/text/@fill": 1,
+   "svg/g/text/@font-family": 1,
+   "svg/g/text/@font-size": 1,
+   "svg/g/text/@textLength": 1,
+   "svg/g/text/@x": 1,
+   "svg/g/text/@y": 1,
+   "svg/g/text/text()": 1,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "zexili-92-fifa666",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zexuna-08-kuci388",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zicadi-21-koje636",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zidova-39-bapi223",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zigire-72-muga285",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "ziloke-42-lodi019",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zimoci-54-sedi066",
+  "ws": 21,
+  "n": 2,
+  "cohort": "structural",
+  "nonPaint": 2,
+  "keys": {
+   "svg/defs[childCount]": 1,
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "zisuri-53-punu876",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zizeca-16-cavi659",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zoculi-89-nodo007",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zofeda-77-xiba744",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zofibo-80-kisi168",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zofini-90-tuta329",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zogane-85-raja214",
+  "ws": 2,
+  "n": 2,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/rect/@fill": 1,
+   "svg/g/rect/@fill-opacity": 1
+  }
+ },
+ {
+  "slug": "zogici-88-nini947",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zolude-08-leka122",
+  "ws": 12,
+  "n": 1,
+  "cohort": "structural",
+  "nonPaint": 1,
+  "keys": {
+   "svg/g[childCount]": 1
+  }
+ },
+ {
+  "slug": "zoluna-26-papu450",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zonadu-68-gido115",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zosulu-72-fati889",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zoturo-25-jima978",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zovido-40-xeju664",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zuboto-07-gimo515",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zucesu-12-neno978",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zudize-61-vomi445",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zufido-27-laru296",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zujani-47-femu345",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zujuge-00-sida366",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zukume-07-xasu503",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zuluja-50-zore143",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zumila-29-nulo712",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zunile-23-zezi158",
+  "ws": 27,
+  "n": 27,
+  "cohort": "geometry",
+  "nonPaint": 26,
+  "keys": {
+   "svg/@height": 1,
+   "svg/@viewBox": 1,
+   "svg/g/g/text/@font-size": 1,
+   "svg/g/g/text/@textLength": 1,
+   "svg/g/g/text/@x": 1,
+   "svg/g/g/text/@y": 1,
+   "svg/g/g/rect/@y": 2,
+   "svg/g/g/line/@y1": 2,
+   "svg/g/g/line/@y2": 2,
+   "svg/g/rect/@y": 4,
+   "svg/g/text/@y": 5,
+   "svg/g/polygon/@points": 4,
+   "svg/g/line/@y1": 1,
+   "svg/g/line/@y2": 1
+  }
+ },
+ {
+  "slug": "zupiba-94-gevi986",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zupora-06-pazi006",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zuravu-52-mike252",
+  "ws": 4,
+  "n": 4,
+  "cohort": "paint-only",
+  "nonPaint": 0,
+  "keys": {
+   "svg/g/path/@stroke": 2,
+   "svg/g/path/@stroke-width": 2
+  }
+ },
+ {
+  "slug": "zusedo-90-gaje635",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zutesu-04-xevu025",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ },
+ {
+  "slug": "zuvusi-13-fika929",
+  "ws": 0,
+  "n": 0,
+  "cohort": "zero",
+  "nonPaint": 0,
+  "keys": {}
+ }
+]

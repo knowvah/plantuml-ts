@@ -11,6 +11,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
+import { assembleSvg } from '../../../src/core/assemble-svg.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type {
@@ -22,12 +23,12 @@ import type {
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import { renderSequence } from '../../../src/diagrams/sequence/renderer.js';
-import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.js';
 import { NEWPAGE_TILE_HEIGHT } from '../../../src/diagrams/sequence/newpage-style.js';
 import { paginateSequence } from '../../../src/diagrams/sequence/sequence-page.js';
 import { destroyPaint, stepIndent } from '../../../src/diagrams/sequence/sequence-layout-life-event.js';
 import { astOrThrow } from '../../helpers/parse-ast.js';
 import { DEFAULT_SEQUENCE_STYLE_BUILDER } from '../../helpers/sequence-source.js';
+import { tagsOf } from '../../helpers/svg-tags.js';
 
 const measurer = new DeterministicMeasurer();
 
@@ -72,10 +73,6 @@ const BODOBU = [
   'A->User: Done',
 ];
 const AB = ['participant A', 'participant B'];
-
-function linesOf(svg: string): string[] {
-  return svg.match(/<line [^>]*>/g) ?? [];
-}
 
 describe('destroy paint (ComponentRoseDestroy.java:52-65)', () => {
   it('defaults to #A80036 at 2, undashed (plantuml.skin:149-153)', () => {
@@ -204,9 +201,10 @@ describe('the lifeline stops at the destroy (LivingSpace.java:151-166)', () => {
 describe('drawing the cross', () => {
   it('draws two diagonals in LineColor at the thickness, down-right first (jar bodobu-73)', () => {
     const svg = renderSequence(geoOf(BODOBU), defaultTheme, measurer).body;
-    expect(linesOf(svg).filter((l) => l.includes('#A80036'))).toEqual([
-      '<line x1="322.831" y1="138" x2="340.831" y2="156" stroke="#A80036" stroke-width="2"/>',
-      '<line x1="322.831" y1="156" x2="340.831" y2="138" stroke="#A80036" stroke-width="2"/>',
+    const ink = { stroke: '#A80036', 'stroke-width': '2' };
+    expect(tagsOf(svg, 'line').filter((l) => l['stroke'] === '#A80036')).toEqual([
+      { x1: '322.831', y1: '138', x2: '340.831', y2: '156', ...ink },
+      { x1: '322.831', y1: '156', x2: '340.831', y2: '138', ...ink },
     ]);
   });
 
@@ -223,13 +221,10 @@ describe('drawing the cross', () => {
     expect(svg.indexOf('#A80036')).toBeGreaterThan(svg.indexOf('fill="#E2E2F0"'));
   });
 
-  it('scales the corner, the size and the stroke (SvgGraphics.java:466-468,556-561)', () => {
+  it('strokes the cross at the exporter scale (SvgGraphics.java:466-468,556-561)', () => {
     const geo = geoOf(['A -> B : one', 'destroy B']);
-    const [cross] = crossesOf(scaleSequenceGeometry(geo, 2));
-    const [unscaled] = crossesOf(geo);
-    expect([cross?.x, cross?.y]).toEqual([unscaled!.x * 2, unscaled!.y * 2]);
-    const svg = renderSequence({ ...geo, scale: { kind: 'simple', factor: 2 } }, defaultTheme, measurer).body;
-    expect(linesOf(svg).filter((l) => l.includes('#A80036'))[0]).toContain('stroke-width="4"');
+    const svg = assembleSvg(renderSequence({ ...geo, scale: { kind: 'simple', factor: 2 } }, defaultTheme, measurer));
+    expect(tagsOf(svg, 'line').find((l) => l['stroke'] === '#A80036')).toMatchObject({ 'stroke-width': '4' });
   });
 });
 

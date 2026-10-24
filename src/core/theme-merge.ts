@@ -48,6 +48,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'wrapWidth',
   'dpi',
   'topurl', // cdd-T34
+  'lengthAdjust', // sdd3-T2c
   'maxMessageSize',
   'sameClassWidth',
   'classAttributeIconSize',

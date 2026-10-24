@@ -8,7 +8,6 @@ import {} from './paint.js';
 import type {} from './paint.js';
 import {
   attrs,
-  escapeXmlText,
   resolvePaint,
   resolvePaintAttrs,
   attrsFromRecord,
@@ -16,14 +15,12 @@ import {
   PAINT_NONE,
   type BoxStyle,
   type LineStyle,
-  type TextStyle,
   type SvgAttrsPaint,
 } from './svg.js';
-import { textFontFamily, emittedTextForm } from './svg-text-font.js';
 export { emittedTextForm } from './svg-text-font.js';
+export { text, multilineText, tspan } from './svg-shapes-text.js';
 import { DEFAULT_SVG_DECIMALS, fmt, formatOpacity, shortenColor } from './svg-format.js';
 import { roundedCornerAttrs } from './svg-rect-corners.js';
-import { backColorFilterDef } from './svg-defs.js';
 import { extraLineStrokeWidth } from './klimt/drawing/svg/driver-text-svg-decorations.js';
 import type { ExtraLine } from './klimt/drawing/svg/driver-text-svg-decorations.js';
 
@@ -43,6 +40,45 @@ function strokeAttrsOf(
   return { stroke, ...strokeDecorationOf(stroke, style.strokeWidth, style.strokeDasharray), styled: true };
 }
 
+/** `SvgGraphics#fillMe`'s test (`SvgGraphics.java:880`): `#[0-9A-Fa-f]{8}`. */
+const ALPHA_HEX_FILL = /^#[0-9A-Fa-f]{8}$/;
+
+/**
+ * `SvgGraphics#fillMe` (`klimt/drawing/svg/SvgGraphics.java:880-887`): an
+ * 8-digit `#RRGGBBAA` fill is written as `fill=shortenColor(fill[0..7])` plus
+ * `fill-opacity=formatOpacity(parseInt(fill[7..], 16) / 255.0)`; any other
+ * fill is `shortenColor(fill)` only (already applied by `resolvePaint`).
+ * An opacity the caller passes explicitly wins over the alpha byte -- the
+ * jar has no second source, so this only keeps existing callers' output.
+ */
+function fillAttrsOf(
+  fill: string | undefined,
+  explicitOpacity: number | undefined,
+): { fill: string | undefined; fillOpacity: string | undefined } {
+  const explicit = explicitOpacity === undefined ? undefined : formatOpacity(explicitOpacity, DEFAULT_SVG_DECIMALS);
+  if (fill === undefined || !ALPHA_HEX_FILL.test(fill)) return { fill, fillOpacity: explicit };
+  const alpha = parseInt(fill.slice(7), 16) / 255;
+  return {
+    fill: shortenColor(fill.slice(0, 7)),
+    fillOpacity: explicit ?? formatOpacity(alpha, DEFAULT_SVG_DECIMALS),
+  };
+}
+
+/**
+ * `DriverPathSvg.java:65` `color.equals(back) && !(color instanceof
+ * HColorGradient) && !(color instanceof HColorLinearGradient)`: both paints
+ * resolved to a flat colour (no `<linearGradient>` def) and the same one.
+ * `none` is not a colour here: a path with no fill has no back colour to match.
+ */
+function isSameFlatColour(
+  fill: { value: string | undefined; def: string } | undefined,
+  stroke: { value: string | undefined; def: string },
+): boolean {
+  if (fill === undefined || fill.value === undefined || stroke.value === undefined) return false;
+  if (fill.def !== '' || stroke.def !== '' || fill.value === PAINT_NONE) return false;
+  return fill.value.toLowerCase() === stroke.value.toLowerCase();
+}
+
 /**
  * `<rect>` element.
  */
@@ -51,17 +87,16 @@ export function rect(x: number, y: number, w: number, h: number, style: BoxStyle
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeAttrsOf(strokeR.value, style);
   const opacity = style.opacity === undefined ? undefined : formatOpacity(style.opacity, DEFAULT_SVG_DECIMALS);
-  const fillOpacity =
-    style.fillOpacity === undefined ? undefined : formatOpacity(style.fillOpacity, DEFAULT_SVG_DECIMALS);
+  const fillA = fillAttrsOf(fillR.value, style.fillOpacity);
   const a = attrs([
     ['x', x],
     ['y', y],
     ['width', w],
     ['height', h],
-    ['fill', fillR.value],
+    ['fill', fillA.fill],
     // Directly after `fill`, matching the jar's own emission order for a
     // transparent hit target: `<rect ... fill="#000" fill-opacity="0"/>`.
-    ['fill-opacity', fillOpacity],
+    ['fill-opacity', fillA.fillOpacity],
     ['stroke', sd.stroke],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
@@ -93,127 +128,6 @@ export function line(x1: number, y1: number, x2: number, y2: number, style: Line
 }
 
 /**
- * `<text>` element with plain (un-tspan-wrapped) text content.
- *
- * G2 N4: previously ALWAYS wrapped content in a bare `<tspan>` -- removed.
- * jar's own single-run text draws (`SvgGraphicsCore#text`/
- * `svg-graphics-elements.ts`'s own `setTextContent`, which this port's
- * klimt path already mirrors with zero `<tspan>`) never wrap a simple
- * string in `<tspan>` at all -- `<tspan>` is reserved for MULTI-styled-run
- * or explicit multi-LINE text, each getting its OWN dedicated `<tspan
- * x="..." y="...">` (e.g. `diagrams/activity/renderer.ts`'s own multiline
- * builder, which never calls this function). Verified: 0/351+ cached jar
- * fixtures across `state`/`object` (the two other `core/svg.ts#text()`
- * consumers surveyed) contain a `<tspan>` for a single-run label; this was
- * a universal, cross-diagram-type divergence (`svg/g/g/text/tspan`,
- * 407/718 reach in class's own census alone, `plans/g2-class-svg/
- * ledger.md` N4) -- description/component/usecase are UNAFFECTED (klimt-
- * drawn, never call this function; their own census stays byte-identical).
- *
- * Content is XML-escaped. Style attributes are placed on the outer `<text>`.
- *
- * Leading spaces are trimmed WITHOUT moving `x` (this emitter has no measurer).
- * A caller whose run can start with a space must shift `x` by one space width
- * per space and measure `textLength` on the trimmed text, via
- * `driverTextPlacement` (DriverTextSvg.java:118-126); none of the core callers
- * (usymbol icon labels, node labels, the dispatcher notice) emit such a run.
- */
-/**
- * Rule 5: a one-character label has no inter-character spacing to adjust, so
- * `textLength` is skipped for it (upstream's own `text.length() > 1` guard
- * and its rationale). `textLength` stays per-element otherwise — unlike
- * `lengthAdjust`, it is not inheritable.
- */
-function textLengthOf(content: string, textLength: number | undefined): number | undefined {
-  return content.length > 1 ? textLength : undefined;
-}
-
-export function text(x: number, y: number, rawContent: string, style: TextStyle = {}): string {
-  const content = emittedTextForm(rawContent, style.fontFamily);
-  const fillR = resolvePaint(style.fill);
-  // `SvgGraphics#text`'s `textBackColor` arm (`SvgGraphics.java:733-736`):
-  // register the `feFlood` filter for the colour and reference it. The def
-  // rides inline next to the element, like `resolvePaint`'s gradient def;
-  // `svg-defs.ts#extractFilterDefs` lifts and dedups it at assembly.
-  const back = style.textBackColor === undefined ? undefined : backColorFilterDef(style.textBackColor);
-  const a = attrs([
-    ['x', x],
-    ['y', y],
-    ['font-family', textFontFamily(style.fontFamily)],
-    ['font-size', style.fontSize],
-    ['font-weight', style.fontWeight],
-    ['font-style', style.fontStyle],
-    ['fill', fillR.value],
-    ['text-anchor', style.textAnchor],
-    ['transform', style.transform],
-    ['dominant-baseline', style.dominantBaseline],
-    ['text-decoration', style.textDecoration],
-    // Rule 3: no `lengthAdjust` — hoisted onto the document root and
-    // inherited. `TextStyle.lengthAdjust` is kept as a field (callers still
-    // set it) but is no longer emitted per element.
-    ['textLength', textLengthOf(content, style.textLength)],
-    ['filter', back === undefined ? undefined : `url(#${back.id})`],
-  ] as const);
-  return `${back?.def ?? ''}${fillR.def}<text${a}>${escapeXmlText(content)}</text>`;
-}
-
-/**
- * `<text>` with stacked `<tspan>` children -- one per line, advancing the
- * baseline by `lineHeight`. Upstream has no single element for this (its
- * `TextBlock` composes one `svgText` per line), but five byte-identical
- * hand-built copies existed in `activity-renderer-shapes.ts` alone, each
- * with its own `toFixed(1)` and its own three-`replace` XML escaping. This
- * is the one emitter they now share, so rules 1-3 reach them.
- *
- * The parent `<text>` carries the shared attributes only; `x`/`y` live on
- * the tspans, which is why this cannot just call {@link text}.
- */
-export function multilineText(
-  lines: readonly string[],
-  x: number,
-  firstBaselineY: number,
-  lineHeight: number,
-  style: TextStyle = {},
-): string {
-  const fillR = resolvePaint(style.fill);
-  const a = attrs([
-    ['text-anchor', style.textAnchor],
-    ['font-family', textFontFamily(style.fontFamily)],
-    ['font-size', style.fontSize],
-    ['font-weight', style.fontWeight],
-    ['font-style', style.fontStyle],
-    ['fill', fillR.value],
-  ] as const);
-  const tspans = lines
-    .map((ln, i) => {
-      const ta = attrs([
-        ['x', x],
-        ['y', firstBaselineY + lineHeight * i],
-      ] as const);
-      return `<tspan${ta}>${escapeXmlText(ln)}</tspan>`;
-    })
-    .join('');
-  return `${fillR.def}<text${a}>${tspans}</text>`;
-}
-
-/**
- * A single `<tspan>`. Same attribute choke point as {@link text}, so a color
- * inside a creole run shortens exactly like one on a plain label -- they did
- * not, and `spansToTspan` also emitted its content raw, producing invalid
- * XML for any text containing `&` or `<`.
- */
-export function tspan(content: string, style: TextStyle = {}): string {
-  const fillR = resolvePaint(style.fill);
-  const a = attrs([
-    ['fill', fillR.value],
-    ['font-weight', style.fontWeight],
-    ['font-style', style.fontStyle],
-    ['text-decoration', style.textDecoration],
-  ] as const);
-  return `${fillR.def}<tspan${a}>${escapeXmlText(content)}</tspan>`;
-}
-
-/**
  * `<image>` element -- G2 N22 (class-member-creole inline `<img>`/`<$sprite>`
  * atoms). Attribute order matches `klimt/drawing/svg/svg-graphics-elements
  * .ts#svgImageDataUri` (upstream: `SvgGraphics#svgImageDataUri`) exactly:
@@ -240,14 +154,15 @@ export function image(x: number, y: number, width: number, height: number, href:
 export function path(d: string, style: LineStyle = {}): string {
   const strokeR = resolvePaint(style.stroke);
   const fillR = style.fill !== undefined ? resolvePaint(style.fill) : undefined;
-  const sd = strokeAttrsOf(strokeR.value, style);
+  const fillA = fillAttrsOf(fillR?.value, style.fillOpacity);
+  // `DriverPathSvg#draw` (`DriverPathSvg.java:65-69`): colour == back colour,
+  // neither a gradient, draws with `setStrokeColor("")` + `setStrokeWidth(0)`.
+  const strokeless = isSameFlatColour(fillR, strokeR);
+  const sd = strokeAttrsOf(strokeR.value, strokeless ? { ...style, strokeWidth: 0 } : style);
   const a = attrs([
     ['d', d],
-    ['fill', fillR?.value ?? PAINT_NONE],
-    [
-      'fill-opacity',
-      style.fillOpacity === undefined ? undefined : formatOpacity(style.fillOpacity, DEFAULT_SVG_DECIMALS),
-    ],
+    ['fill', fillA.fill ?? PAINT_NONE],
+    ['fill-opacity', fillA.fillOpacity],
     ['stroke', sd.stroke],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
@@ -292,11 +207,13 @@ export function circle(cx: number, cy: number, r: number, style: BoxStyle = {}):
   const fillR = resolvePaint(style.fill);
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
+  const fillA = fillAttrsOf(fillR.value, undefined);
   const a = attrs([
     ['cx', cx],
     ['cy', cy],
     ['r', r],
-    ['fill', fillR.value],
+    ['fill', fillA.fill],
+    ['fill-opacity', fillA.fillOpacity],
     ['stroke', strokeR.value],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
@@ -340,9 +257,11 @@ export function polygon(points: ReadonlyArray<{ x: number; y: number }>, style: 
   const fillR = resolvePaint(style.fill);
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeAttrsOf(strokeR.value, style);
+  const fillA = fillAttrsOf(fillR.value, undefined);
   const a = attrs([
     ['points', pts],
-    ['fill', fillR.value],
+    ['fill', fillA.fill],
+    ['fill-opacity', fillA.fillOpacity],
     ['stroke', sd.stroke],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
@@ -371,9 +290,11 @@ export function polyline(points: ReadonlyArray<{ x: number; y: number }>, style:
   const fillR = resolvePaint(style.fill);
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
+  const fillA = fillAttrsOf(fillR.value, undefined);
   const a = attrs([
     ['points', pts],
-    ['fill', fillR.value],
+    ['fill', fillA.fill],
+    ['fill-opacity', fillA.fillOpacity],
     ['stroke', strokeR.value],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],

@@ -27,6 +27,7 @@ import { Stereotype } from '../../core/stereo/Stereotype.js';
 import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 import { delaySpansOf, lifelineSegments, type Span } from './sequence-delay.js';
 import { componentStyle, paintOf, type SequencePaint } from './sequence-skin-param.js';
+import { underlineLine } from './sequence-layout-participant-label.js';
 import { displayLines } from './text-block-geo.js';
 
 /** The builder every tile reads after the parse (module head). An AST built
@@ -58,6 +59,12 @@ function participantStereotype(stereotype: string | undefined): Stereotype | und
   return stereotype === undefined ? undefined : Stereotype.build(stereotype, 0, undefined, parseSimpleColor);
 }
 
+/** The first display line, `<u>`-prefixed under `sequenceParticipant underline`. */
+function firstLineOf(participant: Pick<Participant, 'display' | 'underlined'>): string {
+  const line = displayLines(participant.display)[0] ?? '';
+  return participant.underlined === true ? underlineLine(line) : line;
+}
+
 /**
  * The title `ComponentRoseLine` opens its group with:
  * `UGroup.singletonMap(TITLE, stringsToDisplay.toTooltipText())`
@@ -69,15 +76,16 @@ function participantStereotype(stereotype: string | undefined): Stereotype | und
  * (`CommandParticipant.java:176-181`), else the first display line;
  * `UGroup#fix` writes every `[^-\w ]` as `.` (`UGroup.java:70-74`).
  * `stereotypePosition bottom` appends the stereotype, so element 0 is the
- * first display line. Not modelled (unported for the head too): `skinparam
- * sequenceParticipant underline` (`Display#underlined`, `<u>` per line).
+ * first display line. `skinparam sequenceParticipant underline` prefixes every
+ * display line with `<u>` BEFORE the stereotype joins (`Participant.java:125-126`,
+ * `Display.java:462-469`), so the first line reads `<u>Alice` -> `.u.Alice`.
  */
 export function lifelineTitle(
-  participant: Pick<Participant, 'display' | 'stereotype' | 'stereotypeHidden' | 'stereotypeBottom'>,
+  participant: Pick<Participant, 'display' | 'stereotype' | 'stereotypeHidden' | 'stereotypeBottom' | 'underlined'>,
 ): string {
   const hidden = participant.stereotypeHidden === true || participant.stereotypeBottom === true;
   const shown = hidden ? undefined : participant.stereotype;
-  const first = patchBase64Line(participantStereotype(shown)?.toString() ?? displayLines(participant.display)[0] ?? '');
+  const first = patchBase64Line(participantStereotype(shown)?.toString() ?? firstLineOf(participant));
   return UGroup.singletonMap(UGroupType.TITLE, first).asMap().get(UGroupType.TITLE) ?? '';
 }
 

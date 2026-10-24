@@ -5,9 +5,8 @@
  *
  * Every expected point list was rendered by the jar with
  * `scripts/oracle-render.sh` on 2026-10-20 (deterministic text); the jar
- * writes `style="stroke:…"` where the port writes attributes, which
- * `normalize.ts` treats as equal, so only `points` and the paint values are
- * asserted.
+ * writes `style="stroke:…"`, which the port's klimt drivers now write too; only
+ * `points` and the paint values are asserted, through `attrsOf`.
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -15,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
+import { attrsOf } from '../../helpers/svg-tags.js';
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/isw-T2b-seq');
 
@@ -57,8 +57,8 @@ describe('hnote hexagon (ComponentRoseNoteHexagonal.java:87-115)', () => {
     const svg = render('@startuml\nscale 1.5\nskinparam shadowing true\nparticipant A\nhnote over A : odd\n@enduml\n');
     const [poly] = notePolygons(svg);
     expect(pointsOf(poly!)).toBe('37.5,82.5,75,82.5,90,97.5,75,114,37.5,114,22.5,97.5,37.5,82.5');
-    expect(/\sstroke-width="([^"]*)"/.exec(poly!)?.[1]).toBe('0.75');
-    expect(poly).toMatch(/\sfilter="url\(#[^)]+\)"/);
+    expect(attrsOf(poly!)['stroke-width']).toBe('0.75');
+    expect(attrsOf(poly!).filter).toMatch(/^url\(#[^)]+\)$/);
   });
 
   it('draws hnote across as a hexagon too (FactorySequenceNoteAcrossCommand.java:227)', () => {

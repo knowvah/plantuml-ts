@@ -1,0 +1,6 @@
+@startuml
+Title toto
+Bob -> Alice : ok
+footer test
+scale 4
+@enduml

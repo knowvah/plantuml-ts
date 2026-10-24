@@ -1,27 +1,33 @@
 /**
- * `== label ==` / `====` divider rendering — split out of renderer.ts
- * (cdd-T30, 500-line file-size cap).
+ * `== label ==` / `====` divider rendering, drawn through the page's
+ * `UGraphic` (cdd-T30 split it out of renderer.ts for the 500-line cap; sdd3
+ * T8e moved it onto the seam).
  *
  * Every paint value is the divider's merged `separator` style, carried on the
  * geo by layout (`sequence-layout-divider.ts`) and read as
  * `ComponentRoseDivider`'s constructor reads it (`:70-74`): `background` =
  * `BackGroundColor`, `borderColor` = `LineColor`, `stroke` = `getStroke()`
  * (`LineThickness` + `LineStyle`), `roundCorner`, `shadow`. Every length is
- * scaled at emission, as `SvgGraphics#format` scales it (`:466-468`,
- * `:555-561`).
+ * the page's own: the export scale is the exporter's `SvgGraphics#format`
+ * pass (`:466-468`, `:555-561`).
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/rose/ComponentRoseDivider.java
  */
 
-import type { DividerGeo } from './ast.js';
-import { noGradient } from '../../core/paint.js';
-import { fmt } from '../../core/svg-format.js';
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import { Back } from '../../core/klimt/Back.js';
+import { Fore } from '../../core/klimt/Fore.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { ULine } from '../../core/klimt/shape/ULine.js';
+import { URectangle } from '../../core/klimt/shape/URectangle.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
-import { rect, line } from '../../core/svg.js';
-import type { ScaledTheme } from './scale-geo.js';
+import { noGradient } from '../../core/paint.js';
+import type { DividerGeo } from './ast.js';
+import type { PageTheme } from './renderer-ug.js';
 import { DIVIDER_BAND_HEIGHT, DIVIDER_LABEL_DELTA_X } from './divider-style.js';
-import { creoleRunText } from './renderer.js';
-import { sequenceShadowFilter } from './sequence-shadow.js';
+import { strokeOf } from './renderer-line-component.js';
+import { drawCreoleRuns } from './sequence-text.js';
 import type { SequencePaint } from './sequence-skin-param.js';
 
 /** `drawRectLong` strokes the band with `UStroke.simple()` (`:117`), whose
@@ -39,41 +45,24 @@ function dividerPaintOf(divider: DividerGeo): SequencePaint {
   return divider.paint;
 }
 
-/** `URectangle.rounded(roundCorner)`, emitted as `rx = ry = roundCorner / 2`
- *  (`DriverRectangleSvg.java:78`). */
-function roundedOf(paint: SequencePaint, k: number): { readonly rx: number; readonly ry: number } {
-  const r = (paint.roundCorner / 2) * k;
-  return { rx: r, ry: r };
-}
-
-/** `getStroke()`'s dash, formatted as one string (`SvgGraphics.java:555-561`). */
-function dashOf(paint: SequencePaint, k: number): { readonly strokeDasharray?: string } {
-  const dash = paint.dash;
-  return dash === undefined ? {} : { strokeDasharray: `${fmt(dash[0]! * k)},${fmt(dash[1]! * k)}` };
-}
-
 /**
  * `drawSep` (`:107-111`): the band (`drawRectLong`, `:113-119`), filled and
  * stroked with the background colour, then the double rule (`drawDoubleLine`,
  * `:121-126`) in `LineColor` at half the style's thickness, undashed
  * (`UStroke.withThickness`). A rule is a `ULine`, which `DriverLineSvg`
  * strokes with a gradient's FIRST colour (`DriverLineSvg.java:76-80`); the
- * rects keep the gradient.
+ * rects keep the gradient. `ug` is at the divider's top-left, already under
+ * `background.bg()` (`:82`).
  */
-function renderDividerBand(divider: DividerGeo, paint: SequencePaint, theme: ScaledTheme): string {
-  const k = theme.scaleK;
-  const midY = divider.y + divider.height / 2;
-  const { bandX: x, bandWidth: w } = divider;
-  const band = rect(x, midY + UPPER_RULE_DY * k, w, DIVIDER_BAND_HEIGHT * k, {
-    fill: paint.fill,
-    stroke: paint.fill,
-    strokeWidth: BAND_STROKE_THICKNESS * k,
-    ...roundedOf(paint, k),
-    ...sequenceShadowFilter(paint.shadowing),
-  });
-  const ruleStyle = { stroke: noGradient(paint.stroke), strokeWidth: (paint.thickness / 2) * k };
-  const rule = (dy: number): string => line(x, midY + dy * k, x + w, midY + dy * k, ruleStyle);
-  return band + rule(UPPER_RULE_DY) + rule(LOWER_RULE_DY);
+function drawDividerBand(ug: UGraphic, divider: DividerGeo, paint: SequencePaint): void {
+  const sep = ug.apply(UTranslate.dy(divider.height / 2)).apply(new Fore(paint.fill));
+  const band = URectangle.build(divider.bandWidth, DIVIDER_BAND_HEIGHT).rounded(paint.roundCorner);
+  band.setDeltaShadow(paint.shadowing);
+  sep.apply(UTranslate.dy(UPPER_RULE_DY)).apply(UStroke.withThickness(BAND_STROKE_THICKNESS)).draw(band);
+  const rules = sep.apply(UStroke.withThickness(paint.thickness / 2)).apply(new Fore(noGradient(paint.stroke)));
+  const rule = ULine.hline(divider.bandWidth);
+  rules.apply(UTranslate.dy(UPPER_RULE_DY)).draw(rule);
+  rules.apply(UTranslate.dy(LOWER_RULE_DY)).draw(rule);
 }
 
 /**
@@ -86,36 +75,35 @@ function renderDividerBand(divider: DividerGeo, paint: SequencePaint, theme: Sca
  * inside it, with `getOldPaddingY()` of vertical inset. The box takes the
  * style's whole stroke, dash included (`ug.apply(stroke)`, `:98`).
  */
-function renderDividerLabel(divider: DividerGeo, paint: SequencePaint, theme: ScaledTheme): string {
-  const k = theme.scaleK;
-  const deltaX = DIVIDER_LABEL_DELTA_X * k;
-  const xpos = divider.bandX + (divider.bandWidth - divider.textWidth - deltaX) / 2;
-  const ypos = divider.y + (divider.height - divider.textHeight) / 2;
-  const box = rect(xpos, ypos, divider.textWidth + deltaX, divider.textHeight, {
-    fill: paint.fill,
-    stroke: paint.stroke,
-    strokeWidth: paint.thickness * k,
-    ...dashOf(paint, k),
-    ...roundedOf(paint, k),
-    ...sequenceShadowFilter(paint.shadowing),
-  });
-  // One `<text>` per creole atom, as the jar's own multi-line text block emits
+function drawDividerLabel(
+  page: UGraphic,
+  component: UGraphic,
+  divider: DividerGeo,
+  paint: SequencePaint,
+  theme: PageTheme,
+): void {
+  const deltaX = DIVIDER_LABEL_DELTA_X;
+  const xpos = (divider.bandWidth - divider.textWidth - deltaX) / 2;
+  const ypos = (divider.height - divider.textHeight) / 2;
+  const box = URectangle.build(divider.textWidth + deltaX, divider.textHeight).rounded(paint.roundCorner);
+  box.setDeltaShadow(paint.shadowing);
+  component.apply(new Fore(paint.stroke)).apply(strokeOf(paint)).apply(new UTranslate(xpos, ypos)).draw(box);
+  // One `UText` per creole atom, as the jar's own multi-line text block emits
   // (C6). Layout built every run from the style's `FontConfiguration`, so
   // each carries its own size, weight and colour; the fallbacks are that same
-  // font's, for a run that carries none.
-  const font = paint.font;
-  const label = divider.labelRuns
-    .map((run) => creoleRunText(run, theme, font.size * k, font.styles.has(FontStyle.BOLD)))
-    .join('');
-  return box + label;
+  // font's, for a run that carries none. Runs sit at page coordinates.
+  drawCreoleRuns(page, divider.labelRuns, theme, paint.font.size, paint.font.styles.has(FontStyle.BOLD));
 }
 
 /**
  * `== label ==` and the empty `====`: `ComponentRoseDivider#drawInternalU`
- * (`:79-105`) — a band rect, two rules, and for a label a box and its text.
+ * (`:79-105`) -- a band rect, two rules, and for a label a box and its text.
+ * `ug` is the page graphic; the tile's translate to the divider's top-left is
+ * applied here, and `ug.apply(background.bg())` (`:82`) precedes everything.
  */
-export function renderDivider(divider: DividerGeo, theme: ScaledTheme): string {
+export function drawDivider(ug: UGraphic, divider: DividerGeo, theme: PageTheme): void {
   const paint = dividerPaintOf(divider);
-  const band = renderDividerBand(divider, paint, theme);
-  return divider.text.length === 0 ? band : band + renderDividerLabel(divider, paint, theme);
+  const component = ug.apply(new UTranslate(divider.bandX, divider.y)).apply(new Back(paint.fill));
+  drawDividerBand(component, divider, paint);
+  if (divider.text.length > 0) drawDividerLabel(ug, component, divider, paint, theme);
 }

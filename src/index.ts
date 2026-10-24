@@ -1,4 +1,6 @@
 import { buildBlockUml, buildBlockUmls, isBlockEmpty, rawBlocksOf } from './core/BlockUmlBuilder.js';
+import { withRemoteImages } from './core/remote-image-prefetch.js';
+import { inlineRemoteImageLines } from './core/remote-image-store.js';
 import type { BlockUml, BlockUmlOk, RawBlock } from './core/BlockUmlBuilder.js';
 import { registry, type AssembledSvg, type DiagramPlugin, type Resolution } from './core/dispatcher.js';
 import { skinCutOf } from './core/skin-command.js';
@@ -19,6 +21,7 @@ import { prepareIncludeStore } from './core/include-resolver.js';
 import { surfaceSpriteWarnings, type SpriteRegistry } from './core/sprite-commands.js';
 import { surfaceParseWarnings } from './diagrams/json/ast.js';
 import type { PreprocessorResult } from './core/preprocessor.js';
+import { inheritingRenderFn, takePendingPrevious, withPrevious } from './core/nested-previous.js';
 import { DiagramRefusal, emptySvg, errorSvg, preprocessorErrorSvg, welcomeSvg } from './core/error/error-diagrams.js';
 import { resolveMeasurer, type RenderOptions } from './core/render-options.js';
 import { layoutServices, layoutServicesSync } from './core/elk/layout-services.js';
@@ -31,6 +34,7 @@ import { withAllowJavascriptInLink } from './core/security/SecurityUtils.js';
 // consumer of the built library can reach. Same shape as `buildTheme`'s
 // earlier move to `core/build-theme.ts`.
 export type { RenderOptions } from './core/render-options.js';
+export type { ImageProvider, ImageFetchResult } from './core/image-provider.js';
 export { assembleSvg } from './core/assemble-svg.js';
 export { loadElk, type ElkBackend } from './core/elk/load-elk.js';
 
@@ -298,11 +302,15 @@ interface PreparedBlock {
  * `DiagramRefusal`), and surface any sprite/parse warnings. Neither caller's
  * try/catch nor sync-vs-async `layout` call belongs here.
  */
-function prepareBlock(block: BlockUmlOk, umlSource: UmlSource, options: RenderOptions | undefined): PreparedBlock {
+function prepareBlock(block: BlockUmlOk, source: UmlSource, options: RenderOptions | undefined): PreparedBlock {
+  const previous = takePendingPrevious();
+  // Served remote images (`options.assetStore`, `remote-image:<url>`) become the data URIs creole decodes; see `remote-image-store.ts`.
+  const umlSource = { ...source, lines: inlineRemoteImageLines(source.lines, options?.assetStore) };
   const skinCut = skinCutOf(block.preprocessed, umlSource);
   const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore }, skinCut);
   const plugin = resolution.plugin;
-  const preprocessed = plugin.styleInput?.(block.preprocessed, umlSource) ?? block.preprocessed;
+  // sdd3-T8h: a nested `{{ }}` diagram starts from the enclosing diagram's skinparams (`nested-previous.ts`).
+  const preprocessed = withPrevious(plugin.styleInput?.(block.preprocessed, umlSource) ?? block.preprocessed, previous);
   const { theme, styleMap } = buildTheme(preprocessed, options);
   const measurer = resolveMeasurer(plugin.type, options);
   const ast = astOf(resolution, options);
@@ -314,7 +322,9 @@ function prepareBlock(block: BlockUmlOk, umlSource: UmlSource, options: RenderOp
   // nested `Diagram#exportDiagram` shares the enclosing `FileFormatOption`),
   // not a fixed default. See `class-nested-diagram-renderer.ts`'s doc
   // comment for why this cannot be a plain import instead.
-  registerNestedDiagramRenderers((source) => renderSync(source, options));
+  // sdd3-T8h: and hands THIS diagram's skinparams (inherited ones included, as `skinParam.values()` holds them,
+  // `EmbeddedDiagram.java:88-90`) to the diagram each `{{ }}` renders.
+  registerNestedDiagramRenderers(inheritingRenderFn(preprocessed.skinparam, (nested) => renderSync(nested, options)));
   return {
     ctx: { plugin, theme, styleMap, preprocessed, measurer, seed: seedOfUmlSource(umlSource) },
     ast,
@@ -344,7 +354,7 @@ export function renderPagesSync(source: string, options?: RenderOptions): string
           'use render(), or prefetch the includes and pass options.includeStore',
       );
     }
-    const blocks = buildBlockUmls(source, { includeStore: options?.includeStore });
+    const blocks = buildBlockUmls(source, { includeStore: options?.includeStore, filename: options?.filename });
     if (blocks.length === 0) return [welcomeSvg(options)];
 
     const block = blocks[0]!;
@@ -373,7 +383,7 @@ export function renderSync(source: string, options?: RenderOptions): string {
 export async function render(source: string, options?: RenderOptions): Promise<string> {
   try {
     const includeStore = await prepareIncludeStore(source, options);
-    const blocks = buildBlockUmls(source, { includeStore });
+    const blocks = buildBlockUmls(source, { includeStore, filename: options?.filename });
     if (blocks.length === 0) return welcomeSvg(options);
 
     return await renderBlock(blocks[0]!, options);
@@ -390,7 +400,7 @@ export async function render(source: string, options?: RenderOptions): Promise<s
 export async function renderPages(source: string, options?: RenderOptions): Promise<string[]> {
   try {
     const includeStore = await prepareIncludeStore(source, options);
-    const blocks = buildBlockUmls(source, { includeStore });
+    const blocks = buildBlockUmls(source, { includeStore, filename: options?.filename });
     const first = blocks[0];
     if (first === undefined) return [welcomeSvg(options)];
 
@@ -452,12 +462,14 @@ async function renderBlockPages(block: BlockUml, options?: RenderOptions): Promi
 
   const umlSource = umlSourceOfBlock(block);
   try {
-    const { ctx, ast } = prepareBlock(block, umlSource, options);
+    // The only await of the remote-image path: the sync pipeline below just reads the store it returns.
+    const withImages = await withRemoteImages(umlSource.lines.join('\n'), options);
+    const { ctx, ast } = prepareBlock(block, umlSource, withImages);
     const geo =
       'layoutSync' in ctx.plugin
-        ? ctx.plugin.layoutSync(ast, ctx.theme, ctx.measurer, await layoutServices(ctx.plugin, ast, options))
+        ? ctx.plugin.layoutSync(ast, ctx.theme, ctx.measurer, await layoutServices(ctx.plugin, ast, withImages))
         : await ctx.plugin.layout(ast, ctx.theme, ctx.measurer);
-    return assemblePages(ctx, geo, ast, options);
+    return assemblePages(ctx, geo, ast, withImages);
   } catch (err) {
     // The block's own lines, so the listing shows the diagram that failed.
     return [errorSvg(umlSource.lines.join('\n'), err, options)];

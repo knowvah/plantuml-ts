@@ -46,23 +46,19 @@
  *
  * ## Scale
  *
- * The sequence engine scales its layout INPUTS at the layout→render boundary
- * (`scale-geo.ts`), but the glyph geometry below comes from klimt's own
- * upstream pixel constants, which no input scaling can reach. This module
- * therefore uses klimt's OWN scale seam — `SvgOption.scale`, applied in
- * `SvgGraphicsCore#format` exactly as upstream's `SvgGraphics.java:466-473`
- * does — and hands klimt an UNSCALED position (`geo.x / k`), so the emitted
- * coordinate is `(geo.x / k) * k`. No `<g transform="scale(...)">` wrapper is
- * ever produced, matching the jar (see `scale-geo.ts`'s header: the only
- * upstream `transform="scale(...)"` is `manageScale`, for embedded sprites).
- * `k` is 1 for every fixture without a `scale` directive, where the
- * round-trip is exact; elsewhere it is exact to the emitter's 4-decimal
- * rounding.
+ * The glyph geometry comes from klimt's own upstream pixel constants, which no
+ * input scaling can reach, and it is drawn on the page's one graphic at scale
+ * 1 (`renderer-ug.ts`): the page is drawn at `DRAW_SCALE = 1`, and a `scale`
+ * directive or `skinparam dpi` is the exporter's single `SvgGraphics#format`
+ * pass over the finished body (`SvgGraphics.java:466-473`). No
+ * `<g transform="scale(...)">` wrapper is ever produced, matching the jar
+ * (the only upstream `transform="scale(...)"` is `manageScale`, for embedded
+ * sprites).
  *
  * ## What this module does NOT draw
  *
- * The participant's own LABEL. `renderer.ts#renderNameBlock` already draws it
- * — with stereotype rows and sprite badges this engine models separately from
+ * The participant's own LABEL. `renderer-participant-shapes.ts#drawNameBlock`
+ * draws it — with stereotype rows and sprite badges this engine models separately from
  * upstream's single `getTextBlock()` — and the render half holds no
  * `StringMeasurer` to lay text out with. `opts.display` is accepted (it is
  * part of the contract T2-T5 compile against, and `queue`'s text-inside form
@@ -78,11 +74,9 @@
 import type { ParticipantType } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { SequencePaint } from './sequence-skin-param.js';
-import { sequenceShadowFilter } from './sequence-shadow.js';
-import { attrs } from '../../core/svg.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
-import type { ScaledTheme } from './scale-geo.js';
+import type { PageTheme } from './renderer-ug.js';
 
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
@@ -100,11 +94,6 @@ import { resolveActorStyle } from '../../core/decoration/symbol/usymbol-resolve.
 import { Boundary } from '../../core/svek/Boundary.js';
 import { Control } from '../../core/svek/Control.js';
 import { EntityDomain } from '../../core/svek/EntityDomain.js';
-import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
-import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
-import { seedOf } from '../../core/klimt/drawing/svg/svg-seed.js';
-import type { StringBounder as DriverStringBounder } from '../../core/klimt/drawing/svg/driver-text-svg.js';
-import { extractFlatContent, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
 
 /** The SYMBOL-backed participant types — those whose glyph comes from a
  *  `USymbol` or a `svek/` drawing class. `actor` is deliberately absent: it is
@@ -122,11 +111,10 @@ export type SymbolParticipantType = 'database' | 'collections' | 'queue' | 'enti
  *  sharing one composition avoids re-deriving it. */
 export type GlyphParticipantType = SymbolParticipantType | 'actor';
 
-/** The already-laid-out participant box, in RENDER (post-`scale-geo`)
+/** The already-laid-out participant box, in RENDER
  *  coordinates, and the participant's merged-style paint (`ParticipantGeo
- *  .paint`, UNSCALED: klimt scales its lengths at emission through
- *  `SvgOption.scale`, `SvgGraphics.java:468-469`). For `participant` and
- *  `collections` the box is the PAINTED one (`participantBoxOf`). */
+ *  .paint`). For `participant` and `collections` the box is the PAINTED one
+ *  (`participantBoxOf`). */
 export interface ParticipantSymbolGeo {
   readonly x: number;
   readonly y: number;
@@ -145,7 +133,7 @@ export interface ParticipantSymbolGeo {
 export interface ParticipantSymbolOpts {
   readonly head: boolean;
   readonly display: string;
-  readonly theme: ScaledTheme;
+  readonly theme: PageTheme;
 }
 
 /** `ComponentRoseParticipant#getDeltaCollection` — the offset of the second,
@@ -173,15 +161,6 @@ const EMPTY = TextBlockUtils.empty(0, 0);
  *  number the pinned dimensions in `renderer-participant-symbol.test.ts`
  *  reject rather than to a silently plausible one. */
 const NO_PAINT = new SymbolContext(null, null);
-
-/** `DriverTextSvg`'s own width-only seam, over the render's injected measurer
- *  (`ScaledTheme.measurer`). No glyph here draws a `UText`, so it is never
- *  consulted in practice -- but `UGraphicSvg.build` requires one, and when a
- *  glyph does draw text it must answer from the layout's metric, not a second
- *  private one. */
-function driverBounderOf(measurer: StringMeasurer): DriverStringBounder {
-  return { calculateDimension: (font, text) => ({ width: measurer.measure(text, font).width }) };
-}
 
 /** `Style#getStroke()` (`Style.java:299-320`): the thickness, dashed when the
  *  style's `LineStyle` names a dash. */
@@ -348,74 +327,27 @@ export function measureParticipantSymbol(
   return { width: dim.getWidth(), height: dim.getHeight() };
 }
 
-/** The glyph document's own shadow reference: `"f" + getSeed(seed)`
- *  (`SvgGraphics.java:161`). */
-const GLYPH_SHADOW_REF = /filter="url\(#f[0-9a-z]+\)"/g;
-/** A klimt gradient writes its `id` last (`SvgGraphics.java:384-393`); the
- *  page's def collector lifts the `<linearGradient id="g...` spelling only
- *  (`svg-defs.ts#extractGradientDefs`), so the id is moved to the front. */
-const GLYPH_GRADIENT_OPEN = /<linearGradient((?: [a-z0-9]+="[^"]*")*?) id="(g[0-9a-z]+)"/g;
-/** ...and its def, `SvgGraphics.java:1074-1086`'s `<filter id="f...">`. */
-const GLYPH_SHADOW_DEF = /<filter id="f[0-9a-z]+"[^>]*>.*?<\/filter>/g;
-
 /**
- * The glyph's one-glyph document, as inline content for the page.
+ * Draws one participant glyph into the page's graphic, positioned absolutely
+ * at `geo`: `LivingSpace#drawHeadOrTail`'s `comp.drawU(ug, area, ctx)`
+ * (`LivingSpace.java:190-215`) for the glyph half of the component --
+ * `glyph.drawU(ug.apply(UTranslate(x, y)).apply(offset))`
+ * (`ComponentRoseDatabase.java:81-93` and its siblings).
  *
- * A shadowed glyph minted its own shadow filter (`SvgGraphics#manageShadow`,
- * `:1070-1090`). Upstream draws every head into ONE `SvgGraphics`, whose
- * single filter every shadowed shape shares, so that def is dropped and the
- * reference re-pointed at the page's (`sequence-shadow.ts`, emitted through
- * the fragment's `extraDefs`). Any other def -- a gradient fill's
- * `<linearGradient>` -- rides along bare, where `svg-defs.ts
- * #collectDocumentDefs` lifts it into `<defs>` and collapses duplicates, as
- * upstream's one gradient map does (`SvgGraphics.java:363-405`).
+ * The seam graphic is the page's own (`renderer-ug.ts#openSequenceGraphic`),
+ * at scale 1: the page is drawn at `DRAW_SCALE = 1` (`renderer.ts`), the
+ * export scale being the exporter's single `SvgGraphics#format` pass, so
+ * klimt's pixel constants need no scale here. The drop-shadow filter a
+ * shadowed glyph mints, and the id a gradient fill takes, are normalised when
+ * the graphic is serialised (`renderer-ug.ts#normaliseMintedIds`).
  */
-function glyphContent(svg: string, shadow: number): string {
-  const { body, extraDefs } = extractFlatContent(svg);
-  const defs = extraDefs.replace(GLYPH_SHADOW_DEF, '').replace(GLYPH_GRADIENT_OPEN, '<linearGradient id="$2"$1');
-  const filter = sequenceShadowFilter(shadow).filter;
-  const drawn = filter === undefined ? body : body.replace(GLYPH_SHADOW_REF, attrs([['filter', filter]]).trimStart());
-  return defs + drawn;
-}
-
-/**
- * Draws one participant glyph and returns its SVG fragment, positioned
- * absolutely at `geo`.
- *
- * Builds its own single-drawable `UGraphicSvg` document and unwraps it — the
- * mechanism `document-shell.ts#renderDrawableToFragment` established (SI14
- * ADR-2), inlined here only so `SvgOption.scale` can be threaded (see the
- * module header's Scale section; that helper hard-codes scale 1).
- */
-export function renderParticipantSymbol(
+export function drawParticipantSymbol(
+  ug: UGraphic,
   type: ParticipantType,
   geo: ParticipantSymbolGeo,
   opts: ParticipantSymbolOpts,
-): string {
-  const k = opts.theme.scaleK;
-  const option = basicSvgOption({
-    scale: k,
-    minDim: { width: (geo.x + geo.width) / k, height: (geo.y + geo.height) / k },
-  });
-  const ug = UGraphicSvg.build(
-    seedOf(`${type}:${geo.x},${geo.y}`),
-    option,
-    VERSION_PLACEHOLDER,
-    driverBounderOf(opts.theme.measurer),
-    opts.theme.measurer,
-  );
-
-  const unscaled: ParticipantSymbolGeo = {
-    ...geo,
-    x: geo.x / k,
-    y: geo.y / k,
-    width: geo.width / k,
-    height: geo.height / k,
-    shadow: (geo.shadow ?? 0) / k,
-  };
-  const glyph = glyphFor(type, unscaled, opts.theme);
-  const offset = glyphOffset(type, unscaled, glyph.calculateDimension(ug.getStringBounder()), opts.head);
-  glyph.drawU(ug.apply(new UTranslate(unscaled.x, unscaled.y)).apply(offset));
-
-  return glyphContent(ug.getSvgString(), unscaled.shadow ?? 0);
+): void {
+  const glyph = glyphFor(type, geo, opts.theme);
+  const offset = glyphOffset(type, geo, glyph.calculateDimension(ug.getStringBounder()), opts.head);
+  glyph.drawU(ug.apply(new UTranslate(geo.x, geo.y)).apply(offset));
 }

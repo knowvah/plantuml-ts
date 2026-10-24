@@ -437,6 +437,7 @@ function fontKey(font: FontConfiguration): unknown {
     font.fontPosition,
     font.hyperlinkColor,
     font.hyperlinkUnderlineStroke,
+    font.svgAttributes === undefined ? null : [...font.svgAttributes.attributes()],
     identityOf(font.hColor),
   ];
 }

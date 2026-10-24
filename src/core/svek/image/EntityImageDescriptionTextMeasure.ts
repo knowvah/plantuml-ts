@@ -9,6 +9,7 @@ import type { FontConfiguration } from '../../klimt/shape/UText.js';
 import type { AtomImageResolver } from '../../creole-atoms.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
 import { SPACE_ATOM_HEIGHT } from '../../klimt/creole/atom/AtomSpace.js';
+import { verticalAtomBox } from './creole-sea-line.js';
 import { buildLineAtoms, type LineBuildAtoms } from '../../klimt/creole/legacy/StripeSimple.js';
 import { getSplitted } from '../../klimt/creole/Fission.js';
 import { atomTextWidth } from '../../klimt/creole/legacy/AtomText.js';
@@ -150,7 +151,7 @@ export function hasZeroAltitudeAtom(atoms: readonly CreoleAtom[]): boolean {
   return atoms.some((atom) => atom.kind !== 'emoji');
 }
 
-function measureAtomsWidthHeight(
+export function measureAtomsWidthHeight(
   stringBounder: StringBounder,
   atoms: readonly CreoleAtom[],
   resolveAtomImage: AtomImageResolver | undefined,
@@ -212,7 +213,14 @@ function measureAtomsWidthHeight(
       grow(SPACE_ATOM_HEIGHT);
       continue;
     }
-    const resolved = resolveAtomImage?.(atom.atom);
+    // `AtomVerticalTexts#calculateDimensionSlow` (`AtomVerticalTexts.java:54-64`).
+    if (atom.kind === 'vertical') {
+      const box = verticalAtomBox(atom.lines, (sub) => measureAtomsWidthHeight(stringBounder, [sub], resolveAtomImage));
+      width += box.width;
+      grow(box.height);
+      continue;
+    }
+    const resolved = resolveAtomImage?.(atom.atom, () => stringBounder);
     if (resolved === undefined) continue;
     width += resolved.width;
     grow(resolved.height);
@@ -251,7 +259,8 @@ export function measureSingleAtomWidth(
   // A2s R2i: emoji x-advance is the 36*factor box (see measureAtomsWidthHeight).
   if (atom.kind === 'emoji') return emojiBoxDim(atom.factor).width;
   if (atom.kind === 'space') return atom.width;
-  const resolved = resolveAtomImage?.(atom.atom);
+  if (atom.kind === 'vertical') return measureAtomsWidthHeight(stringBounder, [atom], resolveAtomImage).width;
+  const resolved = resolveAtomImage?.(atom.atom, () => stringBounder);
   return resolved === undefined ? 0 : resolved.width;
 }
 

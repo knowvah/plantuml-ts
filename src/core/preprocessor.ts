@@ -23,6 +23,8 @@ import { readLines } from './tim/ReadLineReader.js';
 import { StringLocated } from './tim/StringLocated.js';
 import type { LineLocation } from './tim/LineLocation.js';
 import { TContext } from './tim/TContext.js';
+import { createDefaultTimEnvironment } from './tim/builtin/TimEnvironment.js';
+import type { TimEnvironment } from './tim/builtin/TimEnvironment.js';
 import { TMemoryGlobal } from './tim/TMemoryGlobal.js';
 import { TValue } from './tim/expression/TValue.js';
 import { TVariableScope } from './tim/TVariableScope.js';
@@ -125,6 +127,16 @@ export interface PreprocessorResult {
    * of one line. Absent on a hand-built result.
    */
   readonly skinparamAssignments?: readonly SkinparamAssignment[];
+  /**
+   * sdd3-T8f: the `!option <key> [<value>]` directives the run defined
+   * (`EaterOption.java:61-70` -> `ConfigurationStore#define`), keyed by
+   * `OptionKey` name (`HANDWRITTEN`, ...), last definition winning. Upstream
+   * hands the store to `SkinParam.create(..., preprocessing.getOption())`
+   * and `UgDiagram#isHandwritten` reads it back
+   * (`UgDiagram.java:117-121`); `build-theme.ts` reads it here. Absent on a
+   * hand-built result.
+   */
+  readonly options?: ReadonlyMap<string, string>;
 }
 
 /** See {@link PreprocessorResult.skinparamAssignments}. */
@@ -134,7 +146,17 @@ export interface SkinparamAssignment {
   /** `undefined` for a line the reader never located (as {@link PreprocessorResult.stylePositions}). */
   readonly position: number | undefined;
   readonly order: number;
+  /**
+   * `line` for `skinparam name value` (`CommandSkinParam`, which warns,
+   * CommandSkinParam.java:88-99), `block` for an entry of `skinparam [name] {`
+   * (`CommandSkinParamMultilines` -> `SkinLoader`, which never does,
+   * CommandSkinParamMultilines.java:90-102). Absent on a hand-built entry.
+   */
+  readonly form?: SkinparamForm;
 }
+
+/** See {@link SkinparamAssignment.form}. */
+export type SkinparamForm = 'line' | 'block';
 
 /** See {@link PreprocessorResult.declarationOrder}. */
 export interface DeclarationOrder {
@@ -149,6 +171,11 @@ export interface PreprocessOptions {
    * error. See `tim/IncludeStore.ts`.
    */
   readonly includeStore?: IncludeStore | undefined;
+  /**
+   * The source file name, upstream's `Defines#overrideFilename`
+   * (`Defines.java:89-94`): feeds `%filename()` and `filenameNoExtension`.
+   */
+  readonly filename?: string | undefined;
 }
 
 /**
@@ -274,6 +301,33 @@ export function preprocessOrError(
 }
 
 /**
+ * `Defines#nameNoExtension`: up to the LAST `.`, unchanged when there is none.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/preproc/Defines.java:149-155
+ */
+function nameNoExtension(name: string): string {
+  const x = name.lastIndexOf('.');
+  return x === -1 ? name : name.substring(0, x);
+}
+
+/**
+ * `Defines#overrideFilename`: `filename` and `filenameNoExtension` are set only
+ * when the name is non-null; every other environment name stays `undefined`.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/preproc/Defines.java:89-94
+ */
+function filenameEnvironment(filename: string | undefined): TimEnvironment {
+  const base = createDefaultTimEnvironment();
+  if (filename === undefined) return base;
+  return {
+    ...base,
+    getEnvironmentValue: (name) => {
+      if (name === 'filename') return filename;
+      if (name === 'filenameNoExtension') return nameNoExtension(filename);
+      return base.getEnvironmentValue(name);
+    },
+  };
+}
+
+/**
  * The same, over lines that are ALREADY read and located -- upstream's
  * `TimLoader#load(List<StringLocated>)`, which is how `BlockUml` runs the
  * interpreter: over ONE `@start...@end` block, never over the document.
@@ -291,7 +345,7 @@ export function preprocessLinesOrError(
   defines?: ReadonlyMap<string, string>,
   options?: PreprocessOptions,
 ): PreprocessOutcome {
-  const context = new TContext({ includeStore: options?.includeStore });
+  const context = new TContext({ includeStore: options?.includeStore, env: filenameEnvironment(options?.filename) });
   const memory = new TMemoryGlobal();
 
   if (defines !== undefined)
@@ -340,6 +394,7 @@ function resultOf(context: TContext): PreprocessorResult {
     skinparam: collector.skinparam,
     declarationOrder: { skinparam: collector.skinparamOrder, styles: collector.styleOrder },
     skinparamAssignments: collector.skinparamAssignments,
+    options: new Map(context.getPreprocessingArtifact().getOptions()),
   };
 }
 

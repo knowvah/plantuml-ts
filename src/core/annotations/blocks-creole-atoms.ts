@@ -19,7 +19,7 @@ import { renderLatexAsImage } from '../latex.js';
 import { emojiSquareDim } from '../klimt/creole/atom/AtomEmoji.js';
 import { drawEmojiAtom } from '../svek/image/EntityImageDescriptionEmoji.js';
 import { atomTextWidth, layoutTabbedText } from '../klimt/creole/legacy/AtomText.js';
-import type { AtomImageResolver } from '../creole-atoms.js';
+import type { AtomImageResolver, StringBounderSupplier } from '../creole-atoms.js';
 import type { CreoleAtom, CreoleAtomUrl } from '../klimt/creole/atom/Atom.js';
 import { SPACE_ATOM_HEIGHT } from '../klimt/creole/atom/AtomSpace.js';
 import type { Atom } from '../klimt/creole/SheetBlock1.js';
@@ -70,8 +70,9 @@ function textDim(atom: CreoleAtom & { kind: 'text' }, stringBounder: StringBound
 function atomImageOf(
   atom: CreoleAtom,
   resolveAtomImage: AtomImageResolver | undefined,
+  stringBounder: StringBounderSupplier,
 ): ResolvedAtomImageWithRaster | undefined {
-  return atom.kind === 'inline' ? resolveAtomImage?.(atom.atom) : undefined;
+  return atom.kind === 'inline' ? resolveAtomImage?.(atom.atom, stringBounder) : undefined;
 }
 
 /** SI15 T1's local widening of `AtomImageResolver`'s `image` variant with
@@ -113,7 +114,7 @@ export function atomDim(
     const { width, height } = emojiSquareDim(atom.factor);
     return new XDimension2D(width, height);
   }
-  const resolved = atomImageOf(atom, resolveAtomImage);
+  const resolved = atomImageOf(atom, resolveAtomImage, () => stringBounder);
   return resolved === undefined ? new XDimension2D(0, 0) : new XDimension2D(resolved.width, resolved.height);
 }
 
@@ -199,17 +200,22 @@ export function drawAtom(atom: CreoleAtom, ug: UGraphic, resolveAtomImage: AtomI
   }
   if (atom.kind === 'space') return;
   if (atom.kind === 'emoji') return drawEmojiAtom(ug, atom, undefined);
-  drawAtomImage(atomImageOf(atom, resolveAtomImage), ug);
+  drawAtomImage(
+    atomImageOf(atom, resolveAtomImage, () => ug.getStringBounder()),
+    ug,
+  );
 }
 
-/** `AtomSprite`'s tint colour is the SURROUNDING text configuration's own
- *  (`legacy/StripeSimple.java#addSprite`), which
- *  `makeAtomImageResolverFor`'s curried `font` parameter carries. A
- *  non-text atom has no font of its own in this port's `CreoleAtom` union
- *  except through the run that produced it, so the block's own base
- *  configuration stands in — the same approximation
- *  `creole-atoms-image-resolver.ts`'s own doc comment records for the
- *  description engine's per-textblock font. */
+/** The font a non-text atom is resolved under. `StripeSimple#addSprite`
+ *  builds `new AtomSprite(fontConfiguration.getColor(), ...)`
+ *  (`legacy/StripeSimple.java:234`) and `AtomSprite#drawU` tints with it
+ *  (`atom/AtomSprite.java:77`), so the tint is the colour of the font ACTIVE
+ *  where the stripe built the atom (`<color:red><$s>`, `<b>`, a hyperlink
+ *  colour, ...); `CommandCreoleSprite.java:82` scales by that same stripe
+ *  font's `getSize2D() / 13.0`. `StripeSimple.ts` records that font on the
+ *  inline atom as `ambientFont`; only an atom with none (a pre-N41 call
+ *  site) falls back to the block's base configuration. */
 export function fontOfAtom(atom: CreoleAtom, baseFont: FontConfiguration): FontConfiguration {
-  return atom.kind === 'text' ? atom.font : baseFont;
+  if (atom.kind === 'text') return atom.font;
+  return atom.kind === 'inline' ? (atom.ambientFont ?? baseFont) : baseFont;
 }

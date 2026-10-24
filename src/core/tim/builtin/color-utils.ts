@@ -71,73 +71,100 @@ export function colorToString(c: RgbColor): string {
   return `#${hex2(c.a)}${hex2(c.r)}${hex2(c.g)}${hex2(c.b)}`;
 }
 
-/** `[h(0-360), s(0-100), l(0-100)]`. @see HSLColor#fromRGB */
+/** `[h(0-360), s(0-100), l(0-100)]`, each a Java `float`. @see HSLColor#fromRGB */
 export type Hsl = readonly [number, number, number];
 
-/** @see ~/git/plantuml/.../klimt/color/HSLColor.java#fromRGB */
+/** Java `float` rounding: every `float` local/expression in HSLColor is narrowed with this. */
+const f32 = Math.fround;
+
+/**
+ * Every intermediate is a Java `float` (HSLColor.java:231-272), so each
+ * operation is rounded to 32 bits in Java's evaluation order. Components
+ * come from `XColor#getRGBColorComponents` as `red / 255.0f` (XColor.java:76-78).
+ * @see ~/git/plantuml/.../klimt/color/HSLColor.java#fromRGB
+ */
 export function rgbToHsl(c: RgbColor): Hsl {
-  const r = c.r / 255;
-  const g = c.g / 255;
-  const b = c.b / 255;
+  const r = f32(c.r / 255);
+  const g = f32(c.g / 255);
+  const b = f32(c.b / 255);
   const min = Math.min(r, g, b);
   const max = Math.max(r, g, b);
 
   let h = 0;
   if (max === min) h = 0;
-  else if (max === r) h = ((60 * (g - b)) / (max - min) + 360) % 360;
-  else if (max === g) h = (60 * (b - r)) / (max - min) + 120;
-  else h = (60 * (r - g)) / (max - min) + 240;
+  else if (max === r) h = f32(f32(f32(f32(60 * f32(g - b)) / f32(max - min)) + 360) % 360);
+  else if (max === g) h = f32(f32(f32(60 * f32(b - r)) / f32(max - min)) + 120);
+  else h = f32(f32(f32(60 * f32(r - g)) / f32(max - min)) + 240);
 
-  const l = (max + min) / 2;
+  const l = f32(f32(max + min) / 2);
   let s = 0;
   if (max === min) s = 0;
-  else if (l <= 0.5) s = (max - min) / (max + min);
-  else s = (max - min) / (2 - max - min);
+  else if (l <= f32(0.5)) s = f32(f32(max - min) / f32(max + min));
+  else s = f32(f32(max - min) / f32(f32(2 - max) - min));
 
-  return [h, s * 100, l * 100];
+  return [h, f32(s * 100), f32(l * 100)];
 }
 
+const ONE_THIRD = f32(1 / 3);
+const TWO_THIRDS = f32(2 / 3);
+
+/** @see HSLColor.java:368-387 (`HueToRGB`, all `float`) */
 function hueToRgb(p: number, q: number, hIn: number): number {
   let h = hIn;
-  if (h < 0) h += 1;
-  if (h > 1) h -= 1;
-  if (6 * h < 1) return p + (q - p) * 6 * h;
+  if (h < 0) h = f32(h + 1);
+  if (h > 1) h = f32(h - 1);
+  if (f32(6 * h) < 1) return f32(p + f32(f32(f32(q - p) * 6) * h));
   if (2 * h < 1) return q;
-  if (3 * h < 2) return p + (q - p) * 6 * (2 / 3 - h);
+  if (f32(3 * h) < 2) return f32(p + f32(f32(f32(q - p) * 6) * f32(TWO_THIRDS - h)));
   return p;
 }
 
-/** @see ~/git/plantuml/.../klimt/color/HSLColor.java#toRGB */
-export function hslToRgb([hIn, sIn, lIn]: Hsl, alpha255 = 255): RgbColor {
-  const s = Math.min(100, Math.max(0, sIn)) / 100;
-  const l = Math.min(100, Math.max(0, lIn)) / 100;
-  const h = (((hIn % 360) + 360) % 360) / 360;
-
-  const q = l < 0.5 ? l * (1 + s) : l + s - s * l;
-  const p = 2 * l - q;
-
-  const r = Math.max(0, hueToRgb(p, q, h + 1 / 3));
-  const g = Math.max(0, hueToRgb(p, q, h));
-  const b = Math.max(0, hueToRgb(p, q, h - 1 / 3));
-
-  return {
-    r: Math.round(Math.min(r, 1) * 255),
-    g: Math.round(Math.min(g, 1) * 255),
-    b: Math.round(Math.min(b, 1) * 255),
-    a: alpha255,
-  };
+/**
+ * `XColor.fromFloat` channel: `Math.round(x * 255.0f)` with the product
+ * rounded to float first (XColor.java:41-44). Java's `Math.round(float)` is
+ * `floor(x + 0.5)`, as is JS's for the non-negative inputs here.
+ */
+function floatToChannel(x: number): number {
+  return Math.round(f32(x * 255));
 }
 
-/** @see ~/git/plantuml/.../klimt/color/HColorSimple.java#lighten */
+/**
+ * `alpha255` is the already-rounded 0-255 alpha the caller wants carried
+ * through; upstream's `toRGB` takes a 0-1 float and ends in `XColor.fromFloat`.
+ * @see ~/git/plantuml/.../klimt/color/HSLColor.java#toRGB (lines 326-366)
+ */
+export function hslToRgb([hIn, sIn, lIn]: Hsl, alpha255 = 255): RgbColor {
+  const s = f32(f32(Math.min(100, Math.max(0, f32(sIn)))) / 100);
+  const l = f32(f32(Math.min(100, Math.max(0, f32(lIn)))) / 100);
+  // `h = h % 360.0f` keeps the dividend's sign (HSLColor.java:343); hueToRgb wraps once.
+  const h = f32(f32(f32(hIn) % 360) / 360);
+
+  const q = l < 0.5 ? f32(l * f32(1 + s)) : f32(f32(l + s) - f32(s * l));
+  const p = f32(f32(2 * l) - q);
+
+  const r = Math.min(Math.max(0, hueToRgb(p, q, f32(h + ONE_THIRD))), 1);
+  const g = Math.min(Math.max(0, hueToRgb(p, q, h)), 1);
+  const b = Math.min(Math.max(0, hueToRgb(p, q, f32(h - ONE_THIRD))), 1);
+
+  return { r: floatToChannel(r), g: floatToChannel(g), b: floatToChannel(b), a: alpha255 };
+}
+
+/**
+ * `hsl[2] += hsl[2] * (ratio / 100.0)`: the product and sum are DOUBLE
+ * (`ratio / 100.0`), narrowed to float only on the store (HColorSimple.java:102).
+ * `new HSLColor(hsl)` builds with alpha `1.0f` (HSLColor.java:74-76), so the
+ * source alpha is not carried: the result is fully opaque.
+ * @see ~/git/plantuml/.../klimt/color/HColorSimple.java#lighten
+ */
 export function lighten(c: RgbColor, ratio: number): RgbColor {
   const [h, s, l] = rgbToHsl(c);
-  return hslToRgb([h, s, l + l * (ratio / 100)], c.a);
+  return hslToRgb([h, s, f32(l + l * (ratio / 100))], 255);
 }
 
-/** @see ~/git/plantuml/.../klimt/color/HColorSimple.java#darken */
+/** @see ~/git/plantuml/.../klimt/color/HColorSimple.java#darken (line 111) */
 export function darken(c: RgbColor, ratio: number): RgbColor {
   const [h, s, l] = rgbToHsl(c);
-  return hslToRgb([h, s, l - l * (ratio / 100)], c.a);
+  return hslToRgb([h, s, f32(l - l * (ratio / 100))], 255);
 }
 
 /**

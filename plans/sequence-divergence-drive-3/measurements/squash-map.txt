@@ -1,0 +1,11 @@
+# sdd3 squash map — <batch> <close sha> <tree sha>; working history on tag sdd3/pre-squash
+b0 4d8aea66e9b35217de35ababafdcf6a27dabbdf6 bc7091aee1ed8b0ff12972e7e187f8e9fa8bc696
+b1 fa2ded7a0a458714c607643362c7acd727ed2b69 af857e6304e9e82aa5fa64a0d342a2e3f4768eb3
+b2 9ef8e1c4efe3ef2ad953b2874db7a12513bfdbdb 175b32e7a6eeaed05e3c218c8490c524a3b49af0
+b3 9f2fac67ce824e60557a326c3209f7c79931c11c a2de117014ef980b1e9c387905629a3c43525c81
+b4 b8472518e4aa1bc907fb926ed00f4911d7227f1f a584661beb75d509feb8fc065fbc9d6af4bbfe9a
+b5 c0d5e2bf4478b76dd5dae3715e979788d25e4553 342d6ddf95de9d7ebd6901ae228b266a74f001ef
+b6 488f9104e3991923f7a244564071be452ddd18d0 3c95a2f4993613f1612fa4592d986430ebeebc84
+b7 15277f1bac7af9bafea86b79de5f84d98d1e7ead ed67e2969f3d8ac56fab11c17279aed83874a50e
+b8 94b7cff3c30ea0b23b310d70a078153355cc8d09 27182682cf8469a1ad2d162382c5eca0698746d2
+exit sdd3/pre-squash sdd3/pre-squash^{tree} (the exit commit folds 245808e19, 6925e9991 and this map commit; its tree is the tag's tree, recorded by reference because the map is part of it)

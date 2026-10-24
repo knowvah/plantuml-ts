@@ -180,8 +180,8 @@ describe('preprocessor', () => {
       'A -> B\nskinparam shadowing true\nC -> D\nskinparam shadowing false',
     );
     expect(skinparamAssignments).toEqual([
-      { key: 'shadowing', value: 'true', position: 1, order: 0 },
-      { key: 'shadowing', value: 'false', position: 3, order: 1 },
+      { key: 'shadowing', value: 'true', position: 1, order: 0, form: 'line' },
+      { key: 'shadowing', value: 'false', position: 3, order: 1, form: 'line' },
     ]);
     expect(skinparam.get('shadowing')).toBe('false');
   });
@@ -190,9 +190,9 @@ describe('preprocessor', () => {
     const { skinparamAssignments } = preprocess(
       'A -> B\nskinparam sequence {\n  ParticipantBorderThickness 2\n  ArrowColor red\n}\nC -> D',
     );
-    expect(skinparamAssignments?.map((a) => [a.key, a.value, a.position])).toEqual([
-      ['sequenceparticipantborderthickness', '2', 1],
-      ['sequencearrowcolor', 'red', 1],
+    expect(skinparamAssignments?.map((a) => [a.key, a.value, a.position, a.form])).toEqual([
+      ['sequenceparticipantborderthickness', '2', 1, 'block'],
+      ['sequencearrowcolor', 'red', 1, 'block'],
     ]);
   });
 
@@ -201,7 +201,7 @@ describe('preprocessor', () => {
       '<style>\nbg: red\n</style>\nskinparam shadowing true',
     );
     expect(declarationOrder?.styles).toEqual([0]);
-    expect(skinparamAssignments).toEqual([{ key: 'shadowing', value: 'true', position: 3, order: 1 }]);
+    expect(skinparamAssignments).toEqual([{ key: 'shadowing', value: 'true', position: 3, order: 1, form: 'line' }]);
   });
 
   it('empty source returns empty stylePositions', () => {

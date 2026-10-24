@@ -1,0 +1,15 @@
+@startuml
+!theme cerulean
+ 
+box "S/W"
+participant driver 
+
+end box
+
+box "NIC H/W"
+participant dma_arb 
+end box
+
+== Receive Pkt ==
+driver -> dma_arb: test
+@enduml

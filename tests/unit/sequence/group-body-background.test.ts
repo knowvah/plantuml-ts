@@ -11,6 +11,7 @@
  * The parse-level expectations are jar-verified probes (oracle-render.sh);
  * the band expectations quote the jar goldens of the nine corpus fixtures.
  */
+import { tagsOf } from '../../helpers/svg-tags.js';
 import { describe, expect, it } from 'vitest';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
@@ -119,9 +120,9 @@ interface Band {
  * in these fixtures has a stroke-width of exactly 1.
  */
 function bands(svg: string): Band[] {
-  return [
-    ...svg.matchAll(/<rect [^>]*?fill="([^"]*)"(?: fill-opacity="([^"]*)")? stroke="([^"]*)" stroke-width="1"\/>/g),
-  ].map((m) => ({ fill: m[1]!, fillOpacity: m[2], stroke: m[3]! }));
+  return tagsOf(svg, 'rect')
+    .filter((t) => t['stroke-width'] === '1' && t.stroke !== undefined)
+    .map((t) => ({ fill: t.fill!, fillOpacity: t['fill-opacity'], stroke: t.stroke! }));
 }
 
 function koleji(color: string): string {
@@ -217,11 +218,11 @@ describe('the nine corpus fixtures draw the jar golden bands', () => {
     expect(bands(renderSync(source))).toEqual(jar.map(([stroke, fill]) => ({ fill, fillOpacity: undefined, stroke })));
   });
 
-  // OPEN, not this task's: `core/svg-shapes.ts#rect` emits an 8-digit fill
-  // as written, without `SvgGraphics#fillMe`'s split (SvgGraphics.java:
-  // 879-887) that the klimt driver ports (`svg-graphics-core.ts#fillMe`).
-  // An explicit `group #40112233` band and an alpha note fill show it too.
-  it.fails.each(ALPHA)('%s: the jar fill, split by fillMe', (_slug, source, jar) => {
+  // sdd3 T2a (`5898bfecb`): `core/svg-shapes.ts#fillAttrsOf` now splits an
+  // 8-digit fill into `fill` + `fill-opacity` as `SvgGraphics#fillMe` does
+  // (SvgGraphics.java:880-887), so these five rows match the jar golden;
+  // they were `it.fails` while the string emitter wrote the fill as given.
+  it.each(ALPHA)('%s: the jar fill, split by fillMe', (_slug, source, jar) => {
     expect(bands(renderSync(source))).toEqual(
       jar.map(([stroke, fill, fillOpacity]) => ({ fill, fillOpacity, stroke })),
     );

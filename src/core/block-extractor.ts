@@ -116,7 +116,10 @@ export interface UmlSource {
    * `index.ts#umlSourceOfBlock`; absent for a hand-built literal fixture,
    * which reads as "no skin, no skinparam, no style".
    */
-  readonly styleSource?: Pick<PreprocessorResult, 'skin' | 'skinparam' | 'styles' | 'declarationOrder'>;
+  readonly styleSource?: Pick<
+    PreprocessorResult,
+    'skin' | 'skinparam' | 'skinparamAssignments' | 'styles' | 'declarationOrder'
+  >;
 }
 
 // ---------------------------------------------------------------------------

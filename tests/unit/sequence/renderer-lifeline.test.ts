@@ -10,14 +10,12 @@
  * on output the comparator still cannot descend into.
  */
 import { describe, it, expect } from 'vitest';
-import {
-  renderLifeline,
-  renderActivation,
-  renderLifelinePass,
-} from '../../../src/diagrams/sequence/renderer-lifeline.js';
+import { drawLifeline, drawLifelinePass } from '../../../src/diagrams/sequence/renderer-lifeline.js';
+import { drawActivation, type LiveboxItem } from '../../../src/diagrams/sequence/renderer-livebox.js';
+import { drawMarkup } from './draw-markup.js';
 import type { ParticipantGeo, ActivationGeo, LifelineSegment } from '../../../src/diagrams/sequence/ast.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import type { ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
+import type { PageTheme } from '../../../src/diagrams/sequence/renderer-ug.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
@@ -30,9 +28,22 @@ import {
   paintOf,
   type SequencePaint,
 } from '../../../src/diagrams/sequence/sequence-skin-param.js';
+import { tagsOf } from '../../helpers/svg-tags.js';
 import { DEFAULT_LIFELINE_PAINT, DEFAULT_SEQUENCE_STYLE_BUILDER } from '../../helpers/sequence-source.js';
 
-const theme: ScaledTheme = { ...defaultTheme, scaleK: 1, measurer: new DeterministicMeasurer() };
+// sdd3-T8e: no `src/` module draws a region onto a throwaway graphic any more;
+// these draw on the page's real graphic and read the markup back.
+const renderLifeline = (p: ParticipantGeo, seg: LifelineSegment, t: PageTheme): string =>
+  drawMarkup((ug) => drawLifeline(ug, p, seg), t);
+const renderActivation = (act: ActivationGeo, t: PageTheme): string => drawMarkup((ug) => drawActivation(ug, act), t);
+const renderLifelinePass = (
+  participants: readonly ParticipantGeo[],
+  liveboxes: readonly LiveboxItem[],
+  segmentsOf: (p: ParticipantGeo) => readonly LifelineSegment[],
+  t: PageTheme,
+): string => drawMarkup((ug) => drawLifelinePass(ug, participants, liveboxes, segmentsOf), t);
+
+const theme: PageTheme = { ...defaultTheme, measurer: new DeterministicMeasurer() };
 
 /** The builder after every declaration of a `@startuml` body. */
 function builderOf(body: string): StyleBuilder {
@@ -98,29 +109,17 @@ describe('renderLifeline', () => {
     // 22 here, so x = 18.5; the lifeline itself stays at 22.
     const svg = renderLifeline(participant(), WHOLE_LIFELINE, theme);
 
-    expect(svg).toContain('<rect x="18.5" y="39" width="8" height="139"');
-    expect(svg).toContain('<line x1="22" y1="39" x2="22" y2="178"');
-  });
-
-  it('scales the hover rect width and offset with scaleK', () => {
-    // `SvgGraphics#format` (`SvgGraphics.java:466-473`) multiplies the emitted
-    // x and width: x = 22 + 2 * (1 - 8) / 2 = 15, width = 8 * 2 = 16. Golden
-    // `kofuti-29-goti188` (`scale 2`) carries `width="16"` for this rect.
-    const scaled = { ...theme, scaleK: 2 };
-    const svg = renderLifeline(participant(), WHOLE_LIFELINE, scaled);
-
-    expect(svg).toContain('<rect x="15" y="39" width="16" height="139"');
+    expect(tagsOf(svg, 'rect')).toEqual([expect.objectContaining({ x: '18.5', y: '39', width: '8', height: '139' })]);
+    expect(tagsOf(svg, 'line')).toEqual([expect.objectContaining({ x1: '22', y1: '39', x2: '22', y2: '178' })]);
   });
 
   it('marks the hover rect as a transparent hit target, not ink', () => {
     // `UStroke.withThickness(0)` + `HColors.transparent()` leave NO stroke,
     // and `HColors.transparent(WITH_FILL_OPACITY).bg()` serialises as
     // `fill="#000" fill-opacity="0"` -- not `fill="none"`.
-    const rect = /<rect [^>]*>/.exec(renderLifeline(participant(), WHOLE_LIFELINE, theme))?.[0] ?? '';
+    const [rect] = tagsOf(renderLifeline(participant(), WHOLE_LIFELINE, theme), 'rect');
 
-    expect(rect).toContain('fill="#000"');
-    expect(rect).toContain('fill-opacity="0"');
-    expect(rect).not.toContain('stroke');
+    expect(rect).toEqual({ x: '18.5', y: '39', width: '8', height: '139', fill: '#000', 'fill-opacity': '0' });
   });
 
   it('keeps the group and title but drops the rect at zero height', () => {
@@ -183,7 +182,12 @@ describe('renderActivation', () => {
 
   it('centres a 10-wide bar on the lifeline', () => {
     // `getPreferredWidth` is 10 (`ComponentRoseActiveLine.java:114-116`).
-    expect(renderActivation(activation(), theme)).toContain('<rect x="17" y="50" width="10" height="34"');
+    expect(tagsOf(renderActivation(activation(), theme), 'rect')[0]).toMatchObject({
+      x: '17',
+      y: '50',
+      width: '10',
+      height: '34',
+    });
   });
 
   /**
@@ -204,15 +208,12 @@ describe('renderActivation', () => {
     [4, 32],
   ])('steps level %i right by half a box, to x=%i', (level, x) => {
     // lifelineX 22, half-width 5: level 1 is CENTRED on the lifeline.
-    expect(renderActivation(activation({ level }), theme)).toContain(
-      `<rect x="${String(x)}" y="50" width="10" height="34"`,
-    );
-  });
-
-  it('scales the per-level step with the box', () => {
-    const scaled = { ...theme, scaleK: 2, fontSize: theme.fontSize * 2 };
-    // half = 10, so level 3 sits at lifelineX - 10 + 2 * 10 = 32.
-    expect(renderActivation(activation({ level: 3 }), scaled)).toContain('<rect x="32"');
+    expect(tagsOf(renderActivation(activation({ level }), theme), 'rect')[0]).toMatchObject({
+      x: String(x),
+      y: '50',
+      width: '10',
+      height: '34',
+    });
   });
 
   it('emits NOTHING for a zero-height bar, not an empty group', () => {
@@ -234,12 +235,16 @@ describe('renderActivation', () => {
   });
 
   describe('paint (ComponentRoseActiveLine.java:60-105)', () => {
-    const bar = (svg: string): string => /<rect [^>]*>/.exec(svg)?.[0] ?? '';
+    const bar = (svg: string) => tagsOf(svg, 'rect')[0];
 
     it('fills with BackGroundColor white and strokes LineColor #181818 (plantuml.skin:16,145-147)', () => {
       // `ug.apply(symbolContext.getForeColor())` and `.getBackColor().bg()`
       // (`:85-87`); `#FFFFFF` is written `#FFF` (`SvgGraphics#shortenColor`).
-      expect(bar(renderActivation(activation(), theme))).toContain('fill="#FFF" stroke="#181818" stroke-width="1"');
+      expect(bar(renderActivation(activation(), theme))).toMatchObject({
+        fill: '#FFF',
+        stroke: '#181818',
+        'stroke-width': '1',
+      });
     });
 
     it('never strokes at the style LineThickness: the component applies no UStroke (:85-90)', () => {
@@ -248,20 +253,17 @@ describe('renderActivation', () => {
       const paint = activationPaint(
         builderOf('<style>\nactivationBox { LineThickness 3; BackGroundColor #FF0000; LineColor #0000FF }\n</style>'),
       );
-      expect(bar(renderActivation(activation({ paint }), theme))).toContain(
-        'fill="#F00" stroke="#00F" stroke-width="1"',
-      );
-    });
-
-    it('scales the unit stroke at emission (SvgGraphics.java:555-561)', () => {
-      const scaled = { ...theme, scaleK: 2 };
-      expect(bar(renderActivation(activation(), scaled))).toContain('stroke-width="2"');
+      expect(bar(renderActivation(activation({ paint }), theme))).toMatchObject({
+        fill: '#F00',
+        stroke: '#00F',
+        'stroke-width': '1',
+      });
     });
 
     it('shadows the bar when the style shadows (`isShadowing()` -> delta 1, :82-83)', () => {
       const paint = activationPaint(builderOf('<style>\nactivationBox { Shadowing 2 }\n</style>'));
-      expect(bar(renderActivation(activation({ paint }), theme))).toContain('filter="url(#sequenceShadow)"');
-      expect(bar(renderActivation(activation(), theme))).not.toContain('filter');
+      expect(bar(renderActivation(activation({ paint }), theme))).toMatchObject({ filter: 'url(#sequenceShadow)' });
+      expect(bar(renderActivation(activation(), theme))).not.toHaveProperty('filter');
     });
 
     it('paints an open bar back-on-back, then strokes its sides in LineColor (:88-101)', () => {
@@ -269,11 +271,12 @@ describe('renderActivation', () => {
         builderOf('<style>\nactivationBox { BackGroundColor #FF0000; LineColor #0000FF }\n</style>'),
       );
       const svg = renderActivation(activation({ paint, open: { closeUp: true, closeDown: false } }), theme);
-      expect(bar(svg)).toContain('fill="#F00" stroke="#F00"');
-      expect(svg.match(/<line [^>]*>/g)).toEqual([
-        '<line x1="17" y1="50" x2="17" y2="84" stroke="#00F" stroke-width="1"/>',
-        '<line x1="27" y1="50" x2="27" y2="84" stroke="#00F" stroke-width="1"/>',
-        '<line x1="17" y1="50" x2="27" y2="50" stroke="#00F" stroke-width="1"/>',
+      expect(bar(svg)).toMatchObject({ fill: '#F00', stroke: '#F00' });
+      const sides = { stroke: '#00F', 'stroke-width': '1' };
+      expect(tagsOf(svg, 'line')).toEqual([
+        { x1: '17', y1: '50', x2: '17', y2: '84', ...sides },
+        { x1: '27', y1: '50', x2: '27', y2: '84', ...sides },
+        { x1: '17', y1: '50', x2: '27', y2: '50', ...sides },
       ]);
     });
 

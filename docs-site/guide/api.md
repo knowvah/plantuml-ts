@@ -108,6 +108,8 @@ interface RenderOptions {
   allowJavascriptInLink?: boolean;
   securityProfile?: SecurityProfile;
   urlAllowlist?: readonly string[];
+  imageProvider?: ImageProvider;
+  filename?: string;
 }
 ```
 
@@ -161,6 +163,12 @@ interface RenderOptions {
   `'ALLOWLIST'`, or `'SANDBOX'` — see [Security](#security) below.
 - **`urlAllowlist`** — URL prefixes always allowed (every profile except
   `SANDBOX`), and the *only* ones allowed under `ALLOWLIST`.
+- **`imageProvider`** — fetches remote images (`<img:https://…>`) for
+  `render()`/`renderAll()`/`renderPages()`; `renderSync()` never fetches.
+  Gated by `securityProfile`. Ready-made providers live in
+  `@knowvah/plantuml-ts/image-providers`; see [Remote images](/guide/image-providers).
+- **`filename`** — the source file name that the `%filename()` builtin
+  reports (`Defines.java:89-94`).
 
 `Theme`, `StringMeasurer`, `IncludeFetcher`, `IncludeStore`, `StdlibRegistry`,
 and `AssetStore` are not exported from the package root — they are

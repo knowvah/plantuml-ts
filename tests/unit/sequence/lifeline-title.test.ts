@@ -13,6 +13,7 @@
 import { describe, expect, it } from 'vitest';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
+import { tagsOf } from '../../helpers/svg-tags.js';
 
 function titles(body: string): string[] {
   const svg = renderFixtureSequence(`@startuml\n${body}\n@enduml\n`, new DeterministicMeasurer());
@@ -53,8 +54,8 @@ describe('lifeline title (ComponentRoseLine.java:82, MutingLine.java:107-108)', 
     ].join('\n');
     expect(titles(body)).toEqual(['C .. T ..', 'B']);
     const svg = renderFixtureSequence(`@startuml\n${body}\n@enduml\n`, new DeterministicMeasurer());
-    const [first] = [...svg.matchAll(/<line [^>]*stroke-dasharray="5,5"[^>]*>/g)].map((m) => m[0]);
-    expect(first).toContain('stroke="#00F"');
+    const [first] = tagsOf(svg, 'line').filter((l) => l['stroke-dasharray'] === '5,5');
+    expect(first).toMatchObject({ stroke: '#00F' });
   });
 
   it('keeps an undecoratable spot raw: `#red` is no circleChar COLOR (jar tt-spot with #red)', () => {

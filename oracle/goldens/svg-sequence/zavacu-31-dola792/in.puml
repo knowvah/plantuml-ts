@@ -1,0 +1,5 @@
+@startuml
+title normal
+scale 4
+iiiiiiiiiiiiiiiiiiiiii -> wwwwwwwwwwwwwwwwwwwwwwwww : hello
+@enduml

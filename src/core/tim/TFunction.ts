@@ -47,6 +47,10 @@ export interface TPreprocessingOptionStore {
 export interface TPreprocessingArtifact {
   addWarning(warning: TWarning): void;
   getOption(): TPreprocessingOptionStore;
+  /** `getOption()`'s defined keys (`ConfigurationStore#values`, keyed by
+   *  `OptionKey` name), read after the run: `PreprocessorResult.options`
+   *  (`UgDiagram.java:117-121` reads one back with `isTrue`). */
+  getOptions(): ReadonlyMap<string, string>;
 }
 
 /**

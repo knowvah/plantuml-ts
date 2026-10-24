@@ -27,7 +27,8 @@ describe('finalizeActivityFragment — document scale', () => {
   });
 
   it('a simple factor 2 doubles every geometry attribute once, and the root size', () => {
-    const svg = assembleSvg(fragment({ scaleSpec: { kind: 'simple', factor: 2 } }));
+    // A body drawn deferred, as every scaled producer draws it: the one format pass carries the full vocabulary.
+    const svg = assembleSvg(fragment({ numbersDeferred: true, scaleSpec: { kind: 'simple', factor: 2 } }));
     expect(svg).toContain('style="width:440px;height:298px;');
     expect(svg).toContain('viewBox="0 0 440 298"');
     expect(svg).toContain('<ellipse cx="20" cy="10" rx="4" ry="4" fill="#222" stroke="#222" stroke-width="2"/>');

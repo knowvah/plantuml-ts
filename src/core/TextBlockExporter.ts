@@ -50,6 +50,7 @@ import { attrs, group } from './svg.js';
 import { mapOutsideInlineDefs } from './svg-defs.js';
 import { DEFAULT_SVG_DECIMALS, formatDecimal } from './svg-format.js';
 import { resolveScaleFactor } from './scale-command.js';
+import { scaleShadowFilterDefs } from './svg-defs-scale.js';
 
 export interface DocumentDims {
   width: number;
@@ -229,23 +230,146 @@ export const BODY_ANCHOR = '<g data-body-anchor="" transform="translate(0,0)"/>'
 const BODY_ANCHOR_RE = /<g data-body-anchor="" transform="translate\(([^,)"<]+),([^)"<]+)\)"\/>/;
 
 /**
- * The margin-shifted, scaled chromed body. With a
+ * add4-T3b (ACT-SCALE): the attributes `formatScaledFragmentBody`'s mindmap
+ * vocabulary ({@link SCALABLE_ATTR_RE}) does not name, which a body drawn with
+ * its numbers deferred (activity, description, sequence) also carries. Every
+ * one is a `SvgGraphics#format`-ed length (`SvgGraphics.java:468-475`): ellipse
+ * centres, line endpoints, and the dash pattern (`setStrokeWidth`, `:557-562`).
+ * `stroke-width="..."` is NOT listed: the mindmap regex's `\bwidth` alternative
+ * already matches it after the `-` (pinned by `assemble-svg-activity-scale
+ * .test.ts`), so listing it here would scale it twice.
+ */
+export const ACTIVITY_EXTRA_SCALABLE_ATTR_RE = /(?<![\w-])(cx|cy|x1|y1|x2|y2|stroke-dasharray)="([^"]*)"/g;
+const EXTRA_NUMBER_RE = /-?\d+(?:\.\d+)?/g;
+
+function scaleExtraNumbers(value: string, factor: number): string {
+  return value.replace(EXTRA_NUMBER_RE, (token) => formatDecimal(Number(token) * factor, DEFAULT_SVG_DECIMALS));
+}
+
+/** The whole composed body at `factor` -- upstream draws it through ONE scaled
+ *  `UGraphic` (`TextBlockExporter.java:165-177`). Inline defs are stepped over,
+ *  as `scaleFragmentBody` does (gradient `x1`/`y1` are objectBoundingBox
+ *  fractions). Each number is formatted here, once, after the multiply
+ *  (`SvgGraphics.java:468-475`) -- the body was drawn deferred
+ *  (`RenderFragment.numbersDeferred`), so this runs at factor 1 too. */
+export function scaleActivityBody(body: string, factor: number): string {
+  return mapOutsideInlineDefs(formatScaledFragmentBody(body, factor), (segment) =>
+    segment.replace(ACTIVITY_EXTRA_SCALABLE_ATTR_RE, (_m, name: string, value: string) =>
+      attrs([[name, scaleExtraNumbers(value, factor)]]).trimStart(),
+    ),
+  );
+}
+
+/** One text run of the body at `factor`: the single deferred format pass when
+ *  the producer drew deferred, the legacy regex scale of formatted numbers
+ *  otherwise. */
+function scaleBodyText(fragment: RenderFragment, text: string, factor: number): string {
+  return fragment.numbersDeferred === true ? scaleActivityBody(text, factor) : scaleFragmentBody(text, factor);
+}
+
+/**
+ * The margin-shifted, scaled chromed body of a producer that handed chrome its
+ * RAW text block ({@link RenderFragment.exportMargin}). With a
  * {@link RenderFragment.drawBodyAt} producer the chrome strings around
  * {@link BODY_ANCHOR} are post-multiplied, and the anchor is replaced by the
- * raw text block drawn through klimt at `scale` from the anchor's
- * translate — upstream draws the whole chromed document through one scaled
+ * raw text block drawn through klimt at `factor` from the anchor's
+ * translate -- upstream draws the whole chromed document through one scaled
  * `UGraphic` (TextBlockExporter.java:165-176), so the body's numbers are
  * rounded once, after the scale.
  */
-function scaleChromedBody(fragment: RenderFragment, margin: ClockwiseTopRightBottomLeft, scale: number): string {
-  const shifted = shiftFragmentBody(fragment.body, margin.getLeft(), margin.getTop());
-  if (fragment.drawBodyAt === undefined) return scaleFragmentBody(shifted, scale);
+function scaleMarginedBody(
+  fragment: RenderFragment,
+  body: string,
+  margin: ClockwiseTopRightBottomLeft,
+  factor: number,
+): string {
+  const shifted = shiftFragmentBody(body, margin.getLeft(), margin.getTop());
+  if (fragment.drawBodyAt === undefined) return scaleBodyText(fragment, shifted, factor);
   const anchor = BODY_ANCHOR_RE.exec(shifted);
-  if (anchor === null) throw new Error('finalizeTitledDiagramFragment: drawBodyAt set but the body anchor is missing');
+  if (anchor === null) throw new Error('exportTo: drawBodyAt set but the body anchor is missing');
   const before = shifted.slice(0, anchor.index);
   const after = shifted.slice(anchor.index + anchor[0].length);
-  const body = fragment.drawBodyAt(scale, Number(anchor[1]), Number(anchor[2]));
-  return scaleFragmentBody(before, scale) + body + scaleFragmentBody(after, scale);
+  const drawn = fragment.drawBodyAt(factor, Number(anchor[1]), Number(anchor[2]));
+  return scaleBodyText(fragment, before, factor) + drawn + scaleBodyText(fragment, after, factor);
+}
+
+/** A width x height pair: the export's dimension, or its canvas. */
+interface Extent {
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * `TextBlockExporter#calculateFinalDimension` (`:198-203`) and the canvas
+ * `SvgGraphics` sizes from it (`ensureVisible`'s `(int)(v + 1)`,
+ * `SvgGraphics.java:129-135`). Exactly two arms:
+ *
+ * - `exportMargin` set: the producer handed over the RAW chromed block, so
+ *   `dim` is its `width`/`height` plus the margin (`:200-202`) and the canvas
+ *   is `trunc(dim + 1)` (mindmap, wbs, salt);
+ * - otherwise the producer already baked its margin: `dim` is
+ *   `exportedDimension` when set (`document-margin.ts#applyDocumentMargin`,
+ *   chrome plus margin before `ensureVisible`), else the fragment's own
+ *   `width`/`height`, and those already ARE the `ensureVisible` integers, so
+ *   they are the canvas (activity, description, sequence).
+ */
+function exportExtents(fragment: RenderFragment): { dim: Extent; canvas: Extent } {
+  const margin = fragment.exportMargin;
+  if (margin === undefined) return { dim: fragment.exportedDimension ?? fragment, canvas: fragment };
+  const dim = {
+    width: fragment.width + margin.getLeft() + margin.getRight(),
+    height: fragment.height + margin.getTop() + margin.getBottom(),
+  };
+  return {
+    dim,
+    canvas: {
+      width: Math.trunc(dim.width + ENSURE_VISIBLE_BUMP),
+      height: Math.trunc(dim.height + ENSURE_VISIBLE_BUMP),
+    },
+  };
+}
+
+/**
+ * The ONE `TextBlockExporter#exportTo` tail (`core/TextBlockExporter.java:
+ * 159-177`) for every engine whose chrome is composed OUTSIDE klimt as a
+ * string splice: mindmap, wbs, salt, activity, description and sequence.
+ * `body` is the producer's body after its own pre-draw rects
+ * (`SvgGraphics`'s constructor `paintBackcolor` and `maybeDrawBorder` run
+ * BEFORE `textBlock.drawU(ug)`, `:168-176`); a producer with none passes
+ * `fragment.body`.
+ *
+ * - `dim = calculateFinalDimension()` (`:160`, `:198-203`), see
+ *   {@link exportExtents};
+ * - `factor = computeScaleFactor(dim)` (`:165`, `:205-209`):
+ *   `scale.getScale(dim.w, dim.h) * dpi / 96`, via {@link resolveScaleFactor};
+ * - the body is drawn through one `UGraphic` at `factor` (`:169-177`):
+ *   `exportMargin` shifts it by `(left, top)` (`:173`), `drawBodyAt` redraws
+ *   the raw block at `factor`, `numbersDeferred` runs the single
+ *   `SvgGraphics#format` pass (`SvgGraphics.java:466-475`), and any other
+ *   formatted body is regex-scaled;
+ * - the shadow filter's blur/offset scale with it (`SvgGraphics.java:1081,
+ *   1084`);
+ * - the root writes `format(maxX)` for `width`/`height` (`:800-813`), hence
+ *   `scaledCanvas` and `canvas * factor`.
+ *
+ * A margin-baked producer at factor 1 with a formatted body is left as
+ * handed over: nothing multiplies, so nothing is re-rounded.
+ */
+export function exportTo(fragment: RenderFragment, body: string): RenderFragment {
+  const { dim, canvas } = exportExtents(fragment);
+  const factor = resolveScaleFactor(fragment.scaleSpec, dim.width, dim.height, fragment.dpi);
+  const margin = fragment.exportMargin;
+  if (margin === undefined && factor === 1 && fragment.numbersDeferred !== true) return { ...fragment, body };
+  return {
+    ...fragment,
+    body:
+      margin === undefined ? scaleBodyText(fragment, body, factor) : scaleMarginedBody(fragment, body, margin, factor),
+    ...(fragment.extraDefs === undefined ? {} : { extraDefs: scaleShadowFilterDefs(fragment.extraDefs, factor) }),
+    // isw-T2c-scale: root `width`/`height` attributes are `format(maxX)`.
+    scaledCanvas: true,
+    width: canvas.width * factor,
+    height: canvas.height * factor,
+  };
 }
 
 /**
@@ -256,50 +380,22 @@ function scaleChromedBody(fragment: RenderFragment, margin: ClockwiseTopRightBot
  *   scale), so only the single content `<g>` is added;
  * - chrome composed (`annotations/chrome.ts#applyChrome` wrapped the body):
  *   the engine handed chrome its RAW text block, as upstream's
- *   `DiagramChromeFactory.create` receives it, and the margin comes after —
- *   `ug.apply(new UTranslate(margin.getLeft(), margin.getTop()))`
- *   (`TextBlockExporter.java:173`) and `calculateFinalDimension`
- *   (`:198-202`), then `ensureVisible`. The margin is the producer's
+ *   `DiagramChromeFactory.create` receives it, and the margin comes after
+ *   (`TextBlockExporter.java:173`, `:198-202`): {@link exportTo}'s
+ *   `exportMargin` arm. The margin is the producer's
  *   `Builder#calculateMargin` result (`:510-516`: style `Margin`, else
- *   `getDefaultMargins()` — `same(10)` for mindmap, `TitledDiagram.java:274-277`;
- *   `same(5)` for salt, `PSystemSalt.java:238-240`), carried as
- *   `RenderFragment.exportMargin`. `scaleFragmentBody` (T6d) runs
- *   LAST, after the margin shift — matching upstream's own ordering, since
- *   `computeScaleFactor` reads `calculateFinalDimension()`'s (i.e. the
- *   POST-margin, POST-chrome) dimension, NOT the raw pre-chrome text
- *   block: resolving `fragment.scaleSpec` against the pre-chrome body
- *   alone is measurably wrong (jar-verified against zebuzi — the title's
- *   extra width changes `ScaleWidthAndHeight`'s `Math.min(w-ratio,
- *   h-ratio)` result, giving 1.682 instead of the golden's 1.495).
- *
- *   Two DISTINCT derived quantities, not one (jar-verified — conflating
- *   them into a single truncated value under-scaled zebuzi by ~0.2%,
- *   1.492 vs the golden 1.495): `computeScaleFactor(dim)` (`:184-188`)
- *   reads `dim` — the RAW double `calculateFinalDimension()` returns, with
- *   NO `ensureVisible` bump — as BOTH the scale ratio's denominator AND
- *   (separately) the seed `ensureVisible(dim.width, dim.height)` truncates
- *   to `maxX`/`maxY` (`SvgGraphics.java:143`, `:129-135`'s `(int)(x+1)`)
- *   for the CANVAS size. `dimWidth`/`dimHeight` below are that raw,
- *   un-bumped `dim`; `unscaledWidth`/`unscaledHeight` are the SEPARATE,
- *   `+1`-bumped-then-truncated `maxX`/`maxY` the canvas size is built
- *   from — scale resolves against the former, `width`/`height` multiply
- *   the latter.
+ *   `getDefaultMargins()` -- `same(10)` for mindmap, `TitledDiagram.java:
+ *   274-277`; `same(5)` for salt, `PSystemSalt.java:238-240`), carried as
+ *   `RenderFragment.exportMargin`. Scale resolves against the un-bumped
+ *   post-margin, post-chrome dimension (jar-verified against zebuzi: the
+ *   title's extra width changes `ScaleWidthAndHeight`'s `Math.min`, 1.682
+ *   versus the golden's 1.495), and the canvas multiplies the SEPARATE
+ *   `+1`-bumped truncation (1.492 versus 1.495 when conflated).
  */
 export function finalizeTitledDiagramFragment(fragment: RenderFragment): RenderFragment {
   if (fragment.bodyWrapped !== true) return { ...fragment, body: group(fragment.body) };
-  const margin = fragment.exportMargin;
-  if (margin === undefined) throw new Error('finalizeTitledDiagramFragment: chromed fragment without exportMargin');
-  const dimWidth = fragment.width + margin.getLeft() + margin.getRight();
-  const dimHeight = fragment.height + margin.getTop() + margin.getBottom();
-  const unscaledWidth = Math.trunc(dimWidth + ENSURE_VISIBLE_BUMP);
-  const unscaledHeight = Math.trunc(dimHeight + ENSURE_VISIBLE_BUMP);
-  const scale = resolveScaleFactor(fragment.scaleSpec, dimWidth, dimHeight, fragment.dpi);
-  return {
-    ...fragment,
-    body: scaleChromedBody(fragment, margin, scale),
-    // isw-T2c-scale: root `width`/`height` attributes are `format(maxX)`.
-    scaledCanvas: true,
-    width: unscaledWidth * scale,
-    height: unscaledHeight * scale,
-  };
+  if (fragment.exportMargin === undefined) {
+    throw new Error('finalizeTitledDiagramFragment: chromed fragment without exportMargin');
+  }
+  return exportTo(fragment, fragment.body);
 }

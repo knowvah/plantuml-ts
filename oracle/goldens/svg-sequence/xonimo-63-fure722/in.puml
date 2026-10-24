@@ -1,0 +1,12 @@
+@startuml
+!pragma teoz true
+<style>
+sequenceDiagram {
+    RoundCorner 30
+}
+</style>
+alt #00ff0080 successful case
+    Bob -> Alice: Authentication Accepted
+    Bob -> Alice: Please repeat
+end
+@enduml

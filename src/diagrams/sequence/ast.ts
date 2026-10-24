@@ -57,6 +57,12 @@ export interface Participant {
    *  `Participant.java:141-146`): `getDisplay` appends it after the name lines
    *  (`:125-135`). Absent = top. */
   stereotypeBottom?: boolean;
+  /** `skinparam sequenceParticipant underline` (`SkinParam.java:991-993`), read
+   *  at DRAW time -- `LivingSpace.java:198,219`, `MutingLine.java:107-108` --
+   *  so the FINAL skin answers, declarations above the line included. Every
+   *  display line then carries `<u>` (`Participant.java:125-126`,
+   *  `Display.java:462-469`). Absent = not underlined. */
+  underlined?: boolean | undefined;
   /** `hiddenPortions.contains(EntityPortion.STEREOTYPE)`: `hide stereotype`
    *  drops the stereotype from `getDisplay` only (`Participant.java:125-135`);
    *  `getUsedStyles` still merges it (`:82-91`). */

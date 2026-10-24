@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { HEADER_PADDING, CORNER_SIZE, groupingHeaderDisplay } from '../../../src/diagrams/sequence/frame-style.js';
-import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.js';
-import type { FrameGeo, SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
 
 // ---------------------------------------------------------------------------
 // Constants — ComponentRoseGroupingHeader.java:64,76 (every style-owned
@@ -44,85 +42,5 @@ describe('groupingHeaderDisplay', () => {
     const result = groupingHeaderDisplay('loop', undefined);
     expect(result.tabText).toBe('loop');
     expect(result.tabComment).toBeUndefined();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// scaleFrame (via scaleSequenceGeometry) — lengths scale, tokens/text don't
-// ---------------------------------------------------------------------------
-
-function makeFrameGeo(overrides: Partial<FrameGeo> = {}): FrameGeo {
-  return {
-    kind: 'frame',
-    frameType: 'alt',
-    label: 'x > 0',
-    x: 10,
-    y: 20,
-    width: 100,
-    height: 50,
-    backColorElement: '#FF0000',
-    backColorGeneral: '#00FF00',
-    branchSeparators: [{ y: 40, label: 'else', backColorGeneral: '#0000FF' }],
-    refBody: [],
-    // A4 moved tab-text placement into layout; these suites assert box
-    // geometry, never the tab's own text.
-    tabRuns: [],
-    tabText: 'alt',
-    tabComment: 'x > 0',
-    tabTextWidth: 30,
-    tabWidth: 60,
-    tabHeight: 15,
-    ...overrides,
-  };
-}
-
-function makeGeometry(frame: FrameGeo): SequenceGeometry {
-  return {
-    totalWidth: 400,
-    totalHeight: 300,
-    participants: [],
-    events: [frame],
-    headHeight: 36,
-    lifelineEndY: 200,
-    lifelineSegments: {},
-    footerShapeY: 210,
-    boxes: [],
-    showFootbox: true,
-  };
-}
-
-describe('scaleFrame (via scaleSequenceGeometry)', () => {
-  it('scales tabWidth, tabHeight and tabTextWidth by k', () => {
-    const scaled = scaleSequenceGeometry(makeGeometry(makeFrameGeo()), 2);
-    const frame = scaled.events[0] as FrameGeo;
-    expect(frame.tabWidth).toBe(120);
-    expect(frame.tabHeight).toBe(30);
-    expect(frame.tabTextWidth).toBe(60);
-  });
-
-  it('scales frame x/y/width/height and each separator y', () => {
-    const scaled = scaleSequenceGeometry(makeGeometry(makeFrameGeo()), 2);
-    const frame = scaled.events[0] as FrameGeo;
-    expect(frame.x).toBe(20);
-    expect(frame.y).toBe(40);
-    expect(frame.width).toBe(200);
-    expect(frame.height).toBe(100);
-    expect(frame.branchSeparators[0]?.y).toBe(80);
-  });
-
-  it('passes colour tokens and text through unchanged', () => {
-    const scaled = scaleSequenceGeometry(makeGeometry(makeFrameGeo()), 2);
-    const frame = scaled.events[0] as FrameGeo;
-    expect(frame.backColorElement).toBe('#FF0000');
-    expect(frame.backColorGeneral).toBe('#00FF00');
-    expect(frame.tabText).toBe('alt');
-    expect(frame.tabComment).toBe('x > 0');
-    expect(frame.branchSeparators[0]?.label).toBe('else');
-    expect(frame.branchSeparators[0]?.backColorGeneral).toBe('#0000FF');
-  });
-
-  it('is a no-op at k=1 (identity short-circuit)', () => {
-    const geo = makeGeometry(makeFrameGeo());
-    expect(scaleSequenceGeometry(geo, 1)).toBe(geo);
   });
 });

@@ -53,6 +53,7 @@ import type { StringBounder } from '../../klimt/font/StringBounder.js';
 import { XDimension2D } from '../../klimt/geom/XDimension2D.js';
 import { atomTextStartingAltitude } from '../../klimt/creole/legacy/AtomText.js';
 import { emojiStartingAltitude } from '../../klimt/creole/atom/AtomEmoji.js';
+import { verticalTextsDimension, verticalTextsStartingAltitude } from '../../klimt/creole/atom/AtomVerticalTexts.js';
 import { getFont } from '../../klimt/shape/UText.js';
 import type { FontSpec, StringMeasurer } from '../../measurer.js';
 
@@ -124,11 +125,39 @@ const UNUSED_STRING_BOUNDER: StringBounder = { calculateDimension: () => new XDi
  *   `-3*factor` term IS that altitude), and `descAtomOps` reports 0 for the
  *   same reason. Moving it here would double-count it.
  * - `'latex'`: `AtomMath.java:73-75` returns 0.
+ * - `'vertical'`: `AtomVerticalTexts.java:67-69`, the first stacked line's
+ *   (`AtomHorizontalTexts.java:64-69`) first piece's.
  */
 export function creoleAtomStartingAltitude(atom: CreoleAtom): number {
   if (atom.kind === 'text') return atomTextStartingAltitude(atom.font);
   if (atom.kind === 'emoji') return emojiStartingAltitude(atom.factor);
+  if (atom.kind === 'vertical') {
+    return verticalTextsStartingAltitude(
+      atom.lines,
+      { getStartingAltitude: creoleAtomStartingAltitude },
+      UNUSED_STRING_BOUNDER,
+    );
+  }
   return 0;
+}
+
+/** A `'vertical'` atom's box from a seam's own per-atom `dim` callback:
+ *  `AtomVerticalTexts#calculateDimensionSlow` (`AtomVerticalTexts.java:54-64`)
+ *  over each stacked line (`AtomHorizontalTexts.java:52-62`). The measuring
+ *  seams reach it for the `'vertical'` arm of their atom-kind dispatch. */
+export function verticalAtomBox(
+  lines: readonly (readonly CreoleAtom[])[],
+  dim: (atom: CreoleAtom) => { readonly width: number; readonly height: number },
+): { readonly width: number; readonly height: number } {
+  const box = verticalTextsDimension(
+    lines,
+    {
+      calculateDimension: (atom) => new XDimension2D(dim(atom).width, dim(atom).height),
+      getStartingAltitude: creoleAtomStartingAltitude,
+    },
+    UNUSED_STRING_BOUNDER,
+  );
+  return { width: box.getWidth(), height: box.getHeight() };
 }
 
 /** The `AtomOps` shim `Sea` itself consumes — dimension + altitude only

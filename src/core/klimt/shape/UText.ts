@@ -2,6 +2,7 @@ import type { UShape } from '../UShape.js';
 import type { UStroke } from '../UStroke.js';
 import type { HColorSimple } from '../color/HColorSimple.js';
 import { FontPosition, fontPositionSpace, muteFontSize } from '../font/FontPosition.js';
+import type { SvgAttributes } from '../SvgAttributes.js';
 
 /**
  * FontStyle — the seven style flags a `FontConfiguration` can carry.
@@ -200,6 +201,12 @@ export interface FontConfiguration {
    *  only when it is non-null. `undefined` is the unset-skinparam default
    *  (`UStroke.simple()`); only `null` suppresses the underline. */
   readonly hyperlinkUnderlineStroke?: UStroke | null;
+  /** Upstream's `svgAttributes` field (`FontConfiguration.java:147`), set by
+   *  `changeAttributes` (java:248-251) from a `<text name=value>` creole tag
+   *  and read by `DriverTextSvg` (`getAttributes()`, java:178-180). `undefined`
+   *  is upstream's `SvgAttributes.empty()` -- so every pre-existing literal
+   *  stays valid and draws no extra attribute. */
+  readonly svgAttributes?: SvgAttributes;
 }
 
 /**
@@ -240,6 +247,15 @@ export function getFontFace(fc: FontConfiguration): FontFace {
  */
 export function changeExtendedColor(fc: FontConfiguration, extendedColor: string): FontConfiguration {
   return { ...fc, extendedColor };
+}
+
+/**
+ * Upstream `FontConfiguration#changeAttributes(SvgAttributes)`
+ * (`FontConfiguration.java:248-251`): `svgAttributes.add(toBeAdded)`, every
+ * other field passed through verbatim.
+ */
+export function changeAttributes(fc: FontConfiguration, toBeAdded: SvgAttributes): FontConfiguration {
+  return { ...fc, svgAttributes: fc.svgAttributes === undefined ? toBeAdded : fc.svgAttributes.add(toBeAdded) };
 }
 
 /** Upstream `FontConfiguration#getSpace()` (`FontConfiguration.java:370-372`)

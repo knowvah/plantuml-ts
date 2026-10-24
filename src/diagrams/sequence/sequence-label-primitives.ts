@@ -158,6 +158,10 @@ function styleFieldsOf(font: FontConfiguration, drawnSize: number): Partial<Text
     ...(deco.textDecoration !== null ? { decoration: deco.textDecoration } : {}),
     ...(deco.backColor !== null ? { textBackColor: deco.backColor } : {}),
     ...(deco.extraLines.length > 0 ? { extraLines: deco.extraLines } : {}),
+    // `fontConfiguration.getAttributes()` (`DriverTextSvg.java:178-180`).
+    ...(font.svgAttributes !== undefined && font.svgAttributes.attributes().size > 0
+      ? { svgAttributes: font.svgAttributes.attributes() }
+      : {}),
   };
 }
 

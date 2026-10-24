@@ -17,7 +17,7 @@ import type { SpriteRegistry } from '../sprite-commands.js';
 import { HorizontalAlignment } from '../klimt/geom/HorizontalAlignment.js';
 import { buildChromeTextBlock } from './blocks-creole.js';
 import { mergeFragmentDefs } from '../klimt/document-shell.js';
-import { shiftFragmentBody } from './coord-shift.js';
+import { shiftedFold, shiftFragmentBody } from './coord-shift.js';
 import { buildBigFrame, type BigFrameStyle } from '../klimt/shape/big-frame.js';
 import type { InkBox } from './body-ink.js';
 
@@ -197,6 +197,7 @@ function buildFramedBlock(
     body: parts.join(''),
     width: layout.width,
     height: layout.height,
+    ...shiftedFold(original, layout.originalX + delta.dx, layout.originalY + delta.dy),
     ...(extraDefs === undefined ? {} : { extraDefs }),
   };
 }
@@ -221,6 +222,7 @@ export function addMainframe(
     body: shiftFragmentBody(framed.body, style.margin.left, style.margin.top),
     width: style.margin.left + framed.width + style.margin.right,
     height: style.margin.top + framed.height + style.margin.bottom,
+    ...shiftedFold(framed, style.margin.left, style.margin.top),
     ...(framed.extraDefs === undefined ? {} : { extraDefs: framed.extraDefs }),
   };
 }

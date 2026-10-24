@@ -54,6 +54,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['wrapWidth', (acc) => acc.wrapWidth],
   ['dpi', (acc) => acc.dpi],
   ['topurl', (acc) => acc.topurl],
+  ['lengthAdjust', (acc) => acc.lengthAdjust], // sdd3-T2c
   ['maxMessageSize', (acc) => resolveMaxMessageSize(acc)],
   ['sameClassWidth', (acc) => acc.sameClassWidth],
   ['classAttributeIconSize', (acc) => acc.classAttributeIconSize],

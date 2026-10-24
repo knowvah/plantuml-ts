@@ -69,6 +69,7 @@ import { XDimension2D } from '../../klimt/geom/XDimension2D.js';
 import type { AtomOps } from '../../klimt/creole/Sea.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
 import { SPACE_ATOM_HEIGHT } from '../../klimt/creole/atom/AtomSpace.js';
+import { verticalTextsDimension, verticalTextsStartingAltitude } from '../../klimt/creole/atom/AtomVerticalTexts.js';
 import type { Atom } from '../../klimt/creole/SheetBlock1.js';
 import { emojiBoxDim } from '../../klimt/creole/atom/AtomEmoji.js';
 import { renderLatexAsImage } from '../../latex.js';
@@ -116,10 +117,15 @@ function titleAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps 
     if (atom.kind === 'latex') return renderLatexAsImage(atom.expr, atom.color ?? '#000000');
     if (atom.kind === 'emoji') return emojiBoxDim(atom.factor);
     if (atom.kind === 'space') return { width: atom.width, height: SPACE_ATOM_HEIGHT };
-    const resolved = resolveAtomImage?.(atom.atom);
+    // `AtomVerticalTexts#calculateDimensionSlow` (`AtomVerticalTexts.java:54-64`).
+    if (atom.kind === 'vertical') {
+      const dim = verticalTextsDimension(atom.lines, ops, stringBounder);
+      return { width: dim.getWidth(), height: dim.getHeight() };
+    }
+    const resolved = resolveAtomImage?.(atom.atom, () => stringBounder);
     return resolved === undefined ? { width: 0, height: 0 } : resolved;
   }
-  return {
+  const ops: AtomOps = {
     calculateDimension(creoleAtom: CreoleAtom, stringBounder: StringBounder): XDimension2D {
       const atom = creoleAtom as CreoleAtom | Atom;
       if (!isCreoleAtomData(atom)) return atom.calculateDimension(stringBounder);
@@ -130,6 +136,8 @@ function titleAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps 
       const atom = creoleAtom as CreoleAtom | Atom;
       if (!isCreoleAtomData(atom)) return atom.getStartingAltitude(stringBounder);
       if (atom.kind === 'text') return atomTextStartingAltitude(atom.font); // SI30/D2
+      // `AtomVerticalTexts#getStartingAltitude` (`AtomVerticalTexts.java:67-69`).
+      if (atom.kind === 'vertical') return verticalTextsStartingAltitude(atom.lines, ops, stringBounder);
       return 0;
     },
     drawU(): void {
@@ -139,6 +147,7 @@ function titleAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps 
       );
     },
   };
+  return ops;
 }
 
 /**

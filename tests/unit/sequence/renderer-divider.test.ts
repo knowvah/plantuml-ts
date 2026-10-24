@@ -18,11 +18,13 @@ import { defaultTheme } from '../../../src/core/theme.js';
 import type { DividerGeo } from '../../../src/diagrams/sequence/ast.js';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
-import { renderDivider } from '../../../src/diagrams/sequence/renderer-divider.js';
-import type { ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
+import { drawDivider } from '../../../src/diagrams/sequence/renderer-divider.js';
+import type { PageTheme } from '../../../src/diagrams/sequence/renderer-ug.js';
 import { astOrThrow } from '../../helpers/parse-ast.js';
+import { tagsOf } from '../../helpers/svg-tags.js';
+import { drawMarkup } from './draw-markup.js';
 
-const theme: ScaledTheme = { ...defaultTheme, scaleK: 1, measurer: new DeterministicMeasurer() };
+const theme: PageTheme = { ...defaultTheme, measurer: new DeterministicMeasurer() };
 
 /** `src/index.ts#umlSourceOfBlock`'s widening, over a `@startuml` body. */
 function sourceOf(body: readonly string[]): UmlSource {
@@ -48,8 +50,13 @@ function separatorStyle(declarations: string): string[] {
   return ['<style>', `separator { ${declarations} }`, '</style>'];
 }
 
-const rects = (svg: string): string[] => svg.match(/<rect [^>]*>/g) ?? [];
-const lines = (svg: string): string[] => svg.match(/<line [^>]*>/g) ?? [];
+/** The divider drawn on the page's graphic. */
+const renderDivider = (divider: DividerGeo, at: PageTheme): string =>
+  drawMarkup((ug, t) => drawDivider(ug, divider, t), at);
+
+/** The drawn tags' attributes, `style` expanded (a value, not a spelling). */
+const rects = (svg: string) => tagsOf(svg, 'rect');
+const lines = (svg: string) => tagsOf(svg, 'line');
 
 describe('divider paint, default skin (plantuml.skin:179-187)', () => {
   const svg = renderDivider(dividerOf(['== Init ==']), theme);
@@ -57,23 +64,20 @@ describe('divider paint, default skin (plantuml.skin:179-187)', () => {
   it('fills the 3px band with BackGroundColor #e and strokes it in the same colour at 1 (:108-118)', () => {
     // `drawSep` applies `background` as the fore colour, `drawRectLong`
     // `UStroke.simple()`; `#e` is `#EEEEEE`, written `#EEE`.
-    expect(rects(svg)[0]).toMatch(/height="3" fill="#EEE" stroke="#EEE" stroke-width="1"\/>$/);
+    expect(rects(svg)[0]).toMatchObject({ height: '3', fill: '#EEE', stroke: '#EEE', 'stroke-width': '1' });
   });
 
   it('draws the double rule in LineColor black at half LineThickness 2.0 (:121-126)', () => {
     expect(lines(svg)).toHaveLength(2);
-    for (const l of lines(svg)) expect(l).toMatch(/stroke="#000" stroke-width="1"\/>$/);
+    for (const l of lines(svg)) expect(l).toMatchObject({ stroke: '#000', 'stroke-width': '1' });
   });
 
   it('strokes the label box with LineColor at the full LineThickness (:97-102)', () => {
-    expect(rects(svg)[1]).toMatch(/fill="#EEE" stroke="#000" stroke-width="2"\/>$/);
+    expect(rects(svg)[1]).toMatchObject({ fill: '#EEE', stroke: '#000', 'stroke-width': '2' });
   });
 
   it('draws the label at FontSize 13, FontStyle bold, FontColor black (plantuml.skin:9,184-185)', () => {
-    const text = /<text [^>]*>Init<\/text>/.exec(svg)?.[0] ?? '';
-    expect(text).toContain('font-size="13"');
-    expect(text).toContain('font-weight="700"');
-    expect(text).toContain('fill="#000"');
+    expect(tagsOf(svg, 'text')[0]).toMatchObject({ 'font-size': '13', 'font-weight': '700', fill: '#000' });
   });
 
   it('measures the label box with the style font: 13px line + Padding 4+4 (ComponentRoseDivider.java:67)', () => {
@@ -96,9 +100,9 @@ describe('divider paint, default skin (plantuml.skin:179-187)', () => {
 describe('divider paint, from the style path', () => {
   it('<style> separator { LineThickness 4 } reaches the box and, halved, the rules', () => {
     const svg = renderDivider(dividerOf([...separatorStyle('LineThickness 4'), '== Init ==']), theme);
-    expect(rects(svg)[1]).toContain('stroke-width="4"');
-    for (const l of lines(svg)) expect(l).toContain('stroke-width="2"');
-    expect(rects(svg)[0]).toContain('stroke-width="1"');
+    expect(rects(svg)[1]).toMatchObject({ 'stroke-width': '4' });
+    for (const l of lines(svg)) expect(l).toMatchObject({ 'stroke-width': '2' });
+    expect(rects(svg)[0]).toMatchObject({ 'stroke-width': '1' });
   });
 
   it('LineColor, LineStyle and RoundCorner arrive as the jar draws them', () => {
@@ -107,26 +111,32 @@ describe('divider paint, from the style path', () => {
     // The box takes the whole stroke, dash included (:98); the rules only the
     // thickness (:122); both rects are `.rounded(roundCorner)`, emitted as
     // `rx = roundCorner / 2` (`DriverRectangleSvg.java:78`).
-    expect(rects(svg)[1]).toContain('stroke="#0F0" stroke-width="4" stroke-dasharray="3,3" rx="5" ry="5"');
-    expect(rects(svg)[0]).toContain('stroke="#EEE" stroke-width="1" rx="5" ry="5"');
-    for (const l of lines(svg)) expect(l).toMatch(/stroke="#0F0" stroke-width="2"\/>$/);
+    expect(rects(svg)[1]).toMatchObject({
+      stroke: '#0F0',
+      'stroke-width': '4',
+      'stroke-dasharray': '3,3',
+      rx: '5',
+      ry: '5',
+    });
+    expect(rects(svg)[0]).toMatchObject({ stroke: '#EEE', 'stroke-width': '1', rx: '5', ry: '5' });
+    for (const l of lines(svg)) expect(l).toMatchObject({ stroke: '#0F0', 'stroke-width': '2' });
   });
 
   it('skinparam roundcorner reaches the divider through the style (jar: tukobo-89-zebi935 rx="5")', () => {
     const svg = renderDivider(dividerOf(['skinparam roundcorner 10', '== Init ==']), theme);
-    expect(rects(svg).every((r) => r.includes('rx="5" ry="5"'))).toBe(true);
+    expect(rects(svg).every((r) => r.rx === '5' && r.ry === '5')).toBe(true);
   });
 
   it('BackGroundColor and FontSize arrive', () => {
     const divider = dividerOf([...separatorStyle('BackGroundColor #FF0000; FontSize 20'), '== Init ==']);
     const svg = renderDivider(divider, theme);
-    expect(rects(svg)[0]).toContain('fill="#F00" stroke="#F00"');
-    expect(svg).toContain('font-size="20"');
+    expect(rects(svg)[0]).toMatchObject({ fill: '#F00', stroke: '#F00' });
+    expect(tagsOf(svg, 'text')[0]).toMatchObject({ 'font-size': '20' });
   });
 
   it('a Shadowing style shadows the band and the box (:100,115)', () => {
     const svg = renderDivider(dividerOf([...separatorStyle('Shadowing 2'), '== Init ==']), theme);
-    expect(rects(svg).map((r) => r.includes('filter="url(#sequenceShadow)"'))).toEqual([true, true]);
+    expect(rects(svg).map((r) => r.filter)).toEqual(['url(#sequenceShadow)', 'url(#sequenceShadow)']);
   });
 
   it('the empty ==== form draws the band and rules only (:84-85)', () => {
@@ -135,20 +145,13 @@ describe('divider paint, from the style path', () => {
     expect(lines(svg)).toHaveLength(2);
   });
 
-  it('scales every stroke width at emission (SvgGraphics.java:555-561)', () => {
-    const svg = renderDivider(dividerOf(['== Init ==']), { ...theme, scaleK: 2 });
-    expect(rects(svg)[0]).toContain('stroke-width="2"');
-    expect(rects(svg)[1]).toContain('stroke-width="4"');
-    for (const l of lines(svg)) expect(l).toContain('stroke-width="2"');
-  });
-
   it('strokes a rule with a gradient LineColor in its first colour, the box with the gradient (DriverLineSvg.java:76-80)', () => {
     // jar `sedule-54-falo457`: `skinparam sequenceDividerBorderColor
     // #white|green` -> both rules `stroke:#FFF`, the label box
     // `stroke:url(#…)`.
     const svg = renderDivider(dividerOf(['skinparam sequenceDividerBorderColor #white|green', '== foo ==']), theme);
-    for (const l of lines(svg)) expect(l).toContain('stroke="#FFF"');
-    expect(rects(svg)[1]).toMatch(/stroke="url\(#[^)]+\)"/);
+    for (const l of lines(svg)) expect(l).toMatchObject({ stroke: '#FFF' });
+    expect(rects(svg)[1]!.stroke).toMatch(/^url\(#[^)]+\)$/);
   });
 
   it('refuses a divider layout did not paint', () => {

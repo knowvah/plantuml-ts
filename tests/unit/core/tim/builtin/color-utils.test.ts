@@ -115,6 +115,40 @@ describe('darken / lighten', () => {
   });
 });
 
+// Expected values are gaxera-69-muma363's golden in.svg title text
+// (test-results/dot-cache/sequence/gaxera-69-muma363/in.svg), i.e. the jar's
+// HColorSimple#lighten / #darken answers (HColorSimple.java:98-113).
+describe('lighten / darken in Java float32 (HSLColor.java:228-275,324-380)', () => {
+  const hex = (c: { r: number; g: number; b: number; a: number }): string => colorToString(c);
+
+  it('%lighten("012345", 50) is #013568 (XColor.java:68-79 red/255.0f, HSLColor.java:238-272)', () => {
+    // double arithmetic gave #013468 (g one step low): the float32 `l` and
+    // `s` land the green channel on the other side of the .5 boundary.
+    expect(hex(lighten({ r: 0x01, g: 0x23, b: 0x45, a: 255 }, 50))).toBe('#013568');
+  });
+
+  it('%lighten / %darken("red", 10 and 50) match the golden (HColorSimple.java:98-113)', () => {
+    const red = { r: 255, g: 0, b: 0, a: 255 };
+    expect(hex(lighten(red, 10))).toBe('#FF1A1A');
+    expect(hex(darken(red, 10))).toBe('#E60000');
+    expect(hex(lighten(red, 50))).toBe('#FF8080');
+    expect(hex(darken(red, 50))).toBe('#800000');
+  });
+
+  it('rgbToHsl returns float32 values (HSLColor.java:231-272: every local is a float)', () => {
+    for (const v of rgbToHsl({ r: 0x01, g: 0x23, b: 0x45, a: 255 })) expect(v).toBe(Math.fround(v));
+  });
+
+  it('lighten drops the source alpha: new HSLColor(hsl) uses alpha 1.0f (HSLColor.java:74-76,85-88)', () => {
+    expect(lighten({ r: 0, g: 255, b: 0, a: 128 }, 0).a).toBe(255);
+    expect(darken({ r: 0, g: 255, b: 0, a: 128 }, 0).a).toBe(255);
+  });
+
+  it('a negative hue keeps its sign through `h % 360.0f` (HSLColor.java:343)', () => {
+    expect(hex(hslToRgb([-30, 100, 50]))).toBe('#FF0080');
+  });
+});
+
 describe('grayScale / isDark', () => {
   it('white is grayscale 255, black is 0', () => {
     expect(grayScale({ r: 255, g: 255, b: 255, a: 255 })).toBe(255);

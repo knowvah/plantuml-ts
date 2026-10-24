@@ -40,7 +40,9 @@ function declareParticipant(
   rest: string,
   moveExisting = true,
 ): { id: string; existing: boolean } {
-  const { id, display, color, stereotype, url, order } = parseParticipantDeclaration(rest);
+  const { id, display, color, stereotype, url, order } = parseParticipantDeclaration(rest, () =>
+    state.style.params.getValue('topurl'),
+  );
   // `CommandParticipant.java:146-148`: an existing CODE only moves last.
   if (moveExisting && state.participantIndex.has(id)) {
     putParticipantInLast(state, id);
@@ -177,7 +179,7 @@ export function matchParticipantMultilineCommand(
   // catches this identical throw and tries the next registered command.
   let decl: ReturnType<typeof parseParticipantDeclaration>;
   try {
-    decl = parseParticipantDeclaration(open[1]!.trim());
+    decl = parseParticipantDeclaration(open[1]!.trim(), () => state.style.params.getValue('topurl'));
   } catch (err) {
     if (err instanceof SequenceCommandRefusal) return null;
     throw err;

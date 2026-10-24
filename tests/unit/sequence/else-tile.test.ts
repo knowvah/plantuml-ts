@@ -6,12 +6,14 @@
  * deterministic text) on the `ALT3` body below.
  */
 import { describe, expect, it } from 'vitest';
+import { assembleSvg } from '../../../src/core/assemble-svg.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { ElseGeo, FrameGeo, SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
 import { renderSequence } from '../../../src/diagrams/sequence/renderer.js';
 import { fmt } from '../../../src/core/svg-format.js';
 import { layoutBody } from './frame-paint-fixtures.js';
+import { tagsOf, type TagAttrs } from '../../helpers/svg-tags.js';
 
 const measurer = new DeterministicMeasurer();
 
@@ -34,6 +36,12 @@ function render(geo: SequenceGeometry): string {
 
 function elses(geo: SequenceGeometry): ElseGeo[] {
   return geo.events.filter((e): e is ElseGeo => e.kind === 'else');
+}
+
+/** The else rules of a drawing: the lines dashed `2,2` (a lifeline's is `5,5`),
+ *  `style` expanded. */
+function elseRules(svg: string): TagAttrs[] {
+  return tagsOf(svg, 'line').filter((t) => t['stroke-dasharray'] === '2,2');
 }
 
 /** Each drawn element's tag and the text it carries, in document order. */
@@ -68,9 +76,15 @@ describe('else tile order (GroupingTile.java:280-281, ElseTile#drawU)', () => {
     expect(first!.width).toBe(frame.width);
     expect(first!.y).toBe(frame.branchSeparators[0]!.y);
     const y = fmt(first!.y + 1);
-    expect(render(geo)).toContain(
-      `<line x1="${fmt(frame.x)}" y1="${y}" x2="${fmt(frame.x + frame.width)}" y2="${y}" stroke="#000" stroke-width="1" stroke-dasharray="2,2"/>`,
-    );
+    expect(elseRules(render(geo))).toContainEqual({
+      x1: fmt(frame.x),
+      y1: y,
+      x2: fmt(frame.x + frame.width),
+      y2: y,
+      stroke: '#000',
+      'stroke-width': '1',
+      'stroke-dasharray': '2,2',
+    });
   });
 
   it('scales an else tile at emission under `scale 2` (SvgGraphics.java:466-468,555-561)', () => {
@@ -78,16 +92,24 @@ describe('else tile order (GroupingTile.java:280-281, ElseTile#drawU)', () => {
     const [first] = elses(geo);
     const frame = geo.events.find((e): e is FrameGeo => e.kind === 'frame')!;
     const y = fmt(2 * (first!.y + 1));
-    expect(render(geo)).toContain(
-      `<line x1="${fmt(2 * frame.x)}" y1="${y}" x2="${fmt(2 * (frame.x + frame.width))}" y2="${y}" stroke="#000" stroke-width="2" stroke-dasharray="4,4"/>`,
-    );
+    // The scale is the exporter's (`core/TextBlockExporter.ts#exportTo`), so read the assembled document.
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, measurer));
+    expect(tagsOf(svg, 'line')).toContainEqual({
+      x1: fmt(2 * frame.x),
+      y1: y,
+      x2: fmt(2 * (frame.x + frame.width)),
+      y2: y,
+      stroke: '#000',
+      'stroke-width': '2',
+      'stroke-dasharray': '4,4',
+    });
     const condition = first!.runs[0]!;
-    expect(render(geo)).toContain(`y="${fmt(2 * condition.y)}"`);
+    expect(svg).toContain(`y="${fmt(2 * condition.y)}"`);
   });
 
   it('draws nothing for an else in the background pass', () => {
     const body = render(layoutBody(ALT3, measurer));
-    expect(body.match(/stroke-dasharray="2,2"/g)).toHaveLength(2);
+    expect(elseRules(body)).toHaveLength(2);
   });
 });
 
@@ -99,10 +121,16 @@ describe('else paint (ElseTile.java:92-101, ComponentRoseGroupingElse.java:64-72
     expect(y!.paint.stroke).toBe('#000000');
     expect(z!.paint.stroke).toBe('#FF0000');
     const body = render(geo);
-    const rule = (e: ElseGeo, stroke: string): string =>
-      `y1="${fmt(e.y + 1)}" x2="${fmt(e.x + e.width)}" y2="${fmt(e.y + 1)}" stroke="${stroke}" stroke-width="1" stroke-dasharray="2,2"/>`;
-    expect(body).toContain(rule(y!, '#000'));
-    expect(body).toContain(rule(z!, '#F00'));
+    const rule = (e: ElseGeo, stroke: string): TagAttrs => ({
+      x1: fmt(e.x),
+      y1: fmt(e.y + 1),
+      x2: fmt(e.x + e.width),
+      y2: fmt(e.y + 1),
+      stroke,
+      'stroke-width': '1',
+      'stroke-dasharray': '2,2',
+    });
+    expect(elseRules(body)).toEqual([rule(y!, '#000'), rule(z!, '#F00')]);
     // The frame itself keeps the opener's colour (GroupingStart's own builder).
     const frame = geo.events.find((e): e is FrameGeo => e.kind === 'frame')!;
     expect(frame.paint!.stroke).toBe('#000000');
@@ -112,7 +140,12 @@ describe('else paint (ElseTile.java:92-101, ComponentRoseGroupingElse.java:64-72
     const geo = layoutBody(`skinparam sequenceGroupBorderThickness 3\n${ALT3}`, measurer);
     const [y] = elses(geo);
     expect(y!.paint.thickness).toBe(3);
-    expect(render(geo)).toContain(`y2="${fmt(y!.y + 1)}" stroke="#000" stroke-width="1" stroke-dasharray="2,2"/>`);
+    expect(elseRules(render(geo))[0]).toMatchObject({
+      y2: fmt(y!.y + 1),
+      stroke: '#000',
+      'stroke-width': '1',
+      'stroke-dasharray': '2,2',
+    });
   });
 });
 

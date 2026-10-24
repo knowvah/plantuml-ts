@@ -59,7 +59,7 @@
  * fill passes it to {@link makeAtomImageResolverFor} (unwind2-S7).
  */
 import type { FontConfiguration } from './klimt/shape/UText.js';
-import type { AtomImageResolver, InlineAtomToken, SpriteDimsLookup } from './creole-atoms.js';
+import type { AtomImageResolver, InlineAtomToken, SpriteDimsLookup, StringBounderSupplier } from './creole-atoms.js';
 import { measureInlineAtom, spriteAtomScale } from './creole-atoms-measure.js';
 import type { SpriteRegistry } from './sprite-commands.js';
 import { getSpriteMonochrome, getSpriteSvg, getSpriteColor4096, spriteDimsLookupFor } from './sprite-commands.js';
@@ -68,7 +68,7 @@ import type { SpriteImage } from './klimt/sprite/SpriteImage.js';
 import { HColorSimple } from './klimt/color/HColorSimple.js';
 import { spriteMonochromeAsLike, spriteColor4096ToPngDataUri } from './klimt/sprite/sprite-raster.js';
 import { spriteTintHref, type SpriteTint } from './klimt/sprite/sprite-tint.js';
-import { SvgNanoParser } from './klimt/sprite/SvgNanoParser.js';
+import { SvgParserSelector, createSvgSpriteParser } from './klimt/sprite/sax/svg-sprite-parser-factory.js';
 import type { DrawablePrimitive } from './creole-atoms.js';
 import type { UGraphic } from './klimt/UGraphic.js';
 import type { UChange } from './klimt/UChange.js';
@@ -179,6 +179,7 @@ export class SpritePrimitiveCollector implements UGraphic {
     private readonly back: Paint,
     private readonly stroke: UStroke,
     private readonly primitives: DrawablePrimitive[],
+    private readonly stringBounder: StringBounderSupplier | undefined,
   ) {}
 
   /**
@@ -196,13 +197,16 @@ export class SpritePrimitiveCollector implements UGraphic {
    * every existing caller (none yet passes an ambient stroke) is
    * byte-identical.
    */
-  static create(ambientStroke: UStroke = UStroke.simple()): SpritePrimitiveCollector {
+  static create(
+    ambientStroke: UStroke = UStroke.simple(),
+    stringBounder?: StringBounderSupplier,
+  ): SpritePrimitiveCollector {
     // Fore/back defaults ARE inert: `SvgNanoParser.drawU`'s FIRST act is
     // always `updateColor` (`ug.apply(new Fore(...)).apply(new Back(...))`,
     // `UGraphicWithScale.create`), so every real `draw()` call sees an
     // explicitly-applied fore/back, never these fallbacks -- matching
     // `UGraphicNo.getParam()`'s identical all-black default.
-    return new SpritePrimitiveCollector(UTranslate.none(), 'black', 'black', ambientStroke, []);
+    return new SpritePrimitiveCollector(UTranslate.none(), 'black', 'black', ambientStroke, [], stringBounder);
   }
 
   apply(change: UChange): UGraphic {
@@ -218,7 +222,7 @@ export class SpritePrimitiveCollector implements UGraphic {
     const fore = change instanceof Fore ? toSvgPaint(change.getColor(), ColorMapper.IDENTITY) : this.fore;
     const back = change instanceof Back ? toSvgPaint(change.getBackColor(), ColorMapper.IDENTITY) : this.back;
     const stroke = change instanceof UStroke ? change : this.stroke;
-    return new SpritePrimitiveCollector(translate, fore, back, stroke, this.primitives);
+    return new SpritePrimitiveCollector(translate, fore, back, stroke, this.primitives, this.stringBounder);
   }
 
   draw(shape: UShape): void {
@@ -239,10 +243,13 @@ export class SpritePrimitiveCollector implements UGraphic {
   }
 
   getStringBounder(): StringBounder {
-    // SvgNanoParser.drawU never calls getStringBounder() on its `ug` --
-    // matches AbstractCommonUGraphic.ts's identical "not supported by this
-    // backend" convention for a seam this collector never exercises.
-    throw new Error('SpritePrimitiveCollector.getStringBounder: not supported');
+    // `SvgSaxParser#handleText` reads `ug.getStringBounder()` for a
+    // `text-anchor` (`SvgSaxParser.java:666-675`): the caller's bounder is
+    // answered here. `SvgNanoParser.drawU` never asks, so a collector built
+    // without one keeps AbstractCommonUGraphic.ts's "not supported by this
+    // backend" convention.
+    if (this.stringBounder === undefined) throw new Error('SpritePrimitiveCollector.getStringBounder: not supported');
+    return this.stringBounder();
   }
 
   collected(): readonly DrawablePrimitive[] {
@@ -285,6 +292,12 @@ function resolveImgAtom(atom: Extract<InlineAtomToken, { kind: 'img' }>): Resolv
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/sprite/AtomSprite.java#calculateDimensionSlow
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svg/parser/SvgNanoParser.java#drawU
  *
+ * `parser` is the sprite's definition-time selector (`SpriteSvg.parser`):
+ * `sax` draws through `SvgSaxParser` instead (`SvgSpriteParserFactory.java
+ * :99-105`). Callers that hold only `SpriteDims.svg` pass nothing and stay
+ * nano. `stringBounder` is the caller's, answered by the collector's
+ * `getStringBounder` for `SvgSaxParser`'s `text-anchor` (:666-675).
+ *
  * Exported (T10, ADR-3): `leaf-sizing.ts#sizingAtomImageResolverFor` calls
  * this SAME function at SIZING time (via `SpriteDims.svg`, T10) so `Footprint`
  * observes the sprite's REAL drawn geometry instead of an approximation --
@@ -299,6 +312,8 @@ export function resolveSvgSpriteAtom(
   spriteDims: SpriteDimsLookup,
   font: FontConfiguration,
   ambientStroke?: UStroke,
+  parser: SvgParserSelector = SvgParserSelector.NANO,
+  stringBounder?: StringBounderSupplier,
 ): ResolvedDrawableAtom {
   const dims = measureInlineAtom(atom, spriteDims, font.size);
   // G10: `spriteAtomScale`, not `spriteScale` — a sprite inside a `[[url
@@ -307,8 +322,8 @@ export function resolveSvgSpriteAtom(
   // above) and this decomposition must read the SAME number or the sprite
   // draws at a different size than it measures.
   const scale = spriteAtomScale(atom, font.size);
-  const collector = SpritePrimitiveCollector.create(ambientStroke);
-  new SvgNanoParser(svg).drawU(
+  const collector = SpritePrimitiveCollector.create(ambientStroke, stringBounder);
+  createSvgSpriteParser(svg, parser).drawU(
     collector,
     scale,
     resolveOptionalColor(font.color),
@@ -394,9 +409,11 @@ function resolveSpriteAtom(
   spriteDims: SpriteDimsLookup,
   font: FontConfiguration,
   ambientStroke?: UStroke,
+  stringBounder?: StringBounderSupplier,
 ): ResolvedAtomImage {
   const svgSprite = getSpriteSvg(registry, atom.name);
-  if (svgSprite !== undefined) return resolveSvgSpriteAtom(atom, svgSprite.svg, spriteDims, font, ambientStroke);
+  if (svgSprite !== undefined)
+    return resolveSvgSpriteAtom(atom, svgSprite.svg, spriteDims, font, ambientStroke, svgSprite.parser, stringBounder);
   const imageSprite = getSpriteImage(registry, atom.name);
   if (imageSprite !== undefined) return resolveImageSpriteAtom(atom, imageSprite, spriteDims, font);
   const sprite = getSpriteMonochrome(registry, atom.name);
@@ -464,7 +481,7 @@ export function makeAtomImageResolverFor(
 ): (font: FontConfiguration) => AtomImageResolver {
   const spriteDims = registry !== undefined ? spriteDimsLookupFor(registry) : undefined;
   return (font: FontConfiguration): AtomImageResolver => {
-    return (atom: InlineAtomToken): ResolvedAtomImage => {
+    return (atom: InlineAtomToken, stringBounder?: StringBounderSupplier): ResolvedAtomImage => {
       if (atom.kind === 'img') return resolveImgAtom(atom);
       // G2 N41: OpenIconic glyphs have zero description/usecase corpus
       // reach (class-only per the G2 N40 survey) -- undefined here matches
@@ -472,7 +489,7 @@ export function makeAtomImageResolverFor(
       // than guessing an unverified description-side render path.
       if (atom.kind === 'openiconic') return undefined;
       if (registry === undefined || spriteDims === undefined) return undefined;
-      return overBack(resolveSpriteAtom(atom, registry, spriteDims, font, ambientStroke), backColor);
+      return overBack(resolveSpriteAtom(atom, registry, spriteDims, font, ambientStroke, stringBounder), backColor);
     };
   };
 }

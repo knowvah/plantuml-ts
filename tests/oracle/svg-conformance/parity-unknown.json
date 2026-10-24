@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-22T14:17:29.637Z",
+  "generatedAt": "2026-10-23T14:42:38.323Z",
   "fixtures": [
     {
       "slug": "activity-legacy1-example-0",
@@ -65,10 +65,7 @@
       "type": "unknown",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 318.86199999999985,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@font-size",
-      "maxDeltaPath": "svg/g[1]/text[8]/@y"
+      "verdict": "conformant"
     },
     {
       "slug": "baleco-37-lili752",
@@ -3747,9 +3744,7 @@
       "type": "unknown",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "structural-match",
-      "maxDelta": 188.30100000000002,
-      "maxDeltaPath": "svg/g[1]/rect[2]/@x"
+      "verdict": "conformant"
     },
     {
       "slug": "pacako-16-vudu147",
@@ -5276,10 +5271,7 @@
       "type": "unknown",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 318.86199999999985,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@font-size",
-      "maxDeltaPath": "svg/g[1]/text[8]/@y"
+      "verdict": "conformant"
     },
     {
       "slug": "tuteda-60-toca657",

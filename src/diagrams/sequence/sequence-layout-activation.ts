@@ -59,7 +59,7 @@ interface PendingOwn {
   readonly events: readonly LiveLifeEvent[];
   /** Flat index of the last of them. */
   readonly last: number;
-  /** The message tile's max: their tiles' top when no note widens it. */
+  /** The message chain's max: their tiles' top (the note wrapper's, when one widens it). */
   readonly tileMax: number;
   readonly geoIndex: number;
 }
@@ -231,6 +231,20 @@ export function recordMessageStep(ctx: StepContext, event: MessageEvent, arrow: 
   const last = own[own.length - 1];
   if (last !== undefined)
     walk.pendingOwn = { events: own, last: walk.flatIndex.get(last)!, tileMax, geoIndex: ctx.eventGeos.length };
+}
+
+/**
+ * A message's note wrappers (`CommunicationTileNoteRight.java:96-99`: gauge
+ * `min .. min.addAtLeast(max(tile, note))`) lower its own life events' tiles
+ * to the wrapped chain's max: the pending own steps wait for that y, not the
+ * bare tile's, once {@link layoutNotesOnMessage} has returned it.
+ */
+export function setOwnTileMax(ctx: StepContext, event: MessageEvent, wrappedMax: number): void {
+  const walk = ctx.activationStart.live;
+  const pending = walk.pendingOwn;
+  const last = walk.list.ownOf.get(event)?.at(-1);
+  if (pending === undefined || last === undefined || walk.flatIndex.get(last) !== pending.last) return;
+  walk.pendingOwn = { ...pending, tileMax: wrappedMax };
 }
 
 function selfStepY(message: LiveMessage, arrow: ArrowEnds): number | undefined {

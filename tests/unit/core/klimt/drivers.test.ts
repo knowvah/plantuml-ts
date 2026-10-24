@@ -2,12 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { UGraphicSvg } from '../../../../src/core/klimt/drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from '../../../../src/core/klimt/drawing/svg/svg-graphics.js';
 import type { StringBounder } from '../../../../src/core/klimt/drawing/svg/driver-text-svg.js';
-import {
-  DriverImagePng,
-  DriverImageSvgSvg,
-  DriverTextAsPathSvg,
-  DriverCenteredCharacterSvg,
-} from '../../../../src/core/klimt/drawing/svg/driver-svg-stubs.js';
+import { DriverImagePng, DriverTextAsPathSvg } from '../../../../src/core/klimt/drawing/svg/driver-svg-stubs.js';
 import { URectangle } from '../../../../src/core/klimt/shape/URectangle.js';
 import { UEllipse } from '../../../../src/core/klimt/shape/UEllipse.js';
 import { ULine } from '../../../../src/core/klimt/shape/ULine.js';
@@ -529,9 +524,7 @@ describe('Deferred D3-prime driver stubs (AC4)', () => {
 
   it.each([
     ['DriverImagePng', new DriverImagePng()],
-    ['DriverImageSvgSvg', new DriverImageSvgSvg()],
     ['DriverTextAsPathSvg', new DriverTextAsPathSvg()],
-    ['DriverCenteredCharacterSvg', new DriverCenteredCharacterSvg()],
   ] as const)('%s.draw() throws, naming D3-prime', (_name, driver) => {
     expect(() => driver.draw(dummyShape, dummyParam)).toThrow(/D3-prime/);
   });

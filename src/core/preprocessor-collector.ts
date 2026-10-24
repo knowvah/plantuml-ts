@@ -5,7 +5,7 @@
  * file's header for why it is not a TIM concept.
  */
 
-import type { SkinDirective, SkinparamAssignment } from './preprocessor.js';
+import type { SkinDirective, SkinparamAssignment, SkinparamForm } from './preprocessor.js';
 import { EmbeddedDiagram, getEmbeddedType } from './EmbeddedDiagram.js';
 import type { StringLocated } from './tim/StringLocated.js';
 import { getInputStreamForStyle } from './style/StyleLoader.js';
@@ -308,7 +308,7 @@ export class StyleAndSkinparamCollector {
     const entry = RE_SKINPARAM_BLOCK_ENTRY.exec(trimmed);
     if (entry !== null) {
       const key = this.skinparamStack.join('') + entry[1]!.trim();
-      this.setSkinparam(cleanSkinKey(key), entry[2]!.trim(), this.skinparamBlockPosition);
+      this.setSkinparam(cleanSkinKey(key), entry[2]!.trim(), this.skinparamBlockPosition, 'block');
     }
     return true;
   }
@@ -339,16 +339,16 @@ export class StyleAndSkinparamCollector {
     }
     const single = RE_SKINPARAM_LINE.exec(trimmed);
     if (single !== null) {
-      this.setSkinparam(cleanSkinKey(single[1]!.trim()), single[2]!.trim(), position);
+      this.setSkinparam(cleanSkinKey(single[1]!.trim()), single[2]!.trim(), position, 'line');
       return true;
     }
     return false;
   }
 
-  private setSkinparam(key: string, value: string, position: number | undefined): void {
+  private setSkinparam(key: string, value: string, position: number | undefined, form: SkinparamForm): void {
     this.skinparam.set(key, value);
     const order = this.sequence++;
     this.skinparamOrder.set(key, order);
-    this.skinparamAssignments.push({ key, value, position, order });
+    this.skinparamAssignments.push({ key, value, position, order, form });
   }
 }

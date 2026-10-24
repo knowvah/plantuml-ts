@@ -32,6 +32,7 @@ import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
+import { attrsOf } from '../../helpers/svg-tags.js';
 
 const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/sequence');
 
@@ -221,12 +222,18 @@ describe('participant labels through creole', () => {
 
   it('emits a markup-free name byte-for-byte as it did before the seam', () => {
     // Measurement identity: no markup -> one atom -> `measure(line)`, the same
-    // raw call this row used to make. Pinned as the whole element, so a stray
-    // style attribute or a moved coordinate both fail here.
+    // raw call this row used to make. Pinned as the whole element's attributes
+    // (read style-insensitively: `DriverTextSvg` writes each as an attribute),
+    // so a stray attribute or a moved coordinate both fail here.
     // The baseline is the jar's 27.889 since C3 landed the top margin; the
     // jar's own golden carries `<text x="17" y="27.889" ... >Bob</text>`.
-    expect(render('jobadi-87-jegi648')).toContain(
-      '<text x="17" y="27.889" font-size="14" fill="#000" textLength="24.938">Bob</text>',
-    );
+    const bob = /<text\b[^>]*>Bob<\/text>/.exec(render('jobadi-87-jegi648'));
+    expect(attrsOf(bob![0])).toEqual({
+      x: '17',
+      y: '27.889',
+      'font-size': '14',
+      fill: '#000',
+      textLength: '24.938',
+    });
   });
 });

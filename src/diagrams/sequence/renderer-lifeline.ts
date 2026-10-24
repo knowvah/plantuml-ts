@@ -1,6 +1,6 @@
 /**
- * The two "line" components a sequence participant owns: its lifeline and
- * its activation (livebox) bars.
+ * The lifeline component a sequence participant owns, and the lifeline pass
+ * that draws it together with the livebox bars (`renderer-livebox.ts`).
  *
  * Upstream keeps these as their own component classes rather than as inline
  * drawing code, and this module mirrors that split so each one's guard
@@ -15,16 +15,22 @@
  * @see net/sourceforge/plantuml/skin/rose/ComponentRoseActiveLine.java
  */
 
-import type { ParticipantGeo, ActivationGeo, DestroyCross, DestroyGeo, LifelineSegment } from './ast.js';
+import type { ParticipantGeo, LifelineSegment, SequenceGeometry } from './ast.js';
 import { lifelineTitle } from './sequence-layout-lifeline.js';
-import { noGradient } from '../../core/paint.js';
-import { fmt } from '../../core/svg-format.js';
-import { rect, line, escapeXmlText, type LineStyle } from '../../core/svg.js';
-import type { ScaledTheme } from './scale-geo.js';
-import { activationShadowFilter } from './sequence-shadow.js';
-import type { SequencePaint } from './sequence-skin-param.js';
-import { ACTIVATION_HALF_WIDTH } from './sequence-layout-activation.js';
-import { DESTROY_CROSS_SIZE } from './sequence-layout-life-event.js';
+import { closeGroup, startGroup } from './renderer-ug.js';
+import { drawEmptyGroup, lineColor, strokeOf, titledGroup } from './renderer-line-component.js';
+import { drawLiveboxes, type LiveboxItem } from './renderer-livebox.js';
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
+import { Fore } from '../../core/klimt/Fore.js';
+import { Back } from '../../core/klimt/Back.js';
+import { ULine } from '../../core/klimt/shape/ULine.js';
+import { URectangle } from '../../core/klimt/shape/URectangle.js';
+import { HColors } from '../../core/klimt/color/HColors.js';
+import { TransparentFillBehavior } from '../../core/klimt/drawing/svg/svg-option.js';
+
+export type { LiveboxItem };
 
 /** `ComponentRoseLine#drawTitleHoverTargetRect`'s `hoverTargetWidth`
  *  (`ComponentRoseLine.java:101`). */
@@ -34,37 +40,6 @@ const HOVER_TARGET_WIDTH = 8;
  *  area is one pixel wide, and that width is what both offsets below are
  *  computed from -- it is not an arbitrary unit. */
 const LINE_COMPONENT_WIDTH = 1;
-
-/**
- * `<g><title>...</title>` open tag. Upstream builds this in
- * `PortableSvgDocument#applyGroupAttribute` (`:44-52`), which for
- * `UGroupType.TITLE` creates a `title` element and appends it as the group's
- * FIRST child -- so the title always precedes the drawn content.
- *
- * The title carries an explicit closing tag even when empty
- * (`<title></title>`), matching the jar's serialiser; a self-closed
- * `<title/>` is a different byte sequence.
- */
-function openTitledGroup(title: string): string {
-  return `<g><title>${escapeXmlText(title)}</title>`;
-}
-
-/**
- * The stroke a line component applies: `ug.apply(color)` and
- * `ug.apply(stroke)` (`ComponentRoseLine.java:77-78`,
- * `ComponentRoseDelayLine.java:62`) -- `LineColor`, and `getStroke()`'s
- * thickness and dash, all multiplied by the scale at emission
- * (`SvgGraphics.java:556-561`). A `<line>` cannot carry a gradient: the
- * driver strokes its first colour (`DriverLineSvg.java:76-82`).
- */
-function lineStroke(paint: SequencePaint, k: number): LineStyle {
-  const dash = paint.dash;
-  return {
-    stroke: noGradient(paint.stroke),
-    strokeWidth: paint.thickness * k,
-    ...(dash === undefined ? {} : { strokeDasharray: `${fmt(dash[0]! * k)},${fmt(dash[1]! * k)}` }),
-  };
-}
 
 /**
  * Upstream: `ComponentRoseLine#drawInternalU` (`:74-88`).
@@ -97,7 +72,7 @@ function lineStroke(paint: SequencePaint, k: number): LineStyle {
  * 141-143`), which the jar emits as `stroke:#181818;stroke-width:0.5;
  * stroke-dasharray:5,5;`.
  */
-export function renderLifeline(p: ParticipantGeo, seg: LifelineSegment, theme: ScaledTheme): string {
+export function drawLifeline(ug: UGraphic, p: ParticipantGeo, seg: LifelineSegment): void {
   // `seg.y1` is the head ROW's bottom, not this participant's box bottom.
   // Upstream draws every lifeline from body-coordinate 0 and translates the
   // whole body by `getHeadHeight()` (`PlayingSpaceWithParticipants#drawU:213`),
@@ -107,41 +82,60 @@ export function renderLifeline(p: ParticipantGeo, seg: LifelineSegment, theme: S
   // `jobadi-87-jegi648`'s box ends at 38 and its lifeline begins at 39.
   const height = seg.y2 - seg.y1;
 
+  // `LivingSpaces#drawLifeLines` (`LivingSpaces.java:165-166`) places the piece at the participant centre
+  // and `MutingLine#drawInternal` (`:111`) at `UTranslate.dy(y1)`.
+  const piece = ug.apply(new UTranslate(p.centerX, seg.y1));
+  // `ug = ug.apply(color); ug = ug.apply(stroke)` (`:77-78`).
+  const styled = piece.apply(lineColor(seg.paint)).apply(strokeOf(seg.paint));
+
   // `drawTitleHoverTargetRect` (`:99-108`) guards its whole body on
   // `dimensionToUse.getHeight() > 0`. The group and its title are already
   // open by then, so a zero-height lifeline still emits `<g><title>` --
-  // only the rect is skipped. (Contrast `renderActivation`, whose guard
+  // only the rect is skipped. (Contrast `drawActivation`, whose guard
   // sits ABOVE its own `startGroup`.)
-  //
-  // Both literals are unscaled pixel constants -- `centerX`, `y1` and `height`
-  // arrive already multiplied -- so they take `scaleK` here, where upstream's
-  // `SvgGraphics#format` (`:466-473`) multiplies the emitted x and width.
-  const k = theme.scaleK;
-  const hover =
-    height > 0
-      ? rect(
-          p.centerX + ((LINE_COMPONENT_WIDTH - HOVER_TARGET_WIDTH) / 2) * k,
-          seg.y1,
-          HOVER_TARGET_WIDTH * k,
-          height,
-          {
-            fill: '#000',
-            fillOpacity: 0,
-          },
-        )
-      : '';
+  startGroup(styled, titledGroup(seg.title ?? lifelineTitle(p)));
+  if (height > 0) drawHoverTarget(styled, height);
+  // `final int x = (int) (dimensionToUse.getWidth() / 2)` (`:82`), then
+  // `ug.apply(UTranslate.dx(x)).draw(ULine.vline(height))` (`:83`).
+  const x = Math.trunc(LINE_COMPONENT_WIDTH / 2);
+  styled.apply(UTranslate.dx(x)).draw(ULine.vline(height));
+  closeGroup(styled);
+}
 
-  const vline = line(p.centerX, seg.y1, p.centerX, seg.y2, lineStroke(seg.paint, theme.scaleK));
-
-  return `${openTitledGroup(seg.title ?? lifelineTitle(p))}${hover}${vline}</g>`;
+/**
+ * `ComponentRoseLine#drawTitleHoverTargetRect` (`:99-108`), the body of the
+ * `height > 0` guard:
+ *
+ * ```java
+ * ug = ug.apply(UStroke.withThickness(0));
+ * ug = ug.apply(HColors.transparent());
+ * ug = ug.apply(HColors.transparent(WITH_FILL_OPACITY).bg());
+ * ug = ug.apply(UTranslate.dx((dimensionToUse.getWidth() - hoverTargetWidth) / 2));
+ * ug.draw(URectangle.build(hoverTargetWidth, dimensionToUse.getHeight()));
+ * ```
+ *
+ */
+function drawHoverTarget(ug: UGraphic, height: number): void {
+  ug.apply(UStroke.withThickness(0))
+    .apply(new Fore(HColors.transparent()))
+    .apply(new Back(HColors.transparent(TransparentFillBehavior.WITH_FILL_OPACITY)))
+    .apply(UTranslate.dx((LINE_COMPONENT_WIDTH - HOVER_TARGET_WIDTH) / 2))
+    .draw(URectangle.build(HOVER_TARGET_WIDTH, height));
 }
 
 /** `ComponentRoseDelayLine#drawInternalU` (`:59-65`): one vertical line at
  *  `(int) (width / 2)` = 0 of a 1-wide component, so on the lifeline itself,
  *  in the piece's merged `lifeLine { delay }` style (by default `delay {
  *  LineStyle 1-4 }`, `plantuml.skin:300-305`). It opens no `<g>`. */
-function renderDelayLine(p: ParticipantGeo, seg: LifelineSegment, theme: ScaledTheme): string {
-  return line(p.centerX, seg.y1, p.centerX, seg.y2, lineStroke(seg.paint, theme.scaleK));
+function drawDelayLine(ug: UGraphic, p: ParticipantGeo, seg: LifelineSegment): void {
+  // `ug = ug.apply(getStroke()).apply(color)` (`:62`), then
+  // `ug.apply(UAntiAliasing.ANTI_ALIASING_OFF).apply(UTranslate.dx(x)).draw(
+  // ULine.vline(h))` (`:64`). `UAntiAliasing` is not ported (`LimitFinder.ts`)
+  // and no driver reads it, so that apply is omitted; the chain still ends on
+  // an apply.
+  const styled = ug.apply(new UTranslate(p.centerX, seg.y1)).apply(strokeOf(seg.paint)).apply(lineColor(seg.paint));
+  const x = Math.trunc(LINE_COMPONENT_WIDTH / 2);
+  styled.apply(UTranslate.dx(x)).draw(ULine.vline(seg.y2 - seg.y1));
 }
 
 /**
@@ -164,176 +158,12 @@ export function lifelineOf(
  * titled group (`ComponentRoseLine` starts it before the driver drops the
  * shapes), so it is emitted empty.
  */
-export function renderLifelineSegments(
-  p: ParticipantGeo,
-  segments: readonly LifelineSegment[],
-  theme: ScaledTheme,
-): string {
-  return segments
-    .map((seg) => {
-      if (seg.delay) return renderDelayLine(p, seg, theme);
-      if (seg.clippedOut === true) return `${openTitledGroup(seg.title ?? lifelineTitle(p))}</g>`;
-      return renderLifeline(p, seg, theme);
-    })
-    .join('');
-}
-
-/**
- * Upstream: `ComponentRoseActiveLine#drawInternalU` (`:71-105`).
- *
- * ```java
- * if (dimensionToUse.getHeight() == 0)
- *     return;
- * ug.startGroup(UGroup.singletonMap(UGroupType.TITLE, stringsToDisplay.toTooltipText()));
- * ```
- *
- * The early return sits ABOVE `startGroup`, so a zero-height activation emits
- * nothing whatsoever -- not an empty group. That is the one behavioural
- * difference from `renderLifeline`, whose own guard sits INSIDE its already-
- * opened group. Two components, two guard positions; upstream's distinction,
- * kept rather than unified.
- *
- * The title is empty because the `Display` handed to this component is empty,
- * and the jar emits `<title></title>` rather than omitting the element.
- *
- * Paint is the bar's merged `activationBox` style (`sequence-layout-
- * activation.ts`), read as `getSymbolContext()` (`:63`): the fill is its
- * back colour, the stroke its fore colour (`:85-90`). The component applies
- * no `UStroke`, so the outline keeps the driver's unit stroke whatever the
- * style's `LineThickness` (jar-probed: `activationBox { LineThickness 3 }`
- * still draws `stroke-width:1`); `isShadowing()` only gates a fixed
- * `setDeltaShadow(1)` (`:82-83`), and no corner is read.
- */
-export function renderActivation(act: ActivationGeo, theme: ScaledTheme): string {
-  // The early return, now mirrored. It was deliberately withheld while this
-  // port's LAYOUT still produced zero-height bars the jar gives height to --
-  // 32 of the 121 activation-bearing fixtures at the time -- because
-  // suppressing those would have deleted boxes the golden carries. That
-  // input defect is fixed (the activation STACK and its `Math.max(0, level
-  // - 1)` clamp, `sequence-layout-events.ts`), and the census now reports
-  // ZERO zero-height bars across all 157 activation-bearing fixtures, so the
-  // guard is faithful and no longer costly. It is dead on today's corpus by
-  // construction; it is here because upstream has it, and because a
-  // hand-authored `activate X` / `deactivate X` pair at one y can still
-  // reach it.
-  if (act.height === 0) return '';
-  if (act.clippedOut === true) return `${openTitledGroup('')}</g>`;
-  const paint = activationPaintOf(act);
-  const half = ACTIVATION_HALF_WIDTH * theme.scaleK;
-  // `LiveBoxes#drawOneLevel` draws every bar from the same origin and moves
-  // the whole level right by `(levelToDraw - 1) * drawer.getWidth() / 2`
-  // (`:365-368`) -- HALF the box's own width per level, not a standalone
-  // constant, which is why this reuses `half` rather than
-  // `CommunicationTile.LIVE_DELTA_SIZE` (they coincide at 5 only because the
-  // box is 10 wide). Level 1 is centred on the lifeline; each nested level
-  // steps right by half a box, so the stack reads as a staircase.
-  //
-  // Jar-verified on `kejoke-76-curu931`, four levels deep on one lifeline at
-  // cx=57.075: its golden runs x=52.075, 57.075, 62.075, 67.075.
-  const x = act.lifelineX - half + (act.level - 1) * half;
-  if (act.open !== undefined) return `${openTitledGroup('')}${renderOpenBar(act, x, paint, theme)}</g>`;
-  const bar = rect(x, act.y, half * 2, act.height, {
-    fill: paint.fill,
-    stroke: paint.stroke,
-    strokeWidth: ACTIVATION_STROKE_THICKNESS * theme.scaleK,
-    ...activationShadowFilter(paint),
-  });
-
-  return `${openTitledGroup('')}${bar}</g>`;
-}
-
-/** The driver's unit stroke the bar keeps (`UStroke.simple()`): see
- *  {@link renderActivation}. */
-const ACTIVATION_STROKE_THICKNESS = 1;
-
-/** The paint layout resolved for this bar (`sequence-layout-activation.ts`). */
-function activationPaintOf(act: ActivationGeo): SequencePaint {
-  if (act.paint === undefined) throw new Error(`activation of ${act.participantId} carries no paint`);
-  return act.paint;
-}
-
-/**
- * The `closeUp && closeDown` false branch of `ComponentRoseActiveLine
- * #drawInternalU` (`:88-101`): the rect is filled AND stroked with the back
- * colour, then the two sides are drawn, then whichever ends are closed.
- */
-function renderOpenBar(act: ActivationGeo, x: number, paint: SequencePaint, theme: ScaledTheme): string {
-  const width = ACTIVATION_HALF_WIDTH * theme.scaleK * 2;
-  const style = { stroke: noGradient(paint.stroke), strokeWidth: ACTIVATION_STROKE_THICKNESS * theme.scaleK };
-  const bottom = act.y + act.height;
-  const box = rect(x, act.y, width, act.height, {
-    fill: paint.fill,
-    stroke: paint.fill,
-    strokeWidth: style.strokeWidth,
-    ...activationShadowFilter(paint),
-  });
-  const sides = line(x, act.y, x, bottom, style) + line(x + width, act.y, x + width, bottom, style);
-  const up = act.open!.closeUp ? line(x, act.y, x + width, act.y, style) : '';
-  const down = act.open!.closeDown ? line(x, bottom, x + width, bottom, style) : '';
-  return box + sides + up + down;
-}
-
-/**
- * `ComponentRoseDestroy#drawInternalU` (`:60-65`): two `2 * crossSize`
- * diagonals from the cross's top-left, down-right then up-right, in
- * `LineColor` at the style's stroke -- by default `destroy { LineColor
- * #A80036; LineStyle 0; LineThickness 2 }` (`plantuml.skin:149-153`), which
- * the jar emits as `stroke:#A80036;stroke-width:2;`.
- */
-function renderCross(cross: DestroyCross, paint: SequencePaint, theme: ScaledTheme): string {
-  const k = theme.scaleK;
-  const size = 2 * DESTROY_CROSS_SIZE * k;
-  const style = lineStroke(paint, k);
-  return (
-    line(cross.x, cross.y, cross.x + size, cross.y + size, style) +
-    line(cross.x, cross.y + size, cross.x + size, cross.y, style)
-  );
-}
-
-/** The crosses one drawer owns: `tile` in the foreground pass
- *  (`LifeEventTile#drawU`), `liveboxes` in the lifeline pass. */
-export function renderDestroyCrosses(
-  destroy: DestroyGeo,
-  drawnBy: DestroyCross['drawnBy'],
-  theme: ScaledTheme,
-): string {
-  return destroy.crosses
-    .filter((c) => c.drawnBy === drawnBy)
-    .map((c) => renderCross(c, destroy.paint, theme))
-    .join('');
-}
-
-/** What the lifeline pass draws besides the line: the bars, and the crosses
- *  `LiveBoxes` owns. */
-export type LiveboxItem = ActivationGeo | DestroyGeo;
-
-/** The level a livebox item is drawn in: a bar's own, a cross's pass. */
-function passLevel(item: LiveboxItem, cross?: DestroyCross): number {
-  return item.kind === 'activation' ? item.level : (cross?.level ?? 0);
-}
-
-/**
- * `LiveBoxes#drawBoxes` (`teoz/LiveBoxes.java:374-388`) for one participant:
- * `drawOneLevel(1)` to `drawOneLevel(max)` -- each level's bars in step
- * order, each followed by the cross its closing step draws (`:409-417`) --
- * then the indent-0 crosses (`drawDestroys`, `:390-396`). Jar-probed:
- * `A -> B ++`, `A -> B ++`, `B -> A`, `destroy B` draws the level-1 bar,
- * the level-2 bar, then the cross.
- */
-function renderLiveboxes(items: readonly LiveboxItem[], theme: ScaledTheme): string {
-  const parts = items.flatMap((item) =>
-    item.kind === 'activation'
-      ? [{ level: passLevel(item), svg: renderActivation(item, theme) }]
-      : item.crosses
-          .filter((c) => c.drawnBy === 'liveboxes')
-          .map((c) => ({ level: passLevel(item, c), svg: renderCross(c, item.paint, theme) })),
-  );
-  const order = (level: number): number => (level === 0 ? Number.POSITIVE_INFINITY : level);
-  // A stable sort: within one level, step order is kept.
-  return parts
-    .sort((a, b) => order(a.level) - order(b.level))
-    .map((p) => p.svg)
-    .join('');
+export function drawLifelineSegments(ug: UGraphic, p: ParticipantGeo, segments: readonly LifelineSegment[]): void {
+  for (const seg of segments) {
+    if (seg.delay) drawDelayLine(ug, p, seg);
+    else if (seg.clippedOut === true) drawEmptyGroup(ug, seg.title ?? lifelineTitle(p));
+    else drawLifeline(ug, p, seg);
+  }
 }
 
 /**
@@ -358,16 +188,30 @@ function renderLiveboxes(items: readonly LiveboxItem[], theme: ScaledTheme): str
  * tiles (`teoz/PlayingSpaceWithParticipants.java:218-227`), which is why
  * activations do not belong in the renderer's event loop.
  */
-export function renderLifelinePass(
+export function drawLifelinePass(
+  ug: UGraphic,
   participants: readonly ParticipantGeo[],
   liveboxes: readonly LiveboxItem[],
   segmentsOf: (p: ParticipantGeo) => readonly LifelineSegment[],
-  theme: ScaledTheme,
-): string {
-  return participants
-    .map((p) => {
-      const own = liveboxes.filter((a) => a.participantId === p.id);
-      return renderLifelineSegments(p, segmentsOf(p), theme) + renderLiveboxes(own, theme);
-    })
-    .join('');
+): void {
+  for (const p of participants) {
+    drawLifelineSegments(ug, p, segmentsOf(p));
+    drawLiveboxes(
+      ug,
+      liveboxes.filter((a) => a.participantId === p.id),
+    );
+  }
+}
+
+/**
+ * The lifeline pass over a scaled page geometry: the livebox items are the
+ * activation and destroy events, and each participant's pieces come from
+ * layout's `lifelineSegments`.
+ */
+export function drawLifelinesOf(
+  ug: UGraphic,
+  geo: Pick<SequenceGeometry, 'participants' | 'events' | 'lifelineSegments'>,
+): void {
+  const liveboxes = geo.events.filter((e): e is LiveboxItem => e.kind === 'activation' || e.kind === 'destroy');
+  drawLifelinePass(ug, geo.participants, liveboxes, (p) => lifelineOf(geo.lifelineSegments, p));
 }

@@ -1,0 +1,7 @@
+@startuml
+footer this is a note
+Title toto
+Bob -> Alice : ok
+footer test
+scale 100 height
+@enduml

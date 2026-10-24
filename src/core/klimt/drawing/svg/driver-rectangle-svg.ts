@@ -20,23 +20,23 @@
  * NOT through `paint.ts#paintToSvg`'s content-hash id scheme — the two
  * id schemes are deliberately kept separate; only `SvgGraphics`'s is
  * used at this driver seam, matching upstream's `svg.createSvgGradient
- * (...)` call exactly. Our `Paint`'s `Gradient` variant models exactly
- * one gradient shape (2-stop, `color1`/`color2`/`policy`), corresponding
- * to upstream's `HColorGradient` only — there is no port-side equivalent
- * of `HColorLinearGradient` (multi-stop), so that upstream branch (which
- * calls the `createSvgGradient(HColorLinearGradient, ColorMapper)`
- * overload — itself NOT ported, see `svg-graphics-core.ts`'s doc
- * comment) has nothing to dispatch to here and is dropped.
+ * (...)` call exactly. Our `Paint`'s `Gradient` variant models upstream's
+ * `HColorGradient` (2-stop, `color1`/`color2`/`policy`); upstream's
+ * `HColorLinearGradient` (multi-stop) is a `LinearGradientPaint`
+ * (`paint.ts`, `isLinearGradientPaint`), checked FIRST as upstream does
+ * (`DriverRectangleSvg.java:83,99`) and registered through
+ * `SvgGraphics#createSvgLinearGradient` -- the `createSvgGradient(
+ * HColorLinearGradient, ColorMapper)` overload -- with the RAW paint, since
+ * the mapper is applied per stop inside it.
  *
- * Deferred (out of scope, reported): `background.transparentFillBehavior
- * ()` — upstream's second `setFillColor` arg, an `HColor`-only property
- * (`WITH_FILL_NONE` default vs. `WITH_FILL_OPACITY` override) with no
- * representation on this port's `Paint` type (`src/core/paint.ts`, not in
- * this task's write-set). `setFillColor` is called with its default
- * (`TransparentFillBehavior.WITH_FILL_NONE`, see `svg-graphics-core.ts`),
- * matching upstream's overwhelmingly common case — every `HColor` except
- * the rare caller of `withTransparentFillBehavior(WITH_FILL_OPACITY)`
- * (`HColorSimple.java:231`) already resolves to `WITH_FILL_NONE`.
+ * `background.transparentFillBehavior()` (java:93, sdd3-T8p): upstream's second
+ * `setFillColor` arg. It lives on `HColorSimple` (`transparentFillBehavior()`,
+ * HColorSimple.java:136-139), and an `HColorSimple` already travels through
+ * `UParam` (`HColorOrPaint`), so no `Paint` representation is needed: when the
+ * fill is an `HColorSimple` its behaviour is forwarded; a plain-string `Paint`
+ * is upstream's default `WITH_FILL_NONE`. `WITH_FILL_OPACITY` keeps the
+ * colour's `#rrggbbaa` (`SvgGraphics.java:526-528`), which `fillMe`
+ * (SvgGraphics.java:880-888) writes as `fill` + `fill-opacity`.
  *
  * `UClip`/`ClipContainer` — not ported (see `URectangle.ts`'s own
  * deferred-methods note); this driver's constructor accordingly takes no
@@ -45,7 +45,9 @@
 
 import type { UDriver } from '../../AbstractCommonUGraphic.js';
 import type { UParam } from '../../UParam.js';
+import { isLinearGradientPaint } from '../../../paint.js';
 import { toSvgPaint, type ColorMapper } from '../../color/ColorMapper.js';
+import { HColorSimple } from '../../color/HColorSimple.js';
 import type { URectangle } from '../../shape/URectangle.js';
 import type { SvgGraphics } from './svg-graphics.js';
 
@@ -56,9 +58,16 @@ export class DriverRectangleSvg implements UDriver<URectangle> {
 
   /** Upstream: `DriverRectangleSvg.applyFillColor(SvgGraphics, ColorMapper, UParam)`. */
   static applyFillColor(svg: SvgGraphics, mapper: ColorMapper, param: UParam): void {
-    const background = toSvgPaint(param.getBackcolor(), mapper);
+    const raw = param.getBackcolor();
+    if (isLinearGradientPaint(raw)) {
+      svg.setFillColor(`url(#${svg.createSvgLinearGradient(raw, mapper)})`); // DriverRectangleSvg.java:83-86
+      return;
+    }
+    const background = toSvgPaint(raw, mapper);
     if (typeof background === 'string') {
-      svg.setFillColor(background);
+      // `svg.setFillColor(background.toSvg(mapper), background.transparentFillBehavior())`, java:93;
+      // a `Paint` string has no behaviour of its own: upstream's WITH_FILL_NONE default.
+      svg.setFillColor(background, raw instanceof HColorSimple ? raw.transparentFillBehavior() : undefined);
     } else {
       const id = svg.createSvgGradient(background.color1, background.color2, background.policy);
       svg.setFillColor(`url(#${id})`);
@@ -67,7 +76,12 @@ export class DriverRectangleSvg implements UDriver<URectangle> {
 
   /** Upstream: `DriverRectangleSvg.applyStrokeColor(SvgGraphics, ColorMapper, UParam)`. */
   static applyStrokeColor(svg: SvgGraphics, mapper: ColorMapper, param: UParam): void {
-    const color = toSvgPaint(param.getColor(), mapper);
+    const raw = param.getColor();
+    if (isLinearGradientPaint(raw)) {
+      svg.setStrokeColor(`url(#${svg.createSvgLinearGradient(raw, mapper)})`); // DriverRectangleSvg.java:99-102
+      return;
+    }
+    const color = toSvgPaint(raw, mapper);
     if (typeof color === 'string') {
       svg.setStrokeColor(color);
     } else {

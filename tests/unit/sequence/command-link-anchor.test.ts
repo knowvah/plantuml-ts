@@ -7,7 +7,9 @@
  * time`): the link at x=138.8 from y=68 to y=145, an up head at 68, a down
  * head at 145, the label at x=142.8, baseline 110.111.
  */
+import { attrsOf, tagsOf, type TagAttrs } from '../../helpers/svg-tags.js';
 import { describe, expect, it } from 'vitest';
+import { assembleSvg } from '../../../src/core/assemble-svg.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
@@ -71,18 +73,25 @@ describe('layout and draw (zoturo-25-jima978 in.svg)', () => {
 
   it('emits shaft, up head, down head and label, in the jar order', () => {
     const body = render(ZOTURO);
-    const shaft = '<line x1="138.8" y1="68" x2="138.8" y2="145" stroke="#181818" stroke-width="1"/>';
-    const up = 'points="134.8,78,138.8,68,142.8,78,138.8,74"';
-    const down = 'points="134.8,135,138.8,145,142.8,135,138.8,139"';
-    const label = '<text x="142.8" y="110.111"';
-    const at = [shaft, up, down, label].map((s) => body.indexOf(s));
+    const tags = [...body.matchAll(/<(line|polygon|text)\b[^>]*>/g)].map((m): TagAttrs => ({
+      ...attrsOf(m[0]),
+      name: m[1]!,
+    }));
+    const isShaft = (t: TagAttrs): boolean => t.name === 'line' && t.x1 === '138.8' && t.y1 === '68' && t.y2 === '145';
+    const at = [
+      tags.findIndex(isShaft),
+      tags.findIndex((t) => t.points === '134.8,78,138.8,68,142.8,78,138.8,74'),
+      tags.findIndex((t) => t.points === '134.8,135,138.8,145,142.8,135,138.8,139'),
+      tags.findIndex((t) => t.name === 'text' && t.x === '142.8' && t.y === '110.111'),
+    ];
     expect(at.every((i) => i >= 0)).toBe(true);
     expect(at).toEqual([...at].sort((a, b) => a - b));
+    expect(tags[at[0]!]).toMatchObject({ stroke: '#181818', 'stroke-width': '1' });
   });
 
   it('draws the link in both the background and the foreground pass', () => {
-    const body = render(ZOTURO);
-    expect(body.split('x1="138.8" y1="68" x2="138.8" y2="145"')).toHaveLength(3);
+    const shafts = tagsOf(render(ZOTURO), 'line').filter((t) => t.x1 === '138.8' && t.y1 === '68' && t.y2 === '145');
+    expect(shafts).toHaveLength(2);
   });
 
   it('draws nothing when an anchor matches no message', () => {
@@ -117,7 +126,8 @@ describe('layout and draw (zoturo-25-jima978 in.svg)', () => {
   it('scales every length at emission', () => {
     const scaled = { ...defaultTheme };
     const scaledGeo = layoutSequence(parse(['scale 2', ...ZOTURO]), scaled, measurer);
-    const body = renderSequence(scaledGeo, scaled, measurer).body;
+    // The scale is the exporter's (`core/TextBlockExporter.ts#exportTo`), so read the assembled document.
+    const body = assembleSvg(renderSequence(scaledGeo, scaled, measurer));
     expect(body).toContain('x1="277.6" y1="136" x2="277.6" y2="290"');
   });
 });

@@ -14,6 +14,7 @@ import type { ActorStyle } from './skin/ActorStyle.js';
 import { deepMergeTheme } from './theme-merge.js';
 import type { ThemeColorFields } from './theme-colors-fields.js';
 import type { Paint } from './paint.js';
+import type { RootLengthAdjust } from './svg.js';
 import type { ThemeSequenceFields } from './theme-sequence-fields.js';
 import type { ThemeRootFields } from './theme-root-fields.js';
 
@@ -187,6 +188,10 @@ export interface Theme extends ThemeRootFields {
    *  Absent = 96 (no-op multiplier), matching upstream's own default. */
   dpi?: number;
   topurl?: string; // cdd-T34: `skinparam topurl <url>` -- `UrlBuilder#withTopUrl` (java:140-146) prefix.
+  /** sdd3-T2c: `skinparam lengthAdjust` -- `SkinParam#getlengthAdjust`
+   *  (`skin/SkinParam.java:1258-1270`). Absent = `LengthAdjust.defaultValue()`
+   *  (`spacing`, `style/LengthAdjust.java:41`). Read by `document-shell.ts`. */
+  lengthAdjust?: RootLengthAdjust;
   /** `skinparam nodesep N` (px) — when set (nonzero), unconditionally
    *  replaces the clamped default DOT nodesep (SkinParam.java:847-851
    *  getAsInt("nodesep",0); DotStringFactory.java:117-124). Absent = engine
@@ -413,6 +418,7 @@ export type ThemeOverride = Partial<ThemeRootFields> & {
   /** See {@link Theme.dpi}'s own doc comment. */
   dpi?: number;
   topurl?: string; // See {@link Theme.topurl}'s own doc comment.
+  lengthAdjust?: RootLengthAdjust; // See {@link Theme.lengthAdjust}.
   /** See {@link Theme.maxMessageSize}'s own doc comment. */
   maxMessageSize?: number;
   sameClassWidth?: boolean;

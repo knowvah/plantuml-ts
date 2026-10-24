@@ -72,6 +72,8 @@ interface NotePlacement {
   readonly forceNote: boolean;
   /** See {@link NoteTileInput.rightX}. */
   readonly rightX?: number;
+  /** See {@link NoteTileInput.leftX}. */
+  readonly leftX?: number;
   /** See {@link NoteTileInput.originX}. */
   readonly originX?: number;
 }
@@ -141,6 +143,7 @@ export function resolveNote(
     align,
     ...(group !== undefined ? { group } : {}),
     ...(placement?.rightX !== undefined ? { rightX: placement.rightX } : {}),
+    ...(placement?.leftX !== undefined ? { leftX: placement.leftX } : {}),
     ...(placement?.originX !== undefined ? { originX: placement.originX } : {}),
   });
   return { paint, rows: block.primitives, block, tile, padding, shadow, reserve, component };
@@ -360,6 +363,15 @@ function setSelfNoteDrawnMaxX(owner: MessageEvent, resolved: ResolvedNote, ctx: 
   geo.drawnMaxX = selfDrawnSpan(owner, from.centerX, ctx).max + (resolved.tile.maxX - resolved.tile.minX);
 }
 
+/** `CommunicationTileSelfNoteLeft#getDrawnMinX` (`:170-177`): the inner
+ *  loop's `getDrawnMinX` less the note component's preferred width. */
+function setSelfNoteDrawnMinX(owner: MessageEvent, resolved: ResolvedNote, ctx: EventProcessingContext): void {
+  const from = ctx.participantMap.get(owner.from);
+  if (from === undefined) return;
+  const geo = ctx.eventGeos.at(-1) as NoteGeo;
+  geo.drawnMinX = selfDrawnSpan(owner, from.centerX, ctx).min - (resolved.tile.maxX - resolved.tile.minX);
+}
+
 /** `CommunicationTileNoteLeft`/`...Right` (and the self variants) around the
  *  chain: the same top, `max(tile, note)` tall, the extent they move. */
 function wrapSide(
@@ -370,11 +382,17 @@ function wrapSide(
   ctx: EventProcessingContext,
 ): Chain {
   const forceNote = owner.kind === 'message' && owner.from === owner.to;
-  const { participant, rightX } = noteAnchor(owner, note, position, ctx);
+  const { participant, rightX, leftX } = noteAnchor(owner, note, position, ctx);
   const anchored: NoteEvent = participant === undefined ? note : { ...note, participants: [participant] };
-  const resolved = resolveNote(anchored, ctx, { position, forceNote, ...(rightX !== undefined ? { rightX } : {}) });
+  const resolved = resolveNote(anchored, ctx, {
+    position,
+    forceNote,
+    ...(rightX !== undefined ? { rightX } : {}),
+    ...(leftX !== undefined ? { leftX } : {}),
+  });
   emitNote(anchored, resolved, chain.gauge.min, ctx);
   if (forceNote && position === 'right') setSelfNoteDrawnMaxX(owner, resolved, ctx);
+  if (forceNote && position === 'left') setSelfNoteDrawnMinX(owner, resolved, ctx);
   const height = Math.max(chain.height, notePreferredHeight(resolved));
   const extent = position === 'left' ? { minX: resolved.tile.minX } : { maxX: resolved.tile.maxX };
   return { ...chain, ...extent, height, gauge: wrapGauge(chain.gauge, height) };

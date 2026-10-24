@@ -13,13 +13,18 @@ import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
-import type { LifelineSegment, SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
+import type { LifelineSegment, ParticipantGeo, SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
-import { lifelineOf, renderLifelineSegments } from '../../../src/diagrams/sequence/renderer-lifeline.js';
-import type { ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
+import { drawLifelineSegments, lifelineOf } from '../../../src/diagrams/sequence/renderer-lifeline.js';
+import { drawMarkup } from './draw-markup.js';
+import type { PageTheme } from '../../../src/diagrams/sequence/renderer-ug.js';
 import { endOfParseStyleBuilder } from '../../../src/diagrams/sequence/sequence-layout-lifeline.js';
 import { astOrThrow } from '../../helpers/parse-ast.js';
+import { tagsOf } from '../../helpers/svg-tags.js';
+
+const renderLifelineSegments = (p: ParticipantGeo, segments: readonly LifelineSegment[], t: PageTheme): string =>
+  drawMarkup((ug) => drawLifelineSegments(ug, p, segments), t);
 
 /** `plantuml.skin:16` `root { LineColor #181818 }`. */
 const ROOT_LINE = '#181818';
@@ -112,30 +117,24 @@ describe('lifeline paint (MutingLine.java:102-108)', () => {
 });
 
 describe('rendering a painted lifeline (ComponentRoseLine.java:74-88)', () => {
-  const theme: ScaledTheme = { ...defaultTheme, scaleK: 1, measurer: new DeterministicMeasurer() };
-  const lineOf = (svg: string): string => /<line [^>]*>/.exec(svg)?.[0] ?? '';
+  const theme: PageTheme = { ...defaultTheme, measurer: new DeterministicMeasurer() };
+  const lineOf = (svg: string) => tagsOf(svg, 'line')[0];
 
   it('strokes LineColor at LineThickness with the style dash (jar: stroke:#181818;stroke-width:0.5;stroke-dasharray:5,5;)', () => {
     const geo = geoOf(['A -> B : hi']);
     const a = geo.participants[0]!;
-    expect(lineOf(renderLifelineSegments(a, lifelineOf(geo.lifelineSegments, a), theme))).toContain(
-      'stroke="#181818" stroke-width="0.5" stroke-dasharray="5,5"',
-    );
-  });
-
-  it('scales the width and the dash at emission (SvgGraphics.java:556-561; bocudo-94: 0.441, 4.41,4.41 at 0.882)', () => {
-    const geo = geoOf(['A -> B : hi']);
-    const a = geo.participants[0]!;
-    const seg: LifelineSegment = lifelineOf(geo.lifelineSegments, a)[0]!;
-    const svg = renderLifelineSegments(a, [seg], { ...theme, scaleK: 0.882 });
-    expect(lineOf(svg)).toContain('stroke-width="0.441" stroke-dasharray="4.41,4.41"');
+    expect(lineOf(renderLifelineSegments(a, lifelineOf(geo.lifelineSegments, a), theme))).toMatchObject({
+      stroke: '#181818',
+      'stroke-width': '0.5',
+      'stroke-dasharray': '5,5',
+    });
   });
 
   it('strokes a gradient LineColor with its first colour (DriverLineSvg.java:76-82; sedule-54: stroke:#FFF)', () => {
     const geo = geoOf(['skinparam sequenceLifeLineBorderColor #white|green', 'A -> B : hi']);
     const a = geo.participants[0]!;
     const svg = renderLifelineSegments(a, lifelineOf(geo.lifelineSegments, a), theme);
-    expect(lineOf(svg)).toContain('stroke="#FFF" stroke-width="0.5"');
+    expect(lineOf(svg)).toMatchObject({ stroke: '#FFF', 'stroke-width': '0.5' });
   });
 
   it('refuses a participant layout built no lifeline for', () => {

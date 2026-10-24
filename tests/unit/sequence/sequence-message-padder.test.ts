@@ -4,8 +4,10 @@ import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import { PAINT_NONE } from '../../../src/core/svg.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
-import { renderMessage } from '../../../src/diagrams/sequence/renderer-message.js';
-import { scaleSequenceTheme } from '../../../src/diagrams/sequence/scale-geo.js';
+import { tagsOf } from '../../helpers/svg-tags.js';
+import { drawMessage } from '../../../src/diagrams/sequence/renderer-message.js';
+import { drawMarkup } from './draw-markup.js';
+import { pageThemeOf, type PageTheme } from '../../../src/diagrams/sequence/renderer-ug.js';
 import { layoutPadder, sequenceDiagramPadder } from '../../../src/diagrams/sequence/sequence-message-padder.js';
 import { SequenceLegacyParams } from '../../../src/diagrams/sequence/sequence-skin-param.js';
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
@@ -17,6 +19,9 @@ import {
   placeMessageLabel,
 } from '../../../src/diagrams/sequence/text-block-geo.js';
 import type { MessageGeo, SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
+
+/** The message drawn on the page's graphic and read back as markup. */
+const renderMessage = (msg: MessageGeo, t: PageTheme): string => drawMarkup((ug) => drawMessage(ug, msg, t), t);
 
 function paramsOf(entries: Record<string, string>): SequenceLegacyParams {
   const params = new SequenceLegacyParams();
@@ -86,7 +91,7 @@ const base: MessageGeo = {
 };
 
 describe('renderMessage draws the padder box before the label', () => {
-  const theme = scaleSequenceTheme(defaultTheme, 1, new FormulaMeasurer());
+  const theme = pageThemeOf(defaultTheme, new FormulaMeasurer());
   it('gijamu golden: filled, no stroke', () => {
     const svg = renderMessage(
       {
@@ -103,7 +108,10 @@ describe('renderMessage draws the padder box before the label', () => {
       },
       theme,
     );
-    expect(svg).toContain('<rect x="183.053" y="200" width="95.469" height="13" fill="#FFF" stroke="none"/>');
+    // The klimt rectangle driver writes the stroke in `style` (`tagsOf` expands it).
+    expect(tagsOf(svg, 'rect')).toEqual([
+      { x: '183.053', y: '200', width: '95.469', height: '13', fill: '#FFF', stroke: 'none' },
+    ]);
   });
 
   it('suvodo golden: unfilled, blue stroke, rx = RoundCorner / 2', () => {
@@ -122,9 +130,19 @@ describe('renderMessage draws the padder box before the label', () => {
       },
       theme,
     );
-    expect(svg).toContain(
-      '<rect x="138.925" y="86" width="37.544" height="23" fill="none" stroke="#00F" stroke-width="1" rx="7.5" ry="7.5"/>',
-    );
+    expect(tagsOf(svg, 'rect')).toEqual([
+      {
+        x: '138.925',
+        y: '86',
+        width: '37.544',
+        height: '23',
+        fill: 'none',
+        stroke: '#00F',
+        'stroke-width': '1',
+        rx: '7.5',
+        ry: '7.5',
+      },
+    ]);
   });
 
   it('draws nothing extra without a padder', () => {

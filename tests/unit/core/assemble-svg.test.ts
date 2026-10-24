@@ -347,8 +347,12 @@ describe('assembleSvg — JSON background rect (isSolidNonDefault)', () => {
 /** The dims every SEQUENCE fixture below uses — `dakake-85-nemi992`'s own. */
 const SEQ_DIMS = { width: 114, height: 313 };
 
+/** The margin-less block every sequence fragment declares (`renderer.ts#preChromeDims`, sdd3-T3b): the canvas
+ *  `(int)(dim + 1)` less `same(5)` on both sides. */
+const SEQ_BLOCK = { preChromeWidth: 103, preChromeHeight: 302 };
+
 function sequenceFragment(overrides: Partial<RenderFragment> = {}): RenderFragment {
-  return { body: INNER, ...SEQ_DIMS, diagramType: 'SEQUENCE', ...overrides };
+  return { body: INNER, ...SEQ_DIMS, ...SEQ_BLOCK, diagramType: 'SEQUENCE', ...overrides };
 }
 
 describe('assembleSvg — SEQUENCE root <g> shape (AC1)', () => {

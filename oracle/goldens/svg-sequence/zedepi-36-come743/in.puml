@@ -1,0 +1,6 @@
+@startuml
+Alice -> Bob: Authentication Request
+opt this a very long line \n that I would like to break\ninto several lines
+    Bob -> Alice: Authentication Accepted
+end
+@enduml

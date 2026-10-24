@@ -1,0 +1,8 @@
+@startuml
+rotate
+scale 100 width
+footer this is a note
+Title toto
+Bob -> Alice : ok
+footer test
+@enduml

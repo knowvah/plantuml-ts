@@ -1,3 +1,4 @@
+import { attrsOf } from '../../helpers/svg-tags.js';
 import { describe, it, expect } from 'vitest';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
@@ -730,9 +731,9 @@ function svgOf(arrow: string): string {
 }
 
 function attrs(tag: string, svg: string): Array<Record<string, string>> {
-  return [...svg.matchAll(new RegExp(`<${tag}\\s([^>]*?)/>`, 'g'))].map((m) =>
-    Object.fromEntries([...m[1]!.matchAll(/([\w:-]+)="([^"]*)"/g)].map((a) => [a[1]!, a[2]!])),
-  );
+  // `style="stroke:..;stroke-width:.."` is expanded (`tests/helpers/svg-tags.ts`): the klimt drivers
+  // write the jar's form, and these assertions read VALUES.
+  return [...svg.matchAll(new RegExp(`<${tag}\\s([^>]*?)/>`, 'g'))].map((m) => ({ ...attrsOf(m[1]!) }));
 }
 
 /** The message body and the two head strokes, i.e. every `<line>` that is not

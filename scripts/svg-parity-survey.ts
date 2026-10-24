@@ -64,6 +64,7 @@ import { combineAssetStores } from '../src/core/asset-store.js';
 // <bundle/...>` fixture renders instead of tripping renderSync's include
 // guard and being surveyed as an error page -- the census already did this.
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
+import { remoteImageFixtureStore } from '../tests/oracle/svg-conformance/remote-image-fixtures.js';
 import { routeConsoleToStderr, runPersistentPool, type WorkerOutcome } from './svg-parity-workers.js';
 import { compareSvg, type Diff } from '../tests/oracle/svg-conformance/compare.js';
 import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
@@ -75,7 +76,14 @@ const SURVEY_ASSET_STORE = combineAssetStores(
   buildSpriteAssetsStore(),
   buildEmojiAssetsStore(),
   buildUtilityAssetsStore(),
+  // sdd3-b6 (T6g): the golden-decoded remote image bytes the sequence harness
+  // serves (fifasu-62), so the survey measures what classify measures (stop 12).
+  remoteImageFixtureStore(),
 );
+// sdd3-b6 (T6f): every cached fixture was rendered by the jar from `in.puml`
+// (Defines.java:89-94 sets `filename` from File#getName), as
+// `sequenceFixtureOptions()` passes it; the survey must agree with the ratchet.
+const SURVEY_FILENAME = 'in.puml';
 // cdd8-T2e (D2d): `renderSync` refuses `!pragma layout elk` without
 // `options.elk`. Each render worker (`--render-many` / `--render-one`) awaits
 // `loadElk()` ONCE before it renders and every render below passes the result.
@@ -281,6 +289,7 @@ function renderOneMode(dir: string): void {
       measurer: new DeterministicMeasurer(),
       assetStore: SURVEY_ASSET_STORE,
       includeStore: fixtureIncludeStore(),
+      filename: SURVEY_FILENAME,
       elk: surveyElk,
     });
   } catch (err) {
@@ -308,6 +317,7 @@ function renderFrame(dir: string): string {
       measurer: new DeterministicMeasurer(),
       assetStore: SURVEY_ASSET_STORE,
       includeStore: fixtureIncludeStore(),
+      filename: SURVEY_FILENAME,
       elk: surveyElk,
     });
     const dotEqual = computeDotEqual(svekDots, events, oracleBlind, markup);

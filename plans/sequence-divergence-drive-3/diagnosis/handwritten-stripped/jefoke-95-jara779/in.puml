@@ -1,0 +1,10 @@
+@startuml
+
+participant Bob << (A,#FFFF00) toto >>
+participant Alice << Personnage >>
+participant Chat << (C,#00FFFF) >>
+
+Bob->Alice: test
+Alice -> Chat: test
+
+@enduml

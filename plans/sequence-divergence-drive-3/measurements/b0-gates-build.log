@@ -1,0 +1,33 @@
+
+> @knowvah/plantuml-ts@0.2.0 build
+> vite build
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 1543 modules transformed.
+rendering chunks...
+
+[unplugin:dts] Start generate declaration files...
+[unplugin:dts] Start bundling declaration files...
+Analysis will use the bundled TypeScript version 5.9.3
+*** The target project appears to use TypeScript 6.0.3 which is newer than the bundled compiler engine; consider upgrading API Extractor.
+[unplugin:dts] Declaration files built in 9134ms.
+
+computing gzip size...
+dist/plantuml-ts.js  2,872.33 kB │ gzip: 714.88 kB │ map: 15,408.91 kB
+
+transforming...
+✓ 1543 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/plantuml-ts.cjs  2,300.65 kB │ gzip: 646.91 kB │ map: 15,411.36 kB
+
+✓ built in 10.12s
+[33m[PLUGIN_TIMINGS] [0mJavaScript callbacks ran for 9.6s of this 10.1s build (95%).
+The slowest callbacks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - plugin unplugin-dts writeBundle (49%, 4.9s, 2 calls)
+  - plugin unplugin-dts buildStart (39%, 3.9s, 2 calls)
+Additional callback time came from callbacks under 1s.
+See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.
+
+exit 0

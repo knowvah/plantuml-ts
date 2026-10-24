@@ -23,8 +23,6 @@ import type { StringBounder } from '../../klimt/font/StringBounder.js';
 import { XDimension2D } from '../../klimt/geom/XDimension2D.js';
 import { HorizontalAlignment } from '../../klimt/geom/HorizontalAlignment.js';
 import { UTranslate } from '../../klimt/UTranslate.js';
-import { Fore } from '../../klimt/Fore.js';
-import { Back } from '../../klimt/Back.js';
 import type { FontConfiguration } from '../../klimt/shape/UText.js';
 import { UText, getFont } from '../../klimt/shape/UText.js';
 import {
@@ -39,7 +37,7 @@ import type { TextBlock } from '../../klimt/shape/TextBlock.js';
 import { TextBlockUtils } from '../../klimt/shape/TextBlockUtils.js';
 import type { AtomImageResolver, SpriteDimsLookup } from '../../creole-atoms.js';
 import type { ResolvedColor } from '../../klimt/color/HColorSet.js';
-import { SvgNanoParser } from '../../klimt/sprite/SvgNanoParser.js';
+import { SvgParserSelector, createSvgSpriteParser } from '../../klimt/sprite/sax/svg-sprite-parser-factory.js';
 import type { USymbol } from '../../decoration/symbol/USymbol.js';
 import { buildTextBlock, measureLine } from './EntityImageDescriptionSupport.js';
 import { drawWithAtomUrl } from './EntityImageDescriptionTextBlock.js';
@@ -71,26 +69,14 @@ import type { ISkinSimple } from '../../style/ISkinSimple.js';
 import type { AtomOps } from '../../klimt/creole/Sea.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
 import { SPACE_ATOM_HEIGHT } from '../../klimt/creole/atom/AtomSpace.js';
+import {
+  drawVerticalTexts,
+  verticalTextsDimension,
+  verticalTextsStartingAltitude,
+} from '../../klimt/creole/atom/AtomVerticalTexts.js';
 import type { Atom } from '../../klimt/creole/SheetBlock1.js';
 import { descEmbeddedRenderer } from './EntityImageDescriptionEmbed.js';
-import { spriteHrefOver } from '../../klimt/sprite/sprite-tint.js';
-
-/**
- * SI15 T1 (ADR-1): widens `AtomImageResolver`'s `image` variant with the
- * optional raster-pixel fields `render-atoms.ts`'s producers
- * (`resolveSpriteAtom`/`resolveImgAtom`) now populate. Declared locally
- * rather than widening `AtomImageResolver` itself in `creole-atoms.ts` --
- * that module sits at this project's 500-line file cap; the resolver's
- * runtime shape already carries these fields (`render-atoms.ts`'s own
- * `ResolvedAtomImage`), only the shared static type doesn't expose them.
- * Mirrors `EntityImageDescriptionTextBlock.ts`'s identical local type.
- */
-type ResolvedAtomImageWithRaster =
-  | (Extract<ReturnType<AtomImageResolver>, { readonly kind: 'image' }> & {
-      readonly rasterWidth?: number;
-      readonly rasterHeight?: number;
-    })
-  | Exclude<ReturnType<AtomImageResolver>, { readonly kind: 'image' }>;
+import { drawResolvedInline, type ResolvedAtomImageWithRaster } from './EntityImageDescriptionInline.js';
 
 // ---------------------------------------------------------------------------
 // T4 (`plans/bodyenhanced-atom-seams/`) -- `desc` wired through the REAL
@@ -235,10 +221,15 @@ export function descAtomOps(
     if (atom.kind === 'emoji') return emojiSquareDim(atom.factor);
     // `AtomSpace#calculateDimensionSlow` (AtomSpace.java:~52): (width, 1).
     if (atom.kind === 'space') return { width: atom.width, height: SPACE_ATOM_HEIGHT };
-    const resolved = resolveAtomImage?.(atom.atom);
+    // `AtomVerticalTexts#calculateDimensionSlow` (`AtomVerticalTexts.java:54-64`).
+    if (atom.kind === 'vertical') {
+      const dim = verticalTextsDimension(atom.lines, ops, stringBounder);
+      return { width: dim.getWidth(), height: dim.getHeight() };
+    }
+    const resolved = resolveAtomImage?.(atom.atom, () => stringBounder);
     return resolved === undefined ? { width: 0, height: 0 } : resolved;
   }
-  return {
+  const ops: AtomOps = {
     calculateDimension(creoleAtom: CreoleAtom, stringBounder: StringBounder): XDimension2D {
       const atom = creoleAtom as CreoleAtom | Atom;
       if (!isCreoleAtomData(atom)) return atom.calculateDimension(stringBounder);
@@ -257,6 +248,8 @@ export function descAtomOps(
       // these reported altitudes (`AtomEmoji.java:62-64`, `-3 * factor`).
       if (atom.kind === 'emoji') return emojiStartingAltitude(atom.factor);
       if (atom.kind === 'text') return atomTextStartingAltitude(atom.font); // SI30/D2
+      // `AtomVerticalTexts#getStartingAltitude` (`AtomVerticalTexts.java:67-69`).
+      if (atom.kind === 'vertical') return verticalTextsStartingAltitude(atom.lines, ops, stringBounder);
       return 0;
     },
     drawU(creoleAtom: CreoleAtom, ug: UGraphic): void {
@@ -265,6 +258,7 @@ export function descAtomOps(
         atom.drawU(ug);
         return;
       }
+      if (atom.kind === 'vertical') return drawVerticalTexts(atom.lines, ops, ug);
       const glyph = openIconicOf(atom);
       if (glyph !== undefined) {
         // `AtomOpenIconic.java:76-82`: startUrl, `asTextBlock().drawU`, closeUrl.
@@ -291,73 +285,15 @@ export function descAtomOps(
       }
       // `AtomSpace#drawU` is empty.
       if (atom.kind === 'space') return;
-      const resolved: ResolvedAtomImageWithRaster | undefined = resolveAtomImage?.(atom.atom);
+      const resolved: ResolvedAtomImageWithRaster | undefined = resolveAtomImage?.(atom.atom, () =>
+        ug.getStringBounder(),
+      );
       if (resolved === undefined) return;
       // `AtomSprite.java:73-80`, `AtomImg.java:246-254`: one `<a>` per atom.
       drawWithAtomUrl(ug, atom.url, () => drawResolvedInline(ug, resolved));
     },
   };
-}
-
-function drawResolvedInline(ug: UGraphic, resolved: NonNullable<ResolvedAtomImageWithRaster>): void {
-  // svg-sprite-nanoparser T9 fix (was: `if (resolved.kind !== 'image')
-  // return;`, T4's placeholder guard -- silently dropped every SVG
-  // sprite once T9 started emitting `drawable`, a REAL regression
-  // caught by the orchestrator jar-verifying T9's own report).
-  //
-  // CORRECTED BLAST RADIUS (T9's own two-level trace, preserved here so
-  // it is not re-derived expensively): the brief that commissioned T9
-  // claimed class/object/state sprite atoms reach this call site. They
-  // do NOT -- `EntityImageDescription` (whose `desc`/`stereo` TextBlocks
-  // call `descAtomOps`, hence this `drawU`) is constructed ONLY in
-  // `src/diagrams/description/{leaf-sizing.ts,renderer-entity.ts}`
-  // (grep-verified), and class diagrams' OWN sprite pipeline
-  // (`class-member-creole.ts`) calls only `getSpriteMonochrome`, never
-  // `getSpriteSvg` -- zero reach into an SVG-sprite `drawable` result.
-  // The REAL affected path is narrower and more central: the
-  // DESCRIPTION engine's own MAIN entity label (`buildDesc` ->
-  // `BodyFactory.create3` -> here), a DIFFERENT draw site from
-  // `EntityImageDescriptionSupport.ts#drawAtoms` (T7's `buildTextBlock`,
-  // used only by stereotype labels and notes) -- which is why T7 landing
-  // did not also fix this one.
-  //
-  // Mirrors `drawAtoms`'s own `drawable` branch (see that function's doc
-  // comment, T7/T9 ADR-2): the only structural difference is that THIS
-  // `ug` is already positioned at the atom's origin by
-  // `SheetBlock1.ts#drawU`'s `position.translate(target)` before calling
-  // `AtomOps.drawU` (Sea/SheetBlock1's own per-atom positioning), so no
-  // extra `ug.apply(new UTranslate(x, origin.y))` wrapper is needed here
-  // the way `drawAtoms`'s manual x-cursor requires one.
-  if (resolved.kind === 'image') {
-    // SI15 T1 (ADR-1): mirrors `drawAtoms`'s identical guarded fallback
-    // (`EntityImageDescriptionTextBlock.ts`, this file's own doc
-    // comment above) -- raster dims present only for a real
-    // raster-backed atom (sprite/img).
-    const rasterDims =
-      resolved.rasterWidth !== undefined && resolved.rasterHeight !== undefined
-        ? { rasterWidth: resolved.rasterWidth, rasterHeight: resolved.rasterHeight }
-        : undefined;
-    ug.draw(
-      UImage.build(resolved.width, resolved.height, spriteHrefOver(resolved, ug.getParam().getBackcolor()), rasterDims),
-    );
-  } else {
-    // Each primitive re-applies its OWN translate+paint on top of the
-    // atom's position `ug` already carries (`DrawablePrimitive`,
-    // creole-atoms.ts): `UPath`'s translate is always `(0,0)` (its
-    // geometry is already absolute), but `UEllipse`/`UText` carry no
-    // position of their own; fore/back/stroke are the SAME
-    // `SvgNanoParser` paint state, snapshotted rather than forwarded
-    // when it was resolved (T9 amendment 2, mirrors `drawAtoms`'s
-    // identical fix) -- `DriverPathSvg` collapses `fore === back` to a
-    // strokeless flat fill on its own. @see SvgNanoParser.java#drawU
-    for (const primitive of resolved.primitives) {
-      ug.apply(primitive.translate)
-        .apply(new Fore(primitive.fore))
-        .apply(new Back(primitive.back))
-        .apply(primitive.stroke)
-        .draw(primitive.shape);
-    }
-  }
+  return ops;
 }
 
 /** The real `ISkinSimple` `desc`'s `create3` call path needs -- see this
@@ -470,6 +406,7 @@ export function resolveStereotypeSprite(
     height: dims.height,
     scale: ref.scale,
     ...(dims.svg === undefined ? {} : { svg: dims.svg }),
+    ...(dims.parser === undefined ? {} : { parser: dims.parser }),
     ...(ref.color === undefined ? {} : { color: ref.color }),
   };
 }
@@ -495,7 +432,12 @@ class StereotypeSpriteBlock implements TextBlock {
     // A PNG-backed internal sprite has no draw path in this port (see
     // `EntityImageDescriptionStereotypeSprite.svg`) -- it still measures.
     if (this.sprite.svg === undefined) return;
-    new SvgNanoParser(this.sprite.svg).drawU(ug, this.sprite.scale, this.sprite.color, undefined);
+    createSvgSpriteParser(this.sprite.svg, this.sprite.parser ?? SvgParserSelector.NANO).drawU(
+      ug,
+      this.sprite.scale,
+      this.sprite.color,
+      undefined,
+    );
   }
 }
 
