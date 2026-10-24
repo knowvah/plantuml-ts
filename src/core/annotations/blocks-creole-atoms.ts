@@ -202,14 +202,16 @@ export function drawAtom(atom: CreoleAtom, ug: UGraphic, resolveAtomImage: AtomI
   drawAtomImage(atomImageOf(atom, resolveAtomImage), ug);
 }
 
-/** `AtomSprite`'s tint colour is the SURROUNDING text configuration's own
- *  (`legacy/StripeSimple.java#addSprite`), which
- *  `makeAtomImageResolverFor`'s curried `font` parameter carries. A
- *  non-text atom has no font of its own in this port's `CreoleAtom` union
- *  except through the run that produced it, so the block's own base
- *  configuration stands in — the same approximation
- *  `creole-atoms-image-resolver.ts`'s own doc comment records for the
- *  description engine's per-textblock font. */
+/** The font a non-text atom is resolved under. `StripeSimple#addSprite`
+ *  builds `new AtomSprite(fontConfiguration.getColor(), ...)`
+ *  (`legacy/StripeSimple.java:234`) and `AtomSprite#drawU` tints with it
+ *  (`atom/AtomSprite.java:77`), so the tint is the colour of the font ACTIVE
+ *  where the stripe built the atom (`<color:red><$s>`, `<b>`, a hyperlink
+ *  colour, ...); `CommandCreoleSprite.java:82` scales by that same stripe
+ *  font's `getSize2D() / 13.0`. `StripeSimple.ts` records that font on the
+ *  inline atom as `ambientFont`; only an atom with none (a pre-N41 call
+ *  site) falls back to the block's base configuration. */
 export function fontOfAtom(atom: CreoleAtom, baseFont: FontConfiguration): FontConfiguration {
-  return atom.kind === 'text' ? atom.font : baseFont;
+  if (atom.kind === 'text') return atom.font;
+  return atom.kind === 'inline' ? (atom.ambientFont ?? baseFont) : baseFont;
 }

@@ -1,0 +1,24 @@
+@startuml
+scale 1.5
+hide footbox
+<style>
+sequenceDiagram {
+    RoundCorner 30
+}
+</style>
+
+alt #00ff0080 successful case
+    Bob -> Alice: Authentication Accepted
+else Another type of failure
+   Bob -> Alice: Please repeat
+else #ff000080 Another type of failure
+   Bob -> Alice: Please repeat
+else #0000ff80 Another type of failure
+   Bob -> Alice: Please repeat
+else Another type of failure
+   Bob -> Alice: Please repeat
+else #0000ff80 Another type of failure
+   Bob -> Alice: Please repeat
+end
+
+@enduml

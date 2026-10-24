@@ -8,7 +8,11 @@ import type { SequenceGeometry } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { SEQUENCE_DOCUMENT_MARGIN } from '../../core/document-margin.js';
+import { SEQUENCE_DOCUMENT_MARGIN, calculateMargin, type DocumentMargin } from '../../core/document-margin.js';
+import { shiftFragmentBody } from '../../core/annotations/coord-shift.js';
+
+/** The two document extents {@link canvasOf} and {@link preChromeDims} read. */
+type SequenceExtent = Pick<SequenceGeometry, 'totalWidth' | 'totalHeight'>;
 
 /**
  * `SvgGraphics#ensureVisible:128-135`, called from the constructor with the
@@ -50,7 +54,7 @@ const ENSURE_VISIBLE_DELTA = 1;
  * 227), and carries `scaledCanvas` for the decimal attributes
  * (`jujigi-41-zodo151`, `scale 1.2`: `width="247.2px"`).
  */
-export function canvasOf(geo: SequenceGeometry, k: number): Pick<RenderFragment, 'width' | 'height' | 'scaledCanvas'> {
+export function canvasOf(geo: SequenceExtent, k: number): Pick<RenderFragment, 'width' | 'height' | 'scaledCanvas'> {
   if (k === 1) return { width: geo.totalWidth + ENSURE_VISIBLE_DELTA, height: geo.totalHeight + ENSURE_VISIBLE_DELTA };
   return {
     width: Math.trunc(geo.totalWidth + ENSURE_VISIBLE_DELTA) * k,
@@ -71,12 +75,61 @@ export function canvasOf(geo: SequenceGeometry, k: number): Pick<RenderFragment,
  * subtracted as a constant) -- chrome then sees the final canvas as before.
  */
 export function preChromeDims(
-  geo: SequenceGeometry,
+  geo: SequenceExtent,
   k: number,
+  m: DocumentMargin = SEQUENCE_DOCUMENT_MARGIN,
 ): Pick<RenderFragment, 'preChromeWidth' | 'preChromeHeight'> {
   if (k !== 1) return {};
-  const m = SEQUENCE_DOCUMENT_MARGIN;
   return { preChromeWidth: geo.totalWidth - m.left - m.right, preChromeHeight: geo.totalHeight - m.top - m.bottom };
+}
+
+/** Both margins agree on all four sides. */
+function sameMargin(a: DocumentMargin, b: DocumentMargin): boolean {
+  return a.top === b.top && a.right === b.right && a.bottom === b.bottom && a.left === b.left;
+}
+
+/**
+ * sdd3-T2d: `TextBlockExporter.Builder#calculateMargin` for sequence -- the
+ * merged `{root, document}` style's `Margin`, else `getDefaultMargins()`
+ * (`core/TextBlockExporter.java:510-516`). The layout bakes the DEFAULT
+ * exporter margin, `same(5)` (`SequenceDiagram.java:629-633`), under the
+ * teoz block's own (5, 5) translate (`teoz/SequenceDiagramFileMakerTeoz.java
+ * :134-168`) into the body and `totalWidth`/`totalHeight`. The exporter
+ * translates the block by `(left, top)` and adds both sides to the dimension
+ * (`TextBlockExporter.java:159-176,199-203`), so a style margin M moves the
+ * body by `M.left - 5`, `M.top - 5` and grows the canvas by the summed side
+ * difference. Under a `scale` the whole drawing -- margin included -- is
+ * scaled by `SvgGraphics` (`:800-811`), hence the shift is multiplied by `k`
+ * and the canvas goes through {@link canvasOf} again. The fragment then
+ * declares the margin it is exported with (`RenderFragment.documentMargin`,
+ * read by `document-margin.ts#documentMarginOf`) so chrome and the warning
+ * banner compose around the same margin-less block as before. Identity when
+ * the style margin is the default, so unstyled output is byte-identical.
+ *
+ * @param fragment the page as {@link renderSequence} assembled it, baked at
+ *   the default margin
+ * @param geo the UNSCALED page geometry {@link canvasOf} read
+ */
+export function withExporterMargin(
+  fragment: RenderFragment,
+  geo: SequenceExtent,
+  theme: Theme,
+  k: number,
+): RenderFragment {
+  const m = calculateMargin(theme, SEQUENCE_DOCUMENT_MARGIN);
+  if (sameMargin(m, SEQUENCE_DOCUMENT_MARGIN)) return fragment;
+  const baked = SEQUENCE_DOCUMENT_MARGIN;
+  const grown: SequenceExtent = {
+    totalWidth: geo.totalWidth + (m.left - baked.left) + (m.right - baked.right),
+    totalHeight: geo.totalHeight + (m.top - baked.top) + (m.bottom - baked.bottom),
+  };
+  return {
+    ...fragment,
+    body: shiftFragmentBody(fragment.body, (m.left - baked.left) * k, (m.top - baked.top) * k),
+    ...canvasOf(grown, k),
+    ...preChromeDims(grown, k, m),
+    documentMargin: m,
+  };
 }
 
 /**

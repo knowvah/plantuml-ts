@@ -47,6 +47,27 @@ function textLengthOf(content: string, textLength: number | undefined): number |
   return content.length > 1 ? textLength : undefined;
 }
 
+/**
+ * `for (Map.Entry e : attributes.entrySet()) elt.setAttribute(k, v)`
+ * (`SvgGraphics.java:737-738`), after every other attribute: a key the
+ * element already has keeps its position and takes the new value
+ * (`XmlNode#setAttribute` is a map put), any other is appended.
+ */
+function withSvgAttributes(
+  entries: ReadonlyArray<readonly [string, string | number | undefined]>,
+  extra: ReadonlyMap<string, string> | undefined,
+): ReadonlyArray<readonly [string, string | number | undefined]> {
+  if (extra === undefined) return entries;
+  // An entry holding `undefined` is an attribute never set.
+  const merged = entries.filter(([, value]) => value !== undefined);
+  for (const [name, value] of extra) {
+    const at = merged.findIndex(([existing]) => existing === name);
+    if (at < 0) merged.push([name, value]);
+    else merged[at] = [name, value];
+  }
+  return merged;
+}
+
 export function text(x: number, y: number, rawContent: string, style: TextStyle = {}): string {
   const content = emittedTextForm(rawContent, style.fontFamily);
   const fillR = resolvePaint(style.fill);
@@ -55,7 +76,7 @@ export function text(x: number, y: number, rawContent: string, style: TextStyle 
   // rides inline next to the element, like `resolvePaint`'s gradient def;
   // `svg-defs.ts#extractFilterDefs` lifts and dedups it at assembly.
   const back = style.textBackColor === undefined ? undefined : backColorFilterDef(style.textBackColor);
-  const a = attrs([
+  const set = [
     ['x', x],
     ['y', y],
     ['font-family', textFontFamily(style.fontFamily)],
@@ -72,7 +93,8 @@ export function text(x: number, y: number, rawContent: string, style: TextStyle 
     // set it) but is no longer emitted per element.
     ['textLength', textLengthOf(content, style.textLength)],
     ['filter', back === undefined ? undefined : `url(#${back.id})`],
-  ] as const);
+  ] as const;
+  const a = attrs(withSvgAttributes(set, style.svgAttributes));
   return `${back?.def ?? ''}${fillR.def}<text${a}>${escapeXmlText(content)}</text>`;
 }
 

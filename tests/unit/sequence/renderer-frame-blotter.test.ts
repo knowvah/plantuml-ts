@@ -178,4 +178,39 @@ describe('renderFrameBlotter', () => {
   it('scales the band stroke at emission', () => {
     expect(renderFrameBlotter(coloured('#ffa'), 2)).toContain('stroke-width="2"');
   });
+  it('scales the else-band offset: boundary is (sep.y - frame.y) + k', () => {
+    // `blotter.addChange(ypos + 1, backElse)` (`GroupingTile.java:340`): the
+    // `+ 1` is in layout space, so the export scale multiplies it
+    // (`SvgGraphics#format`). The geo is already scaled: sep.y - frame.y = 30.
+    const frame = coloured('#0000ff', {
+      branchSeparators: [{ y: 130, label: 'x', backColorGeneral: '#ff0000' }],
+    });
+    const svg = renderFrameBlotter(frame, 2);
+    expect(svg).toContain('y="100" width="200" height="32" fill="#00F"'); // 0..30+2
+    expect(svg).toContain('y="132" width="200" height="58" fill="#F00"'); // 32..90
+  });
+
+  it('draws the arc-path bands strokeless and unclosed, rect bands stroked', () => {
+    // `ug.apply(current).apply(current.bg())` makes fore == back, so
+    // `DriverPathSvg` sets stroke "" and width 0 (`DriverPathSvg.java:65-69`);
+    // `SEG_CLOSE` emits nothing (`SvgGraphics.java:855-856`) so no `Z`.
+    // Rects keep `UStroke.simple()` scaled (`DriverRectangleSvg`).
+    const frame = rounded('#0000ff', {
+      branchSeparators: [
+        { y: 130, label: 'x', backColorGeneral: '#ff0000' },
+        { y: 160, label: 'y', backColorGeneral: '#00ff00' },
+      ],
+    });
+    const svg = renderFrameBlotter(frame, 1);
+    const paths = svg.match(/<path[^>]*\/>/g) ?? [];
+    expect(paths).toHaveLength(2);
+    for (const m of paths) {
+      expect(m).not.toContain('stroke');
+      expect(m).not.toContain('Z');
+    }
+    expect(paths[0]).toBe(
+      '<path d="M40,100 L220,100 A10,10 0 0 1 230,110 L230,131 L30,131 L30,110 A10,10 0 0 1 40,100" fill="#00F"/>',
+    );
+    expect(svg).toContain('<rect x="30" y="131" width="200" height="30" fill="#F00" stroke="#F00" stroke-width="1"/>');
+  });
 });

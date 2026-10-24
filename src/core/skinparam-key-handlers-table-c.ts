@@ -7,7 +7,15 @@
  */
 
 import type { KeyHandler } from './skinparam-key-handlers-shared.js';
+import type { RootLengthAdjust } from './svg.js';
 import { parseFiniteNumber } from './skinparam-key-handlers-shared.js';
+
+/** `getlengthAdjust`'s three `equalsIgnoreCase` names (`SkinParam.java:1260-1267`). */
+const LENGTH_ADJUST_BY_LOWER_NAME: ReadonlyMap<string, RootLengthAdjust> = new Map([
+  ['spacingandglyphs', 'spacingAndGlyphs'],
+  ['spacing', 'spacing'],
+  ['none', 'none'],
+]);
 
 export const KEY_HANDLERS_C: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> = [
   // T2c (ex-T2a): `SkinParam.getConditionStyle` (`skin/SkinParam.java:
@@ -35,6 +43,17 @@ export const KEY_HANDLERS_C: ReadonlyArray<readonly [keys: readonly string[], ha
     ['hyperlinkcolor'],
     (acc, _v, color) => {
       (acc.elements['root'] ??= {}).hyperlinkColor = color;
+    },
+  ],
+  // sdd3-T2c: `SkinParam#getlengthAdjust` (`skin/SkinParam.java:1258-1270`):
+  // `spacingAndGlyphs` / `spacing` / `none`, each `equalsIgnoreCase`; any other
+  // value (or none) is `LengthAdjust.defaultValue()` = SPACING, left unset.
+  // `getValue` is last-wins, so an unrecognised later value clears an earlier one.
+  [
+    ['lengthadjust'],
+    (acc, value) => {
+      const v = value.trim().toLowerCase();
+      acc.lengthAdjust = LENGTH_ADJUST_BY_LOWER_NAME.get(v);
     },
   ],
   // add2 T3e (family F): `SkinParam#useUnderlineForHyperlink()`

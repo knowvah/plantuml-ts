@@ -109,6 +109,14 @@ export interface TextStyle {
    */
   textBackColor?: string;
   /**
+   * `SvgGraphics#text`'s `attributes` parameter (`SvgGraphics.java:737-738`):
+   * literal attributes written on the `<text>` AFTER every other one, each
+   * through `XmlNode#setAttribute` -- so a key the element already carries
+   * (`fill`, `font-size`, ...) has its value replaced in place. Fed by a
+   * `<text name=value>` creole tag (`SvgAttributes`). Optional/additive.
+   */
+  svgAttributes?: ReadonlyMap<string, string>;
+  /**
    * G2 N4: the pre-measured text width, matching klimt's own `textLength`
    * emission (`core/klimt/drawing/svg/svg-graphics-elements.ts`'s
    * `applyTextLengthAdjust`) -- jar (`-DPLANTUML_DETERMINISTIC_TEXT=true`)
@@ -271,23 +279,42 @@ export const PAINT_NONE = 'none';
  *  @see .../klimt/drawing/svg/SvgGraphics.java (gRoot's `font-family`) */
 export const ROOT_FONT_FAMILY = 'sans-serif';
 
-/** Hoisted onto the document root the same way (rule 3). Upstream takes it
- *  from `SvgOption.getLengthAdjust()`; every text emitter in this codebase
- *  uses `spacing` (klimt's own `LengthAdjust.SPACING` default). */
-const ROOT_LENGTH_ADJUST = 'spacing';
+/**
+ * `skinparam lengthAdjust`, as `SkinParam#getlengthAdjust` resolves it
+ * (`SkinParam.java:1258-1270`): the three `LengthAdjust` names
+ * (`style/LengthAdjust.java:38-43`), the default being `spacing`.
+ */
+export type RootLengthAdjust = 'spacing' | 'spacingAndGlyphs' | 'none';
+
+/** `LengthAdjust.defaultValue()` (`style/LengthAdjust.java:41`). */
+const DEFAULT_ROOT_LENGTH_ADJUST: RootLengthAdjust = 'spacing';
 
 /**
  * The document's root `<g>` open tag — rule 3's hoisted text attributes go
  * HERE, on the root group, not on `<svg>`, because that is where the jar
  * puts them (verified against the pinned jar for class/state/object/
  * description). Inheritance makes the two equivalent to a renderer; byte
- * comparison against a jar golden does not care. THE single definition of
- * that markup: every `assembleSvg` path reaches the root `<g>` through this
- * constant ({@link svgRoot} directly, the three klimt-shaped shells via
- * `klimt/document-shell.ts#withRootGroupAttributes`), so they cannot drift.
+ * comparison against a jar golden does not care. `font-family` is always
+ * written; `lengthAdjust` follows `SvgOption.getLengthAdjust()`: `spacing`
+ * and `spacingAndGlyphs` name themselves, `none` writes NOTHING
+ * (`SvgGraphics.java:155-158`). Default `spacing`, byte-identical to the
+ * pre-skinparam markup.
+ * @see .../klimt/drawing/svg/SvgGraphics.java:153-158
+ */
+export function rootGroupOpen(lengthAdjust: RootLengthAdjust = DEFAULT_ROOT_LENGTH_ADJUST): string {
+  const adjust = lengthAdjust === 'none' ? '' : ' lengthAdjust="' + lengthAdjust + '"';
+  return '<g font-family="' + ROOT_FONT_FAMILY + '"' + adjust + '>';
+}
+
+/**
+ * {@link rootGroupOpen} with the default length adjust. THE single
+ * definition of that markup: every `assembleSvg` path reaches the root `<g>`
+ * through {@link rootGroupOpen} ({@link svgRoot} directly, the klimt-shaped
+ * shells via `klimt/document-shell.ts#withRootGroupAttributes`), so they
+ * cannot drift.
  * @see .../klimt/drawing/svg/SvgGraphicsCore.java (getG)
  */
-export const ROOT_GROUP_OPEN = '<g font-family="' + ROOT_FONT_FAMILY + '" lengthAdjust="' + ROOT_LENGTH_ADJUST + '">';
+export const ROOT_GROUP_OPEN = rootGroupOpen();
 
 /** Closing tag of {@link ROOT_GROUP_OPEN}'s element. */
 export const ROOT_GROUP_CLOSE = '</g>';

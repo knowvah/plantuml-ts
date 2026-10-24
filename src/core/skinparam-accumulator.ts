@@ -11,6 +11,7 @@
  */
 
 import type { Paint, Gradient } from './paint.js';
+import type { RootLengthAdjust } from './svg.js';
 import type { ElementColors, PackageStyleSetting } from './theme.js';
 import type { ActorStyle } from './skin/ActorStyle.js';
 
@@ -50,6 +51,8 @@ export interface SkinparamAccumulator {
   dpi: number | undefined;
   /** cdd-T34: `skinparam topurl <url>` -- see `theme.ts#topurl`'s own doc comment. */
   topurl: string | undefined;
+  /** sdd3-T2c: `skinparam lengthAdjust` -- see `theme.ts#lengthAdjust`'s own doc comment. */
+  lengthAdjust: RootLengthAdjust | undefined;
   /** Raw `skinparam maxMessageSize` value -- see `theme.ts#maxMessageSize`'s
    *  own doc comment for the fallback-precedence resolution against
    *  {@link wrapMessageWidth}, done in `skinparam-theme-builder.ts`. */
@@ -303,6 +306,7 @@ const SCALAR_FIELD_NAMES = [
   'wrapWidth',
   'dpi',
   'topurl',
+  'lengthAdjust',
   'maxMessageSize',
   'wrapMessageWidth',
   'sameClassWidth',

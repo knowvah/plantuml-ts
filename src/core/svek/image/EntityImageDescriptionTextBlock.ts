@@ -43,6 +43,7 @@ import {
   SEPARATOR_DEFAULT_THICKNESS,
   measureLine,
   measureBuiltLine,
+  measureAtomsWidthHeight,
   buildWrappedLines,
 } from './EntityImageDescriptionTextMeasure.js';
 export { measureLine } from './EntityImageDescriptionTextMeasure.js';
@@ -182,6 +183,18 @@ function drawAtoms(
     // `AtomSpace#drawU` is empty; the cursor still advances its width.
     if (atom.kind === 'space') {
       x += atom.width;
+      continue;
+    }
+    // `AtomVerticalTexts#drawU` (`AtomVerticalTexts.java:71-78`): each stacked
+    // line is drawn as its own atom row, `dy` the heights of the rows above.
+    if (atom.kind === 'vertical') {
+      let rowY = origin.y;
+      for (const row of atom.lines) {
+        const rowM = measureAtomsWidthHeight(stringBounder, row, resolveAtomImage);
+        drawAtoms(ug, row, { x, y: rowY }, rowM, resolveAtomImage);
+        rowY += rowM.height;
+      }
+      x += measureAtomsWidthHeight(stringBounder, [atom], resolveAtomImage).width;
       continue;
     }
     // ADR-2: cursor advances by DECLARED width, never ink.

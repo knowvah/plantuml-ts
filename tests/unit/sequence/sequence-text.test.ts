@@ -18,7 +18,7 @@
  */
 import { describe, it, expect } from 'vitest';
 
-import { sequenceText, type SequenceTextSpec } from '../../../src/diagrams/sequence/sequence-text.js';
+import { primitiveFields, sequenceText, type SequenceTextSpec } from '../../../src/diagrams/sequence/sequence-text.js';
 
 /** The jar's own `jobadi-87-jegi648` participant label, field for field. */
 const JOBADI_BOB: SequenceTextSpec = {
@@ -100,5 +100,46 @@ describe('sequenceText', () => {
   it('XML-escapes the text content', () => {
     const markup = sequenceText({ ...JOBADI_BOB, text: 'a < b & c' });
     expect(markup).toContain('a &lt; b &amp; c');
+  });
+});
+
+describe('sequenceText svgAttributes (SvgGraphics.java:737-738)', () => {
+  // cizeja-06-zedi526 `in.svg`:
+  // `<text x="36.469" y="61.111" fill="#000" font-size="13" textLength="52.731" class="foo" id="dummy">`
+  const CIZEJA: SequenceTextSpec = {
+    leftX: 36.469,
+    baselineY: 61.111,
+    text: 'message',
+    width: 52.731,
+    fontFamily: 'sans-serif',
+    fontSize: 13,
+    fill: '#000',
+    svgAttributes: new Map([
+      ['class', 'foo'],
+      ['id', 'dummy'],
+    ]),
+  };
+
+  it('writes every entry after the built-in attributes, in map order', () => {
+    expect(sequenceText(CIZEJA)).toBe(
+      '<text x="36.469" y="61.111" font-size="13" fill="#000" textLength="52.731" class="foo" id="dummy">message</text>',
+    );
+  });
+
+  it('replaces a built-in attribute in place, as XmlNode#setAttribute does', () => {
+    const svg = sequenceText({ ...CIZEJA, svgAttributes: new Map([['fill', 'red']]) });
+    expect(svg).toContain(' fill="red" ');
+    expect(svg.match(/ fill=/g)).toHaveLength(1);
+  });
+
+  it('escapes a value as an attribute value', () => {
+    const svg = sequenceText({ ...CIZEJA, svgAttributes: new Map([['title', 'a"b<c']]) });
+    expect(svg).toContain('title="a&quot;b&lt;c"');
+  });
+
+  it('copies the attributes off a run and nothing when it has none', () => {
+    const run = { svgAttributes: CIZEJA.svgAttributes } as Parameters<typeof primitiveFields>[0];
+    expect(primitiveFields(run).svgAttributes).toBe(CIZEJA.svgAttributes);
+    expect('svgAttributes' in primitiveFields({} as Parameters<typeof primitiveFields>[0])).toBe(false);
   });
 });

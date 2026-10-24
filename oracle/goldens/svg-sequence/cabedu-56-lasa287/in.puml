@@ -1,0 +1,18 @@
+@startuml
+scale 1.5
+hide footbox
+<style>
+sequenceDiagram {
+    RoundCorner 30
+}
+</style>
+
+alt #blue cas0
+   Bob -> Alice: call0
+else #yellow cas1
+   Bob -> Alice: call1
+else #red cas2
+   Bob -> Alice: call2
+end
+
+@enduml

@@ -25,7 +25,7 @@ import { primitiveFields, runFontWeight, sequenceText } from '../../../src/diagr
 import { scaleRun } from '../../../src/diagrams/sequence/scale-geo.js';
 import { refBodyLines } from '../../../src/diagrams/sequence/ref-body-geo.js';
 import type { TextRun } from '../../../src/diagrams/sequence/ast.js';
-import { labelFont } from '../../helpers/sequence-label.js';
+import { labelBlockOf, labelFont } from '../../helpers/sequence-label.js';
 
 const measurer = new DeterministicMeasurer();
 const ENV = { measurer, bounder: sequenceStringBounder(measurer) };
@@ -164,5 +164,25 @@ describe('refBodyLines', () => {
     expect(refBodyLines('group', 'x')).toEqual([]);
     expect(refBodyLines('ref', '   ')).toEqual([]);
     expect(refBodyLines('ref', 'a')).toEqual(['a']);
+  });
+});
+
+describe('svg attributes reach the recorded run (DriverTextSvg.java:178-180)', () => {
+  const SOURCE = '<text class=foo id=dummy>message</text>';
+
+  it('a <text …> label is one run of its inner text carrying the sorted attributes', () => {
+    const { primitives } = labelBlockOf([SOURCE], labelFont(13));
+    expect(primitives.map((p) => p.text)).toEqual(['message']);
+    expect([...(primitives[0]!.svgAttributes ?? [])]).toEqual([
+      ['class', 'foo'],
+      ['id', 'dummy'],
+    ]);
+  });
+
+  it('records no field on a plain run, and the attributes key the label cache', () => {
+    expect('svgAttributes' in labelBlockOf(['message'], labelFont(13)).primitives[0]!).toBe(false);
+    const tagged = labelBlockOf(['<text class=a>message</text>'], labelFont(13)).primitives[0]!;
+    const other = labelBlockOf(['<text class=b>message</text>'], labelFont(13)).primitives[0]!;
+    expect([tagged.svgAttributes?.get('class'), other.svgAttributes?.get('class')]).toEqual(['a', 'b']);
   });
 });

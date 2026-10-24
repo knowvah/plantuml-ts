@@ -147,6 +147,9 @@ export interface SequenceTextSpec {
   readonly textBackColor?: string;
   /** `ExtraLines#drawAll` after the text (`DriverTextSvg.java:68-75,180`). */
   readonly extraLines?: readonly ExtraLine[];
+  /** `fontConfiguration.getAttributes()` (`DriverTextSvg.java:178-180`),
+   *  written on the `<text>` last (`SvgGraphics.java:737-738`). */
+  readonly svgAttributes?: ReadonlyMap<string, string>;
   /** A non-text primitive: drawn by core's `UGraphicSvg` at
    *  ({@link leftX}, {@link baselineY}) -- here the shape's own origin. */
   readonly shape?: SequenceRunShape;
@@ -156,13 +159,14 @@ export interface SequenceTextSpec {
  *  `DriverTextSvg`/the shape drivers read that has no ambient fallback. */
 export function primitiveFields(
   run: TextRun,
-): Pick<SequenceTextSpec, 'url' | 'image' | 'shape' | 'textBackColor' | 'extraLines'> {
+): Pick<SequenceTextSpec, 'url' | 'image' | 'shape' | 'textBackColor' | 'extraLines' | 'svgAttributes'> {
   return {
     ...(run.url !== undefined ? { url: run.url } : {}),
     ...(run.image !== undefined ? { image: run.image } : {}),
     ...(run.shape !== undefined ? { shape: run.shape } : {}),
     ...(run.textBackColor !== undefined ? { textBackColor: run.textBackColor } : {}),
     ...(run.extraLines !== undefined ? { extraLines: run.extraLines } : {}),
+    ...(run.svgAttributes !== undefined ? { svgAttributes: run.svgAttributes } : {}),
   };
 }
 
@@ -232,6 +236,7 @@ export function sequenceText(spec: SequenceTextSpec): string {
     ...(spec.fontStyle !== undefined ? { fontStyle: spec.fontStyle } : {}),
     ...(spec.textDecoration !== undefined ? { textDecoration: spec.textDecoration } : {}),
     ...(spec.textBackColor !== undefined ? { textBackColor: spec.textBackColor } : {}),
+    ...(spec.svgAttributes !== undefined ? { svgAttributes: spec.svgAttributes } : {}),
     textLength: spec.width,
   });
   // `linkWrap` is `core/svg.ts`'s existing emitter, whose eight attributes and

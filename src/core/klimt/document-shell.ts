@@ -19,7 +19,7 @@
  */
 
 import { collectDocumentDefs } from '../svg-defs.js';
-import { ROOT_GROUP_OPEN } from '../svg.js';
+import { rootGroupOpen, type RootLengthAdjust } from '../svg.js';
 import { escapeAttribute, fmt } from '../svg-format.js';
 import type { Gradient } from '../paint.js';
 
@@ -86,6 +86,9 @@ export interface ShellFragment {
   readonly preserveAspectRatio?: string;
   /** See `RenderFragment.scaledCanvas` (`dispatcher.ts`). */
   readonly scaledCanvas?: true;
+  /** See `RenderFragment.lengthAdjust` (`dispatcher.ts`). `undefined` takes
+   *  `LengthAdjust.defaultValue()` = `spacing` (`style/LengthAdjust.java:41`). */
+  readonly lengthAdjust?: RootLengthAdjust;
 }
 
 /**
@@ -133,10 +136,29 @@ const BARE_G_OPEN = '<g>';
  * `applyChrome` returns the unwrapped fragment verbatim for a mainframe-
  * only diagram, D9), whose missing wrapper predates this change.
  */
-function withRootGroupAttributes(body: string): string {
+function withRootGroupAttributes(body: string, lengthAdjust?: RootLengthAdjust): string {
   const openTag = CONTENT_G_OPEN_RE.exec(body)?.[0];
   if (openTag !== BARE_G_OPEN || !body.endsWith(CONTENT_G_CLOSE)) return body;
-  return ROOT_GROUP_OPEN + body.slice(openTag.length);
+  return rootGroupOpen(lengthAdjust) + body.slice(openTag.length);
+}
+
+/** One `<text …>` open tag. Attribute values are escaped, so no raw `>`
+ *  occurs inside it. Built from a string for the complexity hook. */
+const TEXT_OPEN_TAG_RE = new RegExp('<text\\b[^>]*>', 'g');
+
+/** The `textLength` attribute (with its leading space) inside one open tag. */
+const TEXT_LENGTH_ATTR_RE = new RegExp('\\stextLength="[^"]*"', 'g');
+
+/**
+ * `SvgGraphics#svgText` writes `textLength` only when the document's
+ * `LengthAdjust` is `SPACING` or `SPACING_AND_GLYPHS`
+ * (`SvgGraphics.java:703-705`): under `none` no `<text>` carries it. The
+ * option is document-wide (`TextBlockExporter.java:307`), so the strip runs
+ * once over the finished body rather than inside each engine's emitter.
+ */
+function withLengthAdjustApplied(body: string, lengthAdjust: RootLengthAdjust | undefined): string {
+  if (lengthAdjust !== 'none') return body;
+  return body.replace(TEXT_OPEN_TAG_RE, (tag) => tag.replace(TEXT_LENGTH_ATTR_RE, ''));
 }
 
 /** The `data-diagram-type="…"` root attribute, or `''` when `diagramType`
@@ -280,7 +302,7 @@ export function assembleDocumentShell(fragment: ShellFragment, diagramType?: str
     // (color1, color2, policy) and appends it to `defs` (`:363-405`), where
     // this port's shape emitters each prepended their own copy inline.
     (defsBody === '' ? '<defs/>' : `<defs>${defsBody}</defs>`) +
-    withRootGroupAttributes(lifted.body) +
+    withRootGroupAttributes(withLengthAdjustApplied(lifted.body, fragment.lengthAdjust), fragment.lengthAdjust) +
     '</svg>'
   );
 }

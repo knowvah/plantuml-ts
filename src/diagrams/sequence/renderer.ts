@@ -51,7 +51,7 @@ import { renderDivider } from './renderer-divider.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme } from './scale-geo.js';
 import { paginateSequence } from './sequence-page.js';
-import { canvasOf, documentChromeOf, preChromeDims } from './renderer-document.js';
+import { canvasOf, documentChromeOf, preChromeDims, withExporterMargin } from './renderer-document.js';
 import { sequenceShadowDefs } from './sequence-shadow.js';
 import { renderBoxBackground, renderNote, renderNoteBackground } from './renderer-note.js';
 import { NEWPAGE_MARGIN_Y } from './newpage-style.js';
@@ -393,20 +393,30 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
   children.push(renderLinkAnchors(scaledGeo.linkAnchors, scaledTheme));
 
   const shadowDefs = sequenceShadowDefs(scaledGeo, scaledTheme);
-  return {
-    // sdd3-T1h: `TitledDiagram#muteColorMapper` (`TitledDiagram.java:292-299`)
-    // installs MONOCHROME / MONOCHROME_REVERSE on the exporter for the whole
-    // draw pass (`UgDiagram.java:134-135`), so EVERY colour the body draws is
-    // mapped (`ColorMapper.java:80-91`) -- applied once to the assembled body,
-    // as activity does (`activity/renderer.ts`). No mapper is a no-op.
-    body: applyColorMapperToFragment(children.join(''), colorMapperOf(theme)),
-    ...canvasOf(geo, k),
-    ...preChromeDims(scaledGeo, k),
-    ...documentChromeOf(theme),
-    // T2's `finalizeSequenceBody` (`core/assemble-svg.ts`) owns the content
-    // `<g>` wrap and the background rect, so the body is handed over bare.
-    diagramType: DIAGRAM_TYPE_SEQUENCE,
-    // unwind2-S9: the frames' shadow filter, when one is drawn.
-    ...(shadowDefs === '' ? {} : { extraDefs: shadowDefs }),
-  };
+  // sdd3-T2d: the baked same(5) exporter margin becomes the style's `Margin`
+  // (`TextBlockExporter.java:510-516`); identity when none is declared.
+  return withExporterMargin(
+    {
+      // sdd3-T1h: `TitledDiagram#muteColorMapper` (`TitledDiagram.java:292-299`)
+      // installs MONOCHROME / MONOCHROME_REVERSE on the exporter for the whole
+      // draw pass (`UgDiagram.java:134-135`), so EVERY colour the body draws is
+      // mapped (`ColorMapper.java:80-91`) -- applied once to the assembled body,
+      // as activity does (`activity/renderer.ts`). No mapper is a no-op.
+      body: applyColorMapperToFragment(children.join(''), colorMapperOf(theme)),
+      ...canvasOf(geo, k),
+      ...preChromeDims(scaledGeo, k),
+      ...documentChromeOf(theme),
+      // sdd3-T2c: `TextBlockExporter.java:307` -- `skinparam lengthAdjust` is the
+      // document's `SvgOption`, read by `SvgGraphics.java:155-158,703-705`.
+      ...(theme.lengthAdjust !== undefined ? { lengthAdjust: theme.lengthAdjust } : {}),
+      // T2's `finalizeSequenceBody` (`core/assemble-svg.ts`) owns the content
+      // `<g>` wrap and the background rect, so the body is handed over bare.
+      diagramType: DIAGRAM_TYPE_SEQUENCE,
+      // unwind2-S9: the frames' shadow filter, when one is drawn.
+      ...(shadowDefs === '' ? {} : { extraDefs: shadowDefs }),
+    },
+    geo,
+    theme,
+    k,
+  );
 }

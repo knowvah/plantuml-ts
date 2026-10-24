@@ -1134,7 +1134,8 @@ describe('routing conformance — jar-error classification', () => {
     // 7606 -> 7607 at sdd2/close-exit: +1 svg-sequence golden clones.
     // 7607 -> 7615 at sdd3-prereqs: +8 svg-sequence golden clones.
     // 7615 -> 7631 at sdd3/close-b1: +16 svg-sequence golden clones.
-    expect(pinnedAgree.length).toBe(7631);
+    // 7631 -> 7656 at sdd3/close-b2: +25 svg-sequence golden clones.
+    expect(pinnedAgree.length).toBe(7656);
     expect(pinnedMisroutes.length).toBe(629);
     expect(pinnedJarErrors.length).toBe(86);
     // 7202 -> 7203 at gtc T1 (see the agree derivation above).
@@ -1166,7 +1167,8 @@ describe('routing conformance — jar-error classification', () => {
     // 8321 -> 8322 at sdd2/close-exit: +1 svg-sequence golden clones.
     // 8322 -> 8330 at sdd3-prereqs: +8 svg-sequence golden clones.
     // 8330 -> 8346 at sdd3/close-b1: +16 svg-sequence golden clones.
-    expect(manifest.fixtures.length).toBe(8346);
+    // 8346 -> 8371 at sdd3/close-b2: +25 svg-sequence golden clones.
+    expect(manifest.fixtures.length).toBe(8371);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

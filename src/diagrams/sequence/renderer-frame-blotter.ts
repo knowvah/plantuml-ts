@@ -77,15 +77,18 @@ interface BlotterBand {
  * which `GroupingStart#getUsedStyles` already overrode with the general
  * colour. An else without its own colour inherits it (`:333-339`); one with
  * its own goes through `addChange`, which skips a colour equal to the last
- * ADDED one -- insertion order, not y order (`Blotter.java:130-137`).
+ * ADDED one -- insertion order, not y order (`Blotter.java:130-137`). `k` is
+ * the export scale the `+ 1` of `addChange(ypos + 1, ...)` is multiplied by.
  */
-function buildBands(frame: FrameGeo, back: Paint): BlotterBand[] {
+function buildBands(frame: FrameGeo, back: Paint, k: number): BlotterBand[] {
   const changes = new Map<number, Paint>();
   let last = back;
   for (const sep of frame.branchSeparators) {
     // `ypos = elseTile.getYGauge().getMin().getCurrentValue() - getFrameY()`
-    // (GroupingTile.java:332), then `+ 1` at the `addChange` call (:340).
-    const ypos = sep.y - frame.y + 1;
+    // (GroupingTile.java:332), then `+ 1` at the `addChange` call (:340). The
+    // geo is already scaled, but the `+ 1` is layout space: `SvgGraphics#format`
+    // multiplies it by the export scale, so it enters here as `k`.
+    const ypos = sep.y - frame.y + k;
     const color = sep.backColorGeneral === undefined ? back : branchPaint(sep.backColorGeneral);
     if (paintKey(color) === paintKey(last)) continue;
     changes.set(ypos, color);
@@ -98,37 +101,35 @@ function buildBands(frame: FrameGeo, back: Paint): BlotterBand[] {
 
 /** `Blotter#getRectangleBackground`'s two arc paths (`:98-122`), with the
  *  frame's own absolute (ox, oy) offset baked into every coordinate -- see
- *  this module's header comment for why. */
+ *  this module's header comment for why. `closePath()` (`:106`, `:119`) is a
+ *  `SEG_CLOSE`, which `SvgGraphics#svgPath` emits as nothing
+ *  (`SvgGraphics.java:855-856`): the `d` is left unclosed, no `Z`. */
 function topArcPathD(ox: number, oy: number, width: number, height: number, round: number): string {
   const r = round / 2;
-  return (
-    [
-      moveTo(ox + r, oy),
-      lineTo(ox + width - r, oy),
-      arcTo(ox + width, oy + r, r, 0, 1),
-      lineTo(ox + width, oy + height),
-      lineTo(ox, oy + height),
-      lineTo(ox, oy + r),
-      arcTo(ox + r, oy, r, 0, 1),
-    ].join(' ') + ' Z'
-  );
+  return [
+    moveTo(ox + r, oy),
+    lineTo(ox + width - r, oy),
+    arcTo(ox + width, oy + r, r, 0, 1),
+    lineTo(ox + width, oy + height),
+    lineTo(ox, oy + height),
+    lineTo(ox, oy + r),
+    arcTo(ox + r, oy, r, 0, 1),
+  ].join(' ');
 }
 
 /** The mirror of {@link topArcPathD}: square top edge, rounded BOTTOM
  *  corners (`Blotter.java:110-120`). */
 function bottomArcPathD(ox: number, oy: number, width: number, height: number, round: number): string {
   const r = round / 2;
-  return (
-    [
-      moveTo(ox, oy),
-      lineTo(ox + width, oy),
-      lineTo(ox + width, oy + height - r),
-      arcTo(ox + width - r, oy + height, r, 0, 1),
-      lineTo(ox + r, oy + height),
-      arcTo(ox, oy + height - r, r, 0, 1),
-      lineTo(ox, oy),
-    ].join(' ') + ' Z'
-  );
+  return [
+    moveTo(ox, oy),
+    lineTo(ox + width, oy),
+    lineTo(ox + width, oy + height - r),
+    arcTo(ox + width - r, oy + height, r, 0, 1),
+    lineTo(ox + r, oy + height),
+    arcTo(ox, oy + height - r, r, 0, 1),
+    lineTo(ox, oy),
+  ].join(' ');
 }
 
 /** Everything {@link renderBand} needs besides the per-band values already
@@ -175,10 +176,13 @@ function renderBand(i: number, span: BandSpan, ctx: BandRenderCtx): string {
   const x = frameX;
   const y = frameY + span.localTop;
   const style = { fill: span.color, stroke: span.color, strokeWidth: ctx.strokeWidth };
+  // A `UPath` band has fore == back, so `DriverPathSvg` draws it with an empty
+  // stroke and width 0 (`DriverPathSvg.java:65-69`); rects keep their stroke.
+  const pathStyle = { fill: span.color, strokeWidth: 0 };
   if (round === 0) return rect(x, y, width, height, style);
   if (bandCount === 1) return rect(x, y, width, height, { ...style, rx: round / 2, ry: round / 2 });
-  if (i === 0) return path(topArcPathD(x, y, width, height, round), style);
-  if (i === bandCount - 1) return path(bottomArcPathD(x, y, width, height, round), style);
+  if (i === 0) return path(topArcPathD(x, y, width, height, round), pathStyle);
+  if (i === bandCount - 1) return path(bottomArcPathD(x, y, width, height, round), pathStyle);
   return rect(x, y, width, height, style);
 }
 
@@ -204,7 +208,7 @@ function renderBand(i: number, span: BandSpan, ctx: BandRenderCtx): string {
 export function renderFrameBlotter(frame: FrameGeo, k: number): string {
   const { paint } = framePaintsOf(frame);
   const back = paint.fill;
-  const bands = buildBands(frame, back);
+  const bands = buildBands(frame, back, k);
   const ctx: BandRenderCtx = {
     frameX: frame.x,
     frameY: frame.y,

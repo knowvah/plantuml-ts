@@ -23,7 +23,7 @@ import { getFont, type FontConfiguration } from '../../klimt/shape/UText.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
 import { SPACE_ATOM_HEIGHT } from '../../klimt/creole/atom/AtomSpace.js';
 import { emojiSquareDim } from '../../klimt/creole/atom/AtomEmoji.js';
-import { ATOM_TEXT_MIN_HEIGHT, layoutLineThroughSea, measurerSeaLineOps } from './creole-sea-line.js';
+import { ATOM_TEXT_MIN_HEIGHT, layoutLineThroughSea, measurerSeaLineOps, verticalAtomBox } from './creole-sea-line.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../decoration/symbol/usymbol-resolve.js';
 import { getSplitted } from '../../klimt/creole/Fission.js';
 import { manageGuillemet, type GuillemetPair } from '../../text/Guillemet.js';
@@ -203,6 +203,10 @@ function leafAtomDim(
   // derives the hang from the atom's own altitude (`AtomEmoji.ts`).
   if (atom.kind === 'emoji') return emojiSquareDim(atom.factor);
   if (atom.kind === 'space') return { width: atom.width, height: SPACE_ATOM_HEIGHT };
+  // `AtomVerticalTexts#calculateDimensionSlow` (`AtomVerticalTexts.java:54-64`).
+  if (atom.kind === 'vertical') {
+    return verticalAtomBox(atom.lines, (sub) => leafAtomDim(sub, fontSpec, measurer, sprites));
+  }
   // `latex` is measured through a separate LaTeX path, not this atom stream
   // — the same divergence `creoleVisibleText` below already documents.
   return { width: 0, height: 0 };

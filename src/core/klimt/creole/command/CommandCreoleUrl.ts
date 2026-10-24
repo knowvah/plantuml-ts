@@ -23,10 +23,12 @@
  *  - `topurl`: this port's `StripeBuilder` carries no skin param, so the
  *    builder is constructed with `topurl = null` (no `skinparam topurl`
  *    prefix on a creole link) — the `withTopUrl` arm is inert here.
- *  - the label is drawn through `analyzeAndAddInlineWithUrl` (the port's
- *    recursive creole engine, G2 N40) rather than `AtomTextUtils
- *    .createAtomTextForUrl`'s sprite/openicon/img/emoji-only split and its
- *    `Display.getWithNewlines` line split (AtomTextUtils.java:79-91).
+ *  - each label line is drawn through `analyzeAndAddInlineWithUrl` (the
+ *    port's recursive creole engine, G2 N40) rather than `AtomTextUtils
+ *    .createAtomTextForUrl`'s sprite/openicon/img/emoji-only split. The
+ *    `Display.getWithNewlines` line split IS mirrored: more than one line
+ *    stacks via `addUrlLines` (`atom/AtomVerticalTexts.ts`,
+ *    AtomTextUtils.java:79-92).
  *
  * The `<a href>` wrapper element: `StripeBuilder#analyzeAndAddInlineWithUrl`
  * threads `atom/Atom.ts#CreoleAtomUrl` onto the produced `'text'` atom(s).
@@ -36,6 +38,8 @@ import { FontStyle, type FontConfiguration } from '../../shape/UText.js';
 import { getRegexp, transform, UrlBuilder } from '../../../url/UrlBuilder.js';
 import { UrlMode } from '../../../url/UrlMode.js';
 import type { Url } from '../../../url/Url.js';
+import { Display } from '../Display.js';
+import { Pragma } from '../../../skin/Pragma.js';
 
 /** `Pattern2.cmpile("^(" + UrlBuilder.getRegexp() + ")")` — `%`-token
  *  transform + CASE_INSENSITIVE (Pattern2.java:109-121; `iu`, as
@@ -70,7 +74,11 @@ function applyHyperlinkStyleAndPush(url: Url, stripe: StripeBuilder): void {
   const styles = new Set(saved.styles);
   if (saved.hyperlinkUnderlineStroke !== null) styles.add(FontStyle.UNDERLINE);
   stripe.setActualFontConfiguration({ ...saved, color: resolveHyperlinkColor(saved), styles });
-  stripe.analyzeAndAddInlineWithUrl(url.getLabel(), url.getUrl(), url.getTooltip());
+  // `AtomTextUtils#createUrl` (java:79-92): `Display.getWithNewlines(pragma,
+  // label)` -- more than one line stacks one url text per line.
+  const lines = Display.getWithNewlines(Pragma.createEmpty(), url.getLabel()).asList().map(String);
+  if (lines.length > 1) stripe.addUrlLines(lines, url.getUrl(), url.getTooltip());
+  else stripe.analyzeAndAddInlineWithUrl(url.getLabel(), url.getUrl(), url.getTooltip());
   stripe.setActualFontConfiguration(saved);
 }
 

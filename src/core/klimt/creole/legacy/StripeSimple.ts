@@ -126,7 +126,7 @@ function addStyleAndBigger(font: FontConfiguration, delta: number): FontConfigur
  *  one line's ENTIRE (possibly recursive, nested-style) build, matching
  *  upstream's own single-stripe-per-line lifetime. */
 class StripeAtomBuilder implements StripeBuilder {
-  private readonly built: CreoleAtom[] = [];
+  private built: CreoleAtom[] = [];
   private font: FontConfiguration;
   // A2s R2a: the FULL-vs-OTHER command map this stripe scans against —
   // upstream `StripeSimple.java`'s own `this.commands` field (ctor
@@ -161,6 +161,21 @@ class StripeAtomBuilder implements StripeBuilder {
     this.activeUrl = { url, tooltip };
     this.modifyStripe(text);
     this.activeUrl = saved;
+  }
+
+  addUrlLines(lines: readonly string[], url: string, tooltip: string): void {
+    const outer = this.built;
+    const savedUrl = this.activeUrl;
+    this.activeUrl = { url, tooltip };
+    const stacked: (readonly CreoleAtom[])[] = [];
+    for (const line of lines) {
+      this.built = [];
+      this.modifyStripe(line);
+      stacked.push(this.built);
+    }
+    this.built = outer;
+    this.activeUrl = savedUrl;
+    this.built.push({ kind: 'vertical', lines: stacked });
   }
 
   /** Upstream: `StripeSimple#addSpace` -> `AtomSpace.create(width)`. */

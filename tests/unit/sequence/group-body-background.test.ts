@@ -217,11 +217,11 @@ describe('the nine corpus fixtures draw the jar golden bands', () => {
     expect(bands(renderSync(source))).toEqual(jar.map(([stroke, fill]) => ({ fill, fillOpacity: undefined, stroke })));
   });
 
-  // OPEN, not this task's: `core/svg-shapes.ts#rect` emits an 8-digit fill
-  // as written, without `SvgGraphics#fillMe`'s split (SvgGraphics.java:
-  // 879-887) that the klimt driver ports (`svg-graphics-core.ts#fillMe`).
-  // An explicit `group #40112233` band and an alpha note fill show it too.
-  it.fails.each(ALPHA)('%s: the jar fill, split by fillMe', (_slug, source, jar) => {
+  // sdd3 T2a (`5898bfecb`): `core/svg-shapes.ts#fillAttrsOf` now splits an
+  // 8-digit fill into `fill` + `fill-opacity` as `SvgGraphics#fillMe` does
+  // (SvgGraphics.java:880-887), so these five rows match the jar golden;
+  // they were `it.fails` while the string emitter wrote the fill as given.
+  it.each(ALPHA)('%s: the jar fill, split by fillMe', (_slug, source, jar) => {
     expect(bands(renderSync(source))).toEqual(
       jar.map(([stroke, fill, fillOpacity]) => ({ fill, fillOpacity, stroke })),
     );

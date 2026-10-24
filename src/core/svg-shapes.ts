@@ -40,6 +40,45 @@ function strokeAttrsOf(
   return { stroke, ...strokeDecorationOf(stroke, style.strokeWidth, style.strokeDasharray), styled: true };
 }
 
+/** `SvgGraphics#fillMe`'s test (`SvgGraphics.java:880`): `#[0-9A-Fa-f]{8}`. */
+const ALPHA_HEX_FILL = /^#[0-9A-Fa-f]{8}$/;
+
+/**
+ * `SvgGraphics#fillMe` (`klimt/drawing/svg/SvgGraphics.java:880-887`): an
+ * 8-digit `#RRGGBBAA` fill is written as `fill=shortenColor(fill[0..7])` plus
+ * `fill-opacity=formatOpacity(parseInt(fill[7..], 16) / 255.0)`; any other
+ * fill is `shortenColor(fill)` only (already applied by `resolvePaint`).
+ * An opacity the caller passes explicitly wins over the alpha byte -- the
+ * jar has no second source, so this only keeps existing callers' output.
+ */
+function fillAttrsOf(
+  fill: string | undefined,
+  explicitOpacity: number | undefined,
+): { fill: string | undefined; fillOpacity: string | undefined } {
+  const explicit = explicitOpacity === undefined ? undefined : formatOpacity(explicitOpacity, DEFAULT_SVG_DECIMALS);
+  if (fill === undefined || !ALPHA_HEX_FILL.test(fill)) return { fill, fillOpacity: explicit };
+  const alpha = parseInt(fill.slice(7), 16) / 255;
+  return {
+    fill: shortenColor(fill.slice(0, 7)),
+    fillOpacity: explicit ?? formatOpacity(alpha, DEFAULT_SVG_DECIMALS),
+  };
+}
+
+/**
+ * `DriverPathSvg.java:65` `color.equals(back) && !(color instanceof
+ * HColorGradient) && !(color instanceof HColorLinearGradient)`: both paints
+ * resolved to a flat colour (no `<linearGradient>` def) and the same one.
+ * `none` is not a colour here: a path with no fill has no back colour to match.
+ */
+function isSameFlatColour(
+  fill: { value: string | undefined; def: string } | undefined,
+  stroke: { value: string | undefined; def: string },
+): boolean {
+  if (fill === undefined || fill.value === undefined || stroke.value === undefined) return false;
+  if (fill.def !== '' || stroke.def !== '' || fill.value === PAINT_NONE) return false;
+  return fill.value.toLowerCase() === stroke.value.toLowerCase();
+}
+
 /**
  * `<rect>` element.
  */
@@ -48,17 +87,16 @@ export function rect(x: number, y: number, w: number, h: number, style: BoxStyle
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeAttrsOf(strokeR.value, style);
   const opacity = style.opacity === undefined ? undefined : formatOpacity(style.opacity, DEFAULT_SVG_DECIMALS);
-  const fillOpacity =
-    style.fillOpacity === undefined ? undefined : formatOpacity(style.fillOpacity, DEFAULT_SVG_DECIMALS);
+  const fillA = fillAttrsOf(fillR.value, style.fillOpacity);
   const a = attrs([
     ['x', x],
     ['y', y],
     ['width', w],
     ['height', h],
-    ['fill', fillR.value],
+    ['fill', fillA.fill],
     // Directly after `fill`, matching the jar's own emission order for a
     // transparent hit target: `<rect ... fill="#000" fill-opacity="0"/>`.
-    ['fill-opacity', fillOpacity],
+    ['fill-opacity', fillA.fillOpacity],
     ['stroke', sd.stroke],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
@@ -116,14 +154,15 @@ export function image(x: number, y: number, width: number, height: number, href:
 export function path(d: string, style: LineStyle = {}): string {
   const strokeR = resolvePaint(style.stroke);
   const fillR = style.fill !== undefined ? resolvePaint(style.fill) : undefined;
-  const sd = strokeAttrsOf(strokeR.value, style);
+  const fillA = fillAttrsOf(fillR?.value, style.fillOpacity);
+  // `DriverPathSvg#draw` (`DriverPathSvg.java:65-69`): colour == back colour,
+  // neither a gradient, draws with `setStrokeColor("")` + `setStrokeWidth(0)`.
+  const strokeless = isSameFlatColour(fillR, strokeR);
+  const sd = strokeAttrsOf(strokeR.value, strokeless ? { ...style, strokeWidth: 0 } : style);
   const a = attrs([
     ['d', d],
-    ['fill', fillR?.value ?? PAINT_NONE],
-    [
-      'fill-opacity',
-      style.fillOpacity === undefined ? undefined : formatOpacity(style.fillOpacity, DEFAULT_SVG_DECIMALS),
-    ],
+    ['fill', fillA.fill ?? PAINT_NONE],
+    ['fill-opacity', fillA.fillOpacity],
     ['stroke', sd.stroke],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
@@ -168,11 +207,13 @@ export function circle(cx: number, cy: number, r: number, style: BoxStyle = {}):
   const fillR = resolvePaint(style.fill);
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
+  const fillA = fillAttrsOf(fillR.value, undefined);
   const a = attrs([
     ['cx', cx],
     ['cy', cy],
     ['r', r],
-    ['fill', fillR.value],
+    ['fill', fillA.fill],
+    ['fill-opacity', fillA.fillOpacity],
     ['stroke', strokeR.value],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
@@ -216,9 +257,11 @@ export function polygon(points: ReadonlyArray<{ x: number; y: number }>, style: 
   const fillR = resolvePaint(style.fill);
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeAttrsOf(strokeR.value, style);
+  const fillA = fillAttrsOf(fillR.value, undefined);
   const a = attrs([
     ['points', pts],
-    ['fill', fillR.value],
+    ['fill', fillA.fill],
+    ['fill-opacity', fillA.fillOpacity],
     ['stroke', sd.stroke],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
@@ -247,9 +290,11 @@ export function polyline(points: ReadonlyArray<{ x: number; y: number }>, style:
   const fillR = resolvePaint(style.fill);
   const strokeR = resolvePaint(style.stroke);
   const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
+  const fillA = fillAttrsOf(fillR.value, undefined);
   const a = attrs([
     ['points', pts],
-    ['fill', fillR.value],
+    ['fill', fillA.fill],
+    ['fill-opacity', fillA.fillOpacity],
     ['stroke', strokeR.value],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],

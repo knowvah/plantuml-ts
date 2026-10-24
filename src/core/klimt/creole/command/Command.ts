@@ -52,6 +52,10 @@ export interface StripeBuilder {
    *  resolved label's rendered run(s) in `<a href>` (`CommandCreoleUrl.ts`'s
    *  own doc comment). */
   analyzeAndAddInlineWithUrl(text: string, url: string, tooltip: string): void;
+  /** `AtomTextUtils#createUrl`'s multi-line branch (`AtomTextUtils.java:83-90`):
+   *  each display line of the label is built as its own url-tagged run and the
+   *  runs are stacked in ONE `'vertical'` atom (`atom/AtomVerticalTexts.ts`). */
+  addUrlLines(lines: readonly string[], url: string, tooltip: string): void;
 }
 
 export interface Command {

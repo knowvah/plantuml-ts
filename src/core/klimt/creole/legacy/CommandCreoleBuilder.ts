@@ -58,6 +58,7 @@ import { createMathCommand } from '../command/CommandCreoleMath.js';
 import { createMonospacedCommand } from '../command/CommandCreoleMonospaced.js';
 import { createSpaceCommand } from '../command/CommandCreoleSpace.js';
 import { createUrlCommand } from '../command/CommandCreoleUrl.js';
+import { createSvgAttributeChangeCommand } from '../command/CommandCreoleSvgAttributeChange.js';
 import { createQrcodeCommand } from '../command/CommandCreoleQrcode.js';
 
 /** Upstream: `CommandCreoleBuilder#addCommand` — fans one Command's
@@ -162,6 +163,10 @@ function buildCommandMap(mode: 'FULL' | 'OTHER'): Map<string, Command[]> {
   // pair, before url. `""` is a starter no other command claims.
   addCommand(map, createMonospacedCommand());
   addCommand(map, createUrlCommand());
+  // java :119-122: `if (SecurityUtils.allowSvgText()) addCommand(
+  // CommandCreoleSvgAttributeChange.create())` -- right after url;
+  // `allowSvgText()` is `true` (SecurityUtils.java:258-260). Only `create()`.
+  addCommand(map, createSvgAttributeChangeCommand());
   return map;
 }
 
