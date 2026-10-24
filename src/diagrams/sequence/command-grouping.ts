@@ -121,6 +121,18 @@ function groupBodyBackground(state: ParseState): string | undefined {
   return state.style.params.getHtmlColorToken('sequenceGroupBodyBackground');
 }
 
+/**
+ * `GroupingStart#isParallel` is `parallel || isPar2GroupStart()`
+ * (`GroupingStart.java:104-107`), `isPar2GroupStart()` being
+ * `getTitle().equals("par2")` (`:112-114`). The title is the lower-cased TYPE
+ * keyword (`CommandGrouping.java:136`) unless the `group` rewrite replaced it
+ * (`:143-146`), so a `par2` opener is parallel to the previous tile (read by
+ * `teoz/GroupingTile.java:145-154`) with no `&`.
+ */
+function isPar2GroupStart(title: string): boolean {
+  return title === 'par2';
+}
+
 // 10. Frame types (loop, alt, opt, par, par2, break, critical, group).
 //     T13: added `par2` (`GroupingType.getType`, a same-visual-class START
 //     alongside `par`) and a COLORS pair mirroring `CommandGrouping`'s
@@ -164,7 +176,7 @@ export const groupingCommand: Command = {
       branchColors: [backColorGeneral],
       styleBuilder,
       branchStyleBuilders: [styleBuilder],
-      ...(match[1] !== undefined ? { parallel: true } : {}),
+      ...(match[1] !== undefined || isPar2GroupStart(title ?? frameType) ? { parallel: true } : {}),
       ...(backColorElement !== undefined ? { backColorElement } : {}),
       ...(backColorGeneral !== undefined ? { backColorGeneral } : {}),
     };

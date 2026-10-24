@@ -113,8 +113,8 @@ function titleBlock(tabText: string, headerPaint: SequencePaint, ctx: TextEnv) {
  * The header tab's `Display`, split by `groupingHeaderDisplay`
  * (`GroupingTile.java:127-128`), then measured at `styleHeader`'s font --
  * `ComponentRoseGroupingHeader.java:107-123` / `AbstractTextualComponent
- * .java:100-114`, with `getSuppHeightForComment` and `commentMargin * 2`
- * both 0. An empty `branchLabels[0]` is "no comment", as `groupingCommand`
+ * .java:100-114`, with `commentMargin * 2` 0. `tabHeight` is the DRAWN
+ * corner's; `getSuppHeightForComment` is `headerHeight`'s. An empty `branchLabels[0]` is "no comment", as `groupingCommand`
  * defaults a conditionless frame's label to `''`.
  */
 export function computeHeaderTab(event: FrameEvent, headerPaint: SequencePaint, ctx: TextEnv): HeaderTab {
@@ -174,14 +174,38 @@ export function buildTabRuns(tab: HeaderTab, paints: FramePaints, x: number, y: 
  */
 export function headerWidth(tab: HeaderTab, paint: SequencePaint, ctx: TextEnv): number {
   if (tab.tabComment === undefined) return tab.tabWidth;
-  const comment = alignedBlockRuns(
-    displayLines(`[${tab.tabComment}]`),
+  return tab.tabWidth + HEADER_PADDING.left + commentBlock(tab.tabComment, paint, ctx).width;
+}
+
+/** The `[comment]` block at `style`'s `smallFont2`, LEFT, no margins
+ *  (`ComponentRoseGroupingHeader.java:84,89-90`), at the origin: the one
+ *  block `headerWidth` and `headerHeight` both measure. */
+function commentBlock(comment: string, paint: SequencePaint, ctx: TextEnv) {
+  return alignedBlockRuns(
+    displayLines(`[${comment}]`),
     paint.font,
     { leftX: 0, top: 0 },
     HorizontalAlignment.LEFT,
     headerBlockContext(paint, ctx, false),
   );
-  return tab.tabWidth + HEADER_PADDING.left + comment.width;
+}
+
+/** The `[comment]` block's own height past the 15 px a one-line tab absorbs:
+ *  `getSuppHeightForComment` (`ComponentRoseGroupingHeader.java:95-105`). */
+const COMMENT_FREE_HEIGHT = 15;
+
+/**
+ * The header component's preferred HEIGHT (`GroupingTile.java:157,257-259,
+ * 349-365`): `getTextHeight + 2 * getPaddingY + getSuppHeightForComment`
+ * (`ComponentRoseGroupingHeader.java:121-122`), where the supplement is the
+ * `[comment]` block's height less 15 when taller than 15, else 0
+ * (`:95-105`). `tab.tabHeight` is the first two terms and is what the corner
+ * is DRAWN at (`:138-142`); this is the LAYOUT advance.
+ */
+export function headerHeight(tab: HeaderTab, paint: SequencePaint, ctx: TextEnv): number {
+  if (tab.tabComment === undefined) return tab.tabHeight;
+  const height = commentBlock(tab.tabComment, paint, ctx).height;
+  return tab.tabHeight + (height > COMMENT_FREE_HEIGHT ? height - COMMENT_FREE_HEIGHT : 0);
 }
 
 /**

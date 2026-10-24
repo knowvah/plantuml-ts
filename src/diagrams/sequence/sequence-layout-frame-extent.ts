@@ -256,7 +256,9 @@ function geoSpans(geos: readonly EventGeo[], start: number, xOrigin: number): XS
  *
  * - note: `NoteTile#getMinX`/`#getMaxX` (`:279-296`), which the geo carries
  *   (`drawnMaxX` instead of `maxX` for a self message's right note,
- *   `CommunicationTileSelfNoteRight#getDrawnMaxX:154-178`);
+ *   `CommunicationTileSelfNoteRight#getDrawnMaxX:154-178`; `drawnMinX` instead
+ *   of `minX` for its left note, `CommunicationTileSelfNoteLeft#getDrawnMinX
+ *   :170-177`);
  *   a note on a message widens its wrapper by exactly its own extent
  *   (`CommunicationTileNoteRight.java:242-250`, `...NoteLeft:219-225`,
  *   `...NoteBottomTopAbstract:144-155`).
@@ -269,7 +271,7 @@ function geoSpans(geos: readonly EventGeo[], start: number, xOrigin: number): XS
 function geoSpan(geo: EventGeo, xOrigin: number): XSpan | undefined {
   switch (geo.kind) {
     case 'note':
-      return { min: geo.minX, max: geo.drawnMaxX ?? geo.maxX };
+      return { min: geo.drawnMinX ?? geo.minX, max: geo.drawnMaxX ?? geo.maxX };
     case 'delay':
       return { min: geo.middleX - geo.textWidth / 2, max: geo.middleX + geo.textWidth / 2 };
     case 'divider':

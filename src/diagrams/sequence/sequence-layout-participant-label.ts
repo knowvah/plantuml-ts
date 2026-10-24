@@ -109,6 +109,14 @@ export interface HeadDisplay {
   readonly stereoFont: FontConfiguration;
   /** `Participant.stereotypePositionTop` false (`Participant.java:128-131`). */
   readonly stereotypeBottom?: boolean | undefined;
+  /** `Participant#getDisplay(true)` = `Display#underlined` (`Participant.java
+   *  :125-126`): the name lines carry `<u>`, the stereotype rows do not. */
+  readonly underlined?: boolean | undefined;
+}
+
+/** `"<u>" + line` (`Display.java:462-469`). */
+export function underlineLine(line: string): string {
+  return `<u>${line}`;
 }
 
 /**
@@ -123,9 +131,12 @@ export function headRowsOf(
     readonly font: FontConfiguration;
     readonly stereoFont: FontConfiguration;
     readonly stereotypeBottom?: boolean | undefined;
+    readonly underlined?: boolean | undefined;
   },
 ): HeadDisplay {
-  return { stereotypeLines, lines: displayLines(display), ...fonts };
+  // `Display#underlined` prefixes every (already split) line (`Display.java:462-469`).
+  const lines = displayLines(display);
+  return { stereotypeLines, lines: fonts.underlined === true ? lines.map(underlineLine) : lines, ...fonts };
 }
 
 /** How a head's block is drawn: its `Back` (the sprite tint start), its ink
@@ -326,6 +337,7 @@ export function buildLabelRuns(
     font: paint.font,
     stereoFont,
     stereotypeBottom: p.stereotypeBottom,
+    underlined: p.underlined,
   });
   const block = headBlock(head, ctx, {
     align: paint.align ?? HorizontalAlignment.CENTER,

@@ -445,8 +445,13 @@ describe('measureFixture', () => {
     expect(result.error).toBeUndefined();
     expect(result.slug).toBe(BEXOCE.slug);
     // Shape, not a pinned value: this branch is under concurrent edit.
+    // `bexoce` reached zero diffs at sdd3 batch 1 (T1g, `523e63daa`:
+    // `LifeEventTile.java:64-71,95` — the note-wrapper life step) and is
+    // pinned, so the score is 0 today; asserting `> 0` would fail because
+    // the port improved. The historical scores stay in `BEXOCE` for the
+    // synthetic `classify` tests below.
     expect(typeof result.score).toBe('number');
-    expect(result.score).toBeGreaterThan(0);
+    expect(result.score).toBeGreaterThanOrEqual(0);
     // `childDistance` is legitimately `number | null` HERE, and null is the
     // reading as of `sequence-command-coverage` batch 4.
     //

@@ -28,9 +28,10 @@ tools/`, `$M` = `plans/sequence-divergence-drive-3/measurements/`.
    with its mechanism. No mechanism = stop 4/5.
 7. **Re-pin baselines.** `npx jiti scripts/sequence-repin-snapshot.ts
    $M/bN-snap.json` then `npx jiti scripts/repin-sequence-baselines.ts
-   $M/bN-snap.json`; then `npx jiti tests/oracle/svg-conformance/
-   sequence-diff-census.ts`. Diff the baseline JSON before/after: every row
-   that ROSE gets its own journal line or the re-pin is reverted.
+   $M/bN-snap.json`. Diff the baseline JSON before/after: every row
+   that ROSE gets its own journal line or the re-pin is reverted. The census
+   runs AFTER the pin (8b): it enumerates `status: baseline` rows (b1 close,
+   journal row 28).
 8. **Pin.** Every fixture whose classify `n === 0`:
    `npx jiti $T/pin-goldens.mts sdd3-bN close-bN <slug...>`; check the
    `$comment` it appends to `routing-baseline.json`/`refusal-baseline.json`
@@ -39,11 +40,14 @@ tools/`, `$M` = `plans/sequence-divergence-drive-3/measurements/`.
    (three literals: the manifest total in both files, `pinnedAgree`,
    `pinnedRendering`), each with a dated derivation comment. Run the golden
    and diff-baseline ratchets.
+   8b. `npx jiti tests/oracle/svg-conformance/sequence-diff-census.ts`, then
+   `sequence-diff-census.test.ts`.
 9. **Ledger.** `fixtures.md`: counts row for `bN`; pinned rows get
    `final = pinned (<commit>)`; every row a task targeted and missed names its
    remaining mechanism and owner.
-10. **Dashboard.** `npm run parity:dashboard`; `npm run catalog` if exports
-    changed.
+10. **Dashboard.** `npm run parity:dashboard` AFTER every `parity-*.json`
+    re-pin of step 5 (the D9 drift gate reads every engine's pin — b1 close,
+    journal row 30); `npm run catalog` if exports changed.
 11. **Brief.** Tick the batch in `README.md` and its `overview.md`.
 12. **Commit.** Full gates again (pins changed), then
     `chore(sdd3-bN): close batch N — <pins> pinned, sum <score>`. Body:

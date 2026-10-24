@@ -1,0 +1,11 @@
+@startuml
+  par2
+    Axxx ->Axxx2 : message1 which is long
+    Axxx ->Axxx2 : message1 which is long
+    Axxx ->Axxx2 : message1 which is long
+  else
+	  Bxxx ->Cxxx : message2
+  end
+
+Cxxx -> Dxxx : message4
+@enduml

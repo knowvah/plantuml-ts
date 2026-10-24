@@ -55,6 +55,7 @@ import { canvasOf, documentChromeOf, preChromeDims } from './renderer-document.j
 import { sequenceShadowDefs } from './sequence-shadow.js';
 import { renderBoxBackground, renderNote, renderNoteBackground } from './renderer-note.js';
 import { NEWPAGE_MARGIN_Y } from './newpage-style.js';
+import { applyColorMapperToFragment, colorMapperOf } from '../../core/klimt/color/fragment-color-mapper.js';
 
 /**
  * ONE creole run as a `<text>`, at the caller's ambient font wherever creole
@@ -393,7 +394,12 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
 
   const shadowDefs = sequenceShadowDefs(scaledGeo, scaledTheme);
   return {
-    body: children.join(''),
+    // sdd3-T1h: `TitledDiagram#muteColorMapper` (`TitledDiagram.java:292-299`)
+    // installs MONOCHROME / MONOCHROME_REVERSE on the exporter for the whole
+    // draw pass (`UgDiagram.java:134-135`), so EVERY colour the body draws is
+    // mapped (`ColorMapper.java:80-91`) -- applied once to the assembled body,
+    // as activity does (`activity/renderer.ts`). No mapper is a no-op.
+    body: applyColorMapperToFragment(children.join(''), colorMapperOf(theme)),
     ...canvasOf(geo, k),
     ...preChromeDims(scaledGeo, k),
     ...documentChromeOf(theme),

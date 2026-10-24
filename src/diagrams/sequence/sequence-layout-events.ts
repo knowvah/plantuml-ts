@@ -14,24 +14,19 @@
 import type {
   AbstractMessageEvent,
   ActivationEvent,
-  DelayEvent,
   DestroyCross,
   DividerGeo,
   EventGeo,
   MessageEvent,
   MessageGeo,
   MessageExoEvent,
-  NewpageEvent,
-  NoteEvent,
   NewpageGeo,
+  NoteEvent,
   ParticipantGeo,
   SequenceEvent,
-  SpaceEvent,
-  SpaceGeo,
   TextRun,
 } from './ast.js';
 import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
-import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import { selfMinX } from './sequence-note-anchor.js';
 import { notesOnMessages, type NoteOwner } from './sequence-note-folding.js';
 import {
@@ -41,17 +36,15 @@ import {
   noteTileMetrics,
   notesGroupMetrics,
 } from './sequence-layout-note.js';
-import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
 import type { MessageLabelEnv } from './text-block-geo.js';
 import { handleMessageEvent, messageTileMetrics } from './sequence-layout-message.js';
-import { layoutDelay } from './sequence-delay.js';
 import type { MessageLevels } from './sequence-layout-participants.js';
 import { exoTileMetrics, handleMessageExoEvent } from './sequence-layout-exo.js';
-import type { ActivationStack } from './sequence-layout-activation.js';
+import { setOwnTileMax, type ActivationStack } from './sequence-layout-activation.js';
 import { handleActivateEvent, handleDeactivateEvent } from './sequence-layout-life-event.js';
 import { handleDividerEvent } from './sequence-layout-divider.js';
-import { handleFrameEvent } from './sequence-layout-frame.js';
-import { newpageStyle, paintOf } from './sequence-skin-param.js';
+import { handleDelayEvent, handleNewpageEvent, handleSpaceEvent } from './sequence-layout-simple-tiles.js';
+import { handleFrameEvent, type TileRecord } from './sequence-layout-frame.js';
 import {
   createGauge,
   createParallel,
@@ -127,6 +120,10 @@ export interface EventProcessingContext extends MessageLabelEnv {
    *  read through `sequence-y-gauge.ts#messageTileGauge`. Created by
    *  {@link processEvents}. */
   messageTileGauges?: Map<AbstractMessageEvent, MessageTileGauge>;
+  /** The tiles of the group being walked, in order -- what `GroupingTile`'s
+   *  `tiles` list holds (`GroupingTile.java:178-182`) -- for its height-only
+   *  cluster pass (`:1093-1146`). Set by `sequence-layout-frame.ts`. */
+  tileLog?: TileRecord[] | undefined;
 }
 
 /** Running Y cursor. */
@@ -157,14 +154,21 @@ interface TileRun {
  * place. Returns the last tile's gauge max -- the height the list occupies
  * (`PlayingSpace#drawUInternal:136-143`).
  */
-export function processEvents(events: SequenceEvent[], startY: number, ctx: EventProcessingContext): number {
+export function processEvents(
+  events: SequenceEvent[],
+  startY: number,
+  ctx: EventProcessingContext,
+  startGauge: YGauge = createGauge(startY, 0),
+): number {
   ctx.messageTileGauges ??= new Map();
   const notesOf = notesOnMessages(events);
   const folded = new Set([...notesOf.values()].flat());
   const { tiles, groups } = mergeNotes(events.filter((e) => !folded.has(e as NoteEvent)));
   const run: TileRun = { tiles, notesOf, groups, metrics: new Map() };
-  // `PlayingSpace.java:89`: the chain starts from a contact-less gauge.
-  const cursor: EventCursor = { y: startY, gauge: createGauge(startY, 0) };
+  // `PlayingSpace.java:89`: the chain starts from a contact-less gauge -- or,
+  // in a group's branch after an `else`, from the else tile's own
+  // (`GroupingTile.java:178-182`, `currentY = tile.getYGauge()`).
+  const cursor: EventCursor = { y: startY, gauge: startGauge };
   for (let k = 0; k < run.tiles.length; k++) dispatchTile(run, k, cursor, ctx);
   return cursor.y;
 }
@@ -300,6 +304,7 @@ function dispatchTile(run: TileRun, k: number, cursor: EventCursor, ctx: EventPr
   if (isContactTile(event)) return placeContactTile(run, k, cursor, ctx);
   const before = cursor.gauge;
   dispatchEvent(event, cursor, ctx, run.notesOf);
+  logGenericTile(event, cursor.y - before.max, ctx);
   // Every other tile chains below the previous max: `createPropagating` for a
   // life event or a space, `YGauge.create(currentY.getMax(), ...)` for a
   // divider, delay, reference, newpage or group (`DividerTile.java:72`,
@@ -313,6 +318,25 @@ function dispatchTile(run: TileRun, k: number, cursor: EventCursor, ctx: EventPr
   }
   const min = isParallelGroup(event) ? before.min : before.max;
   cursor.gauge = createGauge(min, cursor.y - min);
+}
+
+/**
+ * The `Tile` a non-contact event stands for, as the group's height pass reads
+ * it: `getContactPointRelative` is `AbstractTile`'s `-1`
+ * (`AbstractTile.java:58-60`) unless the tile overrides it -- `LifeEventTile`
+ * (`:79-81`) and `NewpageTile` (`:66-68`) answer 0. A group is logged by
+ * `handleFrameEvent` (it alone knows its intrinsic height); a `ref` is not
+ * a group.
+ */
+function logGenericTile(event: SequenceEvent, height: number, ctx: EventProcessingContext): void {
+  if (ctx.tileLog === undefined || (event.kind === 'frame' && event.frameType !== 'ref')) return;
+  const lifeEvent = event.kind === 'activate' || event.kind === 'deactivate';
+  ctx.tileLog.push({
+    parallel: false,
+    lifeEvent,
+    contactRelative: lifeEvent || event.kind === 'newpage' ? 0 : -1,
+    height,
+  });
 }
 
 /** A `&` grouping (`GroupingStart#isParallel`); a `ref` is a `ReferenceTile`,
@@ -329,6 +353,8 @@ function placeStackedNote(event: NoteEvent, cursor: EventCursor, ctx: EventProce
   handleNoteEvent(event, gauge, ctx);
   cursor.gauge = gauge;
   cursor.y = gauge.max;
+  const last = ctx.tileLog?.at(-1);
+  if (last !== undefined) last.height += gauge.max - gauge.min;
 }
 
 /**
@@ -362,9 +388,16 @@ function placeContactTile(run: TileRun, k: number, cursor: EventCursor, ctx: Eve
       { gauge, height: metrics.height, contactRelative: metrics.contactRelative, firstGeo },
       ctx,
     );
+    if (event.kind === 'message' && outer !== gauge) setOwnTileMax(ctx, event, outer.max);
   }
   cursor.gauge = afterOwnLifeEvents(event, outer, ctx);
   cursor.y = cursor.gauge.max;
+  ctx.tileLog?.push({
+    parallel: isParallel(run, event),
+    lifeEvent: false,
+    contactRelative: metrics.contactRelative,
+    height: outer.max - outer.min,
+  });
 }
 
 /**
@@ -442,58 +475,4 @@ function dispatchEvent(
  *  for ONE line. */
 export function blockWidthOf(runs: readonly TextRun[]): number {
   return Math.max(0, ...runs.map((r) => r.x + r.textWidth));
-}
-
-/**
- * `DelayTile` (`teoz/DelayTile.java`): the tile reserves its `DELAY_TEXT`
- * component's height -- a bare `...` included, whose `Display.empty()` makes
- * it `0 + 4 + 4 + 20` -- and is laid out, drawn and allowed to cut the
- * lifelines and activation bars by `sequence-delay.ts`.
- */
-function handleDelayEvent(event: DelayEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
-  const geo = layoutDelay(event, cursor.y, [...ctx.participantMap.values()], ctx.measurer, ctx.sprites);
-  ctx.eventGeos.push(geo);
-  cursor.y += geo.height;
-}
-
-/**
- * `NewpageTile` (`teoz/NewpageTile.java:63-67`): a tile whose `YGauge` starts
- * at the running cursor and whose height is a CONSTANT
- * `getPreferredHeight()` — no measurement, no participant lookup. The cursor
- * advances by that height like it does past any other tile, which is what
- * makes `newpage` occupy 21px of the diagram rather than nothing.
- *
- * The tile draws nothing in the background pass (`drawU` returns early on
- * `isBackground`) and one `ULine.hline` in the foreground; the band it spans
- * is back-filled in Step 3. Its paint is `ComponentType.NEWPAGE`'s style,
- * merged in the constructor from the builder current at the command
- * (`Newpage.java:55-57`, `SequenceDiagram.java:248`), read by
- * `ComponentRoseNewpage` (`:54-64`: `getColorLine()`, `getStroke()`).
- */
-function handleNewpageEvent(event: NewpageEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
-  const newpageGeo: NewpageGeo = {
-    paint: paintOf(newpageStyle(event.styleBuilder), HColorSet.instance()),
-    kind: 'newpage',
-    y: cursor.y,
-    height: NEWPAGE_TILE_HEIGHT,
-    bandX: 0, // both back-filled once totalWidth is known (Step 3)
-    bandWidth: 0,
-  };
-  ctx.eventGeos.push(newpageGeo);
-  ctx.newpageGeos.push(newpageGeo);
-  cursor.y += newpageGeo.height;
-}
-
-function handleSpaceEvent(event: SpaceEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
-  const spaceGeo: SpaceGeo = {
-    kind: 'space',
-    y: cursor.y,
-    height: event.pixels,
-  };
-  ctx.eventGeos.push(spaceGeo);
-  // Exactly the requested pixels, and nothing beside them. `HSpaceTile:72-75`
-  // returns the `HSpace`'s own pixel count as its preferred height, and
-  // `ComponentRoseGroupingSpace#getPreferredHeight:66-69` returns the `space
-  // N` argument -- neither adds a gap, because tiles chain flush.
-  cursor.y += event.pixels;
 }

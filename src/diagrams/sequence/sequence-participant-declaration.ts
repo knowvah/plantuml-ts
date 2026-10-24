@@ -212,15 +212,26 @@ function parseParticipantName(head: string): { id: string; display: string } {
  * `(.+)` catch-all (unlike upstream's four separate, narrower grammars), so
  * a shape none of the four registered subclasses accepts would otherwise be
  * silently absorbed here instead of refusing the line.
+ *
+ * `readTopUrl` stands for `diagram.getSkinParam().getValue("topurl")`
+ * (`CommandParticipant.java:187-192`, `CommandParticipantMultilines.java:
+ * 163-168`). It is a thunk because upstream reads the value only inside
+ * `if (urlString != null)`, and the legacy `getValue` caches its first answer
+ * per diagram -- an eager read at a url-less line would freeze that answer
+ * earlier than the jar does.
  */
-export function parseParticipantDeclaration(rest: string): ParticipantDeclaration {
+export function parseParticipantDeclaration(
+  rest: string,
+  readTopUrl: () => string | null = () => null,
+): ParticipantDeclaration {
   if (MISPLACED_STEREOTYPE_RE.test(rest)) {
     throw new SequenceCommandRefusal(
       'participant: no CommandParticipantA/A2/A3/A4 grammar allows a <<stereotype>> between a quoted display and "as CODE"',
     );
   }
   const { head, color, stereotype, url, order } = stripParticipantTail(rest);
-  return { ...parseParticipantName(head), color, stereotype, url: participantUrlOf(url), order };
+  const topurl = url === undefined ? null : readTopUrl();
+  return { ...parseParticipantName(head), color, stereotype, url: participantUrlOf(url, topurl), order };
 }
 
 /**
@@ -231,10 +242,15 @@ export function parseParticipantDeclaration(rest: string): ParticipantDeclaratio
  * deliberately not drawn (`renderer-message.ts`). A participant's reaches
  * the SVG, and the jar puts the tooltip in `title` and `xlink:title`, so
  * both halves survive here.
+ *
+ * `topurl` is the `UrlBuilder` constructor's first argument
+ * (`UrlBuilder.java:140-146`); the declaration commands pass
+ * `skinparam topurl` (`CommandParticipant.java:189`), and `CommandUrl`
+ * (which passes it too, `CommandUrl.java:98`) still omits it.
  */
-export function participantUrlOf(raw: string | undefined): ParticipantUrl | undefined {
+export function participantUrlOf(raw: string | undefined, topurl: string | null = null): ParticipantUrl | undefined {
   if (raw === undefined) return undefined;
-  const resolved = new UrlBuilder(null, UrlMode.STRICT).getUrl(raw);
+  const resolved = new UrlBuilder(topurl, UrlMode.STRICT).getUrl(raw);
   if (resolved === null || resolved === undefined) return undefined;
   return { url: resolved.getUrl(), tooltip: resolved.getTooltip() };
 }

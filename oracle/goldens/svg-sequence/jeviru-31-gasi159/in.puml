@@ -1,0 +1,4 @@
+@startuml
+skinparam sequenceParticipant underline
+Alice -> Bob : hello
+@enduml

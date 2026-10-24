@@ -10,6 +10,8 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | checkpoint | zero | paint-only | geometry | structural | error | Σ ws | pins |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | planning | 1042 | 17 | 52 | 32 | 0 | 3800 | 1042 |
+| b0 | 1042 | 17 | 52 | 32 | 0 | 3800 | 1042 |
+| b1 | 1058 | 15 | 38 | 32 | 0 | 3281 | 1058 |
 
 ## Open rows (101)
 
@@ -17,9 +19,9 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 |---|---|---:|---|---|---|
 | jefoke-95-jara779 | structural | 280 | handwritten-unported | T8f | |
 | gepuce-64-pivu656 | structural | 241 | handwritten-unported | T8f | |
-| jexavi-40-degi377 | geometry | 213 | par2-not-parallel | T1a | |
+| jexavi-40-degi377 | geometry | 213 | par2-not-parallel | T1a | open -> T5b: 121 left after T1a/T1a2 (`0a3779247`); x residual 113.769 px — `pairConstraint` drops the pair but a symbolic span is not the fix; candidate: `RealMax` first-read cache freezes `ensureBiggerThan` forces (`PlayingSpace.java:188-199,240-266`, `RealMin.java:81-85`, `RealLine.java:68-100`), unverified (journal 22) |
 | pafene-01-tedi758 | structural | 173 | handwritten-unported | T8f | |
-| daduxi-21-duse542 | geometry | 172 | par2-not-parallel | T1a | |
+| daduxi-21-duse542 | geometry | 172 | par2-not-parallel | T1a | pinned (0a3779247) at b1 |
 | baketu-62-cumu838 | geometry | 168 | scale-excludes-chrome | T3b | |
 | tumuke-16-xomo243 | geometry | 168 | scale-excludes-chrome | T3b | |
 | dolefo-13-kovu702 | geometry | 164 | scale-excludes-chrome | T3b | |
@@ -28,7 +30,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | kepuxa-88-juxu405 | geometry | 94 | scale-excludes-chrome | T3b | |
 | nabesa-52-nufu501 | geometry | 94 | scale-excludes-chrome | T3b | |
 | vikelu-53-faga789 | geometry | 94 | scale-excludes-chrome | T3b | |
-| nuzise-60-temi305 | geometry | 87 | self-note-left-anchor | T1b | |
+| nuzise-60-temi305 | geometry | 87 | self-note-left-anchor | T1b | pinned (22f543eb3) at b1 |
 | vijito-33-mora824 | geometry | 68 | document-margin-style-ignored | T2d | |
 | vitusu-66-boxa381 | geometry | 68 | document-margin-style-ignored | T2d | |
 | xalafa-49-xere690 | geometry | 68 | document-margin-style-ignored | T2d | |
@@ -36,7 +38,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | ripura-92-vacu541 | structural | 62 | url-label-newline-split | T2e | |
 | bucebo-91-xavo442 | structural | 59 | svgparser-sax-unported | T4f | |
 | jujigi-41-zodo151 | geometry | 58 | scale-excludes-chrome | T3b | |
-| tukobo-89-zebi935 | geometry | 58 | par2-not-parallel | T1a | |
+| tukobo-89-zebi935 | geometry | 58 | par2-not-parallel | T1a | pinned (0a3779247) at b1 |
 | fifasu-62-pipo979 | structural | 57 | remote-image-io | T6g | |
 | suzumi-85-nuzo693 | geometry | 54 | scale-excludes-chrome | T3b | |
 | vopixi-04-lako436 | structural | 51 | url-label-newline-split | T2e | |
@@ -45,7 +47,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | vivava-25-vuba802 | structural | 33 | svgparser-sax-unported | T4f | |
 | bocudo-94-jode371 | geometry | 31 | scale-excludes-chrome | T3b | |
 | jesari-34-mudu065 | geometry | 31 | scale-excludes-chrome | T3b | |
-| refiju-27-nupe082 | geometry | 31 | par2-not-parallel | T1a | |
+| refiju-27-nupe082 | geometry | 31 | par2-not-parallel | T1a | pinned (0a3779247) at b1 |
 | regate-07-rore899 | geometry | 31 | scale-excludes-chrome | T3b | |
 | lokonu-29-zafi019 | structural | 30 | svgparser-sax-unported | T4f | |
 | sebafe-48-pepu053 | structural | 30 | svgparser-sax-unported | T4f | |
@@ -54,7 +56,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | zavacu-31-dola792 | geometry | 27 | scale-excludes-chrome | T3b | |
 | zunile-23-zezi158 | geometry | 27 | scale-excludes-chrome | T3b | |
 | labite-99-lufe939 | structural | 25 | svgparser-sax-unported | T4f | |
-| ralucu-86-voxa492 | structural | 24 | svgparser-sax-unported | T4f | |
+| ralucu-86-voxa492 | structural | 24 | svgparser-sax-unported | T4f | 20 left after T1h (`2486b1af0`): paint diffs were monochrome; remainder `svg/defs childCount` 0 vs 1 + `svg/g childCount` 13 vs 14 (its own family, owner unchanged) |
 | tifube-59-tezo313 | geometry | 21 | filename-env-unwired | T6f | |
 | vibaru-39-gebo741 | structural | 21 | svgparser-sax-unported | T4f | |
 | zimoci-54-sedi066 | structural | 21 | svgparser-sax-unported | T4f | |
@@ -64,7 +66,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | ruboxu-79-joxa034 | structural | 20 | svgparser-sax-unported | T4f | |
 | sodovo-72-kudu756 | structural | 20 | svgparser-sax-unported | T4f | |
 | kixani-97-giji283 | geometry | 19 | alpha-hex-fill-unsplit | T2a | |
-| zedepi-36-come743 | geometry | 19 | group-header-comment-supp-height | T1d | |
+| zedepi-36-come743 | geometry | 19 | group-header-comment-supp-height | T1d | pinned (b1d7e7c68) at b1 |
 | cizeja-06-zedi526 | geometry | 18 | creole-svg-attribute-unported | T2f | |
 | rolota-48-cedi081 | structural | 18 | svgparser-sax-unported | T4f | |
 | lukivo-17-cose300 | structural | 16 | svgparser-sax-unported | T4f | |
@@ -72,16 +74,16 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | vasuvo-82-boxu402 | geometry | 14 | alpha-hex-fill-unsplit | T2a | |
 | zexaja-95-zofi201 | structural | 14 | svgparser-sax-unported | T4f | |
 | dedude-72-xuta800 | structural | 13 | svgparser-sax-unported | T4f | |
-| xezipe-17-tima059 | paint-only | 12 | monochrome-mapper-unported | T1h | |
+| xezipe-17-tima059 | paint-only | 12 | monochrome-mapper-unported | T1h | pinned (2486b1af0) at b1 |
 | zolude-08-leka122 | structural | 12 | svgparser-sax-unported | T4f | |
 | posura-78-koji601 | structural | 11 | svgparser-sax-unported | T4f | |
 | gebeki-18-muci858 | geometry | 8 | blotter-scaled-offset-and-path-stroke | T2b | |
-| modamu-43-juci519 | geometry | 8 | participant-topurl-ignored | T1c | |
-| mugidu-43-jizu986 | geometry | 8 | participant-topurl-ignored | T1c | |
-| xepoda-56-xema668 | geometry | 8 | participant-topurl-ignored | T1c | |
+| modamu-43-juci519 | geometry | 8 | participant-topurl-ignored | T1c | pinned (df9bbfd3e) at b1 |
+| mugidu-43-jizu986 | geometry | 8 | participant-topurl-ignored | T1c | pinned (df9bbfd3e) at b1 |
+| xepoda-56-xema668 | geometry | 8 | participant-topurl-ignored | T1c | pinned (df9bbfd3e) at b1 |
 | cabedu-56-lasa287 | geometry | 7 | blotter-scaled-offset-and-path-stroke | T2b | |
 | cokaci-31-gera999 | structural | 7 | svgparser-sax-unported | T4f | |
-| jeviru-31-gasi159 | geometry | 6 | participant-underline-unported | T1e | |
+| jeviru-31-gasi159 | geometry | 6 | participant-underline-unported | T1e | pinned (0b9a6faf0) at b1 |
 | koleji-09-doni016 | paint-only | 6 | alpha-hex-fill-unsplit | T2a | |
 | nofegi-58-kilo738 | paint-only | 6 | alpha-hex-fill-unsplit | T2a | |
 | patute-88-dena554 | structural | 6 | svgparser-sax-unported | T4f | |
@@ -90,12 +92,12 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | ruzapi-75-pone297 | structural | 5 | svgparser-sax-unported | T4f | |
 | darupa-17-dujo243 | paint-only | 4 | alpha-hex-fill-unsplit | T2a | |
 | kofixo-02-xoso627 | geometry | 4 | xlink-title-decode | T3c | |
-| libipu-23-femo315 | geometry | 4 | participant-topurl-ignored | T1c | |
+| libipu-23-femo315 | geometry | 4 | participant-topurl-ignored | T1c | pinned (df9bbfd3e) at b1 |
 | meleno-54-zume276 | paint-only | 4 | alpha-hex-fill-unsplit | T2a | |
 | xebixi-82-duji787 | paint-only | 4 | alpha-hex-fill-unsplit | T2a | |
-| zofibo-80-kisi168 | paint-only | 4 | monochrome-mapper-unported | T1h | |
+| zofibo-80-kisi168 | paint-only | 4 | monochrome-mapper-unported | T1h | pinned (2486b1af0) at b1 |
 | zuravu-52-mike252 | paint-only | 4 | upath-fore-equals-back-strokeless | T2a | |
-| jigigi-69-bege021 | geometry | 3 | natural-align-dropped | T1f | |
+| jigigi-69-bege021 | geometry | 3 | natural-align-dropped | T1f | pinned (5e359d3bc) at b1 |
 | gadiva-05-pogi376 | paint-only | 2 | alpha-hex-fill-unsplit | T2a | |
 | gaxera-69-muma363 | geometry | 2 | hsl-float32 | T2g | |
 | gizinu-51-rexo332 | paint-only | 2 | svgparser-sax-unported | T4f | |
@@ -111,8 +113,15 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | sulipe-44-jeta861 | geometry | 2 | xlink-title-decode | T3c | |
 | xonimo-63-fure722 | paint-only | 2 | alpha-hex-fill-unsplit | T2a | |
 | zogane-85-raja214 | paint-only | 2 | alpha-hex-fill-unsplit | T2a | |
-| TeozTimelineIssues_0002_Test | geometry | 1 | note-wrapper-life-step | T1g | |
-| bexoce-95-vibe195 | geometry | 1 | note-wrapper-life-step | T1g | |
-| mapeji-83-sebu002 | geometry | 1 | note-wrapper-life-step | T1g | |
+| TeozTimelineIssues_0002_Test | geometry | 1 | note-wrapper-life-step | T1g | pinned (523e63daa) at b1 |
+| bexoce-95-vibe195 | geometry | 1 | note-wrapper-life-step | T1g | pinned (523e63daa) at b1 |
+| mapeji-83-sebu002 | geometry | 1 | note-wrapper-life-step | T1g | pinned (523e63daa) at b1 |
 | musive-74-reva838 | geometry | 1 | svgparser-sax-unported | T4f | |
 | peduzi-80-giki495 | geometry | 1 | skinparam-lengthadjust-unported | T2c | |
+
+## Follow-ons filed during the drive (no open sequence row)
+
+| filed | by | mechanism | owner |
+|---|---|---|---|
+| 2026-10-22 | T1c | `CommandUrl.java:96-98` passes `skinparam topurl` to its `UrlBuilder`; `command-misc.ts:328` calls `participantUrlOf(match[2])` without it — latent for `url of X is [[/rel]]` under a topurl (libipu's `url of` lines are comments). One line; no fixture exercises it. | next drive / author a fixture |
+| 2026-10-22 | T1f | `Display.create0` applies the `\r`/`\l` natural alignment to EVERY display (`Display.java:644-649`); T1f threads it for message labels only (`messageLabelLayout`). Notes, refs, delays, participant labels and frame titles still drop it. No corpus row known to need it. | next drive / author fixtures |

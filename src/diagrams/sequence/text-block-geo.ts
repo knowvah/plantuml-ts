@@ -21,7 +21,7 @@ import type { Theme } from '../../core/theme.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { LineBreakStrategy } from '../../core/klimt/LineBreakStrategy.js';
-import type { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import type { ExtraLine } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
 import { applyPadder, padderGeoAt, type MessagePadder, type PaddedLabelBlock } from './sequence-message-padder.js';
 import type { LabelPadderGeo } from './geo-message.js';
@@ -78,10 +78,11 @@ import type { SequenceRunImage } from './sequence-text.js';
  * body and the multi-line note back to a single line.
  *
  * `splitDisplayLines` returns an `align` alongside the lines, resolved from a
- * `\l`/`\r` escape (`Display.java:290-295`). It is discarded: no sequence
- * component in this port consumes a block alignment yet, exactly as
- * `state-sizing.ts:64-74` discards it for the same reason. The BREAK those
- * two escapes also cause is honoured, which is upstream's behaviour.
+ * `\l`/`\r` escape (`Display.java:290-295`). {@link displayLines} drops it;
+ * {@link displayLinesAligned} keeps it for the one consumer that builds a
+ * `create0` block from a raw label, {@link messageLabelLayout}
+ * (`Display.java:648-649`). The BREAK those two escapes also cause is
+ * honoured either way, which is upstream's behaviour.
  *
  * ## The JAWS deprecation warning: sequence does NOT surface it
  *
@@ -100,7 +101,34 @@ import type { SequenceRunImage } from './sequence-text.js';
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/Display.java#getWithNewlines
  */
 export function displayLines(text: string): readonly string[] {
-  return text.split('\n').flatMap((entry) => splitDisplayLines(entry).lines);
+  return displayLinesAligned(text).lines;
+}
+
+/** {@link displayLines} plus `Display#getNaturalHorizontalAlignment`: the
+ *  LAST `\r` (RIGHT) / `\l` (LEFT), `undefined` for none (`Display.java:290-298`). */
+export interface AlignedDisplayLines {
+  readonly lines: readonly string[];
+  readonly align: HorizontalAlignment | undefined;
+}
+
+/** `splitDisplayLines` says `'center'` for "no escape" (`Display.java:290-295`). */
+const NATURAL_ALIGN = { left: HorizontalAlignment.LEFT, right: HorizontalAlignment.RIGHT } as const;
+
+/**
+ * {@link displayLines} plus the natural alignment `create0` lets override the
+ * component's own (`Display.java:648-649`). Upstream scans once, so the last
+ * escape in the whole text wins; this keeps the last entry that set one.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/Display.java#getWithNewlines
+ */
+export function displayLinesAligned(text: string): AlignedDisplayLines {
+  let align: HorizontalAlignment | undefined;
+  const lines = text.split('\n').flatMap((entry) => {
+    const split = splitDisplayLines(entry);
+    if (split.align !== 'center') align = NATURAL_ALIGN[split.align];
+    return split.lines;
+  });
+  return { lines, align };
 }
 
 /**
@@ -259,8 +287,7 @@ export function numberTextOf(event: {
 export const ARROW_LABEL_PADDING_X1 = 7;
 /** The same padding's right side (`AbstractComponentRoseArrow.java:62`). */
 const ARROW_LABEL_PADDING_X2 = 7;
-/** The same padding's top/bottom, which `getTextHeight` adds twice
- *  (`AbstractTextualComponent.java:110-114`). */
+/** The same padding's top/bottom, added twice by `getTextHeight` (`AbstractTextualComponent.java:110-114`). */
 const ARROW_LABEL_PADDING_Y = 1;
 
 /**
@@ -323,16 +350,17 @@ export function messageLabelLayout(
     readonly styleWidth?: LineBreakStrategy | undefined;
   } = {},
 ): PaddedLabelBlock {
+  const { lines, align: natural } = displayLinesAligned(label);
   const opts = {
     sprites: env.sprites,
-    align: draw.align,
+    align: natural ?? draw.align, // `Display.java:648-649`
     ink: draw.fore === undefined ? undefined : { fore: draw.fore },
     numberText,
     marginX1: ARROW_LABEL_PADDING_X1,
     marginX2: ARROW_LABEL_PADDING_X2,
     maxWidth: arrowMaxWidth(draw.styleWidth, env.theme?.maxMessageSize),
   };
-  return applyPadder(componentLabelBlock(displayLines(label), font, opts, env.measurer), env.padder);
+  return applyPadder(componentLabelBlock(lines, font, opts, env.measurer), env.padder);
 }
 
 /** What a label is measured with: the measurer and sprites, plus -- when the

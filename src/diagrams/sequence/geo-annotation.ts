@@ -68,6 +68,11 @@ export interface NoteGeo {
    *  #getDrawnMaxX` (`:154-178`), the loop's DRAWN max plus the note width,
    *  which a group frame folds instead of {@link maxX}. */
   drawnMaxX?: number;
+  /** A self message's left note only: `CommunicationTileSelfNoteLeft
+   *  #getDrawnMinX` (`:170-177`), the loop's DRAWN min less the note width,
+   *  which a group frame folds instead of {@link minX}
+   *  (`GroupingTile.java:211`). */
+  drawnMinX?: number;
   /** A `note top`/`note bottom` on a message: the line to the message. */
   connector?: NoteConnector;
 }

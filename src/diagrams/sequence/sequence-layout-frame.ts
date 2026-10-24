@@ -37,10 +37,12 @@ import {
   elseComponentWidth,
   elsePaint,
   groupingPaints,
+  headerHeight,
   headerWidth,
   type FramePaints,
   type HeaderTab,
 } from './sequence-frame-metrics.js';
+import { createGauge } from './sequence-y-gauge.js';
 import { handleRefEvent } from './sequence-layout-ref.js';
 import { processEvents, type EventCursor, type EventProcessingContext } from './sequence-layout-events.js';
 import {
@@ -106,6 +108,54 @@ function branchConditionRuns(
 ): readonly TextRun[] {
   const at = { leftX: origin.frameX + ELSE_PADDING_X1, top: origin.separatorY + ELSE_PADDING_Y + ELSE_TEOZ_DY };
   return alignedBlockRuns(conditionLines(label), paint.font, at, paint.align, elseContext(paint, ctx)).runs;
+}
+
+/**
+ * One `Tile` of a group's `tiles` list, as `computeBodyHeight` reads it
+ * (`GroupingTile.java:1093-1146`): `Event#isParallel`, whether it is a
+ * `LifeEventTile`, `getContactPointRelative` and `getPreferredHeight`.
+ */
+export interface TileRecord {
+  readonly parallel: boolean;
+  readonly lifeEvent: boolean;
+  readonly contactRelative: number;
+  /** Mutable: a stacked note folds into the message tile it wraps. */
+  height: number;
+}
+
+/** `flushPending` (`GroupingTile.java:1127-1149`): a `&` run is one cluster,
+ *  `max(contact) + max(getZZZ)` (`AbstractTile.java:62-66`, `getZZZ =
+ *  getPreferredHeight - getContactPointRelative`); any other run is the sum. */
+function flushPending(pending: readonly TileRecord[], wasCluster: boolean): number {
+  if (!wasCluster) return pending.reduce((sum, t) => sum + t.height, 0);
+  const contact = Math.max(0, ...pending.map((t) => t.contactRelative));
+  const after = Math.max(0, ...pending.map((t) => t.height - t.contactRelative));
+  return contact + after;
+}
+
+/**
+ * `GroupingTile#computeBodyHeight` (`GroupingTile.java:1093-1125`): the height
+ * of the group's tiles with each `&` cluster counted once. A parallel tile
+ * joins the pending run; a `LifeEventTile` is held in it without being a
+ * separator; any other tile flushes the run and seeds a new one.
+ */
+export function computeBodyHeight(tiles: readonly TileRecord[]): number {
+  let total = 0;
+  let pending: TileRecord[] = [];
+  let clusterOpen = false;
+  for (const tile of tiles) {
+    if (tile.parallel) {
+      clusterOpen = true;
+      pending.push(tile);
+    } else if (tile.lifeEvent) {
+      pending.push(tile);
+    } else {
+      total += flushPending(pending, clusterOpen);
+      clusterOpen = false;
+      pending = [tile];
+    }
+  }
+  return total + flushPending(pending, clusterOpen);
 }
 
 /** A note written after a group's `end`, its slot in `eventGeos` reserved
@@ -202,7 +252,17 @@ function pushElseTile(
   // x, width and runs are placeholders -- filled by `resolveFrame`.
   const geo: ElseGeo = { paint, kind: 'else', x: 0, width: 0, y, runs: [] };
   ctx.eventGeos.push(geo);
-  cursor.y += separatorHeight(label, paint, ctx);
+  const height = separatorHeight(label, paint, ctx);
+  cursor.y += height;
+  // `ElseTile#getContactPointRelative` is 0 (`ElseTile.java:70-72`);
+  // `GroupingLeaf#isParallel` is `start.isPar2GroupStart()`
+  // (`GroupingLeaf.java:100-104`).
+  ctx.tileLog?.push({
+    parallel: (event.title ?? event.frameType) === 'par2',
+    lifeEvent: false,
+    contactRelative: 0,
+    height,
+  });
   return { geo, label, width: elseComponentWidth(label, paint, ctx) };
 }
 
@@ -217,10 +277,14 @@ function walkBranches(
   const elses: PendingElse[] = [];
   event.branches.forEach((branch, i) => {
     const leaf = new Set(i === 0 ? [] : elseLeafNotes(branch));
+    const elseTop = cursor.y;
     if (i > 0) elses.push(pushElseTile(event, i, frameGeo, cursor, ctx));
     // The `else` leaf's own notes are stored, never drawn (`elseLeafNotes`).
     const drawn = i === 0 ? branch : branch.filter((e) => !leaf.has(e as NoteEvent));
-    cursor.y = processEvents(drawn, cursor.y, ctx);
+    // The branch's first tile chains on the else tile's gauge, `YGauge.create(
+    // currentY.getMax(), h)` (`ElseTile.java:80`): a `&` first tile aligns on
+    // its MIN, the else's top (`YGauge.java:127-129`).
+    cursor.y = processEvents(drawn, cursor.y, ctx, i > 0 ? createGauge(elseTop, cursor.y - elseTop) : undefined);
   });
   return elses;
 }
@@ -332,8 +396,11 @@ export function handleFrameEvent(
   const frameStartY = event.parallel === true ? cursor.gauge.min : previousMax;
   const paints = groupingPaints(event);
   const tab = computeHeaderTab(event, paints.headerPaint, ctx);
-  // `h = dim1.getHeight() + MARGINY_MAGIC / 2 + EXTERNAL_MARGINY` (`:157`).
-  cursor.y = frameStartY + tab.tabHeight + FRAME_MARGINY_MAGIC / 2 + FRAME_EXTERNAL_MARGINY;
+  // `h = dim1.getHeight() + MARGINY_MAGIC / 2 + EXTERNAL_MARGINY` (`:157`),
+  // `dim1` the header's preferred height with the comment's supplement
+  // (`ComponentRoseGroupingHeader.java:121-122`); the drawn corner stays at
+  // `tab.tabHeight`.
+  cursor.y = frameStartY + headerHeight(tab, paints.paint, ctx) + FRAME_MARGINY_MAGIC / 2 + FRAME_EXTERNAL_MARGINY;
   // `getFrameY()` (`:247-249`) -- the drawn border, one top margin below.
   const frameDrawnY = frameStartY + FRAME_EXTERNAL_MARGINY;
   const frameGeo = openFrameGeo(event, paints, tab, frameDrawnY);
@@ -342,7 +409,14 @@ export function handleFrameEvent(
   // (`GroupingTile#drawU`, `:275-276`): their slots are reserved here.
   const endNotes = reserveEndNotes(notesOf.get(event) ?? [], frameDrawnY, ctx);
   const start = ctx.eventGeos.length;
+  const bodyStartY = cursor.y;
+  const outerLog = ctx.tileLog;
+  ctx.tileLog = [];
   const elses = walkBranches(event, frameGeo, cursor, ctx);
+  // `bodyHeight = computeBodyHeight(tiles)` (`:184`) replaces the gauge-chain
+  // sum, which counts a `par2` `else` (a parallel tile) as a separate row.
+  cursor.y = bodyStartY + computeBodyHeight(ctx.tileLog);
+  ctx.tileLog = outerLog;
   resolveFrame({ event, frameGeo, start, endNotes }, elses, paints, ctx);
   // `getTotalHeight = bodyHeight + dimIfEmpty.getHeight() + MARGINY_MAGIC / 2`
   // (`:349-352`), which `cursor.y - frameDrawnY` is exactly.
@@ -350,7 +424,15 @@ export function handleFrameEvent(
   // `getPreferredHeight` (`:355-365`) leaves `EXTERNAL_MARGINY +
   // MARGINY_MAGIC / 2` of slack below the drawn border; a parallel group's
   // max dominates the previous tile's (`parallelMax.ensureBiggerThan`, `:234-235`).
-  cursor.y = Math.max(cursor.y + FRAME_EXTERNAL_MARGINY + FRAME_MARGINY_MAGIC / 2, previousMax);
+  const preferredEnd = cursor.y + FRAME_EXTERNAL_MARGINY + FRAME_MARGINY_MAGIC / 2;
+  // This group as a tile of its parent: `getContactPointRelative` 0 (`:112-114`).
+  ctx.tileLog?.push({
+    parallel: event.parallel === true,
+    lifeEvent: false,
+    contactRelative: 0,
+    height: preferredEnd - frameStartY,
+  });
+  cursor.y = Math.max(preferredEnd, previousMax);
   // `grouping(... GroupingType.END ...)` sets `lastEventWithDeactivate` to the
   // `GroupingLeaf` (`SequenceDiagram.java:438`), which is not an
   // `AbstractMessage` -- so a `destroy` straight after `end` is standalone.

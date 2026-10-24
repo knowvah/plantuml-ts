@@ -1,0 +1,9 @@
+@startuml
+skinparam monochrome true
+Bob -> Alice : hello
+
+par
+Alice --> Bob : ok
+end
+
+@enduml

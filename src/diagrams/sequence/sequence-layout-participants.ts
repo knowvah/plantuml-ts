@@ -136,6 +136,7 @@ function computeParticipantWidths(sortedParticipants: Participant[], ctx: Partic
       ...paints,
       font: paint.font,
       stereotypeBottom: p.stereotypeBottom,
+      underlined: p.underlined,
     });
     const textW = Math.max(...labelRows(rows, ctx).map((r) => r.width));
     // `TextBlockSprited#calculateDimension`: the badge widens the block by its
@@ -314,6 +315,7 @@ function buildParticipantGeo(
     ...paints,
     font: paint.font,
     stereotypeBottom: p.stereotypeBottom,
+    underlined: p.underlined,
   });
   const textHeight = labelRows(rows, ctx).reduce((h, r) => h + r.height, 0);
   // `getTextHeight = textBlock.height + padding.top + padding.bottom`
@@ -337,6 +339,7 @@ function buildParticipantGeo(
     border: paint.stroke,
     ...(stereoLines.length > 0 ? { stereotypeLines: stereoLines } : {}),
     ...(p.stereotypeBottom === true ? { stereotypeBottom: true } : {}),
+    ...(p.underlined === true ? { underlined: true } : {}),
     ...(p.url !== undefined ? { url: p.url } : {}),
     ...(badge !== undefined ? { badge } : {}),
     type: p.type,

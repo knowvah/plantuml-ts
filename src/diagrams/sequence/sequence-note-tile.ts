@@ -72,6 +72,10 @@ export interface NoteTileInput {
    *  `posD` (`CommunicationTileNoteRight.java:122-124`) or a self message's
    *  `getMaxX` (`CommunicationTileSelfNoteRight.java:108-110`). */
   readonly rightX?: number;
+  /** The x a `left` self-message wrapper's note ENDS at -- the loop's
+   *  `getMinX` -- so the tile starts `used` before it
+   *  (`CommunicationTileSelfNoteLeft.java:108-114`). */
+  readonly leftX?: number;
   /** The tile x outright, whatever the position: a `top`/`bottom` wrapper
    *  places its note at the wrapped tile's `getMinX()`
    *  (`CommunicationTileNoteBottomTopAbstract.java:99-102`). */
@@ -208,7 +212,9 @@ export function noteTile(input: NoteTileInput): NoteTile {
     input.originX ??
     (input.rightX !== undefined && event.position === 'right'
       ? input.rightX
-      : tileX(event, used, level, c1, c2, group?.stacking));
+      : input.leftX !== undefined && event.position === 'left'
+        ? input.leftX - used
+        : tileX(event, used, level, c1, c2, group?.stacking));
   // `...Note.java:105-108,112-115`: `(int) getTextWidth`, or `(int) (area -
   // 2 * getPaddingX())` once the area is wider than preferred.
   const width = Math.trunc(used > preferred ? used - 2 * NOTE_COMPONENT_PADDING_X : textWidth);
