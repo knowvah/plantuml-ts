@@ -1,0 +1,11 @@
+@starthcl
+<style>
+jsonDiagram {
+  node { BackGroundColor #EEFFEE
+    LineColor red }
+}
+</style>
+resource "aws_instance" "web" {
+  ami = "ami-123"
+}
+@endhcl

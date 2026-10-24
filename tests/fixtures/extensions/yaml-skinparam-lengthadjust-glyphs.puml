@@ -1,0 +1,5 @@
+@startyaml
+skinparam lengthAdjust spacingAndGlyphs
+a: 1
+b: x
+@endyaml

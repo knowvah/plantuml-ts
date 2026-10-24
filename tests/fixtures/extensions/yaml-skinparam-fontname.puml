@@ -1,0 +1,5 @@
+@startyaml
+skinparam defaultFontName Courier
+a: 1
+b: x
+@endyaml

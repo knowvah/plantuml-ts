@@ -1,0 +1,5 @@
+@startyaml
+skinparam backgroundColor #FFEEEE
+a: 1
+b: x
+@endyaml

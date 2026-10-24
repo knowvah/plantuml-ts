@@ -1,0 +1,30 @@
+
+> @knowvah/plantuml-ts@0.2.0 build
+> vite build
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 1584 modules transformed.
+rendering chunks...
+
+[unplugin:dts] Start generate declaration files...
+[unplugin:dts] Start bundling declaration files...
+Analysis will use the bundled TypeScript version 5.9.3
+*** The target project appears to use TypeScript 6.0.3 which is newer than the bundled compiler engine; consider upgrading API Extractor.
+Analysis will use the bundled TypeScript version 5.9.3
+*** The target project appears to use TypeScript 6.0.3 which is newer than the bundled compiler engine; consider upgrading API Extractor.
+[unplugin:dts] Declaration files built in 20072ms.
+
+computing gzip size...
+dist/image-providers.js      8.68 kB │ gzip:   3.18 kB │ map:     40.34 kB
+dist/plantuml-ts.js      2,925.50 kB │ gzip: 731.87 kB │ map: 15,699.19 kB
+
+transforming...
+✓ 1584 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/image-providers.cjs      7.02 kB │ gzip:   2.89 kB │ map:     40.41 kB
+dist/plantuml-ts.cjs      2,343.14 kB │ gzip: 662.10 kB │ map: 15,701.28 kB
+
+✓ built in 22.45s
+exit 0

@@ -15,6 +15,7 @@ Amendment 1) stay `baseline` by design (D5): their emitters write no
 | b0 (`accb08bb5`) | 64 | 40 | 42 | 13 | 4121 |
 | b1 (`724235b2c`) | 64 | 46 | 45 | 13 | 4109 |
 | b2 (`d486af48d`) | 64 | 64 | 51 | 13 | 1711 |
+| b3 (`05b08187f`) | 64 | 64 | 51 | 13 | 1711 |
 
 ## Rows
 

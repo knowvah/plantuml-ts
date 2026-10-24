@@ -1,0 +1,4 @@
+@startjson
+skinparam defaultFontSize 20
+{ "a": 1, "b": "x" }
+@endjson

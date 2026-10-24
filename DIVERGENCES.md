@@ -1068,3 +1068,80 @@ Oracle seam #3 (fork `37c07dce45a`, `oracle/patches/0003-oracle-svg-property.pat
 ### ~~Deterministic-text oracle crashes on a lone space (measurement artefact)~~ — RETIRED (instrument-space-width, oracle seam #4, 2026-10-09)
 
 Oracle seam #4 (fork `eb0f3cff7df`, `oracle/patches/0004-oracle-space-width.patch`) measures each U+0020 as U+0021 — the table's own 44-tenth advance, the one `!` and U+00A0 already have, and the one Helvetica (Core14 AFM `WX 278` for both) and Arial (569/2048) give the space — and rounds the width to float like the stock SVG bounder (`FileFormat.getJavaDimension` reads `FontMetrics.getStringBounds`, a `Rectangle2D.Float`). `DeterministicMeasurer` mirrors both; `WidthTableMeasurer` stays the verbatim table. The whole oracle was re-captured one JVM per fixture (`scripts/recapture-oracles.ts`): 47,920 of 47,920 unscaled space-bearing oracle text runs now equal our measurement, the 33 crash pages of the old instrument fell to the 6 that pre-date it (all four named above now render real diagrams, deterministically, and are gated again), and every port defect the zero-wide space had hidden was fixed in the same mission (`plans/instrument-space-width/`). The production measurer is unaffected by the instrument change itself (b0 → b1 manifest: 0 changes).
+
+## Extensions (user ruling 2026-10-23)
+
+**Category: limitation (upstream drops styling the port can honour).**
+
+**Ruling.** Where the jar ignores styling input that the port can honour, the
+port honours it as a documented extension. Output for a source without that
+input stays byte-identical to the jar's; the user ruled this on 2026-10-23
+(`plans/lengthadjust-document-wide/decisions.md`, Amendment 1, D9/D10).
+
+**Upstream.** json, yaml, hcl and files parse through `StyleExtractor`; its
+`skinparam` branch keeps only `handwritten` (`StyleExtractor.java:88-96`), the
+files diagram never reads even that (`FilesDiagram.java:62-80`), and
+`@starthcl` also skips `applyStyles` (`HclDiagramFactory.java:86-92`), so
+`<style>`, `skin` and `!theme` are dropped there too.
+
+**This port.** The default mode honours the directives in the table below.
+Measured by rendering each probe in the default and in the internal
+jar-compatible mode (audit: `plans/lengthadjust-document-wide/diagnosis/
+extension-audit.md`). Pinned examples: `tests/fixtures/extensions/`, gated by
+`tests/oracle/svg-conformance/extensions.ratchet.test.ts`. Guide:
+`docs-site/guide/styling-data-diagrams.md`.
+
+| Directive | Engine | Visible change (jar-compatible -> extended) |
+|---|---|---|
+| `skinparam backgroundColor` | json | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:57px;height:58px;background:#FFEEEE;" / added <rect x="0" y="0" width="57" height="58" fill="#FEE" stroke="none"/>` |
+| `skinparam defaultFontName` | json | `<text> font-family (absent)->"Courier" / <text> x "15"->"32.787"; font-family (absent)->"Courier"; font-weight "700"->(absent)` |
+| `skinparam defaultFontSize` | json | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:64px;height:70px;background:#FFFFFF;"; width "57px"->"64px"; height "58px"->"70px" / <rect> width "35.575"->"42.25"; height "36"->"48"` |
+| `skinparam lengthAdjust none` | json | `<g> lengthAdjust "spacing"->(absent)` |
+| `skinparam lengthAdjust spacingAndGlyphs` | json | `<g> lengthAdjust "spacing"->"spacingAndGlyphs"` |
+| `!theme aws-orange` | json | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:55px;height:54px;"; width "57px"->"55px"; height "58px"->"54px" / <rect> width "35.575"->"33.35"; height "36"->"32"` |
+| `skinparam backgroundColor` | yaml | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:57px;height:58px;background:#FFEEEE;" / added <rect x="0" y="0" width="57" height="58" fill="#FEE" stroke="none"/>` |
+| `skinparam defaultFontName` | yaml | `<text> font-family (absent)->"Courier" / <text> x "15"->"32.787"; font-family (absent)->"Courier"; font-weight "700"->(absent)` |
+| `skinparam defaultFontSize` | yaml | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:64px;height:70px;background:#FFFFFF;"; width "57px"->"64px"; height "58px"->"70px" / <rect> width "35.575"->"42.25"; height "36"->"48"` |
+| `skinparam lengthAdjust none` | yaml | `<g> lengthAdjust "spacing"->(absent)` |
+| `skinparam lengthAdjust spacingAndGlyphs` | yaml | `<g> lengthAdjust "spacing"->"spacingAndGlyphs"` |
+| `!theme aws-orange` | yaml | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:55px;height:54px;"; width "57px"->"55px"; height "58px"->"54px" / <rect> width "35.575"->"33.35"; height "36"->"32"` |
+| `skinparam backgroundColor` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:115px;height:40px;background:#FFEEEE;" / added <rect x="0" y="0" width="115" height="40" fill="#FEE" stroke="none"/>` |
+| `skinparam defaultFontName` | hcl | `<text> font-family (absent)->"Courier" / <text> x "15"->"47.575"; font-family (absent)->"Courier"; textLength "22.575"->"50.575"` |
+| `skinparam defaultFontSize` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:146px;height:46px;background:#FFFFFF;"; width "115px"->"146px"; height "40px"->"46px" / <rect> width "93.15"->"124.5"; height "18"->"24"` |
+| `skinparam lengthAdjust none` | hcl | `<g> lengthAdjust "spacing"->(absent) / <text> textLength "22.575"->(absent) / textLength count 2->0` |
+| `skinparam lengthAdjust spacingAndGlyphs` | hcl | `<g> lengthAdjust "spacing"->"spacingAndGlyphs"` |
+| `<style> document` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:115px;height:40px;background:#FFEEEE;" / added <rect x="0" y="0" width="115" height="40" fill="#FEE" stroke="none"/>` |
+| `<style> jsonDiagram { node {...} }` | hcl | `<rect> fill "#F1F1F1"->"#EFE"; stroke "#F1F1F1"->"#EFE" / <line> stroke "#000"->"#F00"` |
+| `!theme aws-orange` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:104px;height:38px;"; width "115px"->"104px"; height "40px"->"38px" / <rect> width "93.15"->"82.7"; height "18"->"16"` |
+| `!theme amiga` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:105px;height:30px;background:#0B58A8;"; width "115px"->"105px"; height "40px"->"30px" / <rect> x "10"->"0"; y "10"->"0"; width "93.15"->"105"` |
+| `skinparam backgroundColor` | files | `<svg> style "width:200px;height:44px;background:#FFFFFF;"->"width:200px;height:44px;background:#FFEEEE;"` |
+| `skinparam lengthAdjust none` | files | `<g> lengthAdjust "spacing"->(absent)` |
+| `skinparam lengthAdjust spacingAndGlyphs` | files | `<g> lengthAdjust "spacing"->"spacingAndGlyphs"` |
+| `!theme aws-orange` | files | `<svg> style "width:200px;height:44px;background:#FFFFFF;"->"width:200px;height:44px;"` |
+
+**Ignored (measured: output identical in both modes and to the directive-free
+render).**
+
+- `skinparam defaultFontColor`: json, yaml, hcl, files
+- `skinparam roundCorner`: json, yaml, hcl, files
+- `skinparam shadowing`: json, yaml, hcl, files
+- `skinparam lineColor`: json, yaml, hcl, files
+- `skin rose`: json, yaml, hcl
+- `skinparam defaultFontName`: files
+- `skinparam defaultFontSize`: files
+- `<style> <engine>Diagram { node {...} }`: files
+- `skinparam handwritten true`: files
+
+Note: hcl `<style>` node styling only works through the `jsonDiagram`
+selector; `hclDiagram` is no `SName` (`Context.java:87-91`). `handwritten`,
+json/yaml `<style>` and `skin`, files `<style> document`/`skin`, and `!theme
+amiga` for json/yaml/files are honoured by the jar itself and are not
+extensions.
+
+**How conformance is measured (D9).** The plugins' `styleInput` cuts
+(`jsonFamilyStyleInput`, `hclStyleInput`, `filesStyleInput`) are the
+jar-compatible normalisation. `prepareBlock` applies them only when the
+internal `jarCompatibleStyleInput` option is set (`src/core/
+internal-render-options.ts`, not exported from `src/index.ts`, no public
+`RenderOptions` field). Every conformance renderer passes it, so scores and
+pins compare the jar's behaviour with ours, never the extension.

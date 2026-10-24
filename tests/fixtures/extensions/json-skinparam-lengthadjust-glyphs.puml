@@ -1,0 +1,4 @@
+@startjson
+skinparam lengthAdjust spacingAndGlyphs
+{ "a": 1, "b": "x" }
+@endjson
