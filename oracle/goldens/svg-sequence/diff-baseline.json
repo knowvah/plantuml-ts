@@ -2182,7 +2182,7 @@
     {
       "type": "sequence",
       "slug": "fifasu-62-pipo979",
-      "status": "baseline",
+      "status": "pinned",
       "weightedScore": 57,
       "diffCount": 57,
       "measuredAt": "2026-10-20",
@@ -8176,7 +8176,7 @@
     {
       "type": "sequence",
       "slug": "tifube-59-tezo313",
-      "status": "baseline",
+      "status": "pinned",
       "weightedScore": 21,
       "diffCount": 35,
       "measuredAt": "2026-10-20",

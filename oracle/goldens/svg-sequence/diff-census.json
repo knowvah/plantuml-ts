@@ -3,24 +3,12 @@
   "totals": {
     "missing-element": 0,
     "extra-element": 0,
-    "geometry": 110,
-    "text-metrics": 1,
+    "geometry": 48,
+    "text-metrics": 0,
     "format-units": 0,
-    "other": 60
+    "other": 58
   },
   "fixtures": [
-    {
-      "slug": "fifasu-62-pipo979",
-      "diffCount": 44,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 43,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 1
-      }
-    },
     {
       "slug": "gebeki-18-muci858",
       "diffCount": 2,
@@ -103,18 +91,6 @@
         "text-metrics": 0,
         "format-units": 0,
         "other": 12
-      }
-    },
-    {
-      "slug": "tifube-59-tezo313",
-      "diffCount": 21,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 19,
-        "text-metrics": 1,
-        "format-units": 0,
-        "other": 1
       }
     }
   ],

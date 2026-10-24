@@ -1,0 +1,5 @@
+@startuml
+'!preprocessorV2
+Alice -> Bob : path %dirpath()
+Alice -> Bob : filename %filename()
+@enduml

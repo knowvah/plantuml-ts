@@ -35,6 +35,11 @@
     ".": {
       "import": "./dist/plantuml-ts.js",
       "require": "./dist/plantuml-ts.cjs"
+    },
+    "./image-providers": {
+      "types": "./dist/image-providers.d.ts",
+      "import": "./dist/image-providers.js",
+      "require": "./dist/image-providers.cjs"
     }
   },
   "workspaces": [

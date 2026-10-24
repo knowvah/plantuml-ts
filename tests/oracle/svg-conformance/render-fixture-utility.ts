@@ -34,6 +34,7 @@ import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
 import { buildUtilityAssetsStore } from '../../helpers/utility-assets-store.js';
 import { compareSvg, weightedScore } from './compare.js';
+import { remoteImageFixtureStore } from './remote-image-fixtures.js';
 
 /**
  * The 17 in-scope `test-results/dot-cache/unknown/<slug>` rows, in the order
@@ -70,10 +71,17 @@ export interface UtilityFixtureRenderOptions {
 
 /**
  * The store the survey renders with (`scripts/svg-parity-survey.ts` `SURVEY_ASSET_STORE`):
- * sprites + emoji + the utility pictures (T1i), so a utility row measures here as it surveys.
+ * sprites + emoji + the utility pictures (T1i) + the golden-decoded remote image
+ * bytes (sdd3-b6 T6g, `remote-image-fixtures.ts`), so a utility or sequence row
+ * measures here as it surveys. Keep this in step with the survey's own store.
  */
 export function surveyAssetStore(): AssetStore {
-  return combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore(), buildUtilityAssetsStore());
+  return combineAssetStores(
+    buildSpriteAssetsStore(),
+    buildEmojiAssetsStore(),
+    buildUtilityAssetsStore(),
+    remoteImageFixtureStore(),
+  );
 }
 
 /**

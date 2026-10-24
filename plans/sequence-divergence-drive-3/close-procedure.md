@@ -47,7 +47,8 @@ tools/`, `$M` = `plans/sequence-divergence-drive-3/measurements/`.
    remaining mechanism and owner.
 10. **Dashboard.** `npm run parity:dashboard` AFTER every `parity-*.json`
     re-pin of step 5 (the D9 drift gate reads every engine's pin — b1 close,
-    journal row 30); `npm run catalog` if exports changed.
+    journal row 30) AND after the census of 8b (it reads the census row
+    count — b6 close, journal row 85); `npm run catalog` if exports changed.
 11. **Brief.** Tick the batch in `README.md` and its `overview.md`.
 12. **Commit.** Full gates again (pins changed), then
     `chore(sdd3-bN): close batch N — <pins> pinned, sum <score>`. Body:

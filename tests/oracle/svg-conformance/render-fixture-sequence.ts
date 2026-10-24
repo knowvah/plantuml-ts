@@ -71,10 +71,13 @@ import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js'
 import { assembleSvg, renderSync } from '../../../src/index.js';
 import { registerNestedDiagramRenderers } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
 import { seedOfUmlSource } from '../../../src/core/assemble-svg.js';
+import { inlineRemoteImageLines } from '../../../src/core/remote-image-store.js';
+import { combineAssetStores } from '../../../src/core/asset-store.js';
 import type { AssetStore } from '../../../src/core/asset-store.js';
 import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { surveyAssetStore } from './render-fixture-utility.js';
+import { remoteImageFixtureStore } from './remote-image-fixtures.js';
 
 /** `renderFixtureSequence`'s own options bag: `PreprocessOptions` (forwarded
  *  to `buildBlockUmls`) UNION `ParseOptions` (`assetStore`, forwarded to
@@ -82,7 +85,8 @@ import { surveyAssetStore } from './render-fixture-utility.js';
  *  `FixtureClassOptions`. */
 type FixtureSequenceOptions = PreprocessOptions & ParseOptions;
 
-let fixtureOptions: { readonly includeStore: IncludeStore; readonly assetStore: AssetStore } | undefined;
+let fixtureOptions:
+  { readonly includeStore: IncludeStore; readonly assetStore: AssetStore; readonly filename: string } | undefined;
 
 /** The one options bag every sequence gate and tool renders with: the
  *  survey's own stores (`render-fixture-utility.ts#surveyAssetStore`,
@@ -91,8 +95,18 @@ let fixtureOptions: { readonly includeStore: IncludeStore; readonly assetStore: 
  *  which both overstates a row's diff and hides its real residual (sdd2
  *  T-exit, `.agent-notes/sdd2-execution.md`). Memoized: one bag, one set of
  *  store references, across calls. */
-export function sequenceFixtureOptions(): { readonly includeStore: IncludeStore; readonly assetStore: AssetStore } {
-  fixtureOptions ??= { includeStore: fixtureIncludeStore(), assetStore: surveyAssetStore() };
+export function sequenceFixtureOptions(): {
+  readonly includeStore: IncludeStore;
+  readonly assetStore: AssetStore;
+  readonly filename: string;
+} {
+  // The oracle renders `in.puml` (sdd3-T6f; Defines.java:89-94), so `%filename()` is `in.puml`.
+  // sdd3-T6g: the remote images the jar fetched, served from the golden (no network).
+  fixtureOptions ??= {
+    includeStore: fixtureIncludeStore(),
+    assetStore: combineAssetStores(surveyAssetStore(), remoteImageFixtureStore()),
+    filename: 'in.puml',
+  };
   return fixtureOptions;
 }
 
@@ -136,7 +150,11 @@ export function renderFixtureSequence(
   // cdd4-T7b: the shipped `buildTheme`, not a copy of it -- a copy measured a
   // path no shipped code takes once theme styling moved into it.
   const { theme, styleMap } = buildTheme(preprocessed);
-  const parsed = parseSequence(sequenceBlockSource(first), { assetStore: options?.assetStore });
+  // `src/index.ts#prepareBlock` inlines served remote images (`remote-image:<url>`) into the
+  // source lines before parse AND seed; this harness bypasses it, so it does the same.
+  const blockSource = sequenceBlockSource(first);
+  const lines = inlineRemoteImageLines(blockSource.lines, options?.assetStore);
+  const parsed = parseSequence({ ...blockSource, lines }, { assetStore: options?.assetStore });
   // T4: `parseSequence` now returns `SequenceDiagramAST | ParseRefusal`
   // (D1). This harness bypasses `src/index.ts`'s production narrowing (it
   // drives the engine directly), so a refusal surfaces the same way
@@ -158,7 +176,7 @@ export function renderFixtureSequence(
   // way (`render-fixture-activity.ts`). Unseeded, 8 fixtures read conformant
   // in the survey and diverged here on `@id` alone.
   const seed = seedOfUmlSource({
-    lines: first.source.lines,
+    lines,
     rawSourceLines: first.rawSource.map((s) => s.getString()),
     seedSourceLines: first.seedSource,
   });

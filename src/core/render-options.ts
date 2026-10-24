@@ -22,6 +22,7 @@ import type { StdlibRegistry } from './tim/StdlibRegistry.js';
 import type { AssetStore } from './asset-store.js';
 import type { SecurityProfile } from './security/SecurityProfile.js';
 import type { ElkBackend } from './elk/elk-backend.js';
+import type { ImageProvider } from './image-provider.js';
 
 export interface RenderOptions {
   theme?: 'default' | 'dark' | 'sketchy' | 'monochrome' | Partial<Theme>;
@@ -81,6 +82,12 @@ export interface RenderOptions {
    * that do not use ELK.
    */
   elk?: ElkBackend | undefined;
+  /**
+   * Fetches remote images (`AtomImg.java:165-169`). Used by the `render()` family only; `renderSync` ignores it.
+   */
+  imageProvider?: ImageProvider | undefined;
+  /** The source file name `%filename()` reports (`Defines.java:89-94`). */
+  filename?: string | undefined;
 }
 
 /** Module-level cache for {@link getDefaultMeasurer} -- see its own doc

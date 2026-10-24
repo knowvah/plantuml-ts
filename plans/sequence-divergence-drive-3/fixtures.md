@@ -16,6 +16,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | b3 | 1103 | 3 | 7 | 30 | 0 | 1600 | 1103 |
 | b4 | 1133 | 0 | 5 | 5 | 0 | 1082 | 1133 |
 | b5 | 1134 | 0 | 4 | 5 | 0 | 961 | 1134 |
+| b6 | 1136 | 0 | 3 | 4 | 0 | 883 | 1136 |
 
 ## Open rows (101)
 
@@ -43,7 +44,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | bucebo-91-xavo442 | structural | 59 | svgparser-sax-unported | T4f | pinned (b59647cc2) at b4 |
 | jujigi-41-zodo151 | geometry | 58 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
 | tukobo-89-zebi935 | geometry | 58 | par2-not-parallel | T1a | pinned (0a3779247) at b1 |
-| fifasu-62-pipo979 | structural | 57 | remote-image-io | T6g | diagnosed at b5 (leftovers.md M4): serve the golden's decoded payload — the embedded bytes are a re-serialisation (2753 B) of the live fetch (2995 B); counterfactual with the payload = 0 diffs |
+| fifasu-62-pipo979 | structural | 57 | remote-image-io | T6g | pinned (merge of T6g, journal row 83) at b6; was: diagnosed at b5 (leftovers.md M4): serve the golden's decoded payload — the embedded bytes are a re-serialisation (2753 B) of the live fetch (2995 B); counterfactual with the payload = 0 diffs |
 | suzumi-85-nuzo693 | geometry | 54 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
 | vopixi-04-lako436 | structural | 51 | url-label-newline-split | T2e | pinned (7ca69af29) at b2 |
 | bugafa-93-duzi514 | structural | 36 | svgparser-sax-unported | T4f | pinned (e336a9a67) at b4 |
@@ -61,7 +62,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | zunile-23-zezi158 | geometry | 27 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
 | labite-99-lufe939 | structural | 25 | svgparser-sax-unported | T4f | pinned (b59647cc2) at b4 |
 | ralucu-86-voxa492 | structural | 24 | svgparser-sax-unported | T4f | pinned (b59647cc2) at b4; was: 20 left after T1h (`2486b1af0`): paint diffs were monochrome; remainder `svg/defs childCount` 0 vs 1 + `svg/g childCount` 13 vs 14 (its own family, owner unchanged) |
-| tifube-59-tezo313 | geometry | 21 | filename-env-unwired | T6f | |
+| tifube-59-tezo313 | geometry | 21 | filename-env-unwired | T6f | pinned (merge of T6f, journal row 78) at b6 |
 | vibaru-39-gebo741 | structural | 21 | svgparser-sax-unported | T4f | pinned (b59647cc2) at b4 |
 | zimoci-54-sedi066 | structural | 21 | svgparser-sax-unported | T4f | pinned (b59647cc2) at b4 |
 | deluve-26-kaxa424 | structural | 20 | svgparser-sax-unported | T4f | pinned (b59647cc2) at b4 |

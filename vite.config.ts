@@ -11,16 +11,23 @@ export default defineConfig({
       include: ['src'],
       // vite-plugin-dts 5 re-bases onto `unplugin-dts` and renames
       // `rollupTypes` to `bundleTypes`. Same behaviour: roll the emitted
-      // declarations up into the single dist/plantuml-ts.d.ts that
-      // package.json's `types` points at.
+      // declarations up into one dist/<entry>.d.ts per library entry
+      // (dist/plantuml-ts.d.ts for `types`, dist/image-providers.d.ts for the
+      // `./image-providers` subpath).
       bundleTypes: true,
     }),
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
+      // Two entries: the core, and the opt-in network/browser image providers
+      // (decisions.md D3) so core consumers never load network code.
+      entry: {
+        'plantuml-ts': resolve(__dirname, 'src/index.ts'),
+        'image-providers': resolve(__dirname, 'src/image-providers/index.ts'),
+      },
       name: 'PlantUmlTs',
-      fileName: 'plantuml-ts',
+      // Entry keys are the output basenames, so the root stays `plantuml-ts.{js,cjs,d.ts}`.
+      fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'js' : 'cjs'}`,
       formats: ['es', 'cjs'],
     },
     rollupOptions: {

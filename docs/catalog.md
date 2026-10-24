@@ -9,13 +9,13 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1758 modules · 6582 exported names.
+1765 modules · 6619 exported names.
 
 ## `src/`
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `index.ts` | `RenderOptions`, `assembleSvg`, `loadElk`, `ElkBackend`, `stdlibStore`, `withStdlib`, `BundleData`, `StdlibStore`, `stdlibRegistry`, `StdlibChunkLoadError`, `StdlibRegistry`, `prepareIncludeStore`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `StdlibNotBundledError`, `IncludeWarmupOptions`, `SecurityProfile`, `remoteStdlib`, `StdlibResourceFetchError`, `StdlibRemoteManifest`, `RemoteBundle`, `spriteSplitStdlib`, `SpriteNotBundledError`, `SpriteSplitManifest`, `combineAssetStores`, `AssetPayload`, `AssetStore`, `renderPagesSync`, `renderSync`, `render`, `renderPages`, `renderAll` |  |
+| `index.ts` | `RenderOptions`, `ImageProvider`, `ImageFetchResult`, `assembleSvg`, `loadElk`, `ElkBackend`, `stdlibStore`, `withStdlib`, `BundleData`, `StdlibStore`, `stdlibRegistry`, `StdlibChunkLoadError`, `StdlibRegistry`, `prepareIncludeStore`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `StdlibNotBundledError`, `IncludeWarmupOptions`, `SecurityProfile`, `remoteStdlib`, `StdlibResourceFetchError`, `StdlibRemoteManifest`, `RemoteBundle`, `spriteSplitStdlib`, `SpriteNotBundledError`, `SpriteSplitManifest`, `combineAssetStores`, `AssetPayload`, `AssetStore`, `renderPagesSync`, `renderSync`, `render`, `renderPages`, `renderAll` |  |
 | `registered-plugins.ts` | `PluginRegistrar`, `registerPlugins` | The composition root's registrations, in upstream's factory order: the `factories.add(...)` run of `PSystemBuilder`'s constructor. |
 
 ## `src/core/`
@@ -36,10 +36,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `cluster-title-table.ts` | `computeTitleTableHeight` | `ClusterHeader`'s title/stereotype/attribute-text-height formula — moved out of `../diagrams/state/state-composite-header.ts` (namespace-cluster-box mission T3: the class engine needs the same formula for its own cluster title table, and no |
 | `color-override.ts` | `resolveBareOrBackColor` | Shared `#color`/`#back:color;...` background-override extraction — split out of `renderer-classifier-box.ts` (G2 N34) so `renderer-note.ts` can reuse the SAME bare/`back:`-component grammar for a note's own `#color` override (`ClassNote.col |
 | `creole-atoms-image-resolver.ts` | `ResolvedDrawableAtom`, `SpritePrimitiveCollector`, `resolveSvgSpriteAtom`, `makeAtomImageResolverFor` | creole-atoms-image-resolver.ts — SI5b+E2r T7 (moved from `diagrams/ description/render-atoms.ts` by SI27 T2 — upstream's `AtomSprite`/ `SvgNanoParser` decomposition is ONE shared place both the description engine (`renderer-entity.ts`) and |
-| `creole-atoms-img.ts` | `cannotDecodeText`, `stripImgSrc`, `SvgImgDecoded`, `isSvgDataImage`, `decodeSvgDataImage` | `<img>` source handling split out of `creole-atoms.ts` (500-line cap): the src-string clean-up (`CommandCreoleImg.executeAndAdvance`), the cannot-decode fallback texts (`AtomImg.create`), and the `data:image/svg+xml;base64,` branch (`AtomIm |
+| `creole-atoms-img.ts` | `cannotDecodeText`, `stripImgSrc`, `SvgImgDecoded`, `isSvgDataImage`, `decodeSvgDataImage`, `remoteImageToDataUri` | `<img>` source handling split out of `creole-atoms.ts` (500-line cap): the src-string clean-up (`CommandCreoleImg.executeAndAdvance`), the cannot-decode fallback texts (`AtomImg.create`), and the `data:image/svg+xml;base64,` branch (`AtomIm |
 | `creole-atoms-measure.ts` | `measureInlineAtom`, `spriteScale`, `spriteAtomScale`, `measureLineWithAtoms`, `lineAtomHeightExcess` | Measurement (D9) for Creole `<img>` / `<$sprite>` / `<&openiconic>` inline atoms — the scaled pixel dims each atom contributes to label measurement, and the per-line width/height composition built on top of them. |
 | `creole-atoms-openicon.ts` | `scanOpenIconSpans`, `matchOpenIconAt` | OpenIconic `<&glyph>` span recognizer -- split out of `creole-atoms.ts` purely to keep that file under this project's 500-line cap (G2 N41; mirrors the existing `class-layout-helpers.ts`/`class-member-rows.ts` split precedent). |
-| `creole-atoms.ts` | `ImgAtomToken`, `SpriteAtomToken`, `OpenIconicAtomToken`, `InlineAtomToken`, `RenderSegment`, `LineAtomScan`, `DrawablePrimitive`, `StringBounderSupplier`, `AtomImageResolver`, `SpriteDims`, `SpriteDimsLookup`, `SPRITE_NAME_PATTERN_SOURCE`, `SPRITE_PATTERN_SOURCE`, `parseScale`, `parseColorFromBlock`, `AtomSpan`, `scanLineForAtoms`, `AtomMatchAt`, `spanToMatch`, `matchAtomAt` | Creole `<img>` / `<$sprite>` / `<&openiconic>` inline atoms. |
+| `creole-atoms.ts` | `ImgAtomToken`, `SpriteAtomToken`, `OpenIconicAtomToken`, `InlineAtomToken`, `RenderSegment`, `LineAtomScan`, `DrawablePrimitive`, `StringBounderSupplier`, `AtomImageResolver`, `SpriteDims`, `SpriteDimsLookup`, `IMG_PATTERN_SOURCE`, `SPRITE_NAME_PATTERN_SOURCE`, `SPRITE_PATTERN_SOURCE`, `parseScale`, `parseColorFromBlock`, `AtomSpan`, `scanLineForAtoms`, `AtomMatchAt`, `spanToMatch`, `matchAtomAt` | Creole `<img>` / `<$sprite>` / `<&openiconic>` inline atoms. |
 | `creole-lexer.ts` | `CreoleSpan`, `EMPTY_STATE`, `tokenise`, `mergeSpans`, `parseTokens` | Creole markup lexer + inline-style parser. |
 | `creole-svg.ts` | `spansToTspan` | Creole span → SVG `<tspan>` serialisation. |
 | `creole-table.ts` | `TableCell`, `TableToken`, `parseTableRow`, `isTableLine`, `DEFAULT_LINE_HEIGHT`, `measureTable`, `tableTokenToSvg` | Creole table parsing, measurement, and SVG rendering. |
@@ -66,6 +66,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `graph-layout-svek-read.ts` | `svgDouble`, `SvekFrame`, `svekFrame`, `svekY`, `svekPoint`, `SvekNodeBox`, `svekNodeCorner`, `LabelTable`, `EdgeLabelTables`, `edgeLabelTables`, `svekEdge`, `svekCluster` | cdd3-T-D3 (D3): read the layout the way the jar's Svek reads it. |
 | `graph-layout.ts` | `CARDINALITY_FONT_SIZE`, `LayoutInputEvent`, `setLayoutInputObserver`, `enterNestedDiagramLayout`, `exitNestedDiagramLayout`, `layoutGraph`, `DotInputNode`, `DotInputNodeShape`, `DotInputEdge`, `DotInputCluster`, `DotInputGraph`, `DotInputTogether`, `DotLayoutResult` |  |
 | `graph-layout.types.ts` | `DotInputNodeShape`, `DotInputPortRow`, `DotInputNode`, `DotInputEdge`, `DotInputCluster`, `DotInputTogether`, `DotInputGraph`, `DotLayoutResult` |  |
+| `image-provider.ts` | `ImageFetchResult`, `ImageProvider` | Injectable fetch seam for remote images (`<img:http(s)://…>`, `<img src=…>`). |
 | `include-resolver-errors.ts` | `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `blockedUrlError`, `includeTimeoutError`, `CircularIncludeError` | The include seam's error types, split out of `include-resolver.ts` (which sits at the repo's 500-line cap) and re-exported from it unchanged. |
 | `include-resolver-node.ts` | `ReadFileFn`, `RealpathFn`, `makeNodeFsFetcher` |  |
 | `include-resolver-timeout.ts` | `withIncludeTimeout` | Bounding one include fetch by time -- the port of upstream's `Future#get(SecurityUtils.getSecurityProfile().getTimeout(), MILLISECONDS)` around every URL read (`security/SURL.java:357-358`, :402, :438). |
@@ -92,6 +93,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `PlainStringsDiagram.ts` | `PlainStringsDiagram` | `PlainStringsDiagram` — a {@link UgDiagram} whose page is its `strings` drawn black on white, optionally with an `image` at `imagePosition` (`version`, the eggs). |
 | `preprocessor-collector.ts` | `StyleAndSkinparamCollector` | preprocessor-collector.ts -- the `<style>` / `skinparam` / `skin` line collector `preprocessor.ts#resultOf` runs over the interpreter's finished result list. |
 | `preprocessor.ts` | `SkinDirective`, `PreprocessorResult`, `SkinparamAssignment`, `SkinparamForm`, `DeclarationOrder`, `PreprocessOptions`, `preprocess`, `PreprocessorFailure`, `PreprocessOutcome`, `preprocessOrError`, `preprocessLinesOrError` | Preprocessor -- a thin wrapper over the TIM interpreter (`src/core/tim/`). |
+| `remote-image-prefetch.ts` | `prefetchRemoteImages`, `withRemoteImages` | The async half of remote images: `render()` asks the host's {@link ImageProvider} for every `<img:http(s)://...>` url in a block and hands the successes to the synchronous pipeline as an {@link AssetStore} (key scheme and read side: `remote |
+| `remote-image-store.ts` | `REMOTE_IMAGE_ASSET_PREFIX`, `remoteImageKey`, `remoteImageStoreFrom`, `isRemoteImageSrc`, `scanRemoteImageSrcs`, `inlineRemoteImages`, `inlineRemoteImageLines` | The remote-image half of `<img:http(s)://...>`: the asset-store key scheme, the scan that finds the urls, and the rewrite that hands a served image to the existing `AtomImg.java:153-161` decode paths. |
 | `render-options.ts` | `RenderOptions`, `getDefaultMeasurer`, `resolveMeasurer` | `RenderOptions` and measurer resolution — extracted from `src/index.ts` (mission A5 / T4). |
 | `rose-note-dim.ts` | `RoseNoteDim`, `roseNoteDim` | The note operand `computeMergedLabelBox` (`core/edge-label-box.ts`) merges into an edge label: `EntityImageNoteLink`'s own dimension. |
 | `scale-command.ts` | `ScaleSpec`, `matchScaleCommand`, `resolveScaleFactor`, `isExportScaled` | scale-command.ts — shared `scale ...` directive parsing + factor resolution (mission G1 I-scale). |
@@ -2213,3 +2216,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `yaml-builder.ts` | `YamlBuilder` | YamlBuilder — builds a Monomorph tree from a sequence of YAML parse events. |
 | `yaml-line.ts` | `YamlLineType`, `YamlLine`, `build` |  |
 | `yaml-parser.ts` | `YamlSyntaxError`, `parseYamlLines` |  |
+
+## `src/image-providers/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `browser.ts` | `BrowserMetaLike`, `BrowserViolationEventLike`, `BrowserDocumentLike`, `BrowserProviderOptions`, `DEFAULT_TIMEOUT_MS`, `DEFAULT_MAX_BYTES`, `createBrowserImageProvider` | The browser {@link ImageProvider}: `fetch()` in CORS mode, preceded by a pre-check against the page's Content Security Policy so a blocked origin is skipped with one clear warning instead of a console error per image. |
+| `csp.ts` | `CspVerdict`, `FETCH_DIRECTIVE_FALLBACKS`, `parseSourceList`, `isUrlAllowedByPolicies` | A pure Content Security Policy Level 3 source-list matcher: given a url, the page origin and serialized policies, would the policies' fetch directive (`connect-src`, falling back to `default-src`) allow the url? |
+| `index.ts` | `ImageFetchResult`, `ImageProvider`, `createNetworkImageProvider`, `NetworkProviderOptions`, `createBrowserImageProvider`, `BrowserDocumentLike`, `BrowserMetaLike`, `BrowserProviderOptions`, `BrowserViolationEventLike` | Public entry for `@knowvah/plantuml-ts/image-providers` (decisions.md D3). |
+| `network.ts` | `NetworkProviderOptions`, `createNetworkImageProvider` | Fetch-based {@link ImageProvider} for hosts with network access. |

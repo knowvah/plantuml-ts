@@ -11,6 +11,7 @@
  */
 
 import { UImageSvg, svgImagePayload } from './klimt/shape/UImageSvg.js';
+import { parsePngIhdrFromDataUri } from './klimt/sprite/png-ihdr.js';
 import { toBase64 } from './klimt/sprite/png-encoder.js';
 
 /** StringUtils.isDoubleQuote: straight, curly, and guillemet double-quote
@@ -22,6 +23,9 @@ const SRC_PREFIX = 'src=';
 
 /** `AtomImg.java:77`. */
 const DATA_IMAGE_SVG_BASE64 = 'data:image/svg+xml;base64,';
+
+/** `AtomImg.java:75`. */
+const DATA_IMAGE_PNG_BASE64 = 'data:image/png;base64,';
 
 /** Short cannot-decode text — used for the `<img>` src forms where upstream
  *  ALSO emits no source string: a file src that doesn't resolve under a
@@ -142,4 +146,22 @@ export function decodeSvgDataImage(src: string, scale: number): SvgImgDecoded | 
   } catch (e) {
     return `ERROR ${e instanceof Error ? e.message : String(e)}`;
   }
+}
+
+/**
+ * The data URI a retrieved remote image takes into the existing decode paths.
+ * `AtomImg.create` sends an `http(s):` src ending `.svg` to `buildSvgFromUrl`
+ * (`AtomImg.java:166-167`, `:223-233`: the bytes as UTF-8 text into
+ * `AtomImgSvg(TileImageSvg)`, the same construction as the base64 branch
+ * `:153-161`), and every other one to `buildRasterFromUrl` (`:169`,
+ * `:211-221`). The only raster this port decodes is PNG (`png-ihdr.ts`), so
+ * any other format returns `undefined` and the caller keeps the jar's
+ * `(Cannot decode: <url>)` text (`:214,218`) -- the jar's ImageIO would draw
+ * it. The suffix test is the jar's own and case-sensitive; the mime type
+ * plays no part in it.
+ */
+export function remoteImageToDataUri(url: string, bytes: Uint8Array): string | undefined {
+  if (url.endsWith('.svg')) return DATA_IMAGE_SVG_BASE64 + toBase64(bytes);
+  const uri = DATA_IMAGE_PNG_BASE64 + toBase64(bytes);
+  return parsePngIhdrFromDataUri(uri) === undefined ? undefined : uri;
 }

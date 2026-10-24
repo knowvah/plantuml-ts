@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-23T16:55:04.474Z",
+  "generatedAt": "2026-10-23T17:42:22.430Z",
   "fixtures": [
     {
       "slug": "bacupi-77-fuke586",
@@ -1630,10 +1630,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 266,
-      "firstDiff": "svg/g[1]/text[7]",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "figezi-68-zefe216",
@@ -6379,10 +6376,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 46,
-      "firstDiff": "svg/g[1]/text[6]/@textLength",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "tijeba-12-zeta132",

@@ -161,6 +161,25 @@ reads is decided by your `fetcher` (`makeNodeFsFetcher` confines reads to its
 base directory, symlinks included). `[[javascript:…]]` link targets are
 emitted as `href=""`, as the jar does, unless `allowJavascriptInLink: true`.
 
+## Remote images
+
+`<img:https://…>` needs a host-supplied transport: pass `imageProvider` to
+`render()`. Ready-made providers ship in a separate entry, so the core never
+loads network code:
+
+```ts
+import { render } from '@knowvah/plantuml-ts';
+import { createNetworkImageProvider } from '@knowvah/plantuml-ts/image-providers';
+
+await render(source, { imageProvider: createNetworkImageProvider(), securityProfile: 'INTERNET' });
+```
+
+In a browser use `createBrowserImageProvider()`; it pre-checks the page's CSP
+but sees only `<meta>` policies, so a header-delivered policy must be passed as
+`cspPolicy`. Fetches are gated by the security profile (`SANDBOX` never
+fetches). Defaults: 5000 ms timeout, 10 MiB. See
+[docs-site/guide/image-providers.md](docs-site/guide/image-providers.md).
+
 ## Layout Engines
 
 | Engine | Algorithm |

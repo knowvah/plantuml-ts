@@ -266,7 +266,7 @@ export interface SpriteDimsLookup {
 /** Splitter.imgPatternNoSrcColon, java Splitter.java:58. Group 1: raw src
  *  content (may carry a `src=` prefix and/or quotes -- stripped by
  *  `stripImgSrc`). Group 2: the optional `{scale=N}` block. */
-const IMG_PATTERN_SOURCE = '<img[\\s:]+([^>{}]+)(\\{scale=[0-9.]+\\})?>';
+export const IMG_PATTERN_SOURCE = '<img[\\s:]+([^>{}]+)(\\{scale=[0-9.]+\\})?>';
 
 /** `SpriteUtils.SPRITE_NAME` (java :45) -- THE sprite-name char class
  *  (`[-\p{L}0-9_/]+`), single source of truth under src/ (si11b ADR-4 /

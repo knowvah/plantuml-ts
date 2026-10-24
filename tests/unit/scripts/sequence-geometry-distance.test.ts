@@ -298,15 +298,23 @@ describe('corpus wiring', () => {
   });
 
   it('measures a real fixture through the deterministic pipeline', () => {
-    // A row that stays non-zero: its image needs an http fetch a sync render
-    // cannot make (sdd2 README push-forward). jobadi-87 reached zero in sdd2 T3a.
+    // fifasu-62 was "a row that stays non-zero" (its image needs an http fetch
+    // a sync render cannot make) until sdd3 batch 6: `surveyAssetStore()` now
+    // serves the golden-decoded bytes (T6g, decision-journal row 83-85), so
+    // the row measures 0 by design. `numericCount` counts the diffs carrying
+    // a delta (`distanceOf`), so a real zero is distance 0 / count 0 with
+    // `descended` true; a comparison that never got below the root group is
+    // the OTHER 0/0 — flagged by `descended` false (`descendedFrom`'s doc,
+    // sequence-geometry-distance.ts:155-166). No sequence corpus row stays
+    // non-zero for the drive's lifetime, so the wiring is asserted on shape.
     const slug = 'fifasu-62-pipo979';
     const measured = measureFixture(join(CACHE, slug), slug, requireIncludeStore(fixtureIncludeStore));
     expect(measured.error).toBeUndefined();
-    expect(measured.distance).toBeGreaterThan(0);
-    expect(measured.numericCount).toBeGreaterThan(0);
-    // Shape only: this branch exists to move these numbers.
-    expect(Object.keys(measured.byAttribute).length).toBeGreaterThan(0);
+    expect(measured.distance).toBe(0);
+    expect(measured.numericCount).toBe(0);
+    expect(measured.descended).toBe(true);
+    // `byAttribute` holds only the differing attributes: empty at a real zero.
+    expect(Object.keys(measured.byAttribute)).toEqual([]);
   });
 
   it('captures a render failure as null rather than as a distance of zero', () => {
