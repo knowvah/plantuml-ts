@@ -6,8 +6,9 @@
  *
  * The sequence layout bakes the default exporter margin (5) plus the teoz
  * block's own translate (5, `teoz/SequenceDiagramFileMakerTeoz.java:134-168`)
- * into the body; {@link withExporterMargin} moves the body by the DIFFERENCE
- * to the style margin and re-derives the canvas. Expected values are jar
+ * into the body; the page is DRAWN under the DIFFERENCE to the style margin
+ * (`renderer-document.ts#exporterPlacement`, sdd3-T8g) and its canvas is the
+ * graphic's fold over the grown dimension. Expected values are jar
  * output (`scripts/oracle-render.sh`) of `Bob -> Alice : hello` under
  * `<style> document { Margin ... } </style>`:
  *
@@ -26,7 +27,6 @@ import { defaultTheme, type Theme } from '../../../src/core/theme.js';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import { renderSequence } from '../../../src/diagrams/sequence/renderer.js';
-import { withExporterMargin } from '../../../src/diagrams/sequence/renderer-document.js';
 import { SEQUENCE_DOCUMENT_MARGIN } from '../../../src/core/document-margin.js';
 import { sequenceSource } from '../../helpers/sequence-source.js';
 import type { SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
@@ -47,10 +47,9 @@ function themed(margin: Theme['diagramMargin']): Theme {
   return margin === undefined ? defaultTheme : { ...defaultTheme, diagramMargin: margin };
 }
 
-/** The unscaled page the renderer hands over, then the exporter margin. */
+/** The unscaled page the renderer hands over, drawn under the exporter margin. */
 function exported(margin: Theme['diagramMargin'], ...lines: string[]): RenderFragment {
-  const geo = geometry(...lines);
-  return withExporterMargin(renderSequence(geo, defaultTheme, MEASURER), geo, themed(margin));
+  return renderSequence(geometry(...lines), themed(margin), MEASURER);
 }
 
 function lifelineRect(fragment: RenderFragment): { x: number; y: number } {
@@ -59,21 +58,20 @@ function lifelineRect(fragment: RenderFragment): { x: number; y: number } {
   return { x: Number(m[1]), y: Number(m[2]) };
 }
 
-describe('withExporterMargin -- no style Margin (TextBlockExporter.java:515)', () => {
-  it('returns the fragment unchanged, so output without a style margin is byte-identical', () => {
-    const geo = geometry();
-    const fragment = renderSequence(geo, defaultTheme, MEASURER);
-    expect(withExporterMargin(fragment, geo, defaultTheme)).toBe(fragment);
+describe('exporter margin -- no style Margin (TextBlockExporter.java:515)', () => {
+  it('declares no margin, so output without a style margin is byte-identical', () => {
+    expect(exported(undefined).documentMargin).toBeUndefined();
   });
 
-  it('returns the fragment unchanged when the style margin equals the default same(5)', () => {
-    const geo = geometry();
-    const fragment = renderSequence(geo, defaultTheme, MEASURER);
-    expect(withExporterMargin(fragment, geo, themed(SEQUENCE_DOCUMENT_MARGIN))).toBe(fragment);
+  it('declares no margin when the style margin equals the default same(5)', () => {
+    const fragment = exported(SEQUENCE_DOCUMENT_MARGIN);
+    expect(fragment.documentMargin).toBeUndefined();
+    expect([fragment.width, fragment.height]).toEqual([exported(undefined).width, exported(undefined).height]);
+    expect(fragment.body).toBe(exported(undefined).body);
   });
 });
 
-describe('withExporterMargin -- style Margin (TextBlockExporter.java:510-516,159-176,199-203)', () => {
+describe('exporter margin -- style Margin (TextBlockExporter.java:510-516,159-176,199-203)', () => {
   const same10 = { top: 10, right: 10, bottom: 10, left: 10 };
 
   it('Margin 10 grows the canvas by 5 per side and moves the body by (5, 5)', () => {

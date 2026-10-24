@@ -15,8 +15,10 @@ import { fmt } from '../../../src/core/svg-format.js';
 import { DEFAULT_DELAY_PAINT, layoutBody } from './frame-paint-fixtures.js';
 import { referencePaints } from '../../../src/diagrams/sequence/ref-body-geo.js';
 import { alignedBlockRuns } from '../../../src/diagrams/sequence/sequence-block-align.js';
-import { renderFrameBlotter } from '../../../src/diagrams/sequence/renderer-frame-blotter.js';
+import { drawFrameBlotter } from '../../../src/diagrams/sequence/renderer-frame-blotter.js';
+import { drawMarkup } from './draw-markup.js';
 import { DEFAULT_SEQUENCE_STYLE_BUILDER } from '../../helpers/sequence-source.js';
+import { attrsOf, tagsOf, type TagAttrs } from '../../helpers/svg-tags.js';
 
 const measurer = new DeterministicMeasurer();
 
@@ -32,9 +34,11 @@ function render(geo: SequenceGeometry): string {
   return renderSequence(geo, defaultTheme, measurer).body;
 }
 
-/** Every `<text>` element of `body` whose content is `content`. */
-function textsOf(body: string, content: string): string[] {
-  return [...body.matchAll(/<text [^>]*>([^<]*)<\/text>/g)].filter((m) => m[1] === content).map((m) => m[0]);
+/** The attributes of every `<text>` element of `body` whose content is
+ *  `content` -- `style` declarations expanded, so a test pins a drawn value,
+ *  not the driver's spelling. */
+function textsOf(body: string, content: string): TagAttrs[] {
+  return [...body.matchAll(/<text [^>]*>([^<]*)<\/text>/g)].filter((m) => m[1] === content).map((m) => attrsOf(m[0]));
 }
 
 function style(rules: string): string {
@@ -55,10 +59,10 @@ describe('grouping frame (Grouping.java:104-113, ComponentRoseGroupingHeader)', 
     expect(frame!.headerPaint!.fill).toBe('#EEEEEE');
     expect(frame!.headerPaint!.font.size).toBe(13);
     const body = render(layoutBody(ALT, measurer));
-    expect(textsOf(body, 'alt')[0]).toContain('font-size="13" font-weight="700"');
-    expect(textsOf(body, '[x]')[0]).toContain('font-size="11" font-weight="700"');
-    expect(textsOf(body, '[y]')[0]).toContain('font-size="11" font-weight="700"');
-    expect(body).toContain('stroke="#000" stroke-width="1.5"/>');
+    expect(textsOf(body, 'alt')[0]).toMatchObject({ 'font-size': '13', 'font-weight': '700' });
+    expect(textsOf(body, '[x]')[0]).toMatchObject({ 'font-size': '11', 'font-weight': '700' });
+    expect(textsOf(body, '[y]')[0]).toMatchObject({ 'font-size': '11', 'font-weight': '700' });
+    expect(tagsOf(body, 'rect')).toContainEqual(expect.objectContaining({ stroke: '#000', 'stroke-width': '1.5' }));
   });
 
   it('draws the else rule in the group LineColor, dashed 2,2 at width 1, one pixel down', () => {
@@ -66,18 +70,24 @@ describe('grouping frame (Grouping.java:104-113, ComponentRoseGroupingHeader)', 
     const [frame] = frames(geo);
     const sep = frame!.branchSeparators[0]!;
     const y = fmt(sep.y + 1);
-    expect(render(geo)).toContain(
-      `<line x1="${fmt(frame!.x)}" y1="${y}" x2="${fmt(frame!.x + frame!.width)}" y2="${y}" stroke="#000" stroke-width="1" stroke-dasharray="2,2"/>`,
-    );
+    expect(tagsOf(render(geo), 'line')).toContainEqual({
+      x1: fmt(frame!.x),
+      y1: y,
+      x2: fmt(frame!.x + frame!.width),
+      y2: y,
+      stroke: '#000',
+      'stroke-width': '1',
+      'stroke-dasharray': '2,2',
+    });
   });
 
   it('takes header and condition fonts from groupHeader and group (<style>)', () => {
     // Jar: alt at font-size 18 italic #FFA500, [cond one] 15 bold #00F.
     const src = `${style('group {\n FontColor blue\n FontSize 15\n}\ngroupHeader {\n FontSize 18\n FontColor orange\n FontStyle italic\n}')}\n${ALT}`;
     const body = render(layoutBody(src, measurer));
-    expect(textsOf(body, 'alt')[0]).toContain('font-size="18" font-style="italic" fill="#FFA500"');
-    expect(textsOf(body, '[x]')[0]).toContain('font-size="15" font-weight="700" fill="#00F"');
-    expect(textsOf(body, '[y]')[0]).toContain('font-size="15" font-weight="700" fill="#00F"');
+    expect(textsOf(body, 'alt')[0]).toMatchObject({ 'font-size': '18', 'font-style': 'italic', fill: '#FFA500' });
+    expect(textsOf(body, '[x]')[0]).toMatchObject({ 'font-size': '15', 'font-weight': '700', fill: '#00F' });
+    expect(textsOf(body, '[y]')[0]).toMatchObject({ 'font-size': '15', 'font-weight': '700', fill: '#00F' });
   });
 
   it('sizes the tab from the header font', () => {
@@ -91,18 +101,22 @@ describe('grouping frame (Grouping.java:104-113, ComponentRoseGroupingHeader)', 
   it('honours sequenceGroupHeaderFontColor / sequenceGroupFontColor through the style', () => {
     const src = `skinparam SequenceGroupHeaderFontColor red\nskinparam SequenceGroupFontColor green\n${ALT}`;
     const body = render(layoutBody(src, measurer));
-    expect(textsOf(body, 'alt')[0]).toContain('fill="#F00"');
-    expect(textsOf(body, '[x]')[0]).toContain('fill="#008000"');
+    expect(textsOf(body, 'alt')[0]).toMatchObject({ fill: '#F00' });
+    expect(textsOf(body, '[x]')[0]).toMatchObject({ fill: '#008000' });
   });
 
   it('paints the body band from the group style (GroupingTile.java:308-316)', () => {
     const fromStyle = render(layoutBody(`${style('group {\n BackGroundColor pink\n}')}\n${ALT}`, measurer));
-    expect(fromStyle).toMatch(/<rect [^>]*fill="#FFC0CB" stroke="#FFC0CB" stroke-width="1"\/>/);
+    expect(tagsOf(fromStyle, 'rect')).toContainEqual(
+      expect.objectContaining({ fill: '#FFC0CB', stroke: '#FFC0CB', 'stroke-width': '1' }),
+    );
   });
 
   it('paints the body band from the opener colour (alt#red #yellow)', () => {
     const src = ALT.replace('alt x', 'alt#red #yellow x');
-    expect(render(layoutBody(src, measurer))).toMatch(/<rect [^>]*fill="#FF0" stroke="#FF0" stroke-width="1"\/>/);
+    expect(tagsOf(render(layoutBody(src, measurer)), 'rect')).toContainEqual(
+      expect.objectContaining({ fill: '#FF0', stroke: '#FF0', 'stroke-width': '1' }),
+    );
   });
 
   it('takes each else condition font from the builder current at that else (D2)', () => {
@@ -115,8 +129,8 @@ describe('grouping frame (Grouping.java:104-113, ComponentRoseGroupingHeader)', 
       'end',
     ];
     const body = render(layoutBody(src.join('\n'), measurer));
-    expect(textsOf(body, '[one]')[0]).toContain('fill="#000"');
-    expect(textsOf(body, '[two]')[0]).toContain('fill="#F00"');
+    expect(textsOf(body, '[one]')[0]).toMatchObject({ fill: '#000' });
+    expect(textsOf(body, '[two]')[0]).toMatchObject({ fill: '#F00' });
   });
 
   it('lays out a multi-line condition as one block, taller by a line', () => {
@@ -143,8 +157,8 @@ describe('ref over (Reference.java:104-113, ComponentRoseReference)', () => {
     expect(ref!.headerPaint!.fill).toBe('#EEEEEE');
     expect(ref!.headerPaint!.thickness).toBe(2);
     const body = render(layoutBody(REF, measurer));
-    expect(textsOf(body, 'ref')[0]).toContain('font-size="13" font-weight="700"');
-    expect(textsOf(body, 'some text')[0]).toContain('font-size="12"');
+    expect(textsOf(body, 'ref')[0]).toMatchObject({ 'font-size': '13', 'font-weight': '700' });
+    expect(textsOf(body, 'some text')[0]).toMatchObject({ 'font-size': '12' });
   });
 
   it('places the body by the reference alignment and font (<style>)', () => {
@@ -153,10 +167,15 @@ describe('ref over (Reference.java:104-113, ComponentRoseReference)', () => {
     const src = `${style('reference {\n FontSize 15\n FontColor green\n HorizontalAlignment right\n}\nreferenceHeader {\n FontSize 9\n FontColor blue\n}')}\n${REF}`;
     const geo = layoutBody(src, measurer);
     const body = render(geo);
-    expect(textsOf(body, 'second longer line')[0]).toContain('x="16"');
-    expect(textsOf(body, 'some text')[0]).toContain('x="72.906"');
-    expect(textsOf(body, 'some text')[0]).toContain('font-size="15" fill="#008000"');
-    expect(textsOf(body, 'ref')[0]).toContain('x="25" y="83" font-size="9" font-weight="700" fill="#00F"');
+    expect(textsOf(body, 'second longer line')[0]).toMatchObject({ x: '16' });
+    expect(textsOf(body, 'some text')[0]).toMatchObject({ x: '72.906', 'font-size': '15', fill: '#008000' });
+    expect(textsOf(body, 'ref')[0]).toMatchObject({
+      x: '25',
+      y: '83',
+      'font-size': '9',
+      'font-weight': '700',
+      fill: '#00F',
+    });
   });
 
   it('widens the component by the reference shadow (ComponentRoseReference.java:155-159)', () => {
@@ -192,22 +211,26 @@ describe('delay (Delay.java:59-62, ComponentRoseDelayText)', () => {
     const [first, second] = delay!.labelRuns;
     expect(first!.x - delay!.labelRuns[0]!.x).toBe(0);
     expect(first!.x).toBeGreaterThan(second!.x);
-    expect(textsOf(render(geo), '5 minutes later')[0]).toContain('font-size="11" fill="#000"');
+    expect(textsOf(render(geo), '5 minutes later')[0]).toMatchObject({ 'font-size': '11', fill: '#000' });
   });
 
   it('takes font, colour and alignment from a delay style', () => {
     // Jar: both lines at x=10, y 100.444 / 116.444, 16 bold #F00.
     const src = `<style>\ndelay {\n FontColor red\n FontSize 16\n FontStyle bold\n HorizontalAlignment left\n}\n</style>\n${DELAY}`;
     const body = render(layoutBody(src, measurer));
-    expect(textsOf(body, '5 minutes later')[0]).toContain(
-      'x="10" y="100.444" font-size="16" font-weight="700" fill="#F00"',
-    );
-    expect(textsOf(body, 'and a long second line')[0]).toContain('x="10" y="116.444"');
+    expect(textsOf(body, '5 minutes later')[0]).toMatchObject({
+      x: '10',
+      y: '100.444',
+      'font-size': '16',
+      'font-weight': '700',
+      fill: '#F00',
+    });
+    expect(textsOf(body, 'and a long second line')[0]).toMatchObject({ x: '10', y: '116.444' });
   });
 
   it('honours sequenceDelayFontColor through the style', () => {
     const body = render(layoutBody(`skinparam sequenceDelayFontColor blue\n${DELAY}`, measurer));
-    expect(textsOf(body, '5 minutes later')[0]).toContain('fill="#00F"');
+    expect(textsOf(body, '5 minutes later')[0]).toMatchObject({ fill: '#00F' });
   });
 
   it('refuses a delay layout did not paint', () => {
@@ -247,6 +270,6 @@ describe('paint seams (sdd1 T3a)', () => {
   it('refuses an else colour that is neither simple nor a gradient', () => {
     const frame = { ...frames(layoutBody(ALT, measurer))[0]! };
     frame.branchSeparators = [{ ...frame.branchSeparators[0]!, backColorGeneral: '#automatic' }];
-    expect(() => renderFrameBlotter(frame, 1)).toThrow(/neither a simple nor a gradient/);
+    expect(() => drawMarkup((ug) => drawFrameBlotter(ug, frame))).toThrow(/neither a simple nor a gradient/);
   });
 });

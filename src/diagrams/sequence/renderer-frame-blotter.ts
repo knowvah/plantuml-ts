@@ -15,10 +15,9 @@
  * entry's own colour AFTER the band for the PRIOR span is drawn).
  *
  * Upstream draws through a `UGraphic`/`URectangle`/`UPath` that composes an
- * `UTranslate` at draw time; this port has no such translate step for a raw
- * `d`-string `<path>` (`core/svg-shapes.ts#path` takes only the finished
- * `d`), so every path-building helper here bakes the frame's own (x, y)
- * offset directly into each coordinate instead.
+ * `UTranslate` at draw time, and so does this module (sdd3 T8e): the bands are
+ * drawn on the page's `UGraphic`, translated to the frame's top-left, in the
+ * frame's local frame.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/teoz/Blotter.java
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/sequencediagram/teoz/GroupingTile.java:301-340
@@ -26,8 +25,14 @@
 
 import type { FrameGeo } from './ast.js';
 import type { Paint } from '../../core/paint.js';
-import { PAINT_NONE, rect, path } from '../../core/svg.js';
-import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
+import { PAINT_NONE } from '../../core/svg.js';
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import type { UShape } from '../../core/klimt/UShape.js';
+import { Back } from '../../core/klimt/Back.js';
+import { Fore } from '../../core/klimt/Fore.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { UPath } from '../../core/klimt/shape/UPath.js';
+import { URectangle } from '../../core/klimt/shape/URectangle.js';
 import { HColorSet } from '../../core/klimt/color/HColorSet.js';
 import { ColorMapper, toSvgPaint } from '../../core/klimt/color/ColorMapper.js';
 import { HColorGradient } from '../../core/klimt/color/HColorGradient.js';
@@ -77,18 +82,18 @@ interface BlotterBand {
  * which `GroupingStart#getUsedStyles` already overrode with the general
  * colour. An else without its own colour inherits it (`:333-339`); one with
  * its own goes through `addChange`, which skips a colour equal to the last
- * ADDED one -- insertion order, not y order (`Blotter.java:130-137`). `k` is
- * the export scale the `+ 1` of `addChange(ypos + 1, ...)` is multiplied by.
+ * ADDED one -- insertion order, not y order (`Blotter.java:130-137`).
  */
-function buildBands(frame: FrameGeo, back: Paint, k: number): BlotterBand[] {
+/** The `+ 1` of `addChange(ypos + 1, ...)` (`GroupingTile.java:340`). */
+const BLOTTER_CHANGE_OFFSET = 1;
+
+function buildBands(frame: FrameGeo, back: Paint): BlotterBand[] {
   const changes = new Map<number, Paint>();
   let last = back;
   for (const sep of frame.branchSeparators) {
     // `ypos = elseTile.getYGauge().getMin().getCurrentValue() - getFrameY()`
-    // (GroupingTile.java:332), then `+ 1` at the `addChange` call (:340). The
-    // geo is already scaled, but the `+ 1` is layout space: `SvgGraphics#format`
-    // multiplies it by the export scale, so it enters here as `k`.
-    const ypos = sep.y - frame.y + k;
+    // (GroupingTile.java:332), then `+ 1` at the `addChange` call (:340).
+    const ypos = sep.y - frame.y + BLOTTER_CHANGE_OFFSET;
     const color = sep.backColorGeneral === undefined ? back : branchPaint(sep.backColorGeneral);
     if (paintKey(color) === paintKey(last)) continue;
     changes.set(ypos, color);
@@ -99,64 +104,56 @@ function buildBands(frame: FrameGeo, back: Paint, k: number): BlotterBand[] {
   return [...changes.entries()].sort(([a], [b]) => a - b).map(([y, color]) => ({ y, color }));
 }
 
-/** `Blotter#getRectangleBackground`'s two arc paths (`:98-122`), with the
- *  frame's own absolute (ox, oy) offset baked into every coordinate -- see
- *  this module's header comment for why. `closePath()` (`:106`, `:119`) is a
- *  `SEG_CLOSE`, which `SvgGraphics#svgPath` emits as nothing
- *  (`SvgGraphics.java:855-856`): the `d` is left unclosed, no `Z`. */
-function topArcPathD(ox: number, oy: number, width: number, height: number, round: number): string {
+/** `Blotter#getRectangleBackground`'s two arc paths (`:98-122`), at the
+ *  frame's origin. `closePath()` (`:106`, `:119`) is a `SEG_CLOSE`, which
+ *  `SvgGraphics#svgPath` emits as nothing (`SvgGraphics.java:855-856`): the
+ *  `d` is left unclosed, no `Z`. */
+function topArcPath(width: number, height: number, round: number): UPath {
   const r = round / 2;
-  return [
-    moveTo(ox + r, oy),
-    lineTo(ox + width - r, oy),
-    arcTo(ox + width, oy + r, r, 0, 1),
-    lineTo(ox + width, oy + height),
-    lineTo(ox, oy + height),
-    lineTo(ox, oy + r),
-    arcTo(ox + r, oy, r, 0, 1),
-  ].join(' ');
+  const result = UPath.none();
+  result.moveTo(r, 0);
+  result.lineTo(width - r, 0);
+  result.arcTo(r, r, 0, 0, 1, width, r);
+  result.lineTo(width, height);
+  result.lineTo(0, height);
+  result.lineTo(0, r);
+  result.arcTo(r, r, 0, 0, 1, r, 0);
+  return result;
 }
 
-/** The mirror of {@link topArcPathD}: square top edge, rounded BOTTOM
+/** The mirror of {@link topArcPath}: square top edge, rounded BOTTOM
  *  corners (`Blotter.java:110-120`). */
-function bottomArcPathD(ox: number, oy: number, width: number, height: number, round: number): string {
+function bottomArcPath(width: number, height: number, round: number): UPath {
   const r = round / 2;
-  return [
-    moveTo(ox, oy),
-    lineTo(ox + width, oy),
-    lineTo(ox + width, oy + height - r),
-    arcTo(ox + width - r, oy + height, r, 0, 1),
-    lineTo(ox + r, oy + height),
-    arcTo(ox, oy + height - r, r, 0, 1),
-    lineTo(ox, oy),
-  ].join(' ');
+  const result = UPath.none();
+  result.moveTo(0, 0);
+  result.lineTo(width, 0);
+  result.lineTo(width, height - r);
+  result.arcTo(r, r, 0, 0, 1, width - r, height);
+  result.lineTo(r, height);
+  result.arcTo(r, r, 0, 0, 1, 0, height - r);
+  result.lineTo(0, 0);
+  return result;
 }
 
-/** Everything {@link renderBand} needs besides the per-band values already
- *  carried on a {@link BlotterBand} -- kept as one object so the function
+/** Everything {@link bandShape} needs besides the per-band values already
+ *  carried on a {@link BandSpan} -- kept as one object so the function
  *  stays within this repo's 5-parameter cap. */
 interface BandRenderCtx {
-  readonly frameX: number;
-  readonly frameY: number;
   readonly width: number;
   readonly round: number;
   readonly bandCount: number;
-  /** The `ug`'s stroke the bands are drawn under, scaled at emission: none
-   *  is applied on the way, so `UStroke.simple()`'s 1 (`UStroke.java:75-77`,
-   *  `AbstractCommonUGraphic.java:58`); jar-verified `stroke-width:1` on a
-   *  `skinparam sequenceGroupBodyBackgroundColor` band. */
-  readonly strokeWidth: number;
 }
 
 /**
  * One drawn span: from `localTop` to `endY` (both LOCAL to the frame, i.e.
- * `Blotter`'s own `y = ent.getKey()` before the caller re-adds `frame.y`),
- * painted in `color` -- which is `current`, the colour that was in force
- * BEFORE this change point, never the change point's OWN colour
- * (`Blotter.java:82` draws with `current`, then only AFTER the draw call
- * does `:85` advance `current = ent.getValue()`). A {@link BlotterBand}
- * entry supplies `endY` and the color for the NEXT span, not this one --
- * conflating the two was the bug this comment now guards against.
+ * `Blotter`'s own `y = ent.getKey()`), painted in `color` -- which is
+ * `current`, the colour that was in force BEFORE this change point, never the
+ * change point's OWN colour (`Blotter.java:82` draws with `current`, then
+ * only AFTER the draw call does `:85` advance `current = ent.getValue()`). A
+ * {@link BlotterBand} entry supplies `endY` and the color for the NEXT span,
+ * not this one -- conflating the two was the bug this comment now guards
+ * against.
  */
 interface BandSpan {
   readonly localTop: number;
@@ -165,25 +162,34 @@ interface BandSpan {
 }
 
 /**
- * `Blotter#getRectangleBackground` (`:90-124`) plus the `ug.apply(current)
- * .apply(current.bg()).apply(UTranslate.dy(y)).draw(rect)` call that uses
- * it (`:82`) -- both colour roles (stroke AND fill) painted with the same
- * `color`, matching that one HColor applied to both `ug` params.
+ * `Blotter#getRectangleBackground` (`:90-124`): the shape of band `i`. A
+ * `UPath` band has fore == back, so `DriverPathSvg` draws it with an empty
+ * stroke and width 0 (`DriverPathSvg.java:65-69`); rects keep their stroke
+ * (`UStroke.simple()`'s 1, `UStroke.java:75-77`, `AbstractCommonUGraphic
+ * .java:58`; jar-verified `stroke-width:1` on a `skinparam
+ * sequenceGroupBodyBackgroundColor` band).
  */
-function renderBand(i: number, span: BandSpan, ctx: BandRenderCtx): string {
-  const { frameX, frameY, width, round, bandCount } = ctx;
+function bandShape(i: number, span: BandSpan, ctx: BandRenderCtx): UShape {
+  const { width, round, bandCount } = ctx;
   const height = span.endY - span.localTop;
-  const x = frameX;
-  const y = frameY + span.localTop;
-  const style = { fill: span.color, stroke: span.color, strokeWidth: ctx.strokeWidth };
-  // A `UPath` band has fore == back, so `DriverPathSvg` draws it with an empty
-  // stroke and width 0 (`DriverPathSvg.java:65-69`); rects keep their stroke.
-  const pathStyle = { fill: span.color, strokeWidth: 0 };
-  if (round === 0) return rect(x, y, width, height, style);
-  if (bandCount === 1) return rect(x, y, width, height, { ...style, rx: round / 2, ry: round / 2 });
-  if (i === 0) return path(topArcPathD(x, y, width, height, round), pathStyle);
-  if (i === bandCount - 1) return path(bottomArcPathD(x, y, width, height, round), pathStyle);
-  return rect(x, y, width, height, style);
+  if (round === 0) return URectangle.build(width, height);
+  if (bandCount === 1) return URectangle.build(width, height).rounded(round);
+  if (i === 0) return topArcPath(width, height, round);
+  if (i === bandCount - 1) return bottomArcPath(width, height, round);
+  return URectangle.build(width, height);
+}
+
+/**
+ * `Blotter#drawU`'s one draw (`:82`): `ug.apply(current).apply(current.bg())
+ * .apply(UTranslate.dy(y)).draw(rect)` -- both colour roles (stroke AND fill)
+ * painted with the same `color`, matching that one HColor applied to both
+ * `ug` params. `ug` is already at the frame's top-left.
+ */
+function drawBand(ug: UGraphic, i: number, span: BandSpan, ctx: BandRenderCtx): void {
+  ug.apply(new Fore(span.color))
+    .apply(new Back(span.color))
+    .apply(UTranslate.dy(span.localTop))
+    .draw(bandShape(i, span, ctx));
 }
 
 /**
@@ -205,27 +211,17 @@ function renderBand(i: number, span: BandSpan, ctx: BandRenderCtx): string {
  *
  * @see Blotter.java#drawU
  */
-export function renderFrameBlotter(frame: FrameGeo, k: number): string {
+export function drawFrameBlotter(ug: UGraphic, frame: FrameGeo): void {
   const { paint } = framePaintsOf(frame);
   const back = paint.fill;
-  const bands = buildBands(frame, back, k);
-  const ctx: BandRenderCtx = {
-    frameX: frame.x,
-    frameY: frame.y,
-    width: frame.width,
-    round: paint.roundCorner * k,
-    bandCount: bands.length,
-    strokeWidth: k,
-  };
+  const bands = buildBands(frame, back);
+  const ctx: BandRenderCtx = { width: frame.width, round: paint.roundCorner, bandCount: bands.length };
+  const origin = ug.apply(new UTranslate(frame.x, frame.y));
   let current = back;
   let localTop = 0;
-  const parts: string[] = [];
   bands.forEach((band, i) => {
-    if (!isTransparentPaint(current)) {
-      parts.push(renderBand(i, { localTop, endY: band.y, color: current }, ctx));
-    }
+    if (!isTransparentPaint(current)) drawBand(origin, i, { localTop, endY: band.y, color: current }, ctx);
     localTop = band.y;
     current = band.color;
   });
-  return parts.join('');
 }

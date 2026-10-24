@@ -3,84 +3,11 @@
   "totals": {
     "missing-element": 0,
     "extra-element": 0,
-    "geometry": 13,
+    "geometry": 0,
     "text-metrics": 0,
     "format-units": 0,
-    "other": 58
+    "other": 0
   },
-  "fixtures": [
-    {
-      "slug": "gebeki-18-muci858",
-      "diffCount": 2,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 2,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 0
-      }
-    },
-    {
-      "slug": "gepuce-64-pivu656",
-      "diffCount": 21,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 4,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 17
-      }
-    },
-    {
-      "slug": "jefoke-95-jara779",
-      "diffCount": 21,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 2,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 19
-      }
-    },
-    {
-      "slug": "kaluna-08-rubu301",
-      "diffCount": 2,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 2,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 0
-      }
-    },
-    {
-      "slug": "menoke-22-luxo044",
-      "diffCount": 13,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 3,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 10
-      }
-    },
-    {
-      "slug": "pafene-01-tedi758",
-      "diffCount": 12,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 0,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 12
-      }
-    }
-  ],
+  "fixtures": [],
   "errors": []
 }

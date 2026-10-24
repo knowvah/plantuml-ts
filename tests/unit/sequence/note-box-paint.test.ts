@@ -4,9 +4,9 @@
  *
  * Expected strings marked "jar" were rendered with
  * `scripts/oracle-render.sh` (deterministic text) on 2026-10-20; the port
- * emits attributes rather than the jar's `style=` form, which
- * `normalize.ts` treats as equal, so the assertions spell the port's form
- * with the jar's values.
+ * draws through the klimt drivers (sdd3 T8e), which write the jar's `style=`
+ * form; assertions read each tag through `attrsOf`, so they pin the jar's
+ * values, not a spelling.
  */
 import { describe, expect, it } from 'vitest';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
@@ -22,6 +22,7 @@ import { notePaint } from '../../../src/diagrams/sequence/sequence-layout-note.j
 import { boxLabelRuns, boxPaint } from '../../../src/diagrams/sequence/sequence-layout-box.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import { sequenceSource } from '../../helpers/sequence-source.js';
+import { attrsOf } from '../../helpers/svg-tags.js';
 
 const DEFAULT_STYLE = currentStyleBuilder(createSequenceStyleDispatch({ lines: [], type: 'sequence' }));
 
@@ -35,7 +36,7 @@ function tags(svg: string, name: 'path' | 'rect' | 'text'): string[] {
 }
 
 function attr(tag: string, name: string): string | undefined {
-  return new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1];
+  return attrsOf(tag)[name];
 }
 
 function noteEvent(overrides: Partial<NoteEvent> = {}): NoteEvent {
@@ -55,10 +56,9 @@ describe('note paint (Note.java:75-82)', () => {
     // jar (`metano-36-gevu843`'s `ok` note, same box): `Opale.getPolygonNormal`'s
     // vertex order (Opale.java:152-157), then the corner (:134-147).
     const [body, fold] = tags(svg, 'path');
-    expect(body).toBe(
-      '<path d="M15,52 L15,75 L49,75 L49,62 L39,52 L15,52" fill="#FEFFDD" stroke="#181818" stroke-width="0.5"/>',
-    );
-    expect(fold).toBe('<path d="M39,52 L39,62 L49,62 L39,52" fill="#FEFFDD" stroke="#181818" stroke-width="0.5"/>');
+    const paint = { fill: '#FEFFDD', stroke: '#181818', 'stroke-width': '0.5' };
+    expect(attrsOf(body!)).toEqual({ d: 'M15,52 L15,75 L49,75 L49,62 L39,52 L15,52', ...paint });
+    expect(attrsOf(fold!)).toEqual({ d: 'M39,52 L39,62 L49,62 L39,52', ...paint });
     // note { FontSize 13 } (plantuml.skin:323), root { FontColor black } (:9).
     const text = tags(svg, 'text').find((t) => t.includes('x="21"'))!;
     expect(attr(text, 'font-size')).toBe('13');
@@ -123,14 +123,23 @@ describe('note paint (Note.java:75-82)', () => {
   it('skinparam roundCorner rounds the Opale polygon, the corner and the rnote box (Opale.java:134-171)', () => {
     const svg = render('skinparam roundCorner 10\nparticipant A\nnote left of A : r\nrnote right of A : b');
     // jar, byte for byte (`d` and paint):
-    expect(tags(svg, 'path')).toEqual([
-      '<path d="M15,57 L15,70 A5,5 0 0 0 20,75 L35,75 A5,5 0 0 0 40,70 L40,62 L30,52 L20,52 A5,5 0 0 0 15,57" fill="#FEFFDD" stroke="#181818" stroke-width="0.5"/>',
-      '<path d="M30,52 L30,59.5 A2.5,2.5 0 0 0 32.5,62 L40,62 L30,52" fill="#FEFFDD" stroke="#181818" stroke-width="0.5"/>',
+    const paint = { fill: '#FEFFDD', stroke: '#181818', 'stroke-width': '0.5' };
+    expect(tags(svg, 'path').map(attrsOf)).toEqual([
+      { d: 'M15,57 L15,70 A5,5 0 0 0 20,75 L35,75 A5,5 0 0 0 40,70 L40,62 L30,52 L20,52 A5,5 0 0 0 15,57', ...paint },
+      { d: 'M30,52 L30,59.5 A2.5,2.5 0 0 0 32.5,62 L40,62 L30,52', ...paint },
     ]);
     // `URectangle#rounded(10)` -> rx = ry = 5 (ComponentRoseNoteBox.java:100).
-    expect(tags(svg, 'rect')).toContain(
-      '<rect x="50.306" y="85" width="15" height="21" fill="#FEFFDD" stroke="#181818" stroke-width="0.5" rx="5" ry="5"/>',
-    );
+    expect(tags(svg, 'rect').map(attrsOf)).toContainEqual({
+      x: '50.306',
+      y: '85',
+      width: '15',
+      height: '21',
+      fill: '#FEFFDD',
+      stroke: '#181818',
+      'stroke-width': '0.5',
+      rx: '5',
+      ry: '5',
+    });
   });
 
   it('each note reads the builder of its own line: a later <style> reaches only later notes (D2)', () => {

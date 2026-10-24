@@ -69,6 +69,10 @@ export interface AnnotationBlock {
   readonly extraDefs?: string;
   readonly width: number;
   readonly height: number;
+  /** sdd3-T8g: the composed original's drawn fold (`RenderFragment.drawnMaxX/Y`), in THIS block's coordinates -- the
+   *  original's own, shifted by wherever the composition placed it. Absent for a block that carries none. */
+  readonly drawnMaxX?: number;
+  readonly drawnMaxY?: number;
 }
 
 /** `TextBlockBordered#calculateDimension` reports `width + 1, height + 1`

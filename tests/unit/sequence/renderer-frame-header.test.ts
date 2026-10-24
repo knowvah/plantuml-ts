@@ -10,14 +10,18 @@ import {
   groupPaintsOf,
   refPaintsOf,
 } from './frame-paint-fixtures.js';
-import { scaleSequenceTheme, type ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
+import { pageThemeOf, type PageTheme } from '../../../src/diagrams/sequence/renderer-ug.js';
 import {
-  renderGroupingHeaderBackground,
-  renderGroupingHeaderForeground,
-  frameHeaderCornerPath,
+  drawGroupingHeaderBackground,
+  drawGroupingHeaderForeground,
+  frameHeaderCorner,
 } from '../../../src/diagrams/sequence/renderer-frame-header.js';
+import type { UPath } from '../../../src/core/klimt/shape/UPath.js';
+import { UTranslate } from '../../../src/core/klimt/UTranslate.js';
+import { attrsOf, tagsOf, type TagAttrs } from '../../helpers/svg-tags.js';
+import { drawMarkup } from './draw-markup.js';
 
-const theme: ScaledTheme = scaleSequenceTheme(defaultTheme, 1, new DeterministicMeasurer());
+const theme: PageTheme = pageThemeOf(defaultTheme, new DeterministicMeasurer());
 
 /** `groupHeader { FontSize 13 }` (`plantuml.skin:127`). */
 const HEADER_FONT_SIZE = 13;
@@ -84,70 +88,85 @@ function makeFrame(overrides: Partial<FrameGeo> = {}): FrameGeo {
   return { ...base, tabRuns: tabRunsFor(base) };
 }
 
-/** Splits a concatenated markup string into its top-level elements (this
- *  module never nests elements, so a simple `<tag` split is exact). */
+/** The header's background pass, drawn on the page's graphic. */
+function background(frame: FrameGeo, at: PageTheme = theme): string {
+  return drawMarkup((ug) => drawGroupingHeaderBackground(ug, frame), at);
+}
+
+/** The header's foreground pass, drawn on the page's graphic. */
+function foreground(frame: FrameGeo, at: PageTheme = theme): string {
+  return drawMarkup((ug) => drawGroupingHeaderForeground(ug, frame), at);
+}
+
+/** The drawn tags in document order (this module never nests elements). */
 function topLevelTags(svg: string): string[] {
   return [...svg.matchAll(/<(path|rect|text)\b/g)].map((m) => m[1] as string);
 }
 
-describe('renderGroupingHeaderBackground', () => {
+/** Every `<path>`/`<rect>` of `svg`, `style` expanded. */
+function shapes(svg: string): TagAttrs[] {
+  return [...svg.matchAll(/<(?:path|rect)\b[^>]*>/g)].map((m) => attrsOf(m[0]));
+}
+
+const OUTLINE = { x: '10', y: '50', width: '200', height: '100', fill: 'none' };
+
+describe('drawGroupingHeaderBackground', () => {
   it('emits exactly one <rect>, fill=none, stroke black 1.5', () => {
-    const svg = renderGroupingHeaderBackground(makeFrame(), theme);
+    const svg = background(makeFrame());
     expect(topLevelTags(svg)).toEqual(['rect']);
-    expect(svg).toContain('fill="none"');
-    expect(svg).toContain('stroke="#000"');
-    expect(svg).toContain('stroke-width="1.5"');
+    expect(shapes(svg)).toEqual([{ ...OUTLINE, stroke: '#000', 'stroke-width': '1.5' }]);
   });
 });
 
-describe('renderGroupingHeaderForeground', () => {
+describe('drawGroupingHeaderForeground', () => {
   it('group frame with no comment: path, rect, text(13, bold)', () => {
-    const svg = renderGroupingHeaderForeground(makeFrame({ tabText: 'foo' }), theme);
+    const svg = foreground(makeFrame({ tabText: 'foo' }));
     expect(topLevelTags(svg)).toEqual(['path', 'rect', 'text']);
-    expect(svg).toContain('font-size="13"');
-    expect(svg).toContain('font-weight="700"');
+    expect(tagsOf(svg, 'text')[0]).toMatchObject({ 'font-size': '13', 'font-weight': '700' });
     expect(svg).toContain('>foo<');
   });
 
   it('corner path is filled #EEE and stroked black 1.5', () => {
-    const svg = renderGroupingHeaderForeground(makeFrame(), theme);
-    const pathEl = svg.slice(0, svg.indexOf('<rect'));
-    expect(pathEl).toContain('fill="#EEE"');
-    expect(pathEl).toContain('stroke="#000"');
-    expect(pathEl).toContain('stroke-width="1.5"');
+    const [corner] = shapes(foreground(makeFrame()));
+    expect(corner).toMatchObject({ fill: '#EEE', stroke: '#000', 'stroke-width': '1.5' });
   });
 
   it('alt frame with a condition: path, rect, text, text(11, bracketed)', () => {
     const frame = makeFrame({ frameType: 'alt', tabText: 'alt', tabComment: 'successful' });
-    const svg = renderGroupingHeaderForeground(frame, theme);
+    const svg = foreground(frame);
     expect(topLevelTags(svg)).toEqual(['path', 'rect', 'text', 'text']);
-    expect(svg).toContain('font-size="11"');
+    expect(tagsOf(svg, 'text')[1]).toMatchObject({ 'font-size': '11' });
     expect(svg).toContain('>[successful]<');
   });
 
   it('background rect and foreground rect share geometry (the double outline)', () => {
     const frame = makeFrame();
-    const bg = renderGroupingHeaderBackground(frame, theme);
-    const fg = renderGroupingHeaderForeground(frame, theme);
-    const fgRect = fg.slice(fg.indexOf('<rect'));
-    expect(fgRect.startsWith(bg)).toBe(true);
+    const [bg] = shapes(background(frame));
+    const fgRect = shapes(foreground(frame))[1];
+    expect(fgRect).toEqual(bg);
   });
 });
 
-describe('frameHeaderCornerPath', () => {
+describe('frameHeaderCorner', () => {
+  /** The path's `d` as the driver writes it: its segments, in order. */
+  function dOf(path: UPath, dx = 0, dy = 0): string {
+    return drawMarkup((ug) => ug.apply(new UTranslate(dx, dy)).draw(path)).match(/ d="([^"]*)"/)![1]!;
+  }
+
   it('roundCorner === 0 matches getCorner:163-171 exactly', () => {
-    const d = frameHeaderCornerPath({ x: 0, y: 0 }, { width: 90, height: 20 }, 10, 0);
-    expect(d).toBe('M0,0 L90,0 L90,10 L80,20 L0,20 L0,0');
+    expect(dOf(frameHeaderCorner({ width: 90, height: 20 }, 10, 0))).toBe('M0,0 L90,0 L90,10 L80,20 L0,20 L0,0');
   });
 
   it('roundCorner > 0 opens at (roundCorner/2, 0) and closes with an arc', () => {
-    const d = frameHeaderCornerPath({ x: 0, y: 0 }, { width: 90, height: 20 }, 10, 8);
-    expect(d).toBe('M4,0 L90,0 L90,10 L80,20 L0,20 L0,4 A4,4 0 0 1 4,0');
+    expect(dOf(frameHeaderCorner({ width: 90, height: 20 }, 10, 8))).toBe(
+      'M4,0 L90,0 L90,10 L80,20 L0,20 L0,4 A4,4 0 0 1 4,0',
+    );
   });
 
-  it('offsets every point by the given origin', () => {
-    const d = frameHeaderCornerPath({ x: 10, y: 50 }, { width: 90, height: 20 }, 10, 0);
-    expect(d).toBe('M10,50 L100,50 L100,60 L90,70 L10,70 L10,50');
+  it('is drawn at the component origin: the translate moves every point', () => {
+    expect(dOf(frameHeaderCorner({ width: 90, height: 20 }, 10, 0), 10, 50)).toBe(
+      'M10,50 L100,50 L100,60 L90,70 L10,70 L10,50',
+    );
   });
 });
 
@@ -158,13 +177,14 @@ function styled(rules: string): ReturnType<typeof builderOf> {
 
 describe('frame paint (sdd1 T3a)', () => {
   it('draws the default skin: outline black 1.5 unrounded, tab #EEE stroked 1.5 (plantuml.skin:116-129)', () => {
-    const svg = renderGroupingHeaderForeground(makeFrame(), theme);
-    expect(svg).toContain(
-      '<path d="M10,50 L100,50 L100,60 L90,70 L10,70 L10,50" fill="#EEE" stroke="#000" stroke-width="1.5"/>',
-    );
-    expect(svg).toContain(
-      '<rect x="10" y="50" width="200" height="100" fill="none" stroke="#000" stroke-width="1.5"/>',
-    );
+    const [corner, rect] = shapes(foreground(makeFrame()));
+    expect(corner).toEqual({
+      d: 'M10,50 L100,50 L100,60 L90,70 L10,70 L10,50',
+      fill: '#EEE',
+      stroke: '#000',
+      'stroke-width': '1.5',
+    });
+    expect(rect).toEqual({ ...OUTLINE, stroke: '#000', 'stroke-width': '1.5' });
   });
 
   it('strokes both rects with the group style and the tab with groupHeader (<style>)', () => {
@@ -173,40 +193,44 @@ describe('frame paint (sdd1 T3a)', () => {
         'groupHeader {\n BackGroundColor yellow\n LineColor green\n LineThickness 2\n}',
     );
     const frame = makeFrame(groupPaintsOf(builder));
-    const fg = renderGroupingHeaderForeground(frame, theme);
+    const [corner, rect] = shapes(foreground(frame));
     // ComponentRoseGroupingHeader.java:79,82,142: the corner is shaped by the
     // BODY's RoundCorner and painted by the header's symbol context.
-    expect(fg).toContain(
-      '<path d="M15,50 L100,50 L100,60 L90,70 L10,70 L10,55 A5,5 0 0 1 15,50" fill="#FF0" stroke="#008000" stroke-width="2"/>',
-    );
-    const rectEl =
-      '<rect x="10" y="50" width="200" height="100" fill="none" stroke="#F00" stroke-width="3" stroke-dasharray="4,4" rx="5" ry="5"/>';
-    expect(fg).toContain(rectEl);
-    expect(renderGroupingHeaderBackground(frame, theme)).toBe(rectEl);
+    expect(corner).toEqual({
+      d: 'M15,50 L100,50 L100,60 L90,70 L10,70 L10,55 A5,5 0 0 1 15,50',
+      fill: '#FF0',
+      stroke: '#008000',
+      'stroke-width': '2',
+    });
+    const outline = {
+      ...OUTLINE,
+      stroke: '#F00',
+      'stroke-width': '3',
+      'stroke-dasharray': '4,4',
+      rx: '5',
+      ry: '5',
+    };
+    expect(rect).toEqual(outline);
+    expect(shapes(background(frame))).toEqual([outline]);
   });
 
   it('honours the old theme-path skinparams through the style (sequenceGroupBorder*)', () => {
     const builder = builderOf('skinparam sequenceGroupBorderThickness 3\nskinparam sequenceGroupBorderColor blue');
-    const svg = renderGroupingHeaderBackground(makeFrame(groupPaintsOf(builder)), theme);
-    expect(svg).toBe('<rect x="10" y="50" width="200" height="100" fill="none" stroke="#00F" stroke-width="3"/>');
+    expect(shapes(background(makeFrame(groupPaintsOf(builder))))).toEqual([
+      { ...OUTLINE, stroke: '#00F', 'stroke-width': '3' },
+    ]);
   });
 
   it('fills the tab with the element colour (alt #pink)', () => {
     const frame = makeFrame(groupPaintsOf(undefined, { backColorElement: '#pink' }));
-    expect(renderGroupingHeaderForeground(frame, theme)).toContain('fill="#FFC0CB"');
-  });
-
-  it('scales the stroke and its dashes at emission', () => {
-    const k2 = scaleSequenceTheme(defaultTheme, 2, new DeterministicMeasurer());
-    const frame = makeFrame(groupPaintsOf(styled('group {\n LineStyle 4\n}')));
-    expect(renderGroupingHeaderBackground(frame, k2)).toContain('stroke-width="3" stroke-dasharray="8,8"');
+    expect(shapes(foreground(frame))[0]).toMatchObject({ fill: '#FFC0CB' });
   });
 
   it('draws no tab text when the header font is transparent (DriverTextSvg.java:93-94)', () => {
     const painted = makeFrame(groupPaintsOf(styled('groupHeader {\n FontColor transparent\n}')));
     // Layout stamps no colour on a transparent run (`sequence-label-primitives.ts:157`).
     const frame = { ...painted, tabRuns: painted.tabRuns.map(({ color: _c, ...run }) => run) };
-    expect(topLevelTags(renderGroupingHeaderForeground(frame, theme))).toEqual(['path', 'rect']);
+    expect(topLevelTags(foreground(frame))).toEqual(['path', 'rect']);
   });
 
   it('omits a comment run whose font colour is transparent, keeping the title (DriverTextSvg.java:93-94)', () => {
@@ -218,7 +242,7 @@ describe('frame paint (sdd1 T3a)', () => {
     const inner: TextRun = { ...bracket!, text: 'x' };
     const { color: _c, ...open } = { ...bracket!, text: '[' };
     const { color: _d, ...close } = { ...bracket!, text: ']' };
-    const svg = renderGroupingHeaderForeground({ ...frame, tabRuns: [title!, open, inner, close] }, theme);
+    const svg = foreground({ ...frame, tabRuns: [title!, open, inner, close] });
     expect(topLevelTags(svg)).toEqual(['path', 'rect', 'text', 'text']);
     expect(svg).not.toContain('>[<');
     expect(svg).not.toContain('>]<');
@@ -228,7 +252,7 @@ describe('frame paint (sdd1 T3a)', () => {
 
   it('refuses a frame layout did not paint', () => {
     const { paint: _p, headerPaint: _h, ...bare } = makeFrame();
-    expect(() => renderGroupingHeaderBackground(bare, theme)).toThrow(/no paint/);
+    expect(() => background(bare)).toThrow(/no paint/);
   });
 });
 
@@ -237,12 +261,10 @@ describe('ref paint (sdd1 T3a)', () => {
     makeFrame({ ...paints, frameType: 'ref', tabText: 'ref', tabWidth: 60, tabHeight: 15 });
 
   it('draws the default skin: body none/black 1.5, tab #EEE stroked 2 (plantuml.skin:155-170)', () => {
-    const svg = renderGroupingHeaderForeground(ref(), theme);
-    expect(svg).toContain(
-      '<rect x="10" y="50" width="200" height="100" fill="none" stroke="#000" stroke-width="1.5"/>',
-    );
-    expect(svg).toContain('fill="#EEE" stroke="#000" stroke-width="2"/>');
-    expect(renderGroupingHeaderBackground(ref(), theme)).toBe('');
+    const [rect, corner] = shapes(foreground(ref()));
+    expect(rect).toEqual({ ...OUTLINE, stroke: '#000', 'stroke-width': '1.5' });
+    expect(corner).toMatchObject({ fill: '#EEE', stroke: '#000', 'stroke-width': '2' });
+    expect(background(ref())).toBe('');
   });
 
   it('fills and strokes the body with reference, the tab with referenceHeader (<style>)', () => {
@@ -250,22 +272,35 @@ describe('ref paint (sdd1 T3a)', () => {
       'reference {\n BackGroundColor lightblue\n LineColor red\n LineThickness 3\n RoundCorner 8\n}\n' +
         'referenceHeader {\n BackGroundColor pink\n LineColor orange\n LineThickness 1\n}',
     );
-    const svg = renderGroupingHeaderForeground(ref(refPaintsOf(builder)), theme);
-    expect(svg).toContain(
-      '<rect x="10" y="50" width="200" height="100" fill="#ADD8E6" stroke="#F00" stroke-width="3" rx="4" ry="4"/>',
-    );
-    expect(svg).toContain(
-      '<path d="M14,50 L70,50 L70,55 L60,65 L10,65 L10,54 A4,4 0 0 1 14,50" fill="#FFC0CB" stroke="#FFA500" stroke-width="1"/>',
-    );
+    const [rect, corner] = shapes(foreground(ref(refPaintsOf(builder))));
+    expect(rect).toEqual({
+      x: '10',
+      y: '50',
+      width: '200',
+      height: '100',
+      fill: '#ADD8E6',
+      stroke: '#F00',
+      'stroke-width': '3',
+      rx: '4',
+      ry: '4',
+    });
+    expect(corner).toEqual({
+      d: 'M14,50 L70,50 L70,55 L60,65 L10,65 L10,54 A4,4 0 0 1 14,50',
+      fill: '#FFC0CB',
+      stroke: '#FFA500',
+      'stroke-width': '1',
+    });
   });
 
   it('honours sequenceReference* skinparams through the style', () => {
     const builder = builderOf(
       'skinparam sequenceReferenceBorderColor red\nskinparam sequenceReferenceBackgroundColor #AAAAAA',
     );
-    const svg = renderGroupingHeaderForeground(ref(refPaintsOf(builder)), theme);
-    expect(svg).toContain(
-      '<rect x="10" y="50" width="200" height="100" fill="#AAA" stroke="#F00" stroke-width="1.5"/>',
-    );
+    expect(shapes(foreground(ref(refPaintsOf(builder))))[0]).toEqual({
+      ...OUTLINE,
+      fill: '#AAA',
+      stroke: '#F00',
+      'stroke-width': '1.5',
+    });
   });
 });

@@ -18,8 +18,10 @@ import {
   type LinePiece,
 } from '../../../src/diagrams/sequence/sequence-delay.js';
 import { paginateSequence } from '../../../src/diagrams/sequence/sequence-page.js';
-import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.js';
-import { renderActivation, renderLifelineSegments } from '../../../src/diagrams/sequence/renderer-lifeline.js';
+import { drawLifelineSegments } from '../../../src/diagrams/sequence/renderer-lifeline.js';
+import { drawActivation } from '../../../src/diagrams/sequence/renderer-livebox.js';
+import { drawMarkup } from './draw-markup.js';
+import { tagsOf } from '../../helpers/svg-tags.js';
 import { NEWPAGE_TILE_HEIGHT } from '../../../src/diagrams/sequence/newpage-style.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type {
@@ -31,7 +33,7 @@ import type {
   SequenceGeometry,
 } from '../../../src/diagrams/sequence/ast.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import type { ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
+import type { PageTheme } from '../../../src/diagrams/sequence/renderer-ug.js';
 import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
 import { componentStyle, paintOf } from '../../../src/diagrams/sequence/sequence-skin-param.js';
 import {
@@ -40,7 +42,11 @@ import {
   DEFAULT_SEQUENCE_STYLE_BUILDER,
 } from '../../helpers/sequence-source.js';
 
-const theme: ScaledTheme = { ...defaultTheme, scaleK: 1, measurer: new DeterministicMeasurer() };
+const renderLifelineSegments = (p: ParticipantGeo, segments: readonly LifelineSegment[], t: PageTheme): string =>
+  drawMarkup((ug) => drawLifelineSegments(ug, p, segments), t);
+const renderActivation = (a: ActivationGeo, t: PageTheme): string => drawMarkup((ug) => drawActivation(ug, a), t);
+
+const theme: PageTheme = { ...defaultTheme, measurer: new DeterministicMeasurer() };
 
 function delay(y: number, height = 28): DelayGeo {
   return { kind: 'delay', y, height, middleX: 100, textWidth: 0, labelRuns: [] };
@@ -176,17 +182,19 @@ describe('rendering the pieces', () => {
     // Jar: `style="stroke:#181818;stroke-width:0.5;stroke-dasharray:1,4;"`
     // (231 corpus delay lines), `element { LineThickness 0.5 }` +
     // `delay { LineStyle 1-4 }` (plantuml.skin:91-93,300-305).
-    expect(svg).toBe(
-      '<line x1="40" y1="39" x2="40" y2="60" stroke="#181818" stroke-width="0.5" stroke-dasharray="1,4"/>' +
-        '<g><title>A</title></g>',
-    );
+    expect(tagsOf(svg, 'line')).toEqual([
+      { x1: '40', y1: '39', x2: '40', y2: '60', stroke: '#181818', 'stroke-width': '0.5', 'stroke-dasharray': '1,4' },
+    ]);
+    expect(svg.endsWith('<g><title>A</title></g>')).toBe(true);
+    expect(svg.startsWith('<line ')).toBe(true);
   });
 
   it('draws an open bar as a back-coloured rect, two sides and its closed end', () => {
     const paint = paintOf(componentStyle(DEFAULT_SEQUENCE_STYLE_BUILDER, 'ACTIVATION_BOX'), HColorSet.instance());
     const svg = renderActivation({ ...act(10, 20), paint, open: { closeUp: true, closeDown: false } }, theme);
-    expect((svg.match(/<line /g) ?? []).length).toBe(3);
-    expect(svg).toContain('<line x1="35" y1="10" x2="45" y2="10"');
+    const lines = tagsOf(svg, 'line');
+    expect(lines).toHaveLength(3);
+    expect(lines[2]).toMatchObject({ x1: '35', y1: '10', x2: '45', y2: '10' });
   });
 });
 
@@ -233,19 +241,5 @@ describe('a page clips the pieces (UClip#getClippedLine)', () => {
     const page = paginateSequence(paged([bar]), 0);
     const clipped = page.events.find((e): e is ActivationGeo => e.kind === 'activation');
     expect([clipped?.y, clipped?.height, clipped?.open]).toEqual([150, 72, { closeUp: false, closeDown: false }]);
-  });
-});
-
-describe('scale', () => {
-  it('scales a delay and the lifeline pieces', () => {
-    const scaled = scaleSequenceGeometry(paged([{ ...delay(100), textWidth: 10, middleX: 50 }]), 2);
-    const d = scaled.events.find((e): e is DelayGeo => e.kind === 'delay');
-    expect([d?.y, d?.height, d?.middleX, d?.textWidth]).toEqual([200, 56, 100, 20]);
-    expect(scaled.lifelineSegments['A']?.[1]).toEqual({
-      y1: 200,
-      y2: 256,
-      delay: true,
-      paint: DEFAULT_DELAY_LINE_PAINT,
-    });
   });
 });

@@ -20,11 +20,11 @@ import type { FontSpec } from '../../../src/core/measurer.js';
 import { renderLatexAsImage } from '../../../src/core/latex.js';
 import { primitiveKind } from '../../../src/diagrams/sequence/sequence-creole-sheet.js';
 import { labelBlockOf, labelFont } from '../../helpers/sequence-label.js';
-import { sequenceText } from '../../../src/diagrams/sequence/sequence-text.js';
-import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.js';
-import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
+import { drawRun } from '../../../src/diagrams/sequence/renderer-text.js';
+import { tagsOf } from '../../helpers/svg-tags.js';
+import { drawMarkup } from './draw-markup.js';
 import { renderSync } from '../../../src/index.js';
-import type { SequenceGeometry, TextRun } from '../../../src/diagrams/sequence/ast.js';
+import type { TextRun } from '../../../src/diagrams/sequence/ast.js';
 
 const measurer = new DeterministicMeasurer();
 const ARROW_FONT: FontSpec = { family: 'sans-serif', size: 13 };
@@ -79,80 +79,31 @@ describe('the creole seam — a latex atom is an image primitive', () => {
   });
 });
 
-describe('sequenceText — an image run emits <image>, never <text>', () => {
-  const spec = {
-    leftX: 12,
-    baselineY: 40,
+describe('drawRun — an image run draws an <image>, never a <text>', () => {
+  const run: TextRun = {
     text: '',
-    width: DRAWN.width,
-    fontFamily: 'sans-serif',
-    fontSize: 13,
-    fill: '#000000',
+    x: 12,
+    y: 40,
+    textWidth: DRAWN.width,
+    textAscent: 0,
+    textLineHeight: DRAWN.height,
     image: { href: DRAWN.href, width: DRAWN.width, height: DRAWN.height, y: 25 },
   };
+  const ambient = { fontFamily: 'sans-serif', fontSize: 13, color: '#000000' };
+  const markup = (r: TextRun): string => drawMarkup((ug) => drawRun(ug, r, ambient));
 
-  it('emits the image at the run left edge and the image own top', () => {
-    const svg = sequenceText(spec);
-    expect(svg).toContain('<image ');
-    expect(svg).toContain('x="12"');
-    expect(svg).toContain('y="25"');
-    expect(svg).toContain(`width="${DRAWN.width}"`);
-    expect(svg).toContain(`height="${DRAWN.height}"`);
+  it('draws the image at the run left edge and the image own top', () => {
+    const svg = markup(run);
+    expect(tagsOf(svg, 'image')).toEqual([
+      expect.objectContaining({ x: '12', y: '25', width: String(DRAWN.width), height: String(DRAWN.height) }),
+    ]);
     expect(svg).not.toContain('<text');
   });
 
   it('wraps the image in its <a> when the run carries a url', () => {
-    const svg = sequenceText({ ...spec, url: { url: 'http://x', tooltip: 'http://x' } });
+    const svg = markup({ ...run, url: { url: 'http://x', tooltip: 'http://x' } });
     expect(svg).toContain('<a ');
     expect(svg).toContain('<image ');
-  });
-});
-
-describe('scaleRun — the image is a length and scales with the diagram', () => {
-  it('multiplies the image width, height and top by k', () => {
-    const run: TextRun = {
-      text: '',
-      x: 10,
-      y: 40,
-      textWidth: DRAWN.width,
-      textAscent: DRAWN.height,
-      textLineHeight: DRAWN.height,
-      image: { href: DRAWN.href, width: DRAWN.width, height: DRAWN.height, y: 25 },
-    };
-    const geo: SequenceGeometry = {
-      totalWidth: 200,
-      totalHeight: 100,
-      participants: [],
-      events: [
-        {
-          kind: 'message',
-          fromX: 40,
-          toX: 160,
-          y: 50,
-          label: '',
-          arrow: arrowConfigurationOf({}),
-          labelLines: [run],
-          arrowDirection: 'right',
-        },
-      ],
-      headHeight: 30,
-      lifelineEndY: 90,
-      lifelineSegments: {},
-      footerShapeY: 90,
-      boxes: [],
-      showFootbox: true,
-    };
-    const message = scaleSequenceGeometry(geo, 2).events[0]!;
-    if (message.kind !== 'message') throw new Error('unreachable');
-    const out = message.labelLines[0]!;
-    // A LENGTH and a COORDINATE both scale: `SvgGraphics#format` multiplies an
-    // emitted `<image>`'s geometry exactly as it does a `<text>`'s
-    // (`SvgGraphics.java:693`).
-    expect(out.image!.width).toBe(DRAWN.width * 2);
-    expect(out.image!.height).toBe(DRAWN.height * 2);
-    expect(out.image!.y).toBe(50);
-    // The image DOCUMENT is not a length.
-    expect(out.image!.href).toBe(DRAWN.href);
   });
 });
 

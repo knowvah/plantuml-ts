@@ -382,13 +382,19 @@ describe('svg-sequence weighted-score baseline ratchet — branch discrimination
   });
 
   it('rise detection fires against a REAL fixture, not only fabricated numbers', () => {
-    const real = baselineFixtures[0];
-    expect(real, 'expected at least one baselined fixture').toBeDefined();
+    // sdd3 close-b8 (2026-10-24, decision-journal row 105): every sequence row
+    // is pinned, so there is no `baseline` row to probe and no live score above
+    // zero to find. The probe prefers a baselined row when a future drive has
+    // one and otherwise takes any real fixture: the detector must still fire
+    // on a REAL measurement (a baseline one below the live score) and stay
+    // quiet on the live score itself, whatever that score is.
+    const real = baselineFixtures[0] ?? manifest.fixtures[0];
+    expect(real, 'expected at least one fixture in the manifest').toBeDefined();
     const result = measure(real!);
     expect(result.errored).toBe(false);
     // Narrowed by the assertion above; TS cannot see through `expect(...).toBe(false)`.
     const live = (result as { errored: false; weightedScore: number }).weightedScore;
-    expect(live).toBeGreaterThan(0);
+    expect(live).toBeGreaterThanOrEqual(0);
     expect(checkNoRise(real!, live - 1, live).ok).toBe(false);
     expect(checkNoRise(real!, live, live).ok).toBe(true);
   });

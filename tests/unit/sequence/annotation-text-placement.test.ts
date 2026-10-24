@@ -99,13 +99,12 @@ describe('renderer.ts emits no anchored text at all (D3)', () => {
     // `dominant-baseline` without first re-adding the import — which is a
     // visible line in a diff, where an attribute buried in an options object
     // is not.
-    const src = readFileSync(join(ROOT, 'src/diagrams/sequence/renderer.ts'), 'utf8');
-    expect(src).toContain("import { line } from '../../core/svg.js';");
-    expect(/^import \{[^}]*\btext\b[^}]*\} from/m.test(src)).toBe(false);
-    // T2e split the note and box drawing out; the rule follows them.
-    const notes = readFileSync(join(ROOT, 'src/diagrams/sequence/renderer-note.ts'), 'utf8');
-    expect(notes).toContain("import { line, path, polygon, rect } from '../../core/svg.js';");
-    expect(/^import \{[^}]*\btext\b[^}]*\} from/m.test(notes)).toBe(false);
+    // sdd3 T8e: every region draws through the page's `UGraphic`, so none of
+    // these modules imports the SVG string seam at all.
+    for (const file of ['renderer', 'renderer-events', 'renderer-note', 'renderer-link-anchor']) {
+      const src = readFileSync(join(ROOT, `src/diagrams/sequence/${file}.ts`), 'utf8');
+      expect(/^import \{[^}]*\btext\b[^}]*\} from '\.\.\/\.\.\/core\/svg(-shapes)?\.js'/m.test(src), file).toBe(false);
+    }
   });
 
   it('emits neither anchor across every fixture these four sites appear in', () => {

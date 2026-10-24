@@ -3,92 +3,86 @@
  *
  * Split out of `renderer.ts` (T1, sequence-command-coverage) to make
  * headroom under the 500-line cap for exo-arrow rendering and decorated
- * arrow heads. Pure move — see `renderer.ts`'s own header for the shared
- * scaling rationale this module inherits (`ScaledTheme.scaleK`).
+ * arrow heads. Pure move.
  */
 
-import { rect } from '../../core/svg.js';
-import { renderCreatedHead } from './renderer-participant-shapes.js';
-import type { MessageGeo, TextRun } from './ast.js';
-import type { ScaledTheme } from './scale-geo.js';
-import { primitiveFields, sequenceText, weightOf } from './sequence-text.js';
-import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
-import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import { Back } from '../../core/klimt/Back.js';
+import { Fore } from '../../core/klimt/Fore.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { URectangle } from '../../core/klimt/shape/URectangle.js';
+import { drawCreatedHead } from './renderer-participant-shapes.js';
+import type { MessageGeo } from './ast.js';
+import type { PageTheme } from './renderer-ug.js';
 import { TRANSPARENT_SVG } from './text-block-geo.js';
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
-import { renderFlatMessageArrow } from './renderer-arrowhead.js';
+import { drawFlatMessageArrow } from './renderer-arrowhead.js';
 import { messagePaintOf } from './sequence-arrow-paint.js';
-import { renderSelfMessageLeft, renderSelfMessageRight } from './renderer-message-self.js';
+import { drawSelfMessageLeft, drawSelfMessageRight } from './renderer-message-self.js';
+import { drawRun, type RunAmbient } from './renderer-text.js';
 
 // ---------------------------------------------------------------------------
 // Message helpers
 // ---------------------------------------------------------------------------
 
 /**
- * ONE label run as its `<text>`.
- *
- * C3: every style below is the RUN's own when creole set it and the message's
- * ambient one when it did not, which is exactly `DriverTextSvg#draw` reading
- * one `FontConfiguration` per `UText` (`:104-160,177-180`). A markup-free
- * label carries a family and a size equal to the ambient pair and none of the
- * flags, so it emits byte-identically to the pre-C3 single run.
- *
- * `url` wraps rather than decorates -- `SvgGraphics#openLink`/`closeLink`
- * (`:1105-1150`) -- and `sequence-text.ts` owns that wrap, so there is no
- * second `<a>` emitter here. No measurer is touched: `textWidth` and
- * `fontSize` were resolved in layout and scaled with the geometry (D5).
+ * What a label run falls back to where creole set nothing: the arrow style's
+ * font layout measured the block at (`AbstractTextualComponent.java:80`), its
+ * size; `paint` carries the style's own lengths. Each run is then ONE `UText` through `DriverTextSvg`
+ * reading one `FontConfiguration` (`:104-160,177-180`), via {@link drawRun}.
+ * `""mono""` sets its own family; `<size:N>`/`<sup>` its own size.
  */
-function messageLabelRun(run: TextRun, font: FontConfiguration, k: number): string {
-  return sequenceText({
-    leftX: drawnLeftX(run),
-    baselineY: run.y,
-    text: run.text,
-    width: drawnWidth(run),
-    // `""mono""` sets its own family; `<size:N>`/`<sup>` its own size. The
-    // fallbacks are the arrow style's font layout measured the block at
-    // (`AbstractTextualComponent.java:80`), its size scaled at emission like
-    // every other length (`SvgGraphics.java:466-468`); `paint` is unscaled.
-    fontFamily: run.fontFamily ?? font.family,
-    fontSize: run.fontSize ?? font.size * k,
-    fill: run.color ?? font.color ?? TRANSPARENT_SVG,
-    // The numeric CSS weight (`sequence-text.ts#runFontWeight`).
-    ...weightOf(run),
-    ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
-    ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
-    ...primitiveFields(run),
-  });
+function labelAmbientOf(msg: MessageGeo): RunAmbient {
+  const font = messagePaintOf(msg).font;
+  return { fontFamily: font.family, fontSize: font.size, color: font.color ?? TRANSPARENT_SVG };
 }
 
 /** The message's label. Upstream draws it last, after the arrow
- *  (`ComponentRoseArrow.java:175`, `ComponentRoseSelfArrow.java:88`).
+ *  (`ComponentRoseArrow.java:179`, `ComponentRoseSelfArrow.java:88`).
  *
  *  The autonumber leads, which is `createMessageNumber` merging `tb1` LEFT of
- *  `tb2` (`Display.java:703-712`) read left to right. */
-function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
-  return renderLabelPadder(msg, theme) + renderLabelRuns(msg, theme);
+ *  `tb2` (`Display.java:703-712`) read left to right.
+ *
+ *  `getTextBlock()` is `padder.apply(super.getTextBlock())`
+ *  (`AbstractComponentRoseArrow.java:72-75`), so the padder's rectangle
+ *  precedes the runs it wraps (`Padder.java:119-135`). */
+export function drawMessageLabel(ug: UGraphic, msg: MessageGeo): void {
+  drawLabelPadder(ug, msg);
+  drawLabelRuns(ug, msg);
 }
 
-/** `Padder#drawU`'s one `URectangle`, drawn before the label it wraps
- *  (`Padder.java:128-131`); `rounded(roundCorner)` reaches the SVG as
- *  `rx = ry = roundCorner / 2`, written when positive (`SvgGraphics.java:
- *  582-584`). Stroke is the default `UStroke` (thickness 1), none when the
- *  border colour is unset. */
-function renderLabelPadder(msg: MessageGeo, theme: ScaledTheme): string {
+/**
+ * `Padder#drawU`'s one `URectangle`, drawn before the label it wraps:
+ *
+ * ```java
+ * ug = ug.apply(margin.getTranslate());                                       // :120
+ * ug2 = ug.apply(borderColor == null ? HColors.none() : borderColor);         // :122-125
+ * ug2 = ug2.apply(backgroundColor == null ? HColors.none().bg() : backgroundColor.bg()); // :127-130
+ * final URectangle rect = URectangle.build(padding.apply(originalDim)).rounded(roundCorner); // :133
+ * ug2.draw(rect);                                                             // :134
+ * orig.drawU(ug.apply(padding.getTranslate()));                               // :135
+ * ```
+ * (`Padder.java`, the anonymous `TextBlock#drawU` of `apply`; the box is
+ * layout's resolved `labelPadder`, so `margin.getTranslate()` is the one
+ * translate to its top-left.) `rounded(roundCorner)` reaches the SVG as `rx =
+ * ry = roundCorner / 2`, written when positive (`SvgGraphics.java:582-584`).
+ * The stroke is the graphic's default `UStroke.simple()` (thickness 1); the
+ * border colour and the background are the geo's paints, `PAINT_NONE` when
+ * unset.
+ */
+export function drawLabelPadder(ug: UGraphic, msg: MessageGeo): void {
   const box = msg.labelPadder;
-  if (box === undefined) return '';
-  const r = (box.roundCorner / 2) * theme.scaleK;
-  return rect(box.x, box.y, box.width, box.height, {
-    fill: box.fill,
-    stroke: box.stroke,
-    strokeWidth: theme.scaleK,
-    ...(r > 0 ? { rx: r, ry: r } : {}),
-  });
+  if (box === undefined) return;
+  ug.apply(new UTranslate(box.x, box.y))
+    .apply(new Fore(box.stroke))
+    .apply(new Back(box.fill))
+    .draw(URectangle.build(box.width, box.height).rounded(box.roundCorner));
 }
 
-function renderLabelRuns(msg: MessageGeo, theme: ScaledTheme): string {
+function drawLabelRuns(ug: UGraphic, msg: MessageGeo): void {
   const runs = msg.labelNumber === undefined ? msg.labelLines : [msg.labelNumber, ...msg.labelLines];
-  const font = messagePaintOf(msg).font;
-  return runs.map((run) => messageLabelRun(run, font, theme.scaleK)).join('');
+  const ambient = labelAmbientOf(msg);
+  for (const run of runs) drawRun(ug, run, ambient);
 }
 
 /**
@@ -130,15 +124,16 @@ function renderLabelRuns(msg: MessageGeo, theme: ScaledTheme): string {
  * through the merged arrow style (`sequence-arrow-paint.ts#messagePaint`,
  * sdd1 T2c), never as text.
  */
-export function renderMessage(msg: MessageGeo, theme: ScaledTheme): string {
+export function drawMessage(ug: UGraphic, msg: MessageGeo, theme: PageTheme): void {
   // A part-anchored message returns from `drawU` before drawing anything
   // (`CommunicationTile.java:328-331`); its tile kept its height in layout.
-  if (msg.partAnchored === true) return '';
+  if (msg.partAnchored === true) return;
+  drawMulticast(ug, msg, theme);
   // A create message draws the created head FIRST, then the arrow
   // (`CommunicationTile#drawU:351-371`) -- and draws it even when the arrow
   // is hidden, since only the arrow component checks `isHidden()`.
-  const head = msg.createdHead === undefined ? '' : renderCreatedHead(msg.createdHead, theme);
-  return renderMulticast(msg, theme) + head + renderMessageArrowAndLabel(msg, theme);
+  if (msg.createdHead !== undefined) drawCreatedHead(ug, msg.createdHead, theme);
+  drawMessageArrowAndLabel(ug, msg, theme);
 }
 
 /**
@@ -147,20 +142,25 @@ export function renderMessage(msg: MessageGeo, theme: ScaledTheme): string {
  * when `x2 < x1`, `getComponentMulticast:169-177`) and no label
  * (`Display.NULL`), over the span between the two lifelines. A hidden arrow
  * draws nothing (`ComponentRoseArrow.java:85-87`).
+ *
+ * ```java
+ * final UGraphic ug2 = ug.apply(UTranslate.dx(Math.min(x1, x2))).apply(UTranslate.dy(dy)); // :386
+ * comp.drawU(ug2, area, (Context2D) ug2);                                                   // :388
+ * ```
+ * Each target's tile translates are the extra target's `x`/`y` here.
  */
-function renderMulticast(msg: MessageGeo, theme: ScaledTheme): string {
-  if (msg.multicast === undefined || msg.arrow.hidden === true) return '';
-  return msg.multicast.map((target) => renderFlatMessageArrow({ ...msg, ...target }, msg.arrow, theme)).join('');
+export function drawMulticast(ug: UGraphic, msg: MessageGeo, theme: PageTheme): void {
+  if (msg.multicast === undefined || msg.arrow.hidden === true) return;
+  for (const target of msg.multicast) drawFlatMessageArrow(ug, { ...msg, ...target }, msg.arrow, theme);
 }
 
 /** `isReverseDefine()` picks the side (`ComponentRoseSelfArrow.java:83-86`). */
-function renderSelfMessage(msg: MessageGeo, configuration: ArrowConfiguration, theme: ScaledTheme): string {
-  return configuration.reverseDefine === true
-    ? renderSelfMessageLeft(msg, configuration, theme)
-    : renderSelfMessageRight(msg, configuration, theme);
+function drawSelfMessage(ug: UGraphic, msg: MessageGeo, configuration: ArrowConfiguration, theme: PageTheme): void {
+  if (configuration.reverseDefine === true) drawSelfMessageLeft(ug, msg, configuration, theme);
+  else drawSelfMessageRight(ug, msg, configuration, theme);
 }
 
-function renderMessageArrowAndLabel(msg: MessageGeo, theme: ScaledTheme): string {
+function drawMessageArrowAndLabel(ug: UGraphic, msg: MessageGeo, theme: PageTheme): void {
   const configuration = msg.arrow;
   // `-[hidden]->` draws NOTHING: `ComponentRoseArrow#drawInternalU:85-87` and
   // `ComponentRoseSelfArrow#drawInternalU:71-73` both return on
@@ -168,10 +168,8 @@ function renderMessageArrowAndLabel(msg: MessageGeo, theme: ScaledTheme): string
   // still occupies its full height -- neither `getPreferredHeight` nor
   // `getPreferredWidth` is guarded (`ComponentRoseArrow.java:342-349`) -- so
   // this suppression belongs here and never in layout.
-  if (configuration.hidden === true) return '';
-  const arrow =
-    msg.arrowDirection === 'self'
-      ? renderSelfMessage(msg, configuration, theme)
-      : renderFlatMessageArrow(msg, configuration, theme);
-  return arrow + renderMessageLabel(msg, theme);
+  if (configuration.hidden === true) return;
+  if (msg.arrowDirection === 'self') drawSelfMessage(ug, msg, configuration, theme);
+  else drawFlatMessageArrow(ug, msg, configuration, theme);
+  drawMessageLabel(ug, msg);
 }

@@ -40,6 +40,7 @@
  * @see ~/git/plantuml/.../klimt/UGraphic.java#apply
  */
 
+import type { RenderFragment } from '../dispatcher.js';
 import { attrs } from '../svg.js';
 import { mapOutsideInlineDefs } from '../svg-defs.js';
 import { DEFAULT_SVG_DECIMALS, fmt } from '../svg-format.js';
@@ -176,6 +177,21 @@ export function shiftFragmentBody(body: string, dx: number, dy: number): string 
       return attrs([['transform', shiftTransform(value, dx, dy)]]).trimStart();
     }),
   );
+}
+
+/**
+ * sdd3-T8g: the drawn fold (`RenderFragment.drawnMaxX/Y`) of a body shifted by `(dx, dy)` -- `ensureVisible` sees
+ * the translated coordinate (`SvgGraphics.java:129-135`). A fragment without a fold gains none.
+ */
+export function shiftedFold(
+  fragment: Pick<RenderFragment, 'drawnMaxX' | 'drawnMaxY'>,
+  dx: number,
+  dy: number,
+): Pick<RenderFragment, 'drawnMaxX' | 'drawnMaxY'> {
+  return {
+    ...(fragment.drawnMaxX === undefined ? {} : { drawnMaxX: fragment.drawnMaxX + dx }),
+    ...(fragment.drawnMaxY === undefined ? {} : { drawnMaxY: fragment.drawnMaxY + dy }),
+  };
 }
 
 /** A numeric token carrying more fractional digits than `SvgGraphics

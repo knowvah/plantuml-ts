@@ -20,6 +20,7 @@ import { parseConditionalColor } from './klimt/color/HColorSet.js';
 import { parseClockwise } from './annotations/annotation-clockwise.js';
 import { withActivityCircleStyle } from './activity-circle-style.js';
 import { ROOT_LINE_COLOR_KEY } from './skinparam-key-handlers-shared.js';
+import { OptionKey } from './tim/EaterOption.js';
 
 /**
  * Five-stage theme resolution:
@@ -99,16 +100,39 @@ export function buildTheme(preprocessed: PreprocessorResult, options?: RenderOpt
           },
         };
 
+  // Stage 3b: `!option handwritten true` (sdd3-T8f), the second arm of
+  // `TitledDiagram#isHandwritten` -- see `withHandwrittenOption`.
+  const withOptions = withHandwrittenOption(withGenerations, preprocessed);
+
   // Stage 4: caller Partial<Theme> wins over everything
   const theme =
     options?.theme !== undefined && typeof options.theme === 'object'
-      ? deepMergeTheme(withGenerations, options.theme)
-      : withGenerations;
+      ? deepMergeTheme(withOptions, options.theme)
+      : withOptions;
   // #lizard forgives -- mechanical extraction of index.ts's own pre-existing
   // `buildTheme` (unchanged five-stage structure); was
   // never flagged in index.ts because that file's 500-line gate short-
   // circuited the per-function check first.
   return { theme, styleMap };
+}
+
+/**
+ * `TitledDiagram#isHandwritten`: `skinParam.handwritten()` (the theme's
+ * `handwritten`, already built from `skinparam handwritten`) OR, through
+ * `super.isHandwritten()`, `UgDiagram#isHandwritten`'s
+ * `getPreprocessingArtifact().getOption().isTrue(OptionKey.HANDWRITTEN)`.
+ * `ConfigurationStore#isTrue` is `"true".equalsIgnoreCase(value)`; a bare
+ * `!option handwritten` defines the key's default `"true"`
+ * (`OptionKey.java:40` `HANDWRITTEN("true")`, `EaterOption.java:66-67`). The
+ * option can only turn handwriting ON: a `skinparam handwritten true` that
+ * set it stays on whatever the option says.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:115-118
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/UgDiagram.java:117-121
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/preproc/ConfigurationStore.java:60-62
+ */
+function withHandwrittenOption(theme: Theme, preprocessed: PreprocessorResult): Theme {
+  const value = preprocessed.options?.get(OptionKey.HANDWRITTEN);
+  return value?.toLowerCase() === 'true' ? { ...theme, handwritten: true } : theme;
 }
 
 /**

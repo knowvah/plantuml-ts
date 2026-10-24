@@ -27,6 +27,7 @@ import {
 import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import type { MessageGeo } from '../../../src/diagrams/sequence/ast.js';
 import { DEFAULT_SEQUENCE_STYLE_BUILDER } from '../../helpers/sequence-source.js';
+import { attrsOf } from '../../helpers/svg-tags.js';
 
 /** `plantuml.skin:16` `root { LineColor #181818 }`, as `SvgGraphics` writes it. */
 const ROOT_LINE = '#181818';
@@ -47,7 +48,8 @@ function shapesOf(source: string): Shape[] {
   const svg = renderSync(`@startuml\n${source}\n@enduml`);
   return [...svg.matchAll(/<(line|polygon|ellipse)\b([^>]*)\/>/g)].map((m) => ({
     tag: m[1]!,
-    attrs: Object.fromEntries([...m[2]!.matchAll(/([a-z0-9-]+)="([^"]*)"/g)].map((a) => [a[1]!, a[2]!])),
+    // `style="stroke:..;.."` expanded: the klimt drivers write the jar's form.
+    attrs: attrsOf(m[2]!),
   }));
 }
 

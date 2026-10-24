@@ -127,6 +127,16 @@ export interface PreprocessorResult {
    * of one line. Absent on a hand-built result.
    */
   readonly skinparamAssignments?: readonly SkinparamAssignment[];
+  /**
+   * sdd3-T8f: the `!option <key> [<value>]` directives the run defined
+   * (`EaterOption.java:61-70` -> `ConfigurationStore#define`), keyed by
+   * `OptionKey` name (`HANDWRITTEN`, ...), last definition winning. Upstream
+   * hands the store to `SkinParam.create(..., preprocessing.getOption())`
+   * and `UgDiagram#isHandwritten` reads it back
+   * (`UgDiagram.java:117-121`); `build-theme.ts` reads it here. Absent on a
+   * hand-built result.
+   */
+  readonly options?: ReadonlyMap<string, string>;
 }
 
 /** See {@link PreprocessorResult.skinparamAssignments}. */
@@ -384,6 +394,7 @@ function resultOf(context: TContext): PreprocessorResult {
     skinparam: collector.skinparam,
     declarationOrder: { skinparam: collector.skinparamOrder, styles: collector.styleOrder },
     skinparamAssignments: collector.skinparamAssignments,
+    options: new Map(context.getPreprocessingArtifact().getOptions()),
   };
 }
 

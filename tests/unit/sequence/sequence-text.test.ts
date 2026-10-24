@@ -1,145 +1,54 @@
 /**
- * `sequenceText` — the sequence engine's single `<text>` emitter (D3).
- *
- * The oracle for every expectation here is the jar's own markup for
- * `jobadi-87-jegi648`, whose participant head is a three-character label:
- *
- * ```
- * <text x="17" y="27.889" fill="#000" font-size="14" textLength="24.938">Bob</text>
- * ```
- * (`test-results/dot-cache/sequence/jobadi-87-jegi648/in.svg`)
- *
- * That one element carries all three properties this module exists to
- * enforce: `x` is the LEFT EDGE, `y` is the BASELINE, and the measured width
- * reaches `textLength`. This port had been emitting a centre plus
- * `text-anchor="middle"`/`dominant-baseline="middle"` for the same label,
- * which draws in the same place and compares as a coordinate error against
- * every jar oracle in the corpus.
+ * `sequence-text.ts` -- the ambient a component's creole runs fall back to,
+ * and their drawing through the page's graphic (the string emitter
+ * `sequenceText` is gone: sdd3 T8e).
  */
 import { describe, it, expect } from 'vitest';
+import { creoleAmbientOf, drawCreoleRuns } from '../../../src/diagrams/sequence/sequence-text.js';
+import type { TextRun } from '../../../src/diagrams/sequence/text-block-geo.js';
+import { tagsOf } from '../../helpers/svg-tags.js';
+import { drawMarkup, pageTheme } from './draw-markup.js';
 
-import { primitiveFields, sequenceText, type SequenceTextSpec } from '../../../src/diagrams/sequence/sequence-text.js';
+const THEME = pageTheme();
 
-/** The jar's own `jobadi-87-jegi648` participant label, field for field. */
-const JOBADI_BOB: SequenceTextSpec = {
-  leftX: 17,
-  baselineY: 27.889,
-  text: 'Bob',
-  width: 24.938,
-  fontFamily: 'sans-serif',
-  fontSize: 14,
-  fill: '#000',
-};
+const run = (text: string, over: Partial<TextRun> = {}): TextRun => ({
+  text,
+  x: 20,
+  y: 30,
+  textWidth: 40,
+  textAscent: 10,
+  textLineHeight: 14,
+  ...over,
+});
 
-/** Attribute name → value, so an assertion is order-independent — the jar's
- *  emission order differs from this port's and neither is meaningful. */
-function attributesOf(markup: string): Record<string, string> {
-  const open = /^<text([^>]*)>/.exec(markup);
-  expect(open).not.toBeNull();
-  const out: Record<string, string> = {};
-  for (const m of open![1]!.matchAll(/([\w-]+)="([^"]*)"/g)) out[m[1]!] = m[2]!;
-  return out;
-}
-
-describe('sequenceText', () => {
-  it("matches the jar's own markup for jobadi-87-jegi648's participant label", () => {
-    const attrs = attributesOf(sequenceText(JOBADI_BOB));
-    // `font-family` is absent by design: `sans-serif` is the family hoisted
-    // onto the document root, and `svg-text-font.ts#textFontFamily` suppresses
-    // a per-element copy of it exactly as the jar does (the oracle carries
-    // `font-family="sans-serif"` on the root `<g>`, not on the `<text>`).
-    expect(attrs).toEqual({
-      x: '17',
-      y: '27.889',
-      'font-size': '14',
-      fill: '#000',
-      textLength: '24.938',
+describe('creoleAmbientOf', () => {
+  it("is the render's family and text ink at the component's size, bold only when the style is", () => {
+    expect(creoleAmbientOf(THEME, 13)).toEqual({
+      fontFamily: THEME.fontFamily,
+      fontSize: 13,
+      color: THEME.colors.text,
+      bold: false,
     });
-    expect(sequenceText(JOBADI_BOB)).toContain('>Bob</text>');
-  });
-
-  it('emits neither text-anchor nor dominant-baseline', () => {
-    const markup = sequenceText({
-      ...JOBADI_BOB,
-      fontWeight: '700',
-      textDecoration: 'underline',
-    });
-    expect(markup).not.toContain('text-anchor');
-    expect(markup).not.toContain('dominant-baseline');
-  });
-
-  it('carries fontWeight and textDecoration through when given', () => {
-    const attrs = attributesOf(sequenceText({ ...JOBADI_BOB, fontWeight: '700', textDecoration: 'wavy underline' }));
-    expect(attrs['font-weight']).toBe('700');
-    expect(attrs['text-decoration']).toBe('wavy underline');
-  });
-
-  it('omits both when absent, rather than emitting an empty attribute', () => {
-    const attrs = attributesOf(sequenceText(JOBADI_BOB));
-    expect(attrs['font-weight']).toBeUndefined();
-    expect(attrs['text-decoration']).toBeUndefined();
-  });
-
-  it("skips textLength for a single character — upstream's text.length() > 1 guard", () => {
-    // `DriverTextSvg` hands the width unconditionally; the guard lives in the
-    // writer (`svg-shapes.ts#textLengthOf`), which this module does not
-    // re-implement. Asserted here so a future change that stops routing
-    // through `text()` cannot silently lose it.
-    const attrs = attributesOf(sequenceText({ ...JOBADI_BOB, text: 'B', width: 8.313 }));
-    expect(attrs['textLength']).toBeUndefined();
-    expect(attrs['x']).toBe('17');
-  });
-
-  it('emits a per-element font-family only when it differs from the root', () => {
-    const attrs = attributesOf(sequenceText({ ...JOBADI_BOB, fontFamily: 'monospaced' }));
-    // `monospaced` is PlantUML's logical name; the SVG attribute is the CSS
-    // generic (`svg-text-font.ts#renameLogicalMonospace`).
-    expect(attrs['font-family']).toBe('monospace');
-  });
-
-  it('XML-escapes the text content', () => {
-    const markup = sequenceText({ ...JOBADI_BOB, text: 'a < b & c' });
-    expect(markup).toContain('a &lt; b &amp; c');
+    expect(creoleAmbientOf(THEME, 11, true).bold).toBe(true);
   });
 });
 
-describe('sequenceText svgAttributes (SvgGraphics.java:737-738)', () => {
-  // cizeja-06-zedi526 `in.svg`:
-  // `<text x="36.469" y="61.111" fill="#000" font-size="13" textLength="52.731" class="foo" id="dummy">`
-  const CIZEJA: SequenceTextSpec = {
-    leftX: 36.469,
-    baselineY: 61.111,
-    text: 'message',
-    width: 52.731,
-    fontFamily: 'sans-serif',
-    fontSize: 13,
-    fill: '#000',
-    svgAttributes: new Map([
-      ['class', 'foo'],
-      ['id', 'dummy'],
-    ]),
-  };
-
-  it('writes every entry after the built-in attributes, in map order', () => {
-    expect(sequenceText(CIZEJA)).toBe(
-      '<text x="36.469" y="61.111" font-size="13" fill="#000" textLength="52.731" class="foo" id="dummy">message</text>',
-    );
+describe('drawCreoleRuns', () => {
+  it('draws one <text> per run at the layout x and baseline, in the ambient where creole set none', () => {
+    const svg = drawMarkup((ug, t) => drawCreoleRuns(ug, [run('one'), run('two', { x: 50, color: '#FF0000' })], t, 13));
+    const [first, second] = tagsOf(svg, 'text');
+    expect(first).toMatchObject({ x: '20', y: '30', 'font-size': '13', fill: '#000' });
+    expect(second).toMatchObject({ x: '50', y: '30', fill: '#F00' });
   });
 
-  it('replaces a built-in attribute in place, as XmlNode#setAttribute does', () => {
-    const svg = sequenceText({ ...CIZEJA, svgAttributes: new Map([['fill', 'red']]) });
-    expect(svg).toContain(' fill="red" ');
-    expect(svg.match(/ fill=/g)).toHaveLength(1);
+  it("makes the component style's bold the fallback, which a run's own flag beats", () => {
+    const svg = drawMarkup((ug, t) => drawCreoleRuns(ug, [run('a'), run('b', { bold: false })], t, 13, true));
+    const [a, b] = tagsOf(svg, 'text');
+    expect(a).toMatchObject({ 'font-weight': '700' });
+    expect(b).not.toHaveProperty('font-weight');
   });
 
-  it('escapes a value as an attribute value', () => {
-    const svg = sequenceText({ ...CIZEJA, svgAttributes: new Map([['title', 'a"b<c']]) });
-    expect(svg).toContain('title="a&quot;b&lt;c"');
-  });
-
-  it('copies the attributes off a run and nothing when it has none', () => {
-    const run = { svgAttributes: CIZEJA.svgAttributes } as Parameters<typeof primitiveFields>[0];
-    expect(primitiveFields(run).svgAttributes).toBe(CIZEJA.svgAttributes);
-    expect('svgAttributes' in primitiveFields({} as Parameters<typeof primitiveFields>[0])).toBe(false);
+  it('draws nothing for no runs', () => {
+    expect(drawMarkup((ug, t) => drawCreoleRuns(ug, [], t, 13))).toBe('');
   });
 });

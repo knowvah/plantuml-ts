@@ -69,6 +69,7 @@ import { isEmpty } from '../../../src/core/annotations/index.js';
 import { applyExportedChrome } from '../../../src/core/annotations/chrome-export.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg, renderSync } from '../../../src/index.js';
+import { inheritingRenderFn } from '../../../src/core/nested-previous.js';
 import { registerNestedDiagramRenderers } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
 import { seedOfUmlSource } from '../../../src/core/assemble-svg.js';
 import { inlineRemoteImageLines } from '../../../src/core/remote-image-store.js';
@@ -140,13 +141,17 @@ export function renderFixtureSequence(
   // (`src/index.ts` prepareBlock) and the activity harness does
   // (`render-fixture-activity.ts:121`); without it a note's `{{ }}`
   // `EmbeddedDiagram.drawU` hits its "no renderer registered" path.
-  registerNestedDiagramRenderers((source) => renderSync(source, { measurer }));
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0];
   if (first === undefined) throw new Error('no diagram block found');
   if (!first.ok) throw first.failure.cause;
 
   const preprocessed = first.preprocessed;
+  // sdd3-T8h-2: the enclosing diagram's skinparams reach each nested `{{ }}` diagram, through the
+  // one function `src/index.ts#prepareBlock` registers with (`nested-previous.ts`).
+  registerNestedDiagramRenderers(
+    inheritingRenderFn(preprocessed.skinparam, (source) => renderSync(source, { measurer })),
+  );
   // cdd4-T7b: the shipped `buildTheme`, not a copy of it -- a copy measured a
   // path no shipped code takes once theme styling moved into it.
   const { theme, styleMap } = buildTheme(preprocessed);
@@ -167,7 +172,12 @@ export function renderFixtureSequence(
   // at parse, the banner at render; `sequence-warnings.ts`).
   const ast = withSkinParamWarnings(parsed, preprocessed);
   const geo = layoutSequence(ast, theme, measurer);
-  const fragment = withSequenceWarningBanner(renderSequence(geo, theme, measurer), sequenceWarnings(ast), measurer);
+  const fragment = withSequenceWarningBanner(
+    renderSequence(geo, theme, measurer),
+    sequenceWarnings(ast),
+    measurer,
+    theme.handwritten === true,
+  );
 
   // sdd1 close-b2 (journal row 40): seed every `<linearGradient>`/`<filter>`
   // id as production does -- `src/index.ts` passes `seedOfUmlSource(

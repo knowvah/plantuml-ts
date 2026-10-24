@@ -17,23 +17,21 @@
  *
  * Every pixel-literal constant left here (`headR`, `armSpan`, `legSpan`, the
  * `1.5` stroke width, the `+2`/`-8` offsets, …) belongs to the actor and is
- * scaled by `theme.scaleK` at its point of use: none of it flows through
- * `SequenceGeometry` (these shapes are computed fresh from an
- * already-positioned point, not looked up), so `scale-geo.ts`'s geometry
- * scaling never reaches it — see that module's header, "Exhaustiveness".
- * Upstream's `SvgGraphics#format` would scale these same numbers regardless
- * of their origin, so this port must too. The symbol seam handles the same
- * problem differently, through klimt's own `SvgOption.scale` — see that
- * module's header.
+ * drawn at scale 1: the export scale is the exporter's single `SvgGraphics
+ * #format` pass (`core/TextBlockExporter.ts#exportTo`), never a multiply
+ * here.
  */
 
-import type { Theme } from '../../core/theme.js';
-import type { ScaledTheme } from './scale-geo.js';
-import type { ParticipantGeo, TextRun } from './ast.js';
-import { attrs, ellipse, image, linkWrap } from '../../core/svg.js';
-import { spotGlyphPath } from '../../core/spot-glyph-data.js';
-import { primitiveFields, sequenceText, weightOf } from './sequence-text.js';
-import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { UFontFactory } from '../../core/klimt/font/UFontFactory.js';
+import { CircledCharacter } from '../../core/klimt/shape/CircledCharacter.js';
+import { UImage } from '../../core/klimt/shape/UImage.js';
+import { PAINT_NONE } from '../../core/svg.js';
+import type { PageTheme } from './renderer-ug.js';
+import type { ParticipantGeo } from './ast.js';
+import { drawRun, withUrl, type RunAmbient } from './renderer-text.js';
 import {
   participantBadgeGeo,
   participantLabelCy,
@@ -42,13 +40,17 @@ import {
 } from './sequence-layout-participant-sizing.js';
 import { participantBoxOf } from './sequence-layout-participants.js';
 import { paintOfGeo } from './sequence-participant-paints.js';
-import { measureParticipantSymbol, renderParticipantSymbol } from './renderer-participant-symbol.js';
+import { drawParticipantSymbol, measureParticipantSymbol } from './renderer-participant-symbol.js';
 import { BADGE_GAP } from './sequence-layout-participant-label.js';
+
+/** The unit the layout's participant helpers measure in -- the page is drawn at scale 1
+ *  (`renderer.ts#DRAW_SCALE`), as `sequence-layout-participant-label.ts` calls them. */
+const PAGE_SCALE = 1;
 
 /**
  * A participant's glyph -- or, for `participant`/`collections`, its
  * rectangle(s) (`ComponentRoseParticipant#drawInternalU:101-111`) -- drawn
- * through the seam with the merged style's paint (sdd1 T2a).
+ * through the seam graphic with the merged style's paint (sdd1 T2a).
  *
  * `database` and `actor` used to be hand-rolled here — the cylinder as
  * `rect + line + line + ellipse` (five top-level elements per glyph where
@@ -64,8 +66,9 @@ import { BADGE_GAP } from './sequence-layout-participant-label.js';
  *
  * @see ~/git/plantuml/.../skin/rose/Rose.java:137-190
  */
-function renderSymbolShape(p: ParticipantGeo, blockTopY: number, head: boolean, theme: ScaledTheme): string {
-  return renderParticipantSymbol(
+function drawSymbolShape(ug: UGraphic, p: ParticipantGeo, blockTopY: number, head: boolean, theme: PageTheme): void {
+  drawParticipantSymbol(
+    ug,
     p.type,
     { x: p.x, y: blockTopY, width: p.width, height: p.height, paint: paintOfGeo(p), shadow: p.shadow ?? 0 },
     { head, display: p.display, theme },
@@ -81,44 +84,23 @@ function renderSymbolShape(p: ParticipantGeo, blockTopY: number, head: boolean, 
 // ---------------------------------------------------------------------------
 
 /**
- * One carried label run, shifted vertically by `dy`.
+ * The ink and font a label run falls back to where creole set none: the
+ * head's ambient value (`DriverTextSvg#draw` reading one `FontConfiguration`
+ * per `UText`, `:104-160,177-180` -- a markup-free name carries a family and a
+ * size equal to the ambient pair and none of the flags, so it draws
+ * byte-identically to a single plain run).
  *
- * A3: this used to take a CENTRE and lean on `text-anchor="middle"` plus
- * `dominant-baseline="middle"` — two attributes the jar never emits on any of
- * its 70 622 sequence `<text>` elements. The run already carries its own left
- * edge and baseline, both resolved in layout (D1, D4), so all that is left
- * here is the head/foot translation the run cannot know.
- *
- * C4: and its own STYLE, when creole set one. Every field below is the run's
- * where it has one and the head's ambient value where it has not, which is
- * `DriverTextSvg#draw` reading one `FontConfiguration` per `UText`
- * (`:104-160,177-180`) — a markup-free name carries a family and a size equal
- * to the ambient pair and none of the flags, so it emits byte-identically to
- * the pre-C4 single run. `url` WRAPS rather than decorates
- * (`SvgGraphics#openLink`/`closeLink`, `:1105-1150`) and `sequence-text.ts`
- * owns that wrap, so there is no second `<a>` emitter here. No measurer is
- * touched: every metric was resolved in layout and scaled with the geometry
- * (D5).
+ * A3: a run draws at its own left edge and baseline, both resolved in layout
+ * (D1, D4) -- no `text-anchor`, no `dominant-baseline`, which the jar never
+ * emits on any of its 70 622 sequence `<text>` elements; `renderer-text.ts
+ * #drawRun` shifts it by the head/foot translation `dy` the run cannot know
+ * (an image's top is absolute: `dy` shifts it as it shifts the baseline
+ * beside it). A `url` WRAPS rather than decorates (`SvgGraphics#openLink`/
+ * `closeLink`, `:1105-1150`): `drawRun` brackets the run in `startUrl`/
+ * `closeUrl`, so there is no second `<a>` emitter here.
  */
-function renderLabelRun(run: TextRun, dy: number, theme: Theme): string {
-  return sequenceText({
-    leftX: drawnLeftX(run),
-    baselineY: run.y + dy,
-    text: run.text,
-    width: drawnWidth(run),
-    // `""mono""` sets its own family; `=heading`/`<size:N>` its own size.
-    fontFamily: run.fontFamily ?? theme.fontFamily,
-    fontSize: run.fontSize ?? theme.fontSize,
-    fill: run.color ?? theme.colors.text,
-    // The numeric CSS weight (`sequence-text.ts#runFontWeight`).
-    ...weightOf(run),
-    ...(run.italic === true ? { fontStyle: 'italic' as const } : {}),
-    ...(run.decoration !== undefined ? { textDecoration: run.decoration } : {}),
-    ...primitiveFields(run),
-    // An image's top is absolute: `dy` shifts it exactly as it shifts the
-    // baseline beside it.
-    ...(run.image !== undefined ? { image: { ...run.image, y: run.image.y + dy } } : {}),
-  });
+function labelAmbientOf(theme: PageTheme): RunAmbient {
+  return { fontFamily: theme.fontFamily, fontSize: theme.fontSize, color: theme.colors.text };
 }
 
 /**
@@ -146,46 +128,56 @@ function renderLabelRun(run: TextRun, dy: number, theme: Theme): string {
  */
 
 /**
- * The badge itself: a rasterised `<image>` for a sprite, or for a circled
- * character the filled circle followed by the letter's outline `<path>`
- * (`CircledCharacter#drawU`, `CircledCharacter.java:63-70`: the ellipse, then
+ * The badge itself: a rasterised `UImage` for a sprite, or for a circled
+ * character the `CircledCharacter` (`CircledCharacter#drawU`,
+ * `CircledCharacter.java:65-74`: border `Fore`, spot `Back`, the `UEllipse`,
+ * then the font colour at `translate(radius, radius)` and the
  * `UCenteredCharacter` -> `DriverCenteredCharacterSvg#draw:56-81`). Drawn at
  * the block ORIGIN, as is the text beside it (`TextBlockSprited.java:70-77`),
  * so `top` is the block's top.
  */
-function renderBadge(p: ParticipantGeo, at: { readonly x: number; readonly top: number }, theme: ScaledTheme): string {
-  const { x, top } = at;
+function drawBadge(
+  ug: UGraphic,
+  p: ParticipantGeo,
+  at: { readonly x: number; readonly top: number },
+  theme: PageTheme,
+): void {
   const badge = p.badge!;
-  if (badge.kind === 'sprite') return image(x, top, badge.width, badge.height, badge.dataUri);
-  const r = badge.width / 2;
+  const origin = ug.apply(new UTranslate(at.x, at.top));
+  if (badge.kind === 'sprite') {
+    origin.draw(UImage.build(badge.width, badge.height, badge.dataUri));
+    return;
+  }
   // `CircledCharacter` is built with a null border (`Display.java:677-678`)
   // and draws in the head's current colour: the style's `LineColor`, at the
   // `UStroke.simple()` the component reset to before its text
   // (`ComponentRoseParticipant.java:94-95,112`).
-  const disc = ellipse(x + r, top + r, r, r, {
-    fill: badge.color ?? theme.colors.background,
-    stroke: p.border,
-    'stroke-width': 1 * theme.scaleK,
-  });
   // The glyph fills with the label font's colour (`ug.apply(fontColor)`, `:66`;
   // `fontColor` is `fontConfiguration.getColor()`, `Display.java:677-678`),
   // centred on the circle's centre (`UTranslate(radius, radius)`, `:67`).
-  const d = spotGlyphPath(badge.character, badge.fontSize, x + r, top + r, theme.scaleK);
-  if (d === undefined) return disc;
-  return (
-    disc +
-    `<path${attrs([
-      ['d', d],
-      ['fill', paintOfGeo(p).font.color ?? undefined],
-    ])}/>`
-  );
+  const font = UFontFactory.build(theme.fontFamily, undefined, badge.fontSize);
+  const fill = badge.color ?? theme.colors.background;
+  new CircledCharacter(
+    badge.character,
+    badge.width / 2,
+    font,
+    fill,
+    p.border,
+    paintOfGeo(p).font.color ?? PAINT_NONE,
+  ).drawU(origin.apply(UStroke.simple()));
 }
 
 /**
  * The name block of the row whose label is centred on `cy`. `p` is the HEAD
  * row's painted box (the runs were placed against it in layout).
  */
-function renderNameBlock(p: ParticipantGeo, cy: number, metrics: ParticipantLabelMetrics, theme: ScaledTheme): string {
+function drawNameBlock(
+  ug: UGraphic,
+  p: ParticipantGeo,
+  cy: number,
+  metrics: ParticipantLabelMetrics,
+  theme: PageTheme,
+): void {
   // The runs were placed against the HEAD's own centre; every other row of the
   // diagram draws the same text translated. `dy` is a difference of two
   // `participantLabelCy` values rather than of two block tops, because a
@@ -194,8 +186,9 @@ function renderNameBlock(p: ParticipantGeo, cy: number, metrics: ParticipantLabe
   // same on both rows, so a block-top delta would be wrong for exactly those
   // kinds.
   const dy = cy - participantLabelCy(p.type, p.height, p.y, true, metrics);
-  const badgeEl = p.badge === undefined ? '' : renderBadge(p, badgeOriginOf(p, theme.scaleK, dy), theme);
-  return badgeEl + p.labelRuns.map((run) => renderLabelRun(run, dy, theme)).join('');
+  if (p.badge !== undefined) drawBadge(ug, p, badgeOriginOf(p, dy), theme);
+  const ambient = labelAmbientOf(theme);
+  for (const run of p.labelRuns) drawRun(ug, run, ambient, dy);
 }
 
 /**
@@ -207,14 +200,14 @@ function renderNameBlock(p: ParticipantGeo, cy: number, metrics: ParticipantLabe
  * `participant` is sized by its box, which can be wider than the block, so it
  * keeps the padding-based origin `participantBadgeGeo` derives.
  */
-function badgeOriginOf(p: ParticipantGeo, k: number, dy: number): { readonly x: number; readonly top: number } {
+function badgeOriginOf(p: ParticipantGeo, dy: number): { readonly x: number; readonly top: number } {
   const badge = p.badge!;
   const rowsTop = Math.min(...p.labelRuns.map((r) => r.y - r.textAscent)) + dy;
   const top = p.labelRuns.length === 0 ? p.y + (p.height - badge.height) / 2 : rowsTop;
   if (p.type === 'participant' || p.type === 'collections' || p.labelRuns.length === 0) {
-    return { x: participantBadgeGeo(p.badge, p.x, paintOfGeo(p).padding, k)!.x, top };
+    return { x: participantBadgeGeo(p.badge, p.x, paintOfGeo(p).padding)!.x, top };
   }
-  return { x: Math.min(...p.labelRuns.map((r) => r.x)) - BADGE_GAP * k - badge.width, top };
+  return { x: Math.min(...p.labelRuns.map((r) => r.x)) - BADGE_GAP - badge.width, top };
 }
 
 /**
@@ -223,7 +216,7 @@ function badgeOriginOf(p: ParticipantGeo, k: number, dy: number): { readonly x: 
  * `ComponentRoseActor.java:92-95`), in the caller's scaled units. `undefined`
  * for the kinds that place their label some other way.
  */
-function stickLabelHeight(p: ParticipantGeo, theme: ScaledTheme): number | undefined {
+function stickLabelHeight(p: ParticipantGeo, theme: PageTheme): number | undefined {
   if (
     p.type !== 'actor' &&
     p.type !== 'boundary' &&
@@ -234,7 +227,7 @@ function stickLabelHeight(p: ParticipantGeo, theme: ScaledTheme): number | undef
     return undefined;
   }
   const glyph = measureParticipantSymbol(p.type, paintOfGeo(p), theme, theme.measurer);
-  return p.height - glyph.height * theme.scaleK;
+  return p.height - glyph.height;
 }
 
 /**
@@ -244,15 +237,21 @@ function stickLabelHeight(p: ParticipantGeo, theme: ScaledTheme): number | undef
  * (`Rose.java#createComponentParticipant`), which every glyph-bearing
  * `ComponentRose*` threads into `drawInternalU` to flip the glyph/text order.
  */
-function renderParticipantBlock(geo: ParticipantGeo, blockTopY: number, head: boolean, theme: ScaledTheme): string {
-  const k = theme.scaleK;
+function drawParticipantBlock(
+  ug: UGraphic,
+  geo: ParticipantGeo,
+  blockTopY: number,
+  head: boolean,
+  theme: PageTheme,
+): void {
   // The painted box, not the preferred one: a `participant`/`collections`
   // head reserves its shadow and margin outside the rectangle it draws.
-  const p = participantBoxOf({ ...geo, shadow: (geo.shadow ?? 0) * k }, k);
+  const p = participantBoxOf(geo);
   const rowTop = p.y + (blockTopY - geo.y);
-  const metrics = participantLabelMetricsOf(paintOfGeo(geo), k, stickLabelHeight(p, theme));
-  const label = renderNameBlock(p, participantLabelCy(p.type, p.height, rowTop, head, metrics), metrics, theme);
-  const shape = renderSymbolShape(p, rowTop, head, theme);
+  const metrics = participantLabelMetricsOf(paintOfGeo(geo), PAGE_SCALE, stickLabelHeight(p, theme));
+  const label = (): void =>
+    drawNameBlock(ug, p, participantLabelCy(p.type, p.height, rowTop, head, metrics), metrics, theme);
+  const shape = (): void => drawSymbolShape(ug, p, rowTop, head, theme);
   // DRAW ORDER, and it is not the obvious one. Every stacked
   // `ComponentRose*#drawInternalU` calls `textBlock.drawU(...)` in BOTH arms
   // of its `head` branch and `stickman.drawU(ug)` only afterwards
@@ -262,23 +261,26 @@ function renderParticipantBlock(geo: ParticipantGeo, blockTopY: number, head: bo
   // `queue`, `participant` and `collections` are the exceptions, and they are
   // exceptions in upstream too: `ComponentRoseQueue#drawInternalU` draws
   // only the glyph (its text is `asSmall`'s own label, drawn inside it), and
-  // `ComponentRoseParticipant` draws its rectangle(s) before its text.
-  if (p.type === 'queue' || p.type === 'participant' || p.type === 'collections') return shape + label;
-  return label + shape;
+  // `ComponentRoseParticipant` draws its rectangle(s) before its text
+  // (`ComponentRoseParticipant.java:99-112`).
+  const glyphFirst = p.type === 'queue' || p.type === 'participant' || p.type === 'collections';
+  for (const part of glyphFirst ? [shape, label] : [label, shape]) part();
 }
 
 /** The head a create message draws at its tile top
  *  (`LivingSpace#drawHead(ug, context, TOP, LEFT|RIGHT)`). */
-export function renderCreatedHead(head: { participant: ParticipantGeo; y: number }, theme: ScaledTheme): string {
-  return withParticipantUrl(head.participant, renderParticipantBlock(head.participant, head.y, true, theme));
-}
-
-/** The header row. */
-export function renderParticipantBox(p: ParticipantGeo, theme: ScaledTheme): string {
-  return withParticipantUrl(p, renderParticipantBlock(p, p.y, true, theme));
+export function drawCreatedHead(
+  ug: UGraphic,
+  head: { participant: ParticipantGeo; y: number },
+  theme: PageTheme,
+): void {
+  withUrl(ug, head.participant.url, () => drawParticipantBlock(ug, head.participant, head.y, true, theme));
 }
 
 /**
+ * The header row: `LivingSpace#drawHead` -> `drawHeadOrTail`
+ * (`LivingSpace.java:181-215`).
+ *
  * B3: the jar's hyperlink around a participant row.
  *
  * ```java
@@ -294,21 +296,17 @@ export function renderParticipantBox(p: ParticipantGeo, theme: ScaledTheme): str
  * and `drawTail` (`:181-189`), so the head row and the footer row each get
  * their own `<a>`: `boparo-11-pema294` carries four for two participants.
  *
- * `linkWrap` is `core/svg.ts`'s existing emitter, whose eight attributes and
- * their order are already jar-verified against the class engine's goldens. A
- * second one is not needed here and would be a second thing to keep right.
- *
  * A MESSAGE-level url is deliberately not drawn — see
  * `renderer-message.ts`'s own note, which records that the jar emits no `<a>`
  * for `A -> B [[url]] : label`.
  */
-function withParticipantUrl(p: ParticipantGeo, drawn: string): string {
-  return p.url === undefined ? drawn : linkWrap(drawn, p.url);
+export function drawParticipantBox(ug: UGraphic, p: ParticipantGeo, theme: PageTheme): void {
+  withUrl(ug, p.url, () => drawParticipantBlock(ug, p, p.y, true, theme));
 }
 
 /** The footer row (`isShowFootbox`), drawn from `footerShapeY` down --
  *  `dy(pageHeight + headHeight)`, `PlayingSpaceWithParticipants.java:225-226`.
  *  Every kind derives its own glyph offset from the block. */
-export function renderFooterBox(p: ParticipantGeo, footerShapeY: number, theme: ScaledTheme): string {
-  return withParticipantUrl(p, renderParticipantBlock(p, footerShapeY, false, theme));
+export function drawFooterBox(ug: UGraphic, p: ParticipantGeo, footerShapeY: number, theme: PageTheme): void {
+  withUrl(ug, p.url, () => drawParticipantBlock(ug, p, footerShapeY, false, theme));
 }

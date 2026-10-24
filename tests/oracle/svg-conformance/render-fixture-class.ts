@@ -35,6 +35,7 @@ import { isEmpty } from '../../../src/core/annotations/index.js';
 import { applyExportedChrome } from '../../../src/core/annotations/chrome-export.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg, loadElk, renderSync, type ElkBackend } from '../../../src/index.js';
+import { inheritingRenderFn } from '../../../src/core/nested-previous.js';
 import { registerNestedDiagramRenderers } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
 import { seedOf } from '../../../src/core/klimt/drawing/svg/svg-seed.js';
 import { seedOfUmlSource } from '../../../src/core/assemble-svg.js';
@@ -93,6 +94,11 @@ export function layoutFixtureClass(
   if (!first.ok) throw first.failure.cause;
 
   const preprocessed = first.preprocessed;
+  // sdd3-T8h-2: registered HERE, ahead of layout (which measures a `{{ }}` embed), with the enclosing
+  // diagram's skinparams reaching each nested diagram (`nested-previous.ts`), as `src/index.ts#prepareBlock`.
+  registerNestedDiagramRenderers(
+    inheritingRenderFn(preprocessed.skinparam, (source) => renderSync(source, { measurer })),
+  );
   // cdd4-T7b/cdd4-T13: the shipped `buildTheme`, not a copy of it -- a copy
   // measured a path no shipped code takes once theme styling (declaration-
   // order skinparam/`<style>` interleaving, root/document routing) moved
@@ -119,7 +125,6 @@ export function renderFixtureClass(markup: string, measurer: StringMeasurer, opt
   // (B7FU-R4, `SvgGraphics.java:160-162`) before assembling. Without both,
   // this harness measured 11 survey-conformant fixtures as census-diverged
   // on the close-b7 tree: the instrument, not the port.
-  registerNestedDiagramRenderers((source) => renderSync(source, { measurer }));
   const { geo, theme, styleMap, annotations } = layoutFixtureClass(markup, measurer, options);
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0]!;

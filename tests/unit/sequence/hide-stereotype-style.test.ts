@@ -12,6 +12,7 @@
 import { describe, expect, it } from 'vitest';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
+import { tagsOf } from '../../helpers/svg-tags.js';
 
 const SOURCE = [
   '@startuml',
@@ -43,11 +44,13 @@ describe('hide stereotype keeps the style (Participant.java:82-91,125-135)', () 
   });
 
   it('strokes the lifeline from .s lifeLine', () => {
-    const [first] = [...svg.matchAll(/<line [^>]*stroke-dasharray="5,5"[^>]*>/g)].map((m) => m[0]);
-    expect(first).toContain('stroke="#00F"');
+    const [first] = tagsOf(svg, 'line').filter((l) => l['stroke-dasharray'] === '5,5');
+    expect(first).toMatchObject({ stroke: '#00F' });
   });
 
   it('fills the activation from .s activationBox (LiveBoxesDrawer.java:140)', () => {
-    expect(svg).toMatch(/<rect [^>]*width="10"[^>]*fill="#008000"/);
+    expect(tagsOf(svg, 'rect').filter((r) => r['width'] === '10')).toEqual([
+      expect.objectContaining({ fill: '#008000' }),
+    ]);
   });
 });

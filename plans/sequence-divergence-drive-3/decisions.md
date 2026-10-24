@@ -117,6 +117,44 @@ the teoz/rose component `drawU` and its apply-chain topology (all 1143 rows
 hash-identical, stop 7); then enable the wrapper for `handwritten true`.
 Replaying emitted SVG through the wrapper is rejected (wrong RNG topology).
 
+**Amendment 1 (2026-10-23, T8a, journal rows 92–93 — stop 3, awaiting the user).**
+T8a (`diagnosis/handwritten.md`, 707 lines, HIGH on the mechanism; its
+shadow-instrumented jar render is byte-identical to all four goldens)
+confirms the apply/draw topology and designs the seam (`renderer-ug.ts`
+`SequenceGraphic` over one `UGraphicSvg` per page, `draw<X>(ug, geo,
+theme)` per module, the note pair drawn on one decorator instance as
+`ComponentRoseNote.java:121-124` does). It also finds that the gate clause
+"all 1143 rows hash-identical, stop 7" cannot hold for a faithful move: the
+core SVG drivers mirror `SvgGraphics` and emit the jar's own attribute form
+(e.g. `DriverPolygonSvg` writes `style="stroke:…;stroke-width:…"`), while
+today's sequence string emitters write `stroke="…" stroke-width="…"`; the
+orchestrator re-measured this on a class render (core drivers) against a
+sequence render (`<polygon … style="stroke:#181818;…">` vs attributes; rect
+and line agree). A pure move therefore changes sequence BYTES toward the
+jar's form while every compareSvg verdict (the pins, the survey, classify)
+stays identical. Two gates satisfy D5's intent — no behaviour change —
+and the user picks: (i) **canonical hash gate for the moves** (T8a's
+recommendation): `svg-hashes.mts --canon` for the 1143 sequence rows
+(drop the `<?plantuml-src?>` PI, expand `style` into attributes, sort
+attributes; numbers byte-equal) PLUS the raw all-engine hash for every
+other engine, with the compareSvg pins as the second witness; or (ii)
+**keep the raw gate** by implementing a string-sink `UGraphic` that emits
+today's attribute form (a second driver set T8a rejects: it duplicates the
+drivers and cannot host T8g's `ensureVisible` fold). Orchestrator's
+recommendation: (i). Bundled for the same ruling (T8a open questions):
+text, images and links move through the seam too (needed for the fold and
+document order; recommended); the core prerequisites (`UGraphicDelegator`
+group forwarding, a `WITH_FILL_OPACITY` colour, `UCenteredCharacter` +
+`CircledCharacter` + its svg driver) land first as a **T8p**, raw-hash
+gated across every engine (recommended); the nested `{{ }}` diagram in
+menoke IS handwritten in the jar (`TitledDiagram.java:106-118` copies
+every skinparam) — invisible to compareSvg (image href bytes exempt) —
+so a **T8h** (nested skinparam inheritance, byte check of the payload) is
+proposed after T8f (recommended; the alternative is a declared
+divergence, which only the user signs); `!option handwritten true` is
+plumbed in T8f (recommended, small).
+
+
 ## D6 — LaTeX array
 
 `src/core/latex-metrics/` sizes KaTeX's parse tree with JLaTeXMath 1.0.7's

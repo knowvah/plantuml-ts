@@ -21,6 +21,7 @@ import type { EventProcessingContext } from '../../../src/diagrams/sequence/sequ
 import { renderFixtureSequence } from '../../oracle/svg-conformance/render-fixture-sequence.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { sequenceSource } from '../../helpers/sequence-source.js';
+import { attrsOf } from '../../helpers/svg-tags.js';
 
 const MEASURER = new DeterministicMeasurer();
 
@@ -41,9 +42,7 @@ interface Shape {
 function shapesOf(svg: string): Shape[] {
   const shapes: Shape[] = [];
   for (const m of svg.matchAll(/<(line|polygon|ellipse)\b([^>]*)>/g)) {
-    const attrs: Record<string, string> = {};
-    for (const a of m[2]!.matchAll(/([\w-]+)="([^"]*)"/g)) attrs[a[1]!] = a[2]!;
-    shapes.push({ tag: m[1] as Shape['tag'], attrs });
+    shapes.push({ tag: m[1] as Shape['tag'], attrs: attrsOf(m[0]) });
   }
   return shapes;
 }

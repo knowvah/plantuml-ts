@@ -1,0 +1,5 @@
+@startuml
+participant ":Main" as m
+create jr
+m -->> jr : create
+@enduml

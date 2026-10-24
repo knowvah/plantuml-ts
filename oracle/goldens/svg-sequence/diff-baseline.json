@@ -2569,11 +2569,11 @@
     {
       "type": "sequence",
       "slug": "gebeki-18-muci858",
-      "status": "baseline",
-      "weightedScore": 2,
-      "diffCount": 2,
-      "measuredAt": "2026-10-22",
-      "measuredAgainstCommit": "b5ba994d"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-23",
+      "measuredAgainstCommit": "70fe5d1f"
     },
     {
       "type": "sequence",
@@ -2668,11 +2668,11 @@
     {
       "type": "sequence",
       "slug": "gepuce-64-pivu656",
-      "status": "baseline",
-      "weightedScore": 241,
-      "diffCount": 29,
-      "measuredAt": "2026-10-21",
-      "measuredAgainstCommit": "5b6d3eec"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-23",
+      "measuredAgainstCommit": "70fe5d1f"
     },
     {
       "type": "sequence",
@@ -3262,11 +3262,11 @@
     {
       "type": "sequence",
       "slug": "jefoke-95-jara779",
-      "status": "baseline",
-      "weightedScore": 280,
-      "diffCount": 30,
-      "measuredAt": "2026-10-21",
-      "measuredAgainstCommit": "5b6d3eec"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-23",
+      "measuredAgainstCommit": "70fe5d1f"
     },
     {
       "type": "sequence",
@@ -3622,11 +3622,11 @@
     {
       "type": "sequence",
       "slug": "kaluna-08-rubu301",
-      "status": "baseline",
-      "weightedScore": 2,
-      "diffCount": 45,
-      "measuredAt": "2026-10-21",
-      "measuredAgainstCommit": "fae94fe7"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-23",
+      "measuredAgainstCommit": "70fe5d1f"
     },
     {
       "type": "sequence",
@@ -5053,11 +5053,11 @@
     {
       "type": "sequence",
       "slug": "menoke-22-luxo044",
-      "status": "baseline",
-      "weightedScore": 150,
-      "diffCount": 22,
-      "measuredAt": "2026-10-21",
-      "measuredAgainstCommit": "5b6d3eec"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-23",
+      "measuredAgainstCommit": "70fe5d1f"
     },
     {
       "type": "sequence",
@@ -6178,11 +6178,11 @@
     {
       "type": "sequence",
       "slug": "pafene-01-tedi758",
-      "status": "baseline",
-      "weightedScore": 173,
-      "diffCount": 15,
-      "measuredAt": "2026-10-21",
-      "measuredAgainstCommit": "5b6d3eec"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-23",
+      "measuredAgainstCommit": "70fe5d1f"
     },
     {
       "type": "sequence",

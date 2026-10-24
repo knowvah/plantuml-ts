@@ -119,6 +119,16 @@ function underlineGate(font: FontConfiguration): FontConfiguration {
   return { ...font, styles };
 }
 
+function measuredFont(font: FontConfiguration): { family: string; size: number; weight?: 'bold'; style?: 'italic' } {
+  const { family, size } = getFont(font);
+  return {
+    family,
+    size,
+    ...(font.styles.has(FontStyle.BOLD) ? { weight: 'bold' as const } : {}),
+    ...(font.styles.has(FontStyle.ITALIC) ? { style: 'italic' as const } : {}),
+  };
+}
+
 /** Upstream: `DriverTextSvg`. Ported: the members listed in the module
  * doc comment above. */
 export class DriverTextSvg implements UDriver<UText> {
@@ -142,7 +152,7 @@ export class DriverTextSvg implements UDriver<UText> {
     // `<sup>`/`<sub>` run measures AND renders at the muted size. Identical to
     // `font` for a NORMAL run.
     const drawFont = getFont(font);
-    const dim = this.stringBounder.calculateDimension(drawFont, trimmed);
+    const dim = this.stringBounder.calculateDimension(measuredFont(font), trimmed);
     const deco = textRenderDecorations(underlineGate(font), drawFont.size);
 
     // Upstream java:161-169: a GRADIENT extended colour is painted as a
@@ -158,7 +168,7 @@ export class DriverTextSvg implements UDriver<UText> {
       fontStyle: deco.fontStyle,
       textDecoration: deco.textDecoration,
       textLength: dim.width,
-      attributes: new Map(),
+      attributes: font.svgAttributes?.attributes() ?? new Map(),
       textBackColor: deco.backColor === null ? null : toSvgSolid(resolveColorToSvgHex(deco.backColor), mapper),
       orientation: shape.getOrientation(),
     });
@@ -223,7 +233,7 @@ export class DriverTextSvg implements UDriver<UText> {
     let text = /^\s*$/.test(rawText) ? rawText.split(' ').join(NBSP) : rawText;
     let x = x0;
     if (text.startsWith(' ')) {
-      const space = this.stringBounder.calculateDimension(getFont(font), ' ').width;
+      const space = this.stringBounder.calculateDimension(measuredFont(font), ' ').width;
       while (text.startsWith(' ')) {
         x += space;
         text = text.slice(1);

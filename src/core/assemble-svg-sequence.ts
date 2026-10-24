@@ -162,15 +162,19 @@ export function finalizeSequenceBody(fragment: RenderFragment): string {
  * constructor and `maybeDrawBorder` run before the draw (`:168-176`) and the
  * root resizes the background with `format(maxX)` (`SvgGraphics.java:819-821`),
  * so they scale with the body. The canvas is the unscaled `ensureVisible`
- * integer (`SvgGraphics.java:129-135`) times the factor (`:800-813`).
+ * integer (`SvgGraphics.java:129-135`) times the factor (`:800-813`). That integer is `ensureVisible`'s running
+ * maximum, so it is the larger of the composed seed and the drawn fold (`RenderFragment.drawnMaxX/Y`, sdd3-T8g:
+ * kaluna's sprite arc reaches `trunc(252.894 + 110 + 1) = 363`, `:854`).
  */
 export function finalizeSequenceFragment(fragment: RenderFragment): RenderFragment {
   const exportedDimension = sequenceExportedDimension(fragment);
   const exported = {
     ...fragment,
     exportedDimension,
-    width: Math.trunc(fragment.width),
-    height: Math.trunc(fragment.height),
+    // `ensureVisible`'s running maximum: the seed composed from chrome and margin (`fragment.width/height`) and
+    // the drawn fold carried with the body (`SvgGraphics.java:129-135`).
+    width: Math.trunc(Math.max(fragment.width, fragment.drawnMaxX ?? 0)),
+    height: Math.trunc(Math.max(fragment.height, fragment.drawnMaxY ?? 0)),
   };
   return exportTo(exported, finalizeSequenceBody(exported));
 }

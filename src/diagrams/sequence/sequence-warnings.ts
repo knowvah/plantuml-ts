@@ -64,13 +64,17 @@ export function withGeometryWarnings(geo: SequenceGeometry, ast: SequenceDiagram
  * `renderer-document.ts#preChromeDims` builds declares its margin-less block,
  * so `documentMarginOf` resolves for it; the `undefined` arm is the type's
  * (a hand-built fragment without a block), not a scaled-page skip.
+ * `handwritten` is `theme.handwritten`: the banner is drawn inside the
+ * exporter's `UGraphicHandwritten` wrap (sdd3-T8f,
+ * `TextBlockExporter.java:172-175`).
  */
 export function withSequenceWarningBanner(
   fragment: RenderFragment,
   warnings: readonly Warning[] | undefined,
   measurer: StringMeasurer,
+  handwritten = false,
 ): RenderFragment {
   const margin = documentMarginOf(fragment);
   if (warnings === undefined || margin === undefined) return fragment;
-  return withWarningBanner(fragment, warnings, measurer, margin, BANNER_UID);
+  return withWarningBanner(fragment, warnings, measurer, margin, BANNER_UID, handwritten);
 }

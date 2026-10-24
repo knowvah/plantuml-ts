@@ -18,20 +18,21 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | b5 | 1134 | 0 | 4 | 5 | 0 | 961 | 1134 |
 | b6 | 1136 | 0 | 3 | 4 | 0 | 883 | 1136 |
 | b7 | 1137 | 0 | 2 | 4 | 0 | 848 | 1137 |
+| b8 | 1143 | 0 | 0 | 0 | 0 | 0 | 1143 |
 
 ## Open rows (101)
 
 | slug | cohort | ws | family | task | final |
 |---|---|---:|---|---|---|
-| jefoke-95-jara779 | structural | 280 | handwritten-unported | T8f | |
-| gepuce-64-pivu656 | structural | 241 | handwritten-unported | T8f | |
+| jefoke-95-jara779 | structural | 280 | handwritten-unported | T8f | zero at b8 (merge of T8f, journal row 102) |
+| gepuce-64-pivu656 | structural | 241 | handwritten-unported | T8f | zero at b8 (merge of T8f, journal row 102; its brace-form banner cleared by T3d, row 54) |
 | jexavi-40-degi377 | geometry | 213 | par2-not-parallel | T5c | open -> T5b: 121 left after T1a/T1a2 (`0a3779247`); x residual 113.769 px — `pairConstraint` drops the pair but a symbolic span is not the fix; candidate: `RealMax` first-read cache freezes `ensureBiggerThan` forces (`PlayingSpace.java:188-199,240-266`, `RealMin.java:81-85`, `RealLine.java:68-100`), unverified (journal 22) -> T5c at b5 (`diagnosis/leftovers.md` M2, journal row 72): cyclic `ensureDisjoint` force finite only via `RealMax`'s first-read cache (`real/RealMax.java:89-94`); port `real/*` in upstream force order -> pinned (22ea19078) at b5 |
-| pafene-01-tedi758 | structural | 173 | handwritten-unported | T8f | |
+| pafene-01-tedi758 | structural | 173 | handwritten-unported | T8f | zero at b8 (merge of T8f, journal row 102) |
 | daduxi-21-duse542 | geometry | 172 | par2-not-parallel | T1a | pinned (0a3779247) at b1 |
 | baketu-62-cumu838 | geometry | 168 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
 | tumuke-16-xomo243 | geometry | 168 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
 | dolefo-13-kovu702 | geometry | 164 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
-| menoke-22-luxo044 | structural | 150 | handwritten-unported | T8f | |
+| menoke-22-luxo044 | structural | 150 | handwritten-unported | T8f | zero at b8 (merge of T8f, journal row 102) |
 | javedu-98-pibi325 | geometry | 94 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
 | kepuxa-88-juxu405 | geometry | 94 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
 | nabesa-52-nufu501 | geometry | 94 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
@@ -83,7 +84,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | xezipe-17-tima059 | paint-only | 12 | monochrome-mapper-unported | T1h | pinned (2486b1af0) at b1 |
 | zolude-08-leka122 | structural | 12 | svgparser-sax-unported | T4f | pinned (e336a9a67) at b4 |
 | posura-78-koji601 | structural | 11 | svgparser-sax-unported | T4f | pinned (e336a9a67) at b4 |
-| gebeki-18-muci858 | geometry | 8 | blotter-scaled-offset-and-path-stroke | T8g | 2 left after T2b (`f5b3e770c`) -> T5a: ARCTO `ensureVisible` adds the arc radius to the canvas (`SvgGraphics.java:854,129-131`), journal row 34 -> T8g after the UGraphic move (journal row 69; artifact `diagnosis/drawn-extent.md`) |
+| gebeki-18-muci858 | geometry | 8 | blotter-scaled-offset-and-path-stroke | T8g | zero at b8 (merge of T8g `7dc866bd6`, journal row 104): ARCTO adds the arc radius to the fold, `trunc(209.625+20+1) = 230` ×2 |
 | modamu-43-juci519 | geometry | 8 | participant-topurl-ignored | T1c | pinned (df9bbfd3e) at b1 |
 | mugidu-43-jizu986 | geometry | 8 | participant-topurl-ignored | T1c | pinned (df9bbfd3e) at b1 |
 | xepoda-56-xema668 | geometry | 8 | participant-topurl-ignored | T1c | pinned (df9bbfd3e) at b1 |
@@ -107,7 +108,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | gadiva-05-pogi376 | paint-only | 2 | alpha-hex-fill-unsplit | T2a | pinned (5898bfecb) at b2 |
 | gaxera-69-muma363 | geometry | 2 | hsl-float32 | T2g | pinned (001a8bf7b) at b2 |
 | gizinu-51-rexo332 | paint-only | 2 | svgparser-sax-unported | T4f | pinned (e336a9a67) at b4 |
-| kaluna-08-rubu301 | geometry | 2 | svg-ensurevisible-drawn-extent | T8g | diagnosed at b5 (`1899a1379`, `diagnosis/drawn-extent.md`): canvas = running `ensureVisible` max over drawn primitives (`SvgGraphics.java:129-135,142-143`); re-slotted to T8g after the UGraphic move (journal row 69) |
+| kaluna-08-rubu301 | geometry | 2 | svg-ensurevisible-drawn-extent | T8g | zero at b8 (merge of T8g `7dc866bd6`, journal row 104): canvas = the shared graphic's `ensureVisible` fold, `trunc(252.894+110+1) = 363` |
 | komafa-88-zutu920 | paint-only | 2 | svgparser-sax-unported | T4f | pinned (e336a9a67) at b4 |
 | nemeji-70-xupi983 | paint-only | 2 | svgparser-sax-unported | T4f | pinned (e336a9a67) at b4 |
 | nidozi-08-daxa280 | geometry | 2 | xlink-title-decode | T3c | pinned (3aa8e915c) at b3 |

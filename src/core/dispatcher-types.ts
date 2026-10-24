@@ -246,6 +246,17 @@ export interface RenderFragment {
    * (`core/annotations/body-ink.ts`). Set by `diagrams/mindmap/index.ts`.
    */
   frameInk?: InkBox;
+  /**
+   * sdd3-T8g, INTERNAL (not re-exported by `src/index.ts`): the sequence page graphic's own `ensureVisible` fold --
+   * `SvgGraphics#maxX`/`maxY`, a running maximum over every drawn primitive seeded with the document dimension
+   * (`SvgGraphics.java:129-135,142-143`) -- in the coordinates of `body`. A shift of `body` (`coord-shift.ts
+   * #shiftFragmentBody`: the warning banner, the margin removal and re-application, chrome) shifts these by the same
+   * amount, as `UGraphic#apply(UTranslate)` moves every coordinate `ensureVisible` later sees.
+   * `core/assemble-svg-sequence.ts#finalizeSequenceFragment` canvases `max(seed composed from chrome and margin,
+   * fold)`. Absent: the producer has no fold (every engine but sequence).
+   */
+  drawnMaxX?: number;
+  drawnMaxY?: number;
 }
 
 /**

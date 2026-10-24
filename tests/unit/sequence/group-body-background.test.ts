@@ -11,6 +11,7 @@
  * The parse-level expectations are jar-verified probes (oracle-render.sh);
  * the band expectations quote the jar goldens of the nine corpus fixtures.
  */
+import { tagsOf } from '../../helpers/svg-tags.js';
 import { describe, expect, it } from 'vitest';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
@@ -119,9 +120,9 @@ interface Band {
  * in these fixtures has a stroke-width of exactly 1.
  */
 function bands(svg: string): Band[] {
-  return [
-    ...svg.matchAll(/<rect [^>]*?fill="([^"]*)"(?: fill-opacity="([^"]*)")? stroke="([^"]*)" stroke-width="1"\/>/g),
-  ].map((m) => ({ fill: m[1]!, fillOpacity: m[2], stroke: m[3]! }));
+  return tagsOf(svg, 'rect')
+    .filter((t) => t['stroke-width'] === '1' && t.stroke !== undefined)
+    .map((t) => ({ fill: t.fill!, fillOpacity: t['fill-opacity'], stroke: t.stroke! }));
 }
 
 function koleji(color: string): string {

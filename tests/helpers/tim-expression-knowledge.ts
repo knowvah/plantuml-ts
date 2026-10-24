@@ -76,6 +76,7 @@ export function fakeContext(knowledge: Knowledge): TContext {
     getPreprocessingArtifact: () => ({
       addWarning: () => undefined,
       getOption: () => ({ define: () => undefined }),
+      getOptions: () => new Map(),
     }),
   };
 }

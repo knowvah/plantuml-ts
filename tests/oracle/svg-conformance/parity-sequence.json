@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-23T18:31:09.431Z",
+  "generatedAt": "2026-10-23T23:50:49.595Z",
   "fixtures": [
     {
       "slug": "bacupi-77-fuke586",
@@ -1931,9 +1931,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "structural-match",
-      "maxDelta": 2,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "gecopo-99-pude139",
@@ -2010,9 +2008,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/g[1]/rect[1]"
+      "verdict": "conformant"
     },
     {
       "slug": "geraku-93-roka956",
@@ -2474,9 +2470,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/rect[1]"
+      "verdict": "conformant"
     },
     {
       "slug": "jerevu-86-gojo026",
@@ -2756,9 +2750,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "structural-match",
-      "maxDelta": 67,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "kaporo-80-vace949",
@@ -3871,9 +3863,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/rect[1]"
+      "verdict": "conformant"
     },
     {
       "slug": "menugo-30-cuxa317",
@@ -4748,9 +4738,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1]/rect[1]"
+      "verdict": "conformant"
     },
     {
       "slug": "pagare-38-rebo342",

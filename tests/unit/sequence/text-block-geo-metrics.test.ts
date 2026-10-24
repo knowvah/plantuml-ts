@@ -20,9 +20,6 @@ import { defaultTheme } from '../../../src/core/theme.js';
 import { messageLabelBlock, messageLabelWidth } from '../../../src/diagrams/sequence/text-block-geo.js';
 import { defaultMessageFont } from '../../../src/diagrams/sequence/sequence-arrow-paint.js';
 import { atomFontSpec } from '../../../src/diagrams/sequence/sequence-creole-sheet.js';
-import { scaleSequenceGeometry } from '../../../src/diagrams/sequence/scale-geo.js';
-import { arrowConfigurationOf } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
-import type { SequenceGeometry, TextRun } from '../../../src/diagrams/sequence/ast.js';
 
 const LEFT_X = 100;
 const ARROW_Y = 50;
@@ -135,68 +132,6 @@ describe('messageLabelBlock placement (A2)', () => {
     const block = messageLabelBlock('', undefined, LEFT_X, ARROW_Y, { theme: defaultTheme, measurer });
     expect(block.lines).toEqual([]);
     expect(block.number).toBeUndefined();
-  });
-});
-
-/** A geometry carrying exactly one message with one placed, measured run. */
-function geometryWithRun(run: TextRun): SequenceGeometry {
-  return {
-    totalWidth: 200,
-    totalHeight: 100,
-    participants: [],
-    events: [
-      {
-        kind: 'message',
-        fromX: 40,
-        toX: 160,
-        y: 50,
-        label: run.text,
-        arrow: arrowConfigurationOf({}),
-        labelLines: [run],
-        labelNumber: run,
-        arrowDirection: 'right',
-      },
-    ],
-    headHeight: 30,
-    lifelineEndY: 90,
-    lifelineSegments: {},
-    footerShapeY: 90,
-    boxes: [],
-    showFootbox: true,
-  };
-}
-
-describe('scaleSequenceGeometry on TextRun metrics', () => {
-  const RUN: TextRun = { text: 'hello', x: 20, y: 40, textWidth: 27.5, textAscent: 10.111, textLineHeight: 13 };
-  const K = 2.5;
-
-  it('multiplies textWidth, textAscent and textLineHeight by k', () => {
-    const scaled = scaleSequenceGeometry(geometryWithRun(RUN), K);
-    const message = scaled.events[0]!;
-    expect(message.kind).toBe('message');
-    if (message.kind !== 'message') throw new Error('unreachable');
-    const line = message.labelLines[0]!;
-    expect(line.textWidth).toBeCloseTo(27.5 * K, 10);
-    expect(line.textAscent).toBeCloseTo(10.111 * K, 10);
-    expect(line.textLineHeight).toBeCloseTo(13 * K, 10);
-    // The coordinates scale too — the metrics must not be scaled INSTEAD of
-    // them, which a careless spread would do.
-    expect(line.x).toBeCloseTo(20 * K, 10);
-    expect(line.y).toBeCloseTo(40 * K, 10);
-  });
-
-  it('scales the autonumber run as well as the label lines', () => {
-    const scaled = scaleSequenceGeometry(geometryWithRun(RUN), K);
-    const message = scaled.events[0]!;
-    if (message.kind !== 'message') throw new Error('unreachable');
-    expect(message.labelNumber!.textWidth).toBeCloseTo(27.5 * K, 10);
-  });
-
-  it('leaves the metrics untouched at k = 1', () => {
-    const scaled = scaleSequenceGeometry(geometryWithRun(RUN), 1);
-    const message = scaled.events[0]!;
-    if (message.kind !== 'message') throw new Error('unreachable');
-    expect(message.labelLines[0]).toEqual(RUN);
   });
 });
 

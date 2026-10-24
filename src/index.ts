@@ -21,6 +21,7 @@ import { prepareIncludeStore } from './core/include-resolver.js';
 import { surfaceSpriteWarnings, type SpriteRegistry } from './core/sprite-commands.js';
 import { surfaceParseWarnings } from './diagrams/json/ast.js';
 import type { PreprocessorResult } from './core/preprocessor.js';
+import { inheritingRenderFn, takePendingPrevious, withPrevious } from './core/nested-previous.js';
 import { DiagramRefusal, emptySvg, errorSvg, preprocessorErrorSvg, welcomeSvg } from './core/error/error-diagrams.js';
 import { resolveMeasurer, type RenderOptions } from './core/render-options.js';
 import { layoutServices, layoutServicesSync } from './core/elk/layout-services.js';
@@ -302,12 +303,14 @@ interface PreparedBlock {
  * try/catch nor sync-vs-async `layout` call belongs here.
  */
 function prepareBlock(block: BlockUmlOk, source: UmlSource, options: RenderOptions | undefined): PreparedBlock {
+  const previous = takePendingPrevious();
   // Served remote images (`options.assetStore`, `remote-image:<url>`) become the data URIs creole decodes; see `remote-image-store.ts`.
   const umlSource = { ...source, lines: inlineRemoteImageLines(source.lines, options?.assetStore) };
   const skinCut = skinCutOf(block.preprocessed, umlSource);
   const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore }, skinCut);
   const plugin = resolution.plugin;
-  const preprocessed = plugin.styleInput?.(block.preprocessed, umlSource) ?? block.preprocessed;
+  // sdd3-T8h: a nested `{{ }}` diagram starts from the enclosing diagram's skinparams (`nested-previous.ts`).
+  const preprocessed = withPrevious(plugin.styleInput?.(block.preprocessed, umlSource) ?? block.preprocessed, previous);
   const { theme, styleMap } = buildTheme(preprocessed, options);
   const measurer = resolveMeasurer(plugin.type, options);
   const ast = astOf(resolution, options);
@@ -319,7 +322,9 @@ function prepareBlock(block: BlockUmlOk, source: UmlSource, options: RenderOptio
   // nested `Diagram#exportDiagram` shares the enclosing `FileFormatOption`),
   // not a fixed default. See `class-nested-diagram-renderer.ts`'s doc
   // comment for why this cannot be a plain import instead.
-  registerNestedDiagramRenderers((source) => renderSync(source, options));
+  // sdd3-T8h: and hands THIS diagram's skinparams (inherited ones included, as `skinParam.values()` holds them,
+  // `EmbeddedDiagram.java:88-90`) to the diagram each `{{ }}` renders.
+  registerNestedDiagramRenderers(inheritingRenderFn(preprocessed.skinparam, (nested) => renderSync(nested, options)));
   return {
     ctx: { plugin, theme, styleMap, preprocessed, measurer, seed: seedOfUmlSource(umlSource) },
     ast,

@@ -1,6 +1,7 @@
 import { HColorGradient, type GradientPolicy } from './HColorGradient.js';
 import { HColorSet, type ParsedColor, type ResolvedColor } from './HColorSet.js';
 import { HColorSimple } from './HColorSimple.js';
+import type { TransparentFillBehavior } from '../drawing/svg/svg-option.js';
 
 /** `new XColor(0, 0, 0, 0)` (HColors.java:121). */
 const TRANSPARENT_XCOLOR: ResolvedColor = { r: 0, g: 0, b: 0, a: 0 };
@@ -13,7 +14,7 @@ function asSimple(c: ParsedColor): HColorSimple {
 
 /**
  * HColors — the colour constants and factories the style engine reaches:
- * `BLACK`, `WHITE`, `transparent()`, `none()`, `gradient()`, `simple()`. The other
+ * `BLACK`, `WHITE`, `transparent()` (both overloads), `none()`, `gradient()`, `simple()`. The other
  * constants (`RED_LIGHT` … `COL_BBBBBB`) and helpers (`noGradient`,
  * `changeBack`, `unlinear`, `middle`) are not ported.
  *
@@ -43,10 +44,13 @@ export class HColors {
     return HColors.white;
   }
 
-  /** @see HColors.java:123-125 */
-  static transparent(): HColorSimple {
+  /** `transparent()` is the shared `TRANSPARENT`; `transparent(fillBehavior)` is a
+   *  fresh copy of it carrying that behaviour (sdd3-T8p: the lifeline hover rect).
+   *  @see HColors.java:123-131 */
+  static transparent(fillBehavior?: TransparentFillBehavior): HColorSimple {
     HColors.transparentColor ??= HColorSimple.create(TRANSPARENT_XCOLOR);
-    return HColors.transparentColor;
+    if (fillBehavior === undefined) return HColors.transparentColor;
+    return HColors.transparentColor.withTransparentFillBehavior(fillBehavior);
   }
 
   /** The same instance as {@link transparent}. @see HColors.java:131-133 */

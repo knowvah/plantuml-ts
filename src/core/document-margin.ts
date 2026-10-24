@@ -38,7 +38,7 @@
 
 import type { RenderFragment } from './dispatcher.js';
 import type { Theme } from './theme.js';
-import { shiftFragmentBody } from './annotations/coord-shift.js';
+import { shiftedFold, shiftFragmentBody } from './annotations/coord-shift.js';
 import {
   CUCA_DOCUMENT_MARGIN_BOTTOM,
   CUCA_DOCUMENT_MARGIN_LEFT,
@@ -109,6 +109,7 @@ export function removeDocumentMargin(fragment: RenderFragment, margin: DocumentM
   return {
     ...fragment,
     body: shiftFragmentBody(fragment.body, -margin.left, -margin.top),
+    ...shiftedFold(fragment, -margin.left, -margin.top),
     width: fragment.preChromeWidth ?? fragment.width,
     height: fragment.preChromeHeight ?? fragment.height,
   };
@@ -123,6 +124,7 @@ export function applyDocumentMargin(fragment: RenderFragment, margin: DocumentMa
   return {
     ...fragment,
     body: shiftFragmentBody(fragment.body, margin.left, margin.top),
+    ...shiftedFold(fragment, margin.left, margin.top),
     exportedDimension: {
       width: fragment.width + margin.left + margin.right,
       height: fragment.height + margin.top + margin.bottom,

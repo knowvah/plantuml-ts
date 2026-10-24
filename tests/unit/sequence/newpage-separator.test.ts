@@ -23,6 +23,7 @@ import { newpageTilesOf } from '../../../src/diagrams/sequence/sequence-page.js'
 import type { SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
 import { sequenceSource } from '../../helpers/sequence-source.js';
 import { layoutBody } from './frame-paint-fixtures.js';
+import { tagsOf, type TagAttrs } from '../../helpers/svg-tags.js';
 
 const measurer = new FixedMeasurer(8, 16);
 
@@ -36,8 +37,8 @@ const SOURCE = ['Alice -> Bob : a', 'newpage', 'Alice -> Bob : b'];
 
 /** Every dashed `2,2` line in a rendered body — the separator's signature,
  *  and not a lifeline's, which dashes `5,5` from `lifeLine { LineStyle 5 }`. */
-function separatorLines(body: string): string[] {
-  return [...body.matchAll(/<line[^>]*stroke-dasharray="2,2"[^>]*\/>/g)].map((m) => m[0]);
+function separatorLines(body: string): TagAttrs[] {
+  return tagsOf(body, 'line').filter((t) => t['stroke-dasharray'] === '2,2');
 }
 
 describe('newpage separator', () => {
@@ -54,9 +55,7 @@ describe('newpage separator', () => {
   it('carries the cascade`s stroke, thickness and dash unit', () => {
     const { body } = renderSequence(layout(SOURCE), defaultTheme, measurer);
     const [sep] = separatorLines(body);
-    expect(sep).toContain('stroke="#181818"');
-    expect(sep).toContain('stroke-width="0.5"');
-    expect(sep).toContain('stroke-dasharray="2,2"');
+    expect(sep).toMatchObject({ stroke: '#181818', 'stroke-width': '0.5', 'stroke-dasharray': '2,2' });
   });
 
   it('takes stroke, thickness and dash from a <style> newpage block', () => {
@@ -66,7 +65,9 @@ describe('newpage separator', () => {
       measurer,
     );
     const { body } = renderSequence(geo, defaultTheme, measurer);
-    expect(body).toMatch(/<line[^>]*stroke="#F00" stroke-width="2" stroke-dasharray="5,5"\/>/);
+    expect(tagsOf(body, 'line')).toContainEqual(
+      expect.objectContaining({ stroke: '#F00', 'stroke-width': '2', 'stroke-dasharray': '5,5' }),
+    );
   });
 
   it('reads the style current at the newpage, not a later one (D2)', () => {
@@ -75,7 +76,7 @@ describe('newpage separator', () => {
       measurer,
     );
     const { body } = renderSequence(geo, defaultTheme, measurer);
-    expect(separatorLines(body)[0]).toContain('stroke="#181818"');
+    expect(separatorLines(body)[0]).toMatchObject({ stroke: '#181818' });
   });
 
   it('refuses a separator layout did not paint', () => {
@@ -95,10 +96,12 @@ describe('newpage separator', () => {
     const [sep] = separatorLines(body);
     // Page 0 of this document needs no translation: ymin is headHeight.
     const y = tile!.y + NEWPAGE_MARGIN_Y;
-    expect(sep).toContain(`y1="${String(y)}"`);
-    expect(sep).toContain(`y2="${String(y)}"`);
-    expect(sep).toContain(`x1="${String(tile!.bandX)}"`);
-    expect(sep).toContain(`x2="${String(tile!.bandX + tile!.bandWidth)}"`);
+    expect(sep).toMatchObject({
+      y1: String(y),
+      y2: String(y),
+      x1: String(tile!.bandX),
+      x2: String(tile!.bandX + tile!.bandWidth),
+    });
   });
 
   /** "the pages slightly overlap on the newpage separator, so that the

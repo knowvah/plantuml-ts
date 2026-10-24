@@ -45,6 +45,7 @@ describe('EaterOption', () => {
       getPreprocessingArtifact: () => ({
         addWarning: vi.fn(),
         getOption: () => ({ define }),
+        getOptions: () => new Map(),
       }),
     });
     new EaterOption(new StringLocated('!option language "fr"', LOC)).analyze(ctx, memory);
@@ -58,6 +59,7 @@ describe('EaterOption', () => {
       getPreprocessingArtifact: () => ({
         addWarning: vi.fn(),
         getOption: () => ({ define }),
+        getOptions: () => new Map(),
       }),
     });
     new EaterOption(new StringLocated('!option handwritten', LOC)).analyze(ctx, memory);
@@ -71,6 +73,7 @@ describe('EaterOption', () => {
       getPreprocessingArtifact: () => ({
         addWarning,
         getOption: () => ({ define: vi.fn() }),
+        getOptions: () => new Map(),
       }),
     });
     new EaterOption(new StringLocated('!option notarealkey', LOC)).analyze(ctx, memory);
@@ -84,6 +87,7 @@ describe('EaterOption', () => {
       getPreprocessingArtifact: () => ({
         addWarning,
         getOption: () => ({ define: vi.fn() }),
+        getOptions: () => new Map(),
       }),
     });
     new EaterOption(new StringLocated('!option language', LOC)).analyze(ctx, memory);

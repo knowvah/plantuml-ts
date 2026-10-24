@@ -29,15 +29,14 @@
  * HColorLinearGradient, ColorMapper)` overload -- with the RAW paint, since
  * the mapper is applied per stop inside it.
  *
- * Deferred (out of scope, reported): `background.transparentFillBehavior
- * ()` — upstream's second `setFillColor` arg, an `HColor`-only property
- * (`WITH_FILL_NONE` default vs. `WITH_FILL_OPACITY` override) with no
- * representation on this port's `Paint` type (`src/core/paint.ts`, not in
- * this task's write-set). `setFillColor` is called with its default
- * (`TransparentFillBehavior.WITH_FILL_NONE`, see `svg-graphics-core.ts`),
- * matching upstream's overwhelmingly common case — every `HColor` except
- * the rare caller of `withTransparentFillBehavior(WITH_FILL_OPACITY)`
- * (`HColorSimple.java:231`) already resolves to `WITH_FILL_NONE`.
+ * `background.transparentFillBehavior()` (java:93, sdd3-T8p): upstream's second
+ * `setFillColor` arg. It lives on `HColorSimple` (`transparentFillBehavior()`,
+ * HColorSimple.java:136-139), and an `HColorSimple` already travels through
+ * `UParam` (`HColorOrPaint`), so no `Paint` representation is needed: when the
+ * fill is an `HColorSimple` its behaviour is forwarded; a plain-string `Paint`
+ * is upstream's default `WITH_FILL_NONE`. `WITH_FILL_OPACITY` keeps the
+ * colour's `#rrggbbaa` (`SvgGraphics.java:526-528`), which `fillMe`
+ * (SvgGraphics.java:880-888) writes as `fill` + `fill-opacity`.
  *
  * `UClip`/`ClipContainer` — not ported (see `URectangle.ts`'s own
  * deferred-methods note); this driver's constructor accordingly takes no
@@ -48,6 +47,7 @@ import type { UDriver } from '../../AbstractCommonUGraphic.js';
 import type { UParam } from '../../UParam.js';
 import { isLinearGradientPaint } from '../../../paint.js';
 import { toSvgPaint, type ColorMapper } from '../../color/ColorMapper.js';
+import { HColorSimple } from '../../color/HColorSimple.js';
 import type { URectangle } from '../../shape/URectangle.js';
 import type { SvgGraphics } from './svg-graphics.js';
 
@@ -65,7 +65,9 @@ export class DriverRectangleSvg implements UDriver<URectangle> {
     }
     const background = toSvgPaint(raw, mapper);
     if (typeof background === 'string') {
-      svg.setFillColor(background);
+      // `svg.setFillColor(background.toSvg(mapper), background.transparentFillBehavior())`, java:93;
+      // a `Paint` string has no behaviour of its own: upstream's WITH_FILL_NONE default.
+      svg.setFillColor(background, raw instanceof HColorSimple ? raw.transparentFillBehavior() : undefined);
     } else {
       const id = svg.createSvgGradient(background.color1, background.color2, background.policy);
       svg.setFillColor(`url(#${id})`);

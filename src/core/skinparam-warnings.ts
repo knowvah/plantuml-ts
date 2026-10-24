@@ -26,8 +26,9 @@ import type { PreprocessorResult } from './preprocessor.js';
 import type { RenderFragment } from './dispatcher.js';
 import type { DocumentMargin } from './document-margin.js';
 import { WarningBannerBlock } from './annotations/WarningBannerBlock.js';
-import { shiftFragmentBody } from './annotations/coord-shift.js';
+import { shiftedFold, shiftFragmentBody } from './annotations/coord-shift.js';
 import { ColorMapper } from './klimt/color/ColorMapper.js';
+import { UGraphicHandwritten } from './klimt/drawing/hand/UGraphicHandwritten.js';
 import { renderDrawableToFragment } from './klimt/document-shell-fragment.js';
 import type { UGraphic } from './klimt/UGraphic.js';
 import { UTranslate } from './klimt/UTranslate.js';
@@ -110,6 +111,16 @@ function canvasSide(raw: number, near: number, far: number): number {
  * composes title/legend/... around banner + body, as upstream's decoration
  * order does. `fragment` unchanged when there is no warning. `uid` is the id
  * namespace of the banner's own klimt document (it emits no defs).
+ *
+ * `handwritten` (sdd3-T8f): the banner is part of the decorated block the
+ * exporter draws, so a handwritten diagram's banner passes through
+ * `UGraphicHandwritten` too: `TextBlockExporter.java:172-175` translates by the
+ * margin and THEN wraps (`ug = new UGraphicHandwritten(ug)`), and the banner
+ * is drawn inside that wrap (`DiagramChromeFactory.java:128`), so its rect is
+ * a jiggled polygon (the golden's `rect[1]` of the four `handwritten true`
+ * sequence rows). A caller whose diagram is not drawn through the decorator
+ * leaves it `false`.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/TextBlockExporter.java:172-175
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/DiagramChromeFactory.java:176-200
  */
 export function withWarningBanner(
@@ -118,6 +129,7 @@ export function withWarningBanner(
   measurer: StringMeasurer,
   margin: DocumentMargin,
   uid: string,
+  handwritten = false,
 ): RenderFragment {
   if (warnings.length === 0) return fragment;
   const rawW = fragment.preChromeWidth ?? fragment.width - (margin.left + margin.right + SVG_CANVAS_CEIL);
@@ -130,7 +142,8 @@ export function withWarningBanner(
       const dim = banner.calculateDimension(ug.getStringBounder());
       bannerW = dim.getWidth();
       bannerH = dim.getHeight();
-      banner.drawU(ug.apply(new UTranslate(margin.left, margin.top)), Math.max(bannerW, rawW));
+      const translated = ug.apply(new UTranslate(margin.left, margin.top));
+      banner.drawU(handwritten ? new UGraphicHandwritten(translated) : translated, Math.max(bannerW, rawW));
     },
   };
   // isw-T2c-scale: drawn into a scaled document, formatted by its scale pass.
@@ -142,6 +155,7 @@ export function withWarningBanner(
   return {
     ...fragment,
     body: drawn.body + shiftFragmentBody(fragment.body, 0, bannerH),
+    ...shiftedFold(fragment, 0, bannerH),
     width: fragment.width - canvasSide(rawW, margin.left, margin.right) + canvasSide(stackW, margin.left, margin.right),
     height:
       fragment.height - canvasSide(rawH, margin.top, margin.bottom) + canvasSide(stackH, margin.top, margin.bottom),

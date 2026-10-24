@@ -51,6 +51,7 @@ import { tileNodes } from '../../../../../src/diagrams/activity/layout/tile-layo
 import { GtileTopDown } from '../../../../../src/diagrams/activity/tiles/gtile-top-down.js';
 import type { StringBounder } from '../../../../../src/diagrams/activity/tiles/tile.js';
 import { renderSync } from '../../../../../src/index.js';
+import { inheritingRenderFn } from '../../../../../src/core/nested-previous.js';
 import { registerNestedDiagramRenderers } from '../../../../../src/diagrams/class/class-nested-diagram-renderer.js';
 import {
   assignCoordinatesFull,
@@ -90,15 +91,14 @@ interface DiffBaselineManifest {
 // invariant to either run's uniform translation.
 const LAYOUT_MARGIN = 12;
 
-// Register the real recursive nested-diagram renderer before any fixture lays
-// out, exactly as `render-fixture-activity.ts` and production (`src/index.ts`'s
+// The real recursive nested-diagram renderer is registered (in `layoutBeforeAfter`)
+// before each fixture lays out, exactly as `render-fixture-activity.ts` and production (`src/index.ts`'s
 // `registerNestedDiagramRenderers`) do. Without it, every `{{ }}` action label
 // in the 8 embed fixtures reaches `activity-creole-sheet.ts#nestedRenderer`'s
 // "no nested-diagram renderer is registered" stub, and `EmbeddedDiagram
 // .calculateDimensionSlow` logs the upstream `Logme.error` and lays the slot
 // out at 42x42 -- 30 stderr lines per run and a layout production never
 // produces. Measuring here must mean measuring what production lays out.
-registerNestedDiagramRenderers((source) => renderSync(source, { measurer: new DeterministicMeasurer() }));
 
 const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')) as DiffBaselineManifest;
 // add4-T3j: every RENDERING row -- `baseline` AND `pinned`. A row leaves
@@ -155,6 +155,10 @@ function layoutBeforeAfter(markup: string, measurer: DeterministicMeasurer): Bef
   if (first === undefined) throw new Error('no diagram block found');
   if (!first.ok) throw first.failure.cause;
   const preprocessed = first.preprocessed;
+  // Registered per fixture (sdd3-T8h-2): the enclosing diagram's skinparams reach each nested `{{ }}` diagram.
+  registerNestedDiagramRenderers(
+    inheritingRenderFn(preprocessed.skinparam, (source) => renderSync(source, { measurer })),
+  );
   const theme = buildThemeForFixture(preprocessed);
   const block = { ...first.source, rawStyles: preprocessed.styles, stylePositions: preprocessed.stylePositions };
   const ast = astOrThrow(parseActivity(block), 'activity');

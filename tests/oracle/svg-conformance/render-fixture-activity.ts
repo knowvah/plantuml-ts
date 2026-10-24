@@ -89,6 +89,7 @@ import { applyActivityChrome, applyActivityScale } from '../../../src/diagrams/a
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg, seedOfUmlSource } from '../../../src/core/assemble-svg.js';
 import { renderSync } from '../../../src/index.js';
+import { inheritingRenderFn } from '../../../src/core/nested-previous.js';
 import { registerNestedDiagramRenderers } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
 
 /** `renderFixtureActivity`'s own options bag: `PreprocessOptions` (forwarded
@@ -118,13 +119,16 @@ export function renderFixtureActivity(
   // Sheet, `activity-creole-sheet.ts#renderActionLabel`) falls back to
   // its own "no renderer registered" error path -- the harness gap, not
   // a defect in this port's own embed handling.
-  registerNestedDiagramRenderers((source) => renderSync(source, { measurer }));
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0];
   if (first === undefined) throw new Error('no diagram block found');
   if (!first.ok) throw first.failure.cause;
 
   const preprocessed = first.preprocessed;
+  // sdd3-T8h-2: the enclosing diagram's skinparams reach each nested `{{ }}` diagram (`nested-previous.ts`).
+  registerNestedDiagramRenderers(
+    inheritingRenderFn(preprocessed.skinparam, (source) => renderSync(source, { measurer })),
+  );
   const rawSourceLines = first.rawSource.map((s) => s.getString());
   // add4-T2e: production's own `buildTheme` (`src/index.ts:366`), not a
   // local copy -- the copy skipped `withDocumentStyle`, so a theme's

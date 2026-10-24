@@ -50,6 +50,7 @@ const DEFAULT_STYLE = currentStyleBuilder(createSequenceStyleDispatch({ lines: [
 import { HEADER_PADDING } from '../../../src/diagrams/sequence/frame-style.js';
 import { DEFAULT_GROUP_PAINTS, groupPaintsOf } from './frame-paint-fixtures.js';
 import { noGradient } from '../../../src/core/paint.js';
+import { tagsOf } from '../../helpers/svg-tags.js';
 import { DEFAULT_SEQUENCE_STYLE_BUILDER, sequenceSource, wholeLifelines } from '../../helpers/sequence-source.js';
 
 /** What layout paints a default-skin activation bar and divider with (sdd1
@@ -606,11 +607,14 @@ describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () =
 
   it('paints the head with the theme arrow colour, filled and stroked', () => {
     const svg = assembleSvg(renderSequence(jarGeo(), defaultTheme, TEST_MEASURER));
-    expect(svg).toContain(
-      '<polygon points="121.231,62,131.231,66,121.231,70,125.231,66" ' +
-        `fill="${shortenColor(noGradient(defaultTheme.colors.arrow))}" ` +
-        `stroke="${shortenColor(noGradient(defaultTheme.colors.arrow))}" stroke-width="1"`,
-    );
+    // The klimt polygon driver writes the stroke in `style` (`attrsOf` expands it).
+    const ink = shortenColor(noGradient(defaultTheme.colors.arrow));
+    expect(tagsOf(svg, 'polygon')[0]).toMatchObject({
+      points: '121.231,62,131.231,66,121.231,70,125.231,66',
+      fill: ink,
+      stroke: ink,
+      'stroke-width': '1',
+    });
   });
 
   it('drops the nice-arrow notch under skinparam style strictuml', () => {
@@ -677,16 +681,14 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
     // that dashed only its outgoing segment would look like two arrows. It is
     // `new UStroke(2, 2, thickness)` (`ArrowConfiguration.java:256-257`, the
     // deprecated `applyStroke(ug)` `ComponentRoseSelfArrow.java:81` calls).
-    for (const seg of [
-      `<line x1="${SELF_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${SELF_Y}"`,
-      `<line x1="${LOOP_RIGHT_X}" y1="${SELF_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
-      `<line x1="${SELF_X}" y1="${LOOP_BOTTOM_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
-    ]) {
-      expect(svg).toContain(
-        `${seg} stroke="${shortenColor(noGradient(defaultTheme.colors.arrow))}" stroke-width="1" ` +
-          'stroke-dasharray="2,2"',
-      );
-    }
+    const ink = shortenColor(noGradient(defaultTheme.colors.arrow));
+    const segments = tagsOf(svg, 'line').filter((l) => l['stroke-dasharray'] === '2,2');
+    expect(segments.map((l) => [l['x1'], l['y1'], l['x2'], l['y2']])).toEqual([
+      [`${SELF_X}`, `${SELF_Y}`, `${LOOP_RIGHT_X}`, `${SELF_Y}`],
+      [`${LOOP_RIGHT_X}`, `${SELF_Y}`, `${LOOP_RIGHT_X}`, `${LOOP_BOTTOM_Y}`],
+      [`${SELF_X}`, `${LOOP_BOTTOM_Y}`, `${LOOP_RIGHT_X}`, `${LOOP_BOTTOM_Y}`],
+    ]);
+    for (const seg of segments) expect(seg).toMatchObject({ stroke: ink, 'stroke-width': '1' });
   });
 });
 
@@ -888,9 +890,11 @@ describe('renderSequence — notes', () => {
     // vertex order the jar emits (`metano-36-gevu843`); `note { LineThickness
     // 0.5 }` and `BackGroundColor --note-background` (`plantuml.skin:3,322-326`)
     // over `root { LineColor #181818 }` (`:16`).
-    const paint = 'fill="#FEFFDD" stroke="#181818" stroke-width="0.5"';
-    expect(svg).toContain(`<path d="M50,80 L50,120 L170,120 L170,90 L160,80 L50,80" ${paint}/>`);
-    expect(svg).toContain(`<path d="M160,80 L160,90 L170,90 L160,80" ${paint}/>`);
+    const paint = { fill: '#FEFFDD', stroke: '#181818', 'stroke-width': '0.5' };
+    expect(tagsOf(svg, 'path')).toEqual([
+      { d: 'M50,80 L50,120 L170,120 L170,90 L160,80 L50,80', ...paint },
+      { d: 'M160,80 L160,90 L170,90 L160,80', ...paint },
+    ]);
     expect(svg).toContain('remember this');
   });
 
@@ -988,13 +992,19 @@ describe('renderSequence — frames', () => {
       tabHeight: 17,
     };
     const frameOnly = assembleSvg(renderSequence(makeGeo({ events: [frame] }), defaultTheme, TEST_MEASURER));
-    expect(frameOnly).not.toContain('stroke-dasharray="2,2"');
+    expect(tagsOf(frameOnly, 'line').filter((l) => l['stroke-dasharray'] === '2,2')).toEqual([]);
     const elseGeo: ElseGeo = { paint: DEFAULT_GROUP_PAINTS.paint, kind: 'else', x: 30, width: 300, y: 110, runs: [] };
     const geo = makeGeo({ events: [frame, elseGeo] });
     const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
-    expect(svg).toContain(
-      '<line x1="30" y1="111" x2="330" y2="111" stroke="#000" stroke-width="1" stroke-dasharray="2,2"/>',
-    );
+    expect(tagsOf(svg, 'line')).toContainEqual({
+      x1: '30',
+      y1: '111',
+      x2: '330',
+      y2: '111',
+      stroke: '#000',
+      'stroke-width': '1',
+      'stroke-dasharray': '2,2',
+    });
   });
 
   it('frame label includes frameType + comment text', () => {
@@ -1166,8 +1176,8 @@ describe('renderSequence — background pass (T6)', () => {
     // before any other renderSequence content: the outer band/outline are
     // opaque colour fills, so they must precede the inner ones to avoid
     // painting over the inner group.
-    const rects = [...body.matchAll(/<rect[^>]*fill="([^"]*)"[^>]*stroke="([^"]*)"/g)].slice(0, 4);
-    expect(rects.map((m) => m[1])).toEqual(['#F00', 'none', '#0F0', 'none']);
+    const rects = tagsOf(body, 'rect').slice(0, 4);
+    expect(rects.map((r) => r['fill'])).toEqual(['#F00', 'none', '#0F0', 'none']);
   });
 });
 
@@ -1298,9 +1308,9 @@ describe('renderSequence — dividers', () => {
     // (`:120`) -- the jar's `tukobo-89-zebi935` golden shows exactly this 1/2
     // split.
     const body = bodyFor(dividerGeo('init phase'));
-    expect(body).toContain('stroke-width="1"');
-    expect(body).toContain('stroke-width="2"');
-    expect(body).toContain('fill="#EEE"');
+    const [band, box] = tagsOf(body, 'rect');
+    expect(band).toMatchObject({ 'stroke-width': '1', fill: '#EEE' });
+    expect(box).toMatchObject({ 'stroke-width': '2' });
   });
 
   it('draws the band alone for the empty ==== form', () => {
@@ -1739,9 +1749,15 @@ describe('renderSequence — box backgrounds', () => {
     const svg = assembleSvg(renderSequence(geo, defaultTheme, TEST_MEASURER));
     // `element { LineThickness 0.5 }` and `root { LineColor #181818 }`
     // (`plantuml.skin:16,93`); `RoundCorner 0` writes no rx (`:13`).
-    expect(svg).toContain(
-      '<rect x="10" y="0" width="200" height="300" fill="#DDD" stroke="#181818" stroke-width="0.5"/>',
-    );
+    expect(tagsOf(svg, 'rect')).toContainEqual({
+      x: '10',
+      y: '0',
+      width: '200',
+      height: '300',
+      fill: '#DDD',
+      stroke: '#181818',
+      'stroke-width': '0.5',
+    });
   });
 
   it('box with label renders a text element', () => {
@@ -2173,14 +2189,14 @@ describe('renderSequence — exogenous arrows', () => {
   it('draws a CROSSX exo end as a saltire and no polygon', () => {
     const svg = render('@startuml\nparticipant Bob\n[x-> Bob : hello\n@enduml');
     expect(headTips(svg)).toHaveLength(1); // the participant-side head only
-    const saltire = svg.match(/<line[^>]*stroke-width="2"[^>]*>/g) ?? [];
+    const saltire = tagsOf(svg, 'line').filter((l) => l['stroke-width'] === '2');
     expect(saltire).toHaveLength(2);
     // Two crossing diagonals, `spaceCrossX` right of the border end.
     // x2 is the lifeline, held at `xOrigin + preferredWidth` by
     // `CommunicationExoTile.java:176-181`; the arrow is still `spaceCrossX`
     // = 12 off the border.
     expect(messageBodies(svg)[0]).toEqual([22, 55.544]);
-    expect(saltire.map((t) => Number(/x1="([-\d.]+)"/.exec(t)?.[1]))).toEqual([17, 17]);
+    expect(saltire.map((t) => Number(t['x1']))).toEqual([17, 17]);
   });
 
   // `getComponent` reverses the configuration when `getDirection() == -1`

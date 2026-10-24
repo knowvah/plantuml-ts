@@ -1,26 +1,37 @@
 /**
- * The note and box (englober) shapes, drawn from their resolved style paint
- * (sdd1 T2e). Split out of `renderer.ts`, which is past the 500-line cap.
+ * The note and box (englober) shapes, drawn through the page's `UGraphic`
+ * from their resolved style paint (sdd1 T2e; sdd3 T8e).
  *
  * Every paint read is the component's own, off the `Style` its event resolved
  * (`Note#getUsedStyles`, `Note.java:75-82`; `Doll#getUsedStyles`,
  * `Doll.java:107-114`): `getSymbolContext(colors)` (`AbstractComponent
  * .java:89-91` -> `Style.java:270-281`) supplies back/fore colour, stroke and
  * delta shadow, `getRoundCorner()` (`AbstractComponent.java:109-111`) the
- * corner. Lengths are scaled here, at emission, as `SvgGraphics#format` and
- * `#setStrokeWidth` scale them (`SvgGraphics.java:466-468,555-561`).
+ * corner. Lengths are the page's own; the export scale is the exporter's
+ * `SvgGraphics#format` pass (`SvgGraphics.java:466-468,555-561`).
+ *
+ * The shapes are drawn in the jar's local frame: the component is translated
+ * to its top-left (`CommunicationTileNoteRight.java:139-141`) and the
+ * `Opale` builders know nothing of where they sit
+ * (`Opale.java:134-171`).
  */
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import { Back } from '../../core/klimt/Back.js';
+import { Fore } from '../../core/klimt/Fore.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { ULine } from '../../core/klimt/shape/ULine.js';
+import { UPath } from '../../core/klimt/shape/UPath.js';
+import { UPolygon } from '../../core/klimt/shape/UPolygon.js';
+import { URectangle } from '../../core/klimt/shape/URectangle.js';
+import { FontStyle } from '../../core/klimt/shape/UText.js';
+import { noGradient } from '../../core/paint.js';
+import { OPALE_CORNERSIZE } from '../../core/svek/image/Opale.js';
 import type { BoxGeo, NoteConnector, NoteGeo } from './ast.js';
 import type { SequencePaint } from './sequence-skin-param.js';
-import type { ScaledTheme } from './scale-geo.js';
-import { line, path, polygon, rect } from '../../core/svg.js';
-import { noGradient } from '../../core/paint.js';
-import { arcTo, lineTo, moveTo } from '../../core/svg-path-builder.js';
-import { fmt } from '../../core/svg-format.js';
-import { OPALE_CORNERSIZE } from '../../core/svek/image/Opale.js';
-import { FontStyle } from '../../core/klimt/shape/UText.js';
-import { withNoteShadow } from './sequence-shadow.js';
-import { creoleRunText } from './renderer.js';
+import type { PageTheme } from './renderer-ug.js';
+import { strokeOf } from './renderer-line-component.js';
+import { drawCreoleRuns } from './sequence-text.js';
 
 /** `new UStroke(2, 2, 1)` (`CommunicationTileNoteBottomTopAbstract.java:78`):
  *  dash, gap, thickness. */
@@ -34,140 +45,143 @@ function paintOf(geo: { readonly paint?: SequencePaint }, what: string): Sequenc
   return geo.paint;
 }
 
-/** `Fashion#apply` (`klimt/Fashion.java`): back, fore and stroke, its
- *  thickness and dashes scaled at emission. */
-function shapeStyle(paint: SequencePaint, k: number) {
-  const dash = paint.dash;
-  return {
-    fill: paint.fill,
-    stroke: paint.stroke,
-    strokeWidth: paint.thickness * k,
-    ...(dash === undefined ? {} : { strokeDasharray: dash.map((d) => fmt(d * k)).join(',') }),
-  };
-}
-
-/** `URectangle#rounded(roundCorner)` (`URectangle.java:80-84`):
- *  `DriverRectangleSvg` hands `svgRectangle` `rx / 2, ry / 2`
- *  (`DriverRectangleSvg.java:57,78`), which writes them only when positive
- *  (`SvgGraphics.java:582-584`). */
-function roundedCorner(roundCorner: number, k: number): { rx?: number; ry?: number } {
-  const r = (roundCorner / 2) * k;
-  return r > 0 ? { rx: r, ry: r } : {};
-}
-
-/** The note's box in document coordinates, with `Opale`'s scaled
- *  `cornersize` (`c`) and `roundCorner` (`rc`). */
-interface OpaleFrame {
-  readonly x: number;
-  readonly y: number;
-  readonly w: number;
-  readonly h: number;
-  readonly c: number;
-  readonly rc: number;
-}
-
 /**
- * `Opale.getPolygonNormal(width, height, roundCorner)` at `(x, y)`, its
- * `closePath` adding nothing to the emitted `d` (the jar's own goldens end at
- * the last segment).
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:149-171
+ * `Fashion#apply` (`klimt/Fashion.java:76-92`): the fore colour, the back
+ * colour `.bg()`, then the stroke -- `symbolContext.apply(ug)` in every
+ * `ComponentRoseNote*` and `ComponentRoseEnglober`. Returns ONE instance: the
+ * note's polygon and corner are both drawn on it
+ * (`ComponentRoseNote.java:121-124`).
  */
-function polygonNormal(f: OpaleFrame): string {
-  const { x, y, w, h, c, rc } = f;
-  if (rc === 0) {
-    const points: Array<[number, number]> = [
-      [x, y + h],
-      [x + w, y + h],
-      [x + w, y + c],
-      [x + w - c, y],
-      [x, y],
-    ];
-    return [moveTo(x, y), ...points.map(([px, py]) => lineTo(px, py))].join(' ');
-  }
-  const r = rc / 2;
-  return [
-    moveTo(x, y + r),
-    lineTo(x, y + h - r),
-    arcTo(x + r, y + h, r, 0, 0),
-    lineTo(x + w - r, y + h),
-    arcTo(x + w, y + h - r, r, 0, 0),
-    lineTo(x + w, y + c),
-    lineTo(x + w - c, y),
-    lineTo(x + r, y),
-    arcTo(x, y + r, r, 0, 0),
-  ].join(' ');
-}
-
-/** `Opale.getCorner(width, roundCorner)` at `(x, y)`.
- *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:134-147 */
-function corner(f: OpaleFrame): string {
-  const { x, y, w, c, rc } = f;
-  const fold =
-    rc === 0
-      ? [lineTo(x + w - c, y + c)]
-      : [lineTo(x + w - c, y + c - rc / 4), arcTo(x + w - c + rc / 4, y + c, rc / 4, 0, 0)];
-  return [moveTo(x + w - c, y), ...fold, lineTo(x + w, y + c), lineTo(x + w - c, y)].join(' ');
+function fashion(ug: UGraphic, paint: SequencePaint): UGraphic {
+  return ug.apply(new Fore(paint.stroke)).apply(new Back(paint.fill)).apply(strokeOf(paint));
 }
 
 /** `ComponentRoseNoteHexagonal`'s `cornersize` (`:54`). */
-export const NOTE_HEXAGON_CORNERSIZE = 10;
+const NOTE_HEXAGON_CORNERSIZE = 10;
 
 /**
- * `ComponentRoseNoteHexagonal#drawInternalU`'s `UPolygon` at `(x, y)`, its
- * seven points in the jar's order (`:99-106`). `textHeight` and `x2` are
- * `int`s (`:89,91,97`), so `textHeight / 2` is INTEGER division. The geo is
- * already scaled while the jar scales each point at emission
- * (`SvgGraphics.java:466-468`): the unscaled height is recovered from the
- * scaled one -- an integer, as layout truncates it (`sequence-layout-note.ts`)
- * -- and halved before `k` is applied again.
+ * `Opale.getPolygonNormal(width, height, roundCorner)`, at the origin: its
+ * `closePath` records nothing (`UPath#closePath` is empty), so the emitted `d`
+ * ends at the last segment, as the jar's own goldens do. The arcs stay
+ * `arcTo` so a decorator can rewrite them (`UPathHand`).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:149-171
  */
-export function hexagonPoints(
-  note: Pick<NoteGeo, 'x' | 'y' | 'width' | 'height'>,
-  k: number,
-): Array<{ x: number; y: number }> {
-  const { x, y, width: x2, height: textHeight } = note;
-  const c = NOTE_HEXAGON_CORNERSIZE * k;
-  const mid = Math.trunc(Math.round(textHeight / k) / 2) * k;
-  return [
-    { x: x + c, y },
-    { x: x + x2 - c, y },
-    { x: x + x2, y: y + mid },
-    { x: x + x2 - c, y: y + textHeight },
-    { x: x + c, y: y + textHeight },
-    { x, y: y + mid },
-    { x: x + c, y },
-  ];
+function polygonNormal(width: number, height: number, cornersize: number, roundCorner: number): UPath {
+  const polygon = UPath.none();
+  if (roundCorner === 0) {
+    polygon.moveTo(0, 0);
+    polygon.lineTo(0, height);
+    polygon.lineTo(width, height);
+    polygon.lineTo(width, cornersize);
+    polygon.lineTo(width - cornersize, 0);
+    polygon.lineTo(0, 0);
+    return polygon;
+  }
+  const r = roundCorner / 2;
+  polygon.moveTo(0, r);
+  polygon.lineTo(0, height - r);
+  polygon.arcTo({ x: r, y: height }, r, 0, 0);
+  polygon.lineTo(width - r, height);
+  polygon.arcTo({ x: width, y: height - r }, r, 0, 0);
+  polygon.lineTo(width, cornersize);
+  polygon.lineTo(width - cornersize, 0);
+  polygon.lineTo(r, 0);
+  polygon.arcTo({ x: 0, y: r }, r, 0, 0);
+  return polygon;
+}
+
+/** `Opale.getCorner(width, roundCorner)`, at the origin.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:134-147 */
+function opaleCornerPath(width: number, cornersize: number, roundCorner: number): UPath {
+  const path = UPath.none();
+  path.moveTo(width - cornersize, 0);
+  if (roundCorner === 0) {
+    path.lineTo(width - cornersize, cornersize);
+  } else {
+    path.lineTo(width - cornersize, cornersize - roundCorner / 4);
+    path.arcTo({ x: width - cornersize + roundCorner / 4, y: cornersize }, roundCorner / 4, 0, 0);
+  }
+  path.lineTo(width, cornersize);
+  path.lineTo(width - cornersize, 0);
+  return path;
+}
+
+/**
+ * `ComponentRoseNoteHexagonal#drawInternalU`'s `UPolygon` at the origin, its
+ * seven points in the jar's order (`:99-106`). `textHeight` and `x2` are
+ * `int`s (`:89,91,97`), so `textHeight / 2` is INTEGER division. The height is an
+ * integer, as layout truncates it (`sequence-layout-note.ts`).
+ */
+function hexagonPolygon(width: number, height: number): UPolygon {
+  const c = NOTE_HEXAGON_CORNERSIZE;
+  const mid = Math.trunc(Math.round(height) / 2);
+  return new UPolygon([
+    { x: c, y: 0 },
+    { x: width - c, y: 0 },
+    { x: width, y: mid },
+    { x: width - c, y: height },
+    { x: c, y: height },
+    { x: 0, y: mid },
+    { x: c, y: 0 },
+  ]);
+}
+
+/**
+ * `ComponentRoseNote#drawInternalU` (`:118-124`):
+ *
+ * ```java
+ * final UPath polygon = Opale.getPolygonNormal(x2, textHeight, roundCorner);
+ * polygon.setDeltaShadow(symbolContext.getDeltaShadow());
+ * ug = symbolContext.apply(ug);
+ * ug.draw(polygon);
+ * ug.draw(Opale.getCorner(x2, roundCorner));
+ * ```
+ * -- the polygon and the corner on ONE instance, so a decorator's random
+ * stream runs on from the polygon into the corner (T8a). The corner carries
+ * no shadow.
+ */
+function drawOpaleNote(ug: UGraphic, note: NoteGeo, paint: SequencePaint): void {
+  const { width, height } = note;
+  const cornersize = OPALE_CORNERSIZE;
+  const roundCorner = paint.roundCorner;
+  const polygon = polygonNormal(width, height, cornersize, roundCorner);
+  polygon.setDeltaShadow(note.shadow ?? 0);
+  const f = fashion(ug, paint);
+  f.draw(polygon);
+  f.draw(opaleCornerPath(width, cornersize, roundCorner));
 }
 
 /**
  * A note's shape: `ComponentRoseNote#drawInternalU` draws the Opale polygon
- * (shadowed) then the corner (`ComponentRoseNote.java:118-124`), both under
- * `symbolContext.apply(ug)`; `ComponentRoseNoteBox#drawInternalU` one rounded
- * `URectangle` (`ComponentRoseNoteBox.java:99-102`);
+ * (shadowed) then the corner (above); `ComponentRoseNoteBox#drawInternalU` one
+ * rounded `URectangle` (`ComponentRoseNoteBox.java:99-102`);
  * `ComponentRoseNoteHexagonal#drawInternalU` one shadowed `UPolygon`
- * (`ComponentRoseNoteHexagonal.java:99-110`).
+ * (`ComponentRoseNoteHexagonal.java:99-110`). `URectangle#rounded` reaches the
+ * SVG as `rx = ry = roundCorner / 2`, written when positive
+ * (`DriverRectangleSvg.java:57,78`; `SvgGraphics.java:582-584`).
  */
-function noteShape(note: NoteGeo, paint: SequencePaint, k: number): string {
-  const style = shapeStyle(paint, k);
-  const { x, y, width: w, height: h } = note;
-  const shadow = note.shadow ?? 0;
-  if (note.shape === 'rect')
-    return withNoteShadow(rect(x, y, w, h, { ...style, ...roundedCorner(paint.roundCorner, k) }), shadow);
-  if (note.shape === 'hexagon') return withNoteShadow(polygon(hexagonPoints(note, k), style), shadow);
-  const frame: OpaleFrame = { x, y, w, h, c: OPALE_CORNERSIZE * k, rc: paint.roundCorner * k };
-  return withNoteShadow(path(polygonNormal(frame), style), shadow) + path(corner(frame), style);
+function drawNoteShape(ug: UGraphic, note: NoteGeo, paint: SequencePaint): void {
+  const placed = ug.apply(new UTranslate(note.x, note.y));
+  const { width, height } = note;
+  if (note.shape === 'rect') {
+    const rect = URectangle.build(width, height).rounded(paint.roundCorner);
+    rect.setDeltaShadow(note.shadow ?? 0);
+    fashion(placed, paint).draw(rect);
+  } else if (note.shape === 'hexagon') {
+    const polygon = hexagonPolygon(width, height);
+    polygon.setDeltaShadow(note.shadow ?? 0);
+    fashion(placed, paint).draw(polygon);
+  } else {
+    drawOpaleNote(placed, note, paint);
+  }
 }
 
 /** A note: its shape, then its body runs at the note style's font. */
-export function renderNote(note: NoteGeo, theme: ScaledTheme): string {
+export function drawNote(ug: UGraphic, note: NoteGeo, theme: PageTheme): void {
   const paint = paintOf(note, 'note');
-  const k = theme.scaleK;
-  const bold = paint.font.styles.has(FontStyle.BOLD);
-  return (
-    noteShape(note, paint, k) +
-    note.textRuns.map((run) => creoleRunText(run, theme, paint.font.size * k, bold)).join('') +
-    (note.connector === undefined ? '' : renderConnector(note.connector, k))
-  );
+  drawNoteShape(ug, note, paint);
+  drawCreoleRuns(ug, note.textRuns, theme, paint.font.size, paint.font.styles.has(FontStyle.BOLD));
+  if (note.connector !== undefined) drawConnector(ug, note.connector);
 }
 
 /**
@@ -177,18 +191,18 @@ export function renderNote(note: NoteGeo, theme: ScaledTheme): string {
  * (`CommunicationTileNoteBottomTopAbstract.java:70-79`; the jar's goldens
  * carry each line twice, ahead of the lifelines and again after the note).
  */
-export function renderNoteBackground(note: NoteGeo, theme: ScaledTheme): string {
-  return note.connector === undefined ? '' : renderConnector(note.connector, theme.scaleK);
+export function drawNoteBackground(ug: UGraphic, note: NoteGeo): void {
+  if (note.connector !== undefined) drawConnector(ug, note.connector);
 }
 
-/** `CommunicationTileNoteBottomTopAbstract#drawLine` (`:70-79`): a
- *  `ULine(dx, dy)` under `UStroke(2, 2, 1)` in the root `LineColor`. */
-function renderConnector(c: NoteConnector, k: number): string {
-  return line(c.x1, c.y1, c.x2, c.y2, {
-    stroke: noGradient(c.paint.stroke),
-    strokeWidth: CONNECTOR_THICKNESS * k,
-    strokeDasharray: [CONNECTOR_DASH, CONNECTOR_GAP].map((d) => fmt(d * k)).join(','),
-  });
+/** `CommunicationTileNoteBottomTopAbstract#drawLine` (`:70-79`):
+ *  `ug.apply(new UTranslate(x1, y1)).apply(color).apply(new UStroke(2, 2, 1))
+ *  .draw(new ULine(dx, dy))`, the colour the root `LineColor`. */
+export function drawConnector(ug: UGraphic, c: NoteConnector): void {
+  ug.apply(new UTranslate(c.x1, c.y1))
+    .apply(new Fore(noGradient(c.paint.stroke)))
+    .apply(new UStroke(CONNECTOR_DASH, CONNECTOR_GAP, CONNECTOR_THICKNESS))
+    .draw(new ULine(c.x2 - c.x1, c.y2 - c.y1));
 }
 
 /**
@@ -196,13 +210,9 @@ function renderConnector(c: NoteConnector, k: number): string {
  * `URectangle` under `symbolContext.apply(ug)`, then the title -- placed in
  * layout (`sequence-layout-box.ts`), drawn at the box style's font.
  */
-export function renderBoxBackground(box: BoxGeo, theme: ScaledTheme): string {
+export function drawBoxBackground(ug: UGraphic, box: BoxGeo, theme: PageTheme): void {
   const paint = paintOf(box, 'box');
-  const k = theme.scaleK;
-  const boxRect = rect(box.x, box.y, box.width, box.height, {
-    ...shapeStyle(paint, k),
-    ...roundedCorner(paint.roundCorner, k),
-  });
-  const bold = paint.font.styles.has(FontStyle.BOLD);
-  return boxRect + box.labelRuns.map((run) => creoleRunText(run, theme, paint.font.size * k, bold)).join('');
+  const rect = URectangle.build(box.width, box.height).rounded(paint.roundCorner);
+  fashion(ug.apply(new UTranslate(box.x, box.y)), paint).draw(rect);
+  drawCreoleRuns(ug, box.labelRuns, theme, paint.font.size, paint.font.styles.has(FontStyle.BOLD));
 }
