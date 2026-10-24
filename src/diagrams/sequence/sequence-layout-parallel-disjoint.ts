@@ -7,13 +7,14 @@
  *
  * The footprints are `getMinX`/`getMaxX`: `RealMin`/`RealMax` over candidate
  * points. `ensureBiggerThan` on a `RealMin` pushes every candidate
- * (`RealMin.java:81-85`), and a lower bound of `RealMax` is a lower bound of
- * each candidate, so one footprint pair becomes one {@link SpanConstraint}
- * per candidate pair. Split out of `sequence-layout-group-clearance.ts`
+ * (`RealMin.java:81-85`), so one footprint pair becomes one
+ * {@link DisjointConstraint}: the `RealMax` of one side's candidates and every
+ * candidate of the other's, solved by `sequence-real-force.ts` with the
+ * `RealMax`'s first-read cache (`real/RealMax.java:89-94`). Split out of `sequence-layout-group-clearance.ts`
  * (500-line cap); every import is a leaf, as there.
  */
 import type { FrameEvent, MessageEvent, MessageExoEvent, Participant, SequenceEvent } from './ast.js';
-import type { Scan, SpanConstraint } from './sequence-layout-participant-constraints.js';
+import type { Anchor, DisjointConstraint, Scan } from './sequence-layout-participant-constraints.js';
 import {
   elseComponentWidth,
   elsePaint,
@@ -41,14 +42,6 @@ import {
 /** The literal `16` of `max2.add(this.min.addFixed(width + 16))`
  *  (`GroupingTile.java:224`). */
 const HEADER_MARGIN = 16;
-
-/** A point relative to one participant: its `posB`, `posC` or `posD`, plus
- *  `offset`. */
-interface Anchor {
-  readonly index: number;
-  readonly offset: number;
-  readonly at: 'B' | 'C' | 'D';
-}
 
 /** A footprint's candidates: `getMinX` is the least of `mins`, `getMaxX` the
  *  greatest of `maxs`. `undefined` where a candidate is not reachable from the
@@ -290,30 +283,34 @@ function isParallel(ev: SequenceEvent): boolean {
 }
 
 /**
- * `lower >= upper`, one candidate pair: `lower` at `posC` or `posB` (the
- * solver's {@link SpanConstraint.createdIndex}, "the `to` end is its `posB`"),
- * `upper` at `posC`, on a participant to its left -- the only shape the
- * left-to-right sweep solves. Any other pair is left out (hand-back).
- */
-function pairConstraint(lower: Anchor, upper: Anchor): SpanConstraint | undefined {
-  if (lower.at === 'D' || upper.at !== 'C' || upper.index >= lower.index) return undefined;
-  const span = upper.offset - lower.offset;
-  return { from: upper.index, to: lower.index, span, ...(lower.at === 'B' ? { createdIndex: lower.index } : {}) };
-}
-
-/**
  * `ensureDisjoint(a, b)` (`PlayingSpace.java:240-266`): two tiles anchored on
  * the same participant are skipped; otherwise, by declaration order of the
  * anchors, the right one's `getMinX` is pushed past the left one's `getMaxX`.
+ * Every candidate pair is kept, the cyclic ones too -- the jar registers them
+ * all, and a cyclic one is finite only through `RealMax`'s first-read cache
+ * (`sequence-real-force.ts`).
  */
-function disjoint(a: SequenceEvent, b: SequenceEvent, ctx: DisjointContext): SpanConstraint[] {
-  const aAnchor = anchorIndexOf(a, ctx.sorted);
-  const bAnchor = anchorIndexOf(b, ctx.sorted);
-  if (aAnchor === undefined || bAnchor === undefined || aAnchor === bAnchor) return [];
-  const [left, right] = aAnchor <= bAnchor ? [a, b] : [b, a];
+function disjoint(a: SequenceEvent, b: SequenceEvent, ctx: DisjointContext): DisjointConstraint[] {
+  const pair = leftThenRight(a, b, ctx.sorted);
+  if (pair === undefined) return [];
+  const [left, right] = pair;
   const lows = tileFootprint(right, ctx.tiles, ctx.sorted, ctx.scan).mins ?? [];
   const highs = tileFootprint(left, ctx.tiles, ctx.sorted, ctx.scan).maxs ?? [];
-  return lows.flatMap((low) => highs.flatMap((high) => pairConstraint(low, high) ?? []));
+  if (lows.length === 0 || highs.length === 0) return [];
+  return [{ disjoint: true, lows, highs, ...(left.kind === 'frame' ? { highsOwner: left } : {}) }];
+}
+
+/** The two tiles by declaration order of their anchors (`PlayingSpace.java:260-266`);
+ *  none when either has no anchor or both share one (`:240-258`). */
+function leftThenRight(
+  a: SequenceEvent,
+  b: SequenceEvent,
+  sorted: readonly Participant[],
+): [SequenceEvent, SequenceEvent] | undefined {
+  const aAnchor = anchorIndexOf(a, sorted);
+  const bAnchor = anchorIndexOf(b, sorted);
+  if (aAnchor === undefined || bAnchor === undefined || aAnchor === bAnchor) return undefined;
+  return aAnchor <= bAnchor ? [a, b] : [b, a];
 }
 
 interface DisjointContext {
@@ -332,9 +329,9 @@ export function parallelDisjoint(
   events: readonly SequenceEvent[],
   sorted: readonly Participant[],
   scan: Scan,
-): SpanConstraint[] {
+): DisjointConstraint[] {
   const ctx: DisjointContext = { tiles: tilesOf({ branches: [[...events]] }), sorted, scan };
-  const out: SpanConstraint[] = [];
+  const out: DisjointConstraint[] = [];
   let cluster: SequenceEvent[] = [];
   for (const ev of events) {
     if (ev.kind === 'note' && ev.onMessage === true) continue;

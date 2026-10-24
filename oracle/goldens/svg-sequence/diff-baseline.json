@@ -3316,11 +3316,11 @@
     {
       "type": "sequence",
       "slug": "jexavi-40-degi377",
-      "status": "baseline",
-      "weightedScore": 121,
-      "diffCount": 121,
-      "measuredAt": "2026-10-22",
-      "measuredAgainstCommit": "0a377924"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-23",
+      "measuredAgainstCommit": "585f2c26"
     },
     {
       "type": "sequence",

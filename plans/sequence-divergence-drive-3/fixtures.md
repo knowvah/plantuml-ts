@@ -15,6 +15,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | b2 | 1083 | 3 | 27 | 30 | 0 | 2774 | 1083 |
 | b3 | 1103 | 3 | 7 | 30 | 0 | 1600 | 1103 |
 | b4 | 1133 | 0 | 5 | 5 | 0 | 1082 | 1133 |
+| b5 | 1134 | 0 | 4 | 5 | 0 | 961 | 1134 |
 
 ## Open rows (101)
 
@@ -22,7 +23,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 |---|---|---:|---|---|---|
 | jefoke-95-jara779 | structural | 280 | handwritten-unported | T8f | |
 | gepuce-64-pivu656 | structural | 241 | handwritten-unported | T8f | |
-| jexavi-40-degi377 | geometry | 213 | par2-not-parallel | T1a | open -> T5b: 121 left after T1a/T1a2 (`0a3779247`); x residual 113.769 px — `pairConstraint` drops the pair but a symbolic span is not the fix; candidate: `RealMax` first-read cache freezes `ensureBiggerThan` forces (`PlayingSpace.java:188-199,240-266`, `RealMin.java:81-85`, `RealLine.java:68-100`), unverified (journal 22) |
+| jexavi-40-degi377 | geometry | 213 | par2-not-parallel | T5c | open -> T5b: 121 left after T1a/T1a2 (`0a3779247`); x residual 113.769 px — `pairConstraint` drops the pair but a symbolic span is not the fix; candidate: `RealMax` first-read cache freezes `ensureBiggerThan` forces (`PlayingSpace.java:188-199,240-266`, `RealMin.java:81-85`, `RealLine.java:68-100`), unverified (journal 22) -> T5c at b5 (`diagnosis/leftovers.md` M2, journal row 72): cyclic `ensureDisjoint` force finite only via `RealMax`'s first-read cache (`real/RealMax.java:89-94`); port `real/*` in upstream force order -> pinned (22ea19078) at b5 |
 | pafene-01-tedi758 | structural | 173 | handwritten-unported | T8f | |
 | daduxi-21-duse542 | geometry | 172 | par2-not-parallel | T1a | pinned (0a3779247) at b1 |
 | baketu-62-cumu838 | geometry | 168 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
@@ -42,7 +43,7 @@ column `final`). `task` is the owning sdd3 task; `final` is filled at closes
 | bucebo-91-xavo442 | structural | 59 | svgparser-sax-unported | T4f | pinned (b59647cc2) at b4 |
 | jujigi-41-zodo151 | geometry | 58 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
 | tukobo-89-zebi935 | geometry | 58 | par2-not-parallel | T1a | pinned (0a3779247) at b1 |
-| fifasu-62-pipo979 | structural | 57 | remote-image-io | T6g | |
+| fifasu-62-pipo979 | structural | 57 | remote-image-io | T6g | diagnosed at b5 (leftovers.md M4): serve the golden's decoded payload — the embedded bytes are a re-serialisation (2753 B) of the live fetch (2995 B); counterfactual with the payload = 0 diffs |
 | suzumi-85-nuzo693 | geometry | 54 | scale-excludes-chrome | T3b | pinned (b07b820b9) at b3 |
 | vopixi-04-lako436 | structural | 51 | url-label-newline-split | T2e | pinned (7ca69af29) at b2 |
 | bugafa-93-duzi514 | structural | 36 | svgparser-sax-unported | T4f | pinned (e336a9a67) at b4 |

@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — IN PROGRESS, batch 5 (started 2026-10-22; batches 0–4 closed 2026-10-22/23; halt on stop 3 resolved 2026-10-23 by the user: D7 Amendment 1 route (ii) + T3d)
+## Status — IN PROGRESS, batch 6 (started 2026-10-22; batches 0–5 closed 2026-10-22/23; halt on stop 3 resolved 2026-10-23 by the user: D7 Amendment 1 route (ii) + T3d)
 
 ## Objective
 
@@ -133,7 +133,7 @@ Collected (JSON reporter) must equal on-disk. Check `uptime` first; above
 | [2](batch-2/overview.md) | core text and SVG fixes | T2a–T2h, close | [x] |
 | [3](batch-3/overview.md) | scale/chrome export re-mirror; xlink title; brace-form skinparam banner | T3a–T3d, close | [x] |
 | [4](batch-4/overview.md) | SAX sprite parser | T4a–T4g, close | [x] |
-| [5](batch-5/overview.md) | drawn-extent canvas; leftover diagnosis | T5a–T5b…, close | [ ] |
+| [5](batch-5/overview.md) | drawn-extent canvas; leftover diagnosis | T5a–T5c, close | [x] |
 | [6](batch-6/overview.md) | ImageProvider + `%filename()` | T6a–T6g, close | [ ] |
 | [7](batch-7/overview.md) | JLaTeXMath `array` sizing | T7a, close | [ ] |
 | [8](batch-8/overview.md) | handwritten: sequence drawing through UGraphic | T8a–T8f, close | [ ] |

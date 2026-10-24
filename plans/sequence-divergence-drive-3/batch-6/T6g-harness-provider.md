@@ -14,8 +14,11 @@ so it serves those exact bytes through the asset-store seam under T6b's key
 from the golden `test-results/dot-cache/sequence/fifasu-62-pipo979/in.svg`
 (one `data:image/svg+xml;base64,` occurrence): decode it once and commit the
 SVG as a fixture asset — the cache dir is gitignored and must not be a
-runtime dependency. Verify the claim that the embedded text equals the fetched
-bytes by re-encoding and comparing to the golden string.
+runtime dependency. Do NOT fetch and do NOT assert that the embedded text equals a live
+fetch: T5b measured the golden payload at 2753 B against a 2995 B live
+fetch (the jar re-serialised the SVG, `diagnosis/leftovers.md` M4, journal
+row 72). The only equality to assert is re-encoding the committed asset back
+to the golden string.
 
 ## Targets
 fifasu-62-pipo979 (ws 57, 44 sites): the remote image draws as in the jar.

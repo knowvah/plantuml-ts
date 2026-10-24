@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-23T16:11:02.251Z",
+  "generatedAt": "2026-10-23T16:55:04.474Z",
   "fixtures": [
     {
       "slug": "bacupi-77-fuke586",
@@ -2521,9 +2521,7 @@
       "type": "sequence",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "structural-match",
-      "maxDelta": 113.769,
-      "maxDeltaPath": "svg/g[1]/rect[1]/@x"
+      "verdict": "conformant"
     },
     {
       "slug": "jigigi-69-bege021",

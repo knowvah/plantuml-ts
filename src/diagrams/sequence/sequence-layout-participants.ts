@@ -13,7 +13,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import { TOP_MARGIN } from './sequence-layout-shared.js';
 import {
   type MessageLevels,
-  type SpanConstraint,
+  type RowConstraint,
   scanMessageLabels,
 } from './sequence-layout-participant-constraints.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
@@ -34,6 +34,7 @@ import type { SequencePaint } from './sequence-skin-param.js';
 import { paintOfGeo, participantPaintsOf } from './sequence-participant-paints.js';
 import { addTileMargins } from './sequence-tile-margins.js';
 import { createEngloberLayout, type EngloberLayout } from './sequence-dolls.js';
+import { solveParticipantRow } from './sequence-real-force.js';
 
 /**
  * The playing space's left border — where the participant row starts, and
@@ -74,7 +75,7 @@ export function computeParticipantLayout(
   levels?: MessageLevels,
 ): ParticipantLayoutResult {
   const sortedParticipants = [...ast.participants].sort((a, b) => a.order - b.order);
-  const constraints: SpanConstraint[] = [];
+  const constraints: RowConstraint[] = [];
   scanMessageLabels(
     ast.events,
     sortedParticipants,
@@ -224,7 +225,7 @@ interface ParticipantColumnResult {
  *  and the englobers' checks and baked margins. */
 interface RowSolveEnv {
   readonly widths: readonly number[];
-  readonly constraints: readonly SpanConstraint[];
+  readonly constraints: readonly RowConstraint[];
   readonly originX: number;
   readonly englobers: EngloberLayout;
 }
@@ -239,7 +240,14 @@ function positionParticipants(
   const participantGeos: ParticipantGeo[] = [];
   const participantMap = new Map<string, ParticipantGeo>();
   const participantIndex = new Map<string, number>();
-  const xs = solveParticipantXs(row, ctx.theme.sequence.participantGap);
+  const xs = solveParticipantRow({
+    widths: participantWidths,
+    constraints: row.constraints,
+    originX: row.originX,
+    participantGap: ctx.theme.sequence.participantGap,
+    baked: row.englobers.baked,
+    dolls: row.englobers.dolls,
+  });
 
   for (let i = 0; i < sortedParticipants.length; i++) {
     const p = sortedParticipants[i]!;
@@ -354,83 +362,4 @@ function buildParticipantGeo(
     centerX,
     ...(shadow > 0 ? { shadow } : {}),
   };
-}
-
-/**
- * Solve every participant's x — the port of `xorigin.compileNow()`
- * (`SequenceDiagramFileMakerTeoz.java:110`), and the D6 decision in code.
- *
- * Upstream builds a `Real` constraint graph and solves it globally. This does
- * NOT reimplement `Real`; it exploits the shape of the constraint set upstream
- * actually produces for the participant row, which is entirely
- * `x[j] >= x[i] + c` with `i < j` in participant order, from two sources and
- * only two:
- *
- *   - `LivingSpaces#addConstraints:61-71`, `nextA >= prevE + 10`, always
- *     between neighbours -- and, run before it, the englobers' own
- *     neighbour checks (`Dolls#addConstraints`, {@link neighbourFloor});
- *   - `CommunicationTile#addConstraints:392-416`, one per message, between the
- *     two participants it runs between — adjacent or not. The reverse branch
- *     (`:402-409`) swaps which endpoint is bounded but demands the same
- *     distance, so it too is a left-to-right edge.
- *
- * A system of difference constraints whose edges all point one way along a
- * total order is a DAG longest-path, so a single left-to-right sweep taking
- * the max of the incoming edges is its EXACT minimal solution -- not an
- * approximation of the solver but, for this constraint set, the solver, at
- * O(participants + messages). It replaced a pairwise pre-scan that widened
- * only ADJACENT gaps (`findings/label-widening.md`).
- */
-function solveParticipantXs(row: RowSolveEnv, participantGap: number): number[] {
-  const { widths, constraints, originX } = row;
-  const xs: number[] = [];
-  const centre = (i: number): number => xs[i]! + widths[i]! / 2;
-  // Incoming edges, bucketed by their higher endpoint, so the sweep reads each
-  // constraint exactly once and never looks ahead.
-  const incoming = new Map<number, SpanConstraint[]>();
-  for (const c of constraints) {
-    const bucket = incoming.get(c.to);
-    if (bucket === undefined) incoming.set(c.to, [c]);
-    else bucket.push(c);
-  }
-
-  for (let i = 0; i < widths.length; i++) {
-    let x = neighbourFloor(i, xs, row, participantGap);
-    for (const c of incoming.get(i) ?? []) {
-      if (c.origin === true) {
-        // `centre[i] >= xOrigin + c.span`.
-        x = Math.max(x, originX + c.span - widths[i]! / 2);
-        continue;
-      }
-      if (c.edge === true) {
-        // `posD[i] >= posB[c.from] + c.span`.
-        x = Math.max(x, xs[c.from]! + c.span - widths[i]!);
-        continue;
-      }
-      // `centre[i] >= centre[c.from] + c.span`, expressed as a left edge.
-      const createdHalf = c.createdIndex === undefined ? 0 : widths[c.createdIndex]! / 2;
-      x = Math.max(x, centre(c.from) + c.span + createdHalf - widths[i]! / 2);
-    }
-    xs.push(x);
-  }
-  return xs;
-}
-
-/**
- * The least `posB(i)` from the row's own edges, before any message:
- *
- *   - `posB(0) >= xorigin` (`xorigin.addAtLeast(0)`,
- *     `SequenceDiagramFileMakerTeoz.java:90`);
- *   - the neighbour rule `current.getPosA() >= previous.getPosE() + 10`
- *     (`LivingSpaces.java:61-71`), whose `posA = posB - marginBefore` and
- *     `posE = posD + marginAfter` bake the margins `dolls.addConstraints`
- *     had set when it ran (`LivingSpace.java:293-299`);
- *   - every englober's live checks into `i` (`Dolls#minPosB`).
- */
-function neighbourFloor(i: number, xs: readonly number[], row: RowSolveEnv, participantGap: number): number {
-  const { baked, dolls } = row.englobers;
-  const previousPosD = i === 0 ? undefined : xs[i - 1]! + row.widths[i - 1]!;
-  const own =
-    previousPosD === undefined ? row.originX : previousPosD + baked.after[i - 1]! + participantGap + baked.before[i]!;
-  return Math.max(own, dolls.minPosB(i, previousPosD, row.originX));
 }

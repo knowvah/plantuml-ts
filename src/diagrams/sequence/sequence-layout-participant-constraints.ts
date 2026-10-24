@@ -64,6 +64,35 @@ export interface SpanConstraint {
   readonly origin?: true;
 }
 
+/** A point relative to one participant: its `posB`, `posC` or `posD`, plus `offset`. */
+export interface Anchor {
+  readonly index: number;
+  readonly offset: number;
+  readonly at: 'B' | 'C' | 'D';
+}
+
+/**
+ * `PlayingSpace#ensureDisjoint`'s `bMin.ensureBiggerThan(aMax)`
+ * (`teoz/PlayingSpace.java:263-266`): every candidate of `lows` (`bMin`'s
+ * `RealMin`, which binds each one -- `RealMin.java:81-85`) is kept right of
+ * `aMax`, one `RealMax` over `highs`. It is NOT a difference constraint a
+ * sweep can solve: `aMax` resolves once, at its first read
+ * (`real/RealMax.java:89-94`), so what it stands for depends on the force
+ * order (`sequence-real-force.ts`).
+ */
+export interface DisjointConstraint {
+  readonly disjoint: true;
+  readonly lows: readonly Anchor[];
+  readonly highs: readonly Anchor[];
+  /** The group whose persistent `max` field `highs` is (`GroupingTile.java:984-990`),
+   *  shared by every `ensureDisjoint` that group takes part in; absent for a
+   *  message, whose `getMaxX` builds a fresh `RealMax` per call. */
+  readonly highsOwner?: object;
+}
+
+/** What a tile registers on the participant row, in registration order. */
+export type RowConstraint = SpanConstraint | DisjointConstraint;
+
 /**
  * Each message's two live levels, `livingSpace1/2.getLevelAt(this,
  * IGNORE_FUTURE_DEACTIVATE)`, as the event walk measured them. The row is
@@ -125,7 +154,7 @@ export function scanMessageLabels(
   events: readonly SequenceEvent[],
   sortedParticipants: Participant[],
   scan: ScanContext,
-  out: SpanConstraint[],
+  out: RowConstraint[],
 ): void {
   const live = flattenLiveEvents(events);
   const boxes = new Map(sortedParticipants.map((p) => [p.id, new LiveBoxes(p.id, live.events)] as const));
@@ -164,7 +193,7 @@ function selfConstraint(ev: MessageEvent, sorted: Participant[], scan: Scan): Sp
   return [{ from: index, to: index + 1, span: (scan.maxPosition.get(ev.from) ?? 0) + width }];
 }
 
-function scanEvents(events: readonly SequenceEvent[], sorted: Participant[], scan: Scan, out: SpanConstraint[]): void {
+function scanEvents(events: readonly SequenceEvent[], sorted: Participant[], scan: Scan, out: RowConstraint[]): void {
   out.push(...notesGroupConstraints(events, sorted, scan));
   for (const ev of events) {
     if (ev.kind === 'message') out.push(...(scan.messageSpan === true ? [] : messageConstraint(ev, sorted, scan)));
@@ -221,9 +250,11 @@ function exoConstraint(ev: MessageExoEvent, sorted: Participant[], scan: Scan): 
 
 /** A frame's own demand (a `ref`'s, {@link refConstraint}) and its
  *  branches' messages. */
-function scanFrame(ev: FrameEvent, sorted: Participant[], scan: Scan, out: SpanConstraint[]): void {
-  out.push(...refConstraint(ev, sorted, scan), ...groupClearance(ev, sorted, scan));
+function scanFrame(ev: FrameEvent, sorted: Participant[], scan: Scan, out: RowConstraint[]): void {
+  out.push(...refConstraint(ev, sorted, scan));
   for (const branch of ev.branches) scanEvents(branch, sorted, scan, out);
+  // `GroupingTile#addConstraints` (`:367-373`): the children's, then the group's own.
+  out.push(...groupClearance(ev, sorted, scan));
 }
 
 /**

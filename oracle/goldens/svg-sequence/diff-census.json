@@ -3,7 +3,7 @@
   "totals": {
     "missing-element": 0,
     "extra-element": 0,
-    "geometry": 231,
+    "geometry": 110,
     "text-metrics": 1,
     "format-units": 0,
     "other": 60
@@ -55,18 +55,6 @@
         "text-metrics": 0,
         "format-units": 0,
         "other": 19
-      }
-    },
-    {
-      "slug": "jexavi-40-degi377",
-      "diffCount": 121,
-      "buckets": {
-        "missing-element": 0,
-        "extra-element": 0,
-        "geometry": 121,
-        "text-metrics": 0,
-        "format-units": 0,
-        "other": 0
       }
     },
     {

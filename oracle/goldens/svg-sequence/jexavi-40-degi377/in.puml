@@ -1,0 +1,17 @@
+@startuml
+actor "person" as p
+participant "microwave" as m
+   
+p->m: cook food
+par2
+   m->m: twiddle
+also
+   p2->p2: twiddle   
+also
+   p3->p3: twiddle   
+also
+   p->p: twiddle   
+end
+   
+p<-m: cooked food   
+@enduml
