@@ -93,6 +93,14 @@ not per call site.
 | small (≤ 21 each) | 24 | 125 | filename env (`Defines.java:89-93`), group-header comment height (`ComponentRoseGroupingHeader.java:95-105`), `<text class=>` creole (`CommandCreoleSvgAttributeChange`), monochrome mapper (`TitledDiagram.java:295-297`), blotter scaled `+1` + fore==back strokeless (`GroupingTile.java:340`, `DriverPathSvg.java:65-68`), xlink title decode (`SvgGraphics.java:1147-1160`), participant underline (`Participant.java:125-126`), ~~to255 truncation~~ DONE (`1ed4a6f2b`, one shared `ColorUtils.ts#to255`), note-wrapper life step (`CommunicationTileNoteRight.java:96-98`), natural alignment (`Display.java:293-297`), HSL float32 (`HSLColor.java`), drawn-extent canvas (`SvgGraphics.java:129-135`) | see `fixtures.md` |
 
 ### Follow-ons (no sequence row; `.agent-notes/sdd2-execution.md`)
+- **LaTeX/math diagnosis (filed 2026-10-22, sdd3 planning).** Of the 40 cached fixtures
+  carrying `<latex>`/`<math>`, 5 are survey-conformant; 30 diverged and 5 structural-match
+  (34 outside sequence: mostly `unknown`, 4 `component`, 1 `state`). Not diagnosed. compare.ts ignores
+  image bytes, so each has another cause: a construct missing from `src/core/latex-metrics/` (as
+  `array` was for sequence mefeke-43, ported in sdd3 D6), one of the 18 jar rollbacks
+  (DIVERGENCES.md "LaTeX rendering engine"), or a non-LaTeX residual. Diagnose per row first;
+  any missing constructs become one rule-by-rule latex-metrics mission (JLaTeXMath 1.0.7 sizing
+  rules, decompiled from the gradle-cached jar), never a full JLaTeXMath port (user, 2026-10-22).
 - `MeasurerStringBounder` drops BOLD for weight-aware measurers
   (`measurer-bounder.ts:27-30`); invisible to every gate (DeterministicMeasurer).
 - `theme-merge.ts` drops Theme scalars outside `OPTIONAL_SCALAR_KEYS`

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1732 modules · 6452 exported names.
+1734 modules · 6459 exported names.
 
 ## `src/`
 
@@ -159,7 +159,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svg-path-builder.ts` | `moveTo`, `lineTo`, `arcTo`, `splinePathD`, `roundedTopRectD`, `roundedBottomRectD`, `cubicTo` | Shared `<path>` `d`-string segment builder — the plain-string counterpart to `UPath` (`core/klimt/shape/UPath.ts`) for this port's several class-diagram renderers that draw markup as plain strings rather than through a `UGraphic`/`SvgGraphi |
 | `svg-rect-corners.ts` | `roundedCornerAttrs` | Whether a `<rect>` carries `rx`/`ry` at all. |
 | `svg-sanitize.ts` | `SanitizeSvgOptions`, `sanitizeSvg` | SVG sanitizer — strips executable content and external resource references. |
-| `svg-shapes.ts` | `emittedTextForm`, `rect`, `line`, `text`, `multilineText`, `tspan`, `image`, `path`, `ellipse`, `circle`, `diamond`, `polygon`, `polyline`, `NoteBoxStyle`, `noteBox`, `foreignObject`, `decorationLines` | SVG shape emitters (rect/line/text/image/path/ellipse/diamond/polygon). |
+| `svg-shapes-text.ts` | `text`, `multilineText`, `tspan` | SVG text emitters (`<text>`, stacked-`<tspan>` text, single `<tspan>`). |
+| `svg-shapes.ts` | `emittedTextForm`, `text`, `multilineText`, `tspan`, `rect`, `line`, `image`, `path`, `ellipse`, `circle`, `diamond`, `polygon`, `polyline`, `NoteBoxStyle`, `noteBox`, `foreignObject`, `decorationLines` | SVG shape emitters (rect/line/text/image/path/ellipse/diamond/polygon). |
 | `svg-text-font.ts` | `textFontFamily`, `emittedTextForm`, `DriverTextPlacement`, `driverTextPlacement` | Text emission rules that depend on the FONT FAMILY — the SVG-safe family string, PlantUML's `monospaced` -> CSS `monospace` rename, and the two NBSP substitutions. |
 | `svg.ts` | `arrowHead`, `arrowHeadRef`, `ALL_ARROW_TYPES`, `ArrowType`, `BoxStyle`, `LineStyle`, `TextStyle`, `SvgAttrs`, `escapeXml`, `escapeXmlText`, `attrs`, `attrsFromRecord`, `SvgAttrsPaint`, `resolvePaint`, `resolvePaintAttrs`, `PAINT_NONE`, `ROOT_FONT_FAMILY`, `ROOT_GROUP_OPEN`, `ROOT_GROUP_CLOSE`, `strokeDecorationOf`, `rect`, `line`, `text`, `multilineText`, `tspan`, `image`, `path`, `ellipse`, `circle`, `diamond`, `polygon`, `polyline`, `noteBox`, `emittedTextForm`, `foreignObject`, `decorationLines`, `NoteBoxStyle`, `group`, `linkWrap`, `defs`, `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `collapseDuplicateFilterDefs`, `collectDocumentDefs`, `svgRoot` | SVG primitive builders — pure string functions, no DOM API. |
 | `text-escapes.ts` | `resolveTextEscapes` | Shared text-escape resolution — `<U+XXXX>`/`<U+XXXXX>` unicode-codepoint escapes and `&#NNN;` HTML numeric character references, resolved to their literal glyph. |
@@ -641,10 +642,11 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `driver-svg-stubs.ts` | `DriverImagePng`, `DriverImageSvgSvg`, `DriverTextAsPathSvg`, `DriverCenteredCharacterSvg` | driver-svg-stubs.ts — D3′ throwing stubs for the SVG driver family members this task defers. |
 | `driver-text-svg-decorations.ts` | `ExtraLine`, `TextRenderDecorations`, `fontWeightOf`, `fontStyleOf`, `extraLineStrokeWidth`, `textRenderDecorations` | driver-text-svg-decorations.ts — the pure, emitter-independent half of `DriverTextSvg#draw`: every decision that method makes about a text run's `font-weight`, `font-style`, `text-decoration`, extended-colour decoration LINES and BACKCOLOR |
 | `driver-text-svg.ts` | `StringBounder`, `DriverTextSvg` | driver-text-svg.ts — the `UText` → SVG `<text>` driver. |
-| `svg-graphics-core.ts` | `LengthAdjust`, `TransparentFillBehavior`, `SvgOption`, `basicSvgOption`, `seedOf`, `SvgGraphicsCore` | svg-graphics-core.ts — SvgGraphics's document-lifecycle layer: the options shape, low-level number formatting, fill/stroke state, and gradient-def registration needed by the constructor itself. |
+| `svg-graphics-core.ts` | `LengthAdjust`, `TransparentFillBehavior`, `basicSvgOption`, `SvgOption`, `seedOf`, `SvgGraphicsCore` | svg-graphics-core.ts — SvgGraphics's document-lifecycle layer: the options shape, low-level number formatting, fill/stroke state, and gradient-def registration needed by the constructor itself. |
 | `svg-graphics-elements.ts` | `TextOptions`, `RectangleGeometry`, `SvgGraphicsElements` | svg-graphics-elements.ts — the shape-drawing methods: every `svg*`-prefixed element-creation call plus the legacy `newpath`/`moveto`/…/`fill` path-builder API. |
 | `svg-graphics-shadow.ts` | `SvgGraphicsShadow` | svg-graphics-shadow.ts — the `<filter>` def machinery for drop shadows and text-backcolor filters. |
 | `svg-graphics.ts` | `SvgOption`, `basicSvgOption`, `LengthAdjust`, `TransparentFillBehavior`, `TextOptions`, `RectangleGeometry`, `META_HEADER`, `getMetadataHex`, `SvgGraphics`, `UGroupType`, `XmlNode` | svg-graphics.ts — the single upstream-named `SvgGraphics` entry point. |
+| `svg-option.ts` | `LengthAdjust`, `TransparentFillBehavior`, `SvgOption`, `basicSvgOption` | svg-option.ts -- the `SvgOption` shape and the two small enums it carries. |
 | `svg-seed.ts` | `getSeed`, `seedOf`, `gradientVector` | UmlSource seed hashing (seedOf/getSeed) + gradient-vector policy for the SVG emitter. |
 | `u-graphic-svg.ts` | `UGraphicSvg` | u-graphic-svg.ts — `UGraphicSvg`, the concrete SVG backend that wires every `Driver*Svg` from this task into `AbstractCommonUGraphic`'s driver registry and owns the shared `SvgGraphics` document. |
 | `xml-writer.ts` | `XmlContent`, `XmlWriter`, `XmlLeaf`, `XmlNode`, `XmlDocument` | xml-writer.ts — the dependency-free XML/SVG node stack `SvgGraphics` builds its document out of: a streaming text writer (`XmlWriter`) plus a small eager DOM (`XmlDocument`/`XmlNode`/`XmlLeaf`/`XmlContent`). |
