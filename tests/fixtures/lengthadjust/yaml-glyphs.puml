@@ -1,0 +1,4 @@
+@startyaml
+skinparam lengthAdjust spacingAndGlyphs
+Alpha: Bravo
+@endyaml

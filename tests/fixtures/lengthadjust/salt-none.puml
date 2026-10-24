@@ -1,0 +1,6 @@
+@startsalt
+skinparam lengthAdjust none
+{
+Alpha | Bravo
+}
+@endsalt

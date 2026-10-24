@@ -1,0 +1,6 @@
+@startboard
+skinparam lengthAdjust spacingAndGlyphs
+Alpha
++Bravo
+++red
+@endboard

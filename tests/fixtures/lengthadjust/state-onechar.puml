@@ -1,0 +1,4 @@
+@startuml
+state A
+state Bravo
+@enduml

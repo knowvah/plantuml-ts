@@ -1,0 +1,7 @@
+@starthcl
+skinparam lengthAdjust none
+blk {
+  Alpha = "Xyz"
+  Bravo = "Uvw"
+}
+@endhcl

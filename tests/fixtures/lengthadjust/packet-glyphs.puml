@@ -1,0 +1,8 @@
+@startpacketdiag
+skinparam lengthAdjust spacingAndGlyphs
+packetdiag {
+  colwidth = 16
+  0-31: Alpha
+  32-39: Bravo
+}
+@endpacketdiag

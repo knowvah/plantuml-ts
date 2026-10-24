@@ -1,0 +1,4 @@
+@startuml
+object A
+object Bravo
+@enduml

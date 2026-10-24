@@ -1,0 +1,4 @@
+@startyaml
+skinparam lengthAdjust none
+Alpha: Bravo
+@endyaml

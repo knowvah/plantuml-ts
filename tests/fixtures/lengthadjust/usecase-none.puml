@@ -1,0 +1,4 @@
+@startuml
+skinparam lengthAdjust none
+(Alpha) --> (Bravo)
+@enduml
