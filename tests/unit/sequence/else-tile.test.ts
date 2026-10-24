@@ -6,6 +6,7 @@
  * deterministic text) on the `ALT3` body below.
  */
 import { describe, expect, it } from 'vitest';
+import { assembleSvg } from '../../../src/core/assemble-svg.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { ElseGeo, FrameGeo, SequenceGeometry } from '../../../src/diagrams/sequence/ast.js';
@@ -78,11 +79,13 @@ describe('else tile order (GroupingTile.java:280-281, ElseTile#drawU)', () => {
     const [first] = elses(geo);
     const frame = geo.events.find((e): e is FrameGeo => e.kind === 'frame')!;
     const y = fmt(2 * (first!.y + 1));
-    expect(render(geo)).toContain(
+    // The scale is the exporter's (`core/TextBlockExporter.ts#exportTo`), so read the assembled document.
+    const svg = assembleSvg(renderSequence(geo, defaultTheme, measurer));
+    expect(svg).toContain(
       `<line x1="${fmt(2 * frame.x)}" y1="${y}" x2="${fmt(2 * (frame.x + frame.width))}" y2="${y}" stroke="#000" stroke-width="2" stroke-dasharray="4,4"/>`,
     );
     const condition = first!.runs[0]!;
-    expect(render(geo)).toContain(`y="${fmt(2 * condition.y)}"`);
+    expect(svg).toContain(`y="${fmt(2 * condition.y)}"`);
   });
 
   it('draws nothing for an else in the background pass', () => {

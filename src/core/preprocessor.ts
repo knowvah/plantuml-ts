@@ -134,7 +134,17 @@ export interface SkinparamAssignment {
   /** `undefined` for a line the reader never located (as {@link PreprocessorResult.stylePositions}). */
   readonly position: number | undefined;
   readonly order: number;
+  /**
+   * `line` for `skinparam name value` (`CommandSkinParam`, which warns,
+   * CommandSkinParam.java:88-99), `block` for an entry of `skinparam [name] {`
+   * (`CommandSkinParamMultilines` -> `SkinLoader`, which never does,
+   * CommandSkinParamMultilines.java:90-102). Absent on a hand-built entry.
+   */
+  readonly form?: SkinparamForm;
 }
+
+/** See {@link SkinparamAssignment.form}. */
+export type SkinparamForm = 'line' | 'block';
 
 /** See {@link PreprocessorResult.declarationOrder}. */
 export interface DeclarationOrder {

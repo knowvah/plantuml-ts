@@ -30,8 +30,8 @@ import { line } from '../../core/svg.js';
 import { primitiveFields, sequenceText, weightOf } from './sequence-text.js';
 import { drawnLeftX, drawnWidth } from './run-draw-metrics.js';
 import type { TextRun } from './text-block-geo.js';
-import { resolveScaleFactor } from '../../core/scale-command.js';
-import { fmt } from '../../core/svg-format.js';
+import { isExportScaled } from '../../core/scale-command.js';
+import { fmt, withDeferredFormat } from '../../core/svg-format.js';
 import { renderMessage } from './renderer-message.js';
 import { renderLinkAnchors } from './renderer-link-anchor.js';
 import { renderParticipantBox, renderFooterBox } from './renderer-participant-shapes.js';
@@ -324,12 +324,16 @@ export function renderSequence(geo: SequenceGeometry, theme: Theme, measurer: St
   return renderSequencePage(geo, theme, 0, measurer);
 }
 
-function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMeasurer): RenderFragment {
-  // T13: `resolveScaleFactor` needs the UNSCALED document dims -- `geo`
-  // itself, before `scaleSequenceGeometry` runs below. cdd-T30: `theme.dpi`
-  // -- `skinParam.getDpi()` (`core/TextBlockExporter.java:206`), default 96
-  // when `skinparam dpi` was never declared (`Theme.dpi`'s own doc comment).
-  const k = resolveScaleFactor(geo.scale, geo.totalWidth, geo.totalHeight, theme.dpi);
+/** The scale every page is DRAWN at. The export scale is the exporter's
+ *  (`core/TextBlockExporter.ts#exportTo`): `computeScaleFactor` reads the
+ *  chrome-included dimension (`TextBlockExporter.java:160,165,205-209`), which
+ *  does not exist until chrome has composed, so the page is drawn at 1 and
+ *  `scale-geo.ts` is the identity here. */
+const DRAW_SCALE = 1;
+
+/** The page's draw passes, in the jar's order, as one SVG body string. */
+function drawPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMeasurer): string {
+  const k = DRAW_SCALE;
   const scaledGeo = scaleSequenceGeometry(geo, k);
   const scaledTheme = scaleSequenceTheme(theme, k, measurer);
   const children: string[] = [];
@@ -392,7 +396,18 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
   children.push(...renderEventPass(scaledGeo.events, scaledTheme, false));
   children.push(renderLinkAnchors(scaledGeo.linkAnchors, scaledTheme));
 
-  const shadowDefs = sequenceShadowDefs(scaledGeo, scaledTheme);
+  return children.join('');
+}
+
+function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMeasurer): RenderFragment {
+  // sdd3-T3b: drawn at scale 1; when the document is export-scaled (a `scale`
+  // directive or `skinparam dpi` != 96, `scale-command.ts#isExportScaled`) the
+  // numbers stay lossless and the exporter's single `SvgGraphics#format` pass
+  // rounds them once (`SvgGraphics.java:466-475`; activity precedent,
+  // `activity/renderer.ts`).
+  const deferred = isExportScaled(geo.scale, theme.dpi);
+  const children = withDeferredFormat(deferred, () => drawPaginated(geo, theme, measurer));
+  const shadowDefs = sequenceShadowDefs(geo, scaleSequenceTheme(theme, DRAW_SCALE, measurer));
   // sdd3-T2d: the baked same(5) exporter margin becomes the style's `Margin`
   // (`TextBlockExporter.java:510-516`); identity when none is declared.
   return withExporterMargin(
@@ -402,10 +417,16 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
       // draw pass (`UgDiagram.java:134-135`), so EVERY colour the body draws is
       // mapped (`ColorMapper.java:80-91`) -- applied once to the assembled body,
       // as activity does (`activity/renderer.ts`). No mapper is a no-op.
-      body: applyColorMapperToFragment(children.join(''), colorMapperOf(theme)),
-      ...canvasOf(geo, k),
-      ...preChromeDims(scaledGeo, k),
+      body: applyColorMapperToFragment(children, colorMapperOf(theme)),
+      ...canvasOf(geo),
+      ...preChromeDims(geo),
       ...documentChromeOf(theme),
+      // sdd3-T3b: the exporter's inputs (`TextBlockExporter.java:205-209`):
+      // the `scale` directive and `skinparam dpi`, resolved against the
+      // chrome-included dimension by `exportTo`.
+      ...(geo.scale === undefined ? {} : { scaleSpec: geo.scale }),
+      ...(theme.dpi === undefined ? {} : { dpi: theme.dpi }),
+      ...(deferred ? { numbersDeferred: true as const } : {}),
       // sdd3-T2c: `TextBlockExporter.java:307` -- `skinparam lengthAdjust` is the
       // document's `SvgOption`, read by `SvgGraphics.java:155-158,703-705`.
       ...(theme.lengthAdjust !== undefined ? { lengthAdjust: theme.lengthAdjust } : {}),
@@ -417,6 +438,5 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme, measurer: StringMe
     },
     geo,
     theme,
-    k,
   );
 }

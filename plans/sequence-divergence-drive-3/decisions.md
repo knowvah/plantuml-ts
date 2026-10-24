@@ -136,6 +136,32 @@ the chromed dimension (`TextBlockExporter.java:160-177,205-208`,
 through core `UgDiagram.ts`/`TextBlockExporter.ts` as mindmap/wbs/salt do,
 after T3a's diagnosis. Other engines' output must not move.
 
+**Amendment 1 (2026-10-22, T3a, journal row 52 — stop 3, awaiting the user).**
+T3a (`diagnosis/scale-chrome.md`, merged `2e654466a`) measured that the named
+route cannot carry sequence as it stands: `core/UgDiagram.ts` is the
+NON-titled arm (`UgDiagram.java:138-139` sends a `TitledDiagram` through
+`builder.styled`, and sequence is one, `SequenceDiagram.java:84`), and
+`core/TextBlockExporter.ts:288` `finalizeTitledDiagramFragment` scales an
+already-formatted body, which double-rounds `textLength` (M3:
+`SvgGraphics#format` multiplies then rounds once, `SvgGraphics.java:466-475`;
+12 of the 15 rows keep 1–18 `@textLength` diffs without deferred numbers).
+The jar's ORDER is unchanged and is the target: chrome, backcolor, margin,
+then the factor from the chromed dimension (`TextBlockExporter.java:159-177,
+205-209`), drawn with numbers deferred. Two routes satisfy it; the user picks:
+(i) T3a's proposal — a sequence-keyed `finalizeSequenceFragment` in
+`core/assemble-svg-sequence.ts` using the activity/description precedent
+(`withDeferredFormat` + `scaleActivityBody`), write-set `sequence/renderer.ts`,
+`sequence/renderer-document.ts`, `core/assemble-svg-sequence.ts`,
+`core/assemble-svg.ts` (2 lines) + 4 test rewrites; prototype zeroes all 15,
+22 scaled pins byte-equal, 1 explained riser (gepuce, A1 below);
+(ii) extend `core/TextBlockExporter.ts#finalizeTitledDiagramFragment` to
+deferred-format string bodies so sequence AND activity share the one exporter
+(upstream has one `TextBlockExporter`; CLAUDE.md "re-mirror rather than
+patch"), write-set (i) + `core/TextBlockExporter.ts` + the activity exit
+path, all-engine gated (mindmap/wbs/salt route through it and must not move).
+Orchestrator's recommendation: (ii), as the structural mirror; (i) is the
+measured, lower-risk fix and is what the prototype proved.
+
 ## D8 — core SVG driver fixes
 
 `SvgGraphics#fillMe` splits `#RRGGBBAA` into fill + fill-opacity

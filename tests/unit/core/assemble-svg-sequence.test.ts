@@ -25,8 +25,12 @@ const KITEVO_DIMS = { width: 228, height: 248 };
  *  `width="112.388" height="157"` plus the 1 px `UStroke.simple()`. */
 const DABOZI_EXPORTED = { width: 113.388, height: 158 };
 
+/** The margin-less block every sequence fragment declares (`renderer.ts#preChromeDims`, sdd3-T3b): the
+ *  canvas `(int)(dim + 1)` less `same(5)` on both sides, so `calculateFinalDimension()` is 227 x 247. */
+const KITEVO_BLOCK = { preChromeWidth: 217, preChromeHeight: 237 };
+
 function sequenceFragment(overrides: Partial<RenderFragment> = {}): RenderFragment {
-  return { body: INNER, ...KITEVO_DIMS, diagramType: 'SEQUENCE', ...overrides };
+  return { body: INNER, ...KITEVO_DIMS, ...KITEVO_BLOCK, diagramType: 'SEQUENCE', ...overrides };
 }
 
 function rootGroupChildren(svg: string): string {
@@ -110,9 +114,10 @@ describe('assembleSvg — SEQUENCE diagram border (AD)', () => {
     expect(rootGroupChildren(svg)).toBe(BORDER_112 + INNER);
   });
 
-  it('falls back to the canvas less ensureVisible`s +1 when the block is undeclared (scaled document)', () => {
-    const svg = assembleSvg(sequenceFragment({ width: 114.388, height: 159, diagramBorderColor: '#000000' }));
-    expect(rootGroupChildren(svg)).toBe(BORDER_112 + INNER);
+  it('a sequence fragment declaring neither exportedDimension nor its block is a broken invariant', () => {
+    expect(() => assembleSvg({ body: INNER, ...KITEVO_DIMS, diagramType: 'SEQUENCE' })).toThrow(
+      /neither exportedDimension nor its block/,
+    );
   });
 
   it('draws the border AFTER the background rect, which the SvgGraphics constructor appends first', () => {

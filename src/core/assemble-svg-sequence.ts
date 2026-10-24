@@ -9,6 +9,7 @@ import { group, rect } from './svg.js';
 import { spliceIntoContentGroup } from './assemble-svg-splice.js';
 import { paintToSvg } from './paint.js';
 import { documentMarginOf } from './document-margin.js';
+import { exportTo } from './TextBlockExporter.js';
 
 /** The default (unset) diagram background -- jar's own `TextBlockExporter
  *  .Builder` field initializer, `HColors.WHITE.withDark(HColors.BLACK)`
@@ -84,26 +85,20 @@ const SEQUENCE_DIAGRAM_BORDER_THICKNESS = 1;
 /** `DriverRectangleSvg.java:78`: `svgRectangle(..., rx / 2, ry / 2, ...)`. */
 const SVG_ROUND_CORNER_DIVISOR = 2;
 
-/** `SvgGraphics#ensureVisible`'s `+ 1` (`SvgGraphics.java:129-135`), which
- *  `diagrams/sequence/renderer.ts` adds to the canvas it hands over. */
-const SEQUENCE_ENSURE_VISIBLE_DELTA = 1;
-
 /**
  * `TextBlockExporter#calculateFinalDimension` (`:198-203`): the chrome-composed
  * block plus the document margin, before `ensureVisible`. Chrome sets it
  * (`document-margin.ts#applyDocumentMargin`); without chrome it is the
- * declared margin-less block plus that margin (`SequenceDiagram.java:629-633`);
- * a block left undeclared (a scaled document) is the canvas less the
- * renderer's `ensureVisible` delta.
+ * declared margin-less block plus that margin (`SequenceDiagram.java:629-633`).
+ * `renderer.ts` always declares the margin-less block (it draws at scale 1;
+ * the factor is the exporter's, `TextBlockExporter.ts#exportTo`), so a
+ * sequence fragment without either is a broken invariant.
  */
 function sequenceExportedDimension(fragment: RenderFragment): { readonly width: number; readonly height: number } {
   if (fragment.exportedDimension !== undefined) return fragment.exportedDimension;
   const margin = documentMarginOf(fragment);
   if (margin === undefined || fragment.preChromeWidth === undefined || fragment.preChromeHeight === undefined)
-    return {
-      width: fragment.width - SEQUENCE_ENSURE_VISIBLE_DELTA,
-      height: fragment.height - SEQUENCE_ENSURE_VISIBLE_DELTA,
-    };
+    throw new Error('finalizeSequenceFragment: sequence fragment declares neither exportedDimension nor its block');
   return {
     width: fragment.preChromeWidth + margin.left + margin.right,
     height: fragment.preChromeHeight + margin.top + margin.bottom,
@@ -154,4 +149,28 @@ export function finalizeSequenceBody(fragment: RenderFragment): string {
   return fragment.bodyWrapped === true
     ? spliceIntoContentGroup(fragment.body, documentChrome)
     : group(documentChrome + fragment.body);
+}
+
+/**
+ * sequence through the one `TextBlockExporter#exportTo` tail
+ * (`TextBlockExporter.ts#exportTo`, `core/TextBlockExporter.java:159-177`).
+ * The page is drawn at scale 1, numbers deferred when the document is
+ * export-scaled, around the margin-less block chrome composed against; so
+ * `calculateFinalDimension()` is {@link sequenceExportedDimension} -- chrome
+ * plus margin -- and `computeScaleFactor` (`:205-209`) reads THAT, not the
+ * body. The background and border rects are spliced first, as `SvgGraphics`'s
+ * constructor and `maybeDrawBorder` run before the draw (`:168-176`) and the
+ * root resizes the background with `format(maxX)` (`SvgGraphics.java:819-821`),
+ * so they scale with the body. The canvas is the unscaled `ensureVisible`
+ * integer (`SvgGraphics.java:129-135`) times the factor (`:800-813`).
+ */
+export function finalizeSequenceFragment(fragment: RenderFragment): RenderFragment {
+  const exportedDimension = sequenceExportedDimension(fragment);
+  const exported = {
+    ...fragment,
+    exportedDimension,
+    width: Math.trunc(fragment.width),
+    height: Math.trunc(fragment.height),
+  };
+  return exportTo(exported, finalizeSequenceBody(exported));
 }

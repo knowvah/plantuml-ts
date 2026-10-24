@@ -1,0 +1,8 @@
+@startuml
+Foo -> Bar
+note over Foo, Bar
+Yet another link to [[http://www.google.com]] as demo.
+You can also [[http://www.yahoo.fr specify a text]] for the link.
+And even [[http://www.yahoo.fr{This \n is a \n tooltip} add a tooltip]] to the link.
+end note
+@enduml

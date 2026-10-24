@@ -34,6 +34,7 @@
 import type { RenderFragment } from '../../core/dispatcher.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import {
+  type SkinparamWarningSource,
   skinParamWarnings,
   uniqueWarnings,
   withWarningBanner as withSharedWarningBanner,
@@ -54,7 +55,7 @@ const BANNER_UID = 'activity-warning-banner';
  */
 export function withSkinParamWarnings(
   ast: ActivityDiagramAST,
-  skinparam: ReadonlyMap<string, string> | undefined,
+  skinparam: SkinparamWarningSource | ReadonlyMap<string, string> | undefined,
 ): ActivityDiagramAST {
   const warnings = skinParamWarnings(skinparam);
   return warnings.length === 0 ? ast : { ...ast, warnings };

@@ -172,29 +172,19 @@ export interface RenderFragment {
   /** Sequence: `maybeDrawBorder`'s `CornerParam.diagramBorder` round corner (unset/0 = square). */
   diagramBorderRoundCorner?: number;
   /**
-   * T6d (mission mindmap-engine-port, batch 6): the diagram's OWN `scale
-   * ...` directive (`ScaleSpec`, unresolved) and `skinparam dpi`, for a
-   * `bodyWrapped` MINDMAP fragment whose producer could NOT resolve (let
-   * alone bake into its klimt draw pass) a scale FACTOR yet, because
-   * chrome (title) is composed OUTSIDE klimt as a string splice
-   * (`core/annotations/chrome.ts#applyChrome`) — upstream resolves the
-   * factor against the CHROME-INCLUDED, margin-included dimension
-   * (`TextBlockExporter#computeScaleFactor` reads `calculateFinalDimension()`,
-   * `TextBlockExporter.java:198-209`), which does not exist until AFTER
-   * chrome has composed the title (jar-verified: resolving against the
-   * pre-chrome body dimension alone gives zebuzi 1.682, not the golden's
-   * 1.495 — the title widens the box `ScaleWidthAndHeight`'s ratio is
-   * computed against). So `TextBlockExporter.ts#finalizeTitledDiagramFragment`
-   * resolves `resolveScaleFactor(scaleSpec, unscaledWidth, unscaledHeight,
-   * dpi)` itself, using the SAME post-chrome/post-margin dimension it
-   * already computes for `width`/`height` — then applies the result
-   * numerically to the composed body, matching upstream's "scale the
-   * whole chromed document" ordering without redrawing chrome through
-   * klimt. `scaleSpec === undefined` is a no-op (dpi-only factor, or 1 at
-   * dpi 96) — every non-MINDMAP fragment, and every mindmap fragment
-   * without a `scale` directive, is unaffected.
-   *
-   * Set by the mindmap and salt plugins' `rawTextBlock`.
+   * The diagram's OWN `scale ...` directive (`ScaleSpec`, unresolved) and
+   * `skinparam dpi`: the inputs of `TextBlockExporter#computeScaleFactor`
+   * (`TextBlockExporter.java:205-209`, `scale.getScale(dim.w, dim.h) * dpi /
+   * 96`). A producer cannot resolve the factor itself, because chrome (title,
+   * header, footer, legend) is composed OUTSIDE klimt as a string splice and
+   * upstream reads the CHROME-INCLUDED, margin-included dimension
+   * (`calculateFinalDimension()`, `:198-203`; jar-verified on zebuzi: the
+   * pre-chrome body gives 1.682, the golden's 1.495). So the ONE exporter tail
+   * `TextBlockExporter.ts#exportTo` resolves `resolveScaleFactor(scaleSpec,
+   * dim.w, dim.h, dpi)` against that dimension -- see `exportMargin` and
+   * `exportedDimension` for which it is -- for every engine that sets either
+   * field: mindmap, wbs, salt, activity, description and sequence.
+   * `scaleSpec === undefined` is a no-op (dpi-only factor, or 1 at dpi 96).
    */
   scaleSpec?: ScaleSpec;
   dpi?: number;
@@ -202,10 +192,10 @@ export interface RenderFragment {
    * isw-T2c-scale: `body` was drawn inside `svg-format.ts#withDeferredFormat`
    * -- its numbers are lossless doubles, and the export's scale pass is
    * their single `SvgGraphics#format` (`SvgGraphics.java:468-475`). Set by a
-   * producer whose document will be scaled (activity: `renderActivity`);
-   * every step that draws more into the body (warning banner, chrome) draws
-   * deferred too, and `assemble-svg-activity.ts#finalizeActivityFragment`
-   * formats even at factor 1.
+   * producer whose document will be scaled (activity, description, sequence:
+   * `scale-command.ts#isExportScaled`); every step that draws more into the
+   * body (warning banner, chrome) draws deferred too, and
+   * `TextBlockExporter.ts#exportTo` formats even at factor 1.
    */
   numbersDeferred?: true;
   /**
@@ -230,12 +220,15 @@ export interface RenderFragment {
    */
   drawBodyAt?: (scale: number, dx: number, dy: number) => string;
   /** sep-T5a: `TextBlockExporter`'s `margin` -- the producer's `Builder#calculateMargin` (style `Margin`, else
-   *  `getDefaultMargins()`, TextBlockExporter.java:510-516), applied after chrome by
-   *  `TextBlockExporter.ts#finalizeTitledDiagramFragment`. Set by the MINDMAP and SALT chrome paths. */
+   *  `getDefaultMargins()`, TextBlockExporter.java:510-516). Its presence selects `TextBlockExporter.ts#exportTo`'s
+   *  first arm: the producer handed over the RAW chromed block, so the exporter shifts the body by `(left, top)`
+   *  (`:173`), takes `dim = width/height + margin` (`:198-203`) and the canvas `(int)(dim + 1)` itself. Set by the
+   *  MINDMAP, WBS and SALT chrome paths. Absent: the producer already baked its margin (second arm). */
   exportMargin?: ClockwiseTopRightBottomLeft;
   /** codd-T4: `TextBlockExporter#calculateFinalDimension` (`:198-203`) -- chrome plus margin, BEFORE `SvgGraphics
-   *  #ensureVisible` floors it; set by `document-margin.ts#applyDocumentMargin`. `computeScaleFactor` (`:204-208`)
-   *  resolves a width/height `scale` against this, not against the floored canvas in `width`/`height`. */
+   *  #ensureVisible` floors it; set by `document-margin.ts#applyDocumentMargin` (sequence's finalizer sets it when
+   *  chrome did not). On the margin-baked arm it IS `dim`: `computeScaleFactor` (`:205-209`) resolves a width/height
+   *  `scale` against this, not against the floored canvas in `width`/`height`, which is then the canvas itself. */
   exportedDimension?: { readonly width: number; readonly height: number };
   /** codd-T4: the document margin this fragment was exported with when it is NOT its diagram class's default
    *  (`TextBlockExporter.Builder#calculateMargin`, a style `Margin`; `document-margin.ts#calculateMargin`).

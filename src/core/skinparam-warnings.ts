@@ -15,13 +15,14 @@
  * `CommandSkinParam#executeArg`'s deprecation warnings (CommandSkinParam
  * .java:92-99) are rebuilt from the collected skinparam map
  * ({@link skinParamWarnings}) because the preprocessor hoists `skinparam`
- * lines out of the block before the parser sees it; they come ahead of the
+ * lines out of the block before the parser sees it (line form only); they come ahead of the
  * command warnings (upstream's order is source order, so a `skinparam`
  * written AFTER a warning command is the one case this reorders).
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:321-334
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/DiagramChromeFactory.java:124-135,176-200
  */
+import type { PreprocessorResult } from './preprocessor.js';
 import type { RenderFragment } from './dispatcher.js';
 import type { DocumentMargin } from './document-margin.js';
 import { WarningBannerBlock } from './annotations/WarningBannerBlock.js';
@@ -52,16 +53,34 @@ export function addUniqueWarning(into: Warning[], warning: Warning): void {
   if (!into.some((w) => w.equals(warning))) into.push(warning);
 }
 
+/** What {@link skinParamWarnings} reads: the collected map and, when the
+ *  collector located each form, its assignments. */
+export type SkinparamWarningSource = Pick<PreprocessorResult, 'skinparam' | 'skinparamAssignments'>;
+
+/** The skin parameter names whose LINE-form assignment upstream warns on, in
+ *  first-assignment order. A hand-built source without `skinparamAssignments`
+ *  (or a bare map) has no recorded form: every map key counts, as before. */
+function lineFormNames(source: SkinparamWarningSource | ReadonlyMap<string, string> | undefined): Iterable<string> {
+  if (source === undefined) return [];
+  if (source instanceof Map) return source.keys();
+  const { skinparam, skinparamAssignments } = source as SkinparamWarningSource;
+  if (skinparamAssignments === undefined) return skinparam?.keys() ?? [];
+  return skinparamAssignments.filter((a) => a.form !== 'block').map((a) => a.key);
+}
+
 /**
- * `CommandSkinParam#executeArg`'s warnings for the collected `skinparam`
- * map, in the map's (first-assignment) order. The collector keeps no line
- * form, so a `skinparam { ... }` block entry warns too, where upstream's
- * `CommandSkinParamMultilines` does not.
+ * `CommandSkinParam#executeArg`'s warnings, for the LINE-form assignments
+ * only (`skinparam handwritten true`), first-assignment order, de-duplicated.
+ * An entry of `skinparam [name] {` is `CommandSkinParamMultilines`, which
+ * delegates to `SkinLoader` and never warns
+ * (CommandSkinParamMultilines.java:90-102); the parameter still applies, via
+ * the merged map.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandSkinParam.java:88-99
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandSkinParamMultilines.java:90-102
  */
-export function skinParamWarnings(skinparam: ReadonlyMap<string, string> | undefined): Warning[] {
+export function skinParamWarnings(source: SkinparamWarningSource | ReadonlyMap<string, string> | undefined): Warning[] {
   const warnings: Warning[] = [];
-  for (const name of skinparam?.keys() ?? []) {
+  for (const name of lineFormNames(source)) {
     const message = SKINPARAM_WARNINGS.get(name.toLowerCase());
     if (message !== undefined) addUniqueWarning(warnings, new Warning(message));
   }

@@ -147,7 +147,7 @@ export function renderFixtureSequence(
   }
   // sdd2-T7e: mirrors `sequence/index.ts#sequencePlugin` (skinparam warnings
   // at parse, the banner at render; `sequence-warnings.ts`).
-  const ast = withSkinParamWarnings(parsed, preprocessed.skinparam);
+  const ast = withSkinParamWarnings(parsed, preprocessed);
   const geo = layoutSequence(ast, theme, measurer);
   const fragment = withSequenceWarningBanner(renderSequence(geo, theme, measurer), sequenceWarnings(ast), measurer);
 

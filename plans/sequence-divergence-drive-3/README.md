@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — IN PROGRESS (started 2026-10-22; batches 0–2 closed 2026-10-22)
+## Status — IN PROGRESS, batch 4 next (started 2026-10-22; batches 0–3 closed 2026-10-22/23; halt on stop 3 resolved 2026-10-23 by the user: D7 Amendment 1 route (ii) + T3d)
 
 ## Objective
 
@@ -131,7 +131,7 @@ Collected (JSON reporter) must equal on-disk. Check `uptime` first; above
 | [0](batch-0/overview.md) | branch, tools, b0; pure-move splits of the core SVG drivers | T0a–T0b, close | [x] |
 | [1](batch-1/overview.md) | small sequence fixes | T1a–T1h, close | [x] |
 | [2](batch-2/overview.md) | core text and SVG fixes | T2a–T2h, close | [x] |
-| [3](batch-3/overview.md) | scale/chrome export re-mirror; xlink title | T3a–T3c, close | [ ] |
+| [3](batch-3/overview.md) | scale/chrome export re-mirror; xlink title; brace-form skinparam banner | T3a–T3d, close | [x] |
 | [4](batch-4/overview.md) | SAX sprite parser | T4a–T4f, close | [ ] |
 | [5](batch-5/overview.md) | drawn-extent canvas; leftover diagnosis | T5a–T5b…, close | [ ] |
 | [6](batch-6/overview.md) | ImageProvider + `%filename()` | T6a–T6g, close | [ ] |

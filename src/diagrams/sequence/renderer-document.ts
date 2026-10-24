@@ -46,21 +46,14 @@ const ENSURE_VISIBLE_DELTA = 1;
  * sdd2-T7f: the canvas, from the UNSCALED geometry. `SvgGraphics` runs
  * `ensureVisible` on unscaled coordinates (`option.withMinDim(dim)`,
  * `TextBlockExporter.java:284`; `SvgGraphics.java:142-143`) and applies the
- * scale only when it writes them out: `finalizeRootAttributes` truncates
- * `maxX * option.getScale()` for `style`/`viewBox` and prints `width`/`height`
- * as `format(maxX)` -- `maxX` scaled, 3 decimals (`SvgGraphics.java:800-811`,
- * `format` at `:468-475`). So a scaled canvas is `(int)(dim + 1) * scale`,
- * not `(int)(dim * scale + 1)` (`kitevo-12-guvo789`, `scale 2`: 228, not
- * 227), and carries `scaledCanvas` for the decimal attributes
- * (`jujigi-41-zodo151`, `scale 1.2`: `width="247.2px"`).
+ * scale only when it writes them out (`:800-811`, `format` at `:468-475`).
+ * sdd3-T3b: the page is always drawn at scale 1 and the scale is the
+ * exporter's (`core/TextBlockExporter.ts#exportTo`), which multiplies the
+ * `(int)(dim + 1)` canvas this returns -- `(int)(dim + 1) * scale`, not
+ * `(int)(dim * scale + 1)` (`kitevo-12-guvo789`, `scale 2`: 228, not 227).
  */
-export function canvasOf(geo: SequenceExtent, k: number): Pick<RenderFragment, 'width' | 'height' | 'scaledCanvas'> {
-  if (k === 1) return { width: geo.totalWidth + ENSURE_VISIBLE_DELTA, height: geo.totalHeight + ENSURE_VISIBLE_DELTA };
-  return {
-    width: Math.trunc(geo.totalWidth + ENSURE_VISIBLE_DELTA) * k,
-    height: Math.trunc(geo.totalHeight + ENSURE_VISIBLE_DELTA) * k,
-    scaledCanvas: true,
-  };
+export function canvasOf(geo: SequenceExtent): Pick<RenderFragment, 'width' | 'height'> {
+  return { width: geo.totalWidth + ENSURE_VISIBLE_DELTA, height: geo.totalHeight + ENSURE_VISIBLE_DELTA };
 }
 
 /**
@@ -70,16 +63,15 @@ export function canvasOf(geo: SequenceExtent, k: number): Pick<RenderFragment, '
  * and `TextBlockExporter` adds `SequenceDiagram#getDefaultMargins()` on top
  * (`core/document-margin.ts`). `totalWidth`/`totalHeight` here are that sum,
  * so the block is `total - margin`; `core/annotations/chrome-export.ts`
- * composes chrome around it and puts the margin back. Left unset under a
- * `scale` (the margin is scaled with the body there, so it cannot be
- * subtracted as a constant) -- chrome then sees the final canvas as before.
+ * composes chrome around it and puts the margin back. sdd3-T3b: declared
+ * under a `scale` too -- the page is drawn at scale 1, so the margin is a
+ * constant and chrome sees the true block (`UgDiagram.java:128`); the
+ * exporter scales the composed whole (`TextBlockExporter.java:165-177`).
  */
 export function preChromeDims(
   geo: SequenceExtent,
-  k: number,
   m: DocumentMargin = SEQUENCE_DOCUMENT_MARGIN,
 ): Pick<RenderFragment, 'preChromeWidth' | 'preChromeHeight'> {
-  if (k !== 1) return {};
   return { preChromeWidth: geo.totalWidth - m.left - m.right, preChromeHeight: geo.totalHeight - m.top - m.bottom };
 }
 
@@ -98,9 +90,8 @@ function sameMargin(a: DocumentMargin, b: DocumentMargin): boolean {
  * translates the block by `(left, top)` and adds both sides to the dimension
  * (`TextBlockExporter.java:159-176,199-203`), so a style margin M moves the
  * body by `M.left - 5`, `M.top - 5` and grows the canvas by the summed side
- * difference. Under a `scale` the whole drawing -- margin included -- is
- * scaled by `SvgGraphics` (`:800-811`), hence the shift is multiplied by `k`
- * and the canvas goes through {@link canvasOf} again. The fragment then
+ * difference; the page is drawn at scale 1, so a `scale` multiplies the whole
+ * drawing, margin included, in the exporter afterwards. The fragment then
  * declares the margin it is exported with (`RenderFragment.documentMargin`,
  * read by `document-margin.ts#documentMarginOf`) so chrome and the warning
  * banner compose around the same margin-less block as before. Identity when
@@ -110,12 +101,7 @@ function sameMargin(a: DocumentMargin, b: DocumentMargin): boolean {
  *   the default margin
  * @param geo the UNSCALED page geometry {@link canvasOf} read
  */
-export function withExporterMargin(
-  fragment: RenderFragment,
-  geo: SequenceExtent,
-  theme: Theme,
-  k: number,
-): RenderFragment {
+export function withExporterMargin(fragment: RenderFragment, geo: SequenceExtent, theme: Theme): RenderFragment {
   const m = calculateMargin(theme, SEQUENCE_DOCUMENT_MARGIN);
   if (sameMargin(m, SEQUENCE_DOCUMENT_MARGIN)) return fragment;
   const baked = SEQUENCE_DOCUMENT_MARGIN;
@@ -125,9 +111,9 @@ export function withExporterMargin(
   };
   return {
     ...fragment,
-    body: shiftFragmentBody(fragment.body, (m.left - baked.left) * k, (m.top - baked.top) * k),
-    ...canvasOf(grown, k),
-    ...preChromeDims(grown, k, m),
+    body: shiftFragmentBody(fragment.body, m.left - baked.left, m.top - baked.top),
+    ...canvasOf(grown),
+    ...preChromeDims(grown, m),
     documentMargin: m,
   };
 }

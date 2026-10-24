@@ -11,6 +11,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
+import { assembleSvg } from '../../../src/core/assemble-svg.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type {
@@ -228,7 +229,7 @@ describe('drawing the cross', () => {
     const [cross] = crossesOf(scaleSequenceGeometry(geo, 2));
     const [unscaled] = crossesOf(geo);
     expect([cross?.x, cross?.y]).toEqual([unscaled!.x * 2, unscaled!.y * 2]);
-    const svg = renderSequence({ ...geo, scale: { kind: 'simple', factor: 2 } }, defaultTheme, measurer).body;
+    const svg = assembleSvg(renderSequence({ ...geo, scale: { kind: 'simple', factor: 2 } }, defaultTheme, measurer));
     expect(linesOf(svg).filter((l) => l.includes('#A80036'))[0]).toContain('stroke-width="4"');
   });
 });

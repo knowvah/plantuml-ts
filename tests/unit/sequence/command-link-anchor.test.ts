@@ -8,6 +8,7 @@
  * head at 145, the label at x=142.8, baseline 110.111.
  */
 import { describe, expect, it } from 'vitest';
+import { assembleSvg } from '../../../src/core/assemble-svg.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
@@ -117,7 +118,8 @@ describe('layout and draw (zoturo-25-jima978 in.svg)', () => {
   it('scales every length at emission', () => {
     const scaled = { ...defaultTheme };
     const scaledGeo = layoutSequence(parse(['scale 2', ...ZOTURO]), scaled, measurer);
-    const body = renderSequence(scaledGeo, scaled, measurer).body;
+    // The scale is the exporter's (`core/TextBlockExporter.ts#exportTo`), so read the assembled document.
+    const body = assembleSvg(renderSequence(scaledGeo, scaled, measurer));
     expect(body).toContain('x1="277.6" y1="136" x2="277.6" y2="290"');
   });
 });

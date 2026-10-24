@@ -44,7 +44,7 @@ export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequencePluginGeo
     // `refused` is `ParseRefusal`'s discriminant (`dispatcher.ts#parseRefusalOf`).
     if ('refused' in ast) return ast;
     // sdd2-T7e: `CommandSkinParam.java:92-99` -> `ast.warnings`.
-    return withSkinParamWarnings(ast, source.styleSource?.skinparam);
+    return withSkinParamWarnings(ast, source.styleSource);
   },
 
   layout(ast: SequenceDiagramAST, theme, measurer): Promise<SequencePluginGeometry> {

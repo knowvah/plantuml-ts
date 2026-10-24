@@ -20,6 +20,7 @@
  *                 248 x 268, lifeline rect x 165.325 y 88  (+10, +10)
  */
 import { describe, it, expect } from 'vitest';
+import { assembleSvg } from '../../../src/core/assemble-svg.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { defaultTheme, type Theme } from '../../../src/core/theme.js';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
@@ -47,9 +48,9 @@ function themed(margin: Theme['diagramMargin']): Theme {
 }
 
 /** The unscaled page the renderer hands over, then the exporter margin. */
-function exported(margin: Theme['diagramMargin'], k = 1, ...lines: string[]): RenderFragment {
+function exported(margin: Theme['diagramMargin'], ...lines: string[]): RenderFragment {
   const geo = geometry(...lines);
-  return withExporterMargin(renderSequence(geo, defaultTheme, MEASURER), geo, themed(margin), k);
+  return withExporterMargin(renderSequence(geo, defaultTheme, MEASURER), geo, themed(margin));
 }
 
 function lifelineRect(fragment: RenderFragment): { x: number; y: number } {
@@ -62,13 +63,13 @@ describe('withExporterMargin -- no style Margin (TextBlockExporter.java:515)', (
   it('returns the fragment unchanged, so output without a style margin is byte-identical', () => {
     const geo = geometry();
     const fragment = renderSequence(geo, defaultTheme, MEASURER);
-    expect(withExporterMargin(fragment, geo, defaultTheme, 1)).toBe(fragment);
+    expect(withExporterMargin(fragment, geo, defaultTheme)).toBe(fragment);
   });
 
   it('returns the fragment unchanged when the style margin equals the default same(5)', () => {
     const geo = geometry();
     const fragment = renderSequence(geo, defaultTheme, MEASURER);
-    expect(withExporterMargin(fragment, geo, themed(SEQUENCE_DOCUMENT_MARGIN), 1)).toBe(fragment);
+    expect(withExporterMargin(fragment, geo, themed(SEQUENCE_DOCUMENT_MARGIN))).toBe(fragment);
   });
 });
 
@@ -104,13 +105,29 @@ describe('withExporterMargin -- style Margin (TextBlockExporter.java:510-516,159
   });
 
   it('a scaled page moves the body and canvas by the margin delta times the scale', () => {
-    const base = exported(undefined, 2, 'scale 2');
-    const f = exported(same10, 2, 'scale 2');
-    expect(lifelineRect(f).x - lifelineRect(base).x).toBe(10);
-    expect(lifelineRect(f).y - lifelineRect(base).y).toBe(10);
-    expect(f.width - base.width).toBe(20); // jar 228 -> 248
-    expect(f.height - base.height).toBe(20); // jar 248 -> 268
-    expect(f.scaledCanvas).toBe(true);
-    expect(f.preChromeWidth).toBeUndefined();
+    // The page is drawn at scale 1 and the scale is the exporter's
+    // (`core/TextBlockExporter.ts#exportTo`, `TextBlockExporter.java:165-177`),
+    // so read the assembled document: jar canvas 228 x 248 -> 248 x 268.
+    const assembled = (margin: Theme['diagramMargin']): string => {
+      const geo = geometry('scale 2');
+      return assembleSvg(renderSequence(geo, themed(margin), MEASURER));
+    };
+    const base = assembled(undefined);
+    const f = assembled(same10);
+    expect(viewBoxOf(base)).toEqual([228, 248]);
+    expect(viewBoxOf(f)).toEqual([248, 268]);
+    expect(lifelineRect({ body: f, width: 0, height: 0 }).x - lifelineRect({ body: base, width: 0, height: 0 }).x).toBe(
+      10,
+    );
+    expect(lifelineRect({ body: f, width: 0, height: 0 }).y - lifelineRect({ body: base, width: 0, height: 0 }).y).toBe(
+      10,
+    );
   });
 });
+
+/** The root `viewBox`'s width and height. */
+function viewBoxOf(svg: string): [number, number] {
+  const m = /viewBox="0 0 (\d+) (\d+)"/.exec(svg);
+  if (m === null) throw new Error('no viewBox');
+  return [Number(m[1]), Number(m[2])];
+}

@@ -141,7 +141,7 @@ export function renderFixtureActivity(
     styleSource: preprocessed,
   };
   const parsed = astOrThrow(parseActivity(block, { assetStore: options?.assetStore }), 'activity');
-  const ast = withSkinParamWarnings(parsed, block.styleSource.skinparam);
+  const ast = withSkinParamWarnings(parsed, block.styleSource);
   const marginTheme = documentMarginTheme(theme, hasActivityChrome(ast));
   const geo = layoutActivity(ast, marginTheme, measurer);
   const fragment = withWarningBanner(

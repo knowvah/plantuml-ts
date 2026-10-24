@@ -42,16 +42,14 @@ import { formatShiftedCoordinates } from './annotations/coord-shift.js';
 import type { AssembledSvg, RenderFragment } from './dispatcher.js';
 import { svgRoot, group, rect } from './svg.js';
 import { spliceAsFirstChild, spliceIntoContentGroup } from './assemble-svg-splice.js';
-import { finalizeSequenceBody } from './assemble-svg-sequence.js';
-import { finalizeActivityFragment, scaleActivityBody } from './assemble-svg-activity.js';
-import { resolveScaleFactor } from './scale-command.js';
+import { finalizeSequenceFragment } from './assemble-svg-sequence.js';
+import { finalizeActivityFragment } from './assemble-svg-activity.js';
 import { applySeededDefIds } from './svg-defs-seeded.js';
-import { scaleShadowFilterDefs } from './svg-defs-scale.js';
 import { seedOf } from './klimt/drawing/svg/svg-seed.js';
 import { assembleDocumentShell } from './klimt/document-shell.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
 import { shortenColor } from './svg-format.js';
-import { applyCucaDocumentMargin, finalizeTitledDiagramFragment } from './TextBlockExporter.js';
+import { applyCucaDocumentMargin, exportTo, finalizeTitledDiagramFragment } from './TextBlockExporter.js';
 import {
   CUCA_DOCUMENT_MARGIN_TOP,
   CUCA_DOCUMENT_MARGIN_RIGHT,
@@ -291,19 +289,9 @@ function finalizeDescriptionFragment(fragment: RenderFragment): RenderFragment {
             strokeWidth: 1,
           }),
         );
-  // `TextBlockExporter#computeScaleFactor` (`:204-208`) reads the chrome-and-margin dimension before `ensureVisible`.
-  const dimension = fragment.exportedDimension ?? fragment;
-  const factor = resolveScaleFactor(fragment.scaleSpec, dimension.width, dimension.height, fragment.dpi);
-  // A `numbersDeferred` body is formatted by this pass alone, so it runs at factor 1 too (assemble-svg-activity.ts).
-  if (factor === 1 && fragment.numbersDeferred !== true) return { ...fragment, body };
-  return {
-    ...fragment,
-    body: scaleActivityBody(body, factor),
-    ...(fragment.extraDefs === undefined ? {} : { extraDefs: scaleShadowFilterDefs(fragment.extraDefs, factor) }),
-    scaledCanvas: true,
-    width: fragment.width * factor,
-    height: fragment.height * factor,
-  };
+  // `TextBlockExporter#exportTo` (`:159-177`): `computeScaleFactor` reads the chrome-and-margin dimension before
+  // `ensureVisible` (`:204-208`); the tail is shared with every other engine.
+  return exportTo(fragment, body);
 }
 
 /**
@@ -327,7 +315,7 @@ function finalizeShellFragment(fragment: RenderFragment): RenderFragment {
     case DIAGRAM_TYPE_STATE:
       return { ...fragment, body: finalizeStateBody(fragment) };
     case DIAGRAM_TYPE_SEQUENCE:
-      return { ...fragment, body: finalizeSequenceBody(fragment) };
+      return finalizeSequenceFragment(fragment);
     case DIAGRAM_TYPE_ACTIVITY:
       return finalizeActivityFragment(fragment);
     case DIAGRAM_TYPE_JSON:

@@ -15,6 +15,7 @@
 
 import { paintToSvg } from './paint.js';
 import { ignoreThisLink } from './security/SecurityUtils.js';
+import { linkTitle } from './svg-link-title.js';
 import type { Paint } from './paint.js';
 import { arrowHead, ALL_ARROW_TYPES } from './svg-markers.js';
 import { collectDocumentDefs } from './svg-defs.js';
@@ -404,11 +405,13 @@ export function group(first: string, second?: string[] | SvgAttrs): string {
  */
 export function linkWrap(
   children: string,
-  url: { readonly url: string; readonly tooltip: string },
+  url: { readonly url: string; readonly tooltip?: string | undefined },
   target = '_top',
 ): string {
   // javascript: security issue (SvgGraphics.java:1136)
   const href = ignoreThisLink(url.url) ? '' : url.url;
+  // SvgGraphics.java:1147-1160,1170-1172: one decoded value for both titles.
+  const title = linkTitle(href, url.tooltip);
   // SI-saea T3a/D2: raw values in -- `attrs()` escapes via `formatAttrValue`.
   // A pre-escape here (removed) double-escaped (`&amp;quot;`).
   const a = attrs([
@@ -418,8 +421,8 @@ export function linkWrap(
     ['xlink:type', 'simple'],
     ['xlink:actuate', 'onRequest'],
     ['xlink:show', 'new'],
-    ['title', url.tooltip],
-    ['xlink:title', url.tooltip],
+    ['title', title],
+    ['xlink:title', title],
   ] as const);
   return `<a${a}>${children}</a>`;
 }
