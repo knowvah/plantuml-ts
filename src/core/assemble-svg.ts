@@ -71,6 +71,10 @@ const DIAGRAM_TYPE_ACTIVITY = 'ACTIVITY';
 const DIAGRAM_TYPE_MINDMAP = 'MINDMAP';
 const DIAGRAM_TYPE_SALT = 'SALT';
 const DIAGRAM_TYPE_WBS = 'WBS';
+const DIAGRAM_TYPE_BOARD = 'BOARD';
+const DIAGRAM_TYPE_FILES = 'FILES';
+const DIAGRAM_TYPE_PACKET = 'PACKET';
+const DIAGRAM_TYPE_CHART = 'CHART';
 
 // ---------------------------------------------------------------------------
 // class finalize (formerly class/renderer-shell.ts#assembleClassShell)
@@ -295,6 +299,16 @@ function finalizeDescriptionFragment(fragment: RenderFragment): RenderFragment {
 }
 
 /**
+ * lad-T1a: board/files/packet/chart. Their jar oracles open the content with the shared root `<g>`
+ * (`TextBlockExporter.java:292-294`, `SvgGraphics.java:155-158`) and draw no extra chrome here, so an
+ * unwrapped body gets a bare `<g>` for the document shell to decorate (`withRootGroupAttributes`);
+ * a `bodyWrapped` body already carries it and passes through.
+ */
+function finalizeGenericRootFragment(fragment: RenderFragment): RenderFragment {
+  return fragment.bodyWrapped === true ? fragment : { ...fragment, body: group(fragment.body) };
+}
+
+/**
  * Per-`diagramType` body finalization -- the work each of the four former
  * `diagrams/<engine>/renderer-shell.ts` files did to `fragment.body` (and,
  * for json, `fragment.background`) before handing off to
@@ -326,6 +340,11 @@ function finalizeShellFragment(fragment: RenderFragment): RenderFragment {
     case DIAGRAM_TYPE_SALT:
     case DIAGRAM_TYPE_WBS:
       return finalizeTitledDiagramFragment(fragment);
+    case DIAGRAM_TYPE_BOARD:
+    case DIAGRAM_TYPE_FILES:
+    case DIAGRAM_TYPE_PACKET:
+    case DIAGRAM_TYPE_CHART:
+      return finalizeGenericRootFragment(fragment);
     default:
       return fragment;
   }

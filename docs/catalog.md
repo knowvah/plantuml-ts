@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1774 modules · 6646 exported names.
+1776 modules · 6650 exported names.
 
 ## `src/`
 
@@ -72,6 +72,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `include-resolver-timeout.ts` | `withIncludeTimeout` | Bounding one include fetch by time -- the port of upstream's `Future#get(SecurityUtils.getSecurityProfile().getTimeout(), MILLISECONDS)` around every URL read (`security/SURL.java:357-358`, :402, :438). |
 | `include-resolver.ts` | `MapIncludeStore`, `IncludeNotFoundError`, `StdlibNotBundledError`, `EMPTY_INCLUDE_STORE`, `IncludeStore`, `IncludeFetcher`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `fetchInclude`, `prefetchIncludes`, `IncludeWarmupOptions`, `prepareIncludeStore` | The ASYNC half of the include seam. |
 | `internal-emoji-store.ts` | `INTERNAL_EMOJI_ASSET_PREFIX`, `internalEmojiAssetKey`, `InternalEmojiStore`, `EmojiArtworkResolver`, `emojiArtworkResolverFor`, `internalEmojiStoreFrom` | The Twemoji artwork half of `<:name:>` emoji rendering. |
+| `internal-render-options.ts` | `InternalRenderOptions`, `isJarCompatibleStyleInput`, `withJarCompatibleStyleInput` |  |
 | `internal-sprite-store.ts` | `INTERNAL_SPRITE_ASSET_PREFIX`, `internalSpriteAssetKey`, `InternalSpriteStore`, `readPng`, `internalSpriteStoreFrom`, `matchJarSpriteLine` | `SpriteImage.fromInternal` (java `klimt/sprite/SpriteImage.java:100-128`) — the jar-internal `/sprites/**` bundle, ported onto ADR-2's synchronous asset channel (`plans/s1l-tail-fix/decisions.md`). |
 | `java-hash-set.ts` | `javaDoubleHashCode`, `javaHashSetOrder` | java-hash-set.ts — the iteration order of a `java.util.HashSet` built by successive `add` calls, for code upstream iterates straight out of a `HashSet` (e.g. |
 | `java-whitespace.ts` | `isJavaWhitespaceAt` | `Character.isWhitespace(char)`, enumerated. |
@@ -1830,6 +1831,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `ast.ts` | `FileEntryType`, `FileEntry`, `FilesDiagramAST`, `EntryGeometry`, `FilesGeometry` |  |
+| `files-style-input.ts` | `filesStyleInput` |  |
 | `index.ts` | `filesPlugin` |  |
 | `layout.ts` | `NOTE_Y_OFFSET`, `layoutFiles` |  |
 | `parser.ts` | `parseFiles` |  |

@@ -9,12 +9,12 @@ Then the standard close as `b1`.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T1a](T1a-shell-arms.md) | `finalizeShellFragment` arms for BOARD/FILES/PACKET/CHART (wrap an unwrapped body) | typescript-pro (sonnet) | `src/core/assemble-svg.ts` + `tests/unit/core/assemble-svg-lad-t1a.test.ts` | B0 | [ ] |
-| [T1b](T1b-class.md) | class (+object): fragment `lengthAdjust` from theme | typescript-pro (sonnet) | `src/diagrams/class/renderer-document.ts` (+ T0d-named mirror) + test | B0 | [ ] |
-| [T1c](T1c-state.md) | state: fragment `lengthAdjust` from theme | typescript-pro (sonnet) | `src/diagrams/state/renderer.ts` + test | B0 | [ ] |
-| [T1d](T1d-json-yaml-hcl.md) | json/yaml/hcl: `renderJson` sets the field once | typescript-pro (sonnet) | `src/diagrams/json/renderer.ts` (+ T0d-named klimt site) + test | B0 | [ ] |
-| [T1e](T1e-jar-compatible-seam.md) | D9 seam: `styleInput` cuts applied only in the internal jar-compatible mode; conformance callers opt in; files cut | typescript-pro (sonnet) | `src/index.ts`, `src/core/internal-render-options.ts`, `src/core/dispatcher-types.ts`, `src/diagrams/files/index.ts`, survey/census/authored harness + found callers, fitness test | B0 | [ ] |
-| close | merge ×5, gates, baseline rebuild, all-engine chain vs b0 | orchestrator | per close-procedure | T1a–T1d | [ ] |
+| [T1a](T1a-shell-arms.md) | `finalizeShellFragment` arms for BOARD/FILES/PACKET/CHART (wrap an unwrapped body) | typescript-pro (sonnet) | `src/core/assemble-svg.ts` + `tests/unit/core/assemble-svg-lad-t1a.test.ts` | B0 | [x] |
+| [T1b](T1b-class.md) | class (+object): fragment `lengthAdjust` from theme | typescript-pro (sonnet) | `src/diagrams/class/renderer-document.ts` (+ T0d-named mirror) + test | B0 | [x] |
+| [T1c](T1c-state.md) | state: fragment `lengthAdjust` from theme | typescript-pro (sonnet) | `src/diagrams/state/renderer.ts` + test | B0 | [x] |
+| [T1d](T1d-json-yaml-hcl.md) | json/yaml/hcl: `renderJson` sets the field once | typescript-pro (sonnet) | `src/diagrams/json/renderer.ts` (+ T0d-named klimt site) + test | B0 | [x] |
+| [T1e](T1e-jar-compatible-seam.md) | D9 seam: `styleInput` cuts applied only in the internal jar-compatible mode; conformance callers opt in; files cut | typescript-pro (sonnet) | `src/index.ts`, `src/core/internal-render-options.ts`, `src/core/dispatcher-types.ts`, `src/diagrams/files/index.ts`, survey/census/authored harness + found callers, fitness test | B0 | [x] |
+| close | merge ×5, gates, baseline rebuild, all-engine chain vs b0 | orchestrator | per close-procedure | T1a–T1d | [x] |
 
 Expected authored movement at the close: class, object, state rows
 `none`/`glyphs` → `rootExact`; their `textLengthMatch` → true (`none` via the

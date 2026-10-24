@@ -3,6 +3,7 @@ import type { FilesDiagramAST, FilesGeometry } from './ast.js';
 import { parseFiles } from './parser.js';
 import { layoutFiles } from './layout.js';
 import { renderFiles } from './renderer.js';
+import { filesStyleInput } from './files-style-input.js';
 
 export const filesPlugin: SyncPlugin<FilesDiagramAST, FilesGeometry> = {
   type: 'files',
@@ -18,4 +19,6 @@ export const filesPlugin: SyncPlugin<FilesDiagramAST, FilesGeometry> = {
   render(geo, theme) {
     return renderFiles(geo, theme);
   },
+
+  styleInput: filesStyleInput,
 };

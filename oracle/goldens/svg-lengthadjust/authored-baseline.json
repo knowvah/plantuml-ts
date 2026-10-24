@@ -1,6 +1,6 @@
 {
   "measuredAt": "2026-10-24",
-  "commit": "accb08bb5",
+  "commit": "724235b2c",
   "rows": [
     {
       "slug": "activity-default",
@@ -146,23 +146,21 @@
       "slug": "class-glyphs",
       "engine": "class",
       "variant": "glyphs",
-      "score": 1,
-      "diffCount": 1,
-      "rootExact": false,
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
       "textLength": "exact",
-      "textLengthMatch": true,
-      "reason": "pending T1b"
+      "textLengthMatch": true
     },
     {
       "slug": "class-none",
       "engine": "class",
       "variant": "none",
-      "score": 3,
-      "diffCount": 3,
-      "rootExact": false,
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
       "textLength": "exact",
-      "textLengthMatch": false,
-      "reason": "pending T1b"
+      "textLengthMatch": true
     },
     {
       "slug": "class-onechar",
@@ -396,23 +394,21 @@
       "slug": "object-glyphs",
       "engine": "object",
       "variant": "glyphs",
-      "score": 1,
-      "diffCount": 1,
-      "rootExact": false,
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
       "textLength": "exact",
-      "textLengthMatch": true,
-      "reason": "pending T1b"
+      "textLengthMatch": true
     },
     {
       "slug": "object-none",
       "engine": "object",
       "variant": "none",
-      "score": 3,
-      "diffCount": 3,
-      "rootExact": false,
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
       "textLength": "exact",
-      "textLengthMatch": false,
-      "reason": "pending T1b"
+      "textLengthMatch": true
     },
     {
       "slug": "object-onechar",
@@ -524,23 +520,21 @@
       "slug": "state-glyphs",
       "engine": "state",
       "variant": "glyphs",
-      "score": 1,
-      "diffCount": 1,
-      "rootExact": false,
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
       "textLength": "exact",
-      "textLengthMatch": true,
-      "reason": "pending T1c"
+      "textLengthMatch": true
     },
     {
       "slug": "state-none",
       "engine": "state",
       "variant": "none",
-      "score": 3,
-      "diffCount": 3,
-      "rootExact": false,
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
       "textLength": "exact",
-      "textLengthMatch": false,
-      "reason": "pending T1c"
+      "textLengthMatch": true
     },
     {
       "slug": "state-onechar",

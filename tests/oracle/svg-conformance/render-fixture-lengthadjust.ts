@@ -14,7 +14,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { renderSync, type RenderOptions } from '../../../src/index.js';
+import { renderSync } from '../../../src/index.js';
+import type { InternalRenderOptions } from '../../../src/core/internal-render-options.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { compareSvg, weightedScore } from './compare.js';
 import { isOurErrorPage, surveyAssetStore } from './render-fixture-utility.js';
@@ -54,11 +55,13 @@ export function readAuthoredLengthAdjustFixture(
 }
 
 /**
- * The ONE place the authored harness builds its `renderSync` options. A later
- * task (T1e) adds the internal jar-compatible style-input flag here.
+ * The ONE place the authored harness builds its `renderSync` options. D5/D9:
+ * the authored gate measures the jar-compatible normalisation of the style
+ * input (the jar's StyleExtractor path drops it for json/yaml/hcl/files).
  */
-function authoredRenderOptions(): RenderOptions {
+function authoredRenderOptions(): InternalRenderOptions {
   return {
+    jarCompatibleStyleInput: true,
     measurer: new DeterministicMeasurer(),
     assetStore: surveyAssetStore(),
     includeStore: fixtureIncludeStore(),

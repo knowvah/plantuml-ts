@@ -23,6 +23,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { renderSync } from '../src/index.js';
+import { withJarCompatibleStyleInput } from '../src/core/internal-render-options.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { compareSvg } from '../tests/oracle/svg-conformance/compare.js';
 import type { Diff } from '../tests/oracle/svg-conformance/compare.js';
@@ -249,7 +250,7 @@ function writeReport(outDir: string, slug: string, html: string): string {
 export function generateReport(cacheDir: string, outDir: string, ref: FixtureRef): string {
   const markup = readCachedMarkup(cacheDir, ref);
   const jarSvg = readCachedJarSvg(cacheDir, ref);
-  const oursSvg = renderSync(markup, { measurer: new DeterministicMeasurer() });
+  const oursSvg = renderSync(markup, withJarCompatibleStyleInput({ measurer: new DeterministicMeasurer() }));
   const result = compareSvg(oursSvg, jarSvg, TOLERANCE_CLASS);
   const html = buildOverlayHtml({ type: ref.type, slug: ref.slug, oursSvg, jarSvg, result });
   return writeReport(outDir, ref.slug, html);

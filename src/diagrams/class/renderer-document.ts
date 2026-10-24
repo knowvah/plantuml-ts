@@ -152,6 +152,10 @@ export function finishClassDocument(doc: ClassDocument, geo: ClassGeometry, draw
     ...(theme.colors.graph.diagramBorderColor !== undefined
       ? { diagramBorderColor: resolveColorToSvgHex(theme.colors.graph.diagramBorderColor) }
       : {}),
+    // lad-T1b: `TextBlockExporter.java:306-307` -- `skinparam lengthAdjust` is the
+    // document's `SvgOption` (`SkinParam.java:1258-1269`), read by
+    // `SvgGraphics.java:155-158,699-705`. Spread only when defined (D4).
+    ...(theme.lengthAdjust !== undefined ? { lengthAdjust: theme.lengthAdjust } : {}),
     diagramType: DIAGRAM_TYPE_CLASS,
   };
 }

@@ -34,6 +34,7 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { renderSync } from '../src/index.js';
+import { withJarCompatibleStyleInput } from '../src/core/internal-render-options.js';
 import { setLayoutInputObserver } from '../src/core/graph-layout.js';
 import type { DotInputGraph } from '../src/core/graph-layout.js';
 import { toSvekDot } from '../src/core/svek-dot-emit.js';
@@ -101,7 +102,10 @@ export function renderFixture(markup: string): ManifestEntry {
   const graphs: DotInputGraph[] = [];
   setLayoutInputObserver(({ graph: g }) => graphs.push(g));
   try {
-    const svg = renderSync(markup, { measurer: new DeterministicMeasurer(), includeStore: fixtureIncludeStore() });
+    const svg = renderSync(
+      markup,
+      withJarCompatibleStyleInput({ measurer: new DeterministicMeasurer(), includeStore: fixtureIncludeStore() }),
+    );
     const entry: { svg: string; dot?: string } = { svg: sha256(svg) };
     if (graphs.length > 0) entry.dot = sha256(graphs.map(toSvekDot).join('\n'));
     return entry;

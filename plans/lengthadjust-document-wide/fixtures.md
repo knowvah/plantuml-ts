@@ -13,6 +13,7 @@ Amendment 1) stay `baseline` by design (D5): their emitters write no
 | checkpoint | rows | rootExact | textLength exact | textLength baseline (never worse) | Σ score |
 |---|---:|---:|---:|---:|---:|
 | b0 (`accb08bb5`) | 64 | 40 | 42 | 13 | 4121 |
+| b1 (`724235b2c`) | 64 | 46 | 45 | 13 | 4109 |
 
 ## Rows
 
@@ -31,8 +32,8 @@ Amendment 1) stay `baseline` by design (D5): their emitters write no
 | chart-none | chart | none | T2f | false | true | pending T2f |
 | chart-onechar | chart | onechar | T2f | true | false | emitter writes no textLength (pre-existing; owner: the engine's own drive) |
 | class-default | class | default | T1b | true | true | exact (b0) |
-| class-glyphs | class | glyphs | T1b | false | true | pending T1b |
-| class-none | class | none | T1b | false | false | pending T1b |
+| class-glyphs | class | glyphs | T1b | true | true | exact (724235b2c) |
+| class-none | class | none | T1b | true | true | exact (724235b2c) |
 | class-onechar | class | onechar | T1b | true | true | exact (b0) |
 | component-default | component | default | T2b | true | true | exact (b0) |
 | component-glyphs | component | glyphs | T2b | false | true | pending T2b |
@@ -55,8 +56,8 @@ Amendment 1) stay `baseline` by design (D5): their emitters write no
 | mindmap-none | mindmap | none | T2c | false | false | pending T2c |
 | mindmap-onechar | mindmap | onechar | T2c | true | true | exact (b0) |
 | object-default | object | default | T1b | true | true | exact (b0) |
-| object-glyphs | object | glyphs | T1b | false | true | pending T1b |
-| object-none | object | none | T1b | false | false | pending T1b |
+| object-glyphs | object | glyphs | T1b | true | true | exact (724235b2c) |
+| object-none | object | none | T1b | true | true | exact (724235b2c) |
 | object-onechar | object | onechar | T1b | true | true | exact (b0) |
 | packet-default | packet | default | T2f | true | false | emitter writes no textLength (pre-existing; owner: the engine's own drive) |
 | packet-glyphs | packet | glyphs | T2f | false | false | emitter writes no textLength (pre-existing; owner: the engine's own drive); pending T2f |
@@ -67,8 +68,8 @@ Amendment 1) stay `baseline` by design (D5): their emitters write no
 | salt-none | salt | none | T2e | false | false | pending T2e |
 | salt-onechar | salt | onechar | T2e | true | true | exact (b0) |
 | state-default | state | default | T1c | true | true | exact (b0) |
-| state-glyphs | state | glyphs | T1c | false | true | pending T1c |
-| state-none | state | none | T1c | false | false | pending T1c |
+| state-glyphs | state | glyphs | T1c | true | true | exact (724235b2c) |
+| state-none | state | none | T1c | true | true | exact (724235b2c) |
 | state-onechar | state | onechar | T1c | true | true | exact (b0) |
 | usecase-default | usecase | default | T2b | true | true | exact (b0) |
 | usecase-glyphs | usecase | glyphs | T2b | false | true | pending T2b |
