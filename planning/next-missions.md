@@ -35,6 +35,98 @@ post-D7 measurements.
 
 ---
 
+## sequence-divergence-drive-3 (sdd3) — DONE 2026-10-24 (branch `feat/sequence-divergence-drive-3`, squashed to one commit per batch, unsigned, not pushed; working history on tag `sdd3/pre-squash`; lands via PR after the user's signing rebase)
+
+**What changed:** the last 101 open sequence rows went to zero and were pinned:
+**every one of the 1143 sequence rows is now byte-conformant with the jar
+(compareSvg, deterministic measurer) and pinned**. Structural landings: one
+`TextBlockExporter#exportTo` tail for every titled diagram (D7 Amendment 1,
+route ii); the full `SvgSaxParser` (`!pragma svgparser sax`) with multi-stop
+sprite gradients and `DriverImageSvgSvg`; teoz's `real/RealLine` solver for the
+participant row; `RenderOptions.imageProvider` / `filename` and the
+`./image-providers` subpath (network and browser providers, D3/D4);
+JLaTeXMath `MatrixAtom` sizing (D6); sequence drawing through one klimt
+`UGraphicSvg` per page with `UGraphicHandwritten` enabled (D5 Amendment 1,
+option i) and the canvas taken from the graphic's own `ensureVisible` fold;
+nested `{{ }}` diagrams inherit the enclosing skinparams. Plan:
+`plans/sequence-divergence-drive-3/`; per-row ledger in its `fixtures.md`,
+105 journal rows in `decision-journal.md`.
+
+**Counts b0 → final** (ratchet-path classify, 1143 rows):
+
+| | b0 | final |
+|---|---:|---:|
+| zero | 1042 | **1143** |
+| paint-only | 17 | 0 |
+| geometry | 52 | 0 |
+| structural | 32 | 0 |
+| error | 0 | 0 |
+| Σ weightedScore | 3800 | **0** |
+
+Pins 1042 → **1143** (the D9 target). Survey sequence conformant 1042 →
+**1143** (1143 / 0 / 0). 0 conformant losses in all 28 engines at every close
+and in the final diff against b0; the only non-sequence movers are the three
+unknown-bucket twins of sequence rows (nuzise, baketu, tumuke).
+
+### ~~Open -> sdd3~~ — RESOLVED by sdd3 (0 rows left; the family table is in the sdd2 section below)
+
+### Follow-ons (no corpus row today; each journaled with its mechanism)
+
+- **Handwritten outside the sequence page.** Activity's banner and body are not
+  drawn through `UGraphicHandwritten` (`TextBlockExporter.java:174-175` wraps
+  every TitledDiagram; no activity corpus row is handwritten). Title, legend,
+  header/footer and mainframe blocks under handwritten (`core/annotations`, T8a
+  F4). Handwritten + `newpage` (the jar's `enlargeClip` vs our geometric
+  pagination).
+- **Nested-diagram seam.** `core/nested-previous.ts` carries the enclosing
+  skinparams through a one-shot module slot (synchronous, cleared in `finally`)
+  so `src/index.ts`'s surface stays fixed — hoist the pipeline into a core
+  module and make `previous` a parameter. The preprocessor collector hoists a
+  nested diagram's own `skinparam`/`<style>` lines when `{{` is not at line
+  start (`label a [{{ … }}]`, moxeku-98, corpus-only). Audit the Style-only
+  exclusion list for inherited keys (`backgroundcolor` only today; other
+  `FromSkinparamToStyle` keys with no legacy reader).
+- **Remote images.** Rasters other than PNG (JPEG/GIF/BMP — the jar's ImageIO
+  decodes them) fall to `(Cannot decode: <url>)`; thread the asset store into
+  `creole-atoms.ts#buildImgSpan` when the creole layer gains a context; stale
+  "this port never fetches" comment at `creole-atoms-img.ts:43-45`. The
+  per-engine ratchet harnesses other than sequence pass no `filename`.
+- **klimt gaps the moves worked around.** `ULine.rotate`/`UPolygon.rotate`
+  (arrowhead rotation stays baked in `sequence-arrowhead.ts`); `UAntiAliasing`
+  (the delay line omits `apply(OFF)`); `scaleK` remnants in
+  `sequence-shadow.ts` and the layout's participant sizing (identity at the
+  page's scale 1); stale `scale-geo.ts` comments.
+- **Spot glyph data** (`core/spot-glyph-data.ts`) is lossy at the third decimal
+  when re-centred (jefoke A `26.71` vs `26.709`, below compareSvg tolerance):
+  re-scrape at integral centres.
+- **Production metrics.** `driver-text-svg.ts` now measures bold/italic and
+  forwards `svgAttributes` (`6e9b69ad8`); the effect on other klimt-text
+  engines under `JarMeasurer` is toward the jar by construction but
+  unmeasured. `MeasurerStringBounder` drops BOLD for weight-aware measurers
+  (`measurer-bounder.ts:27-30`) — still open.
+- **LaTeX.** Unmodelled `MatrixAtom` cases: `|` vlines, `\hline`,
+  `\multicolumn`, the align/aligned/gathered/smallmatrix/cases environments,
+  `\\[2pt]` row gaps; `env.lastFontId` approximated by the last cell's
+  x-height (exact except cmbx). The cross-engine LaTeX diagnosis below stands.
+- **Dedupe.** `PaintAdapter` (two copies), the strict base64 decoder
+  (`creole-atoms-img.ts` + `sax-text-image-use-decode.ts`), `parseNumberList`
+  (two copies), `UImageSvg#manageScale` (option-scale-aware copy in the
+  driver).
+- **Carried from earlier batches:** other engines still emit root
+  `lengthAdjust="spacing"` under `skinparam lengthAdjust none` (T2c);
+  description/non-ELK class sprite tints use the block font (T2h); flat-run
+  engines cannot draw a stacked url label (T2e); `root { Margin }` cascades
+  into sequence participants (~40 px, T2d); legend chrome ignores `skinparam
+  roundcorner` (T3a A3); class paths without a string bounder would throw on a
+  SAX sprite with `text-anchor` (`class-edge-label-measure.ts:57`,
+  `class-edge-label-sprite-runs.ts:96`, `class-namespace-title-runs.ts:200`);
+  the dolls neighbour checks fold to one bounded force per participant
+  (order-sensitive only for box + `&` with a frozen read, T5c);
+  `Base64Coder.decode("A===")` throws in Java and aborts the parse — the port
+  reads "no image" (T4d).
+
+---
+
 ## sequence-divergence-drive-2 (sdd2) — DONE 2026-10-21 (branch `feat/sequence-divergence-drive-2`, squashed to one commit per batch, unsigned, not pushed; lands via PR after the user's `git rebase -S b34120ea9`)
 
 **What changed:** teoz's tile model is ported. Vertical: `YGauge`,
@@ -64,7 +156,7 @@ There were 0 conformant losses in every engine at every close, and in the final
 diff against b0. The non-sequence movers were all improvements: unknown 522 → 554
 (sequence diagrams in that bucket) and usecase 67 → 68 (fajira-11).
 
-### Open -> sdd3 (109 rows Σ 4355, by family; each row's mechanism is in `fixtures.md`)
+### ~~Open -> sdd3~~ — RESOLVED by sdd3 (2026-10-24: all 101 rows zero and pinned; see the sdd3 section above) (109 rows Σ 4355 at sdd2 exit, by family)
 
 **Prerequisites DONE 2026-10-22** (branch `fix/sequence-harness-prereqs`): the
 rows `creole-emoji-case-insensitive`, `harness-no-emoji-store` and the small-family

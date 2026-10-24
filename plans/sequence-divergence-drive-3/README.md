@@ -5,7 +5,29 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — IN PROGRESS, exit batch (started 2026-10-22; batches 0–8 closed 2026-10-22/24; all 101 rows at zero after T8g; halts on stop 3 resolved by the user: D7 Amendment 1 route (ii) + T3d, D5 Amendment 1 option (i) + bundle)
+## Status — DONE 2026-10-24 (started 2026-10-22; batches 0–8 closed; D9 met)
+
+All 101 target rows at zero and pinned; 0 conformant losses in 28 engines at
+every close and at the exit measurement against b0; 0 unexplained rises.
+Two halts on stop 3, both resolved by the user the same day: D7 Amendment 1
+(route (ii) + T3d, batch 3) and D5 Amendment 1 (option (i) + bundle,
+batch 8). The branch is squashed to one commit per batch (D11), unsigned
+and unpushed; the working history is on the tag `sdd3/pre-squash`.
+
+| close | zero | geometry | structural | paint-only | Σ ws | pins |
+|---|---:|---:|---:|---:|---:|---:|
+| b0 (main `5f954eeff`) | 1042 | 52 | 32 | 17 | 3800 | 1042 |
+| b1 | 1058 | 38 | 32 | 15 | 3281 | 1058 |
+| b2 | 1083 | 27 | 30 | 3 | 2774 | 1083 |
+| b3 | 1103 | 7 | 30 | 3 | 1600 | 1103 |
+| b4 | 1133 | 5 | 5 | 0 | 1082 | 1133 |
+| b5 | 1134 | 4 | 5 | 0 | 961 | 1134 |
+| b6 | 1136 | 3 | 4 | 0 | 883 | 1136 |
+| b7 | 1137 | 2 | 4 | 0 | 848 | 1137 |
+| b8 / final | 1143 | 0 | 0 | 0 | 0 | 1143 |
+
+(Copied from the counts table in `fixtures.md`, which has the per-row
+ledger.)
 
 ## Objective
 
@@ -137,8 +159,8 @@ Collected (JSON reporter) must equal on-disk. Check `uptime` first; above
 | [6](batch-6/overview.md) | ImageProvider + `%filename()` | T6a–T6g, close | [x] |
 | [7](batch-7/overview.md) | JLaTeXMath `array` sizing | T7a, close | [x] |
 | [8](batch-8/overview.md) | handwritten: sequence drawing through UGraphic | T8a–T8h, close | [x] |
-| [exit](batch-exit/overview.md) | final re-pin, survey, ledger, PR prep | T-exit | [ ] |
-| [squash](batch-squash/overview.md) | one commit per batch; tag the working history | T-squash | [ ] |
+| [exit](batch-exit/overview.md) | final re-pin, survey, ledger, PR prep | T-exit | [x] |
+| [squash](batch-squash/overview.md) | one commit per batch; tag the working history | T-squash | [x] |
 
 ## Documents
 

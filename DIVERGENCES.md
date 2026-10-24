@@ -185,7 +185,10 @@ the image is sized by JLaTeXMath's TeXIcon rule — `TeXIconBuilder.java:64-70`
 (`STYLE_DISPLAY`, size 20, insets 1, widened by `TeXIcon.java:141-157`) and
 `TeXIcon.java:195,210` — over a box built with JLaTeXMath 1.0.7's rules from
 KaTeX's parse tree and Computer Modern metrics (`src/core/latex-metrics/`);
-every `<latex>` formula in the corpus sizes exactly. **Signed D11.3 residues:
+every `<latex>` formula in the corpus sizes exactly; `array`/matrix nodes are
+sized by `MatrixAtom`'s rules since sdd3 (D6, T7a: `hsep`/`semihsep` column
+separators, row maxima, `vsep`, axis centring, decompiled from the 1.0.7
+jar — mefeke-43's 150×56 derives, nothing fitted). **Signed D11.3 residues:
 none.** The library-forced candidates (KaTeX has no text kern pairs and
 collapses text-mode spaces, e.g. `\text{mod}` −1 px) occur in no fixture that
 renders today.
