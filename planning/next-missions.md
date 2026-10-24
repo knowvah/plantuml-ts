@@ -35,7 +35,7 @@ post-D7 measurements.
 
 ---
 
-## sequence-divergence-drive-3 (sdd3) — DONE 2026-10-24 (branch `feat/sequence-divergence-drive-3`, squashed to one commit per batch, unsigned, not pushed; working history on tag `sdd3/pre-squash`; lands via PR after the user's signing rebase)
+## sequence-divergence-drive-3 (sdd3) — DONE 2026-10-24 (branch `feat/sequence-divergence-drive-3`, one signed commit per batch, pushed; PR #89 open against main; working history on the local tag `sdd3/pre-squash`)
 
 **What changed:** the last 101 open sequence rows went to zero and were pinned:
 **every one of the 1143 sequence rows is now byte-conformant with the jar
