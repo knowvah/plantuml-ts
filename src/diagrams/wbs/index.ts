@@ -29,6 +29,7 @@ import { HColorSimple } from '../../core/klimt/color/HColorSimple.js';
 import { extractFlatContent, extractViewBoxDims, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
 import { UGraphicHandwritten } from '../../core/klimt/drawing/hand/UGraphicHandwritten.js';
 import type { StringBounder as DriverStringBounder } from '../../core/klimt/drawing/svg/driver-text-svg.js';
+import { LengthAdjust } from '../../core/klimt/drawing/svg/svg-option.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics-core.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
@@ -37,6 +38,7 @@ import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
 import { TextBlockUtils } from '../../core/klimt/shape/TextBlockUtils.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import type { RootLengthAdjust } from '../../core/svg.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
@@ -156,8 +158,17 @@ interface DrawPass {
   readonly translate: UTranslate;
 }
 
+/** `RootLengthAdjust` to the klimt enum by name (decisions D3). */
+const KLIMT_LENGTH_ADJUST: Readonly<Record<RootLengthAdjust, LengthAdjust>> = {
+  spacing: LengthAdjust.SPACING,
+  spacingAndGlyphs: LengthAdjust.SPACING_AND_GLYPHS,
+  none: LengthAdjust.NONE,
+};
+
 function svgGraphic(diagram: WBSDiagram, measurer: StringMeasurer, pass: DrawPass): UGraphicSvg {
+  const lengthAdjust = diagram.getSkinParam().getlengthAdjust();
   const option = basicSvgOption({
+    ...(lengthAdjust === undefined ? {} : { lengthAdjust: KLIMT_LENGTH_ADJUST[lengthAdjust] }),
     minDim: { width: pass.minDim.getWidth(), height: pass.minDim.getHeight() },
     backcolor: calculateBackColor(diagram),
     colorMapper: muteColorMapper(diagram),
@@ -189,7 +200,14 @@ function drawFragment(diagram: WBSDiagram, measurer: StringMeasurer, pass: DrawP
   const svg = drawSvg(diagram, measurer, pass);
   const { width, height } = extractViewBoxDims(svg);
   const { body, extraDefs } = extractFlatContent(svg);
-  const fragment: RenderFragment = { body, width, height, diagramType: DIAGRAM_TYPE_WBS };
+  const lengthAdjust = diagram.getSkinParam().getlengthAdjust();
+  const fragment: RenderFragment = {
+    body,
+    width,
+    height,
+    diagramType: DIAGRAM_TYPE_WBS,
+    ...(lengthAdjust === undefined ? {} : { lengthAdjust }),
+  };
   // A gradient backcolor leaves `backcolorString` null (SvgGraphics.java:178-183):
   // no root `background:`, which `RenderFragment.backgroundGradient` carries.
   const withBackground =

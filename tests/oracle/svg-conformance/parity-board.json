@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-22T14:10:38.674Z",
+  "generatedAt": "2026-10-24T05:26:47.749Z",
   "fixtures": [
     {
       "slug": "gasaxu-65-cipo396",
@@ -8,7 +8,7 @@
       "layoutEqual": "n/a",
       "verdict": "diverged",
       "maxDelta": 190.889,
-      "firstDiff": "svg/@background",
+      "firstDiff": "svg/g[1]/rect[1]/@fill",
       "maxDeltaPath": "svg/g[1]/text[11]/@y"
     },
     {
@@ -18,7 +18,7 @@
       "layoutEqual": "n/a",
       "verdict": "diverged",
       "maxDelta": 12,
-      "firstDiff": "svg/@background",
+      "firstDiff": "svg/g[1]/rect[1]/@fill",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -28,7 +28,7 @@
       "layoutEqual": "n/a",
       "verdict": "diverged",
       "maxDelta": 190.889,
-      "firstDiff": "svg/@background",
+      "firstDiff": "svg/g[1]/rect[1]/@fill",
       "maxDeltaPath": "svg/g[1]/text[5]/@y"
     },
     {
@@ -38,7 +38,7 @@
       "layoutEqual": "n/a",
       "verdict": "diverged",
       "maxDelta": 12,
-      "firstDiff": "svg/@background",
+      "firstDiff": "svg/g[1]/rect[1]/@fill",
       "maxDeltaPath": "svg/@viewBox[2]"
     }
   ]

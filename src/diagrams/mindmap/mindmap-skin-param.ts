@@ -1,3 +1,10 @@
+/** `getlengthAdjust`'s three names (SkinParam.java:1260-1267). */
+const LENGTH_ADJUST_BY_LOWER_NAME: ReadonlyMap<string, RootLengthAdjust> = new Map([
+  ['spacingandglyphs', 'spacingAndGlyphs'],
+  ['spacing', 'spacing'],
+  ['none', 'none'],
+]);
+
 /**
  * The mindmap engine's `SkinParam` — the slice of upstream's
  * `skin/SkinParam.java` a `MindMapDiagram` reaches through
@@ -40,6 +47,7 @@ import type { Sprite } from '../../core/klimt/sprite/Sprite.js';
 import type { UStroke } from '../../core/klimt/UStroke.js';
 import { getNestedDiagramRenderer } from '../../core/nested-diagram-registry.js';
 import type { Pragma } from '../../core/skin/Pragma.js';
+import type { RootLengthAdjust } from '../../core/svg.js';
 import { getSprite, type SpriteRegistry } from '../../core/sprite-registry.js';
 import { cleanForKeySlow, type SkinParam as StyleSkinParam } from '../../core/style/mindmap-style-builder.js';
 import { trin } from '../../core/style/parser/StyleParser.js';
@@ -164,6 +172,17 @@ export class SkinParam implements MindMapSkinParam {
   getDpi(): number {
     const dpi = this.getAsInt('dpi', DEFAULT_DPI);
     return dpi <= 0 ? DEFAULT_DPI : dpi;
+  }
+
+  /**
+   * `spacingAndGlyphs` / `spacing` / `none`, each `equalsIgnoreCase`; anything
+   * else is `LengthAdjust.defaultValue()` = SPACING, left implicit (`undefined`).
+   * @see SkinParam.java:1258-1269
+   */
+  getlengthAdjust(): RootLengthAdjust | undefined {
+    const value = this.getValue('lengthAdjust');
+    if (value === null) return undefined;
+    return LENGTH_ADJUST_BY_LOWER_NAME.get(value.toLowerCase());
   }
 
   /** @see SkinParam.java:1096-1098 */

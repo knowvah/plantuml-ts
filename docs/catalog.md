@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1776 modules · 6650 exported names.
+1777 modules · 6651 exported names.
 
 ## `src/`
 
@@ -1226,6 +1226,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-creole-sheet.ts` | `klimtStringBounder`, `buildActionTextBlock`, `actionBoxDimension`, `drawActionTextBlock`, `renderActionLabel`, `buildNoteTextBlock`, `noteTextBlockDimension`, `renderNoteLabel` | activity-creole-sheet -- every action and note label drawn through the REAL `SheetBuilder -> SheetBlock1 -> SheetBlock2 -> stripes/atoms` pipeline upstream builds them with: `FtileBox.java:178-181` for the action box (`new SheetBlock2(new S |
 | `activity-geometry.types.ts` | `ActivityNodeGeo`, `CompositeUSymbol`, `ActivityEdgeGeo`, `SwimlaneGeo`, `SwimlaneBandGeo`, `SwimlaneDividerY`, `ActivityGeometry` | Shared geometry types for the activity diagram layout engine. |
 | `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `SEQUENTIAL_ASSEMBLY_GAP`, `START_STOP_RADIUS`, `STOP_OUTER_RADIUS`, `STOP_INNER_DELTA`, `END_OUTER_RADIUS`, `END_CROSS_THICKNESS`, `NOTE_MARGIN_X1`, `NOTE_MARGIN_X2`, `NOTE_CORNER_SIZE`, `NOTE_SPIKE_DELTA`, `NOTE_MARGIN_Y`, `NOTE_OPALE_GAP`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `JOIN_LABEL_MARGIN`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD`, `RECENTRED_PAD`, `RECENTRED_ENLARGE`, `ACTIVITY_DOCUMENT_MARGIN`, `DocumentMargin`, `activityDocumentMargin`, `documentMarginTheme`, `SVG_CANVAS_CEIL` | Layout constants for the activity diagram layout engine. |
+| `activity-length-adjust.ts` | `lengthAdjustOption` | `skinparam lengthAdjust` for the throwaway klimt `UGraphicSvg` documents the activity text sheets draw through (D3: the klimt `SvgOption` carries the value next to `RenderFragment.lengthAdjust`). |
 | `activity-renderer-bars.ts` | `renderBar`, `renderSplitLine` | Fork/split bar rendering, split out of `activity-renderer-shapes.ts` to keep that file (already over the 500-line cap before this mission) from growing further (mission `activity-parallel-connectors`, T3, README "Push forward" -- "equivalen |
 | `activity-renderer-composite-symbols.ts` | `CompositeInk`, `TitleDim`, `compositeSymbolTitleOrigin`, `drawCompositeSymbol` | The three non-frame container symbols `FtileGroup#drawU` can draw (`type.asBig(name, align, TextBlockUtils.empty(0, 0), ...)`, `ftile/vcompact/FtileGroup.java:216-219`): `package` -> `USymbolFolder`, `card` -> `USymbolCard`, `rectangle` -> |
 | `activity-renderer-composite.ts` | `compositeTitleWidth`, `renderComposite` | `group`/`partition` frame rendering (`USymbolFrame#asBig`, `decoration/symbol/USymbolFrame.java:136-170`, called by `FtileGroup#drawU`, `ftile/vcompact/FtileGroup.java:209-227` -- `USymbols.PARTITION`/`USymbols.GROUP` are both a bare `USymb |
@@ -1886,7 +1887,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Idea.ts` | `STEP_BY_PARENT`, `IdeaContent`, `IdeaDecoration`, `Idea` |  |
 | `IdeaShape.ts` | `IdeaShape`, `fromDesc` | IdeaShape — whether a mindmap node draws a box around its label, no box at all ("boxless"), or a pseudo shape. |
 | `index.ts` | `MindMapGeometry`, `renderMindMap`, `mindmapPlugin` | Mindmap diagram plugin — `MindMapDiagramFactory` (parse, with the style engine built from the block's own skin/skinparam/`<style>` sources, D2), then `TextBlockExporter`'s export of `MindMapDiagram#getTextBlock` on the klimt substrate (D3): |
-| `mindmap-skin-param.ts` | `SkinParamSource`, `SkinParam` | The mindmap engine's `SkinParam` — the slice of upstream's `skin/SkinParam.java` a `MindMapDiagram` reaches through `TitledDiagram#getSkinParam()`: the `ISkinSimple` members the creole sheets read, `getIHtmlColorSet`, the real style engine' |
+| `mindmap-skin-param.ts` | `SkinParamSource`, `SkinParam` | `getlengthAdjust`'s three names (SkinParam.java:1260-1267). |
 | `MindMap.ts` | `MindMapSkinParam`, `MindMap` |  |
 | `MindMapDiagram.ts` | `MindMapDiagram` |  |
 | `MindMapDiagramFactory.ts` | `createMindMapDiagram` |  |

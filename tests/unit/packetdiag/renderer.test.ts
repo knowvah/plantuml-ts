@@ -28,8 +28,8 @@ describe('renderPacket — SVG root', () => {
   it('produces an <svg> string', () => {
     const svg = assembleSvg(renderPacket(geo(), THEME));
     expect(svg).toMatch(/^<svg /);
-    expect(svg).toMatch(/width="735"/);
-    expect(svg).toMatch(/height="67"/);
+    expect(svg).toMatch(/width="735px"/);
+    expect(svg).toMatch(/height="67px"/);
   });
 });
 
@@ -94,7 +94,7 @@ describe('renderPacket — indicators', () => {
 // block rendering
 // ------------------------------------------------------------------
 describe('renderPacket — blocks', () => {
-  it('renders a <rect> for each visible block (plus 1 background rect from svgRoot)', () => {
+  it('renders a <rect> for each visible block (shell route: no svgRoot background rect)', () => {
     const grid = [
       [
         { width: 8, height: 1, label: 'A', leftOpen: false, rightOpen: false },
@@ -102,17 +102,15 @@ describe('renderPacket — blocks', () => {
       ],
     ];
     const svg = assembleSvg(renderPacket(geo({ grid, totalHeight: 101 }), THEME));
-    // +1 for the background rect emitted by svgRoot
     const rectCount = (svg.match(/<rect /g) ?? []).length;
-    expect(rectCount).toBe(3);
+    expect(rectCount).toBe(2);
   });
 
-  it('skips rendering 0-width blocks (only background rect, no block text)', () => {
+  it('skips rendering 0-width blocks (no rect, no block text)', () => {
     const grid = [[{ width: 0, height: 1, label: 'Phantom', leftOpen: false, rightOpen: false }]];
     const svg = assembleSvg(renderPacket(geo({ grid }), THEME));
-    // Only the background rect from svgRoot should be present
     const rectCount = (svg.match(/<rect /g) ?? []).length;
-    expect(rectCount).toBe(1);
+    expect(rectCount).toBe(0);
     expect(svg).not.toContain('Phantom');
   });
 

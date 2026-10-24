@@ -32,6 +32,7 @@ import { fromString as colorOrderFromString } from '../../core/klimt/color/Color
 import { extractFlatContent, extractViewBoxDims, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
 import { UGraphicHandwritten } from '../../core/klimt/drawing/hand/UGraphicHandwritten.js';
 import type { StringBounder as DriverStringBounder } from '../../core/klimt/drawing/svg/driver-text-svg.js';
+import { LengthAdjust as KlimtLengthAdjust } from '../../core/klimt/drawing/svg/svg-option.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics-core.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
@@ -125,6 +126,18 @@ interface DrawPass {
   readonly translate: UTranslate;
 }
 
+/** `SkinParam#getlengthAdjust` as the klimt `SvgOption` enum (`TextBlockExporter.java:306-307`). */
+const KLIMT_LENGTH_ADJUST = {
+  spacing: KlimtLengthAdjust.SPACING,
+  spacingAndGlyphs: KlimtLengthAdjust.SPACING_AND_GLYPHS,
+  none: KlimtLengthAdjust.NONE,
+} as const;
+
+function lengthAdjustOption(diagram: PSystemSalt): { lengthAdjust?: KlimtLengthAdjust } {
+  const adjust = diagram.getSkinParam().getlengthAdjust();
+  return adjust === undefined ? {} : { lengthAdjust: KLIMT_LENGTH_ADJUST[adjust] };
+}
+
 function svgGraphic(diagram: PSystemSalt, measurer: StringMeasurer, pass: DrawPass): UGraphicSvg {
   const option = basicSvgOption({
     minDim: { width: pass.minDim.getWidth(), height: pass.minDim.getHeight() },
@@ -132,6 +145,7 @@ function svgGraphic(diagram: PSystemSalt, measurer: StringMeasurer, pass: DrawPa
     colorMapper: muteColorMapper(diagram),
     scale: pass.scale,
     rootAttributes: new Map([['data-diagram-type', DIAGRAM_TYPE_SALT]]),
+    ...lengthAdjustOption(diagram),
   });
   return UGraphicSvg.build(0, option, VERSION_PLACEHOLDER, driverBounderFor(measurer), measurer);
 }
@@ -160,7 +174,9 @@ function drawFragment(diagram: PSystemSalt, measurer: StringMeasurer, pass: Draw
   const { body, extraDefs } = extractFlatContent(svg);
   const fragment: RenderFragment = { body, width, height, diagramType: DIAGRAM_TYPE_SALT };
   const withBackground = typeof backcolor === 'string' ? { ...fragment, background: backcolor } : fragment;
-  return extraDefs.length > 0 ? { ...withBackground, extraDefs } : withBackground;
+  const withDefs = extraDefs.length > 0 ? { ...withBackground, extraDefs } : withBackground;
+  const lengthAdjust = diagram.getSkinParam().getlengthAdjust();
+  return lengthAdjust === undefined ? withDefs : { ...withDefs, lengthAdjust };
 }
 
 /** `TextBlockUtils.getMinMax(block, sb, false)`: the ink a mainframe

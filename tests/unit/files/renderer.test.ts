@@ -49,7 +49,7 @@ describe('renderFiles', () => {
       }),
     ]);
     const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('<polygon');
+    expect(svg).toContain('<path d="M10,'); // shell route re-emits the note outline as a path (lad-T2f);
   });
 
   it('AC4: depth-2 entry has larger x than depth-0 entry', () => {
@@ -70,8 +70,8 @@ describe('renderFiles', () => {
   it('AC5: svgRoot produces output with width and height attributes', () => {
     const geo = makeGeo([makeEntry()]);
     const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toMatch(/width="\d+"/);
-    expect(svg).toMatch(/height="\d+"/);
+    expect(svg).toMatch(/width="\d+px"/);
+    expect(svg).toMatch(/height="\d+px"/);
   });
 
   it('AC6: note text lines appear in the SVG output', () => {
@@ -143,13 +143,13 @@ describe('renderFiles', () => {
   it('total width floors at MIN_WIDTH=200 for narrow geometry', () => {
     const geo: FilesGeometry = { entries: [], totalWidth: 50, totalHeight: 40 };
     const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('width="200"');
+    expect(svg).toContain('width="200px"');
   });
 
   it('total height floors at 40 for zero-height geometry', () => {
     const geo: FilesGeometry = { entries: [], totalWidth: 300, totalHeight: 0 };
     const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('height="40"');
+    expect(svg).toContain('height="40px"');
   });
 
   it('note box height scales with number of lines', () => {
@@ -165,7 +165,7 @@ describe('renderFiles', () => {
       }),
     ]);
     const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('<polygon');
+    expect(svg).toContain('<path d="M10,'); // shell route re-emits the note outline as a path (lad-T2f);
     // bottom-left and bottom-right points both have y=58
     expect(svg).toContain(',58');
   });
@@ -181,7 +181,7 @@ describe('renderFiles', () => {
     ]);
     const svg = assembleSvg(renderFiles(geo, theme));
     expect(svg).toContain('stroke="#AAA"');
-    expect(svg).toContain('<polyline');
+    expect(svg).toContain('L92,2'); // dog ear, now a path (lad-T2f)
   });
 
   it('note entry without noteLines renders an empty polygon without throwing', () => {
@@ -197,7 +197,7 @@ describe('renderFiles', () => {
     };
     const geo = makeGeo([entry]);
     const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('<polygon');
+    expect(svg).toContain('<path d="M10,'); // shell route re-emits the note outline as a path (lad-T2f);
     // 0 lines: NOTE_PAD*2 = 12. Bottom y = entry.y(0) + 2 + 12 = 14.
     expect(svg).toContain(',14');
   });

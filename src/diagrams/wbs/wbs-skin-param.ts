@@ -38,6 +38,7 @@ import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
 import type { Sprite } from '../../core/klimt/sprite/Sprite.js';
 import type { UStroke } from '../../core/klimt/UStroke.js';
+import type { RootLengthAdjust } from '../../core/svg.js';
 import { getNestedDiagramRenderer } from '../../core/nested-diagram-registry.js';
 import type { Pragma } from '../../core/skin/Pragma.js';
 import { getSprite, type SpriteRegistry } from '../../core/sprite-registry.js';
@@ -54,6 +55,12 @@ const DEFAULT_DPI = 96;
 const DEFAULT_TAB_SIZE = 8;
 /** @see SkinParam.java:131 (`DIGITS`) */
 const DIGITS = /^\d+$/;
+/** `getlengthAdjust`'s three `equalsIgnoreCase` names. @see SkinParam.java:1260-1267 */
+const LENGTH_ADJUST_BY_LOWER_NAME: ReadonlyMap<string, RootLengthAdjust> = new Map([
+  ['spacingandglyphs', 'spacingAndGlyphs'],
+  ['spacing', 'spacing'],
+  ['none', 'none'],
+]);
 /** @see SkinParam.java:133 (`INT_OR_DECIMAL`) */
 const INT_OR_DECIMAL = /^\d+(\.\d+)?$/;
 
@@ -129,6 +136,16 @@ export class SkinParam implements ISkinParamWithSimple {
       if (result !== undefined) return result;
     }
     return null;
+  }
+
+  /**
+   * The skinparam `lengthAdjust`; `undefined` is `LengthAdjust.defaultValue()`
+   * = SPACING (the field is never written as `'spacing'` by callers, D4).
+   * @see SkinParam.java:1258-1269
+   */
+  getlengthAdjust(): RootLengthAdjust | undefined {
+    const value = this.getValue('lengthAdjust');
+    return value === null ? undefined : LENGTH_ADJUST_BY_LOWER_NAME.get(value.toLowerCase());
   }
 
   /** @see SkinParam.java:223-225 */

@@ -38,7 +38,8 @@ work is documented as ignored, never fixed here (report it as a follow-on).
 ## Write-set
 `tests/fixtures/extensions/**`, `tests/oracle/svg-conformance/
 extensions.ratchet.test.ts`, `DIVERGENCES.md`, `docs-site/guide/
-<new page>.md` + the one nav/sidebar file that lists guide pages,
+styling-data-diagrams.md` + `docs-site/.vitepress/config.ts` (sidebar/nav entry
+only), 
 `plans/lengthadjust-document-wide/diagnosis/extension-audit.md`.
 
 ## Acceptance

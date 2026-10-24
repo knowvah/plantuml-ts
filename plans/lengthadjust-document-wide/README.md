@@ -141,7 +141,7 @@ Collected (JSON reporter) must equal on-disk. Check `uptime` first; above
 |---|---|---|---|
 | [0](batch-0/overview.md) | branch, tools, b0 measurement, authored fixtures + oracles, harness, mirror audit | T0a–T0d, close | [x] |
 | [1](batch-1/overview.md) | shell arms for the four re-routed types; class, state, json/yaml/hcl; D9 jar-compatible seam | T1a–T1e, close | [x] |
-| [2](batch-2/overview.md) | klimt-shaped engines (activity, description, mindmap, wbs, salt); board/files/packetdiag/chart re-route | T2a–T2f, close | [ ] |
+| [2](batch-2/overview.md) | klimt-shaped engines (activity, description, mindmap, wbs, salt); board/files/packetdiag/chart re-route | T2a–T2f, close | [x] |
 | [3](batch-3/overview.md) | extension (Amendment 1): audit, pinned examples, DIVERGENCES.md + docs-site | T3a, close | [ ] |
 | [exit](batch-exit/overview.md) | final measurement vs b0, baseline rebuild, docs, memory, PR prep | T-exit | [ ] |
 | [squash](batch-squash/overview.md) | one commit per batch; tag the working history | T-squash | [ ] |
