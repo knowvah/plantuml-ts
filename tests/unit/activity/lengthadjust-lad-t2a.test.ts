@@ -10,8 +10,7 @@ import { renderSync } from '../../../src/index.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { resolveTheme, type Theme } from '../../../src/core/theme.js';
 import { withActivityMeasurer } from '../../../src/diagrams/activity/activity-string-bounder.js';
-import { LengthAdjust } from '../../../src/core/klimt/drawing/svg/svg-option.js';
-import { lengthAdjustOption } from '../../../src/diagrams/activity/activity-length-adjust.js';
+import { LengthAdjust, lengthAdjustOverride } from '../../../src/core/klimt/drawing/svg/svg-option.js';
 import { renderActionLabel } from '../../../src/diagrams/activity/activity-creole-sheet.js';
 import {
   activityDisplayBlock,
@@ -54,10 +53,14 @@ describe('lad-T2a activity lengthAdjust', () => {
 
   it('maps the theme value to the klimt enum; unset adds nothing', () => {
     const base = resolveTheme('default');
-    expect(lengthAdjustOption(base)).toEqual({});
-    expect(lengthAdjustOption({ ...base, lengthAdjust: 'none' })).toEqual({ lengthAdjust: LengthAdjust.NONE });
-    expect(lengthAdjustOption({ ...base, lengthAdjust: 'spacing' })).toEqual({ lengthAdjust: LengthAdjust.SPACING });
-    expect(lengthAdjustOption({ ...base, lengthAdjust: 'spacingAndGlyphs' })).toEqual({
+    expect(lengthAdjustOverride(base.lengthAdjust)).toEqual({});
+    expect(lengthAdjustOverride('none')).toEqual({
+      lengthAdjust: LengthAdjust.NONE,
+    });
+    expect(lengthAdjustOverride('spacing')).toEqual({
+      lengthAdjust: LengthAdjust.SPACING,
+    });
+    expect(lengthAdjustOverride('spacingAndGlyphs')).toEqual({
       lengthAdjust: LengthAdjust.SPACING_AND_GLYPHS,
     });
   });

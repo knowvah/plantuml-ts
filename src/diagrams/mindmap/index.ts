@@ -18,11 +18,10 @@
 import { isDisplayPositionedNull, isEmpty } from '../../core/annotations/index.js';
 import { addWarnings } from '../../core/annotations/WarningBannerBlock.js';
 import type { RenderFragment, SyncPlugin } from '../../core/dispatcher.js';
-import type { RootLengthAdjust } from '../../core/svg.js';
 import { extractFlatContent, extractViewBoxDims, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
 import type { StringBounder as DriverStringBounder } from '../../core/klimt/drawing/svg/driver-text-svg.js';
 import { UGraphicHandwritten } from '../../core/klimt/drawing/hand/UGraphicHandwritten.js';
-import { LengthAdjust } from '../../core/klimt/drawing/svg/svg-option.js';
+import { lengthAdjustOverride } from '../../core/klimt/drawing/svg/svg-option.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics-core.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import { ColorMapper, mapPaint } from '../../core/klimt/color/ColorMapper.js';
@@ -134,17 +133,11 @@ interface DrawPass {
  *  (`backcolor.toSvg(option.getColorMapper())`, SvgGraphics.java:176-188).
  *  After the translate, `if (isHandwritten) ug = new UGraphicHandwritten(ug)`
  *  (TextBlockExporter.java:173-175), so the warnings banner jiggles too. */
-const KLIMT_LENGTH_ADJUST: Readonly<Record<RootLengthAdjust, LengthAdjust>> = {
-  spacing: LengthAdjust.SPACING,
-  spacingAndGlyphs: LengthAdjust.SPACING_AND_GLYPHS,
-  none: LengthAdjust.NONE,
-};
-
 function drawFragment(diagram: MindMapDiagram, measurer: StringMeasurer, pass: DrawPass): RenderFragment {
   const backcolor = mapPaint(diagram.calculateBackColor(), muteColorMapper(diagram));
   const lengthAdjust = diagram.getSkinParam().getlengthAdjust();
   const option = basicSvgOption({
-    ...(lengthAdjust === undefined ? {} : { lengthAdjust: KLIMT_LENGTH_ADJUST[lengthAdjust] }),
+    ...lengthAdjustOverride(lengthAdjust),
     minDim: { width: pass.minDim.getWidth(), height: pass.minDim.getHeight() },
     backcolor,
     scale: pass.scale,

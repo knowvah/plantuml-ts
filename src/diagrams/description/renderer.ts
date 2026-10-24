@@ -88,8 +88,7 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 import type { Theme } from '../../core/theme.js';
 import type { DescriptionGeometry } from './layout.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
-import { LengthAdjust } from '../../core/klimt/drawing/svg/svg-option.js';
-import type { RootLengthAdjust } from '../../core/svg.js';
+import { lengthAdjustOverride } from '../../core/klimt/drawing/svg/svg-option.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { jarMeasurer } from '../../core/measurer-jar.js';
@@ -163,13 +162,6 @@ function degenerateDims(geo: DescriptionGeometry, margin: DocumentMargin): Docum
     height: leaf.height + DEGENERATE_DELTA * 2 + margin.top + margin.bottom,
   };
 }
-
-/** `SkinParam#getlengthAdjust` (`SkinParam.java:1258-1269`) as klimt's `LengthAdjust` enum. */
-const KLIMT_LENGTH_ADJUST: Readonly<Record<RootLengthAdjust, LengthAdjust>> = {
-  spacing: LengthAdjust.SPACING,
-  spacingAndGlyphs: LengthAdjust.SPACING_AND_GLYPHS,
-  none: LengthAdjust.NONE,
-};
 
 /** `EntityImageDegenerated#delta` (`svek/EntityImageDegenerated.java:55`). */
 const DEGENERATE_DELTA = 7;
@@ -299,7 +291,7 @@ export function renderDescription(
     rootAttributes: new Map([['data-diagram-type', DIAGRAM_TYPE_DESCRIPTION]]),
     // lad-T2b: `TextBlockExporter.java:306-307` (`option.withLengthAdjust(skinParam.getlengthAdjust())`);
     // unset keeps `basicSvgOption`'s SPACING default (D4).
-    ...(theme.lengthAdjust !== undefined ? { lengthAdjust: KLIMT_LENGTH_ADJUST[theme.lengthAdjust] } : {}),
+    ...lengthAdjustOverride(theme.lengthAdjust),
   });
   const ug = UGraphicSvg.build(geo.seed ?? 0n, option, VERSION_PLACEHOLDER, driverBounder, measurer);
 

@@ -35,6 +35,37 @@ post-D7 measurements.
 
 ---
 
+## lengthadjust-document-wide (lad) — DONE 2026-10-24 (branch `feat/lengthadjust-document-wide` off `bf18ede54`, one commit per batch after the squash, unsigned, not pushed; lands via PR after the user's `git rebase --force-rebase -S bf18ede54`; working history on the local tag `lad/pre-squash`)
+
+`skinparam lengthAdjust` now applies document-wide as the jar does
+(`TextBlockExporter.java:306-307`): 64/64 authored rows root-exact (b0 40),
+51/64 `textLength`-exact (b0 42; 13 baseline rows all improved), Σ 4121 → 1711;
+0 conformant losses in 28 engines; board/files/packet/chart now route through
+the document shell (`data-diagram-type`, full root `<svg>` attribute set).
+User ruling 2026-10-23 (Amendment 1): json/yaml/hcl/files styling the jar drops
+(`StyleExtractor.java:88-96`) is honoured as a documented extension
+(DIVERGENCES.md "Extensions"; `docs-site/guide/styling-data-diagrams.md`);
+conformance renders through the internal jar-compatible mode
+(`src/core/internal-render-options.ts`).
+
+Follow-ons:
+- **Extension gaps (T3a audit, `plans/lengthadjust-document-wide/diagnosis/
+  extension-audit.md`):** `skinparam defaultFontColor` is ignored in
+  json/yaml/hcl while `defaultFontName`/`Size` work (likely a missing theme →
+  json text colour mapping); files ignores `defaultFontName`/`Size` and node
+  `<style>` (only `document` works). Extension work, no jar target: measure
+  against the directive-free render, document in DIVERGENCES.md "Extensions".
+- **13 `textLength` baseline rows:** board, packet and chart (default /
+  glyphs / onechar) and files (all four) emit no `textLength` where the jar
+  does (`SvgGraphics.java:699-705`). Owner: each engine's own drive (all four
+  are 0-conformant engines; their geometry gaps dominate).
+- Non-targets kept as-is (D8): `@startdot` passthrough, `PlainDiagram`
+  utility/error pages (no SkinParam at `TextBlockExporter.java:306`), the
+  unported engines, the per-element `lengthAdjust: 'spacing'` literals in the
+  class/state renderers.
+
+---
+
 ## sequence-divergence-drive-3 (sdd3) — DONE 2026-10-24 (branch `feat/sequence-divergence-drive-3`, one signed commit per batch, pushed; PR #89 open against main; working history on the local tag `sdd3/pre-squash`)
 
 **What changed:** the last 101 open sequence rows went to zero and were pinned:
@@ -112,9 +143,9 @@ unknown-bucket twins of sequence rows (nuzise, baketu, tumuke).
   (`creole-atoms-img.ts` + `sax-text-image-use-decode.ts`), `parseNumberList`
   (two copies), `UImageSvg#manageScale` (option-scale-aware copy in the
   driver).
-- **Carried from earlier batches:** other engines still emit root
-  `lengthAdjust="spacing"` under `skinparam lengthAdjust none` (T2c);
-  description/non-ELK class sprite tints use the block font (T2h); flat-run
+- **Carried from earlier batches:** ~~other engines still emit root
+  `lengthAdjust="spacing"` under `skinparam lengthAdjust none` (T2c)~~ DONE by
+  lad 2026-10-24 (section above); description/non-ELK class sprite tints use the block font (T2h); flat-run
   engines cannot draw a stacked url label (T2e); `root { Margin }` cascades
   into sequence participants (~40 px, T2d); legend chrome ignores `skinparam
   roundcorner` (T3a A3); class paths without a string bounder would throw on a

@@ -65,7 +65,7 @@ import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
-import { lengthAdjustOption } from './activity-length-adjust.js';
+import { lengthAdjustOverride } from '../../core/klimt/drawing/svg/svg-option.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { extractFlatContent } from '../../core/klimt/document-shell-fragment.js';
 import { activityMeasurer } from './activity-string-bounder.js';
@@ -274,7 +274,8 @@ export function drawActionTextBlock(tb: TextBlock, x: number, y: number, ctx: Dr
   };
   const option = basicSvgOption({
     ...(theme.svgLinkTarget === undefined ? {} : { linkTarget: theme.svgLinkTarget }),
-    ...lengthAdjustOption(theme),
+    // lad-T2a (D3): `TextBlockExporter.java:306-307`.
+    ...lengthAdjustOverride(theme.lengthAdjust),
   });
   const ug = UGraphicSvg.build(0, option, THROWAWAY_VERSION, driverBounder, measurer);
   tb.drawU(ctx.changes.reduce<UGraphic>((g, c) => g.apply(c), ug.apply(new UTranslate(x, y))));

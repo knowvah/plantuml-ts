@@ -11,6 +11,7 @@
 import type { ColorMapper, HColorOrPaint } from '../../color/ColorMapper.js';
 import type { Dimension2D } from '../../shape/UEllipse.js';
 import { DEFAULT_SVG_DECIMALS } from '../../../svg-format.js';
+import type { RootLengthAdjust } from '../../../svg.js';
 
 /** Upstream: `style/LengthAdjust.java` (a 3-value enum), ported as an
  * as-const object — too small for its own file. */
@@ -20,6 +21,23 @@ export const LengthAdjust = {
   SPACING_AND_GLYPHS: 'SPACING_AND_GLYPHS',
 } as const;
 export type LengthAdjust = (typeof LengthAdjust)[keyof typeof LengthAdjust];
+
+/** The port's `SkinParam#getlengthAdjust` value as the klimt enum -- the same
+ *  three names (`style/LengthAdjust.java:38-43`). */
+const LENGTH_ADJUST_OF_ROOT: Readonly<Record<RootLengthAdjust, LengthAdjust>> = {
+  spacing: LengthAdjust.SPACING,
+  spacingAndGlyphs: LengthAdjust.SPACING_AND_GLYPHS,
+  none: LengthAdjust.NONE,
+};
+
+/**
+ * The `SvgOption` override for `skinParam.getlengthAdjust()`
+ * (`TextBlockExporter.java:306-307` `option.withLengthAdjust(...)`); empty when
+ * unset so `basicSvgOption`'s SPACING default stays implicit (lad D4).
+ */
+export function lengthAdjustOverride(adjust: RootLengthAdjust | undefined): Partial<SvgOption> {
+  return adjust === undefined ? {} : { lengthAdjust: LENGTH_ADJUST_OF_ROOT[adjust] };
+}
 
 /** Upstream: the nested enum `HColor.TransparentFillBehavior`. */
 export const TransparentFillBehavior = {

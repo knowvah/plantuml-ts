@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — EXECUTING (started 2026-10-23); Amendment 1 (user ruling) in decisions.md
+## Status — DONE 2026-10-24 (started 2026-10-23); Amendment 1 (user ruling) in decisions.md
 
 ## Objective
 
@@ -143,8 +143,8 @@ Collected (JSON reporter) must equal on-disk. Check `uptime` first; above
 | [1](batch-1/overview.md) | shell arms for the four re-routed types; class, state, json/yaml/hcl; D9 jar-compatible seam | T1a–T1e, close | [x] |
 | [2](batch-2/overview.md) | klimt-shaped engines (activity, description, mindmap, wbs, salt); board/files/packetdiag/chart re-route | T2a–T2f, close | [x] |
 | [3](batch-3/overview.md) | extension (Amendment 1): audit, pinned examples, DIVERGENCES.md + docs-site | T3a, close | [x] |
-| [exit](batch-exit/overview.md) | final measurement vs b0, baseline rebuild, docs, memory, PR prep | T-exit | [ ] |
-| [squash](batch-squash/overview.md) | one commit per batch; tag the working history | T-squash | [ ] |
+| [exit](batch-exit/overview.md) | final measurement vs b0, baseline rebuild, docs, memory, PR prep | T-exit | [x] |
+| [squash](batch-squash/overview.md) | one commit per batch; tag the working history | T-squash | [x] |
 
 ## Documents
 
@@ -169,3 +169,31 @@ Collected (JSON reporter) must equal on-disk. Check `uptime` first; above
   pattern T0c copies.
 - `plans/sequence-divergence-drive-3/batch-squash/overview.md` — the D11
   squash procedure this brief's squash batch repeats.
+
+## Final status (2026-10-24)
+
+| checkpoint | rootExact | textLength exact | baseline rows | Σ score | 28-engine vs b0 | gates |
+|---|---:|---:|---:|---:|---|---|
+| b0 (`accb08bb5`) | 40/64 | 42 | 13 | 4121 | — | 1577/1577, 0 failed |
+| b1 (`724235b2c`) | 46 | 45 | 13 | 4109 | 0 movers, 0 losses | 1582/1582 |
+| b2 (`d486af48d`) | 64 | 51 | 13 | 1711 | 0 movers, 0 losses | 1591/1591 (after a catalog fix) |
+| b3 (`05b08187f`) | 64 | 51 | 13 | 1711 | 0 movers, 0 losses | 1592/1592 |
+| final (`786438c18`) | **64/64** | **51/51 exact rows** | 13 (all improved) | 1711 | 0 movers, 0 losses | 1592/1592, 0 failed |
+
+- Tasks: 18 planned + amended (T0a–T0d, T1a–T1e, T2a–T2f, T3a, exit dedupe) —
+  all done. One halt (stop 3, journal row 4) resolved by the user's extension
+  ruling (Amendment 1: D9 seam, D10 docs; T1e and batch 3 added).
+- Decisions journaled: 32 rows. **Flagged for review:** row 21 (T2a wrote a new
+  helper file outside its write-set — since removed by the dedupe), row 24 (T2f
+  updated 12 pre-existing renderer-test assertions outside its write-set as a
+  direct consequence of D2), row 18 (T2b write-set extended by
+  `description/index.ts`).
+- Output changes: `skinparam lengthAdjust none|spacingAndGlyphs` now honoured
+  by class, object, state, activity, component, usecase, c4, mindmap, wbs,
+  salt, board, files, packet, chart (and json/yaml/hcl/files as an extension);
+  board/files/packet/chart root `<svg>` now carries the jar's attribute set
+  incl. `data-diagram-type`; json/yaml/hcl/files honour their skinparams and
+  hcl its `<style>`/`skin`/`!theme` by default (jar-compatible mode for
+  conformance).
+- Follow-ons: `planning/next-missions.md` lad section (extension gaps, the 13
+  baseline rows' emitter gap).

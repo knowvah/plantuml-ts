@@ -1,6 +1,6 @@
 # Exit — final measurement, ledger, docs, PR prep
 
-Agent: orchestrator. Runs after the batch 3 close. Commits:
+Agent: orchestrator. Runs after the batch 3 close. **DONE 2026-10-24** (step 4 ran before step 1 — journal row 30). Commits:
 `chore(lad-exit): d8 exit bar — 64/64 root-exact, 0 losses`, then
 `docs(lad): close out`.
 
