@@ -44,6 +44,7 @@ import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
+import { lengthAdjustOverride } from '../../core/klimt/drawing/svg/svg-option.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { extractFlatContent } from '../../core/klimt/document-shell-fragment.js';
 import { activityMeasurer } from './activity-string-bounder.js';
@@ -207,7 +208,11 @@ export function drawActivityTextBlock(
       return { width: measurer.measure(text, { family: fc.family, size: f.size }).width };
     },
   };
-  const option = basicSvgOption(theme.svgLinkTarget === undefined ? {} : { linkTarget: theme.svgLinkTarget });
+  const option = basicSvgOption({
+    ...(theme.svgLinkTarget === undefined ? {} : { linkTarget: theme.svgLinkTarget }),
+    // lad-T2a (D3): `TextBlockExporter.java:306-307`.
+    ...lengthAdjustOverride(theme.lengthAdjust),
+  });
   const ug = UGraphicSvg.build(0, option, THROWAWAY_VERSION, driverBounder, measurer);
   tb.drawU(changes.reduce<UGraphic>((g, c) => g.apply(c), ug.apply(new UTranslate(at.x, at.y))));
   const { body, extraDefs } = extractFlatContent(ug.getSvgString());

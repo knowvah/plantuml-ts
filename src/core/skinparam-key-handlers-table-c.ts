@@ -17,6 +17,14 @@ const LENGTH_ADJUST_BY_LOWER_NAME: ReadonlyMap<string, RootLengthAdjust> = new M
   ['none', 'none'],
 ]);
 
+/** `SkinParam#getlengthAdjust` over one raw value: the three names
+ *  `equalsIgnoreCase` (`SkinParam.java:1258-1269`), anything else `undefined`
+ *  (= `LengthAdjust.defaultValue()`, SPACING). Shared by the theme table below
+ *  and the mindmap/wbs/salt SkinParam ports (lad D1). */
+export function lengthAdjustOfName(value: string): RootLengthAdjust | undefined {
+  return LENGTH_ADJUST_BY_LOWER_NAME.get(value.toLowerCase());
+}
+
 export const KEY_HANDLERS_C: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> = [
   // T2c (ex-T2a): `SkinParam.getConditionStyle` (`skin/SkinParam.java:
   // 997-1004`) via `ConditionStyle.fromString` (`svek/ConditionStyle.java:
@@ -52,8 +60,7 @@ export const KEY_HANDLERS_C: ReadonlyArray<readonly [keys: readonly string[], ha
   [
     ['lengthadjust'],
     (acc, value) => {
-      const v = value.trim().toLowerCase();
-      acc.lengthAdjust = LENGTH_ADJUST_BY_LOWER_NAME.get(v);
+      acc.lengthAdjust = lengthAdjustOfName(value.trim());
     },
   ],
   // add2 T3e (family F): `SkinParam#useUnderlineForHyperlink()`

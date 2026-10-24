@@ -32,6 +32,7 @@ import { fromString as colorOrderFromString } from '../../core/klimt/color/Color
 import { extractFlatContent, extractViewBoxDims, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
 import { UGraphicHandwritten } from '../../core/klimt/drawing/hand/UGraphicHandwritten.js';
 import type { StringBounder as DriverStringBounder } from '../../core/klimt/drawing/svg/driver-text-svg.js';
+import { lengthAdjustOverride } from '../../core/klimt/drawing/svg/svg-option.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics-core.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
@@ -132,6 +133,8 @@ function svgGraphic(diagram: PSystemSalt, measurer: StringMeasurer, pass: DrawPa
     colorMapper: muteColorMapper(diagram),
     scale: pass.scale,
     rootAttributes: new Map([['data-diagram-type', DIAGRAM_TYPE_SALT]]),
+    // lad-T2e: `TextBlockExporter.java:306-307`.
+    ...lengthAdjustOverride(diagram.getSkinParam().getlengthAdjust()),
   });
   return UGraphicSvg.build(0, option, VERSION_PLACEHOLDER, driverBounderFor(measurer), measurer);
 }
@@ -160,7 +163,9 @@ function drawFragment(diagram: PSystemSalt, measurer: StringMeasurer, pass: Draw
   const { body, extraDefs } = extractFlatContent(svg);
   const fragment: RenderFragment = { body, width, height, diagramType: DIAGRAM_TYPE_SALT };
   const withBackground = typeof backcolor === 'string' ? { ...fragment, background: backcolor } : fragment;
-  return extraDefs.length > 0 ? { ...withBackground, extraDefs } : withBackground;
+  const withDefs = extraDefs.length > 0 ? { ...withBackground, extraDefs } : withBackground;
+  const lengthAdjust = diagram.getSkinParam().getlengthAdjust();
+  return lengthAdjust === undefined ? withDefs : { ...withDefs, lengthAdjust };
 }
 
 /** `TextBlockUtils.getMinMax(block, sb, false)`: the ink a mainframe

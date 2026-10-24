@@ -1,0 +1,5 @@
+@startchart
+h-axis [A, Bravo]
+v-axis 0 --> 100
+bar [45, 62]
+@endchart

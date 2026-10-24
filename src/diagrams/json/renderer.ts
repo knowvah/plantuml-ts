@@ -379,6 +379,18 @@ function handwrittenDims(ink: PenInk, theme: Theme): { width: number; height: nu
   };
 }
 
+/**
+ * `skinparam lengthAdjust` carrier (D4: spread only when defined, never
+ * `'spacing'`). EXTENSION, user ruling 2026-10-23 (decisions.md Amendment 1):
+ * the jar ignores the skinparam for json/yaml/hcl (`StyleExtractor.java:
+ * 88-96`), so `theme.lengthAdjust` is `undefined` in jar-compatible mode and
+ * the output stays SPACING. Otherwise the jar's mechanism applies:
+ * `TextBlockExporter.java:306-307`, `SvgGraphics.java:155-158,699-705`.
+ */
+function lengthAdjustOf(theme: Theme): Pick<RenderFragment, 'lengthAdjust'> {
+  return theme.lengthAdjust === undefined ? {} : { lengthAdjust: theme.lengthAdjust };
+}
+
 export function renderJson(rawGeo: JsonGeometry, rawTheme: Theme): RenderFragment {
   // `scale …` (StyleExtractor.java:82-83 -> JsonDiagram.java:90-99). Resolved
   // HERE, against the unscaled dims, because that is the order upstream uses:
@@ -408,7 +420,7 @@ export function renderJson(rawGeo: JsonGeometry, rawTheme: Theme): RenderFragmen
   const geo = scaleJsonGeometry(rawGeo, k);
   const theme = rawTheme;
 
-  if (geo.error !== undefined) return renderParseFailure(geo);
+  if (geo.error !== undefined) return { ...renderParseFailure(geo), ...lengthAdjustOf(theme) };
 
   if (geo.nodes.length === 0) {
     return { body: '', width: 0, height: 0 };
@@ -446,5 +458,6 @@ export function renderJson(rawGeo: JsonGeometry, rawTheme: Theme): RenderFragmen
     body: parts.join(''),
     ...dims,
     background: theme.colors.background,
+    ...lengthAdjustOf(theme),
   };
 }

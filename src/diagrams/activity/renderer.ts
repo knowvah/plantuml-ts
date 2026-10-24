@@ -445,6 +445,9 @@ export function renderActivity(geo: ActivityGeometry, skinTheme: Theme): RenderF
     // common case, mirroring `preserveAspectRatio` below.
     ...(theme.colors.backgroundGradient !== undefined ? { backgroundGradient: theme.colors.backgroundGradient } : {}),
     diagramType: DIAGRAM_TYPE_ACTIVITY,
+    // lad-T2a: `TextBlockExporter.java:306-307` -- `skinparam lengthAdjust`; spread
+    // only when set so unset output stays byte-identical (D4).
+    ...(theme.lengthAdjust !== undefined ? { lengthAdjust: theme.lengthAdjust } : {}),
     // T3j: `index.ts#applyAnnotationChrome`'s activity branch undoes the
     // document-margin shift baked into `body` above, composes chrome around
     // the result at these RAW dims, then re-applies the margin to the

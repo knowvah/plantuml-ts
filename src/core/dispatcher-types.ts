@@ -322,9 +322,13 @@ export interface SyncPlugin<AST = unknown, Geo = unknown> extends Partial<Pagina
    */
   render(geo: Geo, theme: Theme, measurer?: StringMeasurer): AssembledSvg;
   /**
-   * The style sources this engine's theme is built from, for an engine that
-   * does NOT execute every `skinparam`/`!theme` the preprocessor collected.
-   * Absent = all of them, which is every engine with a command table. The
+   * The jar-compatible normalisation of this engine's style input: the style
+   * sources the JAR builds its theme from, for an engine whose jar path does
+   * NOT execute every `skinparam`/`!theme` the preprocessor collected. Applied
+   * ONLY when the internal `jarCompatibleStyleInput` option is set (conformance
+   * renders, `InternalRenderOptions`); the library default honours the full
+   * input as a documented port extension (lad D9, user ruling 2026-10-23).
+   * Absent = nothing is cut, which is every engine with a command table. The
    * json family (`@startjson`/`@startyaml`/`@starthcl`) has none upstream and
    * keeps only `skinparam handwritten` (`StyleExtractor.java:88-97`).
    */
@@ -346,7 +350,7 @@ export interface AsyncPlugin<AST = unknown, Geo = unknown> extends Partial<Pagin
    * same instrument as its layout side. Plugins that ignore it are unchanged.
    */
   render(geo: Geo, theme: Theme, measurer?: StringMeasurer): AssembledSvg;
-  /** See {@link SyncPlugin.styleInput}. */
+  /** See {@link SyncPlugin.styleInput} (jar-compatible mode only, D9). */
   styleInput?(preprocessed: PreprocessorResult, source: UmlSource): PreprocessorResult;
 }
 

@@ -1,0 +1,4 @@
+@startuml
+class Alpha
+class Bravo
+@enduml

@@ -1,0 +1,7 @@
+@starthcl
+skinparam lengthAdjust spacingAndGlyphs
+blk {
+  Alpha = "Xyz"
+  Bravo = "Uvw"
+}
+@endhcl

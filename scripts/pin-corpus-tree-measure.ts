@@ -18,6 +18,7 @@ import { readFileSync, readdirSync, existsSync, openSync, readSync, closeSync } 
 import { join } from 'node:path';
 
 import { renderSync } from '../src/index.js';
+import { withJarCompatibleStyleInput } from '../src/core/internal-render-options.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { fullDescription } from '../src/core/version.js';
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
@@ -114,7 +115,10 @@ export function measureFixture(
 ): MeasuredFixture {
   const dir = join(treeDir, slug);
   const markup = readFileSync(join(dir, 'in.puml'), 'utf8');
-  const ours = renderSync(markup, { includeStore: store, measurer: new DeterministicMeasurer() });
+  const ours = renderSync(
+    markup,
+    withJarCompatibleStyleInput({ includeStore: store, measurer: new DeterministicMeasurer() }),
+  );
   const golden = readHead(join(dir, 'in.svg'));
   const jarErrored = isJarErrorPage(golden);
   const weErrored = weErroredIn(ours);

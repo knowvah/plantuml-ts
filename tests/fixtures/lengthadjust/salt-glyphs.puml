@@ -1,0 +1,6 @@
+@startsalt
+skinparam lengthAdjust spacingAndGlyphs
+{
+Alpha | Bravo
+}
+@endsalt

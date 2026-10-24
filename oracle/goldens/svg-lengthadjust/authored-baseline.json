@@ -1,0 +1,659 @@
+{
+  "measuredAt": "2026-10-24",
+  "commit": "786438c18",
+  "rows": [
+    {
+      "slug": "activity-default",
+      "engine": "activity",
+      "variant": "default",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "activity-glyphs",
+      "engine": "activity",
+      "variant": "glyphs",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "activity-none",
+      "engine": "activity",
+      "variant": "none",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "activity-onechar",
+      "engine": "activity",
+      "variant": "onechar",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "board-default",
+      "engine": "board",
+      "variant": "default",
+      "score": 22,
+      "diffCount": 22,
+      "rootExact": true,
+      "textLength": "baseline",
+      "textLengthMatch": false,
+      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+    },
+    {
+      "slug": "board-glyphs",
+      "engine": "board",
+      "variant": "glyphs",
+      "score": 22,
+      "diffCount": 22,
+      "rootExact": true,
+      "textLength": "baseline",
+      "textLengthMatch": false,
+      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+    },
+    {
+      "slug": "board-none",
+      "engine": "board",
+      "variant": "none",
+      "score": 18,
+      "diffCount": 18,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "board-onechar",
+      "engine": "board",
+      "variant": "onechar",
+      "score": 20,
+      "diffCount": 20,
+      "rootExact": true,
+      "textLength": "baseline",
+      "textLengthMatch": false,
+      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+    },
+    {
+      "slug": "chart-default",
+      "engine": "chart",
+      "variant": "default",
+      "score": 156,
+      "diffCount": 103,
+      "rootExact": true,
+      "textLength": "baseline",
+      "textLengthMatch": false,
+      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+    },
+    {
+      "slug": "chart-glyphs",
+      "engine": "chart",
+      "variant": "glyphs",
+      "score": 156,
+      "diffCount": 103,
+      "rootExact": true,
+      "textLength": "baseline",
+      "textLengthMatch": false,
+      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+    },
+    {
+      "slug": "chart-none",
+      "engine": "chart",
+      "variant": "none",
+      "score": 149,
+      "diffCount": 97,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "chart-onechar",
+      "engine": "chart",
+      "variant": "onechar",
+      "score": 155,
+      "diffCount": 102,
+      "rootExact": true,
+      "textLength": "baseline",
+      "textLengthMatch": false,
+      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+    },
+    {
+      "slug": "class-default",
+      "engine": "class",
+      "variant": "default",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "class-glyphs",
+      "engine": "class",
+      "variant": "glyphs",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "class-none",
+      "engine": "class",
+      "variant": "none",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "class-onechar",
+      "engine": "class",
+      "variant": "onechar",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "component-default",
+      "engine": "component",
+      "variant": "default",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "component-glyphs",
+      "engine": "component",
+      "variant": "glyphs",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "component-none",
+      "engine": "component",
+      "variant": "none",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "component-onechar",
+      "engine": "component",
+      "variant": "onechar",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "files-default",
+      "engine": "files",
+      "variant": "default",
+      "score": 29,
+      "diffCount": 15,
+      "rootExact": true,
+      "textLength": "baseline",
+      "textLengthMatch": false,
+      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+    },
+    {
+      "slug": "files-glyphs",
+      "engine": "files",
+      "variant": "glyphs",
+      "score": 29,
+      "diffCount": 15,
+      "rootExact": true,
+      "textLength": "baseline",
+      "textLengthMatch": false,
+      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+    },
+    {
+      "slug": "files-none",
+      "engine": "files",
+      "variant": "none",
+      "score": 29,
+      "diffCount": 15,
+      "rootExact": true,
+      "textLength": "baseline",
+      "textLengthMatch": false,
+      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+    },
+    {
+      "slug": "files-onechar",
+      "engine": "files",
+      "variant": "onechar",
+      "score": 28,
+      "diffCount": 14,
+      "rootExact": true,
+      "textLength": "baseline",
+      "textLengthMatch": false,
+      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+    },
+    {
+      "slug": "hcl-default",
+      "engine": "hcl",
+      "variant": "default",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "hcl-glyphs",
+      "engine": "hcl",
+      "variant": "glyphs",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "hcl-none",
+      "engine": "hcl",
+      "variant": "none",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "hcl-onechar",
+      "engine": "hcl",
+      "variant": "onechar",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "json-default",
+      "engine": "json",
+      "variant": "default",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "json-glyphs",
+      "engine": "json",
+      "variant": "glyphs",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "json-none",
+      "engine": "json",
+      "variant": "none",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "json-onechar",
+      "engine": "json",
+      "variant": "onechar",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "mindmap-default",
+      "engine": "mindmap",
+      "variant": "default",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "mindmap-glyphs",
+      "engine": "mindmap",
+      "variant": "glyphs",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "mindmap-none",
+      "engine": "mindmap",
+      "variant": "none",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "mindmap-onechar",
+      "engine": "mindmap",
+      "variant": "onechar",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "object-default",
+      "engine": "object",
+      "variant": "default",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "object-glyphs",
+      "engine": "object",
+      "variant": "glyphs",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "object-none",
+      "engine": "object",
+      "variant": "none",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "object-onechar",
+      "engine": "object",
+      "variant": "onechar",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "packet-default",
+      "engine": "packet",
+      "variant": "default",
+      "score": 226,
+      "diffCount": 39,
+      "rootExact": true,
+      "textLength": "baseline",
+      "textLengthMatch": false,
+      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+    },
+    {
+      "slug": "packet-glyphs",
+      "engine": "packet",
+      "variant": "glyphs",
+      "score": 226,
+      "diffCount": 39,
+      "rootExact": true,
+      "textLength": "baseline",
+      "textLengthMatch": false,
+      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+    },
+    {
+      "slug": "packet-none",
+      "engine": "packet",
+      "variant": "none",
+      "score": 222,
+      "diffCount": 35,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "packet-onechar",
+      "engine": "packet",
+      "variant": "onechar",
+      "score": 224,
+      "diffCount": 37,
+      "rootExact": true,
+      "textLength": "baseline",
+      "textLengthMatch": false,
+      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+    },
+    {
+      "slug": "salt-default",
+      "engine": "salt",
+      "variant": "default",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "salt-glyphs",
+      "engine": "salt",
+      "variant": "glyphs",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "salt-none",
+      "engine": "salt",
+      "variant": "none",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "salt-onechar",
+      "engine": "salt",
+      "variant": "onechar",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "state-default",
+      "engine": "state",
+      "variant": "default",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "state-glyphs",
+      "engine": "state",
+      "variant": "glyphs",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "state-none",
+      "engine": "state",
+      "variant": "none",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "state-onechar",
+      "engine": "state",
+      "variant": "onechar",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "usecase-default",
+      "engine": "usecase",
+      "variant": "default",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "usecase-glyphs",
+      "engine": "usecase",
+      "variant": "glyphs",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "usecase-none",
+      "engine": "usecase",
+      "variant": "none",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "usecase-onechar",
+      "engine": "usecase",
+      "variant": "onechar",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "wbs-default",
+      "engine": "wbs",
+      "variant": "default",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "wbs-glyphs",
+      "engine": "wbs",
+      "variant": "glyphs",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "wbs-none",
+      "engine": "wbs",
+      "variant": "none",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "wbs-onechar",
+      "engine": "wbs",
+      "variant": "onechar",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "yaml-default",
+      "engine": "yaml",
+      "variant": "default",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "yaml-glyphs",
+      "engine": "yaml",
+      "variant": "glyphs",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "yaml-none",
+      "engine": "yaml",
+      "variant": "none",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    },
+    {
+      "slug": "yaml-onechar",
+      "engine": "yaml",
+      "variant": "onechar",
+      "score": 0,
+      "diffCount": 0,
+      "rootExact": true,
+      "textLength": "exact",
+      "textLengthMatch": true
+    }
+  ]
+}

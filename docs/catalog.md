@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1774 modules · 6646 exported names.
+1776 modules · 6652 exported names.
 
 ## `src/`
 
@@ -72,6 +72,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `include-resolver-timeout.ts` | `withIncludeTimeout` | Bounding one include fetch by time -- the port of upstream's `Future#get(SecurityUtils.getSecurityProfile().getTimeout(), MILLISECONDS)` around every URL read (`security/SURL.java:357-358`, :402, :438). |
 | `include-resolver.ts` | `MapIncludeStore`, `IncludeNotFoundError`, `StdlibNotBundledError`, `EMPTY_INCLUDE_STORE`, `IncludeStore`, `IncludeFetcher`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `fetchInclude`, `prefetchIncludes`, `IncludeWarmupOptions`, `prepareIncludeStore` | The ASYNC half of the include seam. |
 | `internal-emoji-store.ts` | `INTERNAL_EMOJI_ASSET_PREFIX`, `internalEmojiAssetKey`, `InternalEmojiStore`, `EmojiArtworkResolver`, `emojiArtworkResolverFor`, `internalEmojiStoreFrom` | The Twemoji artwork half of `<:name:>` emoji rendering. |
+| `internal-render-options.ts` | `InternalRenderOptions`, `isJarCompatibleStyleInput`, `withJarCompatibleStyleInput` |  |
 | `internal-sprite-store.ts` | `INTERNAL_SPRITE_ASSET_PREFIX`, `internalSpriteAssetKey`, `InternalSpriteStore`, `readPng`, `internalSpriteStoreFrom`, `matchJarSpriteLine` | `SpriteImage.fromInternal` (java `klimt/sprite/SpriteImage.java:100-128`) — the jar-internal `/sprites/**` bundle, ported onto ADR-2's synchronous asset channel (`plans/s1l-tail-fix/decisions.md`). |
 | `java-hash-set.ts` | `javaDoubleHashCode`, `javaHashSetOrder` | java-hash-set.ts — the iteration order of a `java.util.HashSet` built by successive `add` calls, for code upstream iterates straight out of a `HashSet` (e.g. |
 | `java-whitespace.ts` | `isJavaWhitespaceAt` | `Character.isWhitespace(char)`, enumerated. |
@@ -108,7 +109,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `skinparam-key-handlers-shared.ts` | `arrowFontColorValue`, `ROOT_LINE_COLOR_KEY`, `KeyHandler`, `parseFiniteNumber`, `parseFiniteFloat`, `parseFiniteInt`, `parseNonZeroInt`, `parseFontStyleFlags`, `applyGuillemet` | Shared `KeyHandler` type + parse helpers for the skinparam key→handler table. |
 | `skinparam-key-handlers-table-a.ts` | `KEY_HANDLERS_A` | Key -> handler table, half A (entries 1-36 of 73: backgroundcolor through style) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this project's 5 |
 | `skinparam-key-handlers-table-b.ts` | `parseHorizontalAlignment`, `KEY_HANDLERS_B` | Key -> handler table, half B (entries 37-73 of 73: footbox through swimlanebordercolor) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this proj |
-| `skinparam-key-handlers-table-c.ts` | `KEY_HANDLERS_C` | Table-driven dispatch, continued — see `skinparam-key-handlers.ts`'s own doc comment for the full module map and why the table is split (`-table- a.ts`/`-table-b.ts` were both already at the 500-line cap). |
+| `skinparam-key-handlers-table-c.ts` | `lengthAdjustOfName`, `KEY_HANDLERS_C` | Table-driven dispatch, continued — see `skinparam-key-handlers.ts`'s own doc comment for the full module map and why the table is split (`-table- a.ts`/`-table-b.ts` were both already at the 500-line cap). |
 | `skinparam-key-handlers.ts` | `resolveColorPaint`, `applyNormalKey` | Table-driven dispatch for normalized (non stereotype-qualified) skinparam keys — the body of upstream SkinParam.java's key switch. |
 | `skinparam-key-normalize.ts` | `UNPARSEABLE_COLOR`, `isColorSpec`, `resolveColor`, `normaliseKey` | Skinparam key/value normalisation primitives. |
 | `skinparam-stereo-keys.ts` | `applyStereoOverride` | Stereotype-qualified skinparam key handling (`key.includes('<<')` branch). |
@@ -658,7 +659,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svg-graphics-shadow.ts` | `SvgGraphicsShadow` | svg-graphics-shadow.ts — the `<filter>` def machinery for drop shadows and text-backcolor filters. |
 | `svg-graphics.ts` | `SvgOption`, `basicSvgOption`, `LengthAdjust`, `TransparentFillBehavior`, `TextOptions`, `RectangleGeometry`, `META_HEADER`, `getMetadataHex`, `SvgGraphics`, `UGroupType`, `XmlNode` | svg-graphics.ts — the single upstream-named `SvgGraphics` entry point. |
 | `svg-linear-gradient.ts` | `NumberFormat`, `buildLinearGradientKey`, `createLinearGradientElement`, `appendLinearGradientStops` | svg-linear-gradient.ts -- the multi-stop half of `SvgGraphics#createSvgGradient`. |
-| `svg-option.ts` | `LengthAdjust`, `TransparentFillBehavior`, `SvgOption`, `basicSvgOption` | svg-option.ts -- the `SvgOption` shape and the two small enums it carries. |
+| `svg-option.ts` | `LengthAdjust`, `lengthAdjustOverride`, `TransparentFillBehavior`, `SvgOption`, `basicSvgOption` | svg-option.ts -- the `SvgOption` shape and the two small enums it carries. |
 | `svg-seed.ts` | `getSeed`, `seedOf`, `gradientVector` | UmlSource seed hashing (seedOf/getSeed) + gradient-vector policy for the SVG emitter. |
 | `u-graphic-svg.ts` | `UGraphicSvg` | u-graphic-svg.ts — `UGraphicSvg`, the concrete SVG backend that wires every `Driver*Svg` from this task into `AbstractCommonUGraphic`'s driver registry and owns the shared `SvgGraphics` document. |
 | `xml-writer.ts` | `XmlContent`, `XmlWriter`, `XmlLeaf`, `XmlNode`, `XmlDocument` | xml-writer.ts — the dependency-free XML/SVG node stack `SvgGraphics` builds its document out of: a streaming text writer (`XmlWriter`) plus a small eager DOM (`XmlDocument`/`XmlNode`/`XmlLeaf`/`XmlContent`). |
@@ -1830,6 +1831,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `ast.ts` | `FileEntryType`, `FileEntry`, `FilesDiagramAST`, `EntryGeometry`, `FilesGeometry` |  |
+| `files-style-input.ts` | `filesStyleInput` |  |
 | `index.ts` | `filesPlugin` |  |
 | `layout.ts` | `NOTE_Y_OFFSET`, `layoutFiles` |  |
 | `parser.ts` | `parseFiles` |  |

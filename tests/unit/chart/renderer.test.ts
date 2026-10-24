@@ -375,15 +375,14 @@ describe('renderChart — SVG root structure', () => {
   it('output has correct width and height from geo', () => {
     const geo = makeMinimalGeo();
     const svg = assembleSvg(renderChart(geo, theme));
-    expect(svg).toContain(`width="${geo.svgWidth}"`);
-    expect(svg).toContain(`height="${geo.svgHeight}"`);
+    expect(svg).toContain(`width="${geo.svgWidth}px"`);
+    expect(svg).toContain(`height="${geo.svgHeight}px"`);
   });
 
   it('output is well-formed SVG with defs block', () => {
     const geo = makeMinimalGeo();
     const svg = assembleSvg(renderChart(geo, theme));
-    expect(svg).toContain('<defs>');
-    expect(svg).toContain('</defs>');
+    expect(svg).toContain('<defs/>'); // shell route: empty defs self-closes (lad-T2f)
   });
 });
 

@@ -93,6 +93,7 @@ export default defineConfig({
           { text: 'Getting started', link: '/guide/getting-started' },
           { text: 'API reference', link: '/guide/api' },
           { text: 'Remote images', link: '/guide/image-providers' },
+          { text: 'Styling data diagrams', link: '/guide/styling-data-diagrams' },
         ],
       },
       {

@@ -21,6 +21,7 @@ import type { RenderFragment, SyncPlugin } from '../../core/dispatcher.js';
 import { extractFlatContent, extractViewBoxDims, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
 import type { StringBounder as DriverStringBounder } from '../../core/klimt/drawing/svg/driver-text-svg.js';
 import { UGraphicHandwritten } from '../../core/klimt/drawing/hand/UGraphicHandwritten.js';
+import { lengthAdjustOverride } from '../../core/klimt/drawing/svg/svg-option.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics-core.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import { ColorMapper, mapPaint } from '../../core/klimt/color/ColorMapper.js';
@@ -134,7 +135,9 @@ interface DrawPass {
  *  (TextBlockExporter.java:173-175), so the warnings banner jiggles too. */
 function drawFragment(diagram: MindMapDiagram, measurer: StringMeasurer, pass: DrawPass): RenderFragment {
   const backcolor = mapPaint(diagram.calculateBackColor(), muteColorMapper(diagram));
+  const lengthAdjust = diagram.getSkinParam().getlengthAdjust();
   const option = basicSvgOption({
+    ...lengthAdjustOverride(lengthAdjust),
     minDim: { width: pass.minDim.getWidth(), height: pass.minDim.getHeight() },
     backcolor,
     scale: pass.scale,
@@ -148,7 +151,13 @@ function drawFragment(diagram: MindMapDiagram, measurer: StringMeasurer, pass: D
   const svg = ug.getSvgString();
   const { width, height } = extractViewBoxDims(svg);
   const { body, extraDefs } = extractFlatContent(svg);
-  const fragment: RenderFragment = { body, width, height, diagramType: DIAGRAM_TYPE_MINDMAP };
+  const fragment: RenderFragment = {
+    body,
+    width,
+    height,
+    diagramType: DIAGRAM_TYPE_MINDMAP,
+    ...(lengthAdjust === undefined ? {} : { lengthAdjust }),
+  };
   const withBackground = typeof backcolor === 'string' ? { ...fragment, background: backcolor } : fragment;
   return extraDefs.length > 0 ? { ...withBackground, extraDefs } : withBackground;
 }

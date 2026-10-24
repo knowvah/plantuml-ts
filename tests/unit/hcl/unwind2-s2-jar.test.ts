@@ -27,6 +27,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../src/index.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import type { InternalRenderOptions } from '../../../src/core/internal-render-options.js';
 import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 
 const DIR = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/unwind2-S2');
@@ -41,6 +42,9 @@ const DIR = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/unwind
 const SMETANA_GEOMETRY: ReadonlySet<string> = new Set(['hcl-join-caption']);
 const SMETANA_POSITIONAL = /^svg\/@width$|\/@(x|cx|x1|x2|viewBox\[2\]|d\[\d+\])$/u;
 
+/** D9: the jar never applies hcl `<style>`/`skin`/`!theme` (`HclDiagramFactory.java:86-92`), so these are conformance renders. */
+const JAR_MODE: InternalRenderOptions = { measurer: new DeterministicMeasurer(), jarCompatibleStyleInput: true };
+
 const CASES = readdirSync(DIR)
   .filter((f) => f.endsWith('.puml'))
   .map((f) => f.slice(0, -'.puml'.length))
@@ -54,12 +58,25 @@ describe('unwind2-S2 — hcl style, top-level assignment, line joining', () => {
   it.each(CASES)('%s', (name) => {
     const source = readFileSync(join(DIR, `${name}.puml`), 'utf8');
     const jar = readFileSync(join(DIR, `${name}.svg`), 'utf8');
-    const ours = renderSync(source, { measurer: new DeterministicMeasurer() });
+    const ours = renderSync(source, JAR_MODE);
     const paths = compareSvg(ours, jar, 'deterministic').diffs.map((d) => d.path);
     if (SMETANA_GEOMETRY.has(name)) {
       expect(paths.filter((p) => !SMETANA_POSITIONAL.test(p))).toEqual([]);
       return;
     }
     expect(paths).toEqual([]);
+  });
+
+  it('hcl-style-document: extended mode applies the <style> the jar drops', () => {
+    const source = readFileSync(join(DIR, 'hcl-style-document.puml'), 'utf8');
+    const extended = renderSync(source, { measurer: new DeterministicMeasurer() });
+    expect(extended).toContain('background:#FF0000;');
+    expect(renderSync(source, JAR_MODE)).not.toContain('background:#FF0000;');
+  });
+
+  it('hcl-theme-amiga: extended mode applies the theme the jar drops', () => {
+    const source = readFileSync(join(DIR, 'hcl-theme-amiga.puml'), 'utf8');
+    const extended = renderSync(source, { measurer: new DeterministicMeasurer() });
+    expect(extended).not.toBe(renderSync(source, JAR_MODE));
   });
 });

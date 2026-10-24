@@ -63,6 +63,7 @@ import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { loadElk, renderSync, type ElkBackend } from '../../../src/index.js';
+import { withJarCompatibleStyleInput } from '../../../src/core/internal-render-options.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 
@@ -264,11 +265,14 @@ beforeAll(async () => {
 
 function measure(f: FixtureRef, store: ReturnType<typeof fixtureIncludeStore>): LiveRouting {
   const markup = readFileSync(join(fixtureDir(f), 'in.puml'), 'utf8');
-  const ours = renderSync(markup, {
-    includeStore: store,
-    measurer: new DeterministicMeasurer(),
-    elk,
-  }).slice(0, HEAD_BYTES);
+  const ours = renderSync(
+    markup,
+    withJarCompatibleStyleInput({
+      includeStore: store,
+      measurer: new DeterministicMeasurer(),
+      elk,
+    }),
+  ).slice(0, HEAD_BYTES);
   const golden = readHead(goldenPath(f));
   return {
     jarType: diagramTypeOf(golden),

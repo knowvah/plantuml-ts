@@ -5,6 +5,14 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 import { CELL_H } from './layout.js';
 import { hashString } from '../../core/paint.js';
 
+/** `data-diagram-type` (`TextBlockExporter.java:292-293`). */
+const DIAGRAM_TYPE_BOARD = 'BOARD';
+
+/** `lengthAdjust` carrier: spread only when the skinparam set it (lad D4, never an explicit 'spacing'). */
+function lengthAdjustOf(theme: Theme): Pick<RenderFragment, 'lengthAdjust'> {
+  return theme.lengthAdjust === undefined ? {} : { lengthAdjust: theme.lengthAdjust };
+}
+
 // `CardBox.calculateDimension` (`board/CardBox.java:68-70`) — fixed 150x70 box.
 const CARD_W = 150;
 const CARD_H = 70;
@@ -103,6 +111,8 @@ export function renderBoard(geo: BoardGeometry, theme: Theme): RenderFragment {
     width,
     height,
     background: theme.colors.background,
+    diagramType: DIAGRAM_TYPE_BOARD,
+    ...lengthAdjustOf(theme),
     extraDefs: buildShadowDefs(shadowId),
   };
 }

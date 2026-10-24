@@ -24,6 +24,7 @@ import type { PreprocessorResult } from './core/preprocessor.js';
 import { inheritingRenderFn, takePendingPrevious, withPrevious } from './core/nested-previous.js';
 import { DiagramRefusal, emptySvg, errorSvg, preprocessorErrorSvg, welcomeSvg } from './core/error/error-diagrams.js';
 import { resolveMeasurer, type RenderOptions } from './core/render-options.js';
+import { isJarCompatibleStyleInput } from './core/internal-render-options.js';
 import { layoutServices, layoutServicesSync } from './core/elk/layout-services.js';
 import { assembleSvg, seedOfUmlSource } from './core/assemble-svg.js';
 import { withAllowJavascriptInLink } from './core/security/SecurityUtils.js';
@@ -298,7 +299,7 @@ interface PreparedBlock {
  * error wrapping: resolve its diagram plugin (the parse happens HERE: upstream
  * picks a factory by attempting the parse, and D0 forbids a second parse
  * path; a failing `skin` line cuts it, unwind2-S8), build the theme from the
- * plugin's `styleInput` (unwind-U1), resolve its measurer, extract its AST (or throw the block's
+ * plugin's `styleInput` when jar-compatible (unwind-U1, D9), resolve its measurer, extract its AST (or throw the block's
  * `DiagramRefusal`), and surface any sprite/parse warnings. Neither caller's
  * try/catch nor sync-vs-async `layout` call belongs here.
  */
@@ -310,7 +311,9 @@ function prepareBlock(block: BlockUmlOk, source: UmlSource, options: RenderOptio
   const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore }, skinCut);
   const plugin = resolution.plugin;
   // sdd3-T8h: a nested `{{ }}` diagram starts from the enclosing diagram's skinparams (`nested-previous.ts`).
-  const preprocessed = withPrevious(plugin.styleInput?.(block.preprocessed, umlSource) ?? block.preprocessed, previous);
+  // D9 (lad Amendment 1): `styleInput` is the jar-compatible normalisation, applied only when conformance asks for it.
+  const styled = isJarCompatibleStyleInput(options) ? plugin.styleInput?.(block.preprocessed, umlSource) : undefined;
+  const preprocessed = withPrevious(styled ?? block.preprocessed, previous);
   const { theme, styleMap } = buildTheme(preprocessed, options);
   const measurer = resolveMeasurer(plugin.type, options);
   const ast = astOf(resolution, options);

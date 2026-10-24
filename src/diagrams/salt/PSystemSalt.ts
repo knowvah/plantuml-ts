@@ -16,6 +16,8 @@ import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { UStroke } from '../../core/klimt/UStroke.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
 import { Pragma } from '../../core/skin/Pragma.js';
+import type { RootLengthAdjust } from '../../core/svg.js';
+import { lengthAdjustOfName } from '../../core/skinparam-key-handlers-table-c.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import type { Stereotype } from '../../core/stereo/Stereotype.js';
@@ -130,6 +132,17 @@ export class SaltSkinParam implements ISkinParam {
       if (result !== undefined) return result;
     }
     return null;
+  }
+
+  /**
+   * `skinparam lengthAdjust`: `spacingAndGlyphs` / `spacing` / `none`, each
+   * `equalsIgnoreCase`; anything else is `LengthAdjust.defaultValue()` =
+   * SPACING, returned here as `undefined` (unset, D4).
+   * @see SkinParam.java:1258-1269
+   */
+  getlengthAdjust(): RootLengthAdjust | undefined {
+    const value = this.getValue('lengthAdjust');
+    return value === null ? undefined : lengthAdjustOfName(value);
   }
 
   /** @see SkinParam.java:650-656,1166-1172 */

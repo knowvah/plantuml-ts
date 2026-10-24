@@ -69,6 +69,10 @@ import type { StringMeasurer } from '../src/core/measurer.js';
 import { jarMeasurer } from '../src/core/measurer-jar.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { renderSync } from '../src/index.js';
+import type { InternalRenderOptions } from '../src/core/internal-render-options.js';
+
+/** D9: census renders measure the jar-compatible style-input normalisation. */
+const JAR_COMPATIBLE_OPTIONS: InternalRenderOptions = { jarCompatibleStyleInput: true };
 import { compareSvg } from '../tests/oracle/svg-conformance/compare.js';
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 import { buildSpriteAssetsStore } from './sprite-assets-store.js';
@@ -249,7 +253,7 @@ function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer
       // census's two passes therefore produce the identical result for dot,
       // by construction -- that is the type's nature, not a wiring miss.
       // See `oracle/goldens/svg-dot/README.md`.
-      return renderSync(markup);
+      return renderSync(markup, JAR_COMPATIBLE_OPTIONS);
     case 'description':
       return renderFixtureDescription(markup, measurer);
   }

@@ -42,6 +42,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { loadElk, renderSync, type ElkBackend } from '../src/index.js';
+import type { InternalRenderOptions } from '../src/core/internal-render-options.js';
 import { setErrorPageObserver } from '../src/core/error/error-renderer.js';
 import {
   errorPageVerdict,
@@ -285,13 +286,7 @@ function renderOneMode(dir: string): void {
     // width and every label reserving it under-measures. Cost is one 608 KB
     // eager walk per subprocess, measured at 5.5 ms -- ~7 s across the whole
     // corpus, against a survey that runs for tens of minutes.
-    svg = renderSync(markup, {
-      measurer: new DeterministicMeasurer(),
-      assetStore: SURVEY_ASSET_STORE,
-      includeStore: fixtureIncludeStore(),
-      filename: SURVEY_FILENAME,
-      elk: surveyElk,
-    });
+    svg = renderSync(markup, surveyRenderOptions());
   } catch (err) {
     setLayoutInputObserver(undefined);
     process.stderr.write(`__RENDER_ERROR__${errText(err).split('\n')[0]}\n`);
@@ -301,6 +296,18 @@ function renderOneMode(dir: string): void {
   const dotEqual = computeDotEqual(svekDots, events, oracleBlind, markup);
   const layout = computeLayoutEqual(svekDots, events, oracleBlind, markup);
   process.stdout.write(JSON.stringify({ svg, dotEqual, oracleBlind, ...layout }));
+}
+
+/** D9: every survey render measures the jar-compatible style-input normalisation (the jar drops json/yaml/hcl/files styling input). */
+function surveyRenderOptions(): InternalRenderOptions {
+  return {
+    jarCompatibleStyleInput: true,
+    measurer: new DeterministicMeasurer(),
+    assetStore: SURVEY_ASSET_STORE,
+    includeStore: fixtureIncludeStore(),
+    filename: SURVEY_FILENAME,
+    elk: surveyElk,
+  };
 }
 
 /** Renders ONE fixture and returns the protocol frame, without exiting — the
@@ -313,13 +320,7 @@ function renderFrame(dir: string): string {
   setLayoutInputObserver((e) => events.push(e));
   const isErrorPage = installErrorPageFlag();
   try {
-    const svg = renderSync(markup, {
-      measurer: new DeterministicMeasurer(),
-      assetStore: SURVEY_ASSET_STORE,
-      includeStore: fixtureIncludeStore(),
-      filename: SURVEY_FILENAME,
-      elk: surveyElk,
-    });
+    const svg = renderSync(markup, surveyRenderOptions());
     const dotEqual = computeDotEqual(svekDots, events, oracleBlind, markup);
     const layout = computeLayoutEqual(svekDots, events, oracleBlind, markup);
     return JSON.stringify({ svg, dotEqual, oracleBlind, errorPage: isErrorPage(), ...layout });

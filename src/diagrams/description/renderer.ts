@@ -88,6 +88,7 @@ import type { RenderFragment } from '../../core/dispatcher.js';
 import type { Theme } from '../../core/theme.js';
 import type { DescriptionGeometry } from './layout.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
+import { lengthAdjustOverride } from '../../core/klimt/drawing/svg/svg-option.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { jarMeasurer } from '../../core/measurer-jar.js';
@@ -288,6 +289,9 @@ export function renderDescription(
     backcolor: theme.colors.background,
     scale,
     rootAttributes: new Map([['data-diagram-type', DIAGRAM_TYPE_DESCRIPTION]]),
+    // lad-T2b: `TextBlockExporter.java:306-307` (`option.withLengthAdjust(skinParam.getlengthAdjust())`);
+    // unset keeps `basicSvgOption`'s SPACING default (D4).
+    ...lengthAdjustOverride(theme.lengthAdjust),
   });
   const ug = UGraphicSvg.build(geo.seed ?? 0n, option, VERSION_PLACEHOLDER, driverBounder, measurer);
 

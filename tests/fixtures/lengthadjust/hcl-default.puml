@@ -1,0 +1,6 @@
+@starthcl
+blk {
+  Alpha = "Xyz"
+  Bravo = "Uvw"
+}
+@endhcl

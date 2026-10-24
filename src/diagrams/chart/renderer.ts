@@ -24,7 +24,7 @@
 import type { ChartGeometry, LegendGeometry, AnnotationGeometry } from './layout.js';
 import type { Theme } from '../../core/theme.js';
 import { rect, line, text, circle, polygon, attrs } from '../../core/svg.js';
-import type { AssembledSvg } from '../../core/dispatcher.js';
+import type { AssembledSvg, RenderFragment } from '../../core/dispatcher.js';
 import { drawBar } from './renderers/bar.js';
 import { drawLine } from './renderers/line.js';
 import { drawArea } from './renderers/area.js';
@@ -36,6 +36,14 @@ import {
   drawVAxis,
   TICK_LABEL_FONT_SIZE,
 } from './chart-renderer-axes.js';
+
+/** `data-diagram-type` (`TextBlockExporter.java:292-293`). */
+const DIAGRAM_TYPE_CHART = 'CHART';
+
+/** `lengthAdjust` carrier: spread only when the skinparam set it (lad D4, never an explicit 'spacing'). */
+function lengthAdjustOf(theme: Theme): Pick<RenderFragment, 'lengthAdjust'> {
+  return theme.lengthAdjust === undefined ? {} : { lengthAdjust: theme.lengthAdjust };
+}
 
 // ---------------------------------------------------------------------------
 // Layout constants (mirrors ChartRenderer.java)
@@ -338,5 +346,7 @@ export function renderChart(geo: ChartGeometry & { errors?: readonly string[] },
     width: geo.svgWidth,
     height: geo.svgHeight,
     background: geo.bgColor,
+    diagramType: DIAGRAM_TYPE_CHART,
+    ...lengthAdjustOf(theme),
   };
 }

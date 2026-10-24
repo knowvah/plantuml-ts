@@ -1,0 +1,5 @@
+@startyaml
+!theme aws-orange
+a: 1
+b: x
+@endyaml

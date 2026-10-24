@@ -326,5 +326,8 @@ export function renderState(geo: StateGeometry, skinTheme: Theme): RenderFragmen
       : {}),
     ...(geo.frameInk !== undefined ? { frameInk: geo.frameInk } : {}),
     ...(extraDefs !== undefined ? { extraDefs } : {}),
+    // lad-T1c: `TextBlockExporter.java:306-307` -- `skinparam lengthAdjust` is the document's
+    // `SvgOption`, read by `SvgGraphics.java:155-158,699-705`. Unset stays unset (D4).
+    ...(theme.lengthAdjust !== undefined ? { lengthAdjust: theme.lengthAdjust } : {}),
   };
 }

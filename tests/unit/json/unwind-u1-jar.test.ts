@@ -27,6 +27,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../src/index.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import type { InternalRenderOptions } from '../../../src/core/internal-render-options.js';
 import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 
 const DIR = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/unwind-U1');
@@ -58,6 +59,26 @@ const TITLE_CHROME_OFFSET: Readonly<Record<string, number>> = {
 };
 const POSITIONAL = /\/@(x|y|x1|x2|width|viewBox\[2\])$/u;
 
+/** D9: the jar drops this styling input (`StyleExtractor.java:88-96`), so these are conformance renders. */
+const JAR_MODE: InternalRenderOptions = { measurer: new DeterministicMeasurer(), jarCompatibleStyleInput: true };
+
+/**
+ * The fixtures whose directive the library now honours (lad Amendment 1,
+ * user ruling 2026-10-23); each one's jar-mode render is the jar's, its
+ * extended-mode twin must differ.
+ */
+const EXTENDED_DIFFERS: readonly string[] = [
+  'hcl-skinparam',
+  'hcl-style',
+  'json-handwritten-block',
+  'json-skinparam-bg',
+  'json-skinparam-block',
+  'json-skinparam-font',
+  'json-theme-awsorange',
+  'yaml-skinparam-bg',
+  'yaml-skinparam-font',
+];
+
 const CASES = readdirSync(DIR)
   .filter((f) => f.endsWith('.puml'))
   .map((f) => f.slice(0, -'.puml'.length))
@@ -71,7 +92,7 @@ describe('unwind-U1 — json family matches the jar', () => {
   it.each(CASES)('%s', (name) => {
     const source = readFileSync(join(DIR, `${name}.puml`), 'utf8');
     const jar = readFileSync(join(DIR, `${name}.svg`), 'utf8');
-    const ours = renderSync(source, { measurer: new DeterministicMeasurer() });
+    const ours = renderSync(source, JAR_MODE);
     const paths = compareSvg(ours, jar, 'deterministic').diffs.map((d) => d.path);
     const allowed = OTHER_DIVERGENCE[name] ?? [];
     const offset = TITLE_CHROME_OFFSET[name];
@@ -81,5 +102,18 @@ describe('unwind-U1 — json family matches the jar', () => {
     }
     expect(paths.filter((p) => !POSITIONAL.test(p))).toEqual([]);
     expect(paths.length).toBe(offset);
+  });
+
+  it.each(EXTENDED_DIFFERS)('%s: extended mode honours the directive the jar drops', (name) => {
+    const source = readFileSync(join(DIR, `${name}.puml`), 'utf8');
+    const extended = renderSync(source, { measurer: new DeterministicMeasurer() });
+    expect(extended).not.toBe(renderSync(source, JAR_MODE));
+  });
+
+  it('json-skinparam-bg: extended mode paints the red background (lad Amendment 1)', () => {
+    const source = readFileSync(join(DIR, 'json-skinparam-bg.puml'), 'utf8');
+    const extended = renderSync(source, { measurer: new DeterministicMeasurer() });
+    expect(extended).toContain('background:#FF0000;');
+    expect(renderSync(source, JAR_MODE)).not.toContain('background:#FF0000;');
   });
 });

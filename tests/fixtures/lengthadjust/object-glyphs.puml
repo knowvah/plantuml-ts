@@ -1,0 +1,5 @@
+@startuml
+skinparam lengthAdjust spacingAndGlyphs
+object Alpha
+object Bravo
+@enduml

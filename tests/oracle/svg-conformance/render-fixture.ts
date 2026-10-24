@@ -20,6 +20,7 @@
  * (ratchets, `pin-description.mts`) rely on that.
  */
 import { renderSync } from '../../../src/index.js';
+import { withJarCompatibleStyleInput } from '../../../src/core/internal-render-options.js';
 import { setErrorPageObserver } from '../../../src/core/error/error-renderer.js';
 import { combineAssetStores } from '../../../src/core/asset-store.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
@@ -47,11 +48,15 @@ export function renderFixtureSurveyStyle(
     errorPage = true;
   });
   try {
-    const svg = renderSync(markup, {
-      measurer,
-      assetStore: FIXTURE_ASSET_STORE,
-      includeStore: fixtureIncludeStore(),
-    });
+    // lad D9: a conformance render measures the jar-compatible style input.
+    const svg = renderSync(
+      markup,
+      withJarCompatibleStyleInput({
+        measurer,
+        assetStore: FIXTURE_ASSET_STORE,
+        includeStore: fixtureIncludeStore(),
+      }),
+    );
     return { svg, errorPage };
   } finally {
     setErrorPageObserver(undefined);

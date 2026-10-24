@@ -29,6 +29,7 @@ import { HColorSimple } from '../../core/klimt/color/HColorSimple.js';
 import { extractFlatContent, extractViewBoxDims, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
 import { UGraphicHandwritten } from '../../core/klimt/drawing/hand/UGraphicHandwritten.js';
 import type { StringBounder as DriverStringBounder } from '../../core/klimt/drawing/svg/driver-text-svg.js';
+import { lengthAdjustOverride } from '../../core/klimt/drawing/svg/svg-option.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics-core.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
@@ -157,7 +158,9 @@ interface DrawPass {
 }
 
 function svgGraphic(diagram: WBSDiagram, measurer: StringMeasurer, pass: DrawPass): UGraphicSvg {
+  const lengthAdjust = diagram.getSkinParam().getlengthAdjust();
   const option = basicSvgOption({
+    ...lengthAdjustOverride(lengthAdjust),
     minDim: { width: pass.minDim.getWidth(), height: pass.minDim.getHeight() },
     backcolor: calculateBackColor(diagram),
     colorMapper: muteColorMapper(diagram),
@@ -189,7 +192,14 @@ function drawFragment(diagram: WBSDiagram, measurer: StringMeasurer, pass: DrawP
   const svg = drawSvg(diagram, measurer, pass);
   const { width, height } = extractViewBoxDims(svg);
   const { body, extraDefs } = extractFlatContent(svg);
-  const fragment: RenderFragment = { body, width, height, diagramType: DIAGRAM_TYPE_WBS };
+  const lengthAdjust = diagram.getSkinParam().getlengthAdjust();
+  const fragment: RenderFragment = {
+    body,
+    width,
+    height,
+    diagramType: DIAGRAM_TYPE_WBS,
+    ...(lengthAdjust === undefined ? {} : { lengthAdjust }),
+  };
   // A gradient backcolor leaves `backcolorString` null (SvgGraphics.java:178-183):
   // no root `background:`, which `RenderFragment.backgroundGradient` carries.
   const withBackground =

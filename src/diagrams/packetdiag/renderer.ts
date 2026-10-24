@@ -4,6 +4,14 @@ import type { PacketGeometry } from './ast.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { INDICATOR_HEIGHT, V_LINE_SHORT, V_MARGIN, FONT_ASCENT, blockRenderedHeight } from './layout.js';
 
+/** `data-diagram-type` (`TextBlockExporter.java:292-293`). */
+const DIAGRAM_TYPE_PACKET = 'PACKET';
+
+/** `lengthAdjust` carrier: spread only when the skinparam set it (lad D4, never an explicit 'spacing'). */
+function lengthAdjustOf(theme: Theme): Pick<RenderFragment, 'lengthAdjust'> {
+  return theme.lengthAdjust === undefined ? {} : { lengthAdjust: theme.lengthAdjust };
+}
+
 // Root style default (`skin/plantuml.skin:10`, `root { FontSize 14 }`) --
 // see layout.ts's own FONT_SIZE for the same value/citation.
 const FONT_SIZE = 14;
@@ -122,5 +130,7 @@ export function renderPacket(geo: PacketGeometry, theme: Theme): RenderFragment 
     width: totalWidth,
     height: totalHeight,
     background: theme.colors.background,
+    diagramType: DIAGRAM_TYPE_PACKET,
+    ...lengthAdjustOf(theme),
   };
 }

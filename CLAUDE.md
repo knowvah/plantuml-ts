@@ -47,7 +47,10 @@ a fast numeric loop feels like evidence. **Stop and open the Java** before you
   protect what the JAR draws, never our extras. Error pages: stock jar errors
   + we render our own = conformant (2026-10-10); we draw where it errors =
   accepted divergence once the latest release jar also errors (ruling
-  2026-10-10, signed per row); docs/svg-conformance.md.
+  2026-10-10, signed per row); docs/svg-conformance.md. Styling the jar
+  *discards* (json/yaml/hcl/files `StyleExtractor`) is honoured as a documented
+  extension, jar-identical when absent, measured in the internal jar-compatible
+  mode (ruling 2026-10-23; DIVERGENCES.md "Extensions").
 - **A divergence exists only where a library forces it**: dot-engine instead
   of Smetana (below), KaTeX instead of JLaTeXMath, the oracle seam for
   `{{ }}` and platform glyph outlines. Each is named in `DIVERGENCES.md` with

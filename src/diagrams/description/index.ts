@@ -155,6 +155,8 @@ export const descriptionPlugin: SyncPlugin<DescriptionDiagramAST, DescriptionGeo
       ...unwrapKlimtSvg(svg, theme.colors.background),
       ...(deferred ? { numbersDeferred: true as const } : {}),
       ...block,
+      // lad-T2b: `TextBlockExporter.java:306-307` -- the shell re-roots the fragment, so it carries the option.
+      ...(theme.lengthAdjust !== undefined ? { lengthAdjust: theme.lengthAdjust } : {}),
       ...(geo.frameInk !== undefined ? { frameInk: geo.frameInk } : {}),
       // codd-T4: a style `Margin` (`TextBlockExporter.java:510-516`) is the margin the exporter applies AFTER chrome.
       ...(theme.diagramMargin !== undefined ? { documentMargin: theme.diagramMargin } : {}),

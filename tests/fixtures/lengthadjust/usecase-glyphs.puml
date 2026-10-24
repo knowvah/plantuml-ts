@@ -1,0 +1,4 @@
+@startuml
+skinparam lengthAdjust spacingAndGlyphs
+(Alpha) --> (Bravo)
+@enduml

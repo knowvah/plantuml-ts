@@ -4,6 +4,14 @@ import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { NOTE_Y_OFFSET } from './layout.js';
 
+/** `data-diagram-type` (`TextBlockExporter.java:292-293`). */
+const DIAGRAM_TYPE_FILES = 'FILES';
+
+/** `lengthAdjust` carrier: spread only when the skinparam set it (lad D4, never an explicit 'spacing'). */
+function lengthAdjustOf(theme: Theme): Pick<RenderFragment, 'lengthAdjust'> {
+  return theme.lengthAdjust === undefined ? {} : { lengthAdjust: theme.lengthAdjust };
+}
+
 const PADDING = 10;
 const BASELINE_OFFSET = 4;
 
@@ -67,5 +75,7 @@ export function renderFiles(geo: FilesGeometry, theme: Theme): RenderFragment {
     width,
     height,
     background: theme.colors.background,
+    diagramType: DIAGRAM_TYPE_FILES,
+    ...lengthAdjustOf(theme),
   };
 }

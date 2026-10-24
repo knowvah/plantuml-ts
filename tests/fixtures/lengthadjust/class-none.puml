@@ -1,0 +1,5 @@
+@startuml
+skinparam lengthAdjust none
+class Alpha
+class Bravo
+@enduml

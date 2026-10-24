@@ -1,0 +1,4 @@
+@startjson
+skinparam lengthAdjust spacingAndGlyphs
+{"Alpha": "Bravo"}
+@endjson

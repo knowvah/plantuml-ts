@@ -1,0 +1,4 @@
+@startjson
+skinparam lengthAdjust none
+{"Alpha": "Bravo"}
+@endjson
