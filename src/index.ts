@@ -24,7 +24,7 @@ import type { PreprocessorResult } from './core/preprocessor.js';
 import { inheritingRenderFn, takePendingPrevious, withPrevious } from './core/nested-previous.js';
 import { DiagramRefusal, emptySvg, errorSvg, preprocessorErrorSvg, welcomeSvg } from './core/error/error-diagrams.js';
 import { resolveMeasurer, type RenderOptions } from './core/render-options.js';
-import { isJarCompatibleStyleInput } from './core/internal-render-options.js';
+import { clockOfOptions, isJarCompatibleStyleInput } from './core/internal-render-options.js';
 import { layoutServices, layoutServicesSync } from './core/elk/layout-services.js';
 import { assembleSvg, seedOfUmlSource } from './core/assemble-svg.js';
 import { withAllowJavascriptInLink } from './core/security/SecurityUtils.js';
@@ -357,7 +357,11 @@ export function renderPagesSync(source: string, options?: RenderOptions): string
           'use render(), or prefetch the includes and pass options.includeStore',
       );
     }
-    const blocks = buildBlockUmls(source, { includeStore: options?.includeStore, filename: options?.filename });
+    const blocks = buildBlockUmls(source, {
+      includeStore: options?.includeStore,
+      filename: options?.filename,
+      clock: clockOfOptions(options),
+    });
     if (blocks.length === 0) return [welcomeSvg(options)];
 
     const block = blocks[0]!;
@@ -386,7 +390,11 @@ export function renderSync(source: string, options?: RenderOptions): string {
 export async function render(source: string, options?: RenderOptions): Promise<string> {
   try {
     const includeStore = await prepareIncludeStore(source, options);
-    const blocks = buildBlockUmls(source, { includeStore, filename: options?.filename });
+    const blocks = buildBlockUmls(source, {
+      includeStore,
+      filename: options?.filename,
+      clock: clockOfOptions(options),
+    });
     if (blocks.length === 0) return welcomeSvg(options);
 
     return await renderBlock(blocks[0]!, options);
@@ -403,7 +411,11 @@ export async function render(source: string, options?: RenderOptions): Promise<s
 export async function renderPages(source: string, options?: RenderOptions): Promise<string[]> {
   try {
     const includeStore = await prepareIncludeStore(source, options);
-    const blocks = buildBlockUmls(source, { includeStore, filename: options?.filename });
+    const blocks = buildBlockUmls(source, {
+      includeStore,
+      filename: options?.filename,
+      clock: clockOfOptions(options),
+    });
     const first = blocks[0];
     if (first === undefined) return [welcomeSvg(options)];
 
@@ -441,7 +453,7 @@ async function renderRawBlock(raw: RawBlock, options: RenderOptions | undefined)
   const text = raw.lines.map((s) => s.getString()).join('\n');
   try {
     const includeStore = await prepareIncludeStore(text, options);
-    return await renderBlock(buildBlockUml(raw, { includeStore }), options);
+    return await renderBlock(buildBlockUml(raw, { includeStore, clock: clockOfOptions(options) }), options);
   } catch (err) {
     return errorSvg(text, err, options);
   }

@@ -27,24 +27,30 @@ import { fileURLToPath } from 'node:url';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
 import type { AssetStore } from '../../../src/core/asset-store.js';
 import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
+import type { Clock } from '../../../src/core/clock.js';
 import { renderSync } from '../../../src/index.js';
+import { clockForKey, corpusClockKey, fixtureClockKey } from './capture-clock.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 
 /** The `RenderOptions` fields a gantt fixture caller may pass (measurer is separate). */
 export interface GanttFixtureRenderOptions {
   assetStore?: AssetStore;
   includeStore?: IncludeStore;
+  /** The slug's recorded capture clock (`oracle/capture-clock.json`), when the source is clock-dependent. */
+  clock?: Clock;
 }
 
 /**
- * The single place gantt fixture render options are built (T1b adds the
- * recorded clock for `slug` here). `slug` is the sidecar key's slug part.
+ * The single place gantt fixture render options are built, including the
+ * recorded clock for `slug` (gantt-engine-port D3b). `slug` is the sidecar key's slug part.
  */
 export function ganttRenderOptions(
-  _slug: string,
+  slug: string,
   includeStore: IncludeStore = fixtureIncludeStore(),
 ): GanttFixtureRenderOptions {
-  return { includeStore };
+  // A corpus row is keyed `gantt/<slug>`, an authored fixture `fixtures/gantt/<slug>` (capture-clock.ts).
+  const clock = clockForKey(corpusClockKey('gantt', slug)) ?? clockForKey(fixtureClockKey(`gantt/${slug}`));
+  return { includeStore, ...(clock === undefined ? {} : { clock }) };
 }
 
 /** Renders a `.puml` gantt fixture through the PRODUCTION `renderSync`. */

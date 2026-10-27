@@ -42,7 +42,8 @@ export class DateFunction extends SimpleReturnFunction {
 
     const format = values[0]!.toString();
     const epochMillis = values.length >= 2 ? 1000 * values[1]!.toInt() : this.env.clock.nowMillis();
-    const timeZone = values.length === 3 ? values[2]!.toString() : Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const timeZone =
+      values.length === 3 ? values[2]!.toString() : (this.env.zone ?? Intl.DateTimeFormat().resolvedOptions().timeZone);
 
     try {
       return TValue.fromString(formatDate(epochMillis, format, timeZone));

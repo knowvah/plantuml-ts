@@ -65,6 +65,7 @@ import { combineAssetStores } from '../src/core/asset-store.js';
 // <bundle/...>` fixture renders instead of tripping renderSync's include
 // guard and being surveyed as an error page -- the census already did this.
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
+import { clockForPath } from '../tests/oracle/svg-conformance/capture-clock.js';
 import { remoteImageFixtureStore } from '../tests/oracle/svg-conformance/remote-image-fixtures.js';
 import { routeConsoleToStderr, runPersistentPool, type WorkerOutcome } from './svg-parity-workers.js';
 import { compareSvg, type Diff } from '../tests/oracle/svg-conformance/compare.js';
@@ -286,7 +287,7 @@ function renderOneMode(dir: string): void {
     // width and every label reserving it under-measures. Cost is one 608 KB
     // eager walk per subprocess, measured at 5.5 ms -- ~7 s across the whole
     // corpus, against a survey that runs for tens of minutes.
-    svg = renderSync(markup, surveyRenderOptions());
+    svg = renderSync(markup, surveyRenderOptions(dir));
   } catch (err) {
     setLayoutInputObserver(undefined);
     process.stderr.write(`__RENDER_ERROR__${errText(err).split('\n')[0]}\n`);
@@ -298,9 +299,11 @@ function renderOneMode(dir: string): void {
   process.stdout.write(JSON.stringify({ svg, dotEqual, oracleBlind, ...layout }));
 }
 
-/** D9: every survey render measures the jar-compatible style-input normalisation (the jar drops json/yaml/hcl/files styling input). */
-function surveyRenderOptions(): InternalRenderOptions {
+/** D9 + gantt-engine-port D3b: every survey render measures the jar-compatible style-input normalisation (the jar drops json/yaml/hcl/files styling input). */
+function surveyRenderOptions(dir: string): InternalRenderOptions {
+  const clock = clockForPath(join(dir, 'in.puml'));
   return {
+    ...(clock === undefined ? {} : { clock }),
     jarCompatibleStyleInput: true,
     measurer: new DeterministicMeasurer(),
     assetStore: SURVEY_ASSET_STORE,
@@ -320,7 +323,7 @@ function renderFrame(dir: string): string {
   setLayoutInputObserver((e) => events.push(e));
   const isErrorPage = installErrorPageFlag();
   try {
-    const svg = renderSync(markup, surveyRenderOptions());
+    const svg = renderSync(markup, surveyRenderOptions(dir));
     const dotEqual = computeDotEqual(svekDots, events, oracleBlind, markup);
     const layout = computeLayoutEqual(svekDots, events, oracleBlind, markup);
     return JSON.stringify({ svg, dotEqual, oracleBlind, errorPage: isErrorPage(), ...layout });

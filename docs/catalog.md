@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1776 modules · 6652 exported names.
+1793 modules · 6689 exported names.
 
 ## `src/`
 
@@ -33,6 +33,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `block-extractor.ts` | `DiagramType`, `UmlSource`, `finalizeBlock`, `upstreamTypeOf`, `extractBlocks` | Block extractor: types a block's PREPROCESSED content, from the @start<type> keyword suffix or -- for plain @startuml -- by probing the first 20 non-empty content lines. |
 | `BlockUmlBuilder.ts` | `RawBlock`, `BlockUmlOk`, `BlockUmlErr`, `BlockUml`, `buildBlockUmls`, `rawBlocksOf`, `buildBlockUml`, `isBlockEmpty` | `BlockUmlBuilder` -- the document -> blocks stage, and the reason it runs BEFORE the preprocessor. |
 | `build-theme.ts` | `ResolvedThemeAndStyles`, `buildTheme` | Theme resolution -- extracted out of `src/index.ts` (this repo's `check-complexity.py` 500-line file cap; a MECHANICAL move, no behavior change). |
+| `clock.ts` | `Clock`, `DEFAULT_CLOCK`, `renderClock`, `zoneOffsetSeconds`, `localEpochDay` | The one injected clock (gantt-engine-port D3a): TIM `%now` / `%date` and gantt's `today` read it, never the ambient wall clock. |
 | `cluster-title-table.ts` | `computeTitleTableHeight` | `ClusterHeader`'s title/stereotype/attribute-text-height formula — moved out of `../diagrams/state/state-composite-header.ts` (namespace-cluster-box mission T3: the class engine needs the same formula for its own cluster title table, and no |
 | `color-override.ts` | `resolveBareOrBackColor` | Shared `#color`/`#back:color;...` background-override extraction — split out of `renderer-classifier-box.ts` (G2 N34) so `renderer-note.ts` can reuse the SAME bare/`back:`-component grammar for a note's own `#color` override (`ClassNote.col |
 | `creole-atoms-image-resolver.ts` | `ResolvedDrawableAtom`, `SpritePrimitiveCollector`, `resolveSvgSpriteAtom`, `makeAtomImageResolverFor` | creole-atoms-image-resolver.ts — SI5b+E2r T7 (moved from `diagrams/ description/render-atoms.ts` by SI27 T2 — upstream's `AtomSprite`/ `SvgNanoParser` decomposition is ONE shared place both the description engine (`renderer-entity.ts`) and |
@@ -72,7 +73,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `include-resolver-timeout.ts` | `withIncludeTimeout` | Bounding one include fetch by time -- the port of upstream's `Future#get(SecurityUtils.getSecurityProfile().getTimeout(), MILLISECONDS)` around every URL read (`security/SURL.java:357-358`, :402, :438). |
 | `include-resolver.ts` | `MapIncludeStore`, `IncludeNotFoundError`, `StdlibNotBundledError`, `EMPTY_INCLUDE_STORE`, `IncludeStore`, `IncludeFetcher`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `fetchInclude`, `prefetchIncludes`, `IncludeWarmupOptions`, `prepareIncludeStore` | The ASYNC half of the include seam. |
 | `internal-emoji-store.ts` | `INTERNAL_EMOJI_ASSET_PREFIX`, `internalEmojiAssetKey`, `InternalEmojiStore`, `EmojiArtworkResolver`, `emojiArtworkResolverFor`, `internalEmojiStoreFrom` | The Twemoji artwork half of `<:name:>` emoji rendering. |
-| `internal-render-options.ts` | `InternalRenderOptions`, `isJarCompatibleStyleInput`, `withJarCompatibleStyleInput` |  |
+| `internal-render-options.ts` | `InternalRenderOptions`, `isJarCompatibleStyleInput`, `withJarCompatibleStyleInput`, `clockOfOptions`, `withClock` |  |
 | `internal-sprite-store.ts` | `INTERNAL_SPRITE_ASSET_PREFIX`, `internalSpriteAssetKey`, `InternalSpriteStore`, `readPng`, `internalSpriteStoreFrom`, `matchJarSpriteLine` | `SpriteImage.fromInternal` (java `klimt/sprite/SpriteImage.java:100-128`) — the jar-internal `/sprites/**` bundle, ported onto ADR-2's synchronous asset channel (`plans/s1l-tail-fix/decisions.md`). |
 | `java-hash-set.ts` | `javaDoubleHashCode`, `javaHashSetOrder` | java-hash-set.ts — the iteration order of a `java.util.HashSet` built by successive `add` calls, for code upstream iterates straight out of a `HashSet` (e.g. |
 | `java-whitespace.ts` | `isJavaWhitespaceAt` | `Character.isWhitespace(char)`, enumerated. |
@@ -1195,6 +1196,26 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `index.ts` | `CodePosition`, `CodeIterator`, `AbstractCodeIterator`, `CodeIteratorImpl`, `Sub`, `buildCodeIterator`, `CodeIteratorChainDeps`, `CodeIteratorIf`, `CodeIteratorForeach`, `CodeIteratorWhile`, `CodeIteratorProcedure`, `CodeIteratorReturnFunction`, `CodeIteratorSub`, `CodeIteratorAffectation`, `CodeIteratorLegacyDefine`, `CodeIteratorInnerComment`, `CodeIteratorLongComment`, `CodeIteratorShortComment` | Barrel for `tim/iterator/` -- the pull-based `CodeIterator` decorator chain, ported in mission SI5a batch 2b. |
 | `Sub.ts` | `Sub` | A named `!startsub` / `!endsub` block: the lines captured between the two markers, replayable later via `!includesub`. |
 
+## `src/core/time/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ChronoUnit.ts` | `ChronoUnit` | `java.time.temporal.ChronoUnit`, DAYS only -- the one unit gantt names (`GanttTaskTableColumn.java:116` `ChronoUnit.DAYS.getDuration()`, `data/TimeBoundsData.java:155` `ChronoUnit.DAYS.between(minDay, maxDay)`). |
+| `DateTimeException.ts` | `DateTimeException` | `java.time.DateTimeException` -- thrown for a value outside a field's range or an impossible date. |
+| `DayOfWeek.ts` | `DayOfWeek` | `java.time.DayOfWeek` -- immutable singleton instances, Java ordinals (MONDAY = 0 ... |
+| `Duration.ts` | `Duration` | `java.time.Duration` -- seconds (number) + nano adjustment (0..999_999_999). |
+| `Instant.ts` | `Instant` | `java.time.Instant` -- epoch seconds + nano adjustment. |
+| `LocalDate.ts` | `LocalDate` | `java.time.LocalDate` -- proleptic Gregorian (ISO) date, epoch-day based. |
+| `LocalDateTime.ts` | `LocalDateTime` | `java.time.LocalDateTime` -- a `LocalDate` plus a `LocalTime`; no zone. |
+| `LocalTime.ts` | `LocalTime` | `java.time.LocalTime` -- a time of day held as nanosecond-of-day (0 .. |
+| `Month.ts` | `Month` | `java.time.Month` -- immutable singleton instances, Java ordinals (JANUARY = 0 ... |
+| `TemporalField.ts` | `TemporalField` | The slice of `java.time.temporal.TemporalField` that `LocalDate.get(field)` needs: gantt only passes `WeekFields#weekOfYear()` (`time/TimePoint.java:105`). |
+| `time-math.ts` | `SECONDS_PER_DAY`, `NANOS_PER_SECOND`, `NANOS_PER_DAY`, `SECONDS_PER_HOUR`, `SECONDS_PER_MINUTE`, `MILLIS_PER_SECOND`, `NANOS_PER_MILLI`, `floorDiv`, `floorMod`, `checkValid` | time-math.ts -- the `Math.floorDiv` / `Math.floorMod` pair and the range check shared by the `java.time` subset (D2). |
+| `WeekFields.ts` | `WeekFields` | `java.time.temporal.WeekFields` -- locale-independent week definition (first day of week + minimal days in first week). |
+| `YearMonth.ts` | `YearMonth` | `java.time.YearMonth` -- gantt uses only `YearMonth.from(LocalDateTime)` and `getYear()` (`time/TimePoint.java:177-178,136`). |
+| `ZonedDateTime.ts` | `ZonedDateTime` | `java.time.ZonedDateTime` restricted to a fixed `ZoneOffset`, and to the one accessor gantt reads (`toLocalDate`, `time/TimePoint.java:50`). |
+| `ZoneOffset.ts` | `ZoneOffset` | `java.time.ZoneOffset`, fixed offsets only. |
+
 ## `src/core/url/`
 
 | Module | Exports | Purpose |
@@ -1210,6 +1231,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `CharHidder.ts` | `CharHidder` | CharHidder — the '~' tile escape: `~X` (where X is a creole-active character) and `\~` are remapped into the Unicode private-use area (U+E000 + charCode) by {@link CharHidder.hide} so the creole layer never sees them as markup, then restore |
+| `I18nTimeData.ts` | `Locale`, `newLocale`, `dayOfWeekLong`, `dayOfWeekShort`, `monthShort`, `monthLong` | I18nTimeData — generated day/month name tables per language. |
 | `SignatureUtils.ts` | `SignatureUtils` | SignatureUtils — hex/MD5/SHA-512 digest helpers upstream shares across `UmlSource`, `klimt/shape/UImageSvg`, `version/Version`, `version/ FutureVersion`, and (license/keygen, out of this port's roadmap) `version/PLSSignature`, `version/Lice |
 
 ## `src/core/warning/`

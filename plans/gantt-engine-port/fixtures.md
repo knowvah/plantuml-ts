@@ -9,6 +9,7 @@ table (firstDiff family → rows → owner).
 | checkpoint | corpus rows | conformant | structural | diverged | errored | jar-error rows | fixtures pinned |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | b0 | 265 | 1 | 0 | 254 | 0 | 10 | — |
+| b1 | 265 | 1 | 0 | 254 | 0 | 10 | — |
 
 ## Divergence families (from batch 7)
 

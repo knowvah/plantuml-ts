@@ -125,3 +125,42 @@ with an owner in `planning/next-missions.md`. No numeric conformant floor.
 `DeterministicMeasurer` through klimt's `StringBounder`. Upstream gantt never
 calls graphviz or Smetana (`grep -rn "Smetana\|graphviz" gantt/` is empty), so
 the jar's geometry is the target throughout.
+
+## Amendment 1 (2026-10-24, batch-1 close) — the grammar needs `com.plantuml.ubrex` (PROPOSED; mission halted, stop 3)
+
+**Finding (orchestrator, before launching batch 2).** 47 of the 167 gantt files
+import `com.plantuml.ubrex` (Unicode Bracketed Expressions): every `lang/Subject*`
+and `lang/Complement*`, `lang/{Words,Verbs,Something,PairOfSomething,DayPattern,
+TimeResolution}`, `time/{MonthUtils,DayOfWeekUtils}`, `ulang/*`,
+`command/{NaturalGanttCommand,CommandHideShowColumns,CommandPrintBetween}`,
+`GanttTaskTableColumn`. The grammar is built by composing `UBrexPart` trees
+(`UBrexConcat`/`UBrexOr`/`UBrexNamed`/`UBrexLeaf("「dDtTeE」")`…) and read back
+through `UMatcher.findFirstValueByKey` (`lang/SubjectDayAsDate.java:107-142`).
+The library — `~/git/plantuml/src/main/java/com/plantuml/ubrex/` (43 files incl.
+`builder/`, 3,380 lines) plus `command/UBrexSingleLineCommand2.java` (196) and
+`url/UbrexUrlBuilder.java` (220) — has **no port in `src/`** (`find src -ipath
+'*ubrex*'` empty). The SCC layering in `diagnosis/upstream-scc-layers.txt` was
+computed over `gantt/` only, so this edge is outside every batch; D6's "everything
+these files reference is in batch 1 … or this task" is false for T2b (`TimeResolution`,
+`MonthUtils`, `DayOfWeekUtils`), T2d (`Words`, `Verbs`, `Something`, `ulang/*`),
+T3c (`DayPattern`, `PairOfSomething`) and all of batches 6–7. Precedent: E2r ported
+creole's observable semantics without the ubrex DSL (`planning/mission-index.md`
+E2 row) — viable there because creole's commands are leaves; gantt's
+subject/verb/complement grammar IS ubrex composition. ubrex's own outside imports
+are already ported or trivial (`StringLocated`, `LineLocation`, `BlocLines`,
+`RegexResult`, `PSystemError`, `NoSuchColorException`; `TeaVM`/`Explain` are
+annotations).
+
+**Proposal (orchestrator recommendation — needs the user's ruling):**
+- **D11 (new) — port ubrex first.** New **batch 1b**: mirror
+  `com/plantuml/ubrex/**` file-for-file to `src/core/ubrex/**` (upstream names,
+  D1-style `@see`), plus `UBrexSingleLineCommand2` → `src/core/command/` and
+  `UbrexUrlBuilder` → beside the existing url code; layered by its own SCC order
+  (≈3 parallel tasks + close, same contract). Batches 2–7 then proceed unchanged
+  except T2b/T2d/T3c/6/7 read-sets gain `src/core/ubrex`. Existing engines are
+  NOT migrated onto it (separate mission; no movers expected).
+- Rejected alternative: translate each gantt `UBrexPart` tree to a JS `RegExp`
+  per file — a structural divergence in the parser seam (CLAUDE.md: "a
+  structural divergence IS the bug"), and `findFirstValueByKey` over repeated
+  named groups has no `RegExp` equivalent.
+- Cost: ≈ +3.8k Java lines (mission was 20.1k), one extra batch.

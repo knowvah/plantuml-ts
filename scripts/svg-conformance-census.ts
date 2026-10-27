@@ -69,7 +69,9 @@ import type { StringMeasurer } from '../src/core/measurer.js';
 import { jarMeasurer } from '../src/core/measurer-jar.js';
 import { DeterministicMeasurer } from '../src/core/measurer-deterministic.js';
 import { renderSync } from '../src/index.js';
-import type { InternalRenderOptions } from '../src/core/internal-render-options.js';
+import type { Clock } from '../src/core/clock.js';
+import { withClock, type InternalRenderOptions } from '../src/core/internal-render-options.js';
+import { clockForPath } from '../tests/oracle/svg-conformance/capture-clock.js';
 
 /** D9: census renders measure the jar-compatible style-input normalisation. */
 const JAR_COMPATIBLE_OPTIONS: InternalRenderOptions = { jarCompatibleStyleInput: true };
@@ -223,28 +225,32 @@ export function censusClassFixtureOptions(): { includeStore: IncludeStore; asset
   };
 }
 
-function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer): string {
+function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer, clock?: Clock): string {
+  const classOptions = (): ReturnType<typeof censusClassFixtureOptions> & { clock?: Clock } => ({
+    ...censusClassFixtureOptions(),
+    ...(clock === undefined ? {} : { clock }),
+  });
   switch (helperFor(type)) {
     case 'class':
       // cdd5-T1 (D3): object still forces parseClass; class (+ unknown/CLASS)
       // now goes through renderSync, like the survey.
       return type === 'object'
-        ? renderFixtureClass(markup, measurer, censusClassFixtureOptions())
-        : renderClassFixture(markup, measurer, censusClassFixtureOptions());
+        ? renderFixtureClass(markup, measurer, classOptions())
+        : renderClassFixture(markup, measurer, classOptions());
     case 'state':
       // D6 (cdd6-T1c): assetStore now threads through, closing the gap
       // `censusClassFixtureOptions`'s own doc comment used to name.
-      return renderFixtureState(markup, measurer, censusClassFixtureOptions());
+      return renderFixtureState(markup, measurer, classOptions());
     case 'sequence':
-      return renderFixtureSequence(markup, measurer, censusClassFixtureOptions());
+      return renderFixtureSequence(markup, measurer, classOptions());
     case 'activity':
-      return renderFixtureActivity(markup, measurer, censusClassFixtureOptions());
+      return renderFixtureActivity(markup, measurer, classOptions());
     case 'json':
       // Mission A5. ONE helper serves all three: yaml and hcl have no layout
       // or renderer of their own (`yaml/index.ts` and `hcl/index.ts` both
       // import `layoutJson`/`renderJson`), so only the parse differs and
       // `renderFixtureJson` dispatches that internally on the block type.
-      return renderFixtureJson(markup, measurer, censusClassFixtureOptions());
+      return renderFixtureJson(markup, measurer, classOptions());
     case 'dot':
       // Mission D14. The ONE type with no low-level pipeline to dispatch to,
       // and no `measurer` to inject: `@startdot` is a passthrough to
@@ -253,7 +259,7 @@ function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer
       // census's two passes therefore produce the identical result for dot,
       // by construction -- that is the type's nature, not a wiring miss.
       // See `oracle/goldens/svg-dot/README.md`.
-      return renderSync(markup, JAR_COMPATIBLE_OPTIONS);
+      return renderSync(markup, withClock(JAR_COMPATIBLE_OPTIONS, clock));
     case 'description':
       return renderFixtureDescription(markup, measurer);
   }
@@ -289,7 +295,7 @@ function census(fixtures: readonly FixtureDir[], measurer: StringMeasurer): Cens
         results.push({ ...base, diffCount: 'error', reason: 'malformed jar golden SVG' });
         continue;
       }
-      const oursSvg = renderFixtureFor(f.type, markup, measurer);
+      const oursSvg = renderFixtureFor(f.type, markup, measurer, clockForPath(join(f.dir, 'in.puml')));
       const { diffs } = compareSvg(oursSvg, jarSvg, 'deterministic');
       results.push({ ...base, diffCount: diffs.length, paths: diffs.map((d) => d.path) });
     } catch (err) {

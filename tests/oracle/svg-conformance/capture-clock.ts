@@ -1,8 +1,15 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import type { Clock } from '../../../src/core/clock.js';
+
 /**
  * The capture clock (gantt-engine-port D3b): which oracle sources read the
  * wall clock, how a sidecar key is named, and the sidecar's shape.
  *
- * Pure -- no I/O. The scripts (`scripts/oracle-render.sh` via
+ * The key helpers are pure; only {@link clockForKey} reads
+ * `oracle/capture-clock.json` (once, cached). The scripts (`scripts/oracle-render.sh` via
  * `scripts/record-capture-clock.ts`, `scripts/oracle-corpus.ts`) and
  * `capture-clock.test.ts` all share these functions so the key format cannot
  * drift between the recorder and the checker.
@@ -16,6 +23,9 @@ export interface CaptureClockEntry {
 
 /** `oracle/capture-clock.json`: `{ "<key>": CaptureClockEntry }`. */
 export type CaptureClockRecord = Readonly<Record<string, CaptureClockEntry>>;
+
+/** The sidecar, `<repo>/oracle/capture-clock.json`. */
+export const CAPTURE_CLOCK_PATH = join(dirname(fileURLToPath(import.meta.url)), '../../../oracle/capture-clock.json');
 
 /** Key prefix for authored sources under `tests/fixtures/`. */
 export const FIXTURE_KEY_PREFIX = 'fixtures/';
@@ -135,4 +145,41 @@ export function clockKeyForPath(pumlPath: string): string | undefined {
 export function withClockEntry(record: CaptureClockRecord, key: string, entry: CaptureClockEntry): CaptureClockRecord {
   const merged: Record<string, CaptureClockEntry> = { ...record, [key]: entry };
   return Object.fromEntries(Object.entries(merged).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
+}
+
+let cachedRecord: CaptureClockRecord | undefined;
+
+function isEntry(v: unknown): v is CaptureClockEntry {
+  if (typeof v !== 'object' || v === null) return false;
+  const e = v as Record<string, unknown>;
+  return typeof e['epochMillis'] === 'number' && Number.isFinite(e['epochMillis']) && typeof e['zone'] === 'string';
+}
+
+/** `oracle/capture-clock.json` parsed and shape-checked (`{}` when absent); a malformed row throws. */
+export function readCaptureClockRecord(path: string = CAPTURE_CLOCK_PATH): CaptureClockRecord {
+  if (!existsSync(path)) return {};
+  const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'));
+  if (typeof parsed !== 'object' || parsed === null) throw new Error(`${path}: expected an object`);
+  for (const [key, entry] of Object.entries(parsed)) {
+    if (!isEntry(entry)) throw new Error(`${path}: row "${key}" must be { epochMillis: number, zone: string }`);
+  }
+  return parsed as CaptureClockRecord;
+}
+
+/**
+ * The recorded capture {@link Clock} for sidecar `key` (D3b), or `undefined`
+ * when the source is not clock-dependent (no row): the render then uses the
+ * library default, exactly as before the seam.
+ */
+export function clockForKey(key: string, record?: CaptureClockRecord): Clock | undefined {
+  const rows = record ?? (cachedRecord ??= readCaptureClockRecord());
+  const entry = Object.hasOwn(rows, key) ? rows[key] : undefined;
+  if (entry === undefined) return undefined;
+  return { nowMillis: () => entry.epochMillis, zone: entry.zone };
+}
+
+/** {@link clockForKey} for a source path (`clockKeyForPath`); `undefined` for a path in neither tree. */
+export function clockForPath(pumlPath: string, record?: CaptureClockRecord): Clock | undefined {
+  const key = clockKeyForPath(pumlPath);
+  return key === undefined ? undefined : clockForKey(key, record);
 }

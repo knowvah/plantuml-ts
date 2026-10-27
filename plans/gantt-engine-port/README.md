@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — PLANNED 2026-10-24 (not started)
+## Status — HALTED 2026-10-24 after batch 1 (stop 3: Amendment 1, ubrex — awaiting ruling)
 
 ## Objective
 
@@ -117,7 +117,7 @@ New src module ⇒ `npm run catalog` (drift-gated).
 | Batch | Scope | Tasks | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | branch, b0, fixtures + oracles, gantt harness, capture clock | T0a–T0c, close | [x] |
-| [1](batch-1/overview.md) | `src/core/time`, clock seam, `I18nTimeData` | T1a–T1c, close | [ ] |
+| [1](batch-1/overview.md) | `src/core/time`, clock seam, `I18nTimeData` | T1a–T1c, close | [x] |
 | [2](batch-2/overview.md) | upstream layers L00–L01 (3,563 lines) | T2a–T2d, close | [ ] |
 | [3](batch-3/overview.md) | L02–L05 (2,779) | T3a–T3c, close | [ ] |
 | [4](batch-4/overview.md) | L06–L09 (2,606) | T4a–T4c, close | [ ] |
