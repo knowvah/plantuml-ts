@@ -17,6 +17,8 @@ is in batches 1–5 (incl. `GanttDiagram` from batch 5) or in this task (`diagno
 - `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/command/CommandHideResourceFootbox.java` (70 lines) → `src/diagrams/gantt/command/CommandHideResourceFootbox.ts`
 - `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/command/CommandHideResourceName.java` (70 lines) → `src/diagrams/gantt/command/CommandHideResourceName.ts`
 
+**Orchestrator note (journal row 29):** `CommandFootboxGantt` uses `sequencediagram/command/CommandFootbox.HIDE_SHOW_FOOTBOX`; engines may not import each other — inline that pattern in your file with the citation (`CommandFootbox.java`), as other engines inline `StereotypePattern` (row 27).
+
 ## Write-set
 `src/diagrams/gantt/command/CommandColorTask.ts`, `src/diagrams/gantt/command/CommandFootboxGantt.ts`, `src/diagrams/gantt/command/CommandGanttArrow.ts`, `src/diagrams/gantt/command/CommandGanttArrow2.ts`, `src/diagrams/gantt/command/CommandGroupEnd.ts`, `src/diagrams/gantt/command/CommandGroupStart.ts`, `src/diagrams/gantt/command/CommandHideClosed.ts`, `src/diagrams/gantt/command/CommandHideResourceFootbox.ts`, `src/diagrams/gantt/command/CommandHideResourceName.ts`;
 `tests/unit/gantt/command/CommandColorTask.test.ts`, `tests/unit/gantt/command/CommandFootboxGantt.test.ts`, `tests/unit/gantt/command/CommandGanttArrow.test.ts`, `tests/unit/gantt/command/CommandGanttArrow2.test.ts`, `tests/unit/gantt/command/CommandGroupEnd.test.ts`, `tests/unit/gantt/command/CommandGroupStart.test.ts`, `tests/unit/gantt/command/CommandHideClosed.test.ts`, `tests/unit/gantt/command/CommandHideResourceFootbox.test.ts`, `tests/unit/gantt/command/CommandHideResourceName.test.ts`.

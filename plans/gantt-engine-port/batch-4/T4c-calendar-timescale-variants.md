@@ -16,6 +16,8 @@ is in batches 1–3 or in this task (`diagnosis/upstream-batch-groups.txt`).
 `src/diagrams/gantt/data/DayCalendarData.ts`, `src/diagrams/gantt/timescale/TimeScaleDailyHideClosed.ts`, `src/diagrams/gantt/timescale/VariantTimeScale.ts`, `src/diagrams/gantt/timescale/TimeScaleCompressed.ts`;
 `tests/unit/gantt/data/DayCalendarData.test.ts`, `tests/unit/gantt/timescale/TimeScaleDailyHideClosed.test.ts`, `tests/unit/gantt/timescale/VariantTimeScale.test.ts`, `tests/unit/gantt/timescale/TimeScaleCompressed.test.ts`.
 
+**Orchestrator addition (journal row 20, 2026-10-26):** `src/core/utils/JavaHashMap.ts` + `tests/unit/core/utils/JavaHashMap.test.ts` — a Java `HashMap`/`HashSet` iteration-order model (JDK 8+ table: `hash ^ (hash >>> 16)`, index `& (cap-1)`, initial capacity 16, resize at 0.75 load with lo/hi split preserving relative order, insertion order within a bucket; treeify ≥ 8 per bucket not modelled — assert it is not reached). Keys supply `hashCode()`/`equals()`. `DayCalendarData`'s `HashMap`/`HashSet` fields (`DayCalendarData.java:62-67`) use it wherever iteration reaches output (`getNameDays()` is iterated by `GanttDiagram.java:254,409` and `TimeBoundsData.java:149`; `colorDaysInternal.keySet()` returned at `:99`). Expected orders come from a scratch JDK 21 program (`java X.java` under /private/tmp/claude-501/) — record provenance in the test.
+
 ## Read-set
 The Java files above; for each type they import, its already-ported TS file
 (`docs/catalog.md` → path). Do not read the rest of the gantt package.

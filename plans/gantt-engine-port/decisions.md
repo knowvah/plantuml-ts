@@ -15,6 +15,7 @@ then halt.
 | D8 | Fixtures = upstream `vega/xgantt` re-rendered through `oracle-render.sh` + authored for uncovered constructs |
 | D9 | Exit bar measured, not guessed: 0 errors/refusals where the jar renders; every diverged row classified with an owner |
 | D10 | `DeterministicMeasurer` via klimt `StringBounder`; no graphviz/Smetana anywhere |
+| D11 | Port `com.plantuml.ubrex` first (batch 1b) to `src/core/ubrex/`, with `RegexResult`/`RegexPartialMatch`, `CommandControl`, `UBrexSingleLineCommand2`, `UbrexUrlBuilder` (Amendment 1, user-approved 2026-10-26) |
 
 ## D1 — layout and names
 
@@ -126,7 +127,7 @@ with an owner in `planning/next-missions.md`. No numeric conformant floor.
 calls graphviz or Smetana (`grep -rn "Smetana\|graphviz" gantt/` is empty), so
 the jar's geometry is the target throughout.
 
-## Amendment 1 (2026-10-24, batch-1 close) — the grammar needs `com.plantuml.ubrex` (PROPOSED; mission halted, stop 3)
+## Amendment 1 (2026-10-24, batch-1 close) — the grammar needs `com.plantuml.ubrex` (APPROVED by the user 2026-10-26: "approve D11")
 
 **Finding (orchestrator, before launching batch 2).** 47 of the 167 gantt files
 import `com.plantuml.ubrex` (Unicode Bracketed Expressions): every `lang/Subject*`
@@ -164,3 +165,53 @@ annotations).
   structural divergence IS the bug"), and `findFirstValueByKey` over repeated
   named groups has no `RegExp` equivalent.
 - Cost: ≈ +3.8k Java lines (mission was 20.1k), one extra batch.
+
+**As approved, refined at planning (2026-10-26, orchestrator):**
+- Placement: `com/plantuml/ubrex/**` → `src/core/ubrex/**` (`builder/` kept);
+  `regex/RegexResult.java` + `regex/RegexPartialMatch.java` → `src/core/regex/`
+  (RegexResult has a `UMatcher` constructor, `RegexResult.java:58`; every gantt
+  command's `executeArg` takes one); `command/CommandControl.java` +
+  `command/UBrexSingleLineCommand2.java` → `src/core/command/`;
+  `url/UbrexUrlBuilder.java` → `src/core/url/`.
+- `UBrexSingleLineCommand2` keeps its members and per-line semantics but takes
+  the single `StringLocated` line where Java takes `BlocLines` — the adaptation
+  `src/core/command/Command.ts` already documents for every ported engine (no
+  generic `BlocLines` class exists in `src/`). Used by gantt
+  `CommandHideShowColumns` (T6b), `NaturalGanttCommand` and
+  `CommandPrintBetween` (T7a).
+- Build order: ubrex's core is one cycle (`Challenge`↔`ChallengeResult`↔
+  `Capture`↔`TextNavigator`, `AtomicParser`↔`CompositeList`), so batch 1b is a
+  serial chain T1d→T1e→T1f in ONE worktree (the D6 batch-5 pattern), each task a
+  fresh agent reading the previous commits. Upstream's 28 ubrex tests
+  (`src/test/java/com/plantuml/ubrex/`) are ported as the conformance oracle.
+- Existing engines are not migrated onto ubrex; batch 1b's close expects 0
+  movers in all 28 engines.
+
+## Amendment 2 (2026-10-26, during batch 3) — gantt also needs `net.sourceforge.plantuml.real` (PROPOSED; needs the user's ruling before batch 5)
+
+**Finding (orchestrator, path-keyed re-audit, journal row 29).** `data/TaskDrawRegistryData.java:60-62,70,113,151` (batch 5, the 25-file cycle) builds the
+task layout on the `real` constraint package: `RealUtils.createOrigin()`,
+`Real.addFixed`, `addAtLeast`, and through them `RealLine`/`RealImpl`/
+`RealMax`/`RealMin`/`PositiveForce`… — `~/git/plantuml/src/main/java/net/sourceforge/plantuml/real/`,
+16 files, 1,338 lines, one internal cycle (`Real*`↔`RealLine`↔`PositiveForce`),
+outside deps only `log.Logme` and `teavm.TeaVM`; one `__HAXE__` marker
+(`RealMiddle.java:39`, ignored), no `__MIT__`. The port has only a condensed
+single-file version INSIDE the sequence engine
+(`src/diagrams/sequence/sequence-real-line.ts`, 416 lines, missing e.g.
+`RealMiddle*`, `RealDebug`), which gantt may not import
+(`tests/architecture/layering.test.ts`: engine X must not import engine Y).
+Same class of gap as Amendment 1, which D6's gantt-only layering missed.
+
+**Proposal (orchestrator recommendation):**
+- **D12 — port `real/` whole to `src/core/real/` (upstream names) as batch 4b**,
+  one serial task (the package is one cycle; 1,338 lines, similar to T1e),
+  before batch 5. Sequence keeps its own `sequence-real-line.ts`; migrating
+  sequence onto `src/core/real` is a separate mission (sequence is 1143/1143
+  conformant — not touched here). The b4b close expects 0 movers.
+- Rejected: moving `sequence-real-line.ts` into core and sharing it (a
+  sequence refactor with conformance risk, and it is not file-for-file);
+  re-implementing the slice gantt calls inside `TaskDrawRegistryData`
+  (structural divergence).
+- Also recorded (no ruling needed, orchestrator fix-task precedent from T2e):
+  `sequencediagram/graphic/Segment.java` (106 lines) → `src/core/sequencediagram/graphic/Segment.ts`
+  inside T3c (journal row 28).

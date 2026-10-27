@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1793 modules · 6689 exported names.
+1841 modules · 6744 exported names.
 
 ## `src/`
 
@@ -287,11 +287,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `Command.ts` | `Command` |  |
+| `CommandControl.ts` | `CommandControl` | CommandControl -- the verdict of `Command#isValid`: the line is a valid command (`OK`), is not (`NOT_OK`), or becomes valid once the dispatcher appends the next line's opening bracket (`OK_PARTIAL`). |
 | `CommandCreateJson.ts` | `JSON_MULTILINE_DECL_RE`, `JSON_SINGLE_LINE_RE`, `parseJsonNode`, `finalizeJsonBody`, `JsonCommandHost`, `applyJsonMultilineOpen`, `applyJsonSingleLine`, `jsonCommands` | `json` declaration command shared by the class and state diagram parsers (`CommandCreateJson` + `CommandCreateJsonSingleLine` + `BodierJSon`). |
 | `CommandExecutionResult.ts` | `AbstractDiagram`, `CommandExecutionResult` | CommandExecutionResult — the ok/error outcome every command returns. |
 | `JsonNode.ts` | `JsonNode` | Parsed value of a `json Name { ... |
 | `ParserPass.ts` | `ParserPass` | ParserPass — which of the (up to) three parsing passes is running. |
 | `PSystemSingleLineFactory.ts` | `SingleLineType`, `RenderContext`, `SingleLineSpec`, `SingleLineGeometry`, `singleLinePlugin` | `PSystemSingleLineFactory` as a plugin helper: every `@startuml` utility page (`license`, `colors`, `sudoku`, the eggs, ...) is a factory that accepts a source of exactly one line between `@startuml` and `@enduml`, after the noise directly |
+| `UBrexSingleLineCommand2.ts` | `UBrexSingleLineCommand2` | UBrexSingleLineCommand2 -- base class of the commands whose syntax is a single `UnicodeBracketedExpression` matched against one source line. |
 
 ## `src/core/common/`
 
@@ -824,6 +826,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Plasma.ts` | `MAGIC_SEPARATOR`, `Plasma` |  |
 | `Quark.ts` | `Quark` |  |
 
+## `src/core/regex/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `RegexPartialMatch.ts` | `RegexPartialMatch` | `RegexPartialMatch` -- the ordered captured strings of one named regex leaf. |
+| `RegexResult.ts` | `RegexResult` | `RegexResult` -- result of a command pattern match, backed either by a `Map<String, RegexPartialMatch>` (the regex/`RegexConcat` world) or by a ubrex {@link UMatcher}. |
+
 ## `src/core/security/`
 
 | Module | Exports | Purpose |
@@ -1216,12 +1225,66 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ZonedDateTime.ts` | `ZonedDateTime` | `java.time.ZonedDateTime` restricted to a fixed `ZoneOffset`, and to the one accessor gantt reads (`toLocalDate`, `time/TimePoint.java:50`). |
 | `ZoneOffset.ts` | `ZoneOffset` | `java.time.ZoneOffset`, fixed offsets only. |
 
+## `src/core/ubrex/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `AtomicParser.ts` | `AtomicParser` | `AtomicParser` -- parses one ubrex atom (or operator + operand) off the front of a `TextNavigator` into `Challenge`s. |
+| `Capture.ts` | `Capture` | `Capture` -- immutable ordered key/value captures backed by a `SafeList`. |
+| `CaptureEntry.ts` | `CaptureEntry` | `CaptureEntry` -- one key/value pair of a `Capture` (package-private upstream). |
+| `CaptureLookup.ts` | `CaptureLookup` | `CaptureLookup` -- read access to captured values. |
+| `CaseMode.ts` | `CaseMode`, `ensureLowercase` | `CaseMode` -- case sensitivity of a ubrex matcher. |
+| `Challenge.ts` | `Challenge` | `Challenge` -- a ubrex matching step. |
+| `ChallengeAlternative.ts` | `ChallengeAlternative` | `ChallengeAlternative` -- first alternative that matches wins. |
+| `ChallengeCharClass.ts` | `ChallengeCharClass` | `ChallengeCharClass` -- one char matching a `CharClass`. |
+| `ChallengeCharSet.ts` | `ChallengeCharSet` | `ChallengeCharSet` -- one char in (or, with `〤`, not in) a set. |
+| `ChallengeEndOfText.ts` | `ChallengeEndOfText` | `ChallengeEndOfText` -- zero-width match at the end of the text. |
+| `ChallengeLazzyOneOrMore.ts` | `ChallengeLazzyOneOrMore` | `ChallengeLazzyOneOrMore` -- lazy `〇l+`: repeat until the stop condition peeks true. |
+| `ChallengeLookAhead.ts` | `ChallengeLookAhead` | `ChallengeLookAhead` -- zero-width positive/negative look-ahead. |
+| `ChallengeLookBehind.ts` | `ChallengeLookBehind` | `ChallengeLookBehind` -- zero-width positive/negative look-behind, run on the reversed text. |
+| `ChallengeOneOrMore.ts` | `ChallengeOneOrMore` | `ChallengeOneOrMore` -- greedy `〇+`. |
+| `ChallengeOneOrMoreUpToOldVersion.ts` | `ChallengeOneOrMoreUpToOldVersion` | `ChallengeOneOrMoreUpToOldVersion` -- `〄+ p1 -> p2`: repeat p1 until p2 peeks true. |
+| `ChallengeOptional.ts` | `ChallengeOptional` | `ChallengeOptional` -- `〇?`. |
+| `ChallengeRepetition.ts` | `ChallengeRepetition` | `ChallengeRepetition` -- `〇{...}` counted repetition. |
+| `ChallengeResult.ts` | `ChallengeResult` | `ChallengeResult` -- the outcome of a challenge: matched length (`Challenge.NO_MATCH` if none) plus captures. |
+| `ChallengeSingleChar.ts` | `ChallengeSingleChar` | `ChallengeSingleChar` -- one literal char, ASCII case-insensitive. |
+| `ChallengeUpTo.ts` | `ChallengeUpTo` | `ChallengeUpTo` -- `〄>`: advance until the origin matches (without consuming it). |
+| `ChallengeZeroOrMore.ts` | `ChallengeZeroOrMore` | `ChallengeZeroOrMore` -- greedy `〇*`. |
+| `CharClass.ts` | `CharClass` | `CharClass` -- a raw class plus NORMAL/NEGATIVE polarity. |
+| `CharClassRaw.ts` | `isLetter`, `isLetterOrDigit`, `CharClassRaw` | `CharClassRaw` -- the raw (un-negated) character classes of ubrex. |
+| `CharClassType.ts` | `CharClassType` | `CharClassType` -- whether a char class matches or negates its raw class. |
+| `CharSet.ts` | `CharSet` | `CharSet` -- a 128-bit ASCII bitmap (two Java `long`s, offsets from char 32). |
+| `CompositeList.ts` | `CompositeList` | `CompositeList` -- a sequence of challenges, built by parsing a ubrex definition. |
+| `CompositeNamed.ts` | `CompositeNamed` | `CompositeNamed` -- a named capture group (`〶$name=...`). |
+| `LookAround.ts` | `LookAround` | `LookAround` -- look-ahead / look-behind / end-of-text markers. |
+| `package-info.ts` | _(none)_ | `com.plantuml.ubrex` -- PlantUML Unicode Bracketed Expression (Ubrex) engine. |
+| `Repetition.ts` | `Repetition` | `Repetition` -- a `{1;3-5;7+}` repetition spec: a sorted set of exact counts plus an optional open-ended minimum. |
+| `SafeList.ts` | `SafeList` | `SafeList` -- persistent append-only list: each node holds one element (data1) or a block (data2); `size` is the cumulative chain size. |
+| `TextNavigator.ts` | `CharSequence`, `csLength`, `csCharAt`, `TextNavigator` | `TextNavigator` -- a mutable window over a char sequence, optionally read backwards (look-behind). |
+| `UMatcher.ts` | `UMatcher`, `umatcherFindFirstValueByKey` | `UMatcher` -- matcher facade over a ubrex pattern. |
+| `UnicodeBracketedExpression.ts` | `UnicodeBracketedExpression` | `UnicodeBracketedExpression` -- a compiled ubrex. |
+
+## `src/core/ubrex/builder/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `UBrexConcat.ts` | `UBrexConcat` | `UBrexConcat` -- sequence of parts. |
+| `UBrexLeaf.ts` | `UBrexLeaf` | `UBrexLeaf` -- a part parsed from one ubrex definition string. |
+| `UBrexNamed.ts` | `UBrexNamed` | `UBrexNamed` -- names a part's captures. |
+| `UBrexOneOrMore.ts` | `UBrexOneOrMore` | `UBrexOneOrMore` -- wraps a part in `ChallengeOneOrMore`. |
+| `UBrexOptional.ts` | `UBrexOptional` | `UBrexOptional` -- wraps a part in `ChallengeOptional`. |
+| `UBrexOr.ts` | `UBrexOr` | `UBrexOr` -- alternatives. |
+| `UBrexPart.ts` | `UBrexPart` | `UBrexPart` -- a composable ubrex fragment wrapping one {@link Challenge}. |
+| `UBrexUpto.ts` | `UBrexUpto` | `UBrexUpto` -- `what` one or more times, up to (and including) `stop`. |
+| `UBrexZeroOrMore.ts` | `UBrexZeroOrMore` | `UBrexZeroOrMore` -- wraps a part in `ChallengeZeroOrMore`. |
+
 ## `src/core/url/`
 
 | Module | Exports | Purpose |
 |---|---|---|
 | `Check.ts` | `Check` | Check — the url-package junit-mode flag: once `goJunit()` is called, `Url#getCoords` treats an empty visibility box as a hard error instead of silently emitting a degenerate `0,0,0,0` link region. |
 | `inline-links.ts` | `resolveInlineLinks` | Inline `[[url label]]` hyperlink-token resolution (`UrlBuilder`/ `CommandCreoleUrl`) -- originally split out of `parse-helpers- strings.ts` purely to stay under the project's 500-line cap, then moved here (add3 T0b, D9) to the shared url se |
+| `UbrexUrlBuilder.ts` | `UMatchNone`, `UbrexUrlBuilder` | UbrexUrlBuilder -- the ubrex-based sibling of {@link UrlBuilder}: parses the PlantUML `[[...]]` hyperlink syntax into a {@link Url}. |
 | `Url.ts` | `Url`, `eventuallyRemoveStartingAndEndingDoubleQuote` |  |
 | `UrlBuilder.ts` | `transform`, `URL_KEY`, `getRegexp`, `UrlBuilder` |  |
 | `UrlMode.ts` | `UrlMode` | UrlMode — how `UrlBuilder#getUrl` matches its patterns against the input: `STRICT` requires the whole string to be a `[[...]]` form (`Matcher#matches`), `ANYWHERE` accepts one embedded anywhere in the string (`Matcher#find`). |

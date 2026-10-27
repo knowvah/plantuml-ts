@@ -16,6 +16,9 @@ is in batches 1–5 (incl. `GanttDiagram` from batch 5) or in this task (`diagno
 - `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/command/CommandTaskCompleteDefault.java` (84 lines) → `src/diagrams/gantt/command/CommandTaskCompleteDefault.ts`
 - `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/command/CommandWeekNumberStrategy.java` (82 lines) → `src/diagrams/gantt/command/CommandWeekNumberStrategy.ts`
 
+
+**Orchestrator note (journal row 27):** `src/` has no `StereotypePattern` module — engines inline its patterns with a citation (`src/diagrams/activity/dispatch-support.ts:226`). Inline `StereotypePattern.optional` (regex, `stereo/StereotypePattern.java:53-59`) / `uoptional` (ubrex, `:74-77`) the same way, in your own file, citing the Java lines.
+
 ## Write-set
 `src/diagrams/gantt/command/CommandHideShowColumns.ts`, `src/diagrams/gantt/command/CommandLabelOnColumn.ts`, `src/diagrams/gantt/command/CommandLanguage.ts`, `src/diagrams/gantt/command/CommandNoteBottom.ts`, `src/diagrams/gantt/command/CommandPrintScale.ts`, `src/diagrams/gantt/command/CommandSeparator.ts`, `src/diagrams/gantt/command/CommandTaskCompleteDefault.ts`, `src/diagrams/gantt/command/CommandWeekNumberStrategy.ts`;
 `tests/unit/gantt/command/CommandHideShowColumns.test.ts`, `tests/unit/gantt/command/CommandLabelOnColumn.test.ts`, `tests/unit/gantt/command/CommandLanguage.test.ts`, `tests/unit/gantt/command/CommandNoteBottom.test.ts`, `tests/unit/gantt/command/CommandPrintScale.test.ts`, `tests/unit/gantt/command/CommandSeparator.test.ts`, `tests/unit/gantt/command/CommandTaskCompleteDefault.test.ts`, `tests/unit/gantt/command/CommandWeekNumberStrategy.test.ts`.

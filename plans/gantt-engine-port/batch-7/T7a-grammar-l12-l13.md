@@ -18,6 +18,9 @@ Serial chain: ONE worktree `gep-T7` (branch `gep/T7`), T7a→T7c, one commit eac
 - `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/lang/SubjectToday.java` (96 lines) → `src/diagrams/gantt/lang/SubjectToday.ts`
 - `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/lang/SubjectWorkingHours.java` (96 lines) → `src/diagrams/gantt/lang/SubjectWorkingHours.ts`
 
+
+**Orchestrator note (journal row 27):** `src/` has no `StereotypePattern` module — engines inline its patterns with a citation (`src/diagrams/activity/dispatch-support.ts:226`). Inline `StereotypePattern.optional` (regex, `stereo/StereotypePattern.java:53-59`) / `uoptional` (ubrex, `:74-77`) the same way, in your own file, citing the Java lines.
+
 ## Write-set
 `src/diagrams/gantt/command/CommandPrintBetween.ts`, `src/diagrams/gantt/lang/ComplementIntervals.ts`, `src/diagrams/gantt/lang/Subject.ts`, `src/diagrams/gantt/command/NaturalGanttCommand.ts`, `src/diagrams/gantt/lang/ComplementBeforeOrAfterOrAtTaskStartOrEnd.ts`, `src/diagrams/gantt/lang/ComplementFromTo.ts`, `src/diagrams/gantt/lang/ComplementIntervalsSmart.ts`, `src/diagrams/gantt/lang/SubjectTask.ts`, `src/diagrams/gantt/lang/SubjectGantt.ts`, `src/diagrams/gantt/lang/SubjectToday.ts`, `src/diagrams/gantt/lang/SubjectWorkingHours.ts`;
 `tests/unit/gantt/command/CommandPrintBetween.test.ts`, `tests/unit/gantt/lang/ComplementIntervals.test.ts`, `tests/unit/gantt/lang/Subject.test.ts`, `tests/unit/gantt/command/NaturalGanttCommand.test.ts`, `tests/unit/gantt/lang/ComplementBeforeOrAfterOrAtTaskStartOrEnd.test.ts`, `tests/unit/gantt/lang/ComplementFromTo.test.ts`, `tests/unit/gantt/lang/ComplementIntervalsSmart.test.ts`, `tests/unit/gantt/lang/SubjectTask.test.ts`, `tests/unit/gantt/lang/SubjectGantt.test.ts`, `tests/unit/gantt/lang/SubjectToday.test.ts`, `tests/unit/gantt/lang/SubjectWorkingHours.test.ts`.
