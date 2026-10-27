@@ -215,18 +215,30 @@ nodes as a `DotInputGraph`; the engine returns `DotLayoutResult`.
 
 ## Phase 4d — Gantt Charts
 
-See **`planning/gantt-deepdive.md`** for the full brief. This phase is blocked
-on Track SI-2 (datetime.ts).
+**DONE** — mission `gantt-engine-port` (gep); the brief is
+**`plans/gantt-engine-port/`** and the deep dive is
+**`planning/gantt-deepdive.md`**. Gantt went from 1/265 conformant to 263/265 at
+the b7 capture (final, batch 8). `@startgantt` and `{{gantt}}` render.
 
-**Java source:** `project/` (20 files), `project/core/` (14 files),
-`project/time/` (6 files), `project/timescale/` (5 files),
-`project/solver/` (2 files), `project/command/`
+**Java source:** `net/sourceforge/plantuml/gantt/` (167 files, 20,082 lines,
+MIT edition), ported file-for-file to `src/diagrams/gantt/` with upstream names
+(D1). It also needed `com.plantuml.ubrex` (→ `src/core/ubrex`, D11) and
+`net.sourceforge.plantuml.real` (→ `src/core/real`, D12), which the first plan
+missed.
 
-**Reuse:** `src/core/datetime.ts` (SI-2); `src/core/svg.ts`; `src/core/theme.ts`
+**Reuse:** `src/core/time` (a `java.time` subset in integer arithmetic; it
+replaced Track SI-2's `datetime.ts`), one injected clock (`src/core/clock.ts`,
+capture-clock sidecar `oracle/capture-clock.json`), klimt `UGraphicSvg` and the
+document shell like salt/wbs/mindmap.
 
 **Architecture constraint:** Date arithmetic is central. No graph engine —
-built-in timeline layout. The constraint solver (`Solver.java`) resolves task
-dependency chains to compute start/end dates.
+built-in timeline layout; upstream gantt never calls graphviz or Smetana (D10),
+so the jar's geometry is the target. Task dates come from the `real`
+constraint package and the `ngm` allocation model, not a standalone worklist
+solver.
+
+**Open work:** the remaining divergence families are owned in
+`planning/next-missions.md` (gep section) as gantt-divergence-drive work.
 
 ---
 

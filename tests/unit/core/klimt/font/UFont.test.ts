@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { FontStack } from '../../../../../src/core/klimt/font/FontStack.js';
-import { UFont } from '../../../../../src/core/klimt/font/UFont.js';
+import { UFont, UFontFace } from '../../../../../src/core/klimt/font/UFont.js';
 import { UFontFactory } from '../../../../../src/core/klimt/font/UFontFactory.js';
 
 describe('FontStack (FontStack.java)', () => {
@@ -36,5 +36,26 @@ describe('UFont / UFontFactory.build (UFont.java:61-101, UFontFactory.java:48-52
       cssWeight: 300,
       italic: true,
     });
+  });
+});
+
+describe('UFont#withFontFace / UFontFace (UFont.java:89-93, UFontFace.java:55-94)', () => {
+  it('the standard faces are weight 400/700 x upright/italic', () => {
+    expect(UFontFace.normal()).toEqual({ cssWeight: 400, italic: false });
+    expect(UFontFace.bold()).toEqual({ cssWeight: 700, italic: false });
+    expect(UFontFace.italic()).toEqual({ cssWeight: 400, italic: true });
+    expect(UFontFace.boldItalic()).toEqual({ cssWeight: 700, italic: true });
+  });
+
+  it('keeps the stack and size and swaps the face', () => {
+    const f = UFontFactory.build('Serif', undefined, 11).withFontFace(UFontFace.bold());
+    expect(f.getFontFace()).toEqual({ cssWeight: 700, italic: false });
+    expect(f.getSize()).toBe(11);
+    expect(f.getFontStack().getFullDefinition()).toBe('Serif');
+  });
+
+  it('a null face returns the same font (java:90-91)', () => {
+    const f = UFontFactory.build('Serif', undefined, 11);
+    expect(f.withFontFace(undefined)).toBe(f);
   });
 });

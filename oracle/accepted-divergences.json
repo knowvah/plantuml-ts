@@ -28,7 +28,7 @@
       "scope": "svg-conformance unknown ledger (nested {{yaml}} image size -- Smetana path, cdd7 D8)",
       "acceptedAt": "2026-09-30",
       "acceptedBy": "maintainer",
-      "reason": "The description leaf embeds a `{{yaml ...}}` sub-diagram. cdd6 T2b made the outer canvas exact (0/5 -> 0/3, `svg/@width` 211 = jar) and cdd6 T3b/T5e closed the ink family; the residual is the embedded `<image>` width/height, off by 1 px, which is the nested yaml diagram's OWN size. `@startyaml` is a JsonDiagram laid out by Smetana in the jar and by @knowvah/dot-engine here (CLAUDE.md, one layout engine, ruling 2026-08-09; DIVERGENCES.md `Smetana-backed diagram types`), so the delta is the accepted Smetana geometry delta of the nested diagram, surfaced through the embed slot -- not a class or description defect. Mechanism: cdd6 decision-journal row 73 (T3b) and the cdd6 ledger row for gubeca (`open -> cdd7 (nested yaml image Δ1, Smetana path)`). Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30). The survey keeps printing `structural-match`; a fix in the yaml engine that makes the row conformant retires this entry via the ledger gate. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=11. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
+      "reason": "The description leaf embeds a `{{yaml ...}}` sub-diagram. cdd6 T2b made the outer canvas exact (0/5 -> 0/3, `svg/@width` 211 = jar) and cdd6 T3b/T5e closed the ink family; the residual is the embedded `<image>` width/height, off by 1 px, which is the nested yaml diagram's OWN size. `@startyaml` is a JsonDiagram laid out by Smetana in the jar and by @knowvah/dot-engine here (CLAUDE.md, one layout engine, ruling 2026-08-09; DIVERGENCES.md `Smetana-backed diagram types`), so the delta is the accepted Smetana geometry delta of the nested diagram, surfaced through the embed slot -- not a class or description defect. Mechanism: cdd6 decision-journal row 73 (T3b) and the cdd6 ledger row for gubeca (`open -> cdd7 (nested yaml image \u03941, Smetana path)`). Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30). The survey keeps printing `structural-match`; a fix in the yaml engine that makes the row conformant retires this entry via the ledger gate. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=11. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
     },
     {
       "match": {
@@ -37,7 +37,7 @@
       "scope": "svg-conformance unknown ledger (nested {{yaml}} image size -- Smetana path, cdd7 D8)",
       "acceptedAt": "2026-09-30",
       "acceptedBy": "maintainer",
-      "reason": "The description leaf embeds a `{{yaml ...}}` sub-diagram. cdd6 T2b made the outer canvas exact (0/5 -> 0/3, `svg/@width` 211 = jar) and cdd6 T3b/T5e closed the ink family; the residual is the embedded `<image>` width/height, off by 1 px, which is the nested yaml diagram's OWN size. `@startyaml` is a JsonDiagram laid out by Smetana in the jar and by @knowvah/dot-engine here (CLAUDE.md, one layout engine, ruling 2026-08-09; DIVERGENCES.md `Smetana-backed diagram types`), so the delta is the accepted Smetana geometry delta of the nested diagram, surfaced through the embed slot -- not a class or description defect. Mechanism: cdd6 decision-journal row 73 (T3b) and the cdd6 ledger row for jixibu (`open -> cdd7 (nested yaml image Δ1, Smetana path)`). Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30). The survey keeps printing `structural-match`; a fix in the yaml engine that makes the row conformant retires this entry via the ledger gate. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=11. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
+      "reason": "The description leaf embeds a `{{yaml ...}}` sub-diagram. cdd6 T2b made the outer canvas exact (0/5 -> 0/3, `svg/@width` 211 = jar) and cdd6 T3b/T5e closed the ink family; the residual is the embedded `<image>` width/height, off by 1 px, which is the nested yaml diagram's OWN size. `@startyaml` is a JsonDiagram laid out by Smetana in the jar and by @knowvah/dot-engine here (CLAUDE.md, one layout engine, ruling 2026-08-09; DIVERGENCES.md `Smetana-backed diagram types`), so the delta is the accepted Smetana geometry delta of the nested diagram, surfaced through the embed slot -- not a class or description defect. Mechanism: cdd6 decision-journal row 73 (T3b) and the cdd6 ledger row for jixibu (`open -> cdd7 (nested yaml image \u03941, Smetana path)`). Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30). The survey keeps printing `structural-match`; a fix in the yaml engine that makes the row conformant retires this entry via the ledger gate. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=11. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line."
     },
     {
       "match": {
@@ -65,96 +65,6 @@
       "acceptedAt": "2026-10-10",
       "acceptedBy": "maintainer",
       "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 5, \"Syntax Error? (Assumed diagram type: ebnf)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
-    },
-    {
-      "match": {
-        "id": "svg-gantt/fobeda-14-tori503"
-      },
-      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
-      "acceptedAt": "2026-10-10",
-      "acceptedBy": "maintainer",
-      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 3, \"No starting date for the project (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
-    },
-    {
-      "match": {
-        "id": "svg-gantt/furubu-23-mecu777"
-      },
-      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
-      "acceptedAt": "2026-10-10",
-      "acceptedBy": "maintainer",
-      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 2, \"No starting date for the project (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
-    },
-    {
-      "match": {
-        "id": "svg-gantt/govacu-51-puti316"
-      },
-      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
-      "acceptedAt": "2026-10-10",
-      "acceptedBy": "maintainer",
-      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 4, \"Syntax Error? (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
-    },
-    {
-      "match": {
-        "id": "svg-gantt/lituri-55-caju105"
-      },
-      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
-      "acceptedAt": "2026-10-10",
-      "acceptedBy": "maintainer",
-      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 8, \"No such task T2 (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
-    },
-    {
-      "match": {
-        "id": "svg-gantt/mogafu-27-jeci360"
-      },
-      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
-      "acceptedAt": "2026-10-10",
-      "acceptedBy": "maintainer",
-      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 5, \"Bad argument for resource (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
-    },
-    {
-      "match": {
-        "id": "svg-gantt/nakude-77-suji787"
-      },
-      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
-      "acceptedAt": "2026-10-10",
-      "acceptedBy": "maintainer",
-      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 2, \"Gantt diagrams cannot last more than 20 years (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
-    },
-    {
-      "match": {
-        "id": "svg-gantt/papava-92-geve698"
-      },
-      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
-      "acceptedAt": "2026-10-10",
-      "acceptedBy": "maintainer",
-      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 2, \"Syntax Error? (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
-    },
-    {
-      "match": {
-        "id": "svg-gantt/recufa-28-desi167"
-      },
-      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
-      "acceptedAt": "2026-10-10",
-      "acceptedBy": "maintainer",
-      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 8, \"No such P_start2 task (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
-    },
-    {
-      "match": {
-        "id": "svg-gantt/saricu-01-funu594"
-      },
-      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
-      "acceptedAt": "2026-10-10",
-      "acceptedBy": "maintainer",
-      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 4, \"No such task Production 0.2 (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
-    },
-    {
-      "match": {
-        "id": "svg-gantt/votofi-06-rolo321"
-      },
-      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
-      "acceptedAt": "2026-10-10",
-      "acceptedBy": "maintainer",
-      "reason": "Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 8, \"No group to be closed (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it."
     },
     {
       "match": {
@@ -472,7 +382,7 @@
       "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=414, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=1 numeric=414. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
       "retiredAt": "2026-10-12",
       "retiredBy": "maintainer",
-      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported \u2014 the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
     },
     {
       "match": {
@@ -484,7 +394,7 @@
       "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=19 numeric=257, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=19 numeric=257. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
       "retiredAt": "2026-10-12",
       "retiredBy": "maintainer",
-      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported \u2014 the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
     },
     {
       "match": {
@@ -496,7 +406,7 @@
       "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=19 numeric=257, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=19 numeric=257. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
       "retiredAt": "2026-10-12",
       "retiredBy": "maintainer",
-      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported \u2014 the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
     },
     {
       "match": {
@@ -508,7 +418,7 @@
       "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=508, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=1 numeric=508. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
       "retiredAt": "2026-10-12",
       "retiredBy": "maintainer",
-      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported \u2014 the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
     },
     {
       "match": {
@@ -520,7 +430,7 @@
       "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=168, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=1 numeric=168. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
       "retiredAt": "2026-10-12",
       "retiredBy": "maintainer",
-      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported \u2014 the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
     },
     {
       "match": {
@@ -532,7 +442,7 @@
       "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=43 numeric=431, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=43 numeric=431. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
       "retiredAt": "2026-10-12",
       "retiredBy": "maintainer",
-      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported \u2014 the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
     },
     {
       "match": {
@@ -544,7 +454,7 @@
       "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=414, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=1 numeric=414. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line.",
       "retiredAt": "2026-10-12",
       "retiredBy": "maintainer",
-      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported — the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
+      "retiredReason": "Retired by cdd8 (decisions.md#D8/D3, 2026-10-12): `!pragma layout elk` is now ported \u2014 the ELK maker (`CucaDiagramFileMakerElk`, `MyElkDrawing`, `MyElkCluster`, `MyElkEdge`) behind the `ElkBackend` seam on elkjs 0.12.0, the jar's ELK (DIVERGENCES.md entry retired). The fixture is survey-conformant, census 0-diff, ratchet-eligible under D12 (oracleBlind + elk pragma) and pinned (cdd8-b3 close-b3)."
     },
     {
       "match": {
@@ -901,10 +811,120 @@
       "scope": "svg-conformance class ledger (dot-engine known divergence A3 -- cdd4 D6)",
       "acceptedAt": "2026-09-26",
       "acceptedBy": "maintainer",
-      "reason": "One flat labelled `minlen=0` edge (`sh0006->sh0007`) routes around the mirrored side of its label box. docs/graphviz-issues/23 / TRACKER 23: dot-engine accepted this as an instance of its docs/known-divergences.md A3 (spline-routing tie-break). A symmetric label corridor makes the two candidate split corners an exact tie, and C graphviz and the port resolve the tie on floating-point noise, so there is no upstream fix to wait for. Re-verified 2026-09-26 (cdd4 T1) on dot-engine 1.6.1: render-diff structural=0, numeric=23, all on that edge's path and arrowhead polygon (max Δ16.06, label side mirrored); every other element exact. Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=23, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=23. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line. Re-ruled 2026-10-11: no dot-engine fix pursued (cdd8 D5).",
+      "reason": "One flat labelled `minlen=0` edge (`sh0006->sh0007`) routes around the mirrored side of its label box. docs/graphviz-issues/23 / TRACKER 23: dot-engine accepted this as an instance of its docs/known-divergences.md A3 (spline-routing tie-break). A symmetric label corridor makes the two candidate split corners an exact tie, and C graphviz and the port resolve the tie on floating-point noise, so there is no upstream fix to wait for. Re-verified 2026-09-26 (cdd4 T1) on dot-engine 1.6.1: render-diff structural=0, numeric=23, all on that edge's path and arrowhead polygon (max \u039416.06, label side mirrored); every other element exact. Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=23, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin. Re-verified 2026-10-09 (instrument-space-width, oracle seam #4: U+0020 = 44 tenths, widths float-rounded; whole oracle re-captured) with render-diff: pass=false structural=0 numeric=23. Numbers above this line were measured with the zero-width-space instrument (or, for embedded-diagram rows, before lgm's seam #3) and are superseded by this line. Re-ruled 2026-10-11: no dot-engine fix pursued (cdd8 D5).",
       "retiredAt": "2026-10-14",
       "retiredBy": "dot-engine 2.4.0 bump (chore/dot-engine-2.4.0)",
       "retiredReason": "Retired: the divergence no longer exists. dot-engine fixed TRACKER 23 in PR #85 (cdf597bc, reallyroutespline's max-deviation split now matches C bit for bit: libm hypot, strict `>`, clang fp-contract fusion), published in 2.3.1 and carried into 2.4.0; dot-engine retired its A3 known divergence. Measured 2026-10-14 on the pinned 2.4.0 tarball: render-diff structural=0 numeric=0 (was 0/23 on 2.3.0), survey verdict structural-match -> conformant, census diffCount 23 -> 0. Pinned into oracle/goldens/svg-class/ratchet.json (source dot-engine-2.4.0). The A3 premise that C resolves the tie on floating-point noise was wrong: the two corners differ by 1 ULP and C decides deterministically."
+    },
+    {
+      "match": {
+        "id": "svg-gantt/fobeda-14-tori503"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "ORIGINAL (2026-10-10): Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 3, \"No starting date for the project (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it. -- RETIRED (2026-10-26): the ported gantt engine (feat/gantt-engine-port, T7c merge e3b9bf4de) now errors where the jar errors, so the row is conformant by the 2026-10-10 error-page rule; the emitter ledger gate flagged it as closed by a fix.",
+      "retiredAt": "2026-10-26",
+      "retiredBy": "gep b7 turn-on (orchestrator; user review at squash)"
+    },
+    {
+      "match": {
+        "id": "svg-gantt/furubu-23-mecu777"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "ORIGINAL (2026-10-10): Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 2, \"No starting date for the project (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it. -- RETIRED (2026-10-26): the ported gantt engine (feat/gantt-engine-port, T7c merge e3b9bf4de) now errors where the jar errors, so the row is conformant by the 2026-10-10 error-page rule; the emitter ledger gate flagged it as closed by a fix.",
+      "retiredAt": "2026-10-26",
+      "retiredBy": "gep b7 turn-on (orchestrator; user review at squash)"
+    },
+    {
+      "match": {
+        "id": "svg-gantt/govacu-51-puti316"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "ORIGINAL (2026-10-10): Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 4, \"Syntax Error? (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it. -- RETIRED (2026-10-26): the ported gantt engine (feat/gantt-engine-port, T7c merge e3b9bf4de) now errors where the jar errors, so the row is conformant by the 2026-10-10 error-page rule; the emitter ledger gate flagged it as closed by a fix.",
+      "retiredAt": "2026-10-26",
+      "retiredBy": "gep b7 turn-on (orchestrator; user review at squash)"
+    },
+    {
+      "match": {
+        "id": "svg-gantt/lituri-55-caju105"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "ORIGINAL (2026-10-10): Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 8, \"No such task T2 (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it. -- RETIRED (2026-10-26): the ported gantt engine (feat/gantt-engine-port, T7c merge e3b9bf4de) now errors where the jar errors, so the row is conformant by the 2026-10-10 error-page rule; the emitter ledger gate flagged it as closed by a fix.",
+      "retiredAt": "2026-10-26",
+      "retiredBy": "gep b7 turn-on (orchestrator; user review at squash)"
+    },
+    {
+      "match": {
+        "id": "svg-gantt/mogafu-27-jeci360"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "ORIGINAL (2026-10-10): Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 5, \"Bad argument for resource (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it. -- RETIRED (2026-10-26): the ported gantt engine (feat/gantt-engine-port, T7c merge e3b9bf4de) now errors where the jar errors, so the row is conformant by the 2026-10-10 error-page rule; the emitter ledger gate flagged it as closed by a fix.",
+      "retiredAt": "2026-10-26",
+      "retiredBy": "gep b7 turn-on (orchestrator; user review at squash)"
+    },
+    {
+      "match": {
+        "id": "svg-gantt/nakude-77-suji787"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "ORIGINAL (2026-10-10): Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 2, \"Gantt diagrams cannot last more than 20 years (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it. -- RETIRED (2026-10-26): the ported gantt engine (feat/gantt-engine-port, T7c merge e3b9bf4de) now errors where the jar errors, so the row is conformant by the 2026-10-10 error-page rule; the emitter ledger gate flagged it as closed by a fix.",
+      "retiredAt": "2026-10-26",
+      "retiredBy": "gep b7 turn-on (orchestrator; user review at squash)"
+    },
+    {
+      "match": {
+        "id": "svg-gantt/papava-92-geve698"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "ORIGINAL (2026-10-10): Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 2, \"Syntax Error? (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it. -- RETIRED (2026-10-26): the ported gantt engine (feat/gantt-engine-port, T7c merge e3b9bf4de) now errors where the jar errors, so the row is conformant by the 2026-10-10 error-page rule; the emitter ledger gate flagged it as closed by a fix.",
+      "retiredAt": "2026-10-26",
+      "retiredBy": "gep b7 turn-on (orchestrator; user review at squash)"
+    },
+    {
+      "match": {
+        "id": "svg-gantt/recufa-28-desi167"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "ORIGINAL (2026-10-10): Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 8, \"No such P_start2 task (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it. -- RETIRED (2026-10-26): the ported gantt engine (feat/gantt-engine-port, T7c merge e3b9bf4de) now errors where the jar errors, so the row is conformant by the 2026-10-10 error-page rule; the emitter ledger gate flagged it as closed by a fix.",
+      "retiredAt": "2026-10-26",
+      "retiredBy": "gep b7 turn-on (orchestrator; user review at squash)"
+    },
+    {
+      "match": {
+        "id": "svg-gantt/saricu-01-funu594"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "ORIGINAL (2026-10-10): Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 4, \"No such task Production 0.2 (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it. -- RETIRED (2026-10-26): the ported gantt engine (feat/gantt-engine-port, T7c merge e3b9bf4de) now errors where the jar errors, so the row is conformant by the 2026-10-10 error-page rule; the emitter ledger gate flagged it as closed by a fix.",
+      "retiredAt": "2026-10-26",
+      "retiredBy": "gep b7 turn-on (orchestrator; user review at squash)"
+    },
+    {
+      "match": {
+        "id": "svg-gantt/votofi-06-rolo321"
+      },
+      "scope": "svg-conformance gantt ledger (jar errors, we draw -- ruling 2026-10-10)",
+      "acceptedAt": "2026-10-10",
+      "acceptedBy": "maintainer",
+      "reason": "ORIGINAL (2026-10-10): Maintainer ruling 2026-10-10: where the jar errors and we draw, the row is an accepted divergence once the primary PlantUML release also errors, because the diagram parses fine for us. Verified 2026-10-10 against the official release plantuml-1.2026.8.jar (GitHub release v1.2026.8, 149874a; no -D flags, -stdrpt:1): exit 200 (ExitStatus.ERROR_200_SOME_DIAGRAMS_HAVE_ERROR), line 8, \"No group to be closed (Assumed diagram type: gantt)\". Same result as the stock record (oracle/goldens/stock-error-pages.json, built from 97a5992). The survey still prints it diverged with firstDiff 'error-page'; this entry declares it, it does not special-case it. -- RETIRED (2026-10-26): the ported gantt engine (feat/gantt-engine-port, T7c merge e3b9bf4de) now errors where the jar errors, so the row is conformant by the 2026-10-10 error-page rule; the emitter ledger gate flagged it as closed by a fix.",
+      "retiredAt": "2026-10-26",
+      "retiredBy": "gep b7 turn-on (orchestrator; user review at squash)"
     }
   ]
 }

@@ -1,0 +1,514 @@
+{
+  "fixtures": [
+    {
+      "type": "gantt",
+      "slug": "columns-hide-duration",
+      "topic": "Project starts 2020-07-01;hide column duration;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "columns-show-task",
+      "topic": "Project starts 2020-07-01;show column task;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "hide-resource-names",
+      "topic": "Project starts 2020-07-01;hide resources names;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "label-on-column",
+      "topic": "Project starts 2020-07-01;Labels on first column and right a",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "language-de",
+      "topic": "language de;Project starts 2020-06-25;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "language-es",
+      "topic": "language es;Project starts 2020-06-25;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "language-fr",
+      "topic": "language fr;Project starts 2020-06-25;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "language-ja",
+      "topic": "language ja;Project starts 2020-06-25;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "language-ko",
+      "topic": "language ko;Project starts 2020-06-25;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "language-ru",
+      "topic": "language ru;Project starts 2020-06-25;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "language-zh",
+      "topic": "language zh;Project starts 2020-06-25;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "link-task",
+      "topic": "Project starts 2020-07-01;[task1] lasts 5 days;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "ngm-after-hours",
+      "topic": "Project starts 2020-07-01 at 08:00;[Task A] starts 2020-07-0",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "ngm-closed-hours",
+      "topic": "Project starts 2020-07-01;2020-07-02 is closed;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "ngm-lasts-hours",
+      "topic": "Project starts 2020-07-01;[Meeting] lasts 2 hours;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "ngm-lasts-units",
+      "topic": "Project starts 2020-07-01;[Quick] lasts 45 seconds;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "ngm-pause-time",
+      "topic": "Project starts 2020-07-01;[Task] lasts 5 days;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "ngm-relative-hours",
+      "topic": "Project starts 2020-07-01;[Task A] starts at D+4 and lasts 3",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "ngm-requires-hours",
+      "topic": "Project starts 2020-07-01;[Bug Fix] requires 4 hours;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "ngm-requires-resources",
+      "topic": "Project starts 2020-07-01;[Development] requires 80 hours on",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "ngm-succession-gap",
+      "topic": "Project starts 2020-07-01;[Task A] requires 4 hours;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "ngm-working-hours-per-day",
+      "topic": "Project starts 2020-07-01;From 9:00 to 17:00 are working hou",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "printscale-daily-zoom",
+      "topic": "printscale daily zoom 2;Project starts 2020-07-01;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "printscale-monthly-zoom",
+      "topic": "printscale monthly zoom 2;Project starts 2020-01-01;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "printscale-quarterly-zoom",
+      "topic": "printscale quarterly zoom 2;Project starts 2020-01-01;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "printscale-weekly-calendar-date",
+      "topic": "printscale weekly with calendar date;Project starts 2020-07-",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "printscale-weekly-numbering-from",
+      "topic": "printscale weekly with week numbering from 10;Project starts",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "printscale-weekly-zoom",
+      "topic": "printscale weekly zoom 2;Project starts 2020-07-01;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "printscale-yearly-zoom",
+      "topic": "printscale yearly zoom 2;Project starts 2019-01-01;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "projectscale-quarterly",
+      "topic": "projectscale quarterly;Project starts 2020-01-01;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "quirk-pauses-to-the",
+      "topic": "[T] pauses from 2020-07-02 to the 2020-07-05` (T7a probe)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "quirk-pauses-trailing-text",
+      "topic": "[T] pauses from 2020-07-02 to the 2020-07-05 blahblah",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "quirk-stereotype-then-as",
+      "topic": "[A] <<st>> as [B] lasts 3 days",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "quirk-stereotype-then-on",
+      "topic": "[A] <<st>> on {Alice} lasts 3 days",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "today-implicit",
+      "topic": "Project starts 2026-10-01;today is colored in #ff8080;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-gantt0",
+      "topic": "Project starts the 5th of december 2018;saturday are closed;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-gantt1",
+      "topic": "Project starts the 5th of december 2018;saturday are closed;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-gantt10",
+      "topic": "saturday are closed;sunday are closed;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-gantt11",
+      "topic": "scale 2;printscale weekly;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-gantt2",
+      "topic": "[Prototype design] lasts 13 days;[Test prototype] lasts 4 da",
+      "status": "baseline",
+      "weightedScore": 4,
+      "diffCount": 4,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-gantt3",
+      "topic": "project starts on 2020-07-01;[P_start] happens 2020-07-03;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-gantt4",
+      "topic": "Project starts the 20th of september 2018;2018/09/22 is colo",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-gantt5",
+      "topic": "Project starts the 20th of september 2018;printscale yearly;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-gantt6",
+      "topic": "decimal: 0;!$PRIMARY_LIGHT = \"#33b2e2\";",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-gantt7",
+      "topic": "Project starts the 5th of november 2018;saturday are closed;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-gantt8",
+      "topic": "title Long Long Long note KO;Project starts 2020-05-29;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-gantt9",
+      "topic": "[T1] on {def:50%} lasts 5 days;[T2] lasts 15 days;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-hms0",
+      "topic": "Project starts 2024-09-22;[Task 1] starts 2024-09-22 10:30:4",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-hms1",
+      "topic": "language de;Project starts 2024-09-22;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-hms2",
+      "topic": "Project starts 2024-09-22;saturday are closed;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    },
+    {
+      "type": "gantt",
+      "slug": "vega-hms3",
+      "topic": "Project starts 2024-09-19;saturday are closed;",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0d42057b0"
+    }
+  ]
+}

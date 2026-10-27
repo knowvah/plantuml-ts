@@ -20,6 +20,7 @@ import '../src/index.js'; // side effect: registers all diagram plugins
 import { buildBlockUmls } from '../src/core/BlockUmlBuilder.js';
 import { ORACLE_JAR_TIMEOUT_MS } from './lib/oracle-jar-timeout.js';
 import { registry } from '../src/core/dispatcher.js';
+import { recordCaptureClock } from './record-capture-clock.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const JAR = join(REPO, 'oracle', 'dist', 'plantuml-oracle.jar');
@@ -103,10 +104,13 @@ function capture(srcPath: string): string | null {
   const dir = join(CACHE, type, id);
   mkdirSync(dir, { recursive: true });
   cpSync(srcPath, join(dir, 'input.puml'));
+  // D3b: the instant just before the JVM starts, for clock-dependent sources.
+  const startedAt = Date.now();
   if (runOracle(join(dir, 'input.puml'), dir) === 0) {
     rmSync(dir, { recursive: true, force: true });
     return null;
   }
+  recordCaptureClock(join(dir, 'input.puml'), startedAt, undefined, `${type}/${id}`);
   return type;
 }
 

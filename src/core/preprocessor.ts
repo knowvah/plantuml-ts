@@ -23,6 +23,7 @@ import { readLines } from './tim/ReadLineReader.js';
 import { StringLocated } from './tim/StringLocated.js';
 import type { LineLocation } from './tim/LineLocation.js';
 import { TContext } from './tim/TContext.js';
+import type { Clock } from './clock.js';
 import { createDefaultTimEnvironment } from './tim/builtin/TimEnvironment.js';
 import type { TimEnvironment } from './tim/builtin/TimEnvironment.js';
 import { TMemoryGlobal } from './tim/TMemoryGlobal.js';
@@ -176,6 +177,12 @@ export interface PreprocessOptions {
    * (`Defines.java:89-94`): feeds `%filename()` and `filenameNoExtension`.
    */
   readonly filename?: string | undefined;
+  /**
+   * The injected clock behind `%now()` / `%date(...)` (gantt-engine-port D3a,
+   * `Now.java:56`, `DateFunction.java:76-79,90-92`). Omitted -> the default
+   * environment (instant 0, host zone for a zone-less `%date`).
+   */
+  readonly clock?: Clock | undefined;
 }
 
 /**
@@ -314,8 +321,9 @@ function nameNoExtension(name: string): string {
  * when the name is non-null; every other environment name stays `undefined`.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/preproc/Defines.java:89-94
  */
-function filenameEnvironment(filename: string | undefined): TimEnvironment {
-  const base = createDefaultTimEnvironment();
+function filenameEnvironment(filename: string | undefined, clock?: Clock): TimEnvironment {
+  const seeded = createDefaultTimEnvironment();
+  const base: TimEnvironment = clock === undefined ? seeded : { ...seeded, clock, zone: clock.zone };
   if (filename === undefined) return base;
   return {
     ...base,
@@ -345,7 +353,10 @@ export function preprocessLinesOrError(
   defines?: ReadonlyMap<string, string>,
   options?: PreprocessOptions,
 ): PreprocessOutcome {
-  const context = new TContext({ includeStore: options?.includeStore, env: filenameEnvironment(options?.filename) });
+  const context = new TContext({
+    includeStore: options?.includeStore,
+    env: filenameEnvironment(options?.filename, options?.clock),
+  });
   const memory = new TMemoryGlobal();
 
   if (defines !== undefined)

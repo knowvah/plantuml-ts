@@ -1145,8 +1145,13 @@ describe('routing conformance — jar-error classification', () => {
     // 7707 -> 7709 at sdd3/close-b6 (2026-10-23): +2 svg-sequence golden clones (tifube, fifasu).
     // 7709 -> 7710 at sdd3/close-b7 (2026-10-23): +1 svg-sequence golden clone (mefeke).
     // 7710 -> 7716 at sdd3/close-b8 (2026-10-24): +6 svg-sequence golden clones (the last open rows).
-    expect(pinnedAgree.length).toBe(7716);
-    expect(pinnedMisroutes.length).toBe(629);
+    // 7716 -> 7970 at gep/close-b7 (2026-10-26): gantt turned on, 254 known-misroute rows now agree.
+    // 7970 -> 7971 at gep/close-b7: +1 svg-activity golden clone (bozido-07-geze049 promoted).
+    // 7971 -> 8222 at gep/close-b7 capture: +251 svg-gantt golden clones.
+    // 8222 -> 8223 at gep/close-b8: +1 svg-gantt golden clone (ribupo-71-poku778 promoted, T8c).
+    expect(pinnedAgree.length).toBe(8223);
+    // 629 -> 375 at gep/close-b7: the same 254 gantt rows.
+    expect(pinnedMisroutes.length).toBe(375);
     expect(pinnedJarErrors.length).toBe(86);
     // 7202 -> 7203 at gtc T1 (see the agree derivation above).
     // 7203 -> 7214 at gtc T2 (see the agree derivation above).
@@ -1184,7 +1189,10 @@ describe('routing conformance — jar-error classification', () => {
     // 8422 -> 8424 at sdd3/close-b6 (2026-10-23): +2 svg-sequence golden clones (tifube, fifasu).
     // 8424 -> 8425 at sdd3/close-b7 (2026-10-23): +1 svg-sequence golden clone (mefeke).
     // 8425 -> 8431 at sdd3/close-b8 (2026-10-24): +6 svg-sequence golden clones (the last open rows).
-    expect(manifest.fixtures.length).toBe(8431);
+    // 8431 -> 8432 at gep/close-b7 (2026-10-26): +1 svg-activity golden clone (bozido-07-geze049).
+    // 8432 -> 8683 at gep/close-b7 capture: +251 svg-gantt golden clones.
+    // 8683 -> 8684 at gep/close-b8: +1 svg-gantt golden clone (ribupo-71-poku778).
+    expect(manifest.fixtures.length).toBe(8684);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -1254,7 +1262,8 @@ describe('routing conformance — jar-error classification', () => {
     // 631 -> 629 at sdd2/close-b8: fonudu-70 and bomino-39 now agree. The
     // uncensused nuvoja-46 also agrees (T8b), so the uncensused remainder is
     // now EMPTY: censused === pinnedMisroutes.
-    expect(censused.length).toBe(629);
+    // 629 -> 375 at gep/close-b7: 254 gantt rows now agree.
+    expect(censused.length).toBe(375);
     expect(censused.length).toBe(pinnedMisroutes.length);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);

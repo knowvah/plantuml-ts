@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1776 modules · 6652 exported names.
+2028 modules · 7017 exported names.
 
 ## `src/`
 
@@ -33,6 +33,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `block-extractor.ts` | `DiagramType`, `UmlSource`, `finalizeBlock`, `upstreamTypeOf`, `extractBlocks` | Block extractor: types a block's PREPROCESSED content, from the @start<type> keyword suffix or -- for plain @startuml -- by probing the first 20 non-empty content lines. |
 | `BlockUmlBuilder.ts` | `RawBlock`, `BlockUmlOk`, `BlockUmlErr`, `BlockUml`, `buildBlockUmls`, `rawBlocksOf`, `buildBlockUml`, `isBlockEmpty` | `BlockUmlBuilder` -- the document -> blocks stage, and the reason it runs BEFORE the preprocessor. |
 | `build-theme.ts` | `ResolvedThemeAndStyles`, `buildTheme` | Theme resolution -- extracted out of `src/index.ts` (this repo's `check-complexity.py` 500-line file cap; a MECHANICAL move, no behavior change). |
+| `clock.ts` | `Clock`, `DEFAULT_CLOCK`, `renderClock`, `zoneOffsetSeconds`, `localEpochDay` | The one injected clock (gantt-engine-port D3a): TIM `%now` / `%date` and gantt's `today` read it, never the ambient wall clock. |
 | `cluster-title-table.ts` | `computeTitleTableHeight` | `ClusterHeader`'s title/stereotype/attribute-text-height formula — moved out of `../diagrams/state/state-composite-header.ts` (namespace-cluster-box mission T3: the class engine needs the same formula for its own cluster title table, and no |
 | `color-override.ts` | `resolveBareOrBackColor` | Shared `#color`/`#back:color;...` background-override extraction — split out of `renderer-classifier-box.ts` (G2 N34) so `renderer-note.ts` can reuse the SAME bare/`back:`-component grammar for a note's own `#color` override (`ClassNote.col |
 | `creole-atoms-image-resolver.ts` | `ResolvedDrawableAtom`, `SpritePrimitiveCollector`, `resolveSvgSpriteAtom`, `makeAtomImageResolverFor` | creole-atoms-image-resolver.ts — SI5b+E2r T7 (moved from `diagrams/ description/render-atoms.ts` by SI27 T2 — upstream's `AtomSprite`/ `SvgNanoParser` decomposition is ONE shared place both the description engine (`renderer-entity.ts`) and |
@@ -72,7 +73,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `include-resolver-timeout.ts` | `withIncludeTimeout` | Bounding one include fetch by time -- the port of upstream's `Future#get(SecurityUtils.getSecurityProfile().getTimeout(), MILLISECONDS)` around every URL read (`security/SURL.java:357-358`, :402, :438). |
 | `include-resolver.ts` | `MapIncludeStore`, `IncludeNotFoundError`, `StdlibNotBundledError`, `EMPTY_INCLUDE_STORE`, `IncludeStore`, `IncludeFetcher`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `fetchInclude`, `prefetchIncludes`, `IncludeWarmupOptions`, `prepareIncludeStore` | The ASYNC half of the include seam. |
 | `internal-emoji-store.ts` | `INTERNAL_EMOJI_ASSET_PREFIX`, `internalEmojiAssetKey`, `InternalEmojiStore`, `EmojiArtworkResolver`, `emojiArtworkResolverFor`, `internalEmojiStoreFrom` | The Twemoji artwork half of `<:name:>` emoji rendering. |
-| `internal-render-options.ts` | `InternalRenderOptions`, `isJarCompatibleStyleInput`, `withJarCompatibleStyleInput` |  |
+| `internal-render-options.ts` | `InternalRenderOptions`, `isJarCompatibleStyleInput`, `withJarCompatibleStyleInput`, `clockOfOptions`, `withClock` |  |
 | `internal-sprite-store.ts` | `INTERNAL_SPRITE_ASSET_PREFIX`, `internalSpriteAssetKey`, `InternalSpriteStore`, `readPng`, `internalSpriteStoreFrom`, `matchJarSpriteLine` | `SpriteImage.fromInternal` (java `klimt/sprite/SpriteImage.java:100-128`) — the jar-internal `/sprites/**` bundle, ported onto ADR-2's synchronous asset channel (`plans/s1l-tail-fix/decisions.md`). |
 | `java-hash-set.ts` | `javaDoubleHashCode`, `javaHashSetOrder` | java-hash-set.ts — the iteration order of a `java.util.HashSet` built by successive `add` calls, for code upstream iterates straight out of a `HashSet` (e.g. |
 | `java-whitespace.ts` | `isJavaWhitespaceAt` | `Character.isWhitespace(char)`, enumerated. |
@@ -286,11 +287,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `Command.ts` | `Command` |  |
+| `CommandControl.ts` | `CommandControl` | CommandControl -- the verdict of `Command#isValid`: the line is a valid command (`OK`), is not (`NOT_OK`), or becomes valid once the dispatcher appends the next line's opening bracket (`OK_PARTIAL`). |
 | `CommandCreateJson.ts` | `JSON_MULTILINE_DECL_RE`, `JSON_SINGLE_LINE_RE`, `parseJsonNode`, `finalizeJsonBody`, `JsonCommandHost`, `applyJsonMultilineOpen`, `applyJsonSingleLine`, `jsonCommands` | `json` declaration command shared by the class and state diagram parsers (`CommandCreateJson` + `CommandCreateJsonSingleLine` + `BodierJSon`). |
 | `CommandExecutionResult.ts` | `AbstractDiagram`, `CommandExecutionResult` | CommandExecutionResult — the ok/error outcome every command returns. |
 | `JsonNode.ts` | `JsonNode` | Parsed value of a `json Name { ... |
 | `ParserPass.ts` | `ParserPass` | ParserPass — which of the (up to) three parsing passes is running. |
 | `PSystemSingleLineFactory.ts` | `SingleLineType`, `RenderContext`, `SingleLineSpec`, `SingleLineGeometry`, `singleLinePlugin` | `PSystemSingleLineFactory` as a plugin helper: every `@startuml` utility page (`license`, `colors`, `sudoku`, the eggs, ...) is a factory that accepts a source of exactly one line between `@startuml` and `@enduml`, after the noise directly |
+| `UBrexSingleLineCommand2.ts` | `UBrexSingleLineCommand2` | UBrexSingleLineCommand2 -- base class of the commands whose syntax is a single `UnicodeBracketedExpression` matched against one source line. |
 
 ## `src/core/common/`
 
@@ -673,7 +676,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `FontPosition.ts` | `FontPosition`, `fontPositionSpace`, `muteFontSize`, `fontPositionHtmlTag` | FontPosition — where a creole text run sits relative to the normal baseline: NORMAL, EXPOSANT (`<sup>`) or INDICE (`<sub>`). |
 | `FontStack.ts` | `FontStack` | FontStack — a comma-separated font-family definition (`FontName`), as the SVG and PDF back ends name it. |
 | `StringBounder.ts` | `StringBounder` |  |
-| `UFont.ts` | `UFont` |  |
+| `UFont.ts` | `UFontFace`, `UFont` |  |
 | `UFontFactory.ts` | `UFontFactory` |  |
 
 ## `src/core/klimt/geom/`
@@ -823,6 +826,33 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Plasma.ts` | `MAGIC_SEPARATOR`, `Plasma` |  |
 | `Quark.ts` | `Quark` |  |
 
+## `src/core/real/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `AbstractReal.ts` | `IllegalStateException`, `IllegalArgumentException`, `UnsupportedOperationException`, `ClassCastException`, `javaDoubleToString`, `AbstractReal`, `castAbstractReal` |  |
+| `PositiveForce.ts` | `PositiveForce` |  |
+| `Real.ts` | `Real` | `Real` — a one-dimensional coordinate that lazily resolves to a `double`. |
+| `RealDebug.ts` | `RealDebug` | `RealDebug` — the opt-in creation-point capture for `Real`s. |
+| `RealDelta.ts` | `RealDelta` |  |
+| `RealDeltaLive.ts` | `RealDeltaLive` |  |
+| `RealImpl.ts` | `RealImpl` |  |
+| `RealLine.ts` | `RealLine` |  |
+| `RealMax.ts` | `RealMax` |  |
+| `RealMiddle.ts` | `RealMiddle` |  |
+| `RealMiddle2.ts` | `RealMiddle2` |  |
+| `RealMin.ts` | `RealMin` |  |
+| `RealMoveable.ts` | `registerRealDeltaFactory`, `RealMoveable`, `castRealMoveable` |  |
+| `RealOrigin.ts` | `RealOrigin` |  |
+| `RealUtils.ts` | `RealUtils` |  |
+
+## `src/core/regex/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `RegexPartialMatch.ts` | `RegexPartialMatch` | `RegexPartialMatch` -- the ordered captured strings of one named regex leaf. |
+| `RegexResult.ts` | `RegexResult` | `RegexResult` -- result of a command pattern match, backed either by a `Map<String, RegexPartialMatch>` (the regex/`RegexConcat` world) or by a ubrex {@link UMatcher}. |
+
 ## `src/core/security/`
 
 | Module | Exports | Purpose |
@@ -837,6 +867,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `MessageNumber.ts` | `MessageNumber`, `isMessageNumber` | `MessageNumber` — the auto-numbered `autonumber`/explicit sequence message index (`1)`, `<b>2)`), and one of the `CharSequence`-typed element kinds a `Display`'s element list can hold (`Display.create0`'s `get(0) instanceof MessageNumber` d |
+
+## `src/core/sequencediagram/graphic/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Segment.ts` | `Segment` |  |
 
 ## `src/core/skin/`
 
@@ -988,7 +1024,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `leaf-sizing-text.ts` | `lineCount`, `CREOLE_HR_HEIGHT`, `isCreoleHrLine`, `textBlockHeight`, `baseFontConfiguration`, `LeafTextAtomPlacement`, `LeafTextLineLayout`, `leafTextLineLayout`, `creoleVisibleText`, `inlineAtomWidth`, `maxLineWidth`, `atomHeightBonus`, `measureTextBlock` | Shared per-line text measurement for the description engine's leaf sizing. |
 | `leaf-sizing.ts` | `BoxSizingOpts`, `ComponentStyle`, `ACTOR_HEIGHT`, `ACTOR_WIDTH`, `INTERFACE_CIRCLE_SIZE`, `PORT_SIZE`, `USECASE_HEIGHT`, `measureUsecaseOrActorLeaf`, `measureUsecaseOrActorLeafInk`, `LeafSymbolInk`, `measureLeafNode`, `measureLeafShield`, `NoteBodyOpts`, `buildNoteBody`, `measureUsecase` | Leaf-node box sizing for the description diagram engine. |
 | `LeafSizingSubject.ts` | `LeafSizingStereotypeSprite`, `LeafSizingSubject` | Structural subject type for the leaf-sizing family (`leaf-sizing*.ts`, this directory) — the exact fields `measureLeafNode` and its callees read off the description engine's leaf-node AST type (`src/diagrams/description/ast.ts:45`), extract |
-| `Opale.ts` | `OPALE_CORNERSIZE`, `OPALE_MARGIN_X1`, `OPALE_MARGIN_X2`, `OPALE_MARGIN_Y`, `OpalePoint`, `OpaleBox`, `OpaleConnector`, `opalePolygonLeft`, `opalePolygonRight`, `opaleCorner`, `opalePolygonUp`, `opalePolygonDown`, `OpaleDirection`, `getOpaleStrategy`, `resolveOpaleConnector` | `Opale` — the note shape's own geometry constants (the folded-corner box svek draws for `note`/`note on link`). |
+| `Opale.ts` | `OPALE_CORNERSIZE`, `OPALE_MARGIN_X1`, `OPALE_MARGIN_X2`, `OPALE_MARGIN_Y`, `OpalePoint`, `OpaleBox`, `OpaleConnector`, `opalePolygonLeft`, `opalePolygonRight`, `opaleCorner`, `opalePolygonUp`, `opalePolygonDown`, `OpaleDirection`, `getOpaleStrategy`, `resolveOpaleConnector`, `Opale` | `Opale` — the note shape's own geometry constants (the folded-corner box svek draws for `note`/`note on link`). |
+| `OpalePolygons.ts` | `OpaleBounds`, `getPolygonLeft`, `getPolygonRight`, `getPolygonUp`, `getPolygonDown`, `corner`, `polygonNormal`, `getPolygonLinked` |  |
 | `RotatedEllipse.ts` | `RotatedEllipse` |  |
 | `SmallestEnclosingCircle.ts` | `SmallestEnclosingCircle` |  |
 | `YTransformer.ts` | `YTransformer` |  |
@@ -1195,12 +1232,86 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `index.ts` | `CodePosition`, `CodeIterator`, `AbstractCodeIterator`, `CodeIteratorImpl`, `Sub`, `buildCodeIterator`, `CodeIteratorChainDeps`, `CodeIteratorIf`, `CodeIteratorForeach`, `CodeIteratorWhile`, `CodeIteratorProcedure`, `CodeIteratorReturnFunction`, `CodeIteratorSub`, `CodeIteratorAffectation`, `CodeIteratorLegacyDefine`, `CodeIteratorInnerComment`, `CodeIteratorLongComment`, `CodeIteratorShortComment` | Barrel for `tim/iterator/` -- the pull-based `CodeIterator` decorator chain, ported in mission SI5a batch 2b. |
 | `Sub.ts` | `Sub` | A named `!startsub` / `!endsub` block: the lines captured between the two markers, replayable later via `!includesub`. |
 
+## `src/core/time/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ChronoUnit.ts` | `ChronoUnit` | `java.time.temporal.ChronoUnit`, DAYS only -- the one unit gantt names (`GanttTaskTableColumn.java:116` `ChronoUnit.DAYS.getDuration()`, `data/TimeBoundsData.java:155` `ChronoUnit.DAYS.between(minDay, maxDay)`). |
+| `DateTimeException.ts` | `DateTimeException` | `java.time.DateTimeException` -- thrown for a value outside a field's range or an impossible date. |
+| `DayOfWeek.ts` | `DayOfWeek` | `java.time.DayOfWeek` -- immutable singleton instances, Java ordinals (MONDAY = 0 ... |
+| `Duration.ts` | `Duration` | `java.time.Duration` -- seconds (number) + nano adjustment (0..999_999_999). |
+| `Instant.ts` | `Instant` | `java.time.Instant` -- epoch seconds + nano adjustment. |
+| `LocalDate.ts` | `LocalDate` | `java.time.LocalDate` -- proleptic Gregorian (ISO) date, epoch-day based. |
+| `LocalDateTime.ts` | `LocalDateTime` | `java.time.LocalDateTime` -- a `LocalDate` plus a `LocalTime`; no zone. |
+| `LocalTime.ts` | `LocalTime` | `java.time.LocalTime` -- a time of day held as nanosecond-of-day (0 .. |
+| `Month.ts` | `Month` | `java.time.Month` -- immutable singleton instances, Java ordinals (JANUARY = 0 ... |
+| `TemporalField.ts` | `TemporalField` | The slice of `java.time.temporal.TemporalField` that `LocalDate.get(field)` needs: gantt only passes `WeekFields#weekOfYear()` (`time/TimePoint.java:105`). |
+| `time-math.ts` | `SECONDS_PER_DAY`, `NANOS_PER_SECOND`, `NANOS_PER_DAY`, `SECONDS_PER_HOUR`, `SECONDS_PER_MINUTE`, `MILLIS_PER_SECOND`, `NANOS_PER_MILLI`, `floorDiv`, `floorMod`, `checkValid` | time-math.ts -- the `Math.floorDiv` / `Math.floorMod` pair and the range check shared by the `java.time` subset (D2). |
+| `WeekFields.ts` | `WeekFields` | `java.time.temporal.WeekFields` -- locale-independent week definition (first day of week + minimal days in first week). |
+| `YearMonth.ts` | `YearMonth` | `java.time.YearMonth` -- gantt uses only `YearMonth.from(LocalDateTime)` and `getYear()` (`time/TimePoint.java:177-178,136`). |
+| `ZonedDateTime.ts` | `ZonedDateTime` | `java.time.ZonedDateTime` restricted to a fixed `ZoneOffset`, and to the one accessor gantt reads (`toLocalDate`, `time/TimePoint.java:50`). |
+| `ZoneOffset.ts` | `ZoneOffset` | `java.time.ZoneOffset`, fixed offsets only. |
+
+## `src/core/ubrex/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `AtomicParser.ts` | `AtomicParser` | `AtomicParser` -- parses one ubrex atom (or operator + operand) off the front of a `TextNavigator` into `Challenge`s. |
+| `Capture.ts` | `Capture` | `Capture` -- immutable ordered key/value captures backed by a `SafeList`. |
+| `CaptureEntry.ts` | `CaptureEntry` | `CaptureEntry` -- one key/value pair of a `Capture` (package-private upstream). |
+| `CaptureLookup.ts` | `CaptureLookup` | `CaptureLookup` -- read access to captured values. |
+| `CaseMode.ts` | `CaseMode`, `ensureLowercase` | `CaseMode` -- case sensitivity of a ubrex matcher. |
+| `Challenge.ts` | `Challenge` | `Challenge` -- a ubrex matching step. |
+| `ChallengeAlternative.ts` | `ChallengeAlternative` | `ChallengeAlternative` -- first alternative that matches wins. |
+| `ChallengeCharClass.ts` | `ChallengeCharClass` | `ChallengeCharClass` -- one char matching a `CharClass`. |
+| `ChallengeCharSet.ts` | `ChallengeCharSet` | `ChallengeCharSet` -- one char in (or, with `〤`, not in) a set. |
+| `ChallengeEndOfText.ts` | `ChallengeEndOfText` | `ChallengeEndOfText` -- zero-width match at the end of the text. |
+| `ChallengeLazzyOneOrMore.ts` | `ChallengeLazzyOneOrMore` | `ChallengeLazzyOneOrMore` -- lazy `〇l+`: repeat until the stop condition peeks true. |
+| `ChallengeLookAhead.ts` | `ChallengeLookAhead` | `ChallengeLookAhead` -- zero-width positive/negative look-ahead. |
+| `ChallengeLookBehind.ts` | `ChallengeLookBehind` | `ChallengeLookBehind` -- zero-width positive/negative look-behind, run on the reversed text. |
+| `ChallengeOneOrMore.ts` | `ChallengeOneOrMore` | `ChallengeOneOrMore` -- greedy `〇+`. |
+| `ChallengeOneOrMoreUpToOldVersion.ts` | `ChallengeOneOrMoreUpToOldVersion` | `ChallengeOneOrMoreUpToOldVersion` -- `〄+ p1 -> p2`: repeat p1 until p2 peeks true. |
+| `ChallengeOptional.ts` | `ChallengeOptional` | `ChallengeOptional` -- `〇?`. |
+| `ChallengeRepetition.ts` | `ChallengeRepetition` | `ChallengeRepetition` -- `〇{...}` counted repetition. |
+| `ChallengeResult.ts` | `ChallengeResult` | `ChallengeResult` -- the outcome of a challenge: matched length (`Challenge.NO_MATCH` if none) plus captures. |
+| `ChallengeSingleChar.ts` | `ChallengeSingleChar` | `ChallengeSingleChar` -- one literal char, ASCII case-insensitive. |
+| `ChallengeUpTo.ts` | `ChallengeUpTo` | `ChallengeUpTo` -- `〄>`: advance until the origin matches (without consuming it). |
+| `ChallengeZeroOrMore.ts` | `ChallengeZeroOrMore` | `ChallengeZeroOrMore` -- greedy `〇*`. |
+| `CharClass.ts` | `CharClass` | `CharClass` -- a raw class plus NORMAL/NEGATIVE polarity. |
+| `CharClassRaw.ts` | `isLetter`, `isLetterOrDigit`, `CharClassRaw` | `CharClassRaw` -- the raw (un-negated) character classes of ubrex. |
+| `CharClassType.ts` | `CharClassType` | `CharClassType` -- whether a char class matches or negates its raw class. |
+| `CharSet.ts` | `CharSet` | `CharSet` -- a 128-bit ASCII bitmap (two Java `long`s, offsets from char 32). |
+| `CompositeList.ts` | `CompositeList` | `CompositeList` -- a sequence of challenges, built by parsing a ubrex definition. |
+| `CompositeNamed.ts` | `CompositeNamed` | `CompositeNamed` -- a named capture group (`〶$name=...`). |
+| `LookAround.ts` | `LookAround` | `LookAround` -- look-ahead / look-behind / end-of-text markers. |
+| `package-info.ts` | _(none)_ | `com.plantuml.ubrex` -- PlantUML Unicode Bracketed Expression (Ubrex) engine. |
+| `Repetition.ts` | `Repetition` | `Repetition` -- a `{1;3-5;7+}` repetition spec: a sorted set of exact counts plus an optional open-ended minimum. |
+| `SafeList.ts` | `SafeList` | `SafeList` -- persistent append-only list: each node holds one element (data1) or a block (data2); `size` is the cumulative chain size. |
+| `TextNavigator.ts` | `CharSequence`, `csLength`, `csCharAt`, `TextNavigator` | `TextNavigator` -- a mutable window over a char sequence, optionally read backwards (look-behind). |
+| `UMatcher.ts` | `UMatcher`, `umatcherFindFirstValueByKey` | `UMatcher` -- matcher facade over a ubrex pattern. |
+| `UnicodeBracketedExpression.ts` | `UnicodeBracketedExpression` | `UnicodeBracketedExpression` -- a compiled ubrex. |
+
+## `src/core/ubrex/builder/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `UBrexConcat.ts` | `UBrexConcat` | `UBrexConcat` -- sequence of parts. |
+| `UBrexLeaf.ts` | `UBrexLeaf` | `UBrexLeaf` -- a part parsed from one ubrex definition string. |
+| `UBrexNamed.ts` | `UBrexNamed` | `UBrexNamed` -- names a part's captures. |
+| `UBrexOneOrMore.ts` | `UBrexOneOrMore` | `UBrexOneOrMore` -- wraps a part in `ChallengeOneOrMore`. |
+| `UBrexOptional.ts` | `UBrexOptional` | `UBrexOptional` -- wraps a part in `ChallengeOptional`. |
+| `UBrexOr.ts` | `UBrexOr` | `UBrexOr` -- alternatives. |
+| `UBrexPart.ts` | `UBrexPart` | `UBrexPart` -- a composable ubrex fragment wrapping one {@link Challenge}. |
+| `UBrexUpto.ts` | `UBrexUpto` | `UBrexUpto` -- `what` one or more times, up to (and including) `stop`. |
+| `UBrexZeroOrMore.ts` | `UBrexZeroOrMore` | `UBrexZeroOrMore` -- wraps a part in `ChallengeZeroOrMore`. |
+
 ## `src/core/url/`
 
 | Module | Exports | Purpose |
 |---|---|---|
 | `Check.ts` | `Check` | Check — the url-package junit-mode flag: once `goJunit()` is called, `Url#getCoords` treats an empty visibility box as a hard error instead of silently emitting a degenerate `0,0,0,0` link region. |
 | `inline-links.ts` | `resolveInlineLinks` | Inline `[[url label]]` hyperlink-token resolution (`UrlBuilder`/ `CommandCreoleUrl`) -- originally split out of `parse-helpers- strings.ts` purely to stay under the project's 500-line cap, then moved here (add3 T0b, D9) to the shared url se |
+| `UbrexUrlBuilder.ts` | `UMatchNone`, `UbrexUrlBuilder` | UbrexUrlBuilder -- the ubrex-based sibling of {@link UrlBuilder}: parses the PlantUML `[[...]]` hyperlink syntax into a {@link Url}. |
 | `Url.ts` | `Url`, `eventuallyRemoveStartingAndEndingDoubleQuote` |  |
 | `UrlBuilder.ts` | `transform`, `URL_KEY`, `getRegexp`, `UrlBuilder` |  |
 | `UrlMode.ts` | `UrlMode` | UrlMode — how `UrlBuilder#getUrl` matches its patterns against the input: `STRICT` requires the whole string to be a `[[...]]` form (`Matcher#matches`), `ANYWHERE` accepts one embedded anywhere in the string (`Matcher#find`). |
@@ -1210,6 +1321,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `CharHidder.ts` | `CharHidder` | CharHidder — the '~' tile escape: `~X` (where X is a creole-active character) and `\~` are remapped into the Unicode private-use area (U+E000 + charCode) by {@link CharHidder.hide} so the creole layer never sees them as markup, then restore |
+| `I18nTimeData.ts` | `Locale`, `newLocale`, `dayOfWeekLong`, `dayOfWeekShort`, `monthShort`, `monthLong` | I18nTimeData — generated day/month name tables per language. |
 | `SignatureUtils.ts` | `SignatureUtils` | SignatureUtils — hex/MD5/SHA-512 digest helpers upstream shares across `UmlSource`, `klimt/shape/UImageSvg`, `version/Version`, `version/ FutureVersion`, and (license/keygen, out of this port's roadmap) `version/PLSSignature`, `version/Lice |
 
 ## `src/core/warning/`
@@ -1836,6 +1948,241 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `layout.ts` | `NOTE_Y_OFFSET`, `layoutFiles` |  |
 | `parser.ts` | `parseFiles` |  |
 | `renderer.ts` | `renderFiles` |  |
+
+## `src/diagrams/gantt/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Completion.ts` | `Completion` | Completion — a task completion percentage. |
+| `DaysAsDates.ts` | `DaysAsDates` |  |
+| `DayStatus.ts` | `DayStatus` | DayStatus — as-const object + type (memberless Java enum). |
+| `gantt-skin-param.ts` | `SkinParamSource`, `SkinParam` | The gantt engine's `SkinParam` — the slice of upstream's `skin/SkinParam.java` a `GanttDiagram` reaches through `TitledDiagram#getSkinParam()`: the `ISkinSimple` members the creole sheets read, `getIHtmlColorSet`, and the real style engine' |
+| `GanttArrow.ts` | `GanttArrow` |  |
+| `GanttConstraint.ts` | `GanttConstraint` |  |
+| `GanttConstraintMode.ts` | `GanttConstraintMode` | GanttConstraintMode — as-const object + type (memberless Java enum). |
+| `GanttDiagram.ts` | `GanttDiagram` |  |
+| `GanttDiagramConfig.ts` | `GanttDiagramConfig` |  |
+| `GanttDiagramFactory.ts` | `ParsedGantt`, `parseGantt` |  |
+| `GanttDiagramMainBlock.ts` | `GanttDiagramMainBlock` |  |
+| `GanttI18n.ts` | `GanttI18n` |  |
+| `GanttLayout.ts` | `GanttLayout` |  |
+| `GanttStyle.ts` | `GanttStyle` |  |
+| `GanttTaskTable.ts` | `currentStyleBuilder`, `GanttTaskTable` |  |
+| `GanttTaskTableColumn.ts` | `Context`, `GanttTaskTableColumn` |  |
+| `GArrows.ts` | `GArrows` |  |
+| `index.ts` | `GanttGeometry`, `calculateBackColor`, `muteColorMapper`, `isHandwritten`, `calculateMargin`, `renderGantt`, `ganttPlugin` | Gantt diagram plugin -- `GanttDiagramFactory` (parse), then `TextBlockExporter`'s export of `GanttDiagram#getTextBlock` on the klimt substrate (decision D4): canvas = the text block's `calculateDimension` plus `calculateMargin`, the block d |
+| `LabelPosition.ts` | `LabelPosition` | LabelPosition — as-const object + type (memberless Java enum). |
+| `LabelStrategy.ts` | `LabelStrategy` |  |
+| `OpenClose.ts` | `OpenClose` | Open/closed calendar of a project, a resource or a task: per-weekday and per-date statuses, working time ranges and an optional active date window, convertible to a {@link PiecewiseConstant}. |
+| `PValue.ts` | `PValue` | Marker interface for the values a gantt expression can hold (`Instant`, `Load`, ...). |
+| `Today.ts` | `Today` | Today — an empty marker class upstream. |
+
+## `src/diagrams/gantt/command/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `CommandColorTask.ts` | `COMMAND_COLOR_TASK_RE`, `applyCommandColorTask`, `CommandColorTask` |  |
+| `CommandFootboxGantt.ts` | `COMMAND_FOOTBOX_GANTT_RE`, `applyCommandFootboxGantt`, `CommandFootboxGantt` |  |
+| `CommandGanttArrow.ts` | `COMMAND_GANTT_ARROW_RE`, `applyCommandGanttArrow`, `CommandGanttArrow` |  |
+| `CommandGanttArrow2.ts` | `COMMAND_GANTT_ARROW2_RE`, `applyCommandGanttArrow2`, `CommandGanttArrow2` |  |
+| `CommandGroupEnd.ts` | `COMMAND_GROUP_END_RE`, `applyCommandGroupEnd`, `CommandGroupEnd` |  |
+| `CommandGroupStart.ts` | `COMMAND_GROUP_START_RE`, `applyCommandGroupStart`, `CommandGroupStart` |  |
+| `CommandHideClosed.ts` | `COMMAND_HIDE_CLOSED_RE`, `applyCommandHideClosed`, `CommandHideClosed` |  |
+| `CommandHideResourceFootbox.ts` | `COMMAND_HIDE_RESOURCE_FOOTBOX_RE`, `applyCommandHideResourceFootbox`, `CommandHideResourceFootbox` |  |
+| `CommandHideResourceName.ts` | `COMMAND_HIDE_RESOURCE_NAME_RE`, `applyCommandHideResourceName`, `CommandHideResourceName` |  |
+| `CommandHideShowColumns.ts` | `CommandHideShowColumns` |  |
+| `CommandLabelOnColumn.ts` | `COMMAND_LABEL_ON_COLUMN_RE`, `applyCommandLabelOnColumn`, `CommandLabelOnColumn` |  |
+| `CommandLanguage.ts` | `COMMAND_LANGUAGE_RE`, `applyCommandLanguage`, `CommandLanguage` |  |
+| `CommandNoteBottom.ts` | `COMMAND_NOTE_BOTTOM_RE`, `COMMAND_NOTE_BOTTOM_END_RE`, `CommandNoteBottomBlock`, `collectCommandNoteBottomBlock`, `applyCommandNoteBottom`, `CommandNoteBottom` |  |
+| `CommandPrintBetween.ts` | `CommandPrintBetween` |  |
+| `CommandPrintScale.ts` | `COMMAND_PRINT_SCALE_RE`, `applyCommandPrintScale`, `CommandPrintScale` |  |
+| `CommandSeparator.ts` | `COMMAND_SEPARATOR_RE`, `applyCommandSeparator`, `CommandSeparator` |  |
+| `CommandTaskCompleteDefault.ts` | `COMMAND_TASK_COMPLETE_DEFAULT_RE`, `applyCommandTaskCompleteDefault`, `CommandTaskCompleteDefault` |  |
+| `CommandWeekNumberStrategy.ts` | `COMMAND_WEEK_NUMBER_STRATEGY_RE`, `applyCommandWeekNumberStrategy`, `CommandWeekNumberStrategy` |  |
+| `NaturalGanttCommand.ts` | `NaturalGanttCommand` |  |
+
+## `src/diagrams/gantt/core/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `AbstractTask.ts` | `unsupportedOperation`, `AbstractTask` |  |
+| `GArrowType.ts` | `GArrowType` | GArrowType -- Java enum without members, as an as-const object. |
+| `GSide.ts` | `GSide` | GSide -- which side of a task bar an arrow attaches to. |
+| `Moment.ts` | `Moment`, `getEndMinusOneDayTOBEREMOVED` |  |
+| `MomentImpl.ts` | `MomentImpl` |  |
+| `PrintScale.ts` | `PrintScale` | PrintScale -- the timeline compression presets. |
+| `Resource.ts` | `Resource` |  |
+| `Task.ts` | `Task` |  |
+| `TaskAttribute.ts` | `TaskAttribute` | TaskAttribute -- START, END, LOAD. |
+| `TaskCode.ts` | `TaskCode` | TaskCode -- a task's identity (`id`) and what is drawn (`display`). |
+| `TaskGroup.ts` | `TaskGroup` |  |
+| `TaskImpl.ts` | `TaskImpl` |  |
+| `TaskInstant.ts` | `TaskInstant` |  |
+| `TaskSeparator.ts` | `TaskSeparator` |  |
+| `TimeRange.ts` | `TimeRange` |  |
+| `TimeRanges.ts` | `TimeRanges` |  |
+
+## `src/diagrams/gantt/data/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `DayCalendarData.ts` | `DayCalendarData` |  |
+| `DisplayConfigData.ts` | `DisplayConfigData` | DisplayConfigData -- footbox / resource-name display flags. |
+| `GanttModelData.ts` | `GanttModelData` |  |
+| `TaskDrawRegistryData.ts` | `TaskDrawRegistryData` |  |
+| `TimeBoundsData.ts` | `TimeBoundsData` |  |
+| `TimelineStyleData.ts` | `TimelineStyleData` |  |
+| `TimeScaleConfigData.ts` | `TimeScaleConfigData` |  |
+| `WeekConfigData.ts` | `WeekConfigData` | Value object containing week-related configuration and locale. |
+| `WorkingHours.ts` | `WorkingHours` |  |
+
+## `src/diagrams/gantt/draw/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `AbstractTaskDraw.ts` | `mergedStyleOf`, `startUrl`, `closeUrl`, `AbstractTaskDraw` |  |
+| `FingerPrint.ts` | `FingerPrint` |  |
+| `PathUtils.ts` | `PathUtils` |  |
+| `RectangleTask.ts` | `RectangleTask` |  |
+| `ResourceDraw.ts` | `ResourceDraw` |  |
+| `ResourceDrawNumbers.ts` | `ResourceDrawNumbers` |  |
+| `TaskDraw.ts` | `TaskDraw`, `taskDrawLabelOverflow` |  |
+| `TaskDrawDiamond.ts` | `TaskDrawDiamond` |  |
+| `TaskDrawGroup.ts` | `TaskDrawGroup` |  |
+| `TaskDrawRegular.ts` | `TaskDrawRegular` |  |
+| `TaskDrawSeparator.ts` | `TaskDrawSeparator` |  |
+| `WeeklyHeaderStrategy.ts` | `WeeklyHeaderStrategy` | Weekly header numbering mode (upstream enum, ordinal order). |
+
+## `src/diagrams/gantt/draw/header/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `HeaderPiece.ts` | `HeaderPiece` |  |
+| `TimeHeader.ts` | `paintOf`, `applyForeColor`, `hColorEquals`, `createLeftTextBlock`, `emojiStoreOf`, `TimeHeader`, `Pending` |  |
+| `TimeHeaderCalendar.ts` | `TimeHeaderCalendar` |  |
+| `TimeHeaderDaily.ts` | `TimeHeaderDaily` |  |
+| `TimeHeaderFactory.ts` | `TimeHeaderFactory` |  |
+| `TimeHeaderMonthly.ts` | `TimeHeaderMonthly` |  |
+| `TimeHeaderQuarterly.ts` | `TimeHeaderQuarterly` |  |
+| `TimeHeaderSimple.ts` | `TimeHeaderSimple` |  |
+| `TimeHeaderVariant.ts` | `TimeHeaderVariant` |  |
+| `TimeHeaderWeekly.ts` | `TimeHeaderWeekly` |  |
+| `TimeHeaderYearly.ts` | `TimeHeaderYearly` |  |
+
+## `src/diagrams/gantt/lang/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `AbstractComplementTaskInstant.ts` | `AbstractComplementTaskInstant` |  |
+| `CenterBorderColor.ts` | `GanttColor`, `CenterBorderColor` |  |
+| `ComplementAnything.ts` | `ComplementAnything` |  |
+| `ComplementBeforeOrAfterOrAtTaskStartOrEnd.ts` | `ComplementBeforeOrAfterOrAtTaskStartOrEnd` |  |
+| `ComplementClose.ts` | `ComplementClose` |  |
+| `ComplementCompleted.ts` | `ComplementCompleted` |  |
+| `ComplementDate.ts` | `ComplementDate` |  |
+| `ComplementDayOfWeek.ts` | `ComplementDayOfWeek` |  |
+| `ComplementDeleted.ts` | `ComplementDeleted` |  |
+| `ComplementDuration.ts` | `ComplementDuration` |  |
+| `ComplementFromTo.ts` | `ComplementFromTo` |  |
+| `ComplementInColors.ts` | `ComplementInColors` |  |
+| `ComplementInColors2.ts` | `ComplementInColors2` |  |
+| `ComplementInColorsFromTo.ts` | `ComplementInColorsFromTo` |  |
+| `ComplementIntervals.ts` | `ComplementIntervals` |  |
+| `ComplementIntervalsSmart.ts` | `ComplementIntervalsSmart` |  |
+| `ComplementNamed.ts` | `ComplementNamed` |  |
+| `ComplementOpen.ts` | `ComplementOpen` |  |
+| `ComplementTask.ts` | `ComplementTask` |  |
+| `ComplementTimePoint.ts` | `ComplementTimePoint` |  |
+| `ComplementUrl.ts` | `ComplementUrl` |  |
+| `ComplementWithColorLink.ts` | `ComplementWithColorLink` |  |
+| `ComplementWorkingHours.ts` | `ComplementWorkingHours` |  |
+| `DayPattern.ts` | `DayPattern` |  |
+| `PairOfSomething.ts` | `PairOfSomething` |  |
+| `Something.ts` | `Something` |  |
+| `Subject.ts` | `Subject` |  |
+| `SubjectDayAsDate.ts` | `SubjectDayAsDate` |  |
+| `SubjectDayOfWeek.ts` | `SubjectDayOfWeek` |  |
+| `SubjectDaysAsDates.ts` | `SubjectDaysAsDates` |  |
+| `SubjectGantt.ts` | `SubjectGantt` |  |
+| `SubjectResource.ts` | `SubjectResource` |  |
+| `SubjectSeparator.ts` | `SubjectSeparator` |  |
+| `SubjectTask.ts` | `SubjectTask` |  |
+| `SubjectTaskVerbs.ts` | `buildSubjectTaskVerbPhrases` |  |
+| `SubjectToday.ts` | `SubjectToday` |  |
+| `SubjectWorkingHours.ts` | `SubjectWorkingHours` |  |
+| `TimeResolution.ts` | `toUbrexA_DD_MONTH_YYYY`, `toUbrexB_YYYY_MM_DD`, `toUbrexC_MONTH_DD_YYYY`, `TimeResolution` | Ubrex date-shape builders (day-month-year, year-month-day, month-day-year). |
+| `TwoNames.ts` | `TwoNames` | TwoNames — an immutable pair of names. |
+| `Verbs.ts` | `Verbs` |  |
+| `Words.ts` | `Words` |  |
+
+## `src/diagrams/gantt/ngm/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Load.ts` | `Load` | Intrinsic amount of work for a task, in seconds of person-time. |
+| `NGMAllocation.ts` | `NGMAllocation` | The resource allocation applied to a task over time, as a time-varying {@link PiecewiseConstant} FTE function. |
+| `NGMTask.ts` | `NGMTask` | An abstract scheduled task in the New Gantt Model (NGM): total effort, allocation and duration kept independent, with two concrete behaviours (fixed duration, fixed total effort) built by the static factories. |
+| `NGMTaskBase.ts` | `NGMTaskBase` | The abstract task contract of the New Gantt Model. |
+| `NGMTaskFixedDuration.ts` | `NGMTaskFixedDuration` | A fixed-duration task: the calendar span is intrinsic, the effort derived. |
+| `NGMTaskFixedTotalEffort.ts` | `NGMTaskFixedTotalEffort` | A fixed-total-effort task: the effort is intrinsic, the end derived by integrating the allocation's load function. |
+| `package-info.ts` | _(none)_ | Upstream `package-info.java` for the NGM scheduling core: carries only the package javadoc ("a clean, reusable scheduling core that can later be integrated or tested in isolation") and declares no symbol. |
+
+## `src/diagrams/gantt/ngm/math/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `AbstractPiecewiseConstant.ts` | `AbstractPiecewiseConstant` | Base class for {@link PiecewiseConstant} implementations whose value is constant over contiguous time segments. |
+| `Combiner.ts` | `Combiner` | Utilities to combine multiple {@link PiecewiseConstant} functions; a Combiner is itself a {@link PiecewiseConstant}. |
+| `Fraction.ts` | `Fraction` | Immutable reduced rational number. |
+| `LoadIntegrator.ts` | `LoadIntegrator` | Integrates a load function until a total load is consumed. |
+| `PiecewiseConstant.ts` | `SegmentIterator`, `PiecewiseConstant` | A piecewise constant function defined on a {@link LocalDateTime} axis. |
+| `PiecewiseConstantHours.ts` | `PiecewiseConstantHours` | Intra-day piecewise constant profile (a `TreeMap<LocalTime, Fraction>` of boundaries). |
+| `PiecewiseConstantSpecificDays.ts` | `PiecewiseConstantSpecificDays` | Immutable {@link PiecewiseConstant} defined by specific dates, each mapped to a constant {@link Fraction}; other dates get the default value. |
+| `PiecewiseConstantTimeWindow.ts` | `PiecewiseConstantTimeWindow` | {@link PiecewiseConstant} that is ONE inside `[offBefore, offAfter)` and ZERO before and after. |
+| `PiecewiseConstantUtils.ts` | `PiecewiseConstantUtils` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/ngm/math/PiecewiseConstantUtils.java:42 |
+| `PiecewiseConstantWeekday.ts` | `PiecewiseConstantWeekday` | Immutable weekly workload pattern: each `DayOfWeek` maps to a constant {@link Fraction}. |
+| `Segment.ts` | `Segment` | A constant workload segment over a time interval; both bounds exclusive, `]start, end[`, FORWARD (start before end) or BACKWARD (start after end). |
+| `TimeDirection.ts` | `TimeDirection`, `adjustBySeconds` | Direction of time travel for a {@link Segment}. |
+
+## `src/diagrams/gantt/solver/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ImpossibleSolvingException.ts` | `ImpossibleSolvingException` | ImpossibleSolvingException — thrown when the task solver has no solution. |
+| `Solver.ts` | `Solver` | Holds at most two of a task's START / END / LOAD values and derives the missing START or END from them through a fixed-total-effort task. |
+
+## `src/diagrams/gantt/time/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `DayOfWeekUtils.ts` | `getRegexString`, `getUbrex`, `fromString`, `DayOfWeekUtils` | Day-of-week name matching for gantt (regex string, ubrex part, lookup). |
+| `Instant.ts` | `Instant` | Gantt's own millisecond instant (distinct from `java.time.Instant`, which is `src/core/time/Instant.ts`). |
+| `MonthUtils.ts` | `getRegexString`, `getUbrex`, `fromString`, `MonthUtils` | Month name matching for gantt dates (regex string, ubrex part, lookup). |
+| `TimePoint.ts` | `MILLISECONDS_PER_DAY`, `TimePoint` | A UTC date-time on the gantt axis. |
+| `TimePointFormat.ts` | `TimePointFormat` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/time/TimePointFormat.java:40 |
+| `WeekNumberStrategy.ts` | `WeekNumberStrategy` | First day of week + minimal days in the first week (week-number rules). |
+
+## `src/diagrams/gantt/timescale/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `PiecewiseTimeProjection.ts` | `PiecewiseTimeProjection` |  |
+| `PiecewiseTimeType.ts` | `PiecewiseTimeType` | PiecewiseTimeType — as-const object + type (memberless Java enum). |
+| `PixelInstant.ts` | `PixelInstant` |  |
+| `TimeScale.ts` | `TimeScale` |  |
+| `TimeScaleCompressed.ts` | `TimeScaleCompressed` |  |
+| `TimeScaleDaily.ts` | `TimeScaleDaily` |  |
+| `TimeScaleDailyHideClosed.ts` | `TimeScaleDailyHideClosed` |  |
+| `TimeScaleWink.ts` | `TimeScaleWink` |  |
+| `VariantTimeScale.ts` | `VariantTimeScale` |  |
+
+## `src/diagrams/gantt/ulang/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ParsedSentence.ts` | `ParsedSentence` |  |
+| `VerbPhraseAction.ts` | `VerbPhraseAction` |  |
+| `VerbPhraseMatcher.ts` | `VerbPhraseMatcher` |  |
 
 ## `src/diagrams/hcl/`
 

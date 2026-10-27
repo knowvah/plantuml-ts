@@ -1,0 +1,7 @@
+@startgantt
+Project starts 2020-07-01
+[Bug Fix] requires 4 hours
+[Feature] requires 2 hours and 30 minutes
+[Module] requires 1 day and 4 hours
+[Epic] requires 2 days, 3 hours and 15 minutes
+@endgantt

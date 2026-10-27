@@ -61,6 +61,15 @@ export interface StdlibFolderMetadata {
  */
 export interface TimEnvironment {
   readonly clock: TimClock;
+
+  /**
+   * The zone a `%date(format)` / `%date(format, seconds)` call without a zone
+   * argument formats in -- upstream's `TimeZone.getDefault()`, the JVM default
+   * zone (`DateFunction.java:90-92`). Set only with an injected clock (its
+   * `zone` is the jar's default zone at capture, gantt-engine-port D3b); absent,
+   * `%date` keeps the host zone it always used (byte-identical, no setter).
+   */
+  readonly zone?: string;
   readonly random: TimRandomSource;
 
   /**

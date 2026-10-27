@@ -45,6 +45,7 @@ import { sequencePlugin } from '../../src/diagrams/sequence/index.js';
 import { statePlugin } from '../../src/diagrams/state/index.js';
 import { licensePlugin } from '../../src/diagrams/version/PSystemLicenseFactory.js';
 import { versionPlugin } from '../../src/diagrams/version/PSystemVersionFactory.js';
+import { ganttPlugin } from '../../src/diagrams/gantt/index.js';
 import { wbsPlugin } from '../../src/diagrams/wbs/index.js';
 import { yamlPlugin } from '../../src/diagrams/yaml/index.js';
 import { buildEmojiAssetsStore } from '../helpers/emoji-assets-store.js';
@@ -89,6 +90,7 @@ const JAVA_LINE: ReadonlyMap<DiagramPlugin, number> = new Map<DiagramPlugin, num
   [appleTwoPlugin, 176],
   [ripPlugin, 177],
   [charliePlugin, 181],
+  [ganttPlugin, 183],
   [chronologyPlugin, 184],
   [dedicationPlugin, 186],
   [jsonPlugin, 190],

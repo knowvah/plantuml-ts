@@ -230,6 +230,48 @@ describe('Style — eventuallyOverride', () => {
   });
 });
 
+describe('Style — eventuallyOverride (PName, double | String) and (UStroke)', () => {
+  const base = style({ LineThickness: ['1', 7], LineStyle: ['', 8] });
+  const INTEGER_MAX_VALUE = 2147483647; // Style.java:191 `Integer.MAX_VALUE`
+
+  it('(PName, String) stores the string at Integer.MAX_VALUE priority (Style.java:189-193)', () => {
+    const s = base.eventuallyOverride('LineStyle', '4.0-2.0');
+    expect(s.value('LineStyle').asString()).toBe('4.0-2.0');
+    expect(s.value('LineStyle').getPriority()).toBe(INTEGER_MAX_VALUE);
+    expect(s.value('LineThickness').asString()).toBe('1');
+  });
+
+  it('(PName, String) needs no old value, unlike (PName, HColor)', () => {
+    expect(base.eventuallyOverride('Padding', '3').value('Padding').asString()).toBe('3');
+  });
+
+  it('(PName, double) is "" + value: Java Double.toString (Style.java:185-187)', () => {
+    expect(base.eventuallyOverride('LineThickness', 2).value('LineThickness').asString()).toBe('2.0');
+    expect(base.eventuallyOverride('LineThickness', 1.5).value('LineThickness').asString()).toBe('1.5');
+  });
+
+  it('(UStroke) overrides LineThickness and LineStyle visible-space (Style.java:288-296)', () => {
+    const s = base.eventuallyOverride(new UStroke(5, 3, 2));
+    expect(s.value('LineThickness').asString()).toBe('2.0');
+    expect(s.value('LineStyle').asString()).toBe('5.0-3.0');
+    expect(s.getStroke().getDashVisible()).toBe(5);
+    expect(s.getStroke().getDashSpace()).toBe(3);
+    expect(s.getStroke().getThickness()).toBe(2);
+  });
+
+  it('(UStroke) of a simple stroke writes 0.0-0.0', () => {
+    const s = base.eventuallyOverride(UStroke.simple());
+    expect(s.value('LineStyle').asString()).toBe('0.0-0.0');
+    expect(s.value('LineThickness').asString()).toBe('1.0');
+  });
+
+  it('existing dispatch is unchanged: a PName + HColor still keeps the old priority', () => {
+    const red = SET.getColorOrWhite('red');
+    const colored = style({ LineColor: ['black', 8] }).eventuallyOverride('LineColor', red);
+    expect(colored.value('LineColor').getPriority()).toBe(8);
+  });
+});
+
 describe('Style — getters equal the jar (stereo snippet ideas)', () => {
   it('r <<foo>>: margin, padding, dashed stroke, wrap, alignment, shadowing', () => {
     const s = stereoIdea('r ');

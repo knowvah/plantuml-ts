@@ -71,6 +71,7 @@ const DIAGRAM_TYPE_ACTIVITY = 'ACTIVITY';
 const DIAGRAM_TYPE_MINDMAP = 'MINDMAP';
 const DIAGRAM_TYPE_SALT = 'SALT';
 const DIAGRAM_TYPE_WBS = 'WBS';
+const DIAGRAM_TYPE_GANTT = 'GANTT';
 const DIAGRAM_TYPE_BOARD = 'BOARD';
 const DIAGRAM_TYPE_FILES = 'FILES';
 const DIAGRAM_TYPE_PACKET = 'PACKET';
@@ -339,6 +340,7 @@ function finalizeShellFragment(fragment: RenderFragment): RenderFragment {
     case DIAGRAM_TYPE_MINDMAP:
     case DIAGRAM_TYPE_SALT:
     case DIAGRAM_TYPE_WBS:
+    case DIAGRAM_TYPE_GANTT:
       return finalizeTitledDiagramFragment(fragment);
     case DIAGRAM_TYPE_BOARD:
     case DIAGRAM_TYPE_FILES:

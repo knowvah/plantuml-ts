@@ -1,0 +1,6 @@
+@startgantt
+Project starts 2026-10-01
+today is colored in #ff8080
+[Task A] lasts 30 days
+[Task B] lasts 20 days
+@endgantt

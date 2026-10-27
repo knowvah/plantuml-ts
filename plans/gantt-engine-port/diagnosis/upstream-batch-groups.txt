@@ -1,0 +1,49 @@
+## B2: 44 files, 3563 lines, 30 independent groups
+  group  1004: PValue ngm/Load ngm/math/Fraction ngm/math/Segment ngm/math/TimeDirection time/Instant
+  group   213: GArrows core/GSide
+  group   196: data/WeekConfigData draw/WeeklyHeaderStrategy time/WeekNumberStrategy
+  group   177: core/TimeRange core/TimeRanges
+  group   176: lang/TimeResolution time/MonthUtils
+  group   172: GanttStyle data/TimelineStyleData
+  group   146: core/PrintScale data/TimeScaleConfigData
+  group   138: ulang/ParsedSentence ulang/VerbPhraseMatcher
+  group   111: lang/Words
+  group   108: LabelPosition LabelStrategy
+  group    89: lang/CenterBorderColor
+  group    88: time/DayOfWeekUtils
+  group    82: data/DisplayConfigData
+  group    81: core/TaskCode
+  group    81: draw/PathUtils
+  group    74: lang/Verbs
+  group    69: draw/FingerPrint
+  group    56: lang/TwoNames
+  group    50: Completion
+  group    50: lang/Something
+  group    47: draw/ResourceDraw
+  group    45: core/TaskAttribute
+  group    45: draw/header/HeaderPiece
+  group    44: solver/ImpossibleSolvingException
+  group    42: timescale/PiecewiseTimeType
+  group    41: GanttConstraintMode
+  group    41: DayStatus
+  group    40: Today
+  group    40: core/GArrowType
+  group    17: ngm/package-info
+## B3: 24 files, 2779 lines, 6 independent groups
+  group  1486: OpenClose ngm/NGMAllocation ngm/math/AbstractPiecewiseConstant ngm/math/Combiner ngm/math/LoadIntegrator ngm/math/PiecewiseConstant ngm/math/PiecewiseConstantHours ngm/math/PiecewiseConstantSpecificDays ngm/math/PiecewiseConstantTimeWindow ngm/math/PiecewiseConstantUtils ngm/math/PiecewiseConstantWeekday
+  group   761: core/Moment core/MomentImpl time/TimePoint time/TimePointFormat timescale/PiecewiseTimeProjection timescale/PixelInstant timescale/TimeScale timescale/TimeScaleDaily timescale/TimeScaleWink
+  group   232: draw/RectangleTask
+  group   114: data/WorkingHours
+  group   110: lang/DayPattern
+  group    76: lang/PairOfSomething
+## B4: 18 files, 2606 lines, 6 independent groups
+  group  1545: GanttI18n GanttTaskTableColumn core/AbstractTask core/Resource core/Task core/TaskGroup core/TaskInstant core/TaskSeparator draw/TaskDraw draw/TaskDrawSeparator
+  group   660: ngm/NGMTask ngm/NGMTaskFixedDuration ngm/NGMTaskFixedTotalEffort solver/Solver
+  group   157: data/DayCalendarData
+  group    97: timescale/TimeScaleDailyHideClosed
+  group    81: timescale/VariantTimeScale
+  group    66: timescale/TimeScaleCompressed
+## B5: 25 files, 5670 lines, 1 independent groups
+  group  5670: GanttArrow GanttConstraint GanttDiagram GanttDiagramMainBlock GanttLayout GanttTaskTable core/TaskImpl data/GanttModelData data/TaskDrawRegistryData data/TimeBoundsData draw/AbstractTaskDraw draw/ResourceDrawNumbers draw/TaskDrawDiamond draw/TaskDrawGroup draw/TaskDrawRegular draw/header/TimeHeader draw/header/TimeHeaderCalendar draw/header/TimeHeaderDaily draw/header/TimeHeaderFactory draw/header/TimeHeaderMonthly draw/header/TimeHeaderQuarterly draw/header/TimeHeaderSimple draw/header/TimeHeaderVariant draw/header/TimeHeaderWeekly draw/header/TimeHeaderYearly
+## B6: 54 files, 5364 lines, 1 independent groups
+  group  5364: DaysAsDates GanttDiagramFactory command/CommandColorTask command/CommandFootboxGantt command/CommandGanttArrow command/CommandGanttArrow2 command/CommandGroupEnd command/CommandGroupStart command/CommandHideClosed command/CommandHideResourceFootbox command/CommandHideResourceName command/CommandHideShowColumns command/CommandLabelOnColumn command/CommandLanguage command/CommandNoteBottom command/CommandPrintBetween command/CommandPrintScale command/CommandSeparator command/CommandTaskCompleteDefault command/CommandWeekNumberStrategy command/NaturalGanttCommand lang/AbstractComplementTaskInstant lang/ComplementAnything lang/ComplementBeforeOrAfterOrAtTaskStartOrEnd lang/ComplementClose lang/ComplementCompleted lang/ComplementDate lang/ComplementDayOfWeek lang/ComplementDeleted lang/ComplementDuration lang/ComplementFromTo lang/ComplementInColors lang/ComplementInColors2 lang/ComplementInColorsFromTo lang/ComplementIntervals lang/ComplementIntervalsSmart lang/ComplementNamed lang/ComplementOpen lang/ComplementTask lang/ComplementTimePoint lang/ComplementUrl lang/ComplementWithColorLink lang/ComplementWorkingHours lang/Subject lang/SubjectDayAsDate lang/SubjectDayOfWeek lang/SubjectDaysAsDates lang/SubjectGantt lang/SubjectResource lang/SubjectSeparator lang/SubjectTask lang/SubjectToday lang/SubjectWorkingHours ulang/VerbPhraseAction

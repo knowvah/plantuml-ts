@@ -1001,7 +1001,10 @@ describe('refusal coverage — baseline shape', () => {
     // 8422 -> 8424 at sdd3/close-b6 (2026-10-23): +2 svg-sequence golden clones (tifube, fifasu).
     // 8424 -> 8425 at sdd3/close-b7 (2026-10-23): +1 svg-sequence golden clone (mefeke).
     // 8425 -> 8431 at sdd3/close-b8 (2026-10-24): +6 svg-sequence golden clones (the last open rows).
-    expect(manifest.fixtures.length).toBe(8431);
+    // 8431 -> 8432 at gep/close-b7 (2026-10-26): +1 svg-activity golden clone (bozido-07-geze049).
+    // 8432 -> 8683 at gep/close-b7 capture: +251 svg-gantt golden clones.
+    // 8683 -> 8684 at gep/close-b8: +1 svg-gantt golden clone (ribupo-71-poku778).
+    expect(manifest.fixtures.length).toBe(8684);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -1045,7 +1048,9 @@ describe('refusal coverage — baseline shape', () => {
     // 219 -> 216 at sdd2/close-b2: fojomu-60, nizuzi-32, zoturo-25 render (T2e).
     // 216 -> 214 at sdd2/close-b8: bomino-39 (`<style src=>`, T8c; known-gap)
     // and nuvoja-46 (missing `!includedef`, T8b; honest record) render.
-    expect(pinnedErroring.length).toBe(214);
+    // 214 -> 217 at gep/close-b7 (2026-10-26): gantt turned on; its 3 known-gap rows (jar Welcome
+    // page past the 4096-byte head, PSystemError.java:217-218) now count as erroring here.
+    expect(pinnedErroring.length).toBe(217);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -1200,7 +1205,10 @@ describe('refusal coverage — baseline shape', () => {
     // 8208 -> 8210 at sdd3/close-b6 (2026-10-23): +2 svg-sequence golden clones (tifube, fifasu).
     // 8210 -> 8211 at sdd3/close-b7 (2026-10-23): +1 svg-sequence golden clone (mefeke).
     // 8211 -> 8217 at sdd3/close-b8 (2026-10-24): +6 svg-sequence golden clones (the last open rows).
-    expect(pinnedRendering.length).toBe(8217);
+    // 8217 -> 8215 at gep/close-b7: 8432 rows - 217 erroring (gantt +3 known-gap, +1 activity clone).
+    // 8215 -> 8466 at gep/close-b7 capture: 8683 rows - 217 erroring (+251 golden clones, all rendering).
+    // 8466 -> 8467 at gep/close-b8: 8684 rows - 217 erroring.
+    expect(pinnedRendering.length).toBe(8467);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -1275,7 +1283,8 @@ describe('refusal coverage — baseline shape', () => {
     // 181 -> 178 at sdd2/close-b2: fojomu-60, nizuzi-32, zoturo-25 render
     // (sdd2 T2e, CommandLinkAnchor).
     // 178 -> 177 at sdd2/close-b8: bomino-39's `<style src=>` gap is fixed (T8c).
-    expect(gaps.length).toBe(177);
+    // 177 -> 179 at gep/close-b7: two more gantt known-gap rows (nakude-77, papava-92).
+    expect(gaps.length).toBe(179);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //

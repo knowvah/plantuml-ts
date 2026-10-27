@@ -17,6 +17,7 @@ import type { AssetStore } from './asset-store.js';
 import type { InkBox } from './annotations/body-ink.js';
 import type { ScaleSpec } from './scale-command.js';
 import type { PreprocessorResult } from './preprocessor.js';
+import type { Clock } from './clock.js';
 
 /**
  * The per-render inputs a plugin's `parse()` may need beyond the source
@@ -40,6 +41,8 @@ import type { PreprocessorResult } from './preprocessor.js';
 export interface ParseOptions {
   /** `RenderOptions.assetStore`, forwarded verbatim. */
   readonly assetStore?: AssetStore | undefined;
+  /** The render's clock (`renderClock(options)`), for the engines that read "today" (gantt, `GanttDiagram`). */
+  readonly clock?: Clock | undefined;
 }
 
 // ---------------------------------------------------------------------------

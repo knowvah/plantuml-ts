@@ -3,7 +3,7 @@
  * only by `DateFunction` (`%date`). Full `SimpleDateFormat` is its own
  * substantial spec (quoted literals, `G`/`w`/`W`/`D`/`F`/`k`/`K`/`Z`/`X`
  * pattern letters, lenient parsing, ...); this ports the common subset
- * PlantUML fixtures actually exercise: `yyyy`/`yy`, `MMMM`/`MMM`/`MM`, `dd`,
+ * PlantUML fixtures actually exercise: `yyyy`/`yy`, `YYYY`/`YY` (week year), `MMMM`/`MMM`/`MM`, `dd`,
  * `EEEE`/`EEE`, `HH`, `hh`, `mm`, `ss`, `SSS`, `a`. Unrecognized runs of
  * letters pass through unchanged rather than throwing, matching the spirit
  * (not the letter) of `SimpleDateFormat`'s lenient-pattern behavior.
@@ -76,6 +76,29 @@ function resolveDateParts(epochMillis: number, timeZone: string): DateParts {
 
 const PAD2 = (n: number): string => String(n).padStart(2, '0');
 
+const DAYS_IN_DECEMBER = 31;
+const LAST_WEEKDAY_INDEX = 6; // Saturday, with weekday 0 = Sunday
+
+/**
+ * `GregorianCalendar.getWeekYear()` under the capture box's `en_US` locale:
+ * `firstDayOfWeek` = Sunday, `minimalDaysInFirstWeek` = 1, so the week
+ * containing 1 January is always week 1 of that year. A week (Sunday..Saturday)
+ * therefore belongs to the year of its Saturday; only a late-December date can
+ * differ from the calendar year.
+ *
+ * @see java.util.GregorianCalendar#getWeekYear (JDK) and
+ *      java.util.Calendar#getFirstDayOfWeek / getMinimalDaysInFirstWeek
+ */
+function weekYearOf(p: DateParts): number {
+  const saturdayDayOfMonth = p.day + (LAST_WEEKDAY_INDEX - p.weekday);
+  return p.month === 12 && saturdayDayOfMonth > DAYS_IN_DECEMBER ? p.year + 1 : p.year;
+}
+
+/** Number-field rendering shared by `y` and `Y`: count 2 -> two digits, else zero-pad to count. */
+function renderYearField(year: number, count: number): string {
+  return count === 2 ? PAD2(year % 100) : String(year).padStart(count, '0');
+}
+
 /** Year/month/weekday tokens -- split out so `renderToken`'s switch stays small. */
 function renderYearMonthWeekday(token: string, p: DateParts): string | undefined {
   switch (token) {
@@ -121,6 +144,8 @@ function renderTimeOfDay(token: string, p: DateParts): string | undefined {
 }
 
 function renderToken(token: string, parts: DateParts): string {
+  // `Y`: week year (java.text.SimpleDateFormat pattern letter Y).
+  if (token.startsWith('Y')) return renderYearField(weekYearOf(parts), token.length);
   return renderYearMonthWeekday(token, parts) ?? renderTimeOfDay(token, parts) ?? token;
 }
 

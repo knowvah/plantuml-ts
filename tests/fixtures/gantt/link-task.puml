@@ -1,0 +1,5 @@
+@startgantt
+Project starts 2020-07-01
+[task1] lasts 5 days
+[task1] links to [[http://plantuml.com]]
+@endgantt

@@ -1,0 +1,6 @@
+@startgantt
+Project starts 2020-07-01
+show column task
+[Task A] lasts 5 days
+[Task B] lasts 3 days
+@endgantt

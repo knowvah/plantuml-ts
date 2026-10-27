@@ -15,6 +15,7 @@ import { PSystemUnsupported } from '../../../../src/core/error/PSystemUnsupporte
 import { PSystemWelcome } from '../../../../src/core/error/PSystemWelcome.js';
 import { buildV2, merge } from '../../../../src/core/error/PSystemErrorUtils.js';
 import { umlSourceOf } from '../../../../src/core/error/UmlSource.js';
+import { DiagramRefusal, errorSvg } from '../../../../src/core/error/error-diagrams.js';
 import { renderPSystemError, renderPSystemUnsupported } from '../../../../src/core/error/error-renderer.js';
 import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
 import { readLines } from '../../../../src/core/tim/ReadLineReader.js';
@@ -225,5 +226,35 @@ describe('the rendered SVG', () => {
   it('PSystemWelcome is the (Empty) diagram', () => {
     expect(new PSystemWelcome().getDescription()).toBe('(Empty)');
     expect(new PSystemUnsupported('@startfoo').getDescription()).toBe('(Unsupported)');
+  });
+});
+
+describe('errorSvg — the refused line is located by its own position, not by trace index', () => {
+  // 3 header lines precede `@startgantt`: the trace (the @start..@end slice) starts at document
+  // line 3, so the refused document line 5 sits at trace index 2.
+  const document = [
+    '---',
+    'a: b',
+    '---',
+    '@startgantt',
+    '[a] lasts 1 day',
+    '[bad]',
+    '[c] lasts 1 day',
+    '@endgantt',
+  ].join('\n');
+  const textsOf = (svg: string): string[] => [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/gu)].map((m) => m[1]!);
+
+  it('prints `line N` from the offending entry location and lists through it (PSystemError.java:239)', () => {
+    const texts = textsOf(errorSvg(document, new DiagramRefusal('No matching verb phrase', 5, 'gantt'), { measurer }));
+    expect(texts).toContain('[From string (line 6) ]');
+    expect(texts).toContain('[bad]');
+    expect(texts).not.toContain('[c] lasts 1 day');
+    expect(texts).not.toContain('@endgantt');
+  });
+
+  it('falls back to the last trace line when no entry carries the refused position', () => {
+    const texts = textsOf(errorSvg(document, new DiagramRefusal('x', 99, 'gantt'), { measurer }));
+    expect(texts).toContain('[From string (line 8) ]');
+    expect(texts).toContain('@endgantt');
   });
 });

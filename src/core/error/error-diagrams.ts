@@ -75,6 +75,20 @@ export class DiagramRefusal extends Error {
   }
 }
 
+/**
+ * Index in `trace` of the entry whose OWN location is the refused line.
+ * `refusalLine` is a 0-based document-absolute position, `trace` the
+ * `@start..@end` slice, so a front-matter header shifts the two apart:
+ * the entry is found by `getLocation().getPosition()`, as upstream prints the
+ * offending `StringLocated`'s own location (`lineLocation.getPosition() + 1`).
+ * Falls back to the last line when nothing matches.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/error/PSystemError.java:239
+ */
+function refusedIndex(trace: readonly StringLocated[], refusalLine: number | undefined): number {
+  const found = refusalLine === undefined ? -1 : trace.findIndex((s) => s.getLocation()?.getPosition() === refusalLine);
+  return found === -1 ? trace.length - 1 : found;
+}
+
 export function errorSvg(source: string, err: unknown, options?: RenderOptions): string {
   // The last-resort handler: it runs on input already known to be broken -- up
   // to and including a caller who passed something that is not a string at all
@@ -88,7 +102,7 @@ export function errorSvg(source: string, err: unknown, options?: RenderOptions):
   // source "up to and including the offending line" -- attributing to line N
   // while listing past it would show source the diagram never reached.
   const refusal = err instanceof DiagramRefusal ? err : undefined;
-  const at = refusal?.line !== undefined && refusal.line < trace.length ? refusal.line : trace.length - 1;
+  const at = refusedIndex(trace, refusal?.line);
   const listing = trace.slice(0, at + 1);
   const error = new ErrorUml('EXECUTION_ERROR', errorMessage(err), 0, trace[at], refusal?.assumedDiagramType);
   const system =

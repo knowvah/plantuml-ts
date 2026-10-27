@@ -1,0 +1,18 @@
+@startgantt
+
+[task01] lasts 15 days
+note bottom
+'note left
+memo1 ...
+memo2 ...
+explanations1 ...
+explanations2 ...
+end note
+
+[task01] -> [task02]
+
+-- test02 --
+
+[task03] lasts 16 days
+
+@endgantt

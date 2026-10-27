@@ -1,0 +1,5 @@
+@startgantt
+Project starts 2020-07-01
+[T] lasts 10 days
+[T] pauses from 2020-07-02 to the 2020-07-05 blahblah
+@endgantt

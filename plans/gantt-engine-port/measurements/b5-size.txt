@@ -1,0 +1,6 @@
+36168	dist
+-rw-r--r--@ 1 scottseely  staff     7026 Oct 26 17:48 dist/image-providers.cjs
+-rw-r--r--@ 1 scottseely  staff     8685 Oct 26 17:47 dist/image-providers.js
+-rw-r--r--@ 1 scottseely  staff  2343523 Oct 26 17:48 dist/plantuml-ts.cjs
+-rw-r--r--@ 1 scottseely  staff  2925834 Oct 26 17:47 dist/plantuml-ts.js
+-rw-r--r--@ 1 scottseely  staff  2925834 Oct 26 17:47 dist/plantuml-ts.js

@@ -1,0 +1,18 @@
+{
+  "fixtures/gantt/today-implicit": {
+    "epochMillis": 1792864417312,
+    "zone": "America/Chicago"
+  },
+  "gantt/lituri-55-caju105": {
+    "epochMillis": 1791605404000,
+    "zone": "America/Chicago"
+  },
+  "gantt/sakibi-88-zuci243": {
+    "epochMillis": 1791605404000,
+    "zone": "America/Chicago"
+  },
+  "unknown/firiru-71-viki803": {
+    "epochMillis": 1791605405000,
+    "zone": "America/Chicago"
+  }
+}

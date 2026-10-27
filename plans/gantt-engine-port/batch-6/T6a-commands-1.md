@@ -1,0 +1,63 @@
+# T6a — commands A–H
+
+Agent: `typescript-pro` (sonnet), worktree `gep-T6a`. Commit:
+`feat(gantt): port commands 1 (T6a)`.
+Read [../task-contract.md](../task-contract.md) and decisions D1, D2, D5, D6.
+Upstream layer L11 (681 Java lines); everything these files reference
+is in batches 1–5 (incl. `GanttDiagram` from batch 5) or in this task (`diagnosis/upstream-batch-groups.txt`).
+
+## Port (whole files, upstream names)
+- `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/command/CommandColorTask.java` (86 lines) → `src/diagrams/gantt/command/CommandColorTask.ts`
+- `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/command/CommandFootboxGantt.java` (60 lines) → `src/diagrams/gantt/command/CommandFootboxGantt.ts`
+- `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/command/CommandGanttArrow.java` (92 lines) → `src/diagrams/gantt/command/CommandGanttArrow.ts`
+- `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/command/CommandGanttArrow2.java` (91 lines) → `src/diagrams/gantt/command/CommandGanttArrow2.ts`
+- `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/command/CommandGroupEnd.java` (70 lines) → `src/diagrams/gantt/command/CommandGroupEnd.ts`
+- `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/command/CommandGroupStart.java` (73 lines) → `src/diagrams/gantt/command/CommandGroupStart.ts`
+- `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/command/CommandHideClosed.java` (69 lines) → `src/diagrams/gantt/command/CommandHideClosed.ts`
+- `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/command/CommandHideResourceFootbox.java` (70 lines) → `src/diagrams/gantt/command/CommandHideResourceFootbox.ts`
+- `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/command/CommandHideResourceName.java` (70 lines) → `src/diagrams/gantt/command/CommandHideResourceName.ts`
+
+**Orchestrator note (journal row 29):** `CommandFootboxGantt` uses `sequencediagram/command/CommandFootbox.HIDE_SHOW_FOOTBOX`; engines may not import each other — inline that pattern in your file with the citation (`CommandFootbox.java`), as other engines inline `StereotypePattern` (row 27).
+
+## Write-set
+`src/diagrams/gantt/command/CommandColorTask.ts`, `src/diagrams/gantt/command/CommandFootboxGantt.ts`, `src/diagrams/gantt/command/CommandGanttArrow.ts`, `src/diagrams/gantt/command/CommandGanttArrow2.ts`, `src/diagrams/gantt/command/CommandGroupEnd.ts`, `src/diagrams/gantt/command/CommandGroupStart.ts`, `src/diagrams/gantt/command/CommandHideClosed.ts`, `src/diagrams/gantt/command/CommandHideResourceFootbox.ts`, `src/diagrams/gantt/command/CommandHideResourceName.ts`;
+`tests/unit/gantt/command/CommandColorTask.test.ts`, `tests/unit/gantt/command/CommandFootboxGantt.test.ts`, `tests/unit/gantt/command/CommandGanttArrow.test.ts`, `tests/unit/gantt/command/CommandGanttArrow2.test.ts`, `tests/unit/gantt/command/CommandGroupEnd.test.ts`, `tests/unit/gantt/command/CommandGroupStart.test.ts`, `tests/unit/gantt/command/CommandHideClosed.test.ts`, `tests/unit/gantt/command/CommandHideResourceFootbox.test.ts`, `tests/unit/gantt/command/CommandHideResourceName.test.ts`.
+
+## Read-set
+The Java files above; for each type they import, its already-ported TS file
+(`docs/catalog.md` → path). Do not read the rest of the gantt package.
+
+**Orchestrator note (journal row 48):** `command/CommandNoteBottom.java` extends
+`CommandMultilines2` (with `MultilinesStrategy.REMOVE_STARTING_QUOTE`,
+`Trim.BOTH`, `Lazy<Pattern2>` END `^end[%s]*note$`). There is no core
+`CommandMultilines2`; engines port a multiline command as a start RegExp +
+an end RegExp + a block collector the factory dispatches — follow
+`src/diagrams/wbs/CommandWBSItemMultilineNew.ts` (`collectWbsMultilineBlock`,
+`WBS_MULTILINE_END_RE`) and `WBSDiagramFactory.ts`; `REMOVE_STARTING_QUOTE`
+is ported at `src/core/style/mindmap-style-builder.ts:121-130` (reuse or cite).
+`CommandLinkElement.LINE_STYLE` (`CommandGanttArrow*.java:62/65`) is
+`LINE_STYLE` in `src/core/link-style-regex.ts:10`.
+
+**Orchestrator note (journal row 56) — command shape:** there is no core
+`SingleLineCommand2` (row 15). Port each command as `src/diagrams/wbs/CommandWBSLink.ts`
+does: one exported `RegExp` with NAMED groups built from the Java
+`RegexConcat`/`RegexLeaf` list in the same order (`@see` each leaf's line; a
+`RegexOr`/`RegexOptional` becomes the equivalent alternation/optional group), plus an
+exported `apply<Name>(diagram: GanttDiagram, match: RegExpExecArray): CommandExecutionResult`
+mirroring `executeArg` line for line (`RegexResult.get("KEY", i)` → the named
+group; `arg.getLazzy`/`StringUtils` helpers → cite the Java). Export the Java
+class name as a `const` object `{ regex, apply }` too, so T7c's factory can
+register the commands in `GanttDiagramFactory.java`'s order. Do NOT write a
+dispatcher or touch any factory (batch 7). Corpus for the acceptance grep:
+`test-results/dot-cache/gantt/*/in.puml` (265 rows, the survey's inputs) and
+`tests/fixtures/gantt/*.puml` (94) — `tests/corpus/` is unpopulated here.
+
+## Acceptance
+- Given each ported file, then every public member of the Java class exists
+  with the same name and behaviour, and its test cites `file:line` for every
+  expected value.
+- Given each command regex, then it matches every corpus line of its shape (grep the corpus) and rejects near-misses; given `execute` on a fresh `GanttDiagram`, then the diagram state change equals the Java.
+- Given the task, then `npm run typecheck` and eslint are clean and coverage
+  of the new files is ≥ 90/90/90.
+
+Observability: N/A — no new observable operations. Rollback: Reversible.
