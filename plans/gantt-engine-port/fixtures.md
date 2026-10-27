@@ -17,6 +17,7 @@ table (firstDiff family → rows → owner).
 | b5 | 265 | 1 | 0 | 254 | 0 | 10 | — |
 | b6 | 265 | 1 | 0 | 254 | 0 | 10 | — |
 | b7 | 265 | 262 | 1 | 2 | 0 | 10 | 251 |
+| b8 | 265 | 263 | 1 | 1 | 0 | 10 | 252 |
 
 ## Divergence families (from batch 7)
 
@@ -85,12 +86,14 @@ front-matter) + 31 authored. Dropped (jar cannot express, journal row 4):
 (`oracle/capture-clock.json`). Construct → fixture/corpus map: T0b hand-back,
 journal row 4.
 
-## Open families after the b7 capture (turn-on + T8a/T8b)
+## Open families after batch 8 (T8a–T8d landed)
 
-| firstDiff family | rows | candidate mechanism | owner |
+| firstDiff family | rows | mechanism (diagnosis artifact) | owner |
 |---|---:|---|---|
-| `svg/g[childCount]` | 1 (ribupo-71-poku778) | an element the port draws that the jar omits, or the reverse — census the g[1] children against the oracle | batch 8 |
-| `svg/g/path/@stroke` | 1 (xureco-57-lene839) | a constraint/arrow stroke colour or dash differing from the jar's `applyStrokeAndLineColor` | batch 8 |
-| structural (no firstDiff) | 1 (xikovo-87-rosu902) | element order/shape equal, attribute values differ below the diff threshold — `verdict-diff` family listing | batch 8 |
-| error page, front-matter line | authored vega-gantt2 | core `error/error-diagrams.ts:91` clamps a document-absolute refusal line into a trace without the YAML header (T7c, row 80) | batch 8 (core, artifact) |
-| rule-conformant, unpinned | 11 (4 jar error pages, 7 signed accepted divergences incl. the clock row lituri-55) | none — conformant by the 2026-10-10 error-page rule / `accepted-divergences.json` | — |
+| `svg/g/path/@stroke` (transparent link) | 1 (xureco-57-lene839) | `src/core/klimt/AbstractCommonUGraphic.ts:107` defaults the back colour to the string `'none'` where `AbstractCommonUGraphic.java:61` uses the `HColors.none()` singleton, so `DriverPathSvg.java:61-75`'s equal-colour fast path never fires in TS (`driver-path-svg.ts:41-64`) and we emit `style="stroke:none;"` where the jar emits no style. Core, every engine with a transparent line over the default back — needs the full gate (journal row 88). | gantt-divergence-drive |
+| structural (`svg/@height` +8) | 1 (xikovo-87-rosu902) | not pinned: body coordinates identical, canvas height 82 vs 90; title-only and hide-footbox-only fixtures pass; mogafu-27 shows the same 8 px on width. Next: instrument `GanttLayout.getTotalHeight` terms Java vs TS for both rows (row 88). | gantt-divergence-drive |
+| emoji in separator names / note bodies | 0 corpus rows | `TaskDrawSeparator.ts:124` and `AbstractTaskDraw.ts:279` still build an empty sprite container; Java threads the real skin param (row 90). Author a fixture before fixing. | gantt-divergence-drive |
+| nakude "cannot last more than 20 years" | 1 (nakude-77-suji787, conformant: both sides error) | our `checkFinalError` path on a one-day diagram whose task `displays on same row as` itself — both error pages, but the 20-year route suggests a min/max input the Java does not produce (row 81). | gantt-divergence-drive |
+| rule-conformant, unpinned | 11 (4 jar error pages, 7 signed accepted divergences incl. the clock row lituri-55) | none — conformant by the 2026-10-10 error-page rule / `accepted-divergences.json` (the 10 gantt ledger entries were retired at b7, row 87) | — |
+
+Closed in batch 8: fecaru-84 (`%date` week-year letter, T8a), mexito-28 (constraint colour guard, T8b), ribupo-71 (emoji asset store, T8c), authored vega-gantt2 (error listing line by location, T8d).

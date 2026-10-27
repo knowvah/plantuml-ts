@@ -16,7 +16,7 @@ import type { GanttModelData } from './data/GanttModelData.js';
 import type { TaskDrawRegistryData } from './data/TaskDrawRegistryData.js';
 import type { TimeBoundsData } from './data/TimeBoundsData.js';
 import type { TimelineStyleData } from './data/TimelineStyleData.js';
-import { applyForeColor, createLeftTextBlock } from './draw/header/TimeHeader.js';
+import { applyForeColor, createLeftTextBlock, emojiStoreOf } from './draw/header/TimeHeader.js';
 import { Context, type GanttTaskTableColumn } from './GanttTaskTableColumn.js';
 import { TimePoint } from './time/TimePoint.js';
 
@@ -178,6 +178,7 @@ export class GanttTaskTable {
     return createLeftTextBlock(
       Display.getWithNewlines(this.#timelineStyle.getPragma(), text),
       this.#getFontConfiguration(),
+      emojiStoreOf(this.#timelineStyle.getSkinParam()),
     );
   }
 

@@ -3,6 +3,7 @@ import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import { isAssumeTransparent } from '../../core/assume-transparent.js';
 import type { UmlSource } from '../../core/block-extractor.js';
 import { DEFAULT_CLOCK, type Clock } from '../../core/clock.js';
+import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
 import { CommandControl } from '../../core/command/CommandControl.js';
 import type { CommandExecutionResult } from '../../core/command/CommandExecutionResult.js';
 import { ParserPass } from '../../core/command/ParserPass.js';
@@ -357,18 +358,20 @@ function finalRefusal(diagram: GanttDiagram, source: UmlSource): ParseRefusal | 
  * commands, then the gantt commands in `initCommandsList` order, then `checkFinalError`. A command that throws
  * propagates (the crash path).
  * @param clock the instant `today` reads (`TimePoint.todayAtMidnight()`, decision D3).
+ * @param emoji port-only Twemoji artwork store (ADR-2), carried in the sprite registry beside `internal`.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/GanttDiagramFactory.java:73-130
  */
 export function parseGantt(
   source: UmlSource,
   preprocessing: PreprocessingArtifact,
   clock: Clock = DEFAULT_CLOCK,
+  emoji?: InternalEmojiStore,
 ): ParsedGantt | ParseRefusal {
   const dispatch = createStyleDispatch(source);
   const skinParam = new SkinParam({
     style: dispatch.style,
     skinparam: dispatch.skinparam,
-    sprites: createSpriteRegistry(),
+    sprites: createSpriteRegistry(undefined, emoji),
     pragma: Pragma.createEmpty(),
   });
   const diagram = new GanttDiagram(source, preprocessing, skinParam, clock);

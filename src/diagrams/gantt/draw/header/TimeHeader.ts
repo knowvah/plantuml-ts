@@ -16,6 +16,8 @@ import { ULine } from '../../../../core/klimt/shape/ULine.js';
 import { URectangle } from '../../../../core/klimt/shape/URectangle.js';
 import { SpriteContainerEmpty } from '../../../../core/klimt/sprite/SpriteContainerEmpty.js';
 import { FontConfiguration } from '../../../../core/abel/FontConfiguration.js';
+import type { ISkinParam } from '../../../../core/abel/ISkinParam.js';
+import type { InternalEmojiStore } from '../../../../core/internal-emoji-store.js';
 import { Pragma } from '../../../../core/skin/Pragma.js';
 import type { SName } from '../../../../core/style/SName.js';
 import type { HColor } from '../../../../core/style/Value.js';
@@ -27,6 +29,7 @@ import type { TimeBoundsData } from '../../data/TimeBoundsData.js';
 import type { TimeScaleConfigData } from '../../data/TimeScaleConfigData.js';
 import type { TimelineStyleData } from '../../data/TimelineStyleData.js';
 import type { WeekConfigData } from '../../data/WeekConfigData.js';
+import { SkinParam } from '../../gantt-skin-param.js';
 import { TimePoint } from '../../time/TimePoint.js';
 import type { TimePointFormat } from '../../time/TimePointFormat.js';
 import type { TimeScale } from '../../timescale/TimeScale.js';
@@ -61,13 +64,30 @@ export function hColorEquals(a: HColor, b: HColor): boolean {
  * `Display#create(FontConfiguration, HorizontalAlignment, SpriteContainer)` with a `SpriteContainerEmpty`,
  * the way `TimeHeader#getTextBlockSLOW` and `TimeHeaderSimple#drawSimpleDayCounter` call it.
  *
+ * `emoji` is the port-only Twemoji artwork store (ADR-2): upstream's `Emoji#getSvg` reads
+ * `emoji/data/<unicode>.svg` off the classpath unconditionally (`Emoji.java:175-181`), which a
+ * browser-safe library carries through `RenderOptions.assetStore` instead.
+ *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/draw/header/TimeHeader.java:70-299
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/draw/TaskDrawDiamond.java:183-205
  */
-export function createLeftTextBlock(display: Display, fontConfiguration: FontConfiguration): TextBlock {
-  const spriteContainer = new SpriteContainerEmpty();
+export function createLeftTextBlock(
+  display: Display,
+  fontConfiguration: FontConfiguration,
+  emoji?: InternalEmojiStore,
+): TextBlock {
+  const spriteContainer = new SpriteContainerEmpty(undefined, emoji);
   const bridged = bridgeFontConfiguration(fontConfiguration);
   const ctx = { fontConfiguration: bridged, spriteContainer, atomOps: spriteContainer.atomOps(bridged) };
   return display.create(ctx, HorizontalAlignment.LEFT);
+}
+
+/**
+ * The Twemoji artwork store a gantt `SkinParam` carries in its sprite registry (`parseGantt` puts it
+ * there); `undefined` for any other skin param (no artwork wired).
+ */
+export function emojiStoreOf(skinParam: ISkinParam): InternalEmojiStore | undefined {
+  return skinParam instanceof SkinParam ? skinParam.getSprites().emoji : undefined;
 }
 
 /**

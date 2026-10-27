@@ -124,6 +124,7 @@ export class TaskDrawDiamond extends AbstractTaskDraw {
     return createLeftTextBlock(
       Display.getWithNewlines(this.getPragma(), this.prettyDisplay),
       this.getFontConfiguration(),
+      this.getEmojiStore(),
     );
   }
 
@@ -177,6 +178,7 @@ export class TaskDrawDiamond extends AbstractTaskDraw {
       const draw = createLeftTextBlock(
         Display.getWithNewlines(this.getPragma(), displayString),
         this.getFontConfiguration(),
+        this.getEmojiStore(),
       );
       draw.drawU(ug);
     }

@@ -38,6 +38,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import { resolveScaleFactor, type ScaleSpec } from '../../core/scale-command.js';
 import { StyleSignatureBasic } from '../../core/style/StyleSignatureBasic.js';
 import { BODY_ANCHOR } from '../../core/TextBlockExporter.js';
+import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
 import { PreprocessingArtifact } from '../../core/tim/PreprocessingArtifact.js';
 import type { GanttDiagram } from './GanttDiagram.js';
 import { parseGantt, type ParsedGantt } from './GanttDiagramFactory.js';
@@ -308,7 +309,8 @@ export const ganttPlugin: SyncPlugin<ParsedGantt, GanttGeometry> = {
   /** `GanttDiagramFactory#createEmptyDiagram` with a fresh `PreprocessingArtifact` (the wbs/mindmap/salt
    *  factories' precedent); the clock is the render's (`ParseOptions.clock`, decision D3). */
   parse(source, options) {
-    return parseGantt(source, new PreprocessingArtifact(), options?.clock ?? DEFAULT_CLOCK);
+    const emoji = options?.assetStore === undefined ? undefined : internalEmojiStoreFrom(options.assetStore);
+    return parseGantt(source, new PreprocessingArtifact(), options?.clock ?? DEFAULT_CLOCK, emoji);
   },
 
   layoutSync(ast, _theme, measurer) {

@@ -3,6 +3,7 @@ import { HColorSet } from '../../../../../src/core/klimt/color/HColorSet.js';
 import type { UGraphic } from '../../../../../src/core/klimt/UGraphic.js';
 import { UFont } from '../../../../../src/core/klimt/font/UFont.js';
 import { ULine } from '../../../../../src/core/klimt/shape/ULine.js';
+import type { ISkinParam } from '../../../../../src/core/abel/ISkinParam.js';
 import { Pragma } from '../../../../../src/core/skin/Pragma.js';
 import { LocalDate } from '../../../../../src/core/time/LocalDate.js';
 import { PrintScale } from '../../../../../src/diagrams/gantt/core/PrintScale.js';
@@ -16,6 +17,7 @@ import type { FontConfiguration } from '../../../../../src/core/abel/FontConfigu
 import {
   TimeHeader,
   applyForeColor,
+  emojiStoreOf,
   hColorEquals,
   paintOf,
 } from '../../../../../src/diagrams/gantt/draw/header/TimeHeader.js';
@@ -286,5 +288,11 @@ describe('TimeHeader (TimeHeader.java:70-299)', () => {
     const texts = jar.filter((e) => e.startsWith('<text'));
     expect(texts.length).toBeGreaterThan(5);
     expect(elementsOf(drawSvg(diagram))).toEqual(jar);
+  });
+});
+
+describe('emojiStoreOf (T8c)', () => {
+  it('is undefined for a skin param that is not the gantt SkinParam', () => {
+    expect(emojiStoreOf({} as ISkinParam)).toBeUndefined();
   });
 });

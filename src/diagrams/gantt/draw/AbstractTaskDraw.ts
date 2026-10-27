@@ -24,6 +24,7 @@ import { StyleSignatureBasic } from '../../../core/style/StyleSignatureBasic.js'
 import type { HColorSet } from '../../../core/style/Value.js';
 import { Opale } from '../../../core/svek/image/Opale.js';
 import type { Url } from '../../../core/url/Url.js';
+import type { InternalEmojiStore } from '../../../core/internal-emoji-store.js';
 import type { LabelStrategy } from '../LabelStrategy.js';
 import type { GArrowType } from '../core/GArrowType.js';
 import type { GSide } from '../core/GSide.js';
@@ -32,7 +33,7 @@ import type { TaskDrawRegistryData } from '../data/TaskDrawRegistryData.js';
 import type { CenterBorderColor } from '../lang/CenterBorderColor.js';
 import type { TimePoint } from '../time/TimePoint.js';
 import type { TimeScale } from '../timescale/TimeScale.js';
-import { paintOf } from './header/TimeHeader.js';
+import { emojiStoreOf, paintOf } from './header/TimeHeader.js';
 import type { FingerPrint } from './FingerPrint.js';
 import type { TaskDraw } from './TaskDraw.js';
 
@@ -248,6 +249,11 @@ export abstract class AbstractTaskDraw implements TaskDraw {
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/draw/AbstractTaskDraw.java:207-209 */
   protected getCompletion(): number {
     return this.#completion;
+  }
+
+  /** Port-only (ADR-2): the Twemoji artwork the title blocks draw `<:name:>` from (`Emoji.java:175-181`). */
+  protected getEmojiStore(): InternalEmojiStore | undefined {
+    return emojiStoreOf(this.#skinParam);
   }
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/draw/AbstractTaskDraw.java:211-213 */

@@ -13,8 +13,9 @@ b7 capture.
 |---|---|---|---|---|---|
 | [T8a](T8a-tim-date-week-year.md) | `%date` letter `Y` (week year) missing — core TIM, diagnosis artifact in the spec | fecaru-84-gofi396 | typescript-pro (sonnet), gep-T8a | `src/core/tim/builtin/date-format.ts` + test | [x] |
 | [T8b](T8b-arrow-colour-crash.md) | `GanttConstraint.ts:25` invented `instanceof HColorSimple` guard crashes on a `<style>` arrow colour | mexito-28-toli086 | typescript-pro (sonnet), gep-T8b | `src/diagrams/gantt/GanttConstraint.ts`, `GanttArrow.ts` + tests | [x] |
-| [T8c](T8c-emoji-asset-store.md) | gantt plugin drops `assetStore` → emoji artwork never drawn (gantt tree + 1 harness line) | ribupo-71-poku778 | typescript-pro (sonnet), gep-T8c | `src/diagrams/gantt/index.ts`, `draw/**` call sites, harness | [ ] |
-| [T8d](T8d-error-line-front-matter.md) | core error page indexes a document-absolute refusal line into the block-only trace (artifact in spec) | authored vega-gantt2 (+ any engine with a header) | typescript-pro (sonnet), gep-T8d | `src/core/error/error-diagrams.ts` + test | [ ] |
+| [T8c](T8c-emoji-asset-store.md) | gantt plugin drops `assetStore` → emoji artwork never drawn (gantt tree + 1 harness line) | ribupo-71-poku778 | typescript-pro (sonnet), gep-T8c | `src/diagrams/gantt/index.ts`, `draw/**` call sites, harness | [x] |
+| [T8d](T8d-error-line-front-matter.md) | core error page indexes a document-absolute refusal line into the block-only trace (artifact in spec) | authored vega-gantt2 (+ any engine with a header) | typescript-pro (sonnet), gep-T8d | `src/core/error/error-diagrams.ts` + test | [x] |
+| close | b8: gates, pins (ribupo promoted, authored bar), chain vs b7 (ribupo only), ledger | orchestrator | per close-procedure | T8c, T8d | [x] |
 | re-pin | known-gap refusals: jar Welcome page beyond the head window (3- and 4-line sources) | nakude-77-suji787, papava-92-geve698 | orchestrator (`repin-gantt-routing.mts --write`) | refusal/routing pins | [x] |
 
 ## Deferred to gantt-divergence-drive (stop 16: four families used; artifacts in journal row 88)

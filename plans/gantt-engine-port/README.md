@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — batch 7 CLOSING (gantt ON: 262/265 conformant, 251 goldens); batch 8 T8a/T8b landed, ≤2 families remain
+## Status — EXIT in progress (batches 0–8 closed; gantt 263/265 conformant, 0 losses elsewhere); squash next
 
 ## Objective
 
@@ -126,7 +126,7 @@ New src module ⇒ `npm run catalog` (drift-gated).
 | [5](batch-5/overview.md) | the 25-file cycle (5,670), serial chain | T5a–T5f, close | [x] |
 | [6](batch-6/overview.md) | L11 grammar + commands (2,824) | T6z, T6a–T6e, close | [x] |
 | [7](batch-7/overview.md) | grammar top, factory, plugin, turn-on + capture (serial) | T7a–T7c (+T7p tooling), close | [x] |
-| [8](batch-8/overview.md) | first conformance pass (2–4 families) | T8x, close | [ ] |
+| [8](batch-8/overview.md) | first conformance pass (4 families: T8a–T8d) | T8a–T8d, close | [x] |
 | [exit](batch-exit/overview.md) | final measurement vs b0, docs, memory, PR prep | T-exit | [ ] |
 | [squash](batch-squash/overview.md) | one commit per batch; tag the history | T-squash | [ ] |
 

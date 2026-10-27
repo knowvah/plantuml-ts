@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-2028 modules · 7016 exported names.
+2028 modules · 7017 exported names.
 
 ## `src/`
 
@@ -2058,7 +2058,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `HeaderPiece.ts` | `HeaderPiece` |  |
-| `TimeHeader.ts` | `paintOf`, `applyForeColor`, `hColorEquals`, `createLeftTextBlock`, `TimeHeader`, `Pending` |  |
+| `TimeHeader.ts` | `paintOf`, `applyForeColor`, `hColorEquals`, `createLeftTextBlock`, `emojiStoreOf`, `TimeHeader`, `Pending` |  |
 | `TimeHeaderCalendar.ts` | `TimeHeaderCalendar` |  |
 | `TimeHeaderDaily.ts` | `TimeHeaderDaily` |  |
 | `TimeHeaderFactory.ts` | `TimeHeaderFactory` |  |

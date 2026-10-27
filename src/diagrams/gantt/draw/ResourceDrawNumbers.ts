@@ -16,7 +16,7 @@ import type { TimelineStyleData } from '../data/TimelineStyleData.js';
 import type { TimePoint } from '../time/TimePoint.js';
 import type { TimeScale } from '../timescale/TimeScale.js';
 import type { ResourceDraw } from './ResourceDraw.js';
-import { createLeftTextBlock } from './header/TimeHeader.js';
+import { createLeftTextBlock, emojiStoreOf } from './header/TimeHeader.js';
 
 /** The font size of the resource name (`ResourceDrawNumbers.java:80`). */
 const NAME_FONT_SIZE = 13;
@@ -74,6 +74,7 @@ export class ResourceDrawNumbers implements ResourceDraw {
     const title = createLeftTextBlock(
       Display.getWithNewlines(this.#timelineStyleData.getPragma(), this.#res.getName()),
       this.#getFontConfiguration(NAME_FONT_SIZE),
+      emojiStoreOf(this.#timelineStyleData.getSkinParam()),
     );
     title.drawU(ug);
     const line = ULine.hline(

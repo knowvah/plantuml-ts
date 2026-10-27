@@ -30,7 +30,11 @@ import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
 import type { Clock } from '../../../src/core/clock.js';
 import { renderSync } from '../../../src/index.js';
 import { clockForKey, corpusClockKey, fixtureClockKey } from './capture-clock.js';
+import { buildEmojiAssetsStore } from '../../helpers/emoji-assets-store.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
+
+/** The Twemoji artwork the jar reads off its classpath (`Emoji.java:175-181`), built once per process. */
+const GANTT_ASSET_STORE: AssetStore = buildEmojiAssetsStore();
 
 /** The `RenderOptions` fields a gantt fixture caller may pass (measurer is separate). */
 export interface GanttFixtureRenderOptions {
@@ -50,7 +54,7 @@ export function ganttRenderOptions(
 ): GanttFixtureRenderOptions {
   // A corpus row is keyed `gantt/<slug>`, an authored fixture `fixtures/gantt/<slug>` (capture-clock.ts).
   const clock = clockForKey(corpusClockKey('gantt', slug)) ?? clockForKey(fixtureClockKey(`gantt/${slug}`));
-  return { includeStore, ...(clock === undefined ? {} : { clock }) };
+  return { assetStore: GANTT_ASSET_STORE, includeStore, ...(clock === undefined ? {} : { clock }) };
 }
 
 /** Renders a `.puml` gantt fixture through the PRODUCTION `renderSync`. */

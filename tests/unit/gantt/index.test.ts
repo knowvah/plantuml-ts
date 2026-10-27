@@ -22,6 +22,8 @@ import {
   muteColorMapper,
   renderGantt,
 } from '../../../src/diagrams/gantt/index.js';
+import type { AssetStore } from '../../../src/core/asset-store.js';
+import { internalEmojiAssetKey } from '../../../src/core/internal-emoji-store.js';
 import { renderSync } from '../../../src/index.js';
 import { registerPlugins } from '../../../src/registered-plugins.js';
 import { withClock } from '../../../src/core/internal-render-options.js';
@@ -216,5 +218,34 @@ describe('{{gantt}} nested in another diagram (EmbeddedDiagram.java:284-354)', (
       measurer,
     });
     expect(nestedSvg(svg)).toContain('>Nested</text>');
+  });
+});
+
+/**
+ * T8c: `options.assetStore` reaches the milestone label's sprite container, so `<:innocent:>` draws the Twemoji
+ * artwork (`Emoji.java:175-181`, `TaskDrawDiamond.java:183-205`) instead of a dropped text run.
+ */
+describe('gantt plugin -- emoji artwork through options.assetStore', () => {
+  const INNOCENT_UNICODE = '1f607';
+  const ARTWORK_FILL = '#123456';
+  const ARTWORK = `<circle cx="18" cy="18" r="18" fill="${ARTWORK_FILL}"/>`;
+  const store: AssetStore = {
+    get: (key) =>
+      key === internalEmojiAssetKey(INNOCENT_UNICODE)
+        ? { bytes: new TextEncoder().encode(ARTWORK), mimeType: 'image/svg+xml' }
+        : undefined,
+    has: (key) => key === internalEmojiAssetKey(INNOCENT_UNICODE),
+  };
+  const MILESTONE =
+    "@startgantt\n[A] requires 10 days.\n[M] happens at [A]'s end.\nIt is displayed as <:innocent:>\n@endgantt";
+
+  it('draws the artwork when the store carries it', () => {
+    const svg = renderSync(MILESTONE, { measurer, assetStore: store });
+    expect(svg).toContain(`fill="${ARTWORK_FILL}"`);
+  });
+
+  it('draws no artwork without a store (the jar has no text fallback either)', () => {
+    const svg = renderSync(MILESTONE, { measurer });
+    expect(svg).not.toContain(ARTWORK_FILL);
   });
 });

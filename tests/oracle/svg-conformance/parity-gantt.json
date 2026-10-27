@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T00:36:08.632Z",
+  "generatedAt": "2026-10-27T01:27:25.235Z",
   "fixtures": [
     {
       "slug": "bafilu-92-tafa086",
@@ -1324,9 +1324,7 @@
       "type": "gantt",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "diverged",
-      "maxDelta": 0,
-      "firstDiff": "svg/g[1][childCount]"
+      "verdict": "conformant"
     },
     {
       "slug": "ricogo-60-juda624",

@@ -137,6 +137,7 @@ export class TaskDrawRegular extends AbstractTaskDraw {
     return createLeftTextBlock(
       Display.getWithNewlines(this.getPragma(), this.prettyDisplay),
       this.getFontConfiguration(),
+      this.getEmojiStore(),
     );
   }
 
