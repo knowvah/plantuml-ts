@@ -1,0 +1,5 @@
+@startgantt
+printscale yearly zoom 2
+Project starts 2019-01-01
+[Task A] lasts 900 days
+@endgantt

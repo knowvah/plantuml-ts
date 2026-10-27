@@ -1,0 +1,6 @@
+@startgantt
+Project starts 2020-07-01
+hide resources names
+[Task A] on {Alice} lasts 5 days
+[Task B] on {Bob:50%} lasts 3 days
+@endgantt

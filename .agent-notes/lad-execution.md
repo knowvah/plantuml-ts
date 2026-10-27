@@ -23,3 +23,9 @@
 - **Finding**: `FilesDiagram.java:62-67` calls `styleExtractor.applyStyles(skinParam)` and never reads `handwritten`; so the files jar-compatible cut is "all skinparam dropped, `<style>`/`skin` kept" (`src/diagrams/files/files-style-input.ts`), not `jsonFamilyStyleInput`.
 - **Impact**: files cannot reuse the json-family cut; layering also forbids files → json imports.
 - **Confidence**: High.
+
+## Observation: PR #92 CodeQL alerts 34-37 were deliberate single replacements
+- **Context**: `js/incomplete-sanitization` on line 11 of `tests/unit/{board,chart,files,packetdiag}/lengthadjust-lad-t2f.test.ts`.
+- **Finding**: `SOURCE.replace(/\n/, ...)` inserts one `skinparam` line after the `@start` line of a fixed test string; a global replace would be wrong. No escaping, no untrusted input. Dismissed as false positive 2026-10-24 (user-approved), comment kept under the 280-char API cap.
+- **Impact**: build multi-line test sources from a line array instead of a first-newline `replace` to avoid the rule in future tests.
+- **Confidence**: High.

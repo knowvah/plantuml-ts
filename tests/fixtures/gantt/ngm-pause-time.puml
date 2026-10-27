@@ -1,0 +1,5 @@
+@startgantt
+Project starts 2020-07-01
+[Task] lasts 5 days
+[Task] pauses on 2020-07-03 from 10:00 to 12:00
+@endgantt

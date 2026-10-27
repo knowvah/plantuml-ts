@@ -1,0 +1,5 @@
+@startgantt
+Project starts 2020-07-01
+Labels on first column and right aligned
+[Task A] lasts 5 days
+@endgantt

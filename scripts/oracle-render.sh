@@ -70,21 +70,29 @@ elif command -v gtimeout >/dev/null 2>&1; then
   TIMEOUT_BIN="gtimeout"
 fi
 
+# D3b capture clock: the instant just before the JVM starts, recorded after a
+# successful render for clock-dependent sources only (the detector decides; see
+# scripts/record-capture-clock.ts and oracle/capture-clock.json).
+START_MS=$(node -e 'process.stdout.write(String(Date.now()))')
+
+RUNNER=()
 if [ -z "$TIMEOUT_BIN" ]; then
   echo "warn: no timeout/gtimeout on PATH -- this render is UNBOUNDED." >&2
   echo "      install GNU coreutils (macOS: brew install coreutils) or bound" >&2
   echo "      the caller yourself (see scripts/capture-oracle-cache.ts)." >&2
-  exec java \
-    -DPLANTUML_DETERMINISTIC_TEXT=true \
-    -DPLANTUML_DUMP_DOT="$OUT" \
-    -cp "$CP" \
-    net.sourceforge.plantuml.Run \
-    -tsvg -o "$OUT" "$@"
 else
-  exec "$TIMEOUT_BIN" "${TIMEOUT_SECONDS}s" java \
-    -DPLANTUML_DETERMINISTIC_TEXT=true \
-    -DPLANTUML_DUMP_DOT="$OUT" \
-    -cp "$CP" \
-    net.sourceforge.plantuml.Run \
-    -tsvg -o "$OUT" "$@"
+  RUNNER=("$TIMEOUT_BIN" "${TIMEOUT_SECONDS}s")
 fi
+
+${RUNNER[@]+"${RUNNER[@]}"} java \
+  -DPLANTUML_DETERMINISTIC_TEXT=true \
+  -DPLANTUML_DUMP_DOT="$OUT" \
+  -cp "$CP" \
+  net.sourceforge.plantuml.Run \
+  -tsvg -o "$OUT" "$@"
+
+for f in "$@"; do
+  case "$f" in
+    *.puml) (cd "$REPO" && npx --no-install jiti scripts/record-capture-clock.ts "$(cd "$(dirname "$f")" && pwd)/$(basename "$f")" "$START_MS") ;;
+  esac
+done

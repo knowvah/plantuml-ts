@@ -1,0 +1,5 @@
+@startgantt
+Project starts 2020-07-01
+[Task A] starts at D+4 and lasts 3 hours
+[Task B] starts at D+6 and lasts 2 hours
+@endgantt

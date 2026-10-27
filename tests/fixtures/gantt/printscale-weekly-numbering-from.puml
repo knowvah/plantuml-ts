@@ -1,0 +1,5 @@
+@startgantt
+printscale weekly with week numbering from 10
+Project starts 2020-07-01
+[Task A] lasts 20 days
+@endgantt

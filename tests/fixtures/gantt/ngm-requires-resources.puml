@@ -1,0 +1,7 @@
+@startgantt
+Project starts 2020-07-01
+[Development] requires 80 hours on {Alice}
+[Review] requires 80 hours on {Alice} {Bob}
+[Testing] requires 80 hours on {Alice:50%}
+[Voyage] lasts 14 days on {Captain} {Crew}
+@endgantt
