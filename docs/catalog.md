@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1885 modules · 6797 exported names.
+1910 modules · 6825 exported names.
 
 ## `src/`
 
@@ -847,6 +847,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `MessageNumber.ts` | `MessageNumber`, `isMessageNumber` | `MessageNumber` — the auto-numbered `autonumber`/explicit sequence message index (`1)`, `<b>2)`), and one of the `CharSequence`-typed element kinds a `Display`'s element list can hold (`Display.create0`'s `get(0) instanceof MessageNumber` d |
+
+## `src/core/sequencediagram/graphic/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Segment.ts` | `Segment` |  |
 
 ## `src/core/skin/`
 
@@ -1933,6 +1939,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `GArrows.ts` | `GArrows` |  |
 | `LabelPosition.ts` | `LabelPosition` | LabelPosition — as-const object + type (memberless Java enum). |
 | `LabelStrategy.ts` | `LabelStrategy` |  |
+| `OpenClose.ts` | `OpenClose` | Open/closed calendar of a project, a resource or a task: per-weekday and per-date statuses, working time ranges and an optional active date window, convertible to a {@link PiecewiseConstant}. |
 | `PValue.ts` | `PValue` | Marker interface for the values a gantt expression can hold (`Instant`, `Load`, ...). |
 | `Today.ts` | `Today` | Today — an empty marker class upstream. |
 
@@ -1942,6 +1949,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `GArrowType.ts` | `GArrowType` | GArrowType -- Java enum without members, as an as-const object. |
 | `GSide.ts` | `GSide` | GSide -- which side of a task bar an arrow attaches to. |
+| `Moment.ts` | `Moment`, `getEndMinusOneDayTOBEREMOVED` |  |
+| `MomentImpl.ts` | `MomentImpl` |  |
 | `PrintScale.ts` | `PrintScale` | PrintScale -- the timeline compression presets. |
 | `TaskAttribute.ts` | `TaskAttribute` | TaskAttribute -- START, END, LOAD. |
 | `TaskCode.ts` | `TaskCode` | TaskCode -- a task's identity (`id`) and what is drawn (`display`). |
@@ -1956,6 +1965,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `TimelineStyleData.ts` | `TimelineStyleData` |  |
 | `TimeScaleConfigData.ts` | `TimeScaleConfigData` |  |
 | `WeekConfigData.ts` | `WeekConfigData` | Value object containing week-related configuration and locale. |
+| `WorkingHours.ts` | `WorkingHours` |  |
 
 ## `src/diagrams/gantt/draw/`
 
@@ -1963,6 +1973,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `FingerPrint.ts` | `FingerPrint` |  |
 | `PathUtils.ts` | `PathUtils` |  |
+| `RectangleTask.ts` | `RectangleTask` |  |
 | `ResourceDraw.ts` | `ResourceDraw` |  |
 | `WeeklyHeaderStrategy.ts` | `WeeklyHeaderStrategy` | Weekly header numbering mode (upstream enum, ordinal order). |
 
@@ -1977,6 +1988,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `CenterBorderColor.ts` | `CenterBorderColor` |  |
+| `DayPattern.ts` | `DayPattern` |  |
+| `PairOfSomething.ts` | `PairOfSomething` |  |
 | `Something.ts` | `Something` |  |
 | `TimeResolution.ts` | `toUbrexA_DD_MONTH_YYYY`, `toUbrexB_YYYY_MM_DD`, `toUbrexC_MONTH_DD_YYYY`, `TimeResolution` | Ubrex date-shape builders (day-month-year, year-month-day, month-day-year). |
 | `TwoNames.ts` | `TwoNames` | TwoNames — an immutable pair of names. |
@@ -1988,13 +2001,23 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `Load.ts` | `Load` | Intrinsic amount of work for a task, in seconds of person-time. |
+| `NGMAllocation.ts` | `NGMAllocation` | The resource allocation applied to a task over time, as a time-varying {@link PiecewiseConstant} FTE function. |
 | `package-info.ts` | _(none)_ | Upstream `package-info.java` for the NGM scheduling core: carries only the package javadoc ("a clean, reusable scheduling core that can later be integrated or tested in isolation") and declares no symbol. |
 
 ## `src/diagrams/gantt/ngm/math/`
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `AbstractPiecewiseConstant.ts` | `AbstractPiecewiseConstant` | Base class for {@link PiecewiseConstant} implementations whose value is constant over contiguous time segments. |
+| `Combiner.ts` | `Combiner` | Utilities to combine multiple {@link PiecewiseConstant} functions; a Combiner is itself a {@link PiecewiseConstant}. |
 | `Fraction.ts` | `Fraction` | Immutable reduced rational number. |
+| `LoadIntegrator.ts` | `LoadIntegrator` | Integrates a load function until a total load is consumed. |
+| `PiecewiseConstant.ts` | `SegmentIterator`, `PiecewiseConstant` | A piecewise constant function defined on a {@link LocalDateTime} axis. |
+| `PiecewiseConstantHours.ts` | `PiecewiseConstantHours` | Intra-day piecewise constant profile (a `TreeMap<LocalTime, Fraction>` of boundaries). |
+| `PiecewiseConstantSpecificDays.ts` | `PiecewiseConstantSpecificDays` | Immutable {@link PiecewiseConstant} defined by specific dates, each mapped to a constant {@link Fraction}; other dates get the default value. |
+| `PiecewiseConstantTimeWindow.ts` | `PiecewiseConstantTimeWindow` | {@link PiecewiseConstant} that is ONE inside `[offBefore, offAfter)` and ZERO before and after. |
+| `PiecewiseConstantUtils.ts` | `PiecewiseConstantUtils` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/ngm/math/PiecewiseConstantUtils.java:42 |
+| `PiecewiseConstantWeekday.ts` | `PiecewiseConstantWeekday` | Immutable weekly workload pattern: each `DayOfWeek` maps to a constant {@link Fraction}. |
 | `Segment.ts` | `Segment` | A constant workload segment over a time interval; both bounds exclusive, `]start, end[`, FORWARD (start before end) or BACKWARD (start after end). |
 | `TimeDirection.ts` | `TimeDirection`, `adjustBySeconds` | Direction of time travel for a {@link Segment}. |
 
@@ -2011,13 +2034,20 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `DayOfWeekUtils.ts` | `getRegexString`, `getUbrex`, `fromString`, `DayOfWeekUtils` | Day-of-week name matching for gantt (regex string, ubrex part, lookup). |
 | `Instant.ts` | `Instant` | Gantt's own millisecond instant (distinct from `java.time.Instant`, which is `src/core/time/Instant.ts`). |
 | `MonthUtils.ts` | `getRegexString`, `getUbrex`, `fromString`, `MonthUtils` | Month name matching for gantt dates (regex string, ubrex part, lookup). |
+| `TimePoint.ts` | `MILLISECONDS_PER_DAY`, `TimePoint` | A UTC date-time on the gantt axis. |
+| `TimePointFormat.ts` | `TimePointFormat` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/time/TimePointFormat.java:40 |
 | `WeekNumberStrategy.ts` | `WeekNumberStrategy` | First day of week + minimal days in the first week (week-number rules). |
 
 ## `src/diagrams/gantt/timescale/`
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `PiecewiseTimeProjection.ts` | `PiecewiseTimeProjection` |  |
 | `PiecewiseTimeType.ts` | `PiecewiseTimeType` | PiecewiseTimeType — as-const object + type (memberless Java enum). |
+| `PixelInstant.ts` | `PixelInstant` |  |
+| `TimeScale.ts` | `TimeScale` |  |
+| `TimeScaleDaily.ts` | `TimeScaleDaily` |  |
+| `TimeScaleWink.ts` | `TimeScaleWink` |  |
 
 ## `src/diagrams/gantt/ulang/`
 

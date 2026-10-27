@@ -1,0 +1,61 @@
+wait load 10.65
+== activity 12:03:45 { 7.77 7.11 7.42 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-activity.json — {"conformant":448,"structural-match":1,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== board 12:04:12 { 5.90 6.71 7.27 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 12:04:37 { 4.67 6.35 7.12 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-c4.json — {"conformant":2,"structural-match":0,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== chart 12:05:05 { 4.18 6.10 7.01 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+== chronology 12:05:30 { 4.30 5.94 6.92 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== class 12:05:53 { 3.76 5.72 6.82 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-class.json — {"conformant":723,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== component 12:06:22 { 4.09 5.60 6.74 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-component.json — {"conformant":214,"structural-match":12,"diverged":40,"errored":0,"timeout":0,"oracle-error":0}
+== ditaa 12:06:49 { 3.83 5.41 6.63 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 12:07:01 { 4.30 5.43 6.61 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== ebnf 12:07:26 { 3.75 5.20 6.50 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+== files 12:07:52 { 3.63 5.04 6.40 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-files.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 12:08:14 { 3.79 4.99 6.35 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-gantt.json — {"conformant":1,"structural-match":0,"diverged":264,"errored":0,"timeout":0,"oracle-error":0}
+== hcl 12:08:39 { 3.54 4.83 6.25 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== json 12:09:05 { 3.40 4.68 6.16 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-json.json — {"conformant":13,"structural-match":24,"diverged":13,"errored":0,"timeout":0,"oracle-error":0}
+== mindmap 12:09:30 { 3.07 4.50 6.05 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-mindmap.json — {"conformant":142,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== network 12:09:56 { 3.16 4.37 5.95 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-network.json — {"conformant":1,"structural-match":0,"diverged":2,"errored":0,"timeout":0,"oracle-error":0}
+== object 12:10:22 { 3.71 4.41 5.91 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-object.json — {"conformant":63,"structural-match":8,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== packet 12:10:48 { 3.81 4.36 5.85 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+== regex 12:11:14 { 3.63 4.27 5.77 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+== salt 12:11:40 { 3.66 4.21 5.71 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-salt.json — {"conformant":51,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== sequence 12:12:06 { 3.82 4.21 5.65 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-sequence.json — {"conformant":1143,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== state 12:12:43 { 3.31 4.05 5.54 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-state.json — {"conformant":99,"structural-match":14,"diverged":160,"errored":0,"timeout":0,"oracle-error":0}
+== timing 12:13:09 { 3.35 4.00 5.47 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-timing.json — {"conformant":6,"structural-match":0,"diverged":120,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 12:13:35 { 3.18 3.90 5.40 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-unknown.json — {"conformant":557,"structural-match":19,"diverged":249,"errored":0,"timeout":0,"oracle-error":0}
+== usecase 12:14:05 { 3.37 3.88 5.33 }
+[xmldom fatalError]	comment is not well-formed at position 3151 
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-usecase.json — {"conformant":68,"structural-match":7,"diverged":18,"errored":0,"timeout":0,"oracle-error":1}
+== wbs 12:14:33 { 3.32 3.81 5.26 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-wbs.json — {"conformant":204,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== wire 12:14:59 { 3.33 3.76 5.20 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 12:15:24 { 3.89 3.85 5.18 }
+wrote plans/gantt-engine-port/measurements/b3-eng/parity-yaml.json — {"conformant":7,"structural-match":28,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+DONE 12:15:50

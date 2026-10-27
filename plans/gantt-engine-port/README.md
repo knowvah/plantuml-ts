@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — RUNNING (batch 1b) — D11 approved 2026-10-26 after the batch-1 halt
+## Status — PAUSED after batch 3 (batch 4 tasks done except T4a `TaskDraw`/`TaskDrawSeparator`) — awaiting the D12 ruling (Amendment 2, `real`)
 
 ## Objective
 
@@ -120,7 +120,7 @@ New src module ⇒ `npm run catalog` (drift-gated).
 | [1](batch-1/overview.md) | `src/core/time`, clock seam, `I18nTimeData` | T1a–T1c, close | [x] |
 | [1b](batch-1b/overview.md) | `com.plantuml.ubrex` + RegexResult, CommandControl, UBrexSingleLineCommand2, UbrexUrlBuilder (D11) | T1d–T1f (serial), close | [x] |
 | [2](batch-2/overview.md) | upstream layers L00–L01 (3,563 lines) | T2a–T2d, close | [x] |
-| [3](batch-3/overview.md) | L02–L05 (2,779) | T3a–T3c, close | [ ] |
+| [3](batch-3/overview.md) | L02–L05 (2,779) | T3a–T3c, close | [x] |
 | [4](batch-4/overview.md) | L06–L09 (2,606) | T4a–T4c, close | [ ] |
 | [5](batch-5/overview.md) | the 25-file cycle (5,670), serial chain | T5a–T5e, close | [ ] |
 | [6](batch-6/overview.md) | L11 grammar + commands (2,824) | T6a–T6d, close | [ ] |
