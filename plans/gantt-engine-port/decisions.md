@@ -187,7 +187,7 @@ annotations).
 - Existing engines are not migrated onto ubrex; batch 1b's close expects 0
   movers in all 28 engines.
 
-## Amendment 2 (2026-10-26, during batch 3) — gantt also needs `net.sourceforge.plantuml.real` (PROPOSED; needs the user's ruling before batch 5)
+## Amendment 2 (2026-10-26, during batch 3) — gantt also needs `net.sourceforge.plantuml.real` (PROPOSED; needs the user's ruling — blocks T4a's `TaskDraw`/`TaskDrawSeparator` and batch 5)
 
 **Finding (orchestrator, path-keyed re-audit, journal row 29).** `data/TaskDrawRegistryData.java:60-62,70,113,151` (batch 5, the 25-file cycle) builds the
 task layout on the `real` constraint package: `RealUtils.createOrigin()`,
@@ -204,7 +204,7 @@ Same class of gap as Amendment 1, which D6's gantt-only layering missed.
 
 **Proposal (orchestrator recommendation):**
 - **D12 — port `real/` whole to `src/core/real/` (upstream names) as batch 4b**,
-  one serial task (the package is one cycle; 1,338 lines, similar to T1e),
+  one serial task (then T4a's two `Real` files as a follow-up task, journal row 36) (the package is one cycle; 1,338 lines, similar to T1e),
   before batch 5. Sequence keeps its own `sequence-real-line.ts`; migrating
   sequence onto `src/core/real` is a separate mission (sequence is 1143/1143
   conformant — not touched here). The b4b close expects 0 movers.

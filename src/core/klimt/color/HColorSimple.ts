@@ -3,6 +3,7 @@ import type { HColor } from '../../style/Value.js';
 import type { ColorMapper } from './ColorMapper.js';
 import { distance, getGrayScaleColor } from './ColorUtils.js';
 import { toSvgHex, type ResolvedColor } from './HColorSet.js';
+import { hslToRgb, rgbToHsl, type Hsl } from '../../tim/builtin/color-utils.js';
 import { TransparentFillBehavior } from '../drawing/svg/svg-option.js';
 
 /** `String.format("%02X")` / `"%02x"` of one 8-bit channel. */
@@ -27,7 +28,10 @@ function xColorToString(c: ResolvedColor): string {
  * `create` stays upstream's default `WITH_FILL_NONE`, so `toString`'s
  * behaviour suffix, java:62-63, prints only for an instance that asked),
  * plus the port-only {@link asPaint}.
- * Not ported: the HSL/monochrome/`unlinear` arithmetic, `isDark`.
+ * `unlinear` (with its private `linear` helpers) reuses the float32 HSL
+ * ports in `tim/builtin/color-utils.ts` (`rgbToHsl` = `HSLColor#fromRGB`,
+ * `hslToRgb` = `HSLColor#toRGB`; `core/` -> `core/` is layering-legal).
+ * Not ported: the monochrome arithmetic, `isDark`.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSimple.java:43-242
  */
@@ -53,6 +57,39 @@ export class HColorSimple implements HColor {
     const mono = getGrayScaleColor(this.color);
     const grayScale = 255 - mono.g > 127 ? 255 : 0;
     return HColorSimple.create({ r: grayScale, g: grayScale, b: grayScale, a: 255 });
+  }
+
+  /**
+   * The completion-shaded colour: HSL interpolation with a cubic ease,
+   * `completion = (float)(completionInt / 100.0)` cubed in float32 (clamped
+   * at 100). `new HSLColor(color)` -> `getHSL()` is `rgbToHsl`; `new HSLColor(hsl)`
+   * (alpha 1.0f) -> `getRGB()` is `hslToRgb` with alpha 255.
+   * @see HColorSimple.java:178-195
+   */
+  static unlinear(color1: HColorSimple, color2: HColorSimple, completionInt: number): HColorSimple {
+    const hsl1 = rgbToHsl(color1.color);
+    const hsl2 = rgbToHsl(color2.color);
+
+    if (completionInt > 100) completionInt = 100;
+
+    let completion = Math.fround(completionInt / 100.0);
+    completion = Math.fround(Math.fround(completion * completion) * completion);
+    const hsl = HColorSimple.linearHsl(completion, hsl1, hsl2);
+
+    return HColorSimple.create(hslToRgb(hsl));
+  }
+
+  /** `linear(float, float[], float[])`. @see HColorSimple.java:197-202 */
+  private static linearHsl(factor: number, hsl1: Hsl, hsl2: Hsl): Hsl {
+    const h = HColorSimple.linear(factor, hsl1[0], hsl2[0]);
+    const s = HColorSimple.linear(factor, hsl1[1], hsl2[1]);
+    const l = HColorSimple.linear(factor, hsl1[2], hsl2[2]);
+    return [h, s, l];
+  }
+
+  /** `linear(float, float, float)`: `x + (y - x) * factor` in float32. @see HColorSimple.java:204-206 */
+  private static linear(factor: number, x: number, y: number): number {
+    return Math.fround(x + Math.fround(Math.fround(y - x) * factor));
   }
 
   /** @see HColorSimple.java:141-143 */

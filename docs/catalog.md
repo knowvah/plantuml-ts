@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1841 modules · 6744 exported names.
+1885 modules · 6797 exported names.
 
 ## `src/`
 
@@ -1921,6 +1921,110 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `layout.ts` | `NOTE_Y_OFFSET`, `layoutFiles` |  |
 | `parser.ts` | `parseFiles` |  |
 | `renderer.ts` | `renderFiles` |  |
+
+## `src/diagrams/gantt/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Completion.ts` | `Completion` | Completion — a task completion percentage. |
+| `DayStatus.ts` | `DayStatus` | DayStatus — as-const object + type (memberless Java enum). |
+| `GanttConstraintMode.ts` | `GanttConstraintMode` | GanttConstraintMode — as-const object + type (memberless Java enum). |
+| `GanttStyle.ts` | `GanttStyle` |  |
+| `GArrows.ts` | `GArrows` |  |
+| `LabelPosition.ts` | `LabelPosition` | LabelPosition — as-const object + type (memberless Java enum). |
+| `LabelStrategy.ts` | `LabelStrategy` |  |
+| `PValue.ts` | `PValue` | Marker interface for the values a gantt expression can hold (`Instant`, `Load`, ...). |
+| `Today.ts` | `Today` | Today — an empty marker class upstream. |
+
+## `src/diagrams/gantt/core/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `GArrowType.ts` | `GArrowType` | GArrowType -- Java enum without members, as an as-const object. |
+| `GSide.ts` | `GSide` | GSide -- which side of a task bar an arrow attaches to. |
+| `PrintScale.ts` | `PrintScale` | PrintScale -- the timeline compression presets. |
+| `TaskAttribute.ts` | `TaskAttribute` | TaskAttribute -- START, END, LOAD. |
+| `TaskCode.ts` | `TaskCode` | TaskCode -- a task's identity (`id`) and what is drawn (`display`). |
+| `TimeRange.ts` | `TimeRange` |  |
+| `TimeRanges.ts` | `TimeRanges` |  |
+
+## `src/diagrams/gantt/data/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `DisplayConfigData.ts` | `DisplayConfigData` | DisplayConfigData -- footbox / resource-name display flags. |
+| `TimelineStyleData.ts` | `TimelineStyleData` |  |
+| `TimeScaleConfigData.ts` | `TimeScaleConfigData` |  |
+| `WeekConfigData.ts` | `WeekConfigData` | Value object containing week-related configuration and locale. |
+
+## `src/diagrams/gantt/draw/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `FingerPrint.ts` | `FingerPrint` |  |
+| `PathUtils.ts` | `PathUtils` |  |
+| `ResourceDraw.ts` | `ResourceDraw` |  |
+| `WeeklyHeaderStrategy.ts` | `WeeklyHeaderStrategy` | Weekly header numbering mode (upstream enum, ordinal order). |
+
+## `src/diagrams/gantt/draw/header/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `HeaderPiece.ts` | `HeaderPiece` |  |
+
+## `src/diagrams/gantt/lang/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `CenterBorderColor.ts` | `CenterBorderColor` |  |
+| `Something.ts` | `Something` |  |
+| `TimeResolution.ts` | `toUbrexA_DD_MONTH_YYYY`, `toUbrexB_YYYY_MM_DD`, `toUbrexC_MONTH_DD_YYYY`, `TimeResolution` | Ubrex date-shape builders (day-month-year, year-month-day, month-day-year). |
+| `TwoNames.ts` | `TwoNames` | TwoNames — an immutable pair of names. |
+| `Verbs.ts` | `Verbs` |  |
+| `Words.ts` | `Words` |  |
+
+## `src/diagrams/gantt/ngm/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Load.ts` | `Load` | Intrinsic amount of work for a task, in seconds of person-time. |
+| `package-info.ts` | _(none)_ | Upstream `package-info.java` for the NGM scheduling core: carries only the package javadoc ("a clean, reusable scheduling core that can later be integrated or tested in isolation") and declares no symbol. |
+
+## `src/diagrams/gantt/ngm/math/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Fraction.ts` | `Fraction` | Immutable reduced rational number. |
+| `Segment.ts` | `Segment` | A constant workload segment over a time interval; both bounds exclusive, `]start, end[`, FORWARD (start before end) or BACKWARD (start after end). |
+| `TimeDirection.ts` | `TimeDirection`, `adjustBySeconds` | Direction of time travel for a {@link Segment}. |
+
+## `src/diagrams/gantt/solver/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ImpossibleSolvingException.ts` | `ImpossibleSolvingException` | ImpossibleSolvingException — thrown when the task solver has no solution. |
+
+## `src/diagrams/gantt/time/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `DayOfWeekUtils.ts` | `getRegexString`, `getUbrex`, `fromString`, `DayOfWeekUtils` | Day-of-week name matching for gantt (regex string, ubrex part, lookup). |
+| `Instant.ts` | `Instant` | Gantt's own millisecond instant (distinct from `java.time.Instant`, which is `src/core/time/Instant.ts`). |
+| `MonthUtils.ts` | `getRegexString`, `getUbrex`, `fromString`, `MonthUtils` | Month name matching for gantt dates (regex string, ubrex part, lookup). |
+| `WeekNumberStrategy.ts` | `WeekNumberStrategy` | First day of week + minimal days in the first week (week-number rules). |
+
+## `src/diagrams/gantt/timescale/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `PiecewiseTimeType.ts` | `PiecewiseTimeType` | PiecewiseTimeType — as-const object + type (memberless Java enum). |
+
+## `src/diagrams/gantt/ulang/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `ParsedSentence.ts` | `ParsedSentence` |  |
+| `VerbPhraseMatcher.ts` | `VerbPhraseMatcher` |  |
 
 ## `src/diagrams/hcl/`
 
