@@ -24,6 +24,16 @@ is in batches 1–5 (incl. `GanttDiagram` from batch 5) or in this task (`diagno
 The Java files above; for each type they import, its already-ported TS file
 (`docs/catalog.md` → path). Do not read the rest of the gantt package.
 
+**Orchestrator note (journal row 56):** the `Complement*` classes implement
+`lang/Something.java` (L01, ported: `src/diagrams/gantt/lang/Something.ts`) — there is no
+`Complement` interface upstream. Their ubrex patterns go through the batch-1b
+port (`src/core/ubrex/`, builder entry points in `src/core/ubrex/builder/`;
+`UBrexPart`/`UnicodeBracketedExpression` — see `lang/TimeResolution.ts` and
+`time/MonthUtils.ts` for the pattern already used). Corpus for any acceptance
+grep: `test-results/dot-cache/gantt/*/in.puml` (265) and `tests/fixtures/gantt/*.puml` (94).
+
+**Orchestrator note (journal row 57):** `ComplementUrl.java:60-61` passes `UbrexUrlBuilder.getUrl(s)` straight to `Failable.ok` — read `UbrexUrlBuilder.java:112` to the method end and mirror its fall-through (the TS `src/core/url/UbrexUrlBuilder.ts:125` already returns `Url | null` for it): `Failable<Url | null>` with the citation, never a throw where Java passes null. Colours: after T6z `getIHtmlColorSet()` is the klimt `HColorSet` and `CenterBorderColor` accepts its `getColorOrWhite` result directly.
+
 ## Acceptance
 - Given each ported file, then every public member of the Java class exists
   with the same name and behaviour, and its test cites `file:line` for every

@@ -12,6 +12,20 @@ Serial chain: ONE worktree `gep-T7` (branch `gep/T7`), T7a→T7c, one commit eac
 `src/diagrams/gantt/GanttDiagramFactory.ts`;
 `tests/unit/gantt/GanttDiagramFactory.test.ts`.
 
+**Orchestrator note (journal row 48):** `GanttDiagramFactory` registers
+`CommandNoteBottom` (a `CommandMultilines2`); the factory must dispatch its
+block the way `src/diagrams/wbs/WBSDiagramFactory.ts` dispatches
+`collectWbsMultilineBlock`. `CommonCommands`/`PSystemCommandFactory`/`PathSystem`
+follow the wbs/mindmap/salt factories (`WBSDiagramFactory.ts`,
+`MindMapDiagramFactory.ts`, `PSystemSaltFactory.ts`).
+
+**Orchestrator note (journal row 51):** after the parse loop, call
+`GanttDiagram.checkFinalError()` and refuse with kind `'final'` through
+`src/core/parse-refusal.ts` when it returns a message (upstream
+`PSystemCommandFactory.java:150-153` → `PSystemAbstractFactory.java:67-72`) —
+"Gantt diagrams cannot last more than 20 years" and `ImpossibleSolvingException`
+messages (`GanttDiagram.java:171-181`) become error pages there.
+
 ## Acceptance
 - Given each ported file, then every public member of the Java class exists
   with the same name and behaviour, and its tests cite `file:line`.

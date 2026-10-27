@@ -14,6 +14,7 @@ table (firstDiff family → rows → owner).
 | b2 | 265 | 1 | 0 | 254 | 0 | 10 | — |
 | b3 | 265 | 1 | 0 | 254 | 0 | 10 | — |
 | b4 | 265 | 1 | 0 | 254 | 0 | 10 | — |
+| b5 | 265 | 1 | 0 | 254 | 0 | 10 | — |
 
 ## Divergence families (from batch 7)
 

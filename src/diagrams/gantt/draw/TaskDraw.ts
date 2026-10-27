@@ -15,7 +15,8 @@ import type { FingerPrint } from './FingerPrint.js';
 /**
  * TaskDraw -- the drawable row of one task.
  *
- * The two `getY` overloads (java:58, :60) stay overloads; `null` returns and
+ * `setColorsAndCompletion` takes `CenterBorderColor | undefined`: Java passes `null` for a task without
+ * colours (`core/TaskImpl.java:329-331`). The two `getY` overloads (java:58, :60) stay overloads; `null` returns and
  * parameters are `undefined`. The `default` method `getLabelOverflow`
  * (java:76-78) is optional here; {@link taskDrawLabelOverflow} supplies the
  * Java default body for an implementer that omits it.
@@ -28,7 +29,7 @@ export interface TaskDraw extends UDrawable {
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/draw/TaskDraw.java:55-56 */
   setColorsAndCompletion(
-    colors: CenterBorderColor,
+    colors: CenterBorderColor | undefined,
     completion: number,
     url: Url | undefined,
     note: Display | undefined,

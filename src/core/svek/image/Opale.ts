@@ -63,6 +63,20 @@ export const OPALE_MARGIN_Y = 5;
 // ---------------------------------------------------------------------------
 
 import { moveTo, lineTo, arcTo } from '../../svg-path-builder.js';
+import type { Direction } from '../../abel/Direction.js';
+import { Back } from '../../klimt/Back.js';
+import { Fore } from '../../klimt/Fore.js';
+import type { UGraphic } from '../../klimt/UGraphic.js';
+import type { UStroke } from '../../klimt/UStroke.js';
+import { UTranslate } from '../../klimt/UTranslate.js';
+import type { HColorOrPaint } from '../../klimt/color/ColorMapper.js';
+import type { StringBounder } from '../../klimt/font/StringBounder.js';
+import { XDimension2D } from '../../klimt/geom/XDimension2D.js';
+import type { XPoint2D } from '../../klimt/geom/XPoint2D.js';
+import { TextBlockMemoized } from '../../klimt/shape/TextBlockMemoized.js';
+import type { TextBlock } from '../../klimt/shape/TextBlock.js';
+import type { UPath } from '../../klimt/shape/UPath.js';
+import { corner, getPolygonLinked, polygonNormal, type OpaleBounds } from './OpalePolygons.js';
 
 export interface OpalePoint {
   x: number;
@@ -362,3 +376,116 @@ export function resolveOpaleConnector(
  * shape without a runtime import cycle (that module already imports FROM
  * this one).
  */
+
+/**
+ * `Opale` -- the note block: a text block drawn inside the folded-corner
+ * outline, optionally cut by a notch pointing at a linked entity. The
+ * constants and string helpers above are its geometry for the svg-path
+ * engines; this class is the `TextBlock` form (`gantt` notes build it).
+ * `HColor#bg()` is `new Back(color)` and `ug.apply(HColor)` is `new Fore(..)`.
+ *
+ * The private `getPolygonLeft/Right/Up/Down` (java:175-266) live in `OpalePolygons.ts` (500-line split).
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:51-271
+ */
+export class Opale extends TextBlockMemoized {
+  /** `Opale#marginX1` (java:56). */
+  static readonly marginX1: number = OPALE_MARGIN_X1;
+  /** `Opale#marginX2` (java:57). */
+  static readonly marginX2: number = OPALE_MARGIN_X2;
+
+  readonly #noteBackgroundColor: HColorOrPaint;
+  readonly #borderColor: HColorOrPaint;
+  readonly #shadowing2: number;
+  #strategy: Direction | undefined;
+  #pp1: XPoint2D | undefined;
+  #pp2: XPoint2D | undefined;
+  readonly #withLink: boolean;
+  #roundCorner = 0;
+  readonly #stroke: UStroke | undefined;
+  readonly #textBlock: TextBlock;
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:72-80 */
+  constructor(
+    shadowing: number,
+    borderColor: HColorOrPaint,
+    noteBackgroundColor: HColorOrPaint,
+    textBlock: TextBlock,
+    withLink: boolean,
+    stroke: UStroke | undefined,
+  ) {
+    super();
+    this.#noteBackgroundColor = noteBackgroundColor;
+    this.#withLink = withLink;
+    this.#shadowing2 = shadowing;
+    this.#borderColor = borderColor;
+    this.#textBlock = textBlock;
+    this.#stroke = stroke;
+  }
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:82-84 */
+  setRoundCorner(roundCorner: number): void {
+    this.#roundCorner = roundCorner;
+  }
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:86-90 */
+  setOpale(strategy: Direction, pp1: XPoint2D, pp2: XPoint2D): void {
+    this.#strategy = strategy;
+    this.#pp1 = pp1;
+    this.#pp2 = pp2;
+  }
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:92-94 */
+  #getWidth(stringBounder: StringBounder): number {
+    return this.#textBlock.calculateDimension(stringBounder).getWidth() + OPALE_MARGIN_X1 + OPALE_MARGIN_X2;
+  }
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:96-99 */
+  #getHeight(stringBounder: StringBounder): number {
+    const size = this.#textBlock.calculateDimension(stringBounder);
+    return size.getHeight() + 2 * OPALE_MARGIN_Y;
+  }
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:101-106 */
+  protected calculateDimensionSlow(stringBounder: StringBounder): XDimension2D {
+    const height = this.#getHeight(stringBounder);
+    const width = this.#getWidth(stringBounder);
+    return new XDimension2D(width, height);
+  }
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:108-136 */
+  drawU(ug: UGraphic): void {
+    const stringBounder = ug.getStringBounder();
+    ug = ug.apply(new Back(this.#noteBackgroundColor)).apply(new Fore(this.#borderColor));
+    const bounds: OpaleBounds = {
+      width: this.#getWidth(stringBounder),
+      height: this.#getHeight(stringBounder),
+      roundCorner: this.#roundCorner,
+      cornersize: OPALE_CORNERSIZE,
+    };
+    const polygon = this.#withLink
+      ? getPolygonLinked(this.#strategy, bounds, this.#pp1 as XPoint2D, this.#pp2 as XPoint2D)
+      : Opale.getPolygonNormal(bounds.width, bounds.height, this.#roundCorner);
+
+    polygon.setDeltaShadow(this.#shadowing2);
+    if (this.#stroke !== undefined) ug = ug.apply(this.#stroke);
+    ug.draw(polygon);
+    ug.draw(Opale.getCorner(bounds.width, this.#roundCorner));
+    this.#textBlock.drawU(ug.apply(new UTranslate(OPALE_MARGIN_X1, OPALE_MARGIN_Y)));
+  }
+
+  /** Body in `OpalePolygons.ts`. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:147-161 */
+  static getCorner(width: number, roundCorner: number): UPath {
+    return corner(width, roundCorner, OPALE_CORNERSIZE);
+  }
+
+  /** Body in `OpalePolygons.ts`. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:163-188 */
+  static getPolygonNormal(width: number, height: number, roundCorner: number): UPath {
+    return polygonNormal(width, height, roundCorner, OPALE_CORNERSIZE);
+  }
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java:268-270 */
+  getMarginX1(): number {
+    return OPALE_MARGIN_X1;
+  }
+}

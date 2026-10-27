@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1944 modules · 6870 exported names.
+1972 modules · 6917 exported names.
 
 ## `src/`
 
@@ -676,7 +676,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `FontPosition.ts` | `FontPosition`, `fontPositionSpace`, `muteFontSize`, `fontPositionHtmlTag` | FontPosition — where a creole text run sits relative to the normal baseline: NORMAL, EXPOSANT (`<sup>`) or INDICE (`<sub>`). |
 | `FontStack.ts` | `FontStack` | FontStack — a comma-separated font-family definition (`FontName`), as the SVG and PDF back ends name it. |
 | `StringBounder.ts` | `StringBounder` |  |
-| `UFont.ts` | `UFont` |  |
+| `UFont.ts` | `UFontFace`, `UFont` |  |
 | `UFontFactory.ts` | `UFontFactory` |  |
 
 ## `src/core/klimt/geom/`
@@ -1024,7 +1024,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `leaf-sizing-text.ts` | `lineCount`, `CREOLE_HR_HEIGHT`, `isCreoleHrLine`, `textBlockHeight`, `baseFontConfiguration`, `LeafTextAtomPlacement`, `LeafTextLineLayout`, `leafTextLineLayout`, `creoleVisibleText`, `inlineAtomWidth`, `maxLineWidth`, `atomHeightBonus`, `measureTextBlock` | Shared per-line text measurement for the description engine's leaf sizing. |
 | `leaf-sizing.ts` | `BoxSizingOpts`, `ComponentStyle`, `ACTOR_HEIGHT`, `ACTOR_WIDTH`, `INTERFACE_CIRCLE_SIZE`, `PORT_SIZE`, `USECASE_HEIGHT`, `measureUsecaseOrActorLeaf`, `measureUsecaseOrActorLeafInk`, `LeafSymbolInk`, `measureLeafNode`, `measureLeafShield`, `NoteBodyOpts`, `buildNoteBody`, `measureUsecase` | Leaf-node box sizing for the description diagram engine. |
 | `LeafSizingSubject.ts` | `LeafSizingStereotypeSprite`, `LeafSizingSubject` | Structural subject type for the leaf-sizing family (`leaf-sizing*.ts`, this directory) — the exact fields `measureLeafNode` and its callees read off the description engine's leaf-node AST type (`src/diagrams/description/ast.ts:45`), extract |
-| `Opale.ts` | `OPALE_CORNERSIZE`, `OPALE_MARGIN_X1`, `OPALE_MARGIN_X2`, `OPALE_MARGIN_Y`, `OpalePoint`, `OpaleBox`, `OpaleConnector`, `opalePolygonLeft`, `opalePolygonRight`, `opaleCorner`, `opalePolygonUp`, `opalePolygonDown`, `OpaleDirection`, `getOpaleStrategy`, `resolveOpaleConnector` | `Opale` — the note shape's own geometry constants (the folded-corner box svek draws for `note`/`note on link`). |
+| `Opale.ts` | `OPALE_CORNERSIZE`, `OPALE_MARGIN_X1`, `OPALE_MARGIN_X2`, `OPALE_MARGIN_Y`, `OpalePoint`, `OpaleBox`, `OpaleConnector`, `opalePolygonLeft`, `opalePolygonRight`, `opaleCorner`, `opalePolygonUp`, `opalePolygonDown`, `OpaleDirection`, `getOpaleStrategy`, `resolveOpaleConnector`, `Opale` | `Opale` — the note shape's own geometry constants (the folded-corner box svek draws for `note`/`note on link`). |
+| `OpalePolygons.ts` | `OpaleBounds`, `getPolygonLeft`, `getPolygonRight`, `getPolygonUp`, `getPolygonDown`, `corner`, `polygonNormal`, `getPolygonLinked` |  |
 | `RotatedEllipse.ts` | `RotatedEllipse` |  |
 | `SmallestEnclosingCircle.ts` | `SmallestEnclosingCircle` |  |
 | `YTransformer.ts` | `YTransformer` |  |
@@ -1954,9 +1955,17 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `Completion.ts` | `Completion` | Completion — a task completion percentage. |
 | `DayStatus.ts` | `DayStatus` | DayStatus — as-const object + type (memberless Java enum). |
+| `gantt-skin-param.ts` | `SkinParamSource`, `SkinParam` | The gantt engine's `SkinParam` — the slice of upstream's `skin/SkinParam.java` a `GanttDiagram` reaches through `TitledDiagram#getSkinParam()`: the `ISkinSimple` members the creole sheets read, `getIHtmlColorSet`, and the real style engine' |
+| `GanttArrow.ts` | `GanttArrow` |  |
+| `GanttConstraint.ts` | `GanttConstraint` |  |
 | `GanttConstraintMode.ts` | `GanttConstraintMode` | GanttConstraintMode — as-const object + type (memberless Java enum). |
+| `GanttDiagram.ts` | `GanttDiagram` |  |
+| `GanttDiagramConfig.ts` | `GanttDiagramConfig` |  |
+| `GanttDiagramMainBlock.ts` | `GanttDiagramMainBlock` |  |
 | `GanttI18n.ts` | `GanttI18n` |  |
+| `GanttLayout.ts` | `GanttLayout` |  |
 | `GanttStyle.ts` | `GanttStyle` |  |
+| `GanttTaskTable.ts` | `currentStyleBuilder`, `GanttTaskTable` |  |
 | `GanttTaskTableColumn.ts` | `Context`, `GanttTaskTableColumn` |  |
 | `GArrows.ts` | `GArrows` |  |
 | `LabelPosition.ts` | `LabelPosition` | LabelPosition — as-const object + type (memberless Java enum). |
@@ -1980,6 +1989,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `TaskAttribute.ts` | `TaskAttribute` | TaskAttribute -- START, END, LOAD. |
 | `TaskCode.ts` | `TaskCode` | TaskCode -- a task's identity (`id`) and what is drawn (`display`). |
 | `TaskGroup.ts` | `TaskGroup` |  |
+| `TaskImpl.ts` | `TaskImpl` |  |
 | `TaskInstant.ts` | `TaskInstant` |  |
 | `TaskSeparator.ts` | `TaskSeparator` |  |
 | `TimeRange.ts` | `TimeRange` |  |
@@ -1991,6 +2001,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `DayCalendarData.ts` | `DayCalendarData` |  |
 | `DisplayConfigData.ts` | `DisplayConfigData` | DisplayConfigData -- footbox / resource-name display flags. |
+| `GanttModelData.ts` | `GanttModelData` |  |
+| `TaskDrawRegistryData.ts` | `TaskDrawRegistryData` |  |
+| `TimeBoundsData.ts` | `TimeBoundsData` |  |
 | `TimelineStyleData.ts` | `TimelineStyleData` |  |
 | `TimeScaleConfigData.ts` | `TimeScaleConfigData` |  |
 | `WeekConfigData.ts` | `WeekConfigData` | Value object containing week-related configuration and locale. |
@@ -2000,11 +2013,16 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `AbstractTaskDraw.ts` | `mergedStyleOf`, `startUrl`, `closeUrl`, `AbstractTaskDraw` |  |
 | `FingerPrint.ts` | `FingerPrint` |  |
 | `PathUtils.ts` | `PathUtils` |  |
 | `RectangleTask.ts` | `RectangleTask` |  |
 | `ResourceDraw.ts` | `ResourceDraw` |  |
+| `ResourceDrawNumbers.ts` | `ResourceDrawNumbers` |  |
 | `TaskDraw.ts` | `TaskDraw`, `taskDrawLabelOverflow` |  |
+| `TaskDrawDiamond.ts` | `TaskDrawDiamond` |  |
+| `TaskDrawGroup.ts` | `TaskDrawGroup` |  |
+| `TaskDrawRegular.ts` | `TaskDrawRegular` |  |
 | `TaskDrawSeparator.ts` | `TaskDrawSeparator` |  |
 | `WeeklyHeaderStrategy.ts` | `WeeklyHeaderStrategy` | Weekly header numbering mode (upstream enum, ordinal order). |
 
@@ -2013,6 +2031,16 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `HeaderPiece.ts` | `HeaderPiece` |  |
+| `TimeHeader.ts` | `paintOf`, `applyForeColor`, `hColorEquals`, `createLeftTextBlock`, `TimeHeader`, `Pending` |  |
+| `TimeHeaderCalendar.ts` | `TimeHeaderCalendar` |  |
+| `TimeHeaderDaily.ts` | `TimeHeaderDaily` |  |
+| `TimeHeaderFactory.ts` | `TimeHeaderFactory` |  |
+| `TimeHeaderMonthly.ts` | `TimeHeaderMonthly` |  |
+| `TimeHeaderQuarterly.ts` | `TimeHeaderQuarterly` |  |
+| `TimeHeaderSimple.ts` | `TimeHeaderSimple` |  |
+| `TimeHeaderVariant.ts` | `TimeHeaderVariant` |  |
+| `TimeHeaderWeekly.ts` | `TimeHeaderWeekly` |  |
+| `TimeHeaderYearly.ts` | `TimeHeaderYearly` |  |
 
 ## `src/diagrams/gantt/lang/`
 

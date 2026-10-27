@@ -13,6 +13,7 @@ import type { UFont } from '../klimt/font/UFont.js';
 import { UFontFactory } from '../klimt/font/UFontFactory.js';
 import { ClockwiseTopRightBottomLeft } from '../klimt/geom/ClockwiseTopRightBottomLeft.js';
 import type { HorizontalAlignment } from '../klimt/geom/HorizontalAlignment.js';
+import { javaDoubleToString } from '../decoration/LinkStyle.js';
 import { MergeStrategy } from './MergeStrategy.js';
 import { PNAMES, type PName } from './PName.js';
 import type { StyleSignatureBasic } from './StyleSignatureBasic.js';
@@ -30,6 +31,13 @@ import { ValueNull } from './ValueNull.js';
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/StyleLoader.java:178
  */
 export const DELTA_PRIORITY_FOR_STEREOTYPE = 1000;
+
+/**
+ * `ValueImpl.regular(value, Integer.MAX_VALUE)` priority of an overridden value (Style.java:191);
+ * `Integer.MAX_VALUE` = 2^31 - 1.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/Style.java:191
+ */
+const INTEGER_MAX_VALUE = 2147483647;
 
 /** `getShadowing`'s `asDoubleDefaultTo` argument (Style.java:114). */
 const SHADOWING_DEFAULT = 1.5;
@@ -109,14 +117,15 @@ function parseDash(dash: string): [number, number] | undefined {
  * Translation notes:
  * - `EnumMap<PName, Value>` → a `ReadonlyMap`; `toString` prints in PName
  *   ordinal order, as `EnumMap` iterates.
- * - The three reached `eventuallyOverride` overloads — `(Colors)`,
- *   `(Fashion)`, `(PName, HColor)` (FtileBoxOld.java:155) — are one method
- *   dispatching on argument shape.
+ * - The six reached `eventuallyOverride` overloads — `(Colors)`,
+ *   `(Fashion)`, `(PName, HColor)` (FtileBoxOld.java:155), `(PName, double)`
+ *   (Style.java:185-187), `(PName, String)` (:189-193) and `(UStroke)`
+ *   (:288-296; GanttConstraint.java:101-103) — are one method dispatching on
+ *   argument shape.
  * - `getFontConfiguration(set)` and `(set, colors)` are one method.
  *
  * Not ported (no consumer on the mindmap path): `printMe`,
- * `eventuallyOverride(PName, double|String)`,
- * `eventuallyOverride(UStroke)`, `getSymbolContext`, `getStroke(Colors)`
+ * `getSymbolContext`, `getStroke(Colors)`
  * (needs `Colors#getSpecificLineStroke`), `createTextBlockBordered`,
  * `toColors`, and the `ID_*` constants.
  *
@@ -215,17 +224,44 @@ export class Style {
    * BackGroundColor (Style.java:214-223). `(PName, HColor)`: a
    * `ValueColor` at the old value's priority — an absent old value is
    * upstream's NullPointerException (Style.java:175-183). A null
-   * `Colors`/`Fashion`/`HColor` returns this.
+   * `Colors`/`Fashion`/`HColor` returns this. `(PName, number)` is
+   * `"" + value` (Java `Double.toString`) and `(PName, string)` stores
+   * `ValueImpl.regular(value, Integer.MAX_VALUE)` (Style.java:185-193).
+   * `(UStroke)` overrides `LineThickness` and `LineStyle`
+   * (`visible-space`), a null stroke returns this (Style.java:288-296).
    */
   eventuallyOverride(colors: Colors | Fashion | undefined): Style;
   eventuallyOverride(param: PName, color: HColor | undefined): Style;
-  eventuallyOverride(arg: Colors | Fashion | PName | undefined, color?: HColor): Style {
-    if (typeof arg === 'string') return this.eventuallyOverrideColor(arg, color);
+  eventuallyOverride(param: PName, value: number): Style;
+  eventuallyOverride(param: PName, value: string): Style;
+  eventuallyOverride(stroke: UStroke | undefined): Style;
+  eventuallyOverride(arg: Colors | Fashion | UStroke | PName | undefined, value?: HColor | number | string): Style {
+    if (typeof arg === 'string') {
+      if (typeof value === 'number') return this.eventuallyOverrideString(arg, javaDoubleToString(value));
+      if (typeof value === 'string') return this.eventuallyOverrideString(arg, value);
+      return this.eventuallyOverrideColor(arg, value);
+    }
+    if (arg instanceof UStroke) return this.eventuallyOverrideStroke(arg);
     if (arg instanceof Fashion) return this.eventuallyOverrideColor('BackGroundColor', arg.getBackColor());
     if (arg === undefined) return this;
     return this.eventuallyOverrideColor('BackGroundColor', colorsGet(arg, ColorType.BACK))
       .eventuallyOverrideColor('LineColor', colorsGet(arg, ColorType.LINE))
       .eventuallyOverrideColor('FontColor', colorsGet(arg, ColorType.TEXT));
+  }
+
+  /** `ValueImpl.regular(value, Integer.MAX_VALUE)`; no old value needed. @see Style.java:189-193 */
+  private eventuallyOverrideString(param: PName, value: string): Style {
+    const result = new Map<PName, Value>(this.map);
+    result.set(param, ValueImpl.regular(value, INTEGER_MAX_VALUE));
+    return new Style(this.signature, result);
+  }
+
+  /** `LineThickness` then `LineStyle` = `visible + "-" + space` (Java `double` concatenation). @see Style.java:288-296 */
+  private eventuallyOverrideStroke(stroke: UStroke): Style {
+    const result = this.eventuallyOverrideString('LineThickness', javaDoubleToString(stroke.getThickness()));
+    const space = stroke.getDashSpace();
+    const visible = stroke.getDashVisible();
+    return result.eventuallyOverrideString('LineStyle', javaDoubleToString(visible) + '-' + javaDoubleToString(space));
   }
 
   /** @see Style.java:175-183 */

@@ -21,6 +21,23 @@ Part of the batch-5 serial chain: ONE worktree `gep-T5` (branch `gep/T5`), tasks
 error page = conformant). Keep a comment citing `:137-149`. None of the 265
 gantt corpus oracles is a crash page (grep of `test-results/dot-cache/gantt`).
 
+**Orchestrator addition (journal row 50, stop-1 fix):** `src/core/style/Style.ts`
+and `tests/unit/core/style/Style.test.ts` — add the three unported
+`eventuallyOverride` overloads, additive: `(PName, double)` (`Style.java:185-187`,
+`"" + value` = Java `Double.toString` → reuse `javaDoubleToString` from
+`src/core/decoration/LinkStyle.ts:39`, as `Segment.ts` does), `(PName, String)`
+(`:189-193`, `ValueImpl.regular(value, Integer.MAX_VALUE)` = 2147483647, cite it),
+`(UStroke)` (`:288-296`, null → `this`). Existing overloads and their dispatch
+(`Style.ts:220-232`) must behave exactly as before — every engine reads Style;
+the b5 close chain must show 0 movers. Update the "not ported" note at
+`Style.ts:112-119` for what lands. Existing Style tests untouched.
+Port notes from the stopped attempt: `TaskDraw.getLabelOverflow` is optional →
+`taskDrawLabelOverflow(draw, sb, w)`; `TaskDraw.getY(sb): Real` vs
+`getY(sb, side): number`; `HColor.isTransparent`/`bg()` are not on the style
+`HColor` → `paintOf(back)` + a local transparent check as in
+`draw/TaskDrawSeparator.ts:44-48`; `GanttDiagramMainBlock` calls
+`diagram.getDisplayedColumn()` (T5e's `GanttDiagram.ts`).
+
 ## Write-set
 `src/diagrams/gantt/GanttConstraint.ts`, `src/diagrams/gantt/GanttArrow.ts`, `src/diagrams/gantt/GanttLayout.ts`, `src/diagrams/gantt/GanttTaskTable.ts`, `src/diagrams/gantt/GanttDiagramMainBlock.ts`;
 `tests/unit/gantt/GanttConstraint.test.ts`, `tests/unit/gantt/GanttArrow.test.ts`, `tests/unit/gantt/GanttLayout.test.ts`, `tests/unit/gantt/GanttTaskTable.test.ts`, `tests/unit/gantt/GanttDiagramMainBlock.test.ts`.

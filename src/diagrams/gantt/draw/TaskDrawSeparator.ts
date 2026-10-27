@@ -224,7 +224,7 @@ export class TaskDrawSeparator implements TaskDraw {
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/draw/TaskDrawSeparator.java:211-214 */
   public setColorsAndCompletion(
-    _colors: CenterBorderColor,
+    _colors: CenterBorderColor | undefined,
     _completion: number,
     _url: Url | undefined,
     _note: Display | undefined,

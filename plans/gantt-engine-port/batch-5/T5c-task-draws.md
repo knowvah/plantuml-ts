@@ -15,6 +15,35 @@ Part of the batch-5 serial chain: ONE worktree `gep-T5` (branch `gep/T5`), tasks
 ## Write-set
 `src/diagrams/gantt/draw/AbstractTaskDraw.ts`, `src/diagrams/gantt/draw/TaskDrawRegular.ts`, `src/diagrams/gantt/draw/TaskDrawDiamond.ts`, `src/diagrams/gantt/draw/TaskDrawGroup.ts`, `src/diagrams/gantt/draw/ResourceDrawNumbers.ts`;
 `tests/unit/gantt/draw/AbstractTaskDraw.test.ts`, `tests/unit/gantt/draw/TaskDrawRegular.test.ts`, `tests/unit/gantt/draw/TaskDrawDiamond.test.ts`, `tests/unit/gantt/draw/TaskDrawGroup.test.ts`, `tests/unit/gantt/draw/ResourceDrawNumbers.test.ts`.
+**Orchestrator additions (journal row 46):**
+- `src/diagrams/gantt/draw/TaskDraw.ts` and `src/diagrams/gantt/draw/TaskDrawSeparator.ts` —
+  signature only: `setColorsAndCompletion(colors: CenterBorderColor | undefined, …)`.
+  Java passes `null` when a task has no colours (`core/TaskImpl.java:329-331`)
+  and `AbstractTaskDraw.java:73,96` stores it; `AbstractTaskDraw.colors` is
+  `CenterBorderColor | undefined` and every read keeps the Java null check.
+- `src/diagrams/gantt/data/TaskDrawRegistryData.ts` — drop the
+  `task.getColors() as CenterBorderColor` cast only (T5b, journal row 46).
+- `tests/unit/gantt/data/TaskDrawRegistryData.test.ts` — turn T5b's 7
+  `it.todo` into real tests once your draws load (expected values traced from
+  `data/TaskDrawRegistryData.java`, `file:line`).
+- **`Opale` class (journal row 47, stop-1 fix):** `src/core/svek/image/Opale.ts`
+  holds only Opale's constants and polygon-STRING helpers (class/state/
+  description engines read them) — there is no `Opale` class. Port
+  `~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/Opale.java`
+  (271 lines) whole as `export class Opale extends TextBlockMemoized`
+  (`src/core/klimt/shape/TextBlockMemoized.ts`) INTO `Opale.ts`, additive:
+  every existing export and its behaviour unchanged (class/state are
+  conformant — the close chain must show 0 movers). If the 500-line hook
+  blocks, move the class's private `getPolygonLeft/Right/Up/Down`
+  (`Opale.java:175-266`) into `src/core/svek/image/OpalePolygons.ts` (journal
+  it in the hand-back). Test: extend `tests/unit/core/svek/image/Opale.test.ts`
+  (existing tests untouched). Do not rewire any engine onto the class.
+- `skinParam.sheet(fc, align, CreoleMode.FULL).createSheet(note)`
+  (`AbstractTaskDraw.java:174-189`): the port has `sheet(...)` on
+  `src/core/skin/SkinParamDelegator.ts:129-147` — find the route from the
+  gantt `ISkinParam`, do not re-implement it.
+- Constructor argument orders are fixed by T5b's calls
+  (`TaskDrawRegistryData.java:125-204`); `ResourceDrawNumbers` takes `double y`.
 
 ## Acceptance
 - Given each ported file, then every public member of the Java class exists

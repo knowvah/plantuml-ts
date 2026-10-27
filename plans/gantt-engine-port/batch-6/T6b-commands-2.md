@@ -27,6 +27,33 @@ is in batches 1–5 (incl. `GanttDiagram` from batch 5) or in this task (`diagno
 The Java files above; for each type they import, its already-ported TS file
 (`docs/catalog.md` → path). Do not read the rest of the gantt package.
 
+**Orchestrator note (journal row 48):** `command/CommandNoteBottom.java` extends
+`CommandMultilines2` (with `MultilinesStrategy.REMOVE_STARTING_QUOTE`,
+`Trim.BOTH`, `Lazy<Pattern2>` END `^end[%s]*note$`). There is no core
+`CommandMultilines2`; engines port a multiline command as a start RegExp +
+an end RegExp + a block collector the factory dispatches — follow
+`src/diagrams/wbs/CommandWBSItemMultilineNew.ts` (`collectWbsMultilineBlock`,
+`WBS_MULTILINE_END_RE`) and `WBSDiagramFactory.ts`; `REMOVE_STARTING_QUOTE`
+is ported at `src/core/style/mindmap-style-builder.ts:121-130` (reuse or cite).
+`CommandLinkElement.LINE_STYLE` (`CommandGanttArrow*.java:62/65`) is
+`LINE_STYLE` in `src/core/link-style-regex.ts:10`.
+
+**Orchestrator note (journal row 56) — command shape:** there is no core
+`SingleLineCommand2` (row 15). Port each command as `src/diagrams/wbs/CommandWBSLink.ts`
+does: one exported `RegExp` with NAMED groups built from the Java
+`RegexConcat`/`RegexLeaf` list in the same order (`@see` each leaf's line; a
+`RegexOr`/`RegexOptional` becomes the equivalent alternation/optional group), plus an
+exported `apply<Name>(diagram: GanttDiagram, match: RegExpExecArray): CommandExecutionResult`
+mirroring `executeArg` line for line (`RegexResult.get("KEY", i)` → the named
+group; `arg.getLazzy`/`StringUtils` helpers → cite the Java). Export the Java
+class name as a `const` object `{ regex, apply }` too, so T7c's factory can
+register the commands in `GanttDiagramFactory.java`'s order. Do NOT write a
+dispatcher or touch any factory (batch 7). Corpus for the acceptance grep:
+`test-results/dot-cache/gantt/*/in.puml` (265 rows, the survey's inputs) and
+`tests/fixtures/gantt/*.puml` (94) — `tests/corpus/` is unpopulated here.
+
+**Orchestrator note (journal row 57):** `CommandSeparator.java:65` passes the optional `COMMENT` group (null when absent) to `addSeparator` — after T6z the TS parameter is `string | undefined`; pass the named group as-is, never `?? ''`.
+
 ## Acceptance
 - Given each ported file, then every public member of the Java class exists
   with the same name and behaviour, and its test cites `file:line` for every

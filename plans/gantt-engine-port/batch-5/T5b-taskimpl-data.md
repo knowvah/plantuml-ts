@@ -14,6 +14,7 @@ Part of the batch-5 serial chain: ONE worktree `gep-T5` (branch `gep/T5`), tasks
 ## Write-set
 `src/diagrams/gantt/core/TaskImpl.ts`, `src/diagrams/gantt/data/GanttModelData.ts`, `src/diagrams/gantt/data/TaskDrawRegistryData.ts`, `src/diagrams/gantt/data/TimeBoundsData.ts`;
 `tests/unit/gantt/core/TaskImpl.test.ts`, `tests/unit/gantt/data/GanttModelData.test.ts`, `tests/unit/gantt/data/TaskDrawRegistryData.test.ts`, `tests/unit/gantt/data/TimeBoundsData.test.ts`.
+**Orchestrator addition (journal row 45):** `tests/unit/gantt/draw/header/helpers/header-fixture.ts` — only to replace its structural `TimeBoundsData` stand-in (`boundsOf()`, `:47`) once the real class exists, if needed for typecheck/lint. T5a's headers call `getMinDay()`, `getMaxDay()`, `getPrintStart()` (`LocalDate | undefined`).
 
 ## Acceptance
 - Given each ported file, then every public member of the Java class exists

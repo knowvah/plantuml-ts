@@ -14,9 +14,10 @@ movers in all 28 engines.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T5a](T5a-time-headers.md) | the TimeHeader family (2011 lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` ×10 + tests | B4 | [ ] |
-| [T5b](T5b-taskimpl-data.md) | TaskImpl and the data registries (861 lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` ×4 + tests | T5a | [ ] |
-| [T5c](T5c-task-draws.md) | the task draws (1259 lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` ×5 + tests | T5b | [ ] |
-| [T5d](T5d-constraint-layout-table.md) | constraints, arrows, layout, task table, main block (849 lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` ×5 + tests | T5c | [ ] |
-| [T5e](T5e-gantt-diagram.md) | GanttDiagram (690 lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` ×1 + tests | T5d | [ ] |
-| close | merge the chain once, gates, chain vs b4 (0 movers) | orchestrator | per close-procedure | T5e | [ ] |
+| [T5a](T5a-time-headers.md) | the TimeHeader family (2011 lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` ×10 + tests | B4 | [x] |
+| [T5b](T5b-taskimpl-data.md) | TaskImpl and the data registries (861 lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` ×4 + tests | T5a | [x] |
+| [T5c](T5c-task-draws.md) | the task draws (1259 lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` ×5 + tests | T5b | [x] |
+| [T5d](T5d-constraint-layout-table.md) | constraints, arrows, layout, task table, main block (849 lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` ×5 + tests | T5c | [x] |
+| [T5e](T5e-gantt-diagram.md) | GanttDiagram (690 lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` ×1 + tests | T5d | [x] |
+| [T5f](T5f-coverage.md) | tests-only coverage fix (journal row 54) | typescript-pro (sonnet), worktree gep-T5f | `tests/unit/gantt/**` | T5e | [x] |
+| close | merge the chain once, gates, chain vs b4 (0 movers) | orchestrator | per close-procedure | T5e | [x] |
