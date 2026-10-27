@@ -4,7 +4,7 @@ import { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopR
 import type { SName } from '../../core/style/SName.js';
 import type { Style } from '../../core/style/Style.js';
 import { StyleSignatureBasic } from '../../core/style/StyleSignatureBasic.js';
-import type { HColor, HColorSet as HColorSetSlice } from '../../core/style/Value.js';
+import type { HColor } from '../../core/style/Value.js';
 import type { UmlSource } from '../../core/TitledDiagram.js';
 import { TitledDiagram } from '../../core/TitledDiagram.js';
 import type { PreprocessingArtifact } from '../../core/tim/PreprocessingArtifact.js';
@@ -229,8 +229,8 @@ export abstract class GanttDiagramConfig extends TitledDiagram implements GanttS
     return this.dayCalendar.getDefaultPlan();
   }
 
-  /** @see GanttDiagram.java:568-570 */
-  public getIHtmlColorSet(): HColorSetSlice {
+  /** Returns the klimt `HColorSet` (`getColor` included), not the style-layer slice. @see GanttDiagram.java:568-570, HColorSet.java:58-76 */
+  public getIHtmlColorSet(): HColorSet {
     return this.timelineStyle.getColorSet();
   }
 

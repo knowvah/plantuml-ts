@@ -211,7 +211,7 @@ export class GanttDiagram extends GanttDiagramConfig {
   }
 
   /** @see GanttDiagram.java:310-314 */
-  public addSeparator(comment: string): void {
+  public addSeparator(comment: string | undefined): void {
     const separator = new TaskSeparator(
       this.getSkinParam().getCurrentStyleBuilder(),
       comment,

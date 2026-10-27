@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { HColorSet } from '../../../../src/core/klimt/color/HColorSet.js';
-import type { HColorSimple } from '../../../../src/core/klimt/color/HColorSimple.js';
 import { StyleBuilder } from '../../../../src/core/style/StyleBuilder.js';
 import { CenterBorderColor } from '../../../../src/diagrams/gantt/lang/CenterBorderColor.js';
 import { skinStorageDump, styleFromDump } from '../../core/style/helpers/style-fixture.js';
@@ -212,7 +211,7 @@ describe('TaskDrawDiamond, colours and fonts (java:103-108, 210-216)', () => {
     const draw = make();
     const set = HColorSet.instance();
     draw.setColorsAndCompletion(
-      new CenterBorderColor(set.getColorOrWhite('#00FF00') as HColorSimple, undefined),
+      new CenterBorderColor(set.getColorOrWhite('#00FF00'), undefined),
       100,
       undefined,
       undefined,

@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import type { HColorSimple } from '../../../../src/core/klimt/color/HColorSimple.js';
 import { HColorSet } from '../../../../src/core/klimt/color/HColorSet.js';
 import { HorizontalAlignment } from '../../../../src/core/klimt/geom/HorizontalAlignment.js';
 import { MeasurerStringBounder } from '../../../../src/core/measurer-bounder.js';
@@ -155,7 +154,7 @@ describe('TaskDrawRegular.drawU / drawShape (java:192-196, 271-306)', () => {
     const draw = make();
     const set = HColorSet.instance();
     draw.setColorsAndCompletion(
-      new CenterBorderColor(set.getColorOrWhite('#00FF00') as HColorSimple, undefined),
+      new CenterBorderColor(set.getColorOrWhite('#00FF00'), undefined),
       100,
       undefined,
       undefined,

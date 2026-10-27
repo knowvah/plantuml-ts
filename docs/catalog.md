@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1972 modules · 6917 exported names.
+2006 modules · 6986 exported names.
 
 ## `src/`
 
@@ -1954,6 +1954,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `Completion.ts` | `Completion` | Completion — a task completion percentage. |
+| `DaysAsDates.ts` | `DaysAsDates` |  |
 | `DayStatus.ts` | `DayStatus` | DayStatus — as-const object + type (memberless Java enum). |
 | `gantt-skin-param.ts` | `SkinParamSource`, `SkinParam` | The gantt engine's `SkinParam` — the slice of upstream's `skin/SkinParam.java` a `GanttDiagram` reaches through `TitledDiagram#getSkinParam()`: the `ISkinSimple` members the creole sheets read, `getIHtmlColorSet`, and the real style engine' |
 | `GanttArrow.ts` | `GanttArrow` |  |
@@ -1973,6 +1974,28 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `OpenClose.ts` | `OpenClose` | Open/closed calendar of a project, a resource or a task: per-weekday and per-date statuses, working time ranges and an optional active date window, convertible to a {@link PiecewiseConstant}. |
 | `PValue.ts` | `PValue` | Marker interface for the values a gantt expression can hold (`Instant`, `Load`, ...). |
 | `Today.ts` | `Today` | Today — an empty marker class upstream. |
+
+## `src/diagrams/gantt/command/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `CommandColorTask.ts` | `COMMAND_COLOR_TASK_RE`, `applyCommandColorTask`, `CommandColorTask` |  |
+| `CommandFootboxGantt.ts` | `COMMAND_FOOTBOX_GANTT_RE`, `applyCommandFootboxGantt`, `CommandFootboxGantt` |  |
+| `CommandGanttArrow.ts` | `COMMAND_GANTT_ARROW_RE`, `applyCommandGanttArrow`, `CommandGanttArrow` |  |
+| `CommandGanttArrow2.ts` | `COMMAND_GANTT_ARROW2_RE`, `applyCommandGanttArrow2`, `CommandGanttArrow2` |  |
+| `CommandGroupEnd.ts` | `COMMAND_GROUP_END_RE`, `applyCommandGroupEnd`, `CommandGroupEnd` |  |
+| `CommandGroupStart.ts` | `COMMAND_GROUP_START_RE`, `applyCommandGroupStart`, `CommandGroupStart` |  |
+| `CommandHideClosed.ts` | `COMMAND_HIDE_CLOSED_RE`, `applyCommandHideClosed`, `CommandHideClosed` |  |
+| `CommandHideResourceFootbox.ts` | `COMMAND_HIDE_RESOURCE_FOOTBOX_RE`, `applyCommandHideResourceFootbox`, `CommandHideResourceFootbox` |  |
+| `CommandHideResourceName.ts` | `COMMAND_HIDE_RESOURCE_NAME_RE`, `applyCommandHideResourceName`, `CommandHideResourceName` |  |
+| `CommandHideShowColumns.ts` | `CommandHideShowColumns` |  |
+| `CommandLabelOnColumn.ts` | `COMMAND_LABEL_ON_COLUMN_RE`, `applyCommandLabelOnColumn`, `CommandLabelOnColumn` |  |
+| `CommandLanguage.ts` | `COMMAND_LANGUAGE_RE`, `applyCommandLanguage`, `CommandLanguage` |  |
+| `CommandNoteBottom.ts` | `COMMAND_NOTE_BOTTOM_RE`, `COMMAND_NOTE_BOTTOM_END_RE`, `CommandNoteBottomBlock`, `collectCommandNoteBottomBlock`, `applyCommandNoteBottom`, `CommandNoteBottom` |  |
+| `CommandPrintScale.ts` | `COMMAND_PRINT_SCALE_RE`, `applyCommandPrintScale`, `CommandPrintScale` |  |
+| `CommandSeparator.ts` | `COMMAND_SEPARATOR_RE`, `applyCommandSeparator`, `CommandSeparator` |  |
+| `CommandTaskCompleteDefault.ts` | `COMMAND_TASK_COMPLETE_DEFAULT_RE`, `applyCommandTaskCompleteDefault`, `CommandTaskCompleteDefault` |  |
+| `CommandWeekNumberStrategy.ts` | `COMMAND_WEEK_NUMBER_STRATEGY_RE`, `applyCommandWeekNumberStrategy`, `CommandWeekNumberStrategy` |  |
 
 ## `src/diagrams/gantt/core/`
 
@@ -2046,7 +2069,22 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `AbstractComplementTaskInstant.ts` | `AbstractComplementTaskInstant` |  |
 | `CenterBorderColor.ts` | `CenterBorderColor` |  |
+| `ComplementAnything.ts` | `ComplementAnything` |  |
+| `ComplementCompleted.ts` | `ComplementCompleted` |  |
+| `ComplementDate.ts` | `ComplementDate` |  |
+| `ComplementDayOfWeek.ts` | `ComplementDayOfWeek` |  |
+| `ComplementDeleted.ts` | `ComplementDeleted` |  |
+| `ComplementDuration.ts` | `ComplementDuration` |  |
+| `ComplementInColors.ts` | `ComplementInColors` |  |
+| `ComplementInColors2.ts` | `ComplementInColors2` |  |
+| `ComplementInColorsFromTo.ts` | `ComplementInColorsFromTo` |  |
+| `ComplementNamed.ts` | `ComplementNamed` |  |
+| `ComplementTimePoint.ts` | `ComplementTimePoint` |  |
+| `ComplementUrl.ts` | `ComplementUrl` |  |
+| `ComplementWithColorLink.ts` | `ComplementWithColorLink` |  |
+| `ComplementWorkingHours.ts` | `ComplementWorkingHours` |  |
 | `DayPattern.ts` | `DayPattern` |  |
 | `PairOfSomething.ts` | `PairOfSomething` |  |
 | `Something.ts` | `Something` |  |
@@ -2121,6 +2159,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `ParsedSentence.ts` | `ParsedSentence` |  |
+| `VerbPhraseAction.ts` | `VerbPhraseAction` |  |
 | `VerbPhraseMatcher.ts` | `VerbPhraseMatcher` |  |
 
 ## `src/diagrams/hcl/`

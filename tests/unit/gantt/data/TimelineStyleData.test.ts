@@ -4,7 +4,9 @@ import { Fore } from '../../../../src/core/klimt/Fore.js';
 import type { UGraphic } from '../../../../src/core/klimt/UGraphic.js';
 import { UStroke } from '../../../../src/core/klimt/UStroke.js';
 import type { UChange } from '../../../../src/core/klimt/UChange.js';
+import { HColorSet as KlimtHColorSet } from '../../../../src/core/klimt/color/HColorSet.js';
 import { HColorSimple } from '../../../../src/core/klimt/color/HColorSimple.js';
+import { NoSuchColorException } from '../../../../src/core/klimt/color/NoSuchColorException.js';
 import { Pragma } from '../../../../src/core/skin/Pragma.js';
 import type { HColor, HColorSet } from '../../../../src/core/style/Value.js';
 import { TimelineStyleData } from '../../../../src/diagrams/gantt/data/TimelineStyleData.js';
@@ -34,7 +36,8 @@ class RecordingUGraphic {
 }
 
 function make(colorSet: HColorSet = new TestHColorSet()): TimelineStyleData {
-  return new TimelineStyleData(SKIN_PARAM, skinGanttStyle(), colorSet);
+  // The fakes implement only the style-layer slice; the ctor takes the klimt class (TimelineStyleData.java:50).
+  return new TimelineStyleData(SKIN_PARAM, skinGanttStyle(), colorSet as unknown as KlimtHColorSet);
 }
 
 describe('TimelineStyleData', () => {
@@ -90,5 +93,13 @@ describe('TimelineStyleData', () => {
     expect(() => make().applyVerticalSeparatorStyle(new RecordingUGraphic() as unknown as UGraphic)).toThrow(
       'ClassCastException',
     );
+  });
+
+  it('the real klimt HColorSet is accepted and getColor throws NoSuchColorException (HColorSet.java:69-76)', () => {
+    const set = KlimtHColorSet.instance();
+    const d = new TimelineStyleData(SKIN_PARAM, skinGanttStyle(), set);
+    expect(d.getColorSet()).toBe(set);
+    expect(() => d.getColorSet().getColor('#nope')).toThrow(NoSuchColorException);
+    expect(d.getColorSet().getColor('#FF0000')).toBeInstanceOf(HColorSimple);
   });
 });

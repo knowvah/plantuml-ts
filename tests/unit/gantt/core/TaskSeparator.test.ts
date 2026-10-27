@@ -50,4 +50,8 @@ describe('TaskSeparator', () => {
     ];
     for (const call of calls) expect(call).toThrow(UNSUPPORTED);
   });
+
+  it('a null comment (optional COMMENT group, GanttDiagram.java:310-314) gives an undefined name (:83-85)', () => {
+    expect(new TaskSeparator(STYLE, undefined, 3).getName()).toBeUndefined();
+  });
 });

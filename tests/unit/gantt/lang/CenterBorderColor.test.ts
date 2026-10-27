@@ -3,6 +3,8 @@ import { Back } from '../../../../src/core/klimt/Back.js';
 import { Fore } from '../../../../src/core/klimt/Fore.js';
 import type { UChange } from '../../../../src/core/klimt/UChange.js';
 import type { UGraphic } from '../../../../src/core/klimt/UGraphic.js';
+import { HColorAutomagic } from '../../../../src/core/klimt/color/HColorAutomagic.js';
+import { HColorSet } from '../../../../src/core/klimt/color/HColorSet.js';
 import { HColorSimple } from '../../../../src/core/klimt/color/HColorSimple.js';
 import { HColors } from '../../../../src/core/klimt/color/HColors.js';
 import { CenterBorderColor } from '../../../../src/diagrams/gantt/lang/CenterBorderColor.js';
@@ -65,5 +67,38 @@ describe('CenterBorderColor', () => {
       50,
     );
     expect(noBorder.isOk()).toBe(true);
+  });
+
+  describe('HColorAutomagic (HColor.java:66; jar oracle: crash report)', () => {
+    const CRASH = 'UnsupportedOperationException: class net.sourceforge.plantuml.klimt.color.HColorAutomagic';
+    const automagic = HColorSet.instance().getColor('automatic');
+
+    it('accepts an automagic at construction (HColorSet.java:86; CenterBorderColor.java:42-48)', () => {
+      expect(automagic).toBeInstanceOf(HColorAutomagic);
+      const c = new CenterBorderColor(automagic, undefined);
+      expect(c.isOk()).toBe(true);
+      expect(c.getCenter()).toBe(automagic);
+    });
+
+    it('apply throws the jar crash text for an automagic center or border (:58-69)', () => {
+      const log: UChange[] = [];
+      const a = automagic as HColorAutomagic;
+      expect(() => new CenterBorderColor(a, undefined).apply(recorder(log))).toThrow(CRASH);
+      expect(() => new CenterBorderColor(a, HColors.BLACK).apply(recorder(log))).toThrow(CRASH);
+      expect(() => new CenterBorderColor(HColors.BLACK, a).apply(recorder(log))).toThrow(CRASH);
+      expect(log).toHaveLength(0);
+    });
+
+    it('unlinearTo takes 0 -> color1, 100 -> color2, else color1 (HColors.java:156-167)', () => {
+      const a = automagic as HColorAutomagic;
+      const red = new CenterBorderColor(HColorSimple.create({ r: 255, g: 0, b: 0, a: 255 }), undefined);
+      const auto = new CenterBorderColor(a, undefined, 'sty');
+      expect(auto.unlinearTo(red, 0).getCenter()).toBe(a);
+      expect(auto.unlinearTo(red, 100).getCenter()).toBe(red.getCenter());
+      expect(auto.unlinearTo(red, 50).getCenter()).toBe(a);
+      expect(red.unlinearTo(auto, 50).getCenter()).toBe(red.getCenter());
+      expect(red.unlinearTo(auto, 100).getCenter()).toBe(a);
+      expect(auto.unlinearTo(red, 50).getStyle()).toBe('sty');
+    });
   });
 });

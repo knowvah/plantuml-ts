@@ -15,6 +15,7 @@ table (firstDiff family → rows → owner).
 | b3 | 265 | 1 | 0 | 254 | 0 | 10 | — |
 | b4 | 265 | 1 | 0 | 254 | 0 | 10 | — |
 | b5 | 265 | 1 | 0 | 254 | 0 | 10 | — |
+| b6 | 265 | 1 | 0 | 254 | 0 | 10 | — |
 
 ## Divergence families (from batch 7)
 
@@ -56,6 +57,10 @@ table (firstDiff family → rows → owner).
 | printscale-yearly-zoom | `printscale yearly zoom 2;Project starts 2019-01-01;` | ok | — |
 | projectscale-quarterly | `projectscale quarterly;Project starts 2020-01-01;` | ok | — |
 | today-implicit | `Project starts 2026-10-01;today is colored in #ff8080;` | ok | — |
+| quirk-pauses-to-the | `[T] pauses from 2020-07-02 to the 2020-07-05` (T7a probe) | ok — the jar matches a shorter `pauses` phrase, not a `to the` interval (output differs from the plain `to` control) | row 74 |
+| quirk-pauses-trailing-text | `[T] pauses from 2020-07-02 to the 2020-07-05 blahblah` | ok — the jar tolerates trailing text after a matched phrase | row 74 |
+| quirk-stereotype-then-as | `[A] <<st>> as [B] lasts 3 days` | error page (jar rejects; port rejects — conformant) | row 74 |
+| quirk-stereotype-then-on | `[A] <<st>> on {Alice} lasts 3 days` | error page (jar rejects; port rejects — conformant) | row 74 |
 | vega-gantt0 | `Project starts the 5th of december 2018;saturday are closed;` | ok | — |
 | vega-gantt1 | `Project starts the 5th of december 2018;saturday are closed;` | ok | — |
 | vega-gantt10 | `saturday are closed;sunday are closed;` | ok | — |

@@ -5,9 +5,9 @@ Upstream layer L11: 34 files, none referencing another (same layer). T6z first (
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T6z](T6z-colour-surface.md) | serial pre-task: klimt `HColorSet` surface + `CenterBorderColor` accepts every `HColor` (journal row 57) | typescript-pro (sonnet) | 5 gantt files + tests | B5 | [ ] |
-| [T6a](T6a-commands-1.md) | commands A–H (681 lines) | typescript-pro (sonnet) | `src/diagrams/gantt/…` ×9 + tests | T6z | [ ] |
-| [T6b](T6b-commands-2.md) | commands H–W (705 lines) | typescript-pro (sonnet) | `src/diagrams/gantt/…` ×8 + tests | T6z | [ ] |
-| [T6c](T6c-complements-1.md) | lang complements A–D + DaysAsDates + VerbPhraseAction (843 lines) | typescript-pro (sonnet) | `src/diagrams/gantt/…` ×9 + tests | T6z | [ ] |
-| [T6d](T6d-complements-2.md) | lang complements I–W (595 lines) | typescript-pro (sonnet) | `src/diagrams/gantt/…` ×8 + tests | T6z | [ ] |
-| close | merge ×4, gates, chain vs b5 (0 movers) | orchestrator | per close-procedure | T6a, T6b, T6c, T6d | [ ] |
+| [T6z](T6z-colour-surface.md) | serial pre-task: klimt `HColorSet` surface + `CenterBorderColor` accepts every `HColor` (journal row 57) | typescript-pro (sonnet) | 5 gantt files + tests | B5 | [x] |
+| [T6a](T6a-commands-1.md) | commands A–H (681 lines) | typescript-pro (sonnet) | `src/diagrams/gantt/…` ×9 + tests | T6z | [x] |
+| [T6b](T6b-commands-2.md) | commands H–W (705 lines) | typescript-pro (sonnet) | `src/diagrams/gantt/…` ×8 + tests | T6z | [x] |
+| [T6c](T6c-complements-1.md) | lang complements A–D + DaysAsDates + VerbPhraseAction (843 lines) | typescript-pro (sonnet) | `src/diagrams/gantt/…` ×9 + tests | T6z | [x] |
+| [T6d](T6d-complements-2.md) | lang complements I–W (595 lines) | typescript-pro (sonnet) | `src/diagrams/gantt/…` ×8 + tests | T6z | [x] |
+| close | merge ×4, gates, chain vs b5 (0 movers) | orchestrator | per close-procedure | T6a, T6b, T6c, T6d | [x] |

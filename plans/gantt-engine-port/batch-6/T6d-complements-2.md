@@ -32,7 +32,7 @@ port (`src/core/ubrex/`, builder entry points in `src/core/ubrex/builder/`;
 `time/MonthUtils.ts` for the pattern already used). Corpus for any acceptance
 grep: `test-results/dot-cache/gantt/*/in.puml` (265) and `tests/fixtures/gantt/*.puml` (94).
 
-**Orchestrator note (journal row 57):** `ComplementUrl.java:60-61` passes `UbrexUrlBuilder.getUrl(s)` straight to `Failable.ok` — read `UbrexUrlBuilder.java:112` to the method end and mirror its fall-through (the TS `src/core/url/UbrexUrlBuilder.ts:125` already returns `Url | null` for it): `Failable<Url | null>` with the citation, never a throw where Java passes null. Colours: after T6z `getIHtmlColorSet()` is the klimt `HColorSet` and `CenterBorderColor` accepts its `getColorOrWhite` result directly.
+**Orchestrator note (journal row 57):** `ComplementUrl.java:60-61` passes `UbrexUrlBuilder.getUrl(s)` straight to `Failable.ok` — read `UbrexUrlBuilder.java:112` to the method end and mirror its fall-through (the TS `src/core/url/UbrexUrlBuilder.ts:125` already returns `Url | null` for it): — CORRECTED (journal row 62): `Failable.java:57-58` throws `IllegalArgumentException` on a null `ok(data)`, so `ComplementUrl` returns `Failable.ok(url ?? undefined)` typed `Failable<Url>` and the throw is pinned by its test. Colours: after T6z `getIHtmlColorSet()` is the klimt `HColorSet` and `CenterBorderColor` accepts its `getColorOrWhite` result directly.
 
 ## Acceptance
 - Given each ported file, then every public member of the Java class exists

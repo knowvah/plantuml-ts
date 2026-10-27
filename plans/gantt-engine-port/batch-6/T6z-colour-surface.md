@@ -51,3 +51,32 @@ member of klimt's `ParsedColor` (`HColorSet.ts:324`).
 - No `src/core/**` change. Every widened type cites the Java member it mirrors.
 
 Observability: N/A. Rollback: Reversible.
+
+## Follow-up T6z' (journal row 59) — `CenterBorderColor` and `HColorAutomagic`
+Oracle (`scripts/oracle-render.sh`, fixtures in the orchestrator's scratchpad
+`automagic/`): `[Task] is colored in automatic` (also `automatic/Red`, and
+`Blue/automatic` after the task rect is drawn) makes the jar throw
+`UnsupportedOperationException: class net.sourceforge.plantuml.klimt.color.HColorAutomagic`
+and draw its crash report — the message is `"" + getClass()` from
+`klimt/color/HColor.java:66`, the base `public XColor toColor(ColorMapper mapper)` that `HColorAutomagic` does not
+override (`HColorSimple`/`HColorGradient` do); the SVG drivers reach it when
+the task rect is filled/stroked (`DriverRectangleSvg.java`), i.e. at DRAW time,
+after `CenterBorderColor.java:58-69` has applied the colours. (Not
+`LimitFinder.java:83`: its accept list includes `HColor.class`.)
+Per the error-page rule (2026-10-10) and
+journal row 43, our error page for the same input is conformant. So:
+- `src/diagrams/gantt/lang/CenterBorderColor.ts`: constructor and fields accept
+  `HColorOrPaint | HColorAutomagic | undefined` (`CenterBorderColor.java:42-48`
+  takes any `HColor`). `apply(ug)` throws
+  `new Error('UnsupportedOperationException: class net.sourceforge.plantuml.klimt.color.HColorAutomagic')`
+  the moment an automagic would be applied (`:58-69`, center then border) — the
+  earliest point the port can fail with the jar's message; cite `HColor.java:66`
+  + the oracle. A test proves a non-automagic pair still applies unchanged. `unlinearTo` mirrors
+  `HColors.java:156-167` locally for the automagic case (completion 0 → color1,
+  100 → color2, otherwise non-simple pair → color1) without calling the klimt
+  `unlinear` on an automagic. No `src/core/**` change; no cast that hides a type.
+- Tests: `tests/unit/gantt/lang/CenterBorderColor.test.ts` — construction with
+  an `HColorAutomagic` (from `HColorSet.instance().getColor('automatic')`,
+  `HColorSet.java:86`) is accepted; `apply` throws that exact message; the three
+  `unlinearTo` branches.
+- Second commit on `gep/T6z`: `fix(gantt): fail on an automagic task colour as the jar does (T6z)`.

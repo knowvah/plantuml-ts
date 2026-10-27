@@ -2,12 +2,13 @@ import type { ISkinParam } from '../../../core/abel/ISkinParam.js';
 import { Fore } from '../../../core/klimt/Fore.js';
 import type { UGraphic } from '../../../core/klimt/UGraphic.js';
 import { HColorGradient } from '../../../core/klimt/color/HColorGradient.js';
+import type { HColorSet } from '../../../core/klimt/color/HColorSet.js';
 import { HColorSimple } from '../../../core/klimt/color/HColorSimple.js';
 import type { UFont } from '../../../core/klimt/font/UFont.js';
 import type { Pragma } from '../../../core/skin/Pragma.js';
 import type { SName } from '../../../core/style/SName.js';
 import type { Style } from '../../../core/style/Style.js';
-import type { HColor, HColorSet } from '../../../core/style/Value.js';
+import type { HColor } from '../../../core/style/Value.js';
 import type { GanttStyle } from '../GanttStyle.js';
 
 /** `ug.apply(HColor)`: Java's cast to the concrete colour classes (same as `Style#applyStrokeAndLineColor`). */

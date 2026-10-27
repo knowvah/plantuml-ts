@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — RUNNING batch 6 (T6a–T6d, four parallel worktrees); batches 0–5 closed
+## Status — RUNNING batch 7 (serial chain in `gep-T7`: T7a → T7b → T7c, turn-on + capture at the close); batches 0–6 closed
 
 ## Objective
 
@@ -124,7 +124,7 @@ New src module ⇒ `npm run catalog` (drift-gated).
 | [4](batch-4/overview.md) | L06–L09 (2,606) | T4a–T4c, close | [x] |
 | [4b](batch-4b/overview.md) | `net.sourceforge.plantuml.real` → `src/core/real/` + T4a's `TaskDraw`/`TaskDrawSeparator` (D12) | T4d, T4e; closes with batch 4 | [x] |
 | [5](batch-5/overview.md) | the 25-file cycle (5,670), serial chain | T5a–T5f, close | [x] |
-| [6](batch-6/overview.md) | L11 grammar + commands (2,824) | T6a–T6d, close | [ ] |
+| [6](batch-6/overview.md) | L11 grammar + commands (2,824) | T6z, T6a–T6e, close | [x] |
 | [7](batch-7/overview.md) | grammar top, factory, plugin, turn-on + capture (serial) | T7a–T7c, close | [ ] |
 | [8](batch-8/overview.md) | first conformance pass (2–4 families) | T8x, close | [ ] |
 | [exit](batch-exit/overview.md) | final measurement vs b0, docs, memory, PR prep | T-exit | [ ] |

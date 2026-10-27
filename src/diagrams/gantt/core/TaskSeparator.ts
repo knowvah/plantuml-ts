@@ -18,10 +18,11 @@ import { TaskCode } from './TaskCode.js';
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/core/TaskSeparator.java:49-140
  */
 export class TaskSeparator extends AbstractTask implements Task {
-  readonly #comment: string;
+  /** `String comment` is nullable (`GanttDiagram.java:310-314` passes the optional COMMENT group). */
+  readonly #comment: string | undefined;
 
   /** Code is `TaskCode.fromId("##" + id)`. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/core/TaskSeparator.java:53-56 */
-  constructor(styleBuilder: StyleBuilder, comment: string, id: number) {
+  constructor(styleBuilder: StyleBuilder, comment: string | undefined, id: number) {
     super(styleBuilder, TaskCode.fromId('##' + id));
     this.#comment = comment;
   }
@@ -52,7 +53,7 @@ export class TaskSeparator extends AbstractTask implements Task {
   }
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/core/TaskSeparator.java:83-85 */
-  public getName(): string {
+  public getName(): string | undefined {
     return this.#comment;
   }
 

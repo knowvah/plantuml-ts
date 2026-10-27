@@ -6,6 +6,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Clock } from '../../../src/core/clock.js';
 import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
+import { NoSuchColorException } from '../../../src/core/klimt/color/NoSuchColorException.js';
 import { Display } from '../../../src/core/klimt/creole/Display.js';
 import { Pragma } from '../../../src/core/skin/Pragma.js';
 import { DayOfWeek } from '../../../src/core/time/DayOfWeek.js';
@@ -19,6 +20,7 @@ import { WeeklyHeaderStrategy } from '../../../src/diagrams/gantt/draw/WeeklyHea
 import { TimeDirection } from '../../../src/diagrams/gantt/ngm/math/TimeDirection.js';
 import { ImpossibleSolvingException } from '../../../src/diagrams/gantt/solver/ImpossibleSolvingException.js';
 import { PrintScale } from '../../../src/diagrams/gantt/core/PrintScale.js';
+import { TaskSeparator } from '../../../src/diagrams/gantt/core/TaskSeparator.js';
 import { TaskCode } from '../../../src/diagrams/gantt/core/TaskCode.js';
 import type { TaskImpl } from '../../../src/diagrams/gantt/core/TaskImpl.js';
 import { TaskDrawRegular } from '../../../src/diagrams/gantt/draw/TaskDrawRegular.js';
@@ -111,6 +113,18 @@ describe('GanttDiagram framework members', () => {
 
   it('getIHtmlColorSet is the timeline style colour set (GanttDiagram.java:568-570)', () => {
     expect(newGantt().getIHtmlColorSet()).toBe(COLORS);
+  });
+
+  it('getIHtmlColorSet is the klimt HColorSet: getColor throws NoSuchColorException (HColorSet.java:69-76)', () => {
+    expect(() => newGantt().getIHtmlColorSet().getColor('#nope')).toThrow(NoSuchColorException);
+  });
+
+  it('addSeparator accepts an absent comment (GanttDiagram.java:310-314)', () => {
+    const d = newGantt();
+    d.addSeparator(undefined);
+    const sep = d.getExistingTask('##0');
+    expect(sep).toBeInstanceOf(TaskSeparator);
+    expect((sep as TaskSeparator).getName()).toBeUndefined();
   });
 
   it('checkFinalError is null for a short project and names the 20-year limit past it (GanttDiagram.java:171-181)', () => {

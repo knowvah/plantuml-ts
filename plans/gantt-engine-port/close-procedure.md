@@ -28,7 +28,8 @@ measurement (`b0` for batch 1). `$T`/`$M` as in README.
 6. **Dashboard.** `npm run parity:dashboard` after any `parity-*.json`
    re-pin; `npm run catalog` if exports changed.
 7. **Brief.** Tick the batch in `README.md` and its `overview.md`.
-8. **Commit.** Full gates again if anything under `oracle/` or `tests/`
+8. **d.ts snapshot (b6 only).** After the build gate, `cp dist/plantuml-ts.d.ts $M/b6-plantuml-ts.d.ts` — T7c diffs against it (stop 6).
+9. **Commit.** Full gates again if anything under `oracle/` or `tests/`
    changed in steps 4–6, then `chore(gep-bN): close batch N — <summary>`
    with explicit paths (never `git add plans/` while a chain writes
    `bN-eng/`). Body: what merged, gate counts, movers, pins.

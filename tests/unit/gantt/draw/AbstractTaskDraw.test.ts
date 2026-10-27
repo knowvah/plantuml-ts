@@ -123,10 +123,7 @@ describe('AbstractTaskDraw colours (AbstractTaskDraw.java:123-135, 94-101)', () 
     const draw = regular();
     const set = HColorSet.instance();
     draw.setColorsAndCompletion(
-      new CenterBorderColor(
-        set.getColorOrWhite('#00FF00') as HColorSimple,
-        set.getColorOrWhite('#0000FF') as HColorSimple,
-      ),
+      new CenterBorderColor(set.getColorOrWhite('#00FF00'), set.getColorOrWhite('#0000FF')),
       100,
       undefined,
       undefined,
