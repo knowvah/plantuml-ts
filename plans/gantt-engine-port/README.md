@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — EXIT in progress (batches 0–8 closed; gantt 263/265 conformant, 0 losses elsewhere); squash next
+## Status — DONE (2026-10-27): batches 0–8 + exit closed; gantt 263/265 conformant, 0 losses elsewhere; squashed branch awaits the user's signing (tag `gep/pre-squash` holds the working history)
 
 ## Objective
 
@@ -127,8 +127,8 @@ New src module ⇒ `npm run catalog` (drift-gated).
 | [6](batch-6/overview.md) | L11 grammar + commands (2,824) | T6z, T6a–T6e, close | [x] |
 | [7](batch-7/overview.md) | grammar top, factory, plugin, turn-on + capture (serial) | T7a–T7c (+T7p tooling), close | [x] |
 | [8](batch-8/overview.md) | first conformance pass (4 families: T8a–T8d) | T8a–T8d, close | [x] |
-| [exit](batch-exit/overview.md) | final measurement vs b0, docs, memory, PR prep | T-exit | [ ] |
-| [squash](batch-squash/overview.md) | one commit per batch; tag the history | T-squash | [ ] |
+| [exit](batch-exit/overview.md) | final measurement vs b0, docs, memory, PR prep | T-exit | [x] |
+| [squash](batch-squash/overview.md) | one commit per batch; tag the history | T-squash | [x] |
 
 ## Documents
 
@@ -151,3 +151,15 @@ New src module ⇒ `npm run catalog` (drift-gated).
   `InternalRenderOptions` seam pattern D3 reuses.
 - `planning/gantt-deepdive.md`, `planning/mission-guide.md` Phase 4d — STALE
   (cite `project/`, ~75 files); hints only; the exit corrects them.
+
+## Final status (exit, 2026-10-26)
+
+| Batch | Close | Gantt (265 corpus rows: conformant / structural / diverged / errored) | Other engines |
+|---|---|---|---|
+| 0 | 265 rows + 51 authored fixtures, harness, capture clock | 1 / 0 / 254 / 0 (10 jar-error rows) | baseline |
+| 1, 1b, 2, 3, 4+4b, 5, 6 | seams and layers; no plugin | 1 / 0 / 254 / 0 (unchanged) | 0 movers at every close |
+| 7 | turn-on + capture (251 goldens) | 262 / 1 / 2 / 0 | activity +1 (bozido, `{{gantt}}`) |
+| 8 | T8a–T8d (252 goldens) | **263 / 1 / 1 / 0** | 0 movers |
+| exit | vs b0 | 1 → 263 conformant | 0 conformant losses in 27 engines |
+
+Open: xureco-57 (core default-background equality, transparent stroke), xikovo-87 (8 px canvas height) — owned by the next gantt divergence drive (`fixtures.md` family table). Public API unchanged (`dist/plantuml-ts.d.ts` byte-identical to the b6 snapshot). History: one commit per task + close commits on tag `gep/pre-squash`; the PR branch carries one commit per batch (squash batch).

@@ -1,255 +1,144 @@
 # Gantt Charts — Deep Dive
 
 This document supplements the mission-guide entry for Phase 4d (Gantt Charts).
-Read it before drafting any agent prompt for this phase.
+Read it before drafting any agent prompt that touches the gantt engine.
 
-## Prerequisite: Track SI-2 (datetime.ts)
+**Status: ported.** Mission `gantt-engine-port` (gep) landed the engine; the
+brief, decisions (D1–D12), fixture ledger and decision journal live in
+`plans/gantt-engine-port/`. Gantt went from 1/265 conformant at b0 to 263/265 at
+the b7 capture (final, batch 8): 1 structural, 1 diverged, 0 errored, 252
+byte-exact goldens, and the 10 jar-error rows conformant by the 2026-10-10
+error-page rule (`fixtures.md` counts rows b0…b7, journal row 85).
+`@startgantt` and `{{gantt}}` render. The open divergence families are owned in
+`planning/next-missions.md` (gep section); nothing below is a to-do list.
 
-Gantt is blocked until `src/core/datetime.ts` exists. The date arithmetic
-module handles all format parsing, relative date computation, and working-day
-logic. Do not inline date logic into the Gantt implementation — it will be
-needed again by Timing diagrams.
+## Prerequisite (done): `src/core/time`, not `datetime.ts`
 
-## Java source scale
+The old plan blocked gantt on a hand-rolled `src/core/datetime.ts` (Track SI-2).
+That was dropped. Upstream gantt is written against `java.time`
+(`time/TimePoint.java:55` wraps a UTC `LocalDateTime`), so D2 ports exactly the
+methods gantt calls as a `java.time` subset in `src/core/time/`: `LocalDate`,
+`LocalTime`, `LocalDateTime`, `ZonedDateTime`, `ZoneOffset`, `Instant`,
+`DayOfWeek`, `Month`, `YearMonth`, `WeekFields`, `ChronoUnit`, `Duration`,
+`DateTimeException`. It is pure integer arithmetic over the proleptic Gregorian
+calendar (epoch-day / second-of-day), UTC only — never JS `Date`, which has
+timezone traps and no `WeekFields`/`YearMonth`. This is the shared date module
+Timing (D1) will reuse.
 
-| Package | What it contains |
-|---------|-----------------|
-| `project/` | 20 files: diagram state, tasks, layout, rendering entry points |
-| `project/core/` | 14 files: AbstractTask, Task, TaskGroup, Resource, Moment, GSide |
-| `project/time/` | 6 files: Instant, TimePoint, DayOfWeekUtils, MonthUtils, WeekNumberStrategy |
-| `project/timescale/` | 5 files: TimeScale, PrintScale variants |
-| `project/solver/` | 2 files: Solver + ImpossibleSolvingException |
-| `project/command/` | Command parsers |
-| `project/draw/` | Rendering classes |
-| `project/data/` | Data structures |
-| `project/lang/` | Locale/format helpers |
-| `project/ngm/` | Network graph model for constraint solving |
-| **Total** | ~75 files across sub-packages |
+## Package layout
 
-## Architectural layers
+`src/diagrams/gantt/` mirrors upstream `net/sourceforge/plantuml/gantt/`
+file-for-file (D1): 167 Java files, 20,082 lines, MIT edition, each ported file
+carrying a `@see` to its Java origin and keeping the Java name.
 
-### Layer 1 — Date/Time (→ src/core/datetime.ts)
+| Directory | Contents |
+|-----------|----------|
+| `./` | `GanttDiagram`, `GanttDiagramMainBlock`, `GanttLayout`, `GanttTaskTable`, `GanttArrow`, `GanttConstraint`, `GanttDiagramFactory`, `GanttStyle`, `GanttI18n`, `Today`, `PValue`, `GArrows`, … |
+| `command/` | `NaturalGanttCommand`, `CommandPrintScale`, `CommandLanguage`, `CommandHideShowColumns`, `CommandGanttArrow(2)`, `CommandGroupStart/End`, `CommandSeparator`, `CommandColorTask`, `CommandNoteBottom`, … |
+| `lang/` | the subject/verb/complement grammar: `Subject*`, `Complement*`, `Words`, `Verbs`, `Something`, `DayPattern`, `TimeResolution` |
+| `ulang/` | `VerbPhraseMatcher`, `VerbPhraseAction`, `ParsedSentence` |
+| `core/` | `Task`, `TaskGroup`, `TaskSeparator`, `TaskInstant`, `Resource`, `TaskImpl`, `Moment`, `TimeRange(s)`, `GSide`, `GArrowType` |
+| `data/` | `GanttModelData`, `TaskDrawRegistryData`, `WorkingHours`, `TimeScaleConfigData`, `WeekConfigData`, `TimelineStyleData`, `DisplayConfigData` |
+| `draw/`, `draw/header/` | `TaskDraw*`, `AbstractTaskDraw`, `RectangleTask`, `ResourceDraw*`, `TimeHeader*` (Daily/Weekly/Monthly/Quarterly/Yearly/Calendar/Simple) |
+| `timescale/` | `TimeScale`, `TimeScaleDaily`, `TimeScaleDailyHideClosed`, `TimeScaleCompressed`, `TimeScaleWink`, `PixelInstant`, `PiecewiseTimeProjection` |
+| `time/` | `TimePoint`, `TimePointFormat`, `DayOfWeekUtils`, `MonthUtils`, `WeekNumberStrategy`, `Instant` |
+| `ngm/`, `ngm/math/` | the effort/allocation model: `NGMAllocation`, `Load`, `Fraction`, `Segment`, `PiecewiseConstant*`, `LoadIntegrator` |
+| `solver/` | `Solver`, `ImpossibleSolvingException` |
+| `index.ts`, `gantt-skin-param.ts` | the plugin and the gantt slice of `skin/SkinParam.java` (not upstream files; see Seams) |
 
-All date handling lives in `project/time/`. The key abstractions:
+Two things the old brief got wrong. The real solver is not a short worklist
+over a constraint network: task dates come from the `real` constraint package
+(`data/TaskDrawRegistryData.java:60-62,70,113,151` builds the layout on
+`Real.addFixed`/`addAtLeast`) plus the `ngm` allocation model for effort
+syntax (`ngm/NEW-SYNTAX.md`). And the grammar is not a hand-written parser per
+form: it is `UBrexPart` trees composed in `lang/` and read back through
+`UMatcher.findFirstValueByKey` (`lang/SubjectDayAsDate.java:107-142`).
 
-- **`Instant`** — an abstract point in time (implemented by `DayAsDate` and
-  `DaysAsDate` in `project/time/`)
-- **`TimePoint`** — wraps an Instant; provides arithmetic (`add`, `sub`,
-  `compareTo`)
-- **`DayStatus`** — enum: `WORKING`, `NOT_WORKING` (weekends, holidays, pauses)
-- **`DayOfWeekUtils`** — `isWorkingDay`, day-of-week mapping
-- **`MonthUtils`** — month length, leap year handling
-- **`WeekNumberStrategy`** — ISO vs. US week numbering
+## Build order: the SCC layers
 
-**Date formats to handle:**
-- `YYYY-MM-DD` (ISO)
-- `DD/MM/YYYY`
-- `MM/DD/YYYY`
-- `today` (resolved at parse time to current date)
-- Relative: `+N days`, `+N weeks`, `+N months` applied to a base date
+Upstream's file-level dependency graph was layered into strongly connected
+components (`plans/gantt-engine-port/diagnosis/upstream-scc-layers.txt`, 136
+components, L00–L16). Same-batch tasks never depend on each other (D6; grouping
+in `diagnosis/upstream-batch-groups.txt`).
 
-### Layer 2 — Constraint Solver (project/solver/)
+| Layers | What | Batch |
+|--------|------|-------|
+| — | `src/core/time`, clock seam, `I18nTimeData` | 1 |
+| — | `com.plantuml.ubrex` + `RegexResult`, `CommandControl`, `UBrexSingleLineCommand2`, `UbrexUrlBuilder` (D11) | 1b |
+| L00–L01 | enums, value types, `Fraction`, `Segment`, `Load`, `TimeRange(s)`, config data (44 files, 3,563 lines) | 2 |
+| L02–L05 | `TimePoint`, piecewise constants, `Moment`, timescales, `RectangleTask`, `WorkingHours` (2,779 lines) | 3 |
+| L06–L09 | `AbstractTask`, `Task`, `TaskGroup`, `Resource`, `GanttI18n`, `TaskDraw` family (2,606 lines) | 4 |
+| — | `net.sourceforge.plantuml.real` → `src/core/real` (D12) | 4b |
+| L10 | the single 25-file cycle (`GanttDiagram`, `GanttLayout`, `GanttConstraint`, `TaskImpl`, `GanttModelData`, `TaskDrawRegistryData`, …; 5,670 lines), one serial chain in one worktree | 5 |
+| L11 | the `Complement*` grammar and 20-odd commands (2,824 lines) | 6 |
+| L12–L16 | `Subject*`, `NaturalGanttCommand`, `GanttDiagramFactory`, plugin, turn-on and capture | 7 |
+| — | first conformance pass: T8a `%date` week-year letter, T8b constraint colour | 8 |
 
-`Solver.java` resolves task dependency chains to compute start/end dates.
-Tasks can have explicit start/end or be expressed relative to other tasks:
+The cycle in L10 means batch 5 may not typecheck until its last task; gates run
+at the chain's end.
 
-- `[B] starts at [A]'s end` — B.start = A.end
-- `[C] starts at [A]'s end + 2 days` — C.start = A.end + 2 days
-- `[D] ends at [E]'s start` — D.end = E.start
-- `[A] starts 3 days after [B]'s end`
+## Seams (where gantt reaches outside `src/diagrams/gantt/`)
 
-The solver builds a constraint network (`project/ngm/`) and propagates
-constraints until all dates are resolved. `ImpossibleSolvingException` is
-thrown if a cycle is detected.
-
-**Key constraint:** Only two constraint types exist in practice — start-after
-and end-before relative to another task. The network simplex of the dot engine
-is NOT used here; the solver is a simple constraint propagation.
-
-### Layer 3 — Task Model (project/core/)
-
-- **`Task`** — a leaf task with name, color, style, start/end dates,
-  completion percentage
-- **`TaskGroup`** — a summary bar spanning its children's date range
-- **`TaskSeparator`** — a named separator between task groups (rendered as
-  a full-width row with a different background)
-- **`TaskInstant`** — a milestone (diamond marker at a specific instant)
-- **`Resource`** — a resource assigned to a task (renders as a label on the bar)
-
-### Layer 4 — Timeline/Timescale (project/timescale/)
-
-The timescale maps dates to pixel x-coordinates. Scale granularity is:
-
-- `daily` — one column per day
-- `weekly` — one column per week
-- `monthly` — one column per month
-- `quarterly` — one column per quarter
-- `yearly` — one column per year
-
-Scale is selected via `printscale` / `ganttscale` directives, or auto-selected
-based on the date range width. `scale N` sets pixels-per-day.
-
-### Layer 5 — Layout and Rendering (project/, project/draw/)
-
-`GanttDiagram.java` orchestrates:
-1. Resolve all task dates via the constraint solver
-2. Compute the timescale (start date, end date, column width)
-3. Place tasks in rows (rows = order of declaration; groups are indented)
-4. Render: title bar, timescale header, task bars, separator rows, milestone
-   diamonds, today marker, closed-period shading, grid lines
-
-## Critical syntax details
-
-### Task declaration forms
-
-```
-[Task A] lasts 5 days
-[Task A] starts 2021-01-01
-[Task A] starts 2021-01-01 and ends 2021-01-10
-[Task A] lasts 5 days and is 50% complete
-[Task A] is colored in red
-[Task A] is colored in #FF0000/Lime
-```
-
-### Dependency syntax
-
-```
-[Task B] starts at [Task A]'s end
-[Task B] starts 3 days after [Task A]'s end
-[Task B] starts at [Task A]'s start
-[Task B] ends at [Task A]'s end
-```
-
-Note: dependency syntax uses the apostrophe-s form (`[A]'s end`); this
-is literal text in the grammar, not possessive operator syntax.
-
-### `then` keyword
-
-```
-[Task A] lasts 3 days
-then [Task B] lasts 2 days
-```
-
-`then` is sugar for `starts at [previous-task]'s end`. It applies to the
-immediately preceding task declaration.
-
-### Closed periods and pauses
-
-```
-Project starts 2021-01-01
-2021-01-08 is closed
-2021-01-09 is closed
-2021-01-10 to 2021-01-12 are closed
-```
-
-Closed days are excluded from working-day arithmetic. Working-day-based
-`lasts N days` counts only non-closed days; closed-day-based `lasts N`
-counts calendar days.
-
-```
--- pause on January 11 --
-```
-
-Named separators (via `-- text --`) appear as full-width horizontal rows.
-
-### Milestone syntax
-
-```
-[Milestone A] happens at 2021-01-15
-[Milestone B] happens at [Task A]'s end
-```
-
-Milestones render as diamonds with a label.
-
-### `Project starts` directive
-
-```
-Project starts 2021-01-01
-```
-
-Sets the baseline. Without it, the project starts on the earliest declared
-task start date.
-
-### Colored bars and separators
-
-```
-[Task A] is colored in red/Lime
--- Section 1 -- is colored in #AAAAAA
-```
-
-Gradient colors (`#AAA/white`) render as horizontal gradients on task bars.
-
-### `hide footbox`
-
-Suppresses the bottom date axis (mirrors sequence diagram footbox convention).
+- **`src/core/time`** — the `java.time` subset above (D2). `long` maths in
+  `ngm/math/Fraction.java:66-67` is ported as `number` and bounded by a test
+  (D5; no `BigInt`).
+- **`src/core/clock.ts`** — one injected clock (D3) for gantt `today`
+  (`GanttDiagram.java:456-466`, `time/TimePoint.java:88-95`) and TIM
+  `%now`/`%date`. Default `nowMillis = 0`, UTC. The only setter is the internal
+  `InternalRenderOptions.clock`; no public `RenderOptions` field, `.d.ts`
+  unchanged. Conformance feeds each golden's recorded clock from the sidecar
+  `oracle/capture-clock.json`; `capture-clock.test.ts` fails when a
+  clock-dependent source has no record.
+- **`src/core/ubrex`** (D11) — the ubrex library, 47 of the 167 gantt files
+  import it. Existing engines were not migrated onto it.
+- **`src/core/real`** (D12) — `net.sourceforge.plantuml.real` whole, 16 files.
+  Sequence keeps its own `sequence-real-line.ts`; the layering test forbids
+  gantt importing it.
+- **`Opale` class** in `src/core/svek/image/Opale.ts` (+ `OpalePolygons.ts`
+  split at the 500-line cap) — notes draw through it
+  (`draw/AbstractTaskDraw.java:174-189`); the file previously held only
+  constants and polygon helpers (journal row 47).
+- **`Style.eventuallyOverride` overloads** in `src/core/style/Style.ts` —
+  `GanttConstraint.java:101-103` needs the `(PName, double)` and
+  `(PName, String)` forms (`Style.java:185-193,288-296`; journal row 50).
+- **Plugin wiring** — `ganttPlugin` registered after charlie, before flow, at
+  `PSystemBuilder.java:183` order (D7); `ParseOptions.clock` carries the clock
+  into the factory; `{{gantt}}` re-enters the registry through
+  `EmbeddedDiagram.ts:292`; document shell `diagramType 'GANTT'` (D4,
+  `assemble-svg.ts:342`). `gantt-skin-param.ts` carries the members of
+  `skin/SkinParam.java` the gantt package reaches, as wbs does (journal row 53).
 
 ## Watch-outs
 
-- **Working vs. calendar day arithmetic** — tasks declared with
-  `.working` count only non-closed days; without `.working` they count
-  calendar days. The distinction affects the solver and bar widths.
-- **Gantt vs. chronology** — PlantUML has both `@startgantt` and
-  `@startchronology`. Gantt is `project/`; chronology is a separate
-  simpler diagram. Do not confuse them.
-- **`[Task]` syntax collision** — the `[` / `]` delimiters are also used
-  in links in other diagram types; the block extractor must correctly
-  classify `@startgantt` blocks.
-- **Column header rendering** — the column header is a two-row structure:
-  the top row shows month labels (spanning multiple day columns); the
-  bottom row shows individual day or week labels. The spans must be computed
-  from the timescale, not hardcoded.
-- **`printscale` vs `ganttscale`** — slight behavioral difference upstream;
-  read `GanttStyle.java` before implementing.
-- **Resource assignment** — `[Task A] on {Alice:50%}{Bob:50%}` assigns
-  percentages of named resources. Resource labels appear on the right edge
-  of task bars.
-- **Constraint cycle detection** — when the solver cannot resolve a cycle,
-  render an error diagram, do not crash.
+- **Clock-dependent rows.** A source with `today` and no date, `%now`, or
+  `%date` without a fixed argument compares only against its recorded capture
+  clock. Record it at capture (`scripts/oracle-render.sh`); the gantt entries in
+  the sidecar are `gantt/lituri-55-caju105`, `gantt/sakibi-88-zuci243` and
+  `fixtures/gantt/today-implicit`.
+- **Authored fixtures vs the jar.** The jar matches a shorter `pauses` phrase
+  rather than a `to the` interval and tolerates trailing text after a matched
+  phrase; the `quirk-*` fixtures in `fixtures.md` pin these. Mirror the jar.
+- **Gantt vs chronology.** `@startgantt` is `gantt/`; `@startchronology` is a
+  separate, simpler diagram. Do not confuse them.
+- **No graph engine.** Upstream gantt never calls graphviz or Smetana (D10), so
+  the jar's geometry is the target throughout; text goes through
+  `DeterministicMeasurer`.
+- **Constraint cycles / impossible solves** raise `ImpossibleSolvingException`
+  and render as an error page, as the jar does. The 10 jar-error corpus rows
+  are conformant when ours is the same class of page.
+- **Front-matter error lines.** `error/error-diagrams.ts:91` clamps a
+  document-absolute refusal line into a trace without the YAML header; the
+  authored `vega-gantt2` error page differs until that core defect is fixed
+  (open family, `next-missions.md`).
+- **500-line cap.** Helper splits forced by the hook are journaled; a private
+  Java helper or inner class becomes its own module beside its owner.
 
-## Architecture decisions
+## Where to look
 
-**No third-party date library.** `src/core/datetime.ts` handles everything.
-
-**SyncPlugin.** Constraint solving and layout are synchronous arithmetic;
-no async needed.
-
-**Constraint solver:** A simple iterative propagation (not a full LP solver).
-Read `Solver.java` — it is short (< 100 lines) and uses a worklist algorithm.
-
-**Timescale as axis object:** Model the timescale as a pure function
-`dateToX(date: TimePoint): number` with inverse `xToDate(x: number): TimePoint`.
-This isolates all column-width arithmetic.
-
-## Files to create
-
-```
-src/diagrams/gantt/
-  ast.ts          — GanttDiagramAST, GanttTask, GanttGroup, GanttMilestone, GanttConstraint
-  parser.ts       — parseGantt(source): GanttDiagramAST
-  solver.ts       — solveConstraints(tasks, constraints): ResolvedTasks
-  timescale.ts    — Timescale class: dateToX, xToDate, column headers
-  layout.ts       — layoutGantt(ast, measurer): GanttGeometry
-  renderer.ts     — renderGantt(geo, theme): SVG string
-  index.ts        — ganttPlugin: SyncPlugin
-tests/unit/gantt/
-  parser.test.ts
-  solver.test.ts
-  timescale.test.ts
-  renderer.test.ts
-```
-
-## Suggested batch structure
-
-**Batch 1:** Track SI-2 (datetime.ts) — prerequisite; may be a standalone
-prior mission
-
-**Batch 2:** AST + parser + constraint solver (task declarations,
-dependency syntax, date arithmetic)
-
-**Batch 3:** Timescale + layout (column headers, row positions, bar widths)
-
-**Batch 4:** Renderer (title, task bars, milestones, separators, closed
-periods, resource labels, grid lines)
-
-**Batch 5:** Integration tests against upstream fixtures from
-`tests/corpus/gantt/`
+- Brief: `plans/gantt-engine-port/README.md`; decisions `decisions.md`
+  (D1–D12, two amendments); ledger `fixtures.md`; history
+  `decision-journal.md`.
+- Oracles: `scripts/oracle-render.sh <ABSOLUTE out-dir> <puml>` only; survey
+  with `npm run svg:survey -- gantt --out <path>` (never positional).
+- Ratchets: `oracle/goldens/svg-gantt/` (byte-exact, 251 pins) and the
+  gantt diff-baseline for the rows that are conformant by rule or still open.

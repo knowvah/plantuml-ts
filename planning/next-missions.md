@@ -35,6 +35,69 @@ post-D7 measurements.
 
 ---
 
+## gantt-engine-port (gep) — DONE (final, batch 8: 263/265 conformant) (branch `feat/gantt-engine-port` off `1be33f054`, one unsigned commit per task until the squash batch, then one per batch; not pushed; lands via PR after the user's `git rebase --force-rebase -S 1be33f054`; working history on the local tag `gep/pre-squash`)
+
+`@startgantt` and `{{gantt}}` now render as the jar does; before, both drew a
+300x60 "Error: unknown diagram type" box. Gantt **1/265 -> 263/265 conformant**
+after batch 8 (final): 1 structural, 1 diverged, 0 errored, 252
+byte-exact goldens pinned (`oracle/goldens/svg-gantt/`), the 10 jar-error rows
+conformant by the 2026-10-10 error-page rule (`plans/gantt-engine-port/
+fixtures.md` counts rows b0..b7; journal row 85; row 86 un-pinned the 11 rows
+that are conformant by rule rather than by bytes). The 0-conformant-losses
+check against the other 27 engines is the exit batch's final chain (final at
+exit).
+
+The port is `src/diagrams/gantt/` (file-for-file with upstream
+`net/sourceforge/plantuml/gantt/`, 167 files) over `src/core/time` (a `java.time`
+subset in integer arithmetic, D2), one injected clock (`src/core/clock.ts`,
+D3), `src/core/ubrex` (D11) and `src/core/real` (D12). Layers and seams:
+`planning/gantt-deepdive.md`. Batch 8's first two families landed: T8a (`%date`
+letter `Y`, the week year) and T8b (`<style>` arrow colour crash in
+`GanttConstraint.ts`).
+
+**SI2 done by `src/core/time`.** mission-index SI2 (a hand-rolled
+`datetime.ts`) was never built; the `java.time` subset gantt needed is the shared
+date module, and Timing (D1) can reuse it. mission-index SI2 and D4 are ticked.
+
+**D3 fork-seam fallback: never needed.** D3 recorded an oracle-fork seam
+(`-DPLANTUML_FIXED_NOW`) to be built only if capture-and-compare proved flaky
+(stop 12). The capture-clock sidecar `oracle/capture-clock.json`
+(`gantt/lituri-55-caju105`, `gantt/sakibi-88-zuci243`,
+`fixtures/gantt/today-implicit`; journal rows 5-6) sufficed, and no journal row
+records a stop 12. Only `lituri-55` stays a signed accepted divergence (the
+clock row). Re-open the fallback only if a clock-dependent row compares
+differently on two captures.
+
+### Open -> gantt-divergence-drive (4 families; mechanisms in `plans/gantt-engine-port/fixtures.md`, refined by journal row 88)
+
+Batch 8 landed T8c (ribupo: the asset store now reaches the gantt plugin) and T8d (vega-gantt2: the error listing matches the refused line by location) at the b8 close (journal rows 90–93). Check the brief
+before repeating this table.
+
+| firstDiff family | rows | candidate mechanism |
+|---|---:|---|
+| `svg/g/path/@stroke` | 1 (`xureco-57-lene839`) | `AbstractCommonUGraphic.ts:107` returns the string `'none'` where the jar returns the `HColors.none()` singleton, so the equal-colour fast path in `driver-path-svg.ts` never fires; core, high blast radius, deferred with its artifact (row 88) |
+| structural, no firstDiff | 1 (`xikovo-87-rosu902`) | an 8 px canvas-height difference, mechanism not yet pinned; next step named in the batch-8 overview (row 88) |
+
+Also open, not a family: `nakude-77-suji787` says "Gantt diagrams cannot last
+more than 20 years" for a one-day diagram whose only task `displays on same row
+as` itself. Both sides error (conformant), but the 20-year path suggests a
+min/max input the Java does not produce; diagnose before pinning anything else
+that mentions `today`. The remaining 11 rule-conformant, unpinned rows (4 jar
+error pages, 7 signed accepted divergences) have no owner by design.
+
+### Flags
+
+- Decisions D11 (ubrex) and D12 (`real`) were added mid-mission by user-approved
+  amendments after the SCC layering, computed over `gantt/` only, missed both
+  edges.
+- `emitter.golden` ledger: 10 `svg-gantt/*` "jar errors, we draw" accepted
+  entries moved to `retired` at turn-on (journal row 87); ledger maintenance the
+  gate mandates, not a new entry. `DIVERGENCES.md` is untouched.
+- Follow-on tooling: `pin-gantt.mts` should exclude accepted/jar-error rows from
+  a "conformant" pin list, as the wbs `b4-pinlist.mts` did (journal row 86).
+
+---
+
 ## lengthadjust-document-wide (lad) — DONE 2026-10-24 (branch `feat/lengthadjust-document-wide` off `bf18ede54`, one commit per batch after the squash, unsigned, not pushed; lands via PR after the user's `git rebase --force-rebase -S bf18ede54`; working history on the local tag `lad/pre-squash`)
 
 `skinparam lengthAdjust` now applies document-wide as the jar does
