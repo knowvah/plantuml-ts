@@ -15,3 +15,9 @@
 - **Finding**: `npx prettier --write src/core/ubrex` reformatted T1d's committed `ChallengeResult.ts`; worktree commits can bypass the lint-staged hook, so committed files are not guaranteed prettier-clean.
 - **Impact**: in a shared/chain worktree, run prettier on explicit file lists only; let the close's `npm run lint`/format gate catch the rest.
 - **Confidence**: Medium (agent-reported).
+
+## Observation: three Java `Double.toString` ports in src/
+- **Context**: gep T4d (`real/` port) review, 2026-10-26.
+- **Finding**: `javaDoubleToString` exists in `src/core/decoration/LinkStyle.ts:39` (N.0 / plain fractions only), `src/core/klimt/sprite/sax/sax-text-image-use.ts:210` (private), and `src/core/real/AbstractReal.ts` (full: NaN, ±Infinity, ±0.0, `E` notation outside [1e-3, 1e7)). No shared module; agents grep, miss, and write another.
+- **Impact**: A cleanup PR should move the full version to one `src/core` module and point the others at it (check the LinkStyle callers' outputs stay byte-equal). Same for Java exception classes, which now live in `AbstractReal.ts`.
+- **Confidence**: High

@@ -16,6 +16,7 @@ then halt.
 | D9 | Exit bar measured, not guessed: 0 errors/refusals where the jar renders; every diverged row classified with an owner |
 | D10 | `DeterministicMeasurer` via klimt `StringBounder`; no graphviz/Smetana anywhere |
 | D11 | Port `com.plantuml.ubrex` first (batch 1b) to `src/core/ubrex/`, with `RegexResult`/`RegexPartialMatch`, `CommandControl`, `UBrexSingleLineCommand2`, `UbrexUrlBuilder` (Amendment 1, user-approved 2026-10-26) |
+| D12 | Port `net.sourceforge.plantuml.real` whole to `src/core/real/` (batch 4b, T4d), then T4a's `TaskDraw`/`TaskDrawSeparator` (T4e); sequence keeps `sequence-real-line.ts` (Amendment 2, user-approved 2026-10-26) |
 
 ## D1 — layout and names
 
@@ -187,7 +188,7 @@ annotations).
 - Existing engines are not migrated onto ubrex; batch 1b's close expects 0
   movers in all 28 engines.
 
-## Amendment 2 (2026-10-26, during batch 3) — gantt also needs `net.sourceforge.plantuml.real` (PROPOSED; needs the user's ruling — blocks T4a's `TaskDraw`/`TaskDrawSeparator` and batch 5)
+## Amendment 2 (2026-10-26, during batch 3) — gantt also needs `net.sourceforge.plantuml.real` (APPROVED by the user 2026-10-26: "approve D12")
 
 **Finding (orchestrator, path-keyed re-audit, journal row 29).** `data/TaskDrawRegistryData.java:60-62,70,113,151` (batch 5, the 25-file cycle) builds the
 task layout on the `real` constraint package: `RealUtils.createOrigin()`,

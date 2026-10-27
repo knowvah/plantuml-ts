@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — PAUSED after batch 3 (batch 4 tasks done except T4a `TaskDraw`/`TaskDrawSeparator`) — awaiting the D12 ruling (Amendment 2, `real`)
+## Status — RUNNING batch 5 (serial chain in `gep-T5`); batches 0–4b closed
 
 ## Objective
 
@@ -121,7 +121,8 @@ New src module ⇒ `npm run catalog` (drift-gated).
 | [1b](batch-1b/overview.md) | `com.plantuml.ubrex` + RegexResult, CommandControl, UBrexSingleLineCommand2, UbrexUrlBuilder (D11) | T1d–T1f (serial), close | [x] |
 | [2](batch-2/overview.md) | upstream layers L00–L01 (3,563 lines) | T2a–T2d, close | [x] |
 | [3](batch-3/overview.md) | L02–L05 (2,779) | T3a–T3c, close | [x] |
-| [4](batch-4/overview.md) | L06–L09 (2,606) | T4a–T4c, close | [ ] |
+| [4](batch-4/overview.md) | L06–L09 (2,606) | T4a–T4c, close | [x] |
+| [4b](batch-4b/overview.md) | `net.sourceforge.plantuml.real` → `src/core/real/` + T4a's `TaskDraw`/`TaskDrawSeparator` (D12) | T4d, T4e; closes with batch 4 | [x] |
 | [5](batch-5/overview.md) | the 25-file cycle (5,670), serial chain | T5a–T5e, close | [ ] |
 | [6](batch-6/overview.md) | L11 grammar + commands (2,824) | T6a–T6d, close | [ ] |
 | [7](batch-7/overview.md) | grammar top, factory, plugin, turn-on + capture (serial) | T7a–T7c, close | [ ] |
@@ -131,7 +132,7 @@ New src module ⇒ `npm run catalog` (drift-gated).
 
 ## Documents
 
-- [decisions.md](decisions.md) — D1–D10, locked (user-approved 2026-10-24); D11 (Amendment 1, user-approved 2026-10-26)
+- [decisions.md](decisions.md) — D1–D10, locked (user-approved 2026-10-24); D11 (Amendment 1, user-approved 2026-10-26); D12 (Amendment 2, user-approved 2026-10-26)
 - [task-contract.md](task-contract.md) — shared by every task prompt
 - [close-procedure.md](close-procedure.md) — standard batch close
 - [fixtures.md](fixtures.md) — gantt fixture + corpus ledger

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1910 modules · 6825 exported names.
+1944 modules · 6870 exported names.
 
 ## `src/`
 
@@ -825,6 +825,26 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `PEntry.ts` | `PEntry` |  |
 | `Plasma.ts` | `MAGIC_SEPARATOR`, `Plasma` |  |
 | `Quark.ts` | `Quark` |  |
+
+## `src/core/real/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `AbstractReal.ts` | `IllegalStateException`, `IllegalArgumentException`, `UnsupportedOperationException`, `ClassCastException`, `javaDoubleToString`, `AbstractReal`, `castAbstractReal` |  |
+| `PositiveForce.ts` | `PositiveForce` |  |
+| `Real.ts` | `Real` | `Real` — a one-dimensional coordinate that lazily resolves to a `double`. |
+| `RealDebug.ts` | `RealDebug` | `RealDebug` — the opt-in creation-point capture for `Real`s. |
+| `RealDelta.ts` | `RealDelta` |  |
+| `RealDeltaLive.ts` | `RealDeltaLive` |  |
+| `RealImpl.ts` | `RealImpl` |  |
+| `RealLine.ts` | `RealLine` |  |
+| `RealMax.ts` | `RealMax` |  |
+| `RealMiddle.ts` | `RealMiddle` |  |
+| `RealMiddle2.ts` | `RealMiddle2` |  |
+| `RealMin.ts` | `RealMin` |  |
+| `RealMoveable.ts` | `registerRealDeltaFactory`, `RealMoveable`, `castRealMoveable` |  |
+| `RealOrigin.ts` | `RealOrigin` |  |
+| `RealUtils.ts` | `RealUtils` |  |
 
 ## `src/core/regex/`
 
@@ -1935,7 +1955,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Completion.ts` | `Completion` | Completion — a task completion percentage. |
 | `DayStatus.ts` | `DayStatus` | DayStatus — as-const object + type (memberless Java enum). |
 | `GanttConstraintMode.ts` | `GanttConstraintMode` | GanttConstraintMode — as-const object + type (memberless Java enum). |
+| `GanttI18n.ts` | `GanttI18n` |  |
 | `GanttStyle.ts` | `GanttStyle` |  |
+| `GanttTaskTableColumn.ts` | `Context`, `GanttTaskTableColumn` |  |
 | `GArrows.ts` | `GArrows` |  |
 | `LabelPosition.ts` | `LabelPosition` | LabelPosition — as-const object + type (memberless Java enum). |
 | `LabelStrategy.ts` | `LabelStrategy` |  |
@@ -1947,13 +1969,19 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `AbstractTask.ts` | `unsupportedOperation`, `AbstractTask` |  |
 | `GArrowType.ts` | `GArrowType` | GArrowType -- Java enum without members, as an as-const object. |
 | `GSide.ts` | `GSide` | GSide -- which side of a task bar an arrow attaches to. |
 | `Moment.ts` | `Moment`, `getEndMinusOneDayTOBEREMOVED` |  |
 | `MomentImpl.ts` | `MomentImpl` |  |
 | `PrintScale.ts` | `PrintScale` | PrintScale -- the timeline compression presets. |
+| `Resource.ts` | `Resource` |  |
+| `Task.ts` | `Task` |  |
 | `TaskAttribute.ts` | `TaskAttribute` | TaskAttribute -- START, END, LOAD. |
 | `TaskCode.ts` | `TaskCode` | TaskCode -- a task's identity (`id`) and what is drawn (`display`). |
+| `TaskGroup.ts` | `TaskGroup` |  |
+| `TaskInstant.ts` | `TaskInstant` |  |
+| `TaskSeparator.ts` | `TaskSeparator` |  |
 | `TimeRange.ts` | `TimeRange` |  |
 | `TimeRanges.ts` | `TimeRanges` |  |
 
@@ -1961,6 +1989,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `DayCalendarData.ts` | `DayCalendarData` |  |
 | `DisplayConfigData.ts` | `DisplayConfigData` | DisplayConfigData -- footbox / resource-name display flags. |
 | `TimelineStyleData.ts` | `TimelineStyleData` |  |
 | `TimeScaleConfigData.ts` | `TimeScaleConfigData` |  |
@@ -1975,6 +2004,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `PathUtils.ts` | `PathUtils` |  |
 | `RectangleTask.ts` | `RectangleTask` |  |
 | `ResourceDraw.ts` | `ResourceDraw` |  |
+| `TaskDraw.ts` | `TaskDraw`, `taskDrawLabelOverflow` |  |
+| `TaskDrawSeparator.ts` | `TaskDrawSeparator` |  |
 | `WeeklyHeaderStrategy.ts` | `WeeklyHeaderStrategy` | Weekly header numbering mode (upstream enum, ordinal order). |
 
 ## `src/diagrams/gantt/draw/header/`
@@ -2002,6 +2033,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `Load.ts` | `Load` | Intrinsic amount of work for a task, in seconds of person-time. |
 | `NGMAllocation.ts` | `NGMAllocation` | The resource allocation applied to a task over time, as a time-varying {@link PiecewiseConstant} FTE function. |
+| `NGMTask.ts` | `NGMTask` | An abstract scheduled task in the New Gantt Model (NGM): total effort, allocation and duration kept independent, with two concrete behaviours (fixed duration, fixed total effort) built by the static factories. |
+| `NGMTaskBase.ts` | `NGMTaskBase` | The abstract task contract of the New Gantt Model. |
+| `NGMTaskFixedDuration.ts` | `NGMTaskFixedDuration` | A fixed-duration task: the calendar span is intrinsic, the effort derived. |
+| `NGMTaskFixedTotalEffort.ts` | `NGMTaskFixedTotalEffort` | A fixed-total-effort task: the effort is intrinsic, the end derived by integrating the allocation's load function. |
 | `package-info.ts` | _(none)_ | Upstream `package-info.java` for the NGM scheduling core: carries only the package javadoc ("a clean, reusable scheduling core that can later be integrated or tested in isolation") and declares no symbol. |
 
 ## `src/diagrams/gantt/ngm/math/`
@@ -2026,6 +2061,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `ImpossibleSolvingException.ts` | `ImpossibleSolvingException` | ImpossibleSolvingException — thrown when the task solver has no solution. |
+| `Solver.ts` | `Solver` | Holds at most two of a task's START / END / LOAD values and derives the missing START or END from them through a fixed-total-effort task. |
 
 ## `src/diagrams/gantt/time/`
 
@@ -2046,8 +2082,11 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `PiecewiseTimeType.ts` | `PiecewiseTimeType` | PiecewiseTimeType — as-const object + type (memberless Java enum). |
 | `PixelInstant.ts` | `PixelInstant` |  |
 | `TimeScale.ts` | `TimeScale` |  |
+| `TimeScaleCompressed.ts` | `TimeScaleCompressed` |  |
 | `TimeScaleDaily.ts` | `TimeScaleDaily` |  |
+| `TimeScaleDailyHideClosed.ts` | `TimeScaleDailyHideClosed` |  |
 | `TimeScaleWink.ts` | `TimeScaleWink` |  |
+| `VariantTimeScale.ts` | `VariantTimeScale` |  |
 
 ## `src/diagrams/gantt/ulang/`
 

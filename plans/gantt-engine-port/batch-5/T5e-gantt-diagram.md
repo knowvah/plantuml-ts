@@ -9,7 +9,7 @@ Part of the batch-5 serial chain: ONE worktree `gep-T5` (branch `gep/T5`), tasks
 - `~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/GanttDiagram.java` (690 lines) → `src/diagrams/gantt/GanttDiagram.ts`
 
 ## Write-set
-**Orchestrator notes (journal row 15):** (1) `GanttDiagram.java:593-630` `exportTxt` (ATXT via `asciiverse.ATable`/`InfinitePlan`) is not ported: the port is an SVG-only library with no text-output path (no engine ports `exportTxt`); keep a comment block citing the Java lines. (2) The clock: `GanttDiagram` receives a `Clock` (constructor or setter, from the plugin in T7c) and passes it to `TimePoint.todayAtMidnight(clock)` at `GanttDiagram.java:455-466`.
+**Orchestrator notes (journal row 15):** (1) `GanttDiagram.java:593-630` `exportTxt` (ATXT via `asciiverse.ATable`/`InfinitePlan`) is not ported: the port is an SVG-only library with no text-output path (no engine ports `exportTxt`); keep a comment block citing the Java lines. (2) The clock: `GanttDiagram` receives a `Clock` (constructor or setter, from the plugin in T7c) and passes it to `TimePoint.todayAtMidnight(clock)` at `GanttDiagram.java:455-466`. (3) Framework types (journal row 43): `GanttDiagram extends TitledDiagram` (`src/core/TitledDiagram.ts`); follow `src/diagrams/wbs/WBSDiagram.ts` — `getDescription(): string` (`DiagramDescription` → its text, `WBSDiagram.ts:119-122`), `getTextBlock()` without `FileFormatOption` (the string bounder is the only part reaching it, `UgDiagram.ts:27`), no `ImageData`/`ImageDataSimple`/`FileFormat` (`UgDiagram.ts:18-21`).
 `src/diagrams/gantt/GanttDiagram.ts`;
 `tests/unit/gantt/GanttDiagram.test.ts`.
 
