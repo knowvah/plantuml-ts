@@ -213,6 +213,7 @@ export class RectangleTask {
 
     if (withStartVline) ug.draw(PathUtils.UtoLeft(segment.getLength(), height, 0));
     else if (withEndVline)
+      // Upstream's own `x - x` (RectangleTask.java:209-211): kept verbatim, never "fixed" to dx(0).
       ug.apply(UTranslate.dx(segment.getLength() - segment.getLength())).draw(
         PathUtils.UtoRight(segment.getLength(), height, 0),
       );

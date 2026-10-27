@@ -62,15 +62,15 @@ const START_END_RE = /^@(start|end)gantt\s*$/i;
  *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/PSystemCommandFactory.java:169-175 */
 const SYNTAX_ERROR = 'Syntax Error?';
 
-/** `CommandNope`: `^[%s]*$` over the trimmed line (`%s` = `\s `, Java `\s` being ASCII).
+/** `CommandNope`: `^[%s]*$` over the trimmed line (`%s` = `\s` + U+00A0, Pattern2.java:57, Java `\s` being ASCII).
  *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandNope.java:54-58 */
-const NOPE = /^[ \t\n\x0B\f\r ]*$/;
+const NOPE = /^[ \t\n\x0B\f\r\u00A0]*$/;
 /** `CommandRotate`: `executeArg` returns `ok()`. @see command/CommandRotate.java:54-71 */
 const ROTATE = /^rotate$/i;
 /** `CommandMinwidth`: `setMinwidth` is commented out. @see command/CommandMinwidth.java:54-77 */
-const MINWIDTH = /^minwidth[ \t\n\x0B\f\r ]+(\d+)$/i;
+const MINWIDTH = /^minwidth[ \t\n\x0B\f\r\u00A0]+(\d+)$/i;
 /** `CommandPage`: `page NxM`, read only by the PNG splitter. @see command/CommandPage.java:54-95 */
-const PAGE = /^page[ \t\n\x0B\f\r ]+(\d+)[ \t\n\x0B\f\r ]*x[ \t\n\x0B\f\r ]*(\d+)$/i;
+const PAGE = /^page[ \t\n\x0B\f\r\u00A0]+(\d+)[ \t\n\x0B\f\r\u00A0]*x[ \t\n\x0B\f\r\u00A0]*(\d+)$/i;
 /**
  * `CommandNamespaceSeparator` (registered by `addTitleCommands`, absent from `core/annotations`): `set
  * (separator|namespaceseparator) SEPARATOR` (the salt factory's copy, `PSystemSaltFactory.ts`).
@@ -78,7 +78,7 @@ const PAGE = /^page[ \t\n\x0B\f\r ]+(\d+)[ \t\n\x0B\f\r ]*x[ \t\n\x0B\f\r ]*(\d+
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/classdiagram/command/CommandLinkClass.java:92
  */
 const NAMESPACE_SEPARATOR =
-  /^set[ \t\n\x0B\f\r ]+(?:separator|namespaceseparator)[ \t\n\x0B\f\r ]+((?:none|null)|[\\]{2}|::|[^\p{L}\p{N} \t\n\x0B\f\r _$#\\{}<>"“”])$/iu;
+  /^set[ \t\n\x0B\f\r\u00A0]+(?:separator|namespaceseparator)[ \t\n\x0B\f\r\u00A0]+((?:none|null)|[\\]{2}|::|[^\p{L}\p{N} \t\n\x0B\f\r\u00A0_$#\\{}<>"“”])$/iu;
 
 /** The `new Warning(...)` texts `CommandSkinParam#executeArg` adds, keyed by the lower-cased skin parameter name.
  *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandSkinParam.java:88-99 */
