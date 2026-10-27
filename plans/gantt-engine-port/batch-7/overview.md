@@ -6,10 +6,11 @@ orchestrator re-pins the gates gantt trips BEFORE capturing, then captures.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T7a](T7a-grammar-l12-l13.md) | grammar top part 1 (L12–L13) (1447 Java lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` + tests | B6 | [ ] |
-| [T7b](T7b-grammar-l14-l15.md) | grammar top part 2 (L14–L15) (963 Java lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` + tests | T7a | [ ] |
-| [T7c](T7c-factory-plugin.md) | GanttDiagramFactory, the plugin, registration and {{gantt}} (130 Java lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` + tests + plugin/registration | T7b | [ ] |
-| close | see below | orchestrator | per close-procedure + the turn-on pins | T7c | [ ] |
+| [T7a](T7a-grammar-l12-l13.md) | grammar top part 1 (L12–L13) (1447 Java lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` + tests | B6 | [x] |
+| [T7b](T7b-grammar-l14-l15.md) | grammar top part 2 (L14–L15) (963 Java lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` + tests | T7a | [x] |
+| [T7c](T7c-factory-plugin.md) | GanttDiagramFactory, the plugin, registration and {{gantt}} (130 Java lines) | typescript-pro (sonnet), fresh agent, same worktree | `src/diagrams/gantt/…` + tests + plugin/registration | T7b | [x] |
+| [T7p](T7p-pin-tooling.md) | gantt pin/re-pin scripts (wbs twins), dry-run only until turn-on (journal row 77) | typescript-pro (sonnet), worktree gep-T7p | `plans/gantt-engine-port/measurements/{pin-gantt,repin-gantt-routing,repin-gantt-baseline}.mts` + test + vitest config | B6 | [x] |
+| close | see below | orchestrator | per close-procedure + the turn-on pins | T7c | [x] |
 
 ## Close (turn-on) — orchestrator only, in this order
 1. Merge `gep/T7` (`merge-one.sh T7`).

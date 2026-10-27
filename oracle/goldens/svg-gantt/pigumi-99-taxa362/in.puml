@@ -1,0 +1,7 @@
+@startgantt
+projectscale monthly
+Project starts the 2025-01-01 
+[XXX] starts 2025-01-01 and requires 100 days
+2025-01-18 to 2025-03-31 are colored in red
+2025-01-18 to 2025-03-31 are named [YYY]
+@endgantt

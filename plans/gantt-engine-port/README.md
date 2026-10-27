@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — RUNNING batch 7 (serial chain in `gep-T7`: T7a → T7b → T7c, turn-on + capture at the close); batches 0–6 closed
+## Status — batch 7 CLOSING (gantt ON: 262/265 conformant, 251 goldens); batch 8 T8a/T8b landed, ≤2 families remain
 
 ## Objective
 
@@ -125,7 +125,7 @@ New src module ⇒ `npm run catalog` (drift-gated).
 | [4b](batch-4b/overview.md) | `net.sourceforge.plantuml.real` → `src/core/real/` + T4a's `TaskDraw`/`TaskDrawSeparator` (D12) | T4d, T4e; closes with batch 4 | [x] |
 | [5](batch-5/overview.md) | the 25-file cycle (5,670), serial chain | T5a–T5f, close | [x] |
 | [6](batch-6/overview.md) | L11 grammar + commands (2,824) | T6z, T6a–T6e, close | [x] |
-| [7](batch-7/overview.md) | grammar top, factory, plugin, turn-on + capture (serial) | T7a–T7c, close | [ ] |
+| [7](batch-7/overview.md) | grammar top, factory, plugin, turn-on + capture (serial) | T7a–T7c (+T7p tooling), close | [x] |
 | [8](batch-8/overview.md) | first conformance pass (2–4 families) | T8x, close | [ ] |
 | [exit](batch-exit/overview.md) | final measurement vs b0, docs, memory, PR prep | T-exit | [ ] |
 | [squash](batch-squash/overview.md) | one commit per batch; tag the history | T-squash | [ ] |

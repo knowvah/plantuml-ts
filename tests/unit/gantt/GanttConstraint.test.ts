@@ -4,6 +4,7 @@ import type { UChange } from '../../../src/core/klimt/UChange.js';
 import type { UGraphic } from '../../../src/core/klimt/UGraphic.js';
 import { UStroke } from '../../../src/core/klimt/UStroke.js';
 import type { UShape } from '../../../src/core/klimt/UShape.js';
+import { HColorSimple } from '../../../src/core/klimt/color/HColorSimple.js';
 import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
 import type { StringBounder } from '../../../src/core/klimt/font/StringBounder.js';
 import { MeasurerStringBounder } from '../../../src/core/measurer-bounder.js';
@@ -196,9 +197,21 @@ describe('GanttConstraint.getUDrawable (java:103-108)', () => {
     expect(fore.getColor()).not.toBe(SET.getColorOrWhite('#FF0000'));
   });
 
-  it('a colour that is not an HColorSimple / gradient is a ClassCastException at the abel seam', () => {
+  it('a bare XColor record (the `-[#012]->` colour) is wrapped to an HColorSimple, as HColorSet.getColorOrWhite returns', () => {
+    // Oracle mexito-28-toli086: `-[#012]->` strokes `stroke:#012;stroke-width:1.5` (HColorSet.java:58-63).
+    const link = constraint(new TaskInstant(a, END), new TaskInstant(b, START));
+    link.setSpecificColor({ r: 0, g: 17, b: 34, a: 255 });
+    const out = drawn(link, a, b);
+    const fore = out[0]!.changes.find((ch) => ch instanceof Fore) as Fore;
+    expect(fore.getColor()).toBeInstanceOf(HColorSimple);
+    expect((fore.getColor() as HColorSimple).getAwtColor()).toEqual({ r: 0, g: 17, b: 34, a: 255 });
+  });
+
+  it('an object that is no colour is not narrowed at construction: the failure is at draw time (GanttArrow.java:105)', () => {
     const link = constraint(new TaskInstant(a, END), new TaskInstant(b, START));
     link.setSpecificColor({ r: 1 });
-    expect(() => link.getUDrawable(timeScale, new TaskDrawRegistryData())).toThrow('ClassCastException');
+    const arrow = link.getUDrawable(timeScale, new TaskDrawRegistryData());
+    expect(arrow).toBeInstanceOf(GanttArrow);
+    expect(() => drawn(link, a, b)).toThrow('ClassCastException');
   });
 });

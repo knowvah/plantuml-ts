@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-2006 modules · 6986 exported names.
+2028 modules · 7016 exported names.
 
 ## `src/`
 
@@ -1962,6 +1962,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `GanttConstraintMode.ts` | `GanttConstraintMode` | GanttConstraintMode — as-const object + type (memberless Java enum). |
 | `GanttDiagram.ts` | `GanttDiagram` |  |
 | `GanttDiagramConfig.ts` | `GanttDiagramConfig` |  |
+| `GanttDiagramFactory.ts` | `ParsedGantt`, `parseGantt` |  |
 | `GanttDiagramMainBlock.ts` | `GanttDiagramMainBlock` |  |
 | `GanttI18n.ts` | `GanttI18n` |  |
 | `GanttLayout.ts` | `GanttLayout` |  |
@@ -1969,6 +1970,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `GanttTaskTable.ts` | `currentStyleBuilder`, `GanttTaskTable` |  |
 | `GanttTaskTableColumn.ts` | `Context`, `GanttTaskTableColumn` |  |
 | `GArrows.ts` | `GArrows` |  |
+| `index.ts` | `GanttGeometry`, `calculateBackColor`, `muteColorMapper`, `isHandwritten`, `calculateMargin`, `renderGantt`, `ganttPlugin` | Gantt diagram plugin -- `GanttDiagramFactory` (parse), then `TextBlockExporter`'s export of `GanttDiagram#getTextBlock` on the klimt substrate (decision D4): canvas = the text block's `calculateDimension` plus `calculateMargin`, the block d |
 | `LabelPosition.ts` | `LabelPosition` | LabelPosition — as-const object + type (memberless Java enum). |
 | `LabelStrategy.ts` | `LabelStrategy` |  |
 | `OpenClose.ts` | `OpenClose` | Open/closed calendar of a project, a resource or a task: per-weekday and per-date statuses, working time ranges and an optional active date window, convertible to a {@link PiecewiseConstant}. |
@@ -1992,10 +1994,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `CommandLabelOnColumn.ts` | `COMMAND_LABEL_ON_COLUMN_RE`, `applyCommandLabelOnColumn`, `CommandLabelOnColumn` |  |
 | `CommandLanguage.ts` | `COMMAND_LANGUAGE_RE`, `applyCommandLanguage`, `CommandLanguage` |  |
 | `CommandNoteBottom.ts` | `COMMAND_NOTE_BOTTOM_RE`, `COMMAND_NOTE_BOTTOM_END_RE`, `CommandNoteBottomBlock`, `collectCommandNoteBottomBlock`, `applyCommandNoteBottom`, `CommandNoteBottom` |  |
+| `CommandPrintBetween.ts` | `CommandPrintBetween` |  |
 | `CommandPrintScale.ts` | `COMMAND_PRINT_SCALE_RE`, `applyCommandPrintScale`, `CommandPrintScale` |  |
 | `CommandSeparator.ts` | `COMMAND_SEPARATOR_RE`, `applyCommandSeparator`, `CommandSeparator` |  |
 | `CommandTaskCompleteDefault.ts` | `COMMAND_TASK_COMPLETE_DEFAULT_RE`, `applyCommandTaskCompleteDefault`, `CommandTaskCompleteDefault` |  |
 | `CommandWeekNumberStrategy.ts` | `COMMAND_WEEK_NUMBER_STRATEGY_RE`, `applyCommandWeekNumberStrategy`, `CommandWeekNumberStrategy` |  |
+| `NaturalGanttCommand.ts` | `NaturalGanttCommand` |  |
 
 ## `src/diagrams/gantt/core/`
 
@@ -2070,17 +2074,24 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `AbstractComplementTaskInstant.ts` | `AbstractComplementTaskInstant` |  |
-| `CenterBorderColor.ts` | `CenterBorderColor` |  |
+| `CenterBorderColor.ts` | `GanttColor`, `CenterBorderColor` |  |
 | `ComplementAnything.ts` | `ComplementAnything` |  |
+| `ComplementBeforeOrAfterOrAtTaskStartOrEnd.ts` | `ComplementBeforeOrAfterOrAtTaskStartOrEnd` |  |
+| `ComplementClose.ts` | `ComplementClose` |  |
 | `ComplementCompleted.ts` | `ComplementCompleted` |  |
 | `ComplementDate.ts` | `ComplementDate` |  |
 | `ComplementDayOfWeek.ts` | `ComplementDayOfWeek` |  |
 | `ComplementDeleted.ts` | `ComplementDeleted` |  |
 | `ComplementDuration.ts` | `ComplementDuration` |  |
+| `ComplementFromTo.ts` | `ComplementFromTo` |  |
 | `ComplementInColors.ts` | `ComplementInColors` |  |
 | `ComplementInColors2.ts` | `ComplementInColors2` |  |
 | `ComplementInColorsFromTo.ts` | `ComplementInColorsFromTo` |  |
+| `ComplementIntervals.ts` | `ComplementIntervals` |  |
+| `ComplementIntervalsSmart.ts` | `ComplementIntervalsSmart` |  |
 | `ComplementNamed.ts` | `ComplementNamed` |  |
+| `ComplementOpen.ts` | `ComplementOpen` |  |
+| `ComplementTask.ts` | `ComplementTask` |  |
 | `ComplementTimePoint.ts` | `ComplementTimePoint` |  |
 | `ComplementUrl.ts` | `ComplementUrl` |  |
 | `ComplementWithColorLink.ts` | `ComplementWithColorLink` |  |
@@ -2088,6 +2099,17 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `DayPattern.ts` | `DayPattern` |  |
 | `PairOfSomething.ts` | `PairOfSomething` |  |
 | `Something.ts` | `Something` |  |
+| `Subject.ts` | `Subject` |  |
+| `SubjectDayAsDate.ts` | `SubjectDayAsDate` |  |
+| `SubjectDayOfWeek.ts` | `SubjectDayOfWeek` |  |
+| `SubjectDaysAsDates.ts` | `SubjectDaysAsDates` |  |
+| `SubjectGantt.ts` | `SubjectGantt` |  |
+| `SubjectResource.ts` | `SubjectResource` |  |
+| `SubjectSeparator.ts` | `SubjectSeparator` |  |
+| `SubjectTask.ts` | `SubjectTask` |  |
+| `SubjectTaskVerbs.ts` | `buildSubjectTaskVerbPhrases` |  |
+| `SubjectToday.ts` | `SubjectToday` |  |
+| `SubjectWorkingHours.ts` | `SubjectWorkingHours` |  |
 | `TimeResolution.ts` | `toUbrexA_DD_MONTH_YYYY`, `toUbrexB_YYYY_MM_DD`, `toUbrexC_MONTH_DD_YYYY`, `TimeResolution` | Ubrex date-shape builders (day-month-year, year-month-day, month-day-year). |
 | `TwoNames.ts` | `TwoNames` | TwoNames — an immutable pair of names. |
 | `Verbs.ts` | `Verbs` |  |

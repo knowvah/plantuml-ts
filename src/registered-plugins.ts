@@ -30,6 +30,7 @@ import { eggPlugin } from './diagrams/eggs/PSystemEggFactory.js';
 import { ripPlugin } from './diagrams/eggs/PSystemRIPFactory.js';
 import { listEmojiPlugin } from './diagrams/emoji/PSystemListEmojiFactory.js';
 import { filesPlugin } from './diagrams/files/index.js';
+import { ganttPlugin } from './diagrams/gantt/index.js';
 import { hclPlugin } from './diagrams/hcl/index.js';
 import { jsonPlugin } from './diagrams/json/index.js';
 import { mindmapPlugin } from './diagrams/mindmap/index.js';
@@ -85,6 +86,7 @@ function registerFromSalt(registry: PluginRegistrar): void {
   registry.register(appleTwoPlugin); // java:176
   registry.register(ripPlugin); // java:177
   registry.register(charliePlugin); // java:181
+  registry.register(ganttPlugin); // java:183
   registry.register(chronologyPlugin); // java:184 (commented out upstream)
   registry.register(dedicationPlugin); // java:186
   registry.register(jsonPlugin); // java:190

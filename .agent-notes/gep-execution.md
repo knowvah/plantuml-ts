@@ -39,3 +39,15 @@
 - **Finding**: at least seven gantt files carry a private `parseInt32`/`parseDouble` copy (`lang/DayPattern.ts`, `ComplementDate.ts`, `ComplementTimePoint.ts`, `SubjectDayAsDate.ts`, `SubjectDaysAsDates.ts`, `command/CommandPrintScale.ts`, `CommandTaskCompleteDefault.ts`, `CommandWeekNumberStrategy.ts`), each throwing `NumberFormatException` like Java's.
 - **Impact**: a cleanup PR should move one `javaParseInt`/`javaParseDouble` into `src/core` and point the copies at it (behaviour identical; the per-file tests already pin the throw cases).
 - **Confidence**: High
+
+## Observation: `WithLinkType.getColorOrWhite` hands out a bare colour record
+- **Context**: gep T8b (`-[#012]->` gantt constraint colour), 2026-10-26.
+- **Finding**: `src/core/decoration/WithLinkType.ts:17-19` returns `parseSimpleColor(s)` (a `{r,g,b,a}` record, `HColorSet.ts:124-130`) cast `as HColor`, while upstream `HColorSet.getColorOrWhite` (`HColorSet.java:58-63`) always returns an `HColorSimple`. Any new consumer of a link's specific colour that expects a klimt `HColor` object must wrap it (`HColors.simple`) or it fails `instanceof` checks and draw-time mapping.
+- **Impact**: a cleanup candidate — make the adaptation return `HColors.simple(parseSimpleColor(s))` and drop per-engine wraps (check class/description/gantt consumers for double-wrapping first).
+- **Confidence**: High
+
+## Observation: a survey's "conformant" set is not a golden pin list
+- **Context**: gep b7 capture, 2026-10-26.
+- **Finding**: `svg:survey` marks a row conformant when it is byte-equal OR an accepted divergence (`oracle/accepted-divergences.json`) OR a jar error page we also error on; the golden ratchet requires byte equality. Pinning the survey's conformant slugs directly put 11 rule-conformant rows into `oracle/goldens/svg-gantt/` and turned the ratchet red.
+- **Impact**: build the pin list from compareSvg diffs === 0 (the wbs port's `b4-pinlist.mts` did), or teach `pin-gantt.mts` to refuse slugs present in accepted-divergences.json or whose oracle is a stock error page.
+- **Confidence**: High

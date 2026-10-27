@@ -1,5 +1,5 @@
-import { HColorGradient } from '../../core/klimt/color/HColorGradient.js';
-import { HColorSimple } from '../../core/klimt/color/HColorSimple.js';
+import type { ResolvedColor } from '../../core/klimt/color/HColorSet.js';
+import { HColors } from '../../core/klimt/color/HColors.js';
 import type { UDrawable } from '../../core/klimt/shape/UDrawable.js';
 import { LinkDecor } from '../../core/decoration/LinkDecor.js';
 import { LinkType } from '../../core/decoration/LinkType.js';
@@ -15,14 +15,26 @@ import { GanttArrow } from './GanttArrow.js';
 import type { TimePoint } from './time/TimePoint.js';
 import type { TimeScale } from './timescale/TimeScale.js';
 
+/** A bare `XColor`-shaped record: what `WithLinkType`'s `getColorOrWhite` adaptation returns for `-[#012]->`. */
+function isResolvedColor(color: object): color is ResolvedColor {
+  const c = color as Partial<Record<keyof ResolvedColor, unknown>>;
+  return typeof c.r === 'number' && typeof c.g === 'number' && typeof c.b === 'number' && typeof c.a === 'number';
+}
+
 /**
  * `WithLinkType#getSpecificColor` answers the abel layer's opaque colour; the style layer's
- * `Style#eventuallyOverride(PName, HColor)` takes the concrete classes (Java has one `HColor`).
+ * `Style#eventuallyOverride(PName, HColor)` takes the style `HColor` (Java has one `HColor`).
+ *
+ * The Java narrows nothing: `HColorSet.getColorOrWhite` returns an `HColorSimple`
+ * (`HColorSet.java:58-63`), and any `HColor` flows into `eventuallyOverride`. The port's
+ * `getColorOrWhite` adaptation (`WithLinkType.ts`) returns the bare `ResolvedColor`, so the
+ * `HColors.simple(XColor)` wrap (`HColors.java:178-180`) that Java's parse performs happens here.
+ * Every other colour passes through untouched; an unsupported one fails at draw time, as the jar does.
  */
 function styleColorOf(color: object | undefined): HColor | undefined {
   if (color === undefined) return undefined;
-  if (color instanceof HColorSimple || color instanceof HColorGradient) return color;
-  throw new Error('ClassCastException: arrow colour is not an HColorSimple');
+  if (isResolvedColor(color)) return HColors.simple(color);
+  return color as HColor;
 }
 
 /**

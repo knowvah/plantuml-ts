@@ -211,12 +211,24 @@ describe('svg-gantt weighted-score baseline ratchet -- branch discrimination', (
     expect(checkNoRise(sample, 9, 7).ok).toBe(true);
   });
 
-  it('a gantt source renders the ERROR_SENTINEL today, and measureMarkup reports it as errored', () => {
-    const result = measureMarkup('probe', '@startgantt\n[A] lasts 2 days\n@endgantt\n', '<svg/>');
-    expect(result).toEqual({
-      errored: true,
-      reason: 'renders ERROR_SENTINEL (dispatcher.ts:361-375) -- no gantt plugin registered',
-    });
+  it('a forced regression in an in-memory baseline double fails checkNoRise', () => {
+    // Turn-on (gep T7c, journal row 80) retired the dormant live-render probe here:
+    // gantt now renders, so the ERROR_SENTINEL branch of measureMarkup is only
+    // reachable with the plugin unregistered. This mirrors the wbs twin instead.
+    const double: BaselineFixture = {
+      type: 'gantt',
+      slug: 'regression-double',
+      status: 'baseline',
+      weightedScore: 120,
+      diffCount: 4,
+      measuredAt: '2026-10-26',
+      measuredAgainstCommit: 'e3b9bf4de',
+    };
+    const { ok, message } = checkNoRise(double, double.weightedScore, 121);
+    expect(ok).toBe(false);
+    expect(message).toContain('gantt/regression-double');
+    expect(message).toContain('baseline=120');
+    expect(message).toContain('now=121');
   });
 });
 

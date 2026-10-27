@@ -1,3 +1,141 @@
 {
-  "fixtures": []
+  "fixtures": [
+    {
+      "type": "gantt",
+      "slug": "fobeda-14-tori503",
+      "status": "baseline",
+      "weightedScore": 4,
+      "diffCount": 4,
+      "reason": "jar-error: the stock jar reports \"No starting date for the project (Assumed diagram type: gantt)\" at line 3 (oracle/goldens/stock-error-pages.json gantt/fobeda-14-tori503) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    },
+    {
+      "type": "gantt",
+      "slug": "furubu-23-mecu777",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "reason": "jar-error: the stock jar reports \"No starting date for the project (Assumed diagram type: gantt)\" at line 2 (oracle/goldens/stock-error-pages.json gantt/furubu-23-mecu777) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    },
+    {
+      "type": "gantt",
+      "slug": "govacu-51-puti316",
+      "status": "baseline",
+      "weightedScore": 6,
+      "diffCount": 6,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: gantt)\" at line 4 (oracle/goldens/stock-error-pages.json gantt/govacu-51-puti316) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    },
+    {
+      "type": "gantt",
+      "slug": "lituri-55-caju105",
+      "status": "baseline",
+      "weightedScore": 41,
+      "diffCount": 34,
+      "reason": "jar-error: the stock jar reports \"No such task T2 (Assumed diagram type: gantt)\" at line 8 (oracle/goldens/stock-error-pages.json gantt/lituri-55-caju105) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    },
+    {
+      "type": "gantt",
+      "slug": "mogafu-27-jeci360",
+      "status": "baseline",
+      "weightedScore": 6,
+      "diffCount": 6,
+      "reason": "jar-error: the stock jar reports \"Bad argument for resource (Assumed diagram type: gantt)\" at line 5 (oracle/goldens/stock-error-pages.json gantt/mogafu-27-jeci360) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    },
+    {
+      "type": "gantt",
+      "slug": "nakude-77-suji787",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "reason": "jar-error: the stock jar reports \"Gantt diagrams cannot last more than 20 years (Assumed diagram type: gantt)\" at line 2 (oracle/goldens/stock-error-pages.json gantt/nakude-77-suji787) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    },
+    {
+      "type": "gantt",
+      "slug": "nejadu-63-nifo204",
+      "status": "baseline",
+      "weightedScore": 26,
+      "diffCount": 19,
+      "reason": "jar-error: the stock jar reports \"Empty description (Assumed diagram type: gantt)\" at line 2 (oracle/goldens/stock-error-pages.json gantt/nejadu-63-nifo204) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    },
+    {
+      "type": "gantt",
+      "slug": "papava-92-geve698",
+      "status": "baseline",
+      "weightedScore": 5,
+      "diffCount": 5,
+      "reason": "jar-error: the stock jar reports \"Syntax Error? (Assumed diagram type: gantt)\" at line 2 (oracle/goldens/stock-error-pages.json gantt/papava-92-geve698) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    },
+    {
+      "type": "gantt",
+      "slug": "recufa-28-desi167",
+      "status": "baseline",
+      "weightedScore": 46,
+      "diffCount": 33,
+      "reason": "jar-error: the stock jar reports \"No such P_start2 task (Assumed diagram type: gantt)\" at line 8 (oracle/goldens/stock-error-pages.json gantt/recufa-28-desi167) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    },
+    {
+      "type": "gantt",
+      "slug": "ribupo-71-poku778",
+      "status": "baseline",
+      "weightedScore": 23,
+      "diffCount": 1,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    },
+    {
+      "type": "gantt",
+      "slug": "saricu-01-funu594",
+      "status": "baseline",
+      "weightedScore": 4,
+      "diffCount": 4,
+      "reason": "jar-error: the stock jar reports \"No such task Production 0.2 (Assumed diagram type: gantt)\" at line 4 (oracle/goldens/stock-error-pages.json gantt/saricu-01-funu594) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    },
+    {
+      "type": "gantt",
+      "slug": "votofi-06-rolo321",
+      "status": "baseline",
+      "weightedScore": 6,
+      "diffCount": 6,
+      "reason": "jar-error: the stock jar reports \"No group to be closed (Assumed diagram type: gantt)\" at line 8 (oracle/goldens/stock-error-pages.json gantt/votofi-06-rolo321) -- conformant under the 2026-10-10 error-page rule once the port errors too.",
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    },
+    {
+      "type": "gantt",
+      "slug": "xikovo-87-rosu902",
+      "status": "baseline",
+      "weightedScore": 2,
+      "diffCount": 2,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    },
+    {
+      "type": "gantt",
+      "slug": "xureco-57-lene839",
+      "status": "baseline",
+      "weightedScore": 3,
+      "diffCount": 3,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "e87088fb3"
+    }
+  ]
 }

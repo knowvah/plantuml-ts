@@ -16,6 +16,7 @@ table (firstDiff family → rows → owner).
 | b4 | 265 | 1 | 0 | 254 | 0 | 10 | — |
 | b5 | 265 | 1 | 0 | 254 | 0 | 10 | — |
 | b6 | 265 | 1 | 0 | 254 | 0 | 10 | — |
+| b7 | 265 | 262 | 1 | 2 | 0 | 10 | 251 |
 
 ## Divergence families (from batch 7)
 
@@ -83,3 +84,13 @@ front-matter) + 31 authored. Dropped (jar cannot express, journal row 4):
 `ngm-lasts-iso8601`, `ngm-lasts-abbrev`. Clock-dependent: `today-implicit`
 (`oracle/capture-clock.json`). Construct → fixture/corpus map: T0b hand-back,
 journal row 4.
+
+## Open families after the b7 capture (turn-on + T8a/T8b)
+
+| firstDiff family | rows | candidate mechanism | owner |
+|---|---:|---|---|
+| `svg/g[childCount]` | 1 (ribupo-71-poku778) | an element the port draws that the jar omits, or the reverse — census the g[1] children against the oracle | batch 8 |
+| `svg/g/path/@stroke` | 1 (xureco-57-lene839) | a constraint/arrow stroke colour or dash differing from the jar's `applyStrokeAndLineColor` | batch 8 |
+| structural (no firstDiff) | 1 (xikovo-87-rosu902) | element order/shape equal, attribute values differ below the diff threshold — `verdict-diff` family listing | batch 8 |
+| error page, front-matter line | authored vega-gantt2 | core `error/error-diagrams.ts:91` clamps a document-absolute refusal line into a trace without the YAML header (T7c, row 80) | batch 8 (core, artifact) |
+| rule-conformant, unpinned | 11 (4 jar error pages, 7 signed accepted divergences incl. the clock row lituri-55) | none — conformant by the 2026-10-10 error-page rule / `accepted-divergences.json` | — |

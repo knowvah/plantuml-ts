@@ -10,7 +10,7 @@ const AUTOMAGIC_TO_COLOR_FAILURE =
   'UnsupportedOperationException: class net.sourceforge.plantuml.klimt.color.HColorAutomagic';
 
 /** Any upstream `HColor` (`CenterBorderColor.java:42-48`). */
-type GanttColor = HColorOrPaint | HColorAutomagic;
+export type GanttColor = HColorOrPaint | HColorAutomagic;
 
 /**
  * `HColors.unlinear` over {@link GanttColor}: the klimt port takes no

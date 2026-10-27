@@ -24,6 +24,7 @@ import type { PreprocessorResult } from './core/preprocessor.js';
 import { inheritingRenderFn, takePendingPrevious, withPrevious } from './core/nested-previous.js';
 import { DiagramRefusal, emptySvg, errorSvg, preprocessorErrorSvg, welcomeSvg } from './core/error/error-diagrams.js';
 import { resolveMeasurer, type RenderOptions } from './core/render-options.js';
+import { renderClock } from './core/clock.js';
 import { clockOfOptions, isJarCompatibleStyleInput } from './core/internal-render-options.js';
 import { layoutServices, layoutServicesSync } from './core/elk/layout-services.js';
 import { assembleSvg, seedOfUmlSource } from './core/assemble-svg.js';
@@ -308,7 +309,11 @@ function prepareBlock(block: BlockUmlOk, source: UmlSource, options: RenderOptio
   // Served remote images (`options.assetStore`, `remote-image:<url>`) become the data URIs creole decodes; see `remote-image-store.ts`.
   const umlSource = { ...source, lines: inlineRemoteImageLines(source.lines, options?.assetStore) };
   const skinCut = skinCutOf(block.preprocessed, umlSource);
-  const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore }, skinCut);
+  const resolution = registry.resolve(
+    umlSource,
+    { assetStore: options?.assetStore, clock: renderClock(options) },
+    skinCut,
+  );
   const plugin = resolution.plugin;
   // sdd3-T8h: a nested `{{ }}` diagram starts from the enclosing diagram's skinparams (`nested-previous.ts`).
   // D9 (lad Amendment 1): `styleInput` is the jar-compatible normalisation, applied only when conformance asks for it.

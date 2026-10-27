@@ -1,0 +1,11 @@
+@startgantt
+
+printscale weekly
+saturdays are closed
+sundays are closed
+
+project starts 2023/9/25
+
+[Test] lasts 1 day
+
+@endgantt
