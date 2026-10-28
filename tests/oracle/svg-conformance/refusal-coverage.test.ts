@@ -455,8 +455,19 @@ const pinnedJarErrors = manifest.fixtures.filter((f) => !f.jarRendered);
  *  samples sit in the same band: 108,222 ms (run 37856273415), 111,457 ms
  *  (run 38046648955) and 102,491 ms (run 38075923903), 85-93% of the old
  *  120,000 ms. That margin is too thin for a 4-vCPU runner, so the same
- *  budget applies here. */
-const CORPUS_BUDGET_MS = 330_000;
+ *  budget applies here.
+ *
+ * RE-DERIVED AGAIN (2026-10-28, PR #95 run 40730527655). gantt-engine-port
+ * turned 265 gantt rows from error pages into real renders and added 251
+ * gantt golden clones (8,432 -> 8,684 rows), so this gate's CI cost tripled:
+ * 336,125 ms here (timed out at 330,000) and <= 315 s on the last green main
+ * run (40528746274, same ubuntu-26.04 image, shard-4 wall clock); the sibling
+ * measured 277,236 ms. Not a slow runner: zudize-61 took 24 s against its
+ * 22-41 s samples. The dev box measures 92-131 s across gep b0 .. gdd final
+ * (12 cores vs the runner's 4 vCPU). Budget raised to 10 minutes (user
+ * ruling 2026-10-28); CI's 12-minute `test` step cap remains the outer
+ * backstop. */
+const CORPUS_BUDGET_MS = 600_000;
 
 describe('refusal coverage — corpus completeness', () => {
   it(
