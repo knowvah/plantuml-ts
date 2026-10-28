@@ -1,0 +1,343 @@
+{
+  "generatedAt": "2026-10-28T22:51:08.060Z",
+  "fixtures": [
+    {
+      "slug": "bafemu-96-luji978",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "diverged",
+      "maxDelta": 89.62800000000004,
+      "firstDiff": "svg/g[1]/path[57]/@d",
+      "maxDeltaPath": "svg/g[1]/path[59]/@d[4]"
+    },
+    {
+      "slug": "bedega-54-romu926",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "coxima-79-gano159",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "finofu-94-daso450",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gabalo-23-tefe408",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 2.151999999999987,
+      "maxDeltaPath": "svg/g[1]/path[6]/@d[0]"
+    },
+    {
+      "slug": "gatuva-87-futo104",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.9860000000000042,
+      "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
+    },
+    {
+      "slug": "gipoxa-19-bico146",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gobavi-45-guna544",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.0109999999999957,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
+    },
+    {
+      "slug": "jozapu-14-datu953",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 6.349999999999909,
+      "maxDeltaPath": "svg/g[1]/path[138]/@d[4]"
+    },
+    {
+      "slug": "jukejo-54-pope427",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 2.151999999999987,
+      "maxDeltaPath": "svg/g[1]/path[6]/@d[0]"
+    },
+    {
+      "slug": "ketunu-15-poli031",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.282999999999987,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
+    },
+    {
+      "slug": "kotize-70-nuze855",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.9299999999999926,
+      "maxDeltaPath": "svg/g[1]/path[2]/@d[4]"
+    },
+    {
+      "slug": "lelofi-17-cafo004",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.9299999999999926,
+      "maxDeltaPath": "svg/g[1]/path[2]/@d[4]"
+    },
+    {
+      "slug": "lifuxe-66-maxu442",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lipoka-75-rigo326",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.9860000000000042,
+      "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
+    },
+    {
+      "slug": "litife-43-novo083",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.4100000000000108,
+      "maxDeltaPath": "svg/g[1]/path[8]/@d[26]"
+    },
+    {
+      "slug": "medosa-24-jugi124",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.3019999999999925,
+      "maxDeltaPath": "svg/g[1]/path[2]/@d[4]"
+    },
+    {
+      "slug": "mudeno-46-rado553",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.27699999999993,
+      "maxDeltaPath": "svg/g[1]/path[5]/@d[6]"
+    },
+    {
+      "slug": "najoba-05-nino350",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.4089999999999918,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
+    },
+    {
+      "slug": "nuzaje-74-kenu009",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 133.62999999999997,
+      "maxDeltaPath": "svg/g[1]/path[2]/@d[6]"
+    },
+    {
+      "slug": "polela-38-mopu631",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.9299999999999926,
+      "maxDeltaPath": "svg/g[1]/path[2]/@d[4]"
+    },
+    {
+      "slug": "poxedu-72-bite327",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 2.020999999999958,
+      "maxDeltaPath": "svg/g[1]/path[10]/@d[0]"
+    },
+    {
+      "slug": "sozafu-05-xeka661",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.5339999999999918,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
+    },
+    {
+      "slug": "sudabi-56-dedu341",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.4089999999999918,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
+    },
+    {
+      "slug": "tadari-70-nare798",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.4089999999999918,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
+    },
+    {
+      "slug": "vaceci-80-lezo436",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 2.583000000000027,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
+    },
+    {
+      "slug": "vapoda-87-piku740",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.9860000000000042,
+      "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
+    },
+    {
+      "slug": "vugalo-43-mose807",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 0.8289999999999935,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
+    },
+    {
+      "slug": "vuzosu-08-pake421",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xacali-26-mazu431",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.433000000000007,
+      "maxDeltaPath": "svg/g[1]/path[3]/@d[8]"
+    },
+    {
+      "slug": "xatato-75-mora801",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xofilu-53-tazi162",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 2.1459999999999866,
+      "maxDeltaPath": "svg/g[1]/path[3]/@d[8]"
+    },
+    {
+      "slug": "xubife-72-runi076",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.7200000000000273,
+      "maxDeltaPath": "svg/g[1]/path[6]/@d[0]"
+    },
+    {
+      "slug": "YAML-attribute-hierarchy",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.7419999999999902,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
+    },
+    {
+      "slug": "YAML-list-key-value-pair",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.0109999999999957,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
+    },
+    {
+      "slug": "YAML-space-indent",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 2.1459999999999866,
+      "maxDeltaPath": "svg/g[1]/path[3]/@d[8]"
+    },
+    {
+      "slug": "zebapi-77-zasu051",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 0.9099999999999966,
+      "maxDeltaPath": "svg/g[1]/path[2]/@d[4]"
+    },
+    {
+      "slug": "zeduse-06-fidi174",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.7419999999999902,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
+    },
+    {
+      "slug": "zomime-61-sase339",
+      "type": "yaml",
+      "dotEqual": false,
+      "layoutEqual": "n/a",
+      "verdict": "structural-match",
+      "maxDelta": 1.5049999999999955,
+      "maxDeltaPath": "svg/g[1]/path[5]/@d[8]"
+    }
+  ]
+}

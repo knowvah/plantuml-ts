@@ -148,9 +148,10 @@ describe('extensions (DIVERGENCES.md "Extensions", lad D9)', () => {
     expect(rootOf(jar(body))).toContain('background:#FFFFFF;');
   });
 
-  it('skinparam shadowing never reaches the note (FEntry.java:170 reads the style)', () => {
+  it('skinparam shadowing never reaches the note in jar-compatible mode (FEntry.java:170 reads the style)', () => {
+    // Honoured in extended mode since ddc T3b (extensions.test.ts).
     const body = 'skinparam shadowing true\n<note>\nx\n</note>';
-    expect(render(body)).toBe(jar(body));
-    expect(render(body)).not.toContain('filter=');
+    expect(jar(body)).toBe(jar('<note>\nx\n</note>'));
+    expect(jar(body)).not.toContain('filter=');
   });
 });

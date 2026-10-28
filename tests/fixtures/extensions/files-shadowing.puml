@@ -1,0 +1,8 @@
+@startfiles
+skinparam shadowing true
+/Alpha/
+/Alpha/Bravo.txt
+<note>
+hello
+</note>
+@endfiles

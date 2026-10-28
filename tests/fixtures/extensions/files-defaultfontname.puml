@@ -1,0 +1,8 @@
+@startfiles
+skinparam defaultFontName Courier
+/Alpha/
+/Alpha/Bravo.txt
+<note>
+hello
+</note>
+@endfiles

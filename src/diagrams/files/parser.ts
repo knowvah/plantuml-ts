@@ -20,6 +20,7 @@ import { PreprocessingArtifact } from '../../core/tim/PreprocessingArtifact.js';
 import type { FontConfiguration } from '../../core/abel/FontConfiguration.js';
 import type { FilesDiagramAST } from './ast.js';
 import { SkinParam } from './files-skin-param.js';
+import { hasStyleDirective, isExtended, isHandwrittenRequested, styleDirectivesOf } from './files-extensions.js';
 import { FilesListing } from './renderer.js';
 
 /** A line starting with this adds a path. @see FilesDiagram.java:84 */
@@ -41,7 +42,8 @@ const EMPTY_STYLE_SOURCE: NonNullable<ExtractedSource['styleSource']> = {
  * StyleExtractor.java:88-96) and `FilesDiagram` never reads that (FilesDiagram.java:62-80), so no skinparam
  * reaches the diagram. The same cut as `files-style-input.ts`, which the jar-compatible render applies to the
  * theme; the parse sees the preprocessor's output before that cut, so it makes it itself. The extended-mode
- * skinparams a user may add (DIVERGENCES.md "Extensions") are honoured at render time, off the theme.
+ * skinparams a user may add (DIVERGENCES.md "Extensions") are honoured by {@link FilesDiagram#forMode}, which
+ * parses again with the style directives of `files-extensions.ts` kept.
  */
 function jarStyleSource(styleSource: NonNullable<ExtractedSource['styleSource']>): typeof styleSource {
   const order = styleSource.declarationOrder;
@@ -99,13 +101,23 @@ export class FilesDiagram extends TitledDiagram {
    * on without the style (`e.printStackTrace()`, FilesDiagram.java:68-70).
    */
   readonly styleError: StyleParsingException | undefined;
+  /** What {@link forMode} parses again. */
+  private readonly extractedSource: ExtractedSource;
+  private readonly parseOptions: ParseOptions | undefined;
   /** The `root.element.filesDiagram` font every row is drawn in. @see FilesDiagram.java:71-76 */
   readonly fontConfiguration: FontConfiguration;
 
-  /** @see FilesDiagram.java:62-90 */
-  constructor(source: ExtractedSource, options?: ParseOptions) {
+  /**
+   * `extended` keeps the style directives of `files-extensions.ts` among the skinparams (default: the jar's
+   * cut, none).
+   * @see FilesDiagram.java:62-90
+   */
+  constructor(source: ExtractedSource, options?: ParseOptions, extended = false) {
     super(source, 'FILES', undefined, new PreprocessingArtifact());
-    const styleSource = jarStyleSource(source.styleSource ?? EMPTY_STYLE_SOURCE);
+    this.extractedSource = source;
+    this.parseOptions = options;
+    const given = source.styleSource ?? EMPTY_STYLE_SOURCE;
+    const styleSource = extended ? styleDirectivesOf(given) : jarStyleSource(given);
     const style = createMindmapSkinParam(styleSource);
     this.skinParam = new SkinParam({
       style,
@@ -149,6 +161,22 @@ export class FilesDiagram extends TitledDiagram {
     if (annotation !== null) return annotation.consumed;
     const sprite = matchSpriteCommand(lines, index, this.skinParam.getSprites());
     return sprite === null ? 1 : sprite.consumed;
+  }
+
+  /**
+   * The diagram and drawing flag of this render's mode. Jar-compatible (`files-style-input.ts` marked the
+   * source): this diagram, not handwritten. Otherwise the diagram parsed again with the style directives when the
+   * source declares any, and `handwritten` as `skinparam handwritten true` asks (DIVERGENCES.md "Extensions").
+   * Port-only; the jar has neither.
+   */
+  forMode(): { readonly diagram: FilesDiagram; readonly handwritten: boolean } {
+    // Idempotent; here because `styleInput` (the jar-compatible mark) runs after the parse, so the mode is unknown then.
+    if (!isExtended(this.extractedSource)) return { diagram: this, handwritten: false };
+    const given = this.extractedSource.styleSource ?? EMPTY_STYLE_SOURCE;
+    return {
+      diagram: hasStyleDirective(given) ? new FilesDiagram(this.extractedSource, this.parseOptions, true) : this,
+      handwritten: isHandwrittenRequested(given),
+    };
   }
 
   getSkinParam(): SkinParam {

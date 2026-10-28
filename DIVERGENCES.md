@@ -1102,18 +1102,21 @@ extension-audit.md`). Pinned examples: `tests/fixtures/extensions/`, gated by
 | `skinparam backgroundColor` | json | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:57px;height:58px;background:#FFEEEE;" / added <rect x="0" y="0" width="57" height="58" fill="#FEE" stroke="none"/>` |
 | `skinparam defaultFontName` | json | `<text> font-family (absent)->"Courier" / <text> x "15"->"32.787"; font-family (absent)->"Courier"; font-weight "700"->(absent)` |
 | `skinparam defaultFontSize` | json | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:64px;height:70px;background:#FFFFFF;"; width "57px"->"64px"; height "58px"->"70px" / <rect> width "35.575"->"42.25"; height "36"->"48"` |
+| `skinparam defaultFontColor` | json | `<text> fill "#000"->"#F00" (all 4 texts)` |
 | `skinparam lengthAdjust none` | json | `<g> lengthAdjust "spacing"->(absent)` |
 | `skinparam lengthAdjust spacingAndGlyphs` | json | `<g> lengthAdjust "spacing"->"spacingAndGlyphs"` |
 | `!theme aws-orange` | json | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:55px;height:54px;"; width "57px"->"55px"; height "58px"->"54px" / <rect> width "35.575"->"33.35"; height "36"->"32"` |
 | `skinparam backgroundColor` | yaml | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:57px;height:58px;background:#FFEEEE;" / added <rect x="0" y="0" width="57" height="58" fill="#FEE" stroke="none"/>` |
 | `skinparam defaultFontName` | yaml | `<text> font-family (absent)->"Courier" / <text> x "15"->"32.787"; font-family (absent)->"Courier"; font-weight "700"->(absent)` |
 | `skinparam defaultFontSize` | yaml | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:64px;height:70px;background:#FFFFFF;"; width "57px"->"64px"; height "58px"->"70px" / <rect> width "35.575"->"42.25"; height "36"->"48"` |
+| `skinparam defaultFontColor` | yaml | `<text> fill "#000"->"#F00" (all 4 texts)` |
 | `skinparam lengthAdjust none` | yaml | `<g> lengthAdjust "spacing"->(absent)` |
 | `skinparam lengthAdjust spacingAndGlyphs` | yaml | `<g> lengthAdjust "spacing"->"spacingAndGlyphs"` |
 | `!theme aws-orange` | yaml | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:55px;height:54px;"; width "57px"->"55px"; height "58px"->"54px" / <rect> width "35.575"->"33.35"; height "36"->"32"` |
 | `skinparam backgroundColor` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:115px;height:40px;background:#FFEEEE;" / added <rect x="0" y="0" width="115" height="40" fill="#FEE" stroke="none"/>` |
 | `skinparam defaultFontName` | hcl | `<text> font-family (absent)->"Courier" / <text> x "15"->"47.575"; font-family (absent)->"Courier"; textLength "22.575"->"50.575"` |
 | `skinparam defaultFontSize` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:146px;height:46px;background:#FFFFFF;"; width "115px"->"146px"; height "40px"->"46px" / <rect> width "93.15"->"124.5"; height "18"->"24"` |
+| `skinparam defaultFontColor` | hcl | `<text> fill "#000"->"#F00" (both texts)` |
 | `skinparam lengthAdjust none` | hcl | `<g> lengthAdjust "spacing"->(absent) / <text> textLength "22.575"->(absent) / textLength count 2->0` |
 | `skinparam lengthAdjust spacingAndGlyphs` | hcl | `<g> lengthAdjust "spacing"->"spacingAndGlyphs"` |
 | `<style> document` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:115px;height:40px;background:#FFEEEE;" / added <rect x="0" y="0" width="115" height="40" fill="#FEE" stroke="none"/>` |
@@ -1123,20 +1126,30 @@ extension-audit.md`). Pinned examples: `tests/fixtures/extensions/`, gated by
 | `skinparam backgroundColor` | files | `<svg> style "width:99px;height:70px;background:#FFFFFF;"->"width:99px;height:70px;background:#FFEEEE;" / added <rect x="0" y="0" width="99" height="70" fill="#FEE" style="stroke:none;"/>` |
 | `skinparam lengthAdjust none` | files | `<g> lengthAdjust "spacing"->(absent) / <text> textLength "35.875", "36.575"->(absent)` |
 | `skinparam lengthAdjust spacingAndGlyphs` | files | `<g> lengthAdjust "spacing"->"spacingAndGlyphs"` |
-| `!theme aws-orange` | files | `<svg> style "width:99px;height:70px;background:#FFFFFF;"->"width:99px;height:70px;"` |
+| `skinparam defaultFontName` | files | `<text> font-family (absent)->"Courier"` (3 texts) |
+| `skinparam defaultFontSize` | files | `<svg> style "width:118px;height:95px;background:#FFFFFF;"->"width:150px;height:122px;background:#FFFFFF;"; width "118px"->"150px"; height "95px"->"122px" / <text> font-size "14"->"20" (entries), "13"->"20" (note) / <text> x "31"->"40"; textLength "35.875"->"51.25"` |
+| `skinparam defaultFontColor` | files | `<text> fill "#000"->"#F00"` (3 texts) |
+| `skinparam shadowing` | files | `<defs/>->` a `<filter>` (`feGaussianBlur stdDeviation="2"`, `feOffset dx="4" dy="4"`) / note body `<path> filter (absent)->"url(#...)"` |
+| `skinparam handwritten` | files | note `<path> d "M31,59.5 L31,82.5 L79.544,82.5 ..."->"M31,59.5 L31.187,59.5 L30.632,64.1 ..."` (jiggled polyline); canvas size unchanged |
+| `!theme aws-orange` | files | `<svg> style "width:99px;height:70px;background:#FFFFFF;"->"width:91px;height:64px;"; width "99px"->"91px"; height "70px"->"64px" / <text> font-size "14"->"12"; font-family (absent)->"'Verdana'"; x "31"->"28"; textLength "35.875"->"30.75"` (the theme's `defaultFontName`/`defaultFontSize`, honoured since ddc T3b) |
 
 **Ignored (measured: output identical in both modes and to the directive-free
 render).**
 
-- `skinparam defaultFontColor`: json, yaml, hcl, files
 - `skinparam roundCorner`: json, yaml, hcl, files
-- `skinparam shadowing`: json, yaml, hcl, files
-- `skinparam lineColor`: json, yaml, hcl, files
+- `skinparam shadowing`: json, yaml, hcl
+- `skinparam lineColor`: json, yaml, hcl, files (no `FromSkinparamToStyle`
+  row: a class diagram ignores it too, so no extension is defined — ddc T3b)
 - `skin rose`: json, yaml, hcl
-- `skinparam defaultFontName`: files
-- `skinparam defaultFontSize`: files
-- `<style> <engine>Diagram { node {...} }`: files
-- `skinparam handwritten true`: files
+- `<style> <engine>Diagram { node {...} }`: files (`node` is not a files
+  style element in the jar)
+
+Honoured since ddc batch 3 (2026-10-28), each with the mapping
+`FromSkinparamToStyle.java` gives a class diagram: `defaultFontColor` (json,
+yaml, hcl, files; `:157` → `root { FontColor }`, i.e. "as if the skin had no
+explicit `jsonDiagram { FontColor }`"), and for files `defaultFontName`
+(`:156`), `defaultFontSize` (`:91`), `shadowing` (`:330-333`, `:386-394`),
+`handwritten` (`SkinParam.java:1076-1078`, `TextBlockExporter.java:174-175`).
 
 Note: hcl `<style>` node styling only works through the `jsonDiagram`
 selector; `hclDiagram` is no `SName` (`Context.java:87-91`). `handwritten`,

@@ -13,11 +13,12 @@
  * is always the exported block and {@link filesPlugin} hands `src/index.ts` an AST
  * without `annotations`.
  *
- * No `skinparam`: the diagram executes none (FilesDiagram.java:62-80), so its skin
- * param holds none, and `mode`/`monochrome`/`reversecolor`/`handwritten` never apply.
- * The two skinparam extensions the port honours (DIVERGENCES.md "Extensions", lad D9)
- * come from the theme, which `prepareBlock` builds from the extended-mode skinparams
- * and the jar-compatible mode empties: `lengthAdjust` and the document background.
+ * No `skinparam` in the jar: the diagram executes none (FilesDiagram.java:62-80), so its skin
+ * param holds none, and `mode`/`monochrome`/`reversecolor`/`handwritten` never apply. The port's
+ * documented extensions (DIVERGENCES.md "Extensions", lad D9, ddc D8) honour, in extended mode only:
+ * `lengthAdjust` and the document background (off the theme `prepareBlock` builds from the extended-mode
+ * skinparams, which the jar-compatible mode empties), and the five directives of `files-extensions.ts`
+ * (`FilesDiagram#forMode`).
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/filesdiagram/FilesDiagramFactory.java
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/TextBlockExporter.java:153-209
@@ -32,6 +33,7 @@ import { extractFlatContent, extractViewBoxDims, VERSION_PLACEHOLDER } from '../
 import type { StringBounder as DriverStringBounder } from '../../core/klimt/drawing/svg/driver-text-svg.js';
 import { lengthAdjustOverride } from '../../core/klimt/drawing/svg/svg-option.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics-core.js';
+import { UGraphicHandwritten } from '../../core/klimt/drawing/hand/UGraphicHandwritten.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
 import type { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
@@ -61,6 +63,8 @@ export interface FilesGeometry {
   readonly diagram: FilesDiagram;
   readonly measurer: StringMeasurer;
   readonly theme: Theme;
+  /** `skinparam handwritten true` in extended mode: the graphic is wrapped in `UGraphicHandwritten`. */
+  readonly handwritten: boolean;
 }
 
 /** The width-only driver half of `UGraphicSvg`'s two text seams (the
@@ -160,7 +164,9 @@ function svgGraphic(geo: FilesGeometry, pass: DrawPass): UGraphicSvg {
 function drawFragment(geo: FilesGeometry, pass: DrawPass): RenderFragment {
   const backcolor = toSvgPaint(backColorOf(geo.diagram, geo.theme), ColorMapper.IDENTITY);
   const ug = svgGraphic(geo, pass);
-  pass.textBlock.drawU(ug.apply(pass.translate));
+  // TextBlockExporter.java:173-176: translate by the margin, THEN wrap when handwritten (an extension here).
+  const translated = ug.apply(pass.translate);
+  pass.textBlock.drawU(geo.handwritten ? new UGraphicHandwritten(translated) : translated);
   const svg = ug.getSvgString();
   const { width, height } = extractViewBoxDims(svg);
   const { body, extraDefs } = extractFlatContent(svg);
@@ -242,7 +248,8 @@ export const filesPlugin: SyncPlugin<FilesDiagramAST, FilesGeometry> = {
   styleInput: filesStyleInput,
 
   layoutSync(ast, theme, measurer) {
-    return { diagram: ast.diagram, measurer, theme };
+    const { diagram, handwritten } = ast.diagram.forMode();
+    return { diagram, measurer, theme, handwritten };
   },
 
   render(geo) {

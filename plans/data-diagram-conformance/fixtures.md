@@ -12,6 +12,7 @@ json/yaml rows. Each close adds a counts row and updates the family table.
 | b0 close (`feat/data-diagram-conformance`, 2026-10-28) | 13/24/13 | 7/28/4 | 1/2/0 | 0/0/9 (bucket captured, T0c; 8 still in `unknown`) | 10/6/1/0 | 89 + 3 | 1 files row (diverged, now in `dot-cache/files` + `parity-files.json`) |
 | b1 close (2026-10-28) | 13/36/1 (timafu ceiling) | 7/31/1 (bafemu, geometry: spline piece count) | 1/2/0 | 9/0/0 | 13/7/1/9 | 145 + 3 | json-family 56 clean / 65 (9 open → T2d); files 17 at 0 / 18 (`empty-diagram` 5, core → batch 2) |
 | b2 close (2026-10-28) | 14/35/1 (timafu ceiling) | 7/31/1 (bafemu) | 1/2/0 | 9/0/0 | 14/7/1/9 | 150 + 3 | json-family 61 clean / 65 (4 open: json style engine); files 18 at 0 / 18 |
+| b3 close (2026-10-28, extensions) | 14/35/1 | 7/31/1 | 1/2/0 | 9/0/0 | 14/7/1/9 | 150 + 3 | unchanged (extended mode only); extension examples json 7 / yaml 7 / hcl 10 / files 9 |
 
 ## Families
 

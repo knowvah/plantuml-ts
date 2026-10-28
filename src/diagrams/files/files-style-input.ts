@@ -1,5 +1,6 @@
 import type { UmlSource } from '../../core/block-extractor.js';
 import type { PreprocessorResult } from '../../core/preprocessor.js';
+import { markJarCompatible } from './files-extensions.js';
 
 /**
  * The jar-compatible style input of `@startfiles` (lad D9). `FilesDiagram
@@ -9,8 +10,12 @@ import type { PreprocessorResult } from '../../core/preprocessor.js';
  * (`FilesDiagram.java:62-80`), so no `skinparam` -- not even `handwritten`,
  * which `StyleExtractor.java:88-96` is the only reader of -- reaches the
  * diagram. The preprocessor's skinparam map is therefore emptied.
+ *
+ * Runs only for a jar-compatible render, after the parse: it also marks `source` so the layout leaves the
+ * extensions of `files-extensions.ts` out.
  */
-export function filesStyleInput(preprocessed: PreprocessorResult, _source: UmlSource): PreprocessorResult {
+export function filesStyleInput(preprocessed: PreprocessorResult, source: UmlSource): PreprocessorResult {
+  markJarCompatible(source);
   const order = preprocessed.declarationOrder;
   return {
     ...preprocessed,
