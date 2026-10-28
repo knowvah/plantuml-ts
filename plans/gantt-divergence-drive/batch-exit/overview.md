@@ -6,7 +6,8 @@ Agent: orchestrator. Runs after the batch 2 close. Commits:
 
 ## Steps
 1. **Final measurement** at load < 8: `gates.sh final`; `cmp dist/plantuml-ts.d.ts
-   $M/b0-plantuml-ts.d.ts`; chain into `$M/final-eng/` diffed against **b0**:
+   $M/b0-plantuml-ts.d.ts` (or the journaled `RenderFragment` / `AssembledSvg`
+   diff only — stop 6 amendment 2026-10-27); chain into `$M/final-eng/` diffed against **b0**:
    0 conformant losses in the 27 other engines; every mover journaled with its
    mechanism (T1a rows moving toward the jar are expected movers).
 2. **D8 exit bar:** gantt 265/265, `errored` 0, goldens 254, the five authored

@@ -12,7 +12,9 @@ measurement (`b0` for batch 1). `$T`/`$M` as in README.
    worktrees: `ps -Ao pid,command | grep worktrees/gdd-` and kill leftovers.
 2. **Four gates.** `bash $M/gates.sh bN`. Collected = on-disk (stop 10). A
    "Test timed out" with no diff is load: `uptime`, rerun at `--maxWorkers=4`.
-   `cmp dist/plantuml-ts.d.ts $M/b0-plantuml-ts.d.ts` (stop 6).
+   `cmp dist/plantuml-ts.d.ts $M/b0-plantuml-ts.d.ts` (stop 6; since the
+   2026-10-27 amendment a diff confined to the `RenderFragment` /
+   `AssembledSvg` declarations is quoted in the journal instead of halting).
 3. **All engines (D6).** `bash $M/chain.sh bN-eng`; `node $T/verdict-diff.mjs
    $M/<prev>-eng $M/bN-eng`. Only gantt may gain; a conformant loss elsewhere
    is stop 4; a row elsewhere moving AWAY from the jar after T1a is stop 15; a

@@ -32,6 +32,7 @@ import type { CenterBorderColor } from '../lang/CenterBorderColor.js';
 import { TimePoint } from '../time/TimePoint.js';
 import type { TimeScale } from '../timescale/TimeScale.js';
 import { FingerPrint } from './FingerPrint.js';
+import { emojiStoreOf } from './header/TimeHeader.js';
 import type { TaskDraw } from './TaskDraw.js';
 
 /** `ug.apply(HColor)`: the style layer's `HColor` is an `HColorSimple`/`HColorGradient`; Java's cast otherwise. */
@@ -117,11 +118,15 @@ export class TaskDrawSeparator implements TaskDraw {
     return style;
   }
 
-  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/draw/TaskDrawSeparator.java:123-129 */
+  /**
+   * The title's emoji draw from the injected Twemoji store (port-only, ADR-2); upstream's `Emoji#getSvg` always
+   * finds the artwork on the classpath (`Emoji.java:175-193`), with no text fallback.
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/gantt/draw/TaskDrawSeparator.java:123-129
+   */
   #getTitle(): TextBlock {
     if (this.#name === undefined) return TextBlockUtils.empty(0, 0);
 
-    const spriteContainer = new SpriteContainerEmpty();
+    const spriteContainer = new SpriteContainerEmpty(undefined, emojiStoreOf(this.#skinParam));
     const fontConfiguration = this.#getFontConfiguration();
     const ctx = { fontConfiguration, spriteContainer, atomOps: spriteContainer.atomOps(fontConfiguration) };
     const display: Display = DisplayClass.getWithNewlines(this.#skinParam.getPragma(), this.#name);

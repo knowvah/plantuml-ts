@@ -57,6 +57,25 @@ core: no gantt-only branch, all-engine chain after the commit. If it is
 `src/diagrams/gantt/index.ts`, it mirrors what the other exporting engines
 (wbs/salt/mindmap `rawTextBlock`) hand over. Three authored fixtures pin it.
 
+**Amendment 2026-10-27 (T1b artifact, `diagnosis/xikovo.md`; decision unchanged).**
+The probe narrative above is corrected: the missing 8 px is not the footer
+height (`getTimeFooterHeight` is 16) but day-separator INK drawn below the
+body's `calculateDimension` — `TimeHeaderSimple.java:145-146`
+`drawSmallVlinesDay` applies `dy(6)` and draws `vline(totalHeightWithoutFooter
++ 2)`. The jar's canvas is `SvgGraphics` `maxX/maxY`, grown by `ensureVisible`
+on every primitive (`SvgGraphics.java:129-134, 361-362, 620-621`) and seeded
+with `minDim` (`:142-143`), emitted at `:810-813`; ours sizes the
+`exportMargin` arm from the stacked dimension alone
+(`src/core/TextBlockExporter.ts:326-327`, `trunc(dim + 1)`), discarding the
+canvas `drawBodyAt` produced. Without top chrome the body's own canvas already
+covers the ink (hide-only 55 = 46 + 8 + 1); with a title/header on top the
+ink moves below the stacked dimension and is clipped; a caption stacks 17 px
+BELOW the body, which covers the 8 px. Origin is in the D2 seam (core
+`TextBlockExporter.ts`), so the fix is core: canvas = max(the minDim arm,
+the drawn body's ensureVisible canvas at its anchor), for every exporter on
+that arm (gantt, wbs, salt, mindmap). T1b's gated counterfactual: 3 gantt rows
+move to 0, 0 movers in wbs/salt/mindmap (476 rows).
+
 ## D3 — emoji in separator names and note bodies: fixtures first, then the store
 
 Java: `TaskDrawSeparator.java:123-129` builds the title with
@@ -107,6 +126,11 @@ on-disk); all-engine chain at every close and after every core commit; 0
 conformant losses in 28 engines vs b0; `dist/plantuml-ts.d.ts` byte-identical
 to `$M/b0-plantuml-ts.d.ts`; every constant cites its Java `file:line`; a
 pin only when every changed row moved toward the jar.
+
+**Amendment 2026-10-27 (user ruling, journal row 14; stop 6 amended the same
+day).** The d.ts bar reads: byte-identical to the b0 snapshot except for a
+diff confined to the `RenderFragment` / `AssembledSvg` declarations, which the
+making commit quotes in the journal. T2a (D2) is the only expected user.
 
 ## D7 — branch and commits
 

@@ -1,0 +1,6 @@
+wait load 17.20 13:37:18
+wait load 13.98 13:37:48
+wait load 11.17 13:38:18
+start gates 13:38:48
+GATES_DONE
+start chain 13:49:00

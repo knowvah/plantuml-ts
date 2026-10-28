@@ -1149,7 +1149,8 @@ describe('routing conformance — jar-error classification', () => {
     // 7970 -> 7971 at gep/close-b7: +1 svg-activity golden clone (bozido-07-geze049 promoted).
     // 7971 -> 8222 at gep/close-b7 capture: +251 svg-gantt golden clones.
     // 8222 -> 8223 at gep/close-b8: +1 svg-gantt golden clone (ribupo-71-poku778 promoted, T8c).
-    expect(pinnedAgree.length).toBe(8223);
+    // 8223 -> 8224 at gdd/close-b1 (2026-10-27): +1 svg-gantt golden clone (xureco-57-lene839 promoted, T1a).
+    expect(pinnedAgree.length).toBe(8224);
     // 629 -> 375 at gep/close-b7: the same 254 gantt rows.
     expect(pinnedMisroutes.length).toBe(375);
     expect(pinnedJarErrors.length).toBe(86);
@@ -1192,7 +1193,8 @@ describe('routing conformance — jar-error classification', () => {
     // 8431 -> 8432 at gep/close-b7 (2026-10-26): +1 svg-activity golden clone (bozido-07-geze049).
     // 8432 -> 8683 at gep/close-b7 capture: +251 svg-gantt golden clones.
     // 8683 -> 8684 at gep/close-b8: +1 svg-gantt golden clone (ribupo-71-poku778).
-    expect(manifest.fixtures.length).toBe(8684);
+    // 8684 -> 8685 at gdd/close-b1 (2026-10-27): +1 svg-gantt golden clone (xureco-57-lene839 promoted, T1a).
+    expect(manifest.fixtures.length).toBe(8685);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

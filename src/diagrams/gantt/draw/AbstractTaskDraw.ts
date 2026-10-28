@@ -282,7 +282,7 @@ export abstract class AbstractTaskDraw implements TaskDraw {
       .sheet(fc, horizontalAlignment, CreoleMode.FULL)
       .createSheet(this.note as Display) as unknown as Sheet<CreoleAtom>;
     const padding = style.getPadding();
-    const atomOps = new SpriteContainerEmpty().atomOps(fc);
+    const atomOps = new SpriteContainerEmpty(undefined, this.getEmojiStore()).atomOps(fc);
     const sheet1 = new SheetBlock1(sheet, LineBreakStrategy.NONE, atomOps, padding);
 
     const noteBackgroundColor = style.value('BackGroundColor').asColor(this.getColorSet());

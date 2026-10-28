@@ -69,6 +69,13 @@ New src module ⇒ `npm run catalog` (drift-gated).
    byte-equal or rises.
 6. Any public API change: `render`/`renderSync` signatures, exported types, a
    `Theme`/`RenderOptions` field, any diff against `$M/b0-plantuml-ts.d.ts`.
+   **Amendment 2026-10-27 (user ruling, journal rows 12 and 14).** The plugin
+   seam is exempt: a d.ts diff confined to the `RenderFragment` /
+   `AssembledSvg` declarations (the fragment contract between an engine's
+   `index.ts` and `TextBlockExporter`, carried in the d.ts only because
+   `AssembledSvg` references it; the repo has no consumers) is not a stop. The
+   commit that makes it quotes the diff in the journal. `render`/`renderSync`,
+   every other exported type and `Theme`/`RenderOptions` stay covered.
 7. A fitted constant or new behaviour without an upstream `file:line` in the
    same commit; any oracle rendered by a hand-typed `java -jar`.
 8. Any edit to dot-engine, the plantuml fork, the oracle jar or cached oracle
@@ -119,7 +126,7 @@ New src module ⇒ `npm run catalog` (drift-gated).
 | Batch | Scope | Tasks | Done |
 |---|---|---|---|
 | [0](batch-0/overview.md) | branch + tooling, b0, five authored fixtures | T0a, T0b, T0c, close | [x] |
-| [1](batch-1/overview.md) | D1 seam, xikovo diagnosis, emoji threading, pin tooling (parallel) | T1a–T1d, close | [ ] |
+| [1](batch-1/overview.md) | D1 seam, xikovo diagnosis, emoji threading, pin tooling (parallel) | T1a–T1d, close | [x] |
 | [2](batch-2/overview.md) | xikovo fix from the T1b artifact | T2a, close | [ ] |
 | [exit](batch-exit/overview.md) | final measurement vs b0, docs, memory, PR prep | T-exit | [ ] |
 | [squash](batch-squash/overview.md) | one commit per batch; tag the history | T-squash | [ ] |

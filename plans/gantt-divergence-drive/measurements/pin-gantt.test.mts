@@ -8,10 +8,13 @@
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, dirname } from 'node:path';
+import { join, dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { pinGantt, parseArgs } from './pin-gantt.mts';
 
+const REAL_REPO = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+const ACCEPTED_SLUG = 'lituri-55-caju105';
 const DATE = '2026-10-12';
 const SVG = '<svg>gantt-golden é</svg>\n';
 const PUML = '@startgantt\nProject starts 2020-01-01\n[A] lasts 2 days\n@endgantt\n';
@@ -38,6 +41,9 @@ beforeEach(() => {
   // here rather than copied from the real file: the real one gains pins at
   // every close, and these cases assert exact slug lists (salt's b4 fix).
   writeFileSync(join(goldens, 'ratchet.json'), '{\n  "fixtures": []\n}\n');
+  // The two records the refusal reads, empty in the fake repo.
+  put(join(repo, 'oracle/accepted-divergences.json'), '{ "entries": [] }\n');
+  put(join(repo, 'oracle/goldens/stock-error-pages.json'), '{ "errors": {} }\n');
 });
 afterEach(() => {
   rmSync(repo, { recursive: true, force: true });
@@ -50,7 +56,7 @@ describe('pinGantt — fresh pin', () => {
     seedCache('bbb-22-gantt222');
     const before = ratchet().fixtures;
     const result = pinGantt({ repo, goldens, slugs: ['aaa-11-gantt111', 'bbb-22-gantt222'], date: DATE });
-    expect(result).toEqual({ pinned: ['aaa-11-gantt111', 'bbb-22-gantt222'], alreadyPinned: [] });
+    expect(result).toEqual({ pinned: ['aaa-11-gantt111', 'bbb-22-gantt222'], alreadyPinned: [], refused: [] });
     for (const slug of ['aaa-11-gantt111', 'bbb-22-gantt222']) {
       expect(readFileSync(join(goldens, slug, 'golden.svg')).equals(readFileSync(cacheFile(slug, 'in.svg')))).toBe(
         true,
@@ -72,7 +78,7 @@ describe('pinGantt — idempotent re-pin', () => {
     pinGantt({ repo, goldens, slugs: ['aaa-11-gantt111'], date: DATE });
     const afterFirst = ratchetText();
     const again = pinGantt({ repo, goldens, slugs: ['aaa-11-gantt111'], date: '2026-10-13' });
-    expect(again).toEqual({ pinned: [], alreadyPinned: ['aaa-11-gantt111'] });
+    expect(again).toEqual({ pinned: [], alreadyPinned: ['aaa-11-gantt111'], refused: [] });
     expect(ratchetText()).toBe(afterFirst);
     expect(ratchet().fixtures.filter((f) => f.slug === 'aaa-11-gantt111')).toHaveLength(1);
   });
@@ -82,7 +88,7 @@ describe('pinGantt — idempotent re-pin', () => {
     seedCache('ccc-33-gantt333');
     pinGantt({ repo, goldens, slugs: ['aaa-11-gantt111'], date: DATE });
     const mixed = pinGantt({ repo, goldens, slugs: ['aaa-11-gantt111', 'ccc-33-gantt333'], date: DATE });
-    expect(mixed).toEqual({ pinned: ['ccc-33-gantt333'], alreadyPinned: ['aaa-11-gantt111'] });
+    expect(mixed).toEqual({ pinned: ['ccc-33-gantt333'], alreadyPinned: ['aaa-11-gantt111'], refused: [] });
     expect(ratchet().fixtures.map((f) => f.slug)).toEqual(['aaa-11-gantt111', 'ccc-33-gantt333']);
   });
 });
@@ -121,7 +127,7 @@ describe('pinGantt — dry run', () => {
     seedCache('aaa-11-gantt111');
     const before = ratchetText();
     const result = pinGantt({ repo, goldens, slugs: ['aaa-11-gantt111'], date: DATE, dryRun: true });
-    expect(result).toEqual({ pinned: ['aaa-11-gantt111'], alreadyPinned: [] });
+    expect(result).toEqual({ pinned: ['aaa-11-gantt111'], alreadyPinned: [], refused: [] });
     expect(existsSync(join(goldens, 'aaa-11-gantt111'))).toBe(false);
     expect(ratchetText()).toBe(before);
   });
@@ -130,6 +136,76 @@ describe('pinGantt — dry run', () => {
     expect(() => pinGantt({ repo, goldens, slugs: ['zzz-99-gantt999'], date: DATE, dryRun: true })).toThrow(
       'zzz-99-gantt999: missing test-results/dot-cache/gantt/zzz-99-gantt999/in.puml',
     );
+  });
+});
+
+describe('pinGantt — rule-conformant slugs are refused (T1d, D5)', () => {
+  const stockSlug = (): string => {
+    const keys = Object.keys(
+      (JSON.parse(readFileSync(join(REAL_REPO, 'oracle/goldens/stock-error-pages.json'), 'utf8')) as {
+        errors: Record<string, unknown>;
+      }).errors,
+    );
+    return keys.find((k) => k.startsWith('gantt/') && existsSync(join(REAL_REPO, 'test-results/dot-cache', k, 'in.svg')))!.slice(6);
+  };
+
+  test('the real accepted slug is refused by name and nothing is written', () => {
+    const before = ratchetText();
+    const result = pinGantt({ repo: REAL_REPO, goldens, slugs: [ACCEPTED_SLUG], date: DATE });
+    expect(result.pinned).toEqual([]);
+    expect(result.refused.map((r) => r.slug)).toEqual([ACCEPTED_SLUG]);
+    expect(existsSync(join(goldens, ACCEPTED_SLUG))).toBe(false);
+    expect(ratchetText()).toBe(before);
+  });
+
+  test('an accepted-divergence id alone (not a stock error) is refused with the accepted reason', () => {
+    seedCache('zzz-99-gantt999');
+    put(join(repo, 'oracle/accepted-divergences.json'), JSON.stringify({ entries: [{ match: { id: 'svg-gantt/zzz-99-gantt999' } }] }));
+    const result = pinGantt({ repo, goldens, slugs: ['zzz-99-gantt999'], date: DATE });
+    expect(result.refused).toEqual([
+      {
+        slug: 'zzz-99-gantt999',
+        reason: 'svg-gantt/zzz-99-gantt999 is an accepted divergence (oracle/accepted-divergences.json), not byte-equal',
+      },
+    ]);
+    expect(existsSync(join(goldens, 'zzz-99-gantt999'))).toBe(false);
+  });
+
+  test('a stock-error-page slug is refused and nothing is written', () => {
+    const slug = stockSlug();
+    const before = ratchetText();
+    const result = pinGantt({ repo: REAL_REPO, goldens, slugs: [slug], date: DATE });
+    expect(result.pinned).toEqual([]);
+    expect(result.refused).toEqual([
+      {
+        slug,
+        reason: `gantt/${slug} is a stock jar error page (oracle/goldens/stock-error-pages.json), not byte-equal`,
+      },
+    ]);
+    expect(existsSync(join(goldens, slug))).toBe(false);
+    expect(ratchetText()).toBe(before);
+  });
+
+  test('a refusal does not block the other slugs in the same run', () => {
+    seedCache('aaa-11-gantt111');
+    put(join(repo, 'oracle/accepted-divergences.json'), JSON.stringify({ entries: [{ match: { id: 'svg-gantt/zzz-99-gantt999' } }] }));
+    const result = pinGantt({ repo, goldens, slugs: ['zzz-99-gantt999', 'aaa-11-gantt111'], date: DATE });
+    expect(result.pinned).toEqual(['aaa-11-gantt111']);
+    expect(result.refused.map((r) => r.slug)).toEqual(['zzz-99-gantt999']);
+    expect(ratchet().fixtures).toEqual([{ slug: 'aaa-11-gantt111', addedAt: DATE, source: 'dot-cache' }]);
+  });
+
+  test('a byte-conformant real slug pins a byte-equal golden and appends exactly one entry', () => {
+    const real = JSON.parse(readFileSync(join(REAL_REPO, 'oracle/goldens/svg-gantt/ratchet.json'), 'utf8')) as {
+      fixtures: { slug: string }[];
+    };
+    const slug = real.fixtures[0]!.slug;
+    const result = pinGantt({ repo: REAL_REPO, goldens, slugs: [slug], date: DATE });
+    expect(result).toEqual({ pinned: [slug], alreadyPinned: [], refused: [] });
+    const cached = join(REAL_REPO, 'test-results/dot-cache/gantt', slug);
+    expect(readFileSync(join(goldens, slug, 'golden.svg')).equals(readFileSync(join(cached, 'in.svg')))).toBe(true);
+    expect(readFileSync(join(goldens, slug, 'in.puml')).equals(readFileSync(join(cached, 'in.puml')))).toBe(true);
+    expect(ratchet().fixtures).toEqual([{ slug, addedAt: DATE, source: 'dot-cache' }]);
   });
 });
 
