@@ -240,6 +240,10 @@ solver.
 **Open work:** none — gantt-divergence-drive (gdd, 2026-10-28) took gantt to
 265/265 conformant. Follow-ons (D1 option A none-paint mirror, D9 `data-*`
 comparator blind spot) are filed in `planning/next-missions.md` (gdd section).
+data-diagram-conformance (ddc, 2026-10-28) then took json/yaml/hcl to the
+structural bar (150 clean + 3 ceilings) and `@startfiles` to 27/27 byte-exact;
+its open items (json style engine, bafemu ceiling) are in the ddc block of
+`planning/next-missions.md`.
 
 ---
 

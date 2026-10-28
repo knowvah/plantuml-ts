@@ -5,8 +5,14 @@ Mission **A5** (json family). Sibling of `svg-description`, `svg-class`,
 
 ## Current state
 
-**7 of 50 `@startjson` fixtures byte-conformant and pinned** (plus 5 yaml and
-1 hcl in the sibling folders — 13 across the family).
+**14 of 50 `@startjson` fixtures byte-conformant and pinned** (plus 7 yaml and
+1 hcl in the sibling folders — 22 across the family; data-diagram-conformance,
+2026-10-28). Of the other 36 json rows, 35 are `structural-match` and 1 is the
+ADR-2b ceiling timafu-94; the structural manifest
+(`oracle/goldens/json-family-structural.json`) lists 150 clean rows (89 corpus
++ 61 authored) and 3 ceilings. Edges are now emitted in the jar's
+`manageOneNode` post-order (ddc T1a), which is what moved 16 rows from
+`diverged` to `structural-match`.
 
 This section previously said byte-conformance was unreachable here and the
 ratchet could never admit anything. **That was wrong, and the way it was wrong

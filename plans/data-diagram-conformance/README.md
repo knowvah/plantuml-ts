@@ -163,8 +163,8 @@ New src module ⇒ `npm run catalog` (drift-gated).
 | [1 — edge order, files port, two diagnoses, authored coverage](batch-1/overview.md) | T1a–T1f, close | [x] 2026-10-28 |
 | [2 — residuals](batch-2/overview.md) | T2a, T2b, T2d, T2e, T2f/T2g (T2c skipped), close | [x] 2026-10-28 |
 | [3 — extensions (optional)](batch-3/overview.md) | T3a, T3b, close | [x] 2026-10-28 |
-| [exit](batch-exit/overview.md) | final measurement, docs, memory | [ ] |
-| [squash](batch-squash/overview.md) | one commit per batch, tag `ddc/pre-squash` | [ ] |
+| [exit](batch-exit/overview.md) | final measurement, docs, memory | [x] 2026-10-28 (14ea4cb87, 79e53604d) |
+| [squash](batch-squash/overview.md) | one commit per batch, tag `ddc/pre-squash` | [x] 2026-10-28 |
 
 ## Documents
 
