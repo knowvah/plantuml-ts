@@ -1,0 +1,4 @@
+{
+  "$comment": "ddc T0c: the 8 pdiff @startfiles rows measured agree/ok on first contact (the files engine already stamps data-diagram-type=FILES since lad batch 2), so no excuse row is needed; this fragment exists so the --ledger directory is committed with the pin.",
+  "rows": []
+}

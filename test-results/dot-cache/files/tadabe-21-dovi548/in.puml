@@ -1,0 +1,5 @@
+@startfiles
+/tests/__init_file__.py
+/tests/~__init_file__.py
+
+@endfiles

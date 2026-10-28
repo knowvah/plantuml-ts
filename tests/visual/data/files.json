@@ -1,6 +1,34 @@
 [
   {
-    "slug": "files-directory-tree-with-note",
-    "markup": "@startfiles\n/src/\n/src/index.ts\n/src/utils/\n/src/utils/helper.ts\n/tests/\n/tests/index.test.ts\n<note>\nMain entry point\n</note>\n/README.md\n@endfiles"
+    "slug": "dobido-76-nugu008",
+    "markup": "@startfiles\n/.github/\n/src/example.py\n/src/iiimple1.py\n/tests/example_test.py\n/src/wwwmple2.py\n/tests/v1/example_test.py\n/README.md\n/doc/foo/dummy.doc\n/LICENSE\n@endfiles"
+  },
+  {
+    "slug": "kibilo-60-fado726",
+    "markup": "@startfiles\n/.github/\n/src/1/example.py\n<note>\nthis is note should be between example.py and iiimple1.py\nand not at level 0\n</note>\n/src/1/iiimple1.py\n/src/2/aaaaaa.txt\n@endfiles"
+  },
+  {
+    "slug": "nixaro-94-pefo622",
+    "markup": "@startfiles\n<style>\n  root {\n    BackgroundColor red\n    FontColor blue\n  }\n</style>\n\n/.github/\n/tests/v1/example_test.py\n/doc/dummy.doc\n<note>\nthis is a note\non two lines\n</note>\n/LICENSE\n\n@endfiles"
+  },
+  {
+    "slug": "nojeru-23-tavo641",
+    "markup": "@startfiles\n!theme crt-amber\n\n/.github/\n/tests/v1/example_test.py\n/doc/dummy.doc\n<note>\nthis is a note\non two lines\n</note>\n/LICENSE\n\n@endfiles"
+  },
+  {
+    "slug": "tadabe-21-dovi548",
+    "markup": "@startfiles\n/tests/__init_file__.py\n/tests/~__init_file__.py\n\n@endfiles"
+  },
+  {
+    "slug": "tezofo-39-fano197",
+    "markup": "@startfiles\n/.github\n/src/example.py\n/tests/example_test.py\n/README.md\n/LICENSE\n@endfiles"
+  },
+  {
+    "slug": "xeseve-00-tipa730",
+    "markup": "@startfiles\n/.github/\n/src/example.py\n/src/iiimple1.py\n/tests/example_test.py\n/src/wwwmple2.py\n/tests/v1/example_test.py\n/README.md\n/doc/foo/dummy.doc\n<note>\nthis is a note\non two lines\n</note>\n/LICENSE\n@endfiles"
+  },
+  {
+    "slug": "zixuta-02-suzo281",
+    "markup": "@startfiles\n/.github\n/src/example.py\n/src/example1.py\n/tests/example_test.py\n/src/example2.py\n/tests/v1/example_test.py\n/README.md\n/doc/foo/dummy.doc\n/LICENSE\n@endfiles"
   }
 ]
