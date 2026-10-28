@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — IN PROGRESS: batches 0–3 closed 2026-10-28, exit + squash next
+## Status — DONE 2026-10-28 (all four batches + exit); squash batch last, then the user signs and opens the PR
 
 ## Objective
 
@@ -26,6 +26,28 @@ yaml 6, hcl 1, files 0; structural manifest 89 clean + 3 named ceilings.
 Target (D1): 0 diverged rows outside the 3 ceilings, every conformant
 json/yaml/hcl row pinned, every files row (9 corpus + authored) byte-exact
 and pinned, 0 conformant losses in the other 28 engines, 0 unexplained rises.
+
+## Final status (exit, 2026-10-28)
+
+| checkpoint | json c/s/d | yaml c/s/d | hcl c/s/d | files c/s/d | pins json/yaml/hcl/files | manifest clean + ceilings | authored |
+|---|---|---|---|---|---|---|---|
+| origin/main `10aa35c6b` | 13/24/13 | 7/28/4 | 1/2/0 | 0/0/1 (+8 in `unknown`) | 10/6/1/0 | 89 + 3 | 1 files row, diverged |
+| b0 close `4f4822ee5` | 13/24/13 | 7/28/4 | 1/2/0 | 0/0/9 | 10/6/1/0 | 89 + 3 | — |
+| b1 close `b761d9a83` | 13/36/1 | 7/31/1 | 1/2/0 | 9/0/0 | 13/7/1/9 | 145 + 3 | json-family 56/65 clean; files 17/18 at 0 |
+| b2 close `eb1606573` | 14/35/1 | 7/31/1 | 1/2/0 | 9/0/0 | 14/7/1/9 | 150 + 3 | 61/65; files 18/18 |
+| b3 close `298c76f81` | 14/35/1 | 7/31/1 | 1/2/0 | 9/0/0 | 14/7/1/9 | 150 + 3 | unchanged (extended mode only) |
+
+- **Tasks:** 20 of 20 planned executed or deliberately skipped (T2c skipped: no files-side residual) plus
+  T2f/T2g added; 0 halts; 40 journal rows.
+- **D1 exit bar:** every clause holds except two named exceptions — yaml/bafemu-96 stays `diverged`
+  (spline piece count, Smetana vs dot-engine geometry: needs a user-signed 4th ADR-2b ceiling) and
+  4 json authored rows are not clean (`highlight-stereotype`, `style-highlight-block`,
+  `style-header-separator-arrow`, `theme-cerulean`: json styling is a hand-keyed `StyleMap` projection,
+  not the Style engine — a mission, `planning/next-missions.md` ddc block).
+- **Gates:** all four green at every close and at exit (collected = on-disk every time; d.ts byte-identical
+  to b0 throughout); 0 conformant losses in the 28 other engines at every chain (b0 → b1 → b2 → b3).
+- **Follow-ons:** `planning/next-missions.md` ddc block (style engine, bafemu ceiling, `scale`×`title`,
+  files annotation blocks, empty-source follow-ons, authored fixtures, manifest refresh).
 
 ## Branch
 
