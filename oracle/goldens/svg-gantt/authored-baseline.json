@@ -2,13 +2,23 @@
   "fixtures": [
     {
       "type": "gantt",
+      "slug": "caption-hide-footbox",
+      "topic": "hide footbox + caption Cap (control, D2)",
+      "status": "baseline",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0105a23d1"
+    },
+    {
+      "type": "gantt",
       "slug": "columns-hide-duration",
       "topic": "Project starts 2020-07-01;hide column duration;",
       "status": "baseline",
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -18,7 +28,37 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
+    },
+    {
+      "type": "gantt",
+      "slug": "emoji-note",
+      "topic": "note bottom body with <:innocent:> (emoji in a note, D3)",
+      "status": "baseline",
+      "weightedScore": 23,
+      "diffCount": 1,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0105a23d1"
+    },
+    {
+      "type": "gantt",
+      "slug": "emoji-separator",
+      "topic": "-- <:innocent:> Phase -- (emoji in a separator name, D3)",
+      "status": "baseline",
+      "weightedScore": 23,
+      "diffCount": 1,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0105a23d1"
+    },
+    {
+      "type": "gantt",
+      "slug": "header-hide-footbox",
+      "topic": "hide footbox + header H (D2)",
+      "status": "baseline",
+      "weightedScore": 2,
+      "diffCount": 2,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -28,7 +68,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -38,7 +78,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -48,7 +88,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -58,7 +98,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -68,7 +108,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -78,7 +118,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -88,7 +128,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -98,7 +138,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -108,7 +148,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -118,7 +158,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -128,7 +168,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -138,7 +178,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -148,7 +188,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -158,7 +198,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -168,7 +208,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -178,7 +218,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -188,7 +228,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -198,7 +238,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -208,7 +248,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -218,7 +258,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -228,7 +268,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -238,7 +278,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -248,7 +288,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -258,7 +298,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -268,7 +308,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -278,7 +318,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -288,7 +328,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -298,7 +338,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -308,7 +348,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -318,7 +358,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -328,7 +368,7 @@
       "weightedScore": 5,
       "diffCount": 5,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -338,7 +378,17 @@
       "weightedScore": 5,
       "diffCount": 5,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
+    },
+    {
+      "type": "gantt",
+      "slug": "title-hide-footbox",
+      "topic": "hide footbox + title Test (xikovo shape, D2)",
+      "status": "baseline",
+      "weightedScore": 2,
+      "diffCount": 2,
+      "measuredAt": "2026-10-27",
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -348,7 +398,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -358,7 +408,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -368,7 +418,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -378,7 +428,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -388,7 +438,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -398,7 +448,7 @@
       "weightedScore": 4,
       "diffCount": 4,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -408,7 +458,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -418,7 +468,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -428,7 +478,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -438,7 +488,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -448,7 +498,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -458,7 +508,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -468,7 +518,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -478,7 +528,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -488,7 +538,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -498,7 +548,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     },
     {
       "type": "gantt",
@@ -508,7 +558,7 @@
       "weightedScore": 0,
       "diffCount": 0,
       "measuredAt": "2026-10-27",
-      "measuredAgainstCommit": "0d42057b0"
+      "measuredAgainstCommit": "0105a23d1"
     }
   ]
 }

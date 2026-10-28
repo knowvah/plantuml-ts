@@ -1,0 +1,5 @@
+@startgantt
+hide footbox
+header H
+[Foo] lasts 12 days
+@endgantt

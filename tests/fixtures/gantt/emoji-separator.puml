@@ -1,0 +1,6 @@
+@startgantt
+Project starts 2020-07-01
+[Task A] lasts 3 days
+-- <:innocent:> Phase --
+[Task B] lasts 2 days
+@endgantt

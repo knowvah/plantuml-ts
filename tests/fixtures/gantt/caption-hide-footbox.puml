@@ -1,0 +1,5 @@
+@startgantt
+hide footbox
+caption Cap
+[Foo] lasts 12 days
+@endgantt
