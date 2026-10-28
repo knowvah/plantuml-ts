@@ -28,8 +28,8 @@ probes. Each close adds a counts row and updates the family table.
 
 | slug | construct | expected jar | state |
 |---|---|---|---|
-| emoji-separator | `-- <:innocent:> Phase --` separator name | Twemoji 1f607 as vector `<path>`s (`Emoji.java:175-181` → `SvgSpriteParserFactory`; 5 paths), NOT an `<image>` — planning slip | oracle 147 px (T0c `1774f03f8`); ours `g[1]` childCount 45 vs 51 |
-| emoji-note | `note bottom` body with `<:innocent:>` | Twemoji paths in the note (same mechanism; 5 emoji paths after the 2 note-box paths) | oracle 119 px (T0c); ours childCount 39 vs 45 |
-| title-hide-footbox | `hide footbox` + `title Test` (xikovo's shape) | height 90 (probe) | oracle 90 (T0c); ours 82 (`svg/@height`, `@viewBox[3]`) |
-| header-hide-footbox | `hide footbox` + `header H` | height 51 (probe) | oracle 51 (T0c); ours 43 |
-| caption-hide-footbox | `hide footbox` + `caption Cap` (control, already equal) | height 49 (probe) | oracle 49 (T0c); ours 49, 0 diffs |
+| emoji-separator | `-- <:innocent:> Phase --` separator name | Twemoji 1f607 as vector `<path>`s (`Emoji.java:175-181` → `SvgSpriteParserFactory`; 5 paths), NOT an `<image>` — planning slip | oracle 147 px (T0c `1774f03f8`); b0 ours `g[1]` childCount 45 vs 51 (23 diffs) → **0 diffs** since T1c `32398c121` (b1) |
+| emoji-note | `note bottom` body with `<:innocent:>` | Twemoji paths in the note (same mechanism; 5 emoji paths after the 2 note-box paths) | oracle 119 px (T0c); b0 ours childCount 39 vs 45 (23 diffs) → **0 diffs** since T1c (b1) |
+| title-hide-footbox | `hide footbox` + `title Test` (xikovo's shape) | height 90 (probe) | oracle 90 (T0c); b0 ours 82 (`svg/@height`, `@viewBox[3]`, 2 diffs) → **0 diffs**, 472×90 since T2a `0bedc6aa4` (b2) |
+| header-hide-footbox | `hide footbox` + `header H` | height 51 (probe) | oracle 51 (T0c); b0 ours 43 (2 diffs) → **0 diffs**, 338×51 since T2a (b2) |
+| caption-hide-footbox | `hide footbox` + `caption Cap` (control, already equal) | height 49 (probe) | oracle 49 (T0c); ours 49, 0 diffs at b0, b1, b2 (control held) |

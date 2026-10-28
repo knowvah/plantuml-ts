@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — PLANNED 2026-10-27 (nothing executed)
+## Status — DONE 2026-10-28: batches 0–2 + exit closed; gantt 263 → 265/265 conformant, 0 losses in 27 engines; squashed branch awaits the user's signing (tag `gdd/pre-squash` holds the working history)
 
 ## Objective
 
@@ -152,3 +152,37 @@ New src module ⇒ `npm run catalog` (drift-gated).
   core commits, D8 core driver fixes, D11 squash).
 - `.agent-notes/gep-execution.md` — "a survey's conformant set is not a golden
   pin list" (the D5 tooling fix).
+
+## Final status (exit batch, 2026-10-28)
+
+| batch | tasks | gantt (conformant / structural / diverged / errored) | goldens | chain vs b0 |
+|---|---|---|---|---|
+| 0 | T0a, T0b, T0c, close — 3/3 | 263 / 1 / 1 / 0 | 252 | b0-eng = reference (28 engines) |
+| 1 | T1a, T1b, T1c, T1d, close — 4/4 | 264 / 1 / 0 / 0 | 253 | 0 losses, 1 mover (xureco → conformant) |
+| 2 | T2a, close — 1/1 | **265 / 0 / 0 / 0** | 254 | 0 losses, 1 mover vs b1 (xikovo → conformant); 2 vs b0 |
+| exit | T-exit | 265 / 0 / 0 / 0 | 254 | = b2-eng (no `src/` change after `0bedc6aa4`; journal row 21) |
+
+- **Tasks:** 8 of 8 planned tasks executed (T0a–T0c, T1a–T1d, T2a) plus three
+  closes and the exit; no task re-scoped or dropped. The squash batch follows.
+- **Decisions:** D1–D9 held. Two dated amendments, both journaled: D2's
+  evidence narrative (row 9 — the 8 px is day-separator ink, not the footer
+  height; the decision was unchanged) and stop 6 / D6 (rows 12, 14 — user
+  ruling exempting the `RenderFragment` / `AssembledSvg` plugin seam from d.ts
+  byte-equality; used once, row 18, 13 lines inside `RenderFragment.drawBodyAt`).
+  One halt (row 12), resolved the same day. Flag for review: none beyond the
+  two amendments.
+- **Quality gates:** b0, b1 (+ b1close), b2, final — every run 1868 test files
+  collected = 1868 on disk, 0 failed, typecheck / lint / build exit 0
+  (`measurements/*-gates-run.log`, `*-npm-test.log`).
+- **D8 exit bar:** gantt 265/265, `errored` 0, goldens 254, five authored
+  fixtures jar-equal (`authored-baseline.json`: emoji-separator, emoji-note,
+  title-/header-/caption-hide-footbox all 0), diff baseline 13 → 11 rows with
+  0 rises, every `fixtures.md` family row CLOSED with its commit and Java quote.
+- **Known issues / follow-ups** (`planning/next-missions.md`, gdd section):
+  D1 option A `NONE_PAINT` representation mirror (10 files); D9 `data-*`
+  comparator blind spot; margin-baked-arm canvas measurement (T1b open
+  question). Observations in `.agent-notes/gdd-execution.md`; memory
+  `gdd-status`.
+- **Incident:** the session was lost to an out-of-memory kill mid-chain on
+  2026-10-27 (load 209 from a concurrent session) and resumed 2026-10-28 by
+  finishing the chain per engine (row 16); no work was lost.
