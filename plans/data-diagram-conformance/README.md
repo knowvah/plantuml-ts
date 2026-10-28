@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — IN PROGRESS: batches 0–1 closed 2026-10-28, batch 2 next
+## Status — IN PROGRESS: batches 0–2 closed 2026-10-28, batch 3 (extensions) running
 
 ## Objective
 
@@ -139,7 +139,7 @@ New src module ⇒ `npm run catalog` (drift-gated).
 |---|---|---|
 | [0 — branch, tooling, files harness, files bucket](batch-0/overview.md) | T0a, T0b, T0c, close | [x] 2026-10-28 |
 | [1 — edge order, files port, two diagnoses, authored coverage](batch-1/overview.md) | T1a–T1f, close | [x] 2026-10-28 |
-| [2 — residuals](batch-2/overview.md) | T2a–T2e, close | [ ] |
+| [2 — residuals](batch-2/overview.md) | T2a, T2b, T2d, T2e, T2f/T2g (T2c skipped), close | [x] 2026-10-28 |
 | [3 — extensions (optional)](batch-3/overview.md) | T3a, T3b, close | [ ] |
 | [exit](batch-exit/overview.md) | final measurement, docs, memory | [ ] |
 | [squash](batch-squash/overview.md) | one commit per batch, tag `ddc/pre-squash` | [ ] |

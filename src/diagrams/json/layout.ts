@@ -15,6 +15,7 @@ import type { DotInputEdge, DotInputGraph, DotInputNode, DotLayoutResult } from 
 import { measureNode } from './TextBlockJson.js';
 import { recordLabelFor } from './record-label.js';
 import type { JsonObject } from './JsonObject.js';
+import { JsonNumber } from './JsonNumber.js';
 import type { JsonRowGeo, MeasuredNode } from './TextBlockJson.js';
 
 // A5/T6b: node sizing moved to `TextBlockJson.ts` (upstream's own class
@@ -151,7 +152,7 @@ import { documentDimensions, ENSURE_VISIBLE_BUMP } from './document-dimensions.j
  *    unreachable from the diagram root.
  */
 function normalizeRoot(root: unknown): JsonContainer {
-  if (typeof root !== 'object' || root === null) return [root] as JsonContainer;
+  if (typeof root !== 'object' || root === null || root instanceof JsonNumber) return [root] as JsonContainer;
   const isEmpty = Array.isArray(root) ? root.length === 0 : (root as JsonObject).size === 0;
   return (isEmpty ? [''] : root) as JsonContainer;
 }

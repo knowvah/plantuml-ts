@@ -228,6 +228,10 @@ function withoutChrome(ast: FilesDiagramAST): FilesDiagramAST {
 export const filesPlugin: SyncPlugin<FilesDiagramAST, FilesGeometry> = {
   type: 'files',
 
+  /** `FilesDiagramFactory extends PSystemAbstractFactory` (`FilesDiagramFactory.java:47`): no empty test;
+   *  an empty listing is a 21x21 diagram. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/filesdiagram/FilesDiagramFactory.java:47-59 */
+  factoryBase: 'PSystemAbstractFactory',
+
   /** `FilesDiagramFactory#createSystem`; `options.assetStore` carries the Twemoji artwork of the folder/file
    *  emoticons (ADR-2). */
   parse(source, options) {

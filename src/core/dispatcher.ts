@@ -27,7 +27,7 @@ import type { SkinCut } from './skin-command.js';
 import { rect, text } from './svg.js';
 import type { Theme } from './theme.js';
 import type { StringMeasurer } from './measurer.js';
-import type { AssembledSvg, DiagramPlugin, ParseOptions, SyncPlugin } from './dispatcher-types.js';
+import type { AssembledSvg, DiagramPlugin, ParseOptions, PSystemFactoryBase, SyncPlugin } from './dispatcher-types.js';
 export type {
   ParseOptions,
   RenderFragment,
@@ -37,6 +37,7 @@ export type {
   SyncPlugin,
   AsyncPlugin,
   DiagramPlugin,
+  PSystemFactoryBase,
 } from './dispatcher-types.js';
 
 export { parseRefusalOf } from './parse-refusal.js';
@@ -115,18 +116,52 @@ export class DiagramRegistry {
    * lines before it; one that accepts them is refused AT the cut, one that
    * refuses earlier keeps its own refusal, and the merge picks the page as
    * upstream's `PSystemErrorUtils#merge` does.
+   *
+   * `emptySource` (T2g): the block is empty (`UmlSource#isEmpty`). A
+   * command-factory candidate then answers `buildEmptyError` without parsing
+   * (`PSystemCommandFactory.java:117-122`), never `isOk`, so it is skipped;
+   * the other bases parse the empty source themselves.
    */
-  resolve(source: UmlSource, options?: ParseOptions, cut?: SkinCut): Resolution {
+  resolve(source: UmlSource, options?: ParseOptions, cut?: SkinCut, emptySource = false): Resolution {
     const attempts: Attempt[] = [];
     const parsed = cut === undefined ? source : truncated(source, cut.index);
     for (const plugin of this.plugins) {
-      if (source.types !== undefined && !source.types.has(upstreamTypeOf(plugin.type))) continue;
+      if (!isCandidate(plugin, source) || (emptySource && testsEmpty(plugin))) continue;
       const outcome = attempt(plugin, parsed, options, cut);
       if (outcome.refusal === undefined) return { plugin, ast: outcome.ast };
       attempts.push({ plugin, refusal: outcome.refusal });
     }
     return resolveAllRefused(attempts);
   }
+
+  /**
+   * `PSystemBuilder#createPSystem`'s factory loop over an EMPTY source
+   * (`PSystemBuilder.java:258-287`) when every candidate is a
+   * `PSystemCommandFactory`: each answers `buildEmptyError`
+   * (`PSystemCommandFactory.java:117-122`), so the block's page is the
+   * *Empty description* (or Welcome) page, never a diagram. False when any
+   * candidate has another base: that factory runs its own `createSystem` on
+   * the empty source (`PSystemAbstractFactory`'s direct subclasses build
+   * their diagram; `PSystemBasicFactory` raises its own empty error) and
+   * {@link resolve} hands it the block.
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/PSystemAbstractFactory.java:59-65
+   */
+  isEmptyDescription(source: UmlSource): boolean {
+    return this.plugins.every((plugin) => !isCandidate(plugin, source) || testsEmpty(plugin));
+  }
+}
+
+/** `if (!diagramTypes.contains(f.getDiagramType())) continue;` (`PSystemBuilder.java:259-260`). */
+function isCandidate(plugin: DiagramPlugin, source: UmlSource): boolean {
+  return source.types === undefined || source.types.has(upstreamTypeOf(plugin.type));
+}
+
+/** Absent = `PSystemCommandFactory`, the base whose empty test core holds. */
+const COMMAND_FACTORY: PSystemFactoryBase = 'PSystemCommandFactory';
+
+/** True for a plugin mirroring `PSystemCommandFactory`, whose empty test the dispatcher applies. */
+function testsEmpty(plugin: DiagramPlugin): boolean {
+  return (plugin.factoryBase ?? COMMAND_FACTORY) === COMMAND_FACTORY;
 }
 
 /** `source` with only its first `count` body lines. */

@@ -18,7 +18,8 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import { emittedTextForm } from '../../core/svg.js';
 import { splitStripe } from './Fission.js';
 import { tabStopWidth, tabAwareWidth, walkTabs, hasTab } from './tab-stops.js';
-import { getDisplayValue, containerEntries, splitDisplayLines } from './json-layout-prep.js';
+import { getDisplayValue, containerEntries } from './json-layout-prep.js';
+import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import type { FlatNode, BuildRowsOptions } from './json-layout-prep.js';
 
 /**
@@ -253,8 +254,11 @@ function cellLines(
   const { display, valueType } = getDisplayValue(v);
   // Split via upstream's own single pass, NOT by rewriting the escape to a
   // newline and splitting on that — a real U+000A in the value must stay
-  // inside its line. See `json-layout-prep.ts#splitDisplayLines`.
-  const rawLines: string[] = valueType === 'string' ? splitDisplayLines(display) : [display];
+  // inside its line. `Display#getWithNewlines(Pragma, String)` is the one
+  // `getTextBlock` calls (`TextBlockJson.java:342`); its `else` branch keeps an
+  // unrecognised escape's backslash AND character (`Display.java:310-312`), so
+  // `back\slash` is drawn as written.
+  const rawLines: string[] = valueType === 'string' ? [...splitDisplayLines(display).lines] : [display];
   const processed = rawLines.join('\n');
   // Each raw line is a stripe, and WRAPPING breaks a stripe into lines of
   // ATOMS (`Fission.ts`) — one `<text>` per atom, not per line.

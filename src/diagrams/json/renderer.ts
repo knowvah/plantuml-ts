@@ -36,6 +36,9 @@ import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import type { JsonGeometry, JsonNodeGeo, JsonEdgeGeo, JsonRowGeo } from './layout.js';
 import { noGradient } from '../../core/paint.js';
+import { calculateMargin } from '../../core/document-margin.js';
+import type { DocumentMargin } from '../../core/document-margin.js';
+import { ENSURE_VISIBLE_BUMP } from './document-dimensions.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -60,6 +63,14 @@ const SPOT_STROKE_WIDTH = 1;
 /** `TitledDiagram#getDefaultMargins()` — `same(10)`, the fallback when no
  *  theme sets one. Mirrors `layout.ts#CANVAS_PAD`. */
 const DEFAULT_MARGIN = 10;
+
+/** `ClockwiseTopRightBottomLeft.same(10)` -- {@link DEFAULT_MARGIN} on all four sides. */
+const DEFAULT_DOCUMENT_MARGIN: DocumentMargin = {
+  top: DEFAULT_MARGIN,
+  right: DEFAULT_MARGIN,
+  bottom: DEFAULT_MARGIN,
+  left: DEFAULT_MARGIN,
+};
 
 /** `UFontFactory.monospace(14)` — `JsonDiagram#drawU`'s hard-coded failure
  *  font (`JsonDiagram.java:116`), not the theme's. */
@@ -341,18 +352,59 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen, k: number): s
  * Replaced a bespoke 640x80 red box — the same shape the class engine used
  * before its refusals were routed through the jar's own error page.
  */
-function renderParseFailure(geo: JsonGeometry): RenderFragment {
+function renderParseFailure(geo: JsonGeometry, theme: Theme, k: number): RenderFragment {
   const at = geo.errorLayout;
   const body =
     at === undefined
       ? ''
       : text(at.x, at.y, geo.error ?? '', {
           fontFamily: PARSE_FAILURE_FONT_FAMILY,
-          fontSize: PARSE_FAILURE_FONT_SIZE,
+          // `SvgGraphics.java:693`: `font-size` is scaled like `x`/`textLength`.
+          fontSize: PARSE_FAILURE_FONT_SIZE * k,
           fill: JSON_SKIN_BLACK,
           textLength: at.textLength,
         });
-  return { body, width: geo.width, height: geo.height };
+  return { body, ...declaredBlock(geo.width, geo.height, theme) };
+}
+
+/**
+ * The margin-less block `JsonDiagram` hands `DiagramChromeFactory`, and the
+ * document margin `TextBlockExporter` wraps around the chromed result.
+ *
+ * Upstream composes `getTextBlock` -> `addChrome` -> exporter margin
+ * (`UgDiagram.java:124,128`): `JsonDiagram#getTextBlock` returns `this`
+ * (`JsonDiagram.java:140-142`) sized by `calculateDimension`'s ink only
+ * (`JsonDiagram.java:130-137`), `addChrome` builds the title around THAT block
+ * (`DiagramChromeFactory.java:363-376` -> `DecorateEntityImage.addTop`), and
+ * only then does `TextBlockExporter` translate everything by the margin
+ * (`TextBlockExporter.java:173`) and size it `dim + margins` plus
+ * `ensureVisible`'s `+1` (`:199-203`). `canvasWidth`/`canvasHeight` are the
+ * already-margined canvas this producer draws into, so the block is the canvas
+ * minus both margins minus that `+1`; `applyExportedChrome`
+ * (`core/annotations/chrome-export.ts`) removes the margin, chromes the block
+ * and re-applies the margin. The margin is `TextBlockExporter.java:510-516`:
+ * the style's `Margin`, else `TitledDiagram.java:275-277` `same(10)`.
+ *
+ * A fragment with no annotations never reaches that path
+ * (`chrome-export.ts:44`), so declaring the block changes nothing for it.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/UgDiagram.java:124-128
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonDiagram.java:130-142
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/TextBlockExporter.java:173,199-203,510-516
+ */
+function declaredBlock(
+  canvasWidth: number,
+  canvasHeight: number,
+  theme: Theme,
+): Pick<RenderFragment, 'width' | 'height' | 'preChromeWidth' | 'preChromeHeight' | 'documentMargin'> {
+  const margin = calculateMargin(theme, DEFAULT_DOCUMENT_MARGIN);
+  return {
+    width: canvasWidth,
+    height: canvasHeight,
+    preChromeWidth: canvasWidth - (margin.left + margin.right) - ENSURE_VISIBLE_BUMP,
+    preChromeHeight: canvasHeight - (margin.top + margin.bottom) - ENSURE_VISIBLE_BUMP,
+    documentMargin: margin,
+  };
 }
 
 /**
@@ -420,7 +472,7 @@ export function renderJson(rawGeo: JsonGeometry, rawTheme: Theme): RenderFragmen
   const geo = scaleJsonGeometry(rawGeo, k);
   const theme = rawTheme;
 
-  if (geo.error !== undefined) return { ...renderParseFailure(geo), ...lengthAdjustOf(theme) };
+  if (geo.error !== undefined) return { ...renderParseFailure(geo, theme, k), ...lengthAdjustOf(theme) };
 
   if (geo.nodes.length === 0) {
     return { body: '', width: 0, height: 0 };
@@ -456,7 +508,7 @@ export function renderJson(rawGeo: JsonGeometry, rawTheme: Theme): RenderFragmen
   const dims = ink === undefined ? { width: geo.width, height: geo.height } : handwrittenDims(ink, theme);
   return {
     body: parts.join(''),
-    ...dims,
+    ...declaredBlock(dims.width, dims.height, theme),
     background: theme.colors.background,
     ...lengthAdjustOf(theme),
   };

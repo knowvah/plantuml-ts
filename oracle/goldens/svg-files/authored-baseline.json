@@ -35,10 +35,10 @@
       "slug": "empty-diagram",
       "topic": "empty-diagram",
       "measuredAt": "2026-10-28",
-      "measuredAgainstCommit": "251d214a",
+      "measuredAgainstCommit": "394af9e0",
       "status": "baseline",
-      "diffCount": 5,
-      "weightedScore": 184
+      "diffCount": 0,
+      "weightedScore": 0
     },
     {
       "type": "files",

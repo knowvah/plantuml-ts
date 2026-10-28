@@ -1166,7 +1166,8 @@ describe('routing conformance — jar-error classification', () => {
     // 8233 -> 8234 at ddc/close-b0 (2026-10-28): files/files-directory-tree-with-note re-pinned agree
     // (the files engine stamps data-diagram-type since lad batch 2; repin-files-routing.mts).
     // 8234 -> 8247 at ddc/close-b1 (2026-10-28): +13 golden clones (9 svg-files, 3 svg-json, 1 svg-yaml).
-    expect(pinnedAgree.length).toBe(8247);
+    // 8247 -> 8248 at ddc/close-b2 (2026-10-28): +1 svg-json golden clone (babico-87-soxo095).
+    expect(pinnedAgree.length).toBe(8248);
     // 629 -> 375 at gep/close-b7: the same 254 gantt rows.
     // 375 -> 374 at ddc/close-b0 (2026-10-28): the files authored row above.
     expect(pinnedMisroutes.length).toBe(374);
@@ -1214,7 +1215,8 @@ describe('routing conformance — jar-error classification', () => {
     // 8685 -> 8686 at gdd/close-b2 (2026-10-28): +1 svg-gantt golden clone (xikovo-87-rosu902 promoted, T2a).
     // 8686 -> 8694 at ddc/T0c (2026-10-28): +8 dot-cache/files rows (the pdiff @startfiles bucket, all agree).
     // 8694 -> 8707 at ddc/close-b1 (2026-10-28): +13 golden clones (9 svg-files, 3 svg-json, 1 svg-yaml promoted).
-    expect(manifest.fixtures.length).toBe(8707);
+    // 8707 -> 8708 at ddc/close-b2 (2026-10-28): +1 svg-json golden clone (babico-87-soxo095 promoted, T2a).
+    expect(manifest.fixtures.length).toBe(8708);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

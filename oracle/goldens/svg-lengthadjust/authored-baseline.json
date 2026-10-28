@@ -212,45 +212,41 @@
       "slug": "files-default",
       "engine": "files",
       "variant": "default",
-      "score": 29,
-      "diffCount": 15,
+      "score": 0,
+      "diffCount": 0,
       "rootExact": true,
-      "textLength": "baseline",
-      "textLengthMatch": false,
-      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+      "textLength": "exact",
+      "textLengthMatch": true
     },
     {
       "slug": "files-glyphs",
       "engine": "files",
       "variant": "glyphs",
-      "score": 29,
-      "diffCount": 15,
+      "score": 0,
+      "diffCount": 0,
       "rootExact": true,
-      "textLength": "baseline",
-      "textLengthMatch": false,
-      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+      "textLength": "exact",
+      "textLengthMatch": true
     },
     {
       "slug": "files-none",
       "engine": "files",
       "variant": "none",
-      "score": 29,
-      "diffCount": 15,
+      "score": 0,
+      "diffCount": 0,
       "rootExact": true,
-      "textLength": "baseline",
-      "textLengthMatch": false,
-      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+      "textLength": "exact",
+      "textLengthMatch": true
     },
     {
       "slug": "files-onechar",
       "engine": "files",
       "variant": "onechar",
-      "score": 28,
-      "diffCount": 14,
+      "score": 0,
+      "diffCount": 0,
       "rootExact": true,
-      "textLength": "baseline",
-      "textLengthMatch": false,
-      "reason": "emitter writes no textLength (pre-existing; owner: the engine's own drive)"
+      "textLength": "exact",
+      "textLengthMatch": true
     },
     {
       "slug": "hcl-default",

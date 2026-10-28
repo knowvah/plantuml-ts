@@ -1,14 +1,12 @@
 {
-  "generatedAt": "2026-10-28T20:41:21.558Z",
+  "generatedAt": "2026-10-28T22:07:05.162Z",
   "fixtures": [
     {
       "slug": "babico-87-soxo095",
       "type": "json",
       "dotEqual": false,
       "layoutEqual": "n/a",
-      "verdict": "structural-match",
-      "maxDelta": 21,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "bavize-88-jumu158",

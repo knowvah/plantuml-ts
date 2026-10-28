@@ -144,7 +144,12 @@
     "yaml/scalar-types",
     "yaml/scale-factor",
     "yaml/style-node-maxwidth",
-    "yaml/unicode-keys"
+    "yaml/unicode-keys",
+    "hcl/scale-factor",
+    "json/malformed-trailing-comma",
+    "json/number-forms",
+    "json/scalar-negative-float",
+    "json/scalar-string-escapes"
   ],
   "divergent": {
     "json/timafu-94-bixe774": {

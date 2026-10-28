@@ -6,6 +6,7 @@
 
 import type { HighlightDirective } from './ast.js';
 import type { JsonObject } from './JsonObject.js';
+import { JsonNumber } from './JsonNumber.js';
 import type {} from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 
@@ -26,7 +27,10 @@ export function getDisplayValue(v: unknown): DisplayValue {
       valueType: 'boolean',
     };
   }
-  if (typeof v === 'number') {
+  if (typeof v === 'number' || v instanceof JsonNumber) {
+    // `getShortString` draws `JsonNumber#toString`, the literal text
+    // (`JsonNumber.java:41-44`); `String(v)` of a `number` IS its literal
+    // (`JsonParser.ts#numberValue`).
     return { display: String(v), valueType: 'number' };
   }
   if (typeof v === 'string') {
@@ -85,7 +89,7 @@ export function walkTree(root: JsonContainer): FlatNode[] {
     // Push children in reverse order so they come off the stack in original order
     for (let i = entries.length - 1; i >= 0; i--) {
       const [k, v] = entries[i]!;
-      if (v !== null && typeof v === 'object') {
+      if (v !== null && typeof v === 'object' && !(v instanceof JsonNumber)) {
         stack.push({
           id: `n${counter++}`,
           value: v as JsonContainer,
@@ -106,179 +110,106 @@ export function walkTree(root: JsonContainer): FlatNode[] {
 export const EMPTY_MAP: ReadonlyMap<string, string> = new Map();
 
 /**
- * Builds a map from nodeId → Map<key, styleClass> by following each highlight
- * path through the node tree.
+ * One `#highlight` path still to be matched below the current node.
  *
- * A path like ["address", "city"] starts at the root node, navigates to the
- * child whose parentKey is "address", then marks "city" as highlighted in
- * that child node with the given styleClass. Single-segment paths ["lastName"]
- * mark the key in the root node directly.
+ * @see net/sourceforge/plantuml/yaml/Highlighted.java (class, `:44-103`)
+ */
+export class Highlighted {
+  constructor(
+    readonly paths: readonly string[],
+    readonly styleClass: string,
+  ) {}
+
+  /**
+   * The list handed to a child reached through `key`, or `null` when this
+   * highlight does not follow that child. `**` is passed down UNCHANGED (it is
+   * never stripped), `*` and an exact key match drop the first segment.
+   *
+   * @see net/sourceforge/plantuml/yaml/Highlighted.java:86-96
+   */
+  upOneLevel(key: string): Highlighted | null {
+    if (this.paths.length <= 1) return null;
+    const first = this.paths[0]!;
+    if (first === '**') return new Highlighted(this.paths, this.styleClass);
+    if (first === '*' || first === key) {
+      return new Highlighted(this.paths.slice(1), this.styleClass);
+    }
+    return null;
+  }
+
+  /**
+   * Whether the row `key` of the current node is highlighted: a lone segment
+   * equal to the key, or `** / key`.
+   *
+   * @see net/sourceforge/plantuml/yaml/Highlighted.java:98-102
+   */
+  isKeyHighlight(key: string): boolean {
+    if (this.paths.length === 2 && this.paths[0] === '**' && this.paths[1] === key) return true;
+    return this.paths.length === 1 && this.paths[0] === key;
+  }
+}
+
+/**
+ * Every child receives the surviving highlights of its parent.
  *
- * Wildcard segments are supported:
- *   "*"  — matches all direct children of the current node
- *   "**" — matches the current node and all transitive descendants
+ * @see net/sourceforge/plantuml/jsondiagram/SmetanaForJson.java:148-156
+ */
+export function upOneLevel(key: string, list: readonly Highlighted[]): Highlighted[] {
+  const result: Highlighted[] = [];
+  for (const tmp of list) {
+    const parent = tmp.upOneLevel(key);
+    if (parent !== null) result.push(parent);
+  }
+  return result;
+}
+
+/**
+ * The FIRST highlight in `list` that marks row `key`, else `null`.
+ *
+ * @see net/sourceforge/plantuml/jsondiagram/TextBlockJson.java:155-161
+ */
+export function isHighlighted(key: string, list: readonly Highlighted[]): Highlighted | null {
+  for (const tmp of list) {
+    if (tmp.isKeyHighlight(key)) return tmp;
+  }
+  return null;
+}
+
+/**
+ * Builds a map from nodeId → Map<key, styleClass> by passing the highlight
+ * list down the tree exactly as the jar does: `SmetanaForJson.manageOneNode`
+ * hands `upOneLevel(key)` of the parent's list to EVERY member (so duplicated
+ * keys all receive it, `SmetanaForJson.java:136-142`), and each node marks the
+ * rows for which `TextBlockJson.isHighlighted` finds a matching highlight
+ * (first match wins, `TextBlockJson.java:122,155-161`).
+ *
+ * `flatNodes` lists parents before children (`walkTree`), so one pass suffices.
  */
 export function buildHighlightMap(
   flatNodes: FlatNode[],
   highlights: ReadonlyArray<HighlightDirective>,
 ): Map<string, Map<string, string>> {
-  // Build lookup: `${parentId}/${parentKey}` → childNodeId (exact key navigation)
-  const childLookup = new Map<string, string>();
-  for (const fn of flatNodes) {
-    if (fn.parentId !== null) {
-      childLookup.set(`${fn.parentId}/${fn.parentKey ?? ''}`, fn.id);
-    }
-  }
-
-  // Build childrenOf: parentId → childId[] (for * wildcard: all direct children)
-  const childrenOf = new Map<string, string[]>();
-  for (const fn of flatNodes) {
-    if (fn.parentId !== null) {
-      let arr = childrenOf.get(fn.parentId);
-      if (arr === undefined) {
-        arr = [];
-        childrenOf.set(fn.parentId, arr);
-      }
-      arr.push(fn.id);
-    }
-  }
-
-  // Returns nodeId plus all transitive descendants (for ** wildcard)
-  function descendants(nodeId: string): string[] {
-    const desc: string[] = [nodeId];
-    const queue = [nodeId];
-    while (queue.length > 0) {
-      const id = queue.shift()!;
-      for (const child of childrenOf.get(id) ?? []) {
-        desc.push(child);
-        queue.push(child);
-      }
-    }
-    return desc;
-  }
-
-  const rootId = flatNodes[0]?.id;
+  const lists = new Map<string, Highlighted[]>();
   const result = new Map<string, Map<string, string>>();
 
-  function navigate(nodeId: string, path: readonly string[], styleClass: string): void {
-    if (path.length === 0) return;
-    if (path.length === 1) {
-      // Mark the last key on this node
-      let map = result.get(nodeId);
+  for (const fn of flatNodes) {
+    const list =
+      fn.parentId === null
+        ? highlights.map((d) => new Highlighted(d.path, d.styleClass))
+        : upOneLevel(fn.parentKey ?? '', lists.get(fn.parentId) ?? []);
+    lists.set(fn.id, list);
+    for (const [key] of containerEntries(fn.value)) {
+      const found = isHighlighted(key, list);
+      if (found === null) continue;
+      let map = result.get(fn.id);
       if (map === undefined) {
         map = new Map();
-        result.set(nodeId, map);
+        result.set(fn.id, map);
       }
-      map.set(path[0]!, styleClass);
-      return;
-    }
-    const seg = path[0]!;
-    const rest = path.slice(1);
-    if (seg === '**') {
-      // ** = match at any depth from nodeId (inclusive)
-      for (const desc of descendants(nodeId)) {
-        navigate(desc, rest, styleClass);
-      }
-    } else if (seg === '*') {
-      // * = match all direct children of nodeId
-      for (const childId of childrenOf.get(nodeId) ?? []) {
-        navigate(childId, rest, styleClass);
-      }
-    } else {
-      // Exact match via childLookup
-      const childId = childLookup.get(`${nodeId}/${seg}`);
-      if (childId !== undefined) navigate(childId, rest, styleClass);
+      map.set(key, found.styleClass);
     }
   }
 
-  for (const directive of highlights) {
-    if (directive.path.length === 0 || rootId === undefined) continue;
-    navigate(rootId, directive.path, directive.styleClass);
-  }
-
-  return result;
-}
-
-// ---------------------------------------------------------------------------
-// String display processing
-// ---------------------------------------------------------------------------
-
-/**
- * Apply PlantUML's second-level escape interpretation to a JSON string value.
- *
- * After jsonc-parser decodes standard JSON escapes (\\n → newline, etc.),
- * PlantUML interprets the *literal two-character sequences* that remain in the
- * source text:
- *   \\  (two backslashes) → single backslash in display
- *   \n  (backslash + n)   → newline → row split
- *   \r  (backslash + r)   → empty string → row split to blank
- *   \t  (backslash + t)   → tab character → renders as blank
- *
- * The double-backslash must be protected before the other substitutions so
- * that a literal "\\n" in source becomes "\" + "n" (not a newline).
- */
-export function processStringDisplay(s: string): string {
-  return splitDisplayLines(s).join('\n');
-}
-
-/**
- * @see .../klimt/creole/Display.java#getWithNewlines3
- *
- * Splits a display string into its lines. **The split is on the two-character
- * ESCAPE `\` + `n`, never on the newline CHARACTER** — a real U+000A falls
- * through to the `else` branch upstream and is appended to the current line
- * verbatim.
- *
- * That distinction is the whole mechanism, and this port previously lost it by
- * rewriting the escape to U+000A and then splitting on U+000A, which
- * conflated the two. Consequences, both measured against the jar:
- *
- *  - a YAML block scalar's real newlines stay INSIDE one line, so the jar
- *    emits ONE `<text>` whose content contains literal U+000A characters
- *    (`yaml/ketunu-15-poli031`); this port emitted one per line;
- *  - a JSON string ending in a real CR/LF stays one line, and `trin` then
- *    strips the trailing control characters at emission — so the jar draws one
- *    text where this port drew a second, empty one
- *    (`json/gagebi-92-vere937`, `devime-19-toze896`).
- *
- * Ported as upstream's single pass rather than a chain of replaces.
- *
- * This doc previously claimed `\r` "vanishes" as an unrecognised escape. That
- * was wrong: `\r` and `\l` are line BREAKS alongside `\n`
- * (`Display.java:257-270`), differing only in also setting the natural
- * horizontal alignment — which this port does not yet carry, and no fixture
- * currently measures.
- *
- * The unrecognised-escape branch is deliberately left as-is (consume both,
- * append neither): upstream has two variants of this method and no cached
- * fixture exercises the difference, so changing it would be unverified.
- */
-export function splitDisplayLines(s: string): string[] {
-  const result: string[] = [];
-  let current = '';
-  for (let i = 0; i < s.length; i++) {
-    const c = s.charAt(i);
-    if (c === '\\' && i < s.length - 1) {
-      const c2 = s.charAt(i + 1);
-      i++;
-      if (c2 === 'n' || c2 === 'r' || c2 === 'l') {
-        // `Display#getWithNewlines` breaks the line on ALL THREE of \n, \r
-        // and \l (`Display.java:257-270`); \r and \l additionally set the
-        // natural horizontal alignment to RIGHT/LEFT, which this port does not
-        // yet carry. Jar-verified on `json/nujuke-14-nabo073`, whose "\\r"
-        // entry occupies a 32px two-line row exactly as its "\\n" entry does.
-        result.push(current);
-        current = '';
-      } else if (c2 === 't') {
-        current += '\t';
-      } else if (c2 === '\\') {
-        current += '\\';
-      }
-    } else {
-      current += c;
-    }
-  }
-  result.push(current);
   return result;
 }
 

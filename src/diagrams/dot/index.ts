@@ -18,6 +18,10 @@ import { renderDot } from './renderer.js';
 export const dotPlugin: SyncPlugin<DotDiagramAST, DotGeometry> = {
   type: 'dot',
 
+  /** `PSystemDotFactory extends PSystemBasicFactory` (`PSystemDotFactory.java:45`): its empty test
+   *  (`PSystemBasicFactory.java:89-90`) is `parseDot`'s own. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/directdot/PSystemDotFactory.java:45-60 */
+  factoryBase: 'PSystemBasicFactory',
+
   parse(source: UmlSource): DotDiagramAST | ParseRefusal {
     return parseDot(source);
   },

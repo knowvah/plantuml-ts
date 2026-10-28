@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T20:42:00.579Z",
+  "generatedAt": "2026-10-28T22:07:50.645Z",
   "fixtures": [
     {
       "slug": "bafemu-96-luji978",
@@ -214,8 +214,8 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "structural-match",
-      "maxDelta": 4.9999999999999964,
-      "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@y"
+      "maxDelta": 1.4089999999999918,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
     },
     {
       "slug": "vaceci-80-lezo436",

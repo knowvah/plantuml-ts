@@ -80,16 +80,16 @@ describe('parseJson', () => {
       expect(plainOf(ast.root)).toEqual({ firstName: 'John', lastName: 'Smith', isAlive: true });
     });
 
-    it('parses JSON with block /* */ comments (JSONC)', () => {
+    it('rejects a block /* */ comment: only // is skipped (JsonParser.java:257-258)', () => {
       const ast = parse(['{', '  /* block comment */', '  "x": 1', '}']);
-      expect(ast.parseError).toBe(false);
-      expect(plainOf(ast.root)).toEqual({ x: 1 });
+      expect(ast.parseError).toBe(true);
+      expect(plainOf(ast.root)).toBeNull();
     });
 
-    it('parses JSON with trailing comma (JSONC)', () => {
+    it('rejects a trailing comma (JsonParser.java:234-236); the jar draws the failure page', () => {
       const ast = parse(['{"a": 1, "b": 2,}']);
-      expect(ast.parseError).toBe(false);
-      expect(plainOf(ast.root)).toEqual({ a: 1, b: 2 });
+      expect(ast.parseError).toBe(true);
+      expect(plainOf(ast.root)).toBeNull();
     });
   });
 

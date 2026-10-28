@@ -1079,9 +1079,15 @@ input stays byte-identical to the jar's; the user ruled this on 2026-10-23
 (`plans/lengthadjust-document-wide/decisions.md`, Amendment 1, D9/D10).
 
 **Upstream.** json, yaml, hcl and files parse through `StyleExtractor`; its
-`skinparam` branch keeps only `handwritten` (`StyleExtractor.java:88-96`), the
-files diagram never reads even that (`FilesDiagram.java:62-80`), and
-`@starthcl` also skips `applyStyles` (`HclDiagramFactory.java:86-92`), so
+`skinparam` branch keeps only `handwritten` (`StyleExtractor.java:88-96`); the
+files diagram applies the extracted `<style>`/`skin`/`!theme` through
+`styleExtractor.applyStyles` (`FilesDiagram.java:62-72`) and reads its font
+from `root.element.filesDiagram` (`:72-78`) and its note style from
+`root.element.filesDiagram.note` (`FEntry.java:165-182`) -- so `<style>
+filesDiagram { FontColor; FontSize; note { BackGroundColor; LineColor } }`
+is JAR behaviour there, not an extension (ddc T2e, 2026-10-28: extended ==
+jar-compatible == the jar oracle) -- while it never reads `handwritten`; and
+`@starthcl` skips `applyStyles` (`HclDiagramFactory.java:86-92`), so
 `<style>`, `skin` and `!theme` are dropped there too.
 
 **This port.** The default mode honours the directives in the table below.
@@ -1114,10 +1120,10 @@ extension-audit.md`). Pinned examples: `tests/fixtures/extensions/`, gated by
 | `<style> jsonDiagram { node {...} }` | hcl | `<rect> fill "#F1F1F1"->"#EFE"; stroke "#F1F1F1"->"#EFE" / <line> stroke "#000"->"#F00"` |
 | `!theme aws-orange` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:104px;height:38px;"; width "115px"->"104px"; height "40px"->"38px" / <rect> width "93.15"->"82.7"; height "18"->"16"` |
 | `!theme amiga` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:105px;height:30px;background:#0B58A8;"; width "115px"->"105px"; height "40px"->"30px" / <rect> x "10"->"0"; y "10"->"0"; width "93.15"->"105"` |
-| `skinparam backgroundColor` | files | `<svg> style "width:200px;height:44px;background:#FFFFFF;"->"width:200px;height:44px;background:#FFEEEE;"` |
-| `skinparam lengthAdjust none` | files | `<g> lengthAdjust "spacing"->(absent)` |
+| `skinparam backgroundColor` | files | `<svg> style "width:99px;height:70px;background:#FFFFFF;"->"width:99px;height:70px;background:#FFEEEE;" / added <rect x="0" y="0" width="99" height="70" fill="#FEE" style="stroke:none;"/>` |
+| `skinparam lengthAdjust none` | files | `<g> lengthAdjust "spacing"->(absent) / <text> textLength "35.875", "36.575"->(absent)` |
 | `skinparam lengthAdjust spacingAndGlyphs` | files | `<g> lengthAdjust "spacing"->"spacingAndGlyphs"` |
-| `!theme aws-orange` | files | `<svg> style "width:200px;height:44px;background:#FFFFFF;"->"width:200px;height:44px;"` |
+| `!theme aws-orange` | files | `<svg> style "width:99px;height:70px;background:#FFFFFF;"->"width:99px;height:70px;"` |
 
 **Ignored (measured: output identical in both modes and to the directive-free
 render).**
