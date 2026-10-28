@@ -1,0 +1,10 @@
+@startfiles
+/a.txt
+<note>
+first
+</note>
+<note>
+second
+</note>
+/b.txt
+@endfiles

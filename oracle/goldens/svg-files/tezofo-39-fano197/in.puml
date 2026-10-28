@@ -1,0 +1,7 @@
+@startfiles
+/.github
+/src/example.py
+/tests/example_test.py
+/README.md
+/LICENSE
+@endfiles

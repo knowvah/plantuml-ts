@@ -1,0 +1,7 @@
+@startyaml
+i: 5
+f: 1.5
+t: true
+n: null
+s: hello world
+@endyaml

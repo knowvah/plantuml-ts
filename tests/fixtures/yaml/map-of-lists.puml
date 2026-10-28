@@ -1,0 +1,7 @@
+@startyaml
+fruits:
+  - apple
+  - banana
+veg:
+  - kale
+@endyaml

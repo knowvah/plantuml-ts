@@ -1,0 +1,5 @@
+@startyaml
+scale 2
+a: 1
+b: [x, y]
+@endyaml

@@ -1,0 +1,4 @@
+@starthcl
+list = ["a", "b", "c"]
+nums = [1, 2, 3]
+@endhcl

@@ -1,0 +1,5 @@
+@startfiles
+/my folder/my file.tar.gz
+/.hidden.file.name
+/a b/c d/e.f.g
+@endfiles

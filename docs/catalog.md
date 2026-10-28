@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-2028 modules · 7017 exported names.
+2029 modules · 7025 exported names.
 
 ## `src/`
 
@@ -1942,12 +1942,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `ast.ts` | `FileEntryType`, `FileEntry`, `FilesDiagramAST`, `EntryGeometry`, `FilesGeometry` |  |
+| `ast.ts` | `FilesType`, `FEntry`, `FilesDiagramAST` |  |
+| `files-skin-param.ts` | `SkinParamSource`, `SkinParam` | The files engine's `SkinParam` — the slice of upstream's `skin/SkinParam.java` a `FilesDiagram` reaches through `TitledDiagram#getSkinParam()`: the `ISkinSimple` members the creole sheets read, `getIHtmlColorSet`, and the real style engine' |
 | `files-style-input.ts` | `filesStyleInput` |  |
-| `index.ts` | `filesPlugin` |  |
-| `layout.ts` | `NOTE_Y_OFFSET`, `layoutFiles` |  |
-| `parser.ts` | `parseFiles` |  |
-| `renderer.ts` | `renderFiles` |  |
+| `index.ts` | `FilesGeometry`, `calculateBackColor`, `calculateMargin`, `renderFiles`, `filesPlugin` | Files diagram plugin -- `FilesDiagramFactory` (parse), then `TextBlockExporter`'s export of `FilesDiagram#getTextBlock` (the `FilesListing`, FilesDiagram.java:107-110) on the klimt substrate: canvas = the listing's `calculateDimension` plus |
+| `layout.ts` | `ROW_GAP`, `CHILD_INDENT`, `getTextBlock`, `calculateDimension` |  |
+| `parser.ts` | `FilesDiagram`, `parseFiles` |  |
+| `renderer.ts` | `drawAndMove`, `FilesListing` |  |
 
 ## `src/diagrams/gantt/`
 

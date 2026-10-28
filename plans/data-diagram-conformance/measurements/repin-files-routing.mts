@@ -52,10 +52,21 @@ const HEAD_BYTES = 4096;
 /** `PSystemError#getTextBlock` prepends the tutorial for a source under this many lines (PSystemError.java:217-218). */
 const TUTORIAL_LINE_LIMIT = 5;
 
+/** `--type <json|yaml|hcl|files>` (default `files`): the same two steps for a
+ *  sibling family whose golden clones the gates demand (`svg-json/` etc.);
+ *  json/yaml/hcl render through the same jar-compatible `renderSync` (no
+ *  clock either), and the stock-error head-window reason is keyed `<type>/`. */
+const TYPE = ((): string => {
+  const i = process.argv.indexOf('--type');
+  return i >= 0 ? (process.argv[i + 1] ?? 'files') : 'files';
+})();
+if (!['json', 'yaml', 'hcl', 'files'].includes(TYPE)) throw new Error(`--type must be json|yaml|hcl|files, got ${TYPE}`);
+const GOLDEN_TYPE = `svg-${TYPE}`;
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, '../../..');
-const CACHE = join(REPO, 'test-results/dot-cache/files');
-const RATCHET = join(REPO, 'oracle/goldens/svg-files/ratchet.json');
+const CACHE = join(REPO, `test-results/dot-cache/${TYPE}`);
+const RATCHET = join(REPO, `oracle/goldens/${GOLDEN_TYPE}/ratchet.json`);
 const ROUTING = join(REPO, 'oracle/goldens/svg-conformance/routing-baseline.json');
 const REFUSAL = join(REPO, 'oracle/goldens/svg-conformance/refusal-baseline.json');
 const MISSION = 'data-diagram-conformance';
@@ -74,8 +85,8 @@ interface Baseline {
   fixtures: Row[];
 }
 
-const isFilesCache = (r: Row): boolean => r.tree === 'dot-cache' && r.type === 'files';
-const isFilesGoldens = (r: Row): boolean => r.tree === 'goldens' && r.type === 'svg-files';
+const isFilesCache = (r: Row): boolean => r.tree === 'dot-cache' && r.type === TYPE;
+const isFilesGoldens = (r: Row): boolean => r.tree === 'goldens' && r.type === GOLDEN_TYPE;
 
 /** A row this tool will not pin: the fixture, and why. */
 interface Refusal {
@@ -113,7 +124,7 @@ function routingRow(m: MeasuredFixture, old: Row, stamp: Pick<Row, 'measuredAt' 
     throw new RefusedRow(`still misroutes (${m.jarType} -> ${m.ourType}); no ledger excuse here`);
   return {
     tree: 'dot-cache',
-    type: 'files',
+    type: TYPE,
     slug: m.slug,
     jarType: m.jarType,
     ourType: m.ourType,
@@ -140,13 +151,13 @@ function underFiveLines(slug: string): boolean {
 
 /** The wbs b4 head-window ledger reason (journal row 29), restated for files: valid only for a <5-line source. */
 function headWindowReason(slug: string): string {
-  const e = STOCK_ERRORS[`files/${slug}`]!;
+  const e = STOCK_ERRORS[`${TYPE}/${slug}`]!;
   return (
     `PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() ` +
     `(PSystemError.java:217-218), pushing the jar's 'PlantUML version ...' signature (PSystemError.java:148) ` +
     `past the 4096-byte HEAD_BYTES head-read window (refusal-coverage.test.ts, pin-corpus-tree-measure.ts), ` +
     `so isJarErrorPage misreads a genuine jar error page as jarRendered. The stock jar errors here ` +
-    `(oracle/goldens/stock-error-pages.json files/${slug}: "${e.message}" line ${e.line}) and this port ` +
+    `(oracle/goldens/stock-error-pages.json ${TYPE}/${slug}: "${e.message}" line ${e.line}) and this port ` +
     `refuses with the same string -- conformant under the 2026-10-10 error-page rule. ` +
     `Measurement-tool limitation, not an unported feature (data-diagram-conformance close).`
   );
@@ -154,10 +165,10 @@ function headWindowReason(slug: string): string {
 
 function refusalRow(m: MeasuredFixture, old: Row, stamp: Pick<Row, 'measuredAt' | 'measuredAgainstCommit'>): Row {
   if (old.status === 'jar-error') return old;
-  if (m.weErrored && m.jarRendered && STOCK_ERRORS[`files/${m.slug}`] !== undefined && underFiveLines(m.slug))
+  if (m.weErrored && m.jarRendered && STOCK_ERRORS[`${TYPE}/${m.slug}`] !== undefined && underFiveLines(m.slug))
     return {
       tree: 'dot-cache',
-      type: 'files',
+      type: TYPE,
       slug: m.slug,
       jarRendered: true,
       weErrored: true,
@@ -171,7 +182,7 @@ function refusalRow(m: MeasuredFixture, old: Row, stamp: Pick<Row, 'measuredAt' 
   if (m.weErrored && m.jarRendered) throw new RefusedRow('errors on our side; a known-gap needs a ledger reason');
   return {
     tree: 'dot-cache',
-    type: 'files',
+    type: TYPE,
     slug: m.slug,
     jarRendered: m.jarRendered,
     weErrored: m.weErrored,
@@ -197,7 +208,7 @@ function rebuild(
     .map((r) => {
       if (!isFilesCache(r)) return r;
       const m = bySlug.get(r.slug);
-      if (m === undefined) throw new Error(`${r.slug}: pinned dot-cache/files row has no fixture on disk`);
+      if (m === undefined) throw new Error(`${r.slug}: pinned dot-cache/${TYPE} row has no fixture on disk`);
       try {
         const next = derive(m, r, stamp);
         if (next !== r) replaced++;
@@ -212,13 +223,13 @@ function rebuild(
   let cloned = 0;
   for (const slug of pinned) {
     const twin = cacheRows.get(slug);
-    if (twin === undefined) throw new Error(`${slug}: pinned in ratchet.json but has no dot-cache/files row`);
+    if (twin === undefined) throw new Error(`${slug}: pinned in ratchet.json but has no dot-cache/${TYPE} row`);
     const okStatus = derive === routingRow ? 'agree' : 'ok';
     if (twin.status !== okStatus) {
       refused.push({ file, slug, why: `twin status ${twin.status}, cannot clone as a golden row` });
       continue;
     }
-    fixtures.push({ ...twin, tree: 'goldens', type: 'svg-files', slug, ...stamp });
+    fixtures.push({ ...twin, tree: 'goldens', type: GOLDEN_TYPE, slug, ...stamp });
     cloned++;
   }
   return { fixtures, replaced, cloned, refused };
@@ -242,7 +253,7 @@ function main(): void {
     (f) => f.slug,
   );
   const measured = listFixtureSlugs(CACHE).map(measureFiles);
-  console.log(`measured ${measured.length} files fixtures; ${pinned.length} pinned in ratchet.json`);
+  console.log(`measured ${measured.length} ${TYPE} fixtures; ${pinned.length} pinned in ratchet.json`);
   const outputs: { path: string; text: string }[] = [];
   const refused: Refusal[] = [];
   for (const [path, derive, name] of [
@@ -256,9 +267,9 @@ function main(): void {
     const statuses = new Map<string, number>();
     for (const row of r.fixtures.filter(isFilesCache)) statuses.set(row.status, (statuses.get(row.status) ?? 0) + 1);
     console.log(
-      `${name}: rows ${before} -> ${r.fixtures.length}; dot-cache/files re-pinned ${r.replaced}, goldens clones ${r.cloned}; statuses ${JSON.stringify(Object.fromEntries(statuses))}`,
+      `${name}: rows ${before} -> ${r.fixtures.length}; dot-cache/${TYPE} re-pinned ${r.replaced}, goldens clones ${r.cloned}; statuses ${JSON.stringify(Object.fromEntries(statuses))}`,
     );
-    const note = ` Re-pinned ${stamp.measuredAt} at ${stamp.measuredAgainstCommit} by ${MISSION} / ${label}: ${r.replaced} "files" dot-cache rows re-measured in place (the files port now stamps its diagram type), ${r.cloned} "svg-files" golden rows appended (clones of their byte-identical dot-cache twins).`;
+    const note = ` Re-pinned ${stamp.measuredAt} at ${stamp.measuredAgainstCommit} by ${MISSION} / ${label}: ${r.replaced} "${TYPE}" dot-cache rows re-measured in place, ${r.cloned} "${GOLDEN_TYPE}" golden rows appended (clones of their byte-identical dot-cache twins).`;
     outputs.push({ path, text: `${JSON.stringify({ $comment: b.$comment + note, fixtures: r.fixtures }, null, 2)}\n` });
   }
   if (refused.length > 0) {

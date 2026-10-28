@@ -1,0 +1,7 @@
+@startfiles
+/src/deep/a.ts
+<note>
+sibling of a.ts
+</note>
+/z.md
+@endfiles

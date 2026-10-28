@@ -1,0 +1,10 @@
+@startjson
+<style>
+jsonDiagram {
+  node {
+    MaximumWidth 120
+  }
+}
+</style>
+{"k": "The quick brown fox jumps over the lazy dog and keeps running far beyond the end of the field"}
+@endjson

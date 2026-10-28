@@ -1,0 +1,4 @@
+@starthcl
+// a comment
+a = 1 // trailing
+@endhcl

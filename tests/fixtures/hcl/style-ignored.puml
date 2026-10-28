@@ -1,0 +1,10 @@
+@starthcl
+<style>
+hclDiagram {
+  node {
+    BackGroundColor red
+  }
+}
+</style>
+a = 1
+@endhcl

@@ -1,0 +1,5 @@
+@startyaml
+"a:b": 1
+'c: d': 2
+plain: 3
+@endyaml

@@ -1,0 +1,3 @@
+@startjson
+{"int": 7, "neg": -3, "frac": 0.25, "exp": 1e10, "big": 12345678901234567890}
+@endjson

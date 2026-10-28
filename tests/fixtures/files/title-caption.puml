@@ -1,0 +1,6 @@
+@startfiles
+title My Title
+caption My Caption
+/a.txt
+/b/c.txt
+@endfiles

@@ -1,0 +1,12 @@
+@startjson
+<style>
+jsonDiagram {
+  node {
+    RoundCorner 12
+    HorizontalAlignment right
+    FontSize 16
+  }
+}
+</style>
+{"a": "x", "bbbbbb": "yy"}
+@endjson

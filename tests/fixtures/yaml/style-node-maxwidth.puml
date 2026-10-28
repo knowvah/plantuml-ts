@@ -1,0 +1,10 @@
+@startyaml
+<style>
+yamlDiagram {
+  node {
+    MaximumWidth 100
+  }
+}
+</style>
+k: a long line of text that has to wrap somewhere around here
+@endyaml

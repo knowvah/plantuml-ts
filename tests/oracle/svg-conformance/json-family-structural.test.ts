@@ -16,10 +16,48 @@ import { existsSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { readManifest, structuralDiffs } from './json-family-structural.js';
+import {
+  authoredCachedCollisions,
+  isCachedRow,
+  listAuthoredSlugs,
+  readManifest,
+  structuralDiffs,
+} from './json-family-structural.js';
 
 const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache');
 const TYPES = ['json', 'yaml', 'hcl'] as const;
+
+/** Minimum authored rows per type (ddc T1e acceptance, D7). */
+const MIN_AUTHORED: Readonly<Record<(typeof TYPES)[number], number>> = { json: 18, yaml: 10, hcl: 8 };
+
+describe('json family — authored root helpers', () => {
+  it('lists authored slugs sorted, extension-free, only with a .svg oracle', () => {
+    const hcl = listAuthoredSlugs('hcl');
+    expect(hcl).toContain('heredoc');
+    expect(hcl).toContain('labelled-block');
+    expect(hcl.every((s) => !s.includes('.'))).toBe(true);
+    expect(hcl).toEqual([...hcl].sort());
+  });
+
+  it('returns an empty list for a type with no authored directory', () => {
+    expect(listAuthoredSlugs('no-such-type')).toEqual([]);
+  });
+
+  for (const type of TYPES) {
+    it(`${type} has at least ${MIN_AUTHORED[type]} authored rows`, () => {
+      expect(listAuthoredSlugs(type).length).toBeGreaterThanOrEqual(MIN_AUTHORED[type]);
+    });
+
+    it(`${type} authored slugs never collide with a cached corpus row`, () => {
+      expect(authoredCachedCollisions(type)).toEqual([]);
+    });
+  }
+
+  it('isCachedRow distinguishes corpus rows from authored ones', () => {
+    expect(isCachedRow('hcl', 'heredoc')).toBe(false);
+    expect(isCachedRow('json', 'no-such-slug')).toBe(false);
+  });
+});
 
 describe('json family — structural conformance', () => {
   const manifest = readManifest();
@@ -53,6 +91,25 @@ describe('json family — structural conformance', () => {
       expect(diffs.length, `${entry}\n  ${reason}\n  ${diffs.slice(0, 10).join('\n  ')}`).toBeLessThanOrEqual(maxDiffs);
     });
   }
+
+  it('reports authored rows (clean, unpinned ones never fail the gate)', () => {
+    // D7: the orchestrator appends newly clean authored rows to the manifest at
+    // the mission close, so a clean authored row that is not pinned yet is
+    // listed, not failed. A pinned row is already enforced above.
+    const pinned = new Set(manifest.clean);
+    const lines: string[] = [];
+    for (const type of TYPES) {
+      for (const slug of listAuthoredSlugs(type)) {
+        const entry = `${type}/${slug}`;
+        const { diffs } = structuralDiffs(type, slug);
+        const status =
+          diffs.length > 0 ? `${diffs.length} diffs` : pinned.has(entry) ? 'clean, pinned' : 'clean, unpinned';
+        lines.push(`${entry}: ${status}${diffs[0] === undefined ? '' : ` — ${diffs[0]}`}`);
+      }
+    }
+    console.info(`authored json-family rows:\n  ${lines.join('\n  ')}`);
+    expect(lines.length).toBe(TYPES.reduce((n, t) => n + listAuthoredSlugs(t).length, 0));
+  });
 
   it('every structurally clean fixture is pinned', () => {
     // The ratchet only tightens if newly-clean fixtures get added. This fails

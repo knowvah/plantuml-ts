@@ -1,0 +1,6 @@
+@startfiles
+/a.txt
+this line is ignored
+- neither slash nor note
+/b.txt
+@endfiles

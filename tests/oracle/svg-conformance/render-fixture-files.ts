@@ -26,7 +26,20 @@ import type { AssetStore } from '../../../src/core/asset-store.js';
 import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
 import { withJarCompatibleStyleInput } from '../../../src/core/internal-render-options.js';
 import { renderSync } from '../../../src/index.js';
+import { buildEmojiAssetsStore } from '../../helpers/emoji-assets-store.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
+
+/**
+ * The Twemoji artwork the jar reads off its classpath (`Emoji.java:175-181`),
+ * built once per process -- `render-fixture-gantt.ts`'s `GANTT_ASSET_STORE`.
+ * Every files row draws one (`FEntry.java:124-129`: `<:1f4c2:>` / `<:1f4c4:>`
+ * per entry), and the store comes only from `assetStore` (ADR-2, as json's
+ * parser takes it); without it the emoticon reserves its width and draws
+ * nothing, which the byte ratchet reads as a missing element (ddc b1 close,
+ * journal row 22). The survey passes the same artwork through
+ * `SURVEY_ASSET_STORE` (`scripts/svg-parity-survey.ts:77-80`).
+ */
+const FILES_ASSET_STORE: AssetStore = buildEmojiAssetsStore();
 
 /** `renderFixtureFiles`'s options bag: the measurer plus the two stores a fixture caller may pass. */
 export interface FilesFixtureRenderOptions {
@@ -38,9 +51,16 @@ export interface FilesFixtureRenderOptions {
 /**
  * Renders a `.puml` fixture through the PRODUCTION `renderSync` in
  * jar-compatible style-input mode (see this file's doc comment for why).
+ * `assetStore` defaults to {@link FILES_ASSET_STORE}; a caller passing its
+ * own store replaces it (combine with `combineAssetStores` to extend it).
  */
 export function renderFixtureFiles(markup: string, options: FilesFixtureRenderOptions): string {
-  return renderSync(markup, withJarCompatibleStyleInput(options));
+  return renderSync(markup, withJarCompatibleStyleInput({ assetStore: FILES_ASSET_STORE, ...options }));
+}
+
+/** The default store {@link renderFixtureFiles} renders with, for callers that must match it byte for byte. */
+export function filesFixtureAssetStore(): AssetStore {
+  return FILES_ASSET_STORE;
 }
 
 /** The committed, flat authored-fixture root (`<slug>.puml` + `<slug>.svg`). */

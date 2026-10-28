@@ -1,0 +1,8 @@
+@startfiles
+skinparam shadowing true
+/a.txt
+<note>
+shadow?
+</note>
+/b/c.txt
+@endfiles

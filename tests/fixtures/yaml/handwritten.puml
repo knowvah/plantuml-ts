@@ -1,0 +1,5 @@
+@startyaml
+skinparam handwritten true
+a:
+  b: 1
+@endyaml

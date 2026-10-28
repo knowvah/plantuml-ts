@@ -1,0 +1,6 @@
+@starthcl
+resource "aws_instance" "web" {
+  ami = "abc"
+  count = 2
+}
+@endhcl

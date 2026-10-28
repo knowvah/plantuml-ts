@@ -1,0 +1,4 @@
+@starthcl
+scale 1.5
+a = 1
+@endhcl

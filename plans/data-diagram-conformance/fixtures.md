@@ -10,19 +10,20 @@ json/yaml rows. Each close adds a counts row and updates the family table.
 |---|---|---|---|---|---|---|---|
 | origin/main `10aa35c6b` | 13/24/13 | 7/28/4 | 1/2/0 | 0/0/1 (+8 in `unknown`) | 10/6/1/0 | 89 + 3 | 1 files row (diverged) |
 | b0 close (`feat/data-diagram-conformance`, 2026-10-28) | 13/24/13 | 7/28/4 | 1/2/0 | 0/0/9 (bucket captured, T0c; 8 still in `unknown`) | 10/6/1/0 | 89 + 3 | 1 files row (diverged, now in `dot-cache/files` + `parity-files.json`) |
+| b1 close (2026-10-28) | 13/36/1 (timafu ceiling) | 7/31/1 (bafemu, geometry: spline piece count) | 1/2/0 | 9/0/0 | 13/7/1/9 | 145 + 3 | json-family 56 clean / 65 (9 open → T2d); files 17 at 0 / 18 (`empty-diagram` 5, core → batch 2) |
 
 ## Families
 
 | family (firstDiff) | rows | mechanism | owner | state |
 |---|---:|---|---|---|
-| json/yaml `svg/g/path/@d` only (edge emission order) | json bogiku-88, civofu-04, devime-19, gejena-99, gibego-39, kidoki-70, mudumo-73, nofuvo-36, nopoku-31, tivuru-65, zasitu-09, zevaka-35; yaml bafemu-96, jozapu-14, poxedu-72, xubife-72 | HYPOTHESIS (probe 2026-10-28): ours `path[k]` ≈ jar `path[k-2]`; we emit edges in `walkTree` pre-order (`json-layout-prep.ts:73`, `layout.ts:319,436`), the jar in `manageOneNode` post-order (`SmetanaForJson.java:139-141`) | T1a | open |
+| json/yaml `svg/g/path/@d` only (edge emission order) | json bogiku-88, civofu-04, devime-19, gejena-99, gibego-39, kidoki-70, mudumo-73, nofuvo-36, nopoku-31, tivuru-65, zasitu-09, zevaka-35; yaml bafemu-96, jozapu-14, poxedu-72, xubife-72 | CONFIRMED + FIXED c841f2a9e (T1a, `diagnosis/edge-order.md`): `buildJsonDotEdges` built edges in `walkTree` pre-order; now the `manageOneNode` recursion (`SmetanaForJson.java:139-141`). 15/16 rows `structural-match`; bafemu keeps 1 survey diff — same edge, jar spline 3 cubic pieces vs dot-engine 2 (geometry residue, journal row 20) | T1a | closed (bafemu = geometry residue, needs a user-signed ceiling to leave `diverged`) |
 | json timafu-94 `scale max` rounding (`stroke-width`, `font-size`, `textLength`) | timafu-94 | ADR-2b ceiling (a5 M7): the scale factor is computed from the Smetana envelope (193.087 vs 192.85) | — | accepted ceiling, stays |
 | yaml najoba-05 / tadari-70 width 183 → 184 | 2 | ADR-2b ceiling: Smetana integer node sizing | — | accepted ceiling, stays |
-| files `svg/@background` / `text/@dominant-baseline` (whole engine) | dobido-76, xeseve-00, tezofo-39, tadabe-21, kibilo-60, zixuta-02, nixaro-94, nojeru-23, authored `files-directory-tree-with-note` | `src/diagrams/files/` is not a port: text-glyph emoji, `ROW_HEIGHT 22`, own note box, `dominant-baseline: hanging`, no `textLength`; jar = `FEntry`/`FilesListing` through creole (D3). b0 survey (615c04af2): 9/9 `diverged`, firstDiff `text/@dominant-baseline` ×8, `svg/@background` ×1 (nixaro-94) | T0c ✓ → T1b → T2c | open (bucket captured) |
-| conformant but unpinned | json 3, yaml 1 | none — pin at the batch-1 close | close 1 | open |
-| S2b title chrome offset | TBD by T1c | unknown — diagnosis first (D6) | T1c → T2a | open |
-| S2b highlight through duplicated keys | TBD by T1d | unknown — diagnosis first (D6) | T1d → T2b | open |
-| lengthadjust files rows (`files-default/glyphs/none/onechar`) emit no `textLength` | 4 (`oracle/goldens/svg-lengthadjust/authored-baseline.json:212-245`) | same mechanism as the files family; re-pinned after T1b | T2e | open |
+| files `svg/@background` / `text/@dominant-baseline` (whole engine) | dobido-76, xeseve-00, tezofo-39, tadabe-21, kibilo-60, zixuta-02, nixaro-94, nojeru-23, authored `files-directory-tree-with-note` | PORTED 18ccd35cd (T1b): `FilesDiagram`/`FilesListing`/`FEntry` over klimt, `files-skin-param.ts` added, chrome not drawn (`FilesDiagram.java:80-86`). 9/9 corpus rows byte-exact and pinned (`svg-files/ratchet.json`), 17/18 authored at 0; harness given the Twemoji store (journal row 22) | T1b | closed; T2c scope = `empty-diagram` only if its fix is files-side (it is core: `isBlockEmpty`) |
+| conformant but unpinned | json 3, yaml 1 | pinned at the b1 close: json bitepo-72, dapinu-10, nujuke-14; yaml bedega-54 | close 1 | closed |
+| S2b title chrome offset | corpus babico-87, tadari-70 (+5 unwind-U1 title fixtures, 10 raw diffs each, 0 structural) | PORT-CONTROLLED (T1c, `diagnosis/title-chrome.md`): `renderer.ts:457-462` bakes the document margin into the canvas before chrome, no `preChromeWidth/Height`/`documentMargin` declared; jar adds chrome to the bare block then translates (`TextBlockExporter.java:173,199-203`). yaml same; hcl n/a. Separate: `scale`×`title` needs core (next-missions) | T1c ✓ → T2a | open (T2a: `renderer.ts`, `render-fixture-json.ts:116`, `unwind-u1-jar.test.ts`) |
+| S2b highlight through duplicated keys | 5 scratch constructs (one missing highlight `<rect>` each; yaml/hcl unaffected) | PORT-CONTROLLED (T1d, `diagnosis/highlight-dup-keys.md`): `json-layout-prep.ts:126-131` one-to-one `Map` keyed `parentId/key`, jar passes `upOneLevel(key)` to every member (`SmetanaForJson.java:136-142`, `Highlighted.java:92`); plus `** / a / b` and first-vs-last `#highlight` class in the same function | T1d ✓ → T2b (re-port the per-member list passing, journal row 17) | open |
+| lengthadjust files rows (`files-default/glyphs/none/onechar`) emit no `textLength` | 4 (`oracle/goldens/svg-lengthadjust/authored-baseline.json:212-245`) | T1b hand-back: all 4 at 0 raw diffs with the Twemoji store; baseline rows still carry the old counts | T2e | open (re-pin only) |
 
 ## Authored fixtures
 
@@ -31,3 +32,25 @@ construct, the Java it exercises, and its state at each close.
 
 | slug | type | construct | state |
 |---|---|---|---|
+
+### b1 close — json/yaml/hcl authored rows not clean (T2d queue, structural diffs)
+
+| slug | diffs | firstDiff / mechanism (T1e hand-back) |
+|---|---:|---|
+| json/number-forms | 3 | `text/@textLength`: jar keeps the literal text (`1e10`, `12345678901234567890`), ours prints expanded numbers |
+| json/scalar-negative-float | 4 | `rect/@width`: jar keeps `-12.5e3`, ours `-12500` |
+| json/scalar-string-escapes | 4 | `rect/@width`: jar prints `back\slash`, ours drops the `\\` |
+| json/highlight-stereotype | 2 | `rect/@fill` #CCFF02 vs #FFA500: `<<warn>>` stereotype colour ignored |
+| json/style-highlight-block | 7 | `<style> jsonDiagram { highlight { … } }` not applied |
+| json/style-header-separator-arrow | 13 | `<style>` header/separator/arrow blocks not applied |
+| json/theme-cerulean | 29 | `defs[childCount]` 0 vs 1: jar draws a gradient background, rx 10 vs 5 |
+| json/malformed-trailing-comma | 4 | `text/@font-family`: we parse `{ "a": 1, }`, the jar draws "does not sound like JSON" |
+| hcl/scale-factor | 1 | `text/@font-size` 14 vs 21: `scale 1.5` not applied to hcl text |
+
+### b1 close — files authored rows (18, `oracle/goldens/svg-files/authored-baseline.json`)
+
+17 at `diffCount 0`; `empty-diagram` 5 (we render the Welcome page where the jar draws a 21×21 canvas: `isBlockEmpty`, `src/core/BlockUmlBuilder.ts:283-287`, applies to every engine; `FilesDiagramFactory` is a `PSystemAbstractFactory` — core residual, batch 2).
+
+## Authored fixtures (per T1e / T1f hand-backs)
+
+json (32), yaml (15), hcl (18), files (18): one construct per slug, slug = construct, oracles via `scripts/oracle-render.sh`. The per-slug Java mapping is in the T1e/T1f hand-backs (journal rows 16, 18) and in each fixture's `.puml`; the state per slug is the structural manifest `clean` list (json family) and `authored-baseline.json` (files).

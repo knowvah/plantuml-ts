@@ -1,0 +1,6 @@
+@startyaml
+a:
+b: ""
+c: ~
+d: null
+@endyaml

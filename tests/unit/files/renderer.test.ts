@@ -1,217 +1,156 @@
+/**
+ * The files plugin end to end through `renderSync`, with the Twemoji artwork
+ * store (`FEntry.java:124-129` draws `<:1f4c2:>` / `<:1f4c4:>` as emoji).
+ * Expected values are the jar's own, from the pdiff oracles
+ * `test-results/dot-cache/files/dobido-76-nugu008` (tree) and
+ * `xeseve-00-tipa730` / `nixaro-94-pefo622` (note, style).
+ */
 import { describe, it, expect } from 'vitest';
-import { renderFiles } from '../../../src/diagrams/files/renderer.js';
-import { assembleSvg } from '../../../src/index.js';
-import { resolveTheme } from '../../../src/core/theme.js';
-import type { FilesGeometry, EntryGeometry } from '../../../src/diagrams/files/ast.js';
+import { renderSync } from '../../../src/index.js';
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { withJarCompatibleStyleInput } from '../../../src/core/internal-render-options.js';
+import { buildEmojiAssetsStore } from '../../helpers/emoji-assets-store.js';
 
-const theme = resolveTheme('default');
+const OPTIONS = { measurer: new DeterministicMeasurer(), assetStore: buildEmojiAssetsStore() };
+const JAR = withJarCompatibleStyleInput(OPTIONS);
 
-function makeEntry(overrides: Partial<EntryGeometry> = {}): EntryGeometry {
-  return {
-    type: 'file',
-    name: 'test.ts',
-    depth: 0,
-    x: 0,
-    y: 0,
-    labelWidth: 60,
-    ...overrides,
-  };
+const block = (body: string): string => `@startfiles\n${body}\n@endfiles`;
+const render = (body: string): string => renderSync(block(body), OPTIONS);
+const jar = (body: string): string => renderSync(block(body), JAR);
+
+interface Row {
+  readonly x: number;
+  readonly y: number;
+  readonly textLength: number;
+  readonly text: string;
 }
 
-function makeGeo(entries: EntryGeometry[] = []): FilesGeometry {
-  return {
-    entries,
-    totalWidth: 400,
-    totalHeight: entries.length * 22,
-  };
+/** The `<text>` rows of the 14 px entries (the note text is 13 px). */
+function rowsOf(svg: string): Row[] {
+  return [...svg.matchAll(/<text x="([\d.]+)" y="([\d.]+)"[^>]*font-size="14" textLength="([\d.]+)">([^<]*)</g)].map(
+    (m) => ({ x: Number(m[1]), y: Number(m[2]), textLength: Number(m[3]), text: m[4]! }),
+  );
 }
 
-describe('renderFiles', () => {
-  it('AC1: folder entry contains folder emoji', () => {
-    const geo = makeGeo([makeEntry({ type: 'folder', name: 'src' })]);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('📂');
+const rootOf = (svg: string): string => svg.slice(svg.indexOf('<svg'), svg.indexOf('>') + 1);
+
+describe('rows (FEntry.java:131-138)', () => {
+  const svg = render('/.github/\n/src/example.py\n/README.md');
+
+  it('a folder row draws the 1f4c2 artwork (#269 body, #55ACEE flap) then its name', () => {
+    expect(svg.indexOf('fill="#269"')).toBeGreaterThan(-1);
+    expect(svg.indexOf('fill="#55ACEE"')).toBeGreaterThan(svg.indexOf('fill="#269"'));
+    expect(rowsOf(svg)[0]).toEqual({ x: 31, y: 29.639, textLength: 42, text: '.github' });
   });
 
-  it('AC2: file entry contains file emoji', () => {
-    const geo = makeGeo([makeEntry({ type: 'file', name: 'index.ts' })]);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('📄');
+  it('a file row draws the 1f4c4 artwork (#E1E8ED, #CCD6DD, #99AAB5)', () => {
+    for (const fill of ['#E1E8ED', '#CCD6DD', '#99AAB5']) expect(svg).toContain(`fill="${fill}"`);
   });
 
-  it('AC3: note entry contains a polygon element', () => {
-    const geo = makeGeo([
-      makeEntry({
-        type: 'note',
-        name: '',
-        noteLines: ['hello', 'world'],
-        labelWidth: 80,
-      }),
+  it('each row is height + 2 = 24.75 below the previous', () => {
+    expect(rowsOf(svg).map((r) => r.y)).toEqual([29.639, 54.389, 79.139, 103.889]);
+  });
+
+  it('a child row is 21 further right than its folder', () => {
+    const [github, src, example, readme] = rowsOf(svg);
+    expect([github!.x, src!.x, example!.x, readme!.x]).toEqual([31, 31, 52, 31]);
+    expect(example!.text).toBe('example.py');
+  });
+
+  it('draws no text glyph for the emoticon', () => {
+    expect(svg).not.toContain('📂');
+    expect(svg).not.toContain('<:1f4c2:>');
+  });
+});
+
+describe('document shell', () => {
+  const svg = render('/a.txt');
+
+  it('is a FILES document drawn by klimt: no dominant-baseline, text at the emoticon width', () => {
+    expect(rootOf(svg)).toContain('data-diagram-type="FILES"');
+    expect(svg).not.toContain('dominant-baseline');
+    expect(rowsOf(svg)[0]!.x).toBe(31);
+  });
+
+  it('has no minimum width: the canvas is the listing plus the margins', () => {
+    const width = Number(/width="(\d+)px"/.exec(rootOf(svg))![1]);
+    expect(width).toBeLessThan(100);
+  });
+
+  it('a diagram with no entry is the empty 21x21 canvas (oracle empty-diagram: dim 0 + margins 20, +1)', () => {
+    expect(rootOf(renderSync('@startfiles\nfoo\n@endfiles', OPTIONS))).toContain('width="21px" height="21px"');
+  });
+});
+
+describe('notes (FEntry.java:165-183)', () => {
+  const svg = render('/doc/dummy.doc\n<note>\nthis is a note\non two lines\n</note>\n/LICENSE');
+
+  it('is an Opale outline: folded-corner path in the note colours, stroke 0.5', () => {
+    expect(svg).toMatch(/<path d="M[\d.]+,[\d.]+ L[^"]*" style="stroke:#181818;stroke-width:0.5;" fill="#FEFFDD"\/>/);
+  });
+
+  it('draws the note lines as 13 px creole text, one per line', () => {
+    const lines = [...svg.matchAll(/font-size="13" textLength="([\d.]+)">([^<]*)</g)].map((m) => [m[2], m[1]]);
+    expect(lines).toEqual([
+      ['this is a note', '72.881'],
+      ['on two lines', '68.656'],
     ]);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('<path d="M10,'); // shell route re-emits the note outline as a path (lad-T2f);
+  });
+});
+
+describe('chrome and styling', () => {
+  it('draws no title/header (FilesDiagram.java:80-88 reads only `/` and `<note>`)', () => {
+    const svg = render('title My Title\nheader My Header\n/a.txt');
+    expect(svg).not.toContain('My Title');
+    expect(svg).not.toContain('My Header');
   });
 
-  it('AC4: depth-2 entry has larger x than depth-0 entry', () => {
-    const shallow = makeEntry({ type: 'file', name: 'a.ts', depth: 0, x: 0, y: 0 });
-    const deep = makeEntry({ type: 'file', name: 'b.ts', depth: 2, x: 40, y: 22 });
-    const geo = makeGeo([shallow, deep]);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    // shallow renders at x=0+PADDING=10, deep at x=40+PADDING=50
-    // Both use x attribute on their text element
-    const xMatches = [...svg.matchAll(/x="(\d+)"/g)].map((m) => Number(m[1]));
-    const shallowX = 0 + 10; // PADDING
-    const deepX = 40 + 10; // entry.x + PADDING
-    expect(xMatches).toContain(shallowX);
-    expect(xMatches).toContain(deepX);
-    expect(deepX).toBeGreaterThan(shallowX);
+  it('a <style> root background paints the document (oracle nixaro-94-pefo622)', () => {
+    const svg = render('<style>\nroot {\n BackgroundColor red\n FontColor blue\n}\n</style>\n/a.txt');
+    expect(rootOf(svg)).toContain('background:#FF0000;');
+    expect(svg).toContain('<rect x="0" y="0"');
+    expect(svg).toContain('fill="#00F"');
   });
 
-  it('AC5: svgRoot produces output with width and height attributes', () => {
-    const geo = makeGeo([makeEntry()]);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toMatch(/width="\d+px"/);
-    expect(svg).toMatch(/height="\d+px"/);
+  it('a <style> filesDiagram FontColor colours the rows (FilesDiagram.java:71-76)', () => {
+    expect(render('<style>\nfilesDiagram {\n FontColor red\n}\n</style>\n/a.txt')).toContain('fill="#F00"');
   });
 
-  it('AC6: note text lines appear in the SVG output', () => {
-    const geo = makeGeo([
-      makeEntry({
-        type: 'note',
-        name: '',
-        noteLines: ['first line', 'second line'],
-        labelWidth: 100,
-      }),
-    ]);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('first line');
-    expect(svg).toContain('second line');
+  it('a note takes the filesDiagram.note style (FEntry.java:167-175)', () => {
+    const style = '<style>\nfilesDiagram {\n note {\n BackGroundColor lightblue\n }\n}\n</style>';
+    expect(render(`${style}\n<note>\nx\n</note>`)).toContain('fill="#ADD8E6"');
+  });
+});
+
+describe('document style', () => {
+  it('a <style> document Margin replaces the default margin of 10 (TextBlockExporter.java:510-516)', () => {
+    const svg = render('<style>\ndocument {\n Margin 3\n}\n</style>\n/a.txt');
+    expect(rowsOf(svg)[0]).toMatchObject({ x: 24, y: 22.639 });
   });
 
-  it('AC7: empty geometry renders without throwing and produces valid SVG', () => {
-    const geo = makeGeo([]);
-    let svg: string;
-    expect(() => {
-      svg = assembleSvg(renderFiles(geo, theme));
-    }).not.toThrow();
-    expect(svg!).toMatch(/^<svg/);
-    expect(svg!).toContain('</svg>');
+  it('a gradient document background leaves the root without a `background:` and defines the gradient', () => {
+    const svg = render('<style>\ndocument {\n BackgroundColor red/blue\n}\n</style>\n/a.txt');
+    expect(rootOf(svg)).not.toContain('background:');
+    expect(svg).toContain('<linearGradient');
+  });
+});
+
+describe('extensions (DIVERGENCES.md "Extensions", lad D9)', () => {
+  it('skinparam lengthAdjust is honoured in extended mode, ignored in jar-compatible mode', () => {
+    const body = 'skinparam lengthAdjust none\n/a.txt';
+    expect(render(body)).toContain('<g font-family="sans-serif">');
+    expect(jar(body)).toContain('<g font-family="sans-serif" lengthAdjust="spacing">');
   });
 
-  it('AC8: note rect has fill="#FEFECE" (case-insensitive)', () => {
-    const geo = makeGeo([
-      makeEntry({
-        type: 'note',
-        name: '',
-        noteLines: ['note content'],
-        labelWidth: 80,
-      }),
-    ]);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg.toLowerCase()).toContain('fill="#fefece"');
+  it('skinparam backgroundColor is honoured in extended mode, ignored in jar-compatible mode', () => {
+    const body = 'skinparam backgroundColor #FFEEEE\n/a.txt';
+    expect(rootOf(render(body))).toContain('background:#FFEEEE;');
+    expect(rootOf(jar(body))).toContain('background:#FFFFFF;');
   });
 
-  it('file name appears in SVG text content', () => {
-    const geo = makeGeo([makeEntry({ type: 'file', name: 'hello.ts' })]);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('hello.ts');
-  });
-
-  it('folder name appears in SVG text content', () => {
-    const geo = makeGeo([makeEntry({ type: 'folder', name: 'components' })]);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('components');
-  });
-
-  it('note with zero labelWidth falls back to minimum width', () => {
-    const geo = makeGeo([
-      makeEntry({
-        type: 'note',
-        name: '',
-        noteLines: ['short'],
-        labelWidth: 0,
-      }),
-    ]);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    // NOTE_FALLBACK_WIDTH=120, NOTE_PAD*2=12, so boxWidth=132. Dog ear at W-D=122.
-    // noteBox emits a <path> pentagon and two <line> crease elements.
-    // bx=PADDING=10, so path starts at M10,
-    expect(svg).toContain('<path');
-    expect(svg).toMatch(/d="M10,/);
-  });
-
-  it('total width floors at MIN_WIDTH=200 for narrow geometry', () => {
-    const geo: FilesGeometry = { entries: [], totalWidth: 50, totalHeight: 40 };
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('width="200px"');
-  });
-
-  it('total height floors at 40 for zero-height geometry', () => {
-    const geo: FilesGeometry = { entries: [], totalWidth: 300, totalHeight: 0 };
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('height="40px"');
-  });
-
-  it('note box height scales with number of lines', () => {
-    // 3 lines: NOTE_PAD*2 + (3-1)*NOTE_LINE_H + NOTE_FONT = 12 + 32 + 12 = 56
-    // Polygon bottom y = entry.y(0) + 2 + 56 = 58. Points include ",58".
-    const geo = makeGeo([
-      makeEntry({
-        type: 'note',
-        name: '',
-        noteLines: ['a', 'b', 'c'],
-        labelWidth: 80,
-        y: 0,
-      }),
-    ]);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('<path d="M10,'); // shell route re-emits the note outline as a path (lad-T2f);
-    // bottom-left and bottom-right points both have y=58
-    expect(svg).toContain(',58');
-  });
-
-  it('note polygon uses correct stroke and has a dog ear polyline', () => {
-    const geo = makeGeo([
-      makeEntry({
-        type: 'note',
-        name: '',
-        noteLines: ['content'],
-        labelWidth: 80,
-      }),
-    ]);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('stroke="#AAA"');
-    expect(svg).toContain('L92,2'); // dog ear, now a path (lad-T2f)
-  });
-
-  it('note entry without noteLines renders an empty polygon without throwing', () => {
-    // Covers the noteLines ?? [] branch when noteLines is undefined
-    const entry: EntryGeometry = {
-      type: 'note',
-      name: '',
-      depth: 0,
-      x: 0,
-      y: 0,
-      labelWidth: 80,
-      // noteLines intentionally omitted
-    };
-    const geo = makeGeo([entry]);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('<path d="M10,'); // shell route re-emits the note outline as a path (lad-T2f);
-    // 0 lines: NOTE_PAD*2 = 12. Bottom y = entry.y(0) + 2 + 12 = 14.
-    expect(svg).toContain(',14');
-  });
-
-  it('multiple entries all appear in SVG', () => {
-    const entries = [
-      makeEntry({ type: 'folder', name: 'src', x: 0, y: 0 }),
-      makeEntry({ type: 'file', name: 'index.ts', x: 20, y: 22 }),
-      makeEntry({ type: 'file', name: 'util.ts', x: 20, y: 44 }),
-    ];
-    const geo = makeGeo(entries);
-    const svg = assembleSvg(renderFiles(geo, theme));
-    expect(svg).toContain('src');
-    expect(svg).toContain('index.ts');
-    expect(svg).toContain('util.ts');
+  it('skinparam shadowing never reaches the note (FEntry.java:170 reads the style)', () => {
+    const body = 'skinparam shadowing true\n<note>\nx\n</note>';
+    expect(render(body)).toBe(jar(body));
+    expect(render(body)).not.toContain('filter=');
   });
 });

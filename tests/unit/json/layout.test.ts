@@ -65,6 +65,52 @@ describe('layoutJson arrow attributes', () => {
   });
 });
 
+describe('layoutJson edge order (ddc T1a)', () => {
+  // A 3-level tree: root{a{x{p}, y{q}}, b{c}}. `walkTree` ids are assigned
+  // at push time (root n0, b n1, a n2, y n3, x n4); its list is pre-order.
+  const tree = { a: { x: { p: 1 }, y: { q: 2 } }, b: { c: 3 } };
+
+  function captureDotInput(): { graph: DotInputGraph; geo: ReturnType<typeof layoutJson> } {
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
+    try {
+      const geo = layoutJson(makeAst(tree), defaultTheme, measurer);
+      return { graph: captured[0]!, geo };
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+  }
+
+  // `SmetanaForJson#manageOneNode` creates the node and `nodes.add`s it
+  // (`SmetanaForJson.java:130-133`) BEFORE its child loop (`:136`): pre-order.
+  it('keeps nodes in pre-order (root, a, x, y, b)', () => {
+    expect(captureDotInput().graph.nodes.map((n) => n.id)).toEqual(['n0', 'n2', 'n4', 'n3', 'n1']);
+  });
+
+  // The recursion for a child (`:139`) returns before that child's edge is
+  // created (`:140`) and appended (`:141`): post-order. a->x, a->y, root->a,
+  // root->b -- and the tailport is the child's index among its parent's
+  // rows (`createEdge(zz, node1, childBloc, i)`, `:140`; `"P" + num`, `:224`).
+  it('emits edges in post-order with each parent-row tailport', () => {
+    const { graph } = captureDotInput();
+    expect(graph.edges.map((e) => [e.id, e.attributes?.tailport])).toEqual([
+      ['n2->n4', 'P0'],
+      ['n2->n3', 'P1'],
+      ['n0->n2', 'P0'],
+      ['n0->n1', 'P1'],
+    ]);
+  });
+
+  // `drawMe` draws every edge in that list order (`:172-176`), so the
+  // geometry keeps it: the two edges leaving `a` come first, then the two
+  // leaving the root, which start left of `a`.
+  it('returns edge geometry in the same post-order', () => {
+    const { geo } = captureDotInput();
+    const a = geo.nodes.find((n) => n.id === 'n2')!;
+    expect(geo.edges.map((e) => e.points[0]!.x >= a.x)).toEqual([true, true, false, false]);
+  });
+});
+
 describe('layoutJson', () => {
   // 1. Flat object → 1 node, 2 rows
   it('flat object produces exactly 1 node with 2 rows', () => {

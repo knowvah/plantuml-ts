@@ -1,0 +1,9 @@
+@startfiles
+<style>
+root {
+  BackgroundColor lightyellow
+}
+</style>
+/a.txt
+/b/c.txt
+@endfiles

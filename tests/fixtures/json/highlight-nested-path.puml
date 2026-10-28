@@ -1,0 +1,4 @@
+@startjson
+#highlight "o" / "p" / "q"
+{"o": {"p": {"q": 1, "r": 2}}}
+@endjson

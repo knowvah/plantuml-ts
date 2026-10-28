@@ -1,0 +1,8 @@
+@startfiles
+!theme crt-amber
+/a.txt
+<note>
+themed
+</note>
+/b/c.txt
+@endfiles

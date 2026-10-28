@@ -1,81 +1,91 @@
-import { text, noteBox } from '../../core/svg.js';
-import type { FilesGeometry, EntryGeometry } from './ast.js';
-import type { Theme } from '../../core/theme.js';
-import type { RenderFragment } from '../../core/dispatcher.js';
-import { NOTE_Y_OFFSET } from './layout.js';
+import type { FontConfiguration } from '../../core/abel/FontConfiguration.js';
+import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
+import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
+import { TextBlockMemoized } from '../../core/klimt/shape/TextBlockMemoized.js';
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { FEntry } from './ast.js';
+import type { SkinParam } from './files-skin-param.js';
+import { calculateDimension, CHILD_INDENT, getTextBlock, ROW_GAP } from './layout.js';
 
-/** `data-diagram-type` (`TextBlockExporter.java:292-293`). */
-const DIAGRAM_TYPE_FILES = 'FILES';
-
-/** `lengthAdjust` carrier: spread only when the skinparam set it (lad D4, never an explicit 'spacing'). */
-function lengthAdjustOf(theme: Theme): Pick<RenderFragment, 'lengthAdjust'> {
-  return theme.lengthAdjust === undefined ? {} : { lengthAdjust: theme.lengthAdjust };
+/**
+ * Draws an entry at the current translate shifted right by `deltax`, then
+ * moves down by its block's height plus {@link ROW_GAP} and draws the children
+ * from there, {@link CHILD_INDENT} further right. Answers the graphic moved
+ * past the whole subtree.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/filesdiagram/FEntry.java:131-138
+ */
+export function drawAndMove(
+  entry: FEntry,
+  ug: UGraphic,
+  context: { readonly fontConfiguration: FontConfiguration; readonly skinParam: SkinParam },
+  deltax: number,
+): UGraphic {
+  const result = getTextBlock(entry, context.fontConfiguration, context.skinParam);
+  result.drawU(ug.apply(UTranslate.dx(deltax)));
+  let moved = ug.apply(UTranslate.dy(result.calculateDimension(ug.getStringBounder()).getHeight() + ROW_GAP));
+  for (const child of entry) moved = drawAndMove(child, moved, context, deltax + CHILD_INDENT);
+  return moved;
 }
 
-const PADDING = 10;
-const BASELINE_OFFSET = 4;
+/**
+ * `FilesListing` -- the text block of one `@startfiles` diagram: the entry
+ * tree below an unnamed root, and the last data file added (the note after it
+ * goes to that file's folder).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/filesdiagram/FilesListing.java:46-88
+ */
+export class FilesListing extends TextBlockMemoized {
+  /** @see FilesListing.java:48 */
+  private readonly skinParam: SkinParam;
+  /** @see FilesListing.java:49 */
+  private readonly fontConfiguration: FontConfiguration;
+  /** @see FilesListing.java:50 */
+  private readonly root: FEntry;
+  /** @see FilesListing.java:51 */
+  private lastCreated: FEntry | null = null;
 
-const NOTE_STROKE = '#AAAAAA';
-const NOTE_FONT = 12;
-const NOTE_PAD = 6;
-const NOTE_LINE_H = 16;
-const NOTE_FALLBACK_WIDTH = 120;
-
-const FILES_MIN_WIDTH = 200;
-
-function renderFileOrFolder(entry: EntryGeometry): string {
-  const icon = entry.type === 'folder' ? '📂' : '📄';
-  const label = icon + ' ' + entry.name;
-  return text(entry.x + PADDING, entry.y + BASELINE_OFFSET, label, {
-    fontFamily: 'sans-serif',
-    fontSize: 14,
-    dominantBaseline: 'hanging',
-    fill: '#000000',
-  });
-}
-
-function renderNote(entry: EntryGeometry): string {
-  const lines = entry.noteLines ?? [];
-  const n = lines.length;
-  const boxHeight = n === 0 ? NOTE_PAD * 2 : NOTE_PAD * 2 + (n - 1) * NOTE_LINE_H + NOTE_FONT;
-  const rawWidth = entry.labelWidth > 0 ? entry.labelWidth : NOTE_FALLBACK_WIDTH;
-  const boxWidth = rawWidth + NOTE_PAD * 2;
-
-  const bx = entry.x + PADDING;
-  const by = entry.y + NOTE_Y_OFFSET;
-
-  const box = noteBox(bx, by, boxWidth, boxHeight, { stroke: NOTE_STROKE });
-
-  const lineEls = lines.map((line, i) =>
-    text(entry.x + PADDING + NOTE_PAD, entry.y + NOTE_Y_OFFSET + NOTE_PAD + i * NOTE_LINE_H, line, {
-      fontSize: NOTE_FONT,
-      fontFamily: 'sans-serif',
-      dominantBaseline: 'hanging',
-      fill: '#000000',
-    }),
-  );
-
-  return box + lineEls.join('');
-}
-
-function renderEntry(entry: EntryGeometry): string {
-  if (entry.type === 'note') {
-    return renderNote(entry);
+  /** @see FilesListing.java:53-57 */
+  constructor(skinParam: SkinParam, fontConfiguration: FontConfiguration) {
+    super();
+    this.skinParam = skinParam;
+    this.fontConfiguration = fontConfiguration;
+    this.root = FEntry.createRoot();
   }
-  return renderFileOrFolder(entry);
-}
 
-export function renderFiles(geo: FilesGeometry, theme: Theme): RenderFragment {
-  const parts: string[] = geo.entries.map(renderEntry);
+  /** The unnamed root folder (`FilesListing#root`, private upstream; the AST hands it to the tests and T2c). */
+  getRoot(): FEntry {
+    return this.root;
+  }
 
-  const width = Math.max(geo.totalWidth, FILES_MIN_WIDTH);
-  const height = Math.max(geo.totalHeight, 40);
-  return {
-    body: parts.join(''),
-    width,
-    height,
-    background: theme.colors.background,
-    diagramType: DIAGRAM_TYPE_FILES,
-    ...lengthAdjustOf(theme),
-  };
+  /** The widest entry right edge by the sum of the top-level entries' heights. @see FilesListing.java:59-69 */
+  protected calculateDimensionSlow(stringBounder: StringBounder): XDimension2D {
+    const context = { fontConfiguration: this.fontConfiguration, skinParam: this.skinParam };
+    let width = 0;
+    let height = 0;
+    for (const entry of this.root) {
+      const dim = calculateDimension(entry, stringBounder, context, 0);
+      width = Math.max(width, dim.getWidth());
+      height += dim.getHeight();
+    }
+    return new XDimension2D(width, height);
+  }
+
+  /** @see FilesListing.java:71-75 */
+  drawU(ug: UGraphic): void {
+    const context = { fontConfiguration: this.fontConfiguration, skinParam: this.skinParam };
+    let moved = ug;
+    for (const entry of this.root) moved = drawAndMove(entry, moved, context, 0);
+  }
+
+  /** @see FilesListing.java:77-79 */
+  addRawEntry(raw: string): void {
+    this.lastCreated = this.root.addRawEntry(raw);
+  }
+
+  /** The note goes to the root, or to the folder of the last data file added. @see FilesListing.java:81-86 */
+  addNote(note: readonly string[]): void {
+    // A data file always has a parent (`FEntry.addRawEntry` creates it with `this`, FEntry.java:85).
+    if (this.lastCreated === null) this.root.addNote(note);
+    else (this.lastCreated.getParent() as FEntry).addNote(note);
+  }
 }

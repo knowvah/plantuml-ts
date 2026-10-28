@@ -1,0 +1,6 @@
+@startfiles
+header Top header
+footer Bottom footer
+/a.txt
+/b/c.txt
+@endfiles

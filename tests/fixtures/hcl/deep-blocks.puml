@@ -1,0 +1,9 @@
+@starthcl
+a {
+  b {
+    c {
+      d = 1
+    }
+  }
+}
+@endhcl

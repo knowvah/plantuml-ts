@@ -29,6 +29,7 @@ import { compareSvg, weightedScore } from './compare.js';
 import {
   AUTHORED_FILES_ROOT,
   authoredFilesIncludeStore,
+  filesFixtureAssetStore,
   listAuthoredFilesSlugs,
   readAuthoredFilesFixture,
   renderFixtureFiles,
@@ -162,9 +163,12 @@ describe('svg-files harness helper', () => {
 });
 
 describe('renderFixtureFiles', () => {
-  it('equals renderSync with withJarCompatibleStyleInput, byte for byte', () => {
+  it('equals renderSync with withJarCompatibleStyleInput and the Twemoji store, byte for byte', () => {
     const markup = readFileSync(join(HERE, '../../fixtures/lengthadjust/files-default.puml'), 'utf8');
-    const expected = renderSync(markup, withJarCompatibleStyleInput({ measurer: new DeterministicMeasurer() }));
+    const expected = renderSync(
+      markup,
+      withJarCompatibleStyleInput({ measurer: new DeterministicMeasurer(), assetStore: filesFixtureAssetStore() }),
+    );
     const ours = renderFixtureFiles(markup, { measurer: new DeterministicMeasurer() });
     expect(ours.startsWith('<svg')).toBe(true);
     expect(ours).toBe(expected);

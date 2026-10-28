@@ -1,1 +1,49 @@
-{ "fixtures": [] }
+{
+  "fixtures": [
+    {
+      "slug": "dobido-76-nugu008",
+      "addedAt": "2026-10-28",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "files-directory-tree-with-note",
+      "addedAt": "2026-10-28",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "kibilo-60-fado726",
+      "addedAt": "2026-10-28",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "nixaro-94-pefo622",
+      "addedAt": "2026-10-28",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "nojeru-23-tavo641",
+      "addedAt": "2026-10-28",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "tadabe-21-dovi548",
+      "addedAt": "2026-10-28",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "tezofo-39-fano197",
+      "addedAt": "2026-10-28",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "xeseve-00-tipa730",
+      "addedAt": "2026-10-28",
+      "source": "dot-cache"
+    },
+    {
+      "slug": "zixuta-02-suzo281",
+      "addedAt": "2026-10-28",
+      "source": "dot-cache"
+    }
+  ]
+}

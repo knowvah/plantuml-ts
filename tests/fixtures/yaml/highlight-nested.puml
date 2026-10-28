@@ -1,0 +1,6 @@
+@startyaml
+#highlight "o" / "p"
+o:
+  p: 1
+  q: 2
+@endyaml
