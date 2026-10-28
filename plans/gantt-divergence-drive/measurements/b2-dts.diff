@@ -1,0 +1,13 @@
+1516,1521c1516
+<      * body's numbers are rounded once, after the scale. Returns the flat body
+<      * and the klimt canvas of that pass (`width`/`height`): `SvgGraphics#
+<      * ensureVisible` runs for every primitive drawn (`SvgGraphics.java:129-135`,
+<      * `:620-621`), so the canvas covers ink drawn past the block's own
+<      * dimension. `TextBlockExporter.ts#exportTo` floors its canvas at it.
+<      * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/SvgGraphics.java:129-135
+---
+>      * body's numbers are rounded once, after the scale. Returns the flat body.
+1523c1518
+<     drawBodyAt?: (scale: number, dx: number, dy: number) => Pick<RenderFragment, 'body' | 'width' | 'height'>;
+---
+>     drawBodyAt?: (scale: number, dx: number, dy: number) => string;

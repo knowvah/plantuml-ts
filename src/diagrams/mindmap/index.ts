@@ -208,8 +208,8 @@ function exportTextBlock(diagram: MindMapDiagram, measurer: StringMeasurer): Ren
 function rawTextBlock(diagram: MindMapDiagram, measurer: StringMeasurer): RenderFragment {
   const dim = textBlockDimension(diagram, measurer);
   const fragment = drawFragment(diagram, measurer, { minDim: dim, scale: 1, translate: new UTranslate(0, 0) });
-  const drawBodyAt = (scale: number, dx: number, dy: number): string =>
-    drawFragment(diagram, measurer, { minDim: dim, scale, translate: new UTranslate(dx, dy) }).body;
+  const drawBodyAt = (scale: number, dx: number, dy: number): Pick<RenderFragment, 'body' | 'width' | 'height'> =>
+    drawFragment(diagram, measurer, { minDim: dim, scale, translate: new UTranslate(dx, dy) });
   const anchored: RenderFragment = {
     ...fragment,
     body: BODY_ANCHOR,

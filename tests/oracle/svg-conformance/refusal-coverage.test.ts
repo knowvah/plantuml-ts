@@ -1005,7 +1005,8 @@ describe('refusal coverage — baseline shape', () => {
     // 8432 -> 8683 at gep/close-b7 capture: +251 svg-gantt golden clones.
     // 8683 -> 8684 at gep/close-b8: +1 svg-gantt golden clone (ribupo-71-poku778).
     // 8684 -> 8685 at gdd/close-b1 (2026-10-27): +1 svg-gantt golden clone (xureco-57-lene839 promoted, T1a).
-    expect(manifest.fixtures.length).toBe(8685);
+    // 8685 -> 8686 at gdd/close-b2 (2026-10-28): +1 svg-gantt golden clone (xikovo-87-rosu902 promoted, T2a).
+    expect(manifest.fixtures.length).toBe(8686);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -1210,7 +1211,8 @@ describe('refusal coverage — baseline shape', () => {
     // 8215 -> 8466 at gep/close-b7 capture: 8683 rows - 217 erroring (+251 golden clones, all rendering).
     // 8466 -> 8467 at gep/close-b8: 8684 rows - 217 erroring.
     // 8467 -> 8468 at gdd/close-b1 (2026-10-27): 8685 rows - 217 erroring (xureco-57-lene839 clone renders).
-    expect(pinnedRendering.length).toBe(8468);
+    // 8468 -> 8469 at gdd/close-b2 (2026-10-28): 8686 rows - 217 erroring (xikovo-87-rosu902 clone renders).
+    expect(pinnedRendering.length).toBe(8469);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

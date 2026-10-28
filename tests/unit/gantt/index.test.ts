@@ -110,7 +110,7 @@ describe('renderGantt', () => {
     const fragment = renderGantt(parsed(`title T\n${TASK}`), measurer);
     expect(fragment.body).toBe(BODY_ANCHOR);
     expect(fragment.exportMargin?.getTop()).toBe(0);
-    expect(fragment.drawBodyAt?.(1, 0, 0)).toContain('<rect');
+    expect(fragment.drawBodyAt?.(1, 0, 0).body).toContain('<rect');
     expect(fragment.frameInk).toBeUndefined();
     expect(fragment.scaleSpec).toBeUndefined();
   });

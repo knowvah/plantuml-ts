@@ -127,7 +127,7 @@ describe('renderWbs', () => {
     const fragment = renderWbs(d, measurer);
     expect(fragment.body).toBe(BODY_ANCHOR);
     expect(fragment.exportMargin?.getTop()).toBe(10);
-    expect(fragment.drawBodyAt?.(1, 0, 0)).toContain('<rect');
+    expect(fragment.drawBodyAt?.(1, 0, 0).body).toContain('<rect');
     expect(fragment.frameInk).toBeUndefined();
     expect(fragment.scaleSpec).toBeUndefined();
   });

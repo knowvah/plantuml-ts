@@ -1,0 +1,5 @@
+Wrote /Users/scottseely/git/knowvah/plantuml-ts/docs/parity-report.md
+dashboard exit 0
+ docs/parity-report.md                          | 6 +++---
+ tests/oracle/svg-conformance/parity-gantt.json | 6 ++----
+ 2 files changed, 5 insertions(+), 7 deletions(-)

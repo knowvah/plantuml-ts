@@ -70,7 +70,7 @@ describe('finalizeTitledDiagramFragment — the producer-resolved margin', () =>
         exportMargin: SALT_DEFAULT_MARGIN,
         drawBodyAt: (scale, dx, dy) => {
           calls.push([scale, dx, dy]);
-          return INNER;
+          return { body: INNER, width: 1, height: 1 };
         },
       }),
     );
@@ -197,5 +197,40 @@ describe('exportTo -- the exportMargin arm (mindmap, wbs, salt)', () => {
 describe('scaleActivityBody -- the single format pass', () => {
   it('multiplies then rounds once: 20.83125 * 1.5 -> 31.247, not the double-rounded 31.246', () => {
     expect(scaleActivityBody('<text textLength="20.83125">a</text>', 1.5)).toBe('<text textLength="31.247">a</text>');
+  });
+});
+
+describe('exportTo — the canvas floors at the drawn body canvas (T2a)', () => {
+  // SvgGraphics.java:129-135 ensureVisible runs for every primitive drawn (:620-621 svgLine), so
+  // the jar's canvas is max((int)(dim + 1), (int)(ink + 1)). xikovo: title 35 + dim 46 = 81 -> 82,
+  // body ink 8 px below its dim at dy 35 -> 90.
+  const anchored = (overrides: Partial<RenderFragment>, drawn: { width: number; height: number }): RenderFragment =>
+    chromed({
+      body: `<g>${BODY_ANCHOR}</g>`,
+      width: 100,
+      height: 81,
+      exportMargin: ClockwiseTopRightBottomLeft.same(0),
+      drawBodyAt: () => ({ body: INNER, ...drawn }),
+      ...overrides,
+    });
+
+  it('drawn canvas taller than the declared dimension (title): keeps the drawn height', () => {
+    const out = finalizeTitledDiagramFragment(anchored({}, { width: 90, height: 90 }));
+    expect([out.width, out.height]).toEqual([101, 90]);
+  });
+
+  it('same under a header (SvgGraphics.java:129-135): 42 -> 43 raised to 51', () => {
+    const out = finalizeTitledDiagramFragment(anchored({ height: 42 }, { width: 50, height: 51 }));
+    expect([out.width, out.height]).toEqual([101, 51]);
+  });
+
+  it('drawn canvas inside the dimension (caption): unchanged (48 -> 49)', () => {
+    const out = finalizeTitledDiagramFragment(anchored({ height: 48 }, { width: 50, height: 40 }));
+    expect([out.width, out.height]).toEqual([101, 49]);
+  });
+
+  it('a drawn canvas wider than the dimension raises the width', () => {
+    const out = finalizeTitledDiagramFragment(anchored({}, { width: 130, height: 10 }));
+    expect([out.width, out.height]).toEqual([130, 82]);
   });
 });

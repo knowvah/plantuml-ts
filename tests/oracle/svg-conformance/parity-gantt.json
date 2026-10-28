@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T15:38:43.396Z",
+  "generatedAt": "2026-10-28T16:16:56.982Z",
   "fixtures": [
     {
       "slug": "bafilu-92-tafa086",
@@ -1725,9 +1725,7 @@
       "type": "gantt",
       "dotEqual": true,
       "layoutEqual": "n/a",
-      "verdict": "structural-match",
-      "maxDelta": 8,
-      "maxDeltaPath": "svg/@height"
+      "verdict": "conformant"
     },
     {
       "slug": "xodolo-13-bali118",

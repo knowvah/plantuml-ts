@@ -127,7 +127,7 @@ New src module ⇒ `npm run catalog` (drift-gated).
 |---|---|---|---|
 | [0](batch-0/overview.md) | branch + tooling, b0, five authored fixtures | T0a, T0b, T0c, close | [x] |
 | [1](batch-1/overview.md) | D1 seam, xikovo diagnosis, emoji threading, pin tooling (parallel) | T1a–T1d, close | [x] |
-| [2](batch-2/overview.md) | xikovo fix from the T1b artifact | T2a, close | [ ] |
+| [2](batch-2/overview.md) | xikovo fix from the T1b artifact | T2a, close | [x] |
 | [exit](batch-exit/overview.md) | final measurement vs b0, docs, memory, PR prep | T-exit | [ ] |
 | [squash](batch-squash/overview.md) | one commit per batch; tag the history | T-squash | [ ] |
 
