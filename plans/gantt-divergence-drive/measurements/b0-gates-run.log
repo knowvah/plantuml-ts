@@ -1,0 +1,8 @@
+wait load 13.83 12:01:56
+wait load 15.30 12:02:26
+wait load 22.50 12:02:57
+wait load 17.42 12:03:27
+wait load 15.03 12:03:57
+wait load 11.77 12:04:27
+start gates 12:04:57
+GATES_DONE

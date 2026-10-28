@@ -1,0 +1,7 @@
+@startgantt
+Project starts 2020-07-01
+[Task A] lasts 3 days
+note bottom
+Ready <:innocent:>
+end note
+@endgantt

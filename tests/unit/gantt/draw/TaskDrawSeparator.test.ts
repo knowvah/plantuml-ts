@@ -4,6 +4,10 @@ import { HColorGradient } from '../../../../src/core/klimt/color/HColorGradient.
 import { HColorSimple } from '../../../../src/core/klimt/color/HColorSimple.js';
 import { MeasurerStringBounder } from '../../../../src/core/measurer-bounder.js';
 import { DeterministicMeasurer } from '../../../../src/core/measurer-deterministic.js';
+import type { InternalEmojiStore } from '../../../../src/core/internal-emoji-store.js';
+import { createSpriteRegistry } from '../../../../src/core/sprite-registry.js';
+import { createMindmapSkinParam } from '../../../../src/core/style/mindmap-style-builder.js';
+import { SkinParam } from '../../../../src/diagrams/gantt/gantt-skin-param.js';
 import { RealUtils } from '../../../../src/core/real/RealUtils.js';
 import { Pragma } from '../../../../src/core/skin/Pragma.js';
 import { StyleBuilder } from '../../../../src/core/style/StyleBuilder.js';
@@ -242,5 +246,43 @@ describe('TaskDrawSeparator geometry and the TaskDraw members', () => {
       skinParam(colorSet(true)),
     );
     expect(() => d.getFullHeightTask(bounder)).toThrow(/NullPointerException/);
+  });
+});
+
+// T1c: `<:innocent:>` in the separator name draws the Twemoji artwork (Emoji.java:175-193: `getSvg` always
+// finds the file on the classpath and `SvgSpriteParserFactory` turns it into vector paths; no text fallback).
+describe('TaskDrawSeparator emoji title (TaskDrawSeparator.java:123-129, Emoji.java:175-193)', () => {
+  const ARTWORK = '<circle cx="18" cy="18" r="18" fill="#123456"/>';
+  const emojiSkin = (store: InternalEmojiStore | undefined): SkinParam =>
+    new SkinParam({
+      style: createMindmapSkinParam({}),
+      skinparam: new Map(),
+      sprites: createSpriteRegistry(undefined, store),
+      pragma: Pragma.createEmpty(),
+    });
+  const drawWith = (store: InternalEmojiStore | undefined, name: string): string[] => {
+    const d = new TaskDrawSeparator(
+      name,
+      timeScale,
+      RealUtils.createOrigin(),
+      MIN_DAY,
+      MAX_DAY,
+      styleBuilder,
+      emojiSkin(store),
+    );
+    return record(measurer, (ug) =>
+      d.drawTitle(ug, new LabelStrategy(LabelPosition.FIRST_COLUMN, HorizontalAlignment.LEFT), 40, 90),
+    ).map((e) => ('draw' in e ? e.draw : ''));
+  };
+
+  it('with a store the emoji is the artwork shape (1.5 x the 11pt font) instead of the text run', () => {
+    expect(drawWith({ get: (u) => (u === '1f607' ? ARTWORK : undefined) }, '<:innocent:> Phase')).toEqual([
+      'UEllipse(16.5,16.5)',
+      'UText( Phase)',
+    ]);
+  });
+
+  it('without a store the output is unchanged: the platform-glyph text run', () => {
+    expect(drawWith(undefined, '<:innocent:> Phase')).toEqual(['UText(\u{1F607})', 'UText( Phase)']);
   });
 });

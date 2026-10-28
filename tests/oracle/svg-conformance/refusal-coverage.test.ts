@@ -455,8 +455,19 @@ const pinnedJarErrors = manifest.fixtures.filter((f) => !f.jarRendered);
  *  samples sit in the same band: 108,222 ms (run 37856273415), 111,457 ms
  *  (run 38046648955) and 102,491 ms (run 38075923903), 85-93% of the old
  *  120,000 ms. That margin is too thin for a 4-vCPU runner, so the same
- *  budget applies here. */
-const CORPUS_BUDGET_MS = 330_000;
+ *  budget applies here.
+ *
+ * RE-DERIVED AGAIN (2026-10-28, PR #95 run 40730527655). gantt-engine-port
+ * turned 265 gantt rows from error pages into real renders and added 251
+ * gantt golden clones (8,432 -> 8,684 rows), so this gate's CI cost tripled:
+ * 336,125 ms here (timed out at 330,000) and <= 315 s on the last green main
+ * run (40528746274, same ubuntu-26.04 image, shard-4 wall clock); the sibling
+ * measured 277,236 ms. Not a slow runner: zudize-61 took 24 s against its
+ * 22-41 s samples. The dev box measures 92-131 s across gep b0 .. gdd final
+ * (12 cores vs the runner's 4 vCPU). Budget raised to 10 minutes (user
+ * ruling 2026-10-28); CI's 12-minute `test` step cap remains the outer
+ * backstop. */
+const CORPUS_BUDGET_MS = 600_000;
 
 describe('refusal coverage — corpus completeness', () => {
   it(
@@ -1004,7 +1015,9 @@ describe('refusal coverage — baseline shape', () => {
     // 8431 -> 8432 at gep/close-b7 (2026-10-26): +1 svg-activity golden clone (bozido-07-geze049).
     // 8432 -> 8683 at gep/close-b7 capture: +251 svg-gantt golden clones.
     // 8683 -> 8684 at gep/close-b8: +1 svg-gantt golden clone (ribupo-71-poku778).
-    expect(manifest.fixtures.length).toBe(8684);
+    // 8684 -> 8685 at gdd/close-b1 (2026-10-27): +1 svg-gantt golden clone (xureco-57-lene839 promoted, T1a).
+    // 8685 -> 8686 at gdd/close-b2 (2026-10-28): +1 svg-gantt golden clone (xikovo-87-rosu902 promoted, T2a).
+    expect(manifest.fixtures.length).toBe(8686);
     expect(pinnedJarErrors.length).toBe(86);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -1208,7 +1221,9 @@ describe('refusal coverage — baseline shape', () => {
     // 8217 -> 8215 at gep/close-b7: 8432 rows - 217 erroring (gantt +3 known-gap, +1 activity clone).
     // 8215 -> 8466 at gep/close-b7 capture: 8683 rows - 217 erroring (+251 golden clones, all rendering).
     // 8466 -> 8467 at gep/close-b8: 8684 rows - 217 erroring.
-    expect(pinnedRendering.length).toBe(8467);
+    // 8467 -> 8468 at gdd/close-b1 (2026-10-27): 8685 rows - 217 erroring (xureco-57-lene839 clone renders).
+    // 8468 -> 8469 at gdd/close-b2 (2026-10-28): 8686 rows - 217 erroring (xikovo-87-rosu902 clone renders).
+    expect(pinnedRendering.length).toBe(8469);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

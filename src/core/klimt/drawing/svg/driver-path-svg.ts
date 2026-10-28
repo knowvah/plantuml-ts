@@ -40,6 +40,14 @@ import { DriverRectangleSvg } from './driver-rectangle-svg.js';
 // See the module doc comment above for the HColor#equals adaptation.
 function paintsEqual(a: HColorOrPaint, b: HColorOrPaint): boolean {
   if (a instanceof HColorSimple && b instanceof HColorSimple) return a.equals(b);
+  // The port seeds colour/back with the string 'none' (AbstractCommonUGraphic.ts)
+  // where upstream seeds `HColors.none()` (AbstractCommonUGraphic.java:61-62),
+  // which IS the transparent HColorSimple `TRANSPARENT` (HColors.java:133-135);
+  // HColorSimple#equals compares the XColor (HColorSimple.java:85-89) by
+  // r/g/b/alpha (XColor.java:91-98), so 'none' equals any alpha-0 simple
+  // colour, as upstream's transparent-vs-transparent comparison does.
+  if (typeof a === 'string' && a === 'none' && b instanceof HColorSimple) return b.isTransparent();
+  if (typeof b === 'string' && b === 'none' && a instanceof HColorSimple) return a.isTransparent();
   return typeof a === 'string' && typeof b === 'string' && a === b;
 }
 

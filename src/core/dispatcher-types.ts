@@ -219,9 +219,14 @@ export interface RenderFragment {
    * is only the `TextBlockExporter.ts#BODY_ANCHOR` placeholder. Chrome
    * composes around the anchor; `finalizeTitledDiagramFragment` reads the
    * anchor's shifted translate as `(dx, dy)` and swaps in this draw, so the
-   * body's numbers are rounded once, after the scale. Returns the flat body.
+   * body's numbers are rounded once, after the scale. Returns the flat body
+   * and the klimt canvas of that pass (`width`/`height`): `SvgGraphics#
+   * ensureVisible` runs for every primitive drawn (`SvgGraphics.java:129-135`,
+   * `:620-621`), so the canvas covers ink drawn past the block's own
+   * dimension. `TextBlockExporter.ts#exportTo` floors its canvas at it.
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/SvgGraphics.java:129-135
    */
-  drawBodyAt?: (scale: number, dx: number, dy: number) => string;
+  drawBodyAt?: (scale: number, dx: number, dy: number) => Pick<RenderFragment, 'body' | 'width' | 'height'>;
   /** sep-T5a: `TextBlockExporter`'s `margin` -- the producer's `Builder#calculateMargin` (style `Margin`, else
    *  `getDefaultMargins()`, TextBlockExporter.java:510-516). Its presence selects `TextBlockExporter.ts#exportTo`'s
    *  first arm: the producer handed over the RAW chromed block, so the exporter shifts the body by `(left, top)`

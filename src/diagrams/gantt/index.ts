@@ -264,8 +264,8 @@ function rawTextBlock(
     scale: 1,
     translate: new UTranslate(0, 0),
   });
-  const drawBodyAt = (scale: number, dx: number, dy: number): string =>
-    drawFragment(diagram, measurer, { textBlock, minDim: dim, scale, translate: new UTranslate(dx, dy) }).body;
+  const drawBodyAt = (scale: number, dx: number, dy: number): Pick<RenderFragment, 'body' | 'width' | 'height'> =>
+    drawFragment(diagram, measurer, { textBlock, minDim: dim, scale, translate: new UTranslate(dx, dy) });
   const anchored: RenderFragment = {
     ...background,
     body: BODY_ANCHOR,

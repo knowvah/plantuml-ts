@@ -16,6 +16,7 @@ import { UGroup, UGroupType } from '../../../../src/core/klimt/shape/UGroup.js';
 import { UStroke } from '../../../../src/core/klimt/UStroke.js';
 import { UTranslate } from '../../../../src/core/klimt/UTranslate.js';
 import { Fore } from '../../../../src/core/klimt/Fore.js';
+import { HColorSimple } from '../../../../src/core/klimt/color/HColorSimple.js';
 import { Back } from '../../../../src/core/klimt/Back.js';
 import type { UShape } from '../../../../src/core/klimt/UShape.js';
 import type { UParam } from '../../../../src/core/klimt/UParam.js';
@@ -211,6 +212,37 @@ describe('DriverPathSvg', () => {
     const xml = root.getSvgString();
     // strokeWidth becomes "0" -> styleMe short-circuits, no style attr at all.
     expect(xml).toContain('<path d="M0,0 L10,0 L10,10" fill="#123"/>');
+  });
+
+  // DriverPathSvg.java:64-72 — color.equals(back) fast path vs else arm.
+  const TRANSPARENT = HColorSimple.create({ r: 0, g: 0, b: 0, a: 0 });
+  const OPAQUE = HColorSimple.create({ r: 0x11, g: 0x22, b: 0x33, a: 255 });
+  function drawTriangle(fore: HColorSimple, back?: HColorSimple): string {
+    const root = newGraphic();
+    const path = UPath.none();
+    path.moveTo(0, 0);
+    path.lineTo(10, 0);
+    path.lineTo(10, 10);
+    let g = root.apply(new UStroke(0, 0, 1)).apply(new Fore(fore));
+    if (back !== undefined) g = g.apply(new Back(back));
+    g.draw(path);
+    return root.getSvgString();
+  }
+
+  it('DriverPathSvg.java:64-68: transparent colour over the default back (HColors.none()) takes the fast path', () => {
+    const xml = drawTriangle(TRANSPARENT);
+    expect(xml).toContain('<path d="M0,0 L10,0 L10,10" fill="none"/>');
+    expect(xml).not.toContain('stroke:none');
+  });
+
+  it('DriverPathSvg.java:64-72: opaque colour over the default back keeps the stroke style', () => {
+    const xml = drawTriangle(OPAQUE);
+    expect(xml).toContain('<path d="M0,0 L10,0 L10,10" style="stroke:#123;stroke-width:1;" fill="none"/>');
+  });
+
+  it('DriverPathSvg.java:64-72: transparent colour over an opaque back takes the else arm', () => {
+    const xml = drawTriangle(TRANSPARENT, OPAQUE);
+    expect(xml).toContain('<path d="M0,0 L10,0 L10,10" style="stroke:none;" fill="#123"/>');
   });
 
   it('a Gradient color equal in value to a Gradient backcolor still takes the general branch (never the fast path)', () => {

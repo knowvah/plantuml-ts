@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { HColorSet } from '../../../../src/core/klimt/color/HColorSet.js';
 import { HColorSimple } from '../../../../src/core/klimt/color/HColorSimple.js';
 import { Display } from '../../../../src/core/klimt/creole/Display.js';
+import type { InternalEmojiStore } from '../../../../src/core/internal-emoji-store.js';
+import { createSpriteRegistry } from '../../../../src/core/sprite-registry.js';
+import { createMindmapSkinParam } from '../../../../src/core/style/mindmap-style-builder.js';
+import { SkinParam } from '../../../../src/diagrams/gantt/gantt-skin-param.js';
 import { MeasurerStringBounder } from '../../../../src/core/measurer-bounder.js';
 import { RealUtils } from '../../../../src/core/real/RealUtils.js';
 import { Pragma } from '../../../../src/core/skin/Pragma.js';
@@ -240,5 +244,54 @@ describe('AbstractTaskDraw notes (AbstractTaskDraw.java:215-239)', () => {
     expect(() => mergedStyleOf(StyleSignatureBasic.of('root', 'element', 'ganttDiagram', 'task'), empty)).toThrow(
       'NullPointerException',
     );
+  });
+});
+
+// T1c: `<:innocent:>` in a note draws the Twemoji artwork (Emoji.java:175-193; AbstractTaskDraw.java:215-226
+// builds the note from `skinParam.sheet(..)` with a `SpriteContainerEmpty`, whose emoji always resolve).
+describe('AbstractTaskDraw note emoji (AbstractTaskDraw.java:215-231, Emoji.java:175-193)', () => {
+  const ARTWORK = '<circle cx="18" cy="18" r="18" fill="#123456"/>';
+  const drawNoteWith = (store: InternalEmojiStore | undefined): string[] => {
+    const skin = new SkinParam({
+      style: createMindmapSkinParam({}),
+      skinparam: new Map(),
+      sprites: createSpriteRegistry(undefined, store),
+      pragma: Pragma.createEmpty(),
+    });
+    const draw = new TaskDrawRegular(
+      HColorSet.instance(),
+      timeScale,
+      RealUtils.createOrigin(),
+      'Task',
+      day(4),
+      day(7),
+      false,
+      false,
+      skin,
+      taskOf('Task'),
+      new TaskDrawRegistryData(),
+      [],
+      styleBuilder,
+    );
+    draw.setColorsAndCompletion(
+      undefined,
+      100,
+      undefined,
+      Display.getWithNewlines(Pragma.createEmpty(), '<:innocent:> note'),
+      undefined,
+    );
+    return recorded((ug) => draw.drawU(ug)).map((e) => ('draw' in e ? e.draw : ''));
+  };
+
+  it('with a store the note carries the artwork shape', () => {
+    const draws = drawNoteWith({ get: (u) => (u === '1f607' ? ARTWORK : undefined) });
+    expect(draws.filter((d) => d.startsWith('UEllipse'))).toEqual(['UEllipse(13.5,13.5)']);
+    expect(draws.filter((d) => d.includes('\u{1F607}'))).toEqual([]);
+  });
+
+  it('without a store the note keeps the platform-glyph text run', () => {
+    const draws = drawNoteWith(undefined);
+    expect(draws.filter((d) => d.startsWith('UEllipse'))).toEqual([]);
+    expect(draws.filter((d) => d.includes('\u{1F607}'))).toEqual(['UText(\u{1F607})']);
   });
 });

@@ -1,0 +1,6 @@
+# batch <close sha> <tree sha> — gdd squash map (D7). The close-out entry is the tag gdd/pre-squash itself: its tree is the target tree.
+b0 bc15a0bd41c74297fcc87ebec97efe9fbff88a19 653012c564b11e7e49e4f4ec3c54a2c2dff7df52
+b1 6644b3d39abd5b8a3e2fd20868f815d8e2772e33 a9a45de026016f7f901a1579f125bac416f39076
+b2 9169bced5e42c3f9b19a7a551ecb5454e78552d9 1f3cef6a413461d985f42604af6ae8f39ffd6b65
+exit 732b3c3f2095cc103c478acfaeadc84761300241 467a05de435c90a898cd8cc9bb0b07eaffb1d722
+close-out gdd/pre-squash (tag; tree = gdd/pre-squash^{tree}, the docs(gdd): squash map commit)

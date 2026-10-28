@@ -35,6 +35,59 @@ post-D7 measurements.
 
 ---
 
+## gantt-divergence-drive (gdd) — DONE 2026-10-28 (branch `feat/gantt-divergence-drive` off `01fe0c79b`, one commit per batch after the squash, unsigned, not pushed; lands via PR after the user's `git rebase --force-rebase -S 01fe0c79b`; working history on the local tag `gdd/pre-squash`)
+
+Gantt **263/265 → 265/265 conformant** (0 structural, 0 diverged, 0 errored),
+goldens 252 → 254, five authored fixtures jar-equal (emoji-separator,
+emoji-note, title-hide-footbox, header-hide-footbox, caption-hide-footbox);
+0 conformant losses in the other 27 engines at every close vs b0
+(`plans/gantt-divergence-drive/measurements/{b0,b1,b2}-eng`). Three core/gantt
+fixes, each with its Java quote in `plans/gantt-divergence-drive/fixtures.md`:
+- **T1a (D1, core)** `driver-path-svg.ts` `paintsEqual` equates the string
+  `'none'` with a transparent `HColorSimple` (`HColors.java:133-135`,
+  `XColor.java:91-98`), so `DriverPathSvg.java:64-68`'s fast path fires:
+  transparent-link paths drop `style="stroke:none;"` in every engine (only
+  gantt xureco-57 moved in the corpus).
+- **T1c (D3, gantt)** separator names and note bodies draw emoji from the
+  injected store (`Emoji.java:175-193`, vector paths via
+  `SvgSpriteParserFactory`).
+- **T2a (D2, core)** `RenderFragment.drawBodyAt` hands back its klimt pass's
+  canvas and `TextBlockExporter.ts#exportTo` floors `width`/`height` at it —
+  the jar's canvas is `ensureVisible` over every primitive
+  (`SvgGraphics.java:128-135, 620-621, 801-813`), not the block dimension.
+  Gantt under `hide footbox` draws day separators 8 px below its dimension
+  (`TimeHeaderSimple.java:145-146`); titled/headed gantts are now 8 px taller,
+  as the jar is. The d.ts moved inside `RenderFragment` only (stop-6 amendment,
+  user ruling 2026-10-27, journal rows 12/14/18).
+- nakude-77 / mogafu-27: error pages on both sides, conformant by the
+  2026-10-10 rule (D4); no code.
+
+### Follow-ons filed here
+- **D1 option A — `NONE_PAINT` representation mirror.** Seed
+  `AbstractCommonUGraphic.ts:53,106-107` with the transparent `HColorSimple`
+  singleton (`HColors.none()`, `AbstractCommonUGraphic.java:61-62`) and retire
+  the string `'none'` `Paint`; 10 consumer files from `decisions.md` D1:
+  `EmbeddedDiagram.ts`, `SymbolContext.ts`, `USymbolStack.ts`,
+  `AbstractCommonUGraphic.ts`, `StripeTree.ts`, `driver-dot-path-svg.ts`,
+  `TextBlockLineBefore.ts`, `ActorStickMan.ts`, `Cluster.ts`, `Control.ts`.
+  Its own measured mission: all-engine chain at every close, expected 0 movers
+  (the equality seam already produces the jar's bytes). Removes the
+  `paintsEqual` special case once landed.
+- **D9 — `data-*` comparator blind spot.** Our title/header `<g>` lacks
+  `data-source-line` (`DiagramChromeFactory.java:373-374, 409-410` put the
+  command's `LineLocation` on the `UGroup`); `tests/oracle/svg-conformance/
+  normalize.ts:16` strips every `data-*` attribute for every engine before
+  comparison, so no survey can see it. Measure first: a one-off compare with
+  the strip disabled, per engine, to size the gap before porting the
+  attribute.
+- **Margin-baked arm canvas (T1b open question).** T2a fixed the
+  `exportMargin` arm (gantt, wbs, salt, mindmap). The margin-baked arm
+  (activity, class, sequence, description) sizes its canvas the same way and
+  was not measured for ink drawn past `calculateDimension` under top chrome;
+  no corpus row shows it today. Measure before porting.
+
+---
+
 ## gantt-engine-port (gep) — DONE (final, batch 8: 263/265 conformant) (branch `feat/gantt-engine-port` off `1be33f054`, one unsigned commit per task until the squash batch, then one per batch; not pushed; lands via PR after the user's `git rebase --force-rebase -S 1be33f054`; working history on the local tag `gep/pre-squash`)
 
 `@startgantt` and `{{gantt}}` now render as the jar does; before, both drew a
@@ -68,7 +121,7 @@ records a stop 12. Only `lituri-55` stays a signed accepted divergence (the
 clock row). Re-open the fallback only if a clock-dependent row compares
 differently on two captures.
 
-### Open -> gantt-divergence-drive (4 families; mechanisms in `plans/gantt-engine-port/fixtures.md`, refined by journal row 88)
+### ~~Open -> gantt-divergence-drive~~ — RESOLVED by gdd (2026-10-28: all four families closed, gantt 265/265; see the gdd section above. Three of the four mechanisms below were corrected there: xureco is an equality seam in `paintsEqual`, not a representation change; xikovo is body ink below `calculateDimension` that the jar's `ensureVisible` covers, not a chrome-stacking loss; nakude is an error page on both sides.)
 
 Batch 8 landed T8c (ribupo: the asset store now reaches the gantt plugin) and T8d (vega-gantt2: the error listing matches the refused line by location) at the b8 close (journal rows 90–93). Check the brief
 before repeating this table.

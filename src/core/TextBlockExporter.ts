@@ -275,22 +275,27 @@ function scaleBodyText(fragment: RenderFragment, text: string, factor: number): 
  * raw text block drawn through klimt at `factor` from the anchor's
  * translate -- upstream draws the whole chromed document through one scaled
  * `UGraphic` (TextBlockExporter.java:165-176), so the body's numbers are
- * rounded once, after the scale.
+ * rounded once, after the scale. `drawn` is that pass's klimt canvas, whose
+ * `ensureVisible` ran for every primitive (`SvgGraphics.java:129-135`,
+ * `:620-621`); undefined without a `drawBodyAt`.
  */
 function scaleMarginedBody(
   fragment: RenderFragment,
   body: string,
   margin: ClockwiseTopRightBottomLeft,
   factor: number,
-): string {
+): { body: string; drawn: Extent | undefined } {
   const shifted = shiftFragmentBody(body, margin.getLeft(), margin.getTop());
-  if (fragment.drawBodyAt === undefined) return scaleBodyText(fragment, shifted, factor);
+  if (fragment.drawBodyAt === undefined) return { body: scaleBodyText(fragment, shifted, factor), drawn: undefined };
   const anchor = BODY_ANCHOR_RE.exec(shifted);
   if (anchor === null) throw new Error('exportTo: drawBodyAt set but the body anchor is missing');
   const before = shifted.slice(0, anchor.index);
   const after = shifted.slice(anchor.index + anchor[0].length);
   const drawn = fragment.drawBodyAt(factor, Number(anchor[1]), Number(anchor[2]));
-  return scaleBodyText(fragment, before, factor) + drawn + scaleBodyText(fragment, after, factor);
+  return {
+    body: scaleBodyText(fragment, before, factor) + drawn.body + scaleBodyText(fragment, after, factor),
+    drawn: { width: drawn.width, height: drawn.height },
+  };
 }
 
 /** A width x height pair: the export's dimension, or its canvas. */
@@ -360,15 +365,19 @@ export function exportTo(fragment: RenderFragment, body: string): RenderFragment
   const factor = resolveScaleFactor(fragment.scaleSpec, dim.width, dim.height, fragment.dpi);
   const margin = fragment.exportMargin;
   if (margin === undefined && factor === 1 && fragment.numbersDeferred !== true) return { ...fragment, body };
+  const margined = margin === undefined ? undefined : scaleMarginedBody(fragment, body, margin, factor);
+  // The canvas is `max(minDim + 1, every drawn primitive's extent + 1)`: the constructor's
+  // `ensureVisible(minDim)` (`SvgGraphics.java:143`) and `svgLine`'s (`:620-621`) share `maxX`/`maxY`
+  // (`:129-135`), so ink drawn past the dimension floors the canvas.
+  const drawn = margined?.drawn;
   return {
     ...fragment,
-    body:
-      margin === undefined ? scaleBodyText(fragment, body, factor) : scaleMarginedBody(fragment, body, margin, factor),
+    body: margined === undefined ? scaleBodyText(fragment, body, factor) : margined.body,
     ...(fragment.extraDefs === undefined ? {} : { extraDefs: scaleShadowFilterDefs(fragment.extraDefs, factor) }),
     // isw-T2c-scale: root `width`/`height` attributes are `format(maxX)`.
     scaledCanvas: true,
-    width: canvas.width * factor,
-    height: canvas.height * factor,
+    width: Math.max(canvas.width * factor, drawn?.width ?? 0),
+    height: Math.max(canvas.height * factor, drawn?.height ?? 0),
   };
 }
 

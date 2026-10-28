@@ -178,7 +178,7 @@ describe('finalizeTitledDiagramFragment — klimt-drawn body at the anchor (T6h)
       scaleSpec: simpleScale(2),
       drawBodyAt: (scale, dx, dy) => {
         calls.push([scale, dx, dy]);
-        return '<rect x="1" y="1" width="1" height="1"/>';
+        return { body: '<rect x="1" y="1" width="1" height="1"/>', width: 1, height: 1 };
       },
     });
     const result = finalizeTitledDiagramFragment(fragment);
@@ -190,7 +190,7 @@ describe('finalizeTitledDiagramFragment — klimt-drawn body at the anchor (T6h)
 
   it('the anchor is BODY_ANCHOR, and a missing anchor is a broken invariant', () => {
     expect(BODY_ANCHOR).toBe('<g data-body-anchor="" transform="translate(0,0)"/>');
-    const fragment = wrappedFragment({ body: chromeTitle, drawBodyAt: () => '' });
+    const fragment = wrappedFragment({ body: chromeTitle, drawBodyAt: () => ({ body: '', width: 0, height: 0 }) });
     expect(() => finalizeTitledDiagramFragment(fragment)).toThrow('body anchor is missing');
   });
 });

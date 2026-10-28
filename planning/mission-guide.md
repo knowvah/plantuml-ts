@@ -237,8 +237,9 @@ so the jar's geometry is the target. Task dates come from the `real`
 constraint package and the `ngm` allocation model, not a standalone worklist
 solver.
 
-**Open work:** the remaining divergence families are owned in
-`planning/next-missions.md` (gep section) as gantt-divergence-drive work.
+**Open work:** none — gantt-divergence-drive (gdd, 2026-10-28) took gantt to
+265/265 conformant. Follow-ons (D1 option A none-paint mirror, D9 `data-*`
+comparator blind spot) are filed in `planning/next-missions.md` (gdd section).
 
 ---
 

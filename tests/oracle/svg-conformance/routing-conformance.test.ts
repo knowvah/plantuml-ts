@@ -448,8 +448,19 @@ const pinnedJarErrors = manifest.fixtures.filter((f) => f.status === 'jar-error'
  * No PER-FIXTURE budget is needed or wanted. Unlike the sequence ratchet,
  * nothing here reads a whole golden: `readHead` takes the first 4 KB, so the
  * 8.26 MB `sequence/zudize-61-vomi445` golden that forced that budget costs
- * this gate the same as any other fixture. */
-const CORPUS_BUDGET_MS = 330_000;
+ * this gate the same as any other fixture.
+ *
+ * RE-DERIVED AGAIN (2026-10-28, PR #95 run 40730527655). gantt-engine-port
+ * turned 265 gantt rows from error pages into real renders and added 251
+ * gantt golden clones (8,432 -> 8,684 rows), so this gate's CI cost tripled:
+ * 336,125 ms here (timed out at 330,000) and <= 315 s on the last green main
+ * run (40528746274, same ubuntu-26.04 image, shard-4 wall clock); the sibling
+ * measured 277,236 ms. Not a slow runner: zudize-61 took 24 s against its
+ * 22-41 s samples. The dev box measures 92-131 s across gep b0 .. gdd final
+ * (12 cores vs the runner's 4 vCPU). Budget raised to 10 minutes (user
+ * ruling 2026-10-28); CI's 12-minute `test` step cap remains the outer
+ * backstop. */
+const CORPUS_BUDGET_MS = 600_000;
 
 describe('routing conformance — corpus completeness', () => {
   it(
@@ -1149,7 +1160,9 @@ describe('routing conformance — jar-error classification', () => {
     // 7970 -> 7971 at gep/close-b7: +1 svg-activity golden clone (bozido-07-geze049 promoted).
     // 7971 -> 8222 at gep/close-b7 capture: +251 svg-gantt golden clones.
     // 8222 -> 8223 at gep/close-b8: +1 svg-gantt golden clone (ribupo-71-poku778 promoted, T8c).
-    expect(pinnedAgree.length).toBe(8223);
+    // 8223 -> 8224 at gdd/close-b1 (2026-10-27): +1 svg-gantt golden clone (xureco-57-lene839 promoted, T1a).
+    // 8224 -> 8225 at gdd/close-b2 (2026-10-28): +1 svg-gantt golden clone (xikovo-87-rosu902 promoted, T2a).
+    expect(pinnedAgree.length).toBe(8225);
     // 629 -> 375 at gep/close-b7: the same 254 gantt rows.
     expect(pinnedMisroutes.length).toBe(375);
     expect(pinnedJarErrors.length).toBe(86);
@@ -1192,7 +1205,9 @@ describe('routing conformance — jar-error classification', () => {
     // 8431 -> 8432 at gep/close-b7 (2026-10-26): +1 svg-activity golden clone (bozido-07-geze049).
     // 8432 -> 8683 at gep/close-b7 capture: +251 svg-gantt golden clones.
     // 8683 -> 8684 at gep/close-b8: +1 svg-gantt golden clone (ribupo-71-poku778).
-    expect(manifest.fixtures.length).toBe(8684);
+    // 8684 -> 8685 at gdd/close-b1 (2026-10-27): +1 svg-gantt golden clone (xureco-57-lene839 promoted, T1a).
+    // 8685 -> 8686 at gdd/close-b2 (2026-10-28): +1 svg-gantt golden clone (xikovo-87-rosu902 promoted, T2a).
+    expect(manifest.fixtures.length).toBe(8686);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

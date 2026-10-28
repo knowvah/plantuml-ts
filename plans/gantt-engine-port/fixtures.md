@@ -86,7 +86,14 @@ front-matter) + 31 authored. Dropped (jar cannot express, journal row 4):
 (`oracle/capture-clock.json`). Construct → fixture/corpus map: T0b hand-back,
 journal row 4.
 
-## Open families after batch 8 (T8a–T8d landed)
+## Open families after batch 8 (T8a–T8d landed) — ALL CLOSED by gantt-divergence-drive (2026-10-28)
+
+Every row below is closed in `plans/gantt-divergence-drive/fixtures.md` (gantt
+265/265 conformant, 254 goldens, 0 losses elsewhere). Three of the four
+mechanisms were corrected there: xureco is a one-file equality seam
+(`paintsEqual`, D1), xikovo is day-separator INK below the body dimension that
+the jar's per-primitive `ensureVisible` covers (D2, core `TextBlockExporter`),
+nakude is an error page on both sides (D4). The table is kept as filed.
 
 | firstDiff family | rows | mechanism (diagnosis artifact) | owner |
 |---|---:|---|---|
