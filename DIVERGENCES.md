@@ -1017,6 +1017,17 @@ other engine still resolves styles through the flat `StyleMap`
 which drops `:depth(n)`/`*` selectors and refuses nesting deeper than two
 levels.
 
+**Update (jse, 2026-10-29).** The json family (`@startjson`/`@startyaml`/
+`@starthcl`) now resolves every style through the engine too, at the jar's
+signatures (`TextBlockJson.java:138-152,286-299`, `SmetanaForJson.java:112-125`):
+the parse builds a `JsonSkinParam` (`src/diagrams/json/json-skin-param.ts`),
+`resolveJsonStyles`/`styleToUse` (`json-style-resolve.ts`) feed measurement and
+paint, and the hand-keyed json `StyleMap` projection
+(`style-map-json-diagram.ts`, `computeJsonGraphOverride`) is deleted. The
+`Theme.colors.graph.json` TYPE and its theme seeds remain (public type) but
+nothing reads them. Engines on the style engine now: mindmap, wbs, salt, gantt,
+files, json/yaml/hcl.
+
 **Consequences.** A `<style>` block is parsed twice on a multi-diagram source
 (once per path). The two paths agree on the 142-fixture mindmap corpus and on
 every other engine's ratchet (the all-engine survey moved no non-mindmap

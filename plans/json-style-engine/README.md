@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — EXECUTING 2026-10-29 (batches 0-3 closed; b2+b3 jointly, journal row 18; batch 4 skipped; next: exit)
+## Status — DONE 2026-10-29 (squashed; awaiting the user's signing rebase + PR)
 
 ## Objective
 
@@ -99,8 +99,8 @@ New src module ⇒ `npm run catalog` (drift-gated).
 | [2 — measurement and paint read the engine](batch-2/overview.md) | T2a, T2b, close | [x] |
 | [3 — extended mode and retiring the projection](batch-3/overview.md) | T3a, T3b, close | [x] |
 | [4 — residuals](batch-4/overview.md) | T4a, close | skipped (row 31) |
-| [exit](batch-exit/overview.md) | final measurement, docs, memory | [ ] |
-| [squash](batch-squash/overview.md) | one commit per batch, tag `jse/pre-squash` | [ ] |
+| [exit](batch-exit/overview.md) | final measurement, docs, memory | [x] |
+| [squash](batch-squash/overview.md) | one commit per batch, tag `jse/pre-squash` | [x] |
 
 ## Documents
 
