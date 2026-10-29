@@ -149,7 +149,12 @@
     "json/malformed-trailing-comma",
     "json/number-forms",
     "json/scalar-negative-float",
-    "json/scalar-string-escapes"
+    "json/scalar-string-escapes",
+    "hcl/style-with-theme",
+    "json/arrow-style",
+    "json/node-roundcorner",
+    "json/root-fontcolor",
+    "json/theme-carbon-gray"
   ],
   "divergent": {
     "json/timafu-94-bixe774": {
