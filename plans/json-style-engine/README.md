@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — EXECUTING 2026-10-29 (batches 0-3 closed; b2+b3 jointly, journal row 18; next: batch 4)
+## Status — EXECUTING 2026-10-29 (batches 0-3 closed; b2+b3 jointly, journal row 18; batch 4 skipped; next: exit)
 
 ## Objective
 
@@ -98,7 +98,7 @@ New src module ⇒ `npm run catalog` (drift-gated).
 | [1 — the family SkinParam and the style resolver](batch-1/overview.md) | T1a, T1b, close | [x] |
 | [2 — measurement and paint read the engine](batch-2/overview.md) | T2a, T2b, close | [x] |
 | [3 — extended mode and retiring the projection](batch-3/overview.md) | T3a, T3b, close | [x] |
-| [4 — residuals](batch-4/overview.md) | T4a, close | [ ] |
+| [4 — residuals](batch-4/overview.md) | T4a, close | skipped (row 31) |
 | [exit](batch-exit/overview.md) | final measurement, docs, memory | [ ] |
 | [squash](batch-squash/overview.md) | one commit per batch, tag `jse/pre-squash` | [ ] |
 
@@ -117,3 +117,18 @@ New src module ⇒ `npm run catalog` (drift-gated).
 - `DIVERGENCES.md` "Two style paths" (~line 995) and "Extensions".
 - `src/diagrams/files/{parser,files-skin-param,files-style-input,files-extensions,layout,index}.ts` — the live pattern.
 - Memories: `honour-ignored-styling-extension`, `always-mirror-the-jar`, `agents-write-main-via-serena`, `gate-merges-on-full-set-and-typecheck`, `squash-per-batch-at-end`, `ddc-status`.
+
+## Final status (2026-10-29)
+
+| checkpoint | json c/s/d | yaml c/s/d | hcl c/s/d | pins | manifest clean + ceilings | target rows open | extended movers (journaled) |
+|---|---|---|---|---|---|---|---|
+| main `d0d37ec18` | 14/35/1 | 7/31/1 | 1/2/0 | 14/7/1 | 150 + 3 | 4 | — |
+| b0 | 14/35/1 | 7/31/1 | 1/2/0 | 14/7/1 | 155 + 3 | 4 (+8 authored) | 0 (baseline 218 rows) |
+| b1 | 14/35/1 | 7/31/1 | 1/2/0 | 14/7/1 | 155 + 3 | 4 (+8) | 0 |
+| b2+b3 (joint) | 14/35/1 | 7/31/1 | 1/2/0 | 14/7/1 | **167 + 3** | **0** | 17 (10 toward jar, 7 full-map theme) + 8 new examples |
+| b4 | skipped — no residual (journal row 31) | | | | | | |
+
+- Tasks: T0a-c, T1a-b, T2a-b (+ orchestrator T2pre interface, T2h harness seed), T3a-b done; T4a skipped.
+- Decisions: 31 journal rows; one halt (stop 3, D4 premise) resolved by the user (decisions.md Amendment 1: full map; hcl `yamlDiagram`).
+- Gates: every close green, collected = on-disk; d.ts byte-identical to b0 throughout; 0 conformant losses in all 28 engines vs b0.
+- Follow-ons: `planning/next-missions.md` ddc block, "jse follow-ons".
