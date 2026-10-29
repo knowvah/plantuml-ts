@@ -19,10 +19,12 @@
  * (ADR-4) rather than verifying yaml/hcl at the end.
  *
  * Unlike `render-fixture-class.ts`, there is no multi-page stripping (no
- * `.pages` on `JsonDiagramAST`) and no post-chrome document-margin
- * re-application (`renderJson` never sets `RenderFragment.preChromeWidth`) —
- * both would be guaranteed no-ops here, so both are omitted deliberately
- * rather than by oversight.
+ * `.pages` on `JsonDiagramAST`), which would be a guaranteed no-op here and is
+ * omitted deliberately. Chrome goes through `applyExportedChrome`, exactly as
+ * `src/index.ts` does: `renderJson` declares its margin-less block
+ * (`RenderFragment.preChromeWidth`/`preChromeHeight`/`documentMargin`), so the
+ * margin is removed, the title composed around the block and the margin
+ * re-applied (`UgDiagram.java:124-128`, `TextBlockExporter.java:173,199-203`).
  */
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import type { PreprocessOptions } from '../../../src/core/preprocessor.js';
@@ -37,7 +39,8 @@ import { parseHcl } from '../../../src/diagrams/hcl/parser.js';
 import { layoutJson } from '../../../src/diagrams/json/layout.js';
 import { renderJson } from '../../../src/diagrams/json/renderer.js';
 import { hclStyleInput, jsonFamilyStyleInput } from '../../../src/diagrams/json/json-family-style-input.js';
-import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
+import { isEmpty } from '../../../src/core/annotations/index.js';
+import { applyExportedChrome } from '../../../src/core/annotations/chrome-export.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg } from '../../../src/index.js';
 
@@ -113,5 +116,5 @@ export function renderFixtureJson(markup: string, measurer: StringMeasurer, opti
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
 
   const styles = resolveAnnotationStyles(theme, preprocessed, styleMap);
-  return assembleSvg(applyChrome(fragment, annotations, styles, measurer, ast.sprites));
+  return assembleSvg(applyExportedChrome(fragment, annotations, styles, measurer, ast.sprites));
 }

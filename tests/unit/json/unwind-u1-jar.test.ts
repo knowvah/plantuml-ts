@@ -41,24 +41,6 @@ const OTHER_DIVERGENCE: Readonly<Record<string, readonly string[]>> = {
   // by unwind2-S2 (`HclDiagramFactory.java:86-92` never calls `applyStyles`).
 };
 
-/**
- * Fixtures carrying a title, whose title chrome sits 10px short of the jar's
- * on each axis (the skin's `title { Padding 5; Margin 5 }`, plantuml.skin:
- * 30-38) and the document 21px narrower. NOT a U1 divergence and not caused
- * by it: the same diffs are measured on the pre-U1 parsers. Lives in the
- * shared annotation chrome's composition with the json fragment
- * (`src/core/annotations`), outside U1's write-set -- reported, pinned here
- * by count and kind (positional only) so it cannot grow unseen.
- */
-const TITLE_CHROME_OFFSET: Readonly<Record<string, number>> = {
-  'json-title': 10,
-  'json-title-quoted': 10,
-  'yaml-title': 10,
-  'json-title-only': 2,
-  'yaml-title-only': 2,
-};
-const POSITIONAL = /\/@(x|y|x1|x2|width|viewBox\[2\])$/u;
-
 /** D9: the jar drops this styling input (`StyleExtractor.java:88-96`), so these are conformance renders. */
 const JAR_MODE: InternalRenderOptions = { measurer: new DeterministicMeasurer(), jarCompatibleStyleInput: true };
 
@@ -95,13 +77,11 @@ describe('unwind-U1 — json family matches the jar', () => {
     const ours = renderSync(source, JAR_MODE);
     const paths = compareSvg(ours, jar, 'deterministic').diffs.map((d) => d.path);
     const allowed = OTHER_DIVERGENCE[name] ?? [];
-    const offset = TITLE_CHROME_OFFSET[name];
-    if (offset === undefined) {
-      expect(paths.filter((p) => !allowed.includes(p))).toEqual([]);
-      return;
-    }
-    expect(paths.filter((p) => !POSITIONAL.test(p))).toEqual([]);
-    expect(paths.length).toBe(offset);
+    // Title fixtures included: `renderJson` declares the margin-less block so
+    // chrome composes around it (`UgDiagram.java:124-128`, `DiagramChromeFactory
+    // .java:363-376`) and the exporter re-applies the margin
+    // (`TextBlockExporter.java:173,199-203`) -- T2a.
+    expect(paths.filter((p) => !allowed.includes(p))).toEqual([]);
   });
 
   it.each(EXTENDED_DIFFERS)('%s: extended mode honours the directive the jar drops', (name) => {

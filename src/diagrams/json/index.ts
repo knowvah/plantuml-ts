@@ -27,6 +27,11 @@ const DIAGRAM_TYPE_JSON = 'JSON';
 export const jsonPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   type: 'json',
 
+  /** `JsonDiagramFactory extends PSystemAbstractFactory` (`JsonDiagramFactory.java:61`): no empty test; an
+   *  empty payload fails `Json.parse` and draws "Your data does not sound like JSON data" (`:94-96`,
+   *  `JsonDiagram.java:116-122`). @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonDiagramFactory.java:61-111 */
+  factoryBase: 'PSystemAbstractFactory',
+
   // D6 (cdd6-T1c): forwards `options.assetStore`, mirroring
   // `class/parser.ts:317-318` / `description/index.ts:59-67`.
   parse(source, options) {

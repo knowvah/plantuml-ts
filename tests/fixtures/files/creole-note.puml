@@ -1,0 +1,8 @@
+@startfiles
+/a.txt
+<note>
+**bold** and //italic//
+smile <:1f600:> here
+line three
+</note>
+@endfiles

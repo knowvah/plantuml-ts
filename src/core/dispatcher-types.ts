@@ -307,11 +307,30 @@ export interface PaginatedPlugin<AST = unknown, Geo = unknown> {
 }
 
 /**
+ * The upstream `PSystemFactory` base a plugin's `parse` mirrors. The bases
+ * differ in one way core must know before dispatch: who tests an empty source.
+ * `PSystemCommandFactory#createSystem` answers it with `buildEmptyError`
+ * before any command runs (`PSystemCommandFactory.java:117-122`) -- this
+ * port's command parsers do not carry that test, the dispatcher does
+ * (`DiagramRegistry#isEmptyDescription`). `PSystemBasicFactory` runs its own
+ * line-count test (`PSystemBasicFactory.java:77`, `:89-90`), which its plugin
+ * mirrors in `parse`. `PSystemAbstractFactory` only defines `buildEmptyError`
+ * (`PSystemAbstractFactory.java:59-65`); its direct subclasses never call it
+ * and build their diagram from the empty source.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/PSystemCommandFactory.java:107-122
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/PSystemBasicFactory.java:75-101
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/PSystemAbstractFactory.java:50-79
+ */
+export type PSystemFactoryBase = 'PSystemCommandFactory' | 'PSystemBasicFactory' | 'PSystemAbstractFactory';
+
+/**
  * A plugin that performs layout synchronously.
  * Discriminated from AsyncPlugin by the presence of `layoutSync`.
  */
 export interface SyncPlugin<AST = unknown, Geo = unknown> extends Partial<PaginatedPlugin<AST, Geo>> {
   readonly type: DiagramType;
+  /** The upstream factory base `parse` mirrors; absent = `PSystemCommandFactory`. See {@link PSystemFactoryBase}. */
+  readonly factoryBase?: PSystemFactoryBase;
   parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   /**
    * `services` (cdd8 D2b): what the render supplies beyond the AST — an
@@ -350,6 +369,8 @@ export interface SyncPlugin<AST = unknown, Geo = unknown> extends Partial<Pagina
  */
 export interface AsyncPlugin<AST = unknown, Geo = unknown> extends Partial<PaginatedPlugin<AST, Geo>> {
   readonly type: DiagramType;
+  /** See {@link SyncPlugin.factoryBase}. */
+  readonly factoryBase?: PSystemFactoryBase;
   parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layout(ast: AST, theme: Theme, measurer: StringMeasurer): Promise<Geo>;
   /**

@@ -1,150 +1,228 @@
+import type { UmlSource as ExtractedSource } from '../../core/block-extractor.js';
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
-import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
-import type { FileEntry, FilesDiagramAST } from './ast.js';
-import type { UmlSource } from '../../core/block-extractor.js';
+import type { DiagramAnnotations } from '../../core/annotations/index.js';
+import type { ParseOptions } from '../../core/dispatcher.js';
+import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
+import { internalSpriteStoreFrom } from '../../core/internal-sprite-store.js';
+import { Pragma } from '../../core/skin/Pragma.js';
+import { matchSpriteCommand } from '../../core/sprite-commands.js';
+import { createSpriteRegistry } from '../../core/sprite-registry.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
+import {
+  createMindmapSkinParam,
+  executeDeclaration,
+  positionedDeclarationsOf,
+} from '../../core/style/mindmap-style-builder.js';
+import { StyleParsingException } from '../../core/style/parser/StyleParser.js';
+import { StyleSignatureBasic } from '../../core/style/StyleSignatureBasic.js';
+import { TitledDiagram } from '../../core/TitledDiagram.js';
+import { PreprocessingArtifact } from '../../core/tim/PreprocessingArtifact.js';
+import type { FontConfiguration } from '../../core/abel/FontConfiguration.js';
+import type { FilesDiagramAST } from './ast.js';
+import { SkinParam } from './files-skin-param.js';
+import { hasStyleDirective, isExtended, isHandwrittenRequested, styleDirectivesOf } from './files-extensions.js';
+import { FilesListing } from './renderer.js';
 
-// ---------------------------------------------------------------------------
-// Internal helpers — port of FEntry.addRawEntry and FilesListing from Java
-// ---------------------------------------------------------------------------
+/** A line starting with this adds a path. @see FilesDiagram.java:84 */
+const PATH_PREFIX = '/';
+/** A line starting with this opens a note. @see FilesDiagram.java:86 */
+const NOTE_START = '<note>';
+/** A line starting with this closes a note. @see FilesDiagram.java:96 */
+const NOTE_END = '</note>';
 
-function getOrCreateFolder(node: FileEntry, name: string): FileEntry {
-  const existing = node.children.find((c) => c.type === 'folder' && c.name === name);
-  if (existing !== undefined) return existing;
-  const child: FileEntry = { type: 'folder', name, children: [] };
-  node.children.push(child);
-  return child;
+/** A hand-built source's style sources: no skin, no skinparam, no style. */
+const EMPTY_STYLE_SOURCE: NonNullable<ExtractedSource['styleSource']> = {
+  skinparam: new Map<string, string>(),
+  styles: [],
+};
+
+/**
+ * The style source `FilesDiagram` runs: the `skin` and the `<style>` blocks, no `skinparam`.
+ * `StyleExtractor` consumes a `skinparam` line without executing it (only `handwritten` is kept,
+ * StyleExtractor.java:88-96) and `FilesDiagram` never reads that (FilesDiagram.java:62-80), so no skinparam
+ * reaches the diagram. The same cut as `files-style-input.ts`, which the jar-compatible render applies to the
+ * theme; the parse sees the preprocessor's output before that cut, so it makes it itself. The extended-mode
+ * skinparams a user may add (DIVERGENCES.md "Extensions") are honoured by {@link FilesDiagram#forMode}, which
+ * parses again with the style directives of `files-extensions.ts` kept.
+ */
+function jarStyleSource(styleSource: NonNullable<ExtractedSource['styleSource']>): typeof styleSource {
+  const order = styleSource.declarationOrder;
+  return {
+    ...styleSource,
+    skinparam: new Map<string, string>(),
+    ...(order === undefined ? {} : { declarationOrder: { ...order, skinparam: new Map<string, number>() } }),
+  };
 }
 
 /**
- * Recursively add a raw path (already stripped of the leading '/') into the
- * tree rooted at `node`.  Returns the leaf FileEntry created, or null when
- * the path ends with '/' (folder declaration with no file child).
+ * The sprite registry of one render: the jar-resident sprite bundle and the
+ * Twemoji artwork both come from `options.assetStore` (ADR-2), the way the
+ * json parser threads them.
  */
-function addRawEntry(node: FileEntry, raw: string): FileEntry | null {
-  const x = raw.indexOf('/');
-  if (x === -1) {
-    // Leaf: DATA file
-    const child: FileEntry = { type: 'file', name: raw, children: [] };
-    node.children.push(child);
-    return child;
-  }
-  const folderName = raw.substring(0, x);
-  const folder = getOrCreateFolder(node, folderName);
-  const remain = raw.substring(x + 1);
-  if (remain.length === 0) {
-    // Trailing slash: folder declared, no file child
-    return null;
-  }
-  return addRawEntry(folder, remain);
+function spriteRegistryFor(options: ParseOptions | undefined): SpriteRegistry {
+  const store = options?.assetStore;
+  if (store === undefined) return createSpriteRegistry();
+  return createSpriteRegistry(internalSpriteStoreFrom(store), internalEmojiStoreFrom(store));
 }
 
 /**
- * Walk the tree to find the direct parent of `target`.
- * Returns null when target is null or not found (attaches note to root).
+ * The lines of a note below its `<note>` line, up to (not including) the
+ * `</note>` line; a note never closed takes every remaining line. Answers the
+ * lines and the index of the first line after the note.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/filesdiagram/FilesDiagram.java:92-101
  */
-function findParentOf(node: FileEntry, target: FileEntry | null): FileEntry | null {
-  if (target === null) return null;
-  for (const child of node.children) {
-    if (child === target) return node;
-    const found = findParentOf(child, target);
-    if (found !== null) return found;
-  }
-  return null;
-}
-
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
-
-export function parseFiles(source: UmlSource): FilesDiagramAST {
-  const root: FileEntry = { type: 'folder', name: '', children: [] };
-  let lastCreated: FileEntry | null = null;
-  const annotations = createAnnotations();
-  const sprites = createSpriteRegistry();
-
-  const lines = source.lines;
-  let i = 0;
-
+function getNote(lines: readonly string[], from: number): { note: readonly string[]; next: number } {
+  const note: string[] = [];
+  let i = from;
   while (i < lines.length) {
-    const line = lines[i]!;
-    const t = line.trim();
-    i++;
+    const line = lines[i++]!;
+    if (line.startsWith(NOTE_END)) return { note, next: i };
+    note.push(line);
+  }
+  return { note, next: i };
+}
 
-    // Skip @startfiles / @endfiles wrapper lines
-    if (/^@startfiles\b/i.test(t) || /^@endfiles\b/i.test(t)) continue;
+/**
+ * `FilesDiagram` -- one `@startfiles` block: the style applied up front, the
+ * `root.element.filesDiagram` font, and the listing the `/path` and `<note>`
+ * lines fill. Every other line is ignored, as upstream does -- except the
+ * `title`/`legend`/... chrome and `sprite` definitions the common commands
+ * take (mission G0b, SI5b), tried at the same "everything else" position.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/filesdiagram/FilesDiagram.java:58-112
+ */
+export class FilesDiagram extends TitledDiagram {
+  /** @see FilesDiagram.java:60 */
+  readonly list: FilesListing;
+  readonly skinParam: SkinParam;
+  /** `TitledDiagram`'s title/caption/legend/header/footer/mainframe. */
+  readonly annotations: DiagramAnnotations = createAnnotations();
+  /**
+   * The error a `skin`/`<style>` block raised. Upstream prints it and carries
+   * on without the style (`e.printStackTrace()`, FilesDiagram.java:68-70).
+   */
+  readonly styleError: StyleParsingException | undefined;
+  /** What {@link forMode} parses again. */
+  private readonly extractedSource: ExtractedSource;
+  private readonly parseOptions: ParseOptions | undefined;
+  /** The `root.element.filesDiagram` font every row is drawn in. @see FilesDiagram.java:71-76 */
+  readonly fontConfiguration: FontConfiguration;
 
-    // Skip blank lines and !-directives (e.g. !theme)
-    if (t === '' || t.startsWith('!')) continue;
-
-    // Consume <style>…</style> blocks silently
-    if (/^<style>/i.test(t)) {
-      while (i < lines.length && !/^<\/style>/i.test(lines[i]!.trim())) {
-        i++;
-      }
-      i++; // consume </style>
-      continue;
-    }
-
-    // Collect <note>…</note> blocks
-    if (/^<note>/i.test(t)) {
-      const noteLines: string[] = [];
-      while (i < lines.length && !/^<\/note>/i.test(lines[i]!.trim())) {
-        noteLines.push(lines[i]!);
-        i++;
-      }
-      i++; // consume </note>
-      // Java: note attaches to lastCreated.parent (the folder containing the
-      // last added file).  Since FileEntry has no back-pointer we walk the
-      // tree to find the direct parent.  Falls back to root when
-      // lastCreated is null (no file entry has been seen yet).
-      const noteParent = findParentOf(root, lastCreated) ?? root;
-      noteParent.children.push({
-        type: 'note',
-        name: 'NOTE',
-        children: [],
-        noteLines,
-      });
-      // lastCreated is NOT updated after a note block
-      continue;
-    }
-
-    // File/folder path entry — must start with '/'
-    if (t.startsWith('/')) {
-      const raw = t.substring(1);
-      const created = addRawEntry(root, raw);
-      // Trailing-slash folder declarations (created === null) leave
-      // lastCreated unchanged so subsequent notes still have a valid parent.
-      if (created !== null) {
-        lastCreated = created;
-      }
-      continue;
-    }
-
-    // title/caption/legend/header/footer/mainframe (mission G0b/T6): tried
-    // at the same "everything else" fallback position, right before the
-    // silent-ignore default below -- so a chrome directive reaches
-    // `ast.annotations` instead of being dropped along with genuinely
-    // unrecognized lines.
-    const annotationMatch = matchAnnotationCommand(lines, i - 1, annotations);
-    if (annotationMatch !== null) {
-      i += annotationMatch.consumed - 1;
-      continue;
-    }
-
-    // `sprite $name [WxH/N[z]] { ... }` definitions (mission SI5b/T4): tried
-    // immediately after the chrome matcher, same fallback position.
-    const spriteMatch = matchSpriteCommand(lines, i - 1, sprites);
-    if (spriteMatch !== null) {
-      i += spriteMatch.consumed - 1;
-      continue;
-    }
-
-    // Everything else: ignore
-    // #lizard forgives -- pre-existing faithful port of FEntry.addRawEntry
-    // / FilesListing (already over threshold before mission G0b/T6 added
-    // the annotation-matcher check above); not refactored per project
-    // policy against restructuring faithfully-ported parsing logic.
+  /**
+   * `extended` keeps the style directives of `files-extensions.ts` among the skinparams (default: the jar's
+   * cut, none).
+   * @see FilesDiagram.java:62-90
+   */
+  constructor(source: ExtractedSource, options?: ParseOptions, extended = false) {
+    super(source, 'FILES', undefined, new PreprocessingArtifact());
+    this.extractedSource = source;
+    this.parseOptions = options;
+    const given = source.styleSource ?? EMPTY_STYLE_SOURCE;
+    const styleSource = extended ? styleDirectivesOf(given) : jarStyleSource(given);
+    const style = createMindmapSkinParam(styleSource);
+    this.skinParam = new SkinParam({
+      style,
+      skinparam: styleSource.skinparam,
+      sprites: spriteRegistryFor(options),
+      pragma: Pragma.createEmpty(),
+    });
+    // `styleExtractor.applyStyles(skinParam)`: every `<style>` block before a single line is read (java:67).
+    // Upstream parses them all in one go and mutes nothing when one fails; here an earlier one stays applied.
+    this.styleError = applyDeclarations(style, source, styleSource);
+    // `getMergedStyle` answers undefined only for an undefined builder; a files diagram always has one.
+    const merged = StyleSignatureBasic.of('root', 'element', 'filesDiagram').getMergedStyle(
+      this.skinParam.getCurrentStyleBuilder(),
+    )!;
+    this.fontConfiguration = merged.getFontConfiguration(this.skinParam.getIHtmlColorSet());
+    this.list = new FilesListing(this.skinParam, this.fontConfiguration);
+    this.readLines(source.lines);
   }
 
-  return { root, annotations, sprites };
+  /** @see FilesDiagram.java:80-88 */
+  private readLines(lines: readonly string[]): void {
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i]!;
+      i++;
+      if (line.startsWith(PATH_PREFIX)) {
+        this.list.addRawEntry(line.substring(PATH_PREFIX.length));
+      } else if (line.startsWith(NOTE_START)) {
+        const { note, next } = getNote(lines, i);
+        this.list.addNote(note);
+        i = next;
+      } else {
+        i += this.commonCommandLength(lines, i - 1) - 1;
+      }
+    }
+  }
+
+  /** The lines the chrome or `sprite` command at `index` takes; 1 for a line neither claims (ignored). */
+  private commonCommandLength(lines: readonly string[], index: number): number {
+    const annotation = matchAnnotationCommand(lines, index, this.annotations);
+    if (annotation !== null) return annotation.consumed;
+    const sprite = matchSpriteCommand(lines, index, this.skinParam.getSprites());
+    return sprite === null ? 1 : sprite.consumed;
+  }
+
+  /**
+   * The diagram and drawing flag of this render's mode. Jar-compatible (`files-style-input.ts` marked the
+   * source): this diagram, not handwritten. Otherwise the diagram parsed again with the style directives when the
+   * source declares any, and `handwritten` as `skinparam handwritten true` asks (DIVERGENCES.md "Extensions").
+   * Port-only; the jar has neither.
+   */
+  forMode(): { readonly diagram: FilesDiagram; readonly handwritten: boolean } {
+    // Idempotent; here because `styleInput` (the jar-compatible mark) runs after the parse, so the mode is unknown then.
+    if (!isExtended(this.extractedSource)) return { diagram: this, handwritten: false };
+    const given = this.extractedSource.styleSource ?? EMPTY_STYLE_SOURCE;
+    return {
+      diagram: hasStyleDirective(given) ? new FilesDiagram(this.extractedSource, this.parseOptions, true) : this,
+      handwritten: isHandwrittenRequested(given),
+    };
+  }
+
+  getSkinParam(): SkinParam {
+    return this.skinParam;
+  }
+
+  /** @see FilesDiagram.java:103-105 */
+  getDescription(): string {
+    return '(Files)';
+  }
+
+  /** @see FilesDiagram.java:107-110 */
+  getTextBlock(): FilesListing {
+    return this.list;
+  }
+}
+
+/** Executes every `skinparam`/`<style>` declaration in source order; answers the first style error. */
+function applyDeclarations(
+  style: ReturnType<typeof createMindmapSkinParam>,
+  source: ExtractedSource,
+  styleSource: NonNullable<ExtractedSource['styleSource']>,
+): StyleParsingException | undefined {
+  for (const declaration of positionedDeclarationsOf(styleSource, source.stylePositions ?? [])) {
+    try {
+      executeDeclaration(style, declaration, styleSource.skinparam);
+    } catch (e) {
+      if (!(e instanceof StyleParsingException)) throw e;
+      return e;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Parses one `@startfiles` block, as `FilesDiagramFactory#createSystem` does:
+ * a {@link FilesDiagram} over the source. The tree is `ast.root`, the
+ * chrome `ast.annotations`, the `sprite` definitions `ast.sprites`.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/filesdiagram/FilesDiagramFactory.java:46-52
+ */
+export function parseFiles(source: ExtractedSource, options?: ParseOptions): FilesDiagramAST {
+  const diagram = new FilesDiagram(source, options);
+  return {
+    root: diagram.list.getRoot(),
+    annotations: diagram.annotations,
+    sprites: diagram.skinParam.getSprites(),
+    diagram,
+  };
 }

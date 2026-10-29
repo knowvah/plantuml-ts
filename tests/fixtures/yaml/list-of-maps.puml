@@ -1,0 +1,6 @@
+@startyaml
+- name: a
+  v: 1
+- name: b
+  v: 2
+@endyaml

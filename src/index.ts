@@ -313,6 +313,7 @@ function prepareBlock(block: BlockUmlOk, source: UmlSource, options: RenderOptio
     umlSource,
     { assetStore: options?.assetStore, clock: renderClock(options) },
     skinCut,
+    isBlockEmpty(block),
   );
   const plugin = resolution.plugin;
   // sdd3-T8h: a nested `{{ }}` diagram starts from the enclosing diagram's skinparams (`nested-previous.ts`).
@@ -371,7 +372,7 @@ export function renderPagesSync(source: string, options?: RenderOptions): string
 
     const block = blocks[0]!;
     if (!block.ok) return [preprocessorErrorSvg(block.failure, options)];
-    if (isBlockEmpty(block)) return [emptySvg(block, options)];
+    if (isBlockEmpty(block) && registry.isEmptyDescription(block.source)) return [emptySvg(block, options)];
 
     const { ctx, ast } = prepareBlock(block, umlSourceOfBlock(block), options);
     if (!('layoutSync' in ctx.plugin))
@@ -478,7 +479,7 @@ async function renderBlock(block: BlockUml, options?: RenderOptions): Promise<st
  *  a "page" is and why only the sequence engine produces more than one. */
 async function renderBlockPages(block: BlockUml, options?: RenderOptions): Promise<string[]> {
   if (!block.ok) return [preprocessorErrorSvg(block.failure, options)];
-  if (isBlockEmpty(block)) return [emptySvg(block, options)];
+  if (isBlockEmpty(block) && registry.isEmptyDescription(block.source)) return [emptySvg(block, options)];
 
   const umlSource = umlSourceOfBlock(block);
   try {

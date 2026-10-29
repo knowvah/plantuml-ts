@@ -33,6 +33,11 @@ const DIAGRAM_TYPE_YAML = 'YAML';
 export const yamlPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   type: 'yaml',
 
+  /** `YamlDiagramFactory extends PSystemAbstractFactory` (`YamlDiagramFactory.java:61`): no empty test; an
+   *  empty body yields a null payload, drawn as "…YAML data" (`JsonDiagram.java:116-122`).
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/yaml/YamlDiagramFactory.java:61-108 */
+  factoryBase: 'PSystemAbstractFactory',
+
   // D6 (cdd6-T1c, write-set extension -- see this task's own report: D6's
   // task text names yaml's `plugin.parse` explicitly, but only
   // `yaml/parser.ts` was listed; `yaml/index.ts` is the one remaining call

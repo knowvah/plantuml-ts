@@ -1,0 +1,4 @@
+@startjson
+#highlight "list" / "1"
+{"list": ["a", "b", "c"]}
+@endjson

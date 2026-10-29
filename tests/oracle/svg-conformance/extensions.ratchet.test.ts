@@ -27,7 +27,7 @@ const PLAIN_SUFFIX = '.plain.puml';
 const PUML_SUFFIX = '.puml';
 const ENGINES = ['json', 'yaml', 'hcl', 'files'] as const;
 /** Floor on pinned examples per engine -- the audit's `works` rows (extension-audit.md). */
-const MIN_EXAMPLES: Readonly<Record<(typeof ENGINES)[number], number>> = { json: 6, yaml: 6, hcl: 9, files: 4 };
+const MIN_EXAMPLES: Readonly<Record<(typeof ENGINES)[number], number>> = { json: 7, yaml: 7, hcl: 10, files: 9 };
 
 const OPTIONS = { measurer: new DeterministicMeasurer() };
 const JAR_OPTIONS = withJarCompatibleStyleInput(OPTIONS);

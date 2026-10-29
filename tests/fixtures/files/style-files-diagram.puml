@@ -1,0 +1,17 @@
+@startfiles
+<style>
+filesDiagram {
+  FontColor red
+  FontSize 20
+  note {
+    BackGroundColor lightblue
+    LineColor green
+  }
+}
+</style>
+/a.txt
+<note>
+styled note
+</note>
+/b/c.txt
+@endfiles

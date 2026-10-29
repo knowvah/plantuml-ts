@@ -15,6 +15,7 @@ import type { DotInputEdge, DotInputGraph, DotInputNode, DotLayoutResult } from 
 import { measureNode } from './TextBlockJson.js';
 import { recordLabelFor } from './record-label.js';
 import type { JsonObject } from './JsonObject.js';
+import { JsonNumber } from './JsonNumber.js';
 import type { JsonRowGeo, MeasuredNode } from './TextBlockJson.js';
 
 // A5/T6b: node sizing moved to `TextBlockJson.ts` (upstream's own class
@@ -26,7 +27,6 @@ export type { JsonRowGeo } from './TextBlockJson.js';
 // Constants
 // ---------------------------------------------------------------------------
 
-/** Margin added around the entire canvas so nodes don't touch the SVG edge. */
 /**
  * A5/T6b: the diagram's own margin, from `TitledDiagram#getDefaultMargins()`
  * -- `ClockwiseTopRightBottomLeft.same(10)` (`TitledDiagram.java:275-277`).
@@ -152,7 +152,7 @@ import { documentDimensions, ENSURE_VISIBLE_BUMP } from './document-dimensions.j
  *    unreachable from the diagram root.
  */
 function normalizeRoot(root: unknown): JsonContainer {
-  if (typeof root !== 'object' || root === null) return [root] as JsonContainer;
+  if (typeof root !== 'object' || root === null || root instanceof JsonNumber) return [root] as JsonContainer;
   const isEmpty = Array.isArray(root) ? root.length === 0 : (root as JsonObject).size === 0;
   return (isEmpty ? [''] : root) as JsonContainer;
 }
@@ -315,30 +315,58 @@ function buildJsonDotNodes(measured: MeasuredNode[]): DotInputNode[] {
   }));
 }
 
-/** Build the dot-engine's edge inputs, one per parent->child link. */
+/** One parent->child edge. @see ~/git/plantuml/.../jsondiagram/SmetanaForJson.java#createEdge (:217-231) */
+function createEdge(parent: FlatNode, child: FlatNode, measuredById: Map<string, MeasuredNode>): DotInputEdge {
+  // `tailport="P<rowIndex>"` -- `SmetanaForJson#createEdge` (:224) names the
+  // port by the child's index among the parent's rows.
+  const parentM = measuredById.get(parent.id);
+  const rowIndex = parentM?.rows.findIndex((r) => r.key === (child.parentKey ?? '')) ?? -1;
+  // `SmetanaForJson#createEdge` (:221-223) sets all three arrow attrs on
+  // EVERY edge, unconditionally and in this order, right before the
+  // `tailport` below. They make graphviz shorten the spline for the arrow
+  // and record its attachment point as `bezier.ep` — read back below as
+  // `epX`/`epY` and drawn by `JsonCurve.ts`.
+  const edge: DotInputEdge = {
+    id: `${parent.id}->${child.id}`,
+    from: parent.id,
+    to: child.id,
+    attributes: { arrowsize: '.75', arrowtail: 'none', arrowhead: 'normal' },
+  };
+  if (rowIndex >= 0) edge.attributes!.tailport = `P${rowIndex}`;
+  return edge;
+}
+
+/**
+ * The dot-engine's edge inputs, one per parent->child link, in upstream's
+ * POST-order. @see ~/git/plantuml/.../jsondiagram/SmetanaForJson.java#manageOneNode (:128-145)
+ *
+ * The recursive `manageOneNode(child)` (`:139`) returns BEFORE that child's
+ * edge is created (`:140`) and appended (`:141`); that list is both the
+ * `agedge` creation order and `drawMe`'s draw order (`:172-176`). Nodes stay
+ * pre-order (`nodes.add`, `:133`, precedes the loop), as `flatNodes` is; its
+ * sibling order is key order, and scalars never become a `FlatNode` (the
+ * `tmp != null` skip, `:138`). Was `walkTree`'s pre-order, which put an edge
+ * at a different `<path>` index from the jar's (ddc T1a, `diagnosis/edge-order.md`).
+ */
 function buildJsonDotEdges(flatNodes: FlatNode[], measured: MeasuredNode[]): DotInputEdge[] {
   const measuredById = new Map(measured.map((m) => [m.flatNode.id, m]));
-  return flatNodes
-    .filter((fn) => fn.parentId !== null)
-    .map((fn) => {
-      // `tailport="P<rowIndex>"` -- `SmetanaForJson#createEdge` (:224) names the
-      // port by the child's index among the parent's rows.
-      const parentM = measuredById.get(fn.parentId!);
-      const rowIndex = parentM?.rows.findIndex((r) => r.key === (fn.parentKey ?? '')) ?? -1;
-      // `SmetanaForJson#createEdge` (:221-223) sets all three arrow attrs on
-      // EVERY edge, unconditionally and in this order, right before the
-      // `tailport` below. They make graphviz shorten the spline for the arrow
-      // and record its attachment point as `bezier.ep` — read back below as
-      // `epX`/`epY` and drawn by `JsonCurve.ts`.
-      const edge: DotInputEdge = {
-        id: `${fn.parentId!}->${fn.id}`,
-        from: fn.parentId!,
-        to: fn.id,
-        attributes: { arrowsize: '.75', arrowtail: 'none', arrowhead: 'normal' },
-      };
-      if (rowIndex >= 0) edge.attributes!.tailport = `P${rowIndex}`;
-      return edge;
-    });
+  const childrenOf = new Map<string, FlatNode[]>();
+  for (const fn of flatNodes) {
+    if (fn.parentId === null) continue;
+    const siblings = childrenOf.get(fn.parentId) ?? [];
+    siblings.push(fn);
+    childrenOf.set(fn.parentId, siblings);
+  }
+  const edges: DotInputEdge[] = [];
+  const manageOneNode = (current: FlatNode): void => {
+    for (const child of childrenOf.get(current.id) ?? []) {
+      manageOneNode(child);
+      edges.push(createEdge(current, child, measuredById));
+    }
+  };
+  // `walkTree` returns the root first; `initGraph` starts there (`:187`).
+  manageOneNode(flatNodes[0]!);
+  return edges;
 }
 
 /**

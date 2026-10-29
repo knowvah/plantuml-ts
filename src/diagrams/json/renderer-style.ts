@@ -150,8 +150,31 @@ function resolveFontFace(j: JsonColorsResolved, theme: Theme) {
   return {
     fontFamily: j.nodeFontFamily ?? theme.fontFamily,
     fontSize: j.nodeFontSize ?? theme.fontSize,
-    fontColor: j.nodeFontColor,
+    fontColor: j.nodeFontColor ?? rootFontColor(theme),
   };
+}
+
+/**
+ * EXTENSION (ddc T3a, decisions.md D8; DIVERGENCES.md "Extensions"): the
+ * family font colour a document's `skinparam defaultFontColor` asks for.
+ *
+ * `FromSkinparamToStyle.java:157` converts that directive to
+ * `addConvert("defaultFontColor", PName.FontColor, SName.root)` -- a
+ * ROOT-level `FontColor`. The jar never sees it for json/yaml/hcl
+ * (`StyleExtractor.java:88-96` keeps only `handwritten`), and even if it
+ * did, the skin's explicit `yamlDiagram,jsonDiagram { FontColor black }`
+ * (`plantuml.skin:456-457`) is a more specific selector that would beat the
+ * root value in the cascade. The honest extension is therefore "the directive
+ * sets the family font colour as if the skin had no explicit FontColor": it
+ * fills in only when no `jsonDiagram`/`yamlDiagram` `FontColor` was
+ * resolved (`j.nodeFontColor`). The mode switch is upstream of here
+ * (`json-family-style-input.ts` cuts the skinparam map to `handwritten` in
+ * jar-compatible mode), so no mode check is made.
+ *
+ * @see .../style/FromSkinparamToStyle.java:157
+ */
+function rootFontColor(theme: Theme): string | undefined {
+  return theme.styleOverrides?.root?.fontcolor;
 }
 
 function resolveFontStyle(j: JsonColorsResolved) {

@@ -1,0 +1,3 @@
+@startjson
+"tab\there \"quoted\" back\\slash"
+@endjson

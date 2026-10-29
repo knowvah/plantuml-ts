@@ -1,0 +1,6 @@
+@startyaml
+# top comment
+a: 1 # trailing
+# between
+b: 2
+@endyaml

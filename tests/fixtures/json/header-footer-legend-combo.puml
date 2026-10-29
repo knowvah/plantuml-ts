@@ -1,0 +1,8 @@
+@startjson
+header HDR
+footer FTR
+legend right
+ LG
+end legend
+{"a": 1}
+@endjson

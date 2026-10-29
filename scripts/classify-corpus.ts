@@ -53,6 +53,7 @@ const START_KEYWORD_MAP: Record<string, string> = {
   startregex: 'regex',
   startgitgraph: 'gitgraph',
   startchart: 'chart',
+  startfiles: 'files',
 };
 
 // ---------------------------------------------------------------------------

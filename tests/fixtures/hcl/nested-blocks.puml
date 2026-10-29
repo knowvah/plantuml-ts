@@ -1,0 +1,8 @@
+@starthcl
+resource {
+  inner {
+    leaf = 1
+  }
+  other = "x"
+}
+@endhcl

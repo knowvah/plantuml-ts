@@ -1,0 +1,4 @@
+@startjson
+scale max 200 width
+{"alpha": "a fairly long value to force a wide node", "b": 2}
+@endjson

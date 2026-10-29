@@ -165,16 +165,18 @@ conformance renders through the internal jar-compatible mode
 (`src/core/internal-render-options.ts`).
 
 Follow-ons:
-- **Extension gaps (T3a audit, `plans/lengthadjust-document-wide/diagnosis/
-  extension-audit.md`):** `skinparam defaultFontColor` is ignored in
-  json/yaml/hcl while `defaultFontName`/`Size` work (likely a missing theme →
-  json text colour mapping); files ignores `defaultFontName`/`Size` and node
-  `<style>` (only `document` works). Extension work, no jar target: measure
-  against the directive-free render, document in DIVERGENCES.md "Extensions".
-- **13 `textLength` baseline rows:** board, packet and chart (default /
-  glyphs / onechar) and files (all four) emit no `textLength` where the jar
-  does (`SvgGraphics.java:699-705`). Owner: each engine's own drive (all four
-  are 0-conformant engines; their geometry gaps dominate).
+- ~~**Extension gaps (T3a audit, `plans/lengthadjust-document-wide/diagnosis/
+  extension-audit.md`)**~~ — **DONE in ddc batch 3 (2026-10-28):** `skinparam
+  defaultFontColor` honoured by json/yaml/hcl/files, and `defaultFontName`/
+  `defaultFontSize`/`shadowing`/`handwritten` by files, each with the mapping
+  `FromSkinparamToStyle.java` gives a class diagram (DIVERGENCES.md
+  "Extensions"). `lineColor` has no such row and stays ignored (a class diagram
+  ignores it too). `<style> filesDiagram { … }` font/note styling turned out to
+  be JAR behaviour (`FilesDiagram.java:62-78`), not an extension.
+- **13 `textLength` baseline rows → 9:** board, packet and chart (default /
+  glyphs / onechar) emit no `textLength` where the jar does
+  (`SvgGraphics.java:699-705`). Owner: each engine's own drive. The four files
+  rows are at 0 since the ddc files port (T1b/T2e, 2026-10-28).
 - Non-targets kept as-is (D8): `@startdot` passthrough, `PlainDiagram`
   utility/error pages (no SkinParam at `TextBlockExporter.java:306`), the
   unported engines, the per-element `lengthAdjust: 'spacing'` literals in the
@@ -951,9 +953,9 @@ cannot draw because it reads no clock. Sequence Σ weightedScore fell from
   - non-ND `<img>` re-encode. The jar decodes, resamples and re-encodes: 1 palette and 3 RGB jar PNGs (ticoxo, gabeme, kavama, kicizi).
   - the top-level `Alice -> Bob : hi` 19-attribute diff.
 - U3: class members, description link labels and state transition labels skip `getWithNewlines`.
-- S2b:
-  - json/yaml title chrome offset;
-  - highlight paths through duplicated keys.
+- S2b — **both CLOSED by data-diagram-conformance (ddc, 2026-10-28)**:
+  - ~~json/yaml title chrome offset~~ — PORT-CONTROLLED (`plans/data-diagram-conformance/diagnosis/title-chrome.md`): json baked the document margin into the canvas before chrome; fixed in `src/diagrams/json/renderer.ts` (T2a, babico-87 byte-exact). Re-filed: `scale` × `title` (title unscaled; core `TextBlockExporter` scaler), see the ddc section.
+  - ~~highlight paths through duplicated keys~~ — PORT-CONTROLLED (`diagnosis/highlight-dup-keys.md`): `buildHighlightMap` was navigation by node id; `Highlighted`/`isHighlighted` ported (T2b), which also closed `** / a / b` and first-match class selection.
 - S3:
   - map cells skip `getWithNewlines`;
   - the object engine's private tab walk;
@@ -4919,12 +4921,55 @@ supersedes the conclusion in
   small-to-medium; the risk is that fixing `accepts` moves fixtures between
   engines and therefore moves several diff baselines at once.
 
-- **A5 json/yaml/hcl** — `wip (substantial; NOT at bar)` in mission-index and
-  that is the honest label. `plans/a5-json-family-conformance/ledger.md`: M1a
-  is the accepted Smetana layout delta (ADR-2b), M1b–M5 closed, M6 element
-  tally 17 → 1 fixture. Byte-conformance is not the target for this family;
-  what is left is the M6 singleton and any readability items. Low priority
-  unless a user-facing json defect surfaces.
+- ~~**A5 json/yaml/hcl**~~ — **DONE as data-diagram-conformance (ddc,
+  2026-10-28, `plans/data-diagram-conformance/`).** json 14/35/1, yaml 7/31/1,
+  hcl 1/2/0 (conformant / structural-match / diverged); the only `diverged`
+  rows are the ADR-2b ceiling timafu-94 and yaml/bafemu-96 (below); structural
+  manifest 150 clean + 3 ceilings over 92 corpus + 65 authored rows; pins
+  json 14 / yaml 7 / hcl 1. `@startfiles` re-ported over klimt
+  (`FEntry`/`FilesListing`/`FilesDiagram`): 9/9 corpus + 18/18 authored rows
+  byte-exact, new `svg-files` ratchet. Edge emission order (`manageOneNode`
+  post-order), title chrome, highlight through duplicate keys, the json
+  parser (`JsonParser.java` port: literal number text, escapes, no JSONC
+  leniency), hcl `scale`, and the empty-source test (only in the factory
+  bases that have it, `PSystemCommandFactory.java:117-122`) all mirrored.
+  Follow-ons (ddc, 2026-10-28), each a user decision or its own mission:
+  - **json style engine** — 4 authored rows stay open (`highlight-stereotype`,
+    `style-highlight-block`, `style-header-separator-arrow`, `theme-cerulean`):
+    json styling is a hand-keyed projection of the flattened `StyleMap`
+    (`src/core/style-map-json-diagram.ts`), not the `Style`/
+    `StyleSignatureBasic` engine files/mindmap/wbs/salt use
+    (`TextBlockJson.java:138-152,285-286`); `jsondiagram.highlight/.header/
+    .separator`, stereotype classes and theme `root`/`node` gradients are
+    unread. Mission-sized (121 pinned goldens as the regression surface);
+    `plans/data-diagram-conformance/decision-journal.md` row 33.
+  - **yaml/bafemu-96-luji978** — one survey diff, `path[57]/@d`: the jar's
+    spline has 3 cubic pieces (a sub-pixel stub) where dot-engine emits 2.
+    Geometry residue (journal row 20); needs a user-signed ADR-2b ceiling to
+    leave `diverged`.
+  - **`scale` × `title`** — the title stays unscaled (`renderer.ts` scales the
+    drawing before chrome; the jar scales the titled block,
+    `TextBlockExporter.java:165`); needs the core scaler. No corpus row.
+  - **`<style> jsonDiagram { FontColor X }`** without a `node` block is unread
+    (`computeDataDiagramNodeOverride`, core) — part of the style-engine item.
+  - **files annotation blocks** — the parser still consumes `legend … end
+    legend` etc. (G0b/T6 wiring); the jar treats `/x` inside one as a file
+    entry (`FilesDiagram.java:80-86`). Kept per D3's "keep the parse"; draws
+    nothing either way. User call whether to drop the parse.
+  - **Empty-source follow-ons** — dot's blank/comment-only bodies list raw
+    lines where the jar lists its post-`removeInitialNoise` trace
+    (`dot/parser.ts#documentLineOf`, `error-diagrams.ts#errorSvg`;
+    error-vs-error); `emptySvg` lists one line where the jar lists two
+    (`PSystemCommandFactory.java:118-121`, 14 px); `@startuml` + only
+    `skinparam handwritten true` → jar CLASS "Please use '!option handwritten
+    true'" 287×36, ours 16×16; git/def/jcckit have no plugin.
+  - **Authored fixtures worth adding** — `style-root-fontcolor` (json/yaml;
+    `<style> root { FontColor }` now matches the jar in both modes, no gate),
+    title+handwritten, title narrower than body, title+scale (T1c scratch
+    pairs).
+  - **`tests/visual/data/*.json` refresh** — the committed manifests carry
+    hand-authored rows and have drifted from ~/git/pdiff (`.agent-notes/
+    ddc-T0c.md`); a regeneration must preserve them.
 - ~~**S1L-i / S1L-j / S1L-e**~~ — **already DONE, rows corrected 2026-08-18.**
   All three closed inside `s1l-tail-fix` (F1-b `7e8d101c` for the multi-line
   display; codabo/nixura/xufexu conformant; description at 352/356 with only

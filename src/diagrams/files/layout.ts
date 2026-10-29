@@ -1,93 +1,117 @@
-import type { FileEntry, FilesDiagramAST, EntryGeometry, FilesGeometry } from './ast.js';
-import type { StringMeasurer } from '../../core/measurer.js';
+import type { FontConfiguration as StyleFontConfiguration } from '../../core/abel/FontConfiguration.js';
+import { FontConfiguration } from '../../core/abel/FontConfiguration.js';
+import type { HColor } from '../../core/abel/Colors.js';
+import type { HColorOrPaint } from '../../core/klimt/color/ColorMapper.js';
+import { HColorGradient } from '../../core/klimt/color/HColorGradient.js';
+import { HColorSimple } from '../../core/klimt/color/HColorSimple.js';
+import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
+import { Display } from '../../core/klimt/creole/Display.js';
+import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
+import type { Sheet } from '../../core/klimt/creole/Sheet.js';
+import { SheetBlock1 } from '../../core/klimt/creole/SheetBlock1.js';
+import { bridgeFontConfiguration } from '../../core/klimt/font/FontConfigurationBridge.js';
+import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
+import { LineBreakStrategy } from '../../core/klimt/LineBreakStrategy.js';
+import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
+import type { Style } from '../../core/style/Style.js';
+import { StyleSignatureBasic } from '../../core/style/StyleSignatureBasic.js';
+import { Opale } from '../../core/svek/image/Opale.js';
+import { FilesType, type FEntry } from './ast.js';
+import type { SkinParam } from './files-skin-param.js';
 
-const ROW_HEIGHT = 22;
-const INDENT = 20;
-const PADDING = 10;
-const FONT_SIZE = 14;
-const FONT_FAMILY = 'sans-serif';
+/** The row advance added below every entry's own block. @see FEntry.java:134,145 */
+export const ROW_GAP = 2;
+/** How far right a child is drawn than its parent. @see FEntry.java:136,148 */
+export const CHILD_INDENT = 21;
 
-// Note sizing — imported by renderer.ts so the two stay in sync.
-export const NOTE_Y_OFFSET = 2; // renderer draws box at entry.y + NOTE_Y_OFFSET
-const NOTE_PAD = 6;
-const NOTE_LINE_H = 16;
-const NOTE_FONT = 12;
-const NOTE_MARGIN = 4; // gap between bottom of note box and top of next entry
-
-function noteAdvance(lines: string[]): number {
-  const n = lines.length;
-  const boxH = n === 0 ? NOTE_PAD * 2 : NOTE_PAD * 2 + (n - 1) * NOTE_LINE_H + NOTE_FONT;
-  return NOTE_Y_OFFSET + boxH + NOTE_MARGIN;
+/** `ug.apply(HColor)` / `new Opale(.., HColor, ..)`: the style layer's `HColor` is an `HColorSimple` or a gradient. */
+function paintOf(color: HColor): HColorOrPaint {
+  if (color instanceof HColorSimple || color instanceof HColorGradient) return color;
+  throw new Error('ClassCastException: colour is not an HColorSimple');
 }
 
-/** Returns the display prefix (icon + space) for folder and file entries. */
-function iconPrefix(type: 'folder' | 'file'): string {
-  return type === 'folder' ? '📂 ' : '📄 ';
+/** `StyleSignatureBasic#getMergedStyle` answers `null` upstream only for a missing builder, which a files diagram always has. */
+function mergedStyleOf(signature: StyleSignatureBasic, skinParam: SkinParam): Style {
+  const style = signature.getMergedStyle(skinParam.getCurrentStyleBuilder());
+  if (style === undefined) throw new Error('NullPointerException: no style for ' + String(signature));
+  return style;
 }
 
-function measureNoteWidth(noteLines: string[], measurer: StringMeasurer): number {
-  if (noteLines.length === 0) return 0;
-  let max = 0;
-  for (const line of noteLines) {
-    const { width } = measurer.measure(line, { family: FONT_FAMILY, size: FONT_SIZE });
-    if (width > max) max = width;
-  }
-  return max;
+/**
+ * The block an entry draws: the note's `Opale`, else the emoticon plus the
+ * name as one `NO_CREOLE` line of creole text.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/filesdiagram/FEntry.java:155-163
+ */
+export function getTextBlock(
+  entry: FEntry,
+  fontConfiguration: StyleFontConfiguration,
+  skinParam: SkinParam,
+): TextBlock {
+  if (entry.type === FilesType.NOTE) return createOpale(entry, skinParam);
+
+  const display = Display.getWithNewlines(skinParam.getPragma(), entry.getEmoticon() + entry.getName());
+  const ctx = {
+    fontConfiguration: bridgeFontConfiguration(fontConfiguration),
+    spriteContainer: skinParam,
+    atomOps: skinParam.atomOps,
+  };
+  return display.create7(ctx, HorizontalAlignment.LEFT, CreoleMode.NO_CREOLE);
 }
 
-function traverse(
-  node: FileEntry,
-  depth: number,
-  state: { y: number },
-  measurer: StringMeasurer,
-  out: EntryGeometry[],
-): void {
-  let labelWidth: number;
-  if (node.type === 'note') {
-    labelWidth = measureNoteWidth(node.noteLines ?? [], measurer);
-  } else {
-    const prefix = iconPrefix(node.type);
-    ({ width: labelWidth } = measurer.measure(prefix + node.name, {
-      family: FONT_FAMILY,
-      size: FONT_SIZE,
-    }));
-  }
+/**
+ * The note: a creole sheet of its lines in the `root.element.filesDiagram.note`
+ * style's font, inside an `Opale` of that style's colours, shadow and stroke.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/filesdiagram/FEntry.java:165-183
+ */
+function createOpale(entry: FEntry, skinParam: SkinParam): Opale {
+  const style = mergedStyleOf(StyleSignatureBasic.of('root', 'element', 'filesDiagram', 'note'), skinParam);
 
-  out.push({
-    type: node.type,
-    name: node.name,
-    depth,
-    x: depth * INDENT,
-    y: state.y,
-    ...(node.noteLines !== undefined ? { noteLines: node.noteLines } : {}),
-    labelWidth,
-  });
+  const colorSet = skinParam.getIHtmlColorSet();
+  const fc = FontConfiguration.create(
+    style.getUFont(),
+    style.value('FontColor').asColor(colorSet),
+    style.value('HyperLinkColor').asColor(colorSet),
+    skinParam.useUnderlineForHyperlink(),
+    skinParam.getTabSize(),
+  );
+  const shadowing = style.getShadowing();
+  const borderColor = style.value('LineColor').asColor(colorSet);
+  const noteBackgroundColor = style.value('BackGroundColor').asColor(colorSet);
+  const stroke = style.getStroke();
 
-  if (node.type === 'note') {
-    state.y += noteAdvance(node.noteLines ?? []);
-  } else {
-    state.y += ROW_HEIGHT;
-  }
-
-  for (const child of node.children) {
-    traverse(child, depth + 1, state, measurer, out);
-  }
+  // `entry.note` is non-null for a NOTE (`addNote`, FEntry.java:96-99), the only type that reaches here.
+  const lines = entry.note as readonly string[];
+  // `SheetBuilder#createSheet` widens to `Sheet<StripeAtom>`; `SheetBlock1` takes the narrow `Sheet`
+  // (the same cast as `gantt/draw/AbstractTaskDraw.ts#getOpaleNote`, a pre-existing seam between those two files).
+  const sheet = skinParam
+    .sheet(bridgeFontConfiguration(fc), skinParam.getDefaultTextAlignment(HorizontalAlignment.LEFT), CreoleMode.FULL)
+    .createSheet(Display.create(lines)) as unknown as Sheet<CreoleAtom>;
+  const sheet1 = new SheetBlock1(sheet, LineBreakStrategy.NONE, skinParam.atomOps, skinParam.getPadding());
+  return new Opale(shadowing, paintOf(borderColor), paintOf(noteBackgroundColor), sheet1, false, stroke);
 }
 
-export function layoutFiles(ast: FilesDiagramAST, measurer: StringMeasurer): FilesGeometry {
-  if (ast.root.children.length === 0) {
-    return { entries: [], totalWidth: 0, totalHeight: 0 };
+/**
+ * An entry's own block, then its children indented by {@link CHILD_INDENT}:
+ * the widest right edge, the heights summed with {@link ROW_GAP} below each
+ * entry's own block.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/filesdiagram/FEntry.java:140-153
+ */
+export function calculateDimension(
+  entry: FEntry,
+  stringBounder: StringBounder,
+  context: { readonly fontConfiguration: StyleFontConfiguration; readonly skinParam: SkinParam },
+  deltax: number,
+): XDimension2D {
+  const result = getTextBlock(entry, context.fontConfiguration, context.skinParam);
+  const dim = result.calculateDimension(stringBounder);
+  let width = deltax + dim.getWidth();
+  let height = dim.getHeight() + ROW_GAP;
+  for (const child of entry) {
+    const childDim = calculateDimension(child, stringBounder, context, deltax + CHILD_INDENT);
+    width = Math.max(width, childDim.getWidth());
+    height += childDim.getHeight();
   }
-
-  const entries: EntryGeometry[] = [];
-  const state = { y: 0 };
-
-  for (const child of ast.root.children) {
-    traverse(child, 0, state, measurer, entries);
-  }
-
-  const totalWidth = Math.max(...entries.map((e) => e.x + e.labelWidth)) + PADDING * 2;
-  const totalHeight = state.y;
-
-  return { entries, totalWidth, totalHeight };
+  return new XDimension2D(width, height);
 }

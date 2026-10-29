@@ -1,0 +1,4 @@
+@startjson
+scale 1.5
+{"a": [1, 2]}
+@endjson

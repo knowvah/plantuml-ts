@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-2028 modules · 7017 exported names.
+2032 modules · 7036 exported names.
 
 ## `src/`
 
@@ -47,8 +47,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `creole.ts` | `CreoleSpan`, `TableCell`, `TableToken`, `measureTable`, `tableTokenToSvg`, `spansToTspan`, `CreoleToken`, `parseCreole`, `parseCreoleTokens`, `creoleToSvg` | Creole markup parser for PlantUML labels. |
 | `descriptive-keywords.ts` | `USymbol`, `ALL_TYPES`, `KEYWORD_TO_SYMBOL`, `stripSpriteRegions` | Shared descriptive-keyword table — single source of truth for the descriptive diagram engine (component / use-case / deployment). |
 | `diagram-type-set.ts` | `DiagramType`, `findStartTypes` | Faithful port of `net.sourceforge.plantuml.core.DiagramType`'s start-tag candidate set — `findStartTypes` only. |
-| `dispatcher-types.ts` | `ParseOptions`, `RenderFragment`, `CompleteSvg`, `AssembledSvg`, `PaginatedPlugin`, `SyncPlugin`, `AsyncPlugin`, `DiagramPlugin` | The plugin contract and the fragment shapes the dispatcher resolves to: `ParseOptions`, `RenderFragment`, `CompleteSvg`, `AssembledSvg`, `PaginatedPlugin`, `SyncPlugin`, `AsyncPlugin`, `DiagramPlugin`. |
-| `dispatcher.ts` | `ParseOptions`, `RenderFragment`, `CompleteSvg`, `AssembledSvg`, `PaginatedPlugin`, `SyncPlugin`, `AsyncPlugin`, `DiagramPlugin`, `parseRefusalOf`, `Resolution`, `DiagramRegistry`, `registry` | Dispatcher: holds a registry of DiagramPlugin instances and resolves which one owns a given UmlSource **by attempting the parse**, exactly as upstream does (`PSystemBuilder#createPSystem`, `:257-283`). |
+| `dispatcher-types.ts` | `ParseOptions`, `RenderFragment`, `CompleteSvg`, `AssembledSvg`, `PaginatedPlugin`, `PSystemFactoryBase`, `SyncPlugin`, `AsyncPlugin`, `DiagramPlugin` | The plugin contract and the fragment shapes the dispatcher resolves to: `ParseOptions`, `RenderFragment`, `CompleteSvg`, `AssembledSvg`, `PaginatedPlugin`, `SyncPlugin`, `AsyncPlugin`, `DiagramPlugin`. |
+| `dispatcher.ts` | `ParseOptions`, `RenderFragment`, `CompleteSvg`, `AssembledSvg`, `PaginatedPlugin`, `SyncPlugin`, `AsyncPlugin`, `DiagramPlugin`, `PSystemFactoryBase`, `parseRefusalOf`, `Resolution`, `DiagramRegistry`, `registry` | Dispatcher: holds a registry of DiagramPlugin instances and resolves which one owns a given UmlSource **by attempting the parse**, exactly as upstream does (`PSystemBuilder#createPSystem`, `:257-283`). |
 | `document-margin.ts` | `DocumentMargin`, `SEQUENCE_DOCUMENT_MARGIN`, `CUCA_DOCUMENT_MARGIN`, `documentMarginOf`, `calculateMargin`, `removeDocumentMargin`, `applyDocumentMargin` | document-margin.ts -- lgm-T1a: `TextBlockExporter`'s outer document margin, applied to a fragment AFTER `DiagramChromeFactory.create` composed its chrome (title/legend/caption/header/footer/mainframe), as upstream does. |
 | `dot-engine-measurer.ts` | _(none)_ | The single install point for `@knowvah/dot-engine`'s text measurer. |
 | `dot-splines.ts` | `dotSplinesAttrs` | Translates the `linetype` semantic enum on `DotInputGraph` into the DOT attribute pairs upstream emits for it. |
@@ -1942,12 +1942,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `ast.ts` | `FileEntryType`, `FileEntry`, `FilesDiagramAST`, `EntryGeometry`, `FilesGeometry` |  |
+| `ast.ts` | `FilesType`, `FEntry`, `FilesDiagramAST` |  |
+| `files-extensions.ts` | `markJarCompatible`, `isExtended`, `styleDirectivesOf`, `hasStyleDirective`, `isHandwrittenRequested` | The files engine's documented skinparam extensions (DIVERGENCES.md "Extensions", ddc D8, user ruling 2026-10-23): styling the jar's `StyleExtractor` path discards, honoured in the default (extended) mode and left out of the jar-compatible o |
+| `files-skin-param.ts` | `SkinParamSource`, `SkinParam` | The files engine's `SkinParam` — the slice of upstream's `skin/SkinParam.java` a `FilesDiagram` reaches through `TitledDiagram#getSkinParam()`: the `ISkinSimple` members the creole sheets read, `getIHtmlColorSet`, and the real style engine' |
 | `files-style-input.ts` | `filesStyleInput` |  |
-| `index.ts` | `filesPlugin` |  |
-| `layout.ts` | `NOTE_Y_OFFSET`, `layoutFiles` |  |
-| `parser.ts` | `parseFiles` |  |
-| `renderer.ts` | `renderFiles` |  |
+| `index.ts` | `FilesGeometry`, `calculateBackColor`, `calculateMargin`, `renderFiles`, `filesPlugin` | Files diagram plugin -- `FilesDiagramFactory` (parse), then `TextBlockExporter`'s export of `FilesDiagram#getTextBlock` (the `FilesListing`, FilesDiagram.java:107-110) on the klimt substrate: canvas = the listing's `calculateDimension` plus |
+| `layout.ts` | `ROW_GAP`, `CHILD_INDENT`, `getTextBlock`, `calculateDimension` |  |
+| `parser.ts` | `FilesDiagram`, `parseFiles` |  |
+| `renderer.ts` | `drawAndMove`, `FilesListing` |  |
 
 ## `src/diagrams/gantt/`
 
@@ -2202,10 +2204,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `index.ts` | `jsonPlugin` | JSON diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `json-diagram-factory.ts` | `JsonFamilyHeader`, `headerOf` | What the three json-family factories (`JsonDiagramFactory`, `YamlDiagramFactory`, `HclDiagramFactory`) and the `JsonDiagram` constructor take from a {@link StyleExtractor} besides the payload: the title and the `scale` line. |
 | `json-family-style-input.ts` | `jsonFamilyStyleInput`, `hclStyleInput` | The style sources a json-family diagram's theme is built from -- the `SyncPlugin.styleInput` of `@startjson` / `@startyaml` / `@starthcl`. |
-| `json-layout-prep.ts` | `ValueType`, `DisplayValue`, `getDisplayValue`, `JsonContainer`, `FlatNode`, `containerEntries`, `walkTree`, `EMPTY_MAP`, `buildHighlightMap`, `processStringDisplay`, `splitDisplayLines`, `wordWrapLine`, `BuildRowsOptions` | JSON diagram pre-layout: value display formatting, container tree flattening, highlight-map construction, and string wrapping. |
+| `json-layout-prep.ts` | `ValueType`, `DisplayValue`, `getDisplayValue`, `JsonContainer`, `FlatNode`, `containerEntries`, `walkTree`, `EMPTY_MAP`, `Highlighted`, `upOneLevel`, `isHighlighted`, `buildHighlightMap`, `wordWrapLine`, `BuildRowsOptions` | JSON diagram pre-layout: value display formatting, container tree flattening, highlight-map construction, and string wrapping. |
 | `json-renderer-highlight.ts` | `highlightClassOf`, `highlightFontFlags`, `highlightOverrides`, `highlightRect`, `scaleDasharray`, `keyIsBold`, `replacesFontStyle` | `#highlight`-class + row-separator dash-scaling helpers for the JSON renderer — split out of renderer.ts (cdd-T30, 500-line file-size cap) to make room for the widened `resolveScaleFactor` dpi-term call site. |
 | `JsonCurve.ts` | `CurvePoint`, `VERY_FIRST_LINE`, `supp`, `veryFirstPoint`, `buildArrowHeadPath`, `buildArrowHeadSegments`, `buildCurveSegments`, `buildCurvePath`, `segmentsToPathData` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonCurve.java The path a json edge draws, built from the layout engine's OWN spline rather than re-derived. |
+| `JsonNumber.ts` | `JsonNumber` | minimal-json's `JsonNumber`: a number is kept as the TEXT it was written with, never as a parsed value -- `JsonNumber(String string)` stores the literal and `toString()` returns it (`JsonNumber.java:32-44`), and `TextBlockJson#getShortStrin |
 | `JsonObject.ts` | `JsonObject` | minimal-json's `JsonObject` -- the object value every json-family diagram draws. |
+| `JsonParser.ts` | `ParseException`, `jsonParse` | A port of minimal-json's `JsonParser` driving `Json.DefaultHandler`: a strict JSON reader, plus the one extension PlantUML added -- `//` comments between object members. |
 | `layout.ts` | `JsonRowGeo`, `JsonNodeGeo`, `JsonEdgeGeo`, `JsonGeometry`, `layoutJson` | JSON diagram layout engine. |
 | `Mirror.ts` | `setMirrorBadValueHandler`, `Mirror` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/Mirror.java Upstream lays a json diagram out on a TRANSPOSED graph and rotates the answer back. |
 | `parser.ts` | `jsonSpriteRegistryFor`, `parseJson` | Parser for PlantUML JSON diagrams (@startjson / @endjson). |

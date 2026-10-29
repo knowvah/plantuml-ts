@@ -1,0 +1,184 @@
+{
+  "fixtures": [
+    {
+      "type": "files",
+      "slug": "creole-note",
+      "topic": "creole-note",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "deep-nesting",
+      "topic": "deep-nesting",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "duplicate-folders",
+      "topic": "duplicate-folders",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "empty-diagram",
+      "topic": "empty-diagram",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "394af9e0",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "header-footer",
+      "topic": "header-footer",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "note-after-file",
+      "topic": "note-after-file",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "note-after-folder",
+      "topic": "note-after-folder",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "note-before-entry",
+      "topic": "note-before-entry",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "note-multiline-trailing-folder",
+      "topic": "note-multiline-trailing-folder",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "notes-in-a-row",
+      "topic": "notes-in-a-row",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "skinparam-shadowing",
+      "topic": "skinparam-shadowing",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "spaces-and-dots",
+      "topic": "spaces-and-dots",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "style-files-diagram",
+      "topic": "style-files-diagram",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "style-root-background",
+      "topic": "style-root-background",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "theme-crt-amber",
+      "topic": "theme-crt-amber",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "title-caption",
+      "topic": "title-caption",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "unicode-names",
+      "topic": "unicode-names",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    },
+    {
+      "type": "files",
+      "slug": "unknown-line",
+      "topic": "unknown-line",
+      "measuredAt": "2026-10-28",
+      "measuredAgainstCommit": "251d214a",
+      "status": "baseline",
+      "diffCount": 0,
+      "weightedScore": 0
+    }
+  ]
+}

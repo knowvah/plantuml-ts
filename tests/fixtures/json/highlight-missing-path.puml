@@ -1,0 +1,4 @@
+@startjson
+#highlight "nope" / "none"
+{"a": 1}
+@endjson

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-22T14:13:48.156Z",
+  "generatedAt": "2026-10-28T22:06:29.539Z",
   "fixtures": [
     {
       "slug": "citoda-80-dimi195",
@@ -14,8 +14,8 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "structural-match",
-      "maxDelta": 336.9960000000001,
-      "maxDeltaPath": "svg/g[1]/path[4]/@d[0]"
+      "maxDelta": 1.9230000000000018,
+      "maxDeltaPath": "svg/g[1]/path[8]/@d[0]"
     },
     {
       "slug": "vocago-35-xodu446",
@@ -23,7 +23,7 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "structural-match",
-      "maxDelta": 145.98699999999997,
+      "maxDelta": 1.475999999999999,
       "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
     }
   ]

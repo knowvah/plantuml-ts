@@ -1,0 +1,4 @@
+@startjson
+skinparam defaultFontColor red
+{ "a": 1, "b": "x" }
+@endjson

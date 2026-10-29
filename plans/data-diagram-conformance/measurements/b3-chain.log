@@ -1,0 +1,64 @@
+== activity 17:32:38 { 6.22 13.35 11.34 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-activity.json — {"conformant":449,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== board 17:33:10 { 5.70 12.54 11.11 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 17:33:41 { 6.06 11.96 10.95 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-c4.json — {"conformant":2,"structural-match":0,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== chart 17:34:13 { 6.76 11.48 10.81 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+== chronology 17:34:44 { 6.63 10.97 10.65 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== class 17:35:09 { 5.40 10.33 10.43 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-class.json — {"conformant":723,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== component 17:35:42 { 6.08 9.90 10.26 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-component.json — {"conformant":214,"structural-match":12,"diverged":40,"errored":0,"timeout":0,"oracle-error":0}
+== ditaa 17:36:14 { 5.40 9.35 10.05 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 17:36:27 { 4.95 9.13 9.96 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== ebnf 17:36:56 { 5.00 8.76 9.80 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+wait load 35.08
+wait load 21.89
+wait load 13.97
+wait load 9.90
+== files 17:41:16 { 7.26 11.78 11.22 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-files.json — {"conformant":9,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 17:41:47 { 6.70 11.19 11.02 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-gantt.json — {"conformant":265,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== hcl 17:42:21 { 6.77 10.72 10.85 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== json 17:42:52 { 6.05 10.16 10.64 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-json.json — {"conformant":14,"structural-match":35,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== mindmap 17:43:23 { 5.34 9.51 10.39 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-mindmap.json — {"conformant":142,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== network 17:43:55 { 5.55 9.15 10.22 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-network.json — {"conformant":1,"structural-match":0,"diverged":2,"errored":0,"timeout":0,"oracle-error":0}
+== object 17:44:26 { 5.18 8.70 10.02 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-object.json — {"conformant":63,"structural-match":8,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== packet 17:44:58 { 4.93 8.23 9.80 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+== regex 17:45:30 { 4.72 7.86 9.60 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+== salt 17:46:01 { 4.90 7.61 9.46 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-salt.json — {"conformant":51,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== sequence 17:46:34 { 5.62 7.43 9.31 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-sequence.json — {"conformant":1143,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== state 17:47:18 { 5.83 7.18 9.12 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-state.json — {"conformant":99,"structural-match":14,"diverged":160,"errored":0,"timeout":0,"oracle-error":0}
+== timing 17:47:51 { 5.44 6.94 8.96 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-timing.json — {"conformant":6,"structural-match":0,"diverged":120,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 17:48:22 { 5.31 6.74 8.82 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-unknown.json — {"conformant":565,"structural-match":19,"diverged":241,"errored":0,"timeout":0,"oracle-error":0}
+== usecase 17:48:59 { 4.98 6.46 8.62 }
+[xmldom fatalError]	comment is not well-formed at position 3151 
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-usecase.json — {"conformant":68,"structural-match":7,"diverged":18,"errored":0,"timeout":0,"oracle-error":1}
+== wbs 17:49:33 { 4.45 6.18 8.44 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-wbs.json — {"conformant":204,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== wire 17:50:04 { 4.40 5.97 8.27 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 17:50:36 { 4.82 5.91 8.17 }
+wrote plans/data-diagram-conformance/measurements/b3-eng/parity-yaml.json — {"conformant":7,"structural-match":31,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+DONE 17:51:08

@@ -1,0 +1,8 @@
+@startfiles
+skinparam defaultFontColor #FF0000
+/Alpha/
+/Alpha/Bravo.txt
+<note>
+hello
+</note>
+@endfiles

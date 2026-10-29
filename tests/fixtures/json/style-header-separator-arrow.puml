@@ -1,0 +1,19 @@
+@startjson
+<style>
+jsonDiagram {
+  header {
+    FontColor red
+    FontStyle bold
+  }
+  separator {
+    LineColor blue
+    LineThickness 3
+  }
+  arrow {
+    LineColor green
+    LineThickness 2
+  }
+}
+</style>
+{"a": {"b": 1}, "c": [1, 2]}
+@endjson

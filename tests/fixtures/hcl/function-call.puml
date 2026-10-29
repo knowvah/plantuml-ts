@@ -1,0 +1,4 @@
+@starthcl
+a = upper("x")
+b = length(var.items)
+@endhcl

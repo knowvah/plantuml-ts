@@ -1,0 +1,5 @@
+@starthcl
+/* block
+comment */
+a = 1
+@endhcl

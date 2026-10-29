@@ -5,8 +5,7 @@
  * and returns a JsonDiagramAST.
  */
 
-import { parseTree, type Node as JsoncNode, type ParseError } from 'jsonc-parser';
-import { JsonObject } from './JsonObject.js';
+import { jsonParse, ParseException } from './JsonParser.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
 import type { UmlSource } from '../../core/block-extractor.js';
 import type { ParseOptions } from '../../core/dispatcher.js';
@@ -77,33 +76,15 @@ export function jsonSpriteRegistryFor(options?: ParseOptions): ReturnType<typeof
  * leaves `json` null, which `JsonDiagram#drawU` draws as the "does not sound
  * like JSON" page (`JsonDiagramFactory.java:93-96`, `JsonDiagram.java:116`);
  * an empty payload is such a failure too (`Json.parse("")` throws).
+ * @see {@link jsonParse}
  */
 function parseJsonBody(text: string): { root: unknown; parseError: boolean } {
-  if (text.trim() === '') return { root: null, parseError: true };
-  const errors: ParseError[] = [];
-  const tree = parseTree(text, errors, { allowTrailingComma: true });
-  return errors.length > 0 || tree === undefined
-    ? { root: null, parseError: true }
-    : { root: valueOf(tree), parseError: false };
-}
-
-/**
- * A parsed node as upstream's `Json.DefaultHandler` builds it: an object
- * `add`s every member in source order, a repeated name included
- * (`Json.java:377-378`, `JsonObject.java:337-348`; jar:
- * `unwind2-S2b/json-dup-key`, `json-int-keys`). Walks `parseTree` because
- * `parse` returns a plain object, which cannot hold either.
- */
-function valueOf(node: JsoncNode): unknown {
-  const children = node.children ?? [];
-  if (node.type === 'array') return children.map(valueOf);
-  if (node.type !== 'object') return node.value;
-  const result = new JsonObject();
-  for (const property of children) {
-    const [key, value] = property.children ?? [];
-    if (key !== undefined && value !== undefined) result.add(String(key.value), valueOf(value));
+  try {
+    return { root: jsonParse(text), parseError: false };
+  } catch (error) {
+    if (error instanceof ParseException) return { root: null, parseError: true };
+    throw error;
   }
-  return result;
 }
 
 /**

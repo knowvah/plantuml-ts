@@ -1,0 +1,4 @@
+@starthcl
+skinparam handwritten true
+a = 1
+@endhcl

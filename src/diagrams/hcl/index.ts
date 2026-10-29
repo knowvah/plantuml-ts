@@ -27,6 +27,10 @@ const DIAGRAM_TYPE_HCL = 'HCL';
 export const hclPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   type: 'hcl',
 
+  /** `HclDiagramFactory extends PSystemAbstractFactory` (`HclDiagramFactory.java:55`): no empty test; the
+   *  parser runs over no lines. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/hcl/HclDiagramFactory.java:55-94 */
+  factoryBase: 'PSystemAbstractFactory',
+
   // D6 (cdd6-T1c, write-set extension -- see `yaml/index.ts`'s identical
   // note): the same one-file gap, for hcl.
   parse(source, options) {

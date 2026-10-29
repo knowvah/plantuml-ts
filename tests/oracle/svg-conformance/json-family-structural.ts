@@ -49,7 +49,7 @@
  * must stay clean, and one that becomes clean should be added.
  */
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -59,6 +59,8 @@ import { renderFixtureJson } from './render-fixture-json.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CACHE = join(HERE, '../../../test-results/dot-cache');
+/** Authored fixtures (ddc D7): `<AUTHORED_ROOT>/<type>/<slug>.{puml,svg}`, flat. */
+export const AUTHORED_ROOT = join(HERE, '../../fixtures');
 const MANIFEST = join(HERE, '../../../oracle/goldens/json-family-structural.json');
 
 /**
@@ -106,11 +108,57 @@ export interface StructuralResult {
   readonly diffs: readonly string[];
 }
 
-/** Render one cached fixture and report its non-positional diffs. */
+/** The `.puml`/`.svg` pair of a corpus or authored fixture. */
+interface FixturePair {
+  readonly markup: string;
+  readonly golden: string;
+}
+
+function cachedPath(type: string, slug: string, file: string): string {
+  return join(CACHE, type, slug, file);
+}
+
+function authoredPath(type: string, slug: string, ext: string): string {
+  return join(AUTHORED_ROOT, type, `${slug}.${ext}`);
+}
+
+/** Whether `type/slug` is a corpus row (cached oracle pair present). */
+export function isCachedRow(type: string, slug: string): boolean {
+  return existsSync(cachedPath(type, slug, 'in.puml'));
+}
+
+/** Authored slugs of `type`: every `<slug>.puml` with a `<slug>.svg` oracle, sorted. */
+export function listAuthoredSlugs(type: string): readonly string[] {
+  const dir = join(AUTHORED_ROOT, type);
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((f) => f.endsWith('.puml') && existsSync(join(dir, f.slice(0, -'.puml'.length) + '.svg')))
+    .map((f) => f.slice(0, -'.puml'.length))
+    .sort();
+}
+
+/** Authored slugs of `type` that also exist as a cached corpus row (must be none). */
+export function authoredCachedCollisions(type: string): readonly string[] {
+  return listAuthoredSlugs(type).filter((slug) => isCachedRow(type, slug));
+}
+
+function readPair(type: string, slug: string): FixturePair {
+  if (isCachedRow(type, slug)) {
+    return {
+      markup: readFileSync(cachedPath(type, slug, 'in.puml'), 'utf8'),
+      golden: readFileSync(cachedPath(type, slug, 'in.svg'), 'utf8'),
+    };
+  }
+  return {
+    markup: readFileSync(authoredPath(type, slug, 'puml'), 'utf8'),
+    golden: readFileSync(authoredPath(type, slug, 'svg'), 'utf8'),
+  };
+}
+
+/** Render one fixture (cached pair when it exists, else the authored pair) and report its non-positional diffs. */
 export function structuralDiffs(type: string, slug: string): StructuralResult {
-  const dir = join(CACHE, type, slug);
-  const actual = renderFixtureJson(readFileSync(join(dir, 'in.puml'), 'utf8'), new DeterministicMeasurer());
-  const golden = readFileSync(join(dir, 'in.svg'), 'utf8');
+  const { markup, golden } = readPair(type, slug);
+  const actual = renderFixtureJson(markup, new DeterministicMeasurer());
   const { diffs } = compareSvg(actual, golden, 'deterministic');
   const rounded = SMETANA_ROUNDED_CANVAS.get(`${type}/${slug}`);
   return {

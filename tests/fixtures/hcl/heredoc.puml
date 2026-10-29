@@ -1,0 +1,7 @@
+@starthcl
+text = <<EOT
+line one
+line two
+EOT
+other = 1
+@endhcl

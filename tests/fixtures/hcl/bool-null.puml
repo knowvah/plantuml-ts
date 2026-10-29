@@ -1,0 +1,5 @@
+@starthcl
+a = true
+b = false
+c = null
+@endhcl

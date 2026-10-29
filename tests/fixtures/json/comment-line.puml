@@ -1,0 +1,6 @@
+@startjson
+{
+  "a": 1, // trailing
+  "b": 2
+}
+@endjson
