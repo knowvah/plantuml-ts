@@ -1,0 +1,11 @@
+@startyaml
+<style>
+yamlDiagram {
+  header {
+    FontColor red
+  }
+}
+</style>
+a: 1
+bb: 2
+@endyaml

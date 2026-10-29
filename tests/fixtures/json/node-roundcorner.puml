@@ -1,0 +1,10 @@
+@startjson
+<style>
+jsonDiagram {
+  node {
+    RoundCorner 25
+  }
+}
+</style>
+{"a": {"b": 1}, "c": [1, 2]}
+@endjson

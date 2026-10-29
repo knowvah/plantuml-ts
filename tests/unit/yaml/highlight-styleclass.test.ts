@@ -4,11 +4,15 @@ import { parseJson } from '../../../src/diagrams/json/parser.js';
 import { layoutJson } from '../../../src/diagrams/json/layout.js';
 import { renderJson } from '../../../src/diagrams/json/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
-import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
+import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { JsonDiagramAST } from '../../../src/diagrams/json/ast.js';
 import { jsonObjectOf } from '../../helpers/json-object.js';
+import { jsonSkinParamOf } from '../../helpers/json-skin.js';
+
+/** `plantuml.skin` jsonDiagram highlight BackGroundColor default. */
+const DEFAULT_HIGHLIGHT_BACKGROUND = '#CCFF02';
 
 function makeYamlSource(lines: string[]): UmlSource {
   return { lines, type: 'yaml' };
@@ -74,10 +78,9 @@ describe('parseJson — captures styleClass from <<stereotype>>', () => {
 
 describe('layoutJson — propagates styleClass to row.highlight', () => {
   it('row.highlight is "h1" when directive has styleClass "h1"', () => {
-    const theme = deepMergeTheme(defaultTheme, {
-      colors: { graph: { json: { highlightClasses: { h1: { background: '#0F0' } } } } },
-    });
+    const theme = defaultTheme;
     const ast: JsonDiagramAST = {
+      skinParam: jsonSkinParamOf('yaml'),
       root: jsonObjectOf({ fruit: 'Apple', size: 'Large' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
@@ -89,6 +92,7 @@ describe('layoutJson — propagates styleClass to row.highlight', () => {
 
   it('row.highlight is "" when directive has no styleClass', () => {
     const ast: JsonDiagramAST = {
+      skinParam: jsonSkinParamOf('yaml'),
       root: jsonObjectOf({ fruit: 'Apple' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: '' }],
@@ -100,6 +104,7 @@ describe('layoutJson — propagates styleClass to row.highlight', () => {
 
   it('non-highlighted rows have highlight=false', () => {
     const ast: JsonDiagramAST = {
+      skinParam: jsonSkinParamOf('yaml'),
       root: jsonObjectOf({ fruit: 'Apple', size: 'Large' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
@@ -111,15 +116,14 @@ describe('layoutJson — propagates styleClass to row.highlight', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Layer 4: renderJson uses highlightClasses background
+// Layer 4: renderJson uses `.h1` style background
 // ---------------------------------------------------------------------------
 
-describe('renderJson — uses highlightClasses background for named class', () => {
+describe('renderJson — uses `.h1` style background for named class', () => {
   it('uses class background color instead of default highlightBackground', () => {
-    const theme = deepMergeTheme(defaultTheme, {
-      colors: { graph: { json: { highlightClasses: { h1: { background: '#ABCDEF' } } } } },
-    });
+    const theme = defaultTheme;
     const ast: JsonDiagramAST = {
+      skinParam: jsonSkinParamOf('yaml', '<style>\n.h1 { BackGroundColor #ABCDEF }\n</style>'),
       root: jsonObjectOf({ fruit: 'Apple' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
@@ -131,24 +135,24 @@ describe('renderJson — uses highlightClasses background for named class', () =
     expect(svg).not.toContain('#CCFF02');
   });
 
-  it('falls back to default highlight color when class not defined in highlightClasses', () => {
-    // h1 class present in directive but not in theme.highlightClasses
+  it('falls back to default highlight color when class no `.h1` style is declared', () => {
+    // h1 class present in directive but no `.h1` style declared
     const ast: JsonDiagramAST = {
+      skinParam: jsonSkinParamOf('yaml'),
       root: jsonObjectOf({ fruit: 'Apple' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
     };
     const geo = layoutJson(ast, defaultTheme, new FormulaMeasurer());
     const svg = assembleSvg(renderJson(geo, defaultTheme));
-    const hlBg = defaultTheme.colors.graph.json?.highlightBackground ?? '#CCFF02';
+    const hlBg = DEFAULT_HIGHLIGHT_BACKGROUND;
     expect(svg).toContain(hlBg);
   });
 
   it('uses class fontColor for text when defined', () => {
-    const theme = deepMergeTheme(defaultTheme, {
-      colors: { graph: { json: { highlightClasses: { h1: { background: '#ABCDEF', fontColor: '#F00' } } } } },
-    });
+    const theme = defaultTheme;
     const ast: JsonDiagramAST = {
+      skinParam: jsonSkinParamOf('yaml', '<style>\n.h1 { BackGroundColor #ABCDEF\nFontColor #F00 }\n</style>'),
       root: jsonObjectOf({ fruit: 'Apple' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
@@ -165,10 +169,11 @@ describe('renderJson — uses highlightClasses background for named class', () =
 
 describe('end-to-end: YAML <<h1>> highlight class in SVG output', () => {
   it('full pipeline uses class background from theme', () => {
-    const theme = deepMergeTheme(defaultTheme, {
-      colors: { graph: { json: { highlightClasses: { h1: { background: '#0F0' } } } } },
-    });
-    const ast = parseYaml(makeYamlSource(['#highlight "fruit" <<h1>>', 'fruit: Apple', 'size: Large']));
+    const theme = defaultTheme;
+    const ast = {
+      ...parseYaml(makeYamlSource(['#highlight "fruit" <<h1>>', 'fruit: Apple', 'size: Large'])),
+      skinParam: jsonSkinParamOf('yaml', '<style>\n.h1 { BackGroundColor #0F0 }\n</style>'),
+    };
     const geo = layoutJson(ast, theme, new FormulaMeasurer());
     const svg = assembleSvg(renderJson(geo, theme));
     expect(svg).toContain('#0F0');
@@ -179,26 +184,21 @@ describe('end-to-end: YAML <<h1>> highlight class in SVG output', () => {
     const ast = parseYaml(makeYamlSource(['#highlight "fruit"', 'fruit: Apple', 'size: Large']));
     const geo = layoutJson(ast, defaultTheme, new FormulaMeasurer());
     const svg = assembleSvg(renderJson(geo, defaultTheme));
-    const hlBg = defaultTheme.colors.graph.json?.highlightBackground ?? '#CCFF02';
+    const hlBg = DEFAULT_HIGHLIGHT_BACKGROUND;
     expect(svg).toContain(hlBg);
   });
 
   it('two highlights with different classes use their respective colors', () => {
-    const theme = deepMergeTheme(defaultTheme, {
-      colors: {
-        graph: {
-          json: {
-            highlightClasses: {
-              h1: { background: '#F00' },
-              h2: { background: '#00F' },
-            },
-          },
-        },
-      },
-    });
-    const ast = parseYaml(
-      makeYamlSource(['#highlight "fruit" <<h1>>', '#highlight "size" <<h2>>', 'fruit: Apple', 'size: Large']),
-    );
+    const theme = defaultTheme;
+    const ast = {
+      ...parseYaml(
+        makeYamlSource(['#highlight "fruit" <<h1>>', '#highlight "size" <<h2>>', 'fruit: Apple', 'size: Large']),
+      ),
+      skinParam: jsonSkinParamOf(
+        'yaml',
+        '<style>\n.h1 { BackGroundColor #F00 }\n.h2 { BackGroundColor #00F }\n</style>',
+      ),
+    };
     const geo = layoutJson(ast, theme, new FormulaMeasurer());
     const svg = assembleSvg(renderJson(geo, theme));
     expect(svg).toContain('#F00');

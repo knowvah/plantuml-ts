@@ -5,7 +5,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { preprocess } from '../../../src/core/preprocessor.js';
-import { hclStyleInput, jsonFamilyStyleInput } from '../../../src/diagrams/json/json-family-style-input.js';
+import { hclStyleInput, isExtended, jsonFamilyStyleInput } from '../../../src/diagrams/json/json-family-style-input.js';
 import { jsonPlugin } from '../../../src/diagrams/json/index.js';
 import { yamlPlugin } from '../../../src/diagrams/yaml/index.js';
 import { hclPlugin } from '../../../src/diagrams/hcl/index.js';
@@ -84,5 +84,24 @@ describe('hclStyleInput', () => {
     const { pre, out } = hclInputOf(['!theme amiga', 'r {', '}']);
     expect(pre.theme).toBe('amiga');
     expect(out.theme).toBeNull();
+  });
+});
+
+describe('isExtended', () => {
+  const block = (type: 'json' | 'hcl'): UmlSource => ({ lines: ['{}'], type, seedSourceLines: [] });
+
+  it('is true for a source no styleInput has seen: the default mode honours the extensions', () => {
+    expect(isExtended(block('json'))).toBe(true);
+  });
+
+  it.each([
+    ['jsonFamilyStyleInput', jsonFamilyStyleInput, 'json'],
+    ['hclStyleInput', hclStyleInput, 'hcl'],
+  ] as const)('%s marks the very source it ran on as jar-compatible, and no other', (_name, styleInput, type) => {
+    const marked = block(type);
+    const other = block(type);
+    styleInput(preprocess(`@start${type}\n{}\n@end${type}`), marked);
+    expect(isExtended(marked)).toBe(false);
+    expect(isExtended(other)).toBe(true);
   });
 });

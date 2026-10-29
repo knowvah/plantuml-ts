@@ -4934,7 +4934,9 @@ supersedes the conclusion in
   leniency), hcl `scale`, and the empty-source test (only in the factory
   bases that have it, `PSystemCommandFactory.java:117-122`) all mirrored.
   Follow-ons (ddc, 2026-10-28), each a user decision or its own mission:
-  - **json style engine** — 4 authored rows stay open (`highlight-stereotype`,
+  - ~~**json style engine**~~ — **DONE 2026-10-29 by json-style-engine (jse):** all 4
+    rows + 13 new authored rows structurally clean; the projection is deleted.
+    Was: 4 authored rows stay open (`highlight-stereotype`,
     `style-highlight-block`, `style-header-separator-arrow`, `theme-cerulean`):
     json styling is a hand-keyed projection of the flattened `StyleMap`
     (`src/core/style-map-json-diagram.ts`), not the `Style`/
@@ -4950,7 +4952,8 @@ supersedes the conclusion in
   - **`scale` × `title`** — the title stays unscaled (`renderer.ts` scales the
     drawing before chrome; the jar scales the titled block,
     `TextBlockExporter.java:165`); needs the core scaler. No corpus row.
-  - **`<style> jsonDiagram { FontColor X }`** without a `node` block is unread
+  - ~~**`<style> jsonDiagram { FontColor X }`**~~ (DONE, jse: authored
+    `json/diagram-fontcolor-no-node` clean) without a `node` block is unread
     (`computeDataDiagramNodeOverride`, core) — part of the style-engine item.
   - **files annotation blocks** — the parser still consumes `legend … end
     legend` etc. (G0b/T6 wiring); the jar treats `/x` inside one as a file
@@ -4963,6 +4966,17 @@ supersedes the conclusion in
     (`PSystemCommandFactory.java:118-121`, 14 px); `@startuml` + only
     `skinparam handwritten true` → jar CLASS "Please use '!option handwritten
     true'" 287×36, ours 16×16; git/def/jcckit have no plugin.
+  - **jse follow-ons (2026-10-29)** — files' `<style>`/`skin` error handling
+    diverges from `StyleExtractor.java:115-135` (a rejected `<style>` keeps
+    earlier blocks; a bad `skin` still applies `<style>`; jse journal row 14);
+    dead code made dead by jse (`resolveGlobalFontName`,
+    `BuildRowsOptions` font fields, `NodeStyleJson.text.fontSize` +
+    `scale-geo.ts#scaleNodeStyle`, the unread theme `json` seeds — public type,
+    rows 19/22/25); `columnWidths` caps the value column at `MaximumWidth + 10`
+    where `getWidthColB` (`TextBlockJson.java:200-262`) has none (row 19, verify
+    first); the authored `hcl/style-ignored.svg` is a jar error page, so it never
+    pinned what its name says (row 7); core `TextStyle.fontWeight` types only
+    normal/bold/700 (row 22).
   - **Authored fixtures worth adding** — `style-root-fontcolor` (json/yaml;
     `<style> root { FontColor }` now matches the jar in both modes, no gate),
     title+handwritten, title narrower than body, title+scale (T1c scratch

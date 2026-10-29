@@ -1,0 +1,13 @@
+@starthcl
+!theme cerulean
+<style>
+hclDiagram {
+  node {
+    BackGroundColor red
+  }
+}
+</style>
+server "web" {
+  port = 80
+}
+@endhcl

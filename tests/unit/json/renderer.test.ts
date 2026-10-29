@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { renderJson } from '../../../src/diagrams/json/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
-import { defaultTheme, resolveTheme } from '../../../src/core/theme.js';
+import { defaultTheme } from '../../../src/core/theme.js';
 import type { JsonGeometry, JsonNodeGeo, JsonEdgeGeo, JsonRowGeo } from '../../../src/diagrams/json/layout.js';
-import type { Theme } from '../../../src/core/theme.js';
+import { jsonStylesOf } from '../../helpers/json-skin.js';
+
+const DEFAULT_STYLES = jsonStylesOf('json');
 
 // ---------------------------------------------------------------------------
 // Geometry factories
@@ -69,6 +71,7 @@ function makeNode(overrides: Partial<JsonNodeGeo> = {}): JsonNodeGeo {
 
 function makeGeo(overrides: Partial<JsonGeometry> = {}): JsonGeometry {
   return {
+    styles: DEFAULT_STYLES,
     nodes: [],
     edges: [],
     width: 400,
@@ -88,28 +91,15 @@ function makeEdge(overrides: Partial<JsonEdgeGeo> = {}): JsonEdgeGeo {
   };
 }
 
-/**
- * A theme whose graph.json is absent so ?? fallback defaults in the renderer
- * are exercised.  We build the graph object without the json key so
- * exactOptionalPropertyTypes is satisfied (omitting an optional key is legal;
- * assigning undefined to it is not).
- *
- * The destructuring extracts and discards 'json'; the rest spread produces
- * an object whose type satisfies Theme['colors']['graph'] since json is optional.
- */
-function makeGraphWithoutJson(): Theme['colors']['graph'] {
-  const { json: _unused, ...rest } = defaultTheme.colors.graph;
-  void _unused;
-  return rest;
+/** A `<style>` block, as the tests below write it. */
+function styleBlock(css: string): string {
+  return `<style>\n${css}\n</style>`;
 }
 
-const noJsonTheme: Theme = {
-  ...defaultTheme,
-  colors: {
-    ...defaultTheme.colors,
-    graph: makeGraphWithoutJson(),
-  },
-};
+/** A geometry whose styles come from the engine for `directives` (`jsonStylesOf`). */
+function styledGeo(directives: string, overrides: Partial<JsonGeometry>, type: 'json' | 'yaml' = 'json'): JsonGeometry {
+  return makeGeo({ styles: jsonStylesOf(type, directives), ...overrides });
+}
 
 /**
  * Strip the leading <defs>…</defs> block that svgRoot always emits so
@@ -139,21 +129,13 @@ describe('renderJson — AC #1: value text color', () => {
     expect(body).not.toContain('fill="#3A6E96"');
   });
 
-  it('still honours a THEME-supplied value color', () => {
-    // The four per-type fields are kept precisely so a theme can set them —
-    // all 20 built-in themes do, each to one shared color.
-    const themed = {
-      ...defaultTheme,
-      colors: {
-        ...defaultTheme.colors,
-        graph: {
-          ...defaultTheme.colors.graph,
-          json: { ...defaultTheme.colors.graph.json, stringValue: '#FF00FF' },
-        },
-      },
-    };
-    const body = contentAfterDefs(assembleSvg(renderJson(makeGeo({ nodes: [makeNode()] }), themed)));
-    expect(body).toContain('fill="#F0F"');
+  it('paints a value in the FontColor a <style> block gives the node', () => {
+    // `getStyleToUse(false, …)` merges `jsonDiagram { node { FontColor … } }`
+    // over the skin's black (`TextBlockJson.java:151`); the key cell, whose
+    // `header` style inherits from `node`, follows it.
+    const geo = styledGeo(styleBlock('jsonDiagram { node { FontColor #FF00FF } }'), { nodes: [makeNode()] });
+    const body = contentAfterDefs(assembleSvg(renderJson(geo, defaultTheme)));
+    expect(body.match(/<text [^>]*fill="#F0F"/g) ?? []).toHaveLength(2);
   });
 });
 
@@ -171,8 +153,8 @@ describe('renderJson — AC #2: highlight background', () => {
     const geo = makeGeo({ nodes: [node] });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    const hlColor = defaultTheme.colors.graph.json?.highlightBackground ?? '#FEFECE';
-    expect(body).toContain(`fill="${hlColor}"`);
+    // `plantuml.skin:458`'s `node { highlight { BackGroundColor #ccff02 } }`.
+    expect(body).toContain('fill="#CCFF02" stroke="#CCFF02"');
   });
 });
 
@@ -506,7 +488,7 @@ describe('renderJson — branch coverage', () => {
     expect(d2).not.toContain('C');
   });
 
-  it('nested valueType with non-empty value uses keyText color (default branch)', () => {
+  it('a nested value cell takes the node FontColor, like every other value cell', () => {
     const nestedRow = makeRow({
       key: 'obj',
       value: '{...}',
@@ -518,11 +500,9 @@ describe('renderJson — branch coverage', () => {
     const geo = makeGeo({ nodes: [node] });
     const svg = assembleSvg(renderJson(geo, defaultTheme));
     const body = contentAfterDefs(svg);
-    // Value text uses keyText color — the default branch of valueColor, whose
-    // fallback is this family's own black (`skin/plantuml.skin:446`
+    // Value text takes the node's FontColor (`skin/plantuml.skin:446`
     // `yamlDiagram,jsonDiagram { FontColor black }`), not the global `#181818`.
     // `#000000` reaches the SVG in its shortened form, as the jar writes it.
-    expect(defaultTheme.colors.graph.json?.keyText).toBeUndefined();
     expect(body).toContain('fill="#000"');
   });
 
@@ -550,7 +530,7 @@ describe('renderJson — branch coverage', () => {
     expect(cCount).toBe(2);
   });
 
-  it('renders all value types when theme has no json color overrides (uses ?? defaults)', () => {
+  it('renders every value type from the skin defaults alone', () => {
     const rows: JsonRowGeo[] = [
       makeRow({ key: 'a', value: 'hello', valueType: 'string', y: 4, height: 20 }),
       makeRow({ key: 'b', value: '42', valueType: 'number', y: 24, height: 20 }),
@@ -558,27 +538,18 @@ describe('renderJson — branch coverage', () => {
       makeRow({ key: 'd', value: '␀', valueType: 'null', y: 64, height: 20, highlight: '' }),
       makeRow({ key: 'e', value: '{...}', valueType: 'nested', y: 84, height: 20 }),
     ];
-    const node = makeNode({ rows });
-    const edge = makeEdge();
-    const geo = makeGeo({ nodes: [node], edges: [edge] });
-    const svg = assembleSvg(renderJson(geo, noJsonTheme));
-    const body = contentAfterDefs(svg);
-    // With `graph.json` absent entirely, every arm of `valueColor` takes its
-    // OWN fallback — which is this family's skin black (`plantuml.skin:446`),
-    // the same for all five. That sameness is the point: upstream has no
-    // per-type value styling, so there is nothing for the arms to differ on.
-    // These four lines used to assert four distinct IDE-palette colors.
-    expect(body).toContain('fill="#000"');
-    expect(body).toContain('fill="#CCFF02"'); // highlightBackground (plantuml.skin default)
-    expect(body).toContain('fill="#FFF"'); // background → noJsonTheme.colors.background
-    // headerBackground inherits from bg (#FFFFFF) — no longer a distinct hard-coded color
-    // Edge still renders with theme.colors.arrow fallback
+    const geo = makeGeo({ nodes: [makeNode({ rows })], edges: [makeEdge()] });
+    const body = contentAfterDefs(assembleSvg(renderJson(geo, defaultTheme)));
+    // Upstream has no per-type value styling, so all five arms are the skin's
+    // black (`plantuml.skin:446`): ten texts, none in any other colour.
+    expect(body.match(/<text [^>]*fill="#000"/g) ?? []).toHaveLength(10);
+    expect(body).toContain('fill="#CCFF02"'); // `node { highlight { BackGroundColor #ccff02 } }`
+    expect(body).toContain('fill="#F1F1F1"'); // `root { BackGroundColor --common-background }`
     expect(body).toContain('<path');
-    // keyText and border fall back to theme.colors.text / theme.colors.border (#181818)
-    expect(body).toContain('fill="#181818"');
+    expect(body).not.toContain('fill="#181818"');
   });
 
-  it('highlighted row with named class uses class background color', () => {
+  it('a highlighted row with a stereotype takes the class background', () => {
     const highlightedRow = makeRow({
       key: 'fruit',
       value: 'Apple',
@@ -587,29 +558,16 @@ describe('renderJson — branch coverage', () => {
       y: 4,
       height: 20,
     });
-    const node = makeNode({ rows: [highlightedRow] });
-    const geo = makeGeo({ nodes: [node] });
-    const theme: Theme = {
-      ...defaultTheme,
-      colors: {
-        ...defaultTheme.colors,
-        graph: {
-          ...defaultTheme.colors.graph,
-          json: {
-            ...defaultTheme.colors.graph.json,
-            highlightClasses: { h1: { background: '#ABCDEF' } },
-          },
-        },
-      },
-    };
-    const svg = assembleSvg(renderJson(geo, theme));
-    const body = contentAfterDefs(svg);
-    expect(body).toContain('fill="#ABCDEF"');
-    // Default highlight color should not be used
+    // `node { highlight }` + `withTOBECHANGED(<<h1>>)` (`TextBlockJson.java:141-146,296-299`).
+    const geo = styledGeo(styleBlock('jsonDiagram { .h1 { BackGroundColor #ABCDEF } }'), {
+      nodes: [makeNode({ rows: [highlightedRow] })],
+    });
+    const body = contentAfterDefs(assembleSvg(renderJson(geo, defaultTheme)));
+    expect(body).toContain('fill="#ABCDEF" stroke="#ABCDEF"');
     expect(body).not.toContain('fill="#CCFF02"');
   });
 
-  it('highlighted row with named class falls back to default highlight when class not in highlightClasses', () => {
+  it('a highlighted row whose class the style does not declare falls back to the default highlight', () => {
     const highlightedRow = makeRow({
       key: 'fruit',
       value: 'Apple',
@@ -618,121 +576,53 @@ describe('renderJson — branch coverage', () => {
       y: 4,
       height: 20,
     });
-    const node = makeNode({ rows: [highlightedRow] });
-    const geo = makeGeo({ nodes: [node] });
-    // No highlightClasses defined in theme
-    const svg = assembleSvg(renderJson(geo, defaultTheme));
-    const body = contentAfterDefs(svg);
-    const hlBg = defaultTheme.colors.graph.json?.highlightBackground ?? '#CCFF02';
-    expect(body).toContain(`fill="${hlBg}"`);
+    const geo = makeGeo({ nodes: [makeNode({ rows: [highlightedRow] })] });
+    const body = contentAfterDefs(assembleSvg(renderJson(geo, defaultTheme)));
+    expect(body).toContain('fill="#CCFF02" stroke="#CCFF02"');
   });
 });
 
 // ---------------------------------------------------------------------------
-// Built-in theme integration (amiga)
+// A built-in theme reaches the family through the style engine
 // ---------------------------------------------------------------------------
 describe('renderJson — built-in theme colors', () => {
-  it('!theme amiga: node background, borders, and all text use the amiga palette', () => {
-    const amigaTheme = resolveTheme('amiga');
+  it('!theme amiga: node background, borders and all text come from the amiga styles', () => {
     const rows: JsonRowGeo[] = [makeRow({ key: 'fruit', value: 'Apple', valueType: 'string', y: 0, height: 20 })];
-    const node = makeNode({ rows });
-    const geo = makeGeo({ nodes: [node] });
-    const svg = assembleSvg(renderJson(geo, amigaTheme));
-    const body = contentAfterDefs(svg);
-    // Node and header column both blue
+    const geo = styledGeo('!theme amiga', { nodes: [makeNode({ rows })] });
+    const body = contentAfterDefs(assembleSvg(renderJson(geo, defaultTheme)));
     expect(body).toContain('fill="#0B58A8"');
-    // Borders white
     expect(body).toContain('stroke="#FFF"');
-    // Text (key + value) white — type coloring overridden by theme
-    expect(body).toContain('fill="#FFF"');
-    // No dark text from default theme leaking through
+    expect(body.match(/<text [^>]*fill="#FFF"/g) ?? []).toHaveLength(2);
     expect(body).not.toContain('fill="#181818"');
-    // No type-specific colors leaking through
-    expect(body).not.toContain('fill="#3A6E96"');
-  });
-
-  it('!theme amiga: SVG canvas background is amiga blue', () => {
-    const amigaTheme = resolveTheme('amiga');
-    const node = makeNode();
-    const geo = makeGeo({ nodes: [node] });
-    const svg = assembleSvg(renderJson(geo, amigaTheme));
-    // svgRoot emits the background as a rect or viewBox fill
-    expect(svg).toContain('#0B58A8');
   });
 });
 
 describe('renderJson — node-level style cascade', () => {
-  it('node FontColor cascades to key text via nodeFontColor (default theme has no keyText override)', () => {
-    // defaultTheme.colors.graph.json has no keyText, so nodeFontColor must reach key text.
-    // This was broken when keyText:'#181818' was hardcoded in defaultTheme.
-    const theme: Theme = {
-      ...defaultTheme,
-      colors: {
-        ...defaultTheme.colors,
-        graph: {
-          ...defaultTheme.colors.graph,
-          json: {
-            ...defaultTheme.colors.graph.json,
-            nodeFontColor: '#FF7F50', // Coral
-          },
-        },
-      },
-    };
-    const rows: JsonRowGeo[] = [makeRow({ key: 'myKey', value: 'val', valueType: 'string', y: 0, height: 20 })];
-    const node = makeNode({ rows });
-    const geo = makeGeo({ nodes: [node] });
-    const svg = assembleSvg(renderJson(geo, theme));
-    // Key text must use the node-level FontColor
-    expect(svg).toContain('fill="#FF7F50"');
+  const ROWS: JsonRowGeo[] = [makeRow({ key: 'myKey', value: 'val', valueType: 'string', y: 0, height: 20 })];
+
+  it('node FontColor reaches the key text through the header style', () => {
+    const geo = styledGeo(styleBlock('jsonDiagram { node { FontColor #FF7F50 } }'), {
+      nodes: [makeNode({ rows: ROWS })],
+    });
+    const body = contentAfterDefs(assembleSvg(renderJson(geo, defaultTheme)));
+    expect(body.match(/<text [^>]*fill="#FF7F50"/g) ?? []).toHaveLength(2);
   });
 
-  it('node FontName and FontSize cascade to key text', () => {
-    const theme: Theme = {
-      ...defaultTheme,
-      colors: {
-        ...defaultTheme.colors,
-        graph: {
-          ...defaultTheme.colors.graph,
-          json: {
-            ...defaultTheme.colors.graph.json,
-            nodeFontFamily: 'Helvetica',
-            nodeFontSize: 12,
-          },
-        },
-      },
-    };
-    const rows: JsonRowGeo[] = [makeRow({ key: 'myKey', value: 'val', valueType: 'string', y: 0, height: 20 })];
-    const node = makeNode({ rows });
-    const geo = makeGeo({ nodes: [node] });
-    const svg = assembleSvg(renderJson(geo, theme));
-    // Key text must use node-level font
-    expect(svg).toContain('font-family="Helvetica"');
-    expect(svg).toContain('font-size="12"');
+  it('node FontName and FontSize cascade to the key text', () => {
+    const geo = styledGeo(styleBlock('jsonDiagram { node { FontName Helvetica\nFontSize 12 } }'), {
+      nodes: [makeNode({ rows: ROWS })],
+    });
+    const body = contentAfterDefs(assembleSvg(renderJson(geo, defaultTheme)));
+    expect(body.match(/<text [^>]*font-family="Helvetica"[^>]*font-size="12"/g) ?? []).toHaveLength(2);
   });
 
-  it('explicit keyText color takes precedence over nodeFontColor', () => {
-    const theme: Theme = {
-      ...defaultTheme,
-      colors: {
-        ...defaultTheme.colors,
-        graph: {
-          ...defaultTheme.colors.graph,
-          json: {
-            ...defaultTheme.colors.graph.json,
-            keyText: '#AABBCC',
-            nodeFontColor: '#FF7F50',
-          },
-        },
-      },
-    };
-    const rows: JsonRowGeo[] = [makeRow({ key: 'k', value: 'v', valueType: 'string', y: 0, height: 20 })];
-    const node = makeNode({ rows });
-    const geo = makeGeo({ nodes: [node] });
-    const svg = assembleSvg(renderJson(geo, theme));
-    // keyText wins over nodeFontColor for the key column
-    expect(svg).toContain('fill="#ABC"');
-    // nodeFontColor still appears (applied to value text)
-    expect(svg).toContain('fill="#FF7F50"');
+  it('an explicit header FontColor wins over the node FontColor for the key column only', () => {
+    const geo = styledGeo(styleBlock('jsonDiagram { node { FontColor #FF7F50\nheader { FontColor #AABBCC } } }'), {
+      nodes: [makeNode({ rows: ROWS })],
+    });
+    const body = contentAfterDefs(assembleSvg(renderJson(geo, defaultTheme)));
+    expect(/<text [^>]*fill="#ABC"[^>]*>myKey</.test(body)).toBe(true);
+    expect(/<text [^>]*fill="#FF7F50"[^>]*>val</.test(body)).toBe(true);
   });
 });
 

@@ -9,8 +9,9 @@ Mission **A5** (json family). Sibling of `svg-description`, `svg-class`,
 1 hcl in the sibling folders — 22 across the family; data-diagram-conformance,
 2026-10-28). Of the other 36 json rows, 35 are `structural-match` and 1 is the
 ADR-2b ceiling timafu-94; the structural manifest
-(`oracle/goldens/json-family-structural.json`) lists 150 clean rows (89 corpus
-+ 61 authored) and 3 ceilings. Edges are now emitted in the jar's
+(`oracle/goldens/json-family-structural.json`) lists 167 clean rows (89 corpus
++ 78 authored) and 3 ceilings (json-style-engine, 2026-10-29: the family's
+styles now come from the ported style engine). Edges are now emitted in the jar's
 `manageOneNode` post-order (ddc T1a), which is what moved 16 rows from
 `diverged` to `structural-match`.
 

@@ -6,6 +6,7 @@ import type { ParseOptions } from '../../core/dispatcher.js';
 import { jsonSpriteRegistryFor } from '../json/parser.js';
 import { extractStyle, payloadOf, upstreamSourceLines } from '../json/StyleExtractor.js';
 import { headerOf } from '../json/json-diagram-factory.js';
+import { createJsonSkinParam } from '../json/json-skin-param.js';
 import { JsonObject } from '../json/JsonObject.js';
 
 // ---------------------------------------------------------------------------
@@ -332,5 +333,6 @@ export function parseHcl(source: UmlSource, options?: ParseOptions): JsonDiagram
     ...headerOf(extractor, false),
     // D6 (cdd6-T1c): mirrors `class/parser.ts:326-327`.
     sprites: jsonSpriteRegistryFor(options),
+    skinParam: createJsonSkinParam(source, 'hcl'),
   };
 }

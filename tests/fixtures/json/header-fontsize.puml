@@ -1,0 +1,10 @@
+@startjson
+<style>
+jsonDiagram {
+  header {
+    FontSize 20
+  }
+}
+</style>
+{"a": 1, "bb": 2}
+@endjson

@@ -21,6 +21,9 @@ import { tabStopWidth, tabAwareWidth, walkTabs, hasTab } from './tab-stops.js';
 import { getDisplayValue, containerEntries } from './json-layout-prep.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import type { FlatNode, BuildRowsOptions } from './json-layout-prep.js';
+import type { JsonStyleSet } from './json-style-resolve.js';
+import { rowMeasureOf } from './text-block-style.js';
+import type { CellFont, CellMeasure, RowMeasure } from './text-block-style.js';
 
 /**
  * Per-CELL margins. `TextBlockJson#getTextBlock` wraps every cell's text block
@@ -159,30 +162,6 @@ export interface MeasuredNode {
   totalHeight: number;
 }
 
-interface FontSpec {
-  family: string;
-  size: number;
-  weight?: 'bold';
-  /** `skinparam tabSize` — upstream hangs it off the FONT CONFIGURATION
-   *  (`FontConfiguration#getTabSize`), which is why it rides here rather than
-   *  being threaded as a parameter. Consumed only by `tab-stops.ts`. */
-  tabSize?: number;
-}
-
-/** The key- and value-cell fonts. Upstream resolves these per cell through the
- *  style cascade (`getStyleToUse(header, highlighted)`); this port carries the
- *  same header-vs-body distinction on `BuildRowsOptions`. */
-function fontsFor(fontSize: number, options: BuildRowsOptions | undefined): { keyFont: FontSpec; valFont: FontSpec } {
-  const family = options?.fontFamily ?? 'sans-serif';
-  const tab = options?.tabSize === undefined ? {} : { tabSize: options.tabSize };
-  const bold = { family, size: fontSize, weight: 'bold' as const, ...tab };
-  const plain = { family, size: fontSize, ...tab };
-  return {
-    keyFont: (options?.headerFontBold ?? options?.fontBold) ? bold : plain,
-    valFont: options?.fontBold ? bold : plain,
-  };
-}
-
 /**
  * @see .../jsondiagram/TextBlockJson.java#Line.getHeightOfRow
  *
@@ -194,12 +173,14 @@ function fontsFor(fontSize: number, options: BuildRowsOptions | undefined): { ke
  * does not have, and sizing the row from the KEY alone, which let a multi-line
  * value overflow its own row.
  */
-function heightOfRow(textHeight: number, valueLineCount: number, arrayEntry: boolean): number {
-  const valueCell = valueLineCount * textHeight + 2 * CELL_MARGIN_Y;
+function heightOfRow(heights: { key: number; value: number }, valueLineCount: number, arrayEntry: boolean): number {
+  const valueCell = valueLineCount * heights.value + 2 * CELL_MARGIN_Y;
   // An array line has no b2, so `getHeightOfRow` returns b1's height alone --
   // and b1 IS the value cell.
   if (arrayEntry) return valueCell;
-  const keyCell = textHeight + 2 * CELL_MARGIN_Y;
+  // Each cell is measured with ITS OWN style's font (`getTextBlock`), so the
+  // key and value text heights differ whenever their styles do.
+  const keyCell = heights.key + 2 * CELL_MARGIN_Y;
   return Math.max(keyCell, valueCell);
 }
 
@@ -212,33 +193,32 @@ function heightOfRow(textHeight: number, valueLineCount: number, arrayEntry: boo
  */
 function columnWidths(
   rows: readonly JsonRowGeo[],
-  measurer: StringMeasurer,
-  keyFont: FontSpec,
-  valFont: FontSpec,
-  maximumWidth: number | undefined,
+  valueWraps: readonly number[],
 ): { keyColWidth: number; valueColWidth: number } {
   let keyColWidth = 0;
   let valueColWidth = 0;
-  for (const row of rows) {
+  rows.forEach((row, i) => {
     // For multi-line values, the widest individual line -- taken from the
     // widths `cellMetrics` already computed rather than re-measured here.
     // Those are TAB-AWARE (`tab-stops.ts`): a `\t` advances to the next stop
     // instead of contributing its table width, which is zero. Re-measuring
     // lost that, so a tab-only cell sized to nothing.
-    const vw = Math.max(...row.valueLineWidths.map((w) => w + 2 * CELL_MARGIN_X));
+    let vw = Math.max(...row.valueLineWidths.map((w) => w + 2 * CELL_MARGIN_X));
+    // Cap a cell at its own style's `MaximumWidth` when word-wrap is active.
+    // This port's cap, not upstream's (`getWidthColB` is a plain max); applied
+    // per row because the wrap width is per style (`getTextBlock`'s
+    // `style.wrapWidth()`) -- identical to one node-wide cap when it is uniform.
+    const wrap = valueWraps[i] ?? 0;
+    if (wrap > 0) vw = Math.min(vw, wrap + 2 * CELL_MARGIN_X);
     if (row.arrayEntry) {
       // b1 IS the value, and there is no b2 to widen column B.
       if (vw > keyColWidth) keyColWidth = vw;
-      continue;
+      return;
     }
     const kw = row.keyWidth + 2 * CELL_MARGIN_X;
     if (kw > keyColWidth) keyColWidth = kw;
     if (vw > valueColWidth) valueColWidth = vw;
-  }
-  // Cap the value column when word-wrap is active.
-  if (maximumWidth !== undefined) {
-    valueColWidth = Math.min(valueColWidth, maximumWidth + 2 * CELL_MARGIN_X);
-  }
+  });
   return { keyColWidth, valueColWidth };
 }
 
@@ -248,8 +228,7 @@ function columnWidths(
 function cellLines(
   v: unknown,
   measurer: StringMeasurer,
-  font: FontSpec,
-  maximumWidth: number | undefined,
+  { font, wrap }: CellMeasure,
 ): { processed: string; valueLines: string[]; atomLines: string[][]; valueType: JsonRowGeo['valueType'] } {
   const { display, valueType } = getDisplayValue(v);
   // Split via upstream's own single pass, NOT by rewriting the escape to a
@@ -274,7 +253,6 @@ function cellLines(
   // Harmless for the others: a number, a null (`␀`) and a nested cell
   // (three spaces) each survive as one atom, and `splitStripe` with a 0
   // width returns its input untouched, which is the no-`MaximumWidth` case.
-  const wrap = maximumWidth ?? 0;
   const atomLines: string[][] = [];
   for (const segment of rawLines) {
     for (const atoms of splitStripe(segment, wrap, (t) => measurer.measure(t, font).width)) {
@@ -317,12 +295,10 @@ function cellMetrics(
     atomLines: readonly (readonly string[])[];
     rowY: number;
     arrayEntry: boolean;
-    wrap: number;
   },
-  textHeight: number,
+  heights: { key: number; value: number },
   measurer: StringMeasurer,
-  keyFont: FontSpec,
-  valFont: FontSpec,
+  { key: keyCell, value: valueCell }: RowMeasure,
 ): Pick<
   JsonRowGeo,
   | 'keyWidth'
@@ -334,37 +310,45 @@ function cellMetrics(
   | 'valueAtoms'
   | 'keyAtoms'
 > {
+  const keyFont = keyCell.font;
+  const valFont = valueCell.font;
   // `withMargin(_, 5, 2)` — the text block's top edge sits CELL_MARGIN_Y below
-  // the row's, and its baseline `descent` above its own bottom.
-  const descent = measurer.getDescent(valFont, cell.key);
-  const firstBaseline = cell.rowY + CELL_MARGIN_Y + textHeight - descent;
+  // the row's, and its baseline `descent` above its own bottom. Each cell's
+  // block is built from its own style's font (`getTextBlock`), so the key and
+  // value baselines are derived separately.
+  const baselineOf = (height: number, font: CellFont, text: string): number =>
+    cell.rowY + CELL_MARGIN_Y + height - measurer.getDescent(font, text);
+  const firstBaseline = baselineOf(heights.value, valFont, cell.key);
   // See `JsonRowGeo.valueTextLengths` for why the emitted form is measured
   // separately from the raw one.
-  const emitted = (t: string, f: FontSpec) => measurer.measure(emittedTextForm(t), f).width;
+  const emitted = (t: string, f: CellFont) => measurer.measure(emittedTextForm(t), f).width;
   // `AtomText#getTabSize` -- always `fontSize * 4` under deterministic metrics,
   // because the space its `tabString()` is made of measures 0 there.
-  const valMeasure = (t: string) => measurer.measure(t, valFont).width;
-  const keyMeasure = (t: string) => measurer.measure(t, keyFont).width;
-  const tabStop = tabStopWidth(valMeasure, valFont.size, valFont.tabSize);
+  const measureWith = (font: CellFont) => (t: string) => measurer.measure(t, font).width;
+  const valMeasure = measureWith(valFont);
+  const keyMeasure = measureWith(keyFont);
   // Atoms advance by their SIZING width, exactly as consecutive text runs do
   // -- except a TAB, which advances to the next stop and draws nothing
   // (`AtomText#drawU`), so it contributes an offset but no atom.
-  const atomsOf = (atoms: readonly string[]): CellAtom[] => {
+  const atomsOf = (atoms: readonly string[], font: CellFont): CellAtom[] => {
+    const measure = measureWith(font);
+    const tabStop = tabStopWidth(measure, font.size, font.tabSize);
     const out: CellAtom[] = [];
     let dx = 0;
     for (const text of atoms) {
       if (!hasTab(text)) {
-        out.push({ text, dx, textLength: emitted(text, valFont) });
-        dx += valMeasure(text);
+        out.push({ text, dx, textLength: emitted(text, font) });
+        dx += measure(text);
         continue;
       }
-      for (const run of walkTabs(text, valMeasure, tabStop, dx)) {
-        out.push({ text: run.text, dx: run.dx, textLength: emitted(run.text, valFont) });
+      for (const run of walkTabs(text, measure, tabStop, dx)) {
+        out.push({ text: run.text, dx: run.dx, textLength: emitted(run.text, font) });
       }
-      dx += tabAwareWidth(text, valMeasure, tabStop);
+      dx += tabAwareWidth(text, measure, tabStop);
     }
     return out;
   };
+  const tabStop = tabStopWidth(valMeasure, valFont.size, valFont.tabSize);
   const lineWidth = (l: string) => (hasTab(l) ? tabAwareWidth(l, valMeasure, tabStop) : valMeasure(l));
   return {
     // A key is the same creole block as a value (`TextBlockJson.java:123`,
@@ -375,40 +359,31 @@ function cellMetrics(
     valueLineWidths: cell.valueLines.map(lineWidth),
     keyTextLength: cell.arrayEntry ? 0 : emitted(cell.key, keyFont),
     valueTextLengths: cell.valueLines.map((l) => emitted(l, valFont)),
-    valueAtoms: cell.atomLines.map(atomsOf),
-    keyAtoms: cell.arrayEntry
-      ? []
-      : atomsOf(splitStripe(cell.key, cell.wrap, (t) => measurer.measure(t, keyFont).width)[0] ?? [cell.key]),
-    keyBaselineY: firstBaseline,
-    valueBaselineYs: cell.valueLines.map((_, i) => firstBaseline + textHeight * i),
+    valueAtoms: cell.atomLines.map((a) => atomsOf(a, valFont)),
+    keyAtoms: cell.arrayEntry ? [] : atomsOf(splitStripe(cell.key, keyCell.wrap, keyMeasure)[0] ?? [cell.key], keyFont),
+    keyBaselineY: cell.arrayEntry ? firstBaseline : baselineOf(heights.key, keyFont, cell.key),
+    valueBaselineYs: cell.valueLines.map((_, i) => firstBaseline + heights.value * i),
   };
-}
-
-/** The measurer plus the two resolved cell fonts — one bundle so {@link buildRow}
- *  stays inside this repo's 5-parameter cap. */
-interface RowFonts {
-  measurer: StringMeasurer;
-  keyFont: FontSpec;
-  valFont: FontSpec;
-  maximumWidth: number | undefined;
 }
 
 /** One `TextBlockJson.Line`, measured and positioned. */
 function buildRow(
   cell: { key: string; value: unknown; rowY: number; arrayEntry: boolean },
-  fonts: RowFonts,
-  highlightKeys: ReadonlyMap<string, string>,
+  measurer: StringMeasurer,
+  measure: RowMeasure,
+  highlight: string | false,
 ): JsonRowGeo {
-  const { measurer, keyFont, valFont } = fonts;
-  const { processed, valueLines, atomLines, valueType } = cellLines(cell.value, measurer, valFont, fonts.maximumWidth);
-  const textHeight = measurer.measure(cell.key, valFont).height;
+  const { processed, valueLines, atomLines, valueType } = cellLines(cell.value, measurer, measure.value);
+  const heights = {
+    key: measurer.measure(cell.key, measure.key.font).height,
+    value: measurer.measure(cell.key, measure.value.font).height,
+  };
   const positioned = {
     key: cell.key,
     valueLines,
     atomLines,
     rowY: cell.rowY,
     arrayEntry: cell.arrayEntry,
-    wrap: fonts.maximumWidth ?? 0,
   };
   return {
     arrayEntry: cell.arrayEntry,
@@ -416,36 +391,56 @@ function buildRow(
     value: processed,
     valueLines,
     valueType,
-    highlight: highlightKeys.get(cell.key) ?? false,
+    highlight,
     y: cell.rowY,
-    height: heightOfRow(textHeight, valueLines.length, cell.arrayEntry),
-    ...cellMetrics(positioned, textHeight, measurer, keyFont, valFont),
+    height: heightOfRow(heights, valueLines.length, cell.arrayEntry),
+    ...cellMetrics(positioned, heights, measurer, measure),
   };
 }
 
-export function buildRows(
+/** The rows plus each row's value-cell wrap width, index-aligned (see {@link columnWidths}). */
+function measureRows(
   node: FlatNode,
   highlightKeys: ReadonlyMap<string, string>,
   measurer: StringMeasurer,
-  fontSize: number,
-  options?: BuildRowsOptions,
-): JsonRowGeo[] {
-  const { keyFont, valFont } = fontsFor(fontSize, options);
-  const fonts: RowFonts = { measurer, keyFont, valFont, maximumWidth: options?.maximumWidth };
+  styles: JsonStyleSet,
+  options: BuildRowsOptions | undefined,
+): { rows: JsonRowGeo[]; valueWraps: number[] } {
   const arrayEntry = Array.isArray(node.value);
   const rows: JsonRowGeo[] = [];
+  const valueWraps: number[] = [];
   // Rows start at the node's top edge: upstream's `drawU` walks
   // `y = 0; for (line) y += heightOfRow` (:267-275). No leading pad, and
   // `getTotalHeight` is a plain sum with no trailing one either.
   let currentY = 0;
 
   for (const [key, value] of containerEntries(node.value)) {
-    const row = buildRow({ key, value, rowY: currentY, arrayEntry }, fonts, highlightKeys);
+    // `isHighlighted(key, allHighlighteds)` picks the row's style class
+    // (`TextBlockJson.java:122,130`), which both cells' styles depend on.
+    const highlight = highlightKeys.get(key) ?? false;
+    const measure = rowMeasureOf(styles, highlight, options?.tabSize);
+    const row = buildRow({ key, value, rowY: currentY, arrayEntry }, measurer, measure, highlight);
     rows.push(row);
+    valueWraps.push(measure.value.wrap);
     currentY += row.height;
   }
 
-  return rows;
+  return { rows, valueWraps };
+}
+
+/**
+ * Every row of `node`, each measured with the font of its own jar style
+ * (`getStyleToUse(header, highlighted)`).
+ * @see .../jsondiagram/TextBlockJson.java#TextBlockJson (:117-135)
+ */
+export function buildRows(
+  node: FlatNode,
+  highlightKeys: ReadonlyMap<string, string>,
+  measurer: StringMeasurer,
+  styles: JsonStyleSet,
+  options?: BuildRowsOptions,
+): JsonRowGeo[] {
+  return measureRows(node, highlightKeys, measurer, styles, options).rows;
 }
 
 /** @see .../jsondiagram/TextBlockJson.java#calculateDimensionSlow */
@@ -453,13 +448,12 @@ export function measureNode(
   flatNode: FlatNode,
   highlightKeys: ReadonlyMap<string, string>,
   measurer: StringMeasurer,
-  fontSize: number,
+  styles: JsonStyleSet,
   options?: BuildRowsOptions,
 ): MeasuredNode {
-  const { keyFont, valFont } = fontsFor(fontSize, options);
-  const rows = buildRows(flatNode, highlightKeys, measurer, fontSize, options);
+  const { rows, valueWraps } = measureRows(flatNode, highlightKeys, measurer, styles, options);
 
-  const { keyColWidth, valueColWidth } = columnWidths(rows, measurer, keyFont, valFont, options?.maximumWidth);
+  const { keyColWidth, valueColWidth } = columnWidths(rows, valueWraps);
 
   const lastRow = rows.at(-1);
   const summedHeight = lastRow !== undefined ? lastRow.y + lastRow.height : 0;

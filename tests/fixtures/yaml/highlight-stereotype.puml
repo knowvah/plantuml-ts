@@ -1,0 +1,15 @@
+@startyaml
+<style>
+yamlDiagram {
+  highlight {
+    BackGroundColor red
+  }
+  .warn {
+    BackGroundColor orange
+  }
+}
+</style>
+#highlight "a" <<warn>>
+a: 1
+b: 2
+@endyaml

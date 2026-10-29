@@ -1,0 +1,68 @@
+{
+  "generatedAt": "2026-10-29T16:06:17.305Z",
+  "fixtures": [
+    {
+      "slug": "dobido-76-nugu008",
+      "type": "files",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "files-directory-tree-with-note",
+      "type": "files",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kibilo-60-fado726",
+      "type": "files",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nixaro-94-pefo622",
+      "type": "files",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nojeru-23-tavo641",
+      "type": "files",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tadabe-21-dovi548",
+      "type": "files",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tezofo-39-fano197",
+      "type": "files",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xeseve-00-tipa730",
+      "type": "files",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zixuta-02-suzo281",
+      "type": "files",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    }
+  ]
+}

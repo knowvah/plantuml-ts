@@ -1017,6 +1017,17 @@ other engine still resolves styles through the flat `StyleMap`
 which drops `:depth(n)`/`*` selectors and refuses nesting deeper than two
 levels.
 
+**Update (jse, 2026-10-29).** The json family (`@startjson`/`@startyaml`/
+`@starthcl`) now resolves every style through the engine too, at the jar's
+signatures (`TextBlockJson.java:138-152,286-299`, `SmetanaForJson.java:112-125`):
+the parse builds a `JsonSkinParam` (`src/diagrams/json/json-skin-param.ts`),
+`resolveJsonStyles`/`styleToUse` (`json-style-resolve.ts`) feed measurement and
+paint, and the hand-keyed json `StyleMap` projection
+(`style-map-json-diagram.ts`, `computeJsonGraphOverride`) is deleted. The
+`Theme.colors.graph.json` TYPE and its theme seeds remain (public type) but
+nothing reads them. Engines on the style engine now: mindmap, wbs, salt, gantt,
+files, json/yaml/hcl.
+
 **Consequences.** A `<style>` block is parsed twice on a multi-diagram source
 (once per path). The two paths agree on the 142-fixture mindmap corpus and on
 every other engine's ratchet (the all-engine survey moved no non-mindmap
@@ -1105,14 +1116,16 @@ extension-audit.md`). Pinned examples: `tests/fixtures/extensions/`, gated by
 | `skinparam defaultFontColor` | json | `<text> fill "#000"->"#F00" (all 4 texts)` |
 | `skinparam lengthAdjust none` | json | `<g> lengthAdjust "spacing"->(absent)` |
 | `skinparam lengthAdjust spacingAndGlyphs` | json | `<g> lengthAdjust "spacing"->"spacingAndGlyphs"` |
-| `!theme aws-orange` | json | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:55px;height:54px;"; width "57px"->"55px"; height "58px"->"54px" / <rect> width "35.575"->"33.35"; height "36"->"32"` |
+| `!theme aws-orange` | json | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:55px;height:54px;"; width "57px"->"55px"; height "58px"->"54px" / <rect> width "35.575"->"33.35"; height "36"->"32"; fill "#F1F1F1"->"#000" fill-opacity="0"; stroke "#F1F1F1"->"#00000000"; rx/ry "5"->"4" / <text> fill "#000"->"#ABB6C2"; font-family (absent)->"'Verdana'"; font-size "14"->"12" / <line> stroke "#000"->"#ABB6C2"; stroke-width "1"->"2"` (the theme's skinparams through `FromSkinparamToStyle`: `node*` → `node`, `sequenceDivider*` → `separator`, `roundCorner 8`, `defaultFontName/Size`) |
+| `skinparam roundCorner` | json | `<rect> rx "5"->"10"; ry "5"->"10"` (`roundCorner 20` → `root { RoundCorner }`, drawn as RoundCorner/2) |
 | `skinparam backgroundColor` | yaml | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:57px;height:58px;background:#FFEEEE;" / added <rect x="0" y="0" width="57" height="58" fill="#FEE" stroke="none"/>` |
 | `skinparam defaultFontName` | yaml | `<text> font-family (absent)->"Courier" / <text> x "15"->"32.787"; font-family (absent)->"Courier"; font-weight "700"->(absent)` |
 | `skinparam defaultFontSize` | yaml | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:64px;height:70px;background:#FFFFFF;"; width "57px"->"64px"; height "58px"->"70px" / <rect> width "35.575"->"42.25"; height "36"->"48"` |
 | `skinparam defaultFontColor` | yaml | `<text> fill "#000"->"#F00" (all 4 texts)` |
 | `skinparam lengthAdjust none` | yaml | `<g> lengthAdjust "spacing"->(absent)` |
 | `skinparam lengthAdjust spacingAndGlyphs` | yaml | `<g> lengthAdjust "spacing"->"spacingAndGlyphs"` |
-| `!theme aws-orange` | yaml | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:55px;height:54px;"; width "57px"->"55px"; height "58px"->"54px" / <rect> width "35.575"->"33.35"; height "36"->"32"` |
+| `!theme aws-orange` | yaml | `<svg> style "width:57px;height:58px;background:#FFFFFF;"->"width:55px;height:54px;"; width "57px"->"55px"; height "58px"->"54px" / <rect> width "35.575"->"33.35"; height "36"->"32"; fill "#F1F1F1"->"#000" fill-opacity="0"; stroke "#F1F1F1"->"#00000000"; rx/ry "5"->"4" / <text> fill "#000"->"#ABB6C2"; font-family (absent)->"'Verdana'"; font-size "14"->"12" / <line> stroke "#000"->"#ABB6C2"; stroke-width "1"->"2"` (the theme's skinparams through `FromSkinparamToStyle`: `node*` → `node`, `sequenceDivider*` → `separator`, `roundCorner 8`, `defaultFontName/Size`) |
+| `skinparam roundCorner` | yaml | `<rect> rx "5"->"10"; ry "5"->"10"` (`roundCorner 20` → `root { RoundCorner }`, drawn as RoundCorner/2) |
 | `skinparam backgroundColor` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:115px;height:40px;background:#FFEEEE;" / added <rect x="0" y="0" width="115" height="40" fill="#FEE" stroke="none"/>` |
 | `skinparam defaultFontName` | hcl | `<text> font-family (absent)->"Courier" / <text> x "15"->"47.575"; font-family (absent)->"Courier"; textLength "22.575"->"50.575"` |
 | `skinparam defaultFontSize` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:146px;height:46px;background:#FFFFFF;"; width "115px"->"146px"; height "40px"->"46px" / <rect> width "93.15"->"124.5"; height "18"->"24"` |
@@ -1120,8 +1133,10 @@ extension-audit.md`). Pinned examples: `tests/fixtures/extensions/`, gated by
 | `skinparam lengthAdjust none` | hcl | `<g> lengthAdjust "spacing"->(absent) / <text> textLength "22.575"->(absent) / textLength count 2->0` |
 | `skinparam lengthAdjust spacingAndGlyphs` | hcl | `<g> lengthAdjust "spacing"->"spacingAndGlyphs"` |
 | `<style> document` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:115px;height:40px;background:#FFEEEE;" / added <rect x="0" y="0" width="115" height="40" fill="#FEE" stroke="none"/>` |
-| `<style> jsonDiagram { node {...} }` | hcl | `<rect> fill "#F1F1F1"->"#EFE"; stroke "#F1F1F1"->"#EFE" / <line> stroke "#000"->"#F00"` |
-| `!theme aws-orange` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:104px;height:38px;"; width "115px"->"104px"; height "40px"->"38px" / <rect> width "93.15"->"82.7"; height "18"->"16"` |
+| `<style> yamlDiagram { node {...} }` | hcl | `<rect> fill "#F1F1F1"->"#EFE"; stroke "#F1F1F1"->"#EFE" / <line> stroke "#000"->"#F00"` |
+| `skin rose` | hcl | `<rect> fill "#F1F1F1"->"#FFF"; stroke "#F1F1F1"->"#FFF"` (hcl keeps the `skin` line the jar drops) |
+| `skinparam roundCorner` | hcl | `<rect> rx "5"->"10"; ry "5"->"10"` (`roundCorner 20` → `root { RoundCorner }`, drawn as RoundCorner/2) |
+| `!theme aws-orange` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:104px;height:38px;"; width "115px"->"104px"; height "40px"->"38px" / <rect> width "93.15"->"82.7"; height "18"->"16"; fill "#F1F1F1"->"#000" fill-opacity="0"; stroke "#F1F1F1"->"#00000000"; rx/ry "5"->"4" / <text> fill "#000"->"#ABB6C2"; font-size "14"->"12" / <line> stroke "#000"->"#ABB6C2"; stroke-width "1"->"2"` (as json) |
 | `!theme amiga` | hcl | `<svg> style "width:115px;height:40px;background:#FFFFFF;"->"width:105px;height:30px;background:#0B58A8;"; width "115px"->"105px"; height "40px"->"30px" / <rect> x "10"->"0"; y "10"->"0"; width "93.15"->"105"` |
 | `skinparam backgroundColor` | files | `<svg> style "width:99px;height:70px;background:#FFFFFF;"->"width:99px;height:70px;background:#FFEEEE;" / added <rect x="0" y="0" width="99" height="70" fill="#FEE" style="stroke:none;"/>` |
 | `skinparam lengthAdjust none` | files | `<g> lengthAdjust "spacing"->(absent) / <text> textLength "35.875", "36.575"->(absent)` |
@@ -1136,11 +1151,11 @@ extension-audit.md`). Pinned examples: `tests/fixtures/extensions/`, gated by
 **Ignored (measured: output identical in both modes and to the directive-free
 render).**
 
-- `skinparam roundCorner`: json, yaml, hcl, files
+- `skinparam roundCorner`: files
 - `skinparam shadowing`: json, yaml, hcl
 - `skinparam lineColor`: json, yaml, hcl, files (no `FromSkinparamToStyle`
   row: a class diagram ignores it too, so no extension is defined — ddc T3b)
-- `skin rose`: json, yaml, hcl
+- `skin rose`: json, yaml (honoured by the jar itself there, not an extension)
 - `<style> <engine>Diagram { node {...} }`: files (`node` is not a files
   style element in the jar)
 
@@ -1151,8 +1166,18 @@ explicit `jsonDiagram { FontColor }`"), and for files `defaultFontName`
 (`:156`), `defaultFontSize` (`:91`), `shadowing` (`:330-333`, `:386-394`),
 `handwritten` (`SkinParam.java:1076-1078`, `TextBlockExporter.java:174-175`).
 
-Note: hcl `<style>` node styling only works through the `jsonDiagram`
-selector; `hclDiagram` is no `SName` (`Context.java:87-91`). `handwritten`,
+json/yaml/hcl since jse batch 3 (2026-10-29, user ruling — jse decisions
+Amendment 1): extended mode feeds EVERY skinparam (a theme's included) through
+`FromSkinparamToStyle` into the same `StyleBuilder` the jar-styled `<style>`
+uses, with one wrapper (`defaultFontColor` also answers `<T> { FontColor }`).
+A skinparam whose mapped `SName` collides with the family's signatures restyles
+it: `node*` → `node`, `sequenceDivider*` → `separator`, `arrow*` → `arrow`,
+`roundCorner` → `root { RoundCorner }`; later lines outrank earlier ones, so a
+theme's skinparams can outrank its own `jsonDiagram { node }` style.
+
+Note: hcl resolves as `yamlDiagram` in both modes (`TextBlockJson.java:113`),
+so hcl `<style>` node styling works through the `yamlDiagram` selector;
+`jsonDiagram` and `hclDiagram` (no `SName`, `Context.java:87-91`) match nothing. `handwritten`,
 json/yaml `<style>` and `skin`, files `<style> document`/`skin`, and `!theme
 amiga` for json/yaml/files are honoured by the jar itself and are not
 extensions.

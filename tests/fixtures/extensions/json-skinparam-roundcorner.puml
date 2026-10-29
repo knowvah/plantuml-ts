@@ -1,0 +1,4 @@
+@startjson
+skinparam roundCorner 20
+{ "a": 1, "b": "x" }
+@endjson

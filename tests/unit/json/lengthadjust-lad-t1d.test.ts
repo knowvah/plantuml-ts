@@ -19,8 +19,10 @@ import { defaultTheme } from '../../../src/core/theme.js';
 import type { RootLengthAdjust } from '../../../src/core/svg.js';
 import type { Theme } from '../../../src/core/theme.js';
 import type { JsonGeometry } from '../../../src/diagrams/json/layout.js';
+import { jsonStylesOf } from '../../helpers/json-skin.js';
 
 const GEO: JsonGeometry = {
+  styles: jsonStylesOf('json'),
   nodes: [
     {
       id: 'n0',

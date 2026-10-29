@@ -5,7 +5,7 @@
  * line cap. Mirrors upstream StyleSignature resolution: selector paths map to
  * specific Theme color fields. `applyStyleMap` itself is a composition of
  * several table-driven sub-resolvers (`style-map-simple-fields.ts`,
- * `style-map-json-diagram.ts`, `style-map-element.ts`,
+ * `style-map-element.ts`,
  * `style-cascade-class.ts`) split out purely to satisfy per-file/per-function
  * size limits — the field mappings, cascade/priority order, and defaults are
  * unchanged from the original single-function version (see .agent-notes).
@@ -30,48 +30,19 @@ import { computeDescriptionStyleCascadeOverrides } from './style-cascade-descrip
 // class.ts) -- see that file's own doc comment.
 import { computeCardinalityFontOverride, computeArrowFontOverride } from './style-cascade-class-arrow-font.js';
 import { computeSimpleSelectorOverrides } from './style-map-simple-fields.js';
-import {
-  computeJsonFamilyOverride,
-  computeYamlFamilyOverride,
-  computeHighlightClassesOverride,
-} from './style-map-json-diagram.js';
 
 type GraphColors = Theme['colors']['graph'];
-type JsonGraphOverride = Partial<NonNullable<GraphColors['json']>>;
-
-/**
- * JSON diagram: element / element.header / element.highlight /
- * jsondiagram.node (from jsonDiagram { node { … } } style block), plus the
- * yamlDiagram sibling sharing the same "json" graph bucket —
- * see `style-map-json-diagram.ts`'s own head doc comment. Each family is
- * merged in the SAME order the original if-chain processed them (json, then
- * yaml) so a fixture combining more than one family resolves
- * identically to before. Returns `undefined` when no family (nor any
- * `.tagname` highlight class) contributed anything — matching the original
- * "only assign `graphOverride.json` when non-empty" gate.
- */
-function computeJsonGraphOverride(styleMap: StyleMap, jsonBase: JsonGraphOverride): JsonGraphOverride | undefined {
-  const jsonOverride: JsonGraphOverride = {
-    ...computeJsonFamilyOverride(styleMap),
-    ...computeYamlFamilyOverride(styleMap),
-  };
-  const highlightClasses = computeHighlightClassesOverride(styleMap);
-  if (highlightClasses !== undefined) jsonOverride.highlightClasses = highlightClasses;
-  return Object.keys(jsonOverride).length > 0 ? { ...jsonBase, ...jsonOverride } : undefined;
-}
 
 /**
  * Every `Theme.colors.graph` override reachable from `styleMap` alone
  * (i.e. everything except the document/elements/shadowing/border extras
  * handled by {@link computeStyleMapExtras}): the simple single-selector
- * table, the json/yaml diagram family, the class-cascade ancestor
+ * table, the class-cascade ancestor
  * overrides (G2 N36), and the bare root/element BackgroundColor cascade
  * (D3).
  */
 function computeGraphOverride(styleMap: StyleMap, base: Theme): Partial<GraphColors> {
   const graphOverride: Partial<GraphColors> = { ...computeSimpleSelectorOverrides(styleMap) };
-  const json = computeJsonGraphOverride(styleMap, base.colors.graph.json ?? {});
-  if (json !== undefined) graphOverride.json = json;
   // G2 N36: classDiagram/root/nested-class-selector ancestor cascade (box
   // background/border/font, badge root-fallback, edge stroke) -- merged
   // into graphOverride BEFORE the early-return check below so a fixture
