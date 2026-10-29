@@ -11,6 +11,18 @@ import { extractStyle, upstreamSourceLines } from './StyleExtractor.js';
 const HANDWRITTEN = 'handwritten';
 
 /**
+ * The sources whose render is jar-compatible. `SyncPlugin.styleInput` runs only then, after the parse, on the
+ * very source the parse took; the mark is how the family's style slice (`json-skin-param.ts`, built lazily)
+ * learns the mode. Keyed weakly: it dies with the source. Port-only, as `files-extensions.ts#JAR_COMPATIBLE`.
+ */
+const JAR_COMPATIBLE = new WeakSet<UmlSource>();
+
+/** True unless a {@link jsonFamilyStyleInput} / {@link hclStyleInput} ran on `source`: the default mode honours the extensions. */
+export function isExtended(source: UmlSource): boolean {
+  return !JAR_COMPATIBLE.has(source);
+}
+
+/**
  * The style sources a json-family diagram's theme is built from.
  *
  * Upstream these diagrams have no command table, so no `skinparam` ever
@@ -29,8 +41,12 @@ const HANDWRITTEN = 'handwritten';
  * (`scripts/compile-themes.py`) -- e.g. amiga's json node colours. Jar:
  * `tests/fixtures/unwind-U1/json-theme-awsorange` (skinparam font and
  * background gone) and `json-theme-amiga` (`<style>` colours and font kept).
+ *
+ * Runs only for a jar-compatible render, after the parse: it also marks `source` so the family's style slice
+ * leaves the extensions of `json-skin-param.ts` out ({@link isExtended}).
  */
 export function jsonFamilyStyleInput(preprocessed: PreprocessorResult, source: UmlSource): PreprocessorResult {
+  JAR_COMPATIBLE.add(source);
   const { handwritten } = extractStyle(upstreamSourceLines(source, source.type));
   const skinparam = new Map<string, string>(handwritten ? [[HANDWRITTEN, 'true']] : []);
   const order = preprocessed.declarationOrder;

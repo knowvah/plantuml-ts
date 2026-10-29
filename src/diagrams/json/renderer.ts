@@ -10,7 +10,7 @@
 // `text` is the exception — upstream's handwritten decorator does not touch
 // text, it falls through to `getUg().draw(shape)`.
 import { text } from '../../core/svg.js';
-import { canonicalColor } from './color-form.js';
+import type { TextStyle } from '../../core/svg.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { scaleJsonGeometry, scaleNodeStyle } from './scale-geo.js';
 
@@ -24,18 +24,11 @@ import {
 import { penFor } from './renderer-pen.js';
 import type { JsonPen, PenInk } from './renderer-pen.js';
 import { resolveNodeStyle, JSON_SKIN_BLACK } from './renderer-style.js';
-import type { NodeStyleJson, TextStyleJson } from './renderer-style.js';
-import {
-  highlightOverrides,
-  highlightRect,
-  scaleDasharray,
-  keyIsBold,
-  replacesFontStyle,
-} from './json-renderer-highlight.js';
+import type { ArrowStyleJson, CellPaint, NodeStyleJson, TextStyleJson } from './renderer-style.js';
+import { highlightRect, scaleDasharray } from './json-renderer-highlight.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import type { JsonGeometry, JsonNodeGeo, JsonEdgeGeo, JsonRowGeo } from './layout.js';
-import { noGradient } from '../../core/paint.js';
 import { calculateMargin } from '../../core/document-margin.js';
 import type { DocumentMargin } from '../../core/document-margin.js';
 import { ENSURE_VISIBLE_BUMP } from './document-dimensions.js';
@@ -54,6 +47,9 @@ import { ENSURE_VISIBLE_BUMP } from './document-dimensions.js';
  * jar's.
  */
 const CELL_MARGIN_X = 5;
+
+/** `UFontFace.bold()`'s CSS weight (`UFontFace.java:56`). */
+const BOLD_CSS_WEIGHT = 700;
 
 /** `JsonCurve#drawSpot` — `new UEllipse(6, 6)` drawn at `-3, -3`, stroked with
  *  `UStroke.simple()` (`JsonCurve.java:114-118`). */
@@ -80,33 +76,6 @@ const PARSE_FAILURE_FONT_SIZE = 14;
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
-function valueColor(valueType: JsonRowGeo['valueType'], json: Theme['colors']['graph']['json']): string {
-  return canonicalColor(rawValueColor(valueType, json));
-}
-
-/** The theme's own string, before `color-form.ts` puts it in emitted form. */
-function rawValueColor(valueType: JsonRowGeo['valueType'], json: Theme['colors']['graph']['json']): string {
-  // Upstream has NO per-type value styling: `TextBlockJson#getTextBlock` builds
-  // every cell from one `getStyleToUse(false, highlighted)` style, whose
-  // FontColor the skin sets to black for this family (`plantuml.skin:446`).
-  // So all five arms resolve to the same color unless a THEME has set one —
-  // which is exactly what the four fields exist for, and what all 20 built-in
-  // themes use them for (each sets a single shared value color).
-  switch (valueType) {
-    case 'string':
-      return json?.stringValue ?? JSON_SKIN_BLACK;
-    case 'number':
-      return json?.numberValue ?? JSON_SKIN_BLACK;
-    case 'boolean':
-      return json?.booleanValue ?? JSON_SKIN_BLACK;
-    case 'null':
-      return json?.nullValue ?? JSON_SKIN_BLACK;
-    // 'nested' — the three-space cell (`TextBlockJson.java:194`).
-    default:
-      return json?.keyText ?? JSON_SKIN_BLACK;
-  }
-}
 
 /**
  * `HorizontalAlignment#draw(ug, tb, 0, 0, width)` — the block (text plus its
@@ -137,20 +106,19 @@ function cellTextX(colLeft: number, colWidth: number, textWidth: number, align: 
  */
 function renderRow(node: JsonNodeGeo, row: JsonRowGeo, style: NodeStyleJson, pen: JsonPen): string {
   const { box } = style;
-  const hl = highlightOverrides(row, style);
   const rowTop = node.y + row.y;
   const sepStyle = {
     stroke: box.sepColor,
     strokeWidth: box.sepThickness,
-    ...(box.sepDash !== undefined ? { strokeDasharray: box.sepDash } : {}),
+    ...(box.sepDash !== undefined ? { strokeDasharray: scaleDasharray(box.sepDash, style.scale) } : {}),
   };
   const dividerX = node.x + node.keyColWidth;
 
   return [
-    hl.isHighlighted ? highlightRect(node, row, style, hl.background, pen) : '',
+    row.highlight === false ? '' : highlightRect(node, row, style, style.highlightFill(row.highlight), pen),
     // `if (y > 0) ugline.draw(ULine.hline(trueWidth))` — no line above row 0.
     row.y > 0 ? pen.line(node.x, rowTop, node.x + node.width, rowTop, sepStyle) : '',
-    renderRowText(node, row, style, hl),
+    renderRowText(node, row, style),
     // The divider lives INSIDE `if (line.b2 != null)`, so an array row -- whose
     // lines all have a null b2 -- gets none, and it spans only THIS row's
     // height rather than the node's.
@@ -158,30 +126,38 @@ function renderRow(node: JsonNodeGeo, row: JsonRowGeo, style: NodeStyleJson, pen
   ].join('');
 }
 
+/**
+ * `<text>`'s weight from the cell style's CSS weight (`DriverTextSvg.java:
+ * 106-108` writes `face.toCssWeightString()` for any weight but 400). The
+ * emitter writes the string verbatim; its `TextStyle` type only names the
+ * bold weight, so the other weights (`FontWeight 300`, ...) are narrowed
+ * here, at the one place that knows they are real.
+ */
+function fontWeightOf(cssWeight: number): NonNullable<TextStyle['fontWeight']> {
+  return cssWeight === BOLD_CSS_WEIGHT ? '700' : (String(cssWeight) as NonNullable<TextStyle['fontWeight']>);
+}
+
+/** A cell's `<text>` presentation attributes, from the style it was measured with. */
+function cellTextStyle(cell: CellPaint, k: number): TextStyle {
+  return {
+    fontFamily: cell.fontFamily,
+    fontSize: cell.fontSize * k,
+    fill: cell.fill,
+    ...(cell.fontWeight === undefined ? {} : { fontWeight: fontWeightOf(cell.fontWeight) }),
+    ...(cell.italic ? { fontStyle: 'italic' as const } : {}),
+  };
+}
+
 /** Column A's cell then column B's, both as absolute-positioned `<text>`. */
-function renderRowText(
-  node: JsonNodeGeo,
-  row: JsonRowGeo,
-  style: NodeStyleJson,
-  hl: ReturnType<typeof highlightOverrides>,
-): string {
+function renderRowText(node: JsonNodeGeo, row: JsonRowGeo, style: NodeStyleJson): string {
   const ts = style.text;
   const parts: string[] = [];
-  const common = { fontFamily: ts.fontFamily, fontSize: ts.fontSize };
 
   // A5/T6b: an ARRAY row has no key cell. Upstream puts the VALUE in `b1` and
   // never draws the index (it uses it only to resolve highlights).
   if (!row.arrayEntry) {
-    const keyColor = hl.isHighlighted && hl.fontColor !== undefined ? hl.fontColor : ts.keyColor;
-    const keyStyle = {
-      ...common,
-      fill: keyColor,
-      // `header.node.highlight`: a highlight that DECLARED FontStyle replaces
-      // the skin's `node { header { FontStyle bold } }` entirely; one that did
-      // not leaves it standing.
-      ...(keyIsBold(hl, ts) ? { fontWeight: '700' as const } : {}),
-      ...(hl.isHighlighted && hl.fontItalic ? { fontStyle: 'italic' as const } : {}),
-    };
+    // `getStyleToUse(true, highlighted)` (`TextBlockJson.java:123`).
+    const keyStyle = cellTextStyle(style.cell(true, row.highlight), style.scale);
     // Column A splits into atoms under wrap for the same reason column B does
     // — `getTextBlock` builds both from the same style, wrapWidth included.
     const keyX = cellTextX(node.x, node.keyColWidth, row.keyWidth, ts.align);
@@ -198,20 +174,13 @@ function renderRowText(
   // No early return for an empty value: an empty cell still draws (a space,
   // per `TextBlockJson.ts#cellLines`). `valueLines` is always non-empty.
 
-  const baseColor = ts.fontColor ?? valueColor(row.valueType, style.json);
-  const vColor = hl.isHighlighted && hl.fontColor !== undefined ? hl.fontColor : baseColor;
+  // `getStyleToUse(false, highlighted)` (`TextBlockJson.java:124,130`): every
+  // value cell, nested's three-space one included, takes this one style.
+  const runStyle = cellTextStyle(style.cell(false, row.highlight), style.scale);
   // An array row's single cell IS column A, so it spans the whole node.
   const colLeft = row.arrayEntry ? node.x : node.x + node.keyColWidth;
   const colWidth = node.width - (row.arrayEntry ? 0 : node.keyColWidth);
-  const bold = replacesFontStyle(hl) ? hl.fontBold : ts.bold;
-  const italic = replacesFontStyle(hl) ? hl.fontItalic : ts.italic;
 
-  const runStyle = {
-    ...common,
-    fill: vColor,
-    ...(bold ? { fontWeight: '700' as const } : {}),
-    ...(italic ? { fontStyle: 'italic' as const } : {}),
-  };
   for (let li = 0; li < row.valueLines.length; li++) {
     // The LINE is aligned as a whole, then its atoms lay out left-to-right
     // from that origin. Wrap off => exactly one atom, so this is the same
@@ -249,7 +218,7 @@ function renderNode(node: JsonNodeGeo, style: NodeStyleJson, pen: JsonPen): stri
       fill: box.bg,
       stroke: box.bg,
       strokeWidth: box.borderWidth,
-      ...(box.borderDash !== undefined ? { strokeDasharray: box.borderDash } : {}),
+      ...(box.borderDash !== undefined ? { strokeDasharray: scaleDasharray(box.borderDash, style.scale) } : {}),
       ...corners,
     }),
   ];
@@ -261,7 +230,7 @@ function renderNode(node: JsonNodeGeo, style: NodeStyleJson, pen: JsonPen): stri
       fill: 'none',
       stroke: box.border,
       strokeWidth: box.borderWidth,
-      ...(box.borderDash !== undefined ? { strokeDasharray: box.borderDash } : {}),
+      ...(box.borderDash !== undefined ? { strokeDasharray: scaleDasharray(box.borderDash, style.scale) } : {}),
       ...corners,
     }),
   );
@@ -281,7 +250,7 @@ function renderNode(node: JsonNodeGeo, style: NodeStyleJson, pen: JsonPen): stri
  *
  * This port previously drew the spot FIRST, reversing upstream's order.
  */
-function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen, k: number): string {
+function renderEdge(edge: JsonEdgeGeo, arrow: ArrowStyleJson, pen: JsonPen, k: number): string {
   // A5/T8: the path and the spot both come from the ported `JsonCurve`, which
   // consumes the engine's spline. This used to build its own S-curve and place
   // the spot on a horizontal offset; upstream extrapolates along the spline's
@@ -289,19 +258,18 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen, k: number): s
   const d = buildCurvePath(edge.points);
   if (d === '') return '';
 
-  const json = theme.colors.graph.json;
-  const stroke = canonicalColor(json?.arrowColor ?? noGradient(theme.colors.arrow));
-  const strokeWidth = (json?.arrowThickness ?? 1) * k;
-  // `yamlDiagram,jsonDiagram { arrow { LineStyle 3-3 } }` (`skin/plantuml.skin`
-  // :449-451), emitted comma-separated — see `style-map-json-diagram.ts`.
-  // Dashes go through `format` like every other numeric, so `3-3` at scale 2
-  // is emitted as `6,6` -- jar-verified on `json/timafu-94-bixe774`.
-  const strokeDasharray = scaleDasharray(json?.arrowDasharray ?? '3,3', k);
+  // `getStyleArrow()`'s `LineColor`, `LineThickness` and `LineStyle`
+  // (`SmetanaForJson.java:119-122,172,175-176`; skin `arrow { LineStyle 3-3 }`,
+  // `plantuml.skin:449-451`). Dashes go through `format` like every other
+  // numeric, so `3-3` at scale 2 is emitted as `6,6` -- jar-verified on
+  // `json/timafu-94-bixe774`.
+  const stroke = arrow.color;
+  const strokeWidth = arrow.thickness * k;
 
   const linePart = pen.path(buildCurveSegments(edge.points), d, {
     stroke,
     strokeWidth,
-    strokeDasharray,
+    ...(arrow.dash === undefined ? {} : { strokeDasharray: scaleDasharray(arrow.dash, k) }),
     fill: 'none',
   });
 
@@ -480,7 +448,7 @@ export function renderJson(rawGeo: JsonGeometry, rawTheme: Theme): RenderFragmen
 
   // Scaled AFTER resolution so a skin DEFAULT scales identically to a theme
   // override -- see `scale-geo.ts#scaleNodeStyle`.
-  const style = scaleNodeStyle(resolveNodeStyle(theme), k);
+  const style = scaleNodeStyle(resolveNodeStyle(geo.styles), k);
   // ONE pen per diagram: the handwritten one carries the shared random stream.
   const pen = penFor(theme.handwritten);
   const parts: string[] = [];
@@ -493,7 +461,7 @@ export function renderJson(rawGeo: JsonGeometry, rawTheme: Theme): RenderFragmen
   }
 
   for (const edge of geo.edges) {
-    parts.push(renderEdge(edge, theme, pen, k));
+    parts.push(renderEdge(edge, style.arrow, pen, k));
   }
 
   // No `extraDefs`: the jar's json documents carry an EMPTY `<defs/>` (M3).

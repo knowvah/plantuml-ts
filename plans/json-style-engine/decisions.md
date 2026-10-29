@@ -95,3 +95,31 @@ origin. Every Modify write-set file and every Create parent directory exists.
 Every task spec carries Observability and Rollback. No Irreversible change.
 Working tree: the brief (untracked) and the uncommitted `docs/architecture/`
 refresh, which T0a moves to its own `docs/architecture-refresh` branch first.
+
+## Amendment 1 (2026-10-29) — D4's premise is false; HALTED for a user decision (stop 3)
+D4 says extended mode feeds "every skinparam into the same builder through
+`convertSkinparam` … as files T3b does". files does NOT: it restricts extended
+mode to four directives (`STYLE_DIRECTIVES` = defaultfontname, defaultfontsize,
+defaultfontcolor, shadowing; `src/diagrams/files/files-extensions.ts:26-31,73-75`).
+T3a (`jse/T3a` 0091f5181) implemented D4 literally (full map). Measured effect:
+a theme's component skinparams collide with the family's SNames —
+`nodeBackgroundColor/BorderColor/FontColor` → `node`, `sequenceDivider*` →
+`separator` (`json-style-resolve.ts:78`), `roundCorner` → `root { RoundCorner }`
+— so extended `!theme aws-orange` draws transparent nodes, `#ABB6C2` text,
+`rx=4`, 2px separators, and extended cerulean/materia lose their jar-honoured
+`<style>` node gradient to the theme's later skinparams. That contradicts the
+DIVERGENCES "Extensions" measured contract (lines ~1072-1160): `roundCorner`,
+`shadowing`, `lineColor` are documented as having NO effect on json/yaml/hcl.
+Options put to the user: (A) whitelist mirroring files — `defaultFontName`,
+`defaultFontSize`, `defaultFontColor` (+ the one wrapper), keeping the
+documented table; (B) keep the full map and rewrite the DIVERGENCES table and
+"Ignored" list. Also asked: T3a reads extended-mode hcl as `jsonDiagram` (jar-compatible
+stays `yamlDiagram`, `TextBlockJson.java:113`) to keep the documented "hcl
+`<style>` works through the `jsonDiagram` selector" behaviour.
+**Resolution (user, 2026-10-29):** (B) FULL MAP — every skinparam reaches the
+extended-mode builder through `FromSkinparamToStyle`, as D4 is worded; theme
+component skinparams restyle nodes/separators/corners where their SNames
+collide; DIVERGENCES "Extensions" table and "Ignored" list are rewritten to the
+measured behaviour. hcl resolves as **`yamlDiagram` in BOTH modes**
+(`TextBlockJson.java:113`); the hcl `<style>` extension example and its
+documentation move to the `yamlDiagram` selector.

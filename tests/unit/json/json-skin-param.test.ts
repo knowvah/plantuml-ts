@@ -16,6 +16,7 @@ import {
   type JsonSkinParam,
 } from '../../../src/diagrams/json/json-skin-param.js';
 import { parseHcl } from '../../../src/diagrams/hcl/parser.js';
+import { hclStyleInput, jsonFamilyStyleInput } from '../../../src/diagrams/json/json-family-style-input.js';
 import { parseJson } from '../../../src/diagrams/json/parser.js';
 import { parseYaml } from '../../../src/diagrams/yaml/parser.js';
 
@@ -40,11 +41,14 @@ const RED = 'red';
 const BODY: Record<JsonFamilyType, string> = { json: '{"a":1}', yaml: 'a: 1', hcl: 'a = 1' };
 const NODE_RED = (name: string): string => `<style>\n${name} { node { BackGroundColor ${RED} } }\n</style>`;
 
-/** The source `index.ts#umlSourceOfBlock` hands the parse. */
-function sourceOf(type: JsonFamilyType, directives: string): UmlSource {
+/**
+ * The source `index.ts#umlSourceOfBlock` hands the parse, marked jar-compatible (the `styleInput` of a conformance
+ * render ran on it) unless `extended`: the family's slice is built on first read, in the mode the mark records.
+ */
+function sourceOf(type: JsonFamilyType, directives: string, extended = false): UmlSource {
   const block = buildBlockUmls(`@start${type}\n${directives}\n${BODY[type]}\n@end${type}`)[0];
   if (block === undefined || !block.ok) throw new Error('no block');
-  return {
+  const source: UmlSource = {
     ...block.source,
     rawStyles: block.preprocessed.styles,
     stylePositions: block.preprocessed.stylePositions,
@@ -52,6 +56,8 @@ function sourceOf(type: JsonFamilyType, directives: string): UmlSource {
     styleSource: block.preprocessed,
     seedSourceLines: block.seedSource,
   };
+  if (!extended) (type === 'hcl' ? hclStyleInput : jsonFamilyStyleInput)(block.preprocessed, source);
+  return source;
 }
 
 function nodeFill(skin: JsonSkinParam, name: JsonSkinParam['styleName']): string | null {
@@ -141,7 +147,8 @@ describe('createJsonSkinParam', () => {
   });
 
   it('a fault that is no style error propagates', () => {
-    expect(() => createJsonSkinParam(sourceOf('json', `skin ${FAULTY}`), 'json')).toThrow('loader fault');
+    // Built on first read, so the fault surfaces there.
+    expect(() => createJsonSkinParam(sourceOf('json', `skin ${FAULTY}`), 'json').styleError).toThrow('loader fault');
   });
 
   it('a rejected <style> block is kept on styleError and NO block applies (StyleExtractor.java:132-135)', () => {
@@ -161,6 +168,98 @@ describe('createJsonSkinParam', () => {
   it('answers the same builder on every call, as the mutated SkinParam does (SkinParam.java:156-162)', () => {
     const skin = createJsonSkinParam(sourceOf('json', ''), 'json');
     expect(skin.getCurrentStyleBuilder()).toBe(skin.getCurrentStyleBuilder());
+  });
+});
+
+/** A property of the merged `root.element.<name>.node` style. */
+function nodeValue(skin: JsonSkinParam, property: 'FontColor' | 'FontName' | 'FontSize'): string | null {
+  const style = StyleSignatureBasic.of('root', 'element', skin.styleName, 'node').getMergedStyle(
+    skin.getCurrentStyleBuilder(),
+  );
+  return style!.value(property).asString();
+}
+
+describe('extended mode (DIVERGENCES.md "Extensions")', () => {
+  const extended = (type: JsonFamilyType, directives: string): JsonSkinParam =>
+    createJsonSkinParam(sourceOf(type, directives, true), type);
+
+  it('defaultFontSize reaches the node style as element FontSize (FromSkinparamToStyle.java:91)', () => {
+    expect(nodeValue(extended('json', 'skinparam defaultFontSize 20'), 'FontSize')).toBe('20');
+    expect(nodeValue(createJsonSkinParam(sourceOf('json', 'skinparam defaultFontSize 20'), 'json'), 'FontSize')).toBe(
+      '14',
+    );
+  });
+
+  it('defaultFontName reaches the node style as root FontName (FromSkinparamToStyle.java:156)', () => {
+    expect(nodeValue(extended('yaml', 'skinparam defaultFontName Courier'), 'FontName')).toBe('Courier');
+    expect(
+      nodeValue(createJsonSkinParam(sourceOf('yaml', 'skinparam defaultFontName Courier'), 'yaml'), 'FontName'),
+    ).toBe('SansSerif');
+  });
+
+  it.each<[JsonFamilyType, JsonSkinParam['styleName']]>([
+    ['json', 'jsonDiagram'],
+    ['yaml', 'yamlDiagram'],
+    ['hcl', 'yamlDiagram'],
+  ])(
+    "%s: defaultFontColor also answers %s { FontColor }, which outranks the skin's own black (java:157, plantuml.skin:456-457)",
+    (type, name) => {
+      const skin = extended(type, 'skinparam defaultFontColor red');
+      expect(skin.styleName).toBe(name);
+      expect(nodeValue(skin, 'FontColor')).toBe(RED);
+      expect(nodeValue(createJsonSkinParam(sourceOf(type, 'skinparam defaultFontColor red'), type), 'FontColor')).toBe(
+        'black',
+      );
+    },
+  );
+
+  it("a stereotyped defaultFontColor gets no wrapper: only the converter's own style answers", () => {
+    expect(nodeValue(extended('json', 'skinparam defaultFontColor<<x>> red'), 'FontColor')).toBe('black');
+  });
+
+  it("no other directive is wrapped: defaultFontName leaves the family font name at the skin's", () => {
+    const skin = extended('json', 'skinparam defaultFontName Courier');
+    const family = StyleSignatureBasic.of('jsonDiagram').getMergedStyle(skin.getCurrentStyleBuilder());
+    expect(family!.hasValue('FontName')).toBe(false);
+  });
+
+  it('hcl keeps the <style> block the jar drops (HclDiagramFactory.java:86-92)', () => {
+    const hcl = extended('hcl', NODE_RED('yamlDiagram'));
+    expect(nodeFill(hcl, 'yamlDiagram')).toBe(RED);
+    expect(hcl.styleError).toBeUndefined();
+    expect(nodeFill(extended('hcl', NODE_RED('jsonDiagram')), 'yamlDiagram')).toBe('#f1f1f1');
+  });
+
+  it('hcl is read as yamlDiagram in both modes (TextBlockJson.java:113; user ruling 2026-10-29)', () => {
+    expect(extended('hcl', '').styleName).toBe('yamlDiagram');
+    expect(createJsonSkinParam(sourceOf('hcl', ''), 'hcl').styleName).toBe('yamlDiagram');
+    expect(extended('yaml', '').styleName).toBe('yamlDiagram');
+  });
+
+  it('hcl keeps the skin line, so a missing skin is reported', () => {
+    expect(extended('hcl', 'skin nonexistent').styleError?.message).toBe('Cannot find style nonexistent');
+  });
+
+  it('a rejected <style> block still mutes every block, but the extended skinparams stay applied', () => {
+    const skin = extended('json', `skinparam defaultFontSize 20\n${NODE_RED('jsonDiagram')}\n<style>\n{ }\n</style>`);
+    expect(skin.styleError?.message).toBe('Invalid open bracket');
+    expect(nodeFill(skin, 'jsonDiagram')).toBe('#f1f1f1');
+    expect(nodeValue(skin, 'FontSize')).toBe('20');
+  });
+
+  it('a skin that does not load ends applyStyles, but the extended skinparams stay applied', () => {
+    const skin = extended('json', 'skin nonexistent\nskinparam defaultFontSize 20');
+    expect(skin.styleError?.message).toBe('Cannot find style nonexistent');
+    expect(nodeValue(skin, 'FontSize')).toBe('20');
+  });
+
+  it('the mode is the one recorded when the slice is first read, not when it is created', () => {
+    const block = sourceOf('json', 'skinparam defaultFontSize 20', true);
+    const skin = createJsonSkinParam(block, 'json');
+    const preprocessed = buildBlockUmls('@startjson\nskinparam defaultFontSize 20\n{}\n@endjson')[0];
+    if (preprocessed === undefined || !preprocessed.ok) throw new Error('no block');
+    jsonFamilyStyleInput(preprocessed.preprocessed, block);
+    expect(nodeValue(skin, 'FontSize')).toBe('14');
   });
 });
 
@@ -195,19 +294,19 @@ describe('jsonFamilyJarStyleSource', () => {
 
 describe('the parsers carry the slice on JsonDiagramAST.skinParam', () => {
   it('parseJson builds a jsonDiagram slice that sees the <style> block', () => {
-    const skin = parseJson(sourceOf('json', NODE_RED('jsonDiagram'))).skinParam!;
+    const skin = parseJson(sourceOf('json', NODE_RED('jsonDiagram'))).skinParam;
     expect(skin.styleName).toBe('jsonDiagram');
     expect(nodeFill(skin, 'jsonDiagram')).toBe(RED);
   });
 
   it('parseYaml builds a yamlDiagram slice that sees the <style> block', () => {
-    const skin = parseYaml(sourceOf('yaml', NODE_RED('yamlDiagram'))).skinParam!;
+    const skin = parseYaml(sourceOf('yaml', NODE_RED('yamlDiagram'))).skinParam;
     expect(skin.styleName).toBe('yamlDiagram');
     expect(nodeFill(skin, 'yamlDiagram')).toBe(RED);
   });
 
   it('parseHcl builds a yamlDiagram slice that ignores the <style> block', () => {
-    const skin = parseHcl(sourceOf('hcl', NODE_RED('yamlDiagram'))).skinParam!;
+    const skin = parseHcl(sourceOf('hcl', NODE_RED('yamlDiagram'))).skinParam;
     expect(skin.styleName).toBe('yamlDiagram');
     expect(nodeFill(skin, 'yamlDiagram')).toBe('#f1f1f1');
   });

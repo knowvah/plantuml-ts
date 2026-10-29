@@ -92,3 +92,14 @@ export function resolveJsonStyles(skin: JsonStyleInput): JsonStyleSet {
     },
   };
 }
+
+/**
+ * `TextBlockJson#getStyleToUse(header, highlighted)`: the one style a cell is both measured with
+ * (`getTextBlock`, `:340-349`) and painted with. `highlight` is the row's `JsonRowGeo.highlight`:
+ * `false` = not highlighted, otherwise the stereotype class (`''` = none).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/TextBlockJson.java:138-152 (callers :123-131)
+ */
+export function styleToUse(styles: JsonStyleSet, header: boolean, highlight: string | false): Style {
+  if (highlight !== false) return styles.highlight(highlight, header);
+  return header ? styles.nodeHeader : styles.node;
+}

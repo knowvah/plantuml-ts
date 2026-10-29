@@ -1,266 +1,211 @@
 /**
- * The resolved `jsonDiagram.node` style — the whole skinparam/style cascade
- * for the json family, collapsed once per diagram into plain values the
- * renderer only reads.
+ * The json family's styles, read once per diagram into plain values the
+ * renderer only draws with.
  *
- * Split out of `renderer.ts` for two reasons, both structural: that file sits
- * against this repo's 500-line cap, and upstream draws with a `Style` object
- * resolved BEFORE `drawU` runs (`TextBlockJson.java:269-288` resolves
- * `styleNode` and `styleSeparator` up front, then walks the rows), so
- * resolution and drawing are separate stages there too.
+ * Every value comes from the `Style` the jar reads it from, resolved by
+ * `json-style-resolve.ts` at the jar's six signatures and carried on
+ * `JsonGeometry.styles`: the node (`TextBlockJson.java:269-288`), its
+ * separator (`:286-288`), the per-cell font styles (`getStyleToUse`,
+ * `:138-152`) and the arrow (`SmetanaForJson.java:119-122`). Resolution and
+ * drawing are separate stages upstream too (`drawU` resolves `styleNode` and
+ * `styleSeparator` before it walks the rows), which is why this lives apart
+ * from `renderer.ts`.
  *
- * Each resolver stays narrow deliberately: a `??` fallback chain is a branch,
- * and one function carrying the whole cascade trips this repo's
- * cyclomatic-complexity gate.
- *
- * @see .../jsondiagram/TextBlockJson.java#drawU
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/TextBlockJson.java#drawU
  */
 
-import type { Theme } from '../../core/theme.js';
-import { canonicalColor, canonicalColorOpt } from './color-form.js';
-
-type JsonColors = Theme['colors']['graph']['json'];
-
-/** One named `#highlight` style class's overrides (e.g. `.h1 { … }`). */
-export interface HighlightClassStyle {
-  background?: string;
-  fontColor?: string;
-  fontBold?: boolean;
-  fontItalic?: boolean;
-}
+import { HColorSet } from '../../core/klimt/color/HColorSet.js';
+import { HColorGradient } from '../../core/klimt/color/HColorGradient.js';
+import { HColorSimple } from '../../core/klimt/color/HColorSimple.js';
+import { ColorMapper, toSvgPaint } from '../../core/klimt/color/ColorMapper.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { fmt } from '../../core/svg-format.js';
+import { noGradient } from '../../core/paint.js';
+import type { Paint } from '../../core/paint.js';
+import type { PName } from '../../core/style/PName.js';
+import type { Style } from '../../core/style/Style.js';
+import { canonicalColor } from './color-form.js';
+import { styleToUse } from './json-style-resolve.js';
+import type { JsonStyleSet } from './json-style-resolve.js';
 
 /** The resolved box values — everything drawn as a shape. */
 export interface BoxStyleJson {
-  bg: string;
-  border: string;
+  /** `node`'s `BackGroundColor`; a gradient when written `a-b` (`TextBlockJson.java:283`). */
+  bg: Paint;
+  /** `node`'s `LineColor` (`applyStrokeAndLineColor`, `TextBlockJson.java:270`). */
+  border: Paint;
+  /** `node`'s `LineThickness`. */
   borderWidth: number;
+  /** `node`'s `LineStyle`, as the comma-separated SVG dasharray. */
   borderDash: string | undefined;
-  /** Already halved for SVG — see {@link SVG_CORNER_DIVISOR}. */
+  /** `RoundCorner / 2` — see {@link SVG_CORNER_DIVISOR}. */
   rx: number;
-  sepColor: string;
+  /** The `node+separator` style's `LineColor`, `LineThickness` and `LineStyle`. */
+  sepColor: Paint;
   sepThickness: number;
   sepDash: string | undefined;
-  hlBg: string;
-  highlightClasses: Record<string, HighlightClassStyle> | undefined;
 }
 
-/** The resolved text values. */
+/** The resolved text values the node itself decides. */
 export interface TextStyleJson {
+  /** `node`'s `HorizontalAlignment` — one alignment places both columns (`TextBlockJson.java:313,320`). */
+  align: 'left' | 'center' | 'right';
+  /**
+   * `node`'s `FontSize`. Carried only so `scale-geo.ts#scaleNodeStyle` has a
+   * font size to scale; every cell draws with its OWN style's size
+   * ({@link CellPaint}), multiplied by `scale` at the draw site.
+   */
+  fontSize: number;
+}
+
+/**
+ * What one cell's `<text>` is painted with: the font of the style the cell was
+ * MEASURED with (`getTextBlock(getStyleToUse(header, highlighted), …)`,
+ * `TextBlockJson.java:123-131,340-349`). Unscaled; the renderer multiplies
+ * `fontSize` by `NodeStyleJson#scale`.
+ */
+export interface CellPaint {
   fontFamily: string;
   fontSize: number;
-  fontColor: string | undefined;
-  bold: boolean;
+  fill: Paint;
+  /** The raw CSS weight, absent at 400 (`DriverTextSvg.java:106-108`). */
+  fontWeight: number | undefined;
   italic: boolean;
-  align: 'left' | 'center' | 'right';
-  keyColor: string;
-  headerBold: boolean;
-  hlFontColor: string | undefined;
-  hlFontBold: boolean;
-  hlFontItalic: boolean;
-  /**
-   * Whether the `highlight` block DECLARED a `FontStyle` at all.
-   *
-   * `FontStyle` is a single style property, not a set of flags, so a
-   * `highlight { FontStyle italic }` REPLACES an enclosing
-   * `node { FontStyle bold }` rather than adding to it — `getStyleToUse`
-   * (`TextBlockJson.java:138-153`) resolves one merged style per cell and
-   * `StyleStorage#computeMergedStyle` gives the last writer the whole
-   * property. A highlight that declares nothing must leave the surrounding
-   * bold intact, which is why the distinction has to be carried rather than
-   * inferred from `hlFontBold === false`.
-   */
-  hlFontStyleDeclared: boolean;
+}
+
+/** The arrow's stroke, from `root,element,<T>,arrow` (`SmetanaForJson.java:119-122`). */
+export interface ArrowStyleJson {
+  /** `LineColor`, first stop only for a gradient (`DriverLineSvg.java:76-82`). */
+  color: string;
+  thickness: number;
+  /** `LineStyle`, as the comma-separated SVG dasharray. */
+  dash: string | undefined;
 }
 
 export interface NodeStyleJson {
   box: BoxStyleJson;
   text: TextStyleJson;
-  json: JsonColors;
+  arrow: ArrowStyleJson;
+  /**
+   * The `<highlight>` row fill: `node+highlight` (stereotype applied), the
+   * non-header style (`TextBlockJson.java:296-299`).
+   */
+  highlightFill(styleClass: string): Paint;
+  /** The paint of one cell; memoised per diagram. */
+  cell(header: boolean, highlight: string | false): CellPaint;
   /**
    * The resolved `scale …` factor (`scale-geo.ts#scaleNodeStyle`), carried on
    * the style so the renderer's own literal constants — the highlight rect's
-   * inset, width reduction and corner radius — can be scaled at their single
-   * use site without widening four call signatures past this repo's 5-param
-   * cap. 1 when the diagram is unscaled.
+   * inset, width reduction and corner radius — and the per-cell font size can
+   * be scaled at their single use site. 1 when the diagram is unscaled.
    */
   scale: number;
 }
 
 /**
- * `skin/plantuml.skin`'s `yamlDiagram,jsonDiagram { FontColor black; LineColor
- * black }` (the block at :446). This family does NOT inherit the global
- * `#181818` default the other diagram types use — a distinction this port
- * previously missed, emitting `#181818` for both key text and node borders
- * where every cached golden has `#000`.
- *
- * Value text is the deliberate exception: see DIVERGENCES.md, "Value text —
- * per-type colors (aesthetic)".
- */
-export const JSON_SKIN_BLACK = '#000000';
-
-/**
  * `URectangle#rounded(round)` stores `round` on both axes, and
  * `DriverRectangleSvg.java:78` emits `rx/2`, `ry/2`. So the skin's
  * `node { RoundCorner 10 }` reaches the SVG as `rx="5" ry="5"` — which is what
- * every cached golden shows, and what this port previously emitted as `rx="10"`.
+ * every cached golden shows.
  */
 export const SVG_CORNER_DIVISOR = 2;
 
-/** `node { LineThickness 1.5 }`. */
-const NODE_LINE_THICKNESS = 1.5;
-/** `node { separator { LineThickness 1 } }` — was an unsourced 0.5 here. */
-const SEPARATOR_LINE_THICKNESS = 1;
-/** `node { RoundCorner 10 }`. */
-const NODE_ROUND_CORNER = 10;
-/** `node { highlight { BackGroundColor #ccff02 } }`. */
-const HIGHLIGHT_BACKGROUND = '#CCFF02';
+/** `skin/plantuml.skin`'s `yamlDiagram,jsonDiagram { FontColor black }` (the block at :446), in emitted form. */
+export const JSON_SKIN_BLACK = '#000000';
+
+/** `node.getHorizontalAlignment()` as the lowercase form `renderer.ts#cellTextX` branches on. */
+const ALIGNMENTS = {
+  [HorizontalAlignment.LEFT]: 'left',
+  [HorizontalAlignment.CENTER]: 'center',
+  [HorizontalAlignment.RIGHT]: 'right',
+} as const;
+
+/** The CSS weight `FontStyle`/`FontWeight` leave a plain cell at (`DriverTextSvg.java:106`). */
+const NORMAL_CSS_WEIGHT = 400;
 
 /**
- * Every resolver below takes an already-defaulted `j` rather than the optional
- * `json` itself. Optional chaining is a branch to this repo's complexity gate
- * exactly as `??` is, so `json?.a ?? x` costs two per field and a resolver of
- * any useful width trips the cap; defaulting once costs one for the whole
- * function.
+ * A style colour as the paint the shape emitters take: `HColor#toSvg` for a
+ * solid (shortened to the jar's `#RGB` form, `color-form.ts`), the gradient's
+ * two stops otherwise — which the core path lifts into `<defs>`
+ * (`svg-defs.ts#extractGradientDefs`; decisions D5).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/DriverRectangleSvg.java:83-99
  */
-type JsonColorsResolved = NonNullable<JsonColors>;
-
-function resolveBoxPaint(j: JsonColorsResolved, theme: Theme) {
-  return {
-    // Inherit from global theme colors when no explicit JSON override is set,
-    // so built-in themes colorize JSON nodes without per-theme json overrides.
-    bg: j.background ?? theme.colors.background,
-    border: j.border ?? JSON_SKIN_BLACK,
-    borderWidth: j.nodeLineThickness ?? NODE_LINE_THICKNESS,
-    borderDash: j.nodeLineDasharray,
-    rx: (j.roundCorner ?? NODE_ROUND_CORNER) / SVG_CORNER_DIVISOR,
-  };
-}
-
-function resolveBoxSeparator(j: JsonColorsResolved) {
-  return {
-    sepColor: j.separatorColor ?? j.border ?? JSON_SKIN_BLACK,
-    sepThickness: j.separatorThickness ?? SEPARATOR_LINE_THICKNESS,
-    sepDash: j.separatorDasharray,
-    hlBg: j.highlightBackground ?? HIGHLIGHT_BACKGROUND,
-    highlightClasses: j.highlightClasses,
-  };
-}
-
-function resolveFontFace(j: JsonColorsResolved, theme: Theme) {
-  return {
-    fontFamily: j.nodeFontFamily ?? theme.fontFamily,
-    fontSize: j.nodeFontSize ?? theme.fontSize,
-    fontColor: j.nodeFontColor ?? rootFontColor(theme),
-  };
-}
-
-/**
- * EXTENSION (ddc T3a, decisions.md D8; DIVERGENCES.md "Extensions"): the
- * family font colour a document's `skinparam defaultFontColor` asks for.
- *
- * `FromSkinparamToStyle.java:157` converts that directive to
- * `addConvert("defaultFontColor", PName.FontColor, SName.root)` -- a
- * ROOT-level `FontColor`. The jar never sees it for json/yaml/hcl
- * (`StyleExtractor.java:88-96` keeps only `handwritten`), and even if it
- * did, the skin's explicit `yamlDiagram,jsonDiagram { FontColor black }`
- * (`plantuml.skin:456-457`) is a more specific selector that would beat the
- * root value in the cascade. The honest extension is therefore "the directive
- * sets the family font colour as if the skin had no explicit FontColor": it
- * fills in only when no `jsonDiagram`/`yamlDiagram` `FontColor` was
- * resolved (`j.nodeFontColor`). The mode switch is upstream of here
- * (`json-family-style-input.ts` cuts the skinparam map to `handwritten` in
- * jar-compatible mode), so no mode check is made.
- *
- * @see .../style/FromSkinparamToStyle.java:157
- */
-function rootFontColor(theme: Theme): string | undefined {
-  return theme.styleOverrides?.root?.fontcolor;
-}
-
-function resolveFontStyle(j: JsonColorsResolved) {
-  return {
-    bold: j.nodeFontBold ?? false,
-    italic: j.nodeFontItalic ?? false,
-    align: j.textAlign ?? 'left',
-  };
-}
-
-function resolveTextHighlight(j: JsonColorsResolved) {
-  return {
-    // `node { header { FontStyle bold } }`; overridable to plain.
-    headerBold: j.headerFontBold !== false,
-    hlFontColor: j.highlightFontColor,
-    hlFontBold: j.highlightFontBold ?? false,
-    hlFontItalic: j.highlightFontItalic ?? false,
-    // Both flags are written together by `style-map-json-diagram.ts:174-178`,
-    // and only when a `FontStyle` line is present — so one being defined is
-    // exactly "the block declared FontStyle".
-    hlFontStyleDeclared: j.highlightFontBold !== undefined,
-  };
-}
-
-/**
- * Every color the resolved style carries, in the jar's emitted form.
- * Centralised here so the renderer cannot emit a raw theme string by omission
- * — see `color-form.ts` for why the form matters.
- */
-function canonicalizeColors(style: NodeStyleJson): NodeStyleJson {
-  const { box, text } = style;
-  return {
-    ...style,
-    box: {
-      ...box,
-      bg: canonicalColor(box.bg),
-      border: canonicalColor(box.border),
-      sepColor: canonicalColor(box.sepColor),
-      hlBg: canonicalColor(box.hlBg),
-      ...(box.highlightClasses === undefined ? {} : { highlightClasses: canonicalizeClasses(box.highlightClasses) }),
-    },
-    text: {
-      ...text,
-      keyColor: canonicalColor(text.keyColor),
-      ...opt('fontColor', text.fontColor),
-      ...opt('hlFontColor', text.hlFontColor),
-    },
-  };
-}
-
-/** Absent must stay absent under `exactOptionalPropertyTypes`. */
-function opt(key: 'fontColor' | 'hlFontColor', v: string | undefined) {
-  const c = canonicalColorOpt(v);
-  return c === undefined ? {} : { [key]: c };
-}
-
-function canonicalizeClasses(classes: Record<string, HighlightClassStyle>): Record<string, HighlightClassStyle> {
-  const out: Record<string, HighlightClassStyle> = {};
-  for (const [name, cls] of Object.entries(classes)) {
-    const bg = canonicalColorOpt(cls.background);
-    const fc = canonicalColorOpt(cls.fontColor);
-    out[name] = {
-      ...cls,
-      ...(bg === undefined ? {} : { background: bg }),
-      ...(fc === undefined ? {} : { fontColor: fc }),
-    };
+function paintOf(style: Style, name: PName): Paint {
+  const color = style.value(name).asColor(HColorSet.instance());
+  // `HColorSet` builds only these two (`HColorSet.java:109-117`); anything else is a broken invariant.
+  if (!(color instanceof HColorSimple || color instanceof HColorGradient)) {
+    throw new Error(`json style: ${name} is neither a simple nor a gradient colour`);
   }
-  return out;
+  const paint = toSvgPaint(color, ColorMapper.IDENTITY);
+  return typeof paint === 'string' ? canonicalColor(paint) : paint;
 }
 
-/** Resolve the whole cascade once per diagram. */
-export function resolveNodeStyle(theme: Theme): NodeStyleJson {
-  const json = theme.colors.graph.json;
-  const j: JsonColorsResolved = json ?? {};
-  const font = resolveFontFace(j, theme);
-  return canonicalizeColors({
+/**
+ * `Style#getStroke`'s dash as the comma-separated SVG dasharray (`UStroke
+ * #getDasharraySvg`), or `undefined` for a solid line.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/Style.java:299-320
+ */
+function dashOf(style: Style): string | undefined {
+  const dash = style.getStroke().getDasharraySvg();
+  return dash === undefined ? undefined : `${fmt(dash[0])},${fmt(dash[1])}`;
+}
+
+function resolveBox(node: Style, separator: Style): BoxStyleJson {
+  return {
+    bg: paintOf(node, 'BackGroundColor'),
+    border: paintOf(node, 'LineColor'),
+    borderWidth: node.getStroke().getThickness(),
+    borderDash: dashOf(node),
+    // TextBlockJson.java:281
+    rx: node.value('RoundCorner').asDouble() / SVG_CORNER_DIVISOR,
+    sepColor: paintOf(separator, 'LineColor'),
+    sepThickness: separator.getStroke().getThickness(),
+    sepDash: dashOf(separator),
+  };
+}
+
+function resolveArrow(arrow: Style): ArrowStyleJson {
+  return {
+    // SmetanaForJson.java:172
+    color: noGradient(paintOf(arrow, 'LineColor')),
+    thickness: arrow.getStroke().getThickness(),
+    dash: dashOf(arrow),
+  };
+}
+
+/** One cell's paint from the style `getStyleToUse` picks. */
+function resolveCell(style: Style): CellPaint {
+  const font = style.getUFont();
+  const face = font.getFontFace();
+  return {
+    fontFamily: font.getFontStack().getSvgFamily(),
+    fontSize: font.getSize(),
+    fill: paintOf(style, 'FontColor'),
+    fontWeight: face.cssWeight === NORMAL_CSS_WEIGHT ? undefined : face.cssWeight,
+    italic: face.italic,
+  };
+}
+
+/** Resolve every style the renderer reads, once per diagram. */
+export function resolveNodeStyle(styles: JsonStyleSet): NodeStyleJson {
+  const cells = new Map<string, CellPaint>();
+  return {
     scale: 1,
-    box: { ...resolveBoxPaint(j, theme), ...resolveBoxSeparator(j) },
+    box: resolveBox(styles.node, styles.separator),
     text: {
-      ...font,
-      ...resolveFontStyle(j),
-      // Key text inherits node-level FontColor/FontName/FontSize (Java style
-      // cascade), then falls back to this family's own black.
-      keyColor: j.keyText ?? font.fontColor ?? JSON_SKIN_BLACK,
-      ...resolveTextHighlight(j),
+      // HorizontalAlignment.fromString answered null: upstream's `.draw` would NPE (TextBlockJson.java:313).
+      align: ALIGNMENTS[styles.node.getHorizontalAlignment() ?? HorizontalAlignment.LEFT],
+      fontSize: styles.node.getUFont().getSize(),
     },
-    json,
-  });
+    arrow: resolveArrow(styles.arrow),
+    highlightFill: (styleClass) => paintOf(styles.highlight(styleClass, false), 'BackGroundColor'),
+    cell(header, highlight) {
+      const key = `${String(header)}|${highlight === false ? '' : `#${highlight}`}`;
+      const cached = cells.get(key);
+      if (cached !== undefined) return cached;
+      const paint = resolveCell(styleToUse(styles, header, highlight));
+      cells.set(key, paint);
+      return paint;
+    },
+  };
 }

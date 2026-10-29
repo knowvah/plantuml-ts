@@ -1,6 +1,6 @@
 @starthcl
 <style>
-jsonDiagram {
+yamlDiagram {
   node { BackGroundColor #EEFFEE
     LineColor red }
 }

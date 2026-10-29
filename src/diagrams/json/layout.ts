@@ -91,6 +91,12 @@ export interface JsonEdgeGeo {
 }
 
 export interface JsonGeometry {
+  /**
+   * The family's styles at the jar's signatures, resolved once from `ast.skinParam`
+   * (`TextBlockJson.java:112-152`, `SmetanaForJson.java:112-125`): what measurement and paint read
+   * instead of `Theme.colors.graph.json` (decisions D2/D3).
+   */
+  styles: JsonStyleSet;
   nodes: JsonNodeGeo[];
   edges: JsonEdgeGeo[];
   width: number;
@@ -129,6 +135,7 @@ import { walkTree, EMPTY_MAP, buildHighlightMap } from './json-layout-prep.js';
 import type { JsonContainer, FlatNode, BuildRowsOptions } from './json-layout-prep.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
 import { documentDimensions, ENSURE_VISIBLE_BUMP } from './document-dimensions.js';
+import { resolveJsonStyles, type JsonStyleSet } from './json-style-resolve.js';
 
 /**
  * @see ~/git/plantuml/.../jsondiagram/JsonDiagram.java:78-88 (the constructor)
@@ -241,6 +248,7 @@ function layoutParseFailure(
   const inkWidth = textWidth + 2 * CELL_MARGIN_X;
   const inkHeight = textHeight + 2 * CELL_MARGIN_Y;
   return {
+    styles: resolveJsonStyles(ast.skinParam),
     nodes: [],
     edges: [],
     width: inkWidth + margin.x + ENSURE_VISIBLE_BUMP,
@@ -258,30 +266,14 @@ function layoutParseFailure(
 }
 
 /**
- * Resolve `jsonDiagram.node` theme overrides into `TextBlockJson#buildRows`
- * options, plus the effective node font size. Split out of `layoutJson`
- * (code review 2026-09-21) purely to keep that function under the repo's
- * CCN/NLOC caps — no behavior change.
+ * The one measuring input that is not a style: `skinparam tabSize`, which
+ * upstream hangs off the `FontConfiguration` (`FontConfiguration#getTabSize`)
+ * and `tab-stops.ts` reads. Font family, size, weight, italic and the wrap
+ * width come from each cell's jar style (`TextBlockJson.ts`, `getTextBlock`
+ * `:340-349`), no longer from `Theme.colors.graph.json`.
  */
-function resolveJsonMeasureConfig(theme: Theme): { nodeFontSize: number; measureOptions: BuildRowsOptions } {
-  const jsonTheme = theme.colors.graph.json;
-  const nodeFontSize = jsonTheme?.nodeFontSize ?? theme.fontSize;
-  const nodeFontFamily = jsonTheme?.nodeFontFamily ?? theme.fontFamily;
-  const nodeFontBold = jsonTheme?.nodeFontBold ?? false;
-  const maximumWidth = jsonTheme?.maximumWidth;
-  // Default true: matches plantuml.skin jsonDiagram.node.header { FontStyle bold }
-  const headerFontBold = jsonTheme?.headerFontBold !== false;
-
-  const measureOptions: BuildRowsOptions = {
-    fontFamily: nodeFontFamily,
-    ...(nodeFontBold ? { fontBold: true } : {}),
-    ...(headerFontBold ? { headerFontBold: true } : {}),
-    ...(maximumWidth !== undefined ? { maximumWidth } : {}),
-    // `skinparam tabSize` -- reaches the cell fonts, where `tab-stops.ts`
-    // uses it exactly as `AtomText#tabString` does.
-    ...(theme.tabSize !== undefined ? { tabSize: theme.tabSize } : {}),
-  };
-  return { nodeFontSize, measureOptions };
+function measureOptionsOf(theme: Theme): BuildRowsOptions {
+  return theme.tabSize === undefined ? {} : { tabSize: theme.tabSize };
 }
 
 /**
@@ -443,11 +435,14 @@ export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMe
   // highlighted in that destination node.
   const highlightMap = buildHighlightMap(flatNodes, ast.highlights);
 
-  const { nodeFontSize, measureOptions } = resolveJsonMeasureConfig(theme);
+  // The styles every cell is measured with, and which the renderer paints with
+  // (`JsonGeometry.styles`): resolved once per diagram.
+  const styles = resolveJsonStyles(ast.skinParam);
+  const measureOptions = measureOptionsOf(theme);
 
   // Measure each node
   const measured = flatNodes.map((fn) =>
-    measureNode(fn, highlightMap.get(fn.id) ?? EMPTY_MAP, measurer, nodeFontSize, measureOptions),
+    measureNode(fn, highlightMap.get(fn.id) ?? EMPTY_MAP, measurer, styles, measureOptions),
   );
 
   // Build dot input graph (nodes + edges) -- see buildJsonDotNodes/
@@ -486,6 +481,7 @@ export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMe
 
   const { width, height, finalWidth, finalHeight } = documentDimensions(nodes, edges, margin);
   const result: JsonGeometry = {
+    styles,
     nodes,
     edges,
     width,

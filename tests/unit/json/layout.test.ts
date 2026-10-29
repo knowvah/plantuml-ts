@@ -7,6 +7,7 @@ import { jsonObjectOf } from '../../helpers/json-object.js';
 import type { FontSpec, StringMeasurer } from '../../../src/core/measurer.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
+import { jsonSkinParamOf } from '../../helpers/json-skin.js';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -18,10 +19,20 @@ import type { DotInputGraph } from '../../../src/core/graph-layout.js';
  */
 const measurer = new FixedMeasurer(8, 14);
 
-function makeAst(root: unknown, highlights: ReadonlyArray<readonly string[]> = [], parseError = false): JsonDiagramAST {
+function makeAst(
+  root: unknown,
+  highlights: ReadonlyArray<readonly string[]> = [],
+  parseError = false,
+  directives = '',
+): JsonDiagramAST {
   // Convert plain string[][] to HighlightDirective[] with styleClass: ''
-  const directives: HighlightDirective[] = highlights.map((path) => ({ path, styleClass: '' }));
-  return { root: jsonObjectOf(root), parseError, highlights: directives };
+  const highlightDirectives: HighlightDirective[] = highlights.map((path) => ({ path, styleClass: '' }));
+  return {
+    root: jsonObjectOf(root),
+    parseError,
+    highlights: highlightDirectives,
+    skinParam: jsonSkinParamOf('json', directives),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -509,7 +520,7 @@ describe('layoutJson', () => {
     expect(row!.value).toBe('\\n');
   });
 
-  it('nodeFontBold=true causes value column to be measured with bold weight', () => {
+  it('a node FontStyle bold style measures the value column with bold weight', () => {
     // A measurer that returns 20% wider widths for bold text.
     const boldMeasurer: StringMeasurer = {
       measure(text: string, font: FontSpec) {
@@ -521,23 +532,14 @@ describe('layoutJson', () => {
       },
     };
 
-    const ast = makeAst({ label: 'hello' });
-    const boldTheme = {
-      ...defaultTheme,
-      colors: {
-        ...defaultTheme.colors,
-        graph: {
-          ...defaultTheme.colors.graph,
-          json: { ...defaultTheme.colors.graph.json, nodeFontBold: true },
-        },
-      },
-    };
+    const bold = '<style>\njsonDiagram {\n node {\n FontStyle bold\n }\n}\n</style>';
+    const geoNormal = layoutJson(makeAst({ label: 'hello' }), defaultTheme, boldMeasurer);
+    const geoBold = layoutJson(makeAst({ label: 'hello' }, [], false, bold), defaultTheme, boldMeasurer);
 
-    const geoNormal = layoutJson(ast, defaultTheme, boldMeasurer);
-    const geoBold = layoutJson(ast, boldTheme, boldMeasurer);
-
-    // Bold measurement must produce a wider value column
-    expect(geoBold.nodes[0]!.valueColWidth).toBeGreaterThan(geoNormal.nodes[0]!.valueColWidth);
+    // TextBlockJson#getTextBlock measures with the cell style's font
+    // (TextBlockJson.java:340-349): 5 chars * 8 * 1.2 + 10 margin.
+    expect(geoNormal.nodes[0]!.valueColWidth).toBe(5 * 8 + 10);
+    expect(geoBold.nodes[0]!.valueColWidth).toBe(5 * 8 * 1.2 + 10);
   });
 
   // ---------------------------------------------------------------------------
@@ -587,6 +589,7 @@ describe('layoutJson', () => {
 
   it('highlight directive with styleClass "h1" produces row.highlight === "h1"', () => {
     const ast: JsonDiagramAST = {
+      skinParam: jsonSkinParamOf('json'),
       root: jsonObjectOf({ fruit: 'Apple', size: 'Large' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
@@ -598,6 +601,7 @@ describe('layoutJson', () => {
 
   it('highlight directive with no styleClass produces row.highlight === ""', () => {
     const ast: JsonDiagramAST = {
+      skinParam: jsonSkinParamOf('json'),
       root: jsonObjectOf({ fruit: 'Apple' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: '' }],

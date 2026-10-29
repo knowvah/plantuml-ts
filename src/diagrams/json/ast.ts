@@ -31,11 +31,9 @@ export interface JsonDiagramAST {
   /**
    * The style slice `TextBlockJson` reads (`skinParam.getCurrentStyleBuilder()`, `TextBlockJson.java:112`):
    * the default skin after `StyleExtractor#applyStyles`, built in the parse (decision D1). Always set by
-   * `parseJson`/`parseYaml`/`parseHcl`; nothing reads it yet. Optional only so the hand-authored AST literals of
-   * `tests/unit/json/layout.test.ts` and `tests/unit/yaml/highlight-styleclass.test.ts` compile unchanged
-   * (the `sprites` precedent); the batch that adds the first reader tightens it with those two files.
+   * `parseJson`/`parseYaml`/`parseHcl`; `layoutJson` resolves {@link JsonGeometry.styles} from it.
    */
-  skinParam?: JsonSkinParam;
+  skinParam: JsonSkinParam;
   /** Highlight directives from #highlight lines, each carrying a path and optional style class. */
   highlights: ReadonlyArray<HighlightDirective>;
   /**

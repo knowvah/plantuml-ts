@@ -43,6 +43,7 @@ import { isEmpty } from '../../../src/core/annotations/index.js';
 import { applyExportedChrome } from '../../../src/core/annotations/chrome-export.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg } from '../../../src/index.js';
+import { seedOfUmlSource } from '../../../src/core/assemble-svg.js';
 
 /** The one per-type step. All three parsers share the signature
  *  `(UmlSource, ParseOptions?) => JsonDiagramAST`; everything after this is
@@ -117,9 +118,15 @@ export function renderFixtureJson(markup: string, measurer: StringMeasurer, opti
   const geo = layoutJson(ast, theme, measurer);
   const fragment = { ...renderJson(geo, theme), diagramType: shellTypeFor(block) };
 
+  // HARNESS-SEED (jse b2, the render-fixture-activity.ts precedent): production seeds
+  // every <linearGradient>/<filter> id with `seedOfUmlSource(umlSource)` (`src/index.ts:
+  // 86-87,338`; upstream `UmlSource#seed()`, `SvgGraphics.java:160-162,393`). Unseeded,
+  // the harness measured content-hash ids the shipped renderer never emits.
+  const seed = seedOfUmlSource({ ...block, rawSourceLines: first.rawSource.map((s) => s.getString()) });
+
   const annotations = ast.annotations;
-  if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
+  if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment, seed);
 
   const styles = resolveAnnotationStyles(theme, preprocessed, styleMap);
-  return assembleSvg(applyExportedChrome(fragment, annotations, styles, measurer, ast.sprites));
+  return assembleSvg(applyExportedChrome(fragment, annotations, styles, measurer, ast.sprites), seed);
 }

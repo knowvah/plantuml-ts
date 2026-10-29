@@ -12,15 +12,24 @@ documented extension (maintainer ruling 2026-10-23, see
 [Divergences](/divergences#extensions-user-ruling-2026-10-23)). A diagram that
 carries none of these directives renders exactly as the jar renders it.
 
+For JSON, YAML and HCL every `skinparam` (a theme's included) is converted to
+the style it would set in a class diagram. Where that style shares a name with a
+data-diagram element it restyles it: `node...` skinparams style the boxes,
+`sequenceDivider...` the row separators, `arrow...` the arrows and
+`roundCorner` the corners. That is why `!theme aws-orange` recolours JSON boxes.
+
 The pages below list only directives that were measured to change the output.
 Everything else listed in the divergences page as *ignored* is still ignored.
 
 | Directive | json | yaml | hcl | files |
 |---|---|---|---|---|
 | `skinparam backgroundColor` | yes | yes | yes | yes |
-| `skinparam defaultFontName`, `defaultFontSize` | yes | yes | yes | no |
+| `skinparam defaultFontName`, `defaultFontSize`, `defaultFontColor` | yes | yes | yes | yes |
 | `skinparam lengthAdjust none` / `spacingAndGlyphs` | yes | yes | yes | yes |
-| `<style>` `jsonDiagram { node { ... } }` | jar already | jar already | yes | no |
+| `<style>` `jsonDiagram { node { ... } }` | jar already | no | no | no |
+| `<style>` `yamlDiagram { node { ... } }` | no | jar already | yes | no |
+| `skinparam roundCorner` | yes | yes | yes | no |
+| `skin rose` | jar already | jar already | yes | no |
 | `<style>` `document { ... }` | jar already | jar already | yes | jar already |
 | `!theme aws-orange` | yes | yes | yes | yes |
 | `!theme amiga` | jar already | jar already | yes | jar already |
@@ -69,12 +78,12 @@ Port output (jar-compatible mode draws the default style instead):
 
 ## Node style in HCL
 
-In HCL diagrams a `<style>` block is honoured through the `jsonDiagram` selector. `hclDiagram` is not a PlantUML style name, so a block that selects it has no effect.
+In HCL diagrams a `<style>` block is honoured through the `yamlDiagram` selector: PlantUML styles an HCL diagram under the YAML name. `jsonDiagram` and `hclDiagram` select nothing there.
 
 ```plantuml
 @starthcl
 <style>
-jsonDiagram {
+yamlDiagram {
   node { BackGroundColor #EEFFEE
     LineColor red }
 }

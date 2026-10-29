@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { preprocess } from '../../../src/core/preprocessor.js';
 import { HColorSet } from '../../../src/core/klimt/color/HColorSet.js';
 import { buildMindmapStyleBuilder } from '../../../src/core/style/mindmap-style-builder.js';
-import { resolveJsonStyles, type JsonStyleInput } from '../../../src/diagrams/json/json-style-resolve.js';
+import { resolveJsonStyles, styleToUse, type JsonStyleInput } from '../../../src/diagrams/json/json-style-resolve.js';
 
 const SET = HColorSet.instance();
 
@@ -98,5 +98,21 @@ describe('resolveJsonStyles: a builder that matches nothing', () => {
     expect(() => resolveJsonStyles({ getCurrentStyleBuilder: () => empty, styleName: 'jsonDiagram' })).toThrow(
       /no declaration matches .*node/,
     );
+  });
+});
+
+describe('styleToUse: TextBlockJson#getStyleToUse (TextBlockJson.java:138-152)', () => {
+  const s = resolveJsonStyles(skinOf('.warn {\n  BackGroundColor orange\n}'));
+
+  it('not highlighted: header cell is the bold +header style, value cell the node style', () => {
+    expect(styleToUse(s, true, false)).toBe(s.nodeHeader);
+    expect(styleToUse(s, false, false)).toBe(s.node);
+    expect(styleToUse(s, true, false).value('FontStyle').asString()).toBe('bold');
+  });
+
+  it('highlighted: +highlight with the row stereotype, header or not', () => {
+    expect(colour(styleToUse(s, false, 'warn'), 'BackGroundColor')).toBe('orange');
+    expect(colour(styleToUse(s, true, ''), 'BackGroundColor')).toBe('#ccff02');
+    expect(styleToUse(s, true, '').value('FontStyle').asString()).toBe('bold');
   });
 });
