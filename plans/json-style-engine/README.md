@@ -5,7 +5,7 @@
 [decisions.md](decisions.md), then the current batch's `overview.md`. Tail
 [decision-journal.md](decision-journal.md) for where you stopped.
 
-## Status — EXECUTING 2026-10-29 (batch 0 closed; batch 1 tasks done, unmerged)
+## Status — EXECUTING 2026-10-29 (batches 0-1 closed; batch 2 tasks done, unmerged; b2+b3 close jointly, journal row 18)
 
 ## Objective
 
@@ -95,7 +95,7 @@ New src module ⇒ `npm run catalog` (drift-gated).
 | batch | tasks | status |
 |---|---|---|
 | [0 — branch, tooling, extended baseline, authored fixtures](batch-0/overview.md) | T0a, T0b, T0c, close | [x] |
-| [1 — the family SkinParam and the style resolver](batch-1/overview.md) | T1a, T1b, close | [ ] |
+| [1 — the family SkinParam and the style resolver](batch-1/overview.md) | T1a, T1b, close | [x] |
 | [2 — measurement and paint read the engine](batch-2/overview.md) | T2a, T2b, close | [ ] |
 | [3 — extended mode and retiring the projection](batch-3/overview.md) | T3a, T3b, close | [ ] |
 | [4 — residuals](batch-4/overview.md) | T4a, close | [ ] |

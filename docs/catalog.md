@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-2032 modules · 7036 exported names.
+2034 modules · 7043 exported names.
 
 ## `src/`
 
@@ -2206,6 +2206,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `json-family-style-input.ts` | `jsonFamilyStyleInput`, `hclStyleInput` | The style sources a json-family diagram's theme is built from -- the `SyncPlugin.styleInput` of `@startjson` / `@startyaml` / `@starthcl`. |
 | `json-layout-prep.ts` | `ValueType`, `DisplayValue`, `getDisplayValue`, `JsonContainer`, `FlatNode`, `containerEntries`, `walkTree`, `EMPTY_MAP`, `Highlighted`, `upOneLevel`, `isHighlighted`, `buildHighlightMap`, `wordWrapLine`, `BuildRowsOptions` | JSON diagram pre-layout: value display formatting, container tree flattening, highlight-map construction, and string wrapping. |
 | `json-renderer-highlight.ts` | `highlightClassOf`, `highlightFontFlags`, `highlightOverrides`, `highlightRect`, `scaleDasharray`, `keyIsBold`, `replacesFontStyle` | `#highlight`-class + row-separator dash-scaling helpers for the JSON renderer — split out of renderer.ts (cdd-T30, 500-line file-size cap) to make room for the widened `resolveScaleFactor` dpi-term call site. |
+| `json-skin-param.ts` | `JsonFamilyType`, `JsonSkinParam`, `jsonFamilyJarStyleSource`, `createJsonSkinParam` | The json family's `SkinParam` slice: the style engine `TextBlockJson` and `SmetanaForJson` read through `skinParam.getCurrentStyleBuilder()` and `getIHtmlColorSet()` (`TextBlockJson.java:112`, `SmetanaForJson.java:119-120`). |
+| `json-style-resolve.ts` | `JsonStyleInput`, `JsonStyleSet`, `resolveJsonStyles` | resolveJsonStyles — the json family's styles at the jar's six signatures. |
 | `JsonCurve.ts` | `CurvePoint`, `VERY_FIRST_LINE`, `supp`, `veryFirstPoint`, `buildArrowHeadPath`, `buildArrowHeadSegments`, `buildCurveSegments`, `buildCurvePath`, `segmentsToPathData` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonCurve.java The path a json edge draws, built from the layout engine's OWN spline rather than re-derived. |
 | `JsonNumber.ts` | `JsonNumber` | minimal-json's `JsonNumber`: a number is kept as the TEXT it was written with, never as a parsed value -- `JsonNumber(String string)` stores the literal and `toString()` returns it (`JsonNumber.java:32-44`), and `TextBlockJson#getShortStrin |
 | `JsonObject.ts` | `JsonObject` | minimal-json's `JsonObject` -- the object value every json-family diagram draws. |

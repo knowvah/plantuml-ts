@@ -97,6 +97,11 @@ export function renderFixtureJson(markup: string, measurer: StringMeasurer, opti
   const block: UmlSource = {
     ...first.source,
     rawStyles: first.preprocessed.styles,
+    // The style sources the parse builds the family's SkinParam from, as `umlSourceOfBlock` sets them
+    // (jse-T1a): without them the harness would parse a diagram production never builds.
+    stylePositions: first.preprocessed.stylePositions,
+    skinparamAssignments: first.preprocessed.skinparamAssignments,
+    styleSource: first.preprocessed,
     seedSourceLines: first.seedSource,
   };
   // unwind-U1: the plugins' `styleInput`, applied where `index.ts#

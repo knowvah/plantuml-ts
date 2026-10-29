@@ -9,6 +9,7 @@ import { parseYamlLines } from './yaml-parser.js';
 import { monomorphToJson } from './monomorph.js';
 import { extractStyle, payloadOf, upstreamSourceLines } from '../json/StyleExtractor.js';
 import { headerOf } from '../json/json-diagram-factory.js';
+import { createJsonSkinParam } from '../json/json-skin-param.js';
 
 /** `Highlighted.HIGHLIGHTED` (`yaml/Highlighted.java:49`). */
 const HIGHLIGHT_PREFIX = '#highlight ';
@@ -88,6 +89,7 @@ export function parseYaml(source: UmlSource, options?: ParseOptions): JsonDiagra
     ...headerOf(extractor, true),
     // D6 (cdd6-T1c): mirrors `class/parser.ts:326-327`.
     sprites: jsonSpriteRegistryFor(options),
+    skinParam: createJsonSkinParam(source, 'yaml'),
     ...(parseWarnings.length === 0 ? {} : { parseWarnings }),
   };
 }

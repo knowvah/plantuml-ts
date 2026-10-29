@@ -5,6 +5,7 @@
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
+import type { JsonSkinParam } from './json-skin-param.js';
 
 export interface HighlightDirective {
   readonly path: readonly string[];
@@ -27,6 +28,14 @@ export interface JsonDiagramAST {
    * once yaml or hcl learn to report one. Defaults to `'JSON'` when unset.
    */
   diagramLabel?: 'JSON' | 'YAML' | 'HCL';
+  /**
+   * The style slice `TextBlockJson` reads (`skinParam.getCurrentStyleBuilder()`, `TextBlockJson.java:112`):
+   * the default skin after `StyleExtractor#applyStyles`, built in the parse (decision D1). Always set by
+   * `parseJson`/`parseYaml`/`parseHcl`; nothing reads it yet. Optional only so the hand-authored AST literals of
+   * `tests/unit/json/layout.test.ts` and `tests/unit/yaml/highlight-styleclass.test.ts` compile unchanged
+   * (the `sprites` precedent); the batch that adds the first reader tightens it with those two files.
+   */
+  skinParam?: JsonSkinParam;
   /** Highlight directives from #highlight lines, each carrying a path and optional style class. */
   highlights: ReadonlyArray<HighlightDirective>;
   /**

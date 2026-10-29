@@ -9,6 +9,7 @@ structural manifest at main `d0d37ec18`. Each close adds a counts row.
 |---|---|---|---|---|---|---|---|
 | main `d0d37ec18` | 14/35/1 | 7/31/1 | 1/2/0 | 14/7/1 | 150 + 3 | 4 | — |
 | b0 close | 14/35/1 | 7/31/1 | 1/2/0 | 14/7/1 | 155 + 3 (5 authored appended) | 4 (+8 authored open) | 0 (baseline written, 218 rows) |
+| b1 close | 14/35/1 | 7/31/1 | 1/2/0 | 14/7/1 | 155 + 3 | 4 (+8) | 0 |
 
 ## Target rows
 

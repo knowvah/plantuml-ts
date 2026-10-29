@@ -14,6 +14,7 @@ import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
 import type { HighlightDirective, JsonDiagramAST } from './ast.js';
 import { extractStyle, payloadOf, upstreamSourceLines } from './StyleExtractor.js';
 import { headerOf } from './json-diagram-factory.js';
+import { createJsonSkinParam } from './json-skin-param.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -108,5 +109,6 @@ export function parseJson(source: UmlSource, options?: ParseOptions): JsonDiagra
     highlights,
     ...headerOf(extractor, true),
     sprites: jsonSpriteRegistryFor(options),
+    skinParam: createJsonSkinParam(source, 'json'),
   };
 }
