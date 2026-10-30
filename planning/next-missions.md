@@ -4977,6 +4977,28 @@ supersedes the conclusion in
     first); the authored `hcl/style-ignored.svg` is a jar error page, so it never
     pinned what its name says (row 7); core `TextStyle.fontWeight` types only
     normal/bold/700 (row 22).
+  - ~~**json family positional parity**~~ — **DONE 2026-10-30 by
+    json-family-parity (jfp):** all 70 non-conformant json/yaml/hcl rows
+    diagnosed (`plans/json-family-parity/diagnosis/ledger.md`); jar
+    `getPosition`/`Mirror` ported (0 movers: the root is alone in rank 0);
+    `scale` now applied at emit (nuzaje 133.6 → 2.8, timafu 64.1 → 0.8); empty
+    containers get the jar's engine size (11 rows fall); remainder is graphviz
+    2.38 vs modern arithmetic, recorded in DIVERGENCES (Smetana-backed types).
+    New shrink-only gate `oracle/goldens/json-family-positional.json`.
+  - **jfp follow-ons (2026-10-30)** — (1) labelless record: mirroring
+    `SmetanaForJson.java:253-254` (no label when empty) needs
+    `src/core/graph-layout-build.ts:147-148,166-167` and measured WORSE on
+    dot-engine (`\N` sized as the node name + PAD, 29.5 wide vs Smetana's 15;
+    4 rows rise, 6 unalign — jfp journal row 21); (2) core `inches()` 6-dp vs
+    the jar's full precision (`svek-dot-emit-clusters.ts:33`; kusule + 10 rows,
+    chaotic elsewhere, user ruling: left); (3) dot-engine re-render of one graph
+    object is not idempotent (`.agent-notes/jfp-b1.md`; check, then file in
+    `docs/graphviz-issues/`); (4) dead json `scale` plumbing after T4a
+    (`NodeStyleJson.scale`, `scaleDasharray`, `renderer-style.ts`,
+    `json-renderer-highlight.ts`); (5) scale × title still unscaled (needs core
+    `TextBlockExporter#exportTo` routing); (6) the structural manifest's
+    najoba/tadari/vapoda notes name dot-engine/`shapes__c.java:253-254` where the
+    mechanism is U-REC at `:1807-1808` (jfp T1c) — reword at the next re-pin.
   - **Authored fixtures worth adding** — `style-root-fontcolor` (json/yaml;
     `<style> root { FontColor }` now matches the jar in both modes, no gate),
     title+handwritten, title narrower than body, title+scale (T1c scratch

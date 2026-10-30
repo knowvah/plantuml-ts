@@ -104,8 +104,8 @@ Collected (JSON reporter) must equal on-disk. `uptime` first; above ~10 wait
 | [2 — engine node data in core](batch-2/overview.md) | T2a, close | [x] |
 | [3 — port getPosition + Mirror (M1+M2)](batch-3/overview.md) | T3a, close | [x] |
 | [4 — remaining port-controlled mechanisms](batch-4/overview.md) | T4a (M5), T4b (M3), close | [x] |
-| [exit](batch-exit/overview.md) | final measurement, DIVERGENCES, docs, memory | [ ] |
-| [squash](batch-squash/overview.md) | one commit per batch, tag `jfp/pre-squash` | [ ] |
+| [exit](batch-exit/overview.md) | final measurement, DIVERGENCES, docs, memory | [x] |
+| [squash](batch-squash/overview.md) | one commit per batch, tag `jfp/pre-squash` | [x] |
 
 ## Documents
 
@@ -123,3 +123,16 @@ Collected (JSON reporter) must equal on-disk. `uptime` first; above ~10 wait
 - `plans/a5-json-family-conformance/` — where the transposed dot input and the no-`Mirror` frame came from (`adr1-gonogo.md`).
 - `DIVERGENCES.md` ADR-2b json geometry entry; `oracle/goldens/svg-json/README.md`.
 - Memories: `dot-engine-blame-needs-real-dot`, `measurement-artifacts-outnumber-defects`, `comparesvg-count-not-monotonic`, `agents-write-main-via-serena`, `gate-merges-on-full-set-and-typecheck`, `squash-per-batch-at-end`, `jse-status`.
+
+## Final status (2026-10-30)
+
+| checkpoint | json c/n | yaml c/n | hcl c/n | pins | manifest | positional Σ node / path / canvas (66 aligned rows) |
+|---|---|---|---|---|---|---|
+| main `7d08a6592` / b0 | 14/36 | 7/32 | 1/2 | 14/7/1 | 167 + 3 | 498.455 / 710.158 / 110 |
+| b4 close (final) | 14/36 | 7/32 | 1/2 | 14/7/1 | 167 + 3 | 457.355 / 546.207 / 85 |
+
+- **Tasks:** T0a, T0b, T1a, T1b, T1c, T2a, T3a, T4a, T4b — 9/9 as amended (B4 written at the B1 close, rulings 2026-10-30). One halt (stop 3, B1 close) resolved by user rulings Q1-Q4.
+- **Bar:** every one of the 70 non-conformant rows carries a ledger mechanism (`diagnosis/ledger.md`); remaining classes are Smetana (U-REC, U-CLIP, U-ARROW, U-NS — D3 shown; DIVERGENCES "Smetana-backed diagram types") plus two ruled items (M4 core `inches()`, user Q3; the empty-container label half, Smetana arithmetic + core). 0 dot-engine rows. No port-controlled mechanism left open. Positional ceilings ≤ b0 on every row (0 rises, 25 field falls); manifest unchanged; 0 conformant losses in all 28 engines vs b0; d.ts byte-identical to b0; all 20 extended movers journaled (rows 19, 23).
+- **No row became byte-conformant**: every remaining residue on those 70 rows is graphviz-2.38-vs-modern arithmetic.
+- **Decisions journaled:** 25 rows; flagged for review: row 21 (T4b Variant A over B), row 4 (0.01 conformant band).
+- **Follow-ons:** `planning/next-missions.md`, "jfp follow-ons (2026-10-30)".
