@@ -15,6 +15,15 @@ styles now come from the ported style engine). Edges are now emitted in the jar'
 `manageOneNode` post-order (ddc T1a), which is what moved 16 rows from
 `diverged` to `structural-match`.
 
+**Positional residue (json-family-parity, 2026-10-30).** Every one of the 36
+non-conformant json rows (and yaml 32, hcl 2) has a diagnosed mechanism in
+`plans/json-family-parity/diagnosis/ledger.md`; its max |Δ| is pinned as a
+shrink-only ceiling in `oracle/goldens/json-family-positional.json`
+(`tests/oracle/svg-conformance/json-family-positional.test.ts`). The remaining
+residue is graphviz 2.38 (Smetana) vs modern graphviz arithmetic — record-size
+rounding, spline clip side, arrow length, in-rank network simplex — see
+DIVERGENCES.md, "Smetana-backed diagram types". Counts unchanged: 14/7/1.
+
 This section previously said byte-conformance was unreachable here and the
 ratchet could never admit anything. **That was wrong, and the way it was wrong
 is worth keeping.** The claim rested on M1 — "document dimensions differ

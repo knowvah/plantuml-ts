@@ -17,6 +17,9 @@ import { recordLabelFor } from './record-label.js';
 import type { JsonObject } from './JsonObject.js';
 import { JsonNumber } from './JsonNumber.js';
 import type { JsonRowGeo, MeasuredNode } from './TextBlockJson.js';
+import { jsonNodePositions, type JsonNodePosition } from './json-node-position.js';
+import type { Mirror } from './Mirror.js';
+import { XPoint2D } from '../../core/klimt/geom/XPoint2D.js';
 
 // A5/T6b: node sizing moved to `TextBlockJson.ts` (upstream's own class
 // boundary). Re-exported so `renderer.ts` and every existing consumer keep
@@ -164,47 +167,6 @@ function normalizeRoot(root: unknown): JsonContainer {
   return (isEmpty ? [''] : root) as JsonContainer;
 }
 
-/**
- * Transpose the solved layout back into diagram space (mission A5 / T6).
- *
- * The graph was handed to the engine with every node's width and height
- * swapped and no `rankdir`, so it was solved top-to-bottom in a transposed
- * frame — upstream's `SmetanaForJson#createNode` does exactly this
- * (`SmetanaForJson.java:236-244`). Reading it back means undoing that.
- *
- * **Only the x/y SWITCH is applied here, not upstream's flip — and that is a
- * deliberate consequence of our seam, not a shortcut.** Upstream's
- * `getPosition` computes `sym(x - width/2, xMirror.inv(y + height/2))`, where
- * `Mirror#inv` turns graphviz's **y-up** coordinates into screen y-down ones.
- * This port asks the engine for `getLayout({ yAxis: 'down' })`
- * (`graph-layout.ts`), so that flip has ALREADY happened by the time these
- * coordinates arrive. Applying `inv` again mirrors the diagram horizontally:
- * measured against the jar on `bavize-88-jumu158`, it put the root node at
- * x=76.83 with its child at x=10, where the jar has the root at x=10 and the
- * child at x=132 — a fully reversed layout that the document-dimension metric
- * cannot see, because a mirrored diagram has identical dimensions.
- *
- * `Mirror.ts` is still the faithful port of `Mirror.java` and still what an
- * upstream-frame consumer should use; it is simply not needed on this path.
- *
- * So: a node's mirrored left edge is its transposed-frame TOP (`p.y` — its
- * distance down from the graph's top, which is exactly what upstream's
- * `max - topEdge` computes in the y-up frame), and its mirrored top is its
- * transposed-frame left edge (`p.x`).
- *
- * Edges are NOT touched here: `layoutJson` derives its edge points from final
- * node geometry rather than from the engine's splines, so they follow the
- * nodes automatically. Porting `JsonCurve` to consume the engine's own
- * splines is T8.
- */
-function mirrorToDiagramSpace(
-  placed: ReadonlyArray<{ id: string; x: number; y: number }>,
-): Map<string, { x: number; y: number }> {
-  const out = new Map<string, { x: number; y: number }>();
-  for (const p of placed) out.set(p.id, { x: p.y, y: p.x });
-  return out;
-}
-
 // ---------------------------------------------------------------------------
 // Public layout function
 // ---------------------------------------------------------------------------
@@ -282,7 +244,7 @@ function measureOptionsOf(theme: Theme): BuildRowsOptions {
  * hands graphviz each node's height as its width and vice versa
  * (`SmetanaForJson.java:236-244`) so the graph solves top-to-bottom in a
  * transposed frame, then transposes the answer back. See
- * `mirrorToDiagramSpace`.
+ * `json-node-position.ts`.
  * A5/T7: real `shape=record` nodes with a `<Pn>` port per row, so each edge
  * leaves the ROW it belongs to. `recordLabelFor` builds the label upstream
  * builds (`SmetanaForJson#getDotLabelArray`/`#getDotLabelMap`).
@@ -296,12 +258,27 @@ function measureOptionsOf(theme: Theme): BuildRowsOptions {
  * produces. The jar shows no such inflation because Smetana does not
  * reproduce it, and per CLAUDE.md ("Smetana is NOT a porting target") that
  * delta is accepted and named rather than chased. See DIVERGENCES.md.
+ *
+ * jfp T4b (M3): the declared size is `TextBlockJson#calculateDimension`
+ * (`TextBlockJson.java:225-231`), swapped (`SmetanaForJson.java:243-244`) --
+ * NOT the drawn box. For an empty `[]`/`{}` its width is 0 (`MIN_WIDTH` is
+ * draw-only, `:278-279`), so the engine's height is 0, not 30.
+ *
+ * The label half is deliberately NOT ported: the jar sets no `label` when the
+ * node has no lines (`SmetanaForJson.java:253-254`, `if (size > 0)`), but we
+ * keep an explicit '' label. "No label" needs a `src/core/` change
+ * (`graph-layout-build.ts:147-148,166-167`: `addRecordNode` always passes
+ * `label`), and on dot-engine the default `\N` label is sized as the node name
+ * + XPAD/YPAD (29.5 wide for "n1", measured in jfp T4b), where Smetana sizes it
+ * (0,16) with no PAD (`labels__c.java:119-122`) -- the label half is Smetana
+ * arithmetic (decisions.md, amendment 2026-10-29). Measured: omitting the label
+ * raises bogiku/zasitu/jidata/cilemo and unaligns six rows.
  */
 function buildJsonDotNodes(measured: MeasuredNode[]): DotInputNode[] {
   return measured.map((m) => ({
     id: m.flatNode.id,
-    width: m.totalHeight,
-    height: m.totalWidth,
+    width: m.calculateDimension.height,
+    height: m.calculateDimension.width,
     shape: 'record' as const,
     recordLabel: recordLabelFor(m),
   }));
@@ -362,19 +339,19 @@ function buildJsonDotEdges(flatNodes: FlatNode[], measured: MeasuredNode[]): Dot
 }
 
 /**
- * Place measured nodes at their solved dot-engine coordinates, transposed
- * back into diagram space and offset by the document margin -- same
- * arithmetic as the former separate "build then shift" loops, folded into
- * one pass.
+ * Place measured nodes at the jar's origin (`json-node-position.ts`, the port
+ * of `SmetanaForJson#getPosition`), offset by the document margin. The size
+ * drawn is the measured block's — upstream draws `node.block` at that
+ * translation (`SmetanaForJson.java:166-168`), never the engine box.
  */
 function placeJsonNodes(
   measured: MeasuredNode[],
-  mirrored: Map<string, { x: number; y: number }>,
+  positions: ReadonlyMap<string, JsonNodePosition>,
   margin: { left: number; top: number },
 ): JsonNodeGeo[] {
   const nodes: JsonNodeGeo[] = [];
   for (const m of measured) {
-    const dn = mirrored.get(m.flatNode.id);
+    const dn = positions.get(m.flatNode.id);
     if (dn === undefined) continue;
     nodes.push({
       id: m.flatNode.id,
@@ -390,35 +367,49 @@ function placeJsonNodes(
   return nodes;
 }
 
+/** `Mirror#invAndXYSwitch` (`Mirror.java:55-59`), then the document margin. */
+function mirrorPoint(
+  xMirror: Mirror,
+  x: number,
+  y: number,
+  margin: { left: number; top: number },
+): { x: number; y: number } {
+  const p = xMirror.invAndXYSwitch(new XPoint2D(x, y));
+  return { x: p.getX() + margin.left, y: p.getY() + margin.top };
+}
+
 /**
- * Transpose the dot engine's own splines into diagram space and offset by
- * the document margin. A5/T8: the edges are the ENGINE's own splines,
- * transposed, not points re-derived from node geometry. Upstream does the
- * same -- `SmetanaForJson#drawMe` hands each `ST_Agedge_s` to `JsonCurve`,
- * which reads `data.spl` (`JsonCurve.java:58-71`).
+ * The engine's own splines, read off its raw y-up frame through the SAME
+ * `Mirror` as the nodes, offset by the document margin. A5/T8: the edges are
+ * the ENGINE's splines, not points re-derived from node geometry. Upstream:
  *
- * This became worth doing at T7: with real `<Pn>` record ports the engine
- * routes each edge out of the row it belongs to, so its spline carries
- * information the old re-derivation could only approximate (a horizontal
- * stub plus a hand-built S-curve).
+ *     final JsonCurve curve = getCurve(edge, 13);          // SmetanaForJson.java:173
+ *     return new JsonCurve(data, xMirror, veryFirstLine);  // :212-215
+ *     path.lineTo(xMirror.invAndXYSwitch(points.get(0)));  // JsonCurve.java:96-103
+ *     final XPoint2D trueEp = xMirror.invAndXYSwitch(ep);  // :106-109
  *
- * Same transposition as the nodes, and for the same reason -- `yAxis: 'down'`
- * has already applied `Mirror#inv`, so only the x/y switch remains. See
- * `mirrorToDiagramSpace`.
- * `ep` takes the IDENTICAL transposition as the points — it is reported in
- * the same frame, so anything else would put the arrow tip in a different
- * space from the spline it terminates. Absent when the engine placed no
- * arrow, which `JsonCurve.ts` handles the way upstream does (draw nothing).
+ * `ep` takes the identical mirror as the points. Absent when the engine placed
+ * no arrow, which `JsonCurve.ts` handles the way upstream does (draw nothing).
+ * `Mirror#inv` reports but never clamps a point beyond `max` (`Mirror.java:48-53`).
  */
 function buildJsonEdgeGeometries(
-  dotEdges: DotLayoutResult['edges'],
+  engineEdges: NonNullable<DotLayoutResult['engineEdges']>,
+  xMirror: Mirror,
   margin: { left: number; top: number },
 ): JsonEdgeGeo[] {
-  return dotEdges.map((e) => ({
-    points: e.points.map((p) => ({ x: p.y + margin.left, y: p.x + margin.top })),
-    ...(e.epX !== undefined && e.epY !== undefined ? { ep: { x: e.epY + margin.left, y: e.epX + margin.top } } : {}),
+  return engineEdges.map((e) => ({
+    points: e.points.map((p) => mirrorPoint(xMirror, p.x, p.y, margin)),
+    ...(e.epX !== undefined && e.epY !== undefined ? { ep: mirrorPoint(xMirror, e.epX, e.epY, margin) } : {}),
     spline: true,
   }));
+}
+
+/** The raw engine frame `read: 'exact'` guarantees for a non-empty graph (D1). */
+function engineFrameOf(r: DotLayoutResult): Required<Pick<DotLayoutResult, 'engineNodes' | 'engineEdges'>> {
+  if (r.engineNodes === undefined || r.engineEdges === undefined) {
+    throw new Error("layoutJson: layoutGraph(read: 'exact') returned no engineNodes/engineEdges");
+  }
+  return { engineNodes: r.engineNodes, engineEdges: r.engineEdges };
 }
 
 export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMeasurer): JsonGeometry {
@@ -460,24 +451,15 @@ export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMe
     omitSepAttrs: true,
   };
 
-  const dotResult = dotLayout(dotInput, { read: 'exact' });
+  const { engineNodes, engineEdges } = engineFrameOf(dotLayout(dotInput, { read: 'exact' }));
 
-  // Transpose the solved layout back into diagram space before anything reads
-  // a coordinate off it.
-  const mirrored = mirrorToDiagramSpace(dotResult.nodes);
+  // `drawMe`'s `max` + `getPosition` over the raw engine frame
+  // (`SmetanaForJson.java:160-168,203-209`). Title no longer reserves layout
+  // space here (mission G0b/T8) -- it is drawn by the shared applyChrome step.
+  const { positions, xMirror } = jsonNodePositions(engineNodes);
+  const nodes = placeJsonNodes(measured, positions, margin);
 
-  // Apply CANVAS_PAD to node positions first so that edge anchor points
-  // computed below are in final canvas coordinates. Title no longer
-  // reserves layout space here (mission G0b/T8) -- it flows through
-  // ast.annotations.title and is drawn by the shared applyChrome step in
-  // src/index.ts, entirely outside this layout stage.
-  // T1/N -- `rankMaxRight` (a per-rank right-boundary map for edge routing)
-  // was computed here and never read; removed as dead code surfaced by this
-  // extraction (code review 2026-09-21, pr-workflow.md dead-code policy).
-  // No consumer existed anywhere in src/ or tests/ (grepped before removal).
-  const nodes = placeJsonNodes(measured, mirrored, margin);
-
-  const edges = buildJsonEdgeGeometries(dotResult.edges, margin);
+  const edges = buildJsonEdgeGeometries(engineEdges, xMirror, margin);
 
   const { width, height, finalWidth, finalHeight } = documentDimensions(nodes, edges, margin);
   const result: JsonGeometry = {

@@ -158,8 +158,17 @@ export interface MeasuredNode {
   rows: JsonRowGeo[];
   keyColWidth: number;
   valueColWidth: number;
+  /** The DRAWN width: `drawU`'s `trueWidth`, with `MIN_WIDTH` when it is 0 (`:278-279`). */
   totalWidth: number;
   totalHeight: number;
+  /**
+   * `TextBlockJson#calculateDimensionSlow` (`TextBlockJson.java:225-231`): the
+   * size the ENGINE is declared, NOT the drawn box. Width = `getWidthColA +
+   * getWidthColB` (0 for an empty `[]`/`{}`, no `MIN_WIDTH`); height =
+   * `getTotalHeight` (`:322-330`, `MIN_HEIGHT` when no lines). The
+   * `SmetanaForJson#manageOneNode` call (`:130-132`) hands this to `createNode`.
+   */
+  calculateDimension: { width: number; height: number };
 }
 
 /**
@@ -466,5 +475,6 @@ export function measureNode(
     valueColWidth,
     totalWidth: summedWidth === 0 ? JSON_CELL_MIN_WIDTH : summedWidth,
     totalHeight: summedHeight === 0 ? MIN_HEIGHT : summedHeight,
+    calculateDimension: { width: summedWidth, height: summedHeight === 0 ? MIN_HEIGHT : summedHeight },
   };
 }

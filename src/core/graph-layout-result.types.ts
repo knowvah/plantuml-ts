@@ -65,6 +65,45 @@ export interface DotLayoutResult {
    * (`svek/SvekResult.java:130-134`). Absent only for the empty graph.
    */
   readonly originShift?: { readonly x: number; readonly y: number };
+  /**
+   * D1 (json-family-parity T2a): the engine's RAW node frame, present ONLY
+   * under `layoutGraph(..., { read: 'exact' })` -- absent under the default
+   * `read: 'svek'`, and absent for the empty graph. Every other field of this
+   * result is computed exactly as without it; this one is additive.
+   *
+   * `cx`/`cy` are graphviz's `ND_coord`, the node CENTRE, in the engine's
+   * native y-UP frame (`getLayout({ yAxis: 'up' })`): no origin shift
+   * (`shiftToOrigin`), no y flip. `width`/`height` are the engine's own
+   * post-layout size in points (`ND_width * 72`, `ND_height * 72`) -- never
+   * our declared size echoed back (contrast `nodes[].width`, `mapNodes`'
+   * `ROUND_TRIP_EPSILON` echo). These are the inputs the jar's `getPosition`
+   * and `Mirror` take, so a Smetana-backed caller can port that arithmetic
+   * literally.
+   *
+   * @see SmetanaForJson.java:97-102 (`max` over `InternalNode#getMaxX`, edges excluded)
+   * @see SmetanaForJson.java:203-215 (`getPosition` / `Mirror` / `JsonCurve`)
+   */
+  engineNodes?: ReadonlyArray<{
+    readonly id: string;
+    readonly cx: number;
+    readonly cy: number;
+    readonly width: number;
+    readonly height: number;
+  }>;
+  /**
+   * D1: the edge counterpart of {@link engineNodes}, same presence rule and
+   * same native y-up, unshifted frame. `id` equals the matching `edges[].id`;
+   * `points` are the spline control points and `epX`/`epY` the arrow
+   * attachment point (`bezier.ep`, absent when the head end carries no arrow
+   * -- see `edges[].epX`). The jar passes edges through the same `Mirror` as
+   * the nodes (`SmetanaForJson.java:212-215`, `JsonCurve`).
+   */
+  engineEdges?: ReadonlyArray<{
+    readonly id: string;
+    readonly points: ReadonlyArray<{ readonly x: number; readonly y: number }>;
+    readonly epX?: number;
+    readonly epY?: number;
+  }>;
   /** G5 C2: real per-cluster bbox from graphviz's own subgraph-cluster
    *  layout (@knowvah/dot-engine's `getLayout().clusters`, see
    *  docs/graphviz-issues/06-cluster-bbox-not-in-getlayout.md's RESOLVED

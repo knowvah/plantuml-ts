@@ -246,6 +246,9 @@ its open items are in the ddc block of `planning/next-missions.md`.
 json-style-engine (jse, 2026-10-29) moved the json family onto the ported style
 engine (manifest 167 clean + 3 ceilings; extended mode through
 `FromSkinparamToStyle`); only the bafemu ceiling and the jse follow-ons remain.
+json-family-parity (jfp, 2026-10-30) diagnosed every positional residue row:
+the remainder is graphviz 2.38 vs modern arithmetic (DIVERGENCES); open items
+are the jfp follow-ons in `planning/next-missions.md`.
 
 ---
 

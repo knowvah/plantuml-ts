@@ -55,6 +55,11 @@ export function recordLabelFor(m: MeasuredNode): string {
   const cell = (height: number, width: number): string => `_dim_${height - heightPad}_${width}_`;
   const ported = (i: number, height: number, width: number): string => `<P${i}>${cell(height, width)}`;
 
+  // The jar sets NO label when the node has no lines (`SmetanaForJson.java:253-254`).
+  // We keep an explicit '' because "no label" needs a `src/core/` change
+  // (`graph-layout-build.ts:147-148,166-167`) and dot-engine would then size the
+  // default `\N` label as the node name + XPAD/YPAD where Smetana sizes it (0,16)
+  // (`labels__c.java:119-122`) -- see `layout.ts#buildJsonDotNodes` (jfp T4b).
   if (m.rows.length === 0) return '';
   if (m.rows[0]!.arrayEntry) {
     return m.rows.map((r, i) => ported(i, r.height, widthA)).join('|');
