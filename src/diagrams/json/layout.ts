@@ -258,12 +258,27 @@ function measureOptionsOf(theme: Theme): BuildRowsOptions {
  * produces. The jar shows no such inflation because Smetana does not
  * reproduce it, and per CLAUDE.md ("Smetana is NOT a porting target") that
  * delta is accepted and named rather than chased. See DIVERGENCES.md.
+ *
+ * jfp T4b (M3): the declared size is `TextBlockJson#calculateDimension`
+ * (`TextBlockJson.java:225-231`), swapped (`SmetanaForJson.java:243-244`) --
+ * NOT the drawn box. For an empty `[]`/`{}` its width is 0 (`MIN_WIDTH` is
+ * draw-only, `:278-279`), so the engine's height is 0, not 30.
+ *
+ * The label half is deliberately NOT ported: the jar sets no `label` when the
+ * node has no lines (`SmetanaForJson.java:253-254`, `if (size > 0)`), but we
+ * keep an explicit '' label. "No label" needs a `src/core/` change
+ * (`graph-layout-build.ts:147-148,166-167`: `addRecordNode` always passes
+ * `label`), and on dot-engine the default `\N` label is sized as the node name
+ * + XPAD/YPAD (29.5 wide for "n1", measured in jfp T4b), where Smetana sizes it
+ * (0,16) with no PAD (`labels__c.java:119-122`) -- the label half is Smetana
+ * arithmetic (decisions.md, amendment 2026-10-29). Measured: omitting the label
+ * raises bogiku/zasitu/jidata/cilemo and unaligns six rows.
  */
 function buildJsonDotNodes(measured: MeasuredNode[]): DotInputNode[] {
   return measured.map((m) => ({
     id: m.flatNode.id,
-    width: m.totalHeight,
-    height: m.totalWidth,
+    width: m.calculateDimension.height,
+    height: m.calculateDimension.width,
     shape: 'record' as const,
     recordLabel: recordLabelFor(m),
   }));

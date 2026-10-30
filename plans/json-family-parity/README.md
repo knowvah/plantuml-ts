@@ -103,7 +103,7 @@ Collected (JSON reporter) must equal on-disk. `uptime` first; above ~10 wait
 | [1 — diagnosis ledger](batch-1/overview.md) | T1a, T1b, T1c, close (+ B4 amendment) | [x] |
 | [2 — engine node data in core](batch-2/overview.md) | T2a, close | [x] |
 | [3 — port getPosition + Mirror (M1+M2)](batch-3/overview.md) | T3a, close | [x] |
-| [4 — remaining port-controlled mechanisms](batch-4/overview.md) | T4a (M5), T4b (M3), close | [ ] |
+| [4 — remaining port-controlled mechanisms](batch-4/overview.md) | T4a (M5), T4b (M3), close | [x] |
 | [exit](batch-exit/overview.md) | final measurement, DIVERGENCES, docs, memory | [ ] |
 | [squash](batch-squash/overview.md) | one commit per batch, tag `jfp/pre-squash` | [ ] |
 

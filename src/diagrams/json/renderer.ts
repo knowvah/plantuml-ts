@@ -12,7 +12,9 @@
 import { text } from '../../core/svg.js';
 import type { TextStyle } from '../../core/svg.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
-import { scaleJsonGeometry, scaleNodeStyle } from './scale-geo.js';
+import { withDeferredFormat } from '../../core/svg-format.js';
+import { scaleAtEmit } from './scale-at-emit.js';
+import type { DrawnJson } from './scale-at-emit.js';
 
 import {
   buildCurvePath,
@@ -25,7 +27,7 @@ import { penFor } from './renderer-pen.js';
 import type { JsonPen, PenInk } from './renderer-pen.js';
 import { resolveNodeStyle, JSON_SKIN_BLACK } from './renderer-style.js';
 import type { ArrowStyleJson, CellPaint, NodeStyleJson, TextStyleJson } from './renderer-style.js';
-import { highlightRect, scaleDasharray } from './json-renderer-highlight.js';
+import { highlightRect } from './json-renderer-highlight.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import type { JsonGeometry, JsonNodeGeo, JsonEdgeGeo, JsonRowGeo } from './layout.js';
@@ -110,7 +112,7 @@ function renderRow(node: JsonNodeGeo, row: JsonRowGeo, style: NodeStyleJson, pen
   const sepStyle = {
     stroke: box.sepColor,
     strokeWidth: box.sepThickness,
-    ...(box.sepDash !== undefined ? { strokeDasharray: scaleDasharray(box.sepDash, style.scale) } : {}),
+    ...(box.sepDash !== undefined ? { strokeDasharray: box.sepDash } : {}),
   };
   const dividerX = node.x + node.keyColWidth;
 
@@ -138,10 +140,10 @@ function fontWeightOf(cssWeight: number): NonNullable<TextStyle['fontWeight']> {
 }
 
 /** A cell's `<text>` presentation attributes, from the style it was measured with. */
-function cellTextStyle(cell: CellPaint, k: number): TextStyle {
+function cellTextStyle(cell: CellPaint): TextStyle {
   return {
     fontFamily: cell.fontFamily,
-    fontSize: cell.fontSize * k,
+    fontSize: cell.fontSize,
     fill: cell.fill,
     ...(cell.fontWeight === undefined ? {} : { fontWeight: fontWeightOf(cell.fontWeight) }),
     ...(cell.italic ? { fontStyle: 'italic' as const } : {}),
@@ -157,7 +159,7 @@ function renderRowText(node: JsonNodeGeo, row: JsonRowGeo, style: NodeStyleJson)
   // never draws the index (it uses it only to resolve highlights).
   if (!row.arrayEntry) {
     // `getStyleToUse(true, highlighted)` (`TextBlockJson.java:123`).
-    const keyStyle = cellTextStyle(style.cell(true, row.highlight), style.scale);
+    const keyStyle = cellTextStyle(style.cell(true, row.highlight));
     // Column A splits into atoms under wrap for the same reason column B does
     // — `getTextBlock` builds both from the same style, wrapWidth included.
     const keyX = cellTextX(node.x, node.keyColWidth, row.keyWidth, ts.align);
@@ -176,7 +178,7 @@ function renderRowText(node: JsonNodeGeo, row: JsonRowGeo, style: NodeStyleJson)
 
   // `getStyleToUse(false, highlighted)` (`TextBlockJson.java:124,130`): every
   // value cell, nested's three-space one included, takes this one style.
-  const runStyle = cellTextStyle(style.cell(false, row.highlight), style.scale);
+  const runStyle = cellTextStyle(style.cell(false, row.highlight));
   // An array row's single cell IS column A, so it spans the whole node.
   const colLeft = row.arrayEntry ? node.x : node.x + node.keyColWidth;
   const colWidth = node.width - (row.arrayEntry ? 0 : node.keyColWidth);
@@ -218,7 +220,7 @@ function renderNode(node: JsonNodeGeo, style: NodeStyleJson, pen: JsonPen): stri
       fill: box.bg,
       stroke: box.bg,
       strokeWidth: box.borderWidth,
-      ...(box.borderDash !== undefined ? { strokeDasharray: scaleDasharray(box.borderDash, style.scale) } : {}),
+      ...(box.borderDash !== undefined ? { strokeDasharray: box.borderDash } : {}),
       ...corners,
     }),
   ];
@@ -230,7 +232,7 @@ function renderNode(node: JsonNodeGeo, style: NodeStyleJson, pen: JsonPen): stri
       fill: 'none',
       stroke: box.border,
       strokeWidth: box.borderWidth,
-      ...(box.borderDash !== undefined ? { strokeDasharray: scaleDasharray(box.borderDash, style.scale) } : {}),
+      ...(box.borderDash !== undefined ? { strokeDasharray: box.borderDash } : {}),
       ...corners,
     }),
   );
@@ -250,7 +252,7 @@ function renderNode(node: JsonNodeGeo, style: NodeStyleJson, pen: JsonPen): stri
  *
  * This port previously drew the spot FIRST, reversing upstream's order.
  */
-function renderEdge(edge: JsonEdgeGeo, arrow: ArrowStyleJson, pen: JsonPen, k: number): string {
+function renderEdge(edge: JsonEdgeGeo, arrow: ArrowStyleJson, pen: JsonPen): string {
   // A5/T8: the path and the spot both come from the ported `JsonCurve`, which
   // consumes the engine's spline. This used to build its own S-curve and place
   // the spot on a horizontal offset; upstream extrapolates along the spline's
@@ -260,16 +262,16 @@ function renderEdge(edge: JsonEdgeGeo, arrow: ArrowStyleJson, pen: JsonPen, k: n
 
   // `getStyleArrow()`'s `LineColor`, `LineThickness` and `LineStyle`
   // (`SmetanaForJson.java:119-122,172,175-176`; skin `arrow { LineStyle 3-3 }`,
-  // `plantuml.skin:449-451`). Dashes go through `format` like every other
-  // numeric, so `3-3` at scale 2 is emitted as `6,6` -- jar-verified on
-  // `json/timafu-94-bixe774`.
+  // `plantuml.skin:449-451`). Drawn at 1x: the dash goes through `format` with
+  // every other numeric at emit, so `3-3` at scale 2 comes out as `6,6`
+  // (`scaleJsonBody`) -- jar-verified on `json/timafu-94-bixe774`.
   const stroke = arrow.color;
-  const strokeWidth = arrow.thickness * k;
+  const strokeWidth = arrow.thickness;
 
   const linePart = pen.path(buildCurveSegments(edge.points), d, {
     stroke,
     strokeWidth,
-    ...(arrow.dash === undefined ? {} : { strokeDasharray: scaleDasharray(arrow.dash, k) }),
+    ...(arrow.dash === undefined ? {} : { strokeDasharray: arrow.dash }),
     fill: 'none',
   });
 
@@ -287,12 +289,10 @@ function renderEdge(edge: JsonEdgeGeo, arrow: ArrowStyleJson, pen: JsonPen, k: n
       ? // `ellipse` takes RAW SVG attribute names, not the camelCase `BoxStyle`
         // keys `rect`/`line` use — `strokeWidth` here would emit a literal
         // `strokeWidth=` attribute.
-        // Radius and stroke are pre-scale lengths, so both take `k` like every
-        // other numeric `SvgGraphics#format` writes.
-        pen.ellipse(spot.x, spot.y, SPOT_RADIUS * k, SPOT_RADIUS * k, {
+        pen.ellipse(spot.x, spot.y, SPOT_RADIUS, SPOT_RADIUS, {
           fill: stroke,
           stroke,
-          'stroke-width': SPOT_STROKE_WIDTH * k,
+          'stroke-width': SPOT_STROKE_WIDTH,
         })
       : '';
 
@@ -303,9 +303,6 @@ function renderEdge(edge: JsonEdgeGeo, arrow: ArrowStyleJson, pen: JsonPen, k: n
 // Public API
 // ---------------------------------------------------------------------------
 
-/**
- * Render a JSON diagram geometry into an SVG string.
- */
 /**
  * The page upstream draws when the body will not parse — `JsonDiagram#drawU`'s
  * `root == null` branch. ONE monospace text and nothing else: no box, no
@@ -320,19 +317,16 @@ function renderEdge(edge: JsonEdgeGeo, arrow: ArrowStyleJson, pen: JsonPen, k: n
  * Replaced a bespoke 640x80 red box — the same shape the class engine used
  * before its refusals were routed through the jar's own error page.
  */
-function renderParseFailure(geo: JsonGeometry, theme: Theme, k: number): RenderFragment {
+function renderParseFailure(geo: JsonGeometry): string {
   const at = geo.errorLayout;
-  const body =
-    at === undefined
-      ? ''
-      : text(at.x, at.y, geo.error ?? '', {
-          fontFamily: PARSE_FAILURE_FONT_FAMILY,
-          // `SvgGraphics.java:693`: `font-size` is scaled like `x`/`textLength`.
-          fontSize: PARSE_FAILURE_FONT_SIZE * k,
-          fill: JSON_SKIN_BLACK,
-          textLength: at.textLength,
-        });
-  return { body, ...declaredBlock(geo.width, geo.height, theme) };
+  return at === undefined
+    ? ''
+    : text(at.x, at.y, geo.error ?? '', {
+        fontFamily: PARSE_FAILURE_FONT_FAMILY,
+        fontSize: PARSE_FAILURE_FONT_SIZE,
+        fill: JSON_SKIN_BLACK,
+        textLength: at.textLength,
+      });
 }
 
 /**
@@ -411,17 +405,58 @@ function lengthAdjustOf(theme: Theme): Pick<RenderFragment, 'lengthAdjust'> {
   return theme.lengthAdjust === undefined ? {} : { lengthAdjust: theme.lengthAdjust };
 }
 
-export function renderJson(rawGeo: JsonGeometry, rawTheme: Theme): RenderFragment {
+/**
+ * The page's elements and their canvas size, all at 1x -- the parse-failure
+ * page when the body did not parse, otherwise every node then every edge.
+ */
+function drawJson(geo: JsonGeometry, theme: Theme): DrawnJson {
+  if (geo.error !== undefined) {
+    return { body: renderParseFailure(geo), width: geo.width, height: geo.height };
+  }
+  const style = resolveNodeStyle(geo.styles);
+  // ONE pen per diagram: the handwritten one carries the shared random stream.
+  const pen = penFor(theme.handwritten);
+  const parts: string[] = [];
+
+  // Title is no longer drawn here (mission G0b/T8) -- it flows through
+  // ast.annotations.title and is drawn once, centrally, by applyChrome
+  // (src/index.ts) around the RenderFragment this function returns.
+  for (const node of geo.nodes) {
+    parts.push(renderNode(node, style, pen));
+  }
+
+  for (const edge of geo.edges) {
+    parts.push(renderEdge(edge, style.arrow, pen));
+  }
+
+  // No `extraDefs`: the jar's json documents carry an EMPTY `<defs/>` (M3).
+  //
+  // A handwritten diagram re-derives its own size from what was actually
+  // drawn. `JsonDiagram#calculateDimension` measures by DRAWING into a
+  // `LimitFinder`, and `drawU` wraps that finder in `UGraphicHandwritten`
+  // too — so the measured shapes are the jiggled ones, and every rectangle
+  // has become a polygon. `layout.ts` cannot know that extent without
+  // repeating the jiggle, and the pen already has it.
+  const ink = pen.ink();
+  const dims = ink === undefined ? { width: geo.width, height: geo.height } : handwrittenDims(ink, theme);
+  return { body: parts.join(''), ...dims, background: theme.colors.background };
+}
+
+/**
+ * Render a JSON diagram geometry into an SVG fragment.
+ */
+export function renderJson(geo: JsonGeometry, theme: Theme): RenderFragment {
+  // Nothing parsed and no error page to draw: no canvas either.
+  if (geo.error === undefined && geo.nodes.length === 0) return { body: '', width: 0, height: 0 };
+
   // `scale …` (StyleExtractor.java:82-83 -> JsonDiagram.java:90-99). Resolved
-  // HERE, against the unscaled dims, because that is the order upstream uses:
+  // against the unscaled dims, because that is the order upstream uses:
   // `computeScaleFactor(dim)` reads `calculateFinalDimension()`'s own pre-scale
-  // result, then every numeric is multiplied on the way out by
-  // `SvgGraphics#format`. See `scale-geo.ts` for why this port multiplies the
-  // inputs instead of the outputs, and why that is the same arithmetic.
-  const dim = rawGeo.finalDimension ?? { width: rawGeo.width, height: rawGeo.height };
+  // result (`TextBlockExporter.java:205-209`).
+  const dim = geo.finalDimension ?? { width: geo.width, height: geo.height };
   // cdd-T30: UNLIKE description/sequence/class, json/yaml/hcl's `dpi` term
   // is deliberately left at its 96 (no-op) default here, never
-  // `rawTheme.dpi` -- `JsonDiagram`'s own `SkinParam` is built from
+  // `theme.dpi` -- `JsonDiagram`'s own `SkinParam` is built from
   // `StyleExtractor`, a narrow extractor (`jsondiagram/StyleExtractor.java:
   // 82-89`) that recognises only `<style>`, `!assume`, `!pragma`, `hide`,
   // `scale`, `title` and `skin` among its leading directive lines --
@@ -435,49 +470,17 @@ export function renderJson(rawGeo: JsonGeometry, rawTheme: Theme): RenderFragmen
   // above (`json/parser.ts`'s dedicated `matchScaleCommand` capture,
   // itself modeled on `StyleExtractor`'s OWN `scale` arm) -- `dpi` has no
   // such arm, so this port reproduces that omission exactly by never
-  // reading `rawTheme.dpi` here.
-  const k = resolveScaleFactor(rawGeo.scale, dim.width, dim.height);
-  const geo = scaleJsonGeometry(rawGeo, k);
-  const theme = rawTheme;
-
-  if (geo.error !== undefined) return { ...renderParseFailure(geo, theme, k), ...lengthAdjustOf(theme) };
-
-  if (geo.nodes.length === 0) {
-    return { body: '', width: 0, height: 0 };
-  }
-
-  // Scaled AFTER resolution so a skin DEFAULT scales identically to a theme
-  // override -- see `scale-geo.ts#scaleNodeStyle`.
-  const style = scaleNodeStyle(resolveNodeStyle(geo.styles), k);
-  // ONE pen per diagram: the handwritten one carries the shared random stream.
-  const pen = penFor(theme.handwritten);
-  const parts: string[] = [];
-
-  // Title is no longer drawn here (mission G0b/T8) -- it flows through
-  // ast.annotations.title and is drawn once, centrally, by applyChrome
-  // (src/index.ts) around the RenderFragment this function returns.
-  for (const node of geo.nodes) {
-    parts.push(renderNode(node, style, pen));
-  }
-
-  for (const edge of geo.edges) {
-    parts.push(renderEdge(edge, style.arrow, pen, k));
-  }
-
-  // No `extraDefs`: the jar's json documents carry an EMPTY `<defs/>` (M3).
-  //
-  // A handwritten diagram re-derives its own size from what was actually
-  // drawn. `JsonDiagram#calculateDimension` measures by DRAWING into a
-  // `LimitFinder`, and `drawU` wraps that finder in `UGraphicHandwritten`
-  // too — so the measured shapes are the jiggled ones, and every rectangle
-  // has become a polygon. `layout.ts` cannot know that extent without
-  // repeating the jiggle, and the pen already has it.
-  const ink = pen.ink();
-  const dims = ink === undefined ? { width: geo.width, height: geo.height } : handwrittenDims(ink, theme);
+  // reading `theme.dpi` here.
+  const k = resolveScaleFactor(geo.scale, dim.width, dim.height);
+  const scaled = k !== 1;
+  const drawn = withDeferredFormat(scaled, () => drawJson(geo, theme));
+  const emitted = scaled ? scaleAtEmit(drawn, k) : drawn;
   return {
-    body: parts.join(''),
-    ...declaredBlock(dims.width, dims.height, theme),
-    background: theme.colors.background,
+    body: emitted.body,
+    ...declaredBlock(emitted.width, emitted.height, theme),
+    ...(emitted.background === undefined ? {} : { background: emitted.background }),
+    // `SvgGraphics.java:808-811`: the root `width`/`height` are `format(maxX)`.
+    ...(scaled ? { scaledCanvas: true as const } : {}),
     ...lengthAdjustOf(theme),
   };
 }

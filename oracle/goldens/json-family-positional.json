@@ -9,9 +9,9 @@
     },
     "json/bogiku-88-nano204": {
       "aligned": true,
-      "nodeMax": 8.631,
-      "pathMax": 14.223,
-      "dw": 8,
+      "nodeMax": 4.375,
+      "pathMax": 6.233,
+      "dw": 3,
       "dh": 0
     },
     "json/cilemo-38-fafi313": {
@@ -37,8 +37,8 @@
     },
     "json/debako-68-sice023": {
       "aligned": true,
-      "nodeMax": 7.194,
-      "pathMax": 8.954,
+      "nodeMax": 4.444,
+      "pathMax": 6.302,
       "dw": 0,
       "dh": 1
     },
@@ -58,8 +58,8 @@
     },
     "json/dometa-86-jepe218": {
       "aligned": true,
-      "nodeMax": 7.194,
-      "pathMax": 8.954,
+      "nodeMax": 4.444,
+      "pathMax": 6.302,
       "dw": 0,
       "dh": 1
     },
@@ -107,9 +107,9 @@
     },
     "json/jidata-48-kire666": {
       "aligned": true,
-      "nodeMax": 7.55,
-      "pathMax": 7.557,
-      "dw": 8,
+      "nodeMax": 4.375,
+      "pathMax": 6.308,
+      "dw": 3,
       "dh": 5
     },
     "json/json-escaped": {
@@ -121,8 +121,8 @@
     },
     "json/kicati-76-guvi771": {
       "aligned": true,
-      "nodeMax": 7.194,
-      "pathMax": 8.954,
+      "nodeMax": 4.444,
+      "pathMax": 6.302,
       "dw": 0,
       "dh": 1
     },
@@ -130,7 +130,7 @@
       "aligned": true,
       "nodeMax": 78,
       "pathMax": 80.711,
-      "dw": 6,
+      "dw": 1,
       "dh": 0
     },
     "json/kusule-69-jada088": {
@@ -142,8 +142,8 @@
     },
     "json/letada-23-sisi815": {
       "aligned": true,
-      "nodeMax": 7.194,
-      "pathMax": 8.954,
+      "nodeMax": 4.444,
+      "pathMax": 6.302,
       "dw": 0,
       "dh": 1
     },
@@ -193,7 +193,7 @@
       "aligned": true,
       "nodeMax": 94,
       "pathMax": 94,
-      "dw": 6,
+      "dw": 1,
       "dh": 0
     },
     "json/nuviro-48-sice969": {
@@ -212,8 +212,8 @@
     },
     "json/sevaji-38-xita618": {
       "aligned": true,
-      "nodeMax": 7.194,
-      "pathMax": 8.954,
+      "nodeMax": 4.444,
+      "pathMax": 6.302,
       "dw": 0,
       "dh": 1
     },
@@ -229,16 +229,16 @@
     },
     "json/vogeku-38-soxe333": {
       "aligned": true,
-      "nodeMax": 7.194,
-      "pathMax": 8.954,
+      "nodeMax": 4.444,
+      "pathMax": 6.302,
       "dw": 0,
       "dh": 1
     },
     "json/zasitu-09-lise302": {
       "aligned": true,
-      "nodeMax": 8.544,
-      "pathMax": 14.135,
-      "dw": 8,
+      "nodeMax": 4.375,
+      "pathMax": 6.145,
+      "dw": 3,
       "dh": 0
     },
     "json/zevaka-35-zova441": {
@@ -361,8 +361,8 @@
     },
     "yaml/nuzaje-74-kenu009": {
       "aligned": true,
-      "nodeMax": 14.475,
-      "pathMax": 133.63,
+      "nodeMax": 1.475,
+      "pathMax": 2.82,
       "dw": 2,
       "dh": 0
     },

@@ -17,6 +17,7 @@ Real graphviz on this box: `dot` 16.1.0 (A5/T7's comparison used 15.1.1).
 | b1 close | 14/36 | 7/32 | 1/2 | 14/7/1 | 167 + 3 | 70 (unchanged; no src change) | 70 classed, 0 unknown; U-REC class pending Q1; 0 predicted closed by M1+M2 |
 | b2 close | 14/36 | 7/32 | 1/2 | 14/7/1 | 167 + 3 | 70 (unchanged) | 70 classed |
 | b3 close | 14/36 | 7/32 | 1/2 | 14/7/1 | 167 + 3 | 70 (identical to b0 pin) | 70 classed; M1+M2 ported, 0 movers |
+| b4 close | 14/36 | 7/32 | 1/2 | 14/7/1 | 167 + 3 | 70; ceilings lowered on 12 rows (25 field falls, 0 rises) | 70 classed; M5 + M3 (declared half) fixed |
 
 ## T1a — json, node |Δ| ≤ 1px (18)
 
@@ -112,3 +113,16 @@ Real graphviz on this box: `dot` 16.1.0 (A5/T7's comparison used 15.1.1).
 Why some rows are already conformant while M1/M2 apply to every multi-node row
 is an open question for B1 (T1a records it): a conformant row is evidence about
 when the echo and the min-shift happen to coincide with the jar's arithmetic.
+
+## Ledger rows that moved (b4 close)
+
+| row | before (n/p/dw/dh) | after | commit | mechanism |
+|---|---|---|---|---|
+| yaml/nuzaje-74-kenu009 | 14.475/133.630/2/0 | 1.475/2.820/2/0 | T4a 2717f5516 | M5 scale at emit; remainder = 2× najoba's U-REC/U-CLIP |
+| json/timafu-94-bixe774 | 5.939/64.057 (unaligned) | 0.329/0.810 (unaligned, 37 structural unchanged) | T4a | M5; structural = U-REC scale ratio |
+| json/debako, dometa, kicati, letada, sevaji, vogeku | 7.194/8.954/0/1 | 4.444/6.302/0/1 | T4b 69c4c59bd | M3 declared half; remainder = `\N` label half (Smetana) + U-REC |
+| json/bogiku-88-nano204 | 8.631/14.223/8/0 | 4.375/6.233/3/0 | T4b | M3 |
+| json/zasitu-09-lise302 | 8.544/14.135/8/0 | 4.375/6.145/3/0 | T4b | M3 |
+| json/jidata-48-kire666 | 7.550/7.557/8/5 | 4.375/6.308/3/5 | T4b | M3 |
+| json/kidoki-70-fala224 | 78/80.711/6/0 | 78/80.711/1/0 | T4b | M3 (dw); in-rank 78 = U-NS |
+| json/nopoku-31-cisi925 | 94/94/6/0 | 94/94/1/0 | T4b | M3 (dw); in-rank 94 = U-NS |

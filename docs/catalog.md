@@ -2219,7 +2219,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-pen.ts` | `PenInk`, `JsonPen`, `penFor` | The seam between "which shapes this diagram draws" and "how they are drawn". |
 | `renderer-style.ts` | `BoxStyleJson`, `TextStyleJson`, `CellPaint`, `ArrowStyleJson`, `NodeStyleJson`, `SVG_CORNER_DIVISOR`, `JSON_SKIN_BLACK`, `resolveNodeStyle` | The json family's styles, read once per diagram into plain values the renderer only draws with. |
 | `renderer.ts` | `renderJson` | JSON diagram SVG renderer. |
-| `scale-geo.ts` | `scaleJsonGeometry`, `scaleNodeStyle` | The `scale …` directive for the json family, applied at the layout→render boundary. |
+| `scale-at-emit.ts` | `DrawnJson`, `scaleAtEmit` | The `scale …` directive for the json family, applied where upstream applies it: at emit, to a page drawn at 1x. |
 | `StyleExtractor.ts` | `StyleExtractor`, `extractStyle`, `payloadOf`, `upstreamSourceLines` | Port of upstream's `StyleExtractor` -- the json family's ONLY directive handling. |
 | `tab-stops.ts` | `tabString`, `tabStopWidth`, `TabToken`, `splitOnTabs`, `hasTab`, `tabAwareWidth`, `TabRun`, `walkTabs` | `\t` inside a drawn cell — tab-stop expansion, ported from `AtomText` (`klimt/creole/legacy/AtomText.java`). |
 | `text-block-style.ts` | `CellFont`, `CellMeasure`, `RowMeasure`, `cellMeasureOf`, `rowMeasureOf` | The measuring half of `TextBlockJson#getTextBlock`: the font and wrap width a cell is built with come from the cell's own merged `Style` (`getStyleToUse`), not from one diagram-wide font. |

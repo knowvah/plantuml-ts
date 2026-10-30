@@ -1,0 +1,1871 @@
+{
+  "generatedAt": "2026-10-30T15:31:22.029Z",
+  "fixtures": [
+    {
+      "slug": "bafilu-92-tafa086",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bagumi-85-lozu365",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bajivo-77-pobo340",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "banabu-01-toji092",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "batexe-61-veco004",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "batopu-67-jami141",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bederi-92-koli512",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "besemi-49-veti065",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "besufe-66-gada705",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bezuti-18-nidu462",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bidopa-61-teko164",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bileko-64-dilu512",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bolacu-92-lexa241",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "boriba-70-jaku597",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "borofe-47-jipo808",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bozema-41-lapo916",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "bugufi-22-kuje570",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "butebe-56-pode841",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cabuce-84-vigu667",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "caloxi-80-nuci628",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "camecu-06-maso692",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "caradi-82-kuvu509",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cavudo-55-moci793",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cazumu-70-fuma704",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cikosi-97-xeda373",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cisede-80-vove445",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cizano-33-fizu745",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cocaji-12-pake234",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cofuvo-63-xetu117",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cojudo-17-jepu802",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "colebo-35-fata117",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "colike-20-nisu163",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cukuno-01-guzu991",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cumoso-57-mixi871",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cunixe-77-mico636",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cuxuto-27-relu745",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cuzefo-91-koko300",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cuzoro-55-rudi222",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "cuzuji-45-muda875",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dasiso-94-depe048",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "depati-88-code332",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "digebo-07-ripi221",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dikube-07-beji534",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dikuro-34-refo029",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dirako-61-poni102",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "doboka-09-rona355",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dodeca-79-rudu746",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dofimi-75-piji693",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dofofu-68-gedo777",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dopuku-20-gori831",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dugaka-43-zeri872",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dujoni-50-vaju830",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dunasa-93-cogu513",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dupema-22-roze848",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "dusezi-68-furo555",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "duxifi-78-luke957",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "duxuce-04-fozu747",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "duzibu-35-pusu129",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "falode-20-botu370",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fecaru-84-gofi396",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fefotu-18-laxe696",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "felozo-89-fivo691",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "ficipo-99-puxe496",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fobeda-14-tori503",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "fodero-55-zixe088",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fofeco-01-pado350",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fokoze-20-mogu236",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fomuxu-72-juco154",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fubara-73-pida742",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "fucexe-84-more422",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "furaxa-02-xipi554",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "furubu-23-mecu777",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "fuxefe-01-nofa576",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gafici-65-jero084",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gagaco-10-sazu135",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gamibe-62-saju192",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gefonu-85-zuje780",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gemara-72-zito530",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gepoba-98-jigi979",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gicezu-34-jusu715",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gidaba-54-gimo713",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gijamo-30-jutu048",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gilefa-29-peta924",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "ginuje-41-pexi077",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gireba-14-mego043",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gocovi-57-fosu687",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gocuka-86-xibu161",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gogazu-26-jope140",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "golisa-28-jami599",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "govacu-51-puti316",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "goveba-36-sate631",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gujeda-65-puxa160",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "gupeci-50-tecu011",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jadobo-26-rezu573",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jibeva-93-fefa676",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jideku-30-fece615",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jigadu-98-juzo744",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jijuxe-97-sico836",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jipuni-32-zomu960",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jocino-85-febi208",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jofusa-40-ciki667",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jolipo-52-zozu818",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "judinu-92-kifa754",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "jupamo-68-pice508",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "juteru-56-zepi770",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kagili-15-xazi892",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kekezo-93-coro003",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kenivo-48-tejo604",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "ketaja-32-monu569",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kidaro-46-doda291",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kikela-87-nina038",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kikiga-12-pimu748",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kirebi-17-cuxo270",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "konazo-59-lise768",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "konime-99-saza921",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kotiva-49-lucu764",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "kuladi-04-duka067",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lacuce-93-vuso502",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "laguce-42-soku841",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lapuna-60-disa214",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "laxafo-15-xusu764",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "licuro-27-rixu366",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lififo-68-dili237",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lifumo-33-divi429",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "linizu-20-zima401",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "liseri-03-sagu530",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lituri-55-caju105",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "lojafi-33-zepu568",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lojari-14-ravi742",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lojivi-26-gobo140",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lomolu-38-gifa885",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lucafo-37-lemo654",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lugaje-51-dogu899",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "lugeje-33-bali095",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "luzape-81-vica587",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "majija-08-piso599",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "maleci-46-pale623",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "mavuga-45-nuco656",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "megara-80-life529",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "melacu-98-jere651",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "mexito-28-toli086",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "mikixe-60-riti913",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "mogafu-27-jeci360",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "molalo-93-xova251",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "molapi-68-dota900",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "murugo-92-ximo228",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nakude-77-suji787",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "navuza-63-pite366",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "necute-68-koga797",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "negosu-64-dada865",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nejadu-63-nifo204",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "nekoxi-93-noto522",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nemipi-13-maza277",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nipeki-55-poxe846",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nixane-84-lupi593",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nonuze-13-xonu297",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nopole-15-lanu541",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "novave-08-jiro803",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nujece-78-kude224",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nutadi-16-cuxu821",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "nuvura-15-xelo225",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "palede-79-kove202",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pameku-23-fima694",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "papava-92-geve698",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "patabu-48-guse041",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pefeki-56-jazi903",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pejedu-98-loku576",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pepife-04-pari260",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "petepi-34-duse613",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pezofu-85-veba361",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "picusu-82-xeca706",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pidole-84-tuvu346",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pigumi-99-taxa362",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pilaju-71-nevi681",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pilopa-41-nixe586",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pobexa-93-lelo542",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pomaxi-69-seso714",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "porofo-24-nivo859",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pozuxu-03-jura604",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pufapa-19-saka649",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "puliro-74-xoni409",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "pusaru-93-saxa018",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "puviva-32-meri658",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "puzeji-04-nima839",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "recufa-28-desi167",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "rekiza-32-xufi910",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "religa-63-kaju465",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "ribupo-71-poku778",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "ricogo-60-juda624",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "risute-23-cune531",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "rodava-01-cece748",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "rujulo-51-kice463",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "rumema-77-maci327",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "sadija-61-dune108",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "saduki-63-kuxi294",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "safaba-77-tizo932",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "sakibi-88-zuci243",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "sapule-82-juse994",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "saricu-01-funu594",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "semelu-66-zida372",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "senemu-90-juki505",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "seruka-40-bezu604",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "sevuva-32-sute361",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "sopori-42-tola587",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "soripi-42-pife730",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "sujaxe-77-bero153",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "suxedo-18-baxa547",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "takizo-77-pozi932",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "talopa-08-juxa284",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tamovo-46-dupu588",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "taxobi-33-beva693",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tekumi-86-zusu124",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tenali-11-zumi474",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tesiju-99-joji503",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tidezi-07-vago222",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tipusi-53-bodi732",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tizeno-46-disi122",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "torodu-27-vuga108",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tuduze-27-xale177",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "tuxixe-88-lado350",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vafuja-53-guxe056",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vagofo-93-bogo506",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "valade-26-rusi307",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "valodu-81-xize730",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vefive-25-fupa199",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vefoce-59-pexa532",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vekaxa-30-nisu813",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vekogi-91-ceso247",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vexedu-13-duse828",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vifaze-92-zoro596",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "virejo-92-dobu761",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vitagi-49-dezu555",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vivoca-86-peda017",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vocemu-18-ripe391",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "votofi-06-rolo321",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant",
+      "errorPage": true
+    },
+    {
+      "slug": "vovaje-98-jive278",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "voxupi-62-tica499",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vulura-14-zese292",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vunuze-73-tena303",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "vuveta-68-minu354",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xapevo-24-godi737",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xefava-55-lato939",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xekulu-76-vide299",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xetofo-88-vibi009",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xikovo-87-rosu902",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xodolo-13-bali118",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xubuxa-17-mibi955",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xujape-08-buce356",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xukulo-71-biji397",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xulexa-95-zoco224",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xupole-97-bovu539",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xureco-57-lene839",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xusepo-45-duco430",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xutiga-72-coju432",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "xutupo-03-diti057",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zazisu-54-juna927",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zelebo-79-mila801",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zemude-57-namu175",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zeneni-12-toli163",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zerogu-39-june315",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zesoru-40-poxu719",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zikene-09-betu460",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zimile-05-pomo538",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zizune-28-kage754",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    },
+    {
+      "slug": "zuvuvi-15-fedu171",
+      "type": "gantt",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "conformant"
+    }
+  ]
+}
