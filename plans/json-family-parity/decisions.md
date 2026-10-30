@@ -94,3 +94,52 @@ with its mechanism (D6 extended-baseline tool, copied from jse). The public
 ## Operational (Phase 4)
 Reversible throughout (worktree `--no-ff` merges; `jfp/pre-squash` tag). No API
 or schema change; SVG coordinates move; plantuml-ts has no consumers.
+
+## Amendment 2026-10-29 (B1 close, orchestrator) — findings that contradict D2/D3; HALT (stop 3)
+
+Evidence: `diagnosis/ledger.md` (70 rows) over the three agent ledgers.
+
+**F1 — M1+M2 close no row (contradicts D2's premise).** Three independent
+probes (T1a, T1b, T1c) of exactly D2's M1+M2 port left `residue.mts --all`
+byte-identical on all 92 cached rows. On every json-family graph the root is
+alone in rank 0, so graphviz's bb height equals the jar's `max` and the
+min-shift is 0; the engine's rank-axis extent comes back as declared + 1 (the
+`record_init` Kluge) so M1's echo never fires on it, and the drawn size is the
+measured block anyway. B2 (D1's `engineNodes`/`engineEdges` in `src/core/`) +
+B3 would therefore be a pure structural re-mirror with zero output change.
+Stop 11 is vacuous (0 predicted rows).
+
+**F2 — D3(1) is ambiguous on the dominant mechanism U-REC (all 70 rows).**
+Smetana 2.38's `record_init` rounds the declared size (`shapes__c.java:1807-1808`,
+`POINTS`) and applies no field PAD (`:1636-1644`); graphviz ≥ 8.0.4 does not
+round (`shapes.c:3688-3689`, commit `aee7eda7d`). Our engine INPUT (width,
+height, field sizes as written) is the jar's; the geometry SOLVED inside
+`record_init` differs. D3(1) says "compare the resulting record geometry" —
+read literally, U-REC is port-controlled (T1c's reading: the port can
+pre-round declared sizes and shrink fields to reproduce it); read by intent
+and CLAUDE.md "never chase a Smetana-specific number", it is Smetana (T1a/T1b).
+Measured stakes of emulating it (T1c): yaml/hcl rank axis exact on 34 rows,
+5 json canvas `dw` close; but 35 json rows move and several get worse
+(civofu → unaligned, jidata 7.55→8.0, kidoki/nopoku dw 6→8).
+
+**F3 — M4 (inch precision) has its origin in `src/core/`** (`inches()`,
+`svek-dot-emit-clusters.ts:33`, shared with every svek caller) — stop 7 forbids
+patching it; its effect on non-conformant rows is chaotic (kidoki 33→78).
+
+**Port-controlled and json-local, no ruling needed:** M5 scale-after-layout
+(nuzaje, timafu; `scale-geo.ts`, `JsonCurve.ts`, `renderer.ts`); the declared-size
+half of M3 empty-container-size (12 json rows; `TextBlockJson.ts:467`,
+`json/layout.ts:304`, `record-label.ts:58`) — its label half ((0,16) from Smetana's
+`\N` "WE CHEAT" sizing, `labels__c.java:119-122`) is Smetana arithmetic.
+
+**Questions for the user (the mission halts here):**
+- Q1. U-REC: Smetana (one ADR-2b row-level entry naming the three graphviz
+  version changes `aee7eda7d`/8.0.4, `b03040389`/7.0.0, `cfb1cc1a3`/7.0.0) or
+  port-controlled (B4 emulates `record_init`'s POINTS rounding + no-PAD)?
+- Q2. B2/B3: still land D1's core field + the literal `getPosition`/`Mirror`
+  port as a zero-output structural re-mirror, or drop them?
+- Q3. M4: leave it (core, stop 7), or authorise a core change (e.g. full-precision
+  inches for `shape: 'record'`, whose only caller is json)?
+- Q4. B4 as proposed: T4a M5 scale-after-layout; T4b M3 declared-size half
+  (engine gets `calculateDimension`, MIN_WIDTH draw-only, no label when empty).
+  Disjoint write-sets except `json/layout.ts` (T4a reads, T4b writes) ⇒ serial.
