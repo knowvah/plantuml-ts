@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-2034 modules · 7043 exported names.
+2035 modules · 7047 exported names.
 
 ## `src/`
 
@@ -2204,6 +2204,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `json-diagram-factory.ts` | `JsonFamilyHeader`, `headerOf` | What the three json-family factories (`JsonDiagramFactory`, `YamlDiagramFactory`, `HclDiagramFactory`) and the `JsonDiagram` constructor take from a {@link StyleExtractor} besides the payload: the title and the `scale` line. |
 | `json-family-style-input.ts` | `isExtended`, `jsonFamilyStyleInput`, `hclStyleInput` | The style sources a json-family diagram's theme is built from -- the `SyncPlugin.styleInput` of `@startjson` / `@startyaml` / `@starthcl`. |
 | `json-layout-prep.ts` | `ValueType`, `DisplayValue`, `getDisplayValue`, `JsonContainer`, `FlatNode`, `containerEntries`, `walkTree`, `EMPTY_MAP`, `Highlighted`, `upOneLevel`, `isHighlighted`, `buildHighlightMap`, `wordWrapLine`, `BuildRowsOptions` | JSON diagram pre-layout: value display formatting, container tree flattening, highlight-map construction, and string wrapping. |
+| `json-node-position.ts` | `JsonEngineNode`, `JsonNodePosition`, `JsonNodePositions`, `jsonNodePositions` | Where the jar puts each json node: `SmetanaForJson#drawMe`'s `max` and `#getPosition`, over the engine's raw node frame. |
 | `json-renderer-highlight.ts` | `highlightRect`, `scaleDasharray` | The highlighted row's backing rect and the dash-scaling helper for the JSON renderer — split out of renderer.ts (cdd-T30, 500-line file-size cap). |
 | `json-skin-param.ts` | `JsonFamilyType`, `JsonSkinParam`, `jsonFamilyJarStyleSource`, `createJsonSkinParam` | The json family's `SkinParam` slice: the style engine `TextBlockJson` and `SmetanaForJson` read through `skinParam.getCurrentStyleBuilder()` and `getIHtmlColorSet()` (`TextBlockJson.java:112`, `SmetanaForJson.java:119-120`). |
 | `json-style-resolve.ts` | `JsonStyleInput`, `JsonStyleSet`, `resolveJsonStyles`, `styleToUse` | resolveJsonStyles — the json family's styles at the jar's six signatures. |

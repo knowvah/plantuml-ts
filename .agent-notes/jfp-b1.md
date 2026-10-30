@@ -21,3 +21,9 @@
 - **Finding**: `digraph{a->b}` rendered twice on one graph object: first render `a 27,90 / b 27,18` (= real dot), second `a 27,18 / b 99,18` with the first pass's edge route. `layoutGraph` renders once, so no production row is affected.
 - **Impact**: any harness that calls `render()` twice on one builder graph measures garbage on the second call. Not filed in docs/graphviz-issues/ (no real-dot counterpart established for an in-process second render); needs a dedicated check before filing.
 - **Confidence**: Medium (reproduced by two agents; not checked by the orchestrator)
+
+## Observation: json `scale` leftovers after jfp T4a (cleanup candidates)
+- **Context**: jfp T4a moved json's `scale` to emit time (`scaleActivityBody` + `scaledCanvas`), deleting `scale-geo.ts`.
+- **Finding**: `NodeStyleJson.scale` (`src/diagrams/json/renderer-style.ts:97-102`, default 1 at :193) is now always 1; `json-renderer-highlight.ts` still multiplies by it and calls `scaleDasharray(…, k)` (no-op at 1); stale `scale-geo.ts#scaleNodeStyle` comments at renderer-style.ts:54,97 and json-renderer-highlight.ts:37. Also: `finalizeJsonFragment` does not route through `TextBlockExporter#exportTo`, so scale + title/document margin stays approximate (no corpus row combines them; fixing needs `src/core/assemble-svg.ts`).
+- **Impact**: dead-code cleanup PR for the two files; scale+title needs its own fixture + mission.
+- **Confidence**: High (agent report; dead `scale` field not re-verified by the orchestrator)

@@ -1,0 +1,60 @@
+== activity 09:55:16 { 10.51 11.38 9.10 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-activity.json — {"conformant":449,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== board 09:55:49 { 8.05 10.69 8.93 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 09:56:20 { 7.35 10.28 8.84 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-c4.json — {"conformant":2,"structural-match":0,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== chart 09:56:53 { 7.48 9.95 8.77 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+== chronology 09:57:24 { 6.47 9.46 8.63 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== class 09:57:51 { 5.29 8.94 8.47 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-class.json — {"conformant":723,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== component 09:58:27 { 6.00 8.74 8.42 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-component.json — {"conformant":214,"structural-match":12,"diverged":40,"errored":0,"timeout":0,"oracle-error":0}
+== ditaa 09:59:00 { 6.15 8.51 8.35 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/json-family-parity/measurements/b3-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 09:59:15 { 5.97 8.35 8.29 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== ebnf 09:59:47 { 6.74 8.29 8.27 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+== files 10:00:20 { 10.49 8.88 8.48 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-files.json — {"conformant":9,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 10:00:52 { 8.73 8.61 8.39 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-gantt.json — {"conformant":265,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== hcl 10:01:27 { 7.55 8.35 8.31 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== json 10:01:57 { 6.05 7.91 8.15 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-json.json — {"conformant":14,"structural-match":35,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== mindmap 10:02:28 { 5.69 7.65 8.04 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-mindmap.json — {"conformant":142,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== network 10:02:59 { 5.17 7.33 7.91 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-network.json — {"conformant":1,"structural-match":0,"diverged":2,"errored":0,"timeout":0,"oracle-error":0}
+== object 10:03:30 { 5.02 7.08 7.80 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-object.json — {"conformant":63,"structural-match":8,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== packet 10:04:00 { 4.20 6.67 7.63 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+== regex 10:04:31 { 3.76 6.32 7.47 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+== salt 10:05:01 { 3.52 6.02 7.31 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-salt.json — {"conformant":51,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== sequence 10:05:32 { 3.80 5.80 7.18 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-sequence.json — {"conformant":1143,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== state 10:06:16 { 3.86 5.54 7.02 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-state.json — {"conformant":99,"structural-match":14,"diverged":160,"errored":0,"timeout":0,"oracle-error":0}
+== timing 10:06:46 { 3.49 5.28 6.87 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-timing.json — {"conformant":6,"structural-match":0,"diverged":120,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 10:07:16 { 3.46 5.10 6.75 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-unknown.json — {"conformant":565,"structural-match":19,"diverged":241,"errored":0,"timeout":0,"oracle-error":0}
+== usecase 10:07:52 { 3.35 4.85 6.58 }
+[xmldom fatalError]	comment is not well-formed at position 3151 
+wrote plans/json-family-parity/measurements/b3-eng/parity-usecase.json — {"conformant":68,"structural-match":7,"diverged":18,"errored":0,"timeout":0,"oracle-error":1}
+== wbs 10:08:24 { 3.28 4.69 6.46 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-wbs.json — {"conformant":204,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== wire 10:08:54 { 3.96 4.73 6.42 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 10:09:23 { 3.57 4.55 6.29 }
+wrote plans/json-family-parity/measurements/b3-eng/parity-yaml.json — {"conformant":7,"structural-match":31,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+DONE 10:09:53
