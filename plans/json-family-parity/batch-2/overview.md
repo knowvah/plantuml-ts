@@ -7,8 +7,8 @@ json does not consume the field yet — json/yaml/hcl stay byte-identical too.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T2a](T2a-engine-node-data.md) | `engineNodes` / `engineEdges` under `read: 'exact'` | typescript-pro (sonnet, effort high), jfp-T2a | `src/core/graph-layout.ts`, `src/core/graph-layout-result.types.ts`, `tests/unit/core/graph-layout-engine-nodes.test.ts` | b1 close | [ ] |
-| close | merge; gates `b2`; chain vs b0 (0 movers anywhere); D5 check (0 movers) | orchestrator | per close-procedure | T2a | [ ] |
+| [T2a](T2a-engine-node-data.md) | `engineNodes` / `engineEdges` under `read: 'exact'` | typescript-pro (sonnet, effort high), jfp-T2a | `src/core/graph-layout.ts`, `src/core/graph-layout-result.types.ts`, `tests/unit/core/graph-layout-engine-nodes.test.ts` | b1 close | [x] |
+| close | merge; gates `b2`; chain vs b0 (0 movers anywhere); D5 check (0 movers) | orchestrator | per close-procedure | T2a | [x] |
 
 ## Interface (T2a → T3a)
 ```ts

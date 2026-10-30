@@ -143,3 +143,19 @@ half of M3 empty-container-size (12 json rows; `TextBlockJson.ts:467`,
 - Q4. B4 as proposed: T4a M5 scale-after-layout; T4b M3 declared-size half
   (engine gets `calculateDimension`, MIN_WIDTH draw-only, no label when empty).
   Disjoint write-sets except `json/layout.ts` (T4a reads, T4b writes) ⇒ serial.
+
+## Amendment 2026-10-30 (user rulings on the B1 halt)
+- **Q1 → U-REC is Smetana.** Smetana 2.38's `record_init` rounding/no-PAD is
+  engine arithmetic, not port-controlled input; D3(1) compares the engine INPUT
+  geometry (declared sizes + field sizes as written), which equals the jar's.
+  U-REC joins U-CLIP / U-ARROW / U-NS in one DIVERGENCES ADR-2b row-level entry
+  (exit batch) naming graphviz `aee7eda7d` (8.0.4), `b03040389` (7.0.0),
+  `cfb1cc1a3` (7.0.0) with the measured magnitudes.
+- **Q2 → B2 + B3 land** as a structural re-mirror (CLAUDE.md "a structural
+  divergence IS the bug"). Expected output change: **none**. Any mover at the
+  B3 close is a finding with its mechanism (stop 13 analogue), not a win to bank.
+  Stop 11 is vacuous (0 predicted rows).
+- **Q3 → M4 (6-dp inches, `src/core/svek-dot-emit-clusters.ts:33`) is left as is.**
+  Classed "Smetana-adjacent, core-owned, not patched" in the ledger; listed in
+  DIVERGENCES' json entry as a known residue source on kusule + the 10 M3+M4 rows.
+- **Q4 → B4 = T4a (M5 scale-after-layout) then T4b (M3 declared-size half), serial.**

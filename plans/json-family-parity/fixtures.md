@@ -15,6 +15,7 @@ Real graphviz on this box: `dot` 16.1.0 (A5/T7's comparison used 15.1.1).
 | main `7d08a6592` | 14/36 | 7/32 | 1/2 | 14/7/1 | 167 + 3 | — | 70 |
 | b0 close | 14/36 | 7/32 | 1/2 | 14/7/1 | 167 + 3 | 70 (66 numeric + 4 `aligned:false`: json/timafu, yaml/bafemu, yaml/najoba, yaml/tadari) | 70 |
 | b1 close | 14/36 | 7/32 | 1/2 | 14/7/1 | 167 + 3 | 70 (unchanged; no src change) | 70 classed, 0 unknown; U-REC class pending Q1; 0 predicted closed by M1+M2 |
+| b2 close | 14/36 | 7/32 | 1/2 | 14/7/1 | 167 + 3 | 70 (unchanged) | 70 classed |
 
 ## T1a — json, node |Δ| ≤ 1px (18)
 

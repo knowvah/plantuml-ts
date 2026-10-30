@@ -100,10 +100,10 @@ Collected (JSON reporter) must equal on-disk. `uptime` first; above ~10 wait
 | batch | tasks | status |
 |---|---|---|
 | [0 — branch, tooling, positional guard](batch-0/overview.md) | T0a, T0b, close | [x] |
-| [1 — diagnosis ledger](batch-1/overview.md) | T1a, T1b, T1c, close (+ B4 amendment) | [~] ledgers done; halted for rulings Q1-Q4 |
-| [2 — engine node data in core](batch-2/overview.md) | T2a, close | [ ] |
+| [1 — diagnosis ledger](batch-1/overview.md) | T1a, T1b, T1c, close (+ B4 amendment) | [x] |
+| [2 — engine node data in core](batch-2/overview.md) | T2a, close | [x] |
 | [3 — port getPosition + Mirror (M1+M2)](batch-3/overview.md) | T3a, close | [ ] |
-| [4 — remaining port-controlled mechanisms](batch-4/overview.md) | written at the B1 close | [ ] |
+| [4 — remaining port-controlled mechanisms](batch-4/overview.md) | T4a (M5), T4b (M3), close | [ ] |
 | [exit](batch-exit/overview.md) | final measurement, DIVERGENCES, docs, memory | [ ] |
 | [squash](batch-squash/overview.md) | one commit per batch, tag `jfp/pre-squash` | [ ] |
 

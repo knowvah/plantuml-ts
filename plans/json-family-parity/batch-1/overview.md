@@ -10,7 +10,7 @@ what was probed). Method and row format: [diagnosis-method.md](diagnosis-method.
 | [T1a](T1a-json-subpixel.md) | json rows, node \|Δ\| ≤ 1px (18) | debugger (opus, effort high), jfp-T1a | `plans/json-family-parity/diagnosis/json-subpixel.md` | b0 close | [x] |
 | [T1b](T1b-json-large.md) | json rows, node \|Δ\| > 1px (18, incl. timafu) | debugger (opus, effort high), jfp-T1b | `plans/json-family-parity/diagnosis/json-large.md` | b0 close | [x] |
 | [T1c](T1c-yaml-hcl.md) | yaml (32) + hcl (2) | debugger (opus, effort high), jfp-T1c | `plans/json-family-parity/diagnosis/yaml-hcl.md` | b0 close | [x] |
-| close | merge ledgers; build `diagnosis/ledger.md`; file any graphviz-issues drafts; write the Batch 4 amendment (decisions.md + batch-4/); no gates beyond merge-one (no src change) | orchestrator | per close-procedure + `docs/graphviz-issues/**`, `decisions.md`, `batch-4/**` | T1a, T1b, T1c | [~] halted at Q1-Q4 (decisions.md amendment 2026-10-29) |
+| close | merge ledgers; build `diagnosis/ledger.md`; file any graphviz-issues drafts; write the Batch 4 amendment (decisions.md + batch-4/); no gates beyond merge-one (no src change) | orchestrator | per close-procedure + `docs/graphviz-issues/**`, `decisions.md`, `batch-4/**` | T1a, T1b, T1c | [x] (rulings 2026-10-30) |
 
 ## Close specifics
 1. Every row of `fixtures.md`'s three tables appears in exactly one ledger with a

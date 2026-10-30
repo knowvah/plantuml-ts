@@ -9,7 +9,7 @@
 // decision D4 — renderers untouched). See plans/burn-graphviz-engines/.
 
 import { createGraph, render, getLayout } from '@knowvah/dot-engine';
-import type { LayoutSnapshot } from '@knowvah/dot-engine';
+import type { Graph, LayoutSnapshot } from '@knowvah/dot-engine';
 import {
   applyGraphAttrs,
   addNodes,
@@ -47,6 +47,7 @@ const CANVAS_MARGIN = 12;
 type OutNodes = DotLayoutResult['nodes'];
 type OutEdges = DotLayoutResult['edges'];
 type OutClusters = NonNullable<DotLayoutResult['clusters']>;
+type MatchedEdges = ReadonlyArray<{ index: number; id: string }>;
 
 // Instrumentation seam for the oracle DOT-parity workstream. When set, every
 // layoutGraph() call hands its input here before layout — letting the parity
@@ -188,16 +189,49 @@ function toEdgeEntry(ge: LayoutSnapshot['edges'][number], id: string, inp: DotIn
   return entry;
 }
 
-function mapEdges(snap: LayoutSnapshot, idx: EdgeIndex, frame: SvekFrame | undefined): OutEdges {
-  const edges: OutEdges = [];
-  for (const ge of snap.edges) {
+/** Pairs each snapshot edge (by index) with the caller's edge id, consuming
+ *  `idx.idQueues` in snapshot order. Edges with no remaining id are skipped.
+ *  Shared by {@link mapEdges} and {@link engineFrame} so both agree on which
+ *  edges survive and what each is called. */
+function matchEdgeIds(snap: LayoutSnapshot, idx: EdgeIndex): MatchedEdges {
+  const matched: Array<{ index: number; id: string }> = [];
+  snap.edges.forEach((ge, index) => {
     const q = idx.idQueues.get(edgeKey(ge.tail, ge.head));
     const id = q !== undefined && q.length > 0 ? q.shift() : undefined;
-    if (id === undefined) continue;
+    if (id !== undefined) matched.push({ index, id });
+  });
+  return matched;
+}
+
+function mapEdges(snap: LayoutSnapshot, matched: MatchedEdges, idx: EdgeIndex, frame: SvekFrame | undefined): OutEdges {
+  return matched.map(({ index, id }) => {
+    const ge = snap.edges[index]!;
     const inp = idx.inputEdgeById.get(id);
-    edges.push(toEdgeEntry(frame === undefined ? ge : svekEdge(frame, ge, edgeLabelTables(inp)), id, inp));
-  }
-  return edges;
+    return toEdgeEntry(frame === undefined ? ge : svekEdge(frame, ge, edgeLabelTables(inp)), id, inp);
+  });
+}
+
+/** D1 (json-family-parity T2a): the engine's raw frame -- node centre
+ *  (`ND_coord`) and size (`ND_width/ND_height * 72`), edge control points and
+ *  `bezier.ep` -- read from the NATIVE y-up snapshot of the already laid-out
+ *  graph (a second `getLayout`, not a second layout) with no echo, shift or
+ *  flip. Edge ids come from the same {@link matchEdgeIds} pairing that named
+ *  `edges[]`. Only `read: 'exact'` calls this; nothing else is derived from it.
+ *  @see SmetanaForJson.java:97-102,203-210 (`getPosition`, node `max`)
+ *  @see SmetanaForJson.java:212-215 (`JsonCurve` through the same `Mirror`) */
+function engineFrame(g: Graph, matched: MatchedEdges): Pick<DotLayoutResult, 'engineNodes' | 'engineEdges'> {
+  const up = getLayout(g, { yAxis: 'up' });
+  return {
+    engineNodes: up.nodes.map((n) => ({ id: n.name, cx: n.x, cy: n.y, width: n.width, height: n.height })),
+    engineEdges: matched.map(({ index, id }) => {
+      const ge = up.edges[index]!;
+      return {
+        id,
+        points: ge.points.map((p) => ({ x: p.x, y: p.y })),
+        ...(ge.ep !== undefined ? { epX: ge.ep.x, epY: ge.ep.y } : {}),
+      };
+    }),
+  };
 }
 
 /** G5 C2: re-keys `getLayout()`'s `clusters` snapshot entries from
@@ -371,12 +405,21 @@ export function layoutGraph(
   const snap = frame === undefined ? raw : { ...raw, clusters: raw.clusters.map((c) => svekCluster(frame, c)) };
 
   const nodes = mapNodes(snap, input, frame);
-  const edges = mapEdges(snap, idx, frame);
+  const matched = matchEdgeIds(snap, idx);
+  const edges = mapEdges(snap, matched, idx, frame);
   const clusters = mapClusters(snap, clusterIdx);
   const originShift = shiftToOrigin(nodes, edges, clusters);
   const { width, height } = canvasSize(nodes, edges);
 
-  return { nodes, edges, width, height, originShift, ...(clusters !== undefined ? { clusters } : {}) };
+  return {
+    nodes,
+    edges,
+    width,
+    height,
+    originShift,
+    ...(clusters !== undefined ? { clusters } : {}),
+    ...(svek ? {} : engineFrame(b.graph, matched)),
+  };
 }
 
 export type {
