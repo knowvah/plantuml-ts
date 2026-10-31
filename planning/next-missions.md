@@ -4985,24 +4985,31 @@ supersedes the conclusion in
     containers get the jar's engine size (11 rows fall); remainder is graphviz
     2.38 vs modern arithmetic, recorded in DIVERGENCES (Smetana-backed types).
     New shrink-only gate `oracle/goldens/json-family-positional.json`.
-  - **jfp follow-ons (2026-10-30)** — (1) labelless record: mirroring
-    `SmetanaForJson.java:253-254` (no label when empty) needs
-    `src/core/graph-layout-build.ts:147-148,166-167` and measured WORSE on
-    dot-engine (`\N` sized as the node name + PAD, 29.5 wide vs Smetana's 15;
-    4 rows rise, 6 unalign — jfp journal row 21); (2) core `inches()` 6-dp vs
-    the jar's full precision (`svek-dot-emit-clusters.ts:33`; kusule + 10 rows,
-    chaotic elsewhere, user ruling: left); (3) dot-engine re-render of one graph
-    object is not idempotent (`.agent-notes/jfp-b1.md`; check, then file in
-    `docs/graphviz-issues/`); (4) dead json `scale` plumbing after T4a
-    (`NodeStyleJson.scale`, `scaleDasharray`, `renderer-style.ts`,
-    `json-renderer-highlight.ts`); (5) scale × title still unscaled (needs core
-    `TextBlockExporter#exportTo` routing); (6) the structural manifest's
-    najoba/tadari/vapoda notes name dot-engine/`shapes__c.java:253-254` where the
-    mechanism is U-REC at `:1807-1808` (jfp T1c) — reword at the next re-pin.
-  - **Authored fixtures worth adding** — `style-root-fontcolor` (json/yaml;
-    `<style> root { FontColor }` now matches the jar in both modes, no gate),
-    title+handwritten, title narrower than body, title+scale (T1c scratch
-    pairs).
+  - **jfp follow-ons (2026-10-30)** — closed by json-family-followons (jff,
+    2026-10-30; hashes resolve through tag `jff/pre-squash`): ~~(1) labelless
+    record~~ closed without code (jff D2: the explicit `''` label reproduces
+    Smetana's no-extent outcome; DIVERGENCES "Smetana-backed diagram types");
+    (2) core `inches()` 6-dp — **open by ruling** (user, 2026-10-30, "leave
+    it"); ~~(3) dot-engine re-render~~ filed as
+    `docs/graphviz-issues/37-rerender-not-idempotent.md` (jff T1a 83b7e7e82;
+    native libgvc is idempotent across `gvFreeLayout`); ~~(4) dead json `scale`
+    plumbing~~ removed (jff T1b 162e0fea9); ~~(5) scale × title~~ fixed — the
+    renderer hands core a raw 1x block and core scales the chromed block (jff
+    T2a 687b29e95, T2b 9934e53a4); ~~(6) najoba/tadari/vapoda notes~~ reworded
+    to U-REC, timafu too (jff T0b ef788ad53, b0 close a7ab8240c).
+  - ~~**Authored fixtures worth adding**~~ — landed in jff T0b:
+    `yaml/style-root-fontcolor`, `json/title-handwritten`, `json/title-narrow`,
+    `{json,yaml,hcl}/title-scale`, `json/title-scale-max-width`,
+    `json/caption-scale` (caption is not json-family chrome: a scaled error page).
+  - **jff follow-ons (2026-10-30)** — (a) `#000000` back colour: the jar paints
+    no rect for it (`SvgGraphics.java:189-190`) but `isSolidNonDefault`
+    (`src/core/assemble-svg.ts`) does; no corpus row reaches it. (b) json/yaml
+    unit tests that call `assembleSvg(renderJson(geo))` without `diagramType`
+    skip `finalizeJsonFragment` and assert an unshifted, unformatted body
+    production never emits (`tests/unit/json/renderer.test.ts`,
+    `tests/unit/yaml/highlight-styleclass.test.ts`); stamp `diagramType: 'JSON'`.
+    (c) gradient json back colours (`SvgGraphics.java:178-183`) are unhandled by
+    either finalize path.
   - **`tests/visual/data/*.json` refresh** — the committed manifests carry
     hand-authored rows and have drifted from ~/git/pdiff (`.agent-notes/
     ddc-T0c.md`); a regeneration must preserve them.

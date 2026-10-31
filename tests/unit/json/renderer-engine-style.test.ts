@@ -31,10 +31,12 @@ const ROW: JsonRowGeo = {
   valueAtoms: [[{ text: '1', dx: 0, textLength: 7.787 }]],
 };
 
+/** At the block origin: jff-T2b's exporter adds the same(10) margin
+ *  (`TextBlockExporter.java:173`), so the oracle coordinates stay (10, 10). */
 const NODE: JsonNodeGeo = {
   id: 'n0',
-  x: 10,
-  y: 10,
+  x: 0,
+  y: 0,
   width: 39.338,
   height: 36,
   keyColWidth: 17.787,
@@ -63,7 +65,9 @@ function styled(directives: string, rows: JsonRowGeo[] = NODE.rows, extra: Parti
     height: 80,
     ...extra,
   };
-  return assembleSvg(renderJson(geo, defaultTheme));
+  // The plugin's own stamp (`json/index.ts#render`): it routes the fragment
+  // through the json export tail (`assemble-svg.ts#finalizeJsonFragment`).
+  return assembleSvg({ ...renderJson(geo, defaultTheme), diagramType: 'JSON' });
 }
 
 const css = (block: string): string => `<style>\njsonDiagram {\n${block}\n}\n</style>`;

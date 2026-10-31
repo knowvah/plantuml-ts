@@ -63,7 +63,11 @@ equals real `dot -Tdot` 16.1.0 on that input. The upstream placement arithmetic
 literally (`src/diagrams/json/json-node-position.ts`) — it changed no byte,
 because the root is alone in rank 0 so graphviz's bounding box already IS the
 jar's `max`. Two port-controlled defects were fixed (`scale` applied at emit;
-an empty container's engine size from `calculateDimension`). What remains is
+an empty container's engine size from `calculateDimension`); json-family-followons
+(2026-10-30) then moved `scale` onto the chromed block, as `UgDiagram#getExporter`
+→ `TextBlockExporter#exportTo` does (`UgDiagram.java:123-131`,
+`TextBlockExporter.java:159-177`), so a title scales with the body and
+`scale max` reads the titled, margined width. What remains is
 graphviz 2.38 (Smetana) vs modern graphviz arithmetic, four named sources:
 
 | source | Smetana (2.38) | graphviz (dot-engine, 16.1.0) | graphviz change |
@@ -77,7 +81,9 @@ Plus two smaller items, measured and left by ruling: the empty-container
 **label** half (the jar sets no label, `SmetanaForJson.java:253-254`; Smetana
 sizes the default `\N` as (0,16) with no PAD, `labels__c.java:119-122`, while
 graphviz sizes it as the node name + PAD — omitting the label here also needs a
-`src/core/` change and measured worse), and 6-dp inch strings in core's
+`src/core/` change and measured worse; closed without code, json-family-followons
+D2: the explicit `''` label already reproduces Smetana's outcome, no text extent,
+where the labelless call would import a node-name width Smetana never computes), and 6-dp inch strings in core's
 `inches()` (`svek-dot-emit-clusters.ts:33` vs the jar's full-precision
 `"" + dim/72`, `SmetanaForJson.java:235-236`; json/kusule + 10 rows by ≤ 1 pt).
 Magnitudes (positional ceiling `oracle/goldens/json-family-positional.json`,

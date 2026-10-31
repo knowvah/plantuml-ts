@@ -473,6 +473,62 @@
       "pathMax": 1.476,
       "dw": 1,
       "dh": 0
+    },
+    "authored:json/title-scale": {
+      "aligned": true,
+      "nodeMax": 0.254,
+      "pathMax": 1.861,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:yaml/title-scale": {
+      "aligned": true,
+      "nodeMax": 0.675,
+      "pathMax": 2,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:hcl/title-scale": {
+      "aligned": true,
+      "nodeMax": 0,
+      "pathMax": 0,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/title-scale-max-width": {
+      "aligned": true,
+      "nodeMax": 0,
+      "pathMax": 0,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/caption-scale": {
+      "aligned": true,
+      "nodeMax": 0,
+      "pathMax": 0,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/title-handwritten": {
+      "aligned": true,
+      "nodeMax": 0.225,
+      "pathMax": 1.946,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/title-narrow": {
+      "aligned": true,
+      "nodeMax": 0,
+      "pathMax": 1.41,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:yaml/style-root-fontcolor": {
+      "aligned": true,
+      "nodeMax": 0.338,
+      "pathMax": 1.284,
+      "dw": 0,
+      "dh": 0
     }
   }
 }

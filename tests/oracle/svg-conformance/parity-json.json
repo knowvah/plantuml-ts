@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T22:07:05.162Z",
+  "generatedAt": "2026-10-31T00:57:37.046Z",
   "fixtures": [
     {
       "slug": "babico-87-soxo095",
@@ -37,7 +37,7 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "structural-match",
-      "maxDelta": 14.223000000000013,
+      "maxDelta": 6.233000000000004,
       "maxDeltaPath": "svg/g[1]/path[3]/@d[10]"
     },
     {
@@ -87,7 +87,7 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "structural-match",
-      "maxDelta": 8.95399999999998,
+      "maxDelta": 6.301999999999964,
       "maxDeltaPath": "svg/g[1]/path[9]/@d[12]"
     },
     {
@@ -114,7 +114,7 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "structural-match",
-      "maxDelta": 8.95399999999998,
+      "maxDelta": 6.301999999999964,
       "maxDeltaPath": "svg/g[1]/path[9]/@d[12]"
     },
     {
@@ -184,8 +184,8 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "structural-match",
-      "maxDelta": 8,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "maxDelta": 6.308,
+      "maxDeltaPath": "svg/g[1]/path[2]/@d[1]"
     },
     {
       "slug": "json-escaped",
@@ -209,7 +209,7 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "structural-match",
-      "maxDelta": 8.95399999999998,
+      "maxDelta": 6.301999999999964,
       "maxDeltaPath": "svg/g[1]/path[9]/@d[12]"
     },
     {
@@ -236,7 +236,7 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "structural-match",
-      "maxDelta": 8.95399999999998,
+      "maxDelta": 6.301999999999964,
       "maxDeltaPath": "svg/g[1]/path[9]/@d[12]"
     },
     {
@@ -361,7 +361,7 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "structural-match",
-      "maxDelta": 8.95399999999998,
+      "maxDelta": 6.301999999999964,
       "maxDeltaPath": "svg/g[1]/path[9]/@d[12]"
     },
     {
@@ -377,9 +377,9 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "diverged",
-      "maxDelta": 64.057,
+      "maxDelta": 0.8100000000000023,
       "firstDiff": "svg/g[1]/rect[1]/@stroke-width",
-      "maxDeltaPath": "svg/g[1]/path[2]/@d[6]"
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
     },
     {
       "slug": "tivuru-65-vezu313",
@@ -396,7 +396,7 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "structural-match",
-      "maxDelta": 8.95399999999998,
+      "maxDelta": 6.301999999999964,
       "maxDeltaPath": "svg/g[1]/path[9]/@d[12]"
     },
     {
@@ -412,7 +412,7 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "structural-match",
-      "maxDelta": 14.134999999999991,
+      "maxDelta": 6.144999999999982,
       "maxDeltaPath": "svg/g[1]/path[3]/@d[10]"
     },
     {

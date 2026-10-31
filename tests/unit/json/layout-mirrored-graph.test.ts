@@ -120,11 +120,11 @@ describe('layoutJson — the graph handed to the engine (AC2)', () => {
  * mirror. `max` = max over nodes of `cy + h/2` (`SmetanaForJson.java:97-102,
  * 160-164`); node origin `(max - (cy + h/2), cx - w/2)` (`:203-209`, `.sym()`);
  * every edge point and `ep` through `Mirror#invAndXYSwitch` = `(max - y, x)`
- * (`JsonCurve.java:96-108`, `Mirror.java:55-59`). Margin = `same(10)`
- * (`TitledDiagram.java:275-277`), added after the mirror as before.
+ * (`JsonCurve.java:96-108`, `Mirror.java:55-59`). No document margin: jff-T2b
+ * draws the block at its own origin (`JsonDiagram.java:122`); the exporter
+ * translates by the margin (`TextBlockExporter.java:173`).
  */
 describe('layoutJson — placement through the jar mirror (T3a)', () => {
-  const MARGIN = 10;
   const BODY = '{"a": {"b": 1}, "c": [1]}';
 
   beforeEach(() => {
@@ -138,7 +138,7 @@ describe('layoutJson — placement through the jar mirror (T3a)', () => {
     return Math.max(0, ...g.nodes.map((n, i) => engineCentreOf(i).cy + n.height / 2));
   }
 
-  it('places every node at (max - (cy + h/2), cx - w/2) + margin, drawn at its measured size', () => {
+  it('places every node at (max - (cy + h/2), cx - w/2), drawn at its measured size', () => {
     const ast = parseJson({ type: 'json', lines: BODY.split('\n') });
     const geo = layoutJson(ast, defaultTheme, new DeterministicMeasurer());
     const g = captured[0]!;
@@ -147,8 +147,8 @@ describe('layoutJson — placement through the jar mirror (T3a)', () => {
     g.nodes.forEach((dn, i) => {
       const { cx, cy } = engineCentreOf(i);
       const node = geo.nodes[i]!;
-      expect(node.x).toBe(max - (cy + dn.height / 2) + MARGIN);
-      expect(node.y).toBe(cx - dn.width / 2 + MARGIN);
+      expect(node.x).toBe(max - (cy + dn.height / 2));
+      expect(node.y).toBe(cx - dn.width / 2);
       // drawn size = the measured block = the declared size transposed back
       expect(node.width).toBe(dn.height);
       expect(node.height).toBe(dn.width);
@@ -163,10 +163,10 @@ describe('layoutJson — placement through the jar mirror (T3a)', () => {
     for (const e of geo.edges) {
       // y = 400 lies beyond max: the jar keeps max - 400 (negative), so do we.
       expect(e.points).toEqual([
-        { x: max - 2 + MARGIN, y: 1 + MARGIN },
-        { x: max - 400 + MARGIN, y: 3 + MARGIN },
+        { x: max - 2, y: 1 },
+        { x: max - 400, y: 3 },
       ]);
-      expect(e.ep).toEqual({ x: max - 6 + MARGIN, y: 5 + MARGIN });
+      expect(e.ep).toEqual({ x: max - 6, y: 5 });
       expect(e.spline).toBe(true);
     }
   });

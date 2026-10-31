@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-2035 modules · 7047 exported names.
+2034 modules · 7043 exported names.
 
 ## `src/`
 
@@ -2198,14 +2198,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `ast.ts` | `HighlightDirective`, `JsonDiagramAST`, `surfaceParseWarnings` | AST types for PlantUML JSON diagrams (@startjson / @endjson). |
 | `color-form.ts` | `canonicalColor`, `canonicalColorOpt` | The FORM a color takes in the emitted SVG, as distinct from which color it is. |
-| `document-dimensions.ts` | `ENSURE_VISIBLE_BUMP`, `DocumentDimensions`, `documentDimensions` | The json document's own width/height. |
+| `document-dimensions.ts` | `DocumentDimensions`, `documentDimensions` | The json block's own width/height -- `JsonDiagram#calculateDimension`. |
 | `Fission.ts` | `NeutronType`, `Neutron`, `getNeutrons`, `splitStripe` | Line wrapping, as upstream does it — by splitting a line into ATOMS and breaking between them, not by re-joining words into strings. |
 | `index.ts` | `jsonPlugin` | JSON diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `json-diagram-factory.ts` | `JsonFamilyHeader`, `headerOf` | What the three json-family factories (`JsonDiagramFactory`, `YamlDiagramFactory`, `HclDiagramFactory`) and the `JsonDiagram` constructor take from a {@link StyleExtractor} besides the payload: the title and the `scale` line. |
 | `json-family-style-input.ts` | `isExtended`, `jsonFamilyStyleInput`, `hclStyleInput` | The style sources a json-family diagram's theme is built from -- the `SyncPlugin.styleInput` of `@startjson` / `@startyaml` / `@starthcl`. |
 | `json-layout-prep.ts` | `ValueType`, `DisplayValue`, `getDisplayValue`, `JsonContainer`, `FlatNode`, `containerEntries`, `walkTree`, `EMPTY_MAP`, `Highlighted`, `upOneLevel`, `isHighlighted`, `buildHighlightMap`, `wordWrapLine`, `BuildRowsOptions` | JSON diagram pre-layout: value display formatting, container tree flattening, highlight-map construction, and string wrapping. |
 | `json-node-position.ts` | `JsonEngineNode`, `JsonNodePosition`, `JsonNodePositions`, `jsonNodePositions` | Where the jar puts each json node: `SmetanaForJson#drawMe`'s `max` and `#getPosition`, over the engine's raw node frame. |
-| `json-renderer-highlight.ts` | `highlightRect`, `scaleDasharray` | The highlighted row's backing rect and the dash-scaling helper for the JSON renderer — split out of renderer.ts (cdd-T30, 500-line file-size cap). |
+| `json-renderer-highlight.ts` | `highlightRect` | The highlighted row's backing rect for the JSON renderer — split out of renderer.ts (cdd-T30, 500-line file-size cap). |
 | `json-skin-param.ts` | `JsonFamilyType`, `JsonSkinParam`, `jsonFamilyJarStyleSource`, `createJsonSkinParam` | The json family's `SkinParam` slice: the style engine `TextBlockJson` and `SmetanaForJson` read through `skinParam.getCurrentStyleBuilder()` and `getIHtmlColorSet()` (`TextBlockJson.java:112`, `SmetanaForJson.java:119-120`). |
 | `json-style-resolve.ts` | `JsonStyleInput`, `JsonStyleSet`, `resolveJsonStyles`, `styleToUse` | resolveJsonStyles — the json family's styles at the jar's six signatures. |
 | `JsonCurve.ts` | `CurvePoint`, `VERY_FIRST_LINE`, `supp`, `veryFirstPoint`, `buildArrowHeadPath`, `buildArrowHeadSegments`, `buildCurveSegments`, `buildCurvePath`, `segmentsToPathData` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonCurve.java The path a json edge draws, built from the layout engine's OWN spline rather than re-derived. |
@@ -2219,7 +2219,6 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-pen.ts` | `PenInk`, `JsonPen`, `penFor` | The seam between "which shapes this diagram draws" and "how they are drawn". |
 | `renderer-style.ts` | `BoxStyleJson`, `TextStyleJson`, `CellPaint`, `ArrowStyleJson`, `NodeStyleJson`, `SVG_CORNER_DIVISOR`, `JSON_SKIN_BLACK`, `resolveNodeStyle` | The json family's styles, read once per diagram into plain values the renderer only draws with. |
 | `renderer.ts` | `renderJson` | JSON diagram SVG renderer. |
-| `scale-at-emit.ts` | `DrawnJson`, `scaleAtEmit` | The `scale …` directive for the json family, applied where upstream applies it: at emit, to a page drawn at 1x. |
 | `StyleExtractor.ts` | `StyleExtractor`, `extractStyle`, `payloadOf`, `upstreamSourceLines` | Port of upstream's `StyleExtractor` -- the json family's ONLY directive handling. |
 | `tab-stops.ts` | `tabString`, `tabStopWidth`, `TabToken`, `splitOnTabs`, `hasTab`, `tabAwareWidth`, `TabRun`, `walkTabs` | `\t` inside a drawn cell — tab-stop expansion, ported from `AtomText` (`klimt/creole/legacy/AtomText.java`). |
 | `text-block-style.ts` | `CellFont`, `CellMeasure`, `RowMeasure`, `cellMeasureOf`, `rowMeasureOf` | The measuring half of `TextBlockJson#getTextBlock`: the font and wrap width a cell is built with come from the cell's own merged `Style` (`getStyleToUse`), not from one diagram-wide font. |

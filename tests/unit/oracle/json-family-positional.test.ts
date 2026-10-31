@@ -4,14 +4,21 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import {
+  AUTHORED_KEY_PREFIX,
   PIN_EPSILON,
   checkRow,
   conformantRows,
   hasStructuralDiff,
+  isWithinConformantBand,
+  listAuthoredRows,
   listCachedRows,
   measureResidue,
   measureSvgResidue,
+  missingAuthoredPinKeys,
+  parseRowKey,
   readPin,
+  rowExists,
+  rowKey,
   toPinRow,
 } from '../../oracle/svg-conformance/json-family-positional.js';
 import type { PositionalResidue } from '../../oracle/svg-conformance/json-family-positional.js';
@@ -229,10 +236,14 @@ describe('corpus rows (acceptance, needs test-results/dot-cache)', () => {
   });
 
   it('measures a conformant row inside the comparator band', { timeout: TIMEOUT_MS }, () => {
+    // jff T2b: was 0.001 (52.637 vs the jar's 52.638) while the body was
+    // formatted at draw time; it is now formatted once after the title
+    // translate (SvgGraphics.java:468-475, TextBlockExporter.java:173).
     const r = measureResidue('json', 'babico-87-soxo095');
     expect(r.aligned).toBe(true);
-    expect(r.nodeMax).toBe(0.001);
+    expect(r.nodeMax).toBe(0);
     expect(r.pathMax).toBe(0);
+    expect(isWithinConformantBand(r)).toBe(true);
   });
 
   it('flags json/timafu-94-bixe774 (37 structural diffs) as unaligned', { timeout: TIMEOUT_MS }, () => {
@@ -241,5 +252,116 @@ describe('corpus rows (acceptance, needs test-results/dot-cache)', () => {
 
   it('throws naming the row when no cached fixture exists', () => {
     expect(() => measureResidue('json', 'no-such-slug')).toThrow('no cached fixture json/no-such-slug');
+  });
+});
+
+describe('row keys', () => {
+  it('builds a bare key for corpus rows and an authored: key for authored rows', () => {
+    expect(rowKey('json', 'abc')).toBe('json/abc');
+    expect(rowKey('yaml', 'title-scale', 'authored')).toBe('authored:yaml/title-scale');
+    expect(AUTHORED_KEY_PREFIX).toBe('authored:');
+  });
+
+  it('parses both forms back into source, type and slug', () => {
+    expect(parseRowKey('hcl/xyz-1')).toEqual({ source: 'corpus', type: 'hcl', slug: 'xyz-1' });
+    expect(parseRowKey('authored:json/title-scale')).toEqual({
+      source: 'authored',
+      type: 'json',
+      slug: 'title-scale',
+    });
+  });
+
+  it('keeps a slug that itself contains a slash after the first one', () => {
+    expect(parseRowKey('authored:json/a/b')).toEqual({ source: 'authored', type: 'json', slug: 'a/b' });
+  });
+
+  it.each(['title-scale', 'files/x', 'authored:json', 'authored:json/', 'authored:/x', 'json/', ''])(
+    'rejects the malformed key %j',
+    (key) => {
+      expect(() => parseRowKey(key)).toThrow(`malformed residue row key: ${key}`);
+    },
+  );
+});
+
+describe('authored rows (tests/fixtures)', () => {
+  const TIMEOUT_MS = 60_000;
+
+  it('lists the jff title/scale fixtures among the authored rows', () => {
+    const keys = listAuthoredRows().map(({ type, slug }) => rowKey(type, slug, 'authored'));
+    expect(keys).toEqual(
+      expect.arrayContaining([
+        'authored:json/title-scale',
+        'authored:yaml/title-scale',
+        'authored:hcl/title-scale',
+        'authored:json/title-scale-max-width',
+        'authored:json/caption-scale',
+        'authored:json/title-handwritten',
+        'authored:json/title-narrow',
+        'authored:yaml/style-root-fontcolor',
+      ]),
+    );
+  });
+
+  it('reports row existence per source', () => {
+    expect(rowExists('json', 'title-scale', 'authored')).toBe(true);
+    expect(rowExists('json', 'title-scale')).toBe(false);
+    expect(rowExists('json', 'does-not-exist', 'authored')).toBe(false);
+    expect(rowExists('json', 'bavize-88-jumu158')).toBe(true);
+  });
+
+  it(
+    'measures json/title-scale: the title scales with the block, only body residue remains',
+    { timeout: TIMEOUT_MS },
+    () => {
+      // jff T2b: pre-fix aligned:false, canvas dw 159 / dh 18 (title at 1x).
+      // Now the chromed block is scaled (TextBlockExporter.java:159-177): canvas
+      // equal, body centred under the title 0.254 left (U-REC body width x 1.5 / 2).
+      const r = measureResidue('json', 'title-scale', 'authored');
+      expect(r.aligned).toBe(true);
+      expect(r.canvas).toEqual({ dw: 0, dh: 0 });
+      expect(r.nodeMax).toBeCloseTo(0.254, 3);
+    },
+  );
+
+  it(
+    'measures an authored row that the jar and we agree on as aligned, inside the band',
+    { timeout: TIMEOUT_MS },
+    () => {
+      const r = measureResidue('hcl', 'title-scale', 'authored');
+      expect(r.aligned).toBe(true);
+      expect(isWithinConformantBand(r)).toBe(true);
+    },
+  );
+
+  it('reads the authored pair, not the cache, for the authored source', { timeout: TIMEOUT_MS }, () => {
+    // yaml/title-scale has no corpus counterpart; its body residue is yaml/scale-factor's (0.675).
+    expect(measureResidue('yaml', 'title-scale', 'authored').nodeMax).toBeCloseTo(0.675, 3);
+  });
+
+  it('throws naming the authored key and path when the fixture is missing', () => {
+    expect(() => measureResidue('json', 'does-not-exist', 'authored')).toThrow(
+      /no authored fixture authored:json\/does-not-exist at .*tests\/fixtures\/json\/does-not-exist\.puml/,
+    );
+  });
+
+  it('names a pinned authored row with no fixture on disk (the gate failure)', () => {
+    const keys = ['json/some-corpus-row', 'authored:json/title-scale', 'authored:json/does-not-exist'];
+    expect(missingAuthoredPinKeys(keys)).toEqual(['authored:json/does-not-exist']);
+  });
+});
+
+describe('isWithinConformantBand', () => {
+  it('accepts an aligned row at or under 0.01 on every ceiling', () => {
+    expect(isWithinConformantBand(aligned(0.01, 0, 0, 0.005))).toBe(true);
+  });
+
+  it.each([
+    ['nodeMax', aligned(0.02, 0)],
+    ['pathMax', aligned(0, 0.02)],
+    ['dw', aligned(0, 0, 0.02)],
+    ['dh', aligned(0, 0, 0, 0.02)],
+    ['alignment', unaligned],
+  ])('rejects a row over the band on %s', (_name, r) => {
+    expect(isWithinConformantBand(r)).toBe(false);
   });
 });

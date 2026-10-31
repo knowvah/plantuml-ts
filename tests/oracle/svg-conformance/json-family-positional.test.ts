@@ -12,11 +12,14 @@
 import { describe, it, expect } from 'vitest';
 
 import {
+  AUTHORED_KEY_PREFIX,
   PIN_PATH,
   checkRow,
   conformantRows,
   listCachedRows,
   measureResidue,
+  missingAuthoredPinKeys,
+  parseRowKey,
   readPin,
 } from './json-family-positional.js';
 
@@ -36,7 +39,7 @@ describe('json family — positional residue pin', () => {
     const known = new Set(rows.map(({ type, slug }) => `${type}/${slug}`));
 
     it('names only cached rows that are not conformant', () => {
-      const keys = Object.keys(pin?.rows ?? {});
+      const keys = Object.keys(pin?.rows ?? {}).filter((k) => !k.startsWith(AUTHORED_KEY_PREFIX));
       const stale = keys.filter((k) => !known.has(k));
       const loosening = keys.filter((k) => conformant.has(k));
       expect(stale, `stale pin rows (no cached fixture): ${stale.join(', ')}`).toEqual([]);
@@ -47,6 +50,23 @@ describe('json family — positional residue pin', () => {
       const key = `${type}/${slug}`;
       it(`${key} stays within its pinned residue`, { timeout: ROW_TIMEOUT_MS }, () => {
         const violations = checkRow(key, measureResidue(type, slug), pin?.rows[key], conformant.has(key));
+        expect(violations, violations.join('\n')).toEqual([]);
+      });
+    }
+  });
+
+  describe.skipIf(pin === undefined)('pinned authored rows', () => {
+    const authoredKeys = Object.keys(pin?.rows ?? {}).filter((k) => k.startsWith(AUTHORED_KEY_PREFIX));
+
+    it('names only authored fixtures that exist under tests/fixtures', () => {
+      const missing = missingAuthoredPinKeys(authoredKeys);
+      expect(missing, `pin rows with no authored fixture on disk: ${missing.join(', ')}`).toEqual([]);
+    });
+
+    for (const key of authoredKeys) {
+      const { type, slug } = parseRowKey(key);
+      it(`${key} stays within its pinned residue`, { timeout: ROW_TIMEOUT_MS }, () => {
+        const violations = checkRow(key, measureResidue(type, slug, 'authored'), pin?.rows[key], false);
         expect(violations, violations.join('\n')).toEqual([]);
       });
     }

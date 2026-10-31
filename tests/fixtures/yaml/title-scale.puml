@@ -1,0 +1,6 @@
+@startyaml
+title T
+scale 2
+a: 1
+b: [x, y]
+@endyaml

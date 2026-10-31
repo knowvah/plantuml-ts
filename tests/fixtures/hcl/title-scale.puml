@@ -1,0 +1,8 @@
+@starthcl
+title H Title
+scale 1.5
+server "web" {
+  ami = "abc"
+  count = 2
+}
+@endhcl

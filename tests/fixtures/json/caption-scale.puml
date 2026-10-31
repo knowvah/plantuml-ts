@@ -1,0 +1,5 @@
+@startjson
+caption Caption Scale
+scale 2
+{"a": [1, 2], "b": "x"}
+@endjson

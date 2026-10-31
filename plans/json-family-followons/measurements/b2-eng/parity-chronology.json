@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-10-31T00:53:20.384Z",
+  "fixtures": [
+    {
+      "slug": "lenudo-53-nade902",
+      "type": "chronology",
+      "dotEqual": true,
+      "layoutEqual": "n/a",
+      "verdict": "diverged",
+      "firstDiff": "error-page"
+    }
+  ]
+}

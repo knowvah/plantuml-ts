@@ -11,10 +11,8 @@
 // text, it falls through to `getUg().draw(shape)`.
 import { text } from '../../core/svg.js';
 import type { TextStyle } from '../../core/svg.js';
-import { resolveScaleFactor } from '../../core/scale-command.js';
 import { withDeferredFormat } from '../../core/svg-format.js';
-import { scaleAtEmit } from './scale-at-emit.js';
-import type { DrawnJson } from './scale-at-emit.js';
+import { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 
 import {
   buildCurvePath,
@@ -31,9 +29,6 @@ import { highlightRect } from './json-renderer-highlight.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import type { JsonGeometry, JsonNodeGeo, JsonEdgeGeo, JsonRowGeo } from './layout.js';
-import { calculateMargin } from '../../core/document-margin.js';
-import type { DocumentMargin } from '../../core/document-margin.js';
-import { ENSURE_VISIBLE_BUMP } from './document-dimensions.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -58,17 +53,10 @@ const BOLD_CSS_WEIGHT = 700;
 const SPOT_RADIUS = 3;
 const SPOT_STROKE_WIDTH = 1;
 
-/** `TitledDiagram#getDefaultMargins()` — `same(10)`, the fallback when no
- *  theme sets one. Mirrors `layout.ts#CANVAS_PAD`. */
+/** `TitledDiagram#getDefaultMargins()` — `same(10)` (`TitledDiagram.java:
+ *  274-277`; `JsonDiagram` does not override it), the
+ *  `TextBlockExporter.Builder#calculateMargin` fallback (`:510-516`). */
 const DEFAULT_MARGIN = 10;
-
-/** `ClockwiseTopRightBottomLeft.same(10)` -- {@link DEFAULT_MARGIN} on all four sides. */
-const DEFAULT_DOCUMENT_MARGIN: DocumentMargin = {
-  top: DEFAULT_MARGIN,
-  right: DEFAULT_MARGIN,
-  bottom: DEFAULT_MARGIN,
-  left: DEFAULT_MARGIN,
-};
 
 /** `UFontFactory.monospace(14)` — `JsonDiagram#drawU`'s hard-coded failure
  *  font (`JsonDiagram.java:116`), not the theme's. */
@@ -264,7 +252,7 @@ function renderEdge(edge: JsonEdgeGeo, arrow: ArrowStyleJson, pen: JsonPen): str
   // (`SmetanaForJson.java:119-122,172,175-176`; skin `arrow { LineStyle 3-3 }`,
   // `plantuml.skin:449-451`). Drawn at 1x: the dash goes through `format` with
   // every other numeric at emit, so `3-3` at scale 2 comes out as `6,6`
-  // (`scaleJsonBody`) -- jar-verified on `json/timafu-94-bixe774`.
+  // (core `exportTo`'s deferred format pass) -- jar-verified on `json/timafu-94-bixe774`.
   const stroke = arrow.color;
   const strokeWidth = arrow.thickness;
 
@@ -330,67 +318,35 @@ function renderParseFailure(geo: JsonGeometry): string {
 }
 
 /**
- * The margin-less block `JsonDiagram` hands `DiagramChromeFactory`, and the
- * document margin `TextBlockExporter` wraps around the chromed result.
- *
- * Upstream composes `getTextBlock` -> `addChrome` -> exporter margin
- * (`UgDiagram.java:124,128`): `JsonDiagram#getTextBlock` returns `this`
- * (`JsonDiagram.java:140-142`) sized by `calculateDimension`'s ink only
- * (`JsonDiagram.java:130-137`), `addChrome` builds the title around THAT block
- * (`DiagramChromeFactory.java:363-376` -> `DecorateEntityImage.addTop`), and
- * only then does `TextBlockExporter` translate everything by the margin
- * (`TextBlockExporter.java:173`) and size it `dim + margins` plus
- * `ensureVisible`'s `+1` (`:199-203`). `canvasWidth`/`canvasHeight` are the
- * already-margined canvas this producer draws into, so the block is the canvas
- * minus both margins minus that `+1`; `applyExportedChrome`
- * (`core/annotations/chrome-export.ts`) removes the margin, chromes the block
- * and re-applies the margin. The margin is `TextBlockExporter.java:510-516`:
- * the style's `Margin`, else `TitledDiagram.java:275-277` `same(10)`.
- *
- * A fragment with no annotations never reaches that path
- * (`chrome-export.ts:44`), so declaring the block changes nothing for it.
- *
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/UgDiagram.java:124-128
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonDiagram.java:130-142
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/TextBlockExporter.java:173,199-203,510-516
+ * `TextBlockExporter.Builder#calculateMargin` (`TextBlockExporter.java:
+ * 510-516`): the merged `root.document` style's `Margin` when it has one
+ * (`Theme.diagramMargin`, `build-theme.ts#withDocumentStyle`), else
+ * `TitledDiagram#getDefaultMargins()` = `same(10)` ({@link DEFAULT_MARGIN}).
+ * The exporter translates the chromed block by its left/top (`:173`) and adds
+ * all four sides to the dimension (`:198-203`).
  */
-function declaredBlock(
-  canvasWidth: number,
-  canvasHeight: number,
-  theme: Theme,
-): Pick<RenderFragment, 'width' | 'height' | 'preChromeWidth' | 'preChromeHeight' | 'documentMargin'> {
-  const margin = calculateMargin(theme, DEFAULT_DOCUMENT_MARGIN);
-  return {
-    width: canvasWidth,
-    height: canvasHeight,
-    preChromeWidth: canvasWidth - (margin.left + margin.right) - ENSURE_VISIBLE_BUMP,
-    preChromeHeight: canvasHeight - (margin.top + margin.bottom) - ENSURE_VISIBLE_BUMP,
-    documentMargin: margin,
-  };
+function exportMarginOf(theme: Theme): ClockwiseTopRightBottomLeft {
+  const m = theme.diagramMargin;
+  return m === undefined
+    ? ClockwiseTopRightBottomLeft.same(DEFAULT_MARGIN)
+    : ClockwiseTopRightBottomLeft.topRightBottomLeft(m.top, m.right, m.bottom, m.left);
 }
 
 /**
- * The document size for a handwritten diagram: the drawn SPAN plus the
- * diagram margins plus `ensureVisible`'s truncating `+1`.
+ * A handwritten block's extent: the drawn SPAN (`JsonDiagram#calculateDimension`
+ * walks the jiggled shapes, `JsonDiagram.java:113-115,130-137`; `MinMax
+ * #getDimension` = `maxX - minX`, `MinMax.java:151-153`). The exporter adds the
+ * margins and `ensureVisible`'s `+1` (`TextBlockExporter.java:198-203`).
  *
- * The span is translation-invariant, so the already-applied margin on the
- * shapes does not need removing first. There is no `-1` ink corner here —
- * that belongs to `LimitFinder#drawRectangle`, and a handwritten diagram
- * draws no rectangles.
+ * There is no `-1` ink corner here — that belongs to `LimitFinder
+ * #drawRectangle`, and a handwritten diagram draws no rectangles.
  *
- * Verified against `yaml/litife-43-novo083`: its polygons span x 9.778..182.057
- * and y 9.287..73.247, which with the x-only polygon padding gives
- * `trunc(192.279 + 20 + 1) = 213` by `trunc(63.960 + 20 + 1) = 84` — the
- * golden's exact `viewBox`.
+ * Verified against `yaml/litife-43-novo083`: its polygons span 192.279 by
+ * 63.960, which with the x-only polygon padding gives `trunc(192.279 + 20 + 1)
+ * = 213` by `trunc(63.960 + 20 + 1) = 84` — the golden's exact `viewBox`.
  */
-function handwrittenDims(ink: PenInk, theme: Theme): { width: number; height: number } {
-  const m = theme.diagramMargin;
-  const marginX = m === undefined ? DEFAULT_MARGIN * 2 : m.left + m.right;
-  const marginY = m === undefined ? DEFAULT_MARGIN * 2 : m.top + m.bottom;
-  return {
-    width: ink.maxX - ink.minX + marginX + 1,
-    height: ink.maxY - ink.minY + marginY + 1,
-  };
+function handwrittenDims(ink: PenInk): { width: number; height: number } {
+  return { width: ink.maxX - ink.minX, height: ink.maxY - ink.minY };
 }
 
 /**
@@ -405,9 +361,18 @@ function lengthAdjustOf(theme: Theme): Pick<RenderFragment, 'lengthAdjust'> {
   return theme.lengthAdjust === undefined ? {} : { lengthAdjust: theme.lengthAdjust };
 }
 
+/** What {@link drawJson} puts in the block: its primitives and its extent. */
+interface DrawnJson {
+  readonly body: string;
+  readonly width: number;
+  readonly height: number;
+  readonly background?: string;
+}
+
 /**
- * The page's elements and their canvas size, all at 1x -- the parse-failure
- * page when the body did not parse, otherwise every node then every edge.
+ * `JsonDiagram#drawU` (`JsonDiagram.java:112-123`): the block at 1x, at its own
+ * origin -- the parse-failure page when the body did not parse, otherwise every
+ * node then every edge -- with its `calculateDimension` extent.
  */
 function drawJson(geo: JsonGeometry, theme: Theme): DrawnJson {
   if (geo.error !== undefined) {
@@ -438,49 +403,51 @@ function drawJson(geo: JsonGeometry, theme: Theme): DrawnJson {
   // has become a polygon. `layout.ts` cannot know that extent without
   // repeating the jiggle, and the pen already has it.
   const ink = pen.ink();
-  const dims = ink === undefined ? { width: geo.width, height: geo.height } : handwrittenDims(ink, theme);
+  const dims = ink === undefined ? { width: geo.width, height: geo.height } : handwrittenDims(ink);
   return { body: parts.join(''), ...dims, background: theme.colors.background };
 }
 
 /**
- * Render a JSON diagram geometry into an SVG fragment.
+ * Render a JSON diagram geometry into the block `JsonDiagram#getTextBlock`
+ * returns (`this`, `JsonDiagram.java:140-142`), for `UgDiagram#getExporter`'s
+ * order (`UgDiagram.java:123-139`): chrome around it (`applyExportedChrome`,
+ * as handed over), then `TextBlockExporter#exportTo` in core
+ * (`assemble-svg.ts#finalizeJsonFragment`, `TextBlockExporter.java:159-177`).
+ *
+ * - `width`/`height`: `calculateDimension`'s ink extent (`:130-137`) -- no
+ *   margin, no `+1`;
+ * - `body`: drawn at the block origin, its numbers deferred
+ *   (`withDeferredFormat`): the export's pass is the single `SvgGraphics
+ *   #format` (`SvgGraphics.java:466-475`), after the margin translate and the
+ *   scale, title included;
+ * - `exportMargin`: {@link exportMarginOf};
+ * - `scaleSpec`: the `scale …` line (`StyleExtractor.java:82-83` ->
+ *   `JsonDiagram.java:90-99`), resolved by `computeScaleFactor` over the
+ *   chromed, margined dimension (`TextBlockExporter.java:205-209`);
+ * - never `dpi`: `StyleExtractor` discards `skinparam dpi`
+ *   (`StyleExtractor.java:82-89`), so `getDpi()` is 96 (decisions.md D5;
+ *   jar-verified on `json/kicati-76-guvi771`).
+ *
+ * Handwritten is `drawU`'s own pass (`JsonDiagram.java:113-115`, the pen);
+ * `exportTo` never wraps again -- its `isHandwritten` is the `-handwritten`
+ * option (`TextBlockExporter.java:174-175`), not the skinparam.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonDiagram.java:112-142
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/TextBlockExporter.java:159-177,198-209,510-516
  */
 export function renderJson(geo: JsonGeometry, theme: Theme): RenderFragment {
   // Nothing parsed and no error page to draw: no canvas either.
   if (geo.error === undefined && geo.nodes.length === 0) return { body: '', width: 0, height: 0 };
 
-  // `scale …` (StyleExtractor.java:82-83 -> JsonDiagram.java:90-99). Resolved
-  // against the unscaled dims, because that is the order upstream uses:
-  // `computeScaleFactor(dim)` reads `calculateFinalDimension()`'s own pre-scale
-  // result (`TextBlockExporter.java:205-209`).
-  const dim = geo.finalDimension ?? { width: geo.width, height: geo.height };
-  // cdd-T30: UNLIKE description/sequence/class, json/yaml/hcl's `dpi` term
-  // is deliberately left at its 96 (no-op) default here, never
-  // `theme.dpi` -- `JsonDiagram`'s own `SkinParam` is built from
-  // `StyleExtractor`, a narrow extractor (`jsondiagram/StyleExtractor.java:
-  // 82-89`) that recognises only `<style>`, `!assume`, `!pragma`, `hide`,
-  // `scale`, `title` and `skin` among its leading directive lines --
-  // `skinparam dpi N` falls into its generic `skinparam ` arm, which checks
-  // ONLY for `handwritten`+`true` and a `{`-nested block, then DISCARDS the
-  // line outright. `SkinParam#getDpi()` therefore always returns its 96
-  // default for every json/yaml/hcl diagram, regardless of source content
-  // -- confirmed against the jar-captured `json/kicati-76-guvi771/in.svg`
-  // (`skinparam dpi 600` in the source, `font-size="14"` in the oracle,
-  // i.e. UNSCALED). Mirrors `scale`'s own already-existing special-case
-  // above (`json/parser.ts`'s dedicated `matchScaleCommand` capture,
-  // itself modeled on `StyleExtractor`'s OWN `scale` arm) -- `dpi` has no
-  // such arm, so this port reproduces that omission exactly by never
-  // reading `theme.dpi` here.
-  const k = resolveScaleFactor(geo.scale, dim.width, dim.height);
-  const scaled = k !== 1;
-  const drawn = withDeferredFormat(scaled, () => drawJson(geo, theme));
-  const emitted = scaled ? scaleAtEmit(drawn, k) : drawn;
+  const drawn = withDeferredFormat(true, () => drawJson(geo, theme));
   return {
-    body: emitted.body,
-    ...declaredBlock(emitted.width, emitted.height, theme),
-    ...(emitted.background === undefined ? {} : { background: emitted.background }),
-    // `SvgGraphics.java:808-811`: the root `width`/`height` are `format(maxX)`.
-    ...(scaled ? { scaledCanvas: true as const } : {}),
+    body: drawn.body,
+    width: drawn.width,
+    height: drawn.height,
+    exportMargin: exportMarginOf(theme),
+    numbersDeferred: true,
+    ...(geo.scale === undefined ? {} : { scaleSpec: geo.scale }),
+    ...(drawn.background === undefined ? {} : { background: drawn.background }),
     ...lengthAdjustOf(theme),
   };
 }

@@ -1,0 +1,60 @@
+== activity 16:59:10 { 24.79 17.54 19.15 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-activity.json — {"conformant":449,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== board 16:59:42 { 18.85 16.94 18.87 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 17:00:13 { 13.04 15.70 18.35 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-c4.json — {"conformant":2,"structural-match":0,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== chart 17:00:45 { 9.52 14.60 17.86 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+== chronology 17:01:16 { 7.02 13.50 17.35 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== class 17:01:43 { 5.49 12.50 16.85 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-class.json — {"conformant":723,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== component 17:02:34 { 34.65 19.27 19.09 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-component.json — {"conformant":214,"structural-match":12,"diverged":40,"errored":0,"timeout":0,"oracle-error":0}
+== ditaa 17:03:07 { 22.33 17.89 18.60 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/json-family-followons/measurements/b1-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 17:03:21 { 19.50 17.43 18.43 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== ebnf 17:03:51 { 13.39 16.14 17.91 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+== files 17:04:22 { 10.46 15.17 17.50 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-files.json — {"conformant":9,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 17:04:50 { 9.59 14.57 17.22 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-gantt.json — {"conformant":265,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== hcl 17:05:20 { 17.07 15.92 17.61 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== json 17:05:48 { 12.18 14.86 17.17 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-json.json — {"conformant":14,"structural-match":35,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== mindmap 17:06:17 { 8.97 13.83 16.72 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-mindmap.json — {"conformant":142,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== network 17:06:46 { 7.73 13.15 16.39 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-network.json — {"conformant":1,"structural-match":0,"diverged":2,"errored":0,"timeout":0,"oracle-error":0}
+== object 17:07:15 { 7.16 12.49 16.03 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-object.json — {"conformant":63,"structural-match":8,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== packet 17:07:45 { 5.69 11.61 15.59 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+== regex 17:08:25 { 21.94 15.65 16.92 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+== salt 17:08:55 { 15.93 14.80 16.57 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-salt.json — {"conformant":51,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== sequence 17:09:26 { 12.12 13.96 16.20 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-sequence.json — {"conformant":1143,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== state 17:10:09 { 9.16 12.86 15.68 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-state.json — {"conformant":99,"structural-match":14,"diverged":160,"errored":0,"timeout":0,"oracle-error":0}
+== timing 17:10:39 { 7.46 12.09 15.30 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-timing.json — {"conformant":6,"structural-match":0,"diverged":120,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 17:11:08 { 7.53 11.66 15.03 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-unknown.json — {"conformant":565,"structural-match":19,"diverged":241,"errored":0,"timeout":0,"oracle-error":0}
+== usecase 17:11:42 { 5.81 10.76 14.57 }
+[xmldom fatalError]	comment is not well-formed at position 3151 
+wrote plans/json-family-followons/measurements/b1-eng/parity-usecase.json — {"conformant":68,"structural-match":7,"diverged":18,"errored":0,"timeout":0,"oracle-error":1}
+== wbs 17:12:17 { 14.78 12.14 14.91 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-wbs.json — {"conformant":204,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== wire 17:12:50 { 17.59 13.48 15.31 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 17:13:28 { 24.33 15.59 15.99 }
+wrote plans/json-family-followons/measurements/b1-eng/parity-yaml.json — {"conformant":7,"structural-match":31,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+DONE 17:13:59

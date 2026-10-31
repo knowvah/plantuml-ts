@@ -1,17 +1,18 @@
 /**
- * The json document's own width/height.
+ * The json block's own width/height -- `JsonDiagram#calculateDimension`.
  *
- * The jar does NOT size a json document from its node extents — it ink-walks
- * the whole drawing, adds the margins, and truncates. Reproduced here in that
- * order, because a flat "+2 versus the node extent" is what this looks like
- * from the outside and it encodes nothing:
+ * The jar does NOT size a json block from its node extents — it ink-walks
+ * the whole drawing. Reproduced here, because a flat "+2 versus the node
+ * extent" is what this looks like from the outside and it encodes nothing:
  *
  *   `JsonDiagram#calculateDimension` (`JsonDiagram.java:130-137`)
  *     → `TextBlockUtils.getMinMax(this, sb, true)` → a `LimitFinder` walk
- *   `TextBlockExporter#calculateFinalDimension` (`:199-203`)
- *     → `+ margin.left + margin.right`, `TitledDiagram#getDefaultMargins()`
- *       = `same(10)` (`TitledDiagram.java:275-277`)
- *   `SvgGraphics#ensureVisible` → {@link ENSURE_VISIBLE_BUMP}
+ *     → `MinMax#getDimension` = `maxX - minX` (`MinMax.java:151-153`)
+ *
+ * jff-T2b: the margin (`TextBlockExporter#calculateFinalDimension`, `:198-203`)
+ * and `SvgGraphics#ensureVisible`'s `+1` (`SvgGraphics.java:129-135`) are the
+ * exporter's, added after the chrome by core's `exportTo`
+ * (`TextBlockExporter.java:159-177`), so they are no longer folded in here.
  *
  * Split out of `layout.ts` when the edge walk below pushed that file past this
  * repo's 500-line cap; document sizing is a coherent unit of its own.
@@ -30,32 +31,13 @@ import type { JsonNodeGeo, JsonEdgeGeo } from './layout.js';
  */
 const INK_MIN_CORNER = -1;
 
-/**
- * `SvgGraphics#ensureVisible` stores `maxX = (int)(x + 1)`
- * (`SvgGraphics.java:129-134`), and `maxX`/`maxY` ARE the emitted
- * `width`/`height`/`viewBox` (`:799-811`). The truncation is applied by
- * `klimt/document-shell.ts#assembleDocumentShell`, which already `Math.trunc`s
- * these values; only the `+1` belongs here.
- */
-export const ENSURE_VISIBLE_BUMP = 1;
-
 /** `JsonCurve#drawSpot` — `new UEllipse(6, 6)` drawn at `-3, -3`. */
 const SPOT_RADIUS = 3;
 
-interface Margin {
-  left: number;
-  top: number;
-  x: number;
-  y: number;
-}
-
+/** `JsonDiagram#calculateDimension` (`JsonDiagram.java:130-137`): the ink extent, float. */
 export interface DocumentDimensions {
-  /** The emitted `width`/`height`/`viewBox` — post-`ensureVisible`. */
   width: number;
   height: number;
-  /** `calculateFinalDimension()` — pre-`ensureVisible`, what `scale` divides by. */
-  finalWidth: number;
-  finalHeight: number;
 }
 
 /**
@@ -89,21 +71,13 @@ function edgeInkPoints(edge: JsonEdgeGeo): Array<{ x: number; y: number }> {
   return points;
 }
 
-/** A diagram with nothing drawn still gets its margins. */
-function zeroDimensions(margin: Margin): DocumentDimensions {
-  return {
-    width: margin.x + ENSURE_VISIBLE_BUMP,
-    height: margin.y + ENSURE_VISIBLE_BUMP,
-    finalWidth: margin.x,
-    finalHeight: margin.y,
-  };
-}
-
-export function documentDimensions(
-  nodes: readonly JsonNodeGeo[],
-  edges: readonly JsonEdgeGeo[],
-  margin: Margin,
-): DocumentDimensions {
+/**
+ * The block's ink extent. A walk that met no ink is an empty `MinMax`, whose
+ * extent this port reads as 0 x 0.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonDiagram.java:130-137
+ */
+export function documentDimensions(nodes: readonly JsonNodeGeo[], edges: readonly JsonEdgeGeo[]): DocumentDimensions {
   const inkX: number[] = [];
   const inkY: number[] = [];
   for (const n of nodes) {
@@ -116,15 +90,11 @@ export function documentDimensions(
       inkY.push(p.y);
     }
   }
-  if (inkX.length === 0) return zeroDimensions(margin);
+  if (inkX.length === 0) return { width: 0, height: 0 };
   // `MinMax#getDimension` is `maxX - minX` (`MinMax.java:151-153`) — an
   // EXTENT, so the minimum matters as much as the maximum.
-  const finalWidth = Math.max(...inkX) - Math.min(...inkX) + margin.x;
-  const finalHeight = Math.max(...inkY) - Math.min(...inkY) + margin.y;
   return {
-    width: finalWidth + ENSURE_VISIBLE_BUMP,
-    height: finalHeight + ENSURE_VISIBLE_BUMP,
-    finalWidth,
-    finalHeight,
+    width: Math.max(...inkX) - Math.min(...inkX),
+    height: Math.max(...inkY) - Math.min(...inkY),
   };
 }

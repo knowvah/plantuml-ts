@@ -1,0 +1,690 @@
+{
+  "rows": {
+    "json/bavize-88-jumu158": {
+      "aligned": true,
+      "nodeMax": 0.225,
+      "pathMax": 1.938,
+      "dw": 0,
+      "dh": 0
+    },
+    "json/bogiku-88-nano204": {
+      "aligned": true,
+      "nodeMax": 4.375,
+      "pathMax": 6.233,
+      "dw": 3,
+      "dh": 0
+    },
+    "json/cilemo-38-fafi313": {
+      "aligned": true,
+      "nodeMax": 17.058,
+      "pathMax": 17.058,
+      "dw": 3,
+      "dh": 0
+    },
+    "json/civofu-04-loku952": {
+      "aligned": true,
+      "nodeMax": 47.102,
+      "pathMax": 47.102,
+      "dw": 0,
+      "dh": 34
+    },
+    "json/conigu-03-cuzu022": {
+      "aligned": true,
+      "nodeMax": 0.025,
+      "pathMax": 1.308,
+      "dw": 0,
+      "dh": 0
+    },
+    "json/debako-68-sice023": {
+      "aligned": true,
+      "nodeMax": 4.444,
+      "pathMax": 6.302,
+      "dw": 0,
+      "dh": 1
+    },
+    "json/derele-19-poni229": {
+      "aligned": true,
+      "nodeMax": 0.112,
+      "pathMax": 1.826,
+      "dw": 0,
+      "dh": 0
+    },
+    "json/devime-19-toze896": {
+      "aligned": true,
+      "nodeMax": 1.19,
+      "pathMax": 4.3,
+      "dw": 1,
+      "dh": 0
+    },
+    "json/dometa-86-jepe218": {
+      "aligned": true,
+      "nodeMax": 4.444,
+      "pathMax": 6.302,
+      "dw": 0,
+      "dh": 1
+    },
+    "json/gagebi-92-vere937": {
+      "aligned": true,
+      "nodeMax": 0.72,
+      "pathMax": 1.98,
+      "dw": 1,
+      "dh": 0
+    },
+    "json/gavomi-49-koco364": {
+      "aligned": true,
+      "nodeMax": 0.287,
+      "pathMax": 1.512,
+      "dw": 0,
+      "dh": 0
+    },
+    "json/gejena-99-veme626": {
+      "aligned": true,
+      "nodeMax": 12,
+      "pathMax": 12,
+      "dw": 1,
+      "dh": 0
+    },
+    "json/gibego-39-pelu609": {
+      "aligned": true,
+      "nodeMax": 12,
+      "pathMax": 16.586,
+      "dw": 1,
+      "dh": 0
+    },
+    "json/jaramo-16-doxa994": {
+      "aligned": true,
+      "nodeMax": 0.45,
+      "pathMax": 1.86,
+      "dw": 0,
+      "dh": 0
+    },
+    "json/jekaju-28-gulo479": {
+      "aligned": true,
+      "nodeMax": 0.556,
+      "pathMax": 2.032,
+      "dw": 0,
+      "dh": 0
+    },
+    "json/jidata-48-kire666": {
+      "aligned": true,
+      "nodeMax": 4.375,
+      "pathMax": 6.308,
+      "dw": 3,
+      "dh": 5
+    },
+    "json/json-escaped": {
+      "aligned": true,
+      "nodeMax": 0.556,
+      "pathMax": 2.032,
+      "dw": 0,
+      "dh": 0
+    },
+    "json/kicati-76-guvi771": {
+      "aligned": true,
+      "nodeMax": 4.444,
+      "pathMax": 6.302,
+      "dw": 0,
+      "dh": 1
+    },
+    "json/kidoki-70-fala224": {
+      "aligned": true,
+      "nodeMax": 78,
+      "pathMax": 80.711,
+      "dw": 1,
+      "dh": 0
+    },
+    "json/kusule-69-jada088": {
+      "aligned": true,
+      "nodeMax": 1,
+      "pathMax": 1.021,
+      "dw": 1,
+      "dh": 1
+    },
+    "json/letada-23-sisi815": {
+      "aligned": true,
+      "nodeMax": 4.444,
+      "pathMax": 6.302,
+      "dw": 0,
+      "dh": 1
+    },
+    "json/moseba-10-naza079": {
+      "aligned": true,
+      "nodeMax": 0.675,
+      "pathMax": 1.875,
+      "dw": 1,
+      "dh": 0
+    },
+    "json/mudumo-73-foli040": {
+      "aligned": true,
+      "nodeMax": 0.725,
+      "pathMax": 2.369,
+      "dw": 1,
+      "dh": 0
+    },
+    "json/najixi-88-javo178": {
+      "aligned": true,
+      "nodeMax": 0.513,
+      "pathMax": 1.462,
+      "dw": 0,
+      "dh": 0
+    },
+    "json/nanegu-88-boba399": {
+      "aligned": true,
+      "nodeMax": 0.45,
+      "pathMax": 1.272,
+      "dw": 0,
+      "dh": 0
+    },
+    "json/nofuvo-36-muxe040": {
+      "aligned": true,
+      "nodeMax": 127,
+      "pathMax": 127,
+      "dw": 1,
+      "dh": 0
+    },
+    "json/noleta-28-nutu456": {
+      "aligned": true,
+      "nodeMax": 0.275,
+      "pathMax": 1.705,
+      "dw": 0,
+      "dh": 0
+    },
+    "json/nopoku-31-cisi925": {
+      "aligned": true,
+      "nodeMax": 94,
+      "pathMax": 94,
+      "dw": 1,
+      "dh": 0
+    },
+    "json/nuviro-48-sice969": {
+      "aligned": true,
+      "nodeMax": 0.112,
+      "pathMax": 1.826,
+      "dw": 0,
+      "dh": 0
+    },
+    "json/pijume-87-gufu868": {
+      "aligned": true,
+      "nodeMax": 0.287,
+      "pathMax": 1.705,
+      "dw": 0,
+      "dh": 0
+    },
+    "json/sevaji-38-xita618": {
+      "aligned": true,
+      "nodeMax": 4.444,
+      "pathMax": 6.302,
+      "dw": 0,
+      "dh": 1
+    },
+    "json/timafu-94-bixe774": {
+      "aligned": false
+    },
+    "json/tivuru-65-vezu313": {
+      "aligned": true,
+      "nodeMax": 0.187,
+      "pathMax": 3.438,
+      "dw": 0,
+      "dh": 0
+    },
+    "json/vogeku-38-soxe333": {
+      "aligned": true,
+      "nodeMax": 4.444,
+      "pathMax": 6.302,
+      "dw": 0,
+      "dh": 1
+    },
+    "json/zasitu-09-lise302": {
+      "aligned": true,
+      "nodeMax": 4.375,
+      "pathMax": 6.145,
+      "dw": 3,
+      "dh": 0
+    },
+    "json/zevaka-35-zova441": {
+      "aligned": true,
+      "nodeMax": 0.838,
+      "pathMax": 2.156,
+      "dw": 1,
+      "dh": 0
+    },
+    "yaml/YAML-attribute-hierarchy": {
+      "aligned": true,
+      "nodeMax": 0.654,
+      "pathMax": 1.742,
+      "dw": 1,
+      "dh": 0
+    },
+    "yaml/YAML-list-key-value-pair": {
+      "aligned": true,
+      "nodeMax": 0.451,
+      "pathMax": 1.011,
+      "dw": 1,
+      "dh": 0
+    },
+    "yaml/YAML-space-indent": {
+      "aligned": true,
+      "nodeMax": 0.75,
+      "pathMax": 2.146,
+      "dw": 1,
+      "dh": 0
+    },
+    "yaml/bafemu-96-luji978": {
+      "aligned": false
+    },
+    "yaml/gabalo-23-tefe408": {
+      "aligned": true,
+      "nodeMax": 0.413,
+      "pathMax": 2.152,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/gatuva-87-futo104": {
+      "aligned": true,
+      "nodeMax": 0.494,
+      "pathMax": 1.986,
+      "dw": 1,
+      "dh": 0
+    },
+    "yaml/gobavi-45-guna544": {
+      "aligned": true,
+      "nodeMax": 0.451,
+      "pathMax": 1.011,
+      "dw": 1,
+      "dh": 0
+    },
+    "yaml/jozapu-14-datu953": {
+      "aligned": true,
+      "nodeMax": 5,
+      "pathMax": 6.35,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/jukejo-54-pope427": {
+      "aligned": true,
+      "nodeMax": 0.413,
+      "pathMax": 2.152,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/ketunu-15-poli031": {
+      "aligned": true,
+      "nodeMax": 0.151,
+      "pathMax": 1.283,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/kotize-70-nuze855": {
+      "aligned": true,
+      "nodeMax": 0.207,
+      "pathMax": 1.93,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/lelofi-17-cafo004": {
+      "aligned": true,
+      "nodeMax": 0.207,
+      "pathMax": 1.93,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/lipoka-75-rigo326": {
+      "aligned": true,
+      "nodeMax": 0.494,
+      "pathMax": 1.986,
+      "dw": 1,
+      "dh": 0
+    },
+    "yaml/litife-43-novo083": {
+      "aligned": true,
+      "nodeMax": 0.237,
+      "pathMax": 1.41,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/medosa-24-jugi124": {
+      "aligned": true,
+      "nodeMax": 0.75,
+      "pathMax": 1.302,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/mudeno-46-rado553": {
+      "aligned": true,
+      "nodeMax": 0.263,
+      "pathMax": 1.277,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/najoba-05-nino350": {
+      "aligned": false
+    },
+    "yaml/nuzaje-74-kenu009": {
+      "aligned": true,
+      "nodeMax": 1.475,
+      "pathMax": 2.82,
+      "dw": 2,
+      "dh": 0
+    },
+    "yaml/polela-38-mopu631": {
+      "aligned": true,
+      "nodeMax": 0.207,
+      "pathMax": 1.93,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/poxedu-72-bite327": {
+      "aligned": true,
+      "nodeMax": 0.413,
+      "pathMax": 2.021,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/sozafu-05-xeka661": {
+      "aligned": true,
+      "nodeMax": 0.088,
+      "pathMax": 1.534,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/sudabi-56-dedu341": {
+      "aligned": true,
+      "nodeMax": 0.737,
+      "pathMax": 1.409,
+      "dw": 1,
+      "dh": 0
+    },
+    "yaml/tadari-70-nare798": {
+      "aligned": false
+    },
+    "yaml/vaceci-80-lezo436": {
+      "aligned": true,
+      "nodeMax": 1.1,
+      "pathMax": 2.583,
+      "dw": 1,
+      "dh": 0
+    },
+    "yaml/vapoda-87-piku740": {
+      "aligned": true,
+      "nodeMax": 1,
+      "pathMax": 1.986,
+      "dw": 1,
+      "dh": 0
+    },
+    "yaml/vugalo-43-mose807": {
+      "aligned": true,
+      "nodeMax": 0.713,
+      "pathMax": 0.829,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/xacali-26-mazu431": {
+      "aligned": true,
+      "nodeMax": 0.4,
+      "pathMax": 1.433,
+      "dw": 1,
+      "dh": 0
+    },
+    "yaml/xofilu-53-tazi162": {
+      "aligned": true,
+      "nodeMax": 0.75,
+      "pathMax": 2.146,
+      "dw": 1,
+      "dh": 0
+    },
+    "yaml/xubife-72-runi076": {
+      "aligned": true,
+      "nodeMax": 0.47,
+      "pathMax": 1.72,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/zebapi-77-zasu051": {
+      "aligned": true,
+      "nodeMax": 0.869,
+      "pathMax": 0.91,
+      "dw": 0,
+      "dh": 0
+    },
+    "yaml/zeduse-06-fidi174": {
+      "aligned": true,
+      "nodeMax": 0.654,
+      "pathMax": 1.742,
+      "dw": 1,
+      "dh": 0
+    },
+    "yaml/zomime-61-sase339": {
+      "aligned": true,
+      "nodeMax": 0.087,
+      "pathMax": 1.505,
+      "dw": 1,
+      "dh": 0
+    },
+    "hcl/jubete-32-sutu417": {
+      "aligned": true,
+      "nodeMax": 0.8,
+      "pathMax": 1.923,
+      "dw": 0,
+      "dh": 0
+    },
+    "hcl/vocago-35-xodu446": {
+      "aligned": true,
+      "nodeMax": 0.525,
+      "pathMax": 1.476,
+      "dw": 1,
+      "dh": 0
+    },
+    "authored:json/array-of-arrays-root": {
+      "aligned": true,
+      "nodeMax": 0.45,
+      "pathMax": 1.757,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/array-root-objects": {
+      "aligned": true,
+      "nodeMax": 0.45,
+      "pathMax": 2.29,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/arrow-style": {
+      "aligned": true,
+      "nodeMax": 0.338,
+      "pathMax": 1.284,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/deep-nesting-six": {
+      "aligned": true,
+      "nodeMax": 2.938,
+      "pathMax": 2.938,
+      "dw": 2,
+      "dh": 0
+    },
+    "authored:json/diagram-fontcolor-no-node": {
+      "aligned": true,
+      "nodeMax": 0.338,
+      "pathMax": 1.284,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/empty-nested": {
+      "aligned": true,
+      "nodeMax": 9.375,
+      "pathMax": 9.901,
+      "dw": 0,
+      "dh": 9
+    },
+    "authored:json/handwritten-nested": {
+      "aligned": true,
+      "nodeMax": 0.225,
+      "pathMax": 1.946,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/highlight-array-index": {
+      "aligned": true,
+      "nodeMax": 0.3,
+      "pathMax": 1.71,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/highlight-nested-path": {
+      "aligned": true,
+      "nodeMax": 0.676,
+      "pathMax": 1.383,
+      "dw": 1,
+      "dh": 0
+    },
+    "authored:json/nested-arrays": {
+      "aligned": true,
+      "nodeMax": 3.262,
+      "pathMax": 2.933,
+      "dw": 3,
+      "dh": 1
+    },
+    "authored:json/node-roundcorner": {
+      "aligned": true,
+      "nodeMax": 0.338,
+      "pathMax": 1.284,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/root-fontcolor": {
+      "aligned": true,
+      "nodeMax": 0.338,
+      "pathMax": 1.284,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/scale-factor": {
+      "aligned": true,
+      "nodeMax": 0.507,
+      "pathMax": 1.608,
+      "dw": 2,
+      "dh": 0
+    },
+    "authored:json/separator-style": {
+      "aligned": true,
+      "nodeMax": 0.338,
+      "pathMax": 1.284,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/style-header-separator-arrow": {
+      "aligned": true,
+      "nodeMax": 0.338,
+      "pathMax": 1.284,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/theme-carbon-gray": {
+      "aligned": true,
+      "nodeMax": 0.425,
+      "pathMax": 1.22,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/theme-cerulean": {
+      "aligned": true,
+      "nodeMax": 0.338,
+      "pathMax": 1.095,
+      "dw": 1,
+      "dh": 0
+    },
+    "authored:json/theme-materia": {
+      "aligned": true,
+      "nodeMax": 0.338,
+      "pathMax": 1.095,
+      "dw": 1,
+      "dh": 0
+    },
+    "authored:json/title-handwritten": {
+      "aligned": true,
+      "nodeMax": 0.225,
+      "pathMax": 1.946,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/title-narrow": {
+      "aligned": true,
+      "nodeMax": 0,
+      "pathMax": 1.41,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/title-scale": {
+      "aligned": false
+    },
+    "authored:json/title-scale-max-width": {
+      "aligned": false
+    },
+    "authored:yaml/deep-nesting": {
+      "aligned": true,
+      "nodeMax": 0.675,
+      "pathMax": 1.496,
+      "dw": 1,
+      "dh": 0
+    },
+    "authored:yaml/flow-sequence": {
+      "aligned": true,
+      "nodeMax": 0.262,
+      "pathMax": 1.672,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:yaml/handwritten": {
+      "aligned": true,
+      "nodeMax": 0.338,
+      "pathMax": 1.146,
+      "dw": 1,
+      "dh": 0
+    },
+    "authored:yaml/highlight-nested": {
+      "aligned": true,
+      "nodeMax": 0.338,
+      "pathMax": 1.145,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:yaml/list-of-maps": {
+      "aligned": true,
+      "nodeMax": 0.45,
+      "pathMax": 2.284,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:yaml/map-of-lists": {
+      "aligned": true,
+      "nodeMax": 0.175,
+      "pathMax": 1.434,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:yaml/scale-factor": {
+      "aligned": true,
+      "nodeMax": 0.675,
+      "pathMax": 2,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:yaml/style-root-fontcolor": {
+      "aligned": true,
+      "nodeMax": 0.338,
+      "pathMax": 1.284,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:yaml/title-scale": {
+      "aligned": false
+    },
+    "authored:hcl/multiple-blocks": {
+      "aligned": true,
+      "nodeMax": 0.75,
+      "pathMax": 1.253,
+      "dw": 1,
+      "dh": 0
+    }
+  }
+}
