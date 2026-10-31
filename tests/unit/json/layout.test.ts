@@ -189,10 +189,14 @@ describe('layoutJson', () => {
     expect(geo.nodes).toHaveLength(0);
     expect(geo.edges).toHaveLength(0);
     expect(geo.error).toBe('Your data does not sound like JSON data');
-    expect(geo.width).toBeGreaterThan(0);
-    expect(geo.height).toBeGreaterThan(0);
-    // Text origin is the canvas margin plus the cell margin, on both axes.
-    expect(geo.errorLayout?.x).toBe(15);
+    // jff-T2b: the block, not the document -- `TextBlockUtils.withMargin(result,
+    // 5, 2)` (`JsonDiagram.java:120`) around the message, drawn at the block
+    // origin; the exporter adds the margin (`TextBlockExporter.java:173,198-203`).
+    const textWidth = measurer.measure(geo.error ?? '', { family: 'monospace', size: 14 }).width;
+    expect(geo.width).toBe(textWidth + 2 * 5);
+    expect(geo.height).toBe(measurer.measure(geo.error ?? '', { family: 'monospace', size: 14 }).height + 2 * 2);
+    // Text origin is the cell margin alone.
+    expect(geo.errorLayout?.x).toBe(5);
   });
 
   // 7. boolean true value → '☑ true'

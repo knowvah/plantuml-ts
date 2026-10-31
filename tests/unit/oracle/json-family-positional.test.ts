@@ -236,10 +236,14 @@ describe('corpus rows (acceptance, needs test-results/dot-cache)', () => {
   });
 
   it('measures a conformant row inside the comparator band', { timeout: TIMEOUT_MS }, () => {
+    // jff T2b: was 0.001 (52.637 vs the jar's 52.638) while the body was
+    // formatted at draw time; it is now formatted once after the title
+    // translate (SvgGraphics.java:468-475, TextBlockExporter.java:173).
     const r = measureResidue('json', 'babico-87-soxo095');
     expect(r.aligned).toBe(true);
-    expect(r.nodeMax).toBe(0.001);
+    expect(r.nodeMax).toBe(0);
     expect(r.pathMax).toBe(0);
+    expect(isWithinConformantBand(r)).toBe(true);
   });
 
   it('flags json/timafu-94-bixe774 (37 structural diffs) as unaligned', { timeout: TIMEOUT_MS }, () => {
@@ -306,13 +310,16 @@ describe('authored rows (tests/fixtures)', () => {
   });
 
   it(
-    'measures json/title-scale: the title is scaled by the jar and not by us (canvas defect visible)',
+    'measures json/title-scale: the title scales with the block, only body residue remains',
     { timeout: TIMEOUT_MS },
     () => {
+      // jff T2b: pre-fix aligned:false, canvas dw 159 / dh 18 (title at 1x).
+      // Now the chromed block is scaled (TextBlockExporter.java:159-177): canvas
+      // equal, body centred under the title 0.254 left (U-REC body width x 1.5 / 2).
       const r = measureResidue('json', 'title-scale', 'authored');
-      expect(r.aligned).toBe(false);
-      expect(r.canvas.dw).toBe(159);
-      expect(r.canvas.dh).toBe(18);
+      expect(r.aligned).toBe(true);
+      expect(r.canvas).toEqual({ dw: 0, dh: 0 });
+      expect(r.nodeMax).toBeCloseTo(0.254, 3);
     },
   );
 
@@ -327,7 +334,8 @@ describe('authored rows (tests/fixtures)', () => {
   );
 
   it('reads the authored pair, not the cache, for the authored source', { timeout: TIMEOUT_MS }, () => {
-    expect(measureResidue('yaml', 'title-scale', 'authored').canvas.dh).toBe(35);
+    // yaml/title-scale has no corpus counterpart; its body residue is yaml/scale-factor's (0.675).
+    expect(measureResidue('yaml', 'title-scale', 'authored').nodeMax).toBeCloseTo(0.675, 3);
   });
 
   it('throws naming the authored key and path when the fixture is missing', () => {

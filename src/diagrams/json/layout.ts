@@ -30,34 +30,6 @@ export type { JsonRowGeo } from './TextBlockJson.js';
 // Constants
 // ---------------------------------------------------------------------------
 
-/**
- * A5/T6b: the diagram's own margin, from `TitledDiagram#getDefaultMargins()`
- * -- `ClockwiseTopRightBottomLeft.same(10)` (`TitledDiagram.java:275-277`).
- * `JsonDiagram` does not override it. This port previously used an unsourced 8.
- */
-const CANVAS_PAD = 10;
-
-/**
- * The diagram's outer margin for THIS render — a theme's own `Margin` when it
- * declares one, else {@link CANVAS_PAD}.
- *
- * `TextBlockExporter#calculateMargin` (`:510-516`) reads the merged style for
- * `root.document` and only falls back to `TitledDiagram#getDefaultMargins()`
- * when that style has no `Margin`. 7 built-in themes set 5, so a themed
- * diagram's whole canvas shifts — `json/vogeku-38-soxe333` under
- * `!theme plain` places its first node at `(5, 14)` in the jar against this
- * port's former `(10, 19)`.
- *
- * Reduced to left/top and the two axis totals: this family's layout offsets by
- * the leading margin and sizes by both. The four sides are kept on the theme
- * because upstream's value has four; only the uniform form occurs today.
- */
-function marginsOf(theme: Theme): { left: number; top: number; x: number; y: number } {
-  const m = theme.diagramMargin;
-  if (m === undefined) return { left: CANVAS_PAD, top: CANVAS_PAD, x: CANVAS_PAD * 2, y: CANVAS_PAD * 2 };
-  return { left: m.left, top: m.top, x: m.left + m.right, y: m.top + m.bottom };
-}
-
 /** `TextBlockUtils.withMargin(result, 5, 2)` — the same per-cell margins
  *  `TextBlockJson.ts` uses, applied to the parse-failure message too
  *  (`JsonDiagram.java:120`). */
@@ -102,25 +74,23 @@ export interface JsonGeometry {
   styles: JsonStyleSet;
   nodes: JsonNodeGeo[];
   edges: JsonEdgeGeo[];
+  /**
+   * `JsonDiagram#calculateDimension` (`JsonDiagram.java:130-137`): the ink
+   * EXTENT of the block drawn at its own origin (`MinMax#getDimension`,
+   * `MinMax.java:151-153`) -- no document margin, no `ensureVisible` `+1`.
+   * jff-T2b: those belong to `TextBlockExporter#exportTo`
+   * (`TextBlockExporter.java:159-177,198-203`), which core runs on the chromed
+   * block (`assemble-svg.ts#finalizeJsonFragment`).
+   */
   width: number;
   height: number;
   /**
-   * The `scale …` directive, carried from the AST unresolved. Resolved to a
-   * numeric factor by `renderJson` against `width`/`height` above, which are
-   * the UNSCALED document dims — the same order upstream uses
-   * (`TextBlockExporter#computeScaleFactor`).
+   * The `scale …` directive, carried from the AST unresolved
+   * (`StyleExtractor.java:82-83` -> `JsonDiagram.java:90-99`). Resolved by
+   * `TextBlockExporter#computeScaleFactor` over the chromed block plus margin
+   * (`TextBlockExporter.java:159-165,205-209`) -- core's `exportTo`, never here.
    */
   scale?: ScaleSpec;
-  /**
-   * `TextBlockExporter#calculateFinalDimension()` — ink extent plus margins,
-   * WITHOUT the `ensureVisible` `+1` that `width`/`height` above carry. This
-   * is what {@link scale} is resolved against, because that is the value
-   * upstream passes to `computeScaleFactor`.
-   *
-   * Optional so hand-authored geometry literals in tests compile unchanged;
-   * `renderJson` falls back to `width`/`height` when absent.
-   */
-  finalDimension?: { width: number; height: number };
   /** When the body could not be parsed, the message to display. */
   error?: string;
   /**
@@ -137,7 +107,7 @@ export interface JsonGeometry {
 import { walkTree, EMPTY_MAP, buildHighlightMap } from './json-layout-prep.js';
 import type { JsonContainer, FlatNode, BuildRowsOptions } from './json-layout-prep.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
-import { documentDimensions, ENSURE_VISIBLE_BUMP } from './document-dimensions.js';
+import { documentDimensions } from './document-dimensions.js';
 import { resolveJsonStyles, type JsonStyleSet } from './json-style-resolve.js';
 
 /**
@@ -192,19 +162,17 @@ const PARSE_FAILURE_FONT = { family: 'monospace', size: 14 };
  * 640x80 red box here, the same bespoke shape the class engine used before
  * refusals were routed through the jar's own error page.
  *
- * Document size follows the family's normal chain (see `documentDimensions`),
- * with one difference that matters: a TEXT's ink is its box exactly
- * (`LimitFinder.java:217-225`), with none of the `-1` corner a rectangle
- * contributes, and `TextBlockMarged` draws a `UEmpty` of the full margined
- * size so the ink is `text + 2·5` wide by `text + 2·2` tall. Jar-verified on
+ * The block's extent (`JsonDiagram#calculateDimension`, `:130-137`) differs
+ * from the node page's in one way that matters: a TEXT's ink is its box
+ * exactly (`LimitFinder.java:217-225`), with none of the `-1` corner a
+ * rectangle contributes, and `TextBlockMarged` draws a `UEmpty` of the full
+ * margined size at the block origin so the ink is `text + 2·5` wide by
+ * `text + 2·2` tall. The exporter adds the document margin and `+1`
+ * (`TextBlockExporter.java:173,198-203`). Jar-verified on
  * `json/nixaxa-46-muge983`: `trunc(230.388 + 10 + 20 + 1) = 261` by
  * `trunc(14 + 4 + 20 + 1) = 39`, against its golden's `viewBox="0 0 261 39"`.
  */
-function layoutParseFailure(
-  ast: JsonDiagramAST,
-  measurer: StringMeasurer,
-  margin: ReturnType<typeof marginsOf>,
-): JsonGeometry {
+function layoutParseFailure(ast: JsonDiagramAST, measurer: StringMeasurer): JsonGeometry {
   const message = `Your data does not sound like ${ast.diagramLabel ?? 'JSON'} data`;
   const { width: textWidth, height: textHeight } = measurer.measure(message, PARSE_FAILURE_FONT);
   const inkWidth = textWidth + 2 * CELL_MARGIN_X;
@@ -213,12 +181,12 @@ function layoutParseFailure(
     styles: resolveJsonStyles(ast.skinParam),
     nodes: [],
     edges: [],
-    width: inkWidth + margin.x + ENSURE_VISIBLE_BUMP,
-    height: inkHeight + margin.y + ENSURE_VISIBLE_BUMP,
+    width: inkWidth,
+    height: inkHeight,
     error: message,
     errorLayout: {
-      x: margin.left + CELL_MARGIN_X,
-      y: margin.top + CELL_MARGIN_Y + textHeight - measurer.getDescent(PARSE_FAILURE_FONT, message),
+      x: CELL_MARGIN_X,
+      y: CELL_MARGIN_Y + textHeight - measurer.getDescent(PARSE_FAILURE_FONT, message),
       // Upstream measures for `textLength` BEFORE `SvgGraphics#text` swaps
       // spaces for NBSP under a monospace family, so this is the raw width.
       textLength: textWidth,
@@ -340,23 +308,21 @@ function buildJsonDotEdges(flatNodes: FlatNode[], measured: MeasuredNode[]): Dot
 
 /**
  * Place measured nodes at the jar's origin (`json-node-position.ts`, the port
- * of `SmetanaForJson#getPosition`), offset by the document margin. The size
- * drawn is the measured block's — upstream draws `node.block` at that
- * translation (`SmetanaForJson.java:166-168`), never the engine box.
+ * of `SmetanaForJson#getPosition`). The size drawn is the measured block's —
+ * upstream draws `node.block` at that translation (`SmetanaForJson.java:
+ * 166-168`), never the engine box. jff-T2b: no document margin here --
+ * `SmetanaForJson` draws at the block's own origin (`JsonDiagram.java:122`)
+ * and the exporter translates by the margin (`TextBlockExporter.java:173`).
  */
-function placeJsonNodes(
-  measured: MeasuredNode[],
-  positions: ReadonlyMap<string, JsonNodePosition>,
-  margin: { left: number; top: number },
-): JsonNodeGeo[] {
+function placeJsonNodes(measured: MeasuredNode[], positions: ReadonlyMap<string, JsonNodePosition>): JsonNodeGeo[] {
   const nodes: JsonNodeGeo[] = [];
   for (const m of measured) {
     const dn = positions.get(m.flatNode.id);
     if (dn === undefined) continue;
     nodes.push({
       id: m.flatNode.id,
-      x: dn.x + margin.left,
-      y: dn.y + margin.top,
+      x: dn.x,
+      y: dn.y,
       width: m.totalWidth,
       height: m.totalHeight,
       keyColWidth: m.keyColWidth,
@@ -367,20 +333,15 @@ function placeJsonNodes(
   return nodes;
 }
 
-/** `Mirror#invAndXYSwitch` (`Mirror.java:55-59`), then the document margin. */
-function mirrorPoint(
-  xMirror: Mirror,
-  x: number,
-  y: number,
-  margin: { left: number; top: number },
-): { x: number; y: number } {
+/** `Mirror#invAndXYSwitch` (`Mirror.java:55-59`), at the block's own origin. */
+function mirrorPoint(xMirror: Mirror, x: number, y: number): { x: number; y: number } {
   const p = xMirror.invAndXYSwitch(new XPoint2D(x, y));
-  return { x: p.getX() + margin.left, y: p.getY() + margin.top };
+  return { x: p.getX(), y: p.getY() };
 }
 
 /**
  * The engine's own splines, read off its raw y-up frame through the SAME
- * `Mirror` as the nodes, offset by the document margin. A5/T8: the edges are
+ * `Mirror` as the nodes, at the block's own origin. A5/T8: the edges are
  * the ENGINE's splines, not points re-derived from node geometry. Upstream:
  *
  *     final JsonCurve curve = getCurve(edge, 13);          // SmetanaForJson.java:173
@@ -395,11 +356,10 @@ function mirrorPoint(
 function buildJsonEdgeGeometries(
   engineEdges: NonNullable<DotLayoutResult['engineEdges']>,
   xMirror: Mirror,
-  margin: { left: number; top: number },
 ): JsonEdgeGeo[] {
   return engineEdges.map((e) => ({
-    points: e.points.map((p) => mirrorPoint(xMirror, p.x, p.y, margin)),
-    ...(e.epX !== undefined && e.epY !== undefined ? { ep: mirrorPoint(xMirror, e.epX, e.epY, margin) } : {}),
+    points: e.points.map((p) => mirrorPoint(xMirror, p.x, p.y)),
+    ...(e.epX !== undefined && e.epY !== undefined ? { ep: mirrorPoint(xMirror, e.epX, e.epY) } : {}),
     spline: true,
   }));
 }
@@ -415,8 +375,7 @@ function engineFrameOf(r: DotLayoutResult): Required<Pick<DotLayoutResult, 'engi
 export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMeasurer): JsonGeometry {
   // Handle parse failure: return an error geometry that the renderer will
   // display as PlantUML's canonical "Your data does not sound like JSON data".
-  const margin = marginsOf(theme);
-  if (ast.parseError) return layoutParseFailure(ast, measurer, margin);
+  if (ast.parseError) return layoutParseFailure(ast, measurer);
 
   const flatNodes: FlatNode[] = walkTree(normalizeRoot(ast.root));
 
@@ -457,21 +416,19 @@ export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMe
   // (`SmetanaForJson.java:160-168,203-209`). Title no longer reserves layout
   // space here (mission G0b/T8) -- it is drawn by the shared applyChrome step.
   const { positions, xMirror } = jsonNodePositions(engineNodes);
-  const nodes = placeJsonNodes(measured, positions, margin);
+  const nodes = placeJsonNodes(measured, positions);
 
-  const edges = buildJsonEdgeGeometries(engineEdges, xMirror, margin);
+  const edges = buildJsonEdgeGeometries(engineEdges, xMirror);
 
-  const { width, height, finalWidth, finalHeight } = documentDimensions(nodes, edges, margin);
+  const { width, height } = documentDimensions(nodes, edges);
   const result: JsonGeometry = {
     styles,
     nodes,
     edges,
     width,
     height,
-    finalDimension: { width: finalWidth, height: finalHeight },
-    // Type-carrying only: resolved to a factor at RENDER time against these
-    // (unscaled) dims, mirroring `TextBlockExporter#computeScaleFactor(dim)`
-    // reading `calculateFinalDimension()`'s own pre-scale result.
+    // Type-carrying only: `exportTo` resolves it over the chromed block plus
+    // margin (`TextBlockExporter.java:159-165,198-209`).
     ...(ast.scale === undefined ? {} : { scale: ast.scale }),
   };
   return result;

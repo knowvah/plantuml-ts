@@ -475,10 +475,18 @@
       "dh": 0
     },
     "authored:json/title-scale": {
-      "aligned": false
+      "aligned": true,
+      "nodeMax": 0.254,
+      "pathMax": 1.861,
+      "dw": 0,
+      "dh": 0
     },
     "authored:yaml/title-scale": {
-      "aligned": false
+      "aligned": true,
+      "nodeMax": 0.675,
+      "pathMax": 2,
+      "dw": 0,
+      "dh": 0
     },
     "authored:hcl/title-scale": {
       "aligned": true,
@@ -488,7 +496,11 @@
       "dh": 0
     },
     "authored:json/title-scale-max-width": {
-      "aligned": false
+      "aligned": true,
+      "nodeMax": 0,
+      "pathMax": 0,
+      "dw": 0,
+      "dh": 0
     },
     "authored:json/caption-scale": {
       "aligned": true,

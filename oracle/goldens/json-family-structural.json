@@ -171,7 +171,10 @@
     "json/caption-scale",
     "json/title-handwritten",
     "json/title-narrow",
-    "yaml/style-root-fontcolor"
+    "yaml/style-root-fontcolor",
+    "json/title-scale",
+    "json/title-scale-max-width",
+    "yaml/title-scale"
   ],
   "divergent": {
     "json/timafu-94-bixe774": {
@@ -185,18 +188,6 @@
     "yaml/tadari-70-nare798": {
       "maxDiffs": 1,
       "reason": "U-REC (jfp ledger, plans/json-family-parity/diagnosis/ledger.md): Smetana's record_init rounds the declared record size (shapes__c.java:1807-1808 `sz = POINTS(ND_width)`, no field PAD) where graphviz uses unrounded INCH2PS (lib/common/shapes.c:3688-3689, commit aee7eda7d, 8.0.4); dot-engine equals real `dot` 16.1.0 on this input. tadari is najoba plus a title. Node sizes and document HEIGHT are identical to the jar; the child node sits at x=128.237 where Smetana's rounded root extent puts it at 128, which pushes the ink right edge from 176.85 to 177.087 so the document width rounds 183 -> 184. Measured 2026-08-09 with -DPLANTUML_DETERMINISTIC_TEXT=true. Not chased: a Smetana geometry number is never a target."
-    },
-    "json/title-scale": {
-      "maxDiffs": 2,
-      "reason": "D1 (jff): scale is applied to the json body BEFORE chrome. Our renderer resolves k over the title-less size and multiplies the body (src/diagrams/json/renderer.ts:474-477, scale-at-emit.ts) before applyExportedChrome adds the title at 1x (src/index.ts:193); upstream UgDiagram#getExporter adds chrome + back colour first (UgDiagram.java:123-131), then TextBlockExporter#exportTo scales the whole chromed block (TextBlockExporter.java:159-177, factor :205-209). Diffs: title font-size 14 vs 21 and its textLength (scale 1.5). Closes in jff batch 2 (T2b)."
-    },
-    "json/title-scale-max-width": {
-      "maxDiffs": 2,
-      "reason": "D1 (jff): scale is applied to the json body BEFORE chrome. Our renderer resolves k over the title-less size and multiplies the body (src/diagrams/json/renderer.ts:474-477, scale-at-emit.ts) before applyExportedChrome adds the title at 1x (src/index.ts:193); upstream UgDiagram#getExporter adds chrome + back colour first (UgDiagram.java:123-131), then TextBlockExporter#exportTo scales the whole chromed block (TextBlockExporter.java:159-177, factor :205-209). Diffs: title font-size and textLength (`scale max 200 width`: the jar reads the factor over the CHROMED width, so the title shrinks; ours stays 14). Closes in jff batch 2 (T2b)."
-    },
-    "yaml/title-scale": {
-      "maxDiffs": 1,
-      "reason": "D1 (jff): scale is applied to the json body BEFORE chrome. Our renderer resolves k over the title-less size and multiplies the body (src/diagrams/json/renderer.ts:474-477, scale-at-emit.ts) before applyExportedChrome adds the title at 1x (src/index.ts:193); upstream UgDiagram#getExporter adds chrome + back colour first (UgDiagram.java:123-131), then TextBlockExporter#exportTo scales the whole chromed block (TextBlockExporter.java:159-177, factor :205-209). Diff: title font-size 14 vs 28 (scale 2). Closes in jff batch 2 (T2b)."
     }
   }
 }

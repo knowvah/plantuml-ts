@@ -21,13 +21,16 @@ import type { Theme } from '../../../src/core/theme.js';
 import type { JsonGeometry } from '../../../src/diagrams/json/layout.js';
 import { jsonStylesOf } from '../../helpers/json-skin.js';
 
+/** jff-T2b: the block at its own origin with its extent; the export tail adds
+ *  the same(10) margin and `+1` (`TextBlockExporter.java:173,198-203`), so the
+ *  document is the pre-change one: node at (10, 20), canvas 400 x 300. */
 const GEO: JsonGeometry = {
   styles: jsonStylesOf('json'),
   nodes: [
     {
       id: 'n0',
-      x: 10,
-      y: 20,
+      x: 0,
+      y: 10,
       width: 200,
       height: 60,
       keyColWidth: 80,
@@ -55,8 +58,8 @@ const GEO: JsonGeometry = {
     },
   ],
   edges: [],
-  width: 400,
-  height: 300,
+  width: 379,
+  height: 279,
 };
 
 const themed = (lengthAdjust: RootLengthAdjust): Theme => ({ ...defaultTheme, lengthAdjust });

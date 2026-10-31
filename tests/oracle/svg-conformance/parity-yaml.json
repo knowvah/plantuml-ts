@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T22:07:50.645Z",
+  "generatedAt": "2026-10-31T01:05:17.486Z",
   "fixtures": [
     {
       "slug": "bafemu-96-luji978",
@@ -169,8 +169,8 @@
       "dotEqual": false,
       "layoutEqual": "n/a",
       "verdict": "structural-match",
-      "maxDelta": 133.62999999999997,
-      "maxDeltaPath": "svg/g[1]/path[2]/@d[6]"
+      "maxDelta": 2.819999999999993,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[8]"
     },
     {
       "slug": "polela-38-mopu631",

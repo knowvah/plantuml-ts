@@ -642,20 +642,22 @@ describe('renderJson — node-level style cascade', () => {
 describe('renderJson — skinparam dpi has NO EFFECT (cdd-T30, StyleExtractor.java:82-89)', () => {
   it('theme.dpi is ignored: rendering with and without it is byte-identical', () => {
     const geo = makeGeo({ nodes: [makeNode({ x: 10, y: 20, width: 200, height: 60 })] });
-    const unset = assembleSvg(renderJson(geo, defaultTheme));
-    const withDpi = assembleSvg(renderJson(geo, { ...defaultTheme, dpi: 600 }));
+    const unset = assembleSvg({ ...renderJson(geo, defaultTheme), diagramType: 'JSON' });
+    const withDpi = assembleSvg({ ...renderJson(geo, { ...defaultTheme, dpi: 600 }), diagramType: 'JSON' });
     expect(withDpi).toBe(unset);
   });
 
   it('a `scale ...` directive still applies on its own (dpi is the ONLY term StyleExtractor drops)', () => {
     const geo = makeGeo({
-      nodes: [makeNode({ x: 10, y: 20, width: 200, height: 60 })],
+      nodes: [makeNode({ x: 0, y: 20, width: 200, height: 60 })],
       scale: { kind: 'simple', factor: 2 },
     });
-    const withoutDpi = assembleSvg(renderJson(geo, defaultTheme));
-    const withDpi = assembleSvg(renderJson(geo, { ...defaultTheme, dpi: 600 }));
-    // `scale 2` alone still doubles x (10 -> 20); dpi 600 changes nothing.
-    expect(withoutDpi).toContain('x="20"');
+    // Stamped as `json/index.ts#render` does, so the export tail runs.
+    const withoutDpi = assembleSvg({ ...renderJson(geo, defaultTheme), diagramType: 'JSON' });
+    const withDpi = assembleSvg({ ...renderJson(geo, { ...defaultTheme, dpi: 600 }), diagramType: 'JSON' });
+    // `scale 2` alone still doubles x: block origin 0 + margin 10 (TextBlockExporter.java:173)
+    // -> 10 -> 20; dpi 600 changes nothing.
+    expect(withoutDpi).toContain('<rect x="20" y="60"');
     expect(withDpi).toBe(withoutDpi);
   });
 });

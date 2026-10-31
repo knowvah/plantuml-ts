@@ -226,12 +226,41 @@ function isSolidNonDefault(background: string): boolean {
  *  `stroke:none;` ALONE (no `stroke-width`), matching `core/svg.ts
  *  #strokeDecorationOf`'s own `stroke:none` handling. */
 function maybeJsonBackgroundRect(fragment: RenderFragment): string {
-  const background = fragment.background ?? JSON_DEFAULT_BACKGROUND;
+  return jsonBackgroundRect(fragment.background, Math.trunc(fragment.width), Math.trunc(fragment.height));
+}
+
+/** {@link maybeJsonBackgroundRect}'s rect at an explicit size, `''` when the
+ *  background does not warrant one ({@link isSolidNonDefault}). */
+function jsonBackgroundRect(color: string | undefined, width: number, height: number): string {
+  const background = color ?? JSON_DEFAULT_BACKGROUND;
   if (!isSolidNonDefault(background)) return '';
-  return rect(0, 0, Math.trunc(fragment.width), Math.trunc(fragment.height), {
-    fill: background,
-    stroke: 'none',
-  });
+  return rect(0, 0, width, height, { fill: background, stroke: 'none' });
+}
+
+/**
+ * jff-T2a (decisions.md D1): a json/yaml/hcl producer that handed over its
+ * RAW chromed block ({@link RenderFragment.exportMargin}) is exported the way
+ * `UgDiagram#getExporter` (`UgDiagram.java:123-139`) exports every json
+ * diagram: `addChrome` (`:128`), `TextBlockUtils.addBackcolor` (`:130-132`,
+ * which only carries the colour, `TextBlockUtils.java:152-174`, into
+ * `TextBlockExporter.Builder`, `TextBlockExporter.java:427-428,491`), then
+ * {@link exportTo} (`TextBlockExporter.java:159-177`: margin shift, factor
+ * over block + margin, canvas `trunc(dim + 1) x factor`).
+ *
+ * The back-colour rect is NOT part of the shifted, scaled block: `SvgGraphics`'
+ * constructor paints it (`SvgGraphics.java:176-192`, `paintBackcolor`
+ * `:207-212`) when `createUGraphic` runs (`TextBlockExporter.java:169`,
+ * `:285`), before the margin translate (`:173`), as the root `<g>`'s first
+ * child at (0,0); `finalizeRootAttributes` then sizes it `format(maxX)` x
+ * `format(maxY)` (`SvgGraphics.java:819-821`) -- the same numbers as the root
+ * `width`/`height` (`:810-811`), i.e. {@link exportTo}'s scaled canvas. So it
+ * is spliced AFTER the export, at the exported size.
+ */
+function exportJsonTextBlock(fragment: RenderFragment): RenderFragment {
+  const body = fragment.bodyWrapped === true ? fragment.body : group(fragment.body);
+  const exported = exportTo(fragment, body);
+  const backgroundRect = jsonBackgroundRect(fragment.background, exported.width, exported.height);
+  return { ...exported, body: spliceIntoContentGroup(exported.body, backgroundRect) };
 }
 
 /**
@@ -241,13 +270,16 @@ function maybeJsonBackgroundRect(fragment: RenderFragment): string {
  * themed `"white"` would otherwise reach the document as
  * `background:white` where the jar writes `background:#FFFFFF`
  * (`json/vogeku-38-soxe333`, `!theme plain`) -- matching class's own
- * resolve-before-shell convention (N4).
+ * resolve-before-shell convention (N4). A fragment carrying `exportMargin`
+ * then runs the export tail ({@link exportJsonTextBlock}); without it the
+ * producer already exported its block and only the back-colour rect is added.
  */
 function finalizeJsonFragment(fragment: RenderFragment): RenderFragment {
   const canonical =
     fragment.background === undefined
       ? fragment
       : { ...fragment, background: resolveColorToSvgHex(fragment.background) };
+  if (canonical.exportMargin !== undefined) return exportJsonTextBlock(canonical);
   const backgroundRect = maybeJsonBackgroundRect(canonical);
   const body =
     fragment.bodyWrapped === true
