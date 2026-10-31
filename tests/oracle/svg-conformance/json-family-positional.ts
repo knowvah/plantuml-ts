@@ -24,6 +24,12 @@
  * attribute whose command letters or number-token count differ. An unaligned
  * row reports zero magnitudes that must not be read as "perfect".
  *
+ * ## Two row sources (jff D4)
+ *
+ * `corpus` rows are the oracle cache (`test-results/dot-cache/<type>/<slug>/in.{puml,svg}`),
+ * keyed `<type>/<slug>`. `authored` rows are `tests/fixtures/<type>/<slug>.{puml,svg}`, keyed
+ * `authored:<type>/<slug>` in the pin, so a corpus row and an authored row can never collide.
+ *
  * The pin (`oracle/goldens/json-family-positional.json`) is orchestrator-owned;
  * this module only reads it and checks a measurement against it.
  */
@@ -33,7 +39,7 @@ import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { TOLERANCES, compareSvg } from './compare.js';
-import { isPositionalDiff, structuralDiffs } from './json-family-structural.js';
+import { AUTHORED_ROOT, isPositionalDiff, listAuthoredSlugs, structuralDiffs } from './json-family-structural.js';
 import { normalizeSvg } from './normalize.js';
 import type { NormalizedNode } from './normalize.js';
 import { renderFixtureJson } from './render-fixture-json.js';
@@ -227,13 +233,86 @@ function cachedFile(type: JsonFamilyType, slug: string, file: string): string {
   return join(CACHE, type, slug, file);
 }
 
-/** Render `test-results/dot-cache/<type>/<slug>/in.puml` and measure it against that row's `in.svg`. */
-export function measureResidue(type: JsonFamilyType, slug: string): PositionalResidue {
-  const puml = cachedFile(type, slug, 'in.puml');
-  if (!existsSync(puml)) throw new Error(`no cached fixture ${type}/${slug} at ${puml}`);
+/** Where a row's `.puml`/oracle pair lives: the oracle cache (`corpus`) or `tests/fixtures` (`authored`). */
+export type ResidueSource = 'corpus' | 'authored';
+
+/** Pin-key prefix of an authored row: `authored:<type>/<slug>`; corpus keys are bare `<type>/<slug>`. */
+export const AUTHORED_KEY_PREFIX = 'authored:';
+
+/** A pin/row key split into its parts. */
+export interface RowKey {
+  source: ResidueSource;
+  type: JsonFamilyType;
+  slug: string;
+}
+
+function isJsonFamilyType(s: string): s is JsonFamilyType {
+  return JSON_FAMILY_TYPES.some((t) => t === s);
+}
+
+/** The pin key of one row (`<type>/<slug>`, `authored:<type>/<slug>` for authored rows). */
+export function rowKey(type: JsonFamilyType, slug: string, source: ResidueSource = 'corpus'): string {
+  return `${source === 'authored' ? AUTHORED_KEY_PREFIX : ''}${type}/${slug}`;
+}
+
+/** Inverse of {@link rowKey}; throws on a key that names no json-family type or slug. */
+export function parseRowKey(key: string): RowKey {
+  const source: ResidueSource = key.startsWith(AUTHORED_KEY_PREFIX) ? 'authored' : 'corpus';
+  const rest = source === 'authored' ? key.slice(AUTHORED_KEY_PREFIX.length) : key;
+  const slash = rest.indexOf('/');
+  const type = rest.slice(0, slash);
+  const slug = rest.slice(slash + 1);
+  if (slash === -1 || !isJsonFamilyType(type) || slug === '') throw new Error(`malformed residue row key: ${key}`);
+  return { source, type, slug };
+}
+
+function authoredFile(type: JsonFamilyType, slug: string, ext: 'puml' | 'svg'): string {
+  return join(AUTHORED_ROOT, type, `${slug}.${ext}`);
+}
+
+/** Whether the row's `.puml` and oracle `.svg` are both on disk. */
+export function rowExists(type: JsonFamilyType, slug: string, source: ResidueSource = 'corpus'): boolean {
+  return source === 'authored'
+    ? existsSync(authoredFile(type, slug, 'puml')) && existsSync(authoredFile(type, slug, 'svg'))
+    : existsSync(cachedFile(type, slug, 'in.puml')) && existsSync(cachedFile(type, slug, 'in.svg'));
+}
+
+/**
+ * Render one fixture and measure it against its oracle. `corpus` (default) reads
+ * `test-results/dot-cache/<type>/<slug>/in.{puml,svg}`; `authored` reads
+ * `tests/fixtures/<type>/<slug>.{puml,svg}` (`AUTHORED_ROOT`, json-family-structural.ts).
+ */
+export function measureResidue(
+  type: JsonFamilyType,
+  slug: string,
+  source: ResidueSource = 'corpus',
+): PositionalResidue {
+  if (!rowExists(type, slug, source)) {
+    const where = source === 'authored' ? authoredFile(type, slug, 'puml') : cachedFile(type, slug, 'in.puml');
+    throw new Error(
+      `no ${source === 'authored' ? 'authored' : 'cached'} fixture ${rowKey(type, slug, source)} at ${where}`,
+    );
+  }
+  const [puml, svg] =
+    source === 'authored'
+      ? [authoredFile(type, slug, 'puml'), authoredFile(type, slug, 'svg')]
+      : [cachedFile(type, slug, 'in.puml'), cachedFile(type, slug, 'in.svg')];
   const actual = renderFixtureJson(readFileSync(puml, 'utf8'), new DeterministicMeasurer());
-  const golden = readFileSync(cachedFile(type, slug, 'in.svg'), 'utf8');
-  return measureSvgResidue(actual, golden, structuralDiffs(type, slug).diffs.length === 0);
+  return measureSvgResidue(actual, readFileSync(svg, 'utf8'), structuralDiffs(type, slug).diffs.length === 0);
+}
+
+/** Every authored `type/slug` row (a `.puml` with its oracle `.svg` under `tests/fixtures`), sorted per type. */
+export function listAuthoredRows(): ReadonlyArray<{ type: JsonFamilyType; slug: string }> {
+  return JSON_FAMILY_TYPES.flatMap((type) => listAuthoredSlugs(type).map((slug) => ({ type, slug })));
+}
+
+/** The pin keys that name an authored row with no fixture on disk (the gate fails on these, naming them). */
+export function missingAuthoredPinKeys(keys: readonly string[]): string[] {
+  return keys.filter((k) => {
+    if (!k.startsWith(AUTHORED_KEY_PREFIX)) return false;
+    const { type, slug } = parseRowKey(k);
+    return !rowExists(type, slug, 'authored');
+  });
 }
 
 /** Every cached `type/slug` row of the three families that has an oracle `in.svg`, sorted per type. */
@@ -284,6 +363,17 @@ const CONFORMANT_PIN: PinRow = {
   dw: CONFORMANT_BAND,
   dh: CONFORMANT_BAND,
 };
+
+/** Whether a measurement is aligned and inside `compareSvg`'s conformance band on every ceiling. */
+export function isWithinConformantBand(r: PositionalResidue): boolean {
+  return (
+    r.aligned &&
+    r.nodeMax <= CONFORMANT_BAND &&
+    r.pathMax <= CONFORMANT_BAND &&
+    r.canvas.dw <= CONFORMANT_BAND &&
+    r.canvas.dh <= CONFORMANT_BAND
+  );
+}
 
 const CEILING_FIELDS = ['nodeMax', 'pathMax', 'dw', 'dh'] as const;
 

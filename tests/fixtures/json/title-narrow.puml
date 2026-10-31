@@ -1,0 +1,4 @@
+@startjson
+title T
+{"alpha": "a fairly long value to force a wide node", "b": [1, 2]}
+@endjson

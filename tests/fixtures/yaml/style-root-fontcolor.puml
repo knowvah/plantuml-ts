@@ -1,0 +1,10 @@
+@startyaml
+<style>
+root {
+  FontColor red
+}
+</style>
+a:
+  b: 1
+c: [1, 2]
+@endyaml

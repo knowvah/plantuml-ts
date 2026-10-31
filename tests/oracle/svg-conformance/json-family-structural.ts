@@ -84,14 +84,17 @@ const TRAILING_ATTR_RE = new RegExp('@([A-Za-z0-9-]+)(\\[\\d+\\])?$');
 
 /**
  * Fixtures whose canvas BACKGROUND rect (`svg/g[1]/rect[1]`, present because a
- * `!theme` paints one) is a degree wider/taller only through Smetana's integer
- * node sizing: it rounds every node's width/height to whole points
- * (`POINTS(ND_width(n))`, shapes__c.java:253-254, 1807-1808; `Macro.POINTS` =
- * ROUND, Macro.java:1560-1562). `yaml/vapoda-87-piku740`: the first node is
- * 21.55 wide, the jar lays its child at 5+22+37 = 64, ours at 63.55, so the
- * canvas is 216 vs 215. Same accepted delta as the root `svg/@width` already
- * excluded (CLAUDE.md "One layout engine", ruling 2026-08-09). Per fixture, not
- * by path: in other fixtures `rect[1]` is a node, whose size must stay gated.
+ * `!theme` paints one) is a degree wider/taller through mechanism U-REC (jfp
+ * ledger, `plans/json-family-parity/diagnosis/ledger.md:44-49`): Smetana rounds
+ * every record node's width/height to whole points with no PAD
+ * (`POINTS(ND_width(n))`, shapes__c.java:1807-1808; `Macro.POINTS` = ROUND,
+ * Macro.java:1560-1562), where graphviz sizes the same record with `INCH2PS`
+ * (shapes.c:3688-3689). `shapes__c.java:253-254` is `poly_init`, not records, and
+ * does not apply. `yaml/vapoda-87-piku740`: the first node is 21.55 wide, the jar
+ * lays its child at 5+22+37 = 64, ours at 63.55, so the canvas is 216 vs 215.
+ * Same accepted delta as the root `svg/@width` already excluded (CLAUDE.md "One
+ * layout engine", ruling 2026-08-09). Per fixture, not by path: in other
+ * fixtures `rect[1]` is a node, whose size must stay gated.
  */
 const SMETANA_ROUNDED_CANVAS: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ['yaml/vapoda-87-piku740', new Set(['svg/g[1]/rect[1]/@width'])],

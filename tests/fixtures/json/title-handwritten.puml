@@ -1,0 +1,5 @@
+@startjson
+title Handwritten Title
+skinparam handwritten true
+{"a": {"b": [1, 2]}, "c": true}
+@endjson

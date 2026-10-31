@@ -473,6 +473,50 @@
       "pathMax": 1.476,
       "dw": 1,
       "dh": 0
+    },
+    "authored:json/title-scale": {
+      "aligned": false
+    },
+    "authored:yaml/title-scale": {
+      "aligned": false
+    },
+    "authored:hcl/title-scale": {
+      "aligned": true,
+      "nodeMax": 0,
+      "pathMax": 0,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/title-scale-max-width": {
+      "aligned": false
+    },
+    "authored:json/caption-scale": {
+      "aligned": true,
+      "nodeMax": 0,
+      "pathMax": 0,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/title-handwritten": {
+      "aligned": true,
+      "nodeMax": 0.225,
+      "pathMax": 1.946,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:json/title-narrow": {
+      "aligned": true,
+      "nodeMax": 0,
+      "pathMax": 1.41,
+      "dw": 0,
+      "dh": 0
+    },
+    "authored:yaml/style-root-fontcolor": {
+      "aligned": true,
+      "nodeMax": 0.338,
+      "pathMax": 1.284,
+      "dw": 0,
+      "dh": 0
     }
   }
 }

@@ -1,0 +1,5 @@
+@startjson
+title A Rather Long Title For The Scaled Diagram
+scale 1.5
+{"a": [1, 2], "b": "x"}
+@endjson
