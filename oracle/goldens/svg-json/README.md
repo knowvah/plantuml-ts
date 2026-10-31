@@ -24,6 +24,17 @@ residue is graphviz 2.38 (Smetana) vs modern graphviz arithmetic — record-size
 rounding, spline clip side, arrow length, in-rank network simplex — see
 DIVERGENCES.md, "Smetana-backed diagram types". Counts unchanged: 14/7/1.
 
+**Title × scale (json-family-followons, 2026-10-30).** The renderer now hands
+core its raw 1x block and core scales the CHROMED block (`exportTo`), so a
+title scales with the body (`UgDiagram.java:123-131`,
+`TextBlockExporter.java:159-177`). Eight authored rows pin it
+(`tests/fixtures/{json,yaml,hcl}/{title-scale,title-scale-max-width,caption-scale,
+title-handwritten,title-narrow,style-root-fontcolor}`), each in the structural
+manifest AND the positional ceiling (`authored:<type>/<slug>` keys). The manifest is now
+175 clean rows (89 corpus + 86 authored) and 3 ceilings; the json-family has no
+chrome but `title` (`StyleExtractor.java:55-90` keeps no caption; the jar draws no
+hcl title, `HclDiagramFactory.java:88-90`).
+
 This section previously said byte-conformance was unreachable here and the
 ratchet could never admit anything. **That was wrong, and the way it was wrong
 is worth keeping.** The claim rested on M1 — "document dimensions differ
