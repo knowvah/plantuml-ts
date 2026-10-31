@@ -249,6 +249,10 @@ engine (manifest 167 clean + 3 ceilings; extended mode through
 json-family-parity (jfp, 2026-10-30) diagnosed every positional residue row:
 the remainder is graphviz 2.38 vs modern arithmetic (DIVERGENCES); open items
 are the jfp follow-ons in `planning/next-missions.md`.
+json-family-followons (jff, 2026-10-30) closed them: title × scale now scales the
+chromed block through core's `exportTo` (8 authored rows pinned in both gates),
+dead json scale plumbing removed, dot-engine issue 37 filed; only the ruled
+`inches()` 6-dp item and the jff follow-ons in `planning/next-missions.md` remain.
 
 ---
 

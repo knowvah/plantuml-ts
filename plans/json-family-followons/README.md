@@ -106,8 +106,8 @@ or journal why not (jfp row 2). New/removed src module ⇒ `npm run catalog`.
 | [0 — branch, tooling, authored fixtures + pins](batch-0/overview.md) | T0a, T0b, close | [x] |
 | [1 — idempotence check, dead scale plumbing](batch-1/overview.md) | T1a, T1b, close | [x] |
 | [2 — json joins the TitledDiagram export tail](batch-2/overview.md) | T2a, T2b, T2c (close) | [x] |
-| [exit](batch-exit/overview.md) | final measurement, DIVERGENCES, docs, memory | [ ] |
-| [squash](batch-squash/overview.md) | one commit per batch, tag `jff/pre-squash` | [ ] |
+| [exit](batch-exit/overview.md) | final measurement, DIVERGENCES, docs, memory | [x] |
+| [squash](batch-squash/overview.md) | one commit per batch, tag `jff/pre-squash` | [x] |
 
 ## Documents
 
@@ -124,3 +124,26 @@ or journal why not (jfp row 2). New/removed src module ⇒ `npm run catalog`.
 - `.agent-notes/jfp-b1.md` (re-render observation, scale leftovers), `.agent-notes/jfp-execution.md`.
 - `DIVERGENCES.md` "Smetana-backed diagram types"; `oracle/goldens/svg-json/README.md`.
 - Memories: `squash-per-batch-at-end`, `gate-merges-on-full-set-and-typecheck`, `dot-engine-blame-needs-real-dot`, `conformance-harness-mirrors-index-ts`, `jfp-status`.
+
+## Final status (2026-10-30)
+
+Tasks: 8/8 planned (T0a, T0b, T1a, T1b, T2a, T2b + 3 closes) plus exit; decisions journaled: 32 rows
+(flagged for review: row 20, the T2a back-colour rect premise corrected against
+`SvgGraphics.java:207-212,819-821`; row 26, the yaml title-x 0.338 judged body
+residue under stop 14).
+
+| checkpoint | json/yaml/hcl conformant | pins | manifest | positional (aligned Σ node / path / canvas) |
+|---|---|---|---|---|
+| main b9b309894 | 14/7/1 | 14/7/1 | 167 + 3 | 457.355 / 546.207 / 85 (70 corpus rows) |
+| b0close | 14/7/1 | 14/7/1 | 172 + 6 | 457.918 / 550.847 / 85 (+8 authored) |
+| b1 | 14/7/1 | 14/7/1 | 172 + 6 | unchanged, 0 movers |
+| b2 / final | 14/7/1 | 14/7/1 | 175 + 3 | 458.847 / 554.708 / 85 (corpus unchanged; 3 authored rows unaligned → aligned) |
+
+Gates (final, load 4.4): collected 1888 = on-disk, 36480 passed, 0 failed;
+typecheck, lint, build exit 0; d.ts byte-identical to b0. All engines: 0
+conformant losses vs b0 in 28 engines (b2 chain; src unchanged since).
+Outcome: title + scale rows carry no title diff (json/title-scale-max-width
+conformant; the other two keep only body residue); `scale-at-emit.ts` and
+`NodeStyleJson.scale` gone; dot-engine issue 37 filed. Follow-ons:
+`planning/next-missions.md` "jff follow-ons" (#000000 rect, diagramType-less
+unit tests, gradient back colours).
