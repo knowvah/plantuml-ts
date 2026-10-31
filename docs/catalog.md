@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-2035 modules · 7047 exported names.
+2035 modules · 7046 exported names.
 
 ## `src/`
 
@@ -2205,7 +2205,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `json-family-style-input.ts` | `isExtended`, `jsonFamilyStyleInput`, `hclStyleInput` | The style sources a json-family diagram's theme is built from -- the `SyncPlugin.styleInput` of `@startjson` / `@startyaml` / `@starthcl`. |
 | `json-layout-prep.ts` | `ValueType`, `DisplayValue`, `getDisplayValue`, `JsonContainer`, `FlatNode`, `containerEntries`, `walkTree`, `EMPTY_MAP`, `Highlighted`, `upOneLevel`, `isHighlighted`, `buildHighlightMap`, `wordWrapLine`, `BuildRowsOptions` | JSON diagram pre-layout: value display formatting, container tree flattening, highlight-map construction, and string wrapping. |
 | `json-node-position.ts` | `JsonEngineNode`, `JsonNodePosition`, `JsonNodePositions`, `jsonNodePositions` | Where the jar puts each json node: `SmetanaForJson#drawMe`'s `max` and `#getPosition`, over the engine's raw node frame. |
-| `json-renderer-highlight.ts` | `highlightRect`, `scaleDasharray` | The highlighted row's backing rect and the dash-scaling helper for the JSON renderer — split out of renderer.ts (cdd-T30, 500-line file-size cap). |
+| `json-renderer-highlight.ts` | `highlightRect` | The highlighted row's backing rect for the JSON renderer — split out of renderer.ts (cdd-T30, 500-line file-size cap). |
 | `json-skin-param.ts` | `JsonFamilyType`, `JsonSkinParam`, `jsonFamilyJarStyleSource`, `createJsonSkinParam` | The json family's `SkinParam` slice: the style engine `TextBlockJson` and `SmetanaForJson` read through `skinParam.getCurrentStyleBuilder()` and `getIHtmlColorSet()` (`TextBlockJson.java:112`, `SmetanaForJson.java:119-120`). |
 | `json-style-resolve.ts` | `JsonStyleInput`, `JsonStyleSet`, `resolveJsonStyles`, `styleToUse` | resolveJsonStyles — the json family's styles at the jar's six signatures. |
 | `JsonCurve.ts` | `CurvePoint`, `VERY_FIRST_LINE`, `supp`, `veryFirstPoint`, `buildArrowHeadPath`, `buildArrowHeadSegments`, `buildCurveSegments`, `buildCurvePath`, `segmentsToPathData` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonCurve.java The path a json edge draws, built from the layout engine's OWN spline rather than re-derived. |

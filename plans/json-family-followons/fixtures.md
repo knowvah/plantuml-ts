@@ -33,3 +33,4 @@ yaml/tadari-70-nare798.
 |---|---|---|---|---|---|---|---|
 | main `b9b309894` | 14/36 | 7/32 | 1/2 | 14/7/1 | 167 + 3 | 70 | 457.355 / 546.207 / 85 (66 aligned) |
 | b0close | 14/36 | 7/32 | 1/2 | 14/7/1 | 172 + 6 (5 authored clean, 3 D1 ceilings 2/2/1) | 70 corpus + 8 authored | 457.918 / 550.847 / 85 (71 aligned; authored adds 0.563 / 4.640 / 0) |
+| b1 | 14/36 | 7/32 | 1/2 | 14/7/1 | 172 + 6 | 70 corpus + 8 authored | 457.918 / 550.847 / 85 (unchanged; 0 movers in 28 engines) |

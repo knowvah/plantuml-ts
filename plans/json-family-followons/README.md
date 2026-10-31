@@ -104,7 +104,7 @@ or journal why not (jfp row 2). New/removed src module ⇒ `npm run catalog`.
 | batch | tasks | status |
 |---|---|---|
 | [0 — branch, tooling, authored fixtures + pins](batch-0/overview.md) | T0a, T0b, close | [x] |
-| [1 — idempotence check, dead scale plumbing](batch-1/overview.md) | T1a, T1b, close | [ ] |
+| [1 — idempotence check, dead scale plumbing](batch-1/overview.md) | T1a, T1b, close | [x] |
 | [2 — json joins the TitledDiagram export tail](batch-2/overview.md) | T2a, T2b, T2c (close) | [ ] |
 | [exit](batch-exit/overview.md) | final measurement, DIVERGENCES, docs, memory | [ ] |
 | [squash](batch-squash/overview.md) | one commit per batch, tag `jff/pre-squash` | [ ] |

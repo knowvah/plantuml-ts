@@ -738,5 +738,6 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         CONSUMED 2026-10-15 (codd): unknown/bamami-10-lava790 re-measures CLEAN on dot-engine 2.4.0 (render-diff 0/0, survey conformant, dotEqual and layoutEqual true) after T2's cluster-rect drawing. Box ticked under the file's rule. -->
 - [ ] 36-flat-adjacent-unlabelled-edge-endpoint-offset.md  <!-- FILED 2026-10-15 (codd-T0b): single flat adjacent minlen=0 edge, no port/label, endpoints 0.1-0.3 px off native 16.1.0; unknown/zodela-36-sica712, usecase/cimare-47-deke334 (conformant, invisible edges). 
         CONSUMED 2026-10-15 (codd): still the engine's; zodela-36-sica712 now 0/1 (the one numeric diff is this sub-px rect x). -->
+- [ ] 37-rerender-not-idempotent.md  <!-- FILED 2026-10-30 (jff-T1a): render() twice on one Graph is not idempotent (stale e.info.to_virt + spl survive dotCleanup); native layout/gvFreeLayout cycle is; no fixture affected (layoutGraph renders once). -->
   <!-- 23 ALSO SEEN 2026-10-08 (lgm-T0c): nugecu-04-tona107 minimises to this mechanism; related 32, 33.
         CONSUMED 2026-10-14 (dsw, merge to main pending): unknown/bamami-10-lava790 layoutParity unequal -> EQUAL (p0/p1 wrappers + 17x23 title TABLE); render-diff 0/100 -> 0/88, post-layout residual ours. Box stays open. -->

@@ -51,9 +51,8 @@ export interface TextStyleJson {
   /** `node`'s `HorizontalAlignment` — one alignment places both columns (`TextBlockJson.java:313,320`). */
   align: 'left' | 'center' | 'right';
   /**
-   * `node`'s `FontSize`. Carried only so `scale-geo.ts#scaleNodeStyle` has a
-   * font size to scale; every cell draws with its OWN style's size
-   * ({@link CellPaint}), multiplied by `scale` at the draw site.
+   * `node`'s `FontSize`. Every cell draws with its OWN style's size
+   * ({@link CellPaint}); `scale` is applied at emit.
    */
   fontSize: number;
 }
@@ -61,8 +60,7 @@ export interface TextStyleJson {
 /**
  * What one cell's `<text>` is painted with: the font of the style the cell was
  * MEASURED with (`getTextBlock(getStyleToUse(header, highlighted), …)`,
- * `TextBlockJson.java:123-131,340-349`). Unscaled; the renderer multiplies
- * `fontSize` by `NodeStyleJson#scale`.
+ * `TextBlockJson.java:123-131,340-349`). Unscaled; `scale` is applied at emit.
  */
 export interface CellPaint {
   fontFamily: string;
@@ -93,13 +91,6 @@ export interface NodeStyleJson {
   highlightFill(styleClass: string): Paint;
   /** The paint of one cell; memoised per diagram. */
   cell(header: boolean, highlight: string | false): CellPaint;
-  /**
-   * The resolved `scale …` factor (`scale-geo.ts#scaleNodeStyle`), carried on
-   * the style so the renderer's own literal constants — the highlight rect's
-   * inset, width reduction and corner radius — and the per-cell font size can
-   * be scaled at their single use site. 1 when the diagram is unscaled.
-   */
-  scale: number;
 }
 
 /**
@@ -190,7 +181,6 @@ function resolveCell(style: Style): CellPaint {
 export function resolveNodeStyle(styles: JsonStyleSet): NodeStyleJson {
   const cells = new Map<string, CellPaint>();
   return {
-    scale: 1,
     box: resolveBox(styles.node, styles.separator),
     text: {
       // HorizontalAlignment.fromString answered null: upstream's `.draw` would NPE (TextBlockJson.java:313).

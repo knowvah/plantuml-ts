@@ -7,9 +7,9 @@ is a halt, not a re-pin).
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T1a](T1a-rerender-idempotence.md) | reproduce dot-engine re-render non-idempotence, read its contract, compare native graphviz (D3); file or close | debugger (opus), jff-T1a | `.agent-notes/jff-T1a.md`; conditional `docs/graphviz-issues/<n>-*.md`, `docs/graphviz-issues/TRACKER.md` | T0b close | [ ] |
-| [T1b](T1b-dead-scale-plumbing.md) | delete `NodeStyleJson.scale`, `scaleDasharray`'s `k`, stale `scale-geo` comments (item 4) | typescript-pro (sonnet), jff-T1b | `src/diagrams/json/renderer-style.ts`, `src/diagrams/json/json-renderer-highlight.ts`, their unit tests | T0b close | [ ] |
-| close | merge both; gates `b1`; chain `b1-eng` vs `b0-eng` = 0 movers; residue = b0close | orchestrator | per close-procedure | T1a, T1b | [ ] |
+| [T1a](T1a-rerender-idempotence.md) | reproduce dot-engine re-render non-idempotence, read its contract, compare native graphviz (D3); file or close | debugger (opus), jff-T1a | `.agent-notes/jff-T1a.md`; conditional `docs/graphviz-issues/<n>-*.md`, `docs/graphviz-issues/TRACKER.md` | T0b close | [x] |
+| [T1b](T1b-dead-scale-plumbing.md) | delete `NodeStyleJson.scale`, `scaleDasharray`'s `k`, stale `scale-geo` comments (item 4) | typescript-pro (sonnet), jff-T1b | `src/diagrams/json/renderer-style.ts`, `src/diagrams/json/json-renderer-highlight.ts`, their unit tests | T0b close | [x] |
+| close | merge both; gates `b1`; chain `b1-eng` vs `b0-eng` = 0 movers; residue = b0close | orchestrator | per close-procedure | T1a, T1b | [x] |
 
 No interface outputs: nothing in batch 2 consumes these.
 
